@@ -20,7 +20,9 @@
 #ifndef TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
 #define TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
 
-#include <aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp>
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "tap/communication/sensors/encoder/encoder_interface.hpp"
+
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -28,8 +30,8 @@ class TwoDeadwheelOdometryObserver
 {
 public:
     TwoDeadwheelOdometryObserver(
-        aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
-        aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
+        tap::encoder::EncoderInterface* parallelWheel,
+        tap::encoder::EncoderInterface* perpendicularWheel,
         const float wheelRadius);
 
     const float wheelRadius;
@@ -42,9 +44,9 @@ public:
 
 private:
     /// Parallel wheel is oriented such that it rolls on the tangent line to the chassis
-    aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel;
+    tap::encoder::EncoderInterface* parallelWheel;
     /// Perpendicular wheel is oriented such that it rolls on the line perpendicular to the chassis
-    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel;
+    tap::encoder::EncoderInterface* perpendicularWheel;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

@@ -32,6 +32,8 @@
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
+
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
@@ -94,6 +96,8 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+#include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
+#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -103,6 +107,7 @@ using namespace tap::communication::serial;
 using namespace tap::control;
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
+using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::algorithms;
 using namespace aruwsrc::algorithms::odometry;
@@ -154,6 +159,7 @@ tap::motor::DjiMotor yawMotor(
     true,
     1,
     YAW_MOTOR_CONFIG.startEncoderValue);
+
 StandardTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -211,7 +217,31 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+tap::encoder::CanEncoder parallelOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    tap::can::CanBus::CAN_BUS2);
+
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    tap::can::CanBus::CAN_BUS2);
+
+
+aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
+    &parallelOmni,
+    &perpendicularOmni,
+    aruwsrc::chassis::DEADWHEEL_RADIUS);
+
+aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    deadwheels,
+    turret,
+    drivers()->mpu6500,
+    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
+    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
+    aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
