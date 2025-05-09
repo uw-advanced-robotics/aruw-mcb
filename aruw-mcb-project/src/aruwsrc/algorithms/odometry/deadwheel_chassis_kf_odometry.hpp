@@ -20,9 +20,6 @@
 #ifndef DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 #define DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 
-#include "aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp"
-#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
-
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
@@ -30,6 +27,8 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
+#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
@@ -67,10 +66,10 @@ public:
     DeadwheelChassisKFOdometry(
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
 #if defined(TARGET_SENTRY_HYDRA)
-        tap::algorithms::odometry::ChassisWorldYawObserverInterface &hassisYawObserver,
+        tap::algorithms::odometry::ChassisWorldYawObserverInterface& hassisYawObserver,
 #else
-        aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver &chassisYawObserver,
-#endif        
+        aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver& chassisYawObserver,
+#endif
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
         const float parallelCenterToWheelDistance,

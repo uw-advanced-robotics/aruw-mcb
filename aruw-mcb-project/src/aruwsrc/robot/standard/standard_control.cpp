@@ -21,6 +21,7 @@
 
 #ifdef ALL_STANDARDS
 
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -32,10 +33,9 @@
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
-#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
-
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
@@ -94,10 +94,9 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-#include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
-#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -222,12 +221,10 @@ tap::encoder::CanEncoder parallelOmni(
     tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2);
 
-
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
     tap::can::CanBus::CAN_BUS2);
-
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
     &parallelOmni,

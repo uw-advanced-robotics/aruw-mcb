@@ -20,15 +20,14 @@
 #ifndef SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 #define SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
-#include "aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp"
-#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
-
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
+#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
 
@@ -49,8 +48,9 @@ class ChassisSubsystemInterface;
 
 namespace aruwsrc::algorithms::odometry
 {
-class DeadwheelKFOdometry2DSubsystem : public tap::control::Subsystem,
-                                    public aruwsrc::algorithms::odometry::DeadwheelChassisKFOdometry
+class DeadwheelKFOdometry2DSubsystem
+    : public tap::control::Subsystem,
+      public aruwsrc::algorithms::odometry::DeadwheelChassisKFOdometry
 {
 public:
     /**
@@ -87,7 +87,6 @@ public:
 private:
     aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver chassisYawObserver;
 };
-
 
 }  // namespace aruwsrc::algorithms::odometry
 

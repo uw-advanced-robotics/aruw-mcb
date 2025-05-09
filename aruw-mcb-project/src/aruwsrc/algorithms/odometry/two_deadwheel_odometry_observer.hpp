@@ -20,9 +20,9 @@
 #ifndef TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
 #define TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
 
-#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "tap/communication/sensors/encoder/encoder_interface.hpp"
 
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {

@@ -18,8 +18,8 @@
  */
 
 #include "deadwheel_kf_odometry_2d_subsystem.hpp"
-#include "tap/drivers.hpp"
 
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -40,7 +40,7 @@ DeadwheelKFOdometry2DSubsystem::DeadwheelKFOdometry2DSubsystem(
           centerToWheelDistance,
           (1 / M_SQRT2),
           (1 / M_SQRT2)),
-          chassisYawObserver(yawObserver)
+      chassisYawObserver(yawObserver)
 {
 }
 
