@@ -30,8 +30,13 @@ class TwoDeadwheelOdometryObserver
 {
 public:
     TwoDeadwheelOdometryObserver(
+        #ifdef TARGET_SENTRY_HYDRA
+        aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
+        aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
+        #else
         tap::encoder::EncoderInterface* parallelWheel,
         tap::encoder::EncoderInterface* perpendicularWheel,
+        #endif
         const float wheelRadius);
 
     const float wheelRadius;
@@ -43,10 +48,15 @@ public:
     float getPerpendicularVelocity() const;
 
 private:
+    #ifdef TARGET_SENTRY_HYDRA
+    aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel;
+    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel;
+    #else
     /// Parallel wheel is oriented such that it rolls on the tangent line to the chassis
     tap::encoder::EncoderInterface* parallelWheel;
     /// Perpendicular wheel is oriented such that it rolls on the line perpendicular to the chassis
     tap::encoder::EncoderInterface* perpendicularWheel;
+    #endif
 };
 
 }  // namespace aruwsrc::algorithms::odometry
