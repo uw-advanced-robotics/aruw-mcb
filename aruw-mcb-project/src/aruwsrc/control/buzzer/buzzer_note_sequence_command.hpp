@@ -22,23 +22,41 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "buzzer_subsystem.hpp"
+
 namespace aruwsrc::control::buzzer
 {
 
+/**
+ * Plays a sequence of constant length notes on a buzzer.
+ */
 class BuzzerNoteSequenceCommand : public tap::control::Command
 {
 public:
-    BuzzerNoteSequenceCommand(tap::Drivers* drivers);
+    BuzzerNoteSequenceCommand(
+        BuzzerSubsystem& buzzer,
+        const uint8_t* notes,
+        const size_t numNotes,
+        const uint16_t noteLengthMillis);
 
     void initialize() override;
 
     void execute() override;
 
-    void end(bool interrupted) override;
+    void end(bool) override { buzzer.stop(); }
 
-    bool isFinished() const override;
+    bool isFinished() const override { return noteIndex >= numNotes; }
 
     const char* getName() const override { return "Buzzer Note Sequence Command"; }
+
+private:
+    BuzzerSubsystem& buzzer;
+    const uint8_t* notes;
+    const size_t numNotes;
+    const uint16_t noteLengthMillis;
+
+    uint32_t startTime;
+    size_t noteIndex;
 };  // class BuzzerNoteSequenceCommand
 
 }  // namespace aruwsrc::control::buzzer

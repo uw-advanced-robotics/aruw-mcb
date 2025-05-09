@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,23 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "buzzer_subsystem.hpp"
+#ifndef BUZZER_SEQUENCES_HPP_
+#define BUZZER_SEQUENCES_HPP_
 
-#include "tap/control/subsystem.hpp"
+#include <stdint.h>
+
+#include <cstddef>
 
 namespace aruwsrc::control::buzzer
 {
-BuzzerSubsystem::BuzzerSubsystem(tap::Drivers* drivers) : Subsystem(drivers) {}
 
-void BuzzerSubsystem::playNoise() { tap::buzzer::playNote(&(drivers->pwm), 440); }
+static constexpr uint32_t MARIO_MUSHROOM_NOTE_LENGTH_MS = 34;
+static constexpr uint8_t MARIO_MUSHROOM_NOTES[]{37, 32, 37, 41, 44, 49, 44, 33, 37,
+                                                40, 45, 40, 45, 49, 52, 57, 52, 35,
+                                                39, 42, 47, 42, 47, 51, 54, 59, 54};
 
-void BuzzerSubsystem::playFrequency(float frequency)
-{
-    tap::buzzer::playNote(&(drivers->pwm), static_cast<uint32_t>(frequency));
-}
-
-void BuzzerSubsystem::playNote(uint8_t note) { playFrequency(NOTE_FREQUENCIES[note]); }
-
-void BuzzerSubsystem::stop() { tap::buzzer::silenceBuzzer(&(drivers->pwm)); }
+static constexpr uint32_t ZELDA_SECRET_NOTE_LENGTH_MS = 130;
+static constexpr uint8_t ZELDA_SECRET_NOTES[]{44, 43, 40, 34, 33, 41, 45, 49};
 
 }  // namespace aruwsrc::control::buzzer
+
+#endif  // BUZZER_SEQUENCES_HPP_

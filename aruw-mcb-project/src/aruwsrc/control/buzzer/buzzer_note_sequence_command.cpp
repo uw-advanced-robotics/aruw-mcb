@@ -22,8 +22,33 @@
 namespace aruwsrc::control::buzzer
 {
 
-BuzzerNoteSequenceCommand::BuzzerNoteSequenceCommand() {}
+BuzzerNoteSequenceCommand::BuzzerNoteSequenceCommand(
+    BuzzerSubsystem& buzzer,
+    const uint8_t* notes,
+    const size_t numNotes,
+    const uint16_t noteLengthMillis)
+    : buzzer(buzzer),
+      notes(notes),
+      numNotes(numNotes),
+      noteLengthMillis(noteLengthMillis)
+{
+    addSubsystemRequirement(&buzzer);
+}
 
-void BuzzerNoteSequenceCommand::execute() {}
+void BuzzerNoteSequenceCommand::initialize()
+{
+    startTime = tap::arch::clock::getTimeMilliseconds();
+}
+
+void BuzzerNoteSequenceCommand::execute()
+{
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+
+    size_t noteIndex = ((currTime - startTime) / noteLengthMillis);
+
+    if (noteIndex >= numNotes) return;
+
+    buzzer.playFrequency(notes[noteIndex]);
+}
 
 }  // namespace aruwsrc::control::buzzer
