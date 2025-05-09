@@ -31,8 +31,8 @@ class EngineerCVCommunication : public tap::communication::serial::DJISerial
 {
 public:
     static constexpr tap::communication::serial::Uart::UartPort ENGINEER_CV_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart7; 
-    static constexpr size_t ENGINEER_CV_UART_BAUD_RATE = 200'000;
+        tap::communication::serial::Uart::UartPort::Uart8; 
+    static constexpr size_t ENGINEER_CV_UART_BAUD_RATE = 115'200;
 
     EngineerCVCommunication(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(EngineerCVCommunication);
