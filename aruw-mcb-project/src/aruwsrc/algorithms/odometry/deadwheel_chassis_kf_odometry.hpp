@@ -66,7 +66,7 @@ public:
     DeadwheelChassisKFOdometry(
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
 #if defined(TARGET_SENTRY_HYDRA)
-        tap::algorithms::odometry::ChassisWorldYawObserverInterface& hassisYawObserver,
+        tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
 #else
         aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver& chassisYawObserver,
 #endif
