@@ -218,12 +218,12 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
 
 tap::encoder::CanEncoder parallelOmni(
     drivers(),
-    tap::encoder::CanEncoderId::ID0,
+    tap::encoder::CanEncoderId::ID1,
     tap::can::CanBus::CAN_BUS2);
 
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
-    tap::encoder::CanEncoderId::ID1,
+    tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2);
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
@@ -687,6 +687,9 @@ void initializeSubsystems()
     buzzer.initialize();
     transformSubsystem.initialize();
     capBankSubsystem.initialize();
+
+    perpendicularOmni.initialize();
+    parallelOmni.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
