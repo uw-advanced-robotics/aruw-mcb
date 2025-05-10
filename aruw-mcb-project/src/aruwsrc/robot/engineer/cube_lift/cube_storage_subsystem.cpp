@@ -37,10 +37,14 @@ CubeStorageSubsystem::CubeStorageSubsystem(
 void CubeStorageSubsystem::initialize()
 {
     motor.initialize();
-    moveMotor(0);
+    setDesiredOutput(0);
+    pidState = PIDState::NONE;
 }
 
-void CubeStorageSubsystem::moveMotor(int16_t power) { motorDesiredOutput = power + FEEDFORWARD; }
+void CubeStorageSubsystem::setDesiredOutput(int16_t power)
+{
+    motorDesiredOutput = power + FEEDFORWARD;
+}
 
 bool CubeStorageSubsystem::homedAndBounded() const
 {
@@ -49,19 +53,26 @@ bool CubeStorageSubsystem::homedAndBounded() const
 
 void CubeStorageSubsystem::stopDuringHoming()
 {
-    isPIDControl = false;
-    moveMotor(0);
+    pidState = PIDState::NONE;
+    setDesiredOutput(0);
 }
 
-void CubeStorageSubsystem::setSetpoint(float newSetpoint) { setpoint = newSetpoint; }
+void CubeStorageSubsystem::setPositionSetpoint(float newSetpoint) { setpoint = newSetpoint; }
 
-float CubeStorageSubsystem::getSetpoint() { return setpoint; }
+float CubeStorageSubsystem::getPositionSetpoint() { return setpoint; }
 
-void CubeStorageSubsystem::moveTowardLowerBound()
+void CubeStorageSubsystem::setVelocitySetpoint(float newSetpoint)
 {
-    isPIDControl = false;
-    moveMotor(homingOutput);
+    velocitySetpoint = newSetpoint;
 }
+
+float CubeStorageSubsystem::getVelocitySetpoint() { return velocitySetpoint; }
+
+void CubeStorageSubsystem::setPIDState(PIDState state) { pidState = state; }
+
+PIDState CubeStorageSubsystem::getPIDState() { return pidState; }
+
+void CubeStorageSubsystem::moveTowardLowerBound() { pidState = PIDState::VELOCITY_PID; }
 
 void CubeStorageSubsystem::setHome(uint64_t encoderPosition) { home = encoderPosition; }
 
@@ -75,8 +86,9 @@ uint64_t CubeStorageSubsystem::getLowerBound() const { return lowerBound; }
 
 void CubeStorageSubsystem::refreshSafeDisconnect()
 {
-    isPIDControl = false;
+    pidState = PIDState::NONE;
     motor.setDesiredOutput(0);
+    motorDesiredOutput = 0;
 }
 
 bool CubeStorageSubsystem::isLimitSwitched()
@@ -85,16 +97,17 @@ bool CubeStorageSubsystem::isLimitSwitched()
 }
 
 void CubeStorageSubsystem::refresh()
-{   
+{
     isLimitSwitch = isLimitSwitched();
     if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
     {
-        moveMotor(homingOutput); //debugging only
+        setDesiredOutput(homingOutput);  // debugging only
         if (!trigger.isTriggered())
         {
             calibrationState = CalibrationState::CALIBRATION_COMPLETE;
             motor.getEncoder()->resetEncoderValue();
-            moveMotor(0);
+            pidState = PIDState::NONE;
+            setDesiredOutput(0);
         }
         else
         {
@@ -102,7 +115,8 @@ void CubeStorageSubsystem::refresh()
         }
     }
 
-    if (isPIDControl)
+    if (pidState == PIDState::POSITION_PID &&
+        calibrationState == CalibrationState::CALIBRATION_COMPLETE)
     {
         float error =
             setpoint - motor.getEncoder()->getPosition().getUnwrappedValue() / MM_PER_REVOLUTION;
@@ -112,6 +126,16 @@ void CubeStorageSubsystem::refresh()
         lastTime = tap::arch::clock::getTimeMilliseconds();
         pid.runController(error, errorDerivative, timeDifference);
         motor.setDesiredOutput(pid.getOutput() + FEEDFORWARD);
+    }
+    else if (pidState == PIDState::VELOCITY_PID)
+    {
+        float error = velocitySetpoint -
+                      motor.getEncoder()->getVelocity() / 1000 / 60 / MM_PER_REVOLUTION / 1000;
+        float timeDifference = (tap::arch::clock::getTimeMilliseconds() - lastTime) / 1000;
+        lastTime = tap::arch::clock::getTimeMilliseconds();
+        float errorDerivative = homingPID.runControllerDerivateError(error, timeDifference);
+        homingPID.runController(error, errorDerivative, timeDifference);
+        motor.setDesiredOutput(pid.getOutput());
     }
     else
     {

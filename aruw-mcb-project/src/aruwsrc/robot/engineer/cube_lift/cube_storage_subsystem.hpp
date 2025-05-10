@@ -41,7 +41,7 @@ public:
 
     void initialize() override;
 
-    void moveMotor(int16_t power);
+    void setDesiredOutput(int16_t power);
 
     bool isLimitSwitched();
 
@@ -57,9 +57,17 @@ public:
 
     void moveTowardLowerBound();
 
-    void setSetpoint(float newSetpoint);
+    void setPositionSetpoint(float newSetpoint);
 
-    float getSetpoint();
+    float getPositionSetpoint();
+
+    void setVelocitySetpoint(float newSetpoint);
+
+    float getVelocitySetpoint();
+
+    void setPIDState(PIDState state);
+
+    PIDState getPIDState();
 
     const char* getName() const override { return "Cube Storage"; }
 
@@ -76,7 +84,8 @@ protected:
 
 private:
     bool isLimitSwitch = false;
-    bool isPIDControl = true;
+    // bool isPIDControl = true;
+    PIDState pidState = PIDState::NONE;
     float setpoint = 0;
     float lastTime = 0;
     float motorDesiredOutput = 0;
@@ -86,6 +95,9 @@ private:
     uint64_t lowerBound = 0;
     tap::algorithms::SmoothPid pid =
         tap::algorithms::SmoothPid(aruwsrc::robot::engineer::LIFT_MOTOR_PID_CONFIG);
+    tap::algorithms::SmoothPid homingPID =
+        tap::algorithms::SmoothPid(aruwsrc::robot::engineer::LIFT_HOMING_PID_CONFIG);
+    float velocitySetpoint = 100;
 };  // class CUBE_STORAGE
 
 }  // namespace aruwsrc::robot::engineer

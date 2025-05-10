@@ -29,9 +29,9 @@ CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift,
 
 void CubeMovePositionCommand::initialize() {}
 
-void CubeMovePositionCommand::execute() { cubeLift.setSetpoint(setpoint); }
+void CubeMovePositionCommand::execute() { cubeLift.setPositionSetpoint(setpoint); }
 
-void CubeMovePositionCommand::end(bool) { cubeLift.moveMotor(0); }
+void CubeMovePositionCommand::end(bool) { cubeLift.setDesiredOutput(0); }
 
 bool CubeMovePositionCommand::isFinished() const
 {

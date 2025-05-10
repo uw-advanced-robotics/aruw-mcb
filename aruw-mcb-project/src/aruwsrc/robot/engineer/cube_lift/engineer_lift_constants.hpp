@@ -26,11 +26,9 @@
 
 namespace aruwsrc::robot::engineer
 {
-static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID =
-    tap::motor::MOTOR7;
+static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID = tap::motor::MOTOR7;
 
-static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS =
-    tap::can::CanBus::CAN_BUS2;  
+static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::B;  // TODO: UPDATE W CORRECT VALUE
@@ -50,6 +48,21 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .maxICumulative = 1000.0f,
     .maxOutput = 0.0f,
     .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig LIFT_HOMING_PID_CONFIG = {
+    .kp = 1400.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 1000.0f,
+    .maxOutput = 0.0f,
+    .errorDerivativeFloor = 0.0f};
+
+enum class PIDState
+{
+    POSITION_PID,
+    VELOCITY_PID,
+    NONE
 };
 
 static constexpr float MANUAL_MOVE_SPEED = 10;  // TODO: choose value alter
