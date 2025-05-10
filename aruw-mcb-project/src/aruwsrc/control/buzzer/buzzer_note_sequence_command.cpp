@@ -41,11 +41,13 @@ void BuzzerNoteSequenceCommand::execute()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
 
-    size_t noteIndex = ((currTime - startTime) / noteLengthMillis);
+    currNoteIndex = ((currTime - startTime) / noteLengthMillis);
+    uint8_t newNote = notes[currNoteIndex];
 
-    if (isFinished()) return;
+    if (isFinished() || newNote == currNote) return;
 
-    buzzer.playFrequency(notes[noteIndex]);
+    buzzer.playNote(newNote);
+    currNote = newNote;
 }
 
 }  // namespace aruwsrc::control::buzzer

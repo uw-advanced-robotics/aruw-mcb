@@ -45,7 +45,7 @@ public:
 
     void end(bool) override { buzzer.stop(); }
 
-    bool isFinished() const override { return noteIndex >= notes.size(); }
+    bool isFinished() const override { return currNoteIndex >= notes.size(); }
 
     const char* getName() const override { return "Buzzer Note Sequence Command"; }
 
@@ -55,7 +55,8 @@ private:
     const uint16_t noteLengthMillis;
 
     uint32_t startTime;
-    size_t noteIndex;
+    size_t currNoteIndex;
+    uint8_t currNote{0};
 };  // class BuzzerNoteSequenceCommand
 
 }  // namespace aruwsrc::control::buzzer
