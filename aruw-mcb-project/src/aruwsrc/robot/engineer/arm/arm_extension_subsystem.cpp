@@ -28,7 +28,7 @@ namespace engineer
 ArmExtensionSubsystem::ArmExtensionSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& motors,
-    tap::algorithms::SmoothPidConfig& config,
+    const tap::algorithms::SmoothPidConfig& config,
     float radius,
     float minSetpoint,
     float maxSetpoint,
@@ -43,6 +43,8 @@ ArmExtensionSubsystem::ArmExtensionSubsystem(
 {
     this->setpoint = 0;
 }
+
+void ArmExtensionSubsystem::initialize() { motors.initialize(); }
 
 float ArmExtensionSubsystem::getPosition()
 {

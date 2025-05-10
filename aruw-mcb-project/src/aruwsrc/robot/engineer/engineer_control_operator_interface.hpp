@@ -32,9 +32,6 @@ namespace aruwsrc::control::engineer
 class EngineerControlOperatorInterface : public ControlOperatorInterface
 {
 public:
-    static constexpr float ARM_LIFT_MAX_HEIGHT = 2.0f;
-    static constexpr float ARM_MAX_EXTENSION = 2.0f;
-
     EngineerControlOperatorInterface(tap::Drivers *drivers)
         : ControlOperatorInterface(drivers),
           drivers(drivers)

@@ -43,8 +43,8 @@ public:
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motorLeft,
         tap::motor::MotorInterface &motorRight,
-        tap::algorithms::SmoothPidConfig &configPos,
-        tap::algorithms::SmoothPidConfig &configAlign,
+        const tap::algorithms::SmoothPidConfig &configPos,
+        const tap::algorithms::SmoothPidConfig &configAlign,
         control::TriggerInterface &trigger,
         float radius,
         uint64_t length,
@@ -53,7 +53,7 @@ public:
         float kS = 0,
         float epsilon = 1);
 
-    float getAveragePosition();
+    virtual float getPosition() override;
 
     float getPositionDifference();
 
@@ -61,11 +61,38 @@ public:
 
     float getVelocityDifference();
 
-    bool atSetpoint();
+    virtual void initialize() override;
 
     virtual void refresh() override;
 
     virtual void refreshSafeDisconnect() override;
+
+    virtual void moveTowardLowerBound() override;
+
+    /**
+     * Returns whether or not the home and bounds have been set.
+     */
+    virtual bool homedAndBounded() const override { return true; }
+
+    /**
+     * Returns the upper bound in motor encoder ticks.
+     */
+    virtual uint64_t getUpperBound() const override { return 0; };
+
+    /**
+     * Returns the lower bound in motor encoder ticks.
+     */
+    virtual uint64_t getLowerBound() const override { return 0; };
+
+protected:
+    /**
+     * Stops the motor from moving. Only to be used during calibration.
+     */
+    virtual void stopDuringHoming() override {}
+    /**
+     * Sets the given motor encoder position to be the "home" of the subsystem's motor.
+     */
+    virtual void setHome(uint64_t encoderPosition) override {}
 
 private:
     tap::algorithms::SmoothPid pidPos, pidAlign;

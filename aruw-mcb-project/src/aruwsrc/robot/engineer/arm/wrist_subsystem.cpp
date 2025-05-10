@@ -29,8 +29,8 @@ WristSubsystem::WristSubsystem(
     tap::motor::MotorInterface &motorRight,
     tap::encoder::EncoderInterface &encoderPitch,
     tap::encoder::EncoderInterface &encoderYaw,
-    tap::algorithms::SmoothPidConfig configPitch,
-    tap::algorithms::SmoothPidConfig configYaw,
+    const tap::algorithms::SmoothPidConfig configPitch,
+    const tap::algorithms::SmoothPidConfig configYaw,
     float ratio,
     float kS,
     float epsilon)
@@ -57,6 +57,12 @@ bool WristSubsystem::atSetpoint()
 {
     return tap::algorithms::compareFloatClose(setpointPitch, getPitch(), epsilon) &&
            tap::algorithms::compareFloatClose(setpointYaw, getYaw(), epsilon);
+}
+
+void WristSubsystem::initialize()
+{
+    motorLeft.initialize();
+    motorRight.initialize();
 }
 
 void WristSubsystem::refresh()

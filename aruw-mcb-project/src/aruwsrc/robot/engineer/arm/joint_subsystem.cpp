@@ -28,7 +28,7 @@ namespace engineer
 JointSubsystem::JointSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& motor,
-    tap::algorithms::SmoothPidConfig& config,
+    const tap::algorithms::SmoothPidConfig& config,
     float minSetpoint,
     float maxSetpoint,
     float kS,
@@ -41,6 +41,8 @@ JointSubsystem::JointSubsystem(
 {
     this->setpoint = 0;
 }
+
+void JointSubsystem::initialize() { motor.initialize(); }
 
 float JointSubsystem::getPosition()
 {

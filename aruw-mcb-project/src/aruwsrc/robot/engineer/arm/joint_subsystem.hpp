@@ -40,11 +40,13 @@ public:
     JointSubsystem(
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motor,
-        tap::algorithms::SmoothPidConfig &config,
+        const tap::algorithms::SmoothPidConfig &config,
         float minSetpoint,
         float maxSetpoint,
         float kS = 0,
         float epsilon = 1);
+
+    virtual void initialize() override;
 
     virtual float getPosition() override;
 

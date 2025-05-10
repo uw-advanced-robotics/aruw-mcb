@@ -26,8 +26,8 @@ ArmLiftSubsystem::ArmLiftSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& motorLeft,
     tap::motor::MotorInterface& motorRight,
-    tap::algorithms::SmoothPidConfig& configPos,
-    tap::algorithms::SmoothPidConfig& configAlign,
+    const tap::algorithms::SmoothPidConfig& configPos,
+    const tap::algorithms::SmoothPidConfig& configAlign,
     control::TriggerInterface& trigger,
     float radius,
     uint64_t length,
@@ -48,7 +48,7 @@ ArmLiftSubsystem::ArmLiftSubsystem(
     this->setpoint = 0;
 }
 
-float ArmLiftSubsystem::getAveragePosition()
+float ArmLiftSubsystem::getPosition()
 {
     return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
             motorRight.getEncoder()->getPosition().getUnwrappedValue()) *
@@ -74,6 +74,12 @@ float ArmLiftSubsystem::getVelocityDifference()
            radius;
 }
 
+void ArmLiftSubsystem::initialize()
+{
+    motorLeft.initialize();
+    motorRight.initialize();
+}
+
 void ArmLiftSubsystem::refresh()
 {
     float errorPosition = setpoint - getPosition();
@@ -90,6 +96,10 @@ void ArmLiftSubsystem::refreshSafeDisconnect()
 {
     motorLeft.setDesiredOutput(0);
     motorRight.setDesiredOutput(0);
+}
+
+void ArmLiftSubsystem::moveTowardLowerBound() {
+    //todo
 }
 
 }  // namespace engineer

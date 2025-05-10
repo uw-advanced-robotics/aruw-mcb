@@ -60,6 +60,8 @@ public:
 
     const char *getName() const override { return "Engineer Arm Controller Command"; };
 
+    virtual bool isFinished() const override { return false; }
+
 private:
     ArmLiftSubsystem &lift;
     ArmExtensionSubsystem &extension;

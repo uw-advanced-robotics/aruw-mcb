@@ -41,8 +41,8 @@ public:
         tap::motor::MotorInterface &motorRight,
         tap::encoder::EncoderInterface &encoderPitch,
         tap::encoder::EncoderInterface &encoderYaw,
-        tap::algorithms::SmoothPidConfig configPitch,
-        tap::algorithms::SmoothPidConfig configYaw,
+        const tap::algorithms::SmoothPidConfig configPitch,
+        const tap::algorithms::SmoothPidConfig configYaw,
         float ratio,
         float kS = 0,
         float epsilon = 1);
@@ -59,7 +59,9 @@ public:
 
     void setSetpointYaw(float setpoint) { setpointYaw = setpoint; }
 
-    virtual bool atSetpoint();
+    virtual void initialize() override;
+
+    bool atSetpoint();
 
     virtual void refresh() override;
 

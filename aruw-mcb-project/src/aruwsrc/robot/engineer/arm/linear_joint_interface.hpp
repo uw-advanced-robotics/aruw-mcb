@@ -31,12 +31,12 @@ namespace engineer
 class LinearJointInterface
 {
 public:
-    virtual void setSetpoint(float setpoint)
+virtual void setSetpoint(float setpoint)
     {
         this->setpoint = std::clamp(setpoint, minSetpoint, maxSetpoint);
     };
 
-    float getSetpoint() { return setpoint; }
+    virtual float getSetpoint() { return setpoint; }
 
     virtual float getPosition() = 0;
     virtual bool atSetpoint()
@@ -52,6 +52,7 @@ protected:
           minSetpoint(minPosition),
           maxSetpoint(maxSetpoint){};
 };
+
 }  // namespace engineer
 }  // namespace aruwsrc
 

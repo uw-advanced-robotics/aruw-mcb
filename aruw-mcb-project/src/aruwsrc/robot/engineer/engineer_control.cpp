@@ -23,11 +23,14 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_scheduler.hpp"
 
+#include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/arm/arm_controller_command.hpp"
 #include "aruwsrc/robot/engineer/arm/arm_extension_subsystem.hpp"
 #include "aruwsrc/robot/engineer/arm/arm_lift_subsystem.hpp"
 #include "aruwsrc/robot/engineer/arm/joint_subsystem.hpp"
@@ -96,28 +99,28 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-// aruwsrc::chassis::MecanumChassisSubsystem chassis(
-//     drivers(),
-//     &currentSensor,
-//     leftFrontChassisMotor,
-//     leftBackChassisMotor,
-//     rightFrontChassisMotor,
-//     rightBackChassisMotor,
-//     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
+aruwsrc::chassis::MecanumChassisSubsystem chassis(
+    drivers(),
+    &currentSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
 tap::motor::DjiMotor engineerWristRollMotor(
     drivers(),
     aruwsrc::engineer::WRIST_ROLL_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::engineer::CAN_BUS_GANTRY,
     false,
-    " Wrist Roll Motor",
+    "Wrist Roll Motor",
     false,
     1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor engineerWristLeftMotor(
     drivers(),
     aruwsrc::engineer::WRIST_LEFT_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::engineer::CAN_BUS_GANTRY,
     false,
     "Wrist Left Motor",
     false,
@@ -126,44 +129,170 @@ tap::motor::DjiMotor engineerWristLeftMotor(
 tap::motor::DjiMotor engineerWristRightMotor(
     drivers(),
     aruwsrc::engineer::WRIST_RIGHT_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::engineer::CAN_BUS_GANTRY,
     false,
     "Wrist Right Motor",
     false,
     1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
+tap::encoder::CanEncoder engineerWristPitchEncoder(
+    drivers(),
+    aruwsrc::engineer::WRIST_PITCH_ENCODER_ID,
+    aruwsrc::engineer::CAN_BUS_GANTRY);  // todo
+
+tap::encoder::CanEncoder engineerWristYawEncoder(
+    drivers(),
+    aruwsrc::engineer::WRIST_YAW_ENCODER_ID,
+    aruwsrc::engineer::CAN_BUS_GANTRY);  // todo
+
+tap::motor::DjiMotor engineerGantryLiftLeftMotor(
+    drivers(),
+    aruwsrc::engineer::GANTRY_LIFT_LEFT_MOTOR_ID,
+    aruwsrc::engineer::CAN_BUS_GANTRY,
+    false,
+    "Gantry Lift Left Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor engineerGantryLiftRightMotor(
+    drivers(),
+    aruwsrc::engineer::GANTRY_LIFT_RIGHT_MOTOR_ID,
+    aruwsrc::engineer::CAN_BUS_GANTRY,
+    false,
+    "Gantry Lift Right Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak liftLimitSwitch(
+    &drivers()->digital,
+    aruwsrc::engineer::GANTRY_LIFT_LIMIT_SWITCH_PIN);
+
+LimitSwitchTrigger liftLimitSwitchTrigger(drivers(), &liftLimitSwitch);
+
+tap::motor::DjiMotor cubeStorageLiftMotor(
+    drivers(),
+    tap::motor::MotorId::MOTOR7,
+    tap::can::CanBus::CAN_BUS2,
+    false,
+    "Cube Storage Lift Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor engineerGantryExtensionMotor(
+    drivers(),
+    aruwsrc::engineer::GANTRY_EXTENSION_MOTOR_ID,
+    aruwsrc::engineer::CAN_BUS_GANTRY,
+    false,
+    "Gantry Extension Motor",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimitSwitch(
+    &drivers()->digital,
+    aruwsrc::engineer::GANTRY_EXTENSION_LIMIT_SWITCH_PIN);
+
+LimitSwitchTrigger extensionLimitSwitchTrigger(drivers(), &extensionLimitSwitch);
+
+WristSubsystem wristSubsystem(
+    drivers(),
+    engineerWristLeftMotor,
+    engineerWristRightMotor,
+    engineerWristPitchEncoder,
+    engineerWristYawEncoder,
+    aruwsrc::engineer::WRIST_PITCH_CONFIG,
+    aruwsrc::engineer::WRIST_YAW_CONFIG,
+    aruwsrc::engineer::WRIST_RATIO);
+
+ArmLiftSubsystem armLiftSubsystem(
+    drivers(),
+    engineerGantryLiftLeftMotor,
+    engineerGantryLiftRightMotor,
+    aruwsrc::engineer::GANTRY_LIFT_POS_CONFIG,
+    aruwsrc::engineer::GANTRY_LIFT_BALANCE_CONFIG,
+    liftLimitSwitchTrigger,
+    1.0f,
+    1.0f,
+    0.0f,
+    1000.0f  // todo
+);
+
+ArmExtensionSubsystem armExtensionSubsystem(
+    drivers(),
+    engineerGantryExtensionMotor,
+    aruwsrc::engineer::GANTRY_EXTENSION_CONFIG,
+    1.0f,
+    0.0f,
+    1000.0f);
+
+JointSubsystem wristRollSubsystem(
+    drivers(),
+    engineerWristRollMotor,
+    aruwsrc::engineer::WRIST_ROLL_CONFIG,
+    0.0f,
+    1000.0f);
+
 /* define commands ----------------------------------------------------------*/
 
-// aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
-//     drivers(),
-//     &drivers()->controlOperatorInterface,
-//     &chassis);
+aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+    drivers(),
+    &drivers()->controlOperatorInterface,
+    &chassis);
+
+
+control::engineer::ArmControllerCommand armControllerCommand(
+    armLiftSubsystem,
+    armExtensionSubsystem,
+    wristRollSubsystem,
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    aruwsrc::engineer::GANTRY_LIFT_SCALING_FACTOR,
+    aruwsrc::engineer::GANTRY_EXTENSION_SCALING_FACTOR,
+    aruwsrc::engineer::WRIST_ROLL_SCALING_FACTOR,
+    aruwsrc::engineer::WRIST_PITCH_SCALING_FACTOR,
+    aruwsrc::engineer::WRIST_YAW_SCALING_FACTOR);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() { /*chassis.initialize();*/ }
+void initializeSubsystems()
+{
+    chassis.initialize();
+    armLiftSubsystem.initialize();
+    armExtensionSubsystem.initialize();
+    wristRollSubsystem.initialize();
+    wristSubsystem.initialize();
+}
 
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&armLiftSubsystem);
+    drivers->commandScheduler.registerSubsystem(&armExtensionSubsystem);
+    drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
+    drivers->commandScheduler.registerSubsystem(&wristSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
-    // chassis.setDefaultCommand(&chassisDriveCommand);
+    chassis.setDefaultCommand(&chassisDriveCommand);
+    armLiftSubsystem.setDefaultCommand(&armControllerCommand);
+    armExtensionSubsystem.setDefaultCommand(&armControllerCommand);
+    wristSubsystem.setDefaultCommand(&armControllerCommand);
+    wristRollSubsystem.setDefaultCommand(&armControllerCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers *) {
+    drivers()->commandScheduler.addCommand(&armControllerCommand);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *) {}
-}  // namespace control
 
+}  // namespace control
 }  // namespace aruwsrc
 
 namespace aruwsrc::engineer

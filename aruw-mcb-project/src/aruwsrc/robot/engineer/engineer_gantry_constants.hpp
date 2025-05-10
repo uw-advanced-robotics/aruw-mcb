@@ -20,16 +20,107 @@
 #ifndef ENGINEER_GANTRY_CONSTANTS_HPP_
 #define ENGINEER_GANTRY_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/gpio/digital.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/motor/dji_motor.hpp"
-
 namespace aruwsrc::engineer
 {
-static constexpr tap::can::CanBus GANTRY_CAN_BUS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::can::CanBus CAN_BUS_GANTRY = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId GANTRY_LIFT_LEFT_MOTOR_ID = tap::motor::MotorId::MOTOR1;
 static constexpr tap::motor::MotorId GANTRY_LIFT_RIGHT_MOTOR_ID = tap::motor::MotorId::MOTOR2;
 static constexpr tap::motor::MotorId GANTRY_EXTENSION_MOTOR_ID = tap::motor::MotorId::MOTOR3;
 static constexpr tap::motor::MotorId WRIST_LEFT_MOTOR_ID = tap::motor::MotorId::MOTOR4;
 static constexpr tap::motor::MotorId WRIST_RIGHT_MOTOR_ID = tap::motor::MotorId::MOTOR5;
 static constexpr tap::motor::MotorId WRIST_ROLL_MOTOR_ID = tap::motor::MotorId::MOTOR6;
+static constexpr tap::encoder::CanEncoderId WRIST_PITCH_ENCODER_ID =
+    tap::encoder::CanEncoderId::ID0;
+static constexpr tap::encoder::CanEncoderId WRIST_YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID1;
+
+static constexpr float WRIST_PITCH_PID_KP = 10.0f;
+static constexpr float WRIST_PITCH_PID_KI = 0.0f;
+static constexpr float WRIST_PITCH_PID_KD = 0.0f;
+static constexpr float WRIST_PITCH_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float WRIST_PITCH_PID_KS = 0.0;
+
+static constexpr float WRIST_YAW_PID_KP = 10.0f;
+static constexpr float WRIST_YAW_PID_KI = 0.0f;
+static constexpr float WRIST_YAW_PID_KD = 0.0f;
+static constexpr float WRIST_YAW_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float WRIST_YAW_PID_KS = 0.0;
+
+static constexpr float WRIST_ROLL_PID_KP = 10.0f;
+static constexpr float WRIST_ROLL_PID_KI = 0.0f;
+static constexpr float WRIST_ROLL_PID_KD = 0.0f;
+static constexpr float WRIST_ROLL_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float WRIST_ROLL_PID_KS = 0.0;
+
+static constexpr float WRIST_RATIO = 1.0f;
+
+static constexpr tap::algorithms::SmoothPidConfig WRIST_PITCH_CONFIG(
+    WRIST_PITCH_PID_KP,
+    WRIST_PITCH_PID_KI,
+    WRIST_PITCH_PID_KD,
+    WRIST_PITCH_PID_MAX_ERROR_SUM);
+
+static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_CONFIG(
+    WRIST_YAW_PID_KP,
+    WRIST_YAW_PID_KI,
+    WRIST_YAW_PID_KD,
+    WRIST_YAW_PID_MAX_ERROR_SUM);
+
+static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_CONFIG(
+    WRIST_ROLL_PID_KP,
+    WRIST_ROLL_PID_KI,
+    WRIST_ROLL_PID_KD,
+    WRIST_ROLL_PID_MAX_ERROR_SUM);
+
+static constexpr float GANTRY_LIFT_POS_PID_KP = 10.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KI = 0.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KD = 0.0f;
+static constexpr float GANTRY_LIFT_POS_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KS = 0.0;
+
+static constexpr float GANTRY_LIFT_BALANCE_PID_KP = 10.0f;
+static constexpr float GANTRY_LIFT_BALANCE_PID_KI = 0.0f;
+static constexpr float GANTRY_LIFT_BALANCE_PID_KD = 0.0f;
+static constexpr float GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float GANTRY_LIFT_BALANCE_PID_KS = 0.0;
+
+static constexpr tap::gpio::Digital::InputPin GANTRY_LIFT_LIMIT_SWITCH_PIN =
+    tap::gpio::Digital::InputPin::D;  // TODO: Update to correct pin
+
+static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_POS_CONFIG(
+    GANTRY_LIFT_POS_PID_KP,
+    GANTRY_LIFT_POS_PID_KI,
+    GANTRY_LIFT_POS_PID_KD,
+    GANTRY_LIFT_POS_PID_MAX_ERROR_SUM);
+
+static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_BALANCE_CONFIG(
+    GANTRY_LIFT_BALANCE_PID_KP,
+    GANTRY_LIFT_BALANCE_PID_KI,
+    GANTRY_LIFT_BALANCE_PID_KD,
+    GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM);
+
+static constexpr float GANTRY_EXTENSION_PID_KP = 10.0f;
+static constexpr float GANTRY_EXTENSION_PID_KI = 0.0f;
+static constexpr float GANTRY_EXTENSION_PID_KD = 0.0f;
+static constexpr float GANTRY_EXTENSION_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float GANTRY_EXTENSION_PID_KS = 0.0;
+
+static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_CONFIG(
+    GANTRY_EXTENSION_PID_KP,
+    GANTRY_EXTENSION_PID_KI,
+    GANTRY_EXTENSION_PID_KD,
+    GANTRY_EXTENSION_PID_MAX_ERROR_SUM);
+
+static constexpr tap::gpio::Digital::InputPin GANTRY_EXTENSION_LIMIT_SWITCH_PIN =
+    tap::gpio::Digital::InputPin::B;  // TODO: Update to correct pin
+
+static constexpr float GANTRY_LIFT_SCALING_FACTOR = 1.0f;
+static constexpr float GANTRY_EXTENSION_SCALING_FACTOR = 1.0f;
+static constexpr float WRIST_ROLL_SCALING_FACTOR = 1.0f;
+static constexpr float WRIST_PITCH_SCALING_FACTOR = 1.0f;
+static constexpr float WRIST_YAW_SCALING_FACTOR = 1.0f;
 }  // namespace aruwsrc::engineer
 #endif  // ENGINEER_GANTRY_CONSTANTS_HPP_

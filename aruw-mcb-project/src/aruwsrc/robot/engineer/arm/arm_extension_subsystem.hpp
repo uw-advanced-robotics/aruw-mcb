@@ -36,12 +36,14 @@ public:
     ArmExtensionSubsystem(
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motors,
-        tap::algorithms::SmoothPidConfig &config,
+        const tap::algorithms::SmoothPidConfig &config,
         float radius,
         float minSetpoint,
         float maxSetpoint,
         float kS = 0,
-        float epsilon = 1);
+        float epsilon = 1e-4);
+
+    virtual void initialize() override;
 
     virtual float getPosition() override;
 
