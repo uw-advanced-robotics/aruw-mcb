@@ -63,6 +63,7 @@ public:
     SwerveChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
         Module* moduleLeftFront,
         Module* moduleRightFront,
         Module* moduleLeftBack,
