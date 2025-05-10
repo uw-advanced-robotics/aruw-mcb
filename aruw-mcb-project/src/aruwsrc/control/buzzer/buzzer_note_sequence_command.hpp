@@ -19,6 +19,8 @@
 #ifndef BUZZER_NOTE_SEQUENCE_COMMAND_HPP_
 #define BUZZER_NOTE_SEQUENCE_COMMAND_HPP_
 
+#include <span>
+
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
@@ -34,8 +36,7 @@ class BuzzerNoteSequenceCommand : public tap::control::Command
 public:
     BuzzerNoteSequenceCommand(
         BuzzerSubsystem& buzzer,
-        const uint8_t* notes,
-        const size_t numNotes,
+        const std::span<const uint8_t> notes,
         const uint16_t noteLengthMillis);
 
     void initialize() override;
@@ -44,14 +45,13 @@ public:
 
     void end(bool) override { buzzer.stop(); }
 
-    bool isFinished() const override { return noteIndex >= numNotes; }
+    bool isFinished() const override { return noteIndex >= notes.size(); }
 
     const char* getName() const override { return "Buzzer Note Sequence Command"; }
 
 private:
     BuzzerSubsystem& buzzer;
-    const uint8_t* notes;
-    const size_t numNotes;
+    const std::span<const uint8_t> notes;
     const uint16_t noteLengthMillis;
 
     uint32_t startTime;

@@ -23,12 +23,10 @@ namespace aruwsrc::control::buzzer
 {
 BuzzerNoteSequenceCommand::BuzzerNoteSequenceCommand(
     BuzzerSubsystem& buzzer,
-    const uint8_t* notes,
-    const size_t numNotes,
+    const std::span<const uint8_t> notes,
     const uint16_t noteLengthMillis)
     : buzzer(buzzer),
       notes(notes),
-      numNotes(numNotes),
       noteLengthMillis(noteLengthMillis)
 {
     addSubsystemRequirement(&buzzer);
@@ -45,7 +43,7 @@ void BuzzerNoteSequenceCommand::execute()
 
     size_t noteIndex = ((currTime - startTime) / noteLengthMillis);
 
-    if (noteIndex >= numNotes) return;
+    if (isFinished()) return;
 
     buzzer.playFrequency(notes[noteIndex]);
 }

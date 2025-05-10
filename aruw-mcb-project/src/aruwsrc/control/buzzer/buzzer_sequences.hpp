@@ -22,18 +22,20 @@
 
 #include <stdint.h>
 
-#include <cstddef>
+#include <array>
 
 namespace aruwsrc::control::buzzer
 {
 static constexpr uint32_t MARIO_MUSHROOM_NOTE_LENGTH_MS = 34;
-static constexpr uint8_t MARIO_MUSHROOM_NOTES[]{37, 32, 37, 41, 44, 49, 44, 33, 37,
-                                                40, 45, 40, 45, 49, 52, 57, 52, 35,
-                                                39, 42, 47, 42, 47, 51, 54, 59, 54};
+static constexpr std::array<uint8_t, 27> MARIO_MUSHROOM_NOTES{{37, 32, 37, 41, 44, 49, 44, 33, 37,
+                                                               40, 45, 40, 45, 49, 52, 57, 52, 35,
+                                                               39, 42, 47, 42, 47, 51, 54, 59, 54}};
 
 static constexpr uint32_t ZELDA_SECRET_NOTE_LENGTH_MS = 130;
-static constexpr uint8_t ZELDA_SECRET_NOTES[]{44, 43, 40, 34, 33, 41, 45, 49};
+static constexpr std::array<uint8_t, 8> ZELDA_SECRET_NOTES{{44, 43, 40, 34, 33, 41, 45, 49}};
 
+static constexpr uint32_t IMU_CALIBRATE_SOUND_NOTE_LENGTH_MS = MARIO_MUSHROOM_NOTE_LENGTH_MS;
+static constexpr auto& IMU_CALIBRATE_SOUND_NOTES = MARIO_MUSHROOM_NOTES;
 }  // namespace aruwsrc::control::buzzer
 
 #endif  // BUZZER_SEQUENCES_HPP_
