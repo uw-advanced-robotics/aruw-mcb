@@ -85,10 +85,11 @@ bool CubeStorageSubsystem::isLimitSwitched()
 }
 
 void CubeStorageSubsystem::refresh()
-{
+{   
     isLimitSwitch = isLimitSwitched();
     if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
     {
+        moveMotor(homingOutput); //debugging only
         if (!trigger.isTriggered())
         {
             calibrationState = CalibrationState::CALIBRATION_COMPLETE;

@@ -39,7 +39,7 @@ static constexpr float LIFT_UPPER_BOUND = 1000;  // TODO: UPDATE
 
 static constexpr int64_t LENGTH = 100;  // TODO: UPDATE LATER
 
-static constexpr int16_t FEEDFORWARD = 1000;  // TODO: UPDATE W CORRECT VALUE
+static constexpr int16_t FEEDFORWARD = 0;  // TODO: UPDATE W CORRECT VALUE
 
 static constexpr float MM_PER_REVOLUTION = 71.44;
 

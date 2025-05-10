@@ -80,7 +80,7 @@ private:
     float setpoint = 0;
     float lastTime = 0;
     float motorDesiredOutput = 0;
-    int16_t homingOutput = -1500;
+    int16_t homingOutput = -1000;
     uint64_t home = 0;
     uint64_t upperBound = LIFT_UPPER_BOUND;
     uint64_t lowerBound = 0;

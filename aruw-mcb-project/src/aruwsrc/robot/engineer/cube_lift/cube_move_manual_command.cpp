@@ -42,5 +42,5 @@ void CubeMoveManualCommand::end(bool) { cubeLift.moveMotor(0); }
 bool CubeMoveManualCommand::isFinished() const
 {
     return cubeLift.isLimitSwitched();
-}  // TODO: change back to isLimitSwitched
+}
 }  // namespace aruwsrc::robot::engineer
