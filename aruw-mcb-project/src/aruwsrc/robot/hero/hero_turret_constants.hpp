@@ -60,9 +60,9 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-static constexpr float TURRET_CG_X = -108.16;
-static constexpr float TURRET_CG_Z = 18.45;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 7'000.0f;
+static constexpr float TURRET_CG_X = -40.16;
+static constexpr float TURRET_CG_Z = 16.25;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 13'000.0f;
 
 namespace world_rel_turret_imu
 {
@@ -78,11 +78,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     // .tRProportionalKalman = 5.0f,
     // .errDeadzone = 0.0f,
     // .errorDerivativeFloor = 0.0f,
-    .kp = 0.0f,
+    .kp = 12.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = M_TWOPI,
+    .maxOutput = 2.5,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -128,10 +128,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     // .tRProportionalKalman = 0.5f,
     // .errDeadzone = 0.0f,
     // .errorDerivativeFloor = 0.0f,
-    .kp = 0.0f,
-    .ki = 0.0f,
+    .kp = 9'000.0f,
+    .ki = 30.0f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
+    .maxICumulative = 1'800.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
@@ -170,10 +170,10 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 10'000.0f,
-    .ki = 0.0f,
+    .kp = 17'000.0f,
+    .ki = 400.0f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
+    .maxICumulative = 5'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,

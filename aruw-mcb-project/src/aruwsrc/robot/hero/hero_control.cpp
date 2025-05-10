@@ -207,14 +207,14 @@ tap::encoder::CanEncoder yawEncoder(
     drivers(),
     tap::encoder::CanEncoderId::ID3,
     tap::can::CanBus::CAN_BUS2,
-    true,
+    false,
     1.0,
     YAW_MOTOR_CONFIG.startEncoderValue);
 tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_YAW_MOTOR,
-    true,
+    false,
     "Yaw Turret",
     false,
     1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508,
