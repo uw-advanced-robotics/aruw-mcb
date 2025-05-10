@@ -47,6 +47,7 @@ struct BalstdLegState
 
     void calculateForwardKinematics(BalstdLegConfig config)
     {
+        
         // knee coordinates
         CMSISMat<2, 1> P2 = CMSISMat<2, 1>({config.upperLinkLength * cos(qFront),
                                              config.upperLinkLength * sin(qFront)});
@@ -56,7 +57,7 @@ struct BalstdLegState
 
         kneesWidthX = (P4 - P2).data[0];
         kneesWidthY = (P4 - P2).data[1];
-        
+
         // wheel coordinates
         // ||P2-Ph|| = (a2^2 - a3^2 + ||P4-P2||^2) / (2*||P4-P2||)
         // a2 and a3 are the upper leg links and are the same
@@ -68,24 +69,24 @@ struct BalstdLegState
         arm_power_f32(P4_P2.data.data(), 2, &P4_P2_2);
 
         // ||P4-P2||
-        float P4_P2_mag;
-        arm_sqrt_f32(P4_P2_2, &P4_P2_mag);
+        // float P4_P2_mag;
+        // arm_sqrt_f32(P4_P2_2, &P4_P2_mag);
 
-        // ||P2-Ph||
-        float P2_Ph_mag = (P4_P2_mag*P4_P2_mag) / (2*P4_P2_mag);
+        // // ||P2-Ph||
+        // float P2_Ph_mag = (P4_P2_mag*P4_P2_mag) / (2*P4_P2_mag);
 
-        //Ph = P2 + ||P2-Ph|| / ||P2-P4|| * (P4-P2)
-        CMSISMat<2, 1> Ph = P2 + CMSISMat<2, 1>({P2_Ph_mag / P4_P2_mag, P2_Ph_mag / P4_P2_mag}) * (P4-P2);
+        // //Ph = P2 + ||P2-Ph|| / ||P2-P4|| * (P4-P2)
+        // CMSISMat<2, 1> Ph = P2 + CMSISMat<2, 1>({P2_Ph_mag / P4_P2_mag, P2_Ph_mag / P4_P2_mag}) * (P4-P2);
 
-        // ||P3-Ph|| = sqrt(a2^2 - ||P2-Ph||^2)
-        float P3_Ph_mag;
-        arm_sqrt_f32(config.lowerLinkLength * config.lowerLinkLength - P2_Ph_mag*P2_Ph_mag, &P3_Ph_mag);
+        // // ||P3-Ph|| = sqrt(a2^2 - ||P2-Ph||^2)
+        // float P3_Ph_mag;
+        // arm_sqrt_f32(config.lowerLinkLength * config.lowerLinkLength - P2_Ph_mag*P2_Ph_mag, &P3_Ph_mag);
         
-        // P3 = Ph ± ||P3-Ph|| / ||P2-P4|| * (P4-P2)
-        CMSISMat<2,1> P3 = Ph + CMSISMat<2,1>({P3_Ph_mag / P4_P2_mag, -P3_Ph_mag / P4_P2_mag}) * (P4-P2);
+        // // P3 = Ph ± ||P3-Ph|| / ||P2-P4|| * (P4-P2)
+        // CMSISMat<2,1> P3 = Ph + CMSISMat<2,1>({P3_Ph_mag / P4_P2_mag, -P3_Ph_mag / P4_P2_mag}) * (P4-P2);
 
-        xc = P3.data[0];
-        yc = P3.data[1];
+        // xc = P3.data[0];
+        // yc = P3.data[1];
     }
 
     void calculatePendulumState()
