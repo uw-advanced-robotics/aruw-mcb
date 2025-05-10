@@ -98,8 +98,9 @@ void ArmLiftSubsystem::refreshSafeDisconnect()
     motorRight.setDesiredOutput(0);
 }
 
-void ArmLiftSubsystem::moveTowardLowerBound() {
-    //todo
+void ArmLiftSubsystem::moveTowardLowerBound()
+{
+    // todo
 }
 
 }  // namespace engineer

@@ -31,7 +31,7 @@ namespace engineer
 class LinearJointInterface
 {
 public:
-virtual void setSetpoint(float setpoint)
+    virtual void setSetpoint(float setpoint)
     {
         this->setpoint = std::clamp(setpoint, minSetpoint, maxSetpoint);
     };
