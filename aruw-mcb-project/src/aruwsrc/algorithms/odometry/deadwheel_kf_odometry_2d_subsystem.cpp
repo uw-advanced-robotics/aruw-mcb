@@ -38,8 +38,8 @@ DeadwheelKFOdometry2DSubsystem::DeadwheelKFOdometry2DSubsystem(
           imu,
           modm::Vector2f(initialXPos, initialYPos),
           centerToWheelDistance,
-          (1 / M_SQRT2),
-          (1 / M_SQRT2)),
+          1,
+          1),
       chassisYawObserver(yawObserver)
 {
 }

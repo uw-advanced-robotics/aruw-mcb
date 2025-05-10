@@ -224,7 +224,8 @@ tap::encoder::CanEncoder parallelOmni(
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID0,
-    tap::can::CanBus::CAN_BUS2);
+    tap::can::CanBus::CAN_BUS2,
+    true);
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
     &parallelOmni,

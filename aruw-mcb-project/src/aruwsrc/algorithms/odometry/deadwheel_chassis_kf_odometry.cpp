@@ -61,15 +61,16 @@ void DeadwheelChassisKFOdometry::update()
 
     // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
     // of the two omni wheels
-    float V1 = deadwheelOdometry.getPerpendicularVelocity();
-    float V2 = deadwheelOdometry.getParallelMotorVelocity();
+    perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
+    parallelRaw = deadwheelOdometry.getParallelMotorVelocity();
 
     // Calculate velocities in the robot's frame of reference
     // Correct for rotation of the robot
-    V2 -= imu.getGz() * parallelCenterToWheelDistance;
+    parallelRaw -= imu.getGz() * parallelCenterToWheelDistance;
+    
     // Rotate the velocities based on the wheel rotations
-    float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
-    float Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
+    float Vx = parallelRaw * parallelWheelChassisRelativeAngleRadians;
+    float Vy = perpendicularRaw * perpendicularWheelChassisRelativeAngleRadians;
 
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
 

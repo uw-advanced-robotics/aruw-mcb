@@ -143,12 +143,12 @@ private:
         0, 0, 0, 0, 0, 1,
     };
     static constexpr float KF_Q[STATES_SQUARED] = {
-        1E-2, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E-1, 0  , 0  , 0  , 0  ,
-        0  , 0  , 5E0, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E-2, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E-1, 0  ,
-        0  , 0  , 0  , 0  , 0  , 5E0,
+        1, 0  , 0  , 0  , 0  , 0  ,
+        0  , 1, 0  , 0  , 0  , 0  ,
+        0  , 0  , 1, 0  , 0  , 0  ,
+        0  , 0  , 0  , 1, 0  , 0  ,
+        0  , 0  , 0  , 0  , 1, 0  ,
+        0  , 0  , 0  , 0  , 0  , 1,
     };
     static constexpr float KF_R[INPUTS_SQUARED] = {
         7.49565672e-05, 0, 0, 0,
@@ -187,6 +187,8 @@ private:
     const float parallelWheelChassisRelativeAngleRadians;
     const float perpendicularWheelChassisRelativeAngleRadians;
     void updateChassisStateFromKF(float chassisYaw);
+    float perpendicularRaw;
+    float parallelRaw;
 };
 }  // namespace aruwsrc::algorithms::odometry
 
