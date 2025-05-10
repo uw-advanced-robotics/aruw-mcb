@@ -46,7 +46,7 @@ static constexpr std::array<uint8_t, 8> ZELDA_SECRET_NOTES{{44, 43, 40, 34, 33, 
 
 static constexpr uint32_t MEGALOVANIA_NOTE_LENGTH_MS = 125;
 static constexpr std::array<uint8_t, 16> MEGALOVANIA_NOTES{
-    {27, 27, 39, 0, 34, 0, 0, 33, 0, 31, 0, 29, 29, 26, 29, 31}};
+    {27, 27, 39, 0, 34, 0, 0, 33, 0, 32, 0, 30, 30, 27, 30, 32}};
 
 static constexpr uint32_t IMU_CALIBRATE_SOUND_NOTE_LENGTH_MS = MARIO_MUSHROOM_NOTE_LENGTH_MS;
 static constexpr auto& IMU_CALIBRATE_SOUND_NOTES = MARIO_MUSHROOM_NOTES;
