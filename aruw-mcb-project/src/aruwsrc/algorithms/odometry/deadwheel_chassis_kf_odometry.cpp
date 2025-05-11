@@ -88,7 +88,7 @@ void DeadwheelChassisKFOdometry::update()
 
     filteredParallel = parallelRaw + (angularVelo * parallelCenterToWheelDistance);
     
-    filteredParallel = applyIirFilter(parallelRaw, parallelFilterState, IIR_A, IIR_B, FILTER_ORDER);
+    filteredParallel = applyIirFilter(filteredParallel, parallelFilterState, IIR_A, IIR_B, FILTER_ORDER);
     filteredPerpendicular = applyIirFilter(perpendicularRaw, perpendicularFilterState, IIR_A, IIR_B, FILTER_ORDER);
     
     float Vx = (filteredParallel * std::sin(parallelWheelChassisForwardRelativeAngleRadians) +
