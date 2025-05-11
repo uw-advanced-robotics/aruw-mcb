@@ -179,11 +179,19 @@ TEST(TurretMCBCanComm, receive_turret_data)
     EXPECT_NEAR(static_cast<int16_t>(0x4567) / Mpu6500::LSB_PER_RAD_PER_S, dut.getGx(), 1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x4321) * 0.01, dut.getAx(), 1E-5);
 
+#ifdef TARGET_STANDARD_NULL
+    EXPECT_NEAR(
+        -modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x2345),
+        dut.getPitch(),
+        1E-5);
+    EXPECT_NEAR(-static_cast<int16_t>(0x5678) / Mpu6500::LSB_PER_RAD_PER_S, dut.getGy(), 1E-5);
+#else
     EXPECT_NEAR(
         modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x2345),
         dut.getPitch(),
         1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x5678) / Mpu6500::LSB_PER_RAD_PER_S, dut.getGy(), 1E-5);
+#endif
     EXPECT_NEAR(static_cast<int16_t>(0x5432) * 0.01, dut.getAy(), 1E-5);
 
     EXPECT_NEAR(

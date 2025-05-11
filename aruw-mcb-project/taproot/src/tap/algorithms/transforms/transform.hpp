@@ -51,7 +51,8 @@ namespace tap::algorithms::transforms
  * only to change the orientation of the follower frame's axes relative to the base frame.
  *
  * A Dynamic Transform is an extension of a Static Transform that can store linear velocity, linear
- * acceleration, and angular velocity.
+ * acceleration, and angular velocity. This class handles both, automatically determining whether it
+ * is static or dynamic.
  *
  * Utilizes ARM's CMSIS matrix operations.
  */
@@ -74,18 +75,18 @@ public:
 
     /**
      * Constructs rotations using XYZ Euler angles,
-     * so rotations are applied in order of A, B, then C.
+     * so rotations are applied in order of rx, ry, then rz.
      * As an example, for an x-forward, z-up coordinate system,
      * this is in the order of roll, pitch, then yaw.
      *
      * @param x: Initial x-component of the translation.
      * @param y: Initial y-component of the translation.
      * @param z: Initial z-component of the translation.
-     * @param roll: Initial rotation angle about the x-axis.
-     * @param pitch: Initial rotation angle about the y-axis.
-     * @param yaw: Initial rotation angle about the z-axis.
+     * @param rx: Initial rotation angle about the x-axis.
+     * @param ry: Initial rotation angle about the y-axis.
+     * @param rz: Initial rotation angle about the z-axis.
      */
-    Transform(float x, float y, float z, float roll, float pitch, float yaw);
+    Transform(float x, float y, float z, float rx, float ry, float rz);
 
     /**
      * @param translation Initial translation of this transformation.
@@ -152,16 +153,23 @@ public:
 
     /**
      * Constructs rotations using XYZ Euler angles,
-     * so rotations are applied in order of A, B, then C.
-     * As an example, for an x-forward, z-up coordinate system,
-     * this is in the order of roll, pitch, then yaw.
+     * so rotations are applied in order of rx, ry, then rx.
      *
-     * @param x: Initial x-component of the translation.
-     * @param y: Initial y-component of the translation.
-     * @param z: Initial z-component of the translation.
-     * @param A: Initial rotation angle about the x-axis.
-     * @param B: Initial rotation angle about the y-axis.
-     * @param C: Initial rotation angle about the z-axis.
+     * @param x:  Initial x-component of the translation.
+     * @param y:  Initial y-component of the translation.
+     * @param z:  Initial z-component of the translation.
+     * @param vx: Initial x-component of the translational velocity.
+     * @param vy: Initial y-component of the translational velocity.
+     * @param vz: Initial z-component of the translational velocity.
+     * @param ax: Initial x-component of the translational acceleration.
+     * @param ay: Initial y-component of the translational acceleration.
+     * @param az: Initial z-component of the translational acceleration.
+     * @param rx: Initial rotation angle about the x-axis.
+     * @param ry: Initial rotation angle about the y-axis.
+     * @param rz: Initial rotation angle about the z-axis.
+     * @param wx: Initial angular velocity about the x-axis.
+     * @param wy: Initial angular velocity about the y-axis.
+     * @param wz: Initial angular velocity about the z-axis.
      */
     Transform(
         float x,
@@ -173,12 +181,12 @@ public:
         float ax,
         float ay,
         float az,
-        float roll,
-        float pitch,
-        float yaw,
-        float rollVel,
-        float pitchVel,
-        float yawVel);
+        float rx,
+        float ry,
+        float rz,
+        float wx,
+        float wy,
+        float wz);
 
     /**
      * @brief Constructs an identity transform.
@@ -200,6 +208,8 @@ public:
      * difference between two positions in space, since both positions get translated the same way,
      * causing the translation to cancel out.
      *
+     * @note Only accurate for static transforms!
+     *
      * @param vector Vector as read by base frame.
      * @return Vector in follower frame's basis.
      */
@@ -208,10 +218,25 @@ public:
     DynamicPosition apply(const DynamicPosition& dynamicPosition) const;
 
     /**
-     * @brief Rotates an orientation in the base frame to a vector in the follower frame.
+     * @brief Brings a dynamic position in the base frame to one in the follower frame.
+     */
+    DynamicPosition apply(const DynamicPosition& dynamicPosition) const;
+
+    /**
+     * @brief Brings a dynamic position in the base frame to one in the follower frame.
+     */
+    DynamicPosition apply(const DynamicPosition& dynamicPosition) const;
+
+    /**
+     * @brief Brings an orientation in the base frame to one in the follower frame.
      */
     Orientation apply(const Orientation& orientation) const;
 
+    DynamicOrientation apply(const DynamicOrientation& dynamicOrientation) const;
+
+    /**
+     * @brief Brings a dynamic orientation in the base frame to one in the follower frame.
+     */
     DynamicOrientation apply(const DynamicOrientation& dynamicOrientation) const;
 
     /**
@@ -444,7 +469,7 @@ public:
     /**
      * @return Inverse of this Transform.
      *
-     * @note This is only correct instantaneously for dynamic transforms; It can no longer be
+     * @note This is only instantaneously correct for dynamic transforms; It can no longer be
      * projected forward in time and behave the same way as the original. This is due to the now
      * reversed translation-rotation that would be required to truly mimic the motion of the
      * original. Ex: Consider a dynamic transform with only non-zero translation and angular
@@ -580,6 +605,11 @@ public:
      */
     inline float getZAcc() const { return this->transAcc.data[2]; }
 
+    /**
+     * @brief Whether there are any non-zero derivatives.
+     */
+    inline bool isDynamic() const { return dynamic; }
+
 private:
     bool dynamic{true};
 
@@ -589,12 +619,12 @@ private:
     CMSISMat<3, 1> translation;
 
     /**
-     * Velocity vector.
+     * Translational velocity vector.
      */
     CMSISMat<3, 1> transVel;
 
     /**
-     * Acceleration vector.
+     * Translational acceleration vector.
      */
     CMSISMat<3, 1> transAcc;
 

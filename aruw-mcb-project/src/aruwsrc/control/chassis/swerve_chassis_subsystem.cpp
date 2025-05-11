@@ -28,13 +28,14 @@ namespace chassis
 SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
     Module* moduleLeftFront,
     Module* moduleRightFront,
     Module* moduleLeftBack,
     Module* moduleRightBack,
     const float forwardMatrixArray[24],
     can::capbank::CapacitorBank* capacitorBank)
-    : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
+    : HolonomicChassisSubsystem(drivers, currentSensor, voltageSensor, capacitorBank),
       modules{moduleLeftFront, moduleRightFront, moduleLeftBack, moduleRightBack},
       forwardMatrix(forwardMatrixArray)
 {
