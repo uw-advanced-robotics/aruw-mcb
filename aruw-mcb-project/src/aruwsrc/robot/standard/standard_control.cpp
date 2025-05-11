@@ -219,13 +219,13 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
 tap::encoder::CanEncoder parallelOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
-    tap::can::CanBus::CAN_BUS2);
+    tap::can::CanBus::CAN_BUS2,
+    true);
 
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID0,
-    tap::can::CanBus::CAN_BUS2,
-    true);
+    tap::can::CanBus::CAN_BUS2);
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
     &parallelOmni,
@@ -239,7 +239,9 @@ aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
     drivers()->mpu6500,
     aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
     aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
-    aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS);
+    aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+    aruwsrc::chassis::PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
+    aruwsrc::chassis::PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);

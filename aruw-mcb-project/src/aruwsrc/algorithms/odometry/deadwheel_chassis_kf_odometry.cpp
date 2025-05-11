@@ -31,16 +31,16 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
     const float parallelCenterToWheelDistance,
-    const float parallelWheelChassisRelativeAngleRadians,
-    const float perpendicularWheelChassisRelativeAngleRadians)
+    const float parallelWheelChassisForwardRelativeAngleRadians,
+    const float perpendicularWheelChassisForwardRelativeAngleRadians)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
       parallelCenterToWheelDistance(parallelCenterToWheelDistance),
-      parallelWheelChassisRelativeAngleRadians(parallelWheelChassisRelativeAngleRadians),
-      perpendicularWheelChassisRelativeAngleRadians(perpendicularWheelChassisRelativeAngleRadians)
+      parallelWheelChassisForwardRelativeAngleRadians(parallelWheelChassisForwardRelativeAngleRadians),
+      perpendicularWheelChassisForwardRelativeAngleRadians(perpendicularWheelChassisForwardRelativeAngleRadians)
 {
     reset();
 }
@@ -51,6 +51,28 @@ void DeadwheelChassisKFOdometry::reset()
     kf.init(initialX);
 }
 
+//may or may not work
+float DeadwheelChassisKFOdometry::applyIirFilter(
+    float input, 
+    float* state, 
+    const float* a, 
+    const float* b, 
+    int order) 
+{
+    for (int i = order - 1; i > 0; i--) {
+        state[i] = state[i-1];
+    }
+    
+    float output = b[0] * input;
+    for (int i = 1; i < order; i++) {
+        output += b[i] * state[i];
+        output -= a[i] * state[i-1];
+    }
+    
+    state[0] = input;
+    return output;
+}
+
 void DeadwheelChassisKFOdometry::update()
 {
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
@@ -59,18 +81,20 @@ void DeadwheelChassisKFOdometry::update()
         return;
     }
 
-    // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
-    // of the two omni wheels
+    float angularVelo = imu.getGz();
+
     perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
     parallelRaw = deadwheelOdometry.getParallelMotorVelocity();
 
-    // Calculate velocities in the robot's frame of reference
-    // Correct for rotation of the robot
-    parallelRaw -= imu.getGz() * parallelCenterToWheelDistance;
+    filteredParallel = parallelRaw + (angularVelo * parallelCenterToWheelDistance);
     
-    // Rotate the velocities based on the wheel rotations
-    float Vx = parallelRaw * parallelWheelChassisRelativeAngleRadians;
-    float Vy = perpendicularRaw * perpendicularWheelChassisRelativeAngleRadians;
+    filteredParallel = applyIirFilter(parallelRaw, parallelFilterState, IIR_A, IIR_B, FILTER_ORDER);
+    filteredPerpendicular = applyIirFilter(perpendicularRaw, perpendicularFilterState, IIR_A, IIR_B, FILTER_ORDER);
+    
+    float Vx = (filteredParallel * std::sin(parallelWheelChassisForwardRelativeAngleRadians) +
+                filteredPerpendicular * std::cos(perpendicularWheelChassisForwardRelativeAngleRadians));
+    float Vy = (filteredParallel * std::cos(parallelWheelChassisForwardRelativeAngleRadians) -
+                filteredPerpendicular * std::sin(perpendicularWheelChassisForwardRelativeAngleRadians));
 
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
 

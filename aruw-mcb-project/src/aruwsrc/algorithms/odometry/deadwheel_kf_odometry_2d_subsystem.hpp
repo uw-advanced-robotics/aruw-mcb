@@ -76,7 +76,9 @@ public:
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,
         float initialYPos,
-        const float centerToWheelDistance);
+        const float centerToWheelDistance,
+        const float parallelWheelChassisForwardRelativeAngleRadians,
+        const float perpendicularWheelChassisForwardRelativeAngleRadians);
 
     void refresh() override;
 

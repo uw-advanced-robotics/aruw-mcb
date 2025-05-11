@@ -30,7 +30,9 @@ DeadwheelKFOdometry2DSubsystem::DeadwheelKFOdometry2DSubsystem(
     tap::communication::sensors::imu::ImuInterface &imu,
     float initialXPos,
     float initialYPos,
-    const float centerToWheelDistance)
+    const float centerToWheelDistance,
+    const float parallelWheelChassisForwardRelativeAngleRadians,
+    const float perpendicularWheelChassisForwardRelativeAngleRadians)
     : Subsystem(&drivers),
       DeadwheelChassisKFOdometry(
           deadwheels,
@@ -38,8 +40,8 @@ DeadwheelKFOdometry2DSubsystem::DeadwheelKFOdometry2DSubsystem(
           imu,
           modm::Vector2f(initialXPos, initialYPos),
           centerToWheelDistance,
-          1,
-          1),
+          parallelWheelChassisForwardRelativeAngleRadians,
+          perpendicularWheelChassisForwardRelativeAngleRadians),
       chassisYawObserver(yawObserver)
 {
 }
