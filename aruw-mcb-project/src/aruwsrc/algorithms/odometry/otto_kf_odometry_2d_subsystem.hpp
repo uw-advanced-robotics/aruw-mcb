@@ -35,10 +35,6 @@ namespace tap
 {
 class Drivers;
 }
-namespace aruwsrc::control::turret
-{
-class TurretSubsystem;
-}
 
 namespace tap::control::chassis
 {
@@ -58,6 +54,7 @@ namespace aruwsrc::algorithms::odometry
 class OttoKFOdometry2DSubsystem final : public tap::control::Subsystem, public ChassisKFOdometry
 {
 public:
+    using Frame = aruwsrc::algorithms::state::Frame;
     /**
      * @param[in] drivers pointer to aruwsrc drivers
      * @param[in] turret pointer to a TurretMotor object, @see OttoChassisWorldYawObserver for how
@@ -67,7 +64,10 @@ public:
      */
     OttoKFOdometry2DSubsystem(
         tap::Drivers& drivers,
-        const aruwsrc::control::turret::TurretSubsystem& turret,
+        const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::TURRET>&
+            worldToTurret,
+        const aruwsrc::algorithms::state::
+            OrientationObserverInterface<Frame::CHASSIS, Frame::TURRET>& chassisToTurret,
         tap::control::chassis::ChassisSubsystemInterface& chassis,
         modm::Vector2f initPos);
 
