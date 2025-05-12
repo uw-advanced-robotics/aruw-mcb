@@ -220,7 +220,12 @@ ChassisWorldOrientationObserver<Frame::TURRET> chassisWorldOrientationObserver(
     turretImu,
     turret);
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+OttoKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    turretImu,
+    turret,
+    chassis,
+    modm::Vector2f(0, 0));
 
 // transforms
 StandardAndHeroTransformer transformer(
