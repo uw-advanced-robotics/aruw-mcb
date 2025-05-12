@@ -39,8 +39,10 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
       imu(imu),
       initPos(initPos),
       parallelCenterToWheelDistance(parallelCenterToWheelDistance),
-      parallelWheelChassisForwardRelativeAngleRadians(parallelWheelChassisForwardRelativeAngleRadians),
-      perpendicularWheelChassisForwardRelativeAngleRadians(perpendicularWheelChassisForwardRelativeAngleRadians)
+      parallelWheelChassisForwardRelativeAngleRadians(
+          parallelWheelChassisForwardRelativeAngleRadians),
+      perpendicularWheelChassisForwardRelativeAngleRadians(
+          perpendicularWheelChassisForwardRelativeAngleRadians)
 {
     reset();
 }
@@ -51,24 +53,26 @@ void DeadwheelChassisKFOdometry::reset()
     kf.init(initialX);
 }
 
-//may or may not work
+// may or may not work
 float DeadwheelChassisKFOdometry::applyIirFilter(
-    float input, 
-    float* state, 
-    const float* a, 
-    const float* b, 
-    int order) 
+    float input,
+    float* state,
+    const float* a,
+    const float* b,
+    int order)
 {
-    for (int i = order - 1; i > 0; i--) {
-        state[i] = state[i-1];
+    for (int i = order - 1; i > 0; i--)
+    {
+        state[i] = state[i - 1];
     }
-    
+
     float output = b[0] * input;
-    for (int i = 1; i < order; i++) {
+    for (int i = 1; i < order; i++)
+    {
         output += b[i] * state[i];
-        output -= a[i] * state[i-1];
+        output -= a[i] * state[i - 1];
     }
-    
+
     state[0] = input;
     return output;
 }
@@ -87,14 +91,18 @@ void DeadwheelChassisKFOdometry::update()
     parallelRaw = deadwheelOdometry.getParallelMotorVelocity();
 
     filteredParallel = parallelRaw + (angularVelo * parallelCenterToWheelDistance);
-    
-    filteredParallel = applyIirFilter(filteredParallel, parallelFilterState, IIR_A, IIR_B, FILTER_ORDER);
-    filteredPerpendicular = applyIirFilter(perpendicularRaw, perpendicularFilterState, IIR_A, IIR_B, FILTER_ORDER);
-    
-    float Vx = (filteredParallel * std::sin(parallelWheelChassisForwardRelativeAngleRadians) +
-                filteredPerpendicular * std::cos(perpendicularWheelChassisForwardRelativeAngleRadians));
-    float Vy = (filteredParallel * std::cos(parallelWheelChassisForwardRelativeAngleRadians) -
-                filteredPerpendicular * std::sin(perpendicularWheelChassisForwardRelativeAngleRadians));
+
+    filteredParallel =
+        applyIirFilter(filteredParallel, parallelFilterState, IIR_A, IIR_B, FILTER_ORDER);
+    filteredPerpendicular =
+        applyIirFilter(perpendicularRaw, perpendicularFilterState, IIR_A, IIR_B, FILTER_ORDER);
+
+    float Vx =
+        (filteredParallel * std::sin(parallelWheelChassisForwardRelativeAngleRadians) +
+         filteredPerpendicular * std::cos(perpendicularWheelChassisForwardRelativeAngleRadians));
+    float Vy =
+        (filteredParallel * std::cos(parallelWheelChassisForwardRelativeAngleRadians) -
+         filteredPerpendicular * std::sin(perpendicularWheelChassisForwardRelativeAngleRadians));
 
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
 

@@ -22,13 +22,13 @@
 namespace aruwsrc::algorithms::odometry
 {
 TwoDeadwheelOdometryObserver::TwoDeadwheelOdometryObserver(
-    #ifdef TARGET_SENTRY_HYDRA
+#ifdef TARGET_SENTRY_HYDRA
     aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
     aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
-    #else
+#else
     tap::encoder::EncoderInterface* parallelWheel,
     tap::encoder::EncoderInterface* perpendicularWheel,
-    #endif
+#endif
     const float wheelRadius)
     : wheelRadius(wheelRadius),
       parallelWheel(parallelWheel),
@@ -38,19 +38,19 @@ TwoDeadwheelOdometryObserver::TwoDeadwheelOdometryObserver(
 
 float TwoDeadwheelOdometryObserver::getParallelMotorVelocity() const
 {
-    #ifdef TARGET_SENTRY_HYDRA
+#ifdef TARGET_SENTRY_HYDRA
     return parallelWheel->getEncoder()->getVelocity() * wheelRadius;
-    #else
+#else
     return parallelWheel->getVelocity() * wheelRadius;
-    #endif
+#endif
 }
 float TwoDeadwheelOdometryObserver::getPerpendicularVelocity() const
 {
-    #ifdef TARGET_SENTRY_HYDRA
+#ifdef TARGET_SENTRY_HYDRA
     return perpendicularWheel->getEncoder()->getVelocity() * wheelRadius;
-    #else
+#else
     return perpendicularWheel->getVelocity() * wheelRadius;
-    #endif
+#endif
 }
 
 }  // namespace aruwsrc::algorithms::odometry
