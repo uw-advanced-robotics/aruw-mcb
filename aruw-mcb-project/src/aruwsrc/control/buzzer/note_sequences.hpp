@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BUZZER_SEQUENCES_HPP_
-#define BUZZER_SEQUENCES_HPP_
+#ifndef NOTE_SEQUENCES_HPP_
+#define NOTE_SEQUENCES_HPP_
 
 #include <stdint.h>
 
@@ -52,4 +52,4 @@ static constexpr uint32_t IMU_CALIBRATE_SOUND_NOTE_LENGTH_MS = MARIO_MUSHROOM_NO
 static constexpr auto& IMU_CALIBRATE_SOUND_NOTES = MARIO_MUSHROOM_NOTES;
 }  // namespace aruwsrc::control::buzzer
 
-#endif  // BUZZER_SEQUENCES_HPP_
+#endif  // NOTE_SEQUENCES_HPP_
