@@ -19,6 +19,7 @@
 
 #include "damage_indicator.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 
 using namespace tap::communication::serial;
@@ -27,17 +28,18 @@ namespace aruwsrc::control::client_display
 {
 DamageIndicator::DamageIndicator(
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
-    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
+    const tap::algorithms::transforms::Transform &worldToTurret,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
       plateHitTracker(plateHitTracker),
-      turretSubsystem(turretSubsystem)
+      worldToTurret(worldToTurret),
+      hitAngleRadian(Angle(0))
 {
 }
 
 modm::ResumableResult<void> DamageIndicator::update()
 {
-    float prevPeakAngle = peakAngleBin.radians.getWrappedValue();
+    WrappedFloat prevPeakAngle = peakAngleBin.radians;
     uint32_t prevOperation = -1;
 
     RF_BEGIN(1);
@@ -45,26 +47,22 @@ modm::ResumableResult<void> DamageIndicator::update()
     peakAngleBin = plateHitTracker.getPeakAnglesRadians()[0];
 
     // Check if current angle is different from previous angle
-    if (peakAngleBin.radians.getWrappedValue() != prevPeakAngle)
+    if (!tap::algorithms::compareFloatClose(
+            peakAngleBin.radians.minDifference(prevPeakAngle),
+            0.0f,
+            1e-3))
     {
         decayTimeout.restart(DECAY_TIMEOUT_MILLIS);
     }
 
     // Get position of hit in turret frame + offset
-    hitAngleRadian = peakAngleBin.radians.getWrappedValue() - turretSubsystem.getWorldYaw();
-
-    // Normalize angle to be between 0 and 2pi
-    hitAngleRadian = fmod(hitAngleRadian, 2 * M_PI);
-    if (hitAngleRadian < 0)
-    {
-        hitAngleRadian += 2 * M_PI;
-    }
+    hitAngleRadian = peakAngleBin.radians - worldToTurret.getYaw();
 
     prevOperation = damageGraphic.graphicData.operation;
 
     // If the damage is old or the angle is within +-45 deg
     if (decayTimeout.isExpired() || decayTimeout.isStopped() ||
-        (fmod(hitAngleRadian + CENTER_THRESHOLD, 2 * M_PI) < CENTER_THRESHOLD * 2))
+        ((hitAngleRadian + CENTER_THRESHOLD).getWrappedValue() < CENTER_THRESHOLD * 2))
     {
         damageGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
@@ -78,8 +76,8 @@ modm::ResumableResult<void> DamageIndicator::update()
     hitAngleRadian += INDICATOR_OFFSET_RADIANS;
 
     // Calculate x and y position of hit
-    x = cos(hitAngleRadian) * DISTANCE_FROM_CENTER;
-    y = sin(hitAngleRadian) * DISTANCE_FROM_CENTER;
+    x = cos(hitAngleRadian.getWrappedValue()) * DISTANCE_FROM_CENTER;
+    y = sin(hitAngleRadian.getWrappedValue()) * DISTANCE_FROM_CENTER;
 
     // Don't update the message if you're deleting it and it's already deleted
     if (prevOperation == Tx::GRAPHIC_DELETE &&

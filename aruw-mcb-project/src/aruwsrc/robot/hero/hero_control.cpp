@@ -513,7 +513,10 @@ AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
 
 CircleCrosshair circleCrosshair(refSerialTransmitter);
 
-DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTransmitter);
+DamageIndicator damageIndicator(
+    drivers()->plateHitTracker,
+    transformer.getWorldToTurret(),
+    refSerialTransmitter);
 
 TextHudIndicators textHudIndicators(
     *drivers(),

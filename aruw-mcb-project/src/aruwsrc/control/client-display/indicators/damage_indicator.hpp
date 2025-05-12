@@ -20,12 +20,12 @@
 #ifndef DAMAGE_INDICATOR_HPP_
 #define DAMAGE_INDICATOR_HPP_
 
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/algorithms/plate_hit_tracker.hpp"
-#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
@@ -46,7 +46,7 @@ public:
      */
     DamageIndicator(
         aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
-        const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
+        const tap::algorithms::transforms::Transform &worldToTurret,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     void initialize() override final;
@@ -55,7 +55,7 @@ public:
 
 private:
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
-    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem;
+    const tap::algorithms::transforms::Transform &worldToTurret;
 
     static constexpr uint16_t DAMAGE_INDICATOR_THICKNESS = 20;
     static constexpr uint16_t DAMAGE_INDICATOR_LENGTH = 20;
@@ -77,7 +77,7 @@ private:
     static constexpr uint32_t DECAY_TIMEOUT_MILLIS = 5000;
 
     float x, y;
-    float hitAngleRadian = 0;
+    WrappedFloat hitAngleRadian;
 
     aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
 
