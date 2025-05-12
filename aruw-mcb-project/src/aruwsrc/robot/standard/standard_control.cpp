@@ -252,11 +252,12 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     odometrySubsystem,
-    turret,
+    transformer.getWorldToTurret(),
     frictionWheels,
     25.0f,  // defaultLaunchSpeed
-    0       // turretID
-);
+    0,      // turretID
+    turret.getPitchOffset());
+
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
