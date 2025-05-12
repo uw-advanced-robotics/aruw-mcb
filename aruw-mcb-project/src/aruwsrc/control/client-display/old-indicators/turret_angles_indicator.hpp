@@ -20,12 +20,12 @@
 #ifndef TURRET_ANGLES_INDICATOR_HPP_
 #define TURRET_ANGLES_INDICATOR_HPP_
 
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
-#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/math/utils/misc.hpp"
 
 namespace tap
@@ -45,14 +45,13 @@ public:
      * Construct a TurretAnglesIndicator object.
      *
      * @param[in] drivers Global drivers instance.
-     * @param[in] robotTurretSubsystem Turret used when updating chassis orientation relative
-     * to the turret and to print turret angles (if turret chassis relative angles are being
-     * printed).
+     * @param[in] worldToTurret Reference to the current worldToTurret transform from which turret
+     * angles are extracted.
      */
     TurretAnglesIndicator(
         tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem);
+        const tap::algorithms::transforms::Transform &worldToTurret);
 
     modm::ResumableResult<void> sendInitialGraphics() override final;
 
@@ -82,7 +81,7 @@ private:
 
     tap::Drivers &drivers;
 
-    const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem;
+    const tap::algorithms::transforms::Transform &worldToTurret;
 
     /** Character graphic containing turret pitch/yaw angles. */
     Tx::GraphicCharacterMessage turretAnglesGraphic;

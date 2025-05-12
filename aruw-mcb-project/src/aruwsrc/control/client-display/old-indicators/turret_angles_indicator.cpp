@@ -31,10 +31,10 @@ namespace aruwsrc::control::client_display
 TurretAnglesIndicator::TurretAnglesIndicator(
     tap::Drivers &drivers,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem)
+    const tap::algorithms::transforms::Transform &worldToTurret)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
-      robotTurretSubsystem(robotTurretSubsystem)
+      worldToTurret(worldToTurret)
 {
 }
 
@@ -52,8 +52,8 @@ modm::ResumableResult<void> TurretAnglesIndicator::sendInitialGraphics()
 modm::ResumableResult<void> TurretAnglesIndicator::update()
 {
     RF_BEGIN(1);
-    yaw = modm::toDegree(robotTurretSubsystem.getWorldYaw());
-    pitch = modm::toDegree(robotTurretSubsystem.getWorldPitch());
+    yaw = modm::toDegree(worldToTurret.getYaw());
+    pitch = modm::toDegree(worldToTurret.getPitch());
 
     if (sendTurretDataTimer.execute() &&
         (!compareFloatClose(prevYaw, yaw, 1.0f / TURRET_ANGLES_DECIMAL_PRECISION) ||
