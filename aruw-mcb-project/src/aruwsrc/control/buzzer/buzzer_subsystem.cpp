@@ -30,7 +30,11 @@ void BuzzerSubsystem::playFrequency(float frequency)
     tap::buzzer::playNote(&(drivers->pwm), static_cast<uint32_t>(frequency));
 }
 
-void BuzzerSubsystem::playNote(uint8_t note) { playFrequency(NOTE_FREQUENCIES[note]); }
+void BuzzerSubsystem::playNote(uint8_t note)
+{
+    if (note > 63) return;
+    playFrequency(NOTE_FREQUENCIES[note]);
+}
 
 void BuzzerSubsystem::stop() { tap::buzzer::silenceBuzzer(&(drivers->pwm)); }
 
