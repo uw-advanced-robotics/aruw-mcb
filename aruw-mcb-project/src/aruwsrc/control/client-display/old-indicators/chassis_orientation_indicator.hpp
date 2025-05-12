@@ -22,18 +22,23 @@
 
 #include <vector>
 
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
-#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/math/geometry/vector2.hpp"
 #include "modm/processing/resumable.hpp"
 
 namespace tap
 {
 class Drivers;
-}
+
+namespace control
+{
+class Command;
+}  // namespace control
+}  // namespace tap
 
 namespace aruwsrc::control::client_display
 {
@@ -57,7 +62,7 @@ public:
     ChassisOrientationIndicator(
         tap::Drivers &drivers,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
+        const tap::algorithms::transforms::Transform &chassisToTurret,
         const std::vector<tap::control::Command *> avoidanceCommands);
 
     modm::ResumableResult<void> sendInitialGraphics() override final;
@@ -90,7 +95,7 @@ private:
 
     tap::Drivers &drivers;
 
-    const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
+    const tap::algorithms::transforms::Transform &chassisToTurret;
     const std::vector<tap::control::Command *> avoidanceCommands;
     /**
      * Vector with origin `(0, 0)` and length CHASSIS_LENGTH / 2. The turret drawn on the screen is

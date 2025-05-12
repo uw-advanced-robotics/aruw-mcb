@@ -30,11 +30,11 @@ namespace aruwsrc::control::client_display
 ChassisOrientationIndicator::ChassisOrientationIndicator(
     tap::Drivers &drivers,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
+    const tap::algorithms::transforms::Transform &chassisToTurret,
     const std::vector<tap::control::Command *> avoidanceCommands)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
-      turretSubsystem(turretSubsystem),
+      chassisToTurret(chassisToTurret),
       avoidanceCommands(avoidanceCommands)
 {
 }
@@ -62,10 +62,7 @@ modm::ResumableResult<void> ChassisOrientationIndicator::update()
 
     // update chassisOrientation if turret is online
     // otherwise don't rotate chassis
-    chassisOrientation.rotate(
-        turretSubsystem.yawMotor.isOnline()
-            ? -turretSubsystem.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue()
-            : 0.0f);
+    chassisOrientation.rotate(-chassisToTurret.getYaw());
 
     // if chassis orientation has changed, send new graphic with updated orientation
     if (chassisOrientation != chassisOrientationPrev)
