@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef BUZZER_NOTE_SEQUENCE_COMMAND_HPP_
-#define BUZZER_NOTE_SEQUENCE_COMMAND_HPP_
+#ifndef NOTE_SEQUENCE_COMMAND_HPP_
+#define NOTE_SEQUENCE_COMMAND_HPP_
 
 #include <span>
 
@@ -31,10 +31,10 @@ namespace aruwsrc::control::buzzer
 /**
  * Plays a sequence of constant length notes on a buzzer.
  */
-class BuzzerNoteSequenceCommand : public tap::control::Command
+class NoteSequenceCommand : public tap::control::Command
 {
 public:
-    BuzzerNoteSequenceCommand(
+    NoteSequenceCommand(
         BuzzerSubsystem& buzzer,
         const std::span<const uint8_t> notes,
         const uint16_t noteLengthMillis);
@@ -57,7 +57,7 @@ private:
     uint32_t startTime;
     size_t currNoteIndex;
     uint8_t currNote{0};
-};  // class BuzzerNoteSequenceCommand
+};  // class NoteSequenceCommand
 
 }  // namespace aruwsrc::control::buzzer
-#endif  // BUZZER_NOTE_SEQUENCE_COMMAND_HPP_
+#endif  // NOTE_SEQUENCE_COMMAND_HPP_

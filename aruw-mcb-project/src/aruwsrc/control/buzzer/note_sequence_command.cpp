@@ -17,11 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "buzzer_note_sequence_command.hpp"
+#include "note_sequence_command.hpp"
 
 namespace aruwsrc::control::buzzer
 {
-BuzzerNoteSequenceCommand::BuzzerNoteSequenceCommand(
+NoteSequenceCommand::NoteSequenceCommand(
     BuzzerSubsystem& buzzer,
     const std::span<const uint8_t> notes,
     const uint16_t noteLengthMillis)
@@ -32,12 +32,9 @@ BuzzerNoteSequenceCommand::BuzzerNoteSequenceCommand(
     addSubsystemRequirement(&buzzer);
 }
 
-void BuzzerNoteSequenceCommand::initialize()
-{
-    startTime = tap::arch::clock::getTimeMilliseconds();
-}
+void NoteSequenceCommand::initialize() { startTime = tap::arch::clock::getTimeMilliseconds(); }
 
-void BuzzerNoteSequenceCommand::execute()
+void NoteSequenceCommand::execute()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
 
