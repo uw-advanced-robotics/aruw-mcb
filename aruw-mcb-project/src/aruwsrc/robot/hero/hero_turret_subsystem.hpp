@@ -29,6 +29,7 @@ namespace aruwsrc::control::turret
  */
 class HeroTurretSubsystem final : public TurretSubsystem<aruwsrc::algorithms::state::Frame::CHASSIS>
 {
+public:
     using TurretSubsystem::TurretSubsystem;
 
     float getPitchOffset() const override { return 0; };

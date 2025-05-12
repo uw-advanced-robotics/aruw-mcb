@@ -30,6 +30,7 @@ namespace aruwsrc::control::turret
 class StandardTurretSubsystem final
     : public TurretSubsystem<aruwsrc::algorithms::state::Frame::CHASSIS>
 {
+public:
     using TurretSubsystem::TurretSubsystem;
 
     inline float getPitchOffset() const override { return 0; };
