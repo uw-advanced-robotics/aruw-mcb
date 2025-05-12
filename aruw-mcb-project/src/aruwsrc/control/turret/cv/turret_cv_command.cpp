@@ -23,8 +23,7 @@
 #include "tap/architecture/clock.hpp"
 
 #include "../algorithms/chassis_frame_turret_controller.hpp"
-#include "../robot_turret_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/otto_velocity_odometry_2d_subsystem.hpp"
+#include "../turret_subsystem.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 
 using namespace tap::arch::clock;
@@ -36,7 +35,7 @@ namespace aruwsrc::control::turret::cv
 TurretCVCommand::TurretCVCommand(
     serial::VisionCoprocessor *visionCoprocessor,
     control::ControlOperatorInterface *controlOperatorInterface,
-    RobotTurretSubsystem *turretSubsystem,
+    TurretSubsystem<aruwsrc::algorithms::state::Frame::CHASSIS> *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
