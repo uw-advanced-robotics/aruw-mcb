@@ -25,8 +25,6 @@ namespace aruwsrc::control::buzzer
 {
 BuzzerSubsystem::BuzzerSubsystem(tap::Drivers* drivers) : Subsystem(drivers) {}
 
-void BuzzerSubsystem::playNoise() { tap::buzzer::playNote(&(drivers->pwm), 440); }
-
 void BuzzerSubsystem::playFrequency(float frequency)
 {
     tap::buzzer::playNote(&(drivers->pwm), static_cast<uint32_t>(frequency));

@@ -34,8 +34,6 @@ public:
 
     const char* getName() const override { return "Buzzer"; }
 
-    void playNoise();
-
     void playFrequency(float frequency);
 
     /**

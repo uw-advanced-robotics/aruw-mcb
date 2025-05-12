@@ -38,7 +38,7 @@ void LowBatteryBuzzerCommand::execute()
 {
     if (chassisVoltage->getVoltageMv() < LOW_BATTERY_THRESHOLD)
     {
-        buzzer.playNoise();
+        buzzer.playFrequency(440);
     }
     else
     {
