@@ -21,18 +21,22 @@
 
 #include "tap/algorithms/wrapped_float.hpp"
 
+#include "aruwsrc/algorithms/state/orientation_observer_interface.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/geometry/angle.hpp"
 
+using aruwsrc::algorithms::state::OrientationObserverInterface;
 using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::algorithms::odometry
 {
 OttoChassisWorldYawObserver::OttoChassisWorldYawObserver(
-    const aruwsrc::control::turret::TurretSubsystem& turretSubsystem)
-    : turretSubsystem(turretSubsystem)
+    const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& worldToTurret,
+    const OrientationObserverInterface<Frame::CHASSIS, Frame::TURRET>& chassisToTurret)
+    : worldToTurret(worldToTurret),
+      chassisToTurret(chassisToTurret)
 {
 }
 
@@ -43,28 +47,18 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     /// @todo in the future we could have the odometry subsystem fall back to using
     /// just chassis IMU and turret when turret IMU is offline.
 
-    // the turret must have a turret IMU for this function to work
-    auto turretMCB = turretSubsystem.getTurretMCB();
-    assert(turretMCB != nullptr);
-
-    if (!turretMCB->isConnected() || !turretSubsystem.yawMotor.isOnline())
+    if (!worldToTurret.isOnline() || !chassisToTurret.isOnline())
     {
         return false;
     }
-    else
-    {
-        // turret IMU and turret subsystem are in business
 
-        // Spec for turretMCBCanComm doesn't say whether or not angle is normalized, so we
-        // do that here. This doesn't specify which direction positive yaw sweeps.
-        WrappedFloat turretWorldYawRadians = Angle(turretMCB->getYaw());
-        // Normalized angle in range (-pi, pi)
-        WrappedFloat turretChassisYawRadians =
-            turretSubsystem.yawMotor.getChassisFrameMeasuredAngle();
+    // Spec for turretMCBCanComm doesn't say whether or not angle is normalized, so we
+    // do that here. This doesn't specify which direction positive yaw sweeps.
+    WrappedFloat turretWorldYawRadians = Angle(worldToTurret.getOrientation().yaw());
+    WrappedFloat turretChassisYawRadians = Angle(chassisToTurret.getOrientation().yaw());
 
-        *output = (turretWorldYawRadians - turretChassisYawRadians).getWrappedValue();
-        return true;
-    }
+    *output = (turretWorldYawRadians - turretChassisYawRadians).getWrappedValue();
+    return true;
 }
 
 }  // namespace aruwsrc::algorithms::odometry
