@@ -203,7 +203,7 @@ SentryTurretMinorSubsystem turretLeft(
     turretLeftMotors.yawMotor,
     turretLeftMotors.pitchMotorConfig,
     turretLeftMotors.yawMotorConfig,
-    &drivers()->turretMCBCanCommBus2,  // @todo: figure out how to put this in config
+    Position(0, TURRET_MINOR_OFFSET, 0),
     turretLeft::turretID);
 
 SentryTurretMinorSubsystem turretRight(
@@ -212,7 +212,7 @@ SentryTurretMinorSubsystem turretRight(
     turretRightMotors.yawMotor,
     turretRightMotors.pitchMotorConfig,
     turretRightMotors.yawMotorConfig,
-    &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
+    Position(0, -TURRET_MINOR_OFFSET, 0),
     turretRight::turretID);
 
 SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorMcbLite.imu, turretMajor);

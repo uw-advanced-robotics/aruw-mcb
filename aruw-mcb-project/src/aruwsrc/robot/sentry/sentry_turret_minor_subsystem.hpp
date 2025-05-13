@@ -34,15 +34,30 @@ public:
         tap::motor::MotorInterface& yawMotor,
         const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
         const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
-        const aruwsrc::can::TurretMCBCanComm* turretMCB,
-        uint8_t turretID);
+        const tap::algorithms::transforms::Position turretOffset,
+        uint8_t turretID)
+        : aruwsrc::control::turret::TurretSubsystem(
+              &drivers,
+              &pitchMotor,
+              &yawMotor,
+              pitchMotorConfig,
+              yawMotorConfig),
+          turretOffset(turretOffset),
+          turretID(turretID)
+    {
+    }
 
-    float getMajorFrameYaw() const;
-    float getMajorFramePitch() const;
+    inline const tap::algorithms::transforms::Position getTurretOffset() const override
+    {
+        return turretOffset;
+    }
+
+    inline float getPitchOffset() const override { return 0; }
 
     uint8_t getTurretID() const { return this->turretID; };
 
 private:
+    const tap::algorithms::transforms::Position turretOffset;
     uint8_t turretID;
 };
 
