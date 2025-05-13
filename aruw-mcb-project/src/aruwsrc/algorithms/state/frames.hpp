@@ -38,7 +38,8 @@ enum class Frame
     CHASSIS,
     GANTRY,
     WRIST,
-    END_EFFECTOR
+    END_EFFECTOR,
+    TURRET
 };
 #else
 enum class Frame
