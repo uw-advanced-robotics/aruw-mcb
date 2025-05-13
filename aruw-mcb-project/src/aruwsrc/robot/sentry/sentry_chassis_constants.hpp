@@ -20,9 +20,8 @@
 #ifndef SENTRY_CHASSIS_CONSTANTS_HPP_
 #define SENTRY_CHASSIS_CONSTANTS_HPP_
 
+#include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
-
-#include "sentry_beyblade_command.hpp"
 
 namespace aruwsrc::sentry::chassis
 {
@@ -56,7 +55,7 @@ constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
     1.5371886548, 1.5371886548, -1.5371886548, -1.5371886548};
 // clang-format on
 
-static constexpr SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig{
+static constexpr aruwsrc::chassis::BeybladeConfig beybladeConfig{
     .beybladeRotationalSpeedFractionOfMax = 0.45f,
     .beybladeTranslationalSpeedMultiplier = 0.1f,
     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
