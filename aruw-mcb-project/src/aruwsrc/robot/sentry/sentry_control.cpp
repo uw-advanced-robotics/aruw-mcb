@@ -59,6 +59,8 @@
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
+#include "aruwsrc/control/turret/turret_encoder_transform_observer.hpp"
+#include "aruwsrc/control/turret/turret_mcb_world_orientation_observer.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/sentry_auto_aim_launch_timer.hpp"
@@ -80,23 +82,24 @@
 #include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::control;
 using namespace tap::communication::serial;
+using namespace tap::control;
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::sentry;
-using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::sentry::chassis;
-using namespace aruwsrc::control::governor;
-using namespace aruwsrc::control::turret;
-using namespace aruwsrc::control::sentry;
-using namespace aruwsrc::control::turret::sentry;
-using namespace aruwsrc::control::turret::algorithms;
-using namespace aruwsrc::virtualMCB;
+using namespace aruwsrc::algorithms::state;
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::sentry;
+using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::algorithms;
+using namespace aruwsrc::control::turret::sentry;
+using namespace aruwsrc::sentry;
+using namespace aruwsrc::sentry::chassis;
+using namespace aruwsrc::virtualMCB;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -206,6 +209,9 @@ SentryTurretMinorSubsystem turretLeft(
     Position(0, TURRET_MINOR_OFFSET, 0),
     turretLeft::turretID);
 
+TurretEncoderTransformObserver<Frame::TURRET_MAJOR> turretLeftEncoders(turretLeft);
+TurretMcbWorldOrientationObserver turretLeftImu(getTurretMCBCanComm2());
+
 SentryTurretMinorSubsystem turretRight(
     *drivers(),
     turretRightMotors.pitchMotor,
@@ -214,6 +220,9 @@ SentryTurretMinorSubsystem turretRight(
     turretRightMotors.yawMotorConfig,
     Position(0, -TURRET_MINOR_OFFSET, 0),
     turretRight::turretID);
+
+TurretEncoderTransformObserver<Frame::TURRET_MAJOR> turretRightEncoders(turretRight);
+TurretMcbWorldOrientationObserver turretRightImu(getTurretMCBCanComm1());
 
 SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorMcbLite.imu, turretMajor);
 
@@ -350,6 +359,10 @@ SentryTransforms transformer(
     turretMajor,
     turretLeft,
     turretRight,
+    turretLeftImu,
+    turretRightImu,
+    turretLeftEncoders,
+    turretRightEncoders,
     {.turretMinorOffset = TURRET_MINOR_OFFSET});
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);

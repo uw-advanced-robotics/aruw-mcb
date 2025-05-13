@@ -31,12 +31,20 @@ SentryTransforms::SentryTransforms(
     const YawTurretSubsystem& turretMajor,
     const SentryTurretMinorSubsystem& turretLeft,
     const SentryTurretMinorSubsystem& turretRight,
+    const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& turretLeftImu,
+    const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& turretRightImu,
+    const TransformObserverInterface<Frame::TURRET_MAJOR, Frame::TURRET>& turretLeftEncoders,
+    const TransformObserverInterface<Frame::TURRET_MAJOR, Frame::TURRET>& turretRightEncoders,
     const SentryTransforms::SentryTransformConfig& config)
     : config(config),
       chassisOdometry(chassisOdometry),
       turretMajor(turretMajor),
       turretLeft(turretLeft),
       turretRight(turretRight),
+      turretLeftImu(turretLeftImu),
+      turretRightImu(turretRightImu),
+      turretLeftEncoders(turretLeftEncoders),
+      turretRightEncoders(turretRightEncoders),
       worldToChassis(Transform::identity()),
       worldToTurretMajor(Transform::identity()),
       worldToTurretLeft(Transform::identity()),
@@ -59,14 +67,8 @@ void SentryTransforms::updateTransforms()
     chassisToTurretMajor.updateRotation(0., 0., turretMajor.getChassisYaw());
 
     // Turret Major to Minors
-    turretMajorToTurretLeft.updateRotation(
-        0.,
-        turretLeft.pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
-        turretLeft.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
-    turretMajorToTurretRight.updateRotation(
-        0.,
-        turretRight.pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
-        turretRight.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
+    turretMajorToTurretLeft = turretLeftEncoders.getTransform();
+    turretMajorToTurretRight = turretRightEncoders.getTransform();
 
     // World transforms
     worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);

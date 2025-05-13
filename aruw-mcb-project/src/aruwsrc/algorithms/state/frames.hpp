@@ -20,35 +20,27 @@
 #ifndef FRAMES_HPP_
 #define FRAMES_HPP_
 
+#include "aruwsrc/util_macros.hpp"
+
 namespace aruwsrc::algorithms::state
 {
 
+enum class Frame
+{
+    WORLD,
+    CHASSIS,
+
 #if defined(ALL_SENTRIES)
-enum class Frame
-{
-    WORLD,
-    CHASSIS,
     TURRET_MAJOR,
-    TURRET
-};
 #elif defined(TARGET_ENGINEER)
-enum class Frame
-{
-    WORLD,
-    CHASSIS,
     GANTRY,
     WRIST,
     END_EFFECTOR,
+#endif  // @todo: figure out how to allow engineer not to define a turret frame
+
     TURRET
 };
-#else
-enum class Frame
-{
-    WORLD,
-    CHASSIS,
-    TURRET
-};
-#endif
+#
 
 }  // namespace aruwsrc::algorithms::state
 

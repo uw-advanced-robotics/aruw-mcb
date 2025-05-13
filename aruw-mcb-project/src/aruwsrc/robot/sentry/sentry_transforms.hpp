@@ -22,6 +22,8 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
+#include "aruwsrc/algorithms/state/frames.hpp"
+#include "aruwsrc/algorithms/state/transform_observer_interface.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
@@ -34,6 +36,16 @@ class SentryTransforms
     friend class SentryTransformAdapter;
 
 public:
+    using Frame = aruwsrc::algorithms::state::Frame;
+
+    template <Frame BASE, Frame FOLLOWER>
+    using TransformObserverInterface =
+        aruwsrc::algorithms::state::TransformObserverInterface<BASE, FOLLOWER>;
+
+    template <Frame BASE, Frame FOLLOWER>
+    using OrientationObserverInterface =
+        aruwsrc::algorithms::state::OrientationObserverInterface<BASE, FOLLOWER>;
+
     struct SentryTransformConfig
     {
         // Offset from turret minor yaw axis to turret major yaw axis (should only be in the
@@ -46,6 +58,10 @@ public:
         const aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft,
         const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight,
+        const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& turretLeftImu,
+        const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& turretRightImu,
+        const TransformObserverInterface<Frame::TURRET_MAJOR, Frame::TURRET>& turretLeftEncoders,
+        const TransformObserverInterface<Frame::TURRET_MAJOR, Frame::TURRET>& turretRightEncoders,
         const SentryTransformConfig& config);
 
     void updateTransforms();
@@ -137,6 +153,10 @@ private:
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft;
     const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight;
+    const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& turretLeftImu;
+    const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& turretRightImu;
+    const TransformObserverInterface<Frame::TURRET_MAJOR, Frame::TURRET>& turretLeftEncoders;
+    const TransformObserverInterface<Frame::TURRET_MAJOR, Frame::TURRET>& turretRightEncoders;
 
     // Transforms
     tap::algorithms::transforms::Transform worldToChassis;
