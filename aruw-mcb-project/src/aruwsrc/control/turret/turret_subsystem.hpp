@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -31,7 +31,6 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/turret_motor_mock.hpp"
-using TurretMotor = testing::NiceMock<mock::TurretMotorMock>;
 #else
 #include "turret_motor.hpp"
 #endif
