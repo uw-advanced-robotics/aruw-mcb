@@ -35,7 +35,10 @@ class TransformObserverInterface : public TranslationObserverInterface<BASE, FOL
                                    public OrientationObserverInterface<BASE, FOLLOWER>
 {
 public:
-    inline Transform getTransform() const { return Transform(getTranslation(), getOrientation()) }
+    inline Transform getTransform() const
+    {
+        return Transform(this->getTranslation(), this->getOrientation());
+    }
 };
 
 }  // namespace aruwsrc::algorithms::state

@@ -45,11 +45,6 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::control::turret
-{
-class RobotTurretSubsystem;
-}
-
 namespace aruwsrc::control::launcher
 {
 class LaunchSpeedPredictorInterface;

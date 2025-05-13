@@ -24,7 +24,6 @@
 
 #include "../algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
-#include "aruwsrc/algorithms/state/frames.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
@@ -43,7 +42,6 @@ class Drivers;
 
 namespace aruwsrc::control::turret
 {
-template <aruwsrc::algorithms::state::Frame MOUNTING_FRAME>
 class TurretSubsystem;
 }
 
@@ -96,7 +94,7 @@ public:
     TurretCVCommand(
         serial::VisionCoprocessor *visionCoprocessor,
         control::ControlOperatorInterface *controlOperatorInterface,
-        TurretSubsystem<aruwsrc::algorithms::state::Frame::CHASSIS> *turretSubsystem,
+        TurretSubsystem *turretSubsystem,
         algorithms::TurretYawControllerInterface *yawController,
         algorithms::TurretPitchControllerInterface *pitchController,
         aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
@@ -131,7 +129,7 @@ private:
 
     uint8_t turretID;
 
-    TurretSubsystem<aruwsrc::algorithms::state::Frame::CHASSIS> *turretSubsystem;
+    TurretSubsystem *turretSubsystem;
 
     algorithms::TurretYawControllerInterface *yawController;
     algorithms::TurretPitchControllerInterface *pitchController;

@@ -21,6 +21,7 @@
 #define TURRET_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
+#include "tap/algorithms/transforms/position.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/control/turret_subsystem_interface.hpp"
@@ -37,7 +38,6 @@ using TurretMotor = testing::NiceMock<mock::TurretMotorMock>;
 
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/algorithms/state/orientation_observer_interface.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 namespace aruwsrc::can
@@ -61,11 +61,7 @@ namespace aruwsrc::control::turret
  * 0-M_TWOPI rotated counterclockwise when looking at the turret from above. Pitch is a value from
  * 0-M_TWOPI rotated counterclockwise when looking at the turret from the right side of the turret.
  */
-template <aruwsrc::algorithms::state::Frame MOUNTING_FRAME>
-class TurretSubsystem
-    : public tap::control::Subsystem,
-      public aruwsrc::algorithms::state::
-          OrientationObserverInterface<MOUNTING_FRAME, aruwsrc::algorithms::state::Frame::TURRET>
+class TurretSubsystem : public tap::control::Subsystem
 {
 public:
     /**
@@ -96,11 +92,14 @@ public:
     mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
 
     /**
+     * @return Translation from the mounting frame origin to the turret origin
+     */
+    virtual const tap::algorithms::transforms::Position getTurretOffset() const = 0;
+
+    /**
      * @return Distance between the pitch axis and the yaw axis in the X-Y plane. Units meters
      */
-    virtual inline float getPitchOffset() const = 0;
-
-    tap::algorithms::transforms::DynamicOrientation getOrientation() const override;
+    virtual float getPitchOffset() const = 0;
 
     /// Associated with and contains logic for controlling the turret's pitch motor
     TurretMotor pitchMotor;

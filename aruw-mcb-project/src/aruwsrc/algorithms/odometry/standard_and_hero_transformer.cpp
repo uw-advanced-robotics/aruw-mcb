@@ -32,18 +32,15 @@ namespace aruwsrc::algorithms::transforms
 StandardAndHeroTransformer::StandardAndHeroTransformer(
     const Odometry2DInterface& chassisOdometry,
     const OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationObserver,
-    const OrientationObserverInterface<Frame::CHASSIS, Frame::TURRET>& turretEncoders,
-    const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& turretImu,
-    const tap::algorithms::transforms::Position& chassisToTurretTranslation)
+    const TransformObserverInterface<Frame::CHASSIS, Frame::TURRET>& turretEncoders,
+    const OrientationObserverInterface<Frame::WORLD, Frame::TURRET>& turretImu)
     : chassisOdometry(chassisOdometry),
       chassisOrientationObserver(chassisOrientationObserver),
       turretEncoders(turretEncoders),
       turretImu(turretImu),
       worldToChassis(Transform::identity()),
       worldToTurret(Transform::identity()),
-      chassisToTurret(Transform(
-          chassisToTurretTranslation,
-          Orientation(0, 0, 0))),  // do we care about z offset?
+      chassisToTurret(Transform::identity()),  // do we care about z offset?
       worldToVTM(Transform::identity())
 {
 }
@@ -64,10 +61,11 @@ void StandardAndHeroTransformer::updateTransforms()
     {
         chassisToTurret.updateRotation(
             chassisOrientation.inverse().compose(turretImu.getOrientation()));
+        chassisToTurret.updateTranslation(turretEncoders.getTranslation());
     }
     else
     {
-        chassisToTurret.updateRotation(turretEncoders.getOrientation());
+        chassisToTurret = turretEncoders.getTransform();
     }
 
     worldToTurret = worldToChassis.compose(chassisToTurret);

@@ -21,6 +21,7 @@
 #define MATRIX_HUD_INDICATORS_HPP_
 
 #include "tap/communication/referee/state_hud_indicator.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
@@ -78,7 +79,8 @@ public:
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
-        const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor);
+        const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
+        const tap::communication::sensors::limit_switch::LimitSwitchInterface *heroAmmoLimitSwitch);
 
     modm::ResumableResult<void> sendInitialGraphics() override final;
 
@@ -145,8 +147,7 @@ private:
 #if defined(DISPLAY_FIRING_MODE)
             {"FIRE", "SNGL\nCONST\n10Hz\n20Hz\nMAX\n"},
 #endif
-            {"CV  ", "GATE\nNOGT\nOFFL"}
-        };
+            {"CV  ", "GATE\nNOGT\nOFFL"}};
 
     /** Enum representing different states that the shooting mechanism can be in. Corresponds to
      * MATRIX_HUD_INDICATOR_TITLES_AND_LABELS[FIRING_MODE]. */
@@ -188,6 +189,8 @@ private:
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler;
 
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor;
+
+    const tap::communication::sensors::limit_switch::LimitSwitchInterface *heroAmmoLimitSwitch;
 
     /** Array of graphic messages to be used by the `matrixHudIndicatorDrawers`. */
     Tx::Graphic1Message matrixHudIndicatorGraphics[NUM_MATRIX_HUD_INDICATORS];

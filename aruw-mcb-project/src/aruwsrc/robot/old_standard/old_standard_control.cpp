@@ -34,6 +34,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/chassis_world_orientation_observer.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
@@ -89,6 +90,8 @@
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
+#include "aruwsrc/control/turret/turret_encoder_transform_observer.hpp"
+#include "aruwsrc/control/turret/turret_mcb_world_orientation_observer.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
@@ -160,8 +163,9 @@ OldStandardTurretSubsystem turret(
     &pitchMotor,
     &yawMotor,
     PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
+    YAW_MOTOR_CONFIG);
+
+TurretEncoderTransformObserver<Frame::CHASSIS> turretEncoders(turret);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
@@ -219,10 +223,27 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+TurretMcbWorldOrientationObserver turretImu(getTurretMCBCanComm());
+
+ChassisWorldOrientationObserver<Frame::TURRET> chassisWorldOrientationObserver(
+    drivers()->mpu6500,
+    turretImu,
+    turretEncoders);
+
+OttoKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    turretImu,
+    turretEncoders,
+    chassis,
+    modm::Vector2f(0, 0));
 
 // transforms
-StandardAndHeroTransformer transformer(odometrySubsystem, turret);
+StandardAndHeroTransformer transformer(
+    odometrySubsystem,
+    chassisWorldOrientationObserver,
+    turretEncoders,
+    turretImu);
+
 StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
@@ -495,7 +516,8 @@ MatrixHudIndicators positionHudIndicators(
     frictionWheels,
     turret,
     &leftMousePressedBNotPressed,
-    &cvOnTargetGovernor);
+    &cvOnTargetGovernor,
+    nullptr);
 
 AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
 

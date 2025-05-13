@@ -35,7 +35,7 @@ namespace aruwsrc::control::turret::cv
 TurretCVCommand::TurretCVCommand(
     serial::VisionCoprocessor *visionCoprocessor,
     control::ControlOperatorInterface *controlOperatorInterface,
-    TurretSubsystem<aruwsrc::algorithms::state::Frame::CHASSIS> *turretSubsystem,
+    TurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,
     algorithms::TurretPitchControllerInterface *pitchController,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,

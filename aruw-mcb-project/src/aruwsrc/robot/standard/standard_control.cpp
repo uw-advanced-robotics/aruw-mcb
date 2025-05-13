@@ -89,6 +89,7 @@
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
+#include "aruwsrc/control/turret/turret_encoder_transform_observer.hpp"
 #include "aruwsrc/control/turret/turret_mcb_world_orientation_observer.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
@@ -164,6 +165,8 @@ StandardTurretSubsystem turret(
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG);
 
+TurretEncoderTransformObserver<Frame::CHASSIS> turretEncoders(turret);
+
 aruwsrc::can::AruwVoltageCurrentSensor voltageCurrentSensor(drivers(), tap::can::CanBus::CAN_BUS2);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
@@ -213,17 +216,17 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
-aruwsrc::control::turret::TurretMcbWorldOrientationObserver turretImu(getTurretMCBCanComm());
+TurretMcbWorldOrientationObserver turretImu(getTurretMCBCanComm());
 
 ChassisWorldOrientationObserver<Frame::TURRET> chassisWorldOrientationObserver(
     drivers()->mpu6500,
     turretImu,
-    turret);
+    turretEncoders);
 
 OttoKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     turretImu,
-    turret,
+    turretEncoders,
     chassis,
     modm::Vector2f(0, 0));
 
@@ -231,9 +234,8 @@ OttoKFOdometry2DSubsystem odometrySubsystem(
 StandardAndHeroTransformer transformer(
     odometrySubsystem,
     chassisWorldOrientationObserver,
-    turret,
-    turretImu,
-    Position(0, 0, 0));
+    turretEncoders,
+    turretImu);
 
 StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
@@ -507,7 +509,8 @@ MatrixHudIndicators positionHudIndicators(
     frictionWheels,
     turret,
     &leftMousePressedBNotPressed,
-    &cvOnTargetGovernor);
+    &cvOnTargetGovernor,
+    nullptr);
 
 AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
 

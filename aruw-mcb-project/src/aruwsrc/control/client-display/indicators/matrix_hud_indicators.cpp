@@ -61,7 +61,8 @@ MatrixHudIndicators::MatrixHudIndicators(
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
-    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor)
+    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor,
+    const tap::communication::sensors::limit_switch::LimitSwitchInterface *heroAmmoLimitSwitch)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
       visionCoprocessor(visionCoprocessor),
@@ -69,26 +70,26 @@ MatrixHudIndicators::MatrixHudIndicators(
       turretSubsystem(turretSubsystem),
       multiShotHandler(multiShotHandler),
       cvOnTargetGovernor(cvOnTargetGovernor),
-      matrixHudIndicatorDrawers
-{
-    StateHUDIndicator<uint16_t>(
-        refSerialTransmitter,
-        &matrixHudIndicatorGraphics[SHOOTER_STATE],
-        updateGraphicYLocation,
-        0),
+      heroAmmoLimitSwitch(heroAmmoLimitSwitch),
+      matrixHudIndicatorDrawers{
+          StateHUDIndicator<uint16_t>(
+              refSerialTransmitter,
+              &matrixHudIndicatorGraphics[SHOOTER_STATE],
+              updateGraphicYLocation,
+              0),
 #if defined(DISPLAY_FIRING_MODE)
-        StateHUDIndicator<uint16_t>(
-            refSerialTransmitter,
-            &matrixHudIndicatorGraphics[FIRING_MODE],
-            updateGraphicYLocation,
-            0),
+          StateHUDIndicator<uint16_t>(
+              refSerialTransmitter,
+              &matrixHudIndicatorGraphics[FIRING_MODE],
+              updateGraphicYLocation,
+              0),
 #endif
-        StateHUDIndicator<uint16_t>(
-            refSerialTransmitter,
-            &matrixHudIndicatorGraphics[CV_STATUS],
-            updateGraphicYLocation,
-            0),
-}
+          StateHUDIndicator<uint16_t>(
+              refSerialTransmitter,
+              &matrixHudIndicatorGraphics[CV_STATUS],
+              updateGraphicYLocation,
+              0),
+      }
 {
 }
 
@@ -138,9 +139,8 @@ void MatrixHudIndicators::updateIndicatorState()
     if (shooterState == ShooterState::READY_TO_FIRE)
     {
 #if defined(TARGET_HERO_PERSEUS)
-        auto turretMCB = turretSubsystem.getTurretMCB();
-        assert(turretMCB != nullptr);
-        if (!turretMCB->getLimitSwitchDepressed())
+        assert(heroAmmoLimitSwitch != nullptr);
+        if (!heroAmmoLimitSwitch->getLimitSwitchDepressed())
         {
             shooterState = ShooterState::LOADING;
         }

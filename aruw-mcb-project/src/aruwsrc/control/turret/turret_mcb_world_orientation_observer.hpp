@@ -6,10 +6,11 @@
 namespace aruwsrc::control::turret
 {
 
-class TurretMcbWorldOrientationObserver : public ImuWorldOrientationObserver
+class TurretMcbWorldOrientationObserver
+    : public ImuWorldOrientationObserver<aruwsrc::algorithms::state::Frame::TURRET>
 {
 public:
-    inline TurretMcbWorldOrientationObserver(const aruwsrc::can::TurretMCBCanComm& turretMcb)
+    TurretMcbWorldOrientationObserver(const aruwsrc::can::TurretMCBCanComm& turretMcb)
         : ImuWorldOrientationObserver(turretMcb),
           turretMcb(turretMcb)
     {

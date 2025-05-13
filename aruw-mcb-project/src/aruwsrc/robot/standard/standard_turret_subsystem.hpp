@@ -27,13 +27,17 @@ namespace aruwsrc::control::turret
 /**
  * Turret subsystem for the Standard.
  */
-class StandardTurretSubsystem final
-    : public TurretSubsystem<aruwsrc::algorithms::state::Frame::CHASSIS>
+class StandardTurretSubsystem final : public TurretSubsystem
 {
 public:
     using TurretSubsystem::TurretSubsystem;
 
-    inline float getPitchOffset() const override { return 0; };
+    inline const tap::algorithms::transforms::Position getTurretOffset() const override
+    {
+        return tap::algorithms::transforms::Position(0, 0, 0);
+    }
+
+    inline float getPitchOffset() const override { return 0; }
 };  // class StandardTurretSubsystem
 
 }  // namespace aruwsrc::control::turret

@@ -23,7 +23,7 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "aruwsrc/algorithms/state/orientation_observer_interface.hpp"
+#include "aruwsrc/algorithms/state/transform_observer_interface.hpp"
 #include "aruwsrc/control/client-display/projection_utils.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
@@ -46,11 +46,10 @@ public:
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::algorithms::state::
             OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>& chassisOrientationObserver,
-        const aruwsrc::algorithms::state::
-            OrientationObserverInterface<Frame::CHASSIS, Frame::TURRET>& turretEncoders,
+        const aruwsrc::algorithms::state::TransformObserverInterface<Frame::CHASSIS, Frame::TURRET>&
+            turretEncoders,
         const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::TURRET>&
-            turretImu,
-        const tap::algorithms::transforms::Position& chassisToTurretTranslation);
+            turretImu);
 
     /**
      * @brief updates the transforms stored by the transformer
@@ -91,7 +90,7 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::CHASSIS>&
         chassisOrientationObserver;
-    const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::CHASSIS, Frame::TURRET>&
+    const aruwsrc::algorithms::state::TransformObserverInterface<Frame::CHASSIS, Frame::TURRET>&
         turretEncoders;
     const aruwsrc::algorithms::state::OrientationObserverInterface<Frame::WORLD, Frame::TURRET>&
         turretImu;
