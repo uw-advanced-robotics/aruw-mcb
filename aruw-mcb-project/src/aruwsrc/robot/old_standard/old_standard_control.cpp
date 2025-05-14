@@ -307,13 +307,15 @@ aruwsrc::chassis::BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
+    (drivers()->controlOperatorInterface),
+    aruwsrc::chassis::BEYBLADE_CONFIG);
 
 aruwsrc::chassis::BeybladeCommand slowBeybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface),
+    aruwsrc::chassis::BEYBLADE_CONFIG,
     0.5f);  // Multiplier for slow beyblade speed
 
 // Turret controllers

@@ -74,8 +74,9 @@ BeybladeCommandMock::BeybladeCommandMock(
     tap::Drivers *drivers,
     chassis::MecanumChassisSubsystem *chassis,
     aruwsrc::control::turret::TurretMotor *yawMotor,
-    aruwsrc::control::ControlOperatorInterface &operatorInterface)
-    : BeybladeCommand(drivers, chassis, yawMotor, operatorInterface)
+    aruwsrc::control::ControlOperatorInterface &operatorInterface,
+    aruwsrc::chassis::BeybladeConfig config)
+    : BeybladeCommand(drivers, chassis, yawMotor, operatorInterface, config)
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
