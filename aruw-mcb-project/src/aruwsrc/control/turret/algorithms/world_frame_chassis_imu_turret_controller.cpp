@@ -157,7 +157,7 @@ void WorldFrameYawChassisImuTurretController::runController(
         turretMotor.getValidMinError(worldFrameSetpoint, worldFrameYawAngle);
     const float pidOutput = pid.runController(
         positionControllerError,
-        turretMotor.getChassisFrameVelocity() + modm::toRadian(drivers.mpu6500.getGz()),
+        turretMotor.getChassisFrameVelocity() + drivers.mpu6500.getGz(),
         dt);
 
     turretMotor.setMotorOutput(pidOutput);

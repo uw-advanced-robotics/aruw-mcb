@@ -112,7 +112,7 @@ private:
         return raw * accelScale / 1000.0f * getAccelerationSensitivity();
     }
 
-    float gyroValueToDegPerSec(const uint8_t *buff)
+    float gyroValueToRadPerSec(const uint8_t *buff)
     {
         float raw = bigEndianInt16ToFloat(buff);
         return raw * gyroScale / 1000.0f;

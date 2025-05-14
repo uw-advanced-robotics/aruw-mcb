@@ -35,13 +35,14 @@ namespace chassis
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
     Motor& leftFrontMotor,
     Motor& leftBackMotor,
     Motor& rightFrontMotor,
     Motor& rightBackMotor,
     tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
     can::capbank::CapacitorBank* capacitorBank)
-    : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
+    : HolonomicChassisSubsystem(drivers, currentSensor, voltageSensor, capacitorBank),
       velocityPid{
           tap::algorithms::SmoothPid(wheelVelocityPidConfig),
           tap::algorithms::SmoothPid(wheelVelocityPidConfig),

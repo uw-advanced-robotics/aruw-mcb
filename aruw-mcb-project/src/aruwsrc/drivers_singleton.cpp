@@ -23,6 +23,8 @@
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
+#elif defined(OLD_STANDARDS)
+namespace aruwsrc::old_standard
 #elif defined(ALL_SENTRIES)
 namespace aruwsrc::sentry
 #elif defined(TARGET_HERO_PERSEUS)
@@ -39,6 +41,8 @@ namespace aruwsrc::testbed
 namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 namespace aruwsrc::motor_tester
+#elif defined(TARGET_CHARACTERIZER)
+namespace aruwsrc::characterizer
 #endif
 {
 /**

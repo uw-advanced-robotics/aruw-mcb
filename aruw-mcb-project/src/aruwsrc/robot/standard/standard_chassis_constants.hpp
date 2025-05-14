@@ -68,12 +68,12 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 10.0f;
+static constexpr float VELOCITY_PID_KP = 19.0f;
 static constexpr float VELOCITY_PID_KI = 0.0f;
-static constexpr float VELOCITY_PID_KD = 1.25f;
+static constexpr float VELOCITY_PID_KD = 0.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-static constexpr float VELOCITY_PID_KV = 0.057f;
-static constexpr float VELOCITY_PID_KS = 350.0f;
+static constexpr float VELOCITY_PID_KV = 0.07f;
+static constexpr float VELOCITY_PID_KS = 400.0f;
 
 /**
  * This max output is measured in the c620 robomaster translated current.
@@ -94,10 +94,10 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
-static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
-static constexpr float AUTOROTATION_PID_KD = 57.3f;
+static constexpr float AUTOROTATION_PID_KP = 3'000.0f;
+static constexpr float AUTOROTATION_PID_KD = 0.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 0.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
@@ -110,17 +110,12 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 /**
  * Radius of the wheels (m).
  */
-static constexpr float WHEEL_RADIUS = 0.076;
+static constexpr float WHEEL_RADIUS = 0.1016;
 
-#if defined(TARGET_STANDARD_SPIDER)
+#if defined(TARGET_STANDARD_NULL)
 
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
-
-#elif defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
-
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.37f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.415f;
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
 
 #else
 

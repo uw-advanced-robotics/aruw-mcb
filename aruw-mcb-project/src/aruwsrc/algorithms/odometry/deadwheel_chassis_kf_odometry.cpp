@@ -62,7 +62,7 @@ void DeadwheelChassisKFOdometry::update()
 
     // Calculate velocities in the robot's frame of reference
     // Correct for rotation of the robot
-    V2 -= modm::toRadian(imu.getGz()) * parallelCenterToWheelDistance;
+    V2 -= imu.getGz() * parallelCenterToWheelDistance;
     // Rotate the velocities based on the wheel rotations
     float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
     float Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
@@ -100,7 +100,9 @@ void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
     prevTime = tap::arch::clock::getTimeMicroseconds();
 }
 
-void DeadwheelChassisKFOdometry::overrideOdometryPosition(float positionX, float positionY)
+void DeadwheelChassisKFOdometry::overrideOdometryPosition(
+    const float positionX,
+    const float positionY)
 {
     auto currKFState = kf.getStateVectorAsMatrix();
 
