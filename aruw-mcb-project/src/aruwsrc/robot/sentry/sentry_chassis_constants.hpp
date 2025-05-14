@@ -55,7 +55,7 @@ constexpr float HALF_SWERVE_FORWARD_MATRIX[12]{
     1.5371886548, 1.5371886548, -1.5371886548, -1.5371886548};
 // clang-format on
 
-static constexpr BeybladeConfig BEYBLADE_CONFIG{
+static constexpr aruwsrc::chassis::BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRotationalSpeedFractionOfMax = 0.45f,
     .beybladeTranslationalSpeedMultiplier = 0.1f,
     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
