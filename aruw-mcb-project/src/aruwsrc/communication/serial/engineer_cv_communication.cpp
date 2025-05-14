@@ -27,7 +27,7 @@ using namespace aruwsrc::serial;
 EngineerCVCommunication* EngineerCVCommunication::engineerCVCommunicationInstance = nullptr;
 
 EngineerCVCommunication::EngineerCVCommunication(tap::Drivers* drivers)
-    : DJISerial(drivers, ENGINEER_CV_RX_UART_PORT)
+    : DJISerial(drivers, ENGINEER_CV_RX_UART_PORT), receptableToCam(aruwsrc::algorithms::transforms::Transform::identity())
 {
 #ifndef ENV_UNIT_TESTS
     // when testing it is OK to have multiple vision coprocessor instances, so this assertion
@@ -41,20 +41,9 @@ EngineerCVCommunication::~EngineerCVCommunication() { engineerCVCommunicationIns
 
 void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
-    int currIndex = 0;
-    memcpy(&(targetPositionMessage.posData.xPos), &completeMessage.data[currIndex], sizeof(float));
-    currIndex += sizeof(float);
-    memcpy(&(targetPositionMessage.posData.yPos), &completeMessage.data[currIndex], sizeof(float));
-    currIndex += sizeof(float);
-    memcpy(&(targetPositionMessage.posData.zPos), &completeMessage.data[currIndex], sizeof(float));
-    currIndex += sizeof(float);
-
-    memcpy(&(targetPositionMessage.rotData.alpha), &completeMessage.data[currIndex], sizeof(float));
-    currIndex += sizeof(float);
-    memcpy(&(targetPositionMessage.rotData.beta), &completeMessage.data[currIndex], sizeof(float));
-    currIndex += sizeof(float);
-    memcpy(&(targetPositionMessage.rotData.gamma), &completeMessage.data[currIndex], sizeof(float));
-    currIndex += sizeof(float);
+    memcpy(&(targetPositionMessage), &completeMessage.data, sizeof(TargetPositionMessage));
+    receptableToCam = aruwsrc::algorithms::transforms::Transform(targetPositionMessage.posData.xPos, targetPositionMessage.posData.yPos, targetPositionMessage.posData.zPos, 
+                                                            targetPositionMessage.rotData.alpha, targetPositionMessage.rotData.beta, targetPositionMessage.rotData.gamma);
 }
 
 void EngineerCVCommunication::initializeCV()

@@ -22,6 +22,7 @@
 
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/drivers.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 
 namespace aruwsrc
 {
@@ -69,10 +70,16 @@ public:
      */
     mockable void initializeCV();
 
+    inline const tap::algorithms::transforms::Transform& getReceptableToCam() const
+    {
+        return receptableToCam;
+    }
+
     // @todo private should not be here
 private:
     static EngineerCVCommunication* engineerCVCommunicationInstance;
     TargetPositionMessage targetPositionMessage;
+    tap::algorithms::transforms::Transform receptableToCam;
 };
 }  // namespace serial
 }  // namespace aruwsrc
