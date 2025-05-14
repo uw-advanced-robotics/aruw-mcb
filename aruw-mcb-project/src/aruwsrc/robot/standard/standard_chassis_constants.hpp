@@ -25,7 +25,6 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
-#include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
@@ -139,7 +138,7 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
-static constexpr aruwsrc::chassis::BeybladeConfig BEYBLADE_CONFIG{
+static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRotationalSpeedFractionOfMax = 0.75f,
     .beybladeTranslationalSpeedMultiplier = 0.6f,
     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
