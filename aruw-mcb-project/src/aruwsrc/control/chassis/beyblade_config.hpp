@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SENTRY_BEYBLADE_CONFIG_HPP_
-#define SENTRY_BEYBLADE_CONFIG_HPP_
+#ifndef BEYBLADE_CONFIG_HPP_
+#define BEYBLADE_CONFIG_HPP_
 
-namespace aruwsrc::sentry
+namespace aruwsrc::chassis
 {
-struct SentryBeybladeConfig
+struct BeybladeConfig
 {
     /**
      * Fraction of max chassis speed that will be applied to rotation when beyblading
@@ -47,5 +47,5 @@ struct SentryBeybladeConfig
      */
     const float beybladeRampRate;
 };
-}  // namespace aruwsrc::sentry
-#endif  // SENTRY_BEYBLADE_CONFIG_HPP
+}  // namespace aruwsrc::chassis
+#endif  // BEYBLADE_CONFIG_HPP

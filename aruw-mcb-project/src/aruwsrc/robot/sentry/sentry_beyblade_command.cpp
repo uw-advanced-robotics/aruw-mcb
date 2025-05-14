@@ -41,7 +41,7 @@ SentryBeybladeCommand::SentryBeybladeCommand(
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
     const tap::algorithms::transforms::Transform& worldToChassis,
-    const SentryBeybladeConfig config)
+    const aruwsrc::chassis::BeybladeConfig config)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
