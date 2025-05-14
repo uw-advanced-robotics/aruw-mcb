@@ -19,7 +19,7 @@
 
 #include "sentry_auto_aim_launch_timer.hpp"
 
-#include <tap/architecture/clock.hpp>
+#include "tap/architecture/clock.hpp"
 
 namespace aruwsrc::control::auto_aim
 {
