@@ -153,7 +153,7 @@ tap::motor::DjiMotor engineerGantryLiftLeftMotor(
     drivers(),
     aruwsrc::engineer::GANTRY_LIFT_LEFT_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_GANTRY,
-    false,
+    true,
     "Gantry Lift Left Motor",
     false,
     1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
@@ -213,12 +213,7 @@ ArmLiftSubsystem armLiftSubsystem(
     engineerGantryLiftRightMotor,
     aruwsrc::engineer::GANTRY_LIFT_POS_CONFIG,
     aruwsrc::engineer::GANTRY_LIFT_BALANCE_CONFIG,
-    liftLimitSwitchTrigger,
-    1.0f,
-    1.0f,
-    0.0f,
-    1000.0f  // todo
-);
+    liftLimitSwitchTrigger);
 
 ArmExtensionSubsystem armExtensionSubsystem(
     drivers(),
@@ -231,9 +226,7 @@ ArmExtensionSubsystem armExtensionSubsystem(
 JointSubsystem wristRollSubsystem(
     drivers(),
     engineerWristRollMotor,
-    aruwsrc::engineer::WRIST_ROLL_CONFIG,
-    0.0f,
-    1000.0f);
+    aruwsrc::engineer::WRIST_ROLL_CONFIG);
 
 /* define commands ----------------------------------------------------------*/
 

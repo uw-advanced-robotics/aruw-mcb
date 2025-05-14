@@ -48,10 +48,10 @@ public:
         control::TriggerInterface &trigger,
         float radius,
         uint64_t length,
-        float minSetpoint,
-        float maxSetpoint,
-        float kS = 0,
-        float epsilon = 1);
+        float minSetpoint = 0.0f,
+        float maxSetpoint = 0.0f,
+        float kS = 0.0f,
+        float epsilon = 1e-4f);
 
     virtual float getPosition() override;
 

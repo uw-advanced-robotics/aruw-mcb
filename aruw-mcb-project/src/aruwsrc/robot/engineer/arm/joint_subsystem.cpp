@@ -33,7 +33,7 @@ JointSubsystem::JointSubsystem(
     float maxSetpoint,
     float kS,
     float epsilon)
-    : LinearJointInterface(epsilon, minSetpoint, maxSetpoint),
+    : LinearJointInterface(minSetpoint, maxSetpoint, epsilon),
       tap::control::Subsystem(drivers),
       pid(config),
       motor(motor),

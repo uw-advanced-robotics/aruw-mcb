@@ -41,10 +41,10 @@ public:
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motor,
         const tap::algorithms::SmoothPidConfig &config,
-        float minSetpoint,
-        float maxSetpoint,
+        float minSetpoint = 0.0f,
+        float maxSetpoint = 0.0f,
         float kS = 0,
-        float epsilon = 1);
+        float epsilon = 1e-4f);
 
     virtual void initialize() override;
 

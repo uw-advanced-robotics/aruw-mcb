@@ -43,9 +43,9 @@ public:
         tap::encoder::EncoderInterface &encoderYaw,
         const tap::algorithms::SmoothPidConfig configPitch,
         const tap::algorithms::SmoothPidConfig configYaw,
-        float ratio,
+        float ratio = 1.0f,
         float kS = 0,
-        float epsilon = 1);
+        float epsilon = 1e-4f);
 
     float getPitch();
 

@@ -41,7 +41,7 @@ public:
         float minSetpoint,
         float maxSetpoint,
         float kS = 0,
-        float epsilon = 1e-4);
+        float epsilon = 1e-4f);
 
     virtual void initialize() override;
 

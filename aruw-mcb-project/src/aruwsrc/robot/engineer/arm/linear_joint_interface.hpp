@@ -33,7 +33,10 @@ class LinearJointInterface
 public:
     virtual void setSetpoint(float setpoint)
     {
-        this->setpoint = std::clamp(setpoint, minSetpoint, maxSetpoint);
+        if (minSetpoint == maxSetpoint)
+            this->setpoint = setpoint;
+        else
+            this->setpoint = std::clamp(setpoint, minSetpoint, maxSetpoint);
     };
 
     virtual float getSetpoint() { return setpoint; }
@@ -47,7 +50,7 @@ public:
 protected:
     float setpoint;
     const float epsilon, minSetpoint, maxSetpoint;
-    LinearJointInterface(float minPosition, float maxSetpoint, float epsilon = 0.001)
+    LinearJointInterface(float minPosition = 0.0f, float maxSetpoint = 0.0f, float epsilon = 1e-4f)
         : epsilon(epsilon),
           minSetpoint(minPosition),
           maxSetpoint(maxSetpoint){};

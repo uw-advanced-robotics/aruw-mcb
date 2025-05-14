@@ -42,18 +42,21 @@ static constexpr float WRIST_PITCH_PID_KI = 0.0f;
 static constexpr float WRIST_PITCH_PID_KD = 0.0f;
 static constexpr float WRIST_PITCH_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float WRIST_PITCH_PID_KS = 0.0;
+static constexpr float WRIST_PITCH_MAX_OUTPUT = 3000.0f;
 
 static constexpr float WRIST_YAW_PID_KP = 10.0f;
 static constexpr float WRIST_YAW_PID_KI = 0.0f;
 static constexpr float WRIST_YAW_PID_KD = 0.0f;
 static constexpr float WRIST_YAW_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float WRIST_YAW_PID_KS = 0.0;
+static constexpr float WRIST_YAW_MAX_OUTPUT = 3000.0f;
 
-static constexpr float WRIST_ROLL_PID_KP = 10.0f;
+static constexpr float WRIST_ROLL_PID_KP = 200.0f;
 static constexpr float WRIST_ROLL_PID_KI = 0.0f;
-static constexpr float WRIST_ROLL_PID_KD = 0.0f;
+static constexpr float WRIST_ROLL_PID_KD = 30.0f;
 static constexpr float WRIST_ROLL_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float WRIST_ROLL_PID_KS = 0.0;
+static constexpr float WRIST_ROLL_MAX_OUTPUT = 3000.0f;
 
 static constexpr float WRIST_RATIO = 1.0f;
 
@@ -67,25 +70,31 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_CONFIG(
     WRIST_YAW_PID_KP,
     WRIST_YAW_PID_KI,
     WRIST_YAW_PID_KD,
-    WRIST_YAW_PID_MAX_ERROR_SUM);
+    WRIST_YAW_PID_MAX_ERROR_SUM,
+    WRIST_YAW_MAX_OUTPUT);
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_CONFIG(
     WRIST_ROLL_PID_KP,
     WRIST_ROLL_PID_KI,
     WRIST_ROLL_PID_KD,
-    WRIST_ROLL_PID_MAX_ERROR_SUM);
+    WRIST_ROLL_PID_MAX_ERROR_SUM,
+    WRIST_ROLL_MAX_OUTPUT);
 
 static constexpr float GANTRY_LIFT_POS_PID_KP = 10.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KI = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KD = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KS = 0.0;
+static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 3000.0f;
+
+static constexpr float GANTRY_LIFT_MAX_SETPOINT = 10.0f;
 
 static constexpr float GANTRY_LIFT_BALANCE_PID_KP = 10.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_KI = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_KD = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_KS = 0.0;
+static constexpr float GANTRY_LIFT_BALANCE_MAX_OUTPUT = 3000.0f;
 
 static constexpr tap::gpio::Digital::InputPin GANTRY_LIFT_LIMIT_SWITCH_PIN =
     tap::gpio::Digital::InputPin::D;  // TODO: Update to correct pin
@@ -94,32 +103,36 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_POS_CONFIG(
     GANTRY_LIFT_POS_PID_KP,
     GANTRY_LIFT_POS_PID_KI,
     GANTRY_LIFT_POS_PID_KD,
-    GANTRY_LIFT_POS_PID_MAX_ERROR_SUM);
+    GANTRY_LIFT_POS_PID_MAX_ERROR_SUM,
+    GANTRY_LIFT_POS_MAX_OUTPUT);
 
 static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_BALANCE_CONFIG(
     GANTRY_LIFT_BALANCE_PID_KP,
     GANTRY_LIFT_BALANCE_PID_KI,
     GANTRY_LIFT_BALANCE_PID_KD,
-    GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM);
+    GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM,
+    GANTRY_LIFT_BALANCE_MAX_OUTPUT);
 
 static constexpr float GANTRY_EXTENSION_PID_KP = 10.0f;
 static constexpr float GANTRY_EXTENSION_PID_KI = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_KD = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_KS = 0.0;
+static constexpr float GANTRY_EXTENSION_MAX_OUTPUT = 3000.0f;
 
 static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_CONFIG(
     GANTRY_EXTENSION_PID_KP,
     GANTRY_EXTENSION_PID_KI,
     GANTRY_EXTENSION_PID_KD,
-    GANTRY_EXTENSION_PID_MAX_ERROR_SUM);
+    GANTRY_EXTENSION_PID_MAX_ERROR_SUM,
+    GANTRY_EXTENSION_MAX_OUTPUT);
 
 static constexpr tap::gpio::Digital::InputPin GANTRY_EXTENSION_LIMIT_SWITCH_PIN =
     tap::gpio::Digital::InputPin::B;  // TODO: Update to correct pin
 
-static constexpr float GANTRY_LIFT_SCALING_FACTOR = 1.0f;
+static constexpr float GANTRY_LIFT_SCALING_FACTOR = 0.001f;
 static constexpr float GANTRY_EXTENSION_SCALING_FACTOR = 1.0f;
-static constexpr float WRIST_ROLL_SCALING_FACTOR = 1.0f;
+static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 1.0f;
 static constexpr float WRIST_YAW_SCALING_FACTOR = 1.0f;
 }  // namespace aruwsrc::engineer

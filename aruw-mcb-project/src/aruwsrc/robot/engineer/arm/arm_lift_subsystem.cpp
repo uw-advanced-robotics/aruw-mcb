@@ -36,7 +36,7 @@ ArmLiftSubsystem::ArmLiftSubsystem(
     float kS,
     float epsilon)
     : OneSidedBoundedSubsystemInterface(drivers, trigger, length),
-      LinearJointInterface(epsilon, minSetpoint, maxSetpoint),
+      LinearJointInterface(minSetpoint, maxSetpoint, epsilon),
       pidPos(configPos),
       pidAlign(configAlign),
       motorLeft(motorLeft),
