@@ -366,7 +366,7 @@ aruwsrc::chassis::ChassisAutoNavController autoNavController(
     chassis,
     drivers()->visionCoprocessor,
     transformer.getWorldToChassis(),
-    aruwsrc::sentry::chassis::beybladeConfig);
+    aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -536,7 +536,7 @@ aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
     &turretMajor.getReadOnlyMotor(),
     drivers()->controlOperatorInterface,
     transformer.getWorldToChassis(),
-    aruwsrc::sentry::chassis::beybladeConfig);
+    aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
 
 aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
     drivers(),
