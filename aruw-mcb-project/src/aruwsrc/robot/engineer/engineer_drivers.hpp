@@ -26,8 +26,8 @@
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 
 #else
-#include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
+#include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
 namespace aruwsrc::engineer

@@ -17,29 +17,30 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "engineer_cv_communication.hpp"
- #include "tap/drivers.hpp"
+#include "engineer_cv_communication.hpp"
 
- using namespace tap::communication::serial;
- using namespace aruwsrc::serial;
- 
- EngineerCVCommunication* EngineerCVCommunication::engineerCVCommunicationInstance = nullptr;
- 
- EngineerCVCommunication::EngineerCVCommunication(tap::Drivers* drivers)
-     : DJISerial(drivers, ENGINEER_CV_RX_UART_PORT)
- {
- #ifndef ENV_UNIT_TESTS
-     // when testing it is OK to have multiple vision coprocessor instances, so this assertion
-     // doesn't hold
-     assert(engineerCVCommunicationInstance == nullptr);
- #endif
- engineerCVCommunicationInstance = this;
- }
- 
- EngineerCVCommunication::~EngineerCVCommunication() { engineerCVCommunicationInstance = nullptr; }
+#include "tap/drivers.hpp"
 
- void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
- {
+using namespace tap::communication::serial;
+using namespace aruwsrc::serial;
+
+EngineerCVCommunication* EngineerCVCommunication::engineerCVCommunicationInstance = nullptr;
+
+EngineerCVCommunication::EngineerCVCommunication(tap::Drivers* drivers)
+    : DJISerial(drivers, ENGINEER_CV_RX_UART_PORT)
+{
+#ifndef ENV_UNIT_TESTS
+    // when testing it is OK to have multiple vision coprocessor instances, so this assertion
+    // doesn't hold
+    assert(engineerCVCommunicationInstance == nullptr);
+#endif
+    engineerCVCommunicationInstance = this;
+}
+
+EngineerCVCommunication::~EngineerCVCommunication() { engineerCVCommunicationInstance = nullptr; }
+
+void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
+{
     int currIndex = 0;
     memcpy(&(targetPositionMessage.posData.xPos), &completeMessage.data[currIndex], sizeof(float));
     currIndex += sizeof(float);
@@ -54,8 +55,9 @@
     currIndex += sizeof(float);
     memcpy(&(targetPositionMessage.rotData.gamma), &completeMessage.data[currIndex], sizeof(float));
     currIndex += sizeof(float);
- }
+}
 
- void EngineerCVCommunication::initializeCV() {
+void EngineerCVCommunication::initializeCV()
+{
     drivers->uart.init<ENGINEER_CV_RX_UART_PORT, ENGINEER_CV_UART_BAUD_RATE>();
- }
+}
