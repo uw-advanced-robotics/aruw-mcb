@@ -29,7 +29,7 @@
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;

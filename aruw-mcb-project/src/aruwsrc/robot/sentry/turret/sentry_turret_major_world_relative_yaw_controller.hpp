@@ -34,8 +34,8 @@
 #include "tap/algorithms/transforms/transform.hpp"
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
+#include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
 
 namespace aruwsrc::control::turret
 {

@@ -22,7 +22,7 @@
 
 #include <aruwsrc/algorithms/otto_ballistics_solver.hpp>
 #include <aruwsrc/communication/serial/vision_coprocessor.hpp>
-#include <aruwsrc/robot/sentry/sentry_ballistics_solver.hpp>
+#include <aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp>
 
 using namespace aruwsrc::sentry;
 

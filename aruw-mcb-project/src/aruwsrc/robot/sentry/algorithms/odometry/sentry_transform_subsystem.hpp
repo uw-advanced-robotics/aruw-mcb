@@ -21,7 +21,7 @@
 
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 
 namespace aruwsrc::sentry
 {

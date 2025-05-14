@@ -28,7 +28,7 @@
 #include "tap/control/subsystem.hpp"
 
 #include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
-#include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
 

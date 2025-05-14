@@ -29,7 +29,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 
 namespace aruwsrc::chassis
 {

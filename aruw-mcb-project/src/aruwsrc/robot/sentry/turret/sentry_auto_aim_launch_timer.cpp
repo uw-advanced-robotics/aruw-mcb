@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/sentry/sentry_auto_aim_launch_timer.hpp"
+#include "sentry_auto_aim_launch_timer.hpp"
 
 #include <tap/architecture/clock.hpp>
 

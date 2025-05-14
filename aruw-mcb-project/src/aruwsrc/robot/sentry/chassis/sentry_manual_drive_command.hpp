@@ -24,8 +24,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-
-#include "sentry_control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
 using namespace aruwsrc::control::sentry;
 

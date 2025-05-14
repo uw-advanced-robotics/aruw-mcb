@@ -31,9 +31,9 @@
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_ballistics_solver.hpp"
-#include "aruwsrc/robot/sentry/sentry_transforms.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
+#include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
+#include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
 
 namespace tap::control::odometry
 {

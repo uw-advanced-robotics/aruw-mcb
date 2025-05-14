@@ -27,7 +27,7 @@
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_chassis_rel_drive.hpp"
+#include "aruwsrc/robot/sentry/chassis/sentry_chassis_rel_drive.hpp"
 
 using namespace tap::algorithms;
 
