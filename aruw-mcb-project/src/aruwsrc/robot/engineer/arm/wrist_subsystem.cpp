@@ -31,6 +31,10 @@ WristSubsystem::WristSubsystem(
     tap::encoder::EncoderInterface &encoderYaw,
     const tap::algorithms::SmoothPidConfig configPitch,
     const tap::algorithms::SmoothPidConfig configYaw,
+    float minPitch,
+    float maxPitch,
+    float minYaw,
+    float maxYaw,
     float ratio,
     float kS,
     float epsilon)
@@ -41,12 +45,32 @@ WristSubsystem::WristSubsystem(
       encoderYaw(encoderYaw),
       pidPitch(configPitch),
       pidYaw(configYaw),
+      minPitch(minPitch),
+      maxPitch(maxPitch),
+      minYaw(minYaw),
+      maxYaw(maxYaw),
       ratio(ratio),
       kS(kS),
       epsilon(epsilon)
 {
     setpointPitch = 0;
     setpointYaw = 0;
+}
+
+void WristSubsystem::setSetpointPitch(float setpoint)
+{
+    if(minPitch == maxPitch)
+        setpointPitch = setpoint;
+    else 
+        setpointPitch = std::clamp(setpoint, minPitch, maxPitch);
+}
+
+void WristSubsystem::setSetpointYaw(float setpoint)
+{
+    if(minYaw == maxYaw)
+        setpointYaw = setpoint;
+    else
+        setpointYaw = std::clamp(setpoint, minYaw, maxYaw);
 }
 
 float WristSubsystem::getPitch() { return encoderPitch.getPosition().getUnwrappedValue(); }
@@ -63,6 +87,8 @@ void WristSubsystem::initialize()
 {
     motorLeft.initialize();
     motorRight.initialize();
+    encoderPitch.initialize();
+    encoderYaw.initialize();
 }
 
 void WristSubsystem::refresh()

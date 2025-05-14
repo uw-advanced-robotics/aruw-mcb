@@ -142,12 +142,18 @@ tap::motor::DjiMotor engineerWristRightMotor(
 tap::encoder::CanEncoder engineerWristPitchEncoder(
     drivers(),
     aruwsrc::engineer::WRIST_PITCH_ENCODER_ID,
-    aruwsrc::engineer::CAN_BUS_GANTRY);  // todo
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    1,
+    WRIST_HOME_PITCH * 4096.0f / (M_PI * 2));  // todo
 
 tap::encoder::CanEncoder engineerWristYawEncoder(
     drivers(),
     aruwsrc::engineer::WRIST_YAW_ENCODER_ID,
-    aruwsrc::engineer::CAN_BUS_GANTRY);  // todo
+    aruwsrc::chassis::CAN_BUS_MOTORS,
+    false,
+    1,
+    WRIST_HOME_YAW * 4096.0f / (M_PI * 2));  // todo
 
 tap::motor::DjiMotor engineerGantryLiftLeftMotor(
     drivers(),
@@ -186,7 +192,7 @@ tap::motor::DjiMotor engineerGantryExtensionMotor(
     drivers(),
     aruwsrc::engineer::GANTRY_EXTENSION_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_GANTRY,
-    false,
+    true,
     "Gantry Extension Motor",
     false,
     1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
@@ -205,6 +211,10 @@ WristSubsystem wristSubsystem(
     engineerWristYawEncoder,
     aruwsrc::engineer::WRIST_PITCH_CONFIG,
     aruwsrc::engineer::WRIST_YAW_CONFIG,
+    aruwsrc::engineer::WRIST_MIN_PITCH,
+    aruwsrc::engineer::WRIST_MAX_PITCH,
+    aruwsrc::engineer::WRIST_MIN_YAW,
+    aruwsrc::engineer::WRIST_MAX_YAW,
     aruwsrc::engineer::WRIST_RATIO);
 
 ArmLiftSubsystem armLiftSubsystem(
@@ -213,7 +223,11 @@ ArmLiftSubsystem armLiftSubsystem(
     engineerGantryLiftRightMotor,
     aruwsrc::engineer::GANTRY_LIFT_POS_CONFIG,
     aruwsrc::engineer::GANTRY_LIFT_BALANCE_CONFIG,
-    liftLimitSwitchTrigger);
+    liftLimitSwitchTrigger,
+    1.0f,
+    10.0f,
+    0.0f,
+    GANTRY_LIFT_MAX_SETPOINT);
 
 ArmExtensionSubsystem armExtensionSubsystem(
     drivers(),
@@ -221,7 +235,7 @@ ArmExtensionSubsystem armExtensionSubsystem(
     aruwsrc::engineer::GANTRY_EXTENSION_CONFIG,
     1.0f,
     0.0f,
-    1000.0f);
+    GANTRY_EXTENSION_MAX_SETPOINT);
 
 JointSubsystem wristRollSubsystem(
     drivers(),

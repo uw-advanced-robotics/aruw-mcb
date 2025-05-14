@@ -19,7 +19,6 @@
 
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 
-// todo we need actual implementations here
 namespace aruwsrc::control::engineer
 {
 bool EngineerControlOperatorInterface::isDriveMode()

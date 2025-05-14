@@ -53,12 +53,22 @@ float ArmExtensionSubsystem::getPosition()
 
 float ArmExtensionSubsystem::getVelocity() { return motors.getEncoder()->getVelocity() * radius; }
 
+float ErrorPosition;
+float Position;
+float Output;
+float Setpoint;
+float Torque;
+
 void ArmExtensionSubsystem::refresh()
 {
     float errorPosition = setpoint - getPosition();
-
+    ErrorPosition = errorPosition;
+    Position = getPosition();
+    Setpoint = setpoint;
+    Torque = motors.getTorque();
+    
     float output = pid.runController(errorPosition, getVelocity(), 2.0f) + kS;
-
+    Output = output;
     motors.setDesiredOutput(output);
 }
 

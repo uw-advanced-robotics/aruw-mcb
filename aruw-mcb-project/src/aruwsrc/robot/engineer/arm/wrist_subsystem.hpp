@@ -43,6 +43,10 @@ public:
         tap::encoder::EncoderInterface &encoderYaw,
         const tap::algorithms::SmoothPidConfig configPitch,
         const tap::algorithms::SmoothPidConfig configYaw,
+        float minPitch = 0.0f,
+        float maxPitch = 0.0f,
+        float minYaw = 0.0f,
+        float maxYaw = 0.0f,
         float ratio = 1.0f,
         float kS = 0,
         float epsilon = 1e-4f);
@@ -55,9 +59,9 @@ public:
 
     float getSetpointYaw() { return setpointYaw; }
 
-    void setSetpointPitch(float setpoint) { setpointPitch = setpoint; }
+    void setSetpointPitch(float setpoint);
 
-    void setSetpointYaw(float setpoint) { setpointYaw = setpoint; }
+    void setSetpointYaw(float setpoint);
 
     virtual void initialize() override;
 
@@ -71,6 +75,9 @@ private:
     tap::motor::MotorInterface &motorLeft, &motorRight;
     tap::encoder::EncoderInterface &encoderPitch, &encoderYaw;
     tap::algorithms::SmoothPid pidPitch, pidYaw;
+    // Minimum and maximum setpoints for pitch and yaw
+    float minPitch, maxPitch;
+    float minYaw, maxYaw;
     float ratio;
     // Constant added to output to overcome static friction
     float kS;
