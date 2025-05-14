@@ -274,12 +274,6 @@ BeybladeCommand beybladeCommand(
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
 
-BeybladeCommand slowBeybladeCommand(
-    drivers(),
-    &chassis,
-    &turret.yawMotor,
-    (drivers()->controlOperatorInterface),
-    0.5f);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -397,12 +391,6 @@ MovedFastRecentlyGovernor movedRecentlyGovernor(
     5000.0f,
     5000);
 
-GovernorWithFallbackCommand<3> beybladeSlowWhenOutOfCombatCommand(
-    {&chassis},
-    slowBeybladeCommand,
-    beybladeCommand,
-    {&firedRecentlyGovernor, &plateHitGovernor, &movedRecentlyGovernor},
-    true);
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
@@ -519,7 +507,7 @@ TextHudIndicators textHudIndicators(
     *drivers(),
     waterwheelAgitator,
     imuCalibrateCommand,
-    {&beybladeSlowWhenOutOfCombatCommand},
+    {&beybladeCommand},
     refSerialTransmitter);
 
 VisionTargetIndicator visionTargetIndicator(
@@ -551,7 +539,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     false);
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeSlowWhenOutOfCombatCommand},
+    {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
@@ -581,7 +569,7 @@ HoldCommandMapping rightMousePressed(
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 ToggleCommandMapping fToggled(
     drivers(),
-    {&beybladeSlowWhenOutOfCombatCommand},
+    {&beybladeCommand},
     RemoteMapState({Remote::Key::F}));
 PressCommandMapping zPressed(
     drivers(),
