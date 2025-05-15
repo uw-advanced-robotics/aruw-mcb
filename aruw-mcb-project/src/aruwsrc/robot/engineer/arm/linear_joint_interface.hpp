@@ -33,7 +33,7 @@ class LinearJointInterface
 public:
     virtual void setSetpoint(float setpoint)
     {
-        if (minSetpoint == maxSetpoint)
+        if (tap::algorithms::compareFloatClose(minSetpoint, maxSetpoint, epsilon))
             this->setpoint = setpoint;
         else
             this->setpoint = std::clamp(setpoint, minSetpoint, maxSetpoint);

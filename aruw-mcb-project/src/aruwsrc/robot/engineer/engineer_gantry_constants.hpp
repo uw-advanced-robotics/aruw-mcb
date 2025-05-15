@@ -37,28 +37,28 @@ static constexpr tap::encoder::CanEncoderId WRIST_PITCH_ENCODER_ID =
     tap::encoder::CanEncoderId::ID0;
 static constexpr tap::encoder::CanEncoderId WRIST_YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID1;
 
-static constexpr float WRIST_PITCH_PID_KP = 1000.0f;
-static constexpr float WRIST_PITCH_PID_KI = 0.0f;
-static constexpr float WRIST_PITCH_PID_KD = 0.0f;
-static constexpr float WRIST_PITCH_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float WRIST_PITCH_PID_KP = 2500.0f;
+static constexpr float WRIST_PITCH_PID_KI = 0.1f;
+static constexpr float WRIST_PITCH_PID_KD = 30.0f;
+static constexpr float WRIST_PITCH_PID_MAX_ERROR_SUM = 1000.0f;
 static constexpr float WRIST_PITCH_PID_KS = 0.0;
 static constexpr float WRIST_PITCH_MAX_OUTPUT = 3000.0f;
 
 // units of radians
 static constexpr float WRIST_MIN_PITCH = -M_PI_2;
-static constexpr float WRIST_MAX_PITCH = M_PI * 3.0f / 2.0f; //todo
-static constexpr float WRIST_HOME_PITCH = 2.46817517f; //todo
+static constexpr float WRIST_MAX_PITCH = M_PI * 3.0f / 2.0f;  // todo
+static constexpr float WRIST_HOME_PITCH = 2.46817517f;        // todo
 
-static constexpr float WRIST_YAW_PID_KP = 1000.0f;
+static constexpr float WRIST_YAW_PID_KP = 2000.0f;
 static constexpr float WRIST_YAW_PID_KI = 0.0f;
-static constexpr float WRIST_YAW_PID_KD = 0.0f;
+static constexpr float WRIST_YAW_PID_KD = 60.0f;
 static constexpr float WRIST_YAW_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float WRIST_YAW_PID_KS = 0.0;
-static constexpr float WRIST_YAW_MAX_OUTPUT = 3000.0f;
+static constexpr float WRIST_YAW_MAX_OUTPUT = 1000.0f;
 
 // units of radians
 static constexpr float WRIST_MIN_YAW = -M_PI * 2;
-static constexpr float WRIST_MAX_YAW = M_PI * 2; //todo
+static constexpr float WRIST_MAX_YAW = M_PI * 2;  // todo
 static constexpr float WRIST_HOME_YAW = 1.23485458f;
 
 static constexpr float WRIST_ROLL_PID_KP = 200.0f;
@@ -74,7 +74,8 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_PITCH_CONFIG(
     WRIST_PITCH_PID_KP,
     WRIST_PITCH_PID_KI,
     WRIST_PITCH_PID_KD,
-    WRIST_PITCH_PID_MAX_ERROR_SUM);
+    WRIST_PITCH_PID_MAX_ERROR_SUM,
+    WRIST_PITCH_MAX_OUTPUT);
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_CONFIG(
     WRIST_YAW_PID_KP,
@@ -99,7 +100,7 @@ static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 3000.0f;
 
 static constexpr float GANTRY_LIFT_MAX_SETPOINT = 17.7f;
 
-static constexpr float GANTRY_LIFT_BALANCE_PID_KP = 100.0f; //todo
+static constexpr float GANTRY_LIFT_BALANCE_PID_KP = 100.0f;  // todo
 static constexpr float GANTRY_LIFT_BALANCE_PID_KI = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_KD = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM = 0.0f;
@@ -145,7 +146,7 @@ static constexpr tap::gpio::Digital::InputPin GANTRY_EXTENSION_LIMIT_SWITCH_PIN 
 static constexpr float GANTRY_LIFT_SCALING_FACTOR = 0.03f;
 static constexpr float GANTRY_EXTENSION_SCALING_FACTOR = 0.03f;
 static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
-static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.05f;
-static constexpr float WRIST_YAW_SCALING_FACTOR = 0.05f;
+static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
+static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
 }  // namespace aruwsrc::engineer
 #endif  // ENGINEER_GANTRY_CONSTANTS_HPP_

@@ -29,19 +29,22 @@ ArmExtensionSubsystem::ArmExtensionSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& motors,
     const tap::algorithms::SmoothPidConfig& config,
+    control::TriggerInterface& trigger,
     float radius,
+    uint64_t length,
     float minSetpoint,
     float maxSetpoint,
     float kS,
     float epsilon)
     : LinearJointInterface(minSetpoint, maxSetpoint, epsilon),
-      tap::control::Subsystem(drivers),
+      OneSidedBoundedSubsystemInterface(drivers, trigger, length),
       pid(config),
       motors(motors),
       radius(radius),
       kS(kS)
 {
     this->setpoint = 0;
+    this->homing = false;
 }
 
 void ArmExtensionSubsystem::initialize() { motors.initialize(); }
@@ -53,26 +56,34 @@ float ArmExtensionSubsystem::getPosition()
 
 float ArmExtensionSubsystem::getVelocity() { return motors.getEncoder()->getVelocity() * radius; }
 
-float ErrorPosition;
-float Position;
-float Output;
-float Setpoint;
-float Torque;
-
 void ArmExtensionSubsystem::refresh()
 {
-    float errorPosition = setpoint - getPosition();
-    ErrorPosition = errorPosition;
-    Position = getPosition();
-    Setpoint = setpoint;
-    Torque = motors.getTorque();
-    
-    float output = pid.runController(errorPosition, getVelocity(), 2.0f) + kS;
-    Output = output;
-    motors.setDesiredOutput(output);
+    if (homing)
+    {
+        if (trigger.isTriggered())
+        {
+            motors.getEncoder()->resetEncoderValue();  // todo
+            motors.setDesiredOutput(0);
+            homing = false;
+            return;
+        }
+        float errorPosition = -getPosition();
+
+        float output = pid.runController(errorPosition, getVelocity(), 2.0f) + kS;
+        motors.setDesiredOutput(output);  // todo
+    }
+    else
+    {
+        float errorPosition = setpoint - getPosition();
+
+        float output = pid.runController(errorPosition, getVelocity(), 2.0f) + kS;
+        motors.setDesiredOutput(output);
+    }
 }
 
 void ArmExtensionSubsystem::refreshSafeDisconnect() { motors.setDesiredOutput(0); }
+
+void ArmExtensionSubsystem::moveTowardLowerBound() {}
 
 }  // namespace engineer
 }  // namespace aruwsrc
