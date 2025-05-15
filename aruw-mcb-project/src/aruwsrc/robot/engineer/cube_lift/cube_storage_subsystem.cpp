@@ -135,7 +135,7 @@ void CubeStorageSubsystem::refresh()
         float error =
             setpoint - motorPos;
         float errorDerivative =
-            motor.getEncoder()->getVelocity() / M_TWOPI * MM_PER_REVOLUTION;
+            motor.getEncoder()->getVelocity() / (tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508) / M_TWOPI * MM_PER_REVOLUTION;
         float timeDifference = (tap::arch::clock::getTimeMilliseconds() - lastTime) / 1000.0f; // (s)
         lastTime = tap::arch::clock::getTimeMilliseconds();
         pid.runController(error, errorDerivative, timeDifference);
