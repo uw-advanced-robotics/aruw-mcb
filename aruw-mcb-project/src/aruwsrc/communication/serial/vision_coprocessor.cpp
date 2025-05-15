@@ -138,7 +138,8 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
     }
     lastSetpointData = setpointData;
 
-    if(this->autoNavController != nullptr){
+    if (this->autoNavController != nullptr)
+    {
         this->autoNavController->attachPath(&autoNavPath);
         this->autoNavController->setDesiredSpeed(setpointData.speed);
     }
