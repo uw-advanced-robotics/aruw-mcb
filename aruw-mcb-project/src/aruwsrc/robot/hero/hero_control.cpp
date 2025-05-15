@@ -218,8 +218,10 @@ tap::motor::DjiMotor yawMotor(
     "Yaw Turret",
     false,
     1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508,
-    0,
-    &yawEncoder);
+    0
+    // ,
+    // &yawEncoder
+);
 HeroTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -266,7 +268,7 @@ ChassisAutorotateCommand chassisAutorotateCommand(
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
 BeybladeCommand beybladeCommand(
     drivers(),
