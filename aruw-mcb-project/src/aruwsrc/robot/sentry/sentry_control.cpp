@@ -364,7 +364,6 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
 aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    drivers()->visionCoprocessor,
     transformer.getWorldToChassis(),
     aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
 
@@ -918,6 +917,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
+    drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
