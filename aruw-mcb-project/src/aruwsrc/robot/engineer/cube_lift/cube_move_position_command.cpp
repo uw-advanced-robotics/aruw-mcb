@@ -18,6 +18,8 @@
  */
 
 #include "cube_move_position_command.hpp"
+//#include "engineer_lift_constants.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 namespace aruwsrc::robot::engineer
 {
 CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift, float setpoint)
@@ -27,14 +29,15 @@ CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift,
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeMovePositionCommand::initialize() {}
+void CubeMovePositionCommand::initialize() {cubeLift.setPIDState(PIDState::POSITION_PID);}
 
-void CubeMovePositionCommand::execute() { cubeLift.setPositionSetpoint(setpoint); }
+float exCount = 0;
+void CubeMovePositionCommand::execute() { cubeLift.setPositionSetpoint(setpoint); exCount += 1; }
 
 void CubeMovePositionCommand::end(bool) { cubeLift.setDesiredOutput(0); }
 
 bool CubeMovePositionCommand::isFinished() const
 {
-    return cubeLift.isLimitSwitched();
-}  // TODO: change back to isLimitSwitched
+    return false;
+}
 }  // namespace aruwsrc::robot::engineer

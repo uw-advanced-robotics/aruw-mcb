@@ -89,7 +89,7 @@ private:
     float setpoint = 0;
     float lastTime = 0;
     float motorDesiredOutput = 0;
-    int16_t homingOutput = -1000;
+    int16_t homingOutput = 1000;
     uint64_t home = 0;
     uint64_t upperBound = LIFT_UPPER_BOUND;
     uint64_t lowerBound = 0;
@@ -98,6 +98,7 @@ private:
     tap::algorithms::SmoothPid homingPID =
         tap::algorithms::SmoothPid(aruwsrc::robot::engineer::LIFT_HOMING_PID_CONFIG);
     float velocitySetpoint = 100;
+    CalibrationState caliState = CalibrationState::AWAITING_CALIBRATE;
 };  // class CUBE_STORAGE
 
 }  // namespace aruwsrc::robot::engineer

@@ -58,7 +58,7 @@ tap::motor::DjiMotor storageLiftMotor(
     drivers(),
     CUBE_LIFT_MOTOR_ID,
     LIFT_MOTOR_CAN_BUS,
-    false,
+    true,
     "Lifting Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
@@ -158,6 +158,11 @@ tap::control::HoldCommandMapping leftDownRightDown(
     {&oneCubePosition},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
+// tap::control::HoldCommandMapping leftSwitchDown(
+//     drivers(),
+//     {&twoCubePosition},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -184,8 +189,6 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
-    // drivers->commandMapper.addMap(&rightSwitchUp);
-    // drivers->commandMapper.addMap(&rightSwitchDown); // old manual power commands
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&leftDownRightUp);
     drivers->commandMapper.addMap(&leftDownRightMid);

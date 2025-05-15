@@ -31,15 +31,15 @@ static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID = tap::motor::MOTOR7;
 static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
-    tap::gpio::Digital::InputPin::B;  // TODO: UPDATE W CORRECT VALUE
+    tap::gpio::Digital::InputPin::B; 
 
 static constexpr float LIFT_UPPER_BOUND = 1000;  // TODO: UPDATE
 
 static constexpr int64_t LENGTH = 100;  // TODO: UPDATE LATER
 
-static constexpr int16_t FEEDFORWARD = 0;  // TODO: UPDATE W CORRECT VALUE
+static constexpr int16_t FEEDFORWARD = 1000; 
 
-static constexpr float MM_PER_REVOLUTION = 71.44;
+static constexpr float MM_PER_REVOLUTION = 60.0f;
 
 static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .kp = 1400.0f,
@@ -65,10 +65,10 @@ enum class PIDState
     NONE
 };
 
-static constexpr float MANUAL_MOVE_SPEED = 10;  // TODO: choose value alter
+static constexpr float MANUAL_MOVE_SPEED = -10;  // TODO: choose value alter
 
-static constexpr float ONE_CUBE_SETPOINT = 420;
-static constexpr float TWO_CUBE_SETPOINT = 210;
+static constexpr float ONE_CUBE_SETPOINT = -420;
+static constexpr float TWO_CUBE_SETPOINT = -210;
 static constexpr float THREE_CUBE_SETPOINT = 0;  // TODO: update correct values
 
 }  // namespace aruwsrc::robot::engineer
