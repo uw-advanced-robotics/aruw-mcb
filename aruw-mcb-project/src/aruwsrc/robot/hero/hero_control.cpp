@@ -40,6 +40,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -132,6 +133,8 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
+aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
     aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
@@ -171,6 +174,7 @@ tap::motor::DjiMotor rightBackChassisMotor(
 MecanumChassisSubsystem chassis(
     drivers(),
     &currentSensor,
+    &voltageSensor,
     leftFrontChassisMotor,
     leftBackChassisMotor,
     rightFrontChassisMotor,
@@ -267,13 +271,15 @@ BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
+    (drivers()->controlOperatorInterface),
+    aruwsrc::chassis::BEYBLADE_CONFIG);
 
 BeybladeCommand slowBeybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface),
+    aruwsrc::chassis::BEYBLADE_CONFIG,
     0.5f);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(

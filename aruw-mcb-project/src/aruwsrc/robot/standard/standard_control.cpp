@@ -39,8 +39,8 @@
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
-#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -162,12 +162,7 @@ StandardTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
-    {&drivers()->analog,
-     aruwsrc::chassis::CURRENT_SENSOR_PIN,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+aruwsrc::can::AruwVoltageCurrentSensor voltageCurrentSensor(drivers(), tap::can::CanBus::CAN_BUS2);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
@@ -207,7 +202,8 @@ tap::motor::DjiMotor rightBackChassisMotor(
 
 aruwsrc::chassis::XDriveChassisSubsystem chassis(
     drivers(),
-    &currentSensor,
+    &voltageCurrentSensor,
+    &voltageCurrentSensor,
     leftFrontChassisMotor,
     leftBackChassisMotor,
     rightFrontChassisMotor,
@@ -281,13 +277,15 @@ aruwsrc::chassis::BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
+    (drivers()->controlOperatorInterface),
+    aruwsrc::chassis::BEYBLADE_CONFIG);
 
 aruwsrc::chassis::BeybladeCommand slowBeybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface),
+    aruwsrc::chassis::BEYBLADE_CONFIG,
     0.5f);  // Multiplier for slow beyblade speed
 
 // Turret controllers
@@ -655,6 +653,7 @@ void registerStandardSubsystems(Drivers *drivers)
 void initializeSubsystems()
 {
     turret.initialize();
+    voltageCurrentSensor.initialize();
     chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();

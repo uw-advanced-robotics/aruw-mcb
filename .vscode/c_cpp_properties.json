@@ -168,6 +168,21 @@
             ]
         },
         {
+            "name": "MCB Motor Characterizer",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_CHARACTERIZER"
+            ]
+        },
+        {
             "name": "MCB Hero Perseus",
             "includePath": [
                 "${default}",

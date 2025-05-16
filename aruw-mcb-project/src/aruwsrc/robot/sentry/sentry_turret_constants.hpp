@@ -26,7 +26,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"  // for turretID enum (could go somewhere else)
+#include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"  // for turretID enum (could go somewhere else)
 #include "modm/math/geometry/angle.hpp"
 #include "modm/math/geometry/vector3.hpp"
 

@@ -112,7 +112,14 @@ public:
     /**
      * @return turret pitch angle in rad, a value normalized between [-pi, pi]
      */
-    mockable inline float getPitch() const override { return lastCompleteImuData.pitch; }
+    mockable inline float getPitch() const override
+    {
+#ifdef TARGET_STANDARD_NULL
+        return -lastCompleteImuData.pitch;
+#else
+        return lastCompleteImuData.pitch;
+#endif
+    }
 
     /**
      * @return turret pitch angular velocity in rad/sec
