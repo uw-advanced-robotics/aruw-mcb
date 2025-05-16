@@ -20,9 +20,9 @@
 #ifndef ENGINEER_CV_COMMUNICATION_HPP_
 #define ENGINEER_CV_COMMUNICATION_HPP_
 
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/drivers.hpp"
-#include "tap/algorithms/transforms/transform.hpp"
 
 namespace aruwsrc
 {
@@ -48,9 +48,9 @@ public:
 
     struct RotationData
     {
-        float alpha;
-        float beta;
-        float gamma;
+        float roll;
+        float pitch;
+        float yaw;
     } modm_packed;
 
     struct TargetPositionMessage

@@ -23,11 +23,13 @@
 
 using namespace tap::communication::serial;
 using namespace aruwsrc::serial;
+using namespace tap::algorithms::transforms;
 
 EngineerCVCommunication* EngineerCVCommunication::engineerCVCommunicationInstance = nullptr;
 
 EngineerCVCommunication::EngineerCVCommunication(tap::Drivers* drivers)
-    : DJISerial(drivers, ENGINEER_CV_RX_UART_PORT), receptableToCam(aruwsrc::algorithms::transforms::Transform::identity())
+    : DJISerial(drivers, ENGINEER_CV_RX_UART_PORT),
+      receptableToCam(Transform::identity())
 {
 #ifndef ENV_UNIT_TESTS
     // when testing it is OK to have multiple vision coprocessor instances, so this assertion
@@ -42,8 +44,13 @@ EngineerCVCommunication::~EngineerCVCommunication() { engineerCVCommunicationIns
 void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     memcpy(&(targetPositionMessage), &completeMessage.data, sizeof(TargetPositionMessage));
-    receptableToCam = aruwsrc::algorithms::transforms::Transform(targetPositionMessage.posData.xPos, targetPositionMessage.posData.yPos, targetPositionMessage.posData.zPos, 
-                                                            targetPositionMessage.rotData.alpha, targetPositionMessage.rotData.beta, targetPositionMessage.rotData.gamma);
+    receptableToCam = Transform(
+        targetPositionMessage.posData.xPos,
+        targetPositionMessage.posData.yPos,
+        targetPositionMessage.posData.zPos,
+        targetPositionMessage.rotData.roll,
+        targetPositionMessage.rotData.pitch,
+        targetPositionMessage.rotData.yaw);
 }
 
 void EngineerCVCommunication::initializeCV()
