@@ -43,17 +43,17 @@
  * |             |            |               |
  * |-------      |   Center   |        -------|
  * |             |            |               |
- * |              ------------                |
- * |                                          |
- * |______                                    |
+ * | SIDE         ------------                |
+ * | WALL              X                      |
+ * |______            (MID_MID)               |
  * |      |                                   |
  * |      |                                   |
- * |      --------------------------          |
- * |Elevated platform        |                |
+ * |      ------------------------     X      |
+ * |Elevated platform        |     (MID_RIGHT)|
  * |_________________________|                |
  * |                                          |
- * |___________                               |
- * | Red      |                               |
+ * |___________             X                 |
+ * | Red      |     (BOTTOM_MIDDLE)           |
  * | Loading  |                               |
  * +------------------------------------------+
  *
@@ -64,6 +64,7 @@ namespace aruwsrc::algorithms::state_machine
 using namespace tap::communication::serial;
 using namespace aruwsrc::chassis;
 using namespace aruwsrc::algorithms;
+using namespace tap::algorithms::transforms;
 class RMULStateMachine
 {
     RMULStateMachine(RefSerial& refSerial, ChassisAutoNavController& autoNavController)
@@ -71,6 +72,8 @@ class RMULStateMachine
           autoNavController(autoNavController)
     {
     }
+
+    void updateState();
 
 private:
     RefSerial& refSerial;
@@ -84,6 +87,15 @@ private:
 
     // Threshold at which the robot goes back to fight having healed
     static constexpr int ATTACKING_THRESHOLD = 550;
+
+    // Speed at which the robot moves when healing, in m/s
+    static constexpr float SPEED = 1.0f;
+
+    const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
+    const Position BOTTOM_MIDDLE = Position(1.2, 2.1, 0);
+    const Position MIDDLE_RIGHT = Position(3.2, 2.0, 0);
+    const Position MIDDLE = Position(4.5, 4.0, 0);
+    const Position SIDE_WALL = Position(5, 7.5, 0);
 };
 }  // namespace aruwsrc::algorithms::state_machine
 
