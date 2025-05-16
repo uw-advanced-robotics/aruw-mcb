@@ -93,7 +93,7 @@ private:
     // Speed at which the robot moves when healing, in m/s
     float SPEED = 1.0f;
 
-    float DEBUG_SCALAR = 0.4f;
+    float DEBUG_SCALAR = 0.2f;
 
     const Position RESUPPLY_ZONE = Position(0.75, 7, 0) * DEBUG_SCALAR;
     const Position BOTTOM_MIDDLE = Position(1.2, 2.1, 0) * DEBUG_SCALAR;
