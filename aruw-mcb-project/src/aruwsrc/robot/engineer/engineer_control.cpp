@@ -20,14 +20,16 @@
 #if defined(TARGET_ENGINEER)
 
 #include "tap/communication/gpio/digital.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 
+#include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
-#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -63,7 +65,11 @@ tap::motor::DjiMotor storageLiftMotor(
     "Lifting Motor",
     false,
     1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-LimitSwitchTrigger cubeLiftTrigger(drivers(), CUBELIFT_LIMITSWITCH_PORT);
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
+    &(drivers()->digital),
+    CUBELIFT_LIMITSWITCH_PORT,
+    true);
+LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
 /* define subsystems --------------------------------------------------------*/
 CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, LENGTH);
 
