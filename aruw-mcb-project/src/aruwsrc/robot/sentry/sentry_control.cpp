@@ -342,12 +342,12 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-// aruwsrc::chassis::ChassisAutoNavController autoNavController(
-//     *drivers(),
-//     chassis,
-//     drivers()->visionCoprocessor,
-//     transformer.getWorldToChassis(),
-//     aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
+aruwsrc::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    drivers()->visionCoprocessor,
+    transformer.getWorldToChassis(),
+    aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
