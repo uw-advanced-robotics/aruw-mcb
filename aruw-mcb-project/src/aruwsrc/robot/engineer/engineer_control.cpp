@@ -61,7 +61,7 @@ tap::motor::DjiMotor storageLiftMotor(
     true,
     "Lifting Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 LimitSwitchTrigger cubeLiftTrigger(drivers(), CUBELIFT_LIMITSWITCH_PORT);
 /* define subsystems --------------------------------------------------------*/
 CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, LENGTH);
@@ -146,7 +146,7 @@ tap::control::HoldCommandMapping leftSwitchMid(
 
 tap::control::HoldCommandMapping leftDownRightUp(
     drivers(),
-    {&threeCubePosition},
+    {&oneCubePosition},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 tap::control::HoldCommandMapping leftDownRightMid(
     drivers(),
@@ -155,7 +155,7 @@ tap::control::HoldCommandMapping leftDownRightMid(
 
 tap::control::HoldCommandMapping leftDownRightDown(
     drivers(),
-    {&oneCubePosition},
+    {&threeCubePosition},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
 // tap::control::HoldCommandMapping leftSwitchDown(

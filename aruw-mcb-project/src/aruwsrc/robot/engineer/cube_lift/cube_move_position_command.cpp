@@ -29,15 +29,16 @@ CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift,
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeMovePositionCommand::initialize() {cubeLift.setPIDState(PIDState::POSITION_PID);}
+void CubeMovePositionCommand::initialize() { cubeLift.setPIDState(PIDState::POSITION_PID); }
 
 float exCount = 0;
-void CubeMovePositionCommand::execute() { cubeLift.setPositionSetpoint(setpoint); exCount += 1; }
+void CubeMovePositionCommand::execute()
+{
+    cubeLift.setPositionSetpoint(setpoint);
+    exCount += 1;
+}
 
 void CubeMovePositionCommand::end(bool) { cubeLift.setDesiredOutput(0); }
 
-bool CubeMovePositionCommand::isFinished() const
-{
-    return false;
-}
+bool CubeMovePositionCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::robot::engineer

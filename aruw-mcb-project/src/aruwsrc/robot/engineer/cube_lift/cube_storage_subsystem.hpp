@@ -49,27 +49,25 @@ public:
 
     void refreshSafeDisconnect() override;
 
-    uint64_t getUpperBound() const;
+    uint64_t getUpperBound() const { return upperBound; }
 
-    uint64_t getLowerBound() const;
+    uint64_t getLowerBound() const { return lowerBound; }
 
     bool homedAndBounded() const;
 
     void moveTowardLowerBound();
 
-    void setPositionSetpoint(float newSetpoint);
+    void setPositionSetpoint(float newSetpoint) { setpoint = newSetpoint; }
 
-    float getPositionSetpoint();
+    float getPositionSetpoint() { return setpoint; }
 
-    void setVelocitySetpoint(float newSetpoint);
+    void setPIDState(PIDState state) { pidState = state; }
 
-    float getVelocitySetpoint();
-
-    void setPIDState(PIDState state);
-
-    PIDState getPIDState();
+    PIDState getPIDState() { return pidState; }
 
     const char* getName() const override { return "Cube Storage"; }
+
+    float getMotorPosition();
 
 protected:
     tap::motor::MotorInterface& motor;
@@ -78,9 +76,9 @@ protected:
 
     void setHome(uint64_t encoderPosition);
 
-    void setUpperBound(uint64_t encoderPosition);
+    void setUpperBound(uint64_t encoderPosition) { upperBound = encoderPosition; }
 
-    void setLowerBound(uint64_t encoderPosition);
+    void setLowerBound(uint64_t encoderPosition) { lowerBound = encoderPosition; }
 
 private:
     bool isLimitSwitch = false;
@@ -99,6 +97,8 @@ private:
         tap::algorithms::SmoothPid(aruwsrc::robot::engineer::LIFT_HOMING_PID_CONFIG);
     float velocitySetpoint = 100;
     CalibrationState caliState = CalibrationState::AWAITING_CALIBRATE;
+    float motorPos = 0;
+    float pidOutput = 0;
 };  // class CUBE_STORAGE
 
 }  // namespace aruwsrc::robot::engineer

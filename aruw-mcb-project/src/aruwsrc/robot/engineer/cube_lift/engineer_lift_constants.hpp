@@ -39,6 +39,8 @@ static constexpr int64_t LENGTH = 100;  // TODO: UPDATE LATER
 
 static constexpr int16_t FEEDFORWARD = 1000;
 
+static constexpr float HOMING_SPEED = 25;
+
 static constexpr float MM_PER_REVOLUTION = 74.63f;
 
 static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
@@ -67,9 +69,9 @@ enum class PIDState
 
 static constexpr float MANUAL_MOVE_SPEED = -10;  // TODO: choose value alter
 
-static constexpr float ONE_CUBE_SETPOINT = -340;
+static constexpr float ONE_CUBE_SETPOINT = -10;
 static constexpr float TWO_CUBE_SETPOINT = -210;
-static constexpr float THREE_CUBE_SETPOINT = -10;  // TODO: update correct values
+static constexpr float THREE_CUBE_SETPOINT = -340;
 
 }  // namespace aruwsrc::robot::engineer
 #endif

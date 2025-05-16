@@ -33,7 +33,7 @@ void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getPositionSetpoi
 
 void CubeMoveManualCommand::execute()
 {
-    setpoint += operatorInterface->getTurretPitchInput(0) * MANUAL_MOVE_SPEED;  // right up 
+    setpoint += operatorInterface->getTurretPitchInput(0) * MANUAL_MOVE_SPEED;  // right up
     cubeLift.setPositionSetpoint(setpoint);
 }
 

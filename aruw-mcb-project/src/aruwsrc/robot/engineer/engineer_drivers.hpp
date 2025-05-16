@@ -38,7 +38,12 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), controlOperatorInterface(this), oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr) {}
+    Drivers()
+        : tap::Drivers(),
+          controlOperatorInterface(this),
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr)
+    {
+    }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
