@@ -44,13 +44,14 @@ EngineerCVCommunication::~EngineerCVCommunication() { engineerCVCommunicationIns
 void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     memcpy(&(targetPositionMessage), &completeMessage.data, sizeof(TargetPositionMessage));
+
     receptableToCam = Transform(
-        targetPositionMessage.posData.xPos,
-        targetPositionMessage.posData.yPos,
-        targetPositionMessage.posData.zPos,
-        targetPositionMessage.rotData.roll,
-        targetPositionMessage.rotData.pitch,
-        targetPositionMessage.rotData.yaw);
+        targetPositionMessage.xPos,
+        targetPositionMessage.yPos,
+        targetPositionMessage.zPos,
+        targetPositionMessage.roll,
+        targetPositionMessage.pitch,
+        targetPositionMessage.yaw);
 }
 
 void EngineerCVCommunication::initializeCV()

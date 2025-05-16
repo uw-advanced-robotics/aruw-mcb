@@ -39,24 +39,14 @@ public:
     DISALLOW_COPY_AND_ASSIGN(EngineerCVCommunication);
     mockable ~EngineerCVCommunication();
 
-    struct PositionData
+    struct TargetPositionMessage
     {
         float xPos;  ///< x position of the target (in cm).
         float yPos;  ///< y position of the target (in cm).
         float zPos;  ///< z position of the target (in cm).
-    } modm_packed;
-
-    struct RotationData
-    {
         float roll;
         float pitch;
         float yaw;
-    } modm_packed;
-
-    struct TargetPositionMessage
-    {
-        PositionData posData;
-        RotationData rotData;
     } modm_packed;
 
     /**
