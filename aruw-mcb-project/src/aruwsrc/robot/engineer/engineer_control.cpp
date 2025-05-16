@@ -27,6 +27,7 @@
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -73,6 +74,8 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
+aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
     aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
@@ -112,6 +115,7 @@ tap::motor::DjiMotor rightBackChassisMotor(
 aruwsrc::chassis::MecanumChassisSubsystem chassis(
     drivers(),
     &currentSensor,
+    &voltageSensor,
     leftFrontChassisMotor,
     leftBackChassisMotor,
     rightFrontChassisMotor,

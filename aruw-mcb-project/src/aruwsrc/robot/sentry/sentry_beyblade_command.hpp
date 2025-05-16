@@ -24,6 +24,7 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
@@ -37,40 +38,13 @@ namespace aruwsrc::sentry
 class SentryBeybladeCommand : public tap::control::Command
 {
 public:
-    struct SentryBeybladeConfig
-    {
-        /**
-         * Fraction of max chassis speed that will be applied to rotation when beyblading
-         */
-        const float beybladeRotationalSpeedFractionOfMax;
-        /**
-         * Fraction between [0, 1], what we multiply user translational input by when beyblading.
-         */
-        const float beybladeTranslationalSpeedMultiplier;
-        /**
-         * The fraction to cut rotation speed while moving and beyblading
-         */
-        const float beybladeRotationalSpeedMultiplierWhenTranslating;
-        /**
-         * Threshold, a fraction of the maximum translational speed that is used to determine if
-         * beyblade speed should be reduced (when translating at an appreciable speed beyblade speed
-         * is reduced).
-         */
-        const float translationalSpeedThresholdMultiplierForRotationSpeedDecrease;
-        /**
-         * Rotational speed to update the beyblade ramp target by each iteration until final
-         * rotation setpoint reached, in RPM.
-         */
-        const float beybladeRampRate;
-    };
-
     SentryBeybladeCommand(
         tap::Drivers* drivers,
         aruwsrc::chassis::HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
         const tap::algorithms::transforms::Transform& worldToChassis,
-        const SentryBeybladeConfig config);
+        const aruwsrc::chassis::BeybladeConfig config);
 
     /**
      * Sets rotational input target on Ramp
@@ -99,7 +73,7 @@ private:
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface;
     const tap::algorithms::transforms::Transform& worldToChassis;
-    const SentryBeybladeConfig config;
+    const aruwsrc::chassis::BeybladeConfig config;
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::sentry

@@ -27,9 +27,8 @@
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/interpolate.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/sentry/sentry_beyblade_config.hpp"
-#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
 
 namespace aruwsrc::chassis
 {
@@ -50,7 +49,7 @@ public:
         aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const Transform& worldToChassis,
-        const aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig)
+        const aruwsrc::chassis::BeybladeConfig beybladeConfig)
         : chassis(chassis),
           path(visionCoprocessor.getAutoNavPath()),
           lastSetPoint(Position(-1, -1, 0)),
@@ -82,7 +81,7 @@ private:
 
     const Transform& worldToChassis;
 
-    aruwsrc::sentry::SentryBeybladeCommand::SentryBeybladeConfig beybladeConfig;
+    aruwsrc::chassis::BeybladeConfig beybladeConfig;
 
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;

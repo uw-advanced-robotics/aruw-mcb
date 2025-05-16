@@ -37,10 +37,12 @@ modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
 ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
     std::vector<Wheel>* wheels,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       wheels(*wheels),
       currentSensor(currentSensor),
+      voltageSensor(voltageSensor),
       chasisSpeedRotationPID({
           AUTOROTATION_PID_KP,
           0.0f,
@@ -52,6 +54,7 @@ ChassisSubsystem::ChassisSubsystem(
       chassisPowerLimiter(
           drivers,
           currentSensor,
+          voltageSensor,
           STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
           ENERGY_BUFFER_CRIT_THRESHOLD)

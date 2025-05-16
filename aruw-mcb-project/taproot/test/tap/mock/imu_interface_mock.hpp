@@ -43,7 +43,6 @@ public:
     MOCK_METHOD(float, getGx, (), (const override));
     MOCK_METHOD(float, getGy, (), (const override));
     MOCK_METHOD(float, getGz, (), (const override));
-    MOCK_METHOD(float, getTemp, (), (const override));
     MOCK_METHOD(float, getYaw, (), (const override));
     MOCK_METHOD(float, getPitch, (), (const override));
     MOCK_METHOD(float, getRoll, (), (const override));

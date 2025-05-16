@@ -78,17 +78,6 @@ protected:
      * Stops the motor from moving. Only to be used during calibration.
      */
     virtual void stopDuringHoming() = 0;
-
-    /**
-     * Sets the lower bound of this bounded subsystem to the given encoder position.
-     */
-    virtual void setLowerBound(uint64_t encoderPosition) = 0;
-
-    /**
-     * Sets the upper bound of this bounded subsystem to the given encoder position.
-     */
-    virtual void setUpperBound(uint64_t encoderPosition) = 0;
-
     /**
      * Sets the given motor encoder position to be the "home" of the subsystem's motor.
      */

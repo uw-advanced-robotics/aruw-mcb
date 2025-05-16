@@ -80,15 +80,11 @@ void TurretMajorWorldFrameController::runController(
     const float positionControllerError =
         turretMotor.getValidMinError(worldFrameSetpoint, Angle(worldToMajor.getYaw()));
 
-    positionPidOutput = positionPid.runController(
-        positionControllerError,
-        modm::toRadian(turretMajorIMU.getGz()),
-        dt);
+    positionPidOutput =
+        positionPid.runController(positionControllerError, turretMajorIMU.getGz(), dt);
 
-    const float velocityControllerError = limitVal(
-        positionPidOutput - modm::toRadian(turretMajorIMU.getGz()),
-        -maxVelErrorInput,
-        maxVelErrorInput);
+    const float velocityControllerError =
+        limitVal(positionPidOutput - turretMajorIMU.getGz(), -maxVelErrorInput, maxVelErrorInput);
 
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
