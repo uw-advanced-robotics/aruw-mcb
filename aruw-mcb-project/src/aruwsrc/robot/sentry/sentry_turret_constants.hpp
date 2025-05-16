@@ -67,7 +67,7 @@ namespace turretMajor
 {
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 3986,
+    .startEncoderValue = 0,
     .minAngle = 0,
     .maxAngle = M_TWOPI,
     .limitMotorAngles = false,
@@ -80,7 +80,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 500.0f,
     .kd = 12'000.0f,
     .maxICumulative = 8'000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
@@ -119,8 +119,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 }  // namespace worldFrameCascadeController
 
 // Turret Major has a double DJI motor, so we need to have two CAN Buses
-static constexpr tap::can::CanBus CAN_BUS_MOTOR_1 = tap::can::CanBus::CAN_BUS1;
-static constexpr tap::can::CanBus CAN_BUS_MOTOR_2 = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::can::CanBus CAN_BUS_MOTOR = tap::can::CanBus::CAN_BUS1;
 
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
 static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
@@ -230,7 +229,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,  // tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
