@@ -23,7 +23,7 @@
 
 #include "sentry_chassis_world_yaw_observer.hpp"
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms::odometry
 {
 SentryKFOdometry2DSubsystem::SentryKFOdometry2DSubsystem(
     tap::Drivers &drivers,
@@ -89,4 +89,4 @@ void SentryKFOdometry2DSubsystem::overrideOdometryOrientation(float deltaYaw)
     DeadwheelChassisKFOdometry::kf.init(newState);
 }
 
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms::odometry

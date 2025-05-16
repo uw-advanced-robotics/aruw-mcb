@@ -35,7 +35,7 @@ using namespace tap::arch::clock;
 using namespace tap::algorithms;
 using namespace aruwsrc::algorithms;
 
-namespace aruwsrc::control::sentry
+namespace aruwsrc::sentry::turret::cv
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
     serial::VisionCoprocessor &visionCoprocessor,
@@ -43,7 +43,7 @@ SentryTurretCVCommand::SentryTurretCVCommand(
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
     TurretConfig &turretLeftConfig,
     TurretConfig &turretRightConfig,
-    aruwsrc::sentry::SentryTransforms &sentryTransforms)
+    aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
       turretMajorSubsystem(turretMajorSubsystem),
       yawControllerMajor(yawControllerMajor),
@@ -66,7 +66,7 @@ void SentryTurretCVCommand::initialize()
 
 void SentryTurretCVCommand::computeAimSetpoints(
     TurretConfig &config,
-    aruwsrc::sentry::SentryBallisticsSolver::BallisticsSolution &solution,
+    aruwsrc::sentry::algorithms::SentryBallisticsSolver::BallisticsSolution &solution,
     WrappedFloat *desiredYawSetpoint,
     WrappedFloat *desiredPitchSetpoint,
     bool *withinAimingTolerance)
@@ -206,4 +206,4 @@ void SentryTurretCVCommand::end(bool)
 
 void SentryTurretCVCommand::requestNewTarget() { visionCoprocessor.sendSelectNewTargetMessage(); }
 
-}  // namespace aruwsrc::control::sentry
+}  // namespace aruwsrc::sentry::turret::cv

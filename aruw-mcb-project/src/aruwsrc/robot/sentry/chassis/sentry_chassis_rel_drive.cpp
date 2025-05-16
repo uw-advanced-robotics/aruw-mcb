@@ -25,13 +25,14 @@
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
 using namespace tap::algorithms;
+using aruwsrc::chassis::HolonomicChassisSubsystem;
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::chassis
 {
 void SentryChassisRelDrive::computeDesiredUserTranslation(
     aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
     tap::Drivers *drivers,
-    chassis::HolonomicChassisSubsystem *chassis,
+    aruwsrc::chassis::HolonomicChassisSubsystem *chassis,
     float chassisRotation,
     float *chassisXDesiredWheelspeed,
     float *chassisYDesiredWheelspeed)
@@ -42,9 +43,9 @@ void SentryChassisRelDrive::computeDesiredUserTranslation(
         return;
     }
 
-    const float maxWheelSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     // what we will multiply x and y speed by to take into account rotation
     float rotationLimitedMaxTranslationalSpeed =
@@ -64,7 +65,7 @@ void SentryChassisRelDrive::computeDesiredUserTranslation(
 void SentryChassisRelDrive::onExecute(
     aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
     tap::Drivers *drivers,
-    chassis::HolonomicChassisSubsystem *chassis)
+    HolonomicChassisSubsystem *chassis)
 {
     float chassisRotationDesiredWheelspeed = operatorInterface->getChassisYawVelocity();
 
@@ -84,4 +85,4 @@ void SentryChassisRelDrive::onExecute(
         chassisYDesiredWheelspeed,
         chassisRotationDesiredWheelspeed);
 }
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::chassis

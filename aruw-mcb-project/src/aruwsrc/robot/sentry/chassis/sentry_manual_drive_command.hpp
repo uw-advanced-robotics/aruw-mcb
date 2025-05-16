@@ -28,9 +28,7 @@
 
 using namespace aruwsrc::control::sentry;
 
-namespace aruwsrc
-{
-namespace control::sentry
+namespace aruwsrc::sentry::chassis
 {
 /**
  * A command that controls chassis-relative mecanum drive.
@@ -41,7 +39,7 @@ public:
     SentryManualDriveCommand(
         tap::Drivers* drivers,
         SentryControlOperatorInterface* operatorInterface,
-        chassis::HolonomicChassisSubsystem* chassis);
+        aruwsrc::chassis::HolonomicChassisSubsystem* chassis);
 
     void initialize() override;
 
@@ -61,11 +59,9 @@ public:
 private:
     tap::Drivers* drivers;
     SentryControlOperatorInterface* operatorInterface;
-    chassis::HolonomicChassisSubsystem* chassis;
+    aruwsrc::chassis::HolonomicChassisSubsystem* chassis;
 };  // class SentryManualDriveCommand
 
-}  // namespace control::sentry
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::sentry::chassis
 
 #endif  // SENTRY_MANUAL_DRIVE_COMMAND_HPP_

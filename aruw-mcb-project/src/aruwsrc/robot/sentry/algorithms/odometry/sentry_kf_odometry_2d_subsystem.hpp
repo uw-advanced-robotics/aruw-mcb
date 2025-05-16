@@ -46,7 +46,7 @@ namespace tap::control::chassis
 class ChassisSubsystemInterface;
 }
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms::odometry
 {
 class SentryKFOdometry2DSubsystem : public tap::control::Subsystem,
                                     public aruwsrc::algorithms::odometry::DeadwheelChassisKFOdometry
@@ -84,6 +84,6 @@ public:
     void overrideOdometryOrientation(const float deltaYaw);
 };
 
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms::odometry
 
 #endif  // SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_

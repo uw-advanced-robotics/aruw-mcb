@@ -25,7 +25,7 @@
 
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms::odometry
 {
 /**
  * @brief Sentry specific ChassisWorldYawObserverInterface implementation
@@ -73,6 +73,6 @@ private:
     float offset = 0.0f;
 };
 
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms::odometry
 
 #endif  // SENTRY_CHASSIS_WORLD_YAW_OBSERVER_HPP_

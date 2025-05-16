@@ -31,7 +31,7 @@ namespace aruwsrc
 class Drivers;
 }  // namespace aruwsrc
 
-namespace aruwsrc::control::turret::sentry
+namespace aruwsrc::sentry::turret
 {
 /**
  * Command that takes user input from the `SentryControlOperatorInterface` to control the pitch and
@@ -55,9 +55,9 @@ public:
     TurretMinorSentryControlCommand(
         tap::Drivers *drivers,
         aruwsrc::control::sentry::SentryControlOperatorInterface &controlOperatorInterface,
-        aruwsrc::control::sentry::SentryTurretMinorSubsystem &turretMinorSubsystem,
-        algorithms::TurretYawControllerInterface &yawController,
-        algorithms::TurretPitchControllerInterface &pitchController,
+        SentryTurretMinorSubsystem &turretMinorSubsystem,
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController,
+        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController,
         float userYawInputScalar,
         float userPitchInputScalar);
 
@@ -77,16 +77,16 @@ private:
     tap::Drivers *drivers;
     aruwsrc::control::sentry::SentryControlOperatorInterface &controlOperatorInterface;
 
-    aruwsrc::control::sentry::SentryTurretMinorSubsystem &turretMinorSubsystem;
+    SentryTurretMinorSubsystem &turretMinorSubsystem;
 
     uint32_t prevTime = 0;
 
-    algorithms::TurretYawControllerInterface &yawController;
-    algorithms::TurretPitchControllerInterface &pitchController;
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController;
 
     const float userYawInputScalar;
     const float userPitchInputScalar;
 };
-}  // namespace aruwsrc::control::turret::sentry
+}  // namespace aruwsrc::sentry::turret
 
 #endif  // TURRET_MINOR_CONTROL_COMMAND_HPP_

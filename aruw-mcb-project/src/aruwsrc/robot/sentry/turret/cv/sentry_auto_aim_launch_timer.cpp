@@ -21,12 +21,12 @@
 
 #include "tap/architecture/clock.hpp"
 
-namespace aruwsrc::control::auto_aim
+namespace aruwsrc::sentry::turret::cv
 {
 SentryAutoAimLaunchTimer::SentryAutoAimLaunchTimer(
     uint32_t agitatorTypicalDelayMicroseconds,
     aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
-    SentryBallisticsSolver *ballistics)
+    aruwsrc::sentry::algorithms::SentryBallisticsSolver *ballistics)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),
       ballistics(ballistics)
@@ -89,4 +89,4 @@ SentryAutoAimLaunchTimer::LaunchInclination SentryAutoAimLaunchTimer::getCurrent
         return LaunchInclination::GATED_DENY;
     }
 }
-}  // namespace aruwsrc::control::auto_aim
+}  // namespace aruwsrc::sentry::turret::cv

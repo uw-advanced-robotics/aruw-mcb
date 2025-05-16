@@ -19,7 +19,7 @@
 
 #include "sentry_turret_minor_subsystem.hpp"
 
-namespace aruwsrc::control::sentry
+namespace aruwsrc::sentry::turret
 {
 SentryTurretMinorSubsystem::SentryTurretMinorSubsystem(
     tap::Drivers& drivers,
@@ -49,4 +49,4 @@ float SentryTurretMinorSubsystem::getMajorFrameYaw() const
     return this->yawMotor.getChassisFrameMeasuredAngle().getWrappedValue();
 }
 
-}  // namespace aruwsrc::control::sentry
+}  // namespace aruwsrc::sentry::turret

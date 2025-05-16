@@ -23,14 +23,14 @@
 
 using namespace aruwsrc::control::sentry;
 
-namespace aruwsrc::control::turret::sentry
+namespace aruwsrc::sentry::turret
 {
 TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     tap::Drivers *drivers,
     SentryControlOperatorInterface &controlOperatorInterface,
     SentryTurretMinorSubsystem &turretMinorSubsystem,
-    algorithms::TurretYawControllerInterface &yawController,
-    algorithms::TurretPitchControllerInterface &pitchController,
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController,
+    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController,
     float userYawInputScalar,
     float userPitchInputScalar)
     : drivers(drivers),
@@ -96,4 +96,4 @@ void TurretMinorSentryControlCommand::end(bool)
     turretMinorSubsystem.yawMotor.setMotorOutput(0);
 }
 
-}  // namespace aruwsrc::control::turret::sentry
+}  // namespace aruwsrc::sentry::turret

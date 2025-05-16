@@ -51,7 +51,7 @@ namespace tap::algorithms::odometry
 class Odometry2DInterface;
 }
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms
 {
 /**
  * An object that computes the world-relative pitch and yaw turret angles based on CV aim data and
@@ -100,12 +100,10 @@ public:
             return false;
         }
 
-        return (abs(yawAngleError) < atan2f(
-                                         aruwsrc::sentry::SentryBallisticsSolver::PLATE_WIDTH,
-                                         2.0f * targetDistance)) &&
-               (abs(pitchAngleError) < atan2f(
-                                           aruwsrc::sentry::SentryBallisticsSolver::PLATE_HEIGHT,
-                                           2.0f * targetDistance));
+        return (abs(yawAngleError) <
+                atan2f(SentryBallisticsSolver::PLATE_WIDTH, 2.0f * targetDistance)) &&
+               (abs(pitchAngleError) <
+                atan2f(SentryBallisticsSolver::PLATE_HEIGHT, 2.0f * targetDistance));
     }
 
     /**
@@ -127,7 +125,7 @@ public:
      */
     SentryBallisticsSolver(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        const aruwsrc::sentry::SentryTransforms &transformer,
+        const odometry::SentryTransforms &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
         float defaultLaunchSpeed,
@@ -150,7 +148,7 @@ public:
 
 private:
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    const aruwsrc::sentry::SentryTransforms &transformer;
+    const odometry::SentryTransforms &transformer;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
     const float defaultLaunchSpeed;
@@ -164,6 +162,6 @@ private:
 public:
     const uint8_t turretID;
 };
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms
 
 #endif  // SENTRY_BALLISTICS_SOLVER_HPP_

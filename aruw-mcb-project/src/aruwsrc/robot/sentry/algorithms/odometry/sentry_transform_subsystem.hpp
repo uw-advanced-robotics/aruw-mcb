@@ -23,12 +23,12 @@
 
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms::odometry
 {
 class SentryTransformSubystem : public tap::control::Subsystem
 {
 public:
-    SentryTransformSubystem(tap::Drivers& drivers, aruwsrc::sentry::SentryTransforms& transformer)
+    SentryTransformSubystem(tap::Drivers& drivers, SentryTransforms& transformer)
         : tap::control::Subsystem(&drivers),
           transformer(transformer)
     {
@@ -38,9 +38,9 @@ public:
     inline void refresh() override { transformer.updateTransforms(); };
 
 private:
-    aruwsrc::sentry::SentryTransforms& transformer;
+    SentryTransforms& transformer;
 };
 
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms::odometry
 
 #endif  // SENTRY_TRANSFORM_SUBSYSTEM_HPP_

@@ -19,16 +19,14 @@
 #include "sentry_turret_major_world_relative_yaw_controller.hpp"
 
 using namespace tap::algorithms;
-// using namespace tap::algorithms::transforms;
 using namespace aruwsrc::chassis;
-using namespace aruwsrc::control::sentry;
 
-namespace aruwsrc::control::turret::algorithms
+namespace aruwsrc::sentry::turret
 {
 TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const transforms::Transform& worldToMajor,
     const HolonomicChassisSubsystem& chassis,
-    TurretMotor& yawMotor,
+    aruwsrc::control::turret::TurretMotor& yawMotor,
     aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU,
     const SentryTurretMinorSubsystem& turretLeft,
     const SentryTurretMinorSubsystem& turretRight,
@@ -118,4 +116,4 @@ WrappedFloat TurretMajorWorldFrameController::getMeasurement() const
 
 bool TurretMajorWorldFrameController::isOnline() const { return turretMotor.isOnline(); }
 
-}  // namespace aruwsrc::control::turret::algorithms
+}  // namespace aruwsrc::sentry::turret

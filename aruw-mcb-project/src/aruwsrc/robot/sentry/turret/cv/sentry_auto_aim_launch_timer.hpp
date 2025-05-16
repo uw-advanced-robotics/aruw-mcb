@@ -24,9 +24,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 
-using namespace aruwsrc::sentry;
-
-namespace aruwsrc::control::auto_aim
+namespace aruwsrc::sentry::turret::cv
 {
 /**
  * A middleman between incoming vision coprocessor data and aim commands. Uses auto-aim obervations
@@ -51,18 +49,13 @@ public:
         GATED_DENY,
         GATED_ALLOW
     };
+
     static constexpr float MAX_ALLOWED_FLIGHT_TIME_SECS = 2.f;
 
-private:
-    uint32_t agitatorTypicalDelayMicroseconds;
-    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
-    SentryBallisticsSolver *ballistics;
-
-public:
     SentryAutoAimLaunchTimer(
         uint32_t agitatorTypicalDelayMicroseconds,
         aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
-        SentryBallisticsSolver *ballistics);
+        aruwsrc::sentry::algorithms::SentryBallisticsSolver *ballistics);
 
     /**
      * Compute a firing inclination for the current time and specified turret.
@@ -77,8 +70,12 @@ public:
      */
     LaunchInclination getCurrentLaunchInclination(uint8_t turretId);
 
+private:
+    uint32_t agitatorTypicalDelayMicroseconds;
+    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
+    aruwsrc::sentry::algorithms::SentryBallisticsSolver *ballistics;
 };  // class SentryAutoAimLaunchTimer
 
-}  // namespace aruwsrc::control::auto_aim
+}  // namespace aruwsrc::sentry::turret::cv
 
 #endif  // SENTRY_AUTO_AIM_LAUNCH_TIMER_HPP_

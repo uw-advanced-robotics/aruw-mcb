@@ -22,7 +22,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms::odometry
 {
 SentryChassisWorldYawObserver::SentryChassisWorldYawObserver(
     tap::communication::sensors::imu::ImuInterface& imu,
@@ -50,4 +50,4 @@ void SentryChassisWorldYawObserver::overrideChassisYaw(float newYaw)
     }
 }
 
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms::odometry

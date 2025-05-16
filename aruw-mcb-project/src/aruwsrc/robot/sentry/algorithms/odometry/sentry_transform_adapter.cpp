@@ -25,7 +25,7 @@
 
 using namespace tap::algorithms::transforms;
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms::odometry
 {
 SentryTransformAdapter::SentryTransformAdapter(const SentryTransforms& transforms)
     : transforms(transforms)
@@ -65,4 +65,4 @@ const Transform& SentryTransformAdapter::getWorldToVTM() const
     return this->transforms.getWorldToVTM();
 }
 
-};  // namespace aruwsrc::sentry
+};  // namespace aruwsrc::sentry::algorithms::odometry

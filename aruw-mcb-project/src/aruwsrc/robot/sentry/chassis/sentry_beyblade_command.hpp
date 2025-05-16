@@ -30,7 +30,7 @@
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::chassis
 {
 /**
  * A command that automatically rotates the chassis while maintaining turret angle
@@ -76,6 +76,6 @@ private:
     const aruwsrc::chassis::BeybladeConfig config;
 };  // class BeybladeCommand
 
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::chassis
 
 #endif  // BEYBLADE_COMMAND_HPP_

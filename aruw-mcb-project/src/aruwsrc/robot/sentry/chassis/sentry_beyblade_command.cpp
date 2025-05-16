@@ -31,9 +31,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace sentry
+namespace aruwsrc::sentry::chassis
 {
 SentryBeybladeCommand::SentryBeybladeCommand(
     tap::Drivers* drivers,
@@ -75,7 +73,7 @@ void SentryBeybladeCommand::execute()
         // Note: pass in 0 as rotation since we don't want to take into consideration
         // scaling due to rotation as this will be fairly constant and thus it isn't
         // worth scaling here.
-        sentry::SentryChassisRelDrive::computeDesiredUserTranslation(
+        SentryChassisRelDrive::computeDesiredUserTranslation(
             &operatorInterface,
             drivers,
             chassis,
@@ -124,6 +122,4 @@ void SentryBeybladeCommand::execute()
 }
 
 void SentryBeybladeCommand::end(bool) { chassis->setZeroRPM(); }
-}  // namespace sentry
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::sentry::chassis

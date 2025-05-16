@@ -42,7 +42,7 @@ namespace aruwsrc::control::turret
 class TurretMotor;
 }
 
-namespace aruwsrc::control::turret::algorithms
+namespace aruwsrc::sentry::turret
 {
 /**
  * World frame turret major yaw controller for the sentry.
@@ -55,7 +55,8 @@ namespace aruwsrc::control::turret::algorithms
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-class TurretMajorWorldFrameController final : public TurretYawControllerInterface
+class TurretMajorWorldFrameController final
+    : public aruwsrc::control::turret::algorithms::TurretYawControllerInterface
 {
 public:
     /**
@@ -75,10 +76,10 @@ public:
     TurretMajorWorldFrameController(
         const tap::algorithms::transforms::Transform& worldToMajor,
         const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
-        TurretMotor& yawMotor,
+        aruwsrc::control::turret::TurretMotor& yawMotor,
         aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU,
-        const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft,
-        const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight,
+        const SentryTurretMinorSubsystem& turretLeft,
+        const SentryTurretMinorSubsystem& turretRight,
         tap::algorithms::SmoothPid& positionPid,
         tap::algorithms::SmoothPid& velocityPid,
         float maxVelErrorInput,
@@ -123,12 +124,12 @@ private:
 
     const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
 
-    TurretMotor& yawMotor;
+    aruwsrc::control::turret::TurretMotor& yawMotor;
 
     aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU;
 
-    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft;
-    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight;
+    const SentryTurretMinorSubsystem& turretLeft;
+    const SentryTurretMinorSubsystem& turretRight;
 
     tap::algorithms::SmoothPid& positionPid;
     tap::algorithms::SmoothPid& velocityPid;
@@ -144,6 +145,6 @@ private:
     float feedforwardGain;
 };
 
-}  // namespace aruwsrc::control::turret::algorithms
+}  // namespace aruwsrc::sentry::turret
 
 #endif  // SENTRY_TURRET_MAJOR_WORLD_RELATIVE_YAW_CONTROLLER_HPP_

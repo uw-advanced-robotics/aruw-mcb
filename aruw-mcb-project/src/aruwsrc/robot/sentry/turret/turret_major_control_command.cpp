@@ -23,13 +23,13 @@
 
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
-namespace aruwsrc::control::turret::sentry
+namespace aruwsrc::sentry::turret
 {
 TurretMajorSentryControlCommand::TurretMajorSentryControlCommand(
     tap::Drivers *drivers,
     SentryControlOperatorInterface &controlOperatorInterface,
-    YawTurretSubsystem &turretMajorSubsystem,
-    algorithms::TurretYawControllerInterface &yawController,
+    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController,
     float userYawInputScalar)
     : drivers(drivers),
       controlOperatorInterface(controlOperatorInterface),
@@ -73,4 +73,4 @@ void TurretMajorSentryControlCommand::end(bool)
     turretMajorSubsystem.getMutableMotor().setMotorOutput(0);
 }
 
-}  // namespace aruwsrc::control::turret::sentry
+}  // namespace aruwsrc::sentry::turret

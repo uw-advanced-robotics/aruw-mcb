@@ -39,7 +39,7 @@ class ControlOperatorInterface;
 }
 }  // namespace aruwsrc
 
-namespace aruwsrc::control::turret::sentry
+namespace aruwsrc::sentry::turret
 {
 /**
  * Command that takes user input from the 'SentryControlOperatorInterface' to control
@@ -59,8 +59,8 @@ public:
     TurretMajorSentryControlCommand(
         tap::Drivers *drivers,
         SentryControlOperatorInterface &controlOperatorInterface,
-        YawTurretSubsystem &turretMajorSubsystem,
-        algorithms::TurretYawControllerInterface &yawController,
+        aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
+        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController,
         float userYawInputScalar);
 
     bool isReady() override;
@@ -78,15 +78,15 @@ public:
 private:
     tap::Drivers *drivers;
     SentryControlOperatorInterface &controlOperatorInterface;
-    YawTurretSubsystem &turretMajorSubsystem;
+    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
 
     WrappedFloat lastYawSetPoint;
     uint32_t prevTime = 0;
 
-    algorithms::TurretYawControllerInterface &yawController;
+    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
 
     const float userYawInputScalar;
 };
-}  // namespace aruwsrc::control::turret::sentry
+}  // namespace aruwsrc::sentry::turret
 
 #endif  // TURRET_MAJOR_CONTROL_COMMAND_HPP_

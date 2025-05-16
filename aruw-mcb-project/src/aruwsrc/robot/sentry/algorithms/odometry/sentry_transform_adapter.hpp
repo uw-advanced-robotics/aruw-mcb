@@ -24,7 +24,7 @@
 
 #include "sentry_transforms.hpp"
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms::odometry
 {
 class SentryTransformAdapter : public aruwsrc::algorithms::transforms::TransformerInterface
 {
@@ -45,6 +45,6 @@ private:
     const SentryTransforms& transforms;
 };
 
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms::odometry
 
 #endif  // SENTRY_TRANSFORM_ADAPTER_HPP_

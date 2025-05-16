@@ -30,11 +30,11 @@
 using namespace tap::algorithms;
 using namespace modm;
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms
 {
 SentryBallisticsSolver::SentryBallisticsSolver(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-    const aruwsrc::sentry::SentryTransforms &transformer,
+    const odometry::SentryTransforms &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
     const float defaultLaunchSpeed,
@@ -126,4 +126,4 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
 
     return lastComputedSolution;
 }
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms

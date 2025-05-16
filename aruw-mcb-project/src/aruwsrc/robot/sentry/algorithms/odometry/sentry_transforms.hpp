@@ -26,7 +26,7 @@
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms::odometry
 {
 class SentryTransforms
 {
@@ -43,8 +43,8 @@ public:
     SentryTransforms(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
-        const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft,
-        const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight,
+        const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretLeft,
+        const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretRight,
         const SentryTransformConfig& config);
 
     void updateTransforms();
@@ -134,8 +134,8 @@ private:
 
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
-    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretLeft;
-    const aruwsrc::control::sentry::SentryTurretMinorSubsystem& turretRight;
+    const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretLeft;
+    const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretRight;
 
     // Transforms
     tap::algorithms::transforms::Transform worldToChassis;
@@ -150,6 +150,6 @@ private:
     tap::algorithms::transforms::Transform turretMajorToTurretRight;
 };
 
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms::odometry
 
 #endif  // SENTRY_TRANSFORMS_HPP_

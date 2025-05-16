@@ -19,12 +19,12 @@
 
 #include "sentry_transforms.hpp"
 
+using namespace tap::algorithms::odometry;
 using namespace tap::algorithms::transforms;
 using namespace aruwsrc::control::turret;
-using namespace tap::algorithms::odometry;
-using namespace aruwsrc::control::sentry;
+using namespace aruwsrc::sentry::turret;
 
-namespace aruwsrc::sentry
+namespace aruwsrc::sentry::algorithms::odometry
 {
 SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
@@ -76,4 +76,4 @@ void SentryTransforms::updateTransforms()
     worldToVTM = worldToTurretMajor;
 }
 
-}  // namespace aruwsrc::sentry
+}  // namespace aruwsrc::sentry::algorithms::odometry

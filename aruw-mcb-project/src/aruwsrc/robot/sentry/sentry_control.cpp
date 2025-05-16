@@ -86,17 +86,21 @@ using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::sentry;
-using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::sentry::chassis;
-using namespace aruwsrc::control::governor;
-using namespace aruwsrc::control::turret;
-using namespace aruwsrc::control::sentry;
-using namespace aruwsrc::control::turret::sentry;
-using namespace aruwsrc::control::turret::algorithms;
-using namespace aruwsrc::virtualMCB;
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::sentry;
+using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::algorithms;
+using namespace aruwsrc::sentry;
+using namespace aruwsrc::sentry::chassis;
+using namespace aruwsrc::sentry::algorithms;
+using namespace aruwsrc::sentry::algorithms::odometry;
+using namespace aruwsrc::sentry::turret;
+using namespace aruwsrc::sentry::turret::cv;
+using namespace aruwsrc::virtualMCB;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -530,7 +534,7 @@ TurretMinorSentryControlCommand turretRightManualCommand(
     MINOR_USER_PITCH_INPUT_SCALAR);
 
 // Chassis beyblade
-aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
+SentryBeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turretMajor.getReadOnlyMotor(),
@@ -538,12 +542,12 @@ aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
     transformer.getWorldToChassis(),
     aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
 
-aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
+SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &(drivers()->controlOperatorInterface),
     &chassis);
 
-imu::SentryImuCalibrateCommand imuCalibrateCommand(
+SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
         {

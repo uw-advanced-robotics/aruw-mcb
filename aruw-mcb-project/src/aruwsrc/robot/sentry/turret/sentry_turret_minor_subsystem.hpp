@@ -23,7 +23,7 @@
 
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
-namespace aruwsrc::control::sentry
+namespace aruwsrc::sentry::turret
 {
 class SentryTurretMinorSubsystem final : public aruwsrc::control::turret::TurretSubsystem
 {
@@ -46,6 +46,6 @@ private:
     uint8_t turretID;
 };
 
-}  // namespace aruwsrc::control::sentry
+}  // namespace aruwsrc::sentry::turret
 
 #endif  // SENTRY_TURRET_MINOR_SUBSYSTEM_HPP_

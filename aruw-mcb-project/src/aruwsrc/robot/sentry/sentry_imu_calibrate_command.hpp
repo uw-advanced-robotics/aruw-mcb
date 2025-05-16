@@ -34,7 +34,7 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
-namespace aruwsrc::control::imu
+namespace aruwsrc::sentry
 {
 /**
  * A command whose job is to perform a calibration of the turret and chassis IMUs. Requires that the
@@ -50,7 +50,7 @@ namespace aruwsrc::control::imu
  * 6. Send signal to onboard IMU to recalibrate.
  * 7. Wait until calibration is complete and then end the command.
  */
-class SentryImuCalibrateCommand : public imu::ImuCalibrateCommand
+class SentryImuCalibrateCommand : public aruwsrc::control::imu::ImuCalibrateCommand
 {
 public:
     /**
@@ -78,9 +78,9 @@ public:
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
-        chassis::HolonomicChassisSubsystem &chassis,
-        aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
-        aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
+        aruwsrc::chassis::HolonomicChassisSubsystem &chassis,
+        algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
+        algorithms::odometry::SentryKFOdometry2DSubsystem &odometryInterface,
         aruwsrc::virtualMCB::MCBLite &majorMCBLite,
         aruwsrc::virtualMCB::MCBLite &chassisMCBLite);
 
@@ -96,14 +96,14 @@ protected:
     aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController;
 
-    aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver;
+    algorithms::odometry::SentryChassisWorldYawObserver &yawObserver;
 
-    aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface;
+    algorithms::odometry::SentryKFOdometry2DSubsystem &odometryInterface;
     aruwsrc::virtualMCB::MCBLite &majorMCBLite;
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite;
 
     // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
 };
-}  // namespace aruwsrc::control::imu
+}  // namespace aruwsrc::sentry
 
 #endif  // SENTRY_IMU_CALIBRATE_COMMAND_HPP_

@@ -23,18 +23,14 @@
 
 #include "sentry_chassis_rel_drive.hpp"
 
-using namespace aruwsrc::control::sentry;
-
-namespace aruwsrc
-{
-namespace control::sentry
+namespace aruwsrc::sentry::chassis
 {
 // class HolonomicChassisSubsystem;
 
 SentryManualDriveCommand::SentryManualDriveCommand(
     tap::Drivers* drivers,
     SentryControlOperatorInterface* operatorInterface,
-    chassis::HolonomicChassisSubsystem* chassis)
+    aruwsrc::chassis::HolonomicChassisSubsystem* chassis)
     : drivers(drivers),
       operatorInterface(operatorInterface),
       chassis(chassis)
@@ -46,13 +42,11 @@ void SentryManualDriveCommand::initialize() {}
 
 void SentryManualDriveCommand::execute()
 {
-    aruwsrc::sentry::SentryChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
+    SentryChassisRelDrive::onExecute(operatorInterface, drivers, chassis);
 }
 
 void SentryManualDriveCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool SentryManualDriveCommand::isFinished() const { return false; }
 
-}  // namespace control::sentry
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::sentry::chassis

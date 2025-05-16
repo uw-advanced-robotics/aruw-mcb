@@ -28,15 +28,8 @@
 #include "sentry_auto_aim_launch_timer.hpp"
 #include "sentry_turret_cv_command.hpp"
 
-using namespace aruwsrc::control::turret;
-
-namespace aruwsrc::control::governor
+namespace aruwsrc::sentry::turret::cv
 {
-namespace
-{
-using namespace aruwsrc::control::auto_aim;
-}
-
 enum class SentryCvOnTargetGovernorMode
 {
     ON_TARGET,
@@ -153,6 +146,6 @@ private:
 
     bool lastGateVal = false;
 };
-}  // namespace aruwsrc::control::governor
+}  // namespace aruwsrc::sentry::turret::cv
 
 #endif  // SENTRY_MINOR_CV_ON_TARGET_GOVERNOR_HPP_

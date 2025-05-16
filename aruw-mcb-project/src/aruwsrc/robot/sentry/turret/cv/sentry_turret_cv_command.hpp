@@ -55,7 +55,7 @@ namespace aruwsrc::control::launcher
 class LaunchSpeedPredictorInterface;
 }
 
-namespace aruwsrc::control::sentry
+namespace aruwsrc::sentry::turret::cv
 {
 /**
  * A command that receives input from the vision system via the `VisionCoprocessor` driver and
@@ -72,7 +72,7 @@ public:
         SentryTurretMinorSubsystem &turretSubsystem;
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController;
-        aruwsrc::sentry::SentryBallisticsSolver &ballisticsSolver;
+        aruwsrc::sentry::algorithms::SentryBallisticsSolver &ballisticsSolver;
     };
 
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
@@ -111,7 +111,7 @@ public:
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
         TurretConfig &turretLeftConfig,
         TurretConfig &turretRightConfig,
-        aruwsrc::sentry::SentryTransforms &sentryTransforms);
+        aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms);
 
     void initialize();
 
@@ -147,7 +147,7 @@ private:
      */
     void computeAimSetpoints(
         TurretConfig &config,
-        aruwsrc::sentry::SentryBallisticsSolver::BallisticsSolution &solution,
+        aruwsrc::sentry::algorithms::SentryBallisticsSolver::BallisticsSolution &solution,
         WrappedFloat *desiredYawSetpoint,
         WrappedFloat *desiredPitchSetpoint,
         bool *withinAimingTolerance);
@@ -159,7 +159,7 @@ private:
 
     TurretConfig &turretLeftConfig;
     TurretConfig &turretRightConfig;
-    aruwsrc::sentry::SentryTransforms &sentryTransforms;
+    aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms;
 
     uint32_t prevTime;
 
@@ -210,6 +210,6 @@ private:
     }
 };
 
-}  // namespace aruwsrc::control::sentry
+}  // namespace aruwsrc::sentry::turret::cv
 
 #endif  // SENTRY_TURRET_CV_COMMAND_HPP_
