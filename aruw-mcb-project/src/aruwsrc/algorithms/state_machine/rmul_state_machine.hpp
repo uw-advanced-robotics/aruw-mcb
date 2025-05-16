@@ -67,35 +67,41 @@ using namespace aruwsrc::algorithms;
 using namespace tap::algorithms::transforms;
 class RMULStateMachine
 {
-    RMULStateMachine(RefSerial& refSerial, ChassisAutoNavController& autoNavController)
-        : refSerial(refSerial),
-          autoNavController(autoNavController)
-    {
-    }
+public:
+    RMULStateMachine(RefSerial& refSerial) : refSerial(refSerial) {}
 
     void updateState();
 
+    void refresh() { updateState(); }
+
+    void attachAutoNavController(ChassisAutoNavController* autoNavController)
+    {
+        this->autoNavController = autoNavController;
+    }
+
 private:
     RefSerial& refSerial;
-    ChassisAutoNavController& autoNavController;
+    ChassisAutoNavController* autoNavController;
 
     AutoNavPath path;
     bool isHealing = false;
 
     // Threshold at which the robot goes to heal due to low health
-    static constexpr int HEALING_THRESHOLD = 200;
+    int HEALING_THRESHOLD = 200;
 
     // Threshold at which the robot goes back to fight having healed
-    static constexpr int ATTACKING_THRESHOLD = 550;
+    int ATTACKING_THRESHOLD = 550;
 
     // Speed at which the robot moves when healing, in m/s
-    static constexpr float SPEED = 1.0f;
+    float SPEED = 1.0f;
 
-    const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
-    const Position BOTTOM_MIDDLE = Position(1.2, 2.1, 0);
-    const Position MIDDLE_RIGHT = Position(3.2, 2.0, 0);
-    const Position MIDDLE = Position(4.5, 4.0, 0);
-    const Position SIDE_WALL = Position(5, 7.5, 0);
+    float DEBUG_SCALAR = 0.5f;
+
+    const Position RESUPPLY_ZONE = Position(0.75, 7, 0) * DEBUG_SCALAR;
+    const Position BOTTOM_MIDDLE = Position(1.2, 2.1, 0) * DEBUG_SCALAR;
+    const Position MIDDLE_RIGHT = Position(3.2, 2.0, 0) * DEBUG_SCALAR;
+    const Position MIDDLE = Position(4.5, 4.0, 0) * DEBUG_SCALAR;
+    const Position SIDE_WALL = Position(5, 7.5, 0) * DEBUG_SCALAR;
 };
 }  // namespace aruwsrc::algorithms::state_machine
 
