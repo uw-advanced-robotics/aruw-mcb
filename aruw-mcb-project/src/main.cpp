@@ -146,6 +146,10 @@ int main()
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS)
             checkTurretMcbDisconnection(drivers);
 #endif
+
+#if defined(TARGET_STANDARD_NULL)
+            PROFILE(drivers->profiler, drivers->stateMachine.updateState, ());
+#endif
         }
         modm::delay_us(10);
     }

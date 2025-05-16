@@ -21,6 +21,8 @@
 
 namespace aruwsrc::algorithms::state_machine
 {
+
+uint16_t health;
 void RMULStateMachine::updateState()
 {
     if (autoNavController == nullptr)
@@ -28,13 +30,14 @@ void RMULStateMachine::updateState()
         return;
     }
 
-    uint16_t health = refSerial.getRobotData().currentHp;
+    health = refSerial.getRobotData().currentHp;
 
     // If our health is below a threshold and we were not previously healing, we are now healing
     if (!isHealing && health < HEALING_THRESHOLD)
     {
         path.resetPath();
 
+        path.pushPoint(SIDE_WALL);
         path.pushPoint(MIDDLE);
         path.pushPoint(MIDDLE_RIGHT);
         path.pushPoint(BOTTOM_MIDDLE);
@@ -52,6 +55,7 @@ void RMULStateMachine::updateState()
     {
         path.resetPath();
 
+        path.pushPoint(RESUPPLY_ZONE);
         path.pushPoint(BOTTOM_MIDDLE);
         path.pushPoint(MIDDLE_RIGHT);
         path.pushPoint(MIDDLE);

@@ -82,18 +82,18 @@ private:
     ChassisAutoNavController* autoNavController;
 
     AutoNavPath path;
-    bool isHealing = false;
+    bool isHealing = true;
 
     // Threshold at which the robot goes to heal due to low health
-    int HEALING_THRESHOLD = 200;
+    int HEALING_THRESHOLD = 25;
 
     // Threshold at which the robot goes back to fight having healed
-    int ATTACKING_THRESHOLD = 550;
+    int ATTACKING_THRESHOLD = 75;
 
     // Speed at which the robot moves when healing, in m/s
     float SPEED = 1.0f;
 
-    float DEBUG_SCALAR = 0.5f;
+    float DEBUG_SCALAR = 0.4f;
 
     const Position RESUPPLY_ZONE = Position(0.75, 7, 0) * DEBUG_SCALAR;
     const Position BOTTOM_MIDDLE = Position(1.2, 2.1, 0) * DEBUG_SCALAR;
