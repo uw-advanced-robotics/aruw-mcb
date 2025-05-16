@@ -72,8 +72,6 @@ public:
 
     void updateState();
 
-    void refresh() { updateState(); }
-
     void attachAutoNavController(ChassisAutoNavController* autoNavController)
     {
         this->autoNavController = autoNavController;
