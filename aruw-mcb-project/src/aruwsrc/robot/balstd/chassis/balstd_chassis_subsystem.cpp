@@ -59,6 +59,9 @@ void BalstdChassisSubsystem::refresh()
         (controller == nullptr) ? ZERO_OUTPUT : controller->runController(currState);
 
     setOutputs(currOutput);
+
+    leftLeg.refresh();
+    rightLeg.refresh();
 }
 
 void BalstdChassisSubsystem::setOutputs(const BalstdChassisOutput& output)
@@ -86,6 +89,9 @@ void BalstdChassisSubsystem::updateState()
     currState.yaw = chassisImu.getYaw();
 
     currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.theta);
+
+    currState.virtualWheelPos +=
+        (currState.leftLegState.wheelVel + currState.rightLegState.wheelVel) / 2 * 0.02f;
 }
 
 }  // namespace aruwsrc::control::balstd

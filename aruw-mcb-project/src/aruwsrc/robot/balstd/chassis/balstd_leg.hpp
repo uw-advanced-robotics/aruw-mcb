@@ -2,15 +2,15 @@
 #define BALSTD_LEG_HPP_
 
 #include "tap/algorithms/transforms/vector.hpp"
-#include "tap/motor/motor_interface.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 namespace aruwsrc::control::balstd
 {
-using tap::algorithms::transforms::Vector;
 using tap::algorithms::CMSISMat;
+using tap::algorithms::transforms::Vector;
 struct BalstdLegConfig
 {
     float upperLinkLength;  // meters
@@ -24,8 +24,10 @@ struct BalstdLegConfig
 };
 struct BalstdLegState
 {
-    float qFront, qBack;  // angles of upper linkages in radians
+    float qFront, qBack;          // angles of upper linkages in radians
     float qFrontVelo, qBackVelo;  // velocities of upper linkages in radians/s
+    float wheelVel;               // wheel angular velocity in rad/s
+
     float xc, yc;                    // coordinates of wheel axle wrt hip center
     float kneesWidthX, kneesWidthY;  // components of distance between knees
 
@@ -36,6 +38,7 @@ struct BalstdLegState
           qBack(0),
           qFrontVelo(0),
           qBackVelo(0),
+          wheelVel(0),
           xc(0),
           yc(0),
           kneesWidthX(0),
@@ -49,41 +52,39 @@ struct BalstdLegState
     {
         
         // knee coordinates
-        CMSISMat<2, 1> P2 = CMSISMat<2, 1>({config.upperLinkLength * cos(qFront),
-                                             config.upperLinkLength * sin(qFront)});
+        CMSISMat<2, 1> P2 = CMSISMat<2, 1>(
+            {config.upperLinkLength * cos(qFront) + config.fixedLinkLength / 2,
+             config.upperLinkLength * sin(qFront)});
 
-        CMSISMat<2, 1> P4 = CMSISMat<2, 1>({config.upperLinkLength * cos(qBack) - config.fixedLinkLength,
-                                             config.upperLinkLength * sin(qBack)});
-
-        kneesWidthX = (P4 - P2).data[0];
-        kneesWidthY = (P4 - P2).data[1];
+        CMSISMat<2, 1> P4 = CMSISMat<2, 1>(
+            {config.upperLinkLength * cos(qBack) - config.fixedLinkLength / 2,
+             config.upperLinkLength * sin(qBack)});
 
         // wheel coordinates
         // ||P2-Ph|| = (a2^2 - a3^2 + ||P4-P2||^2) / (2*||P4-P2||)
         // a2 and a3 are the upper leg links and are the same
         // P4-P2
-        CMSISMat<2,1> P4_P2 = P4 - P2;
+        CMSISMat<2, 1> P4_P2 = P4 - P2;
 
-        // P4_P2_2 = (P4_P2[0])² + (P4_P2[1])²
-        float P4_P2_2;
-        arm_power_f32(P4_P2.data.data(), 2, &P4_P2_2);
+        kneesWidthX = P4_P2.data[0];
+        kneesWidthY = P4_P2.data[1];
 
         // ||P4-P2||
-        // float P4_P2_mag;
-        // arm_sqrt_f32(P4_P2_2, &P4_P2_mag);
+        float P4_P2_mag = sqrtf(P4_P2.data[0] * P4_P2.data[0] + P4_P2.data[1] * P4_P2.data[1]);
 
-        // // ||P2-Ph||
-        // float P2_Ph_mag = (P4_P2_mag*P4_P2_mag) / (2*P4_P2_mag);
+        // ||P2-Ph||
+        float P2_Ph_mag = P4_P2_mag / 2;
 
-        // //Ph = P2 + ||P2-Ph|| / ||P2-P4|| * (P4-P2)
-        // CMSISMat<2, 1> Ph = P2 + CMSISMat<2, 1>({P2_Ph_mag / P4_P2_mag, P2_Ph_mag / P4_P2_mag}) * (P4-P2);
+        // Ph = P2 + ||P2-Ph|| / ||P2-P4|| * (P4-P2)
+        CMSISMat<2, 1> Ph = P2 + P4_P2 / 2;
 
-        // // ||P3-Ph|| = sqrt(a2^2 - ||P2-Ph||^2)
-        // float P3_Ph_mag;
-        // arm_sqrt_f32(config.lowerLinkLength * config.lowerLinkLength - P2_Ph_mag*P2_Ph_mag, &P3_Ph_mag);
-        
-        // // P3 = Ph ± ||P3-Ph|| / ||P2-P4|| * (P4-P2)
-        // CMSISMat<2,1> P3 = Ph + CMSISMat<2,1>({P3_Ph_mag / P4_P2_mag, -P3_Ph_mag / P4_P2_mag}) * (P4-P2);
+        // ||P3-Ph|| = sqrt(a2^2 - ||P2-Ph||^2)
+        float P3_Ph_mag =
+            sqrtf(config.lowerLinkLength * config.lowerLinkLength - P2_Ph_mag * P2_Ph_mag);
+
+        // P3 = Ph ± ||P3-Ph|| / ||P2-P4|| * (P4-P2)
+        CMSISMat<2, 1> P3 =
+            Ph + P3_Ph_mag / P4_P2_mag * CMSISMat<2, 1>({P4_P2.data[1], -P4_P2.data[0]});
 
         // xc = P3.data[0];
         // yc = P3.data[1];
@@ -112,6 +113,8 @@ public:
     }
 
     void initialize();
+
+    void refresh();
 
     bool allMotorsOnline() const;
 
@@ -153,9 +156,11 @@ private:
     }
 
     void setHipTorques(float front, float back);
-    void setBackHipMotorTorque(float torque);
 
     void calculateJacobianTranspose();
+
+    static constexpr float M3508_TORQUE_CONSTANT =
+        (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / Nm/A = desOut/Nm
 };
 
 }  // namespace aruwsrc::control::balstd

@@ -12,7 +12,7 @@ namespace aruwsrc::control::balstd
 struct BalstdChassisState
 {
     BalstdLegState leftLegState, rightLegState, virtualLegState;
-    float roll, pitch, pitchVel, yaw, height;
+    float roll, pitch, pitchVel, yaw, height, virtualWheelPos;
 };
 
 const BalstdChassisState ZERO_STATE{
@@ -24,6 +24,7 @@ const BalstdChassisState ZERO_STATE{
     .pitchVel = 0,
     .yaw = 0,
     .height = 0,
+    .virtualWheelPos = 0,
 };
 
 }  // namespace aruwsrc::control::balstd
