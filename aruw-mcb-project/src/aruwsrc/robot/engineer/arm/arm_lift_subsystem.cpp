@@ -46,6 +46,7 @@ ArmLiftSubsystem::ArmLiftSubsystem(
       kS(kS)
 {
     this->setpoint = 0;
+    this->home = 0;
 }
 
 float ArmLiftSubsystem::getPosition()
@@ -85,16 +86,32 @@ void ArmLiftSubsystem::initialize()
 
 void ArmLiftSubsystem::refresh()
 {
-    float errorPosition = setpoint - getPosition();
+    if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
+    {
+        if (trigger.isTriggered())
+        {
+            calibrationState = CalibrationState::CALIBRATION_COMPLETE;
+            motorLeft.getEncoder()->resetEncoderValue();
+            motorRight.getEncoder()->resetEncoderValue();
+            setSetpoint(home);
+        }
+        else
+        {
+            moveTowardLowerBound();
+        }
+    }
+    else
+    {
+        float errorPosition = setpoint - getPosition();
 
-    float errorAlignment = getPositionDifference();
+        float errorAlignment = getPositionDifference();
 
-    float outputPos = pidPos.runController(errorPosition, getAverageVelocity(), 2.0f) + kS;
-    float outputAlign = pidAlign.runController(errorAlignment, getVelocityDifference(), 2.0f);
-    
+        float outputPos = pidPos.runController(errorPosition, getAverageVelocity(), 2.0f) + kS;
+        float outputAlign = pidAlign.runController(errorAlignment, getVelocityDifference(), 2.0f);
 
-    motorLeft.setDesiredOutput(outputPos + outputAlign);
-    motorRight.setDesiredOutput(outputPos - outputAlign);
+        motorLeft.setDesiredOutput(outputPos + outputAlign);
+        motorRight.setDesiredOutput(outputPos - outputAlign);
+    }
 }
 
 void ArmLiftSubsystem::refreshSafeDisconnect()
@@ -105,8 +122,15 @@ void ArmLiftSubsystem::refreshSafeDisconnect()
 
 void ArmLiftSubsystem::moveTowardLowerBound()
 {
-    // todo
+    float errorAlignment = getPositionDifference();
+
+    float outputAlign = pidAlign.runController(errorAlignment, getVelocityDifference(), 2.0f);
+
+    motorLeft.setDesiredOutput(1000 + outputAlign);
+    motorRight.setDesiredOutput(1000 - outputAlign);  // todo
 }
+
+void ArmLiftSubsystem::stopDuringHoming() { refreshSafeDisconnect(); }
 
 }  // namespace engineer
 }  // namespace aruwsrc

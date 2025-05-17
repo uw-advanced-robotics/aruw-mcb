@@ -59,15 +59,15 @@ WristSubsystem::WristSubsystem(
 
 void WristSubsystem::setSetpointPitch(float setpoint)
 {
-    if(minPitch == maxPitch)
+    if (minPitch == maxPitch)
         setpointPitch = setpoint;
-    else 
+    else
         setpointPitch = std::clamp(setpoint, minPitch, maxPitch);
 }
 
 void WristSubsystem::setSetpointYaw(float setpoint)
 {
-    if(minYaw == maxYaw)
+    if (minYaw == maxYaw)
         setpointYaw = setpoint;
     else
         setpointYaw = std::clamp(setpoint, minYaw, maxYaw);
@@ -98,13 +98,20 @@ float OutRight;
 
 void WristSubsystem::refresh()
 {
+    if (!encoderPitch.isOnline() || !encoderYaw.isOnline())
+    {
+        motorLeft.setDesiredOutput(0);
+        motorRight.setDesiredOutput(0);
+        return;
+    }
+
     float outPitch =
         pidPitch.runController(setpointPitch - getPitch(), encoderPitch.getVelocity(), 2.0f);
     float outYaw =
         pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f);  // todo ks
 
-        OutPitch = outPitch;
-        OutYaw = outYaw;
+    OutPitch = outPitch;
+    OutYaw = outYaw;
     float outLeft = ratio * outYaw + outPitch;
     float outRight = ratio * outYaw - outPitch;  // todo derived from info in notion, double check
 

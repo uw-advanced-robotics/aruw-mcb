@@ -72,33 +72,46 @@ public:
     /**
      * Returns whether or not the home and bounds have been set.
      */
-    virtual bool homedAndBounded() const override { return true; }
+    virtual bool homedAndBounded() const override
+    {
+        return calibrationState == CalibrationState::CALIBRATION_COMPLETE;
+    }  // todo
 
     /**
      * Returns the upper bound in motor encoder ticks.
      */
-    virtual uint64_t getUpperBound() const override { return 0; };
+    virtual uint64_t getUpperBound() const override
+    {
+        return (maxSetpoint / radius) * 4096.0f / M_TWOPI;
+    };
 
     /**
      * Returns the lower bound in motor encoder ticks.
      */
-    virtual uint64_t getLowerBound() const override { return 0; };
+    virtual uint64_t getLowerBound() const override
+    {
+        return (minSetpoint / radius) * 4096.0f / M_TWOPI;
+    };
 
 protected:
     /**
      * Stops the motor from moving. Only to be used during calibration.
      */
-    virtual void stopDuringHoming() override {}
+    virtual void stopDuringHoming() override;
     /**
      * Sets the given motor encoder position to be the "home" of the subsystem's motor.
      */
-    virtual void setHome(uint64_t encoderPosition) override {}
+    virtual void setHome(uint64_t encoderPosition) override
+    {
+        home = (encoderPosition * M_TWOPI / 4096.0f) * radius;
+    }
 
 private:
     tap::algorithms::SmoothPid pidPos, pidAlign;
     tap::motor::MotorInterface &motorLeft, &motorRight;
     control::TriggerInterface &trigger;
     float radius;
+    float home;
     // Constant added to output to overcome static friction
     float kS;
 };

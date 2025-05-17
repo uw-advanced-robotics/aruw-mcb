@@ -42,7 +42,7 @@ bool EngineerControlOperatorInterface::isWristControlMode()
 float EngineerControlOperatorInterface::getArmLiftVelocity()
 {
     if (isGantryControlMode())
-        return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
     else
         return 0.0f;
 }
@@ -58,7 +58,7 @@ float EngineerControlOperatorInterface::getArmExtensionVelocity()
 float EngineerControlOperatorInterface::getArmWristPitchVelocity()
 {
     if (isWristControlMode())
-        return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
     else
         return 0.0f;
 }
@@ -74,7 +74,7 @@ float EngineerControlOperatorInterface::getArmWristYawVelocity()
 float EngineerControlOperatorInterface::getArmWristRollVelocity()
 {
     if (isWristControlMode())
-        return drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL);
+        return drivers->remote.getChannel(Remote::Channel::WHEEL);
     else
         return 0.0f;
 }

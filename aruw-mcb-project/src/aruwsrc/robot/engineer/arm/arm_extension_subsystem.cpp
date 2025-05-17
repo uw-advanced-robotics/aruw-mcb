@@ -27,63 +27,69 @@ namespace engineer
 {
 ArmExtensionSubsystem::ArmExtensionSubsystem(
     tap::Drivers* drivers,
-    tap::motor::MotorInterface& motors,
+    tap::motor::MotorInterface& motor,
     const tap::algorithms::SmoothPidConfig& config,
     control::TriggerInterface& trigger,
     float radius,
-    uint64_t length,
     float minSetpoint,
     float maxSetpoint,
     float kS,
     float epsilon)
-    : LinearJointInterface(minSetpoint, maxSetpoint, epsilon),
-      OneSidedBoundedSubsystemInterface(drivers, trigger, length),
+    : OneSidedBoundedSubsystemInterface(drivers, trigger, 0),
+      LinearJointInterface(minSetpoint, maxSetpoint, epsilon),
       pid(config),
-      motors(motors),
+      motor(motor),
       radius(radius),
       kS(kS)
 {
     this->setpoint = 0;
-    this->homing = false;
+    this->home = 0;
 }
 
-void ArmExtensionSubsystem::initialize() { motors.initialize(); }
+void ArmExtensionSubsystem::initialize() { motor.initialize(); }
 
 float ArmExtensionSubsystem::getPosition()
 {
-    return motors.getEncoder()->getPosition().getUnwrappedValue() * radius;
+    return motor.getEncoder()->getPosition().getUnwrappedValue() * radius;
 }
 
-float ArmExtensionSubsystem::getVelocity() { return motors.getEncoder()->getVelocity() * radius; }
+float ArmExtensionSubsystem::getVelocity() { return motor.getEncoder()->getVelocity() * radius; }
 
 void ArmExtensionSubsystem::refresh()
 {
-    if (homing)
+    if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
     {
         if (trigger.isTriggered())
         {
-            motors.getEncoder()->resetEncoderValue();  // todo
-            motors.setDesiredOutput(0);
-            homing = false;
-            return;
+            calibrationState = CalibrationState::CALIBRATION_COMPLETE;
+            motor.getEncoder()->resetEncoderValue();
+            setSetpoint(home);
         }
-        float errorPosition = -getPosition();
-
-        float output = pid.runController(errorPosition, getVelocity(), 2.0f) + kS;
-        motors.setDesiredOutput(output);  // todo
+        else
+        {
+            moveTowardLowerBound();
+        }
     }
     else
     {
         float errorPosition = setpoint - getPosition();
 
         float output = pid.runController(errorPosition, getVelocity(), 2.0f) + kS;
-        motors.setDesiredOutput(output);
+        motor.setDesiredOutput(output);
     }
 }
 
-void ArmExtensionSubsystem::refreshSafeDisconnect() { motors.setDesiredOutput(0); }
+void ArmExtensionSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 
-void ArmExtensionSubsystem::moveTowardLowerBound() {}
+void ArmExtensionSubsystem::moveTowardLowerBound()
+{
+    motor.setDesiredOutput(-1000.0f);  // todo
+}
+
+void ArmExtensionSubsystem::stopDuringHoming()
+{
+    motor.setDesiredOutput(0);  // todo
+}
 
 }  // namespace engineer
 }  // namespace aruwsrc
