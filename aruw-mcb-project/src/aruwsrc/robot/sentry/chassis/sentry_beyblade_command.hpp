@@ -17,34 +17,34 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BEYBLADE_COMMAND_HPP_
-#define BEYBLADE_COMMAND_HPP_
+#ifndef SENTRY_BEYBLADE_COMMAND_HPP_
+#define SENTRY_BEYBLADE_COMMAND_HPP_
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
+#include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
+#include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::sentry::chassis
 {
-class HolonomicChassisSubsystem;
-
 /**
  * A command that automatically rotates the chassis while maintaining turret angle
  */
-class BeybladeCommand : public tap::control::Command
+class SentryBeybladeCommand : public tap::control::Command
 {
 public:
-    BeybladeCommand(
+    SentryBeybladeCommand(
         tap::Drivers* drivers,
-        HolonomicChassisSubsystem* chassis,
+        aruwsrc::chassis::HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
-        aruwsrc::control::ControlOperatorInterface& operatorInterface,
-        const aruwsrc::chassis::BeybladeConfig config,
-        const float rotationMultiplier = 1.0f);
+        aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
+        const tap::algorithms::transforms::Transform& worldToChassis,
+        const aruwsrc::chassis::BeybladeConfig config);
 
     /**
      * Sets rotational input target on Ramp
@@ -65,18 +65,17 @@ public:
 
 private:
     float rotationDirection;
+
     tap::algorithms::Ramp rotateSpeedRamp;
 
     tap::Drivers* drivers;
-    HolonomicChassisSubsystem* chassis;
+    aruwsrc::chassis::HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
-    aruwsrc::control::ControlOperatorInterface& operatorInterface;
+    aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface;
+    const tap::algorithms::transforms::Transform& worldToChassis;
     const aruwsrc::chassis::BeybladeConfig config;
-
-    const float rotationMultiplier;
-
 };  // class BeybladeCommand
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::sentry::chassis
 
 #endif  // BEYBLADE_COMMAND_HPP_

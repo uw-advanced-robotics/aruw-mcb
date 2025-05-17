@@ -29,7 +29,7 @@
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
 
-namespace aruwsrc::control::imu
+namespace aruwsrc::sentry
 {
 // TODO: we want to be able to calibrate an arbitrary turret subsystem (one that
 // has pitch OR yaw OR both)
@@ -39,11 +39,11 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
     chassis::HolonomicChassisSubsystem &chassis,
-    aruwsrc::sentry::SentryChassisWorldYawObserver &yawObserver,
-    aruwsrc::sentry::SentryKFOdometry2DSubsystem &odometryInterface,
+    algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
+    algorithms::odometry::SentryKFOdometry2DSubsystem &odometryInterface,
     aruwsrc::virtualMCB::MCBLite &majorMCBLite,
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite)
-    : imu::ImuCalibrateCommand(
+    : aruwsrc::control::imu::ImuCalibrateCommand(
           drivers,
           turretsAndControllers,
           &chassis,
@@ -85,7 +85,8 @@ void SentryImuCalibrateCommand::initialize()
     prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
-static inline bool turretMajorReachedCenterAndNotMoving(turret::YawTurretSubsystem &turret)
+static inline bool turretMajorReachedCenterAndNotMoving(
+    aruwsrc::control::turret::YawTurretSubsystem &turret)
 {
     return compareFloatClose(
                0.0f,
@@ -214,4 +215,4 @@ void SentryImuCalibrateCommand::end(bool)
     // turretMajor->yawMotor.setMotorOutput(0);
 }
 
-}  // namespace aruwsrc::control::imu
+}  // namespace aruwsrc::sentry

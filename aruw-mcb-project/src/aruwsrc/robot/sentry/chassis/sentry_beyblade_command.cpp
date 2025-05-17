@@ -17,46 +17,41 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "beyblade_command.hpp"
+#include "sentry_beyblade_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
-
-#include "chassis_rel_drive.hpp"
-#include "holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/sentry/chassis/sentry_chassis_rel_drive.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::communication::sensors::imu::mpu6500;
 
-namespace aruwsrc
+namespace aruwsrc::sentry::chassis
 {
-namespace chassis
-{
-BeybladeCommand::BeybladeCommand(
+SentryBeybladeCommand::SentryBeybladeCommand(
     tap::Drivers* drivers,
-    HolonomicChassisSubsystem* chassis,
+    aruwsrc::chassis::HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::ControlOperatorInterface& operatorInterface,
-    const aruwsrc::chassis::BeybladeConfig config,
-    const float rotationMultiplier)
+    aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
+    const tap::algorithms::transforms::Transform& worldToChassis,
+    const aruwsrc::chassis::BeybladeConfig config)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
       operatorInterface(operatorInterface),
-      config(config),
-      rotationMultiplier(rotationMultiplier)
+      worldToChassis(worldToChassis),
+      config(config)
 {
     addSubsystemRequirement(chassis);
 }
 
 // Resets ramp
-void BeybladeCommand::initialize()
+void SentryBeybladeCommand::initialize()
 {
 #ifdef ENV_UNIT_TESTS
     rotationDirection = 1;
@@ -66,19 +61,19 @@ void BeybladeCommand::initialize()
     rotateSpeedRamp.reset(chassis->getDesiredRotation());
 }
 
-void BeybladeCommand::execute()
+void SentryBeybladeCommand::execute()
 {
     if (yawMotor->isOnline())
     {
         // Gets current turret yaw angle
-        WrappedFloat turretYawAngle = yawMotor->getChassisFrameMeasuredAngle();
+        float worldYawAngle = -worldToChassis.getYaw();
 
         float x = 0.0f;
         float y = 0.0f;
         // Note: pass in 0 as rotation since we don't want to take into consideration
         // scaling due to rotation as this will be fairly constant and thus it isn't
         // worth scaling here.
-        ChassisRelDrive::computeDesiredUserTranslation(
+        SentryChassisRelDrive::computeDesiredUserTranslation(
             &operatorInterface,
             drivers,
             chassis,
@@ -88,18 +83,18 @@ void BeybladeCommand::execute()
         x *= config.beybladeTranslationalSpeedMultiplier;
         y *= config.beybladeTranslationalSpeedMultiplier;
 
-        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        const float maxWheelSpeed = aruwsrc::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
-            HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+            aruwsrc::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
         // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
         const float translationalSpeedThreshold =
             config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
-            config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed * rotationMultiplier;
+            config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
 
-        float rampTarget = rotationDirection * config.beybladeRotationalSpeedFractionOfMax *
-                           maxWheelSpeed * rotationMultiplier;
+        float rampTarget =
+            rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
 
         // reduce the beyblade rotation when translating to allow for better translational speed
         // (otherwise it is likely that you will barely move unless
@@ -115,18 +110,16 @@ void BeybladeCommand::execute()
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, turretYawAngle.getWrappedValue());
+        tap::algorithms::rotateVector(&x, &y, worldYawAngle);
 
         // set outputs
         chassis->setDesiredOutput(x, y, r);
     }
     else
     {
-        ChassisRelDrive::onExecute(&operatorInterface, drivers, chassis);
+        SentryChassisRelDrive::onExecute(&operatorInterface, drivers, chassis);
     }
 }
 
-void BeybladeCommand::end(bool) { chassis->setZeroRPM(); }
-}  // namespace chassis
-
-}  // namespace aruwsrc
+void SentryBeybladeCommand::end(bool) { chassis->setZeroRPM(); }
+}  // namespace aruwsrc::sentry::chassis
