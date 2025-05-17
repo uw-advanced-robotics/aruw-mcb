@@ -26,8 +26,8 @@
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
 #else
-#include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
+#include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
