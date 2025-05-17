@@ -43,8 +43,8 @@ public:
 
     Drivers()
         : tap::Drivers(),
-          controlOperatorInterface(this),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr)
+          controlOperatorInterface(this), 
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr), engineerCVCommunication(this)
     {
     }
 
