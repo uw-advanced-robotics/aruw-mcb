@@ -47,7 +47,6 @@ static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.008f;
 static constexpr float TURRET_CG_X = 14.72264593f;
 static constexpr float TURRET_CG_Z = 34.51638903f - 40.0f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -5000.0f;
-// -13'000.0f;  // Right turret is -14'000 for some reason
 
 static constexpr float TURRET_MINOR_OFFSET = 0.132f;
 
