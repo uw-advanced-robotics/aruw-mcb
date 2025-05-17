@@ -142,14 +142,7 @@ private:
         0, 0, 0, 0, 1, 0,
         0, 0, 0, 0, 0, 1,
     };
-    static constexpr float KF_Q[STATES_SQUARED] = {
-        1, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1, 0  , 0  , 0  , 0  ,
-        0  , 0  , 1, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1, 0  ,
-        0  , 0  , 0  , 0  , 0  , 1,
-    };
+
     static constexpr float KF_R[INPUTS_SQUARED] = {
         7.49565672e-05, 0, 0, 0,
         0, 7.35872941e-04, 0, 0,
@@ -157,6 +150,15 @@ private:
         0, 0, 0, 5.69132363e-04
     };
 
+    static constexpr float KF_Q[STATES_SQUARED] = {
+        9.0120570108e-06f, 5.4281168875e-04f, 5.6797949319e-02f, 4.3864560552e-07f, -7.6362940038e-05f, -7.9139054404e-03f,
+        5.4281168875e-04f, 1.9396555203e-01f, 1.8282498819e+01f, -8.3483362129e-05f, -1.8580184164e-02f, -1.7427705884e+00f,
+        5.6797949319e-02f, 1.8282498819e+01f, 1.7345126240e+03f, -7.4990656881e-03f, -1.7895295666e+00f, -1.6939745776e+02f,
+        4.3864560552e-07f, -8.3483362129e-05f, -7.4990656881e-03f, 4.7600903828e-06f, 4.9474361167e-04f, 4.6590765854e-02f,
+        -7.6362940038e-05f, -1.8580184164e-02f, -1.7895295666e+00f, 4.9474361167e-04f, 1.5265492535e-01f, 1.4482580576e+01f,
+        -7.9139054404e-03f, -1.7427705884e+00f, -1.6939745776e+02f, 4.6590765854e-02f, 1.4482580576e+01f, 1.3770822857e+03f,
+    };
+    
     static constexpr float KF_P0[STATES_SQUARED] = {
         1E-2, 0  , 0  , 0  , 0  , 0  ,
         0  , 1E-6, 0  , 0  , 0  , 0  ,
@@ -194,9 +196,11 @@ private:
     static constexpr int FILTER_ORDER = 3;
     float parallelFilterState[FILTER_ORDER] = {0.0f};
     float perpendicularFilterState[FILTER_ORDER] = {0.0f};
+    float parallelNotchFilterState[3] = {0.0f};
+    float perpendicularNotchFilterState[3] = {0.0f};
 
-    static constexpr float IIR_A[FILTER_ORDER] = {1.0f, -1.9902f, 0.9903f}; 
-    static constexpr float IIR_B[FILTER_ORDER] = {0.000025f, 0.000050f, 0.000025f};
+    static constexpr float IIR_A[FILTER_ORDER] = {1.000000f, -1.583541f, 0.656414f};
+    static constexpr float IIR_B[FILTER_ORDER] = {0.018218f, 0.036436f, 0.018218f};
 
     float applyIirFilter(float input, float* state, const float* a, const float* b, int order);
 };

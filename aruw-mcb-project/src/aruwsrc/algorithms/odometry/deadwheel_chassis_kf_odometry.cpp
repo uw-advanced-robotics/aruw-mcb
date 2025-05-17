@@ -86,9 +86,9 @@ void DeadwheelChassisKFOdometry::update()
     perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
     parallelRaw = deadwheelOdometry.getParallelMotorVelocity();
 
-    filteredParallel = parallelRaw + (angularVelo * parallelCenterToWheelDistance);
+    parallelRaw += (angularVelo * parallelCenterToWheelDistance);
     
-    filteredParallel = applyIirFilter(filteredParallel, parallelFilterState, IIR_A, IIR_B, FILTER_ORDER);
+    filteredParallel = applyIirFilter(parallelRaw, parallelFilterState, IIR_A, IIR_B, FILTER_ORDER);
     filteredPerpendicular = applyIirFilter(perpendicularRaw, perpendicularFilterState, IIR_A, IIR_B, FILTER_ORDER);
     
     float Vx = (filteredParallel * std::sin(parallelWheelChassisForwardRelativeAngleRadians) +
