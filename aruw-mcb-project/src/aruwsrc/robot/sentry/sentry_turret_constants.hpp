@@ -199,11 +199,11 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
 namespace minorPidConfigs
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 160'000.0f,
-    .ki = 200.0f,
-    .kd = 6'000.0f,
-    .maxICumulative = 2'000.0f,
-    .maxOutput = 0.0f,  // 15'000.0f,
+    .kp = 100'000.0f,
+    .ki = 400.0f,
+    .kd = 8'000.0f,
+    .maxICumulative = 4'000.0f,
+    .maxOutput = 15'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
@@ -212,13 +212,13 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME =
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 210'000.0f,
-    .ki = 400.0f,
-    .kd = 6'000.0f,
+    .kp = 100'000.0f,
+    .ki = 200.0f,
+    .kd = 10'000.0f,
     .maxICumulative = 6'000.0f,
-    .maxOutput = 0.0f,  // 15'000.0f,
+    .maxOutput = 15'000.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 20.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
