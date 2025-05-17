@@ -34,10 +34,7 @@ DartLauncherSubsystem::DartLauncherSubsystem(
     : Subsystem(drivers),
       motor(pullMotor){};
 
-void DartLauncherSubsystem::initialize()
-{
-    motor.initialize();
-}
+void DartLauncherSubsystem::initialize() { motor.initialize(); }
 
 void DartLauncherSubsystem::moveMotor(int32_t power) { motor.setDesiredOutput(power); }
 

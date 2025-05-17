@@ -25,10 +25,8 @@
 
 namespace aruwsrc::robot::dart
 {
-static constexpr tap::motor::MotorId UPPER_PULL_MOTOR_ID =
-    tap::motor::MOTOR1; 
-static constexpr tap::motor::MotorId LOWER_PULL_MOTOR_ID =
-    tap::motor::MOTOR2;  
+static constexpr tap::motor::MotorId UPPER_PULL_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId LOWER_PULL_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId DEAD_MOTOR1 = tap::motor::MOTOR5;
 static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;

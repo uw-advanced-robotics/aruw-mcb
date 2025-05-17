@@ -54,7 +54,7 @@ tap::motor::DoubleDjiMotor pullMotor(
     UPPER_PULL_MOTOR_ID,
     LOWER_PULL_MOTOR_ID,
     LAUNCHER_CAN_BUS,
-    LAUNCHER_CAN_BUS, 
+    LAUNCHER_CAN_BUS,
     false,
     false,
     "Upper Motor",
@@ -77,10 +77,7 @@ HoldCommandMapping rightSwitchDown(
     {&dartRelease},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
-void initializeSubsystems()
-{
-    dartLauncher.initialize();
-}
+void initializeSubsystems() { dartLauncher.initialize(); }
 
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
 {
