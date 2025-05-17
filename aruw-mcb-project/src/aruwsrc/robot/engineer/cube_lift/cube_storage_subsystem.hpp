@@ -81,8 +81,6 @@ protected:
     void setLowerBound(uint64_t encoderPosition) { lowerBound = encoderPosition; }
 
 private:
-    bool isLimitSwitch = false;
-    // bool isPIDControl = true;
     PIDState pidState = PIDState::NONE;
     float setpoint = 0;
     float lastTime = 0;

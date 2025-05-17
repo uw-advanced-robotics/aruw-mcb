@@ -158,6 +158,7 @@ tap::control::HoldCommandMapping leftDownRightUp(
     drivers(),
     {&oneCubePosition},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+
 tap::control::HoldCommandMapping leftDownRightMid(
     drivers(),
     {&twoCubePosition},
@@ -167,11 +168,6 @@ tap::control::HoldCommandMapping leftDownRightDown(
     drivers(),
     {&threeCubePosition},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
-
-// tap::control::HoldCommandMapping leftSwitchDown(
-//     drivers(),
-//     {&twoCubePosition},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -183,14 +179,14 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
+    drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
-    // drivers->commandScheduler.registerSubsystem(&chassis);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
-    // chassis.setDefaultCommand(&chassisDriveCommand);
+    chassis.setDefaultCommand(&chassisDriveCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

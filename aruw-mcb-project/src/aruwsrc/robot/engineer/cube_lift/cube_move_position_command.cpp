@@ -29,14 +29,10 @@ CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift,
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeMovePositionCommand::initialize() { cubeLift.setPIDState(PIDState::POSITION_PID); }
+void CubeMovePositionCommand::initialize() { cubeLift.setPIDState(PIDState::POSITION_PID); cubeLift.setPositionSetpoint(setpoint);}
 
-float exCount = 0;
 void CubeMovePositionCommand::execute()
-{
-    cubeLift.setPositionSetpoint(setpoint);
-    exCount += 1;
-}
+{}
 
 void CubeMovePositionCommand::end(bool) { cubeLift.setDesiredOutput(0); }
 
