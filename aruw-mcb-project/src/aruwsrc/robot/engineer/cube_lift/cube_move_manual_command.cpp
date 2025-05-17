@@ -39,5 +39,5 @@ void CubeMoveManualCommand::execute()
 
 void CubeMoveManualCommand::end(bool) { cubeLift.setDesiredOutput(0); }
 
-bool CubeMoveManualCommand::isFinished() const { return cubeLift.isLimitSwitched(); }
+bool CubeMoveManualCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::robot::engineer

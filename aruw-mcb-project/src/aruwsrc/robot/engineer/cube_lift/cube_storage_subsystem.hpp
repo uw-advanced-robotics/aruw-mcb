@@ -28,6 +28,13 @@
 #include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 
+enum class PIDState
+{
+    POSITION_PID,
+    VELOCITY_PID,
+    NONE
+};
+
 namespace aruwsrc::robot::engineer
 {
 class CubeStorageSubsystem : public aruwsrc::control::OneSidedBoundedSubsystemInterface

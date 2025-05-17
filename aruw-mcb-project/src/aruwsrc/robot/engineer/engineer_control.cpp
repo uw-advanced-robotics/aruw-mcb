@@ -71,7 +71,7 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
     true);
 LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
 /* define subsystems --------------------------------------------------------*/
-CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, LENGTH);
+CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, 0);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,

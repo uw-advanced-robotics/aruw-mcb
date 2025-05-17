@@ -173,8 +173,8 @@ static void initializeIo(Drivers *drivers)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA) || \
-    defined(TARGET_ENGINEER)
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || \
+    defined(TARGET_SENTRY_HYDRA) || defined(TARGET_ENGINEER)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS)
@@ -203,8 +203,8 @@ static void updateIo(Drivers *drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA) || \
-    defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
+    defined(TARGET_SENTRY_HYDRA) || defined(TARGET_ENGINEER)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 

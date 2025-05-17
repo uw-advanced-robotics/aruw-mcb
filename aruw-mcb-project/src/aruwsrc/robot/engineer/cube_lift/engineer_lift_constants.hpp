@@ -35,8 +35,6 @@ static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
 
 static constexpr float LIFT_UPPER_BOUND = 1000;  // TODO: UPDATE
 
-static constexpr int64_t LENGTH = 100;  // TODO: UPDATE LATER
-
 static constexpr int16_t FEEDFORWARD = 1000;
 
 static constexpr float HOMING_SPEED = 25;
@@ -59,13 +57,6 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_HOMING_PID_CONFIG = {
     .maxICumulative = 1000.0f,
     .maxOutput = 0.0f,
     .errorDerivativeFloor = 0.0f};
-
-enum class PIDState
-{
-    POSITION_PID,
-    VELOCITY_PID,
-    NONE
-};
 
 static constexpr float MANUAL_MOVE_SPEED = -10;  // TODO: choose value alter
 

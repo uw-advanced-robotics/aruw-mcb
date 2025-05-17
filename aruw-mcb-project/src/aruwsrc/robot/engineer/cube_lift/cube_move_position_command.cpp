@@ -18,7 +18,9 @@
  */
 
 #include "cube_move_position_command.hpp"
-//#include "engineer_lift_constants.hpp"
+
+#include <cstdlib>
+
 #include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 namespace aruwsrc::robot::engineer
 {
@@ -29,12 +31,18 @@ CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift,
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeMovePositionCommand::initialize() { cubeLift.setPIDState(PIDState::POSITION_PID); cubeLift.setPositionSetpoint(setpoint);}
+void CubeMovePositionCommand::initialize()
+{
+    cubeLift.setPIDState(PIDState::POSITION_PID);
+    cubeLift.setPositionSetpoint(setpoint);
+}
 
-void CubeMovePositionCommand::execute()
-{}
+void CubeMovePositionCommand::execute() {}
 
 void CubeMovePositionCommand::end(bool) { cubeLift.setDesiredOutput(0); }
 
-bool CubeMovePositionCommand::isFinished() const { return false; }
+bool CubeMovePositionCommand::isFinished() const
+{
+    return abs(setpoint - cubeLift.getMotorPosition()) < 0.5;
+}
 }  // namespace aruwsrc::robot::engineer
