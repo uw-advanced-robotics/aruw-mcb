@@ -24,6 +24,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/sequential_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
@@ -39,6 +40,9 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
@@ -90,6 +94,7 @@ using namespace aruwsrc::agitator;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::auto_aim;
+using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::sentry;
@@ -206,6 +211,8 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm2()
 }
 
 // /* define subsystems --------------------------------------------------------*/
+BuzzerSubsystem buzzer(drivers());
+
 YawTurretSubsystem turretMajor(*drivers(), turretMajorYawMotor, turretMajor::YAW_MOTOR_CONFIG);
 
 SentryTurretMinorSubsystem turretLeft(
@@ -550,6 +557,14 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     drivers()->turretMajorMcbLite,
     drivers()->chassisMcbLite);
 
+NoteSequenceCommand imuCalibrateDoneBuzzCommand(
+    buzzer,
+    MARIO_MUSHROOM_NOTES,
+    MARIO_MUSHROOM_NOTE_LENGTH_MS);
+
+SequentialCommand<2> imuCalibrateAndBuzzCommand(
+    std::array<Command *, 2>{{&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
+
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
     turretLeftWorldControllers.yawController,
@@ -769,7 +784,7 @@ HoldCommandMapping leftUpRightMid(
 // imu calibrate
 HoldCommandMapping leftUpRightDown(
     drivers(),
-    {&imuCalibrateCommand},
+    {&imuCalibrateAndBuzzCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
 // manual aim and shoot
@@ -839,6 +854,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
+    buzzer.initialize();
     chassis.initialize();
     turretLeft.initialize();
     turretRight.initialize();
@@ -862,6 +878,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerSentrySubsystems(Drivers *drivers)
 {
+    drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretLeft);
@@ -896,7 +913,7 @@ void setDefaultSentryCommands(Drivers *)
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentryCommands(Drivers *drivers)
 {
-    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    drivers->commandScheduler.addCommand(&imuCalibrateAndBuzzCommand);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
 }
 
@@ -938,9 +955,8 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::registerSentryIoMappings(drivers);
 }
 }  // namespace aruwsrc::sentry
-
 // #ifndef PLATFORM_HOSTED
-// imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &sentry_control::imuCalibrateCommand;
-// } #endif
+// imu::ImuCalibrateCommand *getImuCalibrateCommand() { return
+// &sentry_control::imuCalibrateCommand; } #endif
 
 #endif
