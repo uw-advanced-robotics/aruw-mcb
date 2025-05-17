@@ -27,6 +27,7 @@
 #include "aruwsrc/mock/oled_display_mock.hpp"
 #else
 #include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
@@ -39,6 +40,7 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
+
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
@@ -53,6 +55,8 @@ public:
 public:
     control::ControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
+    serial::EngineerCVCommunication engineerCVCommunication;
+
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer
