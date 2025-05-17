@@ -224,11 +224,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 16'500.0f,
+    .kp = 5'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,  // tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -238,7 +238,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_VEL
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
     .kp = 29.0f,
-    .ki = 0.2f,
+    .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 1.6f,
     .maxOutput = 12.0f,
@@ -250,11 +250,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 12'000.0f,
+    .kp = 6'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 0.0f,  // tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
