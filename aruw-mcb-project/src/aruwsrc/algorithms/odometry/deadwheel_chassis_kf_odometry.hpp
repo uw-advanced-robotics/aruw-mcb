@@ -54,8 +54,8 @@ public:
      * @param initPos Initial position of chassis when robot boots
      * @param parallelCenterToWheelDistance Distance from the center of the chassis to the center of
      * the parallel deadwheel
-     * @param parallelWheelChassisForwardRelativeAngleRadians Angle between the parallel deadwheel and
-     * "forward" on the chassis
+     * @param parallelWheelChassisForwardRelativeAngleRadians Angle between the parallel deadwheel
+     * and "forward" on the chassis
      * @param perpendicularWheelChassisForwardRelativeAngleRadians Angle between the perpendicular
      * deadwheel and "forward" on the chassis
      * @brief The parallel deadwheel is the deadwheel that is tangent to the edge of the chassis.
@@ -182,7 +182,7 @@ private:
     float chassisYaw = 0;
 
     /// Previous time `update` was called, in microseconds
-    uint32_t prevTime = 0;    
+    uint32_t prevTime = 0;
 
     const float parallelCenterToWheelDistance;
     const float parallelWheelChassisForwardRelativeAngleRadians;
