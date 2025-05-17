@@ -137,7 +137,7 @@ aruwsrc::virtualMCB::VirtualDjiMotor turretMajorYawMotor(
     false,
     "Major Yaw Turret",
     false,
-    (1.0 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508) * 0.75f,  // pulley ratio
+    (1.0 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508) * 0.6f,  // pulley ratio
     0,
     &turretMajorYawEncoder);
 
