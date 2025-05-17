@@ -27,7 +27,7 @@ bool BalstdLeg::allMotorsOnline() const
 
 void BalstdLeg::setThrust(const Vector thrust)
 {
-    CMSISMat<2, 1> torques = jacobianTranspose * CMSISMat<2, 1>({thrust.x(), thrust.y()});
+    CMSISMat<2, 1> torques = currState.jacobianTranspose * CMSISMat<2, 1>({thrust.x(), thrust.y()});
 
     setHipTorques(torques.data[0], torques.data[1]);
 }
@@ -54,39 +54,55 @@ void BalstdLeg::updateState()
 {
     currState.qFront = getFrontHipAngle();
     currState.qBack = getBackHipAngle();
-    currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
-    currState.calculateForwardKinematics(config);
 
     currState.qFrontVelo = frontHipMotor.getEncoder()->getVelocity();
     currState.qBackVelo = backHipMotor.getEncoder()->getVelocity();
 
+    currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
+    currState.calculateForwardKinematics(config);
+
+
     calculateJacobianTranspose();
 }
 
-void BalstdLeg::calculateJacobianTranspose()
+
+float BalstdLeg::updateCBF()
 {
-    float p1x2 = -config.upperLinkLength * sin(currState.qFront);
-    float p1y2 = config.upperLinkLength * cos(currState.qFront);
-    float p5x4 = -config.upperLinkLength * sin(currState.qBack);
-    float p5y4 = config.upperLinkLength * cos(currState.qBack);
 
-    float d = sqrt(
-        currState.kneesWidthX * currState.kneesWidthX +
-        currState.kneesWidthY * currState.kneesWidthY);
-    float h = sqrt(config.lowerLinkLength * config.lowerLinkLength - d * d / 4);
+    // calculate the available torque from the motors
+    // assume that gravity is the only force acting on the end effector
+    CMSISMat<2, 1> endEffectorTorque = currState.jacobianTranspose * CMSISMat<2, 1>({0, 9.8 * BALSTDWEIGHT / 4});
 
-    float p1d = -(currState.kneesWidthX * p1x2 + currState.kneesWidthY * p1y2) / d;
-    float p5d = (currState.kneesWidthX * p5x4 + currState.kneesWidthY * p5y4) / d;
-    float p1h = -d * p1d / h / 4;
-    float p5h = -d * p5d / h / 4;
+    float torque_available = maxTorque - endEffectorTorque.data[0];
+    float distance_to_stop = currState.qFront - config.frontHipOuterLimit;
 
-    float p1x3 = p1x2 / 2 - h / d * p1y2 + (p1h * d - p1d * h) / (d * d) * currState.kneesWidthY;
-    float p1y3 = p1y2 / 2 + h / d * p1x2 - (p1h * d - p1d * h) / (d * d) * currState.kneesWidthX;
-    float p5x3 = p5x4 / 2 + h / d * p5y4 + (p5h * d - p5d * h) / (d * d) * currState.kneesWidthY;
-    float p5y3 = p5y4 / 2 - h / d * p5x4 - (p5h * d - p5d * h) / (d * d) * currState.kneesWidthX;
+    /* this makes the incorrect assumption that the available torque will be constant
+       through the travel. Doing an integration of the required torque would be better, something
+       to do later. 
+    */
+    float availableEnergy = (torque_available * distance_to_stop);
 
-    jacobianTranspose = CMSISMat<2, 2>({p1x3, p1y3, p5x3, p5y3});
+    /*
+       In this system, the energy is from each link and the wheel translation, coming to
+       Ta + Tb + Tc + Td + Tw, however we only are going to consider the energy from the corresponding
+       half of the link coming to Ta + Tb + 1/2 * Tw.
+    */ 
+
+    // 1/2 I * w^2 (PROBABLY REMOVE LATER BUT NOTE TO SELF, BECAUSE THE CHASSIS MOVES WITH THE LEG THERE ISN'T TRANSLATIONAL ENERGY TO KILL HERE)
+    float Ta = .5 * upper_link_inertia * (currState.qFrontVelo)*(currState.qFrontVelo);
+    float Tb = .5 * lower_link_inertia * (currState.qLowerFrontVelo)*(currState.qLowerFrontVelo) + .5 * lower_link_mass * 
+    (config.upperLinkLength * config.upperLinkLength * currState.qFrontVelo*currState.qFrontVelo + config.lowerLinkLength*config.lowerLinkLength *currState.qLowerFrontVelo * currState.qLowerFrontVelo * .25
+     + config.upperLinkLength*config.lowerLinkLength * .5 * currState.qFrontVelo * currState.qLowerFrontVelo * cos(currState.qFront - currState.qLowerFront));
+
+    float Tw = .5 * wheel_mass * currState.vxc * currState.vxc + .5 * wheel_mass * currState.vyc * currState.vyc;
+
+    float energy = Ta + Tb + Tw/2;
+
+    if (energy - CBF_ENERGY_LIMIT > availableEnergy){
+        return 1000000000000.0f;
+    }
+
+    
 }
-
 
 }  // namespace aruwsrc::control::balstd
