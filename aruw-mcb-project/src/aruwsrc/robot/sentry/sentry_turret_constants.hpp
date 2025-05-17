@@ -66,7 +66,7 @@ namespace turretMajor
 {
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 0,
+    .startEncoderValue = 1287,
     .minAngle = 0,
     .maxAngle = M_TWOPI,
     .limitMotorAngles = false,
@@ -75,11 +75,11 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 160'000.0f,
-    .ki = 500.0f,
-    .kd = 12'000.0f,
+    .kp = 100'000.0f,
+    .ki = 0.0f,  // 500.0f,
+    .kd = 0.0f,  // 12'000.0f,
     .maxICumulative = 8'000.0f,
-    .maxOutput = 0.0f,  // tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.4),
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
