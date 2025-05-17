@@ -21,7 +21,6 @@
 
 namespace aruwsrc::algorithms::state_machine
 {
-
 uint16_t health;
 void RMULStateMachine::updateState()
 {

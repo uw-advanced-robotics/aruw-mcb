@@ -146,10 +146,6 @@ int main()
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS)
             checkTurretMcbDisconnection(drivers);
 #endif
-
-#if defined(TARGET_STANDARD_NULL)
-            PROFILE(drivers->profiler, drivers->stateMachine.updateState, ());
-#endif
         }
         modm::delay_us(10);
     }
@@ -194,6 +190,9 @@ static void initializeIo(Drivers *drivers)
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
 #endif
+#if defined(TARGET_ENGINEER)
+    drivers->engineerCVCommunication.initializeCV();
+#endif
 }
 
 static void updateIo(Drivers *drivers)
@@ -211,6 +210,10 @@ static void updateIo(Drivers *drivers)
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
     defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.updateSerial();
+#endif
+
+#ifdef TARGET_ENGINEER
+    drivers->engineerCVCommunication.updateSerial();
 #endif
 
 #ifdef TARGET_SENTRY_HYDRA

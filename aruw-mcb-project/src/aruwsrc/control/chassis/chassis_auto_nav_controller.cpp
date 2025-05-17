@@ -30,7 +30,6 @@ void ChassisAutoNavController::initialize()
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
 }
 
-Position setpoint(0,0,0);
 void ChassisAutoNavController::runController(
     const float maxWheelSpeed,
     const bool movementEnabled,
@@ -39,7 +38,7 @@ void ChassisAutoNavController::runController(
     Position currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
                                                // this constant with a function in the future
-    setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
+    Position setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
 
     Vector moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
 

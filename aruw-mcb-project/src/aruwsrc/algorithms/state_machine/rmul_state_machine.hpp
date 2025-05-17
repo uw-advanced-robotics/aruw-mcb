@@ -82,13 +82,13 @@ private:
     ChassisAutoNavController* autoNavController;
 
     AutoNavPath path;
-    bool isHealing = true;
+    bool isHealing = true;  // By default, we start in the healing zone
 
     // Threshold at which the robot goes to heal due to low health
-    int HEALING_THRESHOLD = 25;
+    int HEALING_THRESHOLD = 250;
 
     // Threshold at which the robot goes back to fight having healed
-    int ATTACKING_THRESHOLD = 75;
+    int ATTACKING_THRESHOLD = 550;
 
     // Speed at which the robot moves when healing, in m/s
     float SPEED = 1.0f;
