@@ -26,6 +26,7 @@
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 
 #else
+#include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif
 
@@ -38,13 +39,15 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
+    Drivers() : tap::Drivers(), controlOperatorInterface(this), engineerCVCommunication(this) {}
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
+    serial::EngineerCVCommunication engineerCVCommunication;
+
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer
