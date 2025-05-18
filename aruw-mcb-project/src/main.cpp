@@ -131,7 +131,7 @@ int main()
 #if defined(TARGET_SENTRY_ECLIPSE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
-            PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
+            PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
 #endif
 
 #ifdef TARGET_TESTBED
@@ -164,6 +164,10 @@ static void initializeIo(Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
 
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || \
     defined(TARGET_SENTRY_ECLIPSE)
     drivers->visionCoprocessor.initializeCV();
@@ -185,7 +189,8 @@ static void initializeIo(Drivers *drivers)
     // dictates command length
     drivers->mpu6500.setCalibrationSamples(4000);
     drivers->chassisMcbLite.initialize();
-    drivers->turretMajorMcbLite.initialize();
+    drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->turretMajorImu.setCalibrationSamples(4000);
 #endif
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
@@ -211,7 +216,7 @@ static void updateIo(Drivers *drivers)
 
 #ifdef TARGET_SENTRY_ECLIPSE
     drivers->chassisMcbLite.updateSerial();
-    drivers->turretMajorMcbLite.updateSerial();
+    drivers->turretMajorImu.read();
 #endif
 
 #ifdef TARGET_TESTBED

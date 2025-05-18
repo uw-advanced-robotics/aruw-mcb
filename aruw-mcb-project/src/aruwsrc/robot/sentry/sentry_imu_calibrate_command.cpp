@@ -41,7 +41,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     chassis::HolonomicChassisSubsystem &chassis,
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
     algorithms::odometry::SentryKFOdometry2DSubsystem &odometryInterface,
-    aruwsrc::virtualMCB::MCBLite &majorMCBLite,
+    tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite)
     : aruwsrc::control::imu::ImuCalibrateCommand(
           drivers,
@@ -53,7 +53,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       turretMajorController(turretMajorController),
       yawObserver(yawObserver),
       odometryInterface(odometryInterface),
-      majorMCBLite(majorMCBLite),
+      turretMajorImu(turretMajorImu),
       chassisMCBLite(chassisMCBLite)
 {
     for (auto &config : turretsAndControllers)
@@ -149,7 +149,7 @@ void SentryImuCalibrateCommand::execute()
                 drivers->mpu6500.requestCalibration();
 
                 chassisMCBLite.imu.requestCalibration();
-                majorMCBLite.imu.requestCalibration();
+                turretMajorImu.requestCalibration();
 
                 calibrationState = CalibrationState::CALIBRATING_IMU;
             }

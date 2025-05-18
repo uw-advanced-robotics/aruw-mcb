@@ -233,7 +233,7 @@ SentryTurretMinorSubsystem turretRight(
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretRight::turretID);
 
-SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorMcbLite.imu, turretMajor);
+SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
 
 struct TurretMinorChassisControllers
 {
@@ -409,7 +409,7 @@ TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     transformer.getWorldToTurretMajor(),
     chassis,
     turretMajor.getMutableMotor(),
-    drivers()->turretMajorMcbLite.imu,
+    drivers()->turretMajorImu,
     turretLeft,
     turretRight,
     turretMajorYawPosPid,
@@ -554,7 +554,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     chassis,
     chassisYawObserver,
     odometrySubsystem,
-    drivers()->turretMajorMcbLite,
+    drivers()->turretMajorImu,
     drivers()->chassisMcbLite);
 
 NoteSequenceCommand imuCalibrateDoneBuzzCommand(

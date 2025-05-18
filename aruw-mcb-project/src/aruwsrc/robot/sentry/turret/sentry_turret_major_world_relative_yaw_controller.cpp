@@ -27,7 +27,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const transforms::Transform& worldToMajor,
     const HolonomicChassisSubsystem& chassis,
     aruwsrc::control::turret::TurretMotor& yawMotor,
-    aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU,
+    tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
     const SentryTurretMinorSubsystem& turretLeft,
     const SentryTurretMinorSubsystem& turretRight,
     SmoothPid& positionPid,

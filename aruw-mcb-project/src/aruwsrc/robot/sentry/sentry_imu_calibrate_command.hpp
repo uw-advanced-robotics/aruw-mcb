@@ -81,7 +81,7 @@ public:
         aruwsrc::chassis::HolonomicChassisSubsystem &chassis,
         algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
         algorithms::odometry::SentryKFOdometry2DSubsystem &odometryInterface,
-        aruwsrc::virtualMCB::MCBLite &majorMCBLite,
+        tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
         aruwsrc::virtualMCB::MCBLite &chassisMCBLite);
 
     const char *getName() const override { return "Sentry calibrate IMU"; }
@@ -99,7 +99,7 @@ protected:
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver;
 
     algorithms::odometry::SentryKFOdometry2DSubsystem &odometryInterface;
-    aruwsrc::virtualMCB::MCBLite &majorMCBLite;
+    tap::communication::sensors::imu::AbstractIMU &turretMajorImu;
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite;
 
     // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
