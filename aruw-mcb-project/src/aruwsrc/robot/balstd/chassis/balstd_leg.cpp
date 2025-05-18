@@ -3,6 +3,22 @@
 using aruwsrc::control::motor::Tmotor_AK809;
 using tap::algorithms::CMSISMat;
 
+// Link Convention
+
+/*           *  P3
+ *        ⟋    ⟍
+ *     ⟋          ⟍
+ * P1 *             * P2
+ *     \           /
+ *      \         /  
+ *    P5 * ───── * P1
+ * 
+ *  y
+ *  ^
+ *  |
+ *    ──> x
+*/
+
 namespace aruwsrc::control::balstd
 {
 
@@ -68,6 +84,13 @@ void BalstdLeg::updateState()
 
 float BalstdLeg::updateCBF()
 {
+    // Check if we're outside the limits
+    // hi Aiden :3333333
+    if (currState.qFront <= config.frontHipOuterLimit){
+        // We have hit the hardstop
+
+    } 
+     
 
     // calculate the available torque from the motors
     // assume that gravity is the only force acting on the end effector
@@ -88,15 +111,26 @@ float BalstdLeg::updateCBF()
        half of the link coming to Ta + Tb + 1/2 * Tw.
     */ 
 
-    // 1/2 I * w^2 (PROBABLY REMOVE LATER BUT NOTE TO SELF, BECAUSE THE CHASSIS MOVES WITH THE LEG THERE ISN'T TRANSLATIONAL ENERGY TO KILL HERE)
+    // Link COM motion is (P2+P3) / 2
+
+
+    // 1/2 I * w^2 Upper link energy
     float Ta = .5 * upper_link_inertia * (currState.qFrontVelo)*(currState.qFrontVelo);
-    float Tb = .5 * lower_link_inertia * (currState.qLowerFrontVelo)*(currState.qLowerFrontVelo) + .5 * lower_link_mass * 
-    (config.upperLinkLength * config.upperLinkLength * currState.qFrontVelo*currState.qFrontVelo + config.lowerLinkLength*config.lowerLinkLength *currState.qLowerFrontVelo * currState.qLowerFrontVelo * .25
-     + config.upperLinkLength*config.lowerLinkLength * .5 * currState.qFrontVelo * currState.qLowerFrontVelo * cos(currState.qFront - currState.qLowerFront));
 
-    float Tw = .5 * wheel_mass * currState.vxc * currState.vxc + .5 * wheel_mass * currState.vyc * currState.vyc;
+    // Rotational Energy of lower link
+    float Tb_t = .5 * lower_link_inertia * (currState.qLowerFrontVelo)*(currState.qLowerFrontVelo);
+    CMSISMat<3,1> VP2 = cross({{0.0f, 0.0f, currState.qFrontVelo}} , (currState.P2-currState.P1));
 
-    float energy = Ta + Tb + Tw/2;
+    // Velocity of point halfway along the leg linkage for translational energy calculation
+    CMSISMat<3,1> VP3_2 = cross({{0.0f, 0.0f, currState.qLowerFrontVelo}}, (currState.P3-currState.P2)/2.0f) + VP2;
+
+    // Translational energy of lower link
+    float Tb_x = .5 * lower_link_mass * (VP3_2.data[0] * VP3_2.data[0] + VP3_2.data[1] * VP3_2.data[1]);
+
+    // Translational energy of the wheel
+    float Tw = .5 * wheel_mass * sqrtf(currState.vxc * currState.vxc + currState.vyc * currState.vyc);
+
+    float energy = Ta + Tb_t + Tb_x + Tw/2;     
 
     if (energy - CBF_ENERGY_LIMIT > availableEnergy){
         return 1000000000000.0f;

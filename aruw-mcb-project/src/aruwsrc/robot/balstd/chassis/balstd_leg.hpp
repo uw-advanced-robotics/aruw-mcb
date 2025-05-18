@@ -43,6 +43,7 @@ struct BalstdLegState
 {
     float qFront, qBack;          // angles of upper linkages in radians
     float qFrontVelo, qBackVelo;  // velocities of upper linkages in rad/s
+    float qLowerFront, qLowerBack; // Angles of the lower linkages
     float qLowerFrontVelo, qLowerBackVelo; // velocities of lower linkages in rad/s
     float wheelVel;               // wheel angular velocity in rad/s
 
@@ -62,6 +63,8 @@ struct BalstdLegState
           qBack(0),
           qFrontVelo(0),
           qBackVelo(0),
+          qLowerFront(0),
+          qLowerBack(0),
           qLowerFrontVelo(0),
           qLowerBackVelo(0),
           wheelVel(0),
@@ -108,13 +111,13 @@ struct BalstdLegState
     {
         
         // knee coordinates
-        CMSISMat<3, 1> P2 = CMSISMat<3, 1>(
+        P2 = CMSISMat<3, 1>(
             {config.upperLinkLength * cos(qFront) + config.fixedLinkLength / 2,
-             config.upperLinkLength * sin(qFront),0});
+             config.upperLinkLength * sin(qFront), 0});
 
-        CMSISMat<3, 1> P4 = CMSISMat<3, 1>(
+        P4 = CMSISMat<3, 1>(
             {config.upperLinkLength * cos(qBack) - config.fixedLinkLength / 2,
-             config.upperLinkLength * sin(qBack),0});
+             config.upperLinkLength * sin(qBack), 0});
 
         // wheel coordinates
         // ||P2-Ph|| = (a2^2 - a3^2 + ||P4-P2||^2) / (2*||P4-P2||)
@@ -127,6 +130,8 @@ struct BalstdLegState
 
         // ||P4-P2||
         float P4_P2_mag = sqrtf(P4_P2.data[0] * P4_P2.data[0] + P4_P2.data[1] * P4_P2.data[1]);
+
+        // Ph is the intersection point of the line that forms the knee and a perpendicular line to the wheel
 
         // ||P2-Ph||
         float P2_Ph_mag = P4_P2_mag / 2;
@@ -176,6 +181,19 @@ struct BalstdLegState
         CMSISMat<3,1> backAnglularVelo = VP4_VP3 / config.lowerLinkLength;
 
         qLowerBackVelo = backAnglularVelo.data[2];
+    }
+
+    void calculateLowerLegAngle()
+    {
+        // Calculate angle of the front lower leg
+        const float deltaX_1 = (P2 - P3).data[0];
+        const float deltaY_1 = (P2 - P3).data[1];
+        qLowerFront = atan(deltaY_1 / deltaX_1);
+
+        // Calculate angle of the back lower leg
+        const float deltaX_2 = (P4 - P3).data[0];
+        const float deltaY_2 = (P4 - P3).data[0];
+        qLowerBack = atan(deltaX_2 / deltaY_2);
     }
 };
 
