@@ -20,6 +20,8 @@
 #ifndef RMUL_STATE_MACHINE_HPP_
 #define RMUL_STATE_MACHINE_HPP_
 
+#include <array>
+
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
@@ -59,7 +61,7 @@
  *
  */
 
-namespace aruwsrc::algorithms::state_machine
+namespace aruwsrc::algorithms::strategy_state_machine
 {
 using namespace tap::communication::serial;
 using namespace aruwsrc::chassis;
@@ -75,6 +77,8 @@ public:
     void attachAutoNavController(ChassisAutoNavController* autoNavController)
     {
         this->autoNavController = autoNavController;
+        this->autoNavController->attachPath(&path);
+        this->autoNavController->setDesiredSpeed(SPEED);
     }
 
 private:
@@ -100,7 +104,13 @@ private:
     const Position MIDDLE_RIGHT = Position(3.2, 2.0, 0) * DEBUG_SCALAR;
     const Position MIDDLE = Position(4.5, 4.0, 0) * DEBUG_SCALAR;
     const Position SIDE_WALL = Position(5, 7.5, 0) * DEBUG_SCALAR;
+
+    const std::array<Position, 5> ATTACKING_PATH =
+        {RESUPPLY_ZONE, BOTTOM_MIDDLE, MIDDLE_RIGHT, MIDDLE, SIDE_WALL};
+
+    const std::array<Position, 5> HEALING_PATH =
+        {SIDE_WALL, MIDDLE, MIDDLE_RIGHT, BOTTOM_MIDDLE, RESUPPLY_ZONE};
 };
-}  // namespace aruwsrc::algorithms::state_machine
+}  // namespace aruwsrc::algorithms::strategy_state_machine
 
 #endif  // RMUL_STATE_MACHINE_HPP_

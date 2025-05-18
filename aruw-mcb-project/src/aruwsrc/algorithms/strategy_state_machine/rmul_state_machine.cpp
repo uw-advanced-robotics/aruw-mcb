@@ -19,7 +19,7 @@
 
 #include "rmul_state_machine.hpp"
 
-namespace aruwsrc::algorithms::state_machine
+namespace aruwsrc::algorithms::strategy_state_machine
 {
 void RMULStateMachine::updateState()
 {
@@ -34,36 +34,25 @@ void RMULStateMachine::updateState()
     if (!isHealing && health < HEALING_THRESHOLD)
     {
         path.resetPath();
-
-        path.pushPoint(SIDE_WALL);
-        path.pushPoint(MIDDLE);
-        path.pushPoint(MIDDLE_RIGHT);
-        path.pushPoint(BOTTOM_MIDDLE);
-        path.pushPoint(RESUPPLY_ZONE);
-
-        autoNavController->attachPath(&path);
-        autoNavController->setDesiredSpeed(SPEED);
-
+        for (auto &point : HEALING_PATH)
+        {
+            path.pushPoint(point);
+        }
         isHealing = true;
         return;
     }
 
     // If our health is above a threshold and we were previously healing, we are now attacking
-    if (isHealing && health > ATTACKING_THRESHOLD)
+    if (isHealing && health >= ATTACKING_THRESHOLD)
     {
         path.resetPath();
-
-        path.pushPoint(RESUPPLY_ZONE);
-        path.pushPoint(BOTTOM_MIDDLE);
-        path.pushPoint(MIDDLE_RIGHT);
-        path.pushPoint(MIDDLE);
-        path.pushPoint(SIDE_WALL);
-
-        autoNavController->attachPath(&path);
-        autoNavController->setDesiredSpeed(SPEED);
+        for (auto &point : ATTACKING_PATH)
+        {
+            path.pushPoint(point);
+        }
         isHealing = false;
         return;
     }
 }
 
-}  // namespace aruwsrc::algorithms::state_machine
+}  // namespace aruwsrc::algorithms::strategy_state_machine
