@@ -90,26 +90,43 @@ private:
 
     ProjectedPlateResult getEnemyPlatePosition(Position &enemyPosition);
 
-
     /**
      * Useful utils I'll need.
      * Graphic -> ID enum
      * drawTracerLineToOrbit(graphic, position)
      * drawHealthBarToOrbit(graphic, position)
-     * 
+     *
      * drawTargetBoundingBox(graphic, position)
-     * 
      */
 
+    Tx::Graphic7Message graphic;
+
+    enum GraphicIndex : uint8_t
+    {
+        TARGET = 0,
+        HERO_TRACER = 1,
+        HERO_HP = 2,
+        STANDARD_TRACER = 3,
+        STANDARD_HP = 4,
+        SENTRY_HP = 5,
+        SENTRY_TRACER = 6
+    };
+
+    void deleteGraphic(GraphicIndex index)
+    {
+        uint8_t idx = static_cast<uint8_t>(index);
+        graphic.graphicData[idx].operation == Tx::GRAPHIC_DELETE;
+    }
+
+    Vector TRACER_LINE_OFFSET = Vector(0, 0, -0.3);
+    void drawTracerLineToOrbit(Position orbit, GraphicIndex index)
+    {
+        Position cameraFrameOrbit = worldToCameraTransform.apply(orbit);
+        ProjectedResult screenFrameOrbit =
+            convertCameraFrameToScreenFrame(cameraFrameOrbit - TRACER_LINE_OFFSET);
+
         
-
-
-
-
-
-
-
-    
+    }
 };
 
 }  // namespace aruwsrc::control::client_display
