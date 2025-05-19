@@ -368,7 +368,7 @@ private:
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
         CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
         CV_MESSAGE_TYPE_ROBOT_ORBIT = 15,
-        CV_MESSAGE_TYPE_ARDUCAM_ARUCO = 16,
+        CV_MESSAGE_TYPE_ARDUCAM_ARUCO = 17,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.

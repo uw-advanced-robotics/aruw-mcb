@@ -104,6 +104,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToRealsenseArucoData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_ARDUCAM_ARUCO:
+        {
+            decodeToArducamArucoData(completeMessage);
+            return;
+        }
         case CV_MESSAGE_TYPE_ROBOT_ORBIT:
         {
             decodeToRobotOrbitData(completeMessage);
