@@ -32,7 +32,7 @@ public:
     TurretCVCommandMock(
         serial::VisionCoprocessor *visionCoprocessor,
         control::ControlOperatorInterface *controlOperatorInterface,
-        aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
+        aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
         aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,

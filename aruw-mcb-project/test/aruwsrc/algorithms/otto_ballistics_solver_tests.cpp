@@ -26,7 +26,6 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
-#include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
@@ -104,8 +103,8 @@ class OttoBallisticsSolverTest : public Test
 protected:
     OttoBallisticsSolverTest()
         : vc(&drivers),
-          turret(&drivers),
-          solver(vc, odometry, turret, launcher, 15, 0)
+          worldToTurret(Transform::identity()),
+          solver(vc, odometry, worldToTurret, launcher, 15, 0, 0)
     {
     }
 
@@ -128,7 +127,7 @@ protected:
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> vc;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
-    NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;
+    Transform worldToTurret;
 
     OttoBallisticsSolver solver;
 
@@ -202,7 +201,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
-    chassisLoc.setPosition(-2, 0);
+    worldToTurret.updateTranslation(-2, 0, 0);
 
     aimData.timestamp = 100;
 
@@ -223,8 +222,6 @@ TEST_F(
     aimData.timestamp = 100;
 
     clock.time = 100;
-
-    EXPECT_CALL(odometry, getCurrentLocation2D).Times(1);
 
     solution = solver.computeTurretAimAngles();
 

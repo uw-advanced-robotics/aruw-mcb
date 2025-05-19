@@ -40,6 +40,8 @@ public:
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(const char *, getName, (), (const override));
     MOCK_METHOD(bool, isOnline, (), (const override));
+    MOCK_METHOD(const tap::algorithms::transforms::Position, getTurretOffset, (), (const override));
+    MOCK_METHOD(float, getPitchOffset, (), (const override));
 
 private:
     static constexpr aruwsrc::control::turret::TurretMotorConfig MOTOR_CONFIG = {

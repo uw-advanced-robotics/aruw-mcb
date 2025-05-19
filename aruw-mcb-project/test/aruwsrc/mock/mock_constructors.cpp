@@ -28,7 +28,6 @@
 #include "oled_display_mock.hpp"
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
-#include "robot_turret_subsystem_mock.hpp"
 #include "sentry_request_subsystem_mock.hpp"
 #include "swerve_chassis_subsystem_mock.hpp"
 #include "swerve_module_mock.hpp"
@@ -239,16 +238,10 @@ SentryRequestSubsystemMock::SentryRequestSubsystemMock(tap::Drivers *drivers)
 SentryRequestSubsystemMock::~SentryRequestSubsystemMock() {}
 
 TurretSubsystemMock::TurretSubsystemMock(tap::Drivers *drivers)
-    : TurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
+    : TurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG)
 {
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}
-
-RobotTurretSubsystemMock::RobotTurretSubsystemMock(tap::Drivers *drivers)
-    : RobotTurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
-{
-}
-RobotTurretSubsystemMock::~RobotTurretSubsystemMock() {}
 
 VisionCoprocessorMock::VisionCoprocessorMock(tap::Drivers *drivers)
     : serial::VisionCoprocessor(drivers)
@@ -275,7 +268,7 @@ TurretMotorMock::~TurretMotorMock() {}
 TurretCVCommandMock::TurretCVCommandMock(
     serial::VisionCoprocessor *visionCoprocessor,
     control::ControlOperatorInterface *controlOperatorInterface,
-    aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
+    aruwsrc::control::turret::TurretSubsystem *turretSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
     aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
@@ -299,19 +292,21 @@ TurretCVCommandMock::~TurretCVCommandMock() {}
 OttoBallisticsSolverMock::OttoBallisticsSolverMock(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::turret::RobotTurretSubsystem &turretSubsystem,
+    const Transform &worldToTurret,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
-    const uint8_t turretID)
+    const uint8_t turretID,
+    const float pitchOffset)
     : aruwsrc::algorithms::OttoBallisticsSolver(
           visionCoprocessor,
           odometryInterface,
-          turretSubsystem,
+          worldToTurret,
           frictionWheels,
           defaultLaunchSpeed,
-          turretID){};
+          turretID,
+          pitchOffset){};
 
-OttoBallisticsSolverMock::~OttoBallisticsSolverMock(){};
+OttoBallisticsSolverMock::~OttoBallisticsSolverMock() {};
 
 TurretControllerInterfaceMock::TurretControllerInterfaceMock(
     aruwsrc::control::turret::TurretMotor &turretMotor)

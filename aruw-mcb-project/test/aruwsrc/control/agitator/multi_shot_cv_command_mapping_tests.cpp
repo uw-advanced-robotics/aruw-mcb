@@ -33,9 +33,9 @@
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/manual_fire_rate_reselection_manager_mock.hpp"
 #include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
-#include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
+#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
@@ -51,9 +51,10 @@ protected:
           yawController(yawMotor, {}),
           pitchController(pitchMotor, {}),
           turretSubsystem(&drivers),
+          worldToTurret(Transform::identity()),
           visionCoprocessor(&drivers),
           operatorInterface(&drivers),
-          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
+          ballisticsSolver(visionCoprocessor, odometry, worldToTurret, launcher, 0, 0, 0),
           turretCvCommand(
               &visionCoprocessor,
               &operatorInterface,
@@ -91,7 +92,8 @@ private:
     aruwsrc::mock::TurretMotorMock pitchMotor;
     aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController yawController;
     aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController pitchController;
-    NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
+    NiceMock<aruwsrc::mock::TurretSubsystemMock> turretSubsystem;
+    Transform worldToTurret;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;

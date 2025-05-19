@@ -28,7 +28,6 @@
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/referee_feedback_friction_wheel_subsystem_mock.hpp"
-#include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
@@ -46,8 +45,8 @@ protected:
     AutoAimLaunchTimerTest()
         : frictionWheels(&drivers),
           visionCoprocessor(&drivers),
-          turretSubsystem(&drivers),
-          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};
+          worldToTurret(Transform::identity()),
+          ballistics(visionCoprocessor, odometry, worldToTurret, frictionWheels, 0, 0, 0) {};
 
     void SetUp() override {}
 
@@ -56,7 +55,7 @@ protected:
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
-    NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
+    Transform worldToTurret;
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballistics;
 };
 

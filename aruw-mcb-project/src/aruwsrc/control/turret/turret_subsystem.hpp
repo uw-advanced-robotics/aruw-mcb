@@ -100,10 +100,15 @@ public:
      */
     virtual float getPitchOffset() const = 0;
 
+#ifdef ENV_UNIT_TESTS
+    testing::NiceMock<mock::TurretMotorMock> pitchMotor;
+    testing::NiceMock<mock::TurretMotorMock> yawMotor;
+#else
     /// Associated with and contains logic for controlling the turret's pitch motor
     TurretMotor pitchMotor;
     /// Associated with and contains logic for controlling the turret's yaw motor
     TurretMotor yawMotor;
+#endif
 };  // class TurretSubsystem
 
 }  // namespace aruwsrc::control::turret

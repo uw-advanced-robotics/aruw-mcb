@@ -37,10 +37,11 @@ public:
     OttoBallisticsSolverMock(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const Transform &worldToTurret,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
-        const uint8_t turretID);
+        const uint8_t turretID,
+        const float pitchOffset);
     virtual ~OttoBallisticsSolverMock();
 
     MOCK_METHOD(
