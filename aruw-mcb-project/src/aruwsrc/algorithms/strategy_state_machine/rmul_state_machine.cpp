@@ -29,29 +29,52 @@ void RMULStateMachine::updateState()
     }
 
     uint16_t health = refSerial.getRobotData().currentHp;
+    State prevState = state;
 
-    // If our health is below a threshold and we were not previously healing, we are now healing
-    if (!isHealing && health < HEALING_THRESHOLD)
+    switch (state)
     {
-        path.resetPath();
-        for (auto &point : HEALING_PATH)
-        {
-            path.pushPoint(point);
-        }
-        isHealing = true;
-        return;
+        case State::HEALING:
+            if (health >= ATTACKING_THRESHOLD)
+            {
+                state = State::ATTACKING;
+            }
+            break;
+        case State::ATTACKING:
+            if (health < HEALING_THRESHOLD)
+            {
+                state = State::HEALING;
+            }
+            break;
+        default:
+            break;
     }
 
-    // If our health is above a threshold and we were previously healing, we are now attacking
-    if (isHealing && health >= ATTACKING_THRESHOLD)
+    if (state != prevState)
     {
-        path.resetPath();
-        for (auto &point : ATTACKING_PATH)
-        {
-            path.pushPoint(point);
-        }
-        isHealing = false;
-        return;
+        updatePath();
+    }
+}
+
+void RMULStateMachine::updatePath()
+{
+    path.resetPath();
+
+    switch (state)
+    {
+        case State::HEALING:
+            for (auto &point : HEALING_PATH)
+            {
+                path.pushPoint(point);
+            }
+            break;
+        case State::ATTACKING:
+            for (auto &point : ATTACKING_PATH)
+            {
+                path.pushPoint(point);
+            }
+            break;
+        default:
+            break;
     }
 }
 

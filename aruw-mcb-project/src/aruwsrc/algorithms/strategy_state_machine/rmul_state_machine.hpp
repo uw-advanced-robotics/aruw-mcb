@@ -86,7 +86,15 @@ private:
     ChassisAutoNavController* autoNavController;
 
     AutoNavPath path;
-    bool isHealing = true;  // By default, we start in the healing zone
+
+    enum State
+    {
+        HEALING,
+        ATTACKING
+    };
+    State state = State::HEALING;
+
+    void updatePath();
 
     // Threshold at which the robot goes to heal due to low health
     int HEALING_THRESHOLD = 250;
