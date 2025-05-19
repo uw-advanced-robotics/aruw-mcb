@@ -53,7 +53,7 @@ private:
     TransformerInterface& transformer;
 
     // Higher value here means we trust AruCo measurements more
-    float VISION_TRUST = 0.5f;
+    float VISION_TRUST = 0.05f;
 };  // class ArucoResetSubsystem
 
 }  // namespace aruwsrc::control::aruco
