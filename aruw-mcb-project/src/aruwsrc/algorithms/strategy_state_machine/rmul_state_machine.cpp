@@ -34,12 +34,21 @@ void RMULStateMachine::updateState()
     switch (state)
     {
         case State::HEALING:
+            // If we've healed enough, go back to attacking
             if (health >= ATTACKING_THRESHOLD)
             {
                 state = State::ATTACKING;
             }
             break;
         case State::ATTACKING:
+            // If we're low on health, go to healing
+            if (health < HEALING_THRESHOLD)
+            {
+                state = State::HEALING;
+            }
+            break;
+        case State::FIRST_PUSH:
+            // If we're low on health, go to healing
             if (health < HEALING_THRESHOLD)
             {
                 state = State::HEALING;
@@ -73,9 +82,25 @@ void RMULStateMachine::updatePath()
                 path.pushPoint(point);
             }
             break;
+        case State::FIRST_PUSH:
+            for (auto &point : FIRST_PUSH_PATH)
+            {
+                path.pushPoint(point);
+            }
+            break;
         default:
             break;
     }
+}
+
+void RMULStateMachine::attachAutoNavController(ChassisAutoNavController *autoNavController)
+{
+    this->autoNavController = autoNavController;
+    this->autoNavController->attachPath(&path);
+    this->autoNavController->setDesiredSpeed(SPEED);
+
+    // Load initial path
+    updatePath();
 }
 
 }  // namespace aruwsrc::algorithms::strategy_state_machine

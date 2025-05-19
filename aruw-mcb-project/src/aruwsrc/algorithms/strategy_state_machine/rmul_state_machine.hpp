@@ -43,11 +43,11 @@
  * |                                          |
  * |              ------------                |
  * |             |            |               |
- * |-------      |   Center   |        -------|
- * |             |            |               |
+ * |-------      |   Capture  |        -------|
+ * |             |   Point    |               |
  * | SIDE         ------------                |
  * | WALL              X                      |
- * |______            (MID_MID)               |
+ * |______            (MIDDLE)                |
  * |      |                                   |
  * |      |                                   |
  * |      ------------------------     X      |
@@ -74,12 +74,7 @@ public:
 
     void updateState();
 
-    void attachAutoNavController(ChassisAutoNavController* autoNavController)
-    {
-        this->autoNavController = autoNavController;
-        this->autoNavController->attachPath(&path);
-        this->autoNavController->setDesiredSpeed(SPEED);
-    }
+    void attachAutoNavController(ChassisAutoNavController* autoNavController);
 
 private:
     RefSerial& refSerial;
@@ -90,9 +85,10 @@ private:
     enum State
     {
         HEALING,
-        ATTACKING
+        ATTACKING,
+        FIRST_PUSH
     };
-    State state = State::HEALING;
+    State state = State::FIRST_PUSH;
 
     void updatePath();
 
@@ -112,12 +108,16 @@ private:
     const Position MIDDLE_RIGHT = Position(3.2, 2.0, 0) * DEBUG_SCALAR;
     const Position MIDDLE = Position(4.5, 4.0, 0) * DEBUG_SCALAR;
     const Position SIDE_WALL = Position(5, 7.5, 0) * DEBUG_SCALAR;
+    const Position CAPTURE_POINT = Position(6, 4, 0) * DEBUG_SCALAR;
 
     const std::array<Position, 5> ATTACKING_PATH =
         {RESUPPLY_ZONE, BOTTOM_MIDDLE, MIDDLE_RIGHT, MIDDLE, SIDE_WALL};
 
     const std::array<Position, 5> HEALING_PATH =
         {SIDE_WALL, MIDDLE, MIDDLE_RIGHT, BOTTOM_MIDDLE, RESUPPLY_ZONE};
+    
+    const std::array<Position, 4> FIRST_PUSH_PATH =
+        {RESUPPLY_ZONE, BOTTOM_MIDDLE, MIDDLE_RIGHT, CAPTURE_POINT};
 };
 }  // namespace aruwsrc::algorithms::strategy_state_machine
 
