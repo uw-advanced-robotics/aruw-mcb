@@ -44,15 +44,20 @@ void DriverAssistanceIndicator::initialize()
     configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
 }
 
-modm::ResumableResult<void> DriverAssistanceIndicator::update(){
+modm::ResumableResult<void> DriverAssistanceIndicator::update()
+{
     auto aimData = visionCoprocessor.getLastAimData(0);
     bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
-    if (!visionHasTarget){
+    if (!visionHasTarget)
+    {
         deleteGraphic(GraphicIndex::TARGET);
-    } else {
+    }
+    else
+    {
         // Get position
-        Position enemyPlatePosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
+        Position enemyPlatePosition =
+            Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 
         // Draw the target box
         drawPlateTargetBox(enemyPlatePosition, GraphicIndex::TARGET);
@@ -60,36 +65,45 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update(){
 
     bool hasStandard, hasHero, hasSentry;
     auto robotOrbits = visionCoprocessor.getLastRobotOrbitData();
-    for (int i = 0; i < visionCoprocessor.MAX_NUM_ROBOT_ORBITS; i++){
+    for (int i = 0; i < visionCoprocessor.MAX_NUM_ROBOT_ORBITS; i++)
+    {
         int ID = robotOrbits.data[i].robotType;
-        if (ID == 0)
-            continue;
+        if (ID == 0) continue;
 
-        Position robotOrbit = Position(robotOrbits.data[i].x, robotOrbits.data[i].y, robotOrbits.data[i].z);
-        if (ID == 1){
+        Position robotOrbit =
+            Position(robotOrbits.data[i].x, robotOrbits.data[i].y, robotOrbits.data[i].z);
+        if (ID == 1)
+        {
             hasHero = true;
             drawTracerLineToOrbit(robotOrbit, GraphicIndex::HERO_TRACER);
             drawHealthBarToOrbit(robotOrbit, GraphicIndex::HERO_HP, ID);
-        } else if (ID == 3 || ID == 4){
+        }
+        else if (ID == 3 || ID == 4)
+        {
             hasStandard = true;
             drawTracerLineToOrbit(robotOrbit, GraphicIndex::STANDARD_TRACER);
             drawHealthBarToOrbit(robotOrbit, GraphicIndex::STANDARD_HP, ID);
-        } else if (ID == 7){
+        }
+        else if (ID == 7)
+        {
             hasSentry = true;
             drawTracerLineToOrbit(robotOrbit, GraphicIndex::SENTRY_TRACER);
             drawHealthBarToOrbit(robotOrbit, GraphicIndex::SENTRY_HP, ID);
         }
     }
 
-    if (!hasHero){
+    if (!hasHero)
+    {
         deleteGraphic(GraphicIndex::HERO_TRACER);
         deleteGraphic(GraphicIndex::HERO_HP);
     }
-    if (!hasStandard){
+    if (!hasStandard)
+    {
         deleteGraphic(GraphicIndex::STANDARD_TRACER);
         deleteGraphic(GraphicIndex::STANDARD_HP);
     }
-    if (!hasSentry){
+    if (!hasSentry)
+    {
         deleteGraphic(GraphicIndex::SENTRY_TRACER);
         deleteGraphic(GraphicIndex::SENTRY_HP);
     }

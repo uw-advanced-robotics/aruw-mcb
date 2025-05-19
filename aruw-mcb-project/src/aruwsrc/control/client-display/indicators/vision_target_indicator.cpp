@@ -104,8 +104,7 @@ VisionTargetIndicator::ProjectedPlateResult VisionTargetIndicator::getEnemyPlate
 
     ProjectedResult topRight = convertCameraFrameToScreenFrame(cameraFrame + PLATE_CORNER_OFFSET);
 
-    ProjectedResult bottomLeft =
-        convertCameraFrameToScreenFrame(cameraFrame - PLATE_CORNER_OFFSET);
+    ProjectedResult bottomLeft = convertCameraFrameToScreenFrame(cameraFrame - PLATE_CORNER_OFFSET);
 
     output.bottomLeftX = bottomLeft.screenX;
     output.bottomLeftY = bottomLeft.screenY;

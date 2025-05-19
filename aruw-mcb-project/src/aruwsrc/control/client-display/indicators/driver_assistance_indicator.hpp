@@ -82,7 +82,7 @@ private:
     void deleteGraphic(GraphicIndex index)
     {
         uint8_t idx = static_cast<uint8_t>(index);
-        graphic.graphicData[idx].operation == Tx::GRAPHIC_DELETE;
+        graphic.graphicData[idx].operation = Tx::GRAPHIC_DELETE;
     }
 
     void configureGraphic(GraphicIndex index, Tx::GraphicColor color)
