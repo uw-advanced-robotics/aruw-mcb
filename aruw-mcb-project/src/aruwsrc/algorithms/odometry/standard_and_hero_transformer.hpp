@@ -30,6 +30,7 @@
 
 namespace aruwsrc::algorithms::transforms
 {
+using namespace tap::algorithms::transforms;
 /**
  * @brief transform provider for both the standard and hero
  * Use the StandardAndHeroTransformerSubsystem as a convenience class to
@@ -53,27 +54,27 @@ public:
     // @note: In updating this transform we are assuming that the chassis does not pitch or roll
     // This is fine for flat fields, but for an RMUC field with inclines
     // the state of the robot will not be properly tracked
-    inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
+    inline const Transform& getWorldToChassis() const
     {
         return worldToChassis;
     }
 
-    inline const tap::algorithms::transforms::Transform& getWorldToTurret() const
+    inline const Transform& getWorldToTurret() const
     {
         return worldToTurret;
     }
 
-    inline const tap::algorithms::transforms::Transform& getChassisToTurret() const
+    inline const Transform& getChassisToTurret() const
     {
         return chassisToTurret;
     }
 
-    inline const tap::algorithms::transforms::Transform& getWorldToVTM() const
+    inline const Transform& getWorldToVTM() const
     {
         return worldToVTM;
     }
 
-    inline const tap::algorithms::transforms::Transform& getChassisToArducam() const
+    inline const Transform& getChassisToArducam() const
     {
         return chassisToArducam;
     }
@@ -88,11 +89,11 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::RobotTurretSubsystem& turret;
 
-    tap::algorithms::transforms::Transform worldToChassis;
-    tap::algorithms::transforms::Transform worldToTurret;
-    tap::algorithms::transforms::Transform chassisToTurret;
-    tap::algorithms::transforms::Transform worldToVTM;
-    tap::algorithms::transforms::Transform chassisToArducam;
+    Transform worldToChassis;
+    Transform worldToTurret;
+    Transform chassisToTurret;
+    Transform worldToVTM;
+    Transform chassisToArducam;
 };
 
 }  // namespace aruwsrc::algorithms::transforms

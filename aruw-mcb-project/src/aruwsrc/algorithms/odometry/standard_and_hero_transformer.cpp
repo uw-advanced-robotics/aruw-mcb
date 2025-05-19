@@ -23,7 +23,6 @@
 
 using namespace aruwsrc::control::turret;
 using namespace tap::algorithms::odometry;
-using namespace tap::algorithms::transforms;
 using namespace aruwsrc::control::client_display;
 
 namespace aruwsrc::algorithms::transforms
