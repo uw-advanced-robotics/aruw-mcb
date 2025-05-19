@@ -212,7 +212,11 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+OttoKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    turret,
+    chassis,
+    modm::Vector2f(aruwsrc::chassis::STARTING_POSITION_X, aruwsrc::chassis::STARTING_POSITION_Y));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
