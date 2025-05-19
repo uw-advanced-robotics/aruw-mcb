@@ -103,11 +103,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 35'000.0f,
-    .ki = 80.0f,
-    .kd = -10'000'000.0f,
+    .kp = 10'000.0f,
+    .ki = 0.0f,
+    .kd = 4'000.0f,
     .maxICumulative = 1'500.0f,
-    .maxOutput = 0.0f,                // tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.4),
     .tRDerivativeKalman = 60'000.0f,  // Gain needs to be so high for the motors to actually do
                                       // anything that motor encoder resolution becomes a problem
     .tQProportionalKalman = 1.0f,
