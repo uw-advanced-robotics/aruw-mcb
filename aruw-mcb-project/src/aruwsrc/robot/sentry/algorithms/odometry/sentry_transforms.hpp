@@ -53,32 +53,14 @@ public:
 
     inline void initialize() {}
 
-    inline const Transform& getWorldToChassis() const
-    {
-        return worldToChassis;
-    };
-    inline const Transform& getWorldToTurretMajor() const
-    {
-        return worldToTurretMajor;
-    };
-    inline const Transform& getWorldToTurretLeft() const
-    {
-        return worldToTurretLeft;
-    };
-    inline const Transform& getWorldToTurretRight() const
-    {
-        return worldToTurretRight;
-    };
+    inline const Transform& getWorldToChassis() const { return worldToChassis; };
+    inline const Transform& getWorldToTurretMajor() const { return worldToTurretMajor; };
+    inline const Transform& getWorldToTurretLeft() const { return worldToTurretLeft; };
+    inline const Transform& getWorldToTurretRight() const { return worldToTurretRight; };
 
-    inline const Transform& getChassisToMajor() const
-    {
-        return chassisToTurretMajor;
-    };
+    inline const Transform& getChassisToMajor() const { return chassisToTurretMajor; };
 
-    inline const Transform& getWorldToVTM() const
-    {
-        return worldToVTM;
-    }
+    inline const Transform& getWorldToVTM() const { return worldToVTM; }
 
     // If you pass a wrong turretID, the right turret will automatically be returned.
     inline const Transform& getWorldToTurret(int turretID) const
@@ -93,15 +75,9 @@ public:
         }
     }
 
-    inline const Transform& getMajorToTurretLeft() const
-    {
-        return turretMajorToTurretLeft;
-    };
+    inline const Transform& getMajorToTurretLeft() const { return turretMajorToTurretLeft; };
 
-    inline const Transform& getMajorToTurretRight() const
-    {
-        return turretMajorToTurretRight;
-    };
+    inline const Transform& getMajorToTurretRight() const { return turretMajorToTurretRight; };
 
     inline const Transform& getMajorToMinor(uint8_t turretId) const
     {
@@ -163,8 +139,7 @@ private:
     Transform worldToTurretLeft;
     Transform worldToTurretRight;
     Transform worldToVTM;
-    Transform chassisToArducam1, chassisToArducam2, chassisToArducam3,
-        chassisToArducam4;
+    Transform chassisToArducam1, chassisToArducam2, chassisToArducam3, chassisToArducam4;
 
     // Intermediary transforms
     Transform chassisToTurretMajor;

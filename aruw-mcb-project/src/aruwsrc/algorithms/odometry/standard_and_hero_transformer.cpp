@@ -29,11 +29,9 @@ using namespace aruwsrc::control::client_display;
 namespace aruwsrc::algorithms::transforms
 {
 #if defined(TARGET_STANDARD_NULL)
-static Transform ARDUCAM_OFFSET =
-    Transform(Position(0, 0, 0.125), Orientation(0, 0, 0));
+static Transform ARDUCAM_OFFSET = Transform(Position(0, 0, 0.125), Orientation(0, 0, 0));
 #else
-static Transform ARDUCAM_OFFSET =
-    Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+static Transform ARDUCAM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
 #endif
 
 StandardAndHeroTransformer::StandardAndHeroTransformer(
