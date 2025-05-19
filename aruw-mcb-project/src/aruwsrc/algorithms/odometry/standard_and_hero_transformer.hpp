@@ -73,6 +73,11 @@ public:
         return worldToVTM;
     }
 
+    inline const tap::algorithms::transforms::Transform& getChassisToArducam() const
+    {
+        return chassisToArducam;
+    }
+
 protected:
     inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
     {
@@ -87,6 +92,7 @@ private:
     tap::algorithms::transforms::Transform worldToTurret;
     tap::algorithms::transforms::Transform chassisToTurret;
     tap::algorithms::transforms::Transform worldToVTM;
+    tap::algorithms::transforms::Transform chassisToArducam;
 };
 
 }  // namespace aruwsrc::algorithms::transforms

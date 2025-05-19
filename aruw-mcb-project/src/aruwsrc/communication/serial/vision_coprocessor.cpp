@@ -99,9 +99,9 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToAutoNavSetpointData(completeMessage);
             return;
         }
-        case CV_MESSAGE_TYPE_ARUCO_RESET:
+        case CV_MESSAGE_TYPE_REALSENSE_ARUCO:
         {
-            decodeToArucoResetData(completeMessage);
+            decodeToRealsenseArucoData(completeMessage);
             return;
         }
         case CV_MESSAGE_TYPE_ROBOT_ORBIT:
@@ -147,7 +147,15 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
     return true;
 }
 
-bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& message)
+bool VisionCoprocessor::decodeToRealsenseArucoData(const ReceivedSerialMessage& message)
+{
+    // copy packet into data field
+    memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));
+    lastArucoData.updated = true;
+    return true;
+}
+
+bool VisionCoprocessor::decodeToArducamArucoData(const ReceivedSerialMessage& message)
 {
     // copy packet into data field
     memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));

@@ -28,6 +28,14 @@ using namespace aruwsrc::control::client_display;
 
 namespace aruwsrc::algorithms::transforms
 {
+#if defined(TARGET_STANDARD_NULL)
+static Transform ARDUCAM_OFFSET =
+    Transform(Position(0, 0, 0.125), Orientation(0, 0, 0));
+#else
+static Transform ARDUCAM_OFFSET =
+    Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+#endif
+
 StandardAndHeroTransformer::StandardAndHeroTransformer(
     const Odometry2DInterface& chassisOdometry,
     const RobotTurretSubsystem& turret)
@@ -36,7 +44,8 @@ StandardAndHeroTransformer::StandardAndHeroTransformer(
       worldToChassis(Transform::identity()),
       worldToTurret(Transform::identity()),
       chassisToTurret(Transform::identity()),  // do we care about z offset?
-      worldToVTM(Transform::identity())
+      worldToVTM(Transform::identity()),
+      chassisToArducam(Transform::identity())
 {
 }
 
@@ -59,6 +68,10 @@ void StandardAndHeroTransformer::updateTransforms()
 
     worldToTurret.updateTranslation(worldToChassis.getTranslation());
     chassisToTurret = worldToChassis.getInverse().compose(worldToTurret);
+
+    Transform chassisToTurretNoPitch = chassisToTurret;
+    chassisToTurretNoPitch.updateRotation(Orientation(0, 0, chassisToTurret.getRotation().yaw()));
+    chassisToArducam = chassisToTurretNoPitch.compose(ARDUCAM_OFFSET);
 
     worldToVTM = worldToTurret.compose(VTM_OFFSET);
 }

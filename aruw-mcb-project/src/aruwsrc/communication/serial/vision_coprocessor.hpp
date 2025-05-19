@@ -364,10 +364,11 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
+        CV_MESSAGE_TYPE_REALSENSE_ARUCO = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
         CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
         CV_MESSAGE_TYPE_ROBOT_ORBIT = 15,
+        CV_MESSAGE_TYPE_ARDUCAM_ARUCO = 16,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -474,7 +475,9 @@ private:
 
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
 
-    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+    bool decodeToRealsenseArucoData(const ReceivedSerialMessage& message);
+
+    bool decodeToArducamArucoData(const ReceivedSerialMessage& message);
 
     bool decodeToRobotOrbitData(const ReceivedSerialMessage& message);
 

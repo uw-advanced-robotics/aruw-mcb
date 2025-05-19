@@ -48,12 +48,13 @@ void ArucoResetSubsystem::refresh()
     float prevComputedY = odometry.getCurrentLocation2D().getY();
 
     // Get the chassis position estimate from the aruco data
-    float arucoChassisXEstimate = resetData.data.x -
-                                  transformer.getWorldToTurret(resetData.data.turretId).getX() +
-                                  transformer.getWorldToChassis().getX();
-    float arucoChassisYEstimate = resetData.data.y -
-                                  transformer.getWorldToTurret(resetData.data.turretId).getY() +
-                                  transformer.getWorldToChassis().getY();
+    float arucoChassisXEstimate =
+        resetData.data.x +
+        transformer.getChassisToArducam(resetData.data.turretId).getInverse().getX();
+
+    float arucoChassisYEstimate =
+        resetData.data.y +
+        transformer.getChassisToArducam(resetData.data.turretId).getInverse().getY();
 
     // Apply a low-pass between the aruco measurement and our current odometry position
     float newX = lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);

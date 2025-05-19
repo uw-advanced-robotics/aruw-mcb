@@ -52,6 +52,7 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
+#include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
@@ -248,6 +249,12 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+
+aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
+    drivers(),
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    transformAdapter);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
@@ -647,6 +654,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
+    drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -662,6 +670,7 @@ void initializeSubsystems()
     buzzer.initialize();
     transformSubsystem.initialize();
     capBankSubsystem.initialize();
+    arucoResetSubsystem.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/

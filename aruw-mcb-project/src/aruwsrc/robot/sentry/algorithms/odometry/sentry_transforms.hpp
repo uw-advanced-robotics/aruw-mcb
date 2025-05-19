@@ -28,6 +28,8 @@
 
 namespace aruwsrc::sentry::algorithms::odometry
 {
+using namespace tap::algorithms::transforms;
+
 class SentryTransforms
 {
     friend class SentryTransformAdapter;
@@ -51,35 +53,35 @@ public:
 
     inline void initialize() {}
 
-    inline const tap::algorithms::transforms::Transform& getWorldToChassis() const
+    inline const Transform& getWorldToChassis() const
     {
         return worldToChassis;
     };
-    inline const tap::algorithms::transforms::Transform& getWorldToTurretMajor() const
+    inline const Transform& getWorldToTurretMajor() const
     {
         return worldToTurretMajor;
     };
-    inline const tap::algorithms::transforms::Transform& getWorldToTurretLeft() const
+    inline const Transform& getWorldToTurretLeft() const
     {
         return worldToTurretLeft;
     };
-    inline const tap::algorithms::transforms::Transform& getWorldToTurretRight() const
+    inline const Transform& getWorldToTurretRight() const
     {
         return worldToTurretRight;
     };
 
-    inline const tap::algorithms::transforms::Transform& getChassisToMajor() const
+    inline const Transform& getChassisToMajor() const
     {
         return chassisToTurretMajor;
     };
 
-    inline const tap::algorithms::transforms::Transform& getWorldToVTM() const
+    inline const Transform& getWorldToVTM() const
     {
         return worldToVTM;
     }
 
     // If you pass a wrong turretID, the right turret will automatically be returned.
-    inline const tap::algorithms::transforms::Transform& getWorldToTurret(int turretID) const
+    inline const Transform& getWorldToTurret(int turretID) const
     {
         if (turretID == turretLeft.getTurretID())
         {
@@ -91,17 +93,17 @@ public:
         }
     }
 
-    inline const tap::algorithms::transforms::Transform& getMajorToTurretLeft() const
+    inline const Transform& getMajorToTurretLeft() const
     {
         return turretMajorToTurretLeft;
     };
 
-    inline const tap::algorithms::transforms::Transform& getMajorToTurretRight() const
+    inline const Transform& getMajorToTurretRight() const
     {
         return turretMajorToTurretRight;
     };
 
-    inline const tap::algorithms::transforms::Transform& getMajorToMinor(uint8_t turretId) const
+    inline const Transform& getMajorToMinor(uint8_t turretId) const
     {
         if (turretId == turretLeft.getTurretID())
         {
@@ -123,6 +125,24 @@ public:
         return chassisOdometry.getCurrentVelocity2D();
     }
 
+    // If you pass a wrong cameraID, the first camera will automatically be returned.
+    inline const Transform& getChassisToArducam(uint8_t cameraID) const
+    {
+        switch (cameraID)
+        {
+            case 0:
+                return chassisToArducam1;
+            case 1:
+                return chassisToArducam2;
+            case 2:
+                return chassisToArducam3;
+            case 3:
+                return chassisToArducam4;
+            default:
+                return chassisToArducam1;
+        }
+    }
+
 protected:
     inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
     {
@@ -138,16 +158,24 @@ private:
     const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretRight;
 
     // Transforms
-    tap::algorithms::transforms::Transform worldToChassis;
-    tap::algorithms::transforms::Transform worldToTurretMajor;
-    tap::algorithms::transforms::Transform worldToTurretLeft;
-    tap::algorithms::transforms::Transform worldToTurretRight;
-    tap::algorithms::transforms::Transform worldToVTM;
+    Transform worldToChassis;
+    Transform worldToTurretMajor;
+    Transform worldToTurretLeft;
+    Transform worldToTurretRight;
+    Transform worldToVTM;
+    Transform chassisToArducam1, chassisToArducam2, chassisToArducam3,
+        chassisToArducam4;
 
     // Intermediary transforms
-    tap::algorithms::transforms::Transform chassisToTurretMajor;
-    tap::algorithms::transforms::Transform turretMajorToTurretLeft;
-    tap::algorithms::transforms::Transform turretMajorToTurretRight;
+    Transform chassisToTurretMajor;
+    Transform turretMajorToTurretLeft;
+    Transform turretMajorToTurretRight;
+
+    // Arducam offsets
+    Transform ARDUCAM1_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+    Transform ARDUCAM2_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+    Transform ARDUCAM3_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+    Transform ARDUCAM4_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
 };
 
 }  // namespace aruwsrc::sentry::algorithms::odometry

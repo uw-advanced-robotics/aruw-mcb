@@ -44,7 +44,11 @@ SentryTransforms::SentryTransforms(
       worldToVTM(Transform::identity()),
       chassisToTurretMajor(Transform::identity()),
       turretMajorToTurretLeft(0., config.turretMinorOffset, 0., 0., 0., 0.),
-      turretMajorToTurretRight(0., -config.turretMinorOffset, 0., 0., 0., 0.)
+      turretMajorToTurretRight(0., -config.turretMinorOffset, 0., 0., 0., 0.),
+      chassisToArducam1(Transform::identity()),
+      chassisToArducam2(Transform::identity()),
+      chassisToArducam3(Transform::identity()),
+      chassisToArducam4(Transform::identity())
 {
 }
 
@@ -74,6 +78,12 @@ void SentryTransforms::updateTransforms()
     worldToTurretLeft = worldToTurretMajor.compose(turretMajorToTurretLeft);
     worldToTurretRight = worldToTurretMajor.compose(turretMajorToTurretRight);
     worldToVTM = worldToTurretMajor;
+
+    // Chassis to Arducam
+    chassisToArducam1 = chassisToTurretMajor.compose(ARDUCAM1_OFFSET);
+    chassisToArducam2 = chassisToTurretMajor.compose(ARDUCAM2_OFFSET);
+    chassisToArducam3 = chassisToTurretMajor.compose(ARDUCAM3_OFFSET);
+    chassisToArducam4 = chassisToTurretMajor.compose(ARDUCAM4_OFFSET);
 }
 
 }  // namespace aruwsrc::sentry::algorithms::odometry
