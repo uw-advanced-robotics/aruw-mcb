@@ -28,6 +28,11 @@ void RMULStateMachine::updateState()
         return;
     }
 
+    if (!refSerial.getRefSerialReceivingData()){
+        // Wait till we can get health data
+        return;
+    }
+
     uint16_t health = refSerial.getRobotData().currentHp;
     State prevState = state;
 
