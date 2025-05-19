@@ -30,10 +30,10 @@
 
 #include "hud_indicator.hpp"
 
-using namespace aruwsrc::algorithms::transforms;
-
 namespace aruwsrc::control::client_display
 {
+using namespace aruwsrc::algorithms::transforms;
+using namespace tap::communication::serial;
 /**
  * Draws a bounding box around the plate of where the vision system tells us to target.
  * Draws bars above robots to indicate the HP of the target.
@@ -44,51 +44,18 @@ class DriverAssistanceIndicator : public HudIndicator, protected modm::Resumable
 public:
     DriverAssistanceIndicator(
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
+        RefSerialTransmitter &refSerialTransmitter,
+        RefSerial &refSerial,
         const Transform &worldToTurretTransform);
 
     void initialize() override final;
 
     modm::ResumableResult<void> update() override final;
 
-    struct ProjectedPlateResult
-    {
-        bool inFrame;
-        uint32_t bottomLeftX;
-        uint32_t bottomLeftY;
-        uint32_t topRightX;
-        uint32_t topRightY;
-        Position enemyCenterCameraFrame;
-
-        ProjectedPlateResult()
-            : inFrame(false),
-              bottomLeftX(0),
-              bottomLeftY(0),
-              topRightX(0),
-              topRightY(0),
-              enemyCenterCameraFrame(0, 0, 0)
-        {
-        }
-    };
-
 private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    RefSerial &refSerial;
     const Transform &worldToCameraTransform;
-
-    Tx::Graphic1Message visionTargetGraphic;
-    static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
-
-    RefSerialData::Tx::GraphicColor INDICATOR_COLOR = RefSerialData::Tx::GraphicColor::GREEN;
-
-    static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
-    const Vector PLATE_CORNER_OFFSET =
-        Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
-
-    // In world frame
-    Position enemyPosition;
-    ProjectedPlateResult enemyPositionScreenFrame;
-
-    ProjectedPlateResult getEnemyPlatePosition(Position &enemyPosition);
 
     /**
      * Useful utils I'll need.
@@ -118,15 +85,30 @@ private:
         graphic.graphicData[idx].operation == Tx::GRAPHIC_DELETE;
     }
 
-    Vector TRACER_LINE_OFFSET = Vector(0, 0, -0.3);
-    void drawTracerLineToOrbit(Position orbit, GraphicIndex index)
+    void configureGraphic(GraphicIndex index, Tx::GraphicColor color)
     {
-        Position cameraFrameOrbit = worldToCameraTransform.apply(orbit);
-        ProjectedResult screenFrameOrbit =
-            convertCameraFrameToScreenFrame(cameraFrameOrbit - TRACER_LINE_OFFSET);
-
-        
+        uint8_t idx = static_cast<uint8_t>(index);
+        uint8_t graphicName[3];
+        getUnusedGraphicName(graphicName);
+        RefSerialTransmitter::configGraphicGenerics(
+            &graphic.graphicData[idx],
+            graphicName,
+            Tx::GRAPHIC_ADD,
+            DEFAULT_GRAPHIC_LAYER,
+            color);
     }
+
+    Vector TRACER_LINE_OFFSET = Vector(0, 0, -0.3);
+    modm::Vector2i TRACER_LINE_ORIGIN = modm::Vector2i(SCREEN_WIDTH / 2, 300);
+    void drawTracerLineToOrbit(Position orbit, GraphicIndex index);
+
+    Vector HEALTH_BAR_OFFSET = Vector(0, 0, 0.5);
+    void drawHealthBarToOrbit(Position orbit, GraphicIndex index, int ID);
+
+    static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
+    const Vector PLATE_CORNER_OFFSET =
+        Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
+    void drawPlateTargetBox(Position orbit, GraphicIndex index);
 };
 
 }  // namespace aruwsrc::control::client_display
