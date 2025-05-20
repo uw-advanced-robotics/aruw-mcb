@@ -60,12 +60,8 @@ void ArucoResetSubsystem::processRealsenseData()
                                   transformer.getWorldToTurret(resetData.data.turretId).getY() +
                                   transformer.getWorldToChassis().getY();
 
-    // Apply a low-pass between the aruco measurement and our current odometry position
-    float newX = lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);
-    float newY = lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);
-
     // Set the new position in the odometry subsystem
-    odometry.overrideOdometryPosition(newX, newY);
+    odometry.overrideOdometryPosition(arucoChassisXEstimate, arucoChassisYEstimate);
 }
 
 void ArucoResetSubsystem::processArducamData()
