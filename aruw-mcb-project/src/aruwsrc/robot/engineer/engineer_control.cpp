@@ -234,7 +234,7 @@ ArmExtensionSubsystem armExtensionSubsystem(
     engineerGantryExtensionMotor,
     aruwsrc::engineer::GANTRY_EXTENSION_CONFIG,
     extensionLimitSwitchTrigger,
-    1.0f, //todo
+    1.0f,  // todo
     0.0f,
     GANTRY_EXTENSION_MAX_SETPOINT);
 

@@ -38,6 +38,10 @@ public:
     {
     }
 
+    mockable float getChassisXInput();
+
+    mockable float getChassisYInput();
+
     /**
      * @return The arm lift velocity
      */
