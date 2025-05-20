@@ -54,30 +54,15 @@ public:
     // @note: In updating this transform we are assuming that the chassis does not pitch or roll
     // This is fine for flat fields, but for an RMUC field with inclines
     // the state of the robot will not be properly tracked
-    inline const Transform& getWorldToChassis() const
-    {
-        return worldToChassis;
-    }
+    inline const Transform& getWorldToChassis() const { return worldToChassis; }
 
-    inline const Transform& getWorldToTurret() const
-    {
-        return worldToTurret;
-    }
+    inline const Transform& getWorldToTurret() const { return worldToTurret; }
 
-    inline const Transform& getChassisToTurret() const
-    {
-        return chassisToTurret;
-    }
+    inline const Transform& getChassisToTurret() const { return chassisToTurret; }
 
-    inline const Transform& getWorldToVTM() const
-    {
-        return worldToVTM;
-    }
+    inline const Transform& getWorldToVTM() const { return worldToVTM; }
 
-    inline const Transform& getChassisToArducam() const
-    {
-        return chassisToArducam;
-    }
+    inline const Transform& getChassisToArducam() const { return chassisToArducam; }
 
 protected:
     inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
