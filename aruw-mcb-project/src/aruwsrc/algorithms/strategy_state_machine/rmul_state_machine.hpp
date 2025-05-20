@@ -115,7 +115,7 @@ private:
 
     const std::array<Position, 5> HEALING_PATH =
         {SIDE_WALL, MIDDLE, MIDDLE_RIGHT, BOTTOM_MIDDLE, RESUPPLY_ZONE};
-    
+
     const std::array<Position, 5> FIRST_PUSH_PATH =
         {RESUPPLY_ZONE, BOTTOM_MIDDLE, MIDDLE_RIGHT, MIDDLE, CAPTURE_POINT};
 };

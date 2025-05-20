@@ -28,7 +28,8 @@ void RMULStateMachine::updateState()
         return;
     }
 
-    if (!refSerial.getRefSerialReceivingData()){
+    if (!refSerial.getRefSerialReceivingData())
+    {
         // Wait till we can get health data
         return;
     }
