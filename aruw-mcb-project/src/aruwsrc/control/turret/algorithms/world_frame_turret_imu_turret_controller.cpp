@@ -187,12 +187,12 @@ static inline float runWorldFrameTurretImuController(
 }
 
 WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadePidTurretController(
-    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+    const transforms::Transform &worldToTurret,
     TurretMotor &yawMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid)
     : TurretYawControllerInterface(yawMotor),
-      turretMCBCanComm(turretMCBCanComm),
+      worldToTurret(worldToTurret),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(Angle(0))
@@ -203,7 +203,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::initialize()
 {
     initializeWorldFrameTurretImuController(
         this,
-        Angle(turretMCBCanComm.getYawUnwrapped()),
+        Angle(worldToTurret.getYaw()),
         turretMotor,
         positionPid,
         velocityPid,
@@ -215,8 +215,8 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
     const WrappedFloat desiredSetpoint)
 {
     const WrappedFloat chassisFrameYaw = turretMotor.getChassisFrameMeasuredAngle();
-    const WrappedFloat worldFrameYawAngle = Angle(turretMCBCanComm.getYawUnwrapped());
-    const float worldFrameYawVelocity = turretMCBCanComm.getGz();
+    const WrappedFloat worldFrameYawAngle = Angle(worldToTurret.getYaw());
+    const float worldFrameYawVelocity = worldToTurret.getYawVelocity();
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
@@ -240,7 +240,7 @@ void WorldFrameYawTurretImuCascadePidTurretController::runController(
 void WorldFrameYawTurretImuCascadePidTurretController::setSetpoint(WrappedFloat desiredSetpoint)
 {
     const WrappedFloat chassisFrameYaw = turretMotor.getChassisFrameMeasuredAngle();
-    const WrappedFloat worldFrameYawAngle = Angle(turretMCBCanComm.getYawUnwrapped());
+    const WrappedFloat worldFrameYawAngle = Angle(worldToTurret.getYaw());
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
@@ -252,18 +252,18 @@ void WorldFrameYawTurretImuCascadePidTurretController::setSetpoint(WrappedFloat 
 
 WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::getMeasurement() const
 {
-    return Angle(turretMCBCanComm.getYawUnwrapped());
+    return Angle(worldToTurret.getYaw());
 }
 
 bool WorldFrameYawTurretImuCascadePidTurretController::isOnline() const
 {
-    return turretMotor.isOnline() && turretMCBCanComm.isConnected();
+    return turretMotor.isOnline();
 }
 
 WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::convertControllerAngleToChassisFrame(
     WrappedFloat controllerFrameAngle) const
 {
-    const WrappedFloat worldFrameYawAngle = Angle(turretMCBCanComm.getYawUnwrapped());
+    const WrappedFloat worldFrameYawAngle = Angle(worldToTurret.getYaw());
 
     return transformWorldFrameValueToChassisFrame(
         turretMotor.getChassisFrameMeasuredAngle(),
@@ -274,7 +274,7 @@ WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::convertController
 WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::convertChassisAngleToControllerFrame(
     WrappedFloat chassisFrameAngle) const
 {
-    const WrappedFloat worldFrameYawAngle = Angle(turretMCBCanComm.getYawUnwrapped());
+    const WrappedFloat worldFrameYawAngle = Angle(worldToTurret.getYaw());
 
     return transformChassisFrameToWorldFrame(
         turretMotor.getChassisFrameMeasuredAngle(),
@@ -284,12 +284,12 @@ WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::convertChassisAng
 
 WorldFramePitchTurretImuCascadePidTurretController::
     WorldFramePitchTurretImuCascadePidTurretController(
-        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        const transforms::Transform &worldToTurret,
         TurretMotor &turretMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid)
     : TurretPitchControllerInterface(turretMotor),
-      turretMCBCanComm(turretMCBCanComm),
+      worldToTurret(worldToTurret),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(Angle(0))
@@ -300,7 +300,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::initialize()
 {
     initializeWorldFrameTurretImuController(
         this,
-        Angle(turretMCBCanComm.getPitchUnwrapped()),
+        Angle(worldToTurret.getPitch()),
         turretMotor,
         positionPid,
         velocityPid,
@@ -312,8 +312,8 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
     const WrappedFloat desiredSetpoint)
 {
     const WrappedFloat chassisFramePitch = turretMotor.getChassisFrameMeasuredAngle();
-    const WrappedFloat worldFramePitchAngle = Angle(turretMCBCanComm.getPitchUnwrapped());
-    const float worldFramePitchVelocity = turretMCBCanComm.getGy();
+    const WrappedFloat worldFramePitchAngle = Angle(worldToTurret.getPitch());
+    const float worldFramePitchVelocity = worldToTurret.getPitchVelocity();
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
@@ -343,7 +343,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
 void WorldFramePitchTurretImuCascadePidTurretController::setSetpoint(WrappedFloat desiredSetpoint)
 {
     const WrappedFloat chassisFramePitch = turretMotor.getChassisFrameMeasuredAngle();
-    const WrappedFloat worldFramePitchAngle = Angle(turretMCBCanComm.getPitchUnwrapped());
+    const WrappedFloat worldFramePitchAngle = Angle(worldToTurret.getPitch());
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
@@ -355,18 +355,18 @@ void WorldFramePitchTurretImuCascadePidTurretController::setSetpoint(WrappedFloa
 
 WrappedFloat WorldFramePitchTurretImuCascadePidTurretController::getMeasurement() const
 {
-    return Angle(turretMCBCanComm.getPitchUnwrapped());
+    return Angle(worldToTurret.getPitch());
 }
 
 bool WorldFramePitchTurretImuCascadePidTurretController::isOnline() const
 {
-    return turretMotor.isOnline() && turretMCBCanComm.isConnected();
+    return turretMotor.isOnline();
 }
 
 WrappedFloat WorldFramePitchTurretImuCascadePidTurretController::
     convertControllerAngleToChassisFrame(WrappedFloat controllerFrameAngle) const
 {
-    const WrappedFloat worldFramePitchAngle = Angle(turretMCBCanComm.getPitchUnwrapped());
+    const WrappedFloat worldFramePitchAngle = Angle(worldToTurret.getPitch());
 
     return transformWorldFrameValueToChassisFrame(
         turretMotor.getChassisFrameMeasuredAngle(),
@@ -377,7 +377,7 @@ WrappedFloat WorldFramePitchTurretImuCascadePidTurretController::
 WrappedFloat WorldFramePitchTurretImuCascadePidTurretController::
     convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const
 {
-    const WrappedFloat worldFramePitchAngle = Angle(turretMCBCanComm.getPitchUnwrapped());
+    const WrappedFloat worldFramePitchAngle = Angle(worldToTurret.getPitch());
 
     return transformChassisFrameToWorldFrame(
         turretMotor.getChassisFrameMeasuredAngle(),

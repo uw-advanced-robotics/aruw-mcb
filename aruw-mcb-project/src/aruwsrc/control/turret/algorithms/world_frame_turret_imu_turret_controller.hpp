@@ -23,6 +23,7 @@
 #include <cstdint>
 
 #include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
@@ -60,7 +61,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
-        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        const transforms::Transform &worldToTurret,
         TurretMotor &yawMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid);
@@ -92,7 +93,7 @@ public:
     WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
-    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
+    const transforms::Transform &worldToTurret;
 
     SmoothPid &positionPid;
     SmoothPid &velocityPid;
@@ -123,7 +124,7 @@ public:
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
-        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        const transforms::Transform &worldToTurret,
         TurretMotor &pitchMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid);
@@ -154,7 +155,7 @@ public:
     WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
-    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
+    const transforms::Transform &worldToTurret;
 
     SmoothPid &positionPid;
     SmoothPid &velocityPid;
