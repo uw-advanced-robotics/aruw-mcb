@@ -73,21 +73,39 @@ void ArucoResetSubsystem::processArducamData()
     float prevComputedX = odometry.getCurrentLocation2D().getX();
     float prevComputedY = odometry.getCurrentLocation2D().getY();
 
-    // Get the chassis position estimate from the aruco data
-    float arucoChassisXEstimate =
-        resetData.data.x +
-        transformer.getChassisToArducam(resetData.data.turretId).getInverse().getX();
+    EulerAngles angles =
+        quaternionToEulerAngles(resetData.data.quatW, resetData.data.quatX, resetData.data.quatY,
+                                resetData.data.quatZ);
+    Transform worldToCamera = Transform(resetData.data.x, resetData.data.y, resetData.data.z, angles.roll,
+                                        angles.pitch, angles.yaw);
+    Transform cameraToChassis = transformer.getChassisToArducam(resetData.data.turretId).getInverse();
 
-    float arucoChassisYEstimate =
-        resetData.data.y +
-        transformer.getChassisToArducam(resetData.data.turretId).getInverse().getY();
+    Transform worldToChassis = worldToCamera.compose(cameraToChassis);
+    
+    float newX = worldToChassis.getX();
+    float newY = worldToChassis.getY();
 
     // Apply a low-pass between the aruco measurement and our current odometry position
-    float newX = lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);
-    float newY = lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);
+    newX = lowPassFilter(prevComputedX, newX, VISION_TRUST);
+    newY = lowPassFilter(prevComputedY, newY, VISION_TRUST);
 
-    // Set the new position in the odometry subsystem
     odometry.overrideOdometryPosition(newX, newY);
+
+    // Get the chassis position estimate from the aruco data
+    // float arucoChassisXEstimate =
+    //     resetData.data.x +
+    //     transformer.getChassisToArducam(resetData.data.turretId).getInverse().getX();
+
+    // float arucoChassisYEstimate =
+    //     resetData.data.y +
+    //     transformer.getChassisToArducam(resetData.data.turretId).getInverse().getY();
+
+    // Apply a low-pass between the aruco measurement and our current odometry position
+    // float newX = lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);
+    // float newY = lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);
+
+    // // Set the new position in the odometry subsystem
+    // odometry.overrideOdometryPosition(newX, newY);
 }
 
 }  // namespace aruwsrc::control::aruco
