@@ -32,6 +32,15 @@ using namespace aruwsrc::serial;
 using namespace aruwsrc::algorithms::transforms;
 using namespace tap::algorithms::odometry;
 
+struct EulerAngles
+{
+    float roll;
+    float pitch;
+    float yaw;
+};
+
+EulerAngles quaternionToEulerAngles(float w, float x, float y, float z);
+
 class ArucoResetSubsystem : public tap::control::Subsystem
 {
 public:
@@ -41,7 +50,7 @@ public:
         Odometry2DInterface& odometry,
         TransformerInterface& transformer);
 
-    void initialize() override{};
+    void initialize() override {};
 
     void refresh() override;
 
@@ -57,24 +66,6 @@ private:
 
     void processRealsenseData();
     void processArducamData();
-
-    struct EulerAngles
-    {
-        float roll;
-        float pitch;
-        float yaw;
-    };
-
-    EulerAngles quaternionToEulerAngles(
-        float w, float x, float y, float z)
-    {
-        EulerAngles angles;
-        angles.roll = atan2(2.0f * (w * x + y * z), 1.0f - 2.0f * (x * x + y * y));
-        angles.pitch = asin(2.0f * (w * y - z * x));
-        angles.yaw = atan2(2.0f * (w * z + x * y), 1.0f - 2.0f * (y * y + z * z));
-        return angles;
-    }
-
 };  // class ArucoResetSubsystem
 
 }  // namespace aruwsrc::control::aruco

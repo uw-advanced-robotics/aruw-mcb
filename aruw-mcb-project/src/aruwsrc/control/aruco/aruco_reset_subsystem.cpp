@@ -49,13 +49,11 @@ void ArucoResetSubsystem::processRealsenseData()
     if (!resetData.updated) return;
     vision.invalidateRealsenseArucoResetData();
 
-    float prevComputedX = odometry.getCurrentLocation2D().getX();
-    float prevComputedY = odometry.getCurrentLocation2D().getY();
-
     // Get the chassis position estimate from the aruco data
-    float arucoChassisXEstimate = resetData.data.x -
+    float arucoChassisXEstimate = resetData.data.x - // world To turret
                                   transformer.getWorldToTurret(resetData.data.turretId).getX() +
                                   transformer.getWorldToChassis().getX();
+
     float arucoChassisYEstimate = resetData.data.y -
                                   transformer.getWorldToTurret(resetData.data.turretId).getY() +
                                   transformer.getWorldToChassis().getY();
@@ -64,30 +62,35 @@ void ArucoResetSubsystem::processRealsenseData()
     odometry.overrideOdometryPosition(arucoChassisXEstimate, arucoChassisYEstimate);
 }
 
+EulerAngles angles;
+Transform worldToCamera(Transform::identity()), cameraToChassis(Transform::identity()),
+    worldToChassis(Transform::identity());
 void ArucoResetSubsystem::processArducamData()
 {
     const VisionCoprocessor::ArucoResetData& resetData = vision.getLastArducamArucoData();
     if (!resetData.updated) return;
     vision.invalidateArducamArucoResetData();
 
-    float prevComputedX = odometry.getCurrentLocation2D().getX();
-    float prevComputedY = odometry.getCurrentLocation2D().getY();
+    const VisionCoprocessor::ArucoResetPacket& poseData = resetData.data;
 
-    EulerAngles angles =
-        quaternionToEulerAngles(resetData.data.quatW, resetData.data.quatX, resetData.data.quatY,
-                                resetData.data.quatZ);
-    Transform worldToCamera = Transform(resetData.data.x, resetData.data.y, resetData.data.z, angles.roll,
-                                        angles.pitch, angles.yaw);
-    Transform cameraToChassis = transformer.getChassisToArducam(resetData.data.turretId).getInverse();
+    angles =
+        quaternionToEulerAngles(poseData.quatW, poseData.quatX, poseData.quatY, poseData.quatZ);
 
-    Transform worldToChassis = worldToCamera.compose(cameraToChassis);
-    
+    worldToCamera =
+        Transform(poseData.x, poseData.y, poseData.z, angles.roll, angles.pitch, angles.yaw);
+    cameraToChassis = transformer.getChassisToArducam(resetData.data.turretId).getInverse();
+
+    worldToChassis = worldToCamera.compose(cameraToChassis);
+
     float newX = worldToChassis.getX();
     float newY = worldToChassis.getY();
 
+    float prevX = odometry.getCurrentLocation2D().getX();
+    float prevY = odometry.getCurrentLocation2D().getY();
+
     // Apply a low-pass between the aruco measurement and our current odometry position
-    newX = lowPassFilter(prevComputedX, newX, VISION_TRUST);
-    newY = lowPassFilter(prevComputedY, newY, VISION_TRUST);
+    newX = lowPassFilter(prevX, newX, VISION_TRUST);
+    newY = lowPassFilter(prevY, newY, VISION_TRUST);
 
     odometry.overrideOdometryPosition(newX, newY);
 
@@ -101,11 +104,20 @@ void ArucoResetSubsystem::processArducamData()
     //     transformer.getChassisToArducam(resetData.data.turretId).getInverse().getY();
 
     // Apply a low-pass between the aruco measurement and our current odometry position
-    // float newX = lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);
-    // float newY = lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);
+    // float newX = lowPassFilter(prevX, arucoChassisXEstimate, VISION_TRUST);
+    // float newY = lowPassFilter(prevY, arucoChassisYEstimate, VISION_TRUST);
 
     // // Set the new position in the odometry subsystem
     // odometry.overrideOdometryPosition(newX, newY);
+}
+
+EulerAngles quaternionToEulerAngles(float w, float x, float y, float z)
+{
+    EulerAngles angles;
+    angles.roll = atan2(2.0f * (w * x + y * z), 1.0f - 2.0f * (x * x + y * y));
+    angles.pitch = asin(2.0f * (w * y - z * x));
+    angles.yaw = atan2(2.0f * (w * z + x * y), 1.0f - 2.0f * (y * y + z * z));
+    return angles;
 }
 
 }  // namespace aruwsrc::control::aruco
