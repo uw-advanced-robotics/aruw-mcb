@@ -145,7 +145,7 @@ tap::encoder::CanEncoder engineerWristPitchEncoder(
     aruwsrc::chassis::CAN_BUS_MOTORS,
     false,
     1,
-    WRIST_HOME_PITCH * 4096.0f / (M_PI * 2));  // todo
+    WRIST_HOME_PITCH * 4096.0f / (M_PI * 2));
 
 tap::encoder::CanEncoder engineerWristYawEncoder(
     drivers(),
@@ -153,7 +153,7 @@ tap::encoder::CanEncoder engineerWristYawEncoder(
     aruwsrc::chassis::CAN_BUS_MOTORS,
     false,
     1,
-    WRIST_HOME_YAW * 4096.0f / (M_PI * 2));  // todo
+    WRIST_HOME_YAW * 4096.0f / (M_PI * 2));
 
 tap::motor::DjiMotor engineerGantryLiftLeftMotor(
     drivers(),

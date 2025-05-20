@@ -91,11 +91,6 @@ void WristSubsystem::initialize()
     encoderYaw.initialize();
 }
 
-float OutPitch;
-float OutYaw;
-float OutLeft;
-float OutRight;
-
 void WristSubsystem::refresh()
 {
     if (!encoderPitch.isOnline() || !encoderYaw.isOnline())
@@ -110,13 +105,9 @@ void WristSubsystem::refresh()
     float outYaw =
         pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f);  // todo ks
 
-    OutPitch = outPitch;
-    OutYaw = outYaw;
     float outLeft = ratio * outYaw + outPitch;
-    float outRight = ratio * outYaw - outPitch;  // todo derived from info in notion, double check
+    float outRight = ratio * outYaw - outPitch;
 
-    OutLeft = outLeft;
-    OutRight = outRight;
     motorLeft.setDesiredOutput(outLeft + kS);
     motorRight.setDesiredOutput(outRight + kS);
 }

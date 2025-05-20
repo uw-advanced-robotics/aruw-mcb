@@ -51,8 +51,7 @@ public:
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<mock::ControlOperatorInterfaceMock>
-        controlOperatorInterface;  // todo what do I do about this
+    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
 #else
 public:
