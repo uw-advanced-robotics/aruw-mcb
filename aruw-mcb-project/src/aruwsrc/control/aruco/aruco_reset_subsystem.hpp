@@ -32,15 +32,6 @@ using namespace aruwsrc::serial;
 using namespace aruwsrc::algorithms::transforms;
 using namespace tap::algorithms::odometry;
 
-struct EulerAngles
-{
-    float roll;
-    float pitch;
-    float yaw;
-};
-
-EulerAngles quaternionToEulerAngles(float w, float x, float y, float z);
-
 class ArucoResetSubsystem : public tap::control::Subsystem
 {
 public:
