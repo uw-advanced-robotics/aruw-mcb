@@ -123,7 +123,7 @@ int main()
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(TARGET_ENGINEER) 
+#if defined(TARGET_ENGINEER)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
