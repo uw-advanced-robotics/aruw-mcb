@@ -54,6 +54,10 @@ private:
 
     // Higher value here means we trust AruCo measurements more
     float VISION_TRUST = 0.05f;
+
+    void processRealsenseData();
+    void processArducamData();
+
 };  // class ArucoResetSubsystem
 
 }  // namespace aruwsrc::control::aruco

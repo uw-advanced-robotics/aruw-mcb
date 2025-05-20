@@ -279,7 +279,15 @@ public:
 
     mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
 
-    mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
+    mockable inline const ArucoResetData& getLastRealsenseArucoData() const
+    {
+        return lastRealsenseArucoData;
+    }
+
+    mockable inline const ArucoResetData& getLastArducamArucoData() const
+    {
+        return lastArducamArucoData;
+    }
 
     mockable inline bool getSomeTurretHasTarget() const
     {
@@ -337,7 +345,11 @@ public:
      * This signals that the message has been consumed and should not be used
      * for future resets.
      */
-    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+    inline void invalidateRealsenseArucoResetData()
+    {
+        this->lastRealsenseArucoData.updated = false;
+    }
+    inline void invalidateArducamArucoResetData() { this->lastArducamArucoData.updated = false; }
 
     mockable inline void attachAutoNavController(
         aruwsrc::chassis::ChassisAutoNavController* autoNavController)
@@ -432,7 +444,12 @@ private:
         .numSetpoints = 0,
         .setpoints = {}};
 
-    ArucoResetData lastArucoData{
+    ArucoResetData lastRealsenseArucoData{
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .updated = false,
+    };
+
+    ArucoResetData lastArducamArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
     };

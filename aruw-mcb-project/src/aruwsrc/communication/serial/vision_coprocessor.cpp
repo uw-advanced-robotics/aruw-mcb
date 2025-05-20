@@ -155,16 +155,16 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
 bool VisionCoprocessor::decodeToRealsenseArucoData(const ReceivedSerialMessage& message)
 {
     // copy packet into data field
-    memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));
-    lastArucoData.updated = true;
+    memcpy(&(lastRealsenseArucoData.data), &message.data, sizeof(ArucoResetPacket));
+    lastRealsenseArucoData.updated = true;
     return true;
 }
 
 bool VisionCoprocessor::decodeToArducamArucoData(const ReceivedSerialMessage& message)
 {
     // copy packet into data field
-    memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));
-    lastArucoData.updated = true;
+    memcpy(&(lastArducamArucoData.data), &message.data, sizeof(ArucoResetPacket));
+    lastArducamArucoData.updated = true;
     return true;
 }
 

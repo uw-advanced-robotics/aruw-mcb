@@ -39,10 +39,40 @@ ArucoResetSubsystem::ArucoResetSubsystem(
 
 void ArucoResetSubsystem::refresh()
 {
-    const VisionCoprocessor::ArucoResetData& resetData = vision.getLastArucoResetData();
+    processRealsenseData();
+    processArducamData();
+}
 
+void ArucoResetSubsystem::processRealsenseData()
+{
+    const VisionCoprocessor::ArucoResetData& resetData = vision.getLastRealsenseArucoData();
     if (!resetData.updated) return;
-    vision.invalidateArucoResetData();
+    vision.invalidateRealsenseArucoResetData();
+
+    float prevComputedX = odometry.getCurrentLocation2D().getX();
+    float prevComputedY = odometry.getCurrentLocation2D().getY();
+
+    // Get the chassis position estimate from the aruco data
+    float arucoChassisXEstimate = resetData.data.x -
+                                  transformer.getWorldToTurret(resetData.data.turretId).getX() +
+                                  transformer.getWorldToChassis().getX();
+    float arucoChassisYEstimate = resetData.data.y -
+                                  transformer.getWorldToTurret(resetData.data.turretId).getY() +
+                                  transformer.getWorldToChassis().getY();
+
+    // Apply a low-pass between the aruco measurement and our current odometry position
+    float newX = lowPassFilter(prevComputedX, arucoChassisXEstimate, VISION_TRUST);
+    float newY = lowPassFilter(prevComputedY, arucoChassisYEstimate, VISION_TRUST);
+
+    // Set the new position in the odometry subsystem
+    odometry.overrideOdometryPosition(newX, newY);
+}
+
+void ArucoResetSubsystem::processArducamData()
+{
+    const VisionCoprocessor::ArucoResetData& resetData = vision.getLastArducamArucoData();
+    if (!resetData.updated) return;
+    vision.invalidateArducamArucoResetData();
 
     float prevComputedX = odometry.getCurrentLocation2D().getX();
     float prevComputedY = odometry.getCurrentLocation2D().getY();
