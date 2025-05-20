@@ -27,6 +27,7 @@
 #include "aruwsrc/mock/oled_display_mock.hpp"
 
 #else
+#include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
@@ -44,7 +45,8 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
+          engineerCVCommunication(this)
     {
     }
 
@@ -56,6 +58,7 @@ public:
 public:
     control::engineer::EngineerControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
+    serial::EngineerCVCommunication engineerCVCommunication;
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer

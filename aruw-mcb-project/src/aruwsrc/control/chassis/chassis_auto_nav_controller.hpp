@@ -26,7 +26,6 @@
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/interpolate.hpp"
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
@@ -47,13 +46,10 @@ public:
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
         aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
-        aruwsrc::serial::VisionCoprocessor& visionCoprocessor,
         const Transform& worldToChassis,
         const aruwsrc::chassis::BeybladeConfig beybladeConfig)
         : chassis(chassis),
-          path(visionCoprocessor.getAutoNavPath()),
           lastSetPoint(Position(-1, -1, 0)),
-          visionCoprocessor(visionCoprocessor),
           drivers(drivers),
           worldToChassis(worldToChassis),
           beybladeConfig(beybladeConfig)
@@ -72,11 +68,15 @@ public:
         float interpolationParameter,
         bool movementEnabled);
 
+    // Sets the maximum speed the chassis moves at, in units of Meters per Second
+    inline void setDesiredSpeed(float speed) { this->desiredSpeed = speed; }
+
+    inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
+
 private:
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
-    aruwsrc::algorithms::AutoNavPath& path;
+    aruwsrc::algorithms::AutoNavPath* path = nullptr;
     Position lastSetPoint;
-    aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     tap::Drivers& drivers;
 
     const Transform& worldToChassis;
@@ -86,6 +86,8 @@ private:
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;
+
+    float desiredSpeed = 0;
 };
 }  // namespace aruwsrc::chassis
 
