@@ -39,7 +39,7 @@ void CubeMovePositionCommand::initialize()
 
 void CubeMovePositionCommand::execute() {}
 
-void CubeMovePositionCommand::end(bool) { cubeLift.setDesiredOutput(0); }
+void CubeMovePositionCommand::end(bool) {}
 
 bool CubeMovePositionCommand::isFinished() const
 {
