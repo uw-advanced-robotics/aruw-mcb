@@ -38,6 +38,20 @@ struct BalstdLegConfig
     float frontHipInnerLimit;  // radians
     float backHipOuterLimit;   // radians
     float backHipInnerLimit;   // radians
+
+    float frontUpperLegLinkInertia; //kg*m^2
+    float backUpperLegLinkInertia;  //kg*m^2
+    float frontLowerLegLinkInertia; //kg*m^2
+    float backLowerLegLinkInertia;  //kg*m^2
+
+    float frontUpperLegLinkMass; //kg
+    float backUpperLegLinkMass;  //kg
+    float frontLowerLegLinkMass; //kg
+    float backLowerLegLinkMass;  //kg
+
+    float wheelMass;             //kg
+
+    float balstdMass;            //kg
 };
 struct BalstdLegState
 {
@@ -195,6 +209,8 @@ struct BalstdLegState
         const float deltaY_2 = (P4 - P3).data[0];
         qLowerBack = atan(deltaX_2 / deltaY_2);
     }
+
+    std::array<float, 2>  calculateLegEnergy(BalstdLegConfig config);
 };
 
 class BalstdLeg
@@ -226,7 +242,7 @@ public:
 
     inline BalstdLegState getState() const { return currState; }
     
-    float updateCBF();
+    float updateCBF(BalstdLegState leg);
 
 private:
     aruwsrc::control::motor::Tmotor_AK809& frontHipMotor;
@@ -267,12 +283,6 @@ private:
     float CBF_ENERGY_LIMIT;
     float maxTorque;
 
-    float upper_link_inertia = 0.5;  // kg*m^2, TODO: get this from the robot config
-    float lower_link_inertia = 0.5;  // kg*m^2, TODO: get this from the robot config
-    float lower_link_mass = 0.5;  // kg, TODO: get this from the robot config
-    float wheel_mass = 0.5;  // kg, TODO: get this from the robot config
-
-    constexpr static float BALSTDWEIGHT = 19.5;  // kg, TODO: get this from the robot config
 };
 
 }  // namespace aruwsrc::control::balstd

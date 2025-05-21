@@ -77,29 +77,58 @@ void BalstdLeg::updateState()
     currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
     currState.calculateForwardKinematics(config);
 
-
     calculateJacobianTranspose();
 }
 
-
-float BalstdLeg::updateCBF()
+std::array<float,2> BalstdLegState::calculateLegEnergy(BalstdLegConfig config)
 {
-    // Check if we're outside the limits
-    // hi Aiden :3333333
+    // 1/2 I * w^2 Upper link energy
+    float Ta = .5 * config.frontUpperLegLinkInertia * (qFrontVelo)*(qFrontVelo);
+
+    // Rotational Energy of lower link
+    float Tb_t = .5 * config.frontLowerLegLinkInertia * (qLowerFrontVelo)*(qLowerFrontVelo);
+    CMSISMat<3,1> VP2 = cross({{0.0f, 0.0f, qFrontVelo}} , (P2-P1));
+
+    // Velocity of point halfway along the leg linkage for translational energy calculation
+    CMSISMat<3,1> VP3_2 = cross({{0.0f, 0.0f, qLowerFrontVelo}}, (P3-P2)/2.0f) + VP2;
+
+    // Translational energy of lower link
+    float Tb_x = .5 * config.backLowerLegLinkInertia * (VP3_2.data[0] * VP3_2.data[0] + VP3_2.data[1] * VP3_2.data[1]);
+
+    // Translational energy of the wheel
+    float Tw = .5 * config.wheelMass * sqrtf(vxc * vxc + vyc * vyc);
+
+    float energy = Ta + Tb_t + Tb_x + Tw/2;     
+
+    return {energy, 0};
+}
+
+float BalstdLeg::updateCBF(BalstdLegState leg)
+{
+    // Check if we're outside the limits, control within since the CBF is gonna go negative
     if (currState.qFront <= config.frontHipOuterLimit){
-        // We have hit the hardstop
-
-    } 
-     
-
+        // We have hit the hardstop move out of it as much as possible
+        return maxTorque;
+    }
+    if (currState.qFront >= config.frontHipInnerLimit){
+        return -maxTorque;
+    }
+    if (currState.qBack >= config.backHipOuterLimit){
+        return maxTorque;
+    }
+    if (currState.qBack <= config.frontHipInnerLimit){
+        return -maxTorque;
+    }
     // calculate the available torque from the motors
     // assume that gravity is the only force acting on the end effector
-    CMSISMat<2, 1> endEffectorTorque = currState.jacobianTranspose * CMSISMat<2, 1>({0, 9.8 * BALSTDWEIGHT / 4});
+    CMSISMat<2, 1> endEffectorTorque = currState.jacobianTranspose * CMSISMat<2, 1>({0, 9.8 * config.balstdMass / 4});
 
+    // Right half of the linkage (per the paper orientation)
     float torque_available = maxTorque - endEffectorTorque.data[0];
     float distance_to_stop = currState.qFront - config.frontHipOuterLimit;
 
-    /* this makes the incorrect assumption that the available torque will be constant
+    /* 
+       this makes the incorrect assumption that the available torque will be constant
        through the travel. Doing an integration of the required torque would be better, something
        to do later. 
     */
@@ -109,34 +138,12 @@ float BalstdLeg::updateCBF()
        In this system, the energy is from each link and the wheel translation, coming to
        Ta + Tb + Tc + Td + Tw, however we only are going to consider the energy from the corresponding
        half of the link coming to Ta + Tb + 1/2 * Tw.
-    */ 
+    */
+    std::array<float,2> energy = leg.calculateLegEnergy(config);
 
-    // Link COM motion is (P2+P3) / 2
-
-
-    // 1/2 I * w^2 Upper link energy
-    float Ta = .5 * upper_link_inertia * (currState.qFrontVelo)*(currState.qFrontVelo);
-
-    // Rotational Energy of lower link
-    float Tb_t = .5 * lower_link_inertia * (currState.qLowerFrontVelo)*(currState.qLowerFrontVelo);
-    CMSISMat<3,1> VP2 = cross({{0.0f, 0.0f, currState.qFrontVelo}} , (currState.P2-currState.P1));
-
-    // Velocity of point halfway along the leg linkage for translational energy calculation
-    CMSISMat<3,1> VP3_2 = cross({{0.0f, 0.0f, currState.qLowerFrontVelo}}, (currState.P3-currState.P2)/2.0f) + VP2;
-
-    // Translational energy of lower link
-    float Tb_x = .5 * lower_link_mass * (VP3_2.data[0] * VP3_2.data[0] + VP3_2.data[1] * VP3_2.data[1]);
-
-    // Translational energy of the wheel
-    float Tw = .5 * wheel_mass * sqrtf(currState.vxc * currState.vxc + currState.vyc * currState.vyc);
-
-    float energy = Ta + Tb_t + Tb_x + Tw/2;     
-
-    if (energy - CBF_ENERGY_LIMIT > availableEnergy){
-        return 1000000000000.0f;
+    if (energy[0] - CBF_ENERGY_LIMIT > availableEnergy){
+        return maxTorque;
     }
-
-    
 }
 
 }  // namespace aruwsrc::control::balstd

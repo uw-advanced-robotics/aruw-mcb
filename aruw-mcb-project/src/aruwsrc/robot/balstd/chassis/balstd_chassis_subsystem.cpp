@@ -80,8 +80,8 @@ void BalstdChassisSubsystem::updateState()
     currState.leftLegState = leftLeg.getState();
     currState.rightLegState = rightLeg.getState();
 
-    currState.virtualLegState.xc = (currState.leftLegState.xc + currState.rightLegState.xc) / 2;
-    currState.virtualLegState.yc = (currState.leftLegState.xc + currState.rightLegState.xc) / 2;
+    currState.virtualLegState.P3.data[0] = (currState.leftLegState.P3.data[0] + currState.rightLegState.P3.data[0]) / 2;
+    currState.virtualLegState.P3.data[1] = (currState.leftLegState.P3.data[1] + currState.rightLegState.P3.data[1]) / 2;
     currState.virtualLegState.calculatePendulumState();
 
     currState.roll = chassisImu.getRoll();
