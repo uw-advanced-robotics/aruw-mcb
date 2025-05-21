@@ -280,7 +280,7 @@ BeybladeCommand beybladeCommand(
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
-    10.0f,
+    14.0f,
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
