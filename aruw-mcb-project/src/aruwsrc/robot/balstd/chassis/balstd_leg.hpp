@@ -275,8 +275,6 @@ private:
 
     void setHipTorques(float front, float back);
 
-    void calculateJacobianTranspose();
-
     static constexpr float M3508_TORQUE_CONSTANT =
         (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / Nm/A = desOut/Nm
 
