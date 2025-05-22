@@ -41,7 +41,7 @@ public:
         Odometry2DInterface& odometry,
         TransformerInterface& transformer);
 
-    void initialize() override {};
+    void initialize() override{};
 
     void refresh() override;
 

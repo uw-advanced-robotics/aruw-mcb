@@ -76,8 +76,7 @@ void ArucoResetSubsystem::processArducamData()
     modm::Quaternion q(poseData.quatW, poseData.quatX, poseData.quatY, poseData.quatZ);
     angles = eulerAnglesFromQuaternion(q);
 
-    worldToCamera =
-        Transform(poseData.x, poseData.y, poseData.z, angles.x, angles.y, angles.z);
+    worldToCamera = Transform(poseData.x, poseData.y, poseData.z, angles.x, angles.y, angles.z);
     cameraToChassis = transformer.getChassisToArducam(resetData.data.turretId).getInverse();
 
     worldToChassis = worldToCamera.compose(cameraToChassis);
