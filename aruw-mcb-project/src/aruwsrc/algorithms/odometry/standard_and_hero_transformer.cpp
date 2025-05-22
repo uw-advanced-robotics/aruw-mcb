@@ -28,9 +28,9 @@ using namespace aruwsrc::control::client_display;
 namespace aruwsrc::algorithms::transforms
 {
 #if defined(TARGET_STANDARD_NULL)
-static Transform ARDUCAM_OFFSET = Transform(Position(0.016, 0.126, 0.056), Orientation(0, 0, 0));
+static Transform TURRET_TO_ARDUCAM_OFFSET = Transform(Position(0.016, 0.126, 0.056), Orientation(0, 0, 0));
 #else
-static Transform ARDUCAM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+static Transform TURRET_TO_ARDUCAM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
 #endif
 
 StandardAndHeroTransformer::StandardAndHeroTransformer(
@@ -68,7 +68,7 @@ void StandardAndHeroTransformer::updateTransforms()
 
     Transform chassisToTurretNoPitch = chassisToTurret;
     chassisToTurretNoPitch.updateRotation(Orientation(0, 0, chassisToTurret.getRotation().yaw()));
-    chassisToArducam = chassisToTurretNoPitch.compose(ARDUCAM_OFFSET);
+    chassisToArducam = chassisToTurretNoPitch.compose(TURRET_TO_ARDUCAM_OFFSET);
 
     worldToVTM = worldToTurret.compose(VTM_OFFSET);
 }
