@@ -21,6 +21,18 @@ struct BalstdChassisOutput
           rightTorque(tr)
     {
     }
+
+    BalstdChassisOutput(
+        tap::algorithms::transforms::Vector leftForce,
+        tap::algorithms::transforms::Vector rightForce,
+        float tl,
+        float tr)
+        : leftForce(leftForce),
+          rightForce(rightForce),
+          leftTorque(tl),
+          rightTorque(tr)
+    {
+    }
 };
 
 const BalstdChassisOutput ZERO_OUTPUT(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);

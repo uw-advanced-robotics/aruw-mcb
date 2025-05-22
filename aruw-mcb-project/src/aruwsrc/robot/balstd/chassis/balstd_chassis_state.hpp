@@ -12,7 +12,10 @@ namespace aruwsrc::control::balstd
 struct BalstdChassisState
 {
     BalstdLegState leftLegState, rightLegState, virtualLegState;
-    float roll, rollVel, pitch, pitchVel, yaw, yawVel, height, virtualWheelPos;
+    float roll, rollVel, pitch, pitchVel, yaw, yawVel;
+    float height;
+    float virtualPendTheta, virtualPendThetaDot;
+    float virtualWheelPos, virtualWheelVel;  // x pos/vel of the 2d robot model's wheel
 };
 
 const BalstdChassisState ZERO_STATE{
@@ -26,7 +29,10 @@ const BalstdChassisState ZERO_STATE{
     .yaw = 0,
     .yawVel = 0,
     .height = 0,
+    .virtualPendTheta = 0,
+    .virtualPendThetaDot = 0,
     .virtualWheelPos = 0,
+    .virtualWheelVel = 0,
 };
 
 }  // namespace aruwsrc::control::balstd

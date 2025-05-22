@@ -31,7 +31,7 @@ struct BalstdLegState
     float xc, yc;                    // coordinates of wheel axle wrt hip center
     float kneesWidthX, kneesWidthY;  // components of distance between knees
 
-    float L, theta;  // pendulum length and angle wrt hip center
+    float L, alpha;  // pendulum length and angle wrt hip center
 
     BalstdLegState()
         : qFront(0),
@@ -44,7 +44,7 @@ struct BalstdLegState
           kneesWidthX(0),
           kneesWidthY(0),
           L(0),
-          theta(0)
+          alpha(0)
     {
     }
 
@@ -91,8 +91,8 @@ struct BalstdLegState
 
     void calculatePendulumState()
     {
-        L = atan2(xc, yc);
-        theta = sqrt(xc * xc + yc * yc);
+        alpha = atan2(xc, yc);
+        L = sqrt(xc * xc + yc * yc);
     }
 };
 

@@ -10,27 +10,36 @@ namespace aruwsrc::control::balstd
 class BalanceController : public BalstdChassisControllerInterface
 {
 public:
+    float chassisWeight = 11.38763 * 9.8;  // f = ma
+    float heightSetpoint = 0.37;
+    float rollSetpoint = 0;
+    float yawSetpoint = 0;
+
     BalanceController(
         const BalstdControlOperatorInterface& controlOperatorInterface,
         const tap::algorithms::SmoothPidConfig heightControllerConfig,
         const tap::algorithms::SmoothPidConfig splitControllerConfig,
+        const tap::algorithms::SmoothPidConfig rollControllerConfig,
         const tap::algorithms::SmoothPidConfig yawControllerConfig)
         : BalstdChassisControllerInterface(controlOperatorInterface),
           heightController(heightControllerConfig),
           splitController(splitControllerConfig),
-          yawController(yawControllerConfig)
+          rollController(rollControllerConfig),
+          yawController(yawControllerConfig),
+          vmState({{0, 0, 0, 0, 0, 0}})
     {
     }
 
-    BalstdChassisOutput runController(const BalstdChassisState& state) override;
+    BalstdChassisOutput runController(const BalstdChassisState& state, float dt) override;
 
 private:
-    tap::algorithms::SmoothPid heightController, splitController, yawController;
+    tap::algorithms::SmoothPid heightController, splitController, rollController, yawController;
 
     tap::algorithms::CMSISMat<6, 1> vmState;
-    float vmX{0};  // x position of the 2d robot model's wheel
 
     tap::algorithms::CMSISMat<2, 6> getLQRGains(const float legLength) const;
+
+    Vector vmLegForces(float hipTorque, float downwardForce, const BalstdLegState& currState) const;
 };
 }  // namespace aruwsrc::control::balstd
 
