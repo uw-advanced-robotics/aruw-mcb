@@ -158,7 +158,7 @@ struct BalstdLegState
             sqrtf(config.lowerLinkLength * config.lowerLinkLength - P2_Ph_mag * P2_Ph_mag);
 
         // P3 = Ph ± ||P3-Ph|| / ||P2-P4|| * (P4-P2)
-        CMSISMat<3,1> P3_2 = Ph + P3_Ph_mag / P4_P2_mag * CMSISMat<2, 1>({P4_P2.data[1], -P4_P2.data[0]});
+        CMSISMat<3,1> P3_2 = Ph + P3_Ph_mag / P4_P2_mag * CMSISMat<3, 1>({P4_P2.data[1], -P4_P2.data[0], 0});
         
         P3 = {{P3_2.data[0], P3_2.data[1], 0}};
     }
