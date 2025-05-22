@@ -35,6 +35,9 @@
 
 #include "balstd_imu_calibrate_command.hpp"
 // #include "aruwsrc/control/motor/tmotor_ak80_9_encoder.hpp"
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
@@ -54,6 +57,7 @@
 using namespace aruwsrc::balstd;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::balstd;
+using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::motor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::algorithms;
@@ -126,6 +130,8 @@ BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, LEG_C
 
 BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg, drivers()->chassisIsm330);
 
+BuzzerSubsystem buzzer(drivers());
+
 // controllers
 
 ManualLegController manualLegController(drivers()->controlOperatorInterface);
@@ -196,6 +202,8 @@ BalstdImuCalibrateCommand imuCalibrateCommand(
     },
     &chassis);
 
+NoteSequenceCommand startupChime(buzzer, MEGALOVANIA_NOTES, MEGALOVANIA_NOTE_LENGTH_MS);
+
 /* define commands ----------------------------------------------------------*/
 
 // aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
@@ -211,6 +219,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void registerStandardSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&buzzer);
     // drivers->commandScheduler.registerSubsystem(&turret);
     // drivers->commandScheduler.registerSubsystem(&stateMachine);
 }
@@ -219,6 +228,7 @@ void registerStandardSubsystems(Drivers *drivers)
 void initializeSubsystems()
 {
     chassis.initialize();
+    buzzer.initialize();
     // stateMachine.initialize();
     // turret.initialize();
     // odometrySubsystem.initialize();
@@ -235,8 +245,9 @@ void setDefaultStandardCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startStandardCommands(Drivers *)
+void startStandardCommands(Drivers *drivers)
 {
+    drivers->commandScheduler.addCommand(&startupChime);
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     // drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     // drivers->visionCoprocessor.attachTransformer(&transformAdapter);
