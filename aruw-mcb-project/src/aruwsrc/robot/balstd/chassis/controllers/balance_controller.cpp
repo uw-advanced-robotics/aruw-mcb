@@ -65,7 +65,7 @@ Vector BalanceController::vmLegForces(
     return Vector(horizontalForce, downwardForce, 0);
 }
 
-CMSISMat<2, 6> BalanceController::getLQRGains(const float legLength) const
+CMSISMat<2, 6> BalanceController::getLQRGains(const float) const
 {
     // clang-format off
     return CMSISMat<2, 6>({
