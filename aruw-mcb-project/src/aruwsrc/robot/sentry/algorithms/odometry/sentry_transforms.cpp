@@ -80,10 +80,10 @@ void SentryTransforms::updateTransforms()
     worldToVTM = worldToTurretMajor;
 
     // Chassis to Arducam
-    chassisToArducam1 = chassisToTurretMajor.compose(ARDUCAM1_OFFSET);
-    chassisToArducam2 = chassisToTurretMajor.compose(ARDUCAM2_OFFSET);
-    chassisToArducam3 = chassisToTurretMajor.compose(ARDUCAM3_OFFSET);
-    chassisToArducam4 = chassisToTurretMajor.compose(ARDUCAM4_OFFSET);
+    chassisToArducam0 = chassisToTurretMajor.compose(ARDUCAM1_OFFSET);
+    chassisToArducam1 = chassisToTurretMajor.compose(ARDUCAM2_OFFSET);
+    chassisToArducam2 = chassisToTurretMajor.compose(ARDUCAM3_OFFSET);
+    chassisToArducam3 = chassisToTurretMajor.compose(ARDUCAM4_OFFSET);
 }
 
 }  // namespace aruwsrc::sentry::algorithms::odometry
