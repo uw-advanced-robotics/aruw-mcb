@@ -31,6 +31,8 @@ namespace aruwsrc::sentry::algorithms::odometry
 class SentryTransforms
 {
     using Transform = tap::algorithms::transforms::Transform;
+    using Position = tap::algorithms::transforms::Position;
+    using Orientation = tap::algorithms::transforms::Orientation;
     friend class SentryTransformAdapter;
 
 public:
