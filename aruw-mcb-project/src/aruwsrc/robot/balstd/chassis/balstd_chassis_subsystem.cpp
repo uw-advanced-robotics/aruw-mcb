@@ -80,8 +80,12 @@ void BalstdChassisSubsystem::updateState()
     currState.leftLegState = leftLeg.getState();
     currState.rightLegState = rightLeg.getState();
 
-    currState.virtualLegState.P3.data[0] = (currState.leftLegState.P3.data[0] + currState.rightLegState.P3.data[0]) / 2;
-    currState.virtualLegState.P3.data[1] = (currState.leftLegState.P3.data[1] + currState.rightLegState.P3.data[1]) / 2;
+    currState.virtualLegState.P3.data[0] =
+        (currState.leftLegState.P3.data[0] + currState.rightLegState.P3.data[0]) / 2;
+    currState.virtualLegState.P3.data[1] =
+        (currState.leftLegState.P3.data[1] + currState.rightLegState.P3.data[1]) / 2;
+    currState.virtualLegState.vxc = (currState.leftLegState.vxc + currState.rightLegState.vxc) / 2;
+    currState.virtualLegState.vyc = (currState.leftLegState.vyc + currState.rightLegState.vyc) / 2;
     currState.virtualLegState.calculatePendulumState();
 
     currState.roll = chassisImu.getRoll();
@@ -92,6 +96,9 @@ void BalstdChassisSubsystem::updateState()
     currState.yawVel = chassisImu.getGz();
 
     currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.alpha);
+
+    currState.virtualPendTheta = currState.virtualLegState.alpha - currState.pitch;
+    currState.virtualPendThetaDot = currState.virtualLegState.alphaDot - currState.pitchVel;
 
     currState.virtualWheelVel =
         (currState.leftLegState.wheelVel + currState.rightLegState.wheelVel) / 2;

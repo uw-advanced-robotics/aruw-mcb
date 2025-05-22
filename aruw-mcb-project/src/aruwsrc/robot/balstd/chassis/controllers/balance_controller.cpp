@@ -12,13 +12,13 @@ BalstdChassisOutput BalanceController::runController(const BalstdChassisState& c
 {
     // LQR
     this->vmState.data = {
-        0,
-        0,
+        currState.virtualPendTheta,
+        currState.virtualPendThetaDot,
         currState.virtualWheelPos,
         currState.virtualWheelVel,
         currState.pitch,
         currState.pitchVel};
-    CMSISMat<6, 1> vmRef = CMSISMat<6, 1>({0, 0, controlOperatorInterface.getXVel(), 0, 0, 0});
+    CMSISMat<6, 1> vmRef = CMSISMat<6, 1>({0, 0, 0, 0, 0, 0});
 
     // u = K(x_d - x)
     CMSISMat<2, 1> vmOuts = getLQRGains(currState.virtualLegState.L) * (vmRef - vmState);
@@ -69,9 +69,9 @@ CMSISMat<2, 6> BalanceController::getLQRGains(const float) const
 {
     // clang-format off
     return CMSISMat<2, 6>({
-        0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0
-    });
+            -49.12, -8.4605, -20.491, -17.87, 31.272, 3.3703,
+             33.962, 6.4306, 17.903, 14.759, 129.66, 6.5244
+        });
     // clang-format on
 }
 

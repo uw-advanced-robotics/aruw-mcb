@@ -67,10 +67,11 @@ struct BalstdLegState
 
     float kneesWidthX, kneesWidthY;  // components of distance between knees
 
-    float L, alpha;  // pendulum length and angle wrt hip center
+    float L, alpha, alphaDot;  // pendulum length and angle wrt hip center
 
     tap::algorithms::CMSISMat<2, 2> jacobianTranspose;
 
+    // todo: this is completely unnecessary idk why tf i ever put it in
     BalstdLegState()
         : qFront(0),
           qBack(0),
@@ -92,6 +93,7 @@ struct BalstdLegState
           kneesWidthY(0),
           L(0),
           alpha(0),
+          alphaDot(0),
           jacobianTranspose({0, 0, 0, 0})
     {
     }
@@ -167,6 +169,7 @@ struct BalstdLegState
     void calculatePendulumState()
     {
         alpha = atan2(P3.data[0], P3.data[1]);
+        alphaDot = tap::algorithms::cross(P3, {{vxc, vyc, 0.0f}}).data[2];
         L = sqrt(P3.data[0] * P3.data[0] + P3.data[1] * P3.data[1]);
     }
 
