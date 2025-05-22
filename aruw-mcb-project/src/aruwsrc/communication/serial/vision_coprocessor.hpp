@@ -33,6 +33,7 @@
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
+#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
@@ -60,7 +61,7 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_SENTRY_HYRDA)
+#if defined(TARGET_SENTRY_HYDRA)
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
 #else
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
@@ -278,8 +279,6 @@ public:
 
     mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
 
-    mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
-
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
     mockable inline bool getSomeTurretHasTarget() const
@@ -339,6 +338,12 @@ public:
      * for future resets.
      */
     inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+
+    mockable inline void attachAutoNavController(
+        aruwsrc::chassis::ChassisAutoNavController* autoNavController)
+    {
+        this->autoNavController = autoNavController;
+    }
 
     // @todo private should not be here
 private:
@@ -438,6 +443,8 @@ private:
     tap::arch::MilliTimeout cvOfflineTimeout;
 
     aruwsrc::algorithms::transforms::TransformerInterface* transformer;
+
+    aruwsrc::chassis::ChassisAutoNavController* autoNavController = nullptr;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 

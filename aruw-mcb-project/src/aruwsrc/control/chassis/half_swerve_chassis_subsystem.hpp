@@ -41,6 +41,7 @@ public:
     HalfSwerveChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
         Module* moduleOne,
         Module* moduleTwo,
         const float wheelbaseRadius,

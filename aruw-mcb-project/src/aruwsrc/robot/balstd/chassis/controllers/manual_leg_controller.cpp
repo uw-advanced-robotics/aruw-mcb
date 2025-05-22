@@ -3,7 +3,7 @@
 namespace aruwsrc::control::balstd
 {
 float mlx, mly;
-BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&)
+BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&, float)
 {
     mlx = controlOperatorInterface.getManualLegXForce();
     mly = controlOperatorInterface.getManualLegYForce();

@@ -34,6 +34,7 @@ public:
     XDriveChassisSubsystemMock(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
         testing::NiceMock<tap::mock::MotorInterfaceMock>& leftFrontMotor,
         testing::NiceMock<tap::mock::MotorInterfaceMock>& leftBackMotor,
         testing::NiceMock<tap::mock::MotorInterfaceMock>& rightFrontMotor,

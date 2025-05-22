@@ -134,7 +134,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         if (!ballistics::findTargetProjectileIntersection(
                 targetState,
                 launchSpeed,
-                3,
+                NUM_FORWARD_KINEMATIC_PROJECTIONS,
                 &lastComputedSolution->pitchAngle,
                 &lastComputedSolution->yawAngle,
                 &lastComputedSolution->timeOfFlight,

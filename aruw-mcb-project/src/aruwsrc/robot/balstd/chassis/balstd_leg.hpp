@@ -15,14 +15,14 @@
  *     ⟋          ⟍
  * P1 *             * P2
  *     \           /
- *      \         /  
+ *      \         /
  *    P5 * ───── * P1
- * 
+ *
  *  y
  *  ^
  *  |
  *    ──> x
-*/
+ */
 
 namespace aruwsrc::control::balstd
 {
@@ -39,37 +39,36 @@ struct BalstdLegConfig
     float backHipOuterLimit;   // radians
     float backHipInnerLimit;   // radians
 
-    float frontUpperLegLinkInertia; //kg*m^2
-    float backUpperLegLinkInertia;  //kg*m^2
-    float frontLowerLegLinkInertia; //kg*m^2
-    float backLowerLegLinkInertia;  //kg*m^2
+    float frontUpperLegLinkInertia;  // kg*m^2
+    float backUpperLegLinkInertia;   // kg*m^2
+    float frontLowerLegLinkInertia;  // kg*m^2
+    float backLowerLegLinkInertia;   // kg*m^2
 
-    float frontUpperLegLinkMass; //kg
-    float backUpperLegLinkMass;  //kg
-    float frontLowerLegLinkMass; //kg
-    float backLowerLegLinkMass;  //kg
+    float frontUpperLegLinkMass;  // kg
+    float backUpperLegLinkMass;   // kg
+    float frontLowerLegLinkMass;  // kg
+    float backLowerLegLinkMass;   // kg
 
-    float wheelMass;             //kg
+    float wheelMass;  // kg
 
-    float balstdMass;            //kg
+    float balstdMass;  // kg
 };
 struct BalstdLegState
 {
-    float qFront, qBack;          // angles of upper linkages in radians
-    float qFrontVelo, qBackVelo;  // velocities of upper linkages in rad/s
-    float qLowerFront, qLowerBack; // Angles of the lower linkages
-    float qLowerFrontVelo, qLowerBackVelo; // velocities of lower linkages in rad/s
-    float wheelVel;               // wheel angular velocity in rad/s
+    float qFront, qBack;                    // angles of upper linkages in radians
+    float qFrontVelo, qBackVelo;            // velocities of upper linkages in rad/s
+    float qLowerFront, qLowerBack;          // Angles of the lower linkages
+    float qLowerFrontVelo, qLowerBackVelo;  // velocities of lower linkages in rad/s
+    float wheelVel;                         // wheel angular velocity in rad/s
 
-    CMSISMat<3,1> P1, P2, P3, P4, P5; // Positions of joints (x, y, z)
+    CMSISMat<3, 1> P1, P2, P3, P4, P5;  // Positions of joints (x, y, z)
 
-    float vxc, vyc; // Velocity of the wheel transitionally 
-    
+    float vxc, vyc;  // Velocity of the wheel transitionally
+
     float kneesWidthX, kneesWidthY;  // components of distance between knees
-    
-    float L, theta;  // pendulum length and angle wrt hip center
 
-    
+    float L, alpha;  // pendulum length and angle wrt hip center
+
     tap::algorithms::CMSISMat<2, 2> jacobianTranspose;
 
     BalstdLegState()
@@ -82,19 +81,20 @@ struct BalstdLegState
           qLowerFrontVelo(0),
           qLowerBackVelo(0),
           wheelVel(0),
-          P1({0,0,0}),
-          P2({0,0,0}),
-          P3({0,0,0}),
-          P4({0,0,0}),
-          P5({0,0,0}),
+          P1({0, 0, 0}),
+          P2({0, 0, 0}),
+          P3({0, 0, 0}),
+          P4({0, 0, 0}),
+          P5({0, 0, 0}),
           vxc(0),
           vyc(0),
           kneesWidthX(0),
           kneesWidthY(0),
           L(0),
-          theta(0),
-          jacobianTranspose({0,0,0,0})
-    {}
+          alpha(0),
+          jacobianTranspose({0, 0, 0, 0})
+    {
+    }
 
     void calculateJacobianTranspose(BalstdLegConfig config)
     {
@@ -103,9 +103,7 @@ struct BalstdLegState
         float p5x4 = -config.upperLinkLength * sin(qBack);
         float p5y4 = config.upperLinkLength * cos(qBack);
 
-        float d = sqrt(
-            kneesWidthX * kneesWidthX +
-            kneesWidthY * kneesWidthY);
+        float d = sqrt(kneesWidthX * kneesWidthX + kneesWidthY * kneesWidthY);
         float h = sqrt(config.lowerLinkLength * config.lowerLinkLength - d * d / 4);
 
         float p1d = -(kneesWidthX * p1x2 + kneesWidthY * p1y2) / d;
@@ -123,15 +121,16 @@ struct BalstdLegState
 
     void calculateForwardKinematics(BalstdLegConfig config)
     {
-        
         // knee coordinates
         P2 = CMSISMat<3, 1>(
             {config.upperLinkLength * cos(qFront) + config.fixedLinkLength / 2,
-             config.upperLinkLength * sin(qFront), 0});
+             config.upperLinkLength * sin(qFront),
+             0});
 
         P4 = CMSISMat<3, 1>(
             {config.upperLinkLength * cos(qBack) - config.fixedLinkLength / 2,
-             config.upperLinkLength * sin(qBack), 0});
+             config.upperLinkLength * sin(qBack),
+             0});
 
         // wheel coordinates
         // ||P2-Ph|| = (a2^2 - a3^2 + ||P4-P2||^2) / (2*||P4-P2||)
@@ -145,7 +144,8 @@ struct BalstdLegState
         // ||P4-P2||
         float P4_P2_mag = sqrtf(P4_P2.data[0] * P4_P2.data[0] + P4_P2.data[1] * P4_P2.data[1]);
 
-        // Ph is the intersection point of the line that forms the knee and a perpendicular line to the wheel
+        // Ph is the intersection point of the line that forms the knee and a perpendicular line to
+        // the wheel
 
         // ||P2-Ph||
         float P2_Ph_mag = P4_P2_mag / 2;
@@ -158,20 +158,22 @@ struct BalstdLegState
             sqrtf(config.lowerLinkLength * config.lowerLinkLength - P2_Ph_mag * P2_Ph_mag);
 
         // P3 = Ph ± ||P3-Ph|| / ||P2-P4|| * (P4-P2)
-        CMSISMat<3,1> P3_2 = Ph + P3_Ph_mag / P4_P2_mag * CMSISMat<2, 1>({P4_P2.data[1], -P4_P2.data[0]});
-        
+        CMSISMat<3, 1> P3_2 =
+            Ph + P3_Ph_mag / P4_P2_mag * CMSISMat<2, 1>({P4_P2.data[1], -P4_P2.data[0]});
+
         P3 = {{P3_2.data[0], P3_2.data[1], 0}};
     }
 
     void calculatePendulumState()
     {
-        L = atan2(P3.data[0], P3.data[1]);
-        theta = sqrt(P3.data[0] * P3.data[0] + P3.data[1] * P3.data[1]);
+        alpha = atan2(P3.data[0], P3.data[1]);
+        L = sqrt(P3.data[0] * P3.data[0] + P3.data[1] * P3.data[1]);
     }
 
     void calculateWheelTranslationVelocity()
     {
-        const CMSISMat<2,1> wheel_velo = jacobianTranspose.transpose() * CMSISMat<2, 1>({qFrontVelo,qBackVelo});
+        const CMSISMat<2, 1> wheel_velo =
+            jacobianTranspose.transpose() * CMSISMat<2, 1>({qFrontVelo, qBackVelo});
         vxc = wheel_velo.data[0];
         vyc = wheel_velo.data[1];
     }
@@ -179,20 +181,20 @@ struct BalstdLegState
     void calculateLowerLegVelocity(BalstdLegConfig config)
     {
         // ||P2 - P3|| / l
-        CMSISMat<3,1> VP2 = tap::algorithms::cross({{0.0f,0.0f,qFrontVelo}}, P3);
-        CMSISMat<3,1> VP3 = {{vxc,vyc}};
-        
-        CMSISMat<3,1> VP2_VP3 = VP2 - VP3;
+        CMSISMat<3, 1> VP2 = tap::algorithms::cross({{0.0f, 0.0f, qFrontVelo}}, P3);
+        CMSISMat<3, 1> VP3 = {{vxc, vyc}};
 
-        CMSISMat<3,1> frontAngularVelo = VP2_VP3 / config.lowerLinkLength;
+        CMSISMat<3, 1> VP2_VP3 = VP2 - VP3;
+
+        CMSISMat<3, 1> frontAngularVelo = VP2_VP3 / config.lowerLinkLength;
 
         qLowerFrontVelo = frontAngularVelo.data[2];
 
         // ||P4 - P3|| / l
-        CMSISMat<3,1> VP4 = tap::algorithms::cross({{0.0f,0.0f,qBackVelo}}, P4);
-        
-        CMSISMat<3,1> VP4_VP3 = VP4 - VP3;
-        CMSISMat<3,1> backAnglularVelo = VP4_VP3 / config.lowerLinkLength;
+        CMSISMat<3, 1> VP4 = tap::algorithms::cross({{0.0f, 0.0f, qBackVelo}}, P4);
+
+        CMSISMat<3, 1> VP4_VP3 = VP4 - VP3;
+        CMSISMat<3, 1> backAnglularVelo = VP4_VP3 / config.lowerLinkLength;
 
         qLowerBackVelo = backAnglularVelo.data[2];
     }
@@ -210,7 +212,7 @@ struct BalstdLegState
         qLowerBack = atan(deltaX_2 / deltaY_2);
     }
 
-    std::array<float, 2>  calculateLegEnergy(BalstdLegConfig config);
+    std::array<float, 2> calculateLegEnergy(BalstdLegConfig config);
 };
 
 class BalstdLeg
@@ -241,7 +243,7 @@ public:
     void updateState();
 
     inline BalstdLegState getState() const { return currState; }
-    
+
     float updateCBF(BalstdLegState leg);
 
 private:
@@ -252,7 +254,6 @@ private:
     const BalstdLegConfig config;
 
     BalstdLegState currState;
-
 
     inline float getFrontHipAngle() const
     {
@@ -279,10 +280,8 @@ private:
     static constexpr float M3508_TORQUE_CONSTANT =
         (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / Nm/A = desOut/Nm
 
-
     float CBF_ENERGY_LIMIT;
     float maxTorque;
-
 };
 
 }  // namespace aruwsrc::control::balstd

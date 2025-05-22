@@ -56,7 +56,7 @@ void BalstdChassisSubsystem::refresh()
     updateState();
 
     BalstdChassisOutput currOutput =
-        (controller == nullptr) ? ZERO_OUTPUT : controller->runController(currState);
+        (controller == nullptr) ? ZERO_OUTPUT : controller->runController(currState, 0.002f);
 
     setOutputs(currOutput);
 
@@ -85,13 +85,17 @@ void BalstdChassisSubsystem::updateState()
     currState.virtualLegState.calculatePendulumState();
 
     currState.roll = chassisImu.getRoll();
+    currState.rollVel = chassisImu.getGx();
     currState.pitch = chassisImu.getPitch();
+    currState.pitchVel = chassisImu.getGy();
     currState.yaw = chassisImu.getYaw();
+    currState.yawVel = chassisImu.getGz();
 
-    currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.theta);
+    currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.alpha);
 
-    currState.virtualWheelPos +=
-        (currState.leftLegState.wheelVel + currState.rightLegState.wheelVel) / 2 * 0.02f;
+    currState.virtualWheelVel =
+        (currState.leftLegState.wheelVel + currState.rightLegState.wheelVel) / 2;
+    currState.virtualWheelPos += currState.virtualWheelVel * 0.02f;
 }
 
 }  // namespace aruwsrc::control::balstd

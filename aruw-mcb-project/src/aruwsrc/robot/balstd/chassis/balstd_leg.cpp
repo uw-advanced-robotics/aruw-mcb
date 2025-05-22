@@ -77,6 +77,9 @@ void BalstdLeg::updateState()
     currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
     currState.calculateForwardKinematics(config);
 
+    currState.qFrontVelo = frontHipMotor.getEncoder()->getVelocity();
+    currState.qBackVelo = backHipMotor.getEncoder()->getVelocity();
+
     calculateJacobianTranspose();
 }
 
