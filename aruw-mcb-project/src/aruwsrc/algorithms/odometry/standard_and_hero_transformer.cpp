@@ -28,7 +28,8 @@ using namespace aruwsrc::control::client_display;
 namespace aruwsrc::algorithms::transforms
 {
 #if defined(TARGET_STANDARD_NULL)
-static Transform TURRET_TO_ARDUCAM_OFFSET = Transform(Position(0.016, 0.126, 0.056), Orientation(0, 0, 0));
+static Transform TURRET_TO_ARDUCAM_OFFSET =
+    Transform(Position(0.016, 0.126, 0.056), Orientation(0, 0, 0));
 #else
 static Transform TURRET_TO_ARDUCAM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
 #endif

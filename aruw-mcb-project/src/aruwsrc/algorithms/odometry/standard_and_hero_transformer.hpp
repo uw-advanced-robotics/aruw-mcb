@@ -30,7 +30,6 @@
 
 namespace aruwsrc::algorithms::transforms
 {
-using namespace tap::algorithms::transforms;
 /**
  * @brief transform provider for both the standard and hero
  * Use the StandardAndHeroTransformerSubsystem as a convenience class to
@@ -38,6 +37,7 @@ using namespace tap::algorithms::transforms;
  */
 class StandardAndHeroTransformer
 {
+    using Transform = tap::algorithms::transforms::Transform;
     friend class StandardAndHeroTransformAdapter;
 
 public:

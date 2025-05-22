@@ -28,10 +28,9 @@
 
 namespace aruwsrc::sentry::algorithms::odometry
 {
-using namespace tap::algorithms::transforms;
-
 class SentryTransforms
 {
+    using Transform = tap::algorithms::transforms::Transform;
     friend class SentryTransformAdapter;
 
 public:
