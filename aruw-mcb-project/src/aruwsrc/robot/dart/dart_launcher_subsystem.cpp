@@ -32,7 +32,10 @@ DartLauncherSubsystem::DartLauncherSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& pullMotor)
     : Subsystem(drivers),
-      motor(pullMotor){};
+      motor(pullMotor), 
+      servo(drivers, SERVO_PORT, SERVO_MAX, SERVO_MIN, SERVO_SPEED)
+      {servo.setTargetPwm(SERVO_MAX);
+      };
 
 void DartLauncherSubsystem::initialize() { motor.initialize(); }
 
@@ -50,4 +53,15 @@ bool DartLauncherSubsystem::isLimitSwitched() { return drivers->digital.read(LIM
 void DartLauncherSubsystem::refresh() { beam = !drivers->digital.read(BEAMBREAK_PORT); }
 
 void DartLauncherSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
+
+void DartLauncherSubsystem::setOpen() { servo.setTargetPwm(servo.getMaxPWM()); }
+
+void DartLauncherSubsystem::setClose() { servo.setTargetPwm(servo.getMinPWM()); }
+
+void DartLauncherSubsystem::refresh() { servo.updateSendPwmRamp(); }
+
+float DartLauncherSubsystem::getOpenPWM() { return servo.getMaxPWM(); }
+
+float DartLauncherSubsystem::getClosePWM() { return servo.getMinPWM(); }
+
 }  // namespace aruwsrc::robot::dart

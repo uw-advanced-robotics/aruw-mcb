@@ -30,9 +30,14 @@
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 #include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
+#include "tap/motor/servo.hpp"
+
 
 #include "dart_pullback_command.hpp"
 #include "dart_release_command.hpp"
+#include "dart_open_command.hpp"
+#include "dart_close_command.hpp"
+
 using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
@@ -67,6 +72,10 @@ DartLauncherSubsystem dartLauncher(drivers(), pullMotor);
 DartReleaseCommand dartRelease(dartLauncher);
 DartPullbackCommand dartPullback(dartLauncher);
 
+DartOpenCommand servoOpen(dartLauncher);
+DartCloseCommand servoClose(dartLauncher);
+
+
 HoldCommandMapping rightSwitchUp(
     drivers(),
     {&dartPullback},
@@ -76,6 +85,17 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&dartRelease},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+
+
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&servoOpen},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&servoClose},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 void initializeSubsystems() { dartLauncher.initialize(); }
 
@@ -92,6 +112,8 @@ void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
 }
 
 }  // namespace dart_control

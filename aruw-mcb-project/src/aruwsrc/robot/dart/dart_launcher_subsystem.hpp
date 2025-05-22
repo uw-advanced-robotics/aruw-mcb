@@ -43,10 +43,25 @@ public:
     bool isBeamBroken();
     bool isLimitSwitched();
 
+
+    // set servo to the open angle
+    void setOpen();
+
+    // set servo to the close angle
+    void setClose();
+
+    // return the angle defined as open as a PWM value
+    float getOpenPWM();
+
+    // return the angle defined as close as a PWM value
+    float getClosePWM();
+
     const char *getName() const override { return "Dart Launcher Subsystem"; }
 
 protected:
     tap::motor::MotorInterface &motor;
+    tap::motor::Servo servo;
+    
 };  // class DartLauncherSubsystem
 
 }  // namespace aruwsrc::robot::dart
