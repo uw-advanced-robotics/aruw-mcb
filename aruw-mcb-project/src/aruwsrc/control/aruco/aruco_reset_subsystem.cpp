@@ -89,8 +89,8 @@ void ArucoResetSubsystem::processArducamData()
     float prevY = odometry.getCurrentLocation2D().getY();
 
     // Apply a low-pass between the aruco measurement and our current odometry position
-    newX = lowPassFilter(prevX, newX, VISION_TRUST);
-    newY = lowPassFilter(prevY, newY, VISION_TRUST);
+    newX = lowPassFilter(prevX, newX, VISION_TRUST_X);
+    newY = lowPassFilter(prevY, newY, VISION_TRUST_Y);
 
     odometry.overrideOdometryPosition(newX, newY);
 
