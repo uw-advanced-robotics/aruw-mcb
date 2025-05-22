@@ -50,7 +50,7 @@ void ArucoResetSubsystem::processRealsenseData()
     vision.invalidateRealsenseArucoResetData();
 
     // Get the chassis position estimate from the aruco data
-    float arucoChassisXEstimate = resetData.data.x -  // world To turret
+    float arucoChassisXEstimate = resetData.data.x -
                                   transformer.getWorldToTurret(resetData.data.turretId).getX() +
                                   transformer.getWorldToChassis().getX();
 
@@ -62,9 +62,6 @@ void ArucoResetSubsystem::processRealsenseData()
     odometry.overrideOdometryPosition(arucoChassisXEstimate, arucoChassisYEstimate);
 }
 
-modm::Vector3f angles;
-Transform worldToCamera(Transform::identity()), cameraToChassis(Transform::identity()),
-    worldToChassis(Transform::identity());
 void ArucoResetSubsystem::processArducamData()
 {
     const VisionCoprocessor::ArucoResetData& resetData = vision.getLastArducamArucoData();
@@ -74,12 +71,12 @@ void ArucoResetSubsystem::processArducamData()
     const VisionCoprocessor::ArucoResetPacket& poseData = resetData.data;
 
     modm::Quaternion q(poseData.quatW, poseData.quatX, poseData.quatY, poseData.quatZ);
-    angles = eulerAnglesFromQuaternion(q);
+    modm::Vector3f angles = eulerAnglesFromQuaternion(q);
 
-    worldToCamera = Transform(poseData.x, poseData.y, poseData.z, angles.x, angles.y, angles.z);
-    cameraToChassis = transformer.getChassisToArducam(resetData.data.turretId).getInverse();
+    Transform worldToCamera = Transform(poseData.x, poseData.y, poseData.z, angles.x, angles.y, angles.z);
+    Transform cameraToChassis = transformer.getChassisToArducam(resetData.data.turretId).getInverse();
 
-    worldToChassis = worldToCamera.compose(cameraToChassis);
+    Transform worldToChassis = worldToCamera.compose(cameraToChassis);
 
     float newX = worldToChassis.getX();
     float newY = worldToChassis.getY();
@@ -92,22 +89,6 @@ void ArucoResetSubsystem::processArducamData()
     newY = lowPassFilter(prevY, newY, VISION_TRUST);
 
     odometry.overrideOdometryPosition(newX, newY);
-
-    // Get the chassis position estimate from the aruco data
-    // float arucoChassisXEstimate =
-    //     resetData.data.x +
-    //     transformer.getChassisToArducam(resetData.data.turretId).getInverse().getX();
-
-    // float arucoChassisYEstimate =
-    //     resetData.data.y +
-    //     transformer.getChassisToArducam(resetData.data.turretId).getInverse().getY();
-
-    // Apply a low-pass between the aruco measurement and our current odometry position
-    // float newX = lowPassFilter(prevX, arucoChassisXEstimate, VISION_TRUST);
-    // float newY = lowPassFilter(prevY, arucoChassisYEstimate, VISION_TRUST);
-
-    // // Set the new position in the odometry subsystem
-    // odometry.overrideOdometryPosition(newX, newY);
 }
 
 }  // namespace aruwsrc::control::aruco

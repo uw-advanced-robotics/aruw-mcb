@@ -42,10 +42,10 @@ SentryTransforms::SentryTransforms(
       worldToTurretLeft(Transform::identity()),
       worldToTurretRight(Transform::identity()),
       worldToVTM(Transform::identity()),
+      chassisToArducam0(Transform::identity()),
       chassisToArducam1(Transform::identity()),
       chassisToArducam2(Transform::identity()),
       chassisToArducam3(Transform::identity()),
-      chassisToArducam4(Transform::identity()),
       chassisToTurretMajor(Transform::identity()),
       turretMajorToTurretLeft(0., config.turretMinorOffset, 0., 0., 0., 0.),
       turretMajorToTurretRight(0., -config.turretMinorOffset, 0., 0., 0., 0.)

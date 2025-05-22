@@ -107,15 +107,15 @@ public:
         switch (cameraID)
         {
             case 0:
-                return chassisToArducam1;
+                return chassisToArducam0;
             case 1:
-                return chassisToArducam2;
-            case 2:
-                return chassisToArducam3;
-            case 3:
-                return chassisToArducam4;
-            default:
                 return chassisToArducam1;
+            case 2:
+                return chassisToArducam2;
+            case 3:
+                return chassisToArducam3;
+            default:
+                return chassisToArducam0;
         }
     }
 
@@ -139,7 +139,7 @@ private:
     Transform worldToTurretLeft;
     Transform worldToTurretRight;
     Transform worldToVTM;
-    Transform chassisToArducam1, chassisToArducam2, chassisToArducam3, chassisToArducam4;
+    Transform chassisToArducam0, chassisToArducam1, chassisToArducam2, chassisToArducam3;
 
     // Intermediary transforms
     Transform chassisToTurretMajor;
