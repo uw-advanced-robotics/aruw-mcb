@@ -26,16 +26,16 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #endif
 
+#include <type_traits>
+
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
-#include <type_traits>
 
 #include "modm/processing/protothread.hpp"
 
 namespace aruwsrc::communication::serial
 {
-
 enum class RobotOrbitMessageType : uint8_t
 {
     POSITION_UPDATE = 0,
@@ -44,8 +44,12 @@ enum class RobotOrbitMessageType : uint8_t
 
 class RobotOrbitMessageQueue : public modm::pt::Protothread
 {
-    static_assert(static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES) <= 32, "Only 32 message types maximum allowed.");
-    static_assert(static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES) >= 1, "There must at least be 1 message type.");
+    static_assert(
+        static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES) <= 32,
+        "Only 32 message types maximum allowed.");
+    static_assert(
+        static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES) >= 1,
+        "There must at least be 1 message type.");
 
 public:
     static constexpr size_t MAX_MESSAGE_DATA_SIZE = 113;
@@ -97,15 +101,15 @@ public:
         {
             length = MAX_MESSAGE_DATA_SIZE - 1;
         }
-        
+
         uint8_t typeValue = static_cast<uint8_t>(type);
-        
+
         messageDataLength[typeValue] = length;
         for (size_t i = 0; i < length; i++)
         {
             messageData[typeValue][i] = data[i];
         }
-        
+
         queuedMessageTypeBitmap |= (1 << typeValue);
     }
 
@@ -129,7 +133,8 @@ private:
     uint32_t queuedMessageTypeBitmap = 0;
     tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
 
-    static constexpr uint8_t NUM_MSG_TYPES = static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES);
+    static constexpr uint8_t NUM_MSG_TYPES =
+        static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES);
     uint8_t messageData[NUM_MSG_TYPES][MAX_MESSAGE_DATA_SIZE];
     size_t messageDataLength[NUM_MSG_TYPES] = {};
     size_t currentMessageLength = 0;
@@ -154,13 +159,13 @@ private:
     inline void prepareMessageForTransmission()
     {
         robotToRobotMessage.dataAndCRC16[0] = nextMessageType;
-        
+
         size_t dataLength = messageDataLength[nextMessageType];
         for (size_t i = 0; i < dataLength; i++)
         {
             robotToRobotMessage.dataAndCRC16[i + 1] = messageData[nextMessageType][i];
         }
-        
+
         currentMessageLength = dataLength + 1;
     }
 };

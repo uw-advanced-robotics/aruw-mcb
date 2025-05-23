@@ -22,12 +22,12 @@
 
 #include <modm/processing/resumable.hpp>
 
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "robot_orbit_message_queue.hpp"
 #include "robot_orbit_state.hpp"
 
@@ -36,7 +36,6 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::serial
 {
-
 class RobotOrbitTransmitter : public RefSerial::RobotToRobotMessageHandler
 {
 public:
@@ -56,7 +55,7 @@ private:
     RefSerial* refSerial;
 
     RefSerialTransmitter::RobotId getAllyRobotId() const;
-    
+
     // Define scale factor based on field size and uint16_t max value
     // RoboMaster field is 12m in the largest dimension
     // UINT16_MAX = 65535, dividing by 12 gives ~5461 units per meter
