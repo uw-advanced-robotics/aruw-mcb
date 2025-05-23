@@ -23,8 +23,9 @@
 #include "tap/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
-#include "aruwsrc/mock/oled_display_mock.hpp"
+#include "aruwsrc/mock/oled_display_mock.hpp" #include "aruwsrc/mock/oled_display_mock.hpp"
 
 #else
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
@@ -42,10 +43,11 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
+
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr),
           engineerCVCommunication(this)
     {
     }
@@ -53,6 +55,7 @@ public:
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
+    serial::EngineerCVCommunication engineerCVCommunication;
 #else
 public:
     control::engineer::EngineerControlOperatorInterface controlOperatorInterface;

@@ -20,12 +20,17 @@
 #if defined(TARGET_ENGINEER)
 
 #include "tap/communication/gpio/digital.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
+#include "tap/control/command_mapper.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_scheduler.hpp"
+#include "tap/control/hold_command_mapping.hpp"
 
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
+#include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
@@ -36,12 +41,18 @@
 #include "aruwsrc/robot/engineer/arm/arm_lift_subsystem.hpp"
 #include "aruwsrc/robot/engineer/arm/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/arm/wrist_subsystem.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/cube_move_manual_command.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/cube_move_position_command.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 
 using namespace tap::gpio;
+using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
 using namespace aruwsrc::engineer;
+using namespace aruwsrc::robot::engineer;
+using namespace tap::control;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -55,7 +66,21 @@ namespace aruwsrc
 {
 namespace control
 {
+tap::motor::DjiMotor storageLiftMotor(
+    drivers(),
+    CUBE_LIFT_MOTOR_ID,
+    LIFT_MOTOR_CAN_BUS,
+    true,
+    "Lifting Motor",
+    false,
+    1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
+    &(drivers()->digital),
+    CUBELIFT_LIMITSWITCH_PORT,
+    true);
+LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
 /* define subsystems --------------------------------------------------------*/
+CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, 0);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
@@ -244,6 +269,12 @@ JointSubsystem wristRollSubsystem(
     aruwsrc::engineer::WRIST_ROLL_CONFIG);
 
 /* define commands ----------------------------------------------------------*/
+HomingCommand cubeLiftHome(cubeLift);
+
+CubeMoveManualCommand cubeManualControl(cubeLift, &drivers()->controlOperatorInterface);
+CubeMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
+CubeMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
+CubeMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
 
 aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
@@ -265,6 +296,31 @@ control::engineer::ArmControllerCommand armControllerCommand(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+tap::control::HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&cubeLiftHome},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+tap::control::HoldCommandMapping leftSwitchMid(
+    drivers(),
+    {&cubeManualControl},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+
+tap::control::HoldCommandMapping leftDownRightUp(
+    drivers(),
+    {&oneCubePosition},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+
+tap::control::HoldCommandMapping leftDownRightMid(
+    drivers(),
+    {&twoCubePosition},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
+
+tap::control::HoldCommandMapping leftDownRightDown(
+    drivers(),
+    {&threeCubePosition},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -273,6 +329,7 @@ void initializeSubsystems()
     armExtensionSubsystem.initialize();
     wristRollSubsystem.initialize();
     wristSubsystem.initialize();
+    cubeLift.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -283,6 +340,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&armExtensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
+    drivers->commandScheduler.registerSubsystem(&cubeLift);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -302,8 +360,13 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::engineer::Drivers *) {}
-
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
+{
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftDownRightUp);
+    drivers->commandMapper.addMap(&leftDownRightMid);
+    drivers->commandMapper.addMap(&leftDownRightDown);
+}
 }  // namespace control
 }  // namespace aruwsrc
 

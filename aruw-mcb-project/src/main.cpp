@@ -132,6 +132,10 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
+#if defined(TARGET_ENGINEER)
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+#endif
+
 #if defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
