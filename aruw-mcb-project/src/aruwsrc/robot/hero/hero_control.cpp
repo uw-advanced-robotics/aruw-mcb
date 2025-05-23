@@ -276,7 +276,6 @@ BeybladeCommand beybladeCommand(
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
 
-
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
@@ -569,10 +568,7 @@ HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-ToggleCommandMapping fToggled(
-    drivers(),
-    {&beybladeCommand},
-    RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 PressCommandMapping zPressed(
     drivers(),
     {&turretUTurnCommandLimited},
