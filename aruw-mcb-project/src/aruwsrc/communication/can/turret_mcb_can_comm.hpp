@@ -112,27 +112,15 @@ public:
     /**
      * @return turret pitch angle in rad, a value normalized between [-pi, pi]
      */
-    mockable inline float getPitch() const override
-    {
-#ifdef TARGET_STANDARD_NULL
-        return -lastCompleteImuData.pitch;
-#else
-        return lastCompleteImuData.pitch;
-#endif
-    }
+    mockable inline float getPitch() const override { return lastCompleteImuData.pitch; }
 
     /**
      * @return turret pitch angular velocity in rad/sec
      */
     mockable inline float getGy() const override
     {
-#ifdef TARGET_STANDARD_NULL
-        return -static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
-#else
         return static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
                tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
-#endif
     }
 
     /**
@@ -142,11 +130,7 @@ public:
      */
     mockable inline float getPitchUnwrapped() const
     {
-#ifdef TARGET_STANDARD_NULL
-        return -lastCompleteImuData.pitch - M_TWOPI * static_cast<float>(pitchRevolutions);
-#else
         return lastCompleteImuData.pitch + M_TWOPI * static_cast<float>(pitchRevolutions);
-#endif
     }
 
     /**

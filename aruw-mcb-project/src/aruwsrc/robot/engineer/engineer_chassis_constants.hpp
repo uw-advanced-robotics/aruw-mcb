@@ -23,7 +23,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 
-#include "modm/math/filter/pid.hpp"
+#include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
@@ -127,32 +127,13 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
-/**
- * Fraction of max chassis speed that will be applied to rotation when beyblading
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
-
-/**
- * Fraction between [0, 1], what we multiply user translational input by when beyblading.
- */
-static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.5f;
-
-/**
- * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
- * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
- */
-static constexpr float
-    BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.5f;
-
-/**
- * The fraction to cut rotation speed while moving and beyblading.
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0.5f;
-/**
- * Rotational speed to update the beyblade ramp target by each iteration until final rotation
- * setpoint reached, in RPM.
- */
-static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 100;
+static constexpr BeybladeConfig BEYBLADE_CONFIG{
+    .beybladeRotationalSpeedFractionOfMax = 0.75f,
+    .beybladeTranslationalSpeedMultiplier = 0.5f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.5f,
+    .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
+    .beybladeRampRate = 100,
+};
 }  // namespace aruwsrc::chassis
 
 #endif  // ENGINEER_CHASSIS_CONSTANTS_HPP_

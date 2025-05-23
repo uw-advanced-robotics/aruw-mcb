@@ -21,6 +21,7 @@
 
 #ifdef ALL_STANDARDS
 
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -34,6 +35,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
@@ -92,6 +94,7 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
@@ -103,6 +106,7 @@ using namespace tap::communication::serial;
 using namespace tap::control;
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
+using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::algorithms;
 using namespace aruwsrc::algorithms::odometry;
@@ -154,6 +158,7 @@ tap::motor::DjiMotor yawMotor(
     true,
     1,
     YAW_MOTOR_CONFIG.startEncoderValue);
+
 StandardTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -211,7 +216,32 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+tap::encoder::CanEncoder parallelOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    tap::can::CanBus::CAN_BUS2,
+    true);
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    tap::can::CanBus::CAN_BUS2);
+
+aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
+    &parallelOmni,
+    &perpendicularOmni,
+    aruwsrc::chassis::DEADWHEEL_RADIUS);
+
+aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    deadwheels,
+    turret,
+    drivers()->mpu6500,
+    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
+    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
+    aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+    aruwsrc::chassis::PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
+    aruwsrc::chassis::PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -277,13 +307,15 @@ aruwsrc::chassis::BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
+    (drivers()->controlOperatorInterface),
+    aruwsrc::chassis::BEYBLADE_CONFIG);
 
 aruwsrc::chassis::BeybladeCommand slowBeybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface),
+    aruwsrc::chassis::BEYBLADE_CONFIG,
     0.5f);  // Multiplier for slow beyblade speed
 
 // Turret controllers
@@ -369,7 +401,10 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         &chassisFramePitchTurretController,
         true,
     }},
-    &chassis);
+    &chassis,
+    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    &odometrySubsystem);
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
@@ -660,6 +695,9 @@ void initializeSubsystems()
     buzzer.initialize();
     transformSubsystem.initialize();
     capBankSubsystem.initialize();
+
+    perpendicularOmni.initialize();
+    parallelOmni.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/

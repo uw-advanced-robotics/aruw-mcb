@@ -274,7 +274,8 @@ BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
+    (drivers()->controlOperatorInterface),
+    aruwsrc::chassis::BEYBLADE_CONFIG);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -379,7 +380,10 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         &chassisFramePitchTurretController,
         true,
     }},
-    &chassis);
+    &chassis,
+    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    &odometrySubsystem);
 
 // beyblade governors
 
