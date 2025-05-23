@@ -220,7 +220,7 @@ static void updateIo(Drivers *drivers)
     drivers->engineerCVCommunication.updateSerial();
 #endif
 
-#if defined(ALL_STANDARDS)
+#if defined(ALL_STANDARDS) && !defined(OLD_STANDARDS) || defined(HERO_ZERO)
     drivers->robotOrbitTransmitter.update();
 #endif
 

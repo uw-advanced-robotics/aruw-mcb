@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,43 +17,42 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef INTER_ROBOT_SIGNAL_TRANSMITTER_HPP_
-#define INTER_ROBOT_SIGNAL_TRANSMITTER_HPP_
+#ifndef ROBOT_ORBIT_MESSAGE_QUEUE_HPP_
+#define ROBOT_ORBIT_MESSAGE_QUEUE_HPP_
 
 #ifdef ENV_UNIT_TESTS
 #include "tap/mock/ref_serial_transmitter_mock.hpp"
 #else
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #endif
-#include <type_traits>
 
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
+#include <type_traits>
 
 #include "modm/processing/protothread.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-}
-
 namespace aruwsrc::communication::serial
 {
-/**
- * An inter-robot signal transmitter sends messages to a specified list of targets
- */
-template <typename MSG_TYPE_ENUM, uint8_t NUM_MSG_TYPES>
-class InterRobotSignalMessageTransmitter : public modm::pt::Protothread
+
+enum class RobotOrbitMessageType : uint8_t
 {
-    static_assert(std::is_enum<MSG_TYPE_ENUM>(), "MSG_TYPE_ENUM must be an enum.");
-    static_assert(NUM_MSG_TYPES <= 32, "Only 32 message types maximum allowed.");
-    static_assert(NUM_MSG_TYPES >= 1, "There must at least be 1 message type.");
+    POSITION_UPDATE = 0,
+    NUM_MESSAGE_TYPES
+};
+
+class RobotOrbitMessageQueue : public modm::pt::Protothread
+{
+    static_assert(static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES) <= 32, "Only 32 message types maximum allowed.");
+    static_assert(static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES) >= 1, "There must at least be 1 message type.");
 
 public:
-    inline InterRobotSignalMessageTransmitter(
-        tap::Drivers &drivers,
-        std::vector<tap::communication::serial::RefSerialData::RobotId> targetIds,
+    static constexpr size_t MAX_MESSAGE_DATA_SIZE = 113;
+
+    inline RobotOrbitMessageQueue(
+        tap::Drivers& drivers,
+        std::vector<tap::communication::serial::RefSerialData::RobotId>& targetIds,
         uint16_t messageId)
         : refSerial(drivers.refSerial),
           refSerialTransmitter(&drivers),
@@ -70,8 +69,7 @@ public:
             {
                 if (getNextMessageToSend())
                 {
-                    robotToRobotMessage.dataAndCRC16[0] = nextMessageType;
-
+                    prepareMessageForTransmission();
                     for (currentTargetIdIdx = 0; currentTargetIdIdx < targetIds.size();
                          currentTargetIdIdx++)
                     {
@@ -80,38 +78,50 @@ public:
                             messageId,
                             refSerial.getRobotIdBasedOnCurrentRobotTeam(
                                 targetIds[currentTargetIdIdx]),
-                            2));
+                            currentMessageLength));
                     }
                 }
                 else
                 {
                     PT_YIELD();
                 }
-
                 queuedMessageTypeBitmap &= ~(1 << nextMessageType);
             }
         }
         PT_END();
     }
 
-    inline void queueMessage(MSG_TYPE_ENUM type)
+    inline void setMessageData(RobotOrbitMessageType type, const uint8_t* data, size_t length)
     {
-        queuedMessageTypeBitmap |= (1 << static_cast<uint8_t>(type));
+        if (length > MAX_MESSAGE_DATA_SIZE - 1)
+        {
+            length = MAX_MESSAGE_DATA_SIZE - 1;
+        }
+        
+        uint8_t typeValue = static_cast<uint8_t>(type);
+        
+        messageDataLength[typeValue] = length;
+        for (size_t i = 0; i < length; i++)
+        {
+            messageData[typeValue][i] = data[i];
+        }
+        
+        queuedMessageTypeBitmap |= (1 << typeValue);
     }
 
 private:
-    tap::communication::serial::RefSerial &refSerial;
+    tap::communication::serial::RefSerial& refSerial;
 
 #ifdef ENV_UNIT_TESTS
 public:
     tap::mock::RefSerialTransmitterMock refSerialTransmitter;
-
-private:
 #else
+public:
     tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
 #endif
 
-    std::vector<tap::communication::serial::RefSerialData::RobotId> targetIds;
+private:
+    std::vector<tap::communication::serial::RefSerialData::RobotId>& targetIds;
     uint16_t messageId;
 
     uint8_t currentTargetIdIdx = 0;
@@ -119,10 +129,11 @@ private:
     uint32_t queuedMessageTypeBitmap = 0;
     tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
 
-    /**
-     * @brief Sets nextMessageType to next requested message in queuedMessageTypeBitmap.
-     * @return true if there is a next message and false if there are none
-     */
+    static constexpr uint8_t NUM_MSG_TYPES = static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES);
+    uint8_t messageData[NUM_MSG_TYPES][MAX_MESSAGE_DATA_SIZE];
+    size_t messageDataLength[NUM_MSG_TYPES] = {};
+    size_t currentMessageLength = 0;
+
     inline bool getNextMessageToSend()
     {
         if (queuedMessageTypeBitmap == 0)
@@ -130,7 +141,6 @@ private:
             return false;
         }
 
-        // otherwise, iterate through message types until you find one that is queued
         auto getNextMessageType = [](uint8_t type) { return (type + 1) % NUM_MSG_TYPES; };
 
         while ((queuedMessageTypeBitmap & (1 << nextMessageType)) == 0)
@@ -140,7 +150,21 @@ private:
 
         return true;
     }
+
+    inline void prepareMessageForTransmission()
+    {
+        robotToRobotMessage.dataAndCRC16[0] = nextMessageType;
+        
+        size_t dataLength = messageDataLength[nextMessageType];
+        for (size_t i = 0; i < dataLength; i++)
+        {
+            robotToRobotMessage.dataAndCRC16[i + 1] = messageData[nextMessageType][i];
+        }
+        
+        currentMessageLength = dataLength + 1;
+    }
 };
+
 }  // namespace aruwsrc::communication::serial
 
-#endif  // INTER_ROBOT_SIGNAL_TRANSMITTER_HPP_
+#endif  // ROBOT_ORBIT_MESSAGE_QUEUE_HPP_

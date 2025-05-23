@@ -42,8 +42,7 @@ struct RobotState
 class RobotOrbitStateProvider
 {
 public:
-    void updateFromVision(RefSerialData::RobotId robotID, const RobotState& state);
-    void updateFromAlly(RefSerialData::RobotId robotID, const RobotState& state);
+    void updateRobotState(RefSerialData::RobotId robotID, const RobotState& state);
     bool getRobotState(RefSerialData::RobotId robotID, RobotState& outState) const;
     uint8_t getNumKnownVisionStates(RobotState states[MAX_TRACKED_ROBOTS]) const;
     RobotState getRobotState(RefSerialData::RobotId robotID) const;

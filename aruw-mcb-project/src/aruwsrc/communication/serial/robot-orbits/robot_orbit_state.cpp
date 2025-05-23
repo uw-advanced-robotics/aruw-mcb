@@ -33,31 +33,7 @@ int RobotOrbitStateProvider::findRobotIndex(RefSerialData::RobotId robotID) cons
     return -1;
 }
 
-void RobotOrbitStateProvider::updateFromVision(
-    RefSerialData::RobotId robotID,
-    const RobotState& state)
-{
-    int index = findRobotIndex(robotID);
-    if (index != -1)
-    {
-        std::get<2>(robotData[index]) = state;
-    }
-    else
-    {
-        for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
-        {
-            if (!std::get<0>(robotData[i]))
-            {
-                std::get<0>(robotData[i]) = true;
-                std::get<1>(robotData[i]) = robotID;
-                std::get<2>(robotData[i]) = state;
-                return;
-            }
-        }
-    }
-}
-
-void RobotOrbitStateProvider::updateFromAlly(
+void RobotOrbitStateProvider::updateRobotState(
     RefSerialData::RobotId robotID,
     const RobotState& state)
 {

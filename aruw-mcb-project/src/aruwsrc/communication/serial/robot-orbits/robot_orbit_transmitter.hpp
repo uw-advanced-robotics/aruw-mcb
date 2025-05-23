@@ -28,8 +28,7 @@
 #include "tap/control/subsystem.hpp"
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-#include "aruwsrc/communication/serial/inter_robot_signal_transmitter.hpp"
-
+#include "robot_orbit_message_queue.hpp"
 #include "robot_orbit_state.hpp"
 
 using namespace tap::algorithms::odometry;
@@ -37,11 +36,6 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::serial
 {
-enum class RobotOrbitMessageType : uint8_t
-{
-    POSITION_UPDATE = 0,
-    NUM_MESSAGE_TYPES
-};
 
 class RobotOrbitTransmitter : public RefSerial::RobotToRobotMessageHandler
 {
@@ -63,28 +57,13 @@ private:
 
     RefSerialTransmitter::RobotId getAllyRobotId() const;
     
-    class OrbitMessageTransmitter : 
-        public InterRobotSignalMessageTransmitter<
-            RobotOrbitMessageType,
-            static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES)>
-    {
-    public:
-        OrbitMessageTransmitter(
-            tap::Drivers& drivers,
-            std::vector<tap::communication::serial::RefSerialData::RobotId>& targetIds,
-            uint16_t messageId)
-            : InterRobotSignalMessageTransmitter(drivers, targetIds, messageId) {}
-
-        void setMessageData(RobotOrbitMessageType type, const uint8_t* data, size_t length);
-    };
-
     // Define scale factor based on field size and uint16_t max value
     // RoboMaster field is 12m in the largest dimension
     // UINT16_MAX = 65535, dividing by 12 gives ~5461 units per meter
     static constexpr uint16_t STATIC_CAST_SCALE_FACTOR = UINT16_MAX / 12;
 
     std::vector<tap::communication::serial::RefSerialData::RobotId> targetRobots;
-    OrbitMessageTransmitter messageTransmitter;
+    RobotOrbitMessageQueue messageQueue;
 
     void parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message);
     void sendRobotStates();
