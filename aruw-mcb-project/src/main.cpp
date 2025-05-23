@@ -128,6 +128,10 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
+#if defined(TARGET_ENGINEER)
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+#endif
+
 #if defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
@@ -170,7 +174,7 @@ static void initializeIo(Drivers *drivers)
     drivers->turretMCBCanCommBus1.init();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || \
-    defined(TARGET_SENTRY_HYDRA)
+    defined(TARGET_SENTRY_HYDRA) || defined(TARGET_ENGINEER)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS)
@@ -203,7 +207,7 @@ static void updateIo(Drivers *drivers)
     drivers->mpu6500.read();
 
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
-    defined(TARGET_SENTRY_HYDRA)
+    defined(TARGET_SENTRY_HYDRA) || defined(TARGET_ENGINEER)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 

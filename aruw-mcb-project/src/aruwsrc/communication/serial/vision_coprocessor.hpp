@@ -387,10 +387,10 @@ private:
     static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1'000;
 
     /** Time in ms between sending the robot ID message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
+    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 2'000;
 
     /** Time in ms between sending the robot health message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 500;
+    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 350;
 
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
