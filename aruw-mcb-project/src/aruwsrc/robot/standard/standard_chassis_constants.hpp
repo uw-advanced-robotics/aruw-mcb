@@ -152,6 +152,10 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
     .beybladeRampRate = 50,
 };
+
+static constexpr float STARTING_POSITION_X = 0.7f;  // Meters
+static constexpr float STARTING_POSITION_Y = 7.0f;
+
 }  // namespace aruwsrc::chassis
 
 #endif  // STANDARD_CHASSIS_CONSTANTS_HPP_

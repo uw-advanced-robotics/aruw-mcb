@@ -279,7 +279,15 @@ public:
 
     mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
 
-    mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
+    mockable inline const ArucoResetData& getLastRealsenseArucoData() const
+    {
+        return lastRealsenseArucoData;
+    }
+
+    mockable inline const ArucoResetData& getLastArducamArucoData() const
+    {
+        return lastArducamArucoData;
+    }
 
     mockable inline bool getSomeTurretHasTarget() const
     {
@@ -337,7 +345,11 @@ public:
      * This signals that the message has been consumed and should not be used
      * for future resets.
      */
-    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+    inline void invalidateRealsenseArucoResetData()
+    {
+        this->lastRealsenseArucoData.updated = false;
+    }
+    inline void invalidateArducamArucoResetData() { this->lastArducamArucoData.updated = false; }
 
     mockable inline void attachAutoNavController(
         aruwsrc::chassis::ChassisAutoNavController* autoNavController)
@@ -364,10 +376,11 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
+        CV_MESSAGE_TYPE_REALSENSE_ARUCO = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
         CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
         CV_MESSAGE_TYPE_ROBOT_ORBIT = 15,
+        CV_MESSAGE_TYPE_ARDUCAM_ARUCO = 17,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -431,7 +444,12 @@ private:
         .numSetpoints = 0,
         .setpoints = {}};
 
-    ArucoResetData lastArucoData{
+    ArucoResetData lastRealsenseArucoData{
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .updated = false,
+    };
+
+    ArucoResetData lastArducamArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
     };
@@ -474,7 +492,9 @@ private:
 
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
 
-    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+    bool decodeToRealsenseArucoData(const ReceivedSerialMessage& message);
+
+    bool decodeToArducamArucoData(const ReceivedSerialMessage& message);
 
     bool decodeToRobotOrbitData(const ReceivedSerialMessage& message);
 
