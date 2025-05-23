@@ -332,8 +332,8 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     HALF_SWERVE_FORWARD_MATRIX);
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-   leftOmni.getEncoder(),
-   rightOmni.getEncoder(),
+    leftOmni.getEncoder(),
+    rightOmni.getEncoder(),
     DEADWHEEL_RADIUS);
 
 SentryKFOdometry2DSubsystem odometrySubsystem(
