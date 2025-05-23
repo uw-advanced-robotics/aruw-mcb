@@ -46,7 +46,7 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 1643,
+    .startEncoderValue = 2027,
     .minAngle = 0,     ///< Doesn't matter since yaw not limited
     .maxAngle = M_PI,  ///< Doesn't matter since yaw not limited
     .limitMotorAngles = false,
@@ -54,98 +54,99 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 1989,
-    .minAngle = modm::toRadian(-35),
-    .maxAngle = modm::toRadian(25),
+    .startEncoderValue = 6855,
+    .minAngle = modm::toRadian(-20),
+    .maxAngle = modm::toRadian(30),
     .limitMotorAngles = true,
 };
 
-static constexpr float TURRET_CG_X = -108.16;
-static constexpr float TURRET_CG_Z = 18.45;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 7'000.0f;
+// Turret is perfectly balanced
+static constexpr float TURRET_CG_X = 0.0f;
+static constexpr float TURRET_CG_Z = 0.0f;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 14.0f,
+    .kp = 35.0f,
     .ki = 0.0f,
-    .kd = 0.3f,
+    .kd = 1.5f,
     .maxICumulative = 0.0f,
-    .maxOutput = 3'000.0f,
+    .maxOutput = 60,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 5.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 5.0f,
+    .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.1f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 11.5f,  // 9.5
-    .ki = 0.15f,  // 3
+    .kp = 0.0f,
+    .ki = 0.0f,
     .kd = 0.0f,
-    .maxICumulative = 0.2f,  // 0.65
-    .maxOutput = 30.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = M_TWOPI,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 5.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 5.0f,
+    .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 38'000.0f,  // 35'000
+    .kp = 3'000.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 2.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 50.0f,
+    .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 22.0f,
-    .ki = 0.0f,
-    .kd = 0.2f,
+    .kp = 40.0f,
+    .ki = 0.1f,
+    .kd = 1.5f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
+    .maxOutput = 30.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.005f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 22.0f,
-    .ki = 0.05f,
-    .kd = 0.2f,
-    .maxICumulative = 0.1f,
-    .maxOutput = 10'000.0f,
+    .kp = 40.0f,
+    .ki = 0.1f,
+    .kd = 1.5f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 30.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.005f,
+    .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .kp = 30'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
+    .maxICumulative = 5'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.5f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
@@ -154,14 +155,14 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 namespace world_rel_chassis_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 150'000.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
-    .kd = 8'500.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 60.0f,
-    .tQProportionalKalman = 1.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .tQDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 0.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
@@ -172,27 +173,27 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 150'000.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
-    .kd = 12'500.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 30'000.0f,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 60.0f,
-    .tQProportionalKalman = 1.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
+    .tQDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 0.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 150'000.0f,
-    .ki = 200.0f,
-    .kd = 10'000.0f,
-    .maxICumulative = 10'000.0f,
-    .maxOutput = 30'000.0f,
+    .kp = 80'000.0f,
+    .ki = 0.0f,
+    .kd = 7'000.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 20.0f,
+    .tRDerivativeKalman = 10.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 2.0f,
     .errDeadzone = 0.0f,

@@ -32,8 +32,6 @@
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
 #endif
 
-using tap::motor::DjiMotor;
-
 namespace aruwsrc::chassis
 {
 /**
@@ -81,7 +79,7 @@ static constexpr float VELOCITY_PID_KS = 400.0f;
  * The corresponding speed controller output torque current range is
  * -20 ~ 0 ~ 20 A.
  */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = DjiMotor::MAX_OUTPUT_C620;
+static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C620;
 
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = VELOCITY_PID_KP,

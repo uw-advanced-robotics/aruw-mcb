@@ -448,7 +448,7 @@ void VisionCoprocessor::sendBulletsRemaining()
             bulletsRemainMessage;
         bulletsRemainMessage.messageType = CV_MESSAGE_TYPES_BULLETS_REMAINING;
 
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HERO_ZERO)
         const uint16_t* bulletsRemaining =
             &drivers->refSerial.getRobotData().turret.bulletsRemaining42;
 #else
