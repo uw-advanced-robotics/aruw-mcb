@@ -34,17 +34,13 @@ namespace aruwsrc::control
 class LimitSwitchTrigger : public TriggerInterface
 {
 public:
-    LimitSwitchTrigger(
-        tap::Drivers* drivers,
-        tap::communication::sensors::limit_switch::LimitSwitchInterface* limitSwitch)
-        : drivers(drivers),
-          limitSwitch(limitSwitch)
+    LimitSwitchTrigger(tap::communication::sensors::limit_switch::LimitSwitchInterface* limitSwitch)
+        : limitSwitch(limitSwitch)
     {
     }
     bool isTriggered() { return limitSwitch->getLimitSwitchDepressed(); }
 
 private:
-    tap::Drivers* drivers;
     tap::communication::sensors::limit_switch::LimitSwitchInterface* limitSwitch;
 };
 }  // namespace aruwsrc::control
