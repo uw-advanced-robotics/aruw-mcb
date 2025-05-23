@@ -90,7 +90,6 @@ private:
 
     /// DEBUG VARIABLES
     bool hasStandard, hasHero, hasSentry;
-    bool visionHasTarget = false;
     aruwsrc::serial::VisionCoprocessor::RobotOrbitData robotOrbits;
     aruwsrc::serial::VisionCoprocessor::TurretAimData aimData;
 };

@@ -69,7 +69,7 @@ modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
 modm::ResumableResult<void> DriverAssistanceIndicator::update()
 {
     aimData = visionCoprocessor.getLastAimData(0);
-    // bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
+    bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
     if (!visionHasTarget)
     {
