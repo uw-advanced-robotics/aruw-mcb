@@ -62,13 +62,11 @@ protected:
 
         ON_CALL(turretMCBCanCommBus1, getYawUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));
-        ON_CALL(turretMCBCanCommBus1, getYawVelocity)
-            .WillByDefault(ReturnPointee(&turretFrameImuVelocity));
+        ON_CALL(turretMCBCanCommBus1, getGz).WillByDefault(ReturnPointee(&turretFrameImuVelocity));
 
         ON_CALL(turretMCBCanCommBus1, getPitchUnwrapped)
             .WillByDefault(ReturnPointee(&turretFrameImuValue));
-        ON_CALL(turretMCBCanCommBus1, getPitchVelocity)
-            .WillByDefault(ReturnPointee(&turretFrameImuVelocity));
+        ON_CALL(turretMCBCanCommBus1, getGy).WillByDefault(ReturnPointee(&turretFrameImuVelocity));
     }
 
     void setDefaultMotorBehavior(NiceMock<TurretMotorMock> &turretMotor)

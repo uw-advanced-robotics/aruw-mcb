@@ -40,6 +40,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
@@ -52,6 +53,8 @@ tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
 #if defined(ALL_STANDARDS)
 using namespace aruwsrc::standard;
+#elif defined(OLD_STANDARDS)
+using namespace aruwsrc::old_standard;
 #elif defined(ALL_SENTRIES)
 using namespace aruwsrc::sentry;
 #elif defined(TARGET_HERO_PERSEUS)
@@ -68,6 +71,8 @@ using namespace aruwsrc::testbed;
 using namespace aruwsrc::blank;
 #elif defined(TARGET_MOTOR_TESTER)
 using namespace aruwsrc::motor_tester;
+#elif defined(TARGET_CHARACTERIZER)
+using namespace aruwsrc::characterizer;
 #endif
 
 // Place any sort of input/output initialization here. For example, place
@@ -79,7 +84,7 @@ static void initializeIo(Drivers *drivers);
 // called as frequently.
 static void updateIo(Drivers *drivers);
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
@@ -112,12 +117,14 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
+    defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
+    defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
@@ -131,11 +138,12 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
+    defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS)
             checkTurretMcbDisconnection(drivers);
 #endif
         }
@@ -156,17 +164,19 @@ static void initializeIo(Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
 
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || \
+    defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || \
+    defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
+#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
@@ -180,6 +190,9 @@ static void initializeIo(Drivers *drivers)
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
 #endif
+#if defined(TARGET_ENGINEER)
+    drivers->engineerCVCommunication.initializeCV();
+#endif
 }
 
 static void updateIo(Drivers *drivers)
@@ -189,12 +202,18 @@ static void updateIo(Drivers *drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
+    defined(TARGET_SENTRY_HYDRA)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
+    defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.updateSerial();
+#endif
+
+#ifdef TARGET_ENGINEER
+    drivers->engineerCVCommunication.updateSerial();
 #endif
 
 #if defined(ALL_STANDARDS) 
@@ -211,7 +230,7 @@ static void updateIo(Drivers *drivers)
 #endif
 }
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
+#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS)
 static void checkTurretMcbDisconnection(Drivers *drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();

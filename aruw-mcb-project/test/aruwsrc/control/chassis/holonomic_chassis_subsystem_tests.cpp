@@ -24,6 +24,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 
@@ -63,6 +64,7 @@ protected:
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+          voltageSensor(),
           leftFrontMotor(),
           leftBackMotor(),
           rightFrontMotor(),
@@ -70,6 +72,7 @@ protected:
           chassis(
               &drivers,
               &currentSensor,
+              &voltageSensor,
               leftFrontMotor,
               leftBackMotor,
               rightFrontMotor,
@@ -86,6 +89,7 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
     NiceMock<tap::mock::MotorInterfaceMock> leftFrontMotor, leftBackMotor, rightFrontMotor,
         rightBackMotor;
     MecanumChassisSubsystem chassis;

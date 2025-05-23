@@ -33,6 +33,7 @@
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
+#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
@@ -60,12 +61,10 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION) || \
-    defined(TARGET_STANDARD_CYGNUS)
-    // Hero slip ring cannot handle
-    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
-#else
+#if defined(TARGET_SENTRY_HYDRA)
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
+#else
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
 #endif
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
@@ -74,8 +73,7 @@ public:
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
-#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_SPIDER) || \
-    defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
+#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION)
     /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
      *  The IMU Faces to the left of the 'R' on the Type A MCB
      *  0 Rotation corresponds with a 0 rotation of the chassis
@@ -232,6 +230,7 @@ public:
             float y;
             float z;
             float radius;
+            uint16_t robotType;
         } modm_packed;
 
         RobotOrbit data[MAX_NUM_ROBOT_ORBITS];  // Use the nested struct
@@ -279,8 +278,6 @@ public:
     }
 
     mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
-
-    mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
 
     mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
 
@@ -341,6 +338,12 @@ public:
      * for future resets.
      */
     inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+
+    mockable inline void attachAutoNavController(
+        aruwsrc::chassis::ChassisAutoNavController* autoNavController)
+    {
+        this->autoNavController = autoNavController;
+    }
 
     // @todo private should not be here
 private:
@@ -440,6 +443,8 @@ private:
     tap::arch::MilliTimeout cvOfflineTimeout;
 
     aruwsrc::algorithms::transforms::TransformerInterface* transformer;
+
+    aruwsrc::chassis::ChassisAutoNavController* autoNavController = nullptr;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
