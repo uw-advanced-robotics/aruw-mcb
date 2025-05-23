@@ -47,6 +47,9 @@ public:
         uint8_t turretID) const = 0;
 
     virtual const tap::algorithms::transforms::Transform& getWorldToVTM() const = 0;
+
+    virtual const tap::algorithms::transforms::Transform& getChassisToArducam(
+        uint8_t cameraID) const = 0;
 };
 
 }  // namespace aruwsrc::algorithms::transforms

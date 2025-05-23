@@ -29,7 +29,7 @@ namespace aruwsrc::old_standard
 #elif defined(ALL_SENTRIES)
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
 namespace aruwsrc::hero
 #elif defined(TARGET_DRONE)
