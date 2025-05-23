@@ -85,52 +85,52 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
         drawPlateTargetBox(enemyPlatePosition, GraphicIndex::TARGET);
     }
 
-    robotOrbits = visionCoprocessor.getLastRobotOrbitData();
-    hasStandard = false;
-    hasHero = false;
-    hasSentry = false;
-    for (int i = 0; i < visionCoprocessor.MAX_NUM_ROBOT_ORBITS; i++)
-    {
-        int ID = robotOrbits.data[i].robotType;
-        if (ID == 0) continue;
+    // robotOrbits = visionCoprocessor.getLastRobotOrbitData();
+    // hasStandard = false;
+    // hasHero = false;
+    // hasSentry = false;
+    // for (int i = 0; i < visionCoprocessor.MAX_NUM_ROBOT_ORBITS; i++)
+    // {
+    //     int ID = robotOrbits.data[i].robotType;
+    //     if (ID == 0) continue;
 
-        Position robotOrbit =
-            Position(robotOrbits.data[i].x, robotOrbits.data[i].y, robotOrbits.data[i].z);
-        if (ID == 1)
-        {
-            hasHero = true;
-            drawTracerLineToOrbit(robotOrbit, GraphicIndex::HERO_TRACER);
-            drawHealthBarToOrbit(robotOrbit, GraphicIndex::HERO_HP, ID);
-        }
-        else if (ID == 3 || ID == 4)
-        {
-            hasStandard = true;
-            drawTracerLineToOrbit(robotOrbit, GraphicIndex::STANDARD_TRACER);
-            drawHealthBarToOrbit(robotOrbit, GraphicIndex::STANDARD_HP, ID);
-        }
-        else if (ID == 7)
-        {
-            hasSentry = true;
-            drawTracerLineToOrbit(robotOrbit, GraphicIndex::SENTRY_TRACER);
-            drawHealthBarToOrbit(robotOrbit, GraphicIndex::SENTRY_HP, ID);
-        }
-    }
+    //     Position robotOrbit =
+    //         Position(robotOrbits.data[i].x, robotOrbits.data[i].y, robotOrbits.data[i].z);
+    //     if (ID == 1)
+    //     {
+    //         hasHero = true;
+    //         drawTracerLineToOrbit(robotOrbit, GraphicIndex::HERO_TRACER);
+    //         drawHealthBarToOrbit(robotOrbit, GraphicIndex::HERO_HP, ID);
+    //     }
+    //     else if (ID == 3 || ID == 4)
+    //     {
+    //         hasStandard = true;
+    //         drawTracerLineToOrbit(robotOrbit, GraphicIndex::STANDARD_TRACER);
+    //         drawHealthBarToOrbit(robotOrbit, GraphicIndex::STANDARD_HP, ID);
+    //     }
+    //     else if (ID == 7)
+    //     {
+    //         hasSentry = true;
+    //         drawTracerLineToOrbit(robotOrbit, GraphicIndex::SENTRY_TRACER);
+    //         drawHealthBarToOrbit(robotOrbit, GraphicIndex::SENTRY_HP, ID);
+    //     }
+    // }
 
-    if (!hasHero)
-    {
-        deleteGraphic(GraphicIndex::HERO_TRACER);
-        deleteGraphic(GraphicIndex::HERO_HP);
-    }
-    if (!hasStandard)
-    {
-        deleteGraphic(GraphicIndex::STANDARD_TRACER);
-        deleteGraphic(GraphicIndex::STANDARD_HP);
-    }
-    if (!hasSentry)
-    {
-        deleteGraphic(GraphicIndex::SENTRY_TRACER);
-        deleteGraphic(GraphicIndex::SENTRY_HP);
-    }
+    // if (!hasHero)
+    // {
+    //     deleteGraphic(GraphicIndex::HERO_TRACER);
+    //     deleteGraphic(GraphicIndex::HERO_HP);
+    // }
+    // if (!hasStandard)
+    // {
+    //     deleteGraphic(GraphicIndex::STANDARD_TRACER);
+    //     deleteGraphic(GraphicIndex::STANDARD_HP);
+    // }
+    // if (!hasSentry)
+    // {
+    //     deleteGraphic(GraphicIndex::SENTRY_TRACER);
+    //     deleteGraphic(GraphicIndex::SENTRY_HP);
+    // }
 
     // Draw a line from (900, 300) to (1200, 600)
     RefSerialTransmitter::configLine(
