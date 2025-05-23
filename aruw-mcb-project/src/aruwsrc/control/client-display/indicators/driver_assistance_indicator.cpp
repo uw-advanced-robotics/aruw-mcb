@@ -56,11 +56,15 @@ modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
     RF_END();
 }
 
-bool visionHasTarget;
 modm::ResumableResult<void> DriverAssistanceIndicator::update()
 {
+    // Variable definitions because protothread can't 
+    bool visionHasTarget;
+    bool hasStandard, hasHero, hasSentry;
+    aruwsrc::serial::VisionCoprocessor::RobotOrbitData robotOrbits;
+    Position robotOrbit = Position(0, 0, 0);
+    
     RF_BEGIN(1);
-    aimData = visionCoprocessor.getLastAimData(0);
     visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
     if (!visionHasTarget)
@@ -190,6 +194,8 @@ void DriverAssistanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicInde
 
 void DriverAssistanceIndicator::drawPlateTargetBox()
 {
+    auto aimData = visionCoprocessor.getLastAimData(0);
+    
     // Get position
     Position enemyPlatePosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 

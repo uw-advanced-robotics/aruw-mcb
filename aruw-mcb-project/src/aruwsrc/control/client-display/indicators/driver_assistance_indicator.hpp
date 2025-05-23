@@ -86,12 +86,6 @@ private:
     const Vector PLATE_CORNER_OFFSET =
         Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
     void drawPlateTargetBox();
-
-    /// DEBUG VARIABLES
-    bool hasStandard, hasHero, hasSentry;
-    aruwsrc::serial::VisionCoprocessor::RobotOrbitData robotOrbits;
-    aruwsrc::serial::VisionCoprocessor::TurretAimData aimData;
-    Position robotOrbit = Position(0, 0, 0);
 };
 
 }  // namespace aruwsrc::control::client_display
