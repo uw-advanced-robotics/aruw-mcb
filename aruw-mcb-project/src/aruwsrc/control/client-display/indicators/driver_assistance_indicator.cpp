@@ -55,10 +55,20 @@ void DriverAssistanceIndicator::initialize()
         Tx::GraphicColor::PURPLISH_RED);
 }
 
-bool hasStandard, hasHero, hasSentry;
+modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
+{
+    RF_BEGIN(0);
+
+    // Send the graphics
+    RF_CALL(refSerialTransmitter.sendGraphic(&graphic));
+    RF_CALL(refSerialTransmitter.sendGraphic(&justALine));
+
+    RF_END();
+}
+
 modm::ResumableResult<void> DriverAssistanceIndicator::update()
 {
-    auto aimData = visionCoprocessor.getLastAimData(0);
+    aimData = visionCoprocessor.getLastAimData(0);
     // bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
     if (!visionHasTarget)
@@ -75,7 +85,7 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
         drawPlateTargetBox(enemyPlatePosition, GraphicIndex::TARGET);
     }
 
-    auto robotOrbits = visionCoprocessor.getLastRobotOrbitData();
+    robotOrbits = visionCoprocessor.getLastRobotOrbitData();
     hasStandard = false;
     hasHero = false;
     hasSentry = false;
@@ -132,7 +142,7 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
         &justALine.graphicData[0]);
 
     // Send the graphics
-    RF_BEGIN(0);
+    RF_BEGIN(1);
     RF_CALL(refSerialTransmitter.sendGraphic(&graphic));
     RF_CALL(refSerialTransmitter.sendGraphic(&justALine));
     RF_END();

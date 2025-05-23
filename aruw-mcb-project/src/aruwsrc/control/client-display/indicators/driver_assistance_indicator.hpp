@@ -50,23 +50,14 @@ public:
 
     void initialize() override final;
 
-    modm::ResumableResult<void> update() override final;
+    modm::ResumableResult<void> update() override;
+
+    modm::ResumableResult<void> sendInitialGraphics() override;
 
 private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     RefSerial &refSerial;
     const Transform &worldToCameraTransform;
-
-    bool visionHasTarget = false;
-
-    /**
-     * Useful utils I'll need.
-     * Graphic -> ID enum
-     * drawTracerLineToOrbit(graphic, position)
-     * drawHealthBarToOrbit(graphic, position)
-     *
-     * drawTargetBoundingBox(graphic, position)
-     */
 
     Tx::Graphic7Message graphic;
     Tx::Graphic7Message justALine;
@@ -96,6 +87,12 @@ private:
     const Vector PLATE_CORNER_OFFSET =
         Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
     void drawPlateTargetBox(Position orbit, GraphicIndex index);
+
+    /// DEBUG VARIABLES
+    bool hasStandard, hasHero, hasSentry;
+    bool visionHasTarget = false;
+    aruwsrc::serial::VisionCoprocessor::RobotOrbitData robotOrbits;
+    aruwsrc::serial::VisionCoprocessor::TurretAimData aimData;
 };
 
 }  // namespace aruwsrc::control::client_display
