@@ -44,15 +44,6 @@ void DriverAssistanceIndicator::initialize()
     configureGraphic(GraphicIndex::HERO_HP, Tx::GraphicColor::PURPLISH_RED);
     configureGraphic(GraphicIndex::STANDARD_HP, Tx::GraphicColor::PURPLISH_RED);
     configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
-
-    uint8_t graphicName[3];
-    getUnusedGraphicName(graphicName);
-    RefSerialTransmitter::configGraphicGenerics(
-        &justALine.graphicData[0],
-        graphicName,
-        Tx::GRAPHIC_ADD,
-        DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::PURPLISH_RED);
 }
 
 modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
@@ -61,15 +52,16 @@ modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
 
     // Send the graphics
     RF_CALL(refSerialTransmitter.sendGraphic(&graphic));
-    RF_CALL(refSerialTransmitter.sendGraphic(&justALine));
 
     RF_END();
 }
 
+bool visionHasTarget;
 modm::ResumableResult<void> DriverAssistanceIndicator::update()
 {
+    RF_BEGIN(1);
     aimData = visionCoprocessor.getLastAimData(0);
-    bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
+    visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
     if (!visionHasTarget)
     {
@@ -77,74 +69,58 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
     }
     else
     {
-        // Get position
-        Position enemyPlatePosition =
-            Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
-
         // Draw the target box
-        drawPlateTargetBox(enemyPlatePosition, GraphicIndex::TARGET);
+        drawPlateTargetBox();
     }
 
-    // robotOrbits = visionCoprocessor.getLastRobotOrbitData();
-    // hasStandard = false;
-    // hasHero = false;
-    // hasSentry = false;
-    // for (int i = 0; i < visionCoprocessor.MAX_NUM_ROBOT_ORBITS; i++)
-    // {
-    //     int ID = robotOrbits.data[i].robotType;
-    //     if (ID == 0) continue;
+    robotOrbits = visionCoprocessor.getLastRobotOrbitData();
+    hasStandard = false;
+    hasHero = false;
+    hasSentry = false;
+    for (int i = 0; i < visionCoprocessor.MAX_NUM_ROBOT_ORBITS; i++)
+    {
+        int ID = robotOrbits.data[i].robotType;
+        if (ID == 0) continue;
 
-    //     Position robotOrbit =
-    //         Position(robotOrbits.data[i].x, robotOrbits.data[i].y, robotOrbits.data[i].z);
-    //     if (ID == 1)
-    //     {
-    //         hasHero = true;
-    //         drawTracerLineToOrbit(robotOrbit, GraphicIndex::HERO_TRACER);
-    //         drawHealthBarToOrbit(robotOrbit, GraphicIndex::HERO_HP, ID);
-    //     }
-    //     else if (ID == 3 || ID == 4)
-    //     {
-    //         hasStandard = true;
-    //         drawTracerLineToOrbit(robotOrbit, GraphicIndex::STANDARD_TRACER);
-    //         drawHealthBarToOrbit(robotOrbit, GraphicIndex::STANDARD_HP, ID);
-    //     }
-    //     else if (ID == 7)
-    //     {
-    //         hasSentry = true;
-    //         drawTracerLineToOrbit(robotOrbit, GraphicIndex::SENTRY_TRACER);
-    //         drawHealthBarToOrbit(robotOrbit, GraphicIndex::SENTRY_HP, ID);
-    //     }
-    // }
+        robotOrbit = Position(robotOrbits.data[i].x, robotOrbits.data[i].y, robotOrbits.data[i].z);
+        if (ID == 1)
+        {
+            hasHero = true;
+            drawTracerLineToOrbit(robotOrbit, GraphicIndex::HERO_TRACER);
+            drawHealthBarToOrbit(robotOrbit, GraphicIndex::HERO_HP, ID);
+        }
+        else if (ID == 3 || ID == 4)
+        {
+            hasStandard = true;
+            drawTracerLineToOrbit(robotOrbit, GraphicIndex::STANDARD_TRACER);
+            drawHealthBarToOrbit(robotOrbit, GraphicIndex::STANDARD_HP, ID);
+        }
+        else if (ID == 7)
+        {
+            hasSentry = true;
+            drawTracerLineToOrbit(robotOrbit, GraphicIndex::SENTRY_TRACER);
+            drawHealthBarToOrbit(robotOrbit, GraphicIndex::SENTRY_HP, ID);
+        }
+    }
 
-    // if (!hasHero)
-    // {
-    //     deleteGraphic(GraphicIndex::HERO_TRACER);
-    //     deleteGraphic(GraphicIndex::HERO_HP);
-    // }
-    // if (!hasStandard)
-    // {
-    //     deleteGraphic(GraphicIndex::STANDARD_TRACER);
-    //     deleteGraphic(GraphicIndex::STANDARD_HP);
-    // }
-    // if (!hasSentry)
-    // {
-    //     deleteGraphic(GraphicIndex::SENTRY_TRACER);
-    //     deleteGraphic(GraphicIndex::SENTRY_HP);
-    // }
-
-    // Draw a line from (900, 300) to (1200, 600)
-    RefSerialTransmitter::configLine(
-        4,
-        TRACER_LINE_ORIGIN.x,
-        TRACER_LINE_ORIGIN.y,
-        1200,
-        600,
-        &justALine.graphicData[0]);
+    if (!hasHero)
+    {
+        deleteGraphic(GraphicIndex::HERO_TRACER);
+        deleteGraphic(GraphicIndex::HERO_HP);
+    }
+    if (!hasStandard)
+    {
+        deleteGraphic(GraphicIndex::STANDARD_TRACER);
+        deleteGraphic(GraphicIndex::STANDARD_HP);
+    }
+    if (!hasSentry)
+    {
+        deleteGraphic(GraphicIndex::SENTRY_TRACER);
+        deleteGraphic(GraphicIndex::SENTRY_HP);
+    }
 
     // Send the graphics
-    RF_BEGIN(1);
     RF_CALL(refSerialTransmitter.sendGraphic(&graphic));
-    RF_CALL(refSerialTransmitter.sendGraphic(&justALine));
     RF_END();
 }
 
@@ -212,18 +188,29 @@ void DriverAssistanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicInde
         graphicToModify);
 }
 
-void DriverAssistanceIndicator::drawPlateTargetBox(Position orbit, GraphicIndex index)
+void DriverAssistanceIndicator::drawPlateTargetBox()
 {
-    Position cameraFrameOrbit = worldToCameraTransform.apply(orbit);
+    // Get position
+    Position enemyPlatePosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
+
+    Position cameraFrameOrbit = worldToCameraTransform.apply(enemyPlatePosition);
 
     ProjectedResult screenFrameTopRight =
         convertCameraFrameToScreenFrame(cameraFrameOrbit + PLATE_CORNER_OFFSET);
     ProjectedResult screenFrameBottomLeft =
         convertCameraFrameToScreenFrame(cameraFrameOrbit - PLATE_CORNER_OFFSET);
-    auto graphicToModify = &graphic.graphicData[static_cast<uint8_t>(index)];
 
-    graphicToModify->operation =
-        graphicToModify->operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+    auto graphicToModify = &graphic.graphicData[static_cast<uint8_t>(GraphicIndex::TARGET)];
+
+    uint32_t prevOperation = graphicToModify->operation;
+    if (prevOperation == Tx::GRAPHIC_DELETE)
+    {
+        graphicToModify->operation = Tx::GRAPHIC_ADD;
+    }
+    else
+    {
+        graphicToModify->operation = Tx::GRAPHIC_MODIFY;
+    }
 
     RefSerialTransmitter::configRectangle(
         3,

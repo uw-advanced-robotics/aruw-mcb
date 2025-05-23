@@ -106,7 +106,7 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
         }
         case CV_MESSAGE_TYPE_ROBOT_ORBIT:
         {
-            // decodeToRobotOrbitData(completeMessage);
+            decodeToRobotOrbitData(completeMessage);
             return;
         }
         default:
