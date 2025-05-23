@@ -46,6 +46,8 @@
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_constants.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_subsystem.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
+#include "aruwsrc/robot/balstd/chassis/controllers/attach_controller_command.hpp"
+#include "aruwsrc/robot/balstd/chassis/controllers/balance_controller.hpp"
 #include "aruwsrc/robot/balstd/chassis/controllers/manual_leg_controller.hpp"
 #include "aruwsrc/robot/balstd/fsm/balstd_op_state_machine.hpp"
 #include "aruwsrc/robot/balstd/turret/balstd_turret_subsystem.hpp"
@@ -102,7 +104,9 @@ tap::motor::DjiMotor leftWheelMotor(
     tap::motor::MotorId::MOTOR1,
     tap::can::CanBus::CAN_BUS1,
     false,
-    "left wheel");
+    "left wheel",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::control::motor::Tmotor_AK809 rightFrontHipMotor(
     drivers(),
@@ -123,7 +127,9 @@ tap::motor::DjiMotor rightWheelMotor(
     tap::motor::MotorId::MOTOR2,
     tap::can::CanBus::CAN_BUS1,
     true,
-    "right wheel");
+    "right wheel",
+    false,
+    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, LEG_CONFIG);
 BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, LEG_CONFIG);
@@ -135,6 +141,13 @@ BuzzerSubsystem buzzer(drivers());
 // controllers
 
 ManualLegController manualLegController(drivers()->controlOperatorInterface);
+
+BalanceController balanceController(
+    drivers()->controlOperatorInterface,
+    HEIGHT_CONTROLLER_PID_CONFIG,
+    SPLIT_CONTROLLER_PID_CONFIG,
+    ROLL_CONTROLLER_PID_CONFIG,
+    YAW_CONTROLLER_PID_CONFIG);
 
 // transforms
 // StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -178,6 +191,8 @@ algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
+/* define commands ----------------------------------------------------------*/
+
 user::TurretUserControlCommand turretUserControlCommand(
     drivers(),
     drivers()->controlOperatorInterface,
@@ -204,13 +219,30 @@ BalstdImuCalibrateCommand imuCalibrateCommand(
 
 NoteSequenceCommand startupChime(buzzer, MEGALOVANIA_NOTES, MEGALOVANIA_NOTE_LENGTH_MS);
 
-/* define commands ----------------------------------------------------------*/
-
-// aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
+AttachControllerCommand attachManualController(chassis, &manualLegController);
+AttachControllerCommand attachBalanceController(chassis, &balanceController);
 
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
+
+// imu calibrate
+HoldCommandMapping leftUpRightDown(
+    drivers(),
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+
+// manual
+HoldCommandMapping leftMidRightDown(
+    drivers(),
+    {&attachManualController},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
+
+// balancing
+HoldCommandMapping leftMidRightMid(
+    drivers(),
+    {&attachBalanceController},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -255,7 +287,12 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *) {}
+void registerStandardIoMappings(Drivers *drivers)
+{
+    drivers->commandMapper.addMap(&leftUpRightDown);   // imu calibrate
+    drivers->commandMapper.addMap(&leftMidRightDown);  // manual controller
+    drivers->commandMapper.addMap(&leftMidRightMid);   // balance controller
+}
 }  // namespace balstd_control
 
 namespace aruwsrc::balstd

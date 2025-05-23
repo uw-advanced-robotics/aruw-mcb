@@ -56,14 +56,16 @@ void BalstdLeg::setWheelTorque(float torque)
 void BalstdLeg::setHipTorques(float front, float back)
 {
     // soft stops
-    if (currState.qFront <= config.frontHipOuterLimit && front < 0) front = 0;
-    if (currState.qFront >= config.frontHipInnerLimit && front > 0) front = 0;
+    if (currState.qFront <= config.frontHipOuterLimit && front > 0) front = 0;
+    if (currState.qFront >= config.frontHipInnerLimit && front < 0) front = 0;
 
     if (currState.qBack <= config.backHipInnerLimit && back > 0) back = 0;
     if (currState.qBack >= config.backHipOuterLimit && back < 0) back = 0;
 
-    frontHipMotor.setDesiredOutput(front * Tmotor_AK809::TORQUE_CONSTANT);
-    backHipMotor.setDesiredOutput(back * Tmotor_AK809::TORQUE_CONSTANT);
+    frontHipMotor.setDesiredOutput(
+        tap::algorithms::limitVal(front * Tmotor_AK809::TORQUE_CONSTANT, -15000.0f, 15000.0f));
+    backHipMotor.setDesiredOutput(
+        tap::algorithms::limitVal(back * Tmotor_AK809::TORQUE_CONSTANT, -15000.0f, 15000.0f));
 }
 
 void BalstdLeg::updateState()
@@ -71,8 +73,9 @@ void BalstdLeg::updateState()
     currState.qFront = getFrontHipAngle();
     currState.qBack = getBackHipAngle();
 
-    currState.qFrontVelo = frontHipMotor.getEncoder()->getVelocity();
-    currState.qBackVelo = backHipMotor.getEncoder()->getVelocity();
+    // TODO: why negative
+    currState.qFrontVelo = -frontHipMotor.getEncoder()->getVelocity();
+    currState.qBackVelo = -backHipMotor.getEncoder()->getVelocity();
 
     currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
     currState.calculateForwardKinematics(config);
@@ -82,6 +85,7 @@ void BalstdLeg::updateState()
 
     currState.calculateJacobianTranspose(config);
     currState.calculateWheelTranslationVelocity();
+    currState.calculatePendulumState();
 }
 
 std::array<float, 2> BalstdLegState::calculateLegEnergy(BalstdLegConfig config)

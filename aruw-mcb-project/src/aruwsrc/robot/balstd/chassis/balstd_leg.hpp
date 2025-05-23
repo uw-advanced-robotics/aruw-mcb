@@ -168,8 +168,8 @@ struct BalstdLegState
 
     void calculatePendulumState()
     {
-        alpha = atan2(P3.data[0], P3.data[1]);
-        alphaDot = tap::algorithms::cross(P3, {{vxc, vyc, 0.0f}}).data[2];
+        alpha = atan2(-P3.data[0], P3.data[1]);
+        alphaDot = tap::algorithms::cross({{vxc, vyc, 0.0f}}, P3).data[2];
         L = sqrt(P3.data[0] * P3.data[0] + P3.data[1] * P3.data[1]);
     }
 
@@ -279,7 +279,7 @@ private:
     void setHipTorques(float front, float back);
 
     static constexpr float M3508_TORQUE_CONSTANT =
-        (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / Nm/A = desOut/Nm
+        (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
 
     float CBF_ENERGY_LIMIT;
     float maxTorque;

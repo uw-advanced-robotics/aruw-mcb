@@ -55,7 +55,7 @@ void BalstdChassisSubsystem::refresh()
 {
     updateState();
 
-    BalstdChassisOutput currOutput =
+    currOutput =
         (controller == nullptr) ? ZERO_OUTPUT : controller->runController(currState, 0.002f);
 
     setOutputs(currOutput);
@@ -88,21 +88,22 @@ void BalstdChassisSubsystem::updateState()
     currState.virtualLegState.vyc = (currState.leftLegState.vyc + currState.rightLegState.vyc) / 2;
     currState.virtualLegState.calculatePendulumState();
 
-    currState.roll = chassisImu.getRoll();
-    currState.rollVel = chassisImu.getGx();
-    currState.pitch = chassisImu.getPitch();
-    currState.pitchVel = chassisImu.getGy();
+    currState.roll = -chassisImu.getRoll();
+    currState.rollVel = -chassisImu.getGx();
+    currState.pitch = -chassisImu.getPitch();
+    currState.pitchVel = -chassisImu.getGy();
     currState.yaw = chassisImu.getYaw();
     currState.yawVel = chassisImu.getGz();
 
     currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.alpha);
 
-    currState.virtualPendTheta = currState.virtualLegState.alpha - currState.pitch;
-    currState.virtualPendThetaDot = currState.virtualLegState.alphaDot - currState.pitchVel;
+    // should be __ - pitch/vel, but matlab's pitch is positive up instead of down
+    currState.virtualPendTheta = currState.virtualLegState.alpha + currState.pitch;
+    currState.virtualPendThetaDot = currState.virtualLegState.alphaDot + currState.pitchVel;
 
     currState.virtualWheelVel =
-        (currState.leftLegState.wheelVel + currState.rightLegState.wheelVel) / 2;
-    currState.virtualWheelPos += currState.virtualWheelVel * 0.02f;
+        (currState.leftLegState.wheelVel + currState.rightLegState.wheelVel) / 2 * WHEEL_RADIUS_M;
+    currState.virtualWheelPos += currState.virtualWheelVel * 0.002f;
 }
 
 }  // namespace aruwsrc::control::balstd

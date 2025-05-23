@@ -50,6 +50,62 @@ BalstdLegConfig LEG_CONFIG{
     .backHipInnerLimit = INNER_SOFT_STOP,
 };
 
+tap::algorithms::SmoothPidConfig HEIGHT_CONTROLLER_PID_CONFIG{
+    .kp = 500.0f,
+    .ki = 0.0f,
+    .kd = -20.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 90.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+tap::algorithms::SmoothPidConfig SPLIT_CONTROLLER_PID_CONFIG{
+    .kp = 50.0f,
+    .ki = 0.0f,
+    .kd = 20.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 4.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+tap::algorithms::SmoothPidConfig ROLL_CONTROLLER_PID_CONFIG{
+    .kp = 500.0f,
+    .ki = 0.0f,
+    .kd = 20.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 20.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+tap::algorithms::SmoothPidConfig YAW_CONTROLLER_PID_CONFIG{
+    .kp = 10.0f,
+    .ki = 0.0f,
+    .kd = -2.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 1.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
 }  // namespace aruwsrc::control::balstd
 
 #endif  // BALSTD_CHASSIS_CONSTANTS_HPP_

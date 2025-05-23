@@ -201,7 +201,11 @@ static void initializeIo(Drivers *drivers)
     drivers->turretMajorMcbLite.initialize();
 #endif
 #if defined(TARGET_BALSTD)
-    drivers->chassisIsm330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->chassisIsm330.initialize(MAIN_LOOP_FREQUENCY, 1.0f, 0.0f);
+    drivers->chassisIsm330.setCalibrationSamples(2000);
+    drivers->mpu6500.setCalibrationSamples(2000);
+    // drivers->chassisIsm330.setCalibrationSamples(30000);
+    // drivers->mpu6500.setCalibrationSamples(30000);
 #endif
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();

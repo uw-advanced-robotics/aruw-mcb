@@ -51,11 +51,17 @@ public:
         this->controller = newController;
     }
 
-    void refreshSafeDisconnect() override { setZeroRPM(); }
+    void refreshSafeDisconnect() override
+    {
+        controller = nullptr;
+        setZeroRPM();
+    }
 
     void setZeroRPM();
 
     bool allMotorsOnline() const override;
+
+    inline void resetVirtualWheelPos() { currState.virtualWheelPos = 0; }
 
     inline modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override
     {
@@ -77,6 +83,8 @@ private:
     BalstdChassisState currState;
 
     BalstdChassisOutput currOutput;
+
+    static constexpr float WHEEL_RADIUS_M = 0.0762f;
 
 };  // class BalstdChassisSubsystem
 

@@ -19,10 +19,13 @@
 
 #include "balstd_imu_calibrate_command.hpp"
 
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
+
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
+using namespace tap::communication::sensors::imu;
 
 namespace aruwsrc::control::balstd
 {
@@ -136,7 +139,7 @@ void BalstdImuCalibrateCommand::execute()
             break;
         }
         case CalibrationState::CALIBRATING_IMU:
-            if (drivers->chassisIsm330.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED)
+            if (drivers->chassisIsm330.getImuState() == AbstractIMU::ImuState::IMU_CALIBRATED)
             {
                 // assume turret MCB takes approximately as long as the onboard IMU to calibrate,
                 // plus 1 second extra to handle sending the request and processing it
@@ -144,6 +147,9 @@ void BalstdImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::BUZZING;
+
+                // TODO: config
+                drivers->chassisIsm330.setAccelOffset(0.151887074f, -0.567352533f, 0.167321861f);
             }
             buzzerTimer.restart(1000);
             break;

@@ -10,10 +10,16 @@ namespace aruwsrc::control::balstd
 class BalanceController : public BalstdChassisControllerInterface
 {
 public:
-    float chassisWeight = 11.38763 * 9.8;  // f = ma
-    float heightSetpoint = 0.37;
+    float chassisWeight = 9 * 9.8;  // f = ma
+    float heightSetpoint = 0.12;
     float rollSetpoint = 0;
     float yawSetpoint = 0;
+
+    float LQRScalar = 0.0;
+    float LQRWheelScalar = 1.0;
+    float LQRHipScalar = 1.0;
+    float gravityScalar = 0.55;
+    float hipTorqueOverride = 0.1;
 
     BalanceController(
         const BalstdControlOperatorInterface& controlOperatorInterface,
