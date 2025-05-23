@@ -224,4 +224,23 @@ void DriverAssistanceIndicator::drawPlateTargetBox(Position orbit, GraphicIndex 
         graphicToModify);
 }
 
+void DriverAssistanceIndicator::configureGraphic(GraphicIndex index, Tx::GraphicColor color)
+{
+    uint8_t idx = static_cast<uint8_t>(index);
+    uint8_t graphicName[3];
+    getUnusedGraphicName(graphicName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &graphic.graphicData[idx],
+        graphicName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        color);
+}
+
+void DriverAssistanceIndicator::deleteGraphic(GraphicIndex index)
+{
+    uint8_t idx = static_cast<uint8_t>(index);
+    graphic.graphicData[idx].operation = Tx::GRAPHIC_DELETE;
+}
+
 }  // namespace aruwsrc::control::client_display

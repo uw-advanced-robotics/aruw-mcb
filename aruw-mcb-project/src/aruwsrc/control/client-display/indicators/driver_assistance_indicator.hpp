@@ -39,7 +39,7 @@ using namespace tap::communication::serial;
  * Draws bars above robots to indicate the HP of the target.
  * Draws a line to the target.
  */
-class DriverAssistanceIndicator : public HudIndicator, protected modm::Resumable<2>
+class DriverAssistanceIndicator : public HudIndicator, protected modm::Resumable<8>
 {
 public:
     DriverAssistanceIndicator(
@@ -59,7 +59,6 @@ private:
 
     bool visionHasTarget = false;
 
-
     /**
      * Useful utils I'll need.
      * Graphic -> ID enum
@@ -70,7 +69,6 @@ private:
      */
 
     Tx::Graphic7Message graphic;
-
     Tx::Graphic7Message justALine;
 
     enum GraphicIndex : uint8_t
@@ -84,24 +82,8 @@ private:
         SENTRY_TRACER = 6
     };
 
-    void deleteGraphic(GraphicIndex index)
-    {
-        uint8_t idx = static_cast<uint8_t>(index);
-        graphic.graphicData[idx].operation = Tx::GRAPHIC_DELETE;
-    }
-
-    void configureGraphic(GraphicIndex index, Tx::GraphicColor color)
-    {
-        uint8_t idx = static_cast<uint8_t>(index);
-        uint8_t graphicName[3];
-        getUnusedGraphicName(graphicName);
-        RefSerialTransmitter::configGraphicGenerics(
-            &graphic.graphicData[idx],
-            graphicName,
-            Tx::GRAPHIC_ADD,
-            DEFAULT_GRAPHIC_LAYER,
-            color);
-    }
+    void deleteGraphic(GraphicIndex index);
+    void configureGraphic(GraphicIndex index, Tx::GraphicColor color);
 
     Vector TRACER_LINE_OFFSET = Vector(0, 0, -0.3);
     modm::Vector2i TRACER_LINE_ORIGIN = modm::Vector2i(SCREEN_WIDTH / 2, 300);
