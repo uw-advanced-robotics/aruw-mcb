@@ -68,7 +68,7 @@
 #include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
-#include "aruwsrc/control/client-display/indicators/driver_assistance_indicator.cpp"
+#include "aruwsrc/control/client-display/indicators/driver_assistance_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
@@ -549,12 +549,12 @@ DriverAssistanceIndicator driverAssistanceIndicator(
     transformAdapter.getWorldToVTM());
 
 std::vector<HudIndicator *> hudIndicators = {
-    &capBankIndicator,
-    &positionHudIndicators,
+    // &capBankIndicator,
+    // &positionHudIndicators,
     &ammoIndicator,
-    &circleCrosshair,
-    &damageIndicator,
-    &textHudIndicators,
+    // &circleCrosshair,
+    // &damageIndicator,
+    // &textHudIndicators,
     // &visionTargetIndicator,
     &driverAssistanceIndicator};
 
