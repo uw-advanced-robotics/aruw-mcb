@@ -41,6 +41,8 @@ public:
 
     const tap::algorithms::transforms::Transform& getWorldToVTM() const;
 
+    const tap::algorithms::transforms::Transform& getChassisToArducam(uint8_t cameraID) const;
+
 private:
     const SentryTransforms& transforms;
 };
