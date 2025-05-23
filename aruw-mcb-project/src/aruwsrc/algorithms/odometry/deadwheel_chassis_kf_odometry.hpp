@@ -20,8 +20,6 @@
 #ifndef DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 #define DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 
-#include <aruwsrc/control/turret/yaw_turret_subsystem.hpp>
-
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
@@ -29,6 +27,8 @@
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
+#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
@@ -54,9 +54,9 @@ public:
      * @param initPos Initial position of chassis when robot boots
      * @param parallelCenterToWheelDistance Distance from the center of the chassis to the center of
      * the parallel deadwheel
-     * @param parallelWheelChassisRelativeAngleDegrees Angle between the parallel deadwheel and
-     * "forward" on the chassis
-     * @param perpendicularWheelChassisRelativeAngleDegrees Angle between the perpendicular
+     * @param parallelWheelChassisForwardRelativeAngleRadians Angle between the parallel deadwheel
+     * and "forward" on the chassis
+     * @param perpendicularWheelChassisForwardRelativeAngleRadians Angle between the perpendicular
      * deadwheel and "forward" on the chassis
      * @brief The parallel deadwheel is the deadwheel that is tangent to the edge of the chassis.
      * The perpendicular deadwheel is the deadwheel that is perpendicular to the edge of the
@@ -65,12 +65,16 @@ public:
      */
     DeadwheelChassisKFOdometry(
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
+#if defined(TARGET_SENTRY_HYDRA)
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
+#else
+        aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver& chassisYawObserver,
+#endif
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
         const float parallelCenterToWheelDistance,
-        const float parallelWheelChassisRelativeAngleDegrees,
-        const float perpendicularWheelChassisRelativeAngleDegrees);
+        const float parallelWheelChassisForwardRelativeAngleRadians,
+        const float perpendicularWheelChassisForwardRelativeAngleRadians);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
@@ -138,14 +142,7 @@ private:
         0, 0, 0, 0, 1, 0,
         0, 0, 0, 0, 0, 1,
     };
-    static constexpr float KF_Q[STATES_SQUARED] = {
-        1E-2, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E-1, 0  , 0  , 0  , 0  ,
-        0  , 0  , 5E0, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E-2, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E-1, 0  ,
-        0  , 0  , 0  , 0  , 0  , 5E0,
-    };
+
     static constexpr float KF_R[INPUTS_SQUARED] = {
         7.49565672e-05, 0, 0, 0,
         0, 7.35872941e-04, 0, 0,
@@ -153,12 +150,21 @@ private:
         0, 0, 0, 5.69132363e-04
     };
 
+    static constexpr float KF_Q[STATES_SQUARED] = {
+        9.0120570108e-06f, 5.4281168875e-04f, 5.6797949319e-02f, 4.3864560552e-07f, -7.6362940038e-05f, -7.9139054404e-03f,
+        5.4281168875e-04f, 1.9396555203e-01f, 1.8282498819e+01f, -8.3483362129e-05f, -1.8580184164e-02f, -1.7427705884e+00f,
+        5.6797949319e-02f, 1.8282498819e+01f, 1.7345126240e+03f, -7.4990656881e-03f, -1.7895295666e+00f, -1.6939745776e+02f,
+        4.3864560552e-07f, -8.3483362129e-05f, -7.4990656881e-03f, 4.7600903828e-06f, 4.9474361167e-04f, 4.6590765854e-02f,
+        -7.6362940038e-05f, -1.8580184164e-02f, -1.7895295666e+00f, 4.9474361167e-04f, 1.5265492535e-01f, 1.4482580576e+01f,
+        -7.9139054404e-03f, -1.7427705884e+00f, -1.6939745776e+02f, 4.6590765854e-02f, 1.4482580576e+01f, 1.3770822857e+03f,
+    };
+    
     static constexpr float KF_P0[STATES_SQUARED] = {
         1E-2, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E-2, 0  , 0  , 0  , 0  ,
+        0  , 1E-6, 0  , 0  , 0  , 0  ,
         0  , 0  , 1E3, 0  , 0  , 0  ,
         0  , 0  , 0  , 1E-2, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E-2, 0  ,
+        0  , 0  , 0  , 0  , 1E-6, 0  ,
         0  , 0  , 0  , 0  , 0  , 1E3,
     };
     // clang-format on
@@ -166,7 +172,6 @@ private:
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
-
     const modm::Vector2f initPos;
 
     /// Chassis location in the world frame
@@ -180,9 +185,24 @@ private:
     uint32_t prevTime = 0;
 
     const float parallelCenterToWheelDistance;
-    const float parallelWheelChassisRelativeAngleRadians;
-    const float perpendicularWheelChassisRelativeAngleRadians;
+    const float parallelWheelChassisForwardRelativeAngleRadians;
+    const float perpendicularWheelChassisForwardRelativeAngleRadians;
     void updateChassisStateFromKF(float chassisYaw);
+    float perpendicularRaw;
+    float parallelRaw;
+    float filteredPerpendicular;
+    float filteredParallel;
+
+    static constexpr int FILTER_ORDER = 3;
+    float parallelFilterState[FILTER_ORDER] = {0.0f};
+    float perpendicularFilterState[FILTER_ORDER] = {0.0f};
+    float parallelNotchFilterState[3] = {0.0f};
+    float perpendicularNotchFilterState[3] = {0.0f};
+
+    static constexpr float IIR_A[FILTER_ORDER] = {1.000000f, -1.583541f, 0.656414f};
+    static constexpr float IIR_B[FILTER_ORDER] = {0.018218f, 0.036436f, 0.018218f};
+
+    float applyIirFilter(float input, float* state, const float* a, const float* b, int order);
 };
 }  // namespace aruwsrc::algorithms::odometry
 
