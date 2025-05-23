@@ -22,8 +22,8 @@
 namespace aruwsrc::algorithms::odometry
 {
 TwoDeadwheelOdometryObserver::TwoDeadwheelOdometryObserver(
-    aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
-    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
+    tap::encoder::EncoderInterface* parallelWheel,
+    tap::encoder::EncoderInterface* perpendicularWheel,
     const float wheelRadius)
     : wheelRadius(wheelRadius),
       parallelWheel(parallelWheel),
@@ -33,11 +33,11 @@ TwoDeadwheelOdometryObserver::TwoDeadwheelOdometryObserver(
 
 float TwoDeadwheelOdometryObserver::getParallelMotorVelocity() const
 {
-    return parallelWheel->getEncoder()->getVelocity() * wheelRadius;
+    return parallelWheel->getVelocity() * wheelRadius;
 }
 float TwoDeadwheelOdometryObserver::getPerpendicularVelocity() const
 {
-    return perpendicularWheel->getEncoder()->getVelocity() * wheelRadius;
+    return perpendicularWheel->getVelocity() * wheelRadius;
 }
 
 }  // namespace aruwsrc::algorithms::odometry
