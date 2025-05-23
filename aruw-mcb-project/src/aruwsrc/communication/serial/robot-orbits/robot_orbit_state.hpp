@@ -33,9 +33,9 @@ constexpr uint8_t MAX_TRACKED_ROBOTS = 4;
 struct RobotState
 {
     RefSerialData::RobotId robotId;
-    float xPos;  
+    float xPos;
     float yPos;
-    float zPos; 
+    float zPos;
     uint32_t timestamp;
 };
 

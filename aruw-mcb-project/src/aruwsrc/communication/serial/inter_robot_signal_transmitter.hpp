@@ -106,7 +106,6 @@ public:
     tap::mock::RefSerialTransmitterMock refSerialTransmitter;
 
 private:
-
     std::vector<tap::communication::serial::RefSerialData::RobotId> targetIds;
     uint16_t messageId;
 

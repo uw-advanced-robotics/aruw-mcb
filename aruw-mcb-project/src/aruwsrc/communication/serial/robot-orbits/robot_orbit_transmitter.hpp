@@ -72,7 +72,8 @@ private:
     std::vector<tap::communication::serial::RefSerialData::RobotId> targetRobots;
     aruwsrc::communication::serial::InterRobotSignalMessageTransmitter<
         RobotOrbitMessageType,
-        static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES)> messageTransmitter;
+        static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES)>
+        messageTransmitter;
 
     void parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message);
 };
