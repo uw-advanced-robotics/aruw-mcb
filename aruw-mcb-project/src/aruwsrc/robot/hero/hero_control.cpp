@@ -219,8 +219,8 @@ tap::motor::DjiMotor yawMotor(
     false,
     1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508,
     0
-    // ,
-    // &yawEncoder
+    ,
+    &yawEncoder
 );
 HeroTurretSubsystem turret(
     drivers(),
