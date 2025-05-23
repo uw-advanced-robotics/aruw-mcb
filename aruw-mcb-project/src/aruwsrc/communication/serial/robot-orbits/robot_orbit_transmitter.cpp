@@ -23,6 +23,21 @@
 
 namespace aruwsrc::communication::serial
 {
+void RobotOrbitTransmitter::OrbitMessageTransmitter::setMessageData(
+    RobotOrbitMessageType type, 
+    const uint8_t* data, 
+    size_t length)
+{
+    
+    tap::communication::serial::RefSerialData::Tx::RobotToRobotMessage tempMsg;
+    
+    if (length > sizeof(tempMsg.dataAndCRC16) - 1) {
+        length = sizeof(tempMsg.dataAndCRC16) - 1;  // Ensure we don't overflow
+    }
+    std::memcpy(tempMsg.dataAndCRC16 + 1, data, length);
+    queueMessage(type);
+}
+
 RobotOrbitTransmitter::RobotOrbitTransmitter(
     tap::Drivers* drivers,
     RobotOrbitStateProvider& stateProvider,
@@ -66,6 +81,7 @@ void RobotOrbitTransmitter::sendRobotStates()
     {
         return;
     }
+    
     RefSerialTransmitter::RobotId allyRobot = getAllyRobotId();
     if (allyRobot == RefSerialData::RobotId::INVALID)
     {
@@ -75,25 +91,22 @@ void RobotOrbitTransmitter::sendRobotStates()
     targetRobots.clear();
     targetRobots.push_back(allyRobot);
 
+    static constexpr size_t MAX_MSG_SIZE = 113; 
+    uint8_t messageBuffer[MAX_MSG_SIZE] = {0};
+    
     auto robotPosition = odometry->getCurrentLocation2D();
 
-    auto& robotToRobotMsg = messageTransmitter.refSerialTransmitter.robotToRobotMessage;
+    messageBuffer[0] = 0x01;
+    
+    size_t baseIndex = 1;
 
-    // From notion:
-    // https://www.notion.so/aruw/Inter-robot-Communication-17f2d9fe90e28059bf8fd9596cf08a98?pvs=26&qid&origin
-    // Header TOC - 4 bit value that encodes which robots are in the packet
-    uint8_t headerTOC = 0x01;
-
-    uint8_t baseIndex = 1;
-
-    // Encode our own position
     uint16_t xPosScaled = static_cast<uint16_t>(robotPosition.getX() * STATIC_CAST_SCALE_FACTOR);
     uint16_t yPosScaled = static_cast<uint16_t>(robotPosition.getY() * STATIC_CAST_SCALE_FACTOR);
     uint16_t zPosScaled = 0;  // Assuming ground robot with z=0
 
-    tap::arch::convertToLittleEndian(xPosScaled, &robotToRobotMsg.dataAndCRC16[baseIndex]);
-    tap::arch::convertToLittleEndian(yPosScaled, &robotToRobotMsg.dataAndCRC16[baseIndex + 2]);
-    tap::arch::convertToLittleEndian(zPosScaled, &robotToRobotMsg.dataAndCRC16[baseIndex + 4]);
+    tap::arch::convertToLittleEndian(xPosScaled, &messageBuffer[baseIndex]);
+    tap::arch::convertToLittleEndian(yPosScaled, &messageBuffer[baseIndex + 2]);
+    tap::arch::convertToLittleEndian(zPosScaled, &messageBuffer[baseIndex + 4]);
 
     baseIndex += 6;
 
@@ -102,35 +115,36 @@ void RobotOrbitTransmitter::sendRobotStates()
 
     for (uint8_t i = 0; i < numVisionStates; i++)
     {
-        if (baseIndex + 7 >= static_cast<uint8_t>(sizeof(robotToRobotMsg.dataAndCRC16)))
+        if (baseIndex + 7 >= MAX_MSG_SIZE)
         {
             break;
         }
 
-        headerTOC |= (1 << (i + 1));
+        messageBuffer[0] |= (1 << (i + 1));
 
-        robotToRobotMsg.dataAndCRC16[baseIndex] = static_cast<uint8_t>(visionStates[i].robotId);
+        messageBuffer[baseIndex] = static_cast<uint8_t>(visionStates[i].robotId);
         baseIndex++;
 
         uint16_t xPosRobot = static_cast<uint16_t>(visionStates[i].xPos * STATIC_CAST_SCALE_FACTOR);
         uint16_t yPosRobot = static_cast<uint16_t>(visionStates[i].yPos * STATIC_CAST_SCALE_FACTOR);
         uint16_t zPosRobot = static_cast<uint16_t>(visionStates[i].zPos * STATIC_CAST_SCALE_FACTOR);
 
-        tap::arch::convertToLittleEndian(xPosRobot, &robotToRobotMsg.dataAndCRC16[baseIndex]);
-        tap::arch::convertToLittleEndian(yPosRobot, &robotToRobotMsg.dataAndCRC16[baseIndex + 2]);
-        tap::arch::convertToLittleEndian(zPosRobot, &robotToRobotMsg.dataAndCRC16[baseIndex + 4]);
+        tap::arch::convertToLittleEndian(xPosRobot, &messageBuffer[baseIndex]);
+        tap::arch::convertToLittleEndian(yPosRobot, &messageBuffer[baseIndex + 2]);
+        tap::arch::convertToLittleEndian(zPosRobot, &messageBuffer[baseIndex + 4]);
 
         baseIndex += 6;
     }
 
-    robotToRobotMsg.dataAndCRC16[0] = headerTOC;
-
     uint32_t timestamp = tap::arch::clock::getTimeMilliseconds();
-    tap::arch::convertToLittleEndian(timestamp, &robotToRobotMsg.dataAndCRC16[baseIndex]);
+    tap::arch::convertToLittleEndian(timestamp, &messageBuffer[baseIndex]);
     baseIndex += 4;
 
-    messageTransmitter.queueMessage(RobotOrbitMessageType::POSITION_UPDATE);
-    messageTransmitter.sendQueued();
+    messageTransmitter.setMessageData(
+        RobotOrbitMessageType::POSITION_UPDATE,
+        messageBuffer,
+        baseIndex);
+
 }
 
 void RobotOrbitTransmitter::operator()(const DJISerial::ReceivedSerialMessage& message)
@@ -146,9 +160,10 @@ void RobotOrbitTransmitter::parseIncomingMessage(const DJISerial::ReceivedSerial
         return;
     }
 
-    const uint8_t* data = message.data;
+    const uint8_t* data = message.data + sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader);
+    
     uint8_t headerTOC = data[0];
-    uint8_t baseIndex = 1;
+    size_t baseIndex = 1;
 
     if (headerTOC & 0x01)
     {
@@ -207,6 +222,10 @@ void RobotOrbitTransmitter::parseIncomingMessage(const DJISerial::ReceivedSerial
     }
 }
 
-void RobotOrbitTransmitter::update() { sendRobotStates(); }
+void RobotOrbitTransmitter::update() 
+{ 
+    sendRobotStates();
+    messageTransmitter.sendQueued(); 
+}
 
 }  // namespace aruwsrc::communication::serial

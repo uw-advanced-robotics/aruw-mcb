@@ -27,12 +27,12 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/odometry/chassis_kf_odometry.hpp"
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "aruwsrc/communication/serial/inter_robot_signal_transmitter.hpp"
 
 #include "robot_orbit_state.hpp"
 
-using namespace aruwsrc::algorithms::odometry;
+using namespace tap::algorithms::odometry;
 using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::serial
@@ -52,30 +52,42 @@ public:
         RefSerial* refSerial);
 
     void operator()(const DJISerial::ReceivedSerialMessage& message) override final;
-    inline void attachOdometry(ChassisKFOdometry* odometry) { this->odometry = odometry; }
+    inline void attachOdometry(Odometry2DInterface* odometry) { this->odometry = odometry; }
     void update();
-    void sendRobotStates();
 
 private:
     tap::Drivers* drivers;
     RobotOrbitStateProvider& stateProvider;
-    ChassisKFOdometry* odometry = nullptr;
+    Odometry2DInterface* odometry = nullptr;
     RefSerial* refSerial;
 
     RefSerialTransmitter::RobotId getAllyRobotId() const;
+    
+    class OrbitMessageTransmitter : 
+        public InterRobotSignalMessageTransmitter<
+            RobotOrbitMessageType,
+            static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES)>
+    {
+    public:
+        OrbitMessageTransmitter(
+            tap::Drivers& drivers,
+            std::vector<tap::communication::serial::RefSerialData::RobotId>& targetIds,
+            uint16_t messageId)
+            : InterRobotSignalMessageTransmitter(drivers, targetIds, messageId) {}
+
+        void setMessageData(RobotOrbitMessageType type, const uint8_t* data, size_t length);
+    };
 
     // Define scale factor based on field size and uint16_t max value
-    // RoboMaster field is  12m in the largest dimension
+    // RoboMaster field is 12m in the largest dimension
     // UINT16_MAX = 65535, dividing by 12 gives ~5461 units per meter
     static constexpr uint16_t STATIC_CAST_SCALE_FACTOR = UINT16_MAX / 12;
 
     std::vector<tap::communication::serial::RefSerialData::RobotId> targetRobots;
-    aruwsrc::communication::serial::InterRobotSignalMessageTransmitter<
-        RobotOrbitMessageType,
-        static_cast<uint8_t>(RobotOrbitMessageType::NUM_MESSAGE_TYPES)>
-        messageTransmitter;
+    OrbitMessageTransmitter messageTransmitter;
 
     void parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message);
+    void sendRobotStates();
 };
 
 }  // namespace aruwsrc::communication::serial
