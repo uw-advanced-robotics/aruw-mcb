@@ -43,7 +43,6 @@ RefSerialMenu::RefSerialMenu(
           &RefSerialMenu::print42mmHeat,
           &RefSerialMenu::printPowerBuf,
           &RefSerialMenu::printPower,
-          &RefSerialMenu::printShooterSpeed,
       }
 {
 }
@@ -126,13 +125,7 @@ void RefSerialMenu::printPowerBuf(modm::IOStream& stream)
 void RefSerialMenu::printPower(modm::IOStream& stream)
 {
     const auto& robotData = drivers->refSerial.getRobotData();
-    stream << "Power limit: " << robotData.chassis.powerConsumptionLimit << modm::endl;
-}
-
-void RefSerialMenu::printShooterSpeed(modm::IOStream& stream)
-{
-    const auto& robotData = drivers->refSerial.getRobotData();
-    stream.printf("Last Shot Speed: %.2f", static_cast<double>(robotData.turret.bulletSpeed));
+    stream.printf("Power limit: %i", robotData.chassis.powerConsumptionLimit);
 }
 
 }  // namespace tap::display
