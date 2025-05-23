@@ -21,6 +21,7 @@
 #define ROBOT_ORBIT_STATE_HPP_
 
 #include <cstdint>
+#include <tuple>
 
 #include "tap/communication/serial/ref_serial_data.hpp"
 
@@ -32,9 +33,9 @@ constexpr uint8_t MAX_TRACKED_ROBOTS = 4;
 struct RobotState
 {
     RefSerialData::RobotId robotId;
-    uint8_t xPos;
-    uint8_t yPos;
-    uint8_t zPos;
+    float xPos;  
+    float yPos;
+    float zPos; 
     uint32_t timestamp;
 };
 
@@ -48,9 +49,7 @@ public:
     RobotState getRobotState(RefSerialData::RobotId robotID) const;
 
 private:
-    RobotState storedStates[MAX_TRACKED_ROBOTS] = {};
-    RefSerialData::RobotId storedIDs[MAX_TRACKED_ROBOTS] = {RefSerialData::RobotId::INVALID};
-    bool hasState[MAX_TRACKED_ROBOTS] = {false};
+    std::tuple<bool, RefSerialData::RobotId, RobotState> robotData[MAX_TRACKED_ROBOTS];
 
     int findRobotIndex(RefSerialData::RobotId robotID) const;
 };

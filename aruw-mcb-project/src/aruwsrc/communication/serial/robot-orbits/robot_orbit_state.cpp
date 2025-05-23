@@ -25,7 +25,7 @@ int RobotOrbitStateProvider::findRobotIndex(RefSerialData::RobotId robotID) cons
 {
     for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
     {
-        if (hasState[i] && storedIDs[i] == robotID)
+        if (std::get<0>(robotData[i]) && std::get<1>(robotData[i]) == robotID)
         {
             return i;
         }
@@ -40,17 +40,17 @@ void RobotOrbitStateProvider::updateFromVision(
     int index = findRobotIndex(robotID);
     if (index != -1)
     {
-        storedStates[index] = state;
+        std::get<2>(robotData[index]) = state;
     }
     else
     {
         for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
         {
-            if (!hasState[i])
+            if (!std::get<0>(robotData[i]))
             {
-                storedStates[i] = state;
-                storedIDs[i] = robotID;
-                hasState[i] = true;
+                std::get<0>(robotData[i]) = true;
+                std::get<1>(robotData[i]) = robotID;
+                std::get<2>(robotData[i]) = state;
                 return;
             }
         }
@@ -64,17 +64,17 @@ void RobotOrbitStateProvider::updateFromAlly(
     int index = findRobotIndex(robotID);
     if (index != -1)
     {
-        storedStates[index] = state;
+        std::get<2>(robotData[index]) = state;
     }
     else
     {
         for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
         {
-            if (!hasState[i])
+            if (!std::get<0>(robotData[i]))
             {
-                storedStates[i] = state;
-                storedIDs[i] = robotID;
-                hasState[i] = true;
+                std::get<0>(robotData[i]) = true;
+                std::get<1>(robotData[i]) = robotID;
+                std::get<2>(robotData[i]) = state;
                 return;
             }
         }
@@ -87,7 +87,7 @@ bool RobotOrbitStateProvider::getRobotState(RefSerialData::RobotId robotID, Robo
     int index = findRobotIndex(robotID);
     if (index != -1)
     {
-        outState = storedStates[index];
+        outState = std::get<2>(robotData[index]);
         return true;
     }
     return false;
@@ -99,9 +99,9 @@ uint8_t RobotOrbitStateProvider::getNumKnownVisionStates(
     uint8_t count = 0;
     for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
     {
-        if (hasState[i])
+        if (std::get<0>(robotData[i]))
         {
-            states[count++] = storedStates[i];
+            states[count++] = std::get<2>(robotData[i]);
         }
     }
     return count;

@@ -102,14 +102,10 @@ public:
 private:
     tap::communication::serial::RefSerial &refSerial;
 
-#ifdef ENV_UNIT_TESTS
 public:
     tap::mock::RefSerialTransmitterMock refSerialTransmitter;
 
 private:
-#else
-    tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
-#endif
 
     std::vector<tap::communication::serial::RefSerialData::RobotId> targetIds;
     uint16_t messageId;

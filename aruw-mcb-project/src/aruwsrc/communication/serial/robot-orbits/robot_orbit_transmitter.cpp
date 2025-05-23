@@ -19,6 +19,8 @@
 
 #include "robot_orbit_transmitter.hpp"
 
+#include "tap/architecture/endianness_wrappers.hpp"
+
 namespace aruwsrc::communication::serial
 {
 RobotOrbitTransmitter::RobotOrbitTransmitter(
@@ -26,10 +28,13 @@ RobotOrbitTransmitter::RobotOrbitTransmitter(
     RobotOrbitStateProvider& stateProvider,
     RefSerial* refSerial)
     : drivers(drivers),
-      serialTransmitter(drivers),
       stateProvider(stateProvider),
-      refSerial(refSerial)
+      odometry(nullptr),
+      refSerial(refSerial),
+      targetRobots(),
+      messageTransmitter(*drivers, targetRobots, 0x200)
 {
+    refSerial->attachRobotToRobotMessageHandler(0x200, this);
 }
 
 RefSerialTransmitter::RobotId RobotOrbitTransmitter::getAllyRobotId() const
@@ -67,48 +72,64 @@ void RobotOrbitTransmitter::sendRobotStates()
         return;
     }
 
+    targetRobots.clear();
+    targetRobots.push_back(allyRobot);
+
     auto robotPosition = odometry->getCurrentLocation2D();
 
-    RefSerialData::Tx::RobotToRobotMessage message{};
-    message.dataAndCRC16[0] = 0;
+    auto& robotToRobotMsg = messageTransmitter.refSerialTransmitter.robotToRobotMessage;
+    
+    // From notion: https://www.notion.so/aruw/Inter-robot-Communication-17f2d9fe90e28059bf8fd9596cf08a98?pvs=26&qid&origin
+    // Header TOC - 4 bit value that encodes which robots are in the packet
+    uint8_t headerTOC = 0x01; 
+    
     uint8_t baseIndex = 1;
 
-    message.dataAndCRC16[baseIndex] =
-        static_cast<uint8_t>(robotPosition.getX() * STATIC_CAST_SCALE_FACTOR);
-    message.dataAndCRC16[baseIndex + 1] =
-        static_cast<uint8_t>(robotPosition.getY() * STATIC_CAST_SCALE_FACTOR);
+    // Encode our own position
+    uint16_t xPosScaled = static_cast<uint16_t>(robotPosition.getX() * STATIC_CAST_SCALE_FACTOR);
+    uint16_t yPosScaled = static_cast<uint16_t>(robotPosition.getY() * STATIC_CAST_SCALE_FACTOR);
+    uint16_t zPosScaled = 0; // Assuming ground robot with z=0
+    
+    tap::arch::convertToLittleEndian(xPosScaled, &robotToRobotMsg.dataAndCRC16[baseIndex]);
+    tap::arch::convertToLittleEndian(yPosScaled, &robotToRobotMsg.dataAndCRC16[baseIndex + 2]);
+    tap::arch::convertToLittleEndian(zPosScaled, &robotToRobotMsg.dataAndCRC16[baseIndex + 4]);
 
-    baseIndex += 2;
+    baseIndex += 6;
 
     RobotState visionStates[MAX_TRACKED_ROBOTS] = {};
     uint8_t numVisionStates = stateProvider.getNumKnownVisionStates(visionStates);
 
     for (uint8_t i = 0; i < numVisionStates; i++)
     {
-        if (baseIndex + 4 >= static_cast<uint8_t>(sizeof(message.dataAndCRC16)))
+        if (baseIndex + 7 >= static_cast<uint8_t>(sizeof(robotToRobotMsg.dataAndCRC16)))
         {
             break;
         }
 
-        message.dataAndCRC16[0] |= (1 << (i + 1));
+        headerTOC |= (1 << (i + 1));
 
-        message.dataAndCRC16[baseIndex] = static_cast<uint8_t>(visionStates[i].robotId);
-        message.dataAndCRC16[baseIndex + 1] = visionStates[i].xPos;
-        message.dataAndCRC16[baseIndex + 2] = visionStates[i].yPos;
-        message.dataAndCRC16[baseIndex + 3] = visionStates[i].zPos;
-
-        baseIndex += 4;
+        robotToRobotMsg.dataAndCRC16[baseIndex] = static_cast<uint8_t>(visionStates[i].robotId);
+        baseIndex++;
+        
+        uint16_t xPosRobot = static_cast<uint16_t>(visionStates[i].xPos * STATIC_CAST_SCALE_FACTOR);
+        uint16_t yPosRobot = static_cast<uint16_t>(visionStates[i].yPos * STATIC_CAST_SCALE_FACTOR);
+        uint16_t zPosRobot = static_cast<uint16_t>(visionStates[i].zPos * STATIC_CAST_SCALE_FACTOR);
+        
+        tap::arch::convertToLittleEndian(xPosRobot, &robotToRobotMsg.dataAndCRC16[baseIndex]);
+        tap::arch::convertToLittleEndian(yPosRobot, &robotToRobotMsg.dataAndCRC16[baseIndex + 2]);
+        tap::arch::convertToLittleEndian(zPosRobot, &robotToRobotMsg.dataAndCRC16[baseIndex + 4]);
+        
+        baseIndex += 6;
     }
 
-    uint32_t timestamp = tap::arch::clock::getTimeMilliseconds();
-    message.dataAndCRC16[baseIndex] = static_cast<uint8_t>(timestamp & 0xFF);
-    message.dataAndCRC16[baseIndex + 1] = static_cast<uint8_t>((timestamp >> 8) & 0xFF);
-    message.dataAndCRC16[baseIndex + 2] = static_cast<uint8_t>((timestamp >> 16) & 0xFF);
-    message.dataAndCRC16[baseIndex + 3] = static_cast<uint8_t>((timestamp >> 24) & 0xFF);
+    robotToRobotMsg.dataAndCRC16[0] = headerTOC;
 
+    uint32_t timestamp = tap::arch::clock::getTimeMilliseconds();
+    tap::arch::convertToLittleEndian(timestamp, &robotToRobotMsg.dataAndCRC16[baseIndex]);
     baseIndex += 4;
 
-    serialTransmitter.sendRobotToRobotMsg(&message, 0x200, allyRobot, baseIndex);
+    messageTransmitter.queueMessage(RobotOrbitMessageType::POSITION_UPDATE);
+    messageTransmitter.sendQueued();
 }
 
 void RobotOrbitTransmitter::operator()(const DJISerial::ReceivedSerialMessage& message)
@@ -124,60 +145,65 @@ void RobotOrbitTransmitter::parseIncomingMessage(const DJISerial::ReceivedSerial
         return;
     }
 
-    uint8_t baseIndex = 1;
     const uint8_t* data = message.data;
+    uint8_t headerTOC = data[0]; 
+    uint8_t baseIndex = 1;
 
-    float xPos = static_cast<float>(data[baseIndex]) / STATIC_CAST_SCALE_FACTOR;
-    float yPos = static_cast<float>(data[baseIndex + 1]) / STATIC_CAST_SCALE_FACTOR;
-
-    RobotState allyRobotState;
-    allyRobotState.robotId = allyRobot;
-    allyRobotState.xPos = xPos;
-    allyRobotState.yPos = yPos;
-    allyRobotState.zPos = 0;
-
-    baseIndex += 2;
-
-    for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
+    if (headerTOC & 0x01)
     {
-        if (!(data[0] & (1 << (i + 1))))
+        uint16_t xPosScaled, yPosScaled, zPosScaled;
+        tap::arch::convertFromLittleEndian(&xPosScaled, &data[baseIndex]);
+        tap::arch::convertFromLittleEndian(&yPosScaled, &data[baseIndex + 2]);
+        tap::arch::convertFromLittleEndian(&zPosScaled, &data[baseIndex + 4]);
+        
+        float xPos = static_cast<float>(xPosScaled) / STATIC_CAST_SCALE_FACTOR;
+        float yPos = static_cast<float>(yPosScaled) / STATIC_CAST_SCALE_FACTOR;
+        float zPos = static_cast<float>(zPosScaled) / STATIC_CAST_SCALE_FACTOR;
+
+        RobotState allyRobotState;
+        allyRobotState.robotId = allyRobot;
+        allyRobotState.xPos = xPos;
+        allyRobotState.yPos = yPos;
+        allyRobotState.zPos = zPos;
+        
+        baseIndex += 6;
+
+        for (uint8_t i = 1; i < MAX_TRACKED_ROBOTS + 1; i++)
         {
-            continue;
+            if (!(headerTOC & (1 << i)))
+            {
+                continue;
+            }
+
+            RefSerialData::RobotId robotId = static_cast<RefSerialData::RobotId>(data[baseIndex]);
+            baseIndex++;
+            
+            uint16_t xPosRobot, yPosRobot, zPosRobot;
+            tap::arch::convertFromLittleEndian(&xPosRobot, &data[baseIndex]);
+            tap::arch::convertFromLittleEndian(&yPosRobot, &data[baseIndex + 2]);
+            tap::arch::convertFromLittleEndian(&zPosRobot, &data[baseIndex + 4]);
+            
+            float xRobot = static_cast<float>(xPosRobot) / STATIC_CAST_SCALE_FACTOR;
+            float yRobot = static_cast<float>(yPosRobot) / STATIC_CAST_SCALE_FACTOR;
+            float zRobot = static_cast<float>(zPosRobot) / STATIC_CAST_SCALE_FACTOR;
+
+            RobotState newState;
+            newState.robotId = robotId;
+            newState.xPos = xRobot;
+            newState.yPos = yRobot;
+            newState.zPos = zRobot;
+
+            baseIndex += 6;
+            
+            stateProvider.updateFromAlly(robotId, newState);
         }
 
-        RobotState newState;
-        newState.robotId = static_cast<RefSerialData::RobotId>(data[baseIndex]);
-        newState.xPos = data[baseIndex + 1];
-        newState.yPos = data[baseIndex + 2];
-        newState.zPos = data[baseIndex + 3];
-
-        stateProvider.updateFromAlly(newState.robotId, newState);
-
-        baseIndex += 4;
+        uint32_t timestamp;
+        tap::arch::convertFromLittleEndian(&timestamp, &data[baseIndex]);
+        
+        allyRobotState.timestamp = timestamp;
+        stateProvider.updateFromAlly(allyRobot, allyRobotState);
     }
-
-    uint32_t timestamp = static_cast<uint32_t>(data[baseIndex]) |
-                         (static_cast<uint32_t>(data[baseIndex + 1]) << 8) |
-                         (static_cast<uint32_t>(data[baseIndex + 2]) << 16) |
-                         (static_cast<uint32_t>(data[baseIndex + 3]) << 24);
-
-    allyRobotState.timestamp = timestamp;
-
-    for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
-    {
-        if (!(data[0] & (1 << (i + 1))))
-        {
-            continue;
-        }
-
-        RefSerialData::RobotId robotId = static_cast<RefSerialData::RobotId>(data[baseIndex]);
-        RobotState updatedState = stateProvider.getRobotState(robotId);
-        updatedState.timestamp = timestamp;
-        stateProvider.updateFromAlly(robotId, updatedState);
-
-        baseIndex += 4;
-    }
-    stateProvider.updateFromAlly(allyRobot, allyRobotState);
 }
 
 void RobotOrbitTransmitter::update()
