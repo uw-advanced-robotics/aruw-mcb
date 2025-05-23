@@ -20,9 +20,9 @@
 #if defined(TARGET_ENGINEER)
 
 #include "tap/communication/gpio/digital.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/control/command_mapper.hpp"
-#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 
@@ -30,7 +30,6 @@
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
-#include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
@@ -202,7 +201,7 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak liftLimitSwitch(
     &drivers()->digital,
     aruwsrc::engineer::GANTRY_LIFT_LIMIT_SWITCH_PIN);
 
-LimitSwitchTrigger liftLimitSwitchTrigger(drivers(), &liftLimitSwitch);
+LimitSwitchTrigger liftLimitSwitchTrigger(&liftLimitSwitch);
 
 tap::motor::DjiMotor cubeStorageLiftMotor(
     drivers(),
@@ -226,7 +225,7 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimitSwit
     &drivers()->digital,
     aruwsrc::engineer::GANTRY_EXTENSION_LIMIT_SWITCH_PIN);
 
-LimitSwitchTrigger extensionLimitSwitchTrigger(drivers(), &extensionLimitSwitch);
+LimitSwitchTrigger extensionLimitSwitchTrigger(&extensionLimitSwitch);
 
 WristSubsystem wristSubsystem(
     drivers(),
