@@ -703,6 +703,9 @@ void initializeSubsystems()
     buzzer.initialize();
     transformSubsystem.initialize();
     capBankSubsystem.initialize();
+    arucoResetSubsystem.initialize();
+    perpendicularOmni.initialize();
+    parallelOmni.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
