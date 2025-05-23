@@ -36,18 +36,30 @@ DriverAssistanceIndicator::DriverAssistanceIndicator(
 void DriverAssistanceIndicator::initialize()
 {
     configureGraphic(GraphicIndex::TARGET, Tx::GraphicColor::GREEN);
+
     configureGraphic(GraphicIndex::HERO_TRACER, Tx::GraphicColor::ORANGE);
     configureGraphic(GraphicIndex::STANDARD_TRACER, Tx::GraphicColor::ORANGE);
     configureGraphic(GraphicIndex::SENTRY_TRACER, Tx::GraphicColor::ORANGE);
+
     configureGraphic(GraphicIndex::HERO_HP, Tx::GraphicColor::PURPLISH_RED);
     configureGraphic(GraphicIndex::STANDARD_HP, Tx::GraphicColor::PURPLISH_RED);
     configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
+
+    uint8_t graphicName[3];
+    getUnusedGraphicName(graphicName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &justALine.graphicData[0],
+        graphicName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        Tx::GraphicColor::PURPLISH_RED);
 }
 
+bool hasStandard, hasHero, hasSentry;
 modm::ResumableResult<void> DriverAssistanceIndicator::update()
 {
     auto aimData = visionCoprocessor.getLastAimData(0);
-    bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
+    // bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
     if (!visionHasTarget)
     {
@@ -63,8 +75,10 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
         drawPlateTargetBox(enemyPlatePosition, GraphicIndex::TARGET);
     }
 
-    bool hasStandard, hasHero, hasSentry;
     auto robotOrbits = visionCoprocessor.getLastRobotOrbitData();
+    hasStandard = false;
+    hasHero = false;
+    hasSentry = false;
     for (int i = 0; i < visionCoprocessor.MAX_NUM_ROBOT_ORBITS; i++)
     {
         int ID = robotOrbits.data[i].robotType;
@@ -108,9 +122,19 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
         deleteGraphic(GraphicIndex::SENTRY_HP);
     }
 
+    // Draw a line from (900, 300) to (1200, 600)
+    RefSerialTransmitter::configLine(
+        4,
+        TRACER_LINE_ORIGIN.x,
+        TRACER_LINE_ORIGIN.y,
+        1200,
+        600,
+        &justALine.graphicData[0]);
+
     // Send the graphics
     RF_BEGIN(0);
     RF_CALL(refSerialTransmitter.sendGraphic(&graphic));
+    RF_CALL(refSerialTransmitter.sendGraphic(&justALine));
     RF_END();
 }
 

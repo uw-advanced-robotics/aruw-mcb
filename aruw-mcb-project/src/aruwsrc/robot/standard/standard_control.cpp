@@ -549,12 +549,12 @@ DriverAssistanceIndicator driverAssistanceIndicator(
     transformAdapter.getWorldToVTM());
 
 std::vector<HudIndicator *> hudIndicators = {
-    // &capBankIndicator,
-    // &positionHudIndicators,
+    &capBankIndicator,
+    &positionHudIndicators,
     &ammoIndicator,
-    // &circleCrosshair,
-    // &damageIndicator,
-    // &textHudIndicators,
+    &circleCrosshair,
+    &damageIndicator,
+    &textHudIndicators,
     // &visionTargetIndicator,
     &driverAssistanceIndicator};
 

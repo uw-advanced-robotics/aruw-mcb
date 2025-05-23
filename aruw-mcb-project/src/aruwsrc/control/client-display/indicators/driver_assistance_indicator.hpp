@@ -57,6 +57,9 @@ private:
     RefSerial &refSerial;
     const Transform &worldToCameraTransform;
 
+    bool visionHasTarget = false;
+
+
     /**
      * Useful utils I'll need.
      * Graphic -> ID enum
@@ -67,6 +70,8 @@ private:
      */
 
     Tx::Graphic7Message graphic;
+
+    Tx::Graphic7Message justALine;
 
     enum GraphicIndex : uint8_t
     {
