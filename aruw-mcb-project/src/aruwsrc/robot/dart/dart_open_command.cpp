@@ -21,8 +21,7 @@
 
 namespace aruwsrc::robot::dart
 {
-DartOpenCommand::DartOpenCommand(DartLauncherSubsystem &dartLauncher)
-    : dartLauncher(dartLauncher)
+DartOpenCommand::DartOpenCommand(DartLauncherSubsystem &dartLauncher) : dartLauncher(dartLauncher)
 {
     addSubsystemRequirement(&dartLauncher);
 }
@@ -31,7 +30,7 @@ void DartOpenCommand::initialize() {}
 
 void DartOpenCommand::execute() { dartLauncher.setOpen(); }
 
-void DartOpenCommand::end(bool) { }
+void DartOpenCommand::end(bool) {}
 
 bool DartOpenCommand::isFinished() const { return false; }
 

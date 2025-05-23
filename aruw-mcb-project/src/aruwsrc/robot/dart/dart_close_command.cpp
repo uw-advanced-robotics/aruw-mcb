@@ -21,8 +21,7 @@
 
 namespace aruwsrc::robot::dart
 {
-DartCloseCommand::DartCloseCommand(DartLauncherSubsystem &dartLauncher)
-    : dartLauncher(dartLauncher)
+DartCloseCommand::DartCloseCommand(DartLauncherSubsystem &dartLauncher) : dartLauncher(dartLauncher)
 {
     addSubsystemRequirement(&dartLauncher);
 }
@@ -31,7 +30,7 @@ void DartCloseCommand::initialize() {}
 
 void DartCloseCommand::execute() { dartLauncher.setClose(); }
 
-void DartCloseCommand::end(bool) { }
+void DartCloseCommand::end(bool) {}
 
 bool DartCloseCommand::isFinished() const { return false; }
 

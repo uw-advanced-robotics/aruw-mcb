@@ -43,7 +43,6 @@ public:
     bool isBeamBroken();
     bool isLimitSwitched();
 
-
     // set servo to the open angle
     void setOpen();
 
@@ -61,7 +60,7 @@ public:
 protected:
     tap::motor::MotorInterface &motor;
     tap::motor::Servo servo;
-    
+
 };  // class DartLauncherSubsystem
 
 }  // namespace aruwsrc::robot::dart

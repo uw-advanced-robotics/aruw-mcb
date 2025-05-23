@@ -22,6 +22,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
+#include "tap/motor/servo.hpp"
 
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -30,13 +31,11 @@
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 #include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
-#include "tap/motor/servo.hpp"
 
-
+#include "dart_close_command.hpp"
+#include "dart_open_command.hpp"
 #include "dart_pullback_command.hpp"
 #include "dart_release_command.hpp"
-#include "dart_open_command.hpp"
-#include "dart_close_command.hpp"
 
 using namespace tap::control;
 using namespace aruwsrc::control;
@@ -75,7 +74,6 @@ DartPullbackCommand dartPullback(dartLauncher);
 DartOpenCommand servoOpen(dartLauncher);
 DartCloseCommand servoClose(dartLauncher);
 
-
 HoldCommandMapping rightSwitchUp(
     drivers(),
     {&dartPullback},
@@ -85,7 +83,6 @@ HoldCommandMapping rightSwitchDown(
     drivers(),
     {&dartRelease},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
 
 HoldCommandMapping leftSwitchUp(
     drivers(),
