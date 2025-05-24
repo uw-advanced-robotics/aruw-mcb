@@ -38,9 +38,9 @@ public:
     {
     }
 
-    mockable virtual float getChassisXInput() override;
+    virtual float getChassisXInput() override;
 
-    mockable virtual float getChassisYInput() override;
+    virtual float getChassisYInput() override;
 
     /**
      * @return The cube lift velocity.
