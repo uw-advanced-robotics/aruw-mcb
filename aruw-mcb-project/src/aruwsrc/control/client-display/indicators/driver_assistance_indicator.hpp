@@ -48,8 +48,8 @@ public:
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         RefSerialTransmitter &refSerialTransmitter,
         RefSerial &refSerial,
-        const Transform &worldToTurretTransform, // Changed parameter
-
+        const Transform &worldToTurretTransform,
+        RobotOrbitStateProvider &robotOrbitStateProvider);
     void initialize() override final;
 
     modm::ResumableResult<void> update() override;

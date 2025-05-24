@@ -131,7 +131,6 @@ bool RobotOrbitTransmitter::sendRobotStates()
         }
         
         memcpy(&robotToRobotMessage.dataAndCRC16[0], &outgoingData, sizeof(PositionData));
-        memset(&outgoingData, 0, sizeof(PositionData));
         
         PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
             &robotToRobotMessage,

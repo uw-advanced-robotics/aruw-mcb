@@ -28,7 +28,7 @@
 using namespace tap::communication::serial;
 namespace aruwsrc::communication::serial
 {
-constexpr uint8_t MAX_TRACKED_ROBOTS = 4;
+constexpr uint8_t MAX_TRACKED_ROBOTS = 3;
 
 struct RobotState
 {
