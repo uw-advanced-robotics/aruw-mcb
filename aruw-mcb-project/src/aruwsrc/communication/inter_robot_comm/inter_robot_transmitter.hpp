@@ -24,97 +24,79 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/processing/protothread.hpp"
 
 namespace aruwsrc::communication::inter_robot_comm
 {
 using namespace tap::communication::serial;
-class InterRobotTransmitter : public modm::pt::Protothread, RefSerial::RobotToRobotMessageHandler
+using namespace aruwsrc::serial;
+class InterRobotTransmitter : public modm::pt::Protothread,
+                              public RefSerial::RobotToRobotMessageHandler
 {
 public:
-    struct Message
-    {
-        int x = 1;
-        int y = 2;
-        int z = 3;
-    };
+    InterRobotTransmitter(RefSerial* refSerial, RefSerialTransmitter* refSerialTransmitter);
 
-    InterRobotTransmitter(
-        tap::communication::serial::RefSerial* refSerial,
-        tap::communication::serial::RefSerialTransmitter* refSerialTransmitter)
-        : refSerial(refSerial),
-          refSerialTransmitter(refSerialTransmitter)
-    {
-        refSerial->attachRobotToRobotMessageHandler(MSG_ID, this);
-    }
+    /**
+     * Sends the current orbit state to the ally robot.
+     * Needs to be called repeatedly to ensure messages are sent.
+     */
+    bool sendMessage();
 
-    bool sendMessage()
-    {
-        PT_BEGIN()
-        // Send the message using the refSerialTransmitter
-        while (true)
-        {
-            PT_WAIT_UNTIL(timer.execute());
-            targetId = getAllyRobotId();
-            memcpy(&robotToRobotMessage.dataAndCRC16[0], &message, sizeof(Message));
+    /**
+     * Updates state from vision coprocessor.
+     * Needs to be called periodically to ensure the state is up-to-date.
+     */
+    void updateState();
 
-            PT_CALL(refSerialTransmitter->sendRobotToRobotMsg(
-                &robotToRobotMessage,
-                MSG_ID,
-                targetId,
-                sizeof(Message)));
-            ptLoopCount++;
-        }
-        PT_END();
-    }
-
-    void operator()(const DJISerial::ReceivedSerialMessage& message) override
-    {
-        memcpy(
-            &incomingMessage,
-            &message.data[sizeof(RefSerialData::Tx::InteractiveHeader)],
-            sizeof(Message));
-        parsedMessageCount++;
-    }
+    // Processes the received message from the ally robot.
+    void operator()(const DJISerial::ReceivedSerialMessage& message) override;
 
 private:
-    Message message;
-    Message incomingMessage = {0, 0, 0};
-    int parsedMessageCount = 0;
-    int ptLoopCount = 0;
+    RefSerialTransmitter::RobotId getAllyRobotId() const;
 
+    // Needed state
     RefSerial* refSerial;
     RefSerialTransmitter* refSerialTransmitter;
+    VisionCoprocessor* visionCoprocessor;
     RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
 
+    // Sending data
     uint16_t MSG_ID = 0x201;
     RefSerial::RobotId targetId;
     tap::arch::PeriodicMilliTimer timer{500};
 
-    RefSerialTransmitter::RobotId getAllyRobotId() const
+    // Message structure for sending/receiving robot states
+    enum RobotIndex : uint8_t
     {
-        const auto& robotData = refSerial->getRobotData();
-        if (robotData.robotId == RefSerialData::RobotId::INVALID)
-        {
-            return RefSerialData::RobotId::INVALID;
-        }
+        STANDARD = 0,
+        HERO = 1,
+        SENTRY = 2,
+        NUM_ROBOTS = 3
+    };
 
-        bool isBlue = RefSerial::isBlueTeam(robotData.robotId);
-        if (isBlue)
+    struct EnemyRobotState
+    {
+        struct RobotState
         {
-            return (robotData.robotId == RefSerialData::RobotId::BLUE_HERO)
-                       ? RefSerialData::RobotId::BLUE_SOLDIER_3
-                       : RefSerialData::RobotId::BLUE_HERO;
-        }
-        else
-        {
-            return (robotData.robotId == RefSerialData::RobotId::RED_HERO)
-                       ? RefSerialData::RobotId::RED_SOLDIER_3
-                       : RefSerialData::RobotId::RED_HERO;
-        }
-    }
+            bool current;  // Used to signal on the ally robot that this is the current state
+            float x;
+            float y;
+            float z;
+            uint32_t timestamp;  // Timestamp in milliseconds, used for processing "active" robots
+        };
+        RobotState robot[NUM_ROBOTS];
+    } modm_packed;
+
+    EnemyRobotState stateEstimate;
+
+    // Debug stuff
+    EnemyRobotState outgoingMessage;
+    EnemyRobotState incomingMessage = {0, 0, 0};
+    int parsedMessageCount = 0;
+    int ptLoopCount = 0;
 };
 
 }  // namespace aruwsrc::communication::inter_robot_comm
 
-#endif // INTER_ROBOT_TRANSMITTER_HPP_
+#endif  // INTER_ROBOT_TRANSMITTER_HPP_
