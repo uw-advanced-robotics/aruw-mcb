@@ -22,7 +22,7 @@ namespace aruwsrc::robot::engineer
 {
 CubeMoveManualCommand::CubeMoveManualCommand(
     CubeStorageSubsystem& cubeLift,
-    aruwsrc::control::ControlOperatorInterface* operatorInterface)
+    aruwsrc::control::engineer::EngineerControlOperatorInterface* operatorInterface)
     : cubeLift(cubeLift),
       operatorInterface(operatorInterface)
 {
@@ -33,7 +33,7 @@ void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getPositionSetpoi
 
 void CubeMoveManualCommand::execute()
 {
-    setpoint += operatorInterface->getTurretPitchInput(0) * MANUAL_MOVE_SPEED;  // right up
+    setpoint += operatorInterface->getCubeLiftVelocity() * MANUAL_MOVE_SPEED;  // right up
     cubeLift.setPositionSetpoint(setpoint);
 }
 

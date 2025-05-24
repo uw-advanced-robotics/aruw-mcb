@@ -42,6 +42,8 @@ public:
 
     mockable float getChassisYInput();
 
+    mockable float getCubeLiftVelocity();
+    
     /**
      * @return The arm lift velocity
      */

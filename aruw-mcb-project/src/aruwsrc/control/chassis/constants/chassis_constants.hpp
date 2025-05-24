@@ -28,7 +28,7 @@
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #elif defined(OLD_STANDARDS)
 #include "aruwsrc/robot/old_standard/old_standard_chassis_constants.hpp"
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_chassis_constants.hpp"
 #elif defined(TARGET_TESTBED)
 #include "aruwsrc/robot/testbed/testbed_chassis_constants.hpp"

@@ -21,7 +21,7 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 
 #include "cube_storage_subsystem.hpp"
 
@@ -33,7 +33,7 @@ class CubeMoveManualCommand : public tap::control::Command
 public:
     CubeMoveManualCommand(
         CubeStorageSubsystem &cubeLift,
-        aruwsrc::control::ControlOperatorInterface *operatorInterface);
+        aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface);
 
     void initialize() override;
 
@@ -47,7 +47,7 @@ public:
 
 private:
     CubeStorageSubsystem &cubeLift;
-    aruwsrc::control::ControlOperatorInterface *operatorInterface;
+    aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface;
     float setpoint;
 
 };  // class CubeMovePositionCommand

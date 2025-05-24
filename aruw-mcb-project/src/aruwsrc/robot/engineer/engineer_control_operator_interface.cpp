@@ -39,6 +39,14 @@ bool EngineerControlOperatorInterface::isWristControlMode()
     return leftState == Remote::SwitchState::UP;
 }
 
+float EngineerControlOperatorInterface::getCubeLiftVelocity()
+{
+    if (isGantryControlMode())
+        return drivers->remote.getChannel(Remote::Channel::WHEEL);  // todo
+    else
+        return 0.0f;
+}
+
 float EngineerControlOperatorInterface::getArmLiftVelocity()
 {
     if (isGantryControlMode())

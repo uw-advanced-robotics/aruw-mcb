@@ -65,4 +65,9 @@ const Transform& SentryTransformAdapter::getWorldToVTM() const
     return this->transforms.getWorldToVTM();
 }
 
+const Transform& SentryTransformAdapter::getChassisToArducam(uint8_t cameraID) const
+{
+    return this->transforms.getChassisToArducam(cameraID);
+}
+
 };  // namespace aruwsrc::sentry::algorithms::odometry
