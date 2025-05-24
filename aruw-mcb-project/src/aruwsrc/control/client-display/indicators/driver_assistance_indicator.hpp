@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VISION_TARGET_INDICATOR_HPP_
-#define VISION_TARGET_INDICATOR_HPP_
+#ifndef DRIVER_ASSISTANCE_INDICATOR_HPP_
+#define DRIVER_ASSISTANCE_INDICATOR_HPP_
 
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
@@ -30,65 +30,64 @@
 
 #include "hud_indicator.hpp"
 
-using namespace aruwsrc::algorithms::transforms;
-
 namespace aruwsrc::control::client_display
 {
+using namespace aruwsrc::algorithms::transforms;
+using namespace tap::communication::serial;
 /**
- * Draws a square where the enemy robot is.
+ * Draws a bounding box around the plate of where the vision system tells us to target.
+ * Draws bars above robots to indicate the HP of the target.
+ * Draws a line to the target.
  */
-class VisionTargetIndicator : public HudIndicator, protected modm::Resumable<2>
+class DriverAssistanceIndicator : public HudIndicator, protected modm::Resumable<8>
 {
 public:
-    VisionTargetIndicator(
+    DriverAssistanceIndicator(
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
-        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
+        RefSerialTransmitter &refSerialTransmitter,
+        RefSerial &refSerial,
         const Transform &worldToTurretTransform);
 
     void initialize() override final;
 
-    modm::ResumableResult<void> update() override final;
+    modm::ResumableResult<void> update() override;
 
-    struct ProjectedPlateResult
-    {
-        bool inFrame;
-        uint32_t bottomLeftX;
-        uint32_t bottomLeftY;
-        uint32_t topRightX;
-        uint32_t topRightY;
-        Position enemyCenterCameraFrame;
-
-        ProjectedPlateResult()
-            : inFrame(false),
-              bottomLeftX(0),
-              bottomLeftY(0),
-              topRightX(0),
-              topRightY(0),
-              enemyCenterCameraFrame(0, 0, 0)
-        {
-        }
-    };
+    modm::ResumableResult<void> sendInitialGraphics() override;
 
 private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    RefSerial &refSerial;
     const Transform &worldToCameraTransform;
 
-    Tx::Graphic1Message visionTargetGraphic;
-    static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
+    Tx::Graphic7Message graphic;
 
-    RefSerialData::Tx::GraphicColor INDICATOR_COLOR = RefSerialData::Tx::GraphicColor::GREEN;
+    enum GraphicIndex : uint8_t
+    {
+        TARGET = 0,
+        HERO_TRACER = 1,
+        HERO_HP = 2,
+        STANDARD_TRACER = 3,
+        STANDARD_HP = 4,
+        SENTRY_HP = 5,
+        SENTRY_TRACER = 6
+    };
+
+    void deleteGraphic(GraphicIndex index);
+    void configureGraphic(GraphicIndex index, Tx::GraphicColor color);
+
+    Vector TRACER_LINE_OFFSET = Vector(0, 0, -0.3);
+    modm::Vector2i TRACER_LINE_ORIGIN = modm::Vector2i(SCREEN_WIDTH / 2, 300);
+    void drawTracerLineToOrbit(Position orbit, GraphicIndex index);
+
+    Vector HEALTH_BAR_OFFSET = Vector(0, 0, 0.5);
+    void drawHealthBarToOrbit(Position orbit, GraphicIndex index, int ID);
 
     static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
     const Vector PLATE_CORNER_OFFSET =
         Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
-
-    // In world frame
-    Position enemyPosition;
-    ProjectedPlateResult enemyPositionScreenFrame;
-
-    ProjectedPlateResult getEnemyPlatePosition(Position &enemyPosition);
+    void drawPlateTargetBox();
 };
 
 }  // namespace aruwsrc::control::client_display
 
-#endif  // VISION_TARGET_INDICATOR_HPP_
+#endif  // DRIVER_ASSISTANCE_INDICATOR_HPP_
