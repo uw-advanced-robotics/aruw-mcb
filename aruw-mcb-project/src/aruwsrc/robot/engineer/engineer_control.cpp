@@ -45,6 +45,7 @@
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_manual_drive_command.hpp"
 
 using namespace tap::gpio;
 using tap::communication::serial::Remote;
@@ -275,7 +276,7 @@ CubeMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 CubeMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
 CubeMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
 
-aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+aruwsrc::engineer::chassis::EngineerManualDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &chassis);
