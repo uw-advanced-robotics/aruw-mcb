@@ -269,6 +269,8 @@ JointSubsystem wristRollSubsystem(
 
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
+HomingCommand gantryLiftHome(armLiftSubsystem);
+HomingCommand gantryExtensionHome(armExtensionSubsystem);
 
 CubeMoveManualCommand cubeManualControl(cubeLift, &drivers()->controlOperatorInterface);
 CubeMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
@@ -295,30 +297,30 @@ control::engineer::ArmControllerCommand armControllerCommand(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-tap::control::HoldCommandMapping leftSwitchUp(
+tap::control::HoldCommandMapping rightUp(
     drivers(),
-    {&cubeLiftHome},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-tap::control::HoldCommandMapping leftSwitchMid(
+tap::control::HoldCommandMapping leftMidRightMid(
     drivers(),
     {&cubeManualControl},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID));
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-tap::control::HoldCommandMapping leftDownRightUp(
-    drivers(),
-    {&oneCubePosition},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+// tap::control::HoldCommandMapping leftDownRightUp(
+//     drivers(),
+//     {&oneCubePosition},
+//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
-tap::control::HoldCommandMapping leftDownRightMid(
-    drivers(),
-    {&twoCubePosition},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
+// tap::control::HoldCommandMapping leftDownRightMid(
+//     drivers(),
+//     {&twoCubePosition},
+//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
 
-tap::control::HoldCommandMapping leftDownRightDown(
-    drivers(),
-    {&threeCubePosition},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+// tap::control::HoldCommandMapping leftDownRightDown(
+//     drivers(),
+//     {&threeCubePosition},
+//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -361,10 +363,8 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *)
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftDownRightUp);
-    drivers->commandMapper.addMap(&leftDownRightMid);
-    drivers->commandMapper.addMap(&leftDownRightDown);
+    drivers->commandMapper.addMap(&rightUp);
+    drivers->commandMapper.addMap(&leftMidRightMid);
 }
 }  // namespace control
 }  // namespace aruwsrc
