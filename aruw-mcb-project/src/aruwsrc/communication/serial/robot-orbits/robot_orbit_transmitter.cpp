@@ -66,53 +66,51 @@ RefSerialTransmitter::RobotId RobotOrbitTransmitter::getAllyRobotId() const
 void RobotOrbitTransmitter::updateState()
 {
     memset(&outgoingData, 0, sizeof(PositionData));
-    
+
     if (odometry != nullptr)
     {
         auto robotPosition = odometry->getCurrentLocation2D();
-        
-        // Update outgoing message
+
         outgoingData.positions[0].valid = true;
         outgoingData.positions[0].x = robotPosition.getX();
         outgoingData.positions[0].y = robotPosition.getY();
         outgoingData.positions[0].z = 0.0f;
         outgoingData.positions[0].timestamp = tap::arch::clock::getTimeMilliseconds();
-        
-        // Also update local state storage
+
         RobotState ownState;
         ownState.valid = true;
         ownState.xPos = robotPosition.getX();
         ownState.yPos = robotPosition.getY();
         ownState.zPos = 0.0f;
         ownState.timestamp = tap::arch::clock::getTimeMilliseconds();
-        
+
         stateProvider.updateAllyState(ownState);
     }
-    
+
     if (visionCoprocessor != nullptr)
     {
         const auto& robotOrbits = visionCoprocessor->getLastRobotOrbitData();
         const auto& robotData = refSerial->getRobotData();
         bool isBlueTeam = RefSerial::isBlueTeam(robotData.robotId);
         uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
-        
+
         for (int i = 0; i < aruwsrc::serial::VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
         {
             int robotType = robotOrbits.data[i].robotType;
             if (robotType == 0)
             {
-                continue; 
+                continue;
             }
-            
+
             RobotState robotState;
             robotState.robotId = getRobotIdFromType(robotType, isBlueTeam);
             robotState.xPos = robotOrbits.data[i].x;
             robotState.yPos = robotOrbits.data[i].y;
             robotState.zPos = robotOrbits.data[i].z;
             robotState.timestamp = currentTime;
-            
+
             stateProvider.updateRobotState(robotState.robotId, robotState);
-            
+
             uint8_t index = getRobotTypeIndex(robotType);
             if (index > 0 && index <= MAX_TRACKED_ROBOTS)
             {
@@ -129,27 +127,27 @@ void RobotOrbitTransmitter::updateState()
 bool RobotOrbitTransmitter::sendRobotStates()
 {
     PT_BEGIN();
-    
+
     while (true)
     {
         PT_WAIT_UNTIL(messageTimer.execute() && odometry != nullptr);
-        
-        targetId = getAllyRobotId();  
+
+        targetId = getAllyRobotId();
         if (targetId == RefSerialData::RobotId::INVALID)
         {
             PT_YIELD();
             continue;
         }
-        
+
         memcpy(&robotToRobotMessage.dataAndCRC16[0], &outgoingData, sizeof(PositionData));
-        
+
         PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
             &robotToRobotMessage,
             ROBOT_ORBIT_MSG_ID,
             targetId,
             sizeof(PositionData)));
     }
-    
+
     PT_END();
 }
 
@@ -159,12 +157,11 @@ void RobotOrbitTransmitter::operator()(const DJISerial::ReceivedSerialMessage& m
         &incomingData,
         &message.data[sizeof(RefSerialData::Tx::InteractiveHeader)],
         sizeof(PositionData));
-    
+
     RefSerialTransmitter::RobotId allyRobot = getAllyRobotId();
     bool isBlueTeam = RefSerial::isBlueTeam(allyRobot);
     uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
-    
-    // Process ally robot position data
+
     if (allyRobot != RefSerialData::RobotId::INVALID && incomingData.positions[0].valid)
     {
         RobotState allyState;
@@ -174,27 +171,28 @@ void RobotOrbitTransmitter::operator()(const DJISerial::ReceivedSerialMessage& m
         allyState.yPos = incomingData.positions[0].y;
         allyState.zPos = incomingData.positions[0].z;
         allyState.timestamp = currentTime;
-        
-        // Update ally state directly rather than treating as enemy robot
+
         stateProvider.updateAllyState(allyState);
     }
-    
+
     for (uint8_t i = 1; i <= MAX_TRACKED_ROBOTS; i++)
     {
         if (incomingData.positions[i].valid)
         {
-            // if (currentTime - incomingData.positions[i].timestamp > 5000)
-            // {
-            //     continue;
-            // }
-
             RobotIndex robotIndex;
             switch (i)
             {
-                case 1: robotIndex = RobotIndex::HERO; break;
-                case 2: robotIndex = RobotIndex::STANDARD; break;
-                case 3: robotIndex = RobotIndex::SENTRY; break;
-                default: continue;
+                case 1:
+                    robotIndex = RobotIndex::HERO;
+                    break;
+                case 2:
+                    robotIndex = RobotIndex::STANDARD;
+                    break;
+                case 3:
+                    robotIndex = RobotIndex::SENTRY;
+                    break;
+                default:
+                    continue;
             }
             enemyState.valid = true;
             enemyState.robotId = getRobotIdFromIndex(i, isBlueTeam);
@@ -202,7 +200,7 @@ void RobotOrbitTransmitter::operator()(const DJISerial::ReceivedSerialMessage& m
             enemyState.yPos = incomingData.positions[i].y;
             enemyState.zPos = incomingData.positions[i].z;
             enemyState.timestamp = currentTime;
-            
+
             stateProvider.updateRobotState(robotIndex, enemyState);
         }
     }

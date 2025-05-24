@@ -65,7 +65,6 @@
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/driver_assistance_indicator.hpp"
-
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
@@ -93,7 +92,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
-    using namespace tap::communication::serial;
+using namespace tap::communication::serial;
 using namespace tap::control;
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;

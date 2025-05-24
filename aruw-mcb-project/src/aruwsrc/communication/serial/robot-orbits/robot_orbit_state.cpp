@@ -39,16 +39,21 @@ RobotIndex RobotOrbitStateProvider::getRobotIndexFromId(RefSerialData::RobotId r
     }
 }
 
-RefSerialData::RobotId RobotOrbitStateProvider::getRobotIdFromIndex(RobotIndex index, bool isBlueTeam)
+RefSerialData::RobotId RobotOrbitStateProvider::getRobotIdFromIndex(
+    RobotIndex index,
+    bool isBlueTeam)
 {
     switch (index)
     {
         case RobotIndex::HERO:
-            return isBlueTeam ? RefSerialData::RobotId::BLUE_HERO : RefSerialData::RobotId::RED_HERO;
+            return isBlueTeam ? RefSerialData::RobotId::BLUE_HERO
+                              : RefSerialData::RobotId::RED_HERO;
         case RobotIndex::STANDARD:
-            return isBlueTeam ? RefSerialData::RobotId::BLUE_SOLDIER_3 : RefSerialData::RobotId::RED_SOLDIER_3;
+            return isBlueTeam ? RefSerialData::RobotId::BLUE_SOLDIER_3
+                              : RefSerialData::RobotId::RED_SOLDIER_3;
         case RobotIndex::SENTRY:
-            return isBlueTeam ? RefSerialData::RobotId::BLUE_SENTINEL : RefSerialData::RobotId::RED_SENTINEL;
+            return isBlueTeam ? RefSerialData::RobotId::BLUE_SENTINEL
+                              : RefSerialData::RobotId::RED_SENTINEL;
         default:
             return RefSerialData::RobotId::INVALID;
     }
@@ -73,7 +78,6 @@ void RobotOrbitStateProvider::updateRobotState(
     }
 }
 
-// New methods for ally robot state
 void RobotOrbitStateProvider::updateAllyState(const RobotState& state)
 {
     stateEstimate.allyRobot = state;
@@ -89,10 +93,7 @@ bool RobotOrbitStateProvider::getAllyState(RobotState& outState) const
     return false;
 }
 
-RobotState RobotOrbitStateProvider::getAllyState() const
-{
-    return stateEstimate.allyRobot;
-}
+RobotState RobotOrbitStateProvider::getAllyState() const { return stateEstimate.allyRobot; }
 
 bool RobotOrbitStateProvider::getRobotState(RobotIndex index, RobotState& outState) const
 {
@@ -104,7 +105,8 @@ bool RobotOrbitStateProvider::getRobotState(RobotIndex index, RobotState& outSta
     return false;
 }
 
-bool RobotOrbitStateProvider::getRobotState(RefSerialData::RobotId robotID, RobotState& outState) const
+bool RobotOrbitStateProvider::getRobotState(RefSerialData::RobotId robotID, RobotState& outState)
+    const
 {
     RobotIndex index = getRobotIndexFromId(robotID);
     return getRobotState(index, outState);

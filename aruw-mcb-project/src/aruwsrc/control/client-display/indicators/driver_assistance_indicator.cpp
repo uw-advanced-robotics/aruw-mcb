@@ -83,27 +83,37 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
     }
 
     currentTime = tap::arch::clock::getTimeMilliseconds();
-    
+
     if (refSerial.isBlueTeam(refSerial.getRobotData().robotId))
     {
-        hasHero = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::RED_HERO, heroState);
-        hasStandard = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::RED_SOLDIER_3, standardState);
-        hasSentry = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::RED_SENTINEL, sentryState);
+        hasHero =
+            robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::RED_HERO, heroState);
+        hasStandard = robotOrbitStateProvider.getRobotState(
+            RefSerialData::RobotId::RED_SOLDIER_3,
+            standardState);
+        hasSentry = robotOrbitStateProvider.getRobotState(
+            RefSerialData::RobotId::RED_SENTINEL,
+            sentryState);
     }
     else
     {
-        hasHero = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::BLUE_HERO, heroState);
-        hasStandard = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::BLUE_SOLDIER_3, standardState);
-        hasSentry = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::BLUE_SENTINEL, sentryState);
+        hasHero =
+            robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::BLUE_HERO, heroState);
+        hasStandard = robotOrbitStateProvider.getRobotState(
+            RefSerialData::RobotId::BLUE_SOLDIER_3,
+            standardState);
+        hasSentry = robotOrbitStateProvider.getRobotState(
+            RefSerialData::RobotId::BLUE_SENTINEL,
+            sentryState);
     }
-    
+
     if (hasHero && (currentTime - heroState.timestamp < TIME_CUTOFF_MS))
     {
         Position heroOrbit = Position(heroState.xPos, heroState.yPos, heroState.zPos);
         drawTracerLineToOrbit(heroOrbit, GraphicIndex::HERO_TRACER);
         drawHealthBarToOrbit(heroOrbit, GraphicIndex::HERO_HP, 1);
-    } 
-    else 
+    }
+    else
     {
         deleteGraphic(GraphicIndex::HERO_TRACER);
         deleteGraphic(GraphicIndex::HERO_HP);
@@ -111,7 +121,8 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
 
     if (hasStandard && (currentTime - standardState.timestamp < TIME_CUTOFF_MS))
     {
-        Position standardOrbit = Position(standardState.xPos, standardState.yPos, standardState.zPos);
+        Position standardOrbit =
+            Position(standardState.xPos, standardState.yPos, standardState.zPos);
         drawTracerLineToOrbit(standardOrbit, GraphicIndex::STANDARD_TRACER);
         drawHealthBarToOrbit(standardOrbit, GraphicIndex::STANDARD_HP, 3);
     }
