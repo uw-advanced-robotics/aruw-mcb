@@ -52,7 +52,7 @@ void WristFoldOutCommand::execute()
     }
 }
 
-void WristFoldOutCommand::end(bool interrupted) {}
+void WristFoldOutCommand::end(bool) {}
 
 bool WristFoldOutCommand::isFinished() const { return state == COMPLETED; }
 }  // namespace aruwsrc::engineer
