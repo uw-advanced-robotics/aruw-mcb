@@ -77,7 +77,7 @@ public:
 
 private:
     Message message;
-    Message incomingMessage;
+    Message incomingMessage = {0, 0, 0};
     int parsedMessageCount = 0;
     int ptLoopCount = 0;
 
