@@ -25,7 +25,7 @@
 
 #include "modm/processing/protothread.hpp"
 
-namespace aruwsrc::communication::serial::inter_robot_comm
+namespace aruwsrc::communication::inter_robot_comm
 {
 using namespace tap::communication::serial;
 class InterRobotTransmitter : public modm::pt::Protothread, RefSerial::RobotToRobotMessageHandler
@@ -61,19 +61,25 @@ public:
                 MSG_ID,
                 targetId,
                 sizeof(Message)));
+            ptLoopCount++;
         }
         PT_END();
     }
 
     void operator()(const DJISerial::ReceivedSerialMessage& message) override
     {
-        memcpy(&incomingMessage, &message.data[sizeof(RefSerialData::Tx::InteractiveHeader)], sizeof(Message));
+        memcpy(
+            &incomingMessage,
+            &message.data[sizeof(RefSerialData::Tx::InteractiveHeader)],
+            sizeof(Message));
+        parsedMessageCount++;
     }
 
 private:
     Message message;
     Message incomingMessage;
-    int parsingAMessage = 0;
+    int parsedMessageCount = 0;
+    int ptLoopCount = 0;
 
     RefSerial* refSerial;
     RefSerialTransmitter* refSerialTransmitter;
@@ -106,6 +112,6 @@ private:
     }
 };
 
-}  // namespace aruwsrc::communication::serial::inter_robot_comm
+}  // namespace aruwsrc::communication::inter_robot_comm
 
 #endif

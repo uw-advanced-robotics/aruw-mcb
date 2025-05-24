@@ -228,6 +228,10 @@ static void updateIo(Drivers *drivers)
 #ifdef TARGET_TESTBED
     drivers->lite.updateSerial();
 #endif
+
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+    drivers->interRobotTransmitter.sendMessage();
+#endif
 }
 
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO)
