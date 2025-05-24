@@ -91,6 +91,9 @@ private:
     
     PositionData outgoingData;
     PositionData incomingData;
+    RobotState enemyState;
+
+    int insideIncomingData = 0;
     
     RefSerialTransmitter::RobotId targetId;
     
@@ -119,11 +122,25 @@ private:
         {
             case 1:
                 return isBlueTeam ? RefSerialData::RobotId::RED_HERO : RefSerialData::RobotId::BLUE_HERO;
-            case 3: 
+            case 2: 
                 return isBlueTeam ? RefSerialData::RobotId::RED_SOLDIER_3 : RefSerialData::RobotId::BLUE_SOLDIER_3;
             case 4: // standard 4 is actually standard 3
                 return isBlueTeam ? RefSerialData::RobotId::RED_SOLDIER_3 : RefSerialData::RobotId::BLUE_SOLDIER_3;
             case 7: 
+                return isBlueTeam ? RefSerialData::RobotId::RED_SENTINEL : RefSerialData::RobotId::BLUE_SENTINEL;
+            default:
+                return RefSerialData::RobotId::INVALID;
+        }
+    }
+    inline RefSerialData::RobotId getRobotIdFromIndex(uint8_t index, bool isBlueTeam) const
+    {
+        switch (index)
+        {
+            case 1:
+                return isBlueTeam ? RefSerialData::RobotId::RED_HERO : RefSerialData::RobotId::BLUE_HERO;
+            case 2: 
+                return isBlueTeam ? RefSerialData::RobotId::RED_SOLDIER_3 : RefSerialData::RobotId::BLUE_SOLDIER_3;
+            case 3: 
                 return isBlueTeam ? RefSerialData::RobotId::RED_SENTINEL : RefSerialData::RobotId::BLUE_SENTINEL;
             default:
                 return RefSerialData::RobotId::INVALID;

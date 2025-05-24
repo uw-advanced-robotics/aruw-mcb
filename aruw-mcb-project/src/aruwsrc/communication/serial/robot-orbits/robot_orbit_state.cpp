@@ -21,63 +21,104 @@
 
 namespace aruwsrc::communication::serial
 {
-int RobotOrbitStateProvider::findRobotIndex(RefSerialData::RobotId robotID) const
+RobotIndex RobotOrbitStateProvider::getRobotIndexFromId(RefSerialData::RobotId robotID)
 {
-    for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
+    switch (robotID)
     {
-        if (std::get<0>(robotData[i]) && std::get<1>(robotData[i]) == robotID)
-        {
-            return i;
-        }
+        case RefSerialData::RobotId::RED_HERO:
+        case RefSerialData::RobotId::BLUE_HERO:
+            return RobotIndex::HERO;
+        case RefSerialData::RobotId::RED_SOLDIER_3:
+        case RefSerialData::RobotId::BLUE_SOLDIER_3:
+            return RobotIndex::STANDARD;
+        case RefSerialData::RobotId::RED_SENTINEL:
+        case RefSerialData::RobotId::BLUE_SENTINEL:
+            return RobotIndex::SENTRY;
+        default:
+            return RobotIndex::NUM_ROBOTS;  // Invalid
     }
-    return -1;
+}
+
+RefSerialData::RobotId RobotOrbitStateProvider::getRobotIdFromIndex(RobotIndex index, bool isBlueTeam)
+{
+    switch (index)
+    {
+        case RobotIndex::HERO:
+            return isBlueTeam ? RefSerialData::RobotId::BLUE_HERO : RefSerialData::RobotId::RED_HERO;
+        case RobotIndex::STANDARD:
+            return isBlueTeam ? RefSerialData::RobotId::BLUE_SOLDIER_3 : RefSerialData::RobotId::RED_SOLDIER_3;
+        case RobotIndex::SENTRY:
+            return isBlueTeam ? RefSerialData::RobotId::BLUE_SENTINEL : RefSerialData::RobotId::RED_SENTINEL;
+        default:
+            return RefSerialData::RobotId::INVALID;
+    }
+}
+
+void RobotOrbitStateProvider::updateRobotState(RobotIndex index, const RobotState& state)
+{
+    if (index < NUM_ROBOTS)
+    {
+        stateEstimate.robots[index] = state;
+    }
 }
 
 void RobotOrbitStateProvider::updateRobotState(
     RefSerialData::RobotId robotID,
     const RobotState& state)
 {
-    int index = findRobotIndex(robotID);
-    if (index != -1)
+    RobotIndex index = getRobotIndexFromId(robotID);
+    if (index < NUM_ROBOTS)
     {
-        std::get<2>(robotData[index]) = state;
-    }
-    else
-    {
-        for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
-        {
-            if (!std::get<0>(robotData[i]))
-            {
-                std::get<0>(robotData[i]) = true;
-                std::get<1>(robotData[i]) = robotID;
-                std::get<2>(robotData[i]) = state;
-                return;
-            }
-        }
+        stateEstimate.robots[index] = state;
     }
 }
 
-bool RobotOrbitStateProvider::getRobotState(RefSerialData::RobotId robotID, RobotState& outState)
-    const
+// New methods for ally robot state
+void RobotOrbitStateProvider::updateAllyState(const RobotState& state)
 {
-    int index = findRobotIndex(robotID);
-    if (index != -1)
+    stateEstimate.allyRobot = state;
+}
+
+bool RobotOrbitStateProvider::getAllyState(RobotState& outState) const
+{
+    if (stateEstimate.allyRobot.valid)
     {
-        outState = std::get<2>(robotData[index]);
+        outState = stateEstimate.allyRobot;
         return true;
     }
     return false;
+}
+
+RobotState RobotOrbitStateProvider::getAllyState() const
+{
+    return stateEstimate.allyRobot;
+}
+
+bool RobotOrbitStateProvider::getRobotState(RobotIndex index, RobotState& outState) const
+{
+    if (index < NUM_ROBOTS && stateEstimate.robots[index].valid)
+    {
+        outState = stateEstimate.robots[index];
+        return true;
+    }
+    return false;
+}
+
+bool RobotOrbitStateProvider::getRobotState(RefSerialData::RobotId robotID, RobotState& outState) const
+{
+    RobotIndex index = getRobotIndexFromId(robotID);
+    return getRobotState(index, outState);
 }
 
 uint8_t RobotOrbitStateProvider::getNumKnownVisionStates(
     RobotState states[MAX_TRACKED_ROBOTS]) const
 {
     uint8_t count = 0;
-    for (uint8_t i = 0; i < MAX_TRACKED_ROBOTS; i++)
+    for (uint8_t i = 0; i < NUM_ROBOTS; i++)
     {
-        if (std::get<0>(robotData[i]))
+        if (stateEstimate.robots[i].valid)
         {
-            states[count++] = std::get<2>(robotData[i]);
+            states[count++] = stateEstimate.robots[i];
         }
     }
     return count;

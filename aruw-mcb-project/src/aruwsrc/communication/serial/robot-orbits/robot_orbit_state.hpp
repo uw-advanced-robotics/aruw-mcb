@@ -30,8 +30,18 @@ namespace aruwsrc::communication::serial
 {
 constexpr uint8_t MAX_TRACKED_ROBOTS = 3;
 
+enum RobotIndex : uint8_t
+{
+    HERO = 0,
+    STANDARD = 1,
+    
+    SENTRY = 2,
+    NUM_ROBOTS = MAX_TRACKED_ROBOTS
+};
+
 struct RobotState
 {
+    bool valid;
     RefSerialData::RobotId robotId;
     float xPos;
     float yPos;
@@ -42,15 +52,29 @@ struct RobotState
 class RobotOrbitStateProvider
 {
 public:
+    struct RobotStateStorage
+    {
+        RobotState allyRobot;           // Dedicated slot for ally robot position
+        RobotState robots[NUM_ROBOTS];  // Enemy robot positions
+    };
+    
+    void updateRobotState(RobotIndex index, const RobotState& state);
     void updateRobotState(RefSerialData::RobotId robotID, const RobotState& state);
+    bool getRobotState(RobotIndex index, RobotState& outState) const;
     bool getRobotState(RefSerialData::RobotId robotID, RobotState& outState) const;
     uint8_t getNumKnownVisionStates(RobotState states[MAX_TRACKED_ROBOTS]) const;
     RobotState getRobotState(RefSerialData::RobotId robotID) const;
+    
+    // New methods for ally robot state
+    void updateAllyState(const RobotState& state);
+    bool getAllyState(RobotState& outState) const;
+    RobotState getAllyState() const;
+    
+    static RobotIndex getRobotIndexFromId(RefSerialData::RobotId robotID);
+    static RefSerialData::RobotId getRobotIdFromIndex(RobotIndex index, bool isBlueTeam);
 
 private:
-    std::tuple<bool, RefSerialData::RobotId, RobotState> robotData[MAX_TRACKED_ROBOTS];
-
-    int findRobotIndex(RefSerialData::RobotId robotID) const;
+    RobotStateStorage stateEstimate;
 };
 
 }  // namespace aruwsrc::communication::serial
