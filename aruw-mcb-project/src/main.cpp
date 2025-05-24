@@ -230,6 +230,7 @@ static void updateIo(Drivers *drivers)
 #endif
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+    drivers->interRobotTransmitter.updateState();
     drivers->interRobotTransmitter.sendMessage();
 #endif
 }

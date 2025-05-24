@@ -67,7 +67,7 @@ public:
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
           plateHitTracker(this),
           refSerialTransmitter(this),
-          interRobotTransmitter(&this->refSerial, &refSerialTransmitter)
+          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
     {
     }
 
