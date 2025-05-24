@@ -23,9 +23,11 @@ namespace aruwsrc::communication::inter_robot_comm
 {
 InterRobotTransmitter::InterRobotTransmitter(
     RefSerial* refSerial,
-    RefSerialTransmitter* refSerialTransmitter)
+    RefSerialTransmitter* refSerialTransmitter,
+    VisionCoprocessor* visionCoprocessor)
     : refSerial(refSerial),
-      refSerialTransmitter(refSerialTransmitter)
+      refSerialTransmitter(refSerialTransmitter),
+      visionCoprocessor(visionCoprocessor)
 {
     refSerial->attachRobotToRobotMessageHandler(MSG_ID, this);
 }
@@ -38,10 +40,17 @@ bool InterRobotTransmitter::sendMessage()
     {
         PT_WAIT_UNTIL(timer.execute());
         targetId = getAllyRobotId();
-        memcpy(&robotToRobotMessage.dataAndCRC16[0], &message, sizeof(Message));
 
-        PT_CALL(refSerialTransmitter
-                    ->sendRobotToRobotMsg(&robotToRobotMessage, MSG_ID, targetId, sizeof(Message)));
+        // Copy and reset
+        memcpy(&robotToRobotMessage.dataAndCRC16[0], &outgoingMessage, sizeof(EnemyRobotState));
+        memset(&outgoingMessage, 0, sizeof(EnemyRobotState));
+
+        PT_CALL(refSerialTransmitter->sendRobotToRobotMsg(
+            &robotToRobotMessage,
+            MSG_ID,
+            targetId,
+            sizeof(EnemyRobotState)));
+
         ptLoopCount++;
     }
     PT_END();
@@ -52,31 +61,52 @@ void InterRobotTransmitter::operator()(const DJISerial::ReceivedSerialMessage& m
     memcpy(
         &incomingMessage,
         &message.data[sizeof(RefSerialData::Tx::InteractiveHeader)],
-        sizeof(Message));
+        sizeof(EnemyRobotState));
+
+    // Go through each robot state, if it is current, update the state estimate
+    for (int i = 0; i < RobotIndex::NUM_ROBOTS; i++)
+    {
+        if (incomingMessage.robot[i].current)
+        {
+            stateEstimate.robot[i] = incomingMessage.robot[i];
+        }
+    }
+
     parsedMessageCount++;
 }
 
-RefSerialTransmitter::RobotId InterRobotTransmitter::getAllyRobotId() const
+void InterRobotTransmitter::updateState()
 {
-    const auto& robotData = refSerial->getRobotData();
-    if (robotData.robotId == RefSerialData::RobotId::INVALID)
-    {
-        return RefSerialData::RobotId::INVALID;
-    }
+    // Reset the outgoing message
+    memset(&outgoingMessage, 0, sizeof(EnemyRobotState));
 
-    bool isBlue = RefSerial::isBlueTeam(robotData.robotId);
-    if (isBlue)
+    // Go through each robot orbit we have and fill in the according state
+    auto robotOrbits = visionCoprocessor->getLastRobotOrbitData();
+    for (int i = 0; i < VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
     {
-        return (robotData.robotId == RefSerialData::RobotId::BLUE_HERO)
-                   ? RefSerialData::RobotId::BLUE_SOLDIER_3
-                   : RefSerialData::RobotId::BLUE_HERO;
-    }
-    else
-    {
-        return (robotData.robotId == RefSerialData::RobotId::RED_HERO)
-                   ? RefSerialData::RobotId::RED_SOLDIER_3
-                   : RefSerialData::RobotId::RED_HERO;
+        int robotType = robotOrbits.data[i].robotType;
+        if (robotType == 0)
+        {
+            continue;  // Skip invalid robot types
+        }
+        RobotIndex index = getIndexFromRobotType(robotType);
+
+        // Update the outgoing message
+        EnemyRobotState::RobotState& outgoingRobotState =
+            outgoingMessage.robot[static_cast<int>(index)];
+        outgoingRobotState.current = true;
+        outgoingRobotState.x = robotOrbits.data[i].x;
+        outgoingRobotState.y = robotOrbits.data[i].y;
+        outgoingRobotState.z = robotOrbits.data[i].z;
+        outgoingRobotState.timestamp = tap::arch::clock::getTimeMilliseconds();
+
+        // Update the current state estimate
+        EnemyRobotState::RobotState& currentRobotState =
+            stateEstimate.robot[static_cast<int>(index)];
+        currentRobotState.x = robotOrbits.data[i].x;
+        currentRobotState.y = robotOrbits.data[i].y;
+        currentRobotState.z = robotOrbits.data[i].z;
+        currentRobotState.timestamp = tap::arch::clock::getTimeMilliseconds();
     }
 }
-
 }  // namespace aruwsrc::communication::inter_robot_comm

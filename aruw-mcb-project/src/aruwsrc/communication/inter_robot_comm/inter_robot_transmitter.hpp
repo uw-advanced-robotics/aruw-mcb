@@ -35,7 +35,10 @@ class InterRobotTransmitter : public modm::pt::Protothread,
                               public RefSerial::RobotToRobotMessageHandler
 {
 public:
-    InterRobotTransmitter(RefSerial* refSerial, RefSerialTransmitter* refSerialTransmitter);
+    InterRobotTransmitter(
+        RefSerial* refSerial,
+        RefSerialTransmitter* refSerialTransmitter,
+        VisionCoprocessor* visionCoprocessor);
 
     /**
      * Sends the current orbit state to the ally robot.
@@ -92,9 +95,50 @@ private:
 
     // Debug stuff
     EnemyRobotState outgoingMessage;
-    EnemyRobotState incomingMessage = {0, 0, 0};
+    EnemyRobotState incomingMessage;
     int parsedMessageCount = 0;
     int ptLoopCount = 0;
+
+    // Helper methods
+    inline RobotIndex getIndexFromRobotType(int robotType) const
+    {
+        switch (robotType)
+        {
+            case 1:
+                return HERO;
+            case 3:
+                return STANDARD;
+            case 4:
+                return STANDARD;
+            case 7:
+                return SENTRY;
+            default:
+                return NUM_ROBOTS;  // Invalid type
+        }
+    }
+
+    inline RefSerialTransmitter::RobotId getAllyRobotId() const
+    {
+        const auto& robotData = refSerial->getRobotData();
+        if (robotData.robotId == RefSerialData::RobotId::INVALID)
+        {
+            return RefSerialData::RobotId::INVALID;
+        }
+
+        bool isBlue = RefSerial::isBlueTeam(robotData.robotId);
+        if (isBlue)
+        {
+            return (robotData.robotId == RefSerialData::RobotId::BLUE_HERO)
+                       ? RefSerialData::RobotId::BLUE_SOLDIER_3
+                       : RefSerialData::RobotId::BLUE_HERO;
+        }
+        else
+        {
+            return (robotData.robotId == RefSerialData::RobotId::RED_HERO)
+                       ? RefSerialData::RobotId::RED_SOLDIER_3
+                       : RefSerialData::RobotId::RED_HERO;
+        }
+    }
 };
 
 }  // namespace aruwsrc::communication::inter_robot_comm
