@@ -20,15 +20,15 @@
 #ifndef ROBOT_ORBIT_TRANSMITTER_HPP_
 #define ROBOT_ORBIT_TRANSMITTER_HPP_
 
-#include <modm/processing/resumable.hpp>
+#include <modm/processing/protothread.hpp>
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/clock.hpp"
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
-#include "tap/control/subsystem.hpp"
+#include "tap/drivers.hpp"
 
-#include "robot_orbit_message_queue.hpp"
 #include "robot_orbit_state.hpp"
 
 using namespace tap::algorithms::odometry;
@@ -36,7 +36,14 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::serial
 {
-class RobotOrbitTransmitter : public RefSerial::RobotToRobotMessageHandler
+enum class RobotOrbitMessageType : uint8_t
+{
+    POSITION_UPDATE = 0,
+    NUM_MESSAGE_TYPES
+};
+
+class RobotOrbitTransmitter : public modm::pt::Protothread, 
+                              public RefSerial::RobotToRobotMessageHandler
 {
 public:
     RobotOrbitTransmitter(
@@ -46,6 +53,8 @@ public:
 
     void operator()(const DJISerial::ReceivedSerialMessage& message) override final;
     inline void attachOdometry(Odometry2DInterface* odometry) { this->odometry = odometry; }
+    
+    bool sendRobotStates();
     void update();
 
 private:
@@ -53,19 +62,25 @@ private:
     RobotOrbitStateProvider& stateProvider;
     Odometry2DInterface* odometry = nullptr;
     RefSerial* refSerial;
+    RefSerialTransmitter refSerialTransmitter;
+    
+    RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
+    
+    // Message ID for robot-to-robot communication
+    static constexpr uint16_t ROBOT_ORBIT_MSG_ID = 0x200;
+    
+    // Periodic timer to control message sending frequency
+    tap::arch::PeriodicMilliTimer messageTimer{500};
 
     RefSerialTransmitter::RobotId getAllyRobotId() const;
+    void parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message);
 
     // Define scale factor based on field size and uint16_t max value
     // RoboMaster field is 12m in the largest dimension
     // UINT16_MAX = 65535, dividing by 12 gives ~5461 units per meter
     static constexpr uint16_t STATIC_CAST_SCALE_FACTOR = UINT16_MAX / 12;
-
-    std::vector<tap::communication::serial::RefSerialData::RobotId> targetRobots;
-    RobotOrbitMessageQueue messageQueue;
-
-    void parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message);
-    void sendRobotStates();
+    
+    static constexpr size_t MAX_MSG_SIZE = 113;
 };
 
 }  // namespace aruwsrc::communication::serial
