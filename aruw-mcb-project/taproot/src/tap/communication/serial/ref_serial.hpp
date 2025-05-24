@@ -177,7 +177,6 @@ public:
         transmissionSemaphore.release();
         transmissionDelayTimer.restart(
             std::ceil(sentMsgLen * 1000.0f / Tx::MAX_TRANSMIT_SPEED_BYTES_PER_S));
-        Constant 35ms delay
     }
 
     /**
