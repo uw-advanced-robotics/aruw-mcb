@@ -553,7 +553,8 @@ DriverAssistanceIndicator driverAssistanceIndicator(
     drivers()->visionCoprocessor,
     refSerialTransmitter,
     drivers()->refSerial,
-    transformAdapter.getWorldToVTM());
+    transformAdapter.getWorldToVTM(),
+    drivers()->interRobotTransmitter);
 
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
@@ -563,8 +564,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &damageIndicator,
     &textHudIndicators,
     // &visionTargetIndicator,
-    &driverAssistanceIndicator
-};
+    &driverAssistanceIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 

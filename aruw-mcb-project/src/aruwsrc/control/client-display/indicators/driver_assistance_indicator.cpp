@@ -25,11 +25,13 @@ DriverAssistanceIndicator::DriverAssistanceIndicator(
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     tap::communication::serial::RefSerial &refSerial,
-    const Transform &worldToTurretTransform)
+    const Transform &worldToTurretTransform,
+    InterRobotTransmitter &interRobotTransmitter)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),
       refSerial(refSerial),
-      worldToCameraTransform(worldToTurretTransform)
+      worldToCameraTransform(worldToTurretTransform),
+      interRobotTransmitter(interRobotTransmitter)
 {
 }
 
@@ -58,12 +60,11 @@ modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
 
 modm::ResumableResult<void> DriverAssistanceIndicator::update()
 {
-    // Variable definitions because protothread can't 
+    // Variable definitions because protothread can't
     bool visionHasTarget;
     bool hasStandard, hasHero, hasSentry;
-    aruwsrc::serial::VisionCoprocessor::RobotOrbitData robotOrbits;
-    Position robotOrbit = Position(0, 0, 0);
-    
+    InterRobotTransmitter::EnemyRobotState robotOrbits;
+
     RF_BEGIN(1);
     visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
 
@@ -77,48 +78,50 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
         drawPlateTargetBox();
     }
 
-    robotOrbits = visionCoprocessor.getLastRobotOrbitData();
-    hasStandard = false;
-    hasHero = false;
-    hasSentry = false;
-    for (int i = 0; i < visionCoprocessor.MAX_NUM_ROBOT_ORBITS; i++)
-    {
-        int ID = robotOrbits.data[i].robotType;
-        if (ID == 0) continue;
+    robotOrbits = interRobotTransmitter.getStateEstimate();
 
-        robotOrbit = Position(robotOrbits.data[i].x, robotOrbits.data[i].y, robotOrbits.data[i].z);
-        if (ID == 1)
-        {
-            hasHero = true;
-            drawTracerLineToOrbit(robotOrbit, GraphicIndex::HERO_TRACER);
-            drawHealthBarToOrbit(robotOrbit, GraphicIndex::HERO_HP, ID);
-        }
-        else if (ID == 3 || ID == 4)
-        {
-            hasStandard = true;
-            drawTracerLineToOrbit(robotOrbit, GraphicIndex::STANDARD_TRACER);
-            drawHealthBarToOrbit(robotOrbit, GraphicIndex::STANDARD_HP, ID);
-        }
-        else if (ID == 7)
-        {
-            hasSentry = true;
-            drawTracerLineToOrbit(robotOrbit, GraphicIndex::SENTRY_TRACER);
-            drawHealthBarToOrbit(robotOrbit, GraphicIndex::SENTRY_HP, ID);
-        }
-    }
-
-    if (!hasHero)
-    {
+    hasStandard =
+        (tap::arch::clock::getTimeMilliseconds() -
+         robotOrbits.robot[InterRobotTransmitter::RobotIndex::STANDARD].timestamp) < TIME_CUTOFF_MS;
+    hasHero =
+        (tap::arch::clock::getTimeMilliseconds() -
+         robotOrbits.robot[InterRobotTransmitter::RobotIndex::HERO].timestamp) < TIME_CUTOFF_MS;
+    hasSentry =
+        (tap::arch::clock::getTimeMilliseconds() -
+         robotOrbits.robot[InterRobotTransmitter::RobotIndex::SENTRY].timestamp) < TIME_CUTOFF_MS;
+    
+    if (hasHero){
+        Position heroOrbit = Position(
+            robotOrbits.robot[InterRobotTransmitter::RobotIndex::HERO].x,
+            robotOrbits.robot[InterRobotTransmitter::RobotIndex::HERO].y,
+            robotOrbits.robot[InterRobotTransmitter::RobotIndex::HERO].z);
+        drawTracerLineToOrbit(heroOrbit, GraphicIndex::HERO_TRACER);
+        drawHealthBarToOrbit(heroOrbit, GraphicIndex::HERO_HP, 1);
+    } else {
         deleteGraphic(GraphicIndex::HERO_TRACER);
         deleteGraphic(GraphicIndex::HERO_HP);
     }
-    if (!hasStandard)
-    {
+
+    if (hasStandard){
+        Position standardOrbit = Position(
+            robotOrbits.robot[InterRobotTransmitter::RobotIndex::STANDARD].x,
+            robotOrbits.robot[InterRobotTransmitter::RobotIndex::STANDARD].y,
+            robotOrbits.robot[InterRobotTransmitter::RobotIndex::STANDARD].z);
+        drawTracerLineToOrbit(standardOrbit, GraphicIndex::STANDARD_TRACER);
+        drawHealthBarToOrbit(standardOrbit, GraphicIndex::STANDARD_HP, 3);
+    } else {
         deleteGraphic(GraphicIndex::STANDARD_TRACER);
         deleteGraphic(GraphicIndex::STANDARD_HP);
     }
-    if (!hasSentry)
-    {
+
+    if (hasSentry){
+        Position sentryOrbit = Position(
+            robotOrbits.robot[InterRobotTransmitter::RobotIndex::SENTRY].x,
+            robotOrbits.robot[InterRobotTransmitter::RobotIndex::SENTRY].y,
+            robotOrbits.robot[InterRobotTransmitter::RobotIndex::SENTRY].z);
+        drawTracerLineToOrbit(sentryOrbit, GraphicIndex::SENTRY_TRACER);
+        drawHealthBarToOrbit(sentryOrbit, GraphicIndex::SENTRY_HP, 7);
+    } else {
         deleteGraphic(GraphicIndex::SENTRY_TRACER);
         deleteGraphic(GraphicIndex::SENTRY_HP);
     }
@@ -195,7 +198,7 @@ void DriverAssistanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicInde
 void DriverAssistanceIndicator::drawPlateTargetBox()
 {
     auto aimData = visionCoprocessor.getLastAimData(0);
-    
+
     // Get position
     Position enemyPlatePosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 

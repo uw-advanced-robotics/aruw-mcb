@@ -25,6 +25,7 @@
 
 #include "../projection_utils.hpp"
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/communication/inter_robot_comm/inter_robot_transmitter.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/processing/resumable.hpp"
 
@@ -34,6 +35,7 @@ namespace aruwsrc::control::client_display
 {
 using namespace aruwsrc::algorithms::transforms;
 using namespace tap::communication::serial;
+using namespace aruwsrc::communication::inter_robot_comm;
 /**
  * Draws a bounding box around the plate of where the vision system tells us to target.
  * Draws bars above robots to indicate the HP of the target.
@@ -46,7 +48,8 @@ public:
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         RefSerialTransmitter &refSerialTransmitter,
         RefSerial &refSerial,
-        const Transform &worldToTurretTransform);
+        const Transform &worldToTurretTransform,
+        InterRobotTransmitter &interRobotTransmitter);
 
     void initialize() override final;
 
@@ -58,6 +61,7 @@ private:
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     RefSerial &refSerial;
     const Transform &worldToCameraTransform;
+    InterRobotTransmitter &interRobotTransmitter;
 
     Tx::Graphic7Message graphic;
 
@@ -86,6 +90,8 @@ private:
     const Vector PLATE_CORNER_OFFSET =
         Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
     void drawPlateTargetBox();
+
+    uint32_t TIME_CUTOFF_MS = 3000;
 };
 
 }  // namespace aruwsrc::control::client_display
