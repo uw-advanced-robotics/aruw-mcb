@@ -69,6 +69,8 @@ void InterRobotTransmitter::operator()(const DJISerial::ReceivedSerialMessage& m
         if (incomingMessage.robot[i].current)
         {
             stateEstimate.robot[i] = incomingMessage.robot[i];
+            // Set timestamp to our current time
+            stateEstimate.robot[i].timestamp = tap::arch::clock::getTimeMilliseconds();
         }
     }
 
