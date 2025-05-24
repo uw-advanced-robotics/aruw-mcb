@@ -20,9 +20,9 @@
 #ifndef INTER_ROBOT_TRANSMITTER_HPP_
 #define INTER_ROBOT_TRANSMITTER_HPP_
 
+#include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
-#include "tap/architecture/periodic_timer.hpp"
 
 #include "modm/processing/protothread.hpp"
 
@@ -91,7 +91,6 @@ private:
     RefSerial::RobotId targetId;
     tap::arch::PeriodicMilliTimer timer{500};
 
-
     RefSerialTransmitter::RobotId getAllyRobotId() const
     {
         const auto& robotData = refSerial->getRobotData();
@@ -118,4 +117,4 @@ private:
 
 }  // namespace aruwsrc::communication::inter_robot_comm
 
-#endif
+#endif // INTER_ROBOT_TRANSMITTER_HPP_
