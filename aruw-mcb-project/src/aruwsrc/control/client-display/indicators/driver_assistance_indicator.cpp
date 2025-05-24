@@ -1,0 +1,259 @@
+/*
+ * Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "driver_assistance_indicator.hpp"
+
+namespace aruwsrc::control::client_display
+{
+DriverAssistanceIndicator::DriverAssistanceIndicator(
+    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
+    tap::communication::serial::RefSerial &refSerial,
+    const Transform &worldToTurretTransform,
+    RobotOrbitStateProvider &robotOrbitStateProvider)
+    : HudIndicator(refSerialTransmitter),
+      visionCoprocessor(visionCoprocessor),
+      refSerial(refSerial),
+      worldToCameraTransform(worldToTurretTransform),
+      robotOrbitStateProvider(robotOrbitStateProvider)
+{
+}
+
+void DriverAssistanceIndicator::initialize()
+{
+    configureGraphic(GraphicIndex::TARGET, Tx::GraphicColor::GREEN);
+
+    configureGraphic(GraphicIndex::HERO_TRACER, Tx::GraphicColor::ORANGE);
+    configureGraphic(GraphicIndex::STANDARD_TRACER, Tx::GraphicColor::ORANGE);
+    configureGraphic(GraphicIndex::SENTRY_TRACER, Tx::GraphicColor::ORANGE);
+
+    configureGraphic(GraphicIndex::HERO_HP, Tx::GraphicColor::PURPLISH_RED);
+    configureGraphic(GraphicIndex::STANDARD_HP, Tx::GraphicColor::PURPLISH_RED);
+    configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
+}
+
+modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
+{
+    RF_BEGIN(0);
+
+    // Send the graphics
+    RF_CALL(refSerialTransmitter.sendGraphic(&graphic));
+
+    RF_END();
+}
+
+modm::ResumableResult<void> DriverAssistanceIndicator::update()
+{
+    // Variable definitions because protothread can't
+    bool visionHasTarget;
+    bool hasStandard = false;
+    bool hasHero = false;
+    bool hasSentry = false;
+    RobotState heroState;
+    RobotState standardState;
+    RobotState sentryState;
+    uint32_t currentTime;
+
+    RF_BEGIN(1);
+    visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
+
+    if (!visionHasTarget)
+    {
+        deleteGraphic(GraphicIndex::TARGET);
+    }
+    else
+    {
+        drawPlateTargetBox();
+    }
+
+    currentTime = tap::arch::clock::getTimeMilliseconds();
+    
+    if (refSerial.isBlueTeam(refSerial.getRobotData().robotId))
+    {
+        hasHero = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::RED_HERO, heroState);
+        hasStandard = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::RED_SOLDIER_3, standardState);
+        hasSentry = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::RED_SENTINEL, sentryState);
+    }
+    else
+    {
+        hasHero = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::BLUE_HERO, heroState);
+        hasStandard = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::BLUE_SOLDIER_3, standardState);
+        hasSentry = robotOrbitStateProvider.getRobotState(RefSerialData::RobotId::BLUE_SENTINEL, sentryState);
+    }
+    
+    if (hasHero && (currentTime - heroState.timestamp < TIME_CUTOFF_MS))
+    {
+        Position heroOrbit = Position(heroState.xPos, heroState.yPos, heroState.zPos);
+        drawTracerLineToOrbit(heroOrbit, GraphicIndex::HERO_TRACER);
+        drawHealthBarToOrbit(heroOrbit, GraphicIndex::HERO_HP, 1);
+    } 
+    else 
+    {
+        deleteGraphic(GraphicIndex::HERO_TRACER);
+        deleteGraphic(GraphicIndex::HERO_HP);
+    }
+
+    if (hasStandard && (currentTime - standardState.timestamp < TIME_CUTOFF_MS))
+    {
+        Position standardOrbit = Position(standardState.xPos, standardState.yPos, standardState.zPos);
+        drawTracerLineToOrbit(standardOrbit, GraphicIndex::STANDARD_TRACER);
+        drawHealthBarToOrbit(standardOrbit, GraphicIndex::STANDARD_HP, 3);
+    }
+    else
+    {
+        deleteGraphic(GraphicIndex::STANDARD_TRACER);
+        deleteGraphic(GraphicIndex::STANDARD_HP);
+    }
+
+    if (hasSentry && (currentTime - sentryState.timestamp < TIME_CUTOFF_MS))
+    {
+        Position sentryOrbit = Position(sentryState.xPos, sentryState.yPos, sentryState.zPos);
+        drawTracerLineToOrbit(sentryOrbit, GraphicIndex::SENTRY_TRACER);
+        drawHealthBarToOrbit(sentryOrbit, GraphicIndex::SENTRY_HP, 7);
+    }
+    else
+    {
+        deleteGraphic(GraphicIndex::SENTRY_TRACER);
+        deleteGraphic(GraphicIndex::SENTRY_HP);
+    }
+
+    // Send the graphics
+    RF_CALL(refSerialTransmitter.sendGraphic(&graphic));
+    RF_END();
+}
+
+void DriverAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicIndex index)
+{
+    Position cameraFrameOrbit = worldToCameraTransform.apply(orbit);
+    ProjectedResult screenFrameOrbit =
+        convertCameraFrameToScreenFrame(cameraFrameOrbit + TRACER_LINE_OFFSET);
+
+    auto graphicToModify = &graphic.graphicData[static_cast<uint8_t>(index)];
+    graphicToModify->operation =
+        graphicToModify->operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+
+    RefSerialTransmitter::configLine(
+        1,
+        TRACER_LINE_ORIGIN.x,
+        TRACER_LINE_ORIGIN.y,
+        screenFrameOrbit.screenX,
+        screenFrameOrbit.screenY,
+        graphicToModify);
+};
+
+void DriverAssistanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicIndex index, int ID)
+{
+    Position cameraFrameOrbit = worldToCameraTransform.apply(orbit);
+    ProjectedResult screenFrameOrbit =
+        convertCameraFrameToScreenFrame(cameraFrameOrbit + HEALTH_BAR_OFFSET);
+
+    auto graphicToModify = &graphic.graphicData[static_cast<uint8_t>(index)];
+    graphicToModify->operation =
+        graphicToModify->operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+
+    // Show numerically the health of the target
+    int robotHP = 0;
+    auto robotHPData = refSerial.getRobotData().allRobotHp;
+    if (refSerial.isBlueTeam(refSerial.getRobotData().robotId))
+    {
+        if (ID == 1)
+            robotHP = robotHPData.red.hero1;
+        else if (ID == 3)
+            robotHP = robotHPData.red.standard3;
+        else if (ID == 4)
+            robotHP = robotHPData.red.standard4;
+        else if (ID == 7)
+            robotHP = robotHPData.red.sentry7;
+    }
+    else
+    {
+        if (ID == 1)
+            robotHP = robotHPData.blue.hero1;
+        else if (ID == 3)
+            robotHP = robotHPData.blue.standard3;
+        else if (ID == 4)
+            robotHP = robotHPData.blue.standard4;
+        else if (ID == 7)
+            robotHP = robotHPData.blue.sentry7;
+    }
+
+    RefSerialTransmitter::configInteger(
+        20,
+        3,
+        screenFrameOrbit.screenX,
+        screenFrameOrbit.screenY,
+        robotHP,
+        graphicToModify);
+}
+
+void DriverAssistanceIndicator::drawPlateTargetBox()
+{
+    auto aimData = visionCoprocessor.getLastAimData(0);
+
+    // Get position
+    Position enemyPlatePosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
+
+    Position cameraFrameOrbit = worldToCameraTransform.apply(enemyPlatePosition);
+
+    ProjectedResult screenFrameTopRight =
+        convertCameraFrameToScreenFrame(cameraFrameOrbit + PLATE_CORNER_OFFSET);
+    ProjectedResult screenFrameBottomLeft =
+        convertCameraFrameToScreenFrame(cameraFrameOrbit - PLATE_CORNER_OFFSET);
+
+    auto graphicToModify = &graphic.graphicData[static_cast<uint8_t>(GraphicIndex::TARGET)];
+
+    uint32_t prevOperation = graphicToModify->operation;
+    if (prevOperation == Tx::GRAPHIC_DELETE)
+    {
+        graphicToModify->operation = Tx::GRAPHIC_ADD;
+    }
+    else
+    {
+        graphicToModify->operation = Tx::GRAPHIC_MODIFY;
+    }
+
+    RefSerialTransmitter::configRectangle(
+        3,
+        screenFrameBottomLeft.screenX,
+        screenFrameBottomLeft.screenY,
+        screenFrameTopRight.screenX,
+        screenFrameTopRight.screenY,
+        graphicToModify);
+}
+
+void DriverAssistanceIndicator::configureGraphic(GraphicIndex index, Tx::GraphicColor color)
+{
+    uint8_t idx = static_cast<uint8_t>(index);
+    uint8_t graphicName[3];
+    getUnusedGraphicName(graphicName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &graphic.graphicData[idx],
+        graphicName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        color);
+}
+
+void DriverAssistanceIndicator::deleteGraphic(GraphicIndex index)
+{
+    uint8_t idx = static_cast<uint8_t>(index);
+    graphic.graphicData[idx].operation = Tx::GRAPHIC_DELETE;
+}
+
+}  // namespace aruwsrc::control::client_display

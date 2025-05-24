@@ -29,6 +29,7 @@
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "robot_orbit_state.hpp"
 
 using namespace tap::algorithms::odometry;
@@ -55,6 +56,11 @@ public:
 
     inline void attachOdometry(Odometry2DInterface* odometry) { this->odometry = odometry; }
 
+    inline void attachVisionCoprocessor(aruwsrc::serial::VisionCoprocessor* visionCoprocessor) 
+    { 
+        this->visionCoprocessor = visionCoprocessor; 
+    }
+
 private:
     struct PositionData
     {
@@ -73,6 +79,7 @@ private:
     tap::Drivers* drivers;
     RobotOrbitStateProvider& stateProvider;
     Odometry2DInterface* odometry = nullptr;
+    aruwsrc::serial::VisionCoprocessor* visionCoprocessor = nullptr;
     RefSerial* refSerial;
     RefSerialTransmitter refSerialTransmitter;
     
@@ -88,6 +95,40 @@ private:
     RefSerialTransmitter::RobotId targetId;
     
     RefSerialTransmitter::RobotId getAllyRobotId() const;
+    
+    inline uint8_t getRobotTypeIndex(uint8_t robotType) const
+    {
+        switch (robotType)
+        {
+            case 1:
+                return 1;
+            case 3:
+                return 2;
+            case 4:
+                return 2;
+            case 7:
+                return 3;
+            default:
+                return 0; 
+        }
+    }
+    
+    inline RefSerialData::RobotId getRobotIdFromType(uint8_t robotType, bool isBlueTeam) const
+    {
+        switch (robotType)
+        {
+            case 1:
+                return isBlueTeam ? RefSerialData::RobotId::RED_HERO : RefSerialData::RobotId::BLUE_HERO;
+            case 3: 
+                return isBlueTeam ? RefSerialData::RobotId::RED_SOLDIER_3 : RefSerialData::RobotId::BLUE_SOLDIER_3;
+            case 4: // standard 4 is actually standard 3
+                return isBlueTeam ? RefSerialData::RobotId::RED_SOLDIER_3 : RefSerialData::RobotId::BLUE_SOLDIER_3;
+            case 7: 
+                return isBlueTeam ? RefSerialData::RobotId::RED_SENTINEL : RefSerialData::RobotId::BLUE_SENTINEL;
+            default:
+                return RefSerialData::RobotId::INVALID;
+        }
+    }
 };
 
 }  // namespace aruwsrc::communication::serial

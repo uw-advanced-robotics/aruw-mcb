@@ -68,6 +68,7 @@ public:
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
           plateHitTracker(this),
+          refSerialTransmitter(this),
           robotOrbitStateProvider(),
           robotOrbitTransmitter(this, robotOrbitStateProvider, &refSerial)
     {
@@ -90,6 +91,7 @@ public:
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     can::capbank::CapacitorBank capacitorBank;
     algorithms::PlateHitTracker plateHitTracker;
+    RefSerialTransmitter refSerialTransmitter;
     communication::serial::RobotOrbitStateProvider robotOrbitStateProvider;
     communication::serial::RobotOrbitTransmitter robotOrbitTransmitter;
 #endif

@@ -64,6 +64,8 @@
 #include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/driver_assistance_indicator.hpp"
+
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
@@ -91,7 +93,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
-using namespace tap::communication::serial;
+    using namespace tap::communication::serial;
 using namespace tap::control;
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
@@ -228,7 +230,7 @@ HeroTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 2));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -518,6 +520,13 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformer.getWorldToVTM());
 
+DriverAssistanceIndicator driverAssistanceIndicator(
+    drivers()->visionCoprocessor,
+    refSerialTransmitter,
+    drivers()->refSerial,
+    transformAdapter.getWorldToVTM(),
+    drivers()->robotOrbitStateProvider);
+
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
@@ -525,8 +534,8 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &visionTargetIndicator,
-};
+    // &visionTargetIndicator,
+    &driverAssistanceIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
@@ -669,6 +678,8 @@ void startHeroCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
+    drivers->robotOrbitTransmitter.attachOdometry(&odometrySubsystem);
+    drivers->robotOrbitTransmitter.attachVisionCoprocessor(&drivers->visionCoprocessor);
 }
 
 /* register io mappings here ------------------------------------------------*/

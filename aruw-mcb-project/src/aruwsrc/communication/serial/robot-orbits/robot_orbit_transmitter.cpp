@@ -30,6 +30,7 @@ RobotOrbitTransmitter::RobotOrbitTransmitter(
     : drivers(drivers),
       stateProvider(stateProvider),
       odometry(nullptr),
+      visionCoprocessor(nullptr),
       refSerial(refSerial),
       refSerialTransmitter(drivers)
 {
@@ -77,16 +78,40 @@ void RobotOrbitTransmitter::updateState()
         outgoingData.positions[0].timestamp = tap::arch::clock::getTimeMilliseconds();
     }
     
-    RobotState visionStates[MAX_TRACKED_ROBOTS] = {};
-    uint8_t numRobots = stateProvider.getNumKnownVisionStates(visionStates);
-    
-    for (uint8_t i = 0; i < numRobots && i < MAX_TRACKED_ROBOTS; i++)
+    if (visionCoprocessor != nullptr)
     {
-        outgoingData.positions[i + 1].valid = true;
-        outgoingData.positions[i + 1].x = visionStates[i].xPos;
-        outgoingData.positions[i + 1].y = visionStates[i].yPos;
-        outgoingData.positions[i + 1].z = visionStates[i].zPos;
-        outgoingData.positions[i + 1].timestamp = visionStates[i].timestamp;
+        const auto& robotOrbits = visionCoprocessor->getLastRobotOrbitData();
+        const auto& robotData = refSerial->getRobotData();
+        bool isBlueTeam = RefSerial::isBlueTeam(robotData.robotId);
+        uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
+        
+        for (int i = 0; i < aruwsrc::serial::VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
+        {
+            int robotType = robotOrbits.data[i].robotType;
+            if (robotType == 0)
+            {
+                continue; 
+            }
+            
+            RobotState robotState;
+            robotState.robotId = getRobotIdFromType(robotType, isBlueTeam);
+            robotState.xPos = robotOrbits.data[i].x;
+            robotState.yPos = robotOrbits.data[i].y;
+            robotState.zPos = robotOrbits.data[i].z;
+            robotState.timestamp = currentTime;
+            
+            stateProvider.updateRobotState(robotState.robotId, robotState);
+            
+            uint8_t index = getRobotTypeIndex(robotType);
+            if (index > 0 && index <= MAX_TRACKED_ROBOTS)
+            {
+                outgoingData.positions[index].valid = true;
+                outgoingData.positions[index].x = robotState.xPos;
+                outgoingData.positions[index].y = robotState.yPos;
+                outgoingData.positions[index].z = robotState.zPos;
+                outgoingData.positions[index].timestamp = robotState.timestamp;
+            }
+        }
     }
 }
 
@@ -106,6 +131,7 @@ bool RobotOrbitTransmitter::sendRobotStates()
         }
         
         memcpy(&robotToRobotMessage.dataAndCRC16[0], &outgoingData, sizeof(PositionData));
+        memset(&outgoingData, 0, sizeof(PositionData));
         
         PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
             &robotToRobotMessage,
@@ -145,6 +171,40 @@ void RobotOrbitTransmitter::operator()(const DJISerial::ReceivedSerialMessage& m
             if (currentTime - incomingData.positions[i].timestamp > 5000)
             {
                 continue;
+            }
+            
+            RefSerialData::RobotId robotId = RefSerialData::RobotId::INVALID;
+            switch (i)
+            {
+                case 1:
+                    robotId = RefSerial::isBlueTeam(allyRobot) ? 
+                              RefSerialData::RobotId::RED_HERO : 
+                              RefSerialData::RobotId::BLUE_HERO;
+                    break;
+                case 2:
+                    robotId = RefSerial::isBlueTeam(allyRobot) ? 
+                              RefSerialData::RobotId::RED_SOLDIER_3 : 
+                              RefSerialData::RobotId::BLUE_SOLDIER_3;
+                    break;
+                case 3:
+                    robotId = RefSerial::isBlueTeam(allyRobot) ? 
+                              RefSerialData::RobotId::RED_SENTINEL : 
+                              RefSerialData::RobotId::BLUE_SENTINEL;
+                    break;
+                default:
+                    continue;
+            }
+            
+            if (robotId != RefSerialData::RobotId::INVALID)
+            {
+                RobotState enemyState;
+                enemyState.robotId = robotId;
+                enemyState.xPos = incomingData.positions[i].x;
+                enemyState.yPos = incomingData.positions[i].y;
+                enemyState.zPos = incomingData.positions[i].z;
+                enemyState.timestamp = incomingData.positions[i].timestamp;
+                
+                stateProvider.updateRobotState(robotId, enemyState);
             }
         }
     }
