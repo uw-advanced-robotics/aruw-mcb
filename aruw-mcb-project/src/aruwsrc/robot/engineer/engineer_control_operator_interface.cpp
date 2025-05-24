@@ -87,4 +87,28 @@ float EngineerControlOperatorInterface::getArmWristRollVelocity()
         return 0.0f;
 }
 
+float EngineerControlOperatorInterface::getChassisXInput()
+{
+    if (isDriveMode())
+    {
+        return ControlOperatorInterface::getChassisXInput();
+    }
+    else
+    {
+        return 0.0f;
+    }
+}
+
+float EngineerControlOperatorInterface::getChassisYInput()
+{
+    if (isDriveMode())
+    {
+        return ControlOperatorInterface::getChassisYInput();
+    }
+    else
+    {
+        return 0.0f;
+    }
+}
+
 }  // namespace aruwsrc::control::engineer
