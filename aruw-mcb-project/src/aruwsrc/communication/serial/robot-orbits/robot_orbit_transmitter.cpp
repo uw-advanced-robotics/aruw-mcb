@@ -34,6 +34,9 @@ RobotOrbitTransmitter::RobotOrbitTransmitter(
       refSerialTransmitter(drivers)
 {
     refSerial->attachRobotToRobotMessageHandler(ROBOT_ORBIT_MSG_ID, this);
+
+    memset(&outgoingData, 0, sizeof(PositionData));
+    memset(&incomingData, 0, sizeof(PositionData));
 }
 
 RefSerialTransmitter::RobotId RobotOrbitTransmitter::getAllyRobotId() const
@@ -59,111 +62,56 @@ RefSerialTransmitter::RobotId RobotOrbitTransmitter::getAllyRobotId() const
     }
 }
 
+void RobotOrbitTransmitter::updateState()
+{
+    memset(&outgoingData, 0, sizeof(PositionData));
+    
+    if (odometry != nullptr)
+    {
+        auto robotPosition = odometry->getCurrentLocation2D();
+        
+        outgoingData.positions[0].valid = true;
+        outgoingData.positions[0].x = robotPosition.getX();
+        outgoingData.positions[0].y = robotPosition.getY();
+        outgoingData.positions[0].z = 0.0f;
+        outgoingData.positions[0].timestamp = tap::arch::clock::getTimeMilliseconds();
+    }
+    
+    RobotState visionStates[MAX_TRACKED_ROBOTS] = {};
+    uint8_t numRobots = stateProvider.getNumKnownVisionStates(visionStates);
+    
+    for (uint8_t i = 0; i < numRobots && i < MAX_TRACKED_ROBOTS; i++)
+    {
+        outgoingData.positions[i + 1].valid = true;
+        outgoingData.positions[i + 1].x = visionStates[i].xPos;
+        outgoingData.positions[i + 1].y = visionStates[i].yPos;
+        outgoingData.positions[i + 1].z = visionStates[i].zPos;
+        outgoingData.positions[i + 1].timestamp = visionStates[i].timestamp;
+    }
+}
+
 bool RobotOrbitTransmitter::sendRobotStates()
 {
     PT_BEGIN();
+    
     while (true)
     {
         PT_WAIT_UNTIL(messageTimer.execute() && odometry != nullptr);
         
-        RefSerialTransmitter::RobotId allyRobot = getAllyRobotId();
-        if (allyRobot == RefSerialData::RobotId::INVALID)
+        targetId = getAllyRobotId();  
+        if (targetId == RefSerialData::RobotId::INVALID)
         {
             PT_YIELD();
             continue;
         }
         
-        uint8_t messageBuffer[MAX_MSG_SIZE] = {0};
-        
-        struct PositionData
-        {
-            uint16_t xPos;
-            uint16_t yPos;
-            uint16_t zPos;
-        } __attribute__((packed));
-        
-        struct PositionUpdateMessage
-        {
-            uint8_t initValue;
-            PositionData position;
-        } __attribute__((packed));
-        
-        struct RobotPositionEntry
-        {
-            uint8_t robotId;
-            PositionData position;
-        } __attribute__((packed));
-        
-        auto robotPosition = odometry->getCurrentLocation2D();
-        
-        PositionUpdateMessage selfPosition;
-        selfPosition.initValue = 0x01;
-        selfPosition.position.xPos = 
-            static_cast<uint16_t>(robotPosition.getX() * STATIC_CAST_SCALE_FACTOR);
-        selfPosition.position.yPos = 
-            static_cast<uint16_t>(robotPosition.getY() * STATIC_CAST_SCALE_FACTOR);
-        selfPosition.position.zPos = 0;  // Assuming ground robot with z=0
-        
-        tap::arch::convertToLittleEndian(
-            selfPosition.position.xPos,
-            reinterpret_cast<uint8_t*>(&selfPosition.position.xPos));
-        tap::arch::convertToLittleEndian(
-            selfPosition.position.yPos,
-            reinterpret_cast<uint8_t*>(&selfPosition.position.yPos));
-        tap::arch::convertToLittleEndian(
-            selfPosition.position.zPos,
-            reinterpret_cast<uint8_t*>(&selfPosition.position.zPos));
-        
-        size_t currentOffset = 0;
-        memcpy(&messageBuffer[currentOffset], &selfPosition, sizeof(selfPosition));
-        currentOffset += sizeof(selfPosition);
-        
-        RobotState visionStates[MAX_TRACKED_ROBOTS] = {};
-        uint8_t numVisionStates = stateProvider.getNumKnownVisionStates(visionStates);
-        
-        for (uint8_t i = 0; i < numVisionStates; i++)
-        {
-            if (currentOffset + sizeof(RobotPositionEntry) + sizeof(uint32_t) >= MAX_MSG_SIZE)
-            {
-                break;
-            }
-            
-            messageBuffer[0] |= (1 << (i + 1));
-            
-            RobotPositionEntry entry;
-            entry.robotId = static_cast<uint8_t>(visionStates[i].robotId);
-            entry.position.xPos = 
-                static_cast<uint16_t>(visionStates[i].xPos * STATIC_CAST_SCALE_FACTOR);
-            entry.position.yPos = 
-                static_cast<uint16_t>(visionStates[i].yPos * STATIC_CAST_SCALE_FACTOR);
-            entry.position.zPos = 
-                static_cast<uint16_t>(visionStates[i].zPos * STATIC_CAST_SCALE_FACTOR);
-            
-            tap::arch::convertToLittleEndian(
-                entry.position.xPos,
-                reinterpret_cast<uint8_t*>(&entry.position.xPos));
-            tap::arch::convertToLittleEndian(
-                entry.position.yPos,
-                reinterpret_cast<uint8_t*>(&entry.position.yPos));
-            tap::arch::convertToLittleEndian(
-                entry.position.zPos,
-                reinterpret_cast<uint8_t*>(&entry.position.zPos));
-            
-            memcpy(&messageBuffer[currentOffset], &entry, sizeof(entry));
-            currentOffset += sizeof(entry);
-        }
-        
-        uint32_t timestamp = tap::arch::clock::getTimeMilliseconds();
-        tap::arch::convertToLittleEndian(timestamp, &messageBuffer[currentOffset]);
-        currentOffset += sizeof(uint32_t);
-        
-        memcpy(&robotToRobotMessage.dataAndCRC16[0], messageBuffer, currentOffset);
+        memcpy(&robotToRobotMessage.dataAndCRC16[0], &outgoingData, sizeof(PositionData));
         
         PT_CALL(refSerialTransmitter.sendRobotToRobotMsg(
             &robotToRobotMessage,
             ROBOT_ORBIT_MSG_ID,
-            allyRobot,
-            currentOffset));
+            targetId,
+            sizeof(PositionData)));
     }
     
     PT_END();
@@ -171,82 +119,40 @@ bool RobotOrbitTransmitter::sendRobotStates()
 
 void RobotOrbitTransmitter::operator()(const DJISerial::ReceivedSerialMessage& message)
 {
-    parseIncomingMessage(message);
-}
-
-void RobotOrbitTransmitter::parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message)
-{
+    memcpy(
+        &incomingData,
+        &message.data[sizeof(RefSerialData::Tx::InteractiveHeader)],
+        sizeof(PositionData));
+    
     RefSerialTransmitter::RobotId allyRobot = getAllyRobotId();
-    if (allyRobot == RefSerialData::RobotId::INVALID)
+    if (allyRobot != RefSerialData::RobotId::INVALID && incomingData.positions[0].valid)
     {
-        return;
+        RobotState allyState;
+        allyState.robotId = allyRobot;
+        allyState.xPos = incomingData.positions[0].x;
+        allyState.yPos = incomingData.positions[0].y;
+        allyState.zPos = incomingData.positions[0].z;
+        allyState.timestamp = incomingData.positions[0].timestamp;
+        
+        stateProvider.updateRobotState(allyRobot, allyState);
     }
-
-    const uint8_t* data =
-        message.data + sizeof(tap::communication::serial::RefSerialData::Tx::InteractiveHeader);
-
-    uint8_t headerTOC = data[0];
-    size_t baseIndex = 1;
-
-    if (headerTOC & 0x01)
+    
+    for (uint8_t i = 1; i <= MAX_TRACKED_ROBOTS; i++)
     {
-        uint16_t xPosScaled, yPosScaled, zPosScaled;
-        tap::arch::convertFromLittleEndian(&xPosScaled, &data[baseIndex]);
-        tap::arch::convertFromLittleEndian(&yPosScaled, &data[baseIndex + 2]);
-        tap::arch::convertFromLittleEndian(&zPosScaled, &data[baseIndex + 4]);
-
-        float xPos = static_cast<float>(xPosScaled) / STATIC_CAST_SCALE_FACTOR;
-        float yPos = static_cast<float>(yPosScaled) / STATIC_CAST_SCALE_FACTOR;
-        float zPos = static_cast<float>(zPosScaled) / STATIC_CAST_SCALE_FACTOR;
-
-        RobotState allyRobotState;
-        allyRobotState.robotId = allyRobot;
-        allyRobotState.xPos = xPos;
-        allyRobotState.yPos = yPos;
-        allyRobotState.zPos = zPos;
-
-        baseIndex += 6;
-
-        for (uint8_t i = 1; i < MAX_TRACKED_ROBOTS + 1; i++)
+        if (incomingData.positions[i].valid)
         {
-            if (!(headerTOC & (1 << i)))
+            uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
+            if (currentTime - incomingData.positions[i].timestamp > 5000)
             {
                 continue;
             }
-
-            RefSerialData::RobotId robotId = static_cast<RefSerialData::RobotId>(data[baseIndex]);
-            baseIndex++;
-
-            uint16_t xPosRobot, yPosRobot, zPosRobot;
-            tap::arch::convertFromLittleEndian(&xPosRobot, &data[baseIndex]);
-            tap::arch::convertFromLittleEndian(&yPosRobot, &data[baseIndex + 2]);
-            tap::arch::convertFromLittleEndian(&zPosRobot, &data[baseIndex + 4]);
-
-            float xRobot = static_cast<float>(xPosRobot) / STATIC_CAST_SCALE_FACTOR;
-            float yRobot = static_cast<float>(yPosRobot) / STATIC_CAST_SCALE_FACTOR;
-            float zRobot = static_cast<float>(zPosRobot) / STATIC_CAST_SCALE_FACTOR;
-
-            RobotState newState;
-            newState.robotId = robotId;
-            newState.xPos = xRobot;
-            newState.yPos = yRobot;
-            newState.zPos = zRobot;
-
-            baseIndex += 6;
-
-            stateProvider.updateRobotState(robotId, newState);
         }
-
-        uint32_t timestamp;
-        tap::arch::convertFromLittleEndian(&timestamp, &data[baseIndex]);
-
-        allyRobotState.timestamp = timestamp;
-        stateProvider.updateRobotState(allyRobot, allyRobotState);
     }
 }
 
 void RobotOrbitTransmitter::update()
 {
+    updateState();
     sendRobotStates();
 }
 

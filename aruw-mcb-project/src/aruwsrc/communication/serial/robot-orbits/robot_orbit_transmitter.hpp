@@ -36,12 +36,6 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::serial
 {
-enum class RobotOrbitMessageType : uint8_t
-{
-    POSITION_UPDATE = 0,
-    NUM_MESSAGE_TYPES
-};
-
 class RobotOrbitTransmitter : public modm::pt::Protothread, 
                               public RefSerial::RobotToRobotMessageHandler
 {
@@ -51,36 +45,49 @@ public:
         RobotOrbitStateProvider& stateProvider,
         RefSerial* refSerial);
 
-    void operator()(const DJISerial::ReceivedSerialMessage& message) override final;
-    inline void attachOdometry(Odometry2DInterface* odometry) { this->odometry = odometry; }
-    
     bool sendRobotStates();
+
+    void updateState();
+
+    void operator()(const DJISerial::ReceivedSerialMessage& message) override;
+
     void update();
 
+    inline void attachOdometry(Odometry2DInterface* odometry) { this->odometry = odometry; }
+
 private:
+    struct PositionData
+    {
+        struct RobotPosition
+        {
+            bool valid;     
+            float x;       
+            float y;      
+            float z;      
+            uint32_t timestamp; 
+        };
+
+        RobotPosition positions[MAX_TRACKED_ROBOTS + 1];
+    };
+
     tap::Drivers* drivers;
     RobotOrbitStateProvider& stateProvider;
     Odometry2DInterface* odometry = nullptr;
     RefSerial* refSerial;
     RefSerialTransmitter refSerialTransmitter;
     
-    RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
-    
-    // Message ID for robot-to-robot communication
     static constexpr uint16_t ROBOT_ORBIT_MSG_ID = 0x200;
     
-    // Periodic timer to control message sending frequency
-    tap::arch::PeriodicMilliTimer messageTimer{500};
+    tap::arch::PeriodicMilliTimer messageTimer{500}; 
 
-    RefSerialTransmitter::RobotId getAllyRobotId() const;
-    void parseIncomingMessage(const DJISerial::ReceivedSerialMessage& message);
-
-    // Define scale factor based on field size and uint16_t max value
-    // RoboMaster field is 12m in the largest dimension
-    // UINT16_MAX = 65535, dividing by 12 gives ~5461 units per meter
-    static constexpr uint16_t STATIC_CAST_SCALE_FACTOR = UINT16_MAX / 12;
+    RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
     
-    static constexpr size_t MAX_MSG_SIZE = 113;
+    PositionData outgoingData;
+    PositionData incomingData;
+    
+    RefSerialTransmitter::RobotId targetId;
+    
+    RefSerialTransmitter::RobotId getAllyRobotId() const;
 };
 
 }  // namespace aruwsrc::communication::serial
