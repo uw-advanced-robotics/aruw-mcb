@@ -55,18 +55,6 @@ public:
     // Processes the received message from the ally robot.
     void operator()(const DJISerial::ReceivedSerialMessage& message) override;
 
-private:
-    // Needed state
-    RefSerial* refSerial;
-    RefSerialTransmitter* refSerialTransmitter;
-    VisionCoprocessor* visionCoprocessor;
-    RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
-
-    // Sending data
-    uint16_t MSG_ID = 0x201;
-    RefSerial::RobotId targetId;
-    tap::arch::PeriodicMilliTimer timer{500};
-
     // Message structure for sending/receiving robot states
     enum RobotIndex : uint8_t
     {
@@ -88,6 +76,20 @@ private:
         };
         RobotState robot[NUM_ROBOTS];
     };
+
+    const EnemyRobotState& getStateEstimate() const { return stateEstimate; }
+
+private:
+    // Needed state
+    RefSerial* refSerial;
+    RefSerialTransmitter* refSerialTransmitter;
+    VisionCoprocessor* visionCoprocessor;
+    RefSerialData::Tx::RobotToRobotMessage robotToRobotMessage;
+
+    // Sending data
+    uint16_t MSG_ID = 0x201;
+    RefSerial::RobotId targetId;
+    tap::arch::PeriodicMilliTimer timer{500};
 
     EnemyRobotState stateEstimate;
 
