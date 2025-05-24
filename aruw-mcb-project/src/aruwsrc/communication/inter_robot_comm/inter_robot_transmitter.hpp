@@ -56,8 +56,6 @@ public:
     void operator()(const DJISerial::ReceivedSerialMessage& message) override;
 
 private:
-    RefSerialTransmitter::RobotId getAllyRobotId() const;
-
     // Needed state
     RefSerial* refSerial;
     RefSerialTransmitter* refSerialTransmitter;
@@ -89,7 +87,7 @@ private:
             uint32_t timestamp;  // Timestamp in milliseconds, used for processing "active" robots
         };
         RobotState robot[NUM_ROBOTS];
-    } modm_packed;
+    };
 
     EnemyRobotState stateEstimate;
 
