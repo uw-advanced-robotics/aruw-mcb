@@ -26,6 +26,7 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
@@ -124,6 +125,7 @@ public:
         chassis::HolonomicChassisSubsystem *chassis,
         float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
         float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+        const std::vector<tap::communication::sensors::imu::ImuInterface> &imuVector,
         tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr);
 
     const char *getName() const override { return "Calibrate IMU"; }
@@ -137,6 +139,9 @@ public:
     void end(bool interrupted) override;
 
     bool isFinished() const override;
+
+    // Function to request calibration on each of the IMUs in the vector
+    void requestCalibration();
 
     /**
      * @return The current calibration state of the command.
@@ -162,6 +167,7 @@ protected:
 
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
+    std::vector<tap::communication::sensors::imu::ImuInterface> imuVector;
     chassis::HolonomicChassisSubsystem *chassis;
 
     tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface;
