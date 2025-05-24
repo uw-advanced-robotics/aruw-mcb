@@ -22,6 +22,7 @@
 
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/architecture/periodic_timer.hpp"
 
 #include "modm/processing/protothread.hpp"
 
@@ -53,6 +54,7 @@ public:
         // Send the message using the refSerialTransmitter
         while (true)
         {
+            PT_WAIT_UNTIL(timer.execute());
             targetId = getAllyRobotId();
             memcpy(&robotToRobotMessage.dataAndCRC16[0], &message, sizeof(Message));
 
@@ -87,6 +89,8 @@ private:
 
     uint16_t MSG_ID = 0x201;
     RefSerial::RobotId targetId;
+    tap::arch::PeriodicMilliTimer timer{500};
+
 
     RefSerialTransmitter::RobotId getAllyRobotId() const
     {
