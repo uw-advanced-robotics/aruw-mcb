@@ -58,26 +58,26 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "aruwsrc/control/turret/cv/sentry_turret_cv_command.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/sentry/sentry_auto_aim_launch_timer.hpp"
-#include "aruwsrc/robot/sentry/sentry_ballistics_solver.hpp"
-#include "aruwsrc/robot/sentry/sentry_beyblade_command.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_subsystem.hpp"
+#include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
+#include "aruwsrc/robot/sentry/chassis/sentry_beyblade_command.hpp"
+#include "aruwsrc/robot/sentry/chassis/sentry_manual_drive_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
-#include "aruwsrc/robot/sentry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_imu_calibrate_command.hpp"
-#include "aruwsrc/robot/sentry/sentry_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/robot/sentry/sentry_manual_drive_command.hpp"
-#include "aruwsrc/robot/sentry/sentry_minor_cv_on_target_governor.hpp"
-#include "aruwsrc/robot/sentry/sentry_transform_adapter.hpp"
-#include "aruwsrc/robot/sentry/sentry_transform_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_major_world_relative_yaw_controller.hpp"
-#include "aruwsrc/robot/sentry/sentry_turret_minor_subsystem.hpp"
-#include "aruwsrc/robot/sentry/turret_major_control_command.hpp"
-#include "aruwsrc/robot/sentry/turret_minor_control_command.hpp"
+#include "aruwsrc/robot/sentry/turret/cv/sentry_auto_aim_launch_timer.hpp"
+#include "aruwsrc/robot/sentry/turret/cv/sentry_minor_cv_on_target_governor.hpp"
+#include "aruwsrc/robot/sentry/turret/cv/sentry_turret_cv_command.hpp"
+#include "aruwsrc/robot/sentry/turret/sentry_turret_major_world_relative_yaw_controller.hpp"
+#include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
+#include "aruwsrc/robot/sentry/turret/turret_major_control_command.hpp"
+#include "aruwsrc/robot/sentry/turret/turret_minor_control_command.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -86,17 +86,21 @@ using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::agitator;
-using namespace aruwsrc::sentry;
-using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::sentry::chassis;
-using namespace aruwsrc::control::governor;
-using namespace aruwsrc::control::turret;
-using namespace aruwsrc::control::sentry;
-using namespace aruwsrc::control::turret::sentry;
-using namespace aruwsrc::control::turret::algorithms;
-using namespace aruwsrc::virtualMCB;
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::sentry;
+using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::algorithms;
+using namespace aruwsrc::sentry;
+using namespace aruwsrc::sentry::chassis;
+using namespace aruwsrc::sentry::algorithms;
+using namespace aruwsrc::sentry::algorithms::odometry;
+using namespace aruwsrc::sentry::turret;
+using namespace aruwsrc::sentry::turret::cv;
+using namespace aruwsrc::virtualMCB;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -332,8 +336,8 @@ aruwsrc::chassis::HalfSwerveChassisSubsystem chassis(
     HALF_SWERVE_FORWARD_MATRIX);
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-    &leftOmni,
-    &rightOmni,
+    leftOmni.getEncoder(),
+    rightOmni.getEncoder(),
     DEADWHEEL_RADIUS);
 
 SentryKFOdometry2DSubsystem odometrySubsystem(
@@ -364,9 +368,8 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
 aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    drivers()->visionCoprocessor,
     transformer.getWorldToChassis(),
-    aruwsrc::sentry::chassis::beybladeConfig);
+    aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -530,20 +533,20 @@ TurretMinorSentryControlCommand turretRightManualCommand(
     MINOR_USER_PITCH_INPUT_SCALAR);
 
 // Chassis beyblade
-aruwsrc::sentry::SentryBeybladeCommand beybladeCommand(
+SentryBeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turretMajor.getReadOnlyMotor(),
     drivers()->controlOperatorInterface,
     transformer.getWorldToChassis(),
-    aruwsrc::sentry::chassis::beybladeConfig);
+    aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
 
-aruwsrc::control::sentry::SentryManualDriveCommand chassisDriveCommand(
+SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &(drivers()->controlOperatorInterface),
     &chassis);
 
-imu::SentryImuCalibrateCommand imuCalibrateCommand(
+SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
         {
@@ -918,6 +921,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
+    drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

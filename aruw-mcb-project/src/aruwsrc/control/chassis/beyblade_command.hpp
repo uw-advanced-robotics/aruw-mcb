@@ -24,6 +24,7 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
@@ -42,6 +43,7 @@ public:
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
         aruwsrc::control::ControlOperatorInterface& operatorInterface,
+        const aruwsrc::chassis::BeybladeConfig config,
         const float rotationMultiplier = 1.0f);
 
     /**
@@ -69,6 +71,7 @@ private:
     HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
     aruwsrc::control::ControlOperatorInterface& operatorInterface;
+    const aruwsrc::chassis::BeybladeConfig config;
 
     const float rotationMultiplier;
 

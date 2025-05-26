@@ -25,6 +25,7 @@
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
@@ -40,10 +41,10 @@ using aruwsrc::mock::TurretSubsystemMock;
 using namespace tap::communication::serial;
 
 static constexpr float MAX_R =
-    BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
+    BEYBLADE_CONFIG.beybladeRotationalSpeedFractionOfMax * CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
 
 static constexpr float BASE_DESIRED_OUT =
-    CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second * BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
+    CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second * BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier;
 
 static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 1,
@@ -78,7 +79,7 @@ protected:
              rfm,
              rbm,
              MOCK_WHEEL_VELOCITY_PID_CONFIG),
-          bc(&d, &cs, &t.yawMotor, operatorInterface),
+          bc(&d, &cs, &t.yawMotor, operatorInterface, BEYBLADE_CONFIG),
           yawAngle(Angle(std::get<2>(GetParam()))),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))
@@ -107,8 +108,8 @@ protected:
         EXPECT_CALL(
             cs,
             setDesiredOutput(
-                FloatNear(BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * rotatedX, 1E-3),
-                FloatNear(BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * rotatedY, 1E-3),
+                FloatNear(BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier * rotatedX, 1E-3),
+                FloatNear(BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier * rotatedY, 1E-3),
                 FloatNear(rotation, 1E-3)));
     }
 
@@ -127,7 +128,7 @@ protected:
 
 TEST_P(BeybladeCommandTest, single_execute)
 {
-    setupDesiredOutputExpectations(std::min(MAX_R, BEYBLADE_RAMP_UPDATE_RAMP));
+    setupDesiredOutputExpectations(std::min(MAX_R, BEYBLADE_CONFIG.beybladeRampRate));
     bc.execute();
 }
 
@@ -135,7 +136,7 @@ TEST_P(BeybladeCommandTest, multiple_execute)
 {
     for (int i = 1; i < 10; i++)
     {
-        setupDesiredOutputExpectations(std::min(MAX_R, i * BEYBLADE_RAMP_UPDATE_RAMP));
+        setupDesiredOutputExpectations(std::min(MAX_R, i * BEYBLADE_CONFIG.beybladeRampRate));
     }
 
     for (int i = 1; i < 10; i++)

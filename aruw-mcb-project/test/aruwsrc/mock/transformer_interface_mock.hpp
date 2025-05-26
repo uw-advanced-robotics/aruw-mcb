@@ -40,6 +40,11 @@ public:
         (uint8_t),
         (const override));
     MOCK_METHOD(tap::algorithms::transforms::Transform&, getWorldToVTM, (), (const override));
+    MOCK_METHOD(
+        tap::algorithms::transforms::Transform&,
+        getChassisToArducam,
+        (uint8_t),
+        (const override));
 };
 }  // namespace aruwsrc::mock
 
