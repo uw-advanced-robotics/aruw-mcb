@@ -150,6 +150,10 @@ int main()
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO)
             checkTurretMcbDisconnection(drivers);
 #endif
+
+#ifdef ALL_STANDARDS
+            PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
+#endif
         }
         modm::delay_us(10);
     }
@@ -158,6 +162,10 @@ int main()
 
 static void initializeIo(Drivers *drivers)
 {
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+
     drivers->analog.init();
     drivers->pwm.init();
     drivers->digital.init();
@@ -197,6 +205,10 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_ENGINEER)
     drivers->engineerCVCommunication.initializeCV();
 #endif
+
+#ifdef ALL_STANDARDS
+    drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+#endif
 }
 
 static void updateIo(Drivers *drivers)
@@ -227,6 +239,10 @@ static void updateIo(Drivers *drivers)
 
 #ifdef TARGET_TESTBED
     drivers->lite.updateSerial();
+#endif
+
+#ifdef ALL_STANDARDS
+    drivers->ism330.read();
 #endif
 }
 
