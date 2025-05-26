@@ -232,7 +232,6 @@ static void updateIo(Drivers *drivers)
 #ifdef TARGET_TESTBED
     drivers->lite.updateSerial();
 #endif
-
 }
 
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO)
