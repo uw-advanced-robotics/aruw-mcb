@@ -320,8 +320,8 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-    &leftFrontMotor.getEncoder(),
-    &leftBackMotor.getEncoder(),
+    leftFrontMotor.getEncoder(),
+    leftBackMotor.getEncoder(),
     DEADWHEEL_RADIUS);
 
 SentryKFOdometry2DSubsystem odometrySubsystem(
