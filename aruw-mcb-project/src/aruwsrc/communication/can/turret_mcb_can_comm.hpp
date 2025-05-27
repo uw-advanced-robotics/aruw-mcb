@@ -114,7 +114,7 @@ public:
      */
     mockable inline float getPitch() const override
     {
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ECLIPSE)
         return -lastCompleteImuData.pitch;
 #else
         return lastCompleteImuData.pitch;
@@ -126,7 +126,7 @@ public:
      */
     mockable inline float getGy() const override
     {
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ECLIPSE)
         return -static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
                tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
 #else
@@ -142,7 +142,7 @@ public:
      */
     mockable inline float getPitchUnwrapped() const
     {
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ECLIPSE)
         return -lastCompleteImuData.pitch - M_TWOPI * static_cast<float>(pitchRevolutions);
 #else
         return lastCompleteImuData.pitch + M_TWOPI * static_cast<float>(pitchRevolutions);

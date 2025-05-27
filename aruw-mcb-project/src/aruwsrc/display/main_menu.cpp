@@ -26,7 +26,7 @@ using namespace tap::display;
 #ifdef SSH1106_OLED
 #define ENTRIES 7
 #else
-#define ENTRIES 14
+#define ENTRIES 17
 #endif
 
 namespace aruwsrc
@@ -75,6 +75,11 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addImuCalibrateMenuCallback));
+    // addEntry(
+    //     ErrorMenu::getMenuName(),
+    //     modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+    //         this,
+    //         &MainMenu::addErrorMenuCallback));
     if (this->visionCoprocessor != nullptr)
         addEntry(
             CVMenu::getMenuName(),
@@ -179,7 +184,7 @@ void MainMenu::addHardwareTestMenuCallback()
 
 void MainMenu::addMotorMenuCallback()
 {
-    MotorMenu* mm = new (&motorMenu) MotorMenu(getViewStack(), drivers);
+    MotorMenu* mm = new (&motorMenu) MotorMenu(getViewStack(), drivers, ENTRIES);
     getViewStack()->push(mm);
 }
 
@@ -191,7 +196,7 @@ void MainMenu::addPropertyTableCallback()
 void MainMenu::addCommandSchedulerCallback()
 {
     CommandSchedulerMenu* csm =
-        new (&commandSchedulerMenu) CommandSchedulerMenu(getViewStack(), drivers);
+        new (&commandSchedulerMenu) CommandSchedulerMenu(getViewStack(), drivers, ENTRIES);
     getViewStack()->push(csm);
 }
 

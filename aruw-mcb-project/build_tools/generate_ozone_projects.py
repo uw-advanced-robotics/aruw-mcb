@@ -22,6 +22,7 @@ from SCons.Script import *
 ROBOT_IPS = {
     "TARGET_STANDARD_NULL": "192.168.0.103",
     "TARGET_SENTRY_ECLIPSE": "192.168.0.231",
+    "TARGET_HERO_ZERO": "192.168.0.169",
 }
 
 def run_ozone(env, source, robot=""):

@@ -32,8 +32,6 @@
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
 #endif
 
-using tap::motor::DjiMotor;
-
 namespace aruwsrc::chassis
 {
 /**
@@ -81,7 +79,7 @@ static constexpr float VELOCITY_PID_KS = 400.0f;
  * The corresponding speed controller output torque current range is
  * -20 ~ 0 ~ 20 A.
  */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = DjiMotor::MAX_OUTPUT_C620;
+static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C620;
 
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = VELOCITY_PID_KP,
@@ -117,6 +115,13 @@ static constexpr float WHEEL_RADIUS = 0.1016;
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
 
+static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0;
+static constexpr float CENTER_TO_WHEELBASE_RADIUS = 141 / 1000.0f;  // 141mm -> m
+static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
+static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
+
 #else
 
 #error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
@@ -145,6 +150,10 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
     .beybladeRampRate = 50,
 };
+
+static constexpr float STARTING_POSITION_X = 0.7f;  // Meters
+static constexpr float STARTING_POSITION_Y = 7.0f;
+
 }  // namespace aruwsrc::chassis
 
 #endif  // STANDARD_CHASSIS_CONSTANTS_HPP_

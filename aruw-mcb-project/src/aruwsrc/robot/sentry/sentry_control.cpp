@@ -268,7 +268,7 @@ VirtualDjiMotor rightFrontMotor(
     false,
     "Right Front Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 VirtualDjiMotor leftFrontMotor(
     drivers(),
@@ -278,7 +278,7 @@ VirtualDjiMotor leftFrontMotor(
     false,
     "Left Front Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 VirtualDjiMotor leftBackMotor(
     drivers(),
@@ -288,7 +288,7 @@ VirtualDjiMotor leftBackMotor(
     false,
     "Left Back Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 VirtualDjiMotor rightBackMotor(
     drivers(),
@@ -298,7 +298,7 @@ VirtualDjiMotor rightBackMotor(
     false,
     "Right Back Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::virtualMCB::VirtualCurrentSensor currentSensor(
     {&drivers()->chassisMcbLite.analog,
@@ -320,8 +320,8 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-    &leftFrontMotor,
-    &leftBackMotor,
+    &leftFrontMotor.getEncoder(),
+    &leftBackMotor.getEncoder(),
     DEADWHEEL_RADIUS);
 
 SentryKFOdometry2DSubsystem odometrySubsystem(
@@ -352,7 +352,6 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
 aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    drivers()->visionCoprocessor,
     transformer.getWorldToChassis(),
     aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
 
@@ -894,6 +893,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
+    drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

@@ -21,6 +21,7 @@
 
 #ifdef ALL_STANDARDS
 
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -34,6 +35,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
@@ -50,6 +52,7 @@
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
@@ -92,6 +95,7 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
@@ -103,6 +107,7 @@ using namespace tap::communication::serial;
 using namespace tap::control;
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
+using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::agitator;
 using namespace aruwsrc::algorithms;
 using namespace aruwsrc::algorithms::odometry;
@@ -154,6 +159,7 @@ tap::motor::DjiMotor yawMotor(
     true,
     1,
     YAW_MOTOR_CONFIG.startEncoderValue);
+
 StandardTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -171,7 +177,7 @@ tap::motor::DjiMotor leftFrontChassisMotor(
     false,
     "Left Front Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
@@ -180,7 +186,7 @@ tap::motor::DjiMotor leftBackChassisMotor(
     false,
     "Left Back Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
@@ -189,7 +195,7 @@ tap::motor::DjiMotor rightFrontChassisMotor(
     false,
     "Right Front Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
@@ -198,7 +204,7 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     "Right Back Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::chassis::XDriveChassisSubsystem chassis(
     drivers(),
@@ -211,7 +217,32 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+tap::encoder::CanEncoder parallelOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    tap::can::CanBus::CAN_BUS2,
+    true);
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    tap::can::CanBus::CAN_BUS2);
+
+aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
+    &parallelOmni,
+    &perpendicularOmni,
+    aruwsrc::chassis::DEADWHEEL_RADIUS);
+
+aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    deadwheels,
+    turret,
+    drivers()->mpu6500,
+    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
+    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
+    aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+    aruwsrc::chassis::PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
+    aruwsrc::chassis::PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -248,6 +279,12 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+
+aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
+    drivers(),
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    transformAdapter);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
@@ -371,7 +408,10 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         &chassisFramePitchTurretController,
         true,
     }},
-    &chassis);
+    &chassis,
+    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    &odometrySubsystem);
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
@@ -647,6 +687,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
+    drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -662,6 +703,9 @@ void initializeSubsystems()
     buzzer.initialize();
     transformSubsystem.initialize();
     capBankSubsystem.initialize();
+    arucoResetSubsystem.initialize();
+    perpendicularOmni.initialize();
+    parallelOmni.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/

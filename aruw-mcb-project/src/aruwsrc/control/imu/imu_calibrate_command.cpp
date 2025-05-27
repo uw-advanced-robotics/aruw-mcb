@@ -25,6 +25,7 @@
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
+using namespace tap::algorithms::odometry;
 
 namespace aruwsrc::control::imu
 {
@@ -33,13 +34,15 @@ ImuCalibrateCommand::ImuCalibrateCommand(
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
     chassis::HolonomicChassisSubsystem *chassis,
     float velocityZeroThreshold,
-    float positionZeroThreshold)
+    float positionZeroThreshold,
+    Odometry2DInterface *odometry2DInterface)
     : tap::control::Command(),
       velocityZeroThreshold(velocityZeroThreshold),
       positionZeroThreshold(positionZeroThreshold),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
-      chassis(chassis)
+      chassis(chassis),
+      odometry2DInterface(odometry2DInterface)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -73,6 +76,10 @@ void ImuCalibrateCommand::initialize()
             Angle(config.turret->pitchMotor.getConfig().startAngle));
         config.pitchController->initialize();
         config.yawController->initialize();
+    }
+    if (odometry2DInterface != nullptr)
+    {
+        odometry2DInterface->reset();
     }
 
     calibrationLongTimeout.stop();
@@ -143,6 +150,10 @@ void ImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::BUZZING;
+                if (odometry2DInterface != nullptr)
+                {
+                    odometry2DInterface->reset();
+                }
             }
             buzzerTimer.restart(1000);
             break;
