@@ -35,6 +35,34 @@ ImuCalibrateCommand::ImuCalibrateCommand(
     chassis::HolonomicChassisSubsystem *chassis,
     float velocityZeroThreshold,
     float positionZeroThreshold,
+    Odometry2DInterface *odometry2DInterface)
+    : tap::control::Command(),
+      velocityZeroThreshold(velocityZeroThreshold),
+      positionZeroThreshold(positionZeroThreshold),
+      drivers(drivers),
+      turretsAndControllers(turretsAndControllers),
+      chassis(chassis),
+      odometry2DInterface(odometry2DInterface)
+{
+    for (auto &config : turretsAndControllers)
+    {
+        assert(config.turretMCBCanComm != nullptr);
+        assert(config.turret != nullptr);
+        assert(config.yawController != nullptr);
+        assert(config.pitchController != nullptr);
+
+        addSubsystemRequirement(config.turret);
+    }
+
+    addSubsystemRequirement(chassis);
+}
+
+ImuCalibrateCommand::ImuCalibrateCommand(
+    tap::Drivers *drivers,
+    const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
+    chassis::HolonomicChassisSubsystem *chassis,
+    float velocityZeroThreshold,
+    float positionZeroThreshold,
     const std::vector<tap::communication::sensors::imu::ImuInterface> &imuVector,
     Odometry2DInterface *odometry2DInterface)
     : tap::control::Command(),

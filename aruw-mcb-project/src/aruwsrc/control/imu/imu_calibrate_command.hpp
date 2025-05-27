@@ -125,6 +125,14 @@ public:
         chassis::HolonomicChassisSubsystem *chassis,
         float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
         float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+        tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr);
+
+    ImuCalibrateCommand(
+        tap::Drivers *drivers,
+        const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
+        chassis::HolonomicChassisSubsystem *chassis,
+        float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+        float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
         const std::vector<tap::communication::sensors::imu::ImuInterface> &imuVector,
         tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr);
 
