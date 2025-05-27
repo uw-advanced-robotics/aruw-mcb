@@ -117,36 +117,22 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-<<<<<<< HEAD
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) ||
-                defined(TARGET_SENTRY_ECLIPSE) == == ==
-                =
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_HYDRA)
->>>>>>> origin/develop
-                    PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
+    defined(TARGET_SENTRY_ECLIPSE)
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
-<<<<<<< HEAD
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) ||
-                defined(TARGET_SENTRY_ECLIPSE)
-                    PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
-#endif
-
-#if defined(TARGET_SENTRY_ECLIPSE)
-            == == == =
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_HYDRA)
-                         PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+    defined(TARGET_SENTRY_ECLIPSE)
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
 #if defined(TARGET_ENGINEER)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
-#if defined(TARGET_SENTRY_HYDRA)
->>>>>>> origin/develop
+#if defined(TARGET_SENTRY_ECLIPSE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
             PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
@@ -156,14 +142,9 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-<<<<<<< HEAD
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) ||
-                defined(TARGET_SENTRY_ECLIPSE) == == ==
-                =
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_HYDRA)
->>>>>>> origin/develop
-                    PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
+    defined(TARGET_SENTRY_ECLIPSE)
+            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO)
