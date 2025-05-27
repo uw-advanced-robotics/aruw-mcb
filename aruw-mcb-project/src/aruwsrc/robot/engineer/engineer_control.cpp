@@ -64,7 +64,7 @@ tap::motor::DjiMotor storageLiftMotor(
     true,
     "Lifting Motor",
     false,
-    1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
     &(drivers()->digital),
     CUBELIFT_LIMITSWITCH_PORT,
