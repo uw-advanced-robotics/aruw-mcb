@@ -199,6 +199,6 @@ Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [pro
 <<<<<<< HEAD
             - STANDARD_NULL, STANDARD_ORION, DRONE, ENGINEER, SENTRY_ECLIPSE, HERO_PERSEUS
 =======
-            - STANDARD_NULL, STANDARD_ORION, DRONE, ENGINEER, SENTRY_HYDRA, HERO_ZERO
+            - STANDARD_NULL, STANDARD_ORION, DRONE, ENGINEER, SENTRY_ECLIPSE, HERO_ZERO
 >>>>>>> origin/develop
 ```
