@@ -23,26 +23,26 @@ namespace aruwsrc::control::engineer
 {
 bool EngineerControlOperatorInterface::isDriveMode()
 {
-    Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
-    return leftState == Remote::SwitchState::DOWN;
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN &&
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID;
 }
 
 bool EngineerControlOperatorInterface::isGantryControlMode()
 {
-    Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
-    return leftState == Remote::SwitchState::MID;
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID;
 }
 
 bool EngineerControlOperatorInterface::isWristControlMode()
 {
-    Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
-    return leftState == Remote::SwitchState::UP;
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP &&
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID;
 }
 
 float EngineerControlOperatorInterface::getCubeLiftVelocity()
 {
     if (isGantryControlMode())
-        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);  // todo
+        return drivers->remote.getChannel(Remote::Channel::WHEEL);  // todo
     else
         return 0.0f;
 }
