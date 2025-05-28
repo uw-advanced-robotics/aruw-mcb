@@ -21,20 +21,22 @@
 namespace aruwsrc::robot::engineer
 {
 CubeMoveManualCommand::CubeMoveManualCommand(
-    CubeStorageSubsystem& cubeLift,
-    aruwsrc::control::engineer::EngineerControlOperatorInterface* operatorInterface)
+    LimitSwitchSetpointInterface& cubeLift,
+    aruwsrc::control::engineer::EngineerControlOperatorInterface* operatorInterface,
+    float moveSpeed)
     : cubeLift(cubeLift),
-      operatorInterface(operatorInterface)
+      operatorInterface(operatorInterface),
+      moveSpeed(moveSpeed)
 {
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getPositionSetpoint(); }
+void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getSetpoint(); }
 
 void CubeMoveManualCommand::execute()
 {
-    setpoint += operatorInterface->getCubeLiftVelocity() * MANUAL_MOVE_SPEED;  // right up
-    cubeLift.setPositionSetpoint(setpoint);
+    setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;  // right up
+    cubeLift.setSetpoint(setpoint);
 }
 
 void CubeMoveManualCommand::end(bool) { cubeLift.setDesiredOutput(0); }

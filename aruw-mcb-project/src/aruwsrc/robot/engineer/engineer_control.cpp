@@ -43,6 +43,7 @@
 #include "aruwsrc/robot/engineer/cube_lift/cube_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 
@@ -65,29 +66,6 @@ namespace aruwsrc
 {
 namespace control
 {
-tap::motor::DjiMotor storageLiftMotor(
-    drivers(),
-    CUBE_LIFT_MOTOR_ID,
-    LIFT_MOTOR_CAN_BUS,
-    true,
-    "Lifting Motor",
-    false,
-    1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
-    &(drivers()->digital),
-    CUBELIFT_LIMITSWITCH_PORT,
-    true);
-LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
-/* define subsystems --------------------------------------------------------*/
-CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, 0);
-
-tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
-    {&drivers()->analog,
-     aruwsrc::chassis::CURRENT_SENSOR_PIN,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
-
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
 tap::motor::DjiMotor leftFrontChassisMotor(
@@ -126,6 +104,13 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
+tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+    {&drivers()->analog,
+     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+
 aruwsrc::chassis::MecanumChassisSubsystem chassis(
     drivers(),
     &currentSensor,
@@ -135,6 +120,28 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
     rightFrontChassisMotor,
     rightBackChassisMotor,
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
+
+tap::motor::DjiMotor storageLiftMotor(
+    drivers(),
+    CUBE_LIFT_MOTOR_ID,
+    LIFT_MOTOR_CAN_BUS,
+    true,
+    "Lifting Motor",
+    false,
+    1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
+    &(drivers()->digital),
+    CUBELIFT_LIMITSWITCH_PORT,
+    true);
+LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
+/* define subsystems --------------------------------------------------------*/
+CubeStorageSubsystem cubeLift(
+    drivers(),
+    storageLiftMotor,
+    LIFT_MOTOR_PID_CONFIG,
+    LIFT_HOMING_PID_CONFIG,
+    cubeLiftTrigger);
 
 tap::motor::DjiMotor engineerWristRollMotor(
     drivers(),
@@ -249,7 +256,6 @@ ArmLiftSubsystem armLiftSubsystem(
     aruwsrc::engineer::GANTRY_LIFT_BALANCE_CONFIG,
     liftLimitSwitchTrigger,
     1.0f,
-    10.0f,
     0.0f,
     GANTRY_LIFT_MAX_SETPOINT);
 
@@ -272,7 +278,10 @@ HomingCommand cubeLiftHome(cubeLift);
 HomingCommand gantryLiftHome(armLiftSubsystem);
 HomingCommand gantryExtensionHome(armExtensionSubsystem);
 
-CubeMoveManualCommand cubeManualControl(cubeLift, &drivers()->controlOperatorInterface);
+CubeMoveManualCommand cubeManualControl(
+    cubeLift,
+    &drivers()->controlOperatorInterface,
+    MANUAL_MOVE_SPEED);
 CubeMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 CubeMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
 CubeMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
@@ -322,10 +331,8 @@ tap::control::HoldCommandMapping leftMidRightMid(
 //     {&threeCubePosition},
 //     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
-tap::control::C
-    /* initialize subsystems ----------------------------------------------------*/
-    void
-    initializeSubsystems()
+/* initialize subsystems ----------------------------------------------------*/
+void initializeSubsystems()
 {
     chassis.initialize();
     armLiftSubsystem.initialize();

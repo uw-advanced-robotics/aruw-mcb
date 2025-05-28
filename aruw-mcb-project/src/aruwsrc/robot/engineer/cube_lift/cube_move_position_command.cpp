@@ -24,7 +24,9 @@
 #include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 namespace aruwsrc::robot::engineer
 {
-CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift, float setpoint)
+CubeMovePositionCommand::CubeMovePositionCommand(
+    LimitSwitchSetpointInterface &cubeLift,
+    float setpoint)
     : cubeLift(cubeLift),
       setpoint(setpoint)
 {
@@ -34,15 +36,12 @@ CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift,
 void CubeMovePositionCommand::initialize()
 {
     cubeLift.setPIDState(PIDState::POSITION_PID);
-    cubeLift.setPositionSetpoint(setpoint);
+    cubeLift.setSetpoint(setpoint);
 }
 
 void CubeMovePositionCommand::execute() {}
 
 void CubeMovePositionCommand::end(bool) {}
 
-bool CubeMovePositionCommand::isFinished() const
-{
-    return abs(setpoint - cubeLift.getMotorPosition()) < 0.5;
-}
+bool CubeMovePositionCommand::isFinished() const { return cubeLift.atSetpoint(); }
 }  // namespace aruwsrc::robot::engineer

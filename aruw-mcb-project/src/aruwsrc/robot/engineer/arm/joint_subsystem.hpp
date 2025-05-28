@@ -41,8 +41,8 @@ public:
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motor,
         const tap::algorithms::SmoothPidConfig &config,
-        float minSetpoint = 0.0f,
-        float maxSetpoint = 0.0f,
+        float lowerBound = 0.0f,
+        float upperBound = 0.0f,
         float kS = 0,
         float epsilon = 1e-4f);
 

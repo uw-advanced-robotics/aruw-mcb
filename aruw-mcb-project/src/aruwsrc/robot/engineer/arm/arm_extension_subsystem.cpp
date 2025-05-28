@@ -31,16 +31,13 @@ ArmExtensionSubsystem::ArmExtensionSubsystem(
     const tap::algorithms::SmoothPidConfig& config,
     control::TriggerInterface& trigger,
     float radius,
-    float minSetpoint,
-    float maxSetpoint,
-    float kS,
+    float lowerBound,
+    float upperBound,
     float epsilon)
-    : OneSidedBoundedSubsystemInterface(drivers, trigger, 0),
-      LinearJointInterface(minSetpoint, maxSetpoint, epsilon),
+    : LimitSwitchSetpointInterface(drivers, trigger, lowerBound, upperBound, epsilon),
       pid(config),
       motor(motor),
-      radius(radius),
-      kS(kS)
+      radius(radius)
 {
     this->setpoint = 0;
     this->home = 0;
@@ -74,7 +71,7 @@ void ArmExtensionSubsystem::refresh()
     {
         float errorPosition = setpoint - getPosition();
 
-        float output = pid.runController(errorPosition, getVelocity(), 2.0f) + kS;
+        float output = pid.runController(errorPosition, getVelocity(), 2.0f);
         motor.setDesiredOutput(output);
     }
 }

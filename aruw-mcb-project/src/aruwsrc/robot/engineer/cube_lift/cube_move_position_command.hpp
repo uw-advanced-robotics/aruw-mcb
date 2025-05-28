@@ -21,7 +21,9 @@
 
 #include "tap/control/command.hpp"
 
-#include "cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/arm/limit_switch_setpoint_interface.hpp"
+
+using namespace aruwsrc::engineer;
 
 namespace aruwsrc::robot::engineer
 
@@ -29,7 +31,7 @@ namespace aruwsrc::robot::engineer
 class CubeMovePositionCommand : public tap::control::Command
 {
 public:
-    CubeMovePositionCommand(CubeStorageSubsystem &cubeLift, float setpoint);
+    CubeMovePositionCommand(LimitSwitchSetpointInterface &cubeLift, float setpoint);
 
     void initialize() override;
 
@@ -42,7 +44,7 @@ public:
     const char *getName() const override { return "Cube Move Position Command"; }
 
 private:
-    CubeStorageSubsystem &cubeLift;
+    LimitSwitchSetpointInterface &cubeLift;
     float setpoint;
 
 };  // class CubeMovePositionCommand

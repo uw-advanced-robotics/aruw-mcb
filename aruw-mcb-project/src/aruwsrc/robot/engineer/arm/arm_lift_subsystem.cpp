@@ -30,18 +30,15 @@ ArmLiftSubsystem::ArmLiftSubsystem(
     const tap::algorithms::SmoothPidConfig& configAlign,
     control::TriggerInterface& trigger,
     float radius,
-    uint64_t length,
-    float minSetpoint,
-    float maxSetpoint,
+    float lowerBound,
+    float upperBound,
     float kS,
     float epsilon)
-    : OneSidedBoundedSubsystemInterface(drivers, trigger, length),
-      LinearJointInterface(minSetpoint, maxSetpoint, epsilon),
+    : LimitSwitchSetpointInterface(drivers, trigger, lowerBound, upperBound, epsilon),
       pidPos(configPos),
       pidAlign(configAlign),
       motorLeft(motorLeft),
       motorRight(motorRight),
-      trigger(trigger),
       radius(radius),
       kS(kS)
 {

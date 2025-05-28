@@ -27,16 +27,13 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/control/bounded-subsystem/one_sided_bounded_subsystem_interface.hpp"
-#include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
-#include "aruwsrc/robot/engineer/arm/linear_joint_interface.hpp"
+#include "limit_switch_setpoint_interface.hpp"
 
 namespace aruwsrc
 {
 namespace engineer
 {
-class ArmLiftSubsystem : public aruwsrc::control::OneSidedBoundedSubsystemInterface,
-                         public LinearJointInterface
+class ArmLiftSubsystem : public LimitSwitchSetpointInterface
 {
 public:
     ArmLiftSubsystem(
@@ -47,9 +44,8 @@ public:
         const tap::algorithms::SmoothPidConfig &configAlign,
         control::TriggerInterface &trigger,
         float radius,
-        uint64_t length,
-        float minSetpoint = 0.0f,
-        float maxSetpoint = 0.0f,
+        float lowerBound = 0.0f,
+        float upperBound = 0.0f,
         float kS = 0.0f,
         float epsilon = 1e-4f);
 
@@ -69,29 +65,11 @@ public:
 
     virtual void moveTowardLowerBound() override;
 
-    /**
-     * Returns whether or not the home and bounds have been set.
-     */
-    virtual bool homedAndBounded() const override
+    virtual void setDesiredOutput(int16_t output) override
     {
-        return calibrationState == CalibrationState::CALIBRATION_COMPLETE;
-    }  // todo
-
-    /**
-     * Returns the upper bound in motor encoder ticks.
-     */
-    virtual uint64_t getUpperBound() const override
-    {
-        return (maxSetpoint / radius) * 4096.0f / M_TWOPI;
-    };
-
-    /**
-     * Returns the lower bound in motor encoder ticks.
-     */
-    virtual uint64_t getLowerBound() const override
-    {
-        return (minSetpoint / radius) * 4096.0f / M_TWOPI;
-    };
+        motorLeft.setDesiredOutput(output);
+        motorRight.setDesiredOutput(output);
+    }
 
 protected:
     /**
@@ -109,7 +87,6 @@ protected:
 private:
     tap::algorithms::SmoothPid pidPos, pidAlign;
     tap::motor::MotorInterface &motorLeft, &motorRight;
-    control::TriggerInterface &trigger;
     float radius;
     float home;
     // Constant added to output to overcome static friction

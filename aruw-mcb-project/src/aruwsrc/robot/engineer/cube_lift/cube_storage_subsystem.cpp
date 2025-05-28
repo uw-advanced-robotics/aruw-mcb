@@ -26,10 +26,14 @@ namespace aruwsrc::robot::engineer
 CubeStorageSubsystem::CubeStorageSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& storageLiftMotor,
+    const tap::algorithms::SmoothPidConfig& configPos,
+    const tap::algorithms::SmoothPidConfig& configHoming,
     aruwsrc::control::TriggerInterface& trigger,
-    uint64_t length)
-    : OneSidedBoundedSubsystemInterface(drivers, trigger, length),
-      motor(storageLiftMotor)
+    float epsilon)
+    : LimitSwitchSetpointInterface(drivers, trigger, 0.0f, 0.0f, epsilon),
+      motor(storageLiftMotor),
+      pid(configPos),
+      homingPID(configHoming)
 {
     calibrationState = CalibrationState::AWAITING_CALIBRATE;
 };
@@ -44,11 +48,6 @@ void CubeStorageSubsystem::initialize()
 void CubeStorageSubsystem::setDesiredOutput(int16_t power)
 {
     motorDesiredOutput = power + FEEDFORWARD;
-}
-
-bool CubeStorageSubsystem::homedAndBounded() const
-{
-    return calibrationState == CalibrationState::CALIBRATION_COMPLETE;
 }
 
 void CubeStorageSubsystem::stopDuringHoming()
@@ -68,7 +67,7 @@ void CubeStorageSubsystem::stopDuringHoming()
 void CubeStorageSubsystem::moveTowardLowerBound()
 {
     pidState = PIDState::POSITION_PID;
-    setPositionSetpoint(HOMING_SPEED + getMotorPosition());
+    setSetpoint(HOMING_SPEED + getPosition());
 }
 
 void CubeStorageSubsystem::setHome(uint64_t encoderPosition) { home = encoderPosition; }
@@ -80,7 +79,7 @@ void CubeStorageSubsystem::refreshSafeDisconnect()
     motorDesiredOutput = 0;
 }
 
-float CubeStorageSubsystem::getMotorPosition()
+float CubeStorageSubsystem::getPosition()
 {
     return motor.getEncoder()->getPosition().getUnwrappedValue() / M_TWOPI * MM_PER_REVOLUTION;
 }
@@ -94,7 +93,7 @@ void CubeStorageSubsystem::refresh()
             calibrationState = CalibrationState::CALIBRATION_COMPLETE;
             motor.getEncoder()->resetEncoderValue();
             pidState = PIDState::POSITION_PID;
-            setPositionSetpoint(ONE_CUBE_SETPOINT);
+            setSetpoint(ONE_CUBE_SETPOINT);
         }
         else
         {
