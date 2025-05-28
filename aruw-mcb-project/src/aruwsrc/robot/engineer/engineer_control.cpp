@@ -66,6 +66,22 @@ namespace aruwsrc
 {
 namespace control
 {
+tap::motor::DjiMotor storageLiftMotor(
+    drivers(),
+    CUBE_LIFT_MOTOR_ID,
+    LIFT_MOTOR_CAN_BUS,
+    true,
+    "Lifting Motor",
+    false,
+    1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
+    &(drivers()->digital),
+    CUBELIFT_LIMITSWITCH_PORT,
+    true);
+LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
+/* define subsystems --------------------------------------------------------*/
+CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, 0);
+
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
 tap::motor::DjiMotor leftFrontChassisMotor(
@@ -75,7 +91,7 @@ tap::motor::DjiMotor leftFrontChassisMotor(
     false,
     "Left Front Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
@@ -84,7 +100,7 @@ tap::motor::DjiMotor leftBackChassisMotor(
     false,
     "Left Back Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
@@ -93,7 +109,7 @@ tap::motor::DjiMotor rightFrontChassisMotor(
     false,
     "Right Front Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
@@ -102,7 +118,14 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     "Right Back Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
+    {&drivers()->analog,
+     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
+     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,

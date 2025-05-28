@@ -52,7 +52,7 @@ static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG
     .kd = 0,
 };
 
-static constexpr float GEAR_RATIO = 1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+static constexpr float GEAR_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
 
 class MecanumChassisSubsystemTest : public Test
 {
