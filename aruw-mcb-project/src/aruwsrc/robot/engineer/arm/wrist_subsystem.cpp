@@ -77,11 +77,17 @@ float WristSubsystem::getPitch() { return encoderPitch.getPosition().getUnwrappe
 
 float WristSubsystem::getYaw() { return encoderYaw.getPosition().getUnwrappedValue(); }
 
-bool WristSubsystem::atSetpoint()
+bool WristSubsystem::atSetpointPitch(float epsilon)
 {
-    return tap::algorithms::compareFloatClose(setpointPitch, getPitch(), epsilon) &&
-           tap::algorithms::compareFloatClose(setpointYaw, getYaw(), epsilon);
+    return tap::algorithms::compareFloatClose(setpointPitch, getPitch(), epsilon);
 }
+
+bool WristSubsystem::atSetpointYaw(float epsilon)
+{
+    return tap::algorithms::compareFloatClose(setpointYaw, getYaw(), epsilon);
+}
+
+bool WristSubsystem::atSetpoint() { return atSetpointPitch(epsilon) && atSetpointYaw(epsilon); }
 
 void WristSubsystem::initialize()
 {
@@ -90,6 +96,8 @@ void WristSubsystem::initialize()
     encoderPitch.initialize();
     encoderYaw.initialize();
 }
+
+float ErrorPitch;
 
 void WristSubsystem::refresh()
 {
@@ -101,7 +109,8 @@ void WristSubsystem::refresh()
     }
 
     float outPitch =
-        pidPitch.runController(setpointPitch - getPitch(), encoderPitch.getVelocity(), 2.0f);
+        pidPitch.runController(encoderPitch.getPosition().minDifference(setpointPitch), encoderPitch.getVelocity(), 2.0f);
+        ErrorPitch = encoderPitch.getPosition().minDifference(setpointPitch);
     float outYaw =
         pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f);  // todo ks
 

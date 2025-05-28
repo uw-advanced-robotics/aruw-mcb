@@ -35,12 +35,12 @@ void WristFoldOutCommand::execute()
         case TOP:
             wrist.setSetpointPitch(1.5f);
             wrist.setSetpointYaw(0.0f);
-            if (wrist.atSetpoint()) state = BOTTOM;
+            if (wrist.atSetpointPitch()) state = BOTTOM;
             break;
         case BOTTOM:
             wrist.setSetpointPitch(1.5f);
             wrist.setSetpointYaw(M_PI);
-            if (wrist.atSetpoint()) state = OUT;
+            if (wrist.atSetpointPitch() && wrist.getYaw() > M_PI_2) state = OUT;
             break;
         case OUT:
             wrist.setSetpointPitch(0.0f);

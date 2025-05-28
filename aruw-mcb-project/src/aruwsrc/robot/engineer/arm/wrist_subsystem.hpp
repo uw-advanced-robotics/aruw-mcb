@@ -65,6 +65,10 @@ public:
 
     virtual void initialize() override;
 
+    bool atSetpointPitch(float epsilon = 1e-4);
+
+    bool atSetpointYaw(float epsilon = 1e-4);
+
     bool atSetpoint();
 
     virtual void refresh() override;

@@ -322,6 +322,7 @@ tap::control::HoldCommandMapping leftMidRightMid(
 //     {&threeCubePosition},
 //     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
+tap::control::C
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
