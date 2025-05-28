@@ -153,7 +153,7 @@ int main()
             checkTurretMcbDisconnection(drivers);
 #endif
 
-#ifdef ALL_STANDARDS
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
             PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
 #endif
         }
@@ -206,7 +206,7 @@ static void initializeIo(Drivers *drivers)
     drivers->engineerCVCommunication.initializeCV();
 #endif
 
-#ifdef ALL_STANDARDS
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
     drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
 }
@@ -241,7 +241,7 @@ static void updateIo(Drivers *drivers)
     drivers->lite.updateSerial();
 #endif
 
-#ifdef ALL_STANDARDS
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
     drivers->ism330.read();
 #endif
 }
