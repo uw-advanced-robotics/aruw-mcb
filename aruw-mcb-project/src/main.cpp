@@ -115,14 +115,12 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
@@ -140,8 +138,7 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
@@ -166,19 +163,18 @@ static void initializeIo(Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || \
-    defined(TARGET_SENTRY_HYDRA) || defined(TARGET_ENGINEER)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA) || \
+    defined(TARGET_ENGINEER)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) 
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) 
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
@@ -204,13 +200,12 @@ static void updateIo(Drivers *drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_HYDRA) || defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA) || \
+    defined(TARGET_ENGINEER)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.updateSerial();
 #endif
 

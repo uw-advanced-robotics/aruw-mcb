@@ -20,7 +20,6 @@
 #ifndef UTIL_MACROS_HPP_
 #define UTIL_MACROS_HPP_
 
-
 /**
  * Define a helper macro that makes it easier to specify at compile time something that should be
  * true for all standards.

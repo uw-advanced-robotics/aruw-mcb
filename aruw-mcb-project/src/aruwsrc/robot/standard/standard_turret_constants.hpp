@@ -73,7 +73,7 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
 
 namespace world_rel_turret_imu
 {
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) 
+#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 10.0f,
     .ki = 0.0f,
