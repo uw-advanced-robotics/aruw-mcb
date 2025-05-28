@@ -66,22 +66,6 @@ namespace aruwsrc
 {
 namespace control
 {
-tap::motor::DjiMotor storageLiftMotor(
-    drivers(),
-    CUBE_LIFT_MOTOR_ID,
-    LIFT_MOTOR_CAN_BUS,
-    true,
-    "Lifting Motor",
-    false,
-    1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
-    &(drivers()->digital),
-    CUBELIFT_LIMITSWITCH_PORT,
-    true);
-LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
-/* define subsystems --------------------------------------------------------*/
-CubeStorageSubsystem cubeLift(drivers(), storageLiftMotor, cubeLiftTrigger, 0);
-
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
 tap::motor::DjiMotor leftFrontChassisMotor(
@@ -127,13 +111,6 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
-    {&drivers()->analog,
-     aruwsrc::chassis::CURRENT_SENSOR_PIN,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
-
 aruwsrc::chassis::MecanumChassisSubsystem chassis(
     drivers(),
     &currentSensor,
@@ -151,7 +128,7 @@ tap::motor::DjiMotor storageLiftMotor(
     true,
     "Lifting Motor",
     false,
-    1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
     &(drivers()->digital),
@@ -173,7 +150,7 @@ tap::motor::DjiMotor engineerWristRollMotor(
     false,
     "Wrist Roll Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor engineerWristLeftMotor(
     drivers(),
@@ -182,7 +159,7 @@ tap::motor::DjiMotor engineerWristLeftMotor(
     false,
     "Wrist Left Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor engineerWristRightMotor(
     drivers(),
@@ -191,7 +168,7 @@ tap::motor::DjiMotor engineerWristRightMotor(
     false,
     "Wrist Right Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::encoder::CanEncoder engineerWristPitchEncoder(
     drivers(),
@@ -216,7 +193,7 @@ tap::motor::DjiMotor engineerGantryLiftLeftMotor(
     true,
     "Gantry Lift Left Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor engineerGantryLiftRightMotor(
     drivers(),
@@ -225,7 +202,7 @@ tap::motor::DjiMotor engineerGantryLiftRightMotor(
     false,
     "Gantry Lift Right Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak liftLimitSwitch(
     &drivers()->digital,
@@ -240,7 +217,7 @@ tap::motor::DjiMotor cubeStorageLiftMotor(
     false,
     "Cube Storage Lift Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor engineerGantryExtensionMotor(
     drivers(),
@@ -249,7 +226,7 @@ tap::motor::DjiMotor engineerGantryExtensionMotor(
     true,
     "Gantry Extension Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimitSwitch(
     &drivers()->digital,
