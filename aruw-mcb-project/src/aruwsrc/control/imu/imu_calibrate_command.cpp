@@ -207,7 +207,7 @@ bool ImuCalibrateCommand::isFinished() const
 // Function to request calibration on each of the IMUs in the vector
 void ImuCalibrateCommand::requestCalibration()
 {
-    for (auto imu : imuVector)
+    for (auto* imu : imuVector)
     {
         if (imu) imu->requestCalibration();
     }
