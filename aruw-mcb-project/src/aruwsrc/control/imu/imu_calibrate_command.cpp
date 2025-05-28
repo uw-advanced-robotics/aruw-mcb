@@ -35,7 +35,6 @@ ImuCalibrateCommand::ImuCalibrateCommand(
     chassis::HolonomicChassisSubsystem *chassis,
     float velocityZeroThreshold,
     float positionZeroThreshold,
-    const std::vector<tap::communication::sensors::imu::ImuInterface> &imuVector,
     Odometry2DInterface *odometry2DInterface)
     : tap::control::Command(),
       velocityZeroThreshold(velocityZeroThreshold),
@@ -43,7 +42,6 @@ ImuCalibrateCommand::ImuCalibrateCommand(
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
       chassis(chassis),
-      imuVector(imuVector),
       odometry2DInterface(odometry2DInterface)
 {
     for (auto &config : turretsAndControllers)
@@ -204,13 +202,6 @@ bool ImuCalibrateCommand::isFinished() const
            calibrationLongTimeout.isExpired();
 }
 
-// Function to request calibration on each of the IMUs in the vector
-void ImuCalibrateCommand::requestCalibration()
-{
-    for (auto &imu : imuVector)
-    {
-        imu.requestCalibration();
-    }
-}
+
 
 }  // namespace aruwsrc::control::imu

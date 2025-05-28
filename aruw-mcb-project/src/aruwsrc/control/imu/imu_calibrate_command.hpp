@@ -125,7 +125,6 @@ public:
         chassis::HolonomicChassisSubsystem *chassis,
         float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
         float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-        const std::vector<tap::communication::sensors::imu::ImuInterface> &imuVector,
         tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr);
 
     const char *getName() const override { return "Calibrate IMU"; }
@@ -167,7 +166,6 @@ protected:
 
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
-    std::vector<tap::communication::sensors::imu::ImuInterface> imuVector;
     chassis::HolonomicChassisSubsystem *chassis;
 
     tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface;
