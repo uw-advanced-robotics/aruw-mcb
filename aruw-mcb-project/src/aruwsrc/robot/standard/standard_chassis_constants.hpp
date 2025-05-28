@@ -110,7 +110,7 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  */
 static constexpr float WHEEL_RADIUS = 0.1016;
 
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
 
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;

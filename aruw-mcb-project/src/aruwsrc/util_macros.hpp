@@ -20,19 +20,12 @@
 #ifndef UTIL_MACROS_HPP_
 #define UTIL_MACROS_HPP_
 
-/**
- * Define a helper macro that makes it easier to specify at compile time something that should be
- * true for all old standards.
- */
-#if defined(TARGET_STANDARD_ORION)
-#define OLD_STANDARDS
-#endif
 
 /**
  * Define a helper macro that makes it easier to specify at compile time something that should be
  * true for all standards.
  */
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
 #define ALL_STANDARDS
 #endif
 
@@ -44,7 +37,7 @@
 #define ALL_SENTRIES
 #endif
 
-#if defined(TARGET_STANDARD_ORION) || defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_SENTRY_HYDRA)
 #define SSH1106_OLED
 #endif
 

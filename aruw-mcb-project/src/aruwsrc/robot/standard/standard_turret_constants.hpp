@@ -42,7 +42,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 8146,
@@ -62,7 +62,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif
 
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
 // Actual CAD value is 55.76, decreased for balls in hopper
 static constexpr float TURRET_CG_X = 33.83;
 static constexpr float TURRET_CG_Z = 26.68;
@@ -73,7 +73,7 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
 
 namespace world_rel_turret_imu
 {
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 10.0f,
     .ki = 0.0f,
@@ -181,7 +181,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 
 namespace chassis_rel
 {
-#if defined(TARGET_STANDARD_NULL)
+#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 25'000.0f,
     .ki = 0.0f,
