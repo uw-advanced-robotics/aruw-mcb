@@ -35,7 +35,7 @@ ImuCalibrateCommand::ImuCalibrateCommand(
     chassis::HolonomicChassisSubsystem *chassis,
     float velocityZeroThreshold,
     float positionZeroThreshold,
-    const std::vector<tap::communication::sensors::imu::ImuInterface> &imuVector,
+    const std::vector<tap::communication::sensors::imu::ImuInterface*> &imuVector,
     Odometry2DInterface *odometry2DInterface)
     : tap::control::Command(),
       velocityZeroThreshold(velocityZeroThreshold),
@@ -207,9 +207,9 @@ bool ImuCalibrateCommand::isFinished() const
 // Function to request calibration on each of the IMUs in the vector
 void ImuCalibrateCommand::requestCalibration()
 {
-    for (auto &imu : imuVector)
+    for (auto imu : imuVector)
     {
-        imu.requestCalibration();
+        if (imu) imu->requestCalibration();
     }
 }
 
