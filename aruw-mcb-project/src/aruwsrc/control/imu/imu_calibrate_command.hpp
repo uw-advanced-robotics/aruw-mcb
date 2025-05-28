@@ -119,13 +119,6 @@ public:
      * @param[in] positionZeroThreshold Threshold around 0 where turret pitch and yaw position from
      * the center considered to be 0, in radians.
      */
-    ImuCalibrateCommand(
-        tap::Drivers *drivers,
-        const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-        chassis::HolonomicChassisSubsystem *chassis,
-        float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-        float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-        tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr);
 
     ImuCalibrateCommand(
         tap::Drivers *drivers,
@@ -133,7 +126,7 @@ public:
         chassis::HolonomicChassisSubsystem *chassis,
         float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
         float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-        const std::vector<tap::communication::sensors::imu::ImuInterface> &imuVector,
+        const std::vector<tap::communication::sensors::imu::ImuInterface> &imuVector = {},
         tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr);
 
     const char *getName() const override { return "Calibrate IMU"; }
