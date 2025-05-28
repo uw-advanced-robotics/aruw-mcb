@@ -35,7 +35,9 @@ void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getSetpoint(); }
 
 void CubeMoveManualCommand::execute()
 {
-    setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;  // right up
+    if (!operatorInterface->isGantryControlMode()) return;
+
+    setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;
     cubeLift.setSetpoint(setpoint);
 }
 

@@ -42,6 +42,8 @@ public:
 
     virtual float getChassisYInput() override;
 
+    virtual float getChassisRInput() override;
+
     /**
      * @return The cube lift velocity.
      */

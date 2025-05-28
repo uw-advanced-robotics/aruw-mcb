@@ -42,7 +42,7 @@ bool EngineerControlOperatorInterface::isWristControlMode()
 float EngineerControlOperatorInterface::getCubeLiftVelocity()
 {
     if (isGantryControlMode())
-        return drivers->remote.getChannel(Remote::Channel::WHEEL);  // todo
+        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);  // todo
     else
         return 0.0f;
 }
@@ -104,6 +104,18 @@ float EngineerControlOperatorInterface::getChassisYInput()
     if (isDriveMode())
     {
         return ControlOperatorInterface::getChassisYInput();
+    }
+    else
+    {
+        return 0.0f;
+    }
+}
+
+float EngineerControlOperatorInterface::getChassisRInput()
+{
+    if (isDriveMode())
+    {
+        return ControlOperatorInterface::getChassisRInput();
     }
     else
     {

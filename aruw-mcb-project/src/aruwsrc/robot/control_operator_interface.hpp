@@ -111,7 +111,7 @@ public:
      * `MAX_ACCELERATION_R` and `MAX_DECELERATION_R`. A linear combination of keyboard and remote
      * joystick information.
      */
-    mockable float getChassisRInput();
+    virtual float getChassisRInput();
 
     /**
      * @return the value used for turret yaw rotation, between about -1 and 1
