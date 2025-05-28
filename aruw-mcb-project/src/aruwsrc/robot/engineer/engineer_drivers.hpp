@@ -55,7 +55,6 @@ public:
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
-    serial::EngineerCVCommunication engineerCVCommunication;
 #else
 public:
     control::engineer::EngineerControlOperatorInterface controlOperatorInterface;
