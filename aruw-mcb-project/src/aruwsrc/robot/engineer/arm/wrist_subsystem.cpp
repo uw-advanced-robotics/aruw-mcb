@@ -108,9 +108,11 @@ void WristSubsystem::refresh()
         return;
     }
 
-    float outPitch =
-        pidPitch.runController(encoderPitch.getPosition().minDifference(setpointPitch), encoderPitch.getVelocity(), 2.0f);
-        ErrorPitch = encoderPitch.getPosition().minDifference(setpointPitch);
+    float outPitch = pidPitch.runController(
+        encoderPitch.getPosition().minDifference(setpointPitch),
+        encoderPitch.getVelocity(),
+        2.0f);
+    ErrorPitch = encoderPitch.getPosition().minDifference(setpointPitch);
     float outYaw =
         pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f);  // todo ks
 

@@ -323,8 +323,9 @@ tap::control::HoldCommandMapping leftMidRightMid(
 //     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
 tap::control::C
-/* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems()
+    /* initialize subsystems ----------------------------------------------------*/
+    void
+    initializeSubsystems()
 {
     chassis.initialize();
     armLiftSubsystem.initialize();
