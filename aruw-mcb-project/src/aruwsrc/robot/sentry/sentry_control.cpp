@@ -29,6 +29,7 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
@@ -319,19 +320,47 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     rightBackMotor,
     {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
 
+
+tap::encoder::CanEncoder parallelOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    tap::can::CanBus::CAN_BUS2,
+    true);
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    tap::can::CanBus::CAN_BUS2);
+
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-    leftFrontMotor.getEncoder(),
-    leftBackMotor.getEncoder(),
+    &parallelOmni,
+    &perpendicularOmni,
     DEADWHEEL_RADIUS);
 
-SentryKFOdometry2DSubsystem odometrySubsystem(
+aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     deadwheels,
     chassisYawObserver,
-    drivers()->chassisMcbLite.imu,
+    drivers()->mpu6500,
     INITIAL_CHASSIS_POSITION_X,
     INITIAL_CHASSIS_POSITION_Y,
-    CENTER_TO_WHEELBASE_RADIUS);
+    CENTER_TO_WHEELBASE_RADIUS,
+    PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
+    PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
+    
+// aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
+//     leftFrontMotor.getEncoder(),
+//     leftBackMotor.getEncoder(),
+//     DEADWHEEL_RADIUS);
+
+// SentryKFOdometry2DSubsystem odometrySubsystem(
+//     *drivers(),
+//     deadwheels,
+//     chassisYawObserver,
+//     drivers()->chassisMcbLite.imu,
+//     INITIAL_CHASSIS_POSITION_X,
+//     INITIAL_CHASSIS_POSITION_Y,
+//     CENTER_TO_WHEELBASE_RADIUS);
 
 SentryTransforms transformer(
     odometrySubsystem,

@@ -26,13 +26,16 @@
 namespace aruwsrc::sentry::chassis
 {
 // Distance from center of rotation to a swerve module
-static constexpr float CENTER_TO_WHEELBASE_RADIUS = 0.230;
-static constexpr float DEADWHEEL_RADIUS = 0.048f;
+static constexpr float CENTER_TO_WHEELBASE_RADIUS = 264 / 1000.0f;  // 264mm -> m
+static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 // Initial position of the chassis in the field (meters)
 static constexpr float INITIAL_CHASSIS_POSITION_X = 3.05f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 3.5f;
+
+static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_4; // 45 degrees relative to chassis forward
+static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_4; // 45 degrees relative to chassis forward
 
 // @todo generate this using the position offsets in the swerve module configs
 /**

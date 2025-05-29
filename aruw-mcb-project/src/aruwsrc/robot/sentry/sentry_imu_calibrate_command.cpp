@@ -40,7 +40,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
     chassis::HolonomicChassisSubsystem &chassis,
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
-    algorithms::odometry::SentryKFOdometry2DSubsystem &odometryInterface,
+    tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite)
     : aruwsrc::control::imu::ImuCalibrateCommand(
