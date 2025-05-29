@@ -37,6 +37,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
 #endif
 
 namespace aruwsrc::hero
@@ -64,7 +65,8 @@ public:
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
-          plateHitTracker(this)
+          plateHitTracker(this),
+          rmulStateMachine(this->refSerial)
     {
     }
 
@@ -85,6 +87,7 @@ public:
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     can::capbank::CapacitorBank capacitorBank;
     algorithms::PlateHitTracker plateHitTracker;
+    aruwsrc::algorithms::strategy_state_machine::RMULStateMachine rmulStateMachine;
 #endif
 };  // class aruwsrc::HeroDrivers
 }  // namespace aruwsrc::hero

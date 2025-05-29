@@ -89,6 +89,7 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
 using namespace tap::communication::serial;
@@ -251,7 +252,27 @@ AutoAimLaunchTimer autoAimLaunchTimer(
 
 aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
+
+static constexpr aruwsrc::chassis::BeybladeConfig BEYBLADE_CONFIG{
+    .beybladeRotationalSpeedFractionOfMax = 0.45f,
+    .beybladeTranslationalSpeedMultiplier = 0.1f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
+    .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
+    .beybladeRampRate = 45,
+};
+
+aruwsrc::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    transformer.getWorldToChassis(),
+    BEYBLADE_CONFIG);
+
 /* define commands ----------------------------------------------------------*/
+aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
+    *drivers(),
+    chassis,
+    autoNavController,
+    false);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -542,7 +563,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     false);
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeCommand},
+    {&autoNavBeybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
@@ -669,6 +690,7 @@ void startHeroCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
+    drivers->rmulStateMachine.attachAutoNavController(&autoNavController);
 }
 
 /* register io mappings here ------------------------------------------------*/

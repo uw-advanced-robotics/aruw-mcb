@@ -89,6 +89,8 @@ static void updateIo(Drivers *drivers);
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
 
+float analogPin;
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -150,6 +152,8 @@ int main()
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO)
             checkTurretMcbDisconnection(drivers);
 #endif
+            analogPin = drivers->analog.read(tap::gpio::Analog::Pin::OledJoystick);
+
         }
         modm::delay_us(10);
     }
@@ -227,6 +231,11 @@ static void updateIo(Drivers *drivers)
 
 #ifdef TARGET_TESTBED
     drivers->lite.updateSerial();
+#endif
+
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+    drivers->rmulStateMachine.updateState();
+
 #endif
 }
 

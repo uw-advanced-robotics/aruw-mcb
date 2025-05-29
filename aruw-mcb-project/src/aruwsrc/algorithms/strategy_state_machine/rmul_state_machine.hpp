@@ -93,22 +93,26 @@ private:
     void updatePath();
 
     // Threshold at which the robot goes to heal due to low health
-    int HEALING_THRESHOLD = 250;
+    // int HEALING_THRESHOLD = 250;
+    int HEALING_THRESHOLD = 25;
 
     // Threshold at which the robot goes back to fight having healed
-    int ATTACKING_THRESHOLD = 550;
+    // int ATTACKING_THRESHOLD = 550;
+    int ATTACKING_THRESHOLD = 90;
 
     // Speed at which the robot moves when healing, in m/s
     float SPEED = 1.0f;
 
-    float DEBUG_SCALAR = 1.0f;
+    const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
+    const Position BOTTOM_MIDDLE = Position(1.2, 2.1, 0);
+    const Position MIDDLE_RIGHT = Position(3.2, 2.0, 0);
+    // const Position MIDDLE = Position(4.5, 4.0, 0);
+    // const Position SIDE_WALL = Position(5.25, 7.5, 0);
+    // const Position CAPTURE_POINT = Position(6, 4, 0);
+    const Position MIDDLE = Position(4, 4.0, 0);
+    const Position SIDE_WALL = Position(4, 7.5, 0);
+    const Position CAPTURE_POINT = Position(4, 4, 0);
 
-    const Position RESUPPLY_ZONE = Position(0.75, 7, 0) * DEBUG_SCALAR;
-    const Position BOTTOM_MIDDLE = Position(1.2, 2.1, 0) * DEBUG_SCALAR;
-    const Position MIDDLE_RIGHT = Position(3.2, 2.0, 0) * DEBUG_SCALAR;
-    const Position MIDDLE = Position(4.5, 4.0, 0) * DEBUG_SCALAR;
-    const Position SIDE_WALL = Position(5, 7.5, 0) * DEBUG_SCALAR;
-    const Position CAPTURE_POINT = Position(6, 4, 0) * DEBUG_SCALAR;
 
     const std::array<Position, 5> ATTACKING_PATH =
         {RESUPPLY_ZONE, BOTTOM_MIDDLE, MIDDLE_RIGHT, MIDDLE, SIDE_WALL};
