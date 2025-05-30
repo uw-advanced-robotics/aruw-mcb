@@ -195,7 +195,7 @@ public:
         txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
     }
 
-    mockable inline void requestCalibration() override {
+    inline void requestCalibration() override {
         sendImuCalibrationRequest();
     }
 
