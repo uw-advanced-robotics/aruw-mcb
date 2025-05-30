@@ -63,7 +63,7 @@ static constexpr float WRIST_HOME_YAW = 1.23485458f;
 
 static constexpr float WRIST_ROLL_PID_KP = 200.0f;
 static constexpr float WRIST_ROLL_PID_KI = 0.0f;
-static constexpr float WRIST_ROLL_PID_KD = 30.0f;
+static constexpr float WRIST_ROLL_PID_KD = 15.0f;
 static constexpr float WRIST_ROLL_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float WRIST_ROLL_PID_KS = 0.0;
 static constexpr float WRIST_ROLL_MAX_OUTPUT = 3000.0f;
@@ -91,19 +91,19 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_CONFIG(
     WRIST_ROLL_PID_MAX_ERROR_SUM,
     WRIST_ROLL_MAX_OUTPUT);
 
-static constexpr float GANTRY_LIFT_POS_PID_KP = 900.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KP = 30.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KI = 0.0f;
-static constexpr float GANTRY_LIFT_POS_PID_KD = 30.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KD = 20.0f;
 static constexpr float GANTRY_LIFT_POS_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KS = 0.0;
 static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 3000.0f;
 
 static constexpr float GANTRY_LIFT_LOWER_BOUND = 0.0f;
 static constexpr float GANTRY_LIFT_UPPER_BOUND = 0.0f;
-static constexpr float GANTRY_LIFT_RADIUS = 1.0f;
-static constexpr float GANTRY_LIFT_HOME = 0.0f;
+static constexpr float GANTRY_LIFT_RADIUS = 15.0f;
+static constexpr float GANTRY_LIFT_HOME = 360.0f;  // length ~360mm I think?
 static constexpr float GANTRY_LIFT_KS = 0.0f;
-static constexpr float GANTRY_LIFT_EPSILON = 1e-2f;
+static constexpr float GANTRY_LIFT_EPSILON = 1.0f;
 
 static constexpr float GANTRY_LIFT_BALANCE_PID_KP = 100.0f;  // todo
 static constexpr float GANTRY_LIFT_BALANCE_PID_KI = 0.0f;
@@ -137,11 +137,11 @@ static constexpr float GANTRY_EXTENSION_PID_KS = 0.0;
 static constexpr float GANTRY_EXTENSION_MAX_OUTPUT = 4000.0f;
 
 static constexpr float GANTRY_EXTENSION_LOWER_BOUND = 0.0f;
-static constexpr float GANTRY_EXTENSION_UPPER_BOUND = 0.0f;
-static constexpr float GANTRY_EXTENSION_RADIUS = 1.0f;
+static constexpr float GANTRY_EXTENSION_UPPER_BOUND = 0.0f;  // length ~360 mm
+static constexpr float GANTRY_EXTENSION_RADIUS = 30.0f;
 static constexpr float GANTRY_EXTENSION_HOME = 0.0f;
 static constexpr float GANTRY_EXTENSION_KS = 0.0f;
-static constexpr float GANTRY_EXTENSION_EPSILON = 1e-2f;
+static constexpr float GANTRY_EXTENSION_EPSILON = 1.0f;
 
 static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_CONFIG(
     GANTRY_EXTENSION_PID_KP,
@@ -153,8 +153,8 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_CONFIG(
 static constexpr tap::gpio::Digital::InputPin GANTRY_EXTENSION_LIMIT_SWITCH_PIN =
     tap::gpio::Digital::InputPin::E;  // TODO: Update to correct pin
 
-static constexpr float GANTRY_LIFT_SCALING_FACTOR = 0.03f;
-static constexpr float GANTRY_EXTENSION_SCALING_FACTOR = 0.03f;
+static constexpr float GANTRY_LIFT_SCALING_FACTOR = 0.6f;
+static constexpr float GANTRY_EXTENSION_SCALING_FACTOR = 0.6f;
 static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;

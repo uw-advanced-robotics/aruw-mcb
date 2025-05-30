@@ -71,6 +71,8 @@ public:
     // Let the record show Acacia and Swara did this first
     void refresh() override
     {
+        motorPos = getPosition();
+
         if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
         {
             if (trigger.isTriggered())
@@ -83,19 +85,19 @@ public:
             else
             {
                 moveTowardLowerBound();
+                return;
             }
         }
 
         if (pidState == PIDState::POSITION_PID)
         {
-            motorPos = getPosition();
             float error = setpoint - motorPos;
             float errorDerivative = getVelocity();
             float newTime = tap::arch::clock::getTimeMilliseconds();
             float timeDifference = (newTime - lastTime) / 1000.0f;  // (s)
             lastTime = newTime;
-            pidOutput = pid.runController(error, errorDerivative, timeDifference);
-            setDesiredOutput(pidOutput + kS);
+            motorDesiredOutput = pid.runController(error, errorDerivative, timeDifference) + kS;
+            setDesiredOutput(motorDesiredOutput);
         }
         else if (pidState == PIDState::VELOCITY_PID)
         {
@@ -114,21 +116,20 @@ public:
         }
     }
 
-    void refreshSafeDisconnect() override
-    {
-        pidState = PIDState::NONE;
-        setDesiredOutput(0);
-    }
+    void refreshSafeDisconnect() override { setDesiredOutput(0); }
 
     void moveTowardLowerBound() override
     {
-        pidState = PIDState::POSITION_PID;
-        setSetpoint(-copysign(homingSpeed, getPosition()));  // todo
+        pidState = PIDState::NONE;
+        motorDesiredOutput = -copysign(homingSpeed, getPosition()) + kS;  // todo
+
+        setDesiredOutput(motorDesiredOutput);
     }
 
     void stopDuringHoming() override
     {
         pidState = PIDState::NONE;
+        motorDesiredOutput = 0;
         setDesiredOutput(0);
     }
 
@@ -163,7 +164,6 @@ protected:
     float homingSpeed;
     float lastTime = 0;
     float motorPos = 0;
-    float pidOutput = 0;
     float motorDesiredOutput = 0;
 };
 }  // namespace aruwsrc::engineer

@@ -60,7 +60,9 @@ public:
 
     float getVelocityDifference();
 
-    virtual void initialize() override;
+    void initialize() override;
+
+    void refreshSafeDisconnect() override;
 
 protected:
     /**

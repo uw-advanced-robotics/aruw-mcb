@@ -76,8 +76,13 @@ void ArmLiftSubsystem::resetEncoderValue()
     motorRight.getEncoder()->resetEncoderValue();
 }
 
+float LiftPosition;
+
 float ArmLiftSubsystem::getEncoderValue()
 {
+    LiftPosition = (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
+                    motorRight.getEncoder()->getPosition().getUnwrappedValue()) /
+                   2;
     return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
             motorRight.getEncoder()->getPosition().getUnwrappedValue()) /
            2;
@@ -102,6 +107,12 @@ float ArmLiftSubsystem::getVelocityDifference()
 }
 
 void ArmLiftSubsystem::stopDuringHoming() { refreshSafeDisconnect(); }
+
+void ArmLiftSubsystem::refreshSafeDisconnect()
+{
+    motorLeft.setDesiredOutput(0);
+    motorRight.setDesiredOutput(0);
+}
 
 }  // namespace engineer
 }  // namespace aruwsrc

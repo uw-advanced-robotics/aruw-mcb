@@ -53,10 +53,9 @@ void CubeStorageSubsystem::initialize()
 {
     motor.initialize();
     setDesiredOutput(0);
-    pidState = PIDState::NONE;
 }
 
-void CubeStorageSubsystem::setDesiredOutput(int16_t power) { motorDesiredOutput = power; }
+void CubeStorageSubsystem::setDesiredOutput(int16_t power) { motor.setDesiredOutput(power); }
 
 void CubeStorageSubsystem::resetEncoderValue() { motor.getEncoder()->resetEncoderValue(); }
 

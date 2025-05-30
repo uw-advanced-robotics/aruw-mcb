@@ -52,9 +52,13 @@ ArmExtensionSubsystem::ArmExtensionSubsystem(
     this->home = 0;
 }
 
-void ArmExtensionSubsystem::initialize() { motor.initialize(); }
+void ArmExtensionSubsystem::initialize()
+{
+    motor.initialize();
+    motor.getEncoder()->resetEncoderValue();
+}
 
-void ArmExtensionSubsystem::setDesiredOutput(int16_t power) { motorDesiredOutput = power; }
+void ArmExtensionSubsystem::setDesiredOutput(int16_t power) { motor.setDesiredOutput(power); }
 
 void ArmExtensionSubsystem::resetEncoderValue() { motor.getEncoder()->resetEncoderValue(); }
 

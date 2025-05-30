@@ -52,7 +52,11 @@ ArmControllerCommand::ArmControllerCommand(
     addSubsystemRequirement(&wrist);
 }
 
-void ArmControllerCommand::initialize() {}
+void ArmControllerCommand::initialize()
+{
+    lift.setPIDState(PIDState::POSITION_PID);
+    extension.setPIDState(PIDState::POSITION_PID);
+}
 
 void ArmControllerCommand::execute()
 {
