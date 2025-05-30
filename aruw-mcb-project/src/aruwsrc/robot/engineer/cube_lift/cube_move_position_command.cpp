@@ -35,8 +35,8 @@ CubeMovePositionCommand::CubeMovePositionCommand(
 
 void CubeMovePositionCommand::initialize()
 {
-    cubeLift.setPIDState(PIDState::POSITION_PID);
     cubeLift.setSetpoint(setpoint);
+    cubeLift.setPIDState(PIDState::POSITION_PID);
 }
 
 void CubeMovePositionCommand::execute() {}

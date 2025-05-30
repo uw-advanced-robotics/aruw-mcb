@@ -31,7 +31,11 @@ CubeMoveManualCommand::CubeMoveManualCommand(
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getSetpoint(); }
+void CubeMoveManualCommand::initialize()
+{
+    setpoint = cubeLift.getSetpoint();
+    cubeLift.setPIDState(PIDState::POSITION_PID);
+}
 
 void CubeMoveManualCommand::execute()
 {
