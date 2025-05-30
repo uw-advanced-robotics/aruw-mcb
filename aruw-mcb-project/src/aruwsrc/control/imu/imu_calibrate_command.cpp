@@ -35,8 +35,8 @@ ImuCalibrateCommand::ImuCalibrateCommand(
     chassis::HolonomicChassisSubsystem *chassis,
     float velocityZeroThreshold,
     float positionZeroThreshold,
-    const std::vector<tap::communication::sensors::imu::ImuInterface*> &externalIMUs,
-    Odometry2DInterface *odometry2DInterface)
+    Odometry2DInterface *odometry2DInterface,
+    const std::vector<tap::communication::sensors::imu::ImuInterface*> &externalIMUs)
     : tap::control::Command(),
       velocityZeroThreshold(velocityZeroThreshold),
       positionZeroThreshold(positionZeroThreshold),
