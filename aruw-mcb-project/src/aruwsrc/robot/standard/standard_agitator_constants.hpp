@@ -40,7 +40,7 @@ namespace aruwsrc::control::agitator::constants
 /// How much extra heat must be available beyond how much it takes to fire the next shot
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 25;
 
-#if defined(TARGET_STANDARD_NULL) 
+#if defined(TARGET_STANDARD_NULL)
 
 // position PID terms
 // PID terms for standard

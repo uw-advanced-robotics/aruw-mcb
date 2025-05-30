@@ -59,7 +59,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-#elif defined(TARGET_STANDARD_VOID) 
+#elif defined(TARGET_STANDARD_VOID)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 8146,
@@ -79,7 +79,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif
 
-#if defined(TARGET_STANDARD_NULL) 
+#if defined(TARGET_STANDARD_NULL)
 // Actual CAD value is 55.76, decreased for balls in hopper
 static constexpr float TURRET_CG_X = 33.83;
 static constexpr float TURRET_CG_Z = 26.68;
@@ -288,7 +288,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 
 namespace chassis_rel
 {
-#if defined(TARGET_STANDARD_NULL) 
+#if defined(TARGET_STANDARD_NULL)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 25'000.0f,
     .ki = 0.0f,
