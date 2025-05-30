@@ -110,8 +110,19 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  */
 static constexpr float WHEEL_RADIUS = 0.1016;
 
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
+#if defined(TARGET_STANDARD_NULL)
 
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
+
+static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0;
+static constexpr float CENTER_TO_WHEELBASE_RADIUS = 141 / 1000.0f;  // 141mm -> m
+static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
+static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
+
+#elif defined(TARGET_STANDARD_VOID)
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
 
