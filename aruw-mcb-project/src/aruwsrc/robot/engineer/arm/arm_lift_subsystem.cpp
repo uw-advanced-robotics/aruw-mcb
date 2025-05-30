@@ -32,44 +32,23 @@ ArmLiftSubsystem::ArmLiftSubsystem(
     float radius,
     float lowerBound,
     float upperBound,
+    float home,
     float kS,
     float epsilon)
-    : LimitSwitchSetpointInterface(drivers, trigger, lowerBound, upperBound, epsilon),
-      pidPos(configPos),
+    : LimitSwitchSetpointInterface(
+          drivers,
+          trigger,
+          configPos,
+          radius,
+          lowerBound,
+          upperBound,
+          home,
+          kS,
+          epsilon),
       pidAlign(configAlign),
       motorLeft(motorLeft),
-      motorRight(motorRight),
-      radius(radius),
-      kS(kS)
+      motorRight(motorRight)
 {
-    this->setpoint = 0;
-    this->home = 0;
-}
-
-float ArmLiftSubsystem::getPosition()
-{
-    return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
-            motorRight.getEncoder()->getPosition().getUnwrappedValue()) *
-           radius / 2;
-}
-
-float ArmLiftSubsystem::getPositionDifference()
-{
-    return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() -
-            motorRight.getEncoder()->getPosition().getUnwrappedValue()) *
-           radius;
-}
-
-float ArmLiftSubsystem::getAverageVelocity()
-{
-    return (motorLeft.getEncoder()->getVelocity() + motorRight.getEncoder()->getVelocity()) *
-           radius / 2;
-}
-
-float ArmLiftSubsystem::getVelocityDifference()
-{
-    return (motorLeft.getEncoder()->getVelocity() - motorRight.getEncoder()->getVelocity()) *
-           radius;
 }
 
 void ArmLiftSubsystem::initialize()
@@ -81,50 +60,45 @@ void ArmLiftSubsystem::initialize()
     motorRight.getEncoder()->resetEncoderValue();
 }
 
-void ArmLiftSubsystem::refresh()
-{
-    if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
-    {
-        if (trigger.isTriggered())
-        {
-            calibrationState = CalibrationState::CALIBRATION_COMPLETE;
-            motorLeft.getEncoder()->resetEncoderValue();
-            motorRight.getEncoder()->resetEncoderValue();
-            setSetpoint(home);
-        }
-        else
-        {
-            moveTowardLowerBound();
-        }
-    }
-    else
-    {
-        float errorPosition = setpoint - getPosition();
-
-        float errorAlignment = getPositionDifference();
-
-        float outputPos = pidPos.runController(errorPosition, getAverageVelocity(), 2.0f) + kS;
-        float outputAlign = pidAlign.runController(errorAlignment, getVelocityDifference(), 2.0f);
-
-        motorLeft.setDesiredOutput(outputPos + outputAlign);
-        motorRight.setDesiredOutput(outputPos - outputAlign);
-    }
-}
-
-void ArmLiftSubsystem::refreshSafeDisconnect()
-{
-    motorLeft.setDesiredOutput(0);
-    motorRight.setDesiredOutput(0);
-}
-
-void ArmLiftSubsystem::moveTowardLowerBound()
+void ArmLiftSubsystem::setDesiredOutput(int16_t output)
 {
     float errorAlignment = getPositionDifference();
 
     float outputAlign = pidAlign.runController(errorAlignment, getVelocityDifference(), 2.0f);
 
-    motorLeft.setDesiredOutput(1000 + outputAlign);
-    motorRight.setDesiredOutput(1000 - outputAlign);  // todo
+    motorLeft.setDesiredOutput(output + outputAlign + kS);
+    motorRight.setDesiredOutput(output - outputAlign + kS);
+}
+
+void ArmLiftSubsystem::resetEncoderValue()
+{
+    motorLeft.getEncoder()->resetEncoderValue();
+    motorRight.getEncoder()->resetEncoderValue();
+}
+
+float ArmLiftSubsystem::getEncoderValue()
+{
+    return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
+            motorRight.getEncoder()->getPosition().getUnwrappedValue()) /
+           2;
+}
+
+float ArmLiftSubsystem::getEncoderVelocity()
+{
+    return (motorLeft.getEncoder()->getVelocity() + motorRight.getEncoder()->getVelocity()) / 2;
+}
+
+float ArmLiftSubsystem::getPositionDifference()
+{
+    return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() -
+            motorRight.getEncoder()->getPosition().getUnwrappedValue()) *
+           radius;
+}
+
+float ArmLiftSubsystem::getVelocityDifference()
+{
+    return (motorLeft.getEncoder()->getVelocity() - motorRight.getEncoder()->getVelocity()) *
+           radius;
 }
 
 void ArmLiftSubsystem::stopDuringHoming() { refreshSafeDisconnect(); }

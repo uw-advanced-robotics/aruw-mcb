@@ -20,6 +20,8 @@
 #ifndef LIMIT_SWITCH_SETPOINT_INTERFACE_HPP_
 #define LIMIT_SWITCH_SETPOINT_INTERFACE_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
+
 #include "aruwsrc/control/bounded-subsystem/one_sided_bounded_subsystem_interface.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
 #include "aruwsrc/robot/engineer/arm/linear_joint_interface.hpp"
@@ -37,47 +39,132 @@ class LimitSwitchSetpointInterface : public aruwsrc::control::OneSidedBoundedSub
                                      public LinearJointInterface
 {
 public:
+    virtual void setDesiredOutput(int16_t output) = 0;
+
+    virtual void resetEncoderValue() = 0;
+
+    virtual float getEncoderValue() = 0;
+
+    virtual float getEncoderVelocity() = 0;
+
     void setPIDState(PIDState state) { pidState = state; }
 
     PIDState getPIDState() { return pidState; }
 
     bool isTriggered() { return trigger.isTriggered(); }
 
-    virtual void setDesiredOutput(int16_t output) = 0;
+    float getLowerBound() const override { return minSetpoint; }
 
-    virtual uint64_t getLowerBound() const override
-    {
-        return getMinSetpoint() / M_TWOPI * 4096;  // todo
-    }
+    float getUpperBound() const override { return maxSetpoint; }
 
-    virtual uint64_t getUpperBound() const override
-    {
-        return getMaxSetpoint() / M_TWOPI * 4096;  // todo
-    }
+    float getPosition() override { return getEncoderValue() * radius; }
 
-    void setUpperBound(uint64_t encoderPosition) { maxSetpoint = encoderPosition * M_TWOPI / 4096; }
+    float getVelocity() { return getEncoderVelocity() * radius; }
 
-    void setLowerBound(uint64_t encoderPosition) { minSetpoint = encoderPosition * M_TWOPI / 4096; }
+    void setHome(float home) override { this->home = home; };
 
     bool homedAndBounded() const
     {
         return calibrationState == CalibrationState::CALIBRATION_COMPLETE;
     }
 
+    // Let the record show Acacia and Swara did this first
+    void refresh() override
+    {
+        if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
+        {
+            if (trigger.isTriggered())
+            {
+                calibrationState = CalibrationState::CALIBRATION_COMPLETE;
+                resetEncoderValue();
+                pidState = PIDState::POSITION_PID;
+                setSetpoint(home);
+            }
+            else
+            {
+                moveTowardLowerBound();
+            }
+        }
+
+        if (pidState == PIDState::POSITION_PID)
+        {
+            motorPos = getPosition();
+            float error = setpoint - motorPos;
+            float errorDerivative = getVelocity();
+            float newTime = tap::arch::clock::getTimeMilliseconds();
+            float timeDifference = (newTime - lastTime) / 1000.0f;  // (s)
+            lastTime = newTime;
+            pidOutput = pid.runController(error, errorDerivative, timeDifference);
+            setDesiredOutput(pidOutput + kS);
+        }
+        else if (pidState == PIDState::VELOCITY_PID)
+        {
+            // float error = velocitySetpoint -
+            //               motor.getEncoder()->getVelocity() / 1000 / 60 / MM_PER_REVOLUTION /
+            //               1000;
+            // float timeDifference = (tap::arch::clock::getTimeMilliseconds() - lastTime) / 1000;
+            // lastTime = tap::arch::clock::getTimeMilliseconds();
+            // homingPID.runControllerDerivateError(error, timeDifference);
+            // motor.setDesiredOutput(homingPID.getOutput());
+            // TODO: fix math if we actually want to use
+        }
+        else
+        {
+            setDesiredOutput(motorDesiredOutput + kS);
+        }
+    }
+
+    void refreshSafeDisconnect() override
+    {
+        pidState = PIDState::NONE;
+        setDesiredOutput(0);
+    }
+
+    void moveTowardLowerBound() override
+    {
+        pidState = PIDState::POSITION_PID;
+        setSetpoint(-copysign(homingSpeed, getPosition()));  // todo
+    }
+
+    void stopDuringHoming() override
+    {
+        pidState = PIDState::NONE;
+        setDesiredOutput(0);
+    }
+
 protected:
     LimitSwitchSetpointInterface(
         tap::Drivers *drivers,
         aruwsrc::control::TriggerInterface &trigger,
+        const tap::algorithms::SmoothPidConfig &pidConfig,
+        float radius = 1.0f,
         float lowerBound = 0.0f,
         float upperBound = 0.0f,
-        float epsilon = 0.5f)
+        float home = 0.0f,
+        float kS = 0,
+        float epsilon = 0.5f,
+        float homingSpeed = 1000.0f)
         : OneSidedBoundedSubsystemInterface(drivers, trigger, 0),
-          LinearJointInterface(lowerBound, upperBound, epsilon)
+          LinearJointInterface(lowerBound, upperBound, epsilon),
+          pid(pidConfig),
+          radius(radius),
+          home(home),
+          kS(kS),
+          homingSpeed(homingSpeed)
     {
     }
 
     PIDState pidState = PIDState::NONE;
     CalibrationState caliState = CalibrationState::AWAITING_CALIBRATE;
+    tap::algorithms::SmoothPid pid;
+    float radius;
+    float home;
+    float kS;
+    float homingSpeed;
+    float lastTime = 0;
+    float motorPos = 0;
+    float pidOutput = 0;
+    float motorDesiredOutput = 0;
 };
 }  // namespace aruwsrc::engineer
 

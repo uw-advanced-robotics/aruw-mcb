@@ -42,40 +42,27 @@ public:
         const tap::algorithms::SmoothPidConfig& configPos,
         const tap::algorithms::SmoothPidConfig& configHoming,
         aruwsrc::control::TriggerInterface& trigger,
+        float home,
+        float radius = 1.0f,
+        float kS = 0,
         float epsilon = 0.5f);
 
     void initialize() override;
 
     void setDesiredOutput(int16_t power) override;
 
-    void refresh() override;
+    void resetEncoderValue() override;
 
-    void refreshSafeDisconnect() override;
+    float getEncoderValue() override;
 
-    void moveTowardLowerBound();
+    float getEncoderVelocity() override;
 
     const char* getName() const override { return "Cube Storage"; }
 
-    float getPosition() override;
-
-protected:
-    tap::motor::MotorInterface& motor;
-
-    void stopDuringHoming() override;
-
-    void setHome(uint64_t encoderPosition) override;
-
 private:
-    float lastTime = 0;
-    float motorDesiredOutput = 0;
-    int16_t homingOutput = 1000;
-    uint64_t home = 0;
-    tap::algorithms::SmoothPid pid;
+    tap::motor::MotorInterface& motor;
     tap::algorithms::SmoothPid homingPID;
-    // float velocitySetpoint = 100;
-
-    float motorPos = 0;
-    float pidOutput = 0;
+    int16_t homingOutput = 1000;
 };  // class CUBE_STORAGE
 
 }  // namespace aruwsrc::robot::engineer

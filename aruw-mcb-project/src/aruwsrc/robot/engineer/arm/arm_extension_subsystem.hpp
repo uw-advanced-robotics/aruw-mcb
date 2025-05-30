@@ -20,7 +20,6 @@
 #ifndef ARM_EXTENSION_SUBSYSTEM_HPP_
 #define ARM_EXTENSION_SUBSYSTEM_HPP_
 
-#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
@@ -41,41 +40,22 @@ public:
         float radius,
         float lowerBound,
         float upperBound,
+        float home = 0,
+        float kS = 0,
         float epsilon = 1e-4f);
 
     virtual void initialize() override;
 
-    virtual float getPosition() override;
+    void setDesiredOutput(int16_t power) override;
 
-    float getVelocity();
+    void resetEncoderValue() override;
 
-    virtual void refresh() override;
+    float getEncoderValue() override;
 
-    virtual void refreshSafeDisconnect() override;
-
-    virtual void moveTowardLowerBound() override;
-
-    virtual void setDesiredOutput(int16_t output) override { motor.setDesiredOutput(output); }
-
-protected:
-    /**
-     * Stops the motor from moving. Only to be used during calibration.
-     */
-    virtual void stopDuringHoming() override;
-
-    /**
-     * Sets the given motor encoder position to be the "home" of the subsystem's motor.
-     */
-    virtual void setHome(uint64_t encoderPosition) override
-    {
-        home = (encoderPosition * M_TWOPI / 4096.0f) * radius;
-    }
+    float getEncoderVelocity() override;
 
 private:
-    tap::algorithms::SmoothPid pid;
     tap::motor::MotorInterface &motor;
-    float radius;
-    float home;
 };
 
 }  // namespace engineer

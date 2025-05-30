@@ -98,7 +98,12 @@ static constexpr float GANTRY_LIFT_POS_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KS = 0.0;
 static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 3000.0f;
 
-static constexpr float GANTRY_LIFT_MAX_SETPOINT = 17.7f;
+static constexpr float GANTRY_LIFT_LOWER_BOUND = 0.0f;
+static constexpr float GANTRY_LIFT_UPPER_BOUND = 0.0f;
+static constexpr float GANTRY_LIFT_RADIUS = 1.0f;
+static constexpr float GANTRY_LIFT_HOME = 0.0f;
+static constexpr float GANTRY_LIFT_KS = 0.0f;
+static constexpr float GANTRY_LIFT_EPSILON = 1e-2f;
 
 static constexpr float GANTRY_LIFT_BALANCE_PID_KP = 100.0f;  // todo
 static constexpr float GANTRY_LIFT_BALANCE_PID_KI = 0.0f;
@@ -131,7 +136,12 @@ static constexpr float GANTRY_EXTENSION_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_KS = 0.0;
 static constexpr float GANTRY_EXTENSION_MAX_OUTPUT = 4000.0f;
 
-static constexpr float GANTRY_EXTENSION_MAX_SETPOINT = 27.0f;
+static constexpr float GANTRY_EXTENSION_LOWER_BOUND = 0.0f;
+static constexpr float GANTRY_EXTENSION_UPPER_BOUND = 0.0f;
+static constexpr float GANTRY_EXTENSION_RADIUS = 1.0f;
+static constexpr float GANTRY_EXTENSION_HOME = 0.0f;
+static constexpr float GANTRY_EXTENSION_KS = 0.0f;
+static constexpr float GANTRY_EXTENSION_EPSILON = 1e-2f;
 
 static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_CONFIG(
     GANTRY_EXTENSION_PID_KP,

@@ -141,7 +141,9 @@ CubeStorageSubsystem cubeLift(
     storageLiftMotor,
     LIFT_MOTOR_PID_CONFIG,
     LIFT_HOMING_PID_CONFIG,
-    cubeLiftTrigger);
+    cubeLiftTrigger,
+    ONE_CUBE_SETPOINT,
+    MM_PER_REVOLUTION);
 
 tap::motor::DjiMotor engineerWristRollMotor(
     drivers(),
@@ -255,18 +257,24 @@ ArmLiftSubsystem armLiftSubsystem(
     aruwsrc::engineer::GANTRY_LIFT_POS_CONFIG,
     aruwsrc::engineer::GANTRY_LIFT_BALANCE_CONFIG,
     liftLimitSwitchTrigger,
-    1.0f,
-    0.0f,
-    GANTRY_LIFT_MAX_SETPOINT);
+    GANTRY_LIFT_RADIUS,
+    GANTRY_LIFT_LOWER_BOUND,
+    GANTRY_LIFT_UPPER_BOUND,
+    GANTRY_LIFT_HOME,
+    GANTRY_LIFT_KS,
+    GANTRY_LIFT_EPSILON);
 
 ArmExtensionSubsystem armExtensionSubsystem(
     drivers(),
     engineerGantryExtensionMotor,
     aruwsrc::engineer::GANTRY_EXTENSION_CONFIG,
     extensionLimitSwitchTrigger,
-    1.0f,  // todo
-    0.0f,
-    GANTRY_EXTENSION_MAX_SETPOINT);
+    GANTRY_EXTENSION_RADIUS,
+    GANTRY_EXTENSION_LOWER_BOUND,
+    GANTRY_EXTENSION_UPPER_BOUND,
+    GANTRY_EXTENSION_HOME,
+    GANTRY_EXTENSION_KS,
+    GANTRY_EXTENSION_EPSILON);
 
 JointSubsystem wristRollSubsystem(
     drivers(),

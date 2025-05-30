@@ -39,7 +39,7 @@ static constexpr int16_t FEEDFORWARD = 1000;
 
 static constexpr float HOMING_SPEED = 25;
 
-static constexpr float MM_PER_REVOLUTION = 74.63f;
+static constexpr float MM_PER_REVOLUTION = 74.63f / M_TWOPI;
 
 static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .kp = 300.0f,

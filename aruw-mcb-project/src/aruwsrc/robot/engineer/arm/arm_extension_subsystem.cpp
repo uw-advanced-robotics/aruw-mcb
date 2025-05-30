@@ -33,11 +33,20 @@ ArmExtensionSubsystem::ArmExtensionSubsystem(
     float radius,
     float lowerBound,
     float upperBound,
+    float home,
+    float kS,
     float epsilon)
-    : LimitSwitchSetpointInterface(drivers, trigger, lowerBound, upperBound, epsilon),
-      pid(config),
-      motor(motor),
-      radius(radius)
+    : LimitSwitchSetpointInterface(
+          drivers,
+          trigger,
+          config,
+          radius,
+          lowerBound,
+          upperBound,
+          home,
+          kS,
+          epsilon),
+      motor(motor)
 {
     this->setpoint = 0;
     this->home = 0;
@@ -45,48 +54,16 @@ ArmExtensionSubsystem::ArmExtensionSubsystem(
 
 void ArmExtensionSubsystem::initialize() { motor.initialize(); }
 
-float ArmExtensionSubsystem::getPosition()
+void ArmExtensionSubsystem::setDesiredOutput(int16_t power) { motorDesiredOutput = power; }
+
+void ArmExtensionSubsystem::resetEncoderValue() { motor.getEncoder()->resetEncoderValue(); }
+
+float ArmExtensionSubsystem::getEncoderValue()
 {
-    return motor.getEncoder()->getPosition().getUnwrappedValue() * radius;
+    return motor.getEncoder()->getPosition().getUnwrappedValue();
 }
 
-float ArmExtensionSubsystem::getVelocity() { return motor.getEncoder()->getVelocity() * radius; }
-
-void ArmExtensionSubsystem::refresh()
-{
-    if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
-    {
-        if (trigger.isTriggered())
-        {
-            calibrationState = CalibrationState::CALIBRATION_COMPLETE;
-            motor.getEncoder()->resetEncoderValue();
-            setSetpoint(home);
-        }
-        else
-        {
-            moveTowardLowerBound();
-        }
-    }
-    else
-    {
-        float errorPosition = setpoint - getPosition();
-
-        float output = pid.runController(errorPosition, getVelocity(), 2.0f);
-        motor.setDesiredOutput(output);
-    }
-}
-
-void ArmExtensionSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
-
-void ArmExtensionSubsystem::moveTowardLowerBound()
-{
-    motor.setDesiredOutput(-1000.0f);  // todo
-}
-
-void ArmExtensionSubsystem::stopDuringHoming()
-{
-    motor.setDesiredOutput(0);  // todo
-}
+float ArmExtensionSubsystem::getEncoderVelocity() { return motor.getEncoder()->getVelocity(); }
 
 }  // namespace engineer
 }  // namespace aruwsrc

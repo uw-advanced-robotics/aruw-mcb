@@ -47,17 +47,17 @@ public:
         return tap::algorithms::compareFloatClose(setpoint, getPosition(), epsilon);
     };
 
-    float getMinSetpoint() const { return minSetpoint; }
+    float getLowerBound() const { return minSetpoint; }
 
-    float getMaxSetpoint() const { return maxSetpoint; }
+    float getUpperBound() const { return maxSetpoint; }
 
-    void setMinSetpoint(float minSetpoint)
+    void setLowerBound(float minSetpoint)
     {
         if (minSetpoint > this->maxSetpoint) return;
         this->minSetpoint = minSetpoint;
     }
 
-    void setMaxSetpoint(float maxSetpoint)
+    void setUpperBound(float maxSetpoint)
     {
         if (maxSetpoint < this->minSetpoint) return;
         this->maxSetpoint = maxSetpoint;
@@ -68,8 +68,13 @@ protected:
     float minSetpoint, maxSetpoint;
     const float epsilon;
 
-    LinearJointInterface(float minPosition = 0.0f, float maxSetpoint = 0.0f, float epsilon = 1e-4f)
-        : minSetpoint(minPosition),
+    LinearJointInterface(
+        float minPosition = 0.0f,
+        float maxSetpoint = 0.0f,
+        float epsilon = 1e-4f,
+        float setpoint = 0)
+        : setpoint(setpoint),
+          minSetpoint(minPosition),
           maxSetpoint(maxSetpoint),
           epsilon(epsilon){};
 };
