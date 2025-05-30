@@ -36,7 +36,7 @@ ImuCalibrateCommand::ImuCalibrateCommand(
     float velocityZeroThreshold,
     float positionZeroThreshold,
     Odometry2DInterface *odometry2DInterface,
-    const std::vector<tap::communication::sensors::imu::ImuInterface*> &externalIMUs)
+    const std::vector<tap::communication::sensors::imu::ImuInterface *> &externalIMUs)
     : tap::control::Command(),
       velocityZeroThreshold(velocityZeroThreshold),
       positionZeroThreshold(positionZeroThreshold),
@@ -140,7 +140,7 @@ void ImuCalibrateCommand::execute()
                 drivers->mpu6500.requestCalibration();
                 calibrationState = CalibrationState::CALIBRATING_IMU;
 
-                for (auto* imu : externalIMUs)
+                for (auto *imu : externalIMUs)
                 {
                     if (imu) imu->requestCalibration();
                 }
@@ -208,7 +208,5 @@ bool ImuCalibrateCommand::isFinished() const
             calibrationTimer.isExpired()) ||
            calibrationLongTimeout.isExpired();
 }
-
-
 
 }  // namespace aruwsrc::control::imu

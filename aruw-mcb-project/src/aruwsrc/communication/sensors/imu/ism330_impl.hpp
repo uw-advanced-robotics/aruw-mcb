@@ -70,11 +70,9 @@ bool ISM330<I2cMaster>::read()
         imuData.accRaw = {accX, accY, accZ};
 
         this->applyMountingTransformToRaw(imuData);
-        
+
         imuData.gyroRadPerSec = imuData.gyroRaw - imuData.gyroOffsetRaw;
         imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
-
-        
 
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
     }
