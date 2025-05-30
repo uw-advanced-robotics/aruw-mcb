@@ -108,7 +108,7 @@ static constexpr float GANTRY_LIFT_BALANCE_PID_KS = 0.0;
 static constexpr float GANTRY_LIFT_BALANCE_MAX_OUTPUT = 3000.0f;
 
 static constexpr tap::gpio::Digital::InputPin GANTRY_LIFT_LIMIT_SWITCH_PIN =
-    tap::gpio::Digital::InputPin::D;  // TODO: Update to correct pin
+    tap::gpio::Digital::InputPin::C;  // TODO: Update to correct pin
 
 static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_POS_CONFIG(
     GANTRY_LIFT_POS_PID_KP,
@@ -141,7 +141,7 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_CONFIG(
     GANTRY_EXTENSION_MAX_OUTPUT);
 
 static constexpr tap::gpio::Digital::InputPin GANTRY_EXTENSION_LIMIT_SWITCH_PIN =
-    tap::gpio::Digital::InputPin::B;  // TODO: Update to correct pin
+    tap::gpio::Digital::InputPin::E;  // TODO: Update to correct pin
 
 static constexpr float GANTRY_LIFT_SCALING_FACTOR = 0.03f;
 static constexpr float GANTRY_EXTENSION_SCALING_FACTOR = 0.03f;
@@ -149,4 +149,4 @@ static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
 }  // namespace aruwsrc::engineer
-#endif  // ENGINEER_GANTRY_CONSTANTS_HPP_
+#endif  // ENGINEER_GANTRY_CONSTANTS_HPP_   `

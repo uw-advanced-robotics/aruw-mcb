@@ -175,19 +175,19 @@ using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinY, PWMOutPi
 using DigitalInPinB = GpioH12;
 using DigitalInPinC = GpioH11;
 using DigitalInPinD = GpioH10;
+using DigitalInPinE = GpioD15;
 using DigitalInPinButton = GpioB2;
         
-using DigitalInPins = SoftwareGpioPort<DigitalInPinB, DigitalInPinC, DigitalInPinD, DigitalInPinButton>;
+using DigitalInPins = SoftwareGpioPort<DigitalInPinB, DigitalInPinC, DigitalInPinD, DigitalInPinE, DigitalInPinButton>;
 
 // Initialize digital output pins
         
-using DigitalOutPinE = GpioD15;
 using DigitalOutPinF = GpioD14;
 using DigitalOutPinG = GpioD13;
 using DigitalOutPinH = GpioD12;
 using DigitalOutPinLaser = GpioG13;
         
-using DigitalOutPins = SoftwareGpioPort<DigitalOutPinE, DigitalOutPinF, DigitalOutPinG, DigitalOutPinH, DigitalOutPinLaser>;
+using DigitalOutPins = SoftwareGpioPort<DigitalOutPinF, DigitalOutPinG, DigitalOutPinH, DigitalOutPinLaser>;
 
 // gpio pins used for SPI communication to the onboard MPU6500 IMU
 

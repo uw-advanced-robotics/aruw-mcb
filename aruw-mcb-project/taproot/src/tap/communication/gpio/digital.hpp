@@ -59,6 +59,7 @@ public:
         B,
         C,
         D,
+        E,
         Button,
     };
 
@@ -67,7 +68,6 @@ public:
      */
     enum OutputPin
     {
-        E,
         F,
         G,
         H,
