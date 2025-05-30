@@ -126,7 +126,7 @@ public:
         chassis::HolonomicChassisSubsystem *chassis,
         float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
         float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-        const std::vector<tap::communication::sensors::imu::ImuInterface*> &imuVector = {},
+        const std::vector<tap::communication::sensors::imu::ImuInterface*> &externalIMUs= {},
         tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr);
 
     const char *getName() const override { return "Calibrate IMU"; }
@@ -141,8 +141,6 @@ public:
 
     bool isFinished() const override;
 
-    // Function to request calibration on each of the IMUs in the vector
-    void requestCalibration();
 
     /**
      * @return The current calibration state of the command.
@@ -168,7 +166,7 @@ protected:
 
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
-    std::vector<tap::communication::sensors::imu::ImuInterface*> imuVector;
+    std::vector<tap::communication::sensors::imu::ImuInterface*> externalIMUs;
     chassis::HolonomicChassisSubsystem *chassis;
 
     tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface;
