@@ -195,6 +195,10 @@ public:
         txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
     }
 
+    mockable inline void requestCalibration() override {
+        sendImuCalibrationRequest();
+    }
+
     mockable void sendData();
 
     inline const char* getName() const { return "Turret MCB Imu"; }
