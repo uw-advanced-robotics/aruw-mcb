@@ -42,8 +42,8 @@ ImuCalibrateCommand::ImuCalibrateCommand(
       positionZeroThreshold(positionZeroThreshold),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
-      chassis(chassis),
       externalIMUs(externalIMUs),
+      chassis(chassis),
       odometry2DInterface(odometry2DInterface)
 {
     for (auto &config : turretsAndControllers)
