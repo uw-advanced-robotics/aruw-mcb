@@ -56,14 +56,6 @@ public:
     void operator()(const DJISerial::ReceivedSerialMessage& message) override;
 
     // Message structure for sending/receiving robot states
-    enum RobotIndex : uint8_t
-    {
-        STANDARD = 0,
-        HERO = 1,
-        SENTRY = 2,
-        NUM_ROBOTS = 3
-    };
-
     struct EnemyRobotState
     {
         struct RobotState
@@ -74,7 +66,7 @@ public:
             float z;
             uint32_t timestamp;  // Timestamp in milliseconds, used for processing "active" robots
         };
-        RobotState robot[NUM_ROBOTS];
+        RobotState robot[VisionCoprocessor::MAX_NUM_ROBOT_ORBITS];
     };
 
     const EnemyRobotState& getStateEstimate() const { return stateEstimate; }
@@ -100,47 +92,17 @@ private:
     int ptLoopCount = 0;
 
     // Helper methods
-    inline RobotIndex getIndexFromRobotType(int robotType) const
-    {
-        switch (robotType)
-        {
-            case 1:
-                return HERO;
-            case 3:
-                return STANDARD;
-            case 4:
-                return STANDARD;
-            case 7:
-                return SENTRY;
-            default:
-                return NUM_ROBOTS;  // Invalid type
-        }
-    }
+    inline RefSerialTransmitter::RobotId getAllyRobotId() const;
 
-    inline RefSerialTransmitter::RobotId getAllyRobotId() const
-    {
-        const auto& robotData = refSerial->getRobotData();
-        if (robotData.robotId == RefSerialData::RobotId::INVALID)
-        {
-            return RefSerialData::RobotId::INVALID;
-        }
-
-        bool isBlue = RefSerial::isBlueTeam(robotData.robotId);
-        if (isBlue)
-        {
-            return (robotData.robotId == RefSerialData::RobotId::BLUE_HERO)
-                       ? RefSerialData::RobotId::BLUE_SOLDIER_3
-                       : RefSerialData::RobotId::BLUE_HERO;
-        }
-        else
-        {
-            return (robotData.robotId == RefSerialData::RobotId::RED_HERO)
-                       ? RefSerialData::RobotId::RED_SOLDIER_3
-                       : RefSerialData::RobotId::RED_HERO;
-        }
-    }
+    float POSITION_TOLERANCE = 0.75f;  // Meters
+    /**
+     * Assigns incoming robot state to the nearest robot state in the
+     * current state estimate. If the incoming state is closer than
+     * POSITION_TOLERANCE to the nearest robot state, than update that
+     * state. Otherwise, update the state of the oldest robot state.
+     */
+    void updateNearestRobotState(EnemyRobotState::RobotState& state);
 };
-
 }  // namespace aruwsrc::communication::inter_robot_comm
 
 #endif  // INTER_ROBOT_TRANSMITTER_HPP_

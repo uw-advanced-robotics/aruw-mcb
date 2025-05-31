@@ -64,13 +64,11 @@ void InterRobotTransmitter::operator()(const DJISerial::ReceivedSerialMessage& m
         sizeof(EnemyRobotState));
 
     // Go through each robot state, if it is current, update the state estimate
-    for (int i = 0; i < RobotIndex::NUM_ROBOTS; i++)
+    for (int i = 0; i < VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
     {
         if (incomingMessage.robot[i].current)
         {
-            stateEstimate.robot[i] = incomingMessage.robot[i];
-            // Set timestamp to our current time
-            stateEstimate.robot[i].timestamp = tap::arch::clock::getTimeMilliseconds();
+            updateNearestRobotState(incomingMessage.robot[i]);
         }
     }
 
@@ -86,16 +84,8 @@ void InterRobotTransmitter::updateState()
     auto robotOrbits = visionCoprocessor->getLastRobotOrbitData();
     for (int i = 0; i < VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
     {
-        int robotType = robotOrbits.data[i].robotType;
-        if (robotType == 0)
-        {
-            continue;  // Skip invalid robot types
-        }
-        RobotIndex index = getIndexFromRobotType(robotType);
-
-        // Update the outgoing message
-        EnemyRobotState::RobotState& outgoingRobotState =
-            outgoingMessage.robot[static_cast<int>(index)];
+        // Update the outgoing message, broadcasts data as if the index is the robot type
+        EnemyRobotState::RobotState& outgoingRobotState = outgoingMessage.robot[i];
         outgoingRobotState.current = true;
         outgoingRobotState.x = robotOrbits.data[i].x;
         outgoingRobotState.y = robotOrbits.data[i].y;
@@ -103,12 +93,73 @@ void InterRobotTransmitter::updateState()
         outgoingRobotState.timestamp = tap::arch::clock::getTimeMilliseconds();
 
         // Update the current state estimate
-        EnemyRobotState::RobotState& currentRobotState =
-            stateEstimate.robot[static_cast<int>(index)];
-        currentRobotState.x = robotOrbits.data[i].x;
-        currentRobotState.y = robotOrbits.data[i].y;
-        currentRobotState.z = robotOrbits.data[i].z;
-        currentRobotState.timestamp = tap::arch::clock::getTimeMilliseconds();
+        EnemyRobotState::RobotState& currentRobotState = stateEstimate.robot[i];
+        updateNearestRobotState(currentRobotState);
     }
 }
+
+inline RefSerialTransmitter::RobotId InterRobotTransmitter::getAllyRobotId() const
+{
+    const auto& robotData = refSerial->getRobotData();
+    if (robotData.robotId == RefSerialData::RobotId::INVALID)
+    {
+        return RefSerialData::RobotId::INVALID;
+    }
+
+    bool isBlue = RefSerial::isBlueTeam(robotData.robotId);
+    if (isBlue)
+    {
+        return (robotData.robotId == RefSerialData::RobotId::BLUE_HERO)
+                   ? RefSerialData::RobotId::BLUE_SOLDIER_3
+                   : RefSerialData::RobotId::BLUE_HERO;
+    }
+    else
+    {
+        return (robotData.robotId == RefSerialData::RobotId::RED_HERO)
+                   ? RefSerialData::RobotId::RED_SOLDIER_3
+                   : RefSerialData::RobotId::RED_HERO;
+    }
+}
+
+void InterRobotTransmitter::updateNearestRobotState(EnemyRobotState::RobotState& state)
+{
+    int nearestIndex = -1;
+    int oldestIndex = 0;
+    float nearestDistance = FLT_MAX;
+    uint32_t oldestTimestamp = UINT32_MAX;
+    for (int i = 0; i < VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
+    {
+        const auto& currentState = stateEstimate.robot[i];
+        float distance = sqrtf(
+            (currentState.x - state.x) * (currentState.x - state.x) +
+            (currentState.y - state.y) * (currentState.y - state.y) +
+            (currentState.z - state.z) * (currentState.z - state.z));
+
+        if (distance < nearestDistance && distance < POSITION_TOLERANCE)
+        {
+            nearestDistance = distance;
+            nearestIndex = i;
+        }
+
+        if (currentState.timestamp < oldestTimestamp)
+        {
+            oldestTimestamp = currentState.timestamp;
+            oldestIndex = i;
+        }
+    }
+
+    if (nearestIndex != -1)
+    {
+        // Update the nearest state
+        stateEstimate.robot[nearestIndex] = state;
+        stateEstimate.robot[nearestIndex].timestamp = tap::arch::clock::getTimeMilliseconds();
+    }
+    else
+    {
+        // Update the oldest state
+        stateEstimate.robot[oldestIndex] = state;
+        stateEstimate.robot[oldestIndex].timestamp = tap::arch::clock::getTimeMilliseconds();
+    }
+}
+
 }  // namespace aruwsrc::communication::inter_robot_comm
