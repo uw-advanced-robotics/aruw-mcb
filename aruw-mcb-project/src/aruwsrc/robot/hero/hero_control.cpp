@@ -34,6 +34,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
@@ -228,7 +229,32 @@ HeroTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+tap::encoder::CanEncoder parallelOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    tap::can::CanBus::CAN_BUS2,
+    true);
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    tap::can::CanBus::CAN_BUS2);
+
+aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
+    &parallelOmni,
+    &perpendicularOmni,
+    aruwsrc::chassis::DEADWHEEL_RADIUS);
+
+aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    deadwheels,
+    turret,
+    drivers()->mpu6500,
+    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
+    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
+    aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+    aruwsrc::chassis::PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
+    aruwsrc::chassis::PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
