@@ -249,7 +249,7 @@ aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     deadwheels,
     turret,
-    drivers()->mpu6500,
+    drivers()->ism330,
     aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
     aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
     aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
