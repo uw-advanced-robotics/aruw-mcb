@@ -91,17 +91,22 @@ void InterRobotTransmitter::updateState()
             continue;
         }
 
+        EnemyRobotState::RobotState incomingRobotState = {
+            .current = true,
+            .x = robotOrbits.data[i].x,
+            .y = robotOrbits.data[i].y,
+            .z = robotOrbits.data[i].z,
+            .timestamp = tap::arch::clock::getTimeMilliseconds()};
+
         // Update the outgoing message, broadcasts data as if the index is the robot type
-        EnemyRobotState::RobotState& outgoingRobotState = outgoingMessage.robot[i];
-        outgoingRobotState.current = true;
-        outgoingRobotState.x = robotOrbits.data[i].x;
-        outgoingRobotState.y = robotOrbits.data[i].y;
-        outgoingRobotState.z = robotOrbits.data[i].z;
-        outgoingRobotState.timestamp = tap::arch::clock::getTimeMilliseconds();
+        memcpy(
+            &outgoingMessage.robot[i],
+            &incomingRobotState,
+            sizeof(EnemyRobotState::RobotState));
 
         // Update the current state estimate
-        EnemyRobotState::RobotState& currentRobotState = stateEstimate.robot[i];
-        updateNearestRobotState(currentRobotState);
+        incomingRobotState.current = false;
+        updateNearestRobotState(incomingRobotState);
     }
 }
 
