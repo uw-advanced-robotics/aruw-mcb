@@ -44,7 +44,9 @@ ArmLiftSubsystem::ArmLiftSubsystem(
           upperBound,
           home,
           kS,
-          epsilon),
+          epsilon,
+          1000,
+          true),
       pidAlign(configAlign),
       motorLeft(motorLeft),
       motorRight(motorRight)

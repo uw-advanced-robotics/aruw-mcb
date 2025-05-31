@@ -120,15 +120,14 @@ public:
 
     void moveTowardLowerBound() override
     {
-        pidState = PIDState::NONE;
-        motorDesiredOutput = -copysign(homingSpeed, getPosition()) + kS;  // todo
+        // motorDesiredOutput = -copysign(homingSpeed, getPosition()) + kS;  // todo
 
+        motorDesiredOutput = homingReversed ? homingSpeed : -homingSpeed;
         setDesiredOutput(motorDesiredOutput);
     }
 
     void stopDuringHoming() override
     {
-        pidState = PIDState::NONE;
         motorDesiredOutput = 0;
         setDesiredOutput(0);
     }
@@ -144,24 +143,26 @@ protected:
         float home = 0.0f,
         float kS = 0,
         float epsilon = 0.5f,
-        float homingSpeed = 1000.0f)
+        float homingSpeed = 1000.0f,
+        bool homingReversed = false)
         : OneSidedBoundedSubsystemInterface(drivers, trigger, 0),
           LinearJointInterface(lowerBound, upperBound, epsilon),
           pid(pidConfig),
           radius(radius),
           home(home),
           kS(kS),
-          homingSpeed(homingSpeed)
+          homingSpeed(homingSpeed),
+          homingReversed(homingReversed)
     {
     }
 
-    PIDState pidState = PIDState::NONE;
-    CalibrationState caliState = CalibrationState::AWAITING_CALIBRATE;
+    PIDState pidState = PIDState::POSITION_PID;
     tap::algorithms::SmoothPid pid;
     float radius;
     float home;
     float kS;
     float homingSpeed;
+    bool homingReversed;
     float lastTime = 0;
     float motorPos = 0;
     float motorDesiredOutput = 0;

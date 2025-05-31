@@ -37,7 +37,7 @@ static constexpr float LIFT_UPPER_BOUND = 1000;  // TODO: UPDATE
 
 static constexpr int16_t FEEDFORWARD = 1000;
 
-static constexpr float HOMING_SPEED = 25;
+static constexpr float HOMING_SPEED = 1000;  // 25
 
 static constexpr float MM_PER_REVOLUTION = 74.63f / M_TWOPI;
 

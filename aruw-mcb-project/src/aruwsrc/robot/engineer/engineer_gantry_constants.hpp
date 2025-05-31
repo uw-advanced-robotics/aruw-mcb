@@ -91,16 +91,16 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_CONFIG(
     WRIST_ROLL_PID_MAX_ERROR_SUM,
     WRIST_ROLL_MAX_OUTPUT);
 
-static constexpr float GANTRY_LIFT_POS_PID_KP = 30.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KP = 60.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KI = 0.0f;
-static constexpr float GANTRY_LIFT_POS_PID_KD = 20.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KD = 10.0f;
 static constexpr float GANTRY_LIFT_POS_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KS = 0.0;
 static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 3000.0f;
 
 static constexpr float GANTRY_LIFT_LOWER_BOUND = 0.0f;
 static constexpr float GANTRY_LIFT_UPPER_BOUND = 0.0f;
-static constexpr float GANTRY_LIFT_RADIUS = 15.0f;
+static constexpr float GANTRY_LIFT_RADIUS = 11.877733f;
 static constexpr float GANTRY_LIFT_HOME = 360.0f;  // length ~360mm I think?
 static constexpr float GANTRY_LIFT_KS = 0.0f;
 static constexpr float GANTRY_LIFT_EPSILON = 1.0f;
@@ -129,16 +129,16 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_BALANCE_CONFIG(
     GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM,
     GANTRY_LIFT_BALANCE_MAX_OUTPUT);
 
-static constexpr float GANTRY_EXTENSION_PID_KP = 800.0f;
+static constexpr float GANTRY_EXTENSION_PID_KP = 75.0f;
 static constexpr float GANTRY_EXTENSION_PID_KI = 0.0f;
-static constexpr float GANTRY_EXTENSION_PID_KD = 40.0f;
+static constexpr float GANTRY_EXTENSION_PID_KD = 4.0f;
 static constexpr float GANTRY_EXTENSION_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_KS = 0.0;
 static constexpr float GANTRY_EXTENSION_MAX_OUTPUT = 4000.0f;
 
 static constexpr float GANTRY_EXTENSION_LOWER_BOUND = 0.0f;
 static constexpr float GANTRY_EXTENSION_UPPER_BOUND = 0.0f;  // length ~360 mm
-static constexpr float GANTRY_EXTENSION_RADIUS = 30.0f;
+static constexpr float GANTRY_EXTENSION_RADIUS = 11.877733f;
 static constexpr float GANTRY_EXTENSION_HOME = 0.0f;
 static constexpr float GANTRY_EXTENSION_KS = 0.0f;
 static constexpr float GANTRY_EXTENSION_EPSILON = 1.0f;

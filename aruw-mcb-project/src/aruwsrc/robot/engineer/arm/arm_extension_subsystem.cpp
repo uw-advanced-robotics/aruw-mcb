@@ -45,11 +45,11 @@ ArmExtensionSubsystem::ArmExtensionSubsystem(
           upperBound,
           home,
           kS,
-          epsilon),
+          epsilon,
+          1500,
+          false),
       motor(motor)
 {
-    this->setpoint = 0;
-    this->home = 0;
 }
 
 void ArmExtensionSubsystem::initialize()

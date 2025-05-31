@@ -42,7 +42,9 @@ CubeStorageSubsystem::CubeStorageSubsystem(
           0.0f,
           home,
           kS,
-          epsilon),
+          epsilon,
+          2000,
+          true),
       motor(storageLiftMotor),
       homingPID(configHoming)
 {

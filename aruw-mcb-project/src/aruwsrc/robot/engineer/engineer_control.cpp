@@ -319,10 +319,10 @@ tap::control::HoldCommandMapping rightUp(
     {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-tap::control::HoldCommandMapping leftMidRightMid(
-    drivers(),
-    {&cubeManualControl},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+// tap::control::HoldCommandMapping leftMidRightMid(
+//     drivers(),
+//     {&cubeManualControl},
+//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // tap::control::HoldCommandMapping leftDownRightUp(
 //     drivers(),
@@ -369,19 +369,21 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
     armExtensionSubsystem.setDefaultCommand(&armControllerCommand);
     wristSubsystem.setDefaultCommand(&armControllerCommand);
     wristRollSubsystem.setDefaultCommand(&armControllerCommand);
+    cubeLift.setDefaultCommand(&cubeManualControl);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startEngineerCommands(aruwsrc::engineer::Drivers *)
 {
-    drivers()->commandScheduler.addCommand(&armControllerCommand);
+    // drivers()->commandScheduler.addCommand(&armControllerCommand);
+    // drivers()->commandScheduler.addCommand(&chassisDriveCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightUp);
-    drivers->commandMapper.addMap(&leftMidRightMid);
+    // drivers->commandMapper.addMap(&leftMidRightMid);
 }
 }  // namespace control
 }  // namespace aruwsrc
