@@ -172,13 +172,11 @@ public:
         return false;
     }
 
-    mockable void releaseTransmissionSemaphore(uint32_t)
+    mockable void releaseTransmissionSemaphore()
     {
         transmissionSemaphore.release();
-        // transmissionDelayTimer.restart(
-            // std::ceil(sentMsgLen * 1000.0f / Tx::MAX_TRANSMIT_SPEED_BYTES_PER_S));
-        // Constant 35ms delay
-        transmissionDelayTimer.restart(35);
+        transmissionDelayTimer.restart(
+            std::ceil(1.0f / RefSerialData::Tx::ROBOT_INTERACTION_DATA_RATE * 1000.0f));
     }
 
     /**
