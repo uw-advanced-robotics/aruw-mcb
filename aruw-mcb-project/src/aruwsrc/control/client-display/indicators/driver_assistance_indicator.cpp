@@ -93,8 +93,8 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
             // Draw the tracer line to the orbit
             drawTracerLineToOrbit(orbit, tracerIndex);
 
-            // Draw the health bar to the orbit, will just be 0 without icons
-            drawHealthBarToOrbit(orbit, healthBarIndex, 0);
+            // Don't draw health bars for not, with no icon data it will just show 0
+            // drawHealthBarToOrbit(orbit, healthBarIndex, 0);
         }
         else
         {
