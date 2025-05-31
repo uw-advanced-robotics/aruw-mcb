@@ -26,6 +26,7 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
@@ -118,13 +119,15 @@ public:
      * @param[in] positionZeroThreshold Threshold around 0 where turret pitch and yaw position from
      * the center considered to be 0, in radians.
      */
+
     ImuCalibrateCommand(
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         chassis::HolonomicChassisSubsystem *chassis,
         float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
         float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-        tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr);
+        tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr,
+        const std::vector<tap::communication::sensors::imu::ImuInterface *> &externalIMUs = {});
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -162,6 +165,7 @@ protected:
 
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
+    std::vector<tap::communication::sensors::imu::ImuInterface *> externalIMUs;
     chassis::HolonomicChassisSubsystem *chassis;
 
     tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface;
