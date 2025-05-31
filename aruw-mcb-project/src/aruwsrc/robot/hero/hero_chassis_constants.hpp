@@ -39,12 +39,12 @@ namespace aruwsrc::chassis
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 4'500},
-    {60, 5'700},
-    {70, 6'400},
-    {80, 6'700},
-    {100, 7'000},
-    {120, 8'000},
+    {50, 1'958.0f},
+    {60, 2'255.0f},
+    {70, 2'690.0f},
+    {80, 2'957.0f},
+    {90, 3'232.0f},
+    {100, 3'403.0f},
 };
 
 static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
