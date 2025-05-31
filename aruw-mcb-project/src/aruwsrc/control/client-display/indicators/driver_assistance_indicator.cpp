@@ -188,15 +188,8 @@ void DriverAssistanceIndicator::drawPlateTargetBox()
 
     auto graphicToModify = &graphic.graphicData[static_cast<uint8_t>(GraphicIndex::TARGET)];
 
-    uint32_t prevOperation = graphicToModify->operation;
-    if (prevOperation == Tx::GRAPHIC_DELETE)
-    {
-        graphicToModify->operation = Tx::GRAPHIC_ADD;
-    }
-    else
-    {
-        graphicToModify->operation = Tx::GRAPHIC_MODIFY;
-    }
+    graphicToModify->operation =
+        graphicToModify->operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
 
     RefSerialTransmitter::configRectangle(
         3,
