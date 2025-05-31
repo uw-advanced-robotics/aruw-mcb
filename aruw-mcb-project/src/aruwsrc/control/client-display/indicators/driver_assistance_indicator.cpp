@@ -62,7 +62,6 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
 {
     // Variable definitions because protothread can't
     bool visionHasTarget;
-    bool hasStandard, hasHero, hasSentry;
     InterRobotTransmitter::EnemyRobotState robotOrbits;
 
     RF_BEGIN(1);
@@ -80,50 +79,28 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
 
     robotOrbits = interRobotTransmitter.getStateEstimate();
 
-    hasStandard =
-        (tap::arch::clock::getTimeMilliseconds() -
-         robotOrbits.robot[InterRobotTransmitter::RobotIndex::STANDARD].timestamp) < TIME_CUTOFF_MS;
-    hasHero =
-        (tap::arch::clock::getTimeMilliseconds() -
-         robotOrbits.robot[InterRobotTransmitter::RobotIndex::HERO].timestamp) < TIME_CUTOFF_MS;
-    hasSentry =
-        (tap::arch::clock::getTimeMilliseconds() -
-         robotOrbits.robot[InterRobotTransmitter::RobotIndex::SENTRY].timestamp) < TIME_CUTOFF_MS;
-    
-    if (hasHero){
-        Position heroOrbit = Position(
-            robotOrbits.robot[InterRobotTransmitter::RobotIndex::HERO].x,
-            robotOrbits.robot[InterRobotTransmitter::RobotIndex::HERO].y,
-            robotOrbits.robot[InterRobotTransmitter::RobotIndex::HERO].z);
-        drawTracerLineToOrbit(heroOrbit, GraphicIndex::HERO_TRACER);
-        drawHealthBarToOrbit(heroOrbit, GraphicIndex::HERO_HP, 1);
-    } else {
-        deleteGraphic(GraphicIndex::HERO_TRACER);
-        deleteGraphic(GraphicIndex::HERO_HP);
-    }
+    for (int i = 0; i < aruwsrc::serial::VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
+    {
+        bool valid = (tap::arch::clock::getTimeMilliseconds() - robotOrbits.robot[i].timestamp) <
+                     TIME_CUTOFF_MS;
+        GraphicIndex tracerIndex = static_cast<GraphicIndex>(i + 1);
+        GraphicIndex healthBarIndex = static_cast<GraphicIndex>(i + 4);
+        if (valid)
+        {
+            Position orbit =
+                Position(robotOrbits.robot[i].x, robotOrbits.robot[i].y, robotOrbits.robot[i].z);
 
-    if (hasStandard){
-        Position standardOrbit = Position(
-            robotOrbits.robot[InterRobotTransmitter::RobotIndex::STANDARD].x,
-            robotOrbits.robot[InterRobotTransmitter::RobotIndex::STANDARD].y,
-            robotOrbits.robot[InterRobotTransmitter::RobotIndex::STANDARD].z);
-        drawTracerLineToOrbit(standardOrbit, GraphicIndex::STANDARD_TRACER);
-        drawHealthBarToOrbit(standardOrbit, GraphicIndex::STANDARD_HP, 3);
-    } else {
-        deleteGraphic(GraphicIndex::STANDARD_TRACER);
-        deleteGraphic(GraphicIndex::STANDARD_HP);
-    }
+            // Draw the tracer line to the orbit
+            drawTracerLineToOrbit(orbit, tracerIndex);
 
-    if (hasSentry){
-        Position sentryOrbit = Position(
-            robotOrbits.robot[InterRobotTransmitter::RobotIndex::SENTRY].x,
-            robotOrbits.robot[InterRobotTransmitter::RobotIndex::SENTRY].y,
-            robotOrbits.robot[InterRobotTransmitter::RobotIndex::SENTRY].z);
-        drawTracerLineToOrbit(sentryOrbit, GraphicIndex::SENTRY_TRACER);
-        drawHealthBarToOrbit(sentryOrbit, GraphicIndex::SENTRY_HP, 7);
-    } else {
-        deleteGraphic(GraphicIndex::SENTRY_TRACER);
-        deleteGraphic(GraphicIndex::SENTRY_HP);
+            // Draw the health bar to the orbit, will just be 0 without icons
+            drawHealthBarToOrbit(orbit, healthBarIndex, 0);
+        }
+        else
+        {
+            deleteGraphic(tracerIndex);
+            deleteGraphic(healthBarIndex);
+        }
     }
 
     // Send the graphics

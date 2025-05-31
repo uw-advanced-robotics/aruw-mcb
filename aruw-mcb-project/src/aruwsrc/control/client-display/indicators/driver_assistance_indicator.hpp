@@ -41,7 +41,7 @@ using namespace aruwsrc::communication::inter_robot_comm;
  * Draws bars above robots to indicate the HP of the target.
  * Draws a line to the target.
  */
-class DriverAssistanceIndicator : public HudIndicator, protected modm::Resumable<8>
+class DriverAssistanceIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     DriverAssistanceIndicator(
@@ -51,7 +51,7 @@ public:
         const Transform &worldToTurretTransform,
         InterRobotTransmitter &interRobotTransmitter);
 
-    void initialize() override final;
+    void initialize() override;
 
     modm::ResumableResult<void> update() override;
 
