@@ -85,7 +85,7 @@ public:
             else
             {
                 moveTowardLowerBound();
-                return;
+                pidState = PIDState::NONE;
             }
         }
 
@@ -120,10 +120,7 @@ public:
 
     void moveTowardLowerBound() override
     {
-        // motorDesiredOutput = -copysign(homingSpeed, getPosition()) + kS;  // todo
-
         motorDesiredOutput = homingReversed ? homingSpeed : -homingSpeed;
-        setDesiredOutput(motorDesiredOutput);
     }
 
     void stopDuringHoming() override

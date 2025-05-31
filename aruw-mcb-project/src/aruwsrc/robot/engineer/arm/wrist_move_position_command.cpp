@@ -18,10 +18,6 @@
  */
 
 #include "wrist_move_position_command.hpp"
-
-#include <cstdlib>
-
-#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 namespace aruwsrc::engineer
 {
 WristMovePositionCommand::WristMovePositionCommand(

@@ -26,7 +26,7 @@ WristFoldInCommand::WristFoldInCommand(WristSubsystem &wrist) : wrist(wrist)
     addSubsystemRequirement(&wrist);
 }
 
-void WristFoldInCommand::initialize() { state = BOTTOM; }
+void WristFoldInCommand::initialize() {}
 
 void WristFoldInCommand::execute()
 {

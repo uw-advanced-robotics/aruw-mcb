@@ -39,7 +39,6 @@ JointSubsystem::JointSubsystem(
       motor(motor),
       kS(kS)
 {
-    this->setpoint = 0;
 }
 
 void JointSubsystem::initialize() { motor.initialize(); }

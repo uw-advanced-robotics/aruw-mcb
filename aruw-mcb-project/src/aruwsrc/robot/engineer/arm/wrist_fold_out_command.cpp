@@ -26,7 +26,7 @@ WristFoldOutCommand::WristFoldOutCommand(WristSubsystem &wrist) : wrist(wrist)
     addSubsystemRequirement(&wrist);
 }
 
-void WristFoldOutCommand::initialize() { state = TOP; }
+void WristFoldOutCommand::initialize() {}
 
 void WristFoldOutCommand::execute()
 {
