@@ -411,7 +411,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassis,
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-    &odometrySubsystem);
+    &odometrySubsystem,
+    {&drivers()->mpu6500});
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
