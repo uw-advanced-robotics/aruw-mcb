@@ -84,6 +84,13 @@ void InterRobotTransmitter::updateState()
     auto robotOrbits = visionCoprocessor->getLastRobotOrbitData();
     for (int i = 0; i < VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
     {
+        // If all zeros, skip this orbit
+        if (robotOrbits.data[i].x == 0.0f && robotOrbits.data[i].y == 0.0f &&
+            robotOrbits.data[i].z == 0.0f)
+        {
+            continue;
+        }
+
         // Update the outgoing message, broadcasts data as if the index is the robot type
         EnemyRobotState::RobotState& outgoingRobotState = outgoingMessage.robot[i];
         outgoingRobotState.current = true;
