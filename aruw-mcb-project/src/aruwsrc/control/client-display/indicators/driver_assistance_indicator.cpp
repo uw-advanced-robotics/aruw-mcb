@@ -118,6 +118,11 @@ void DriverAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicInd
     graphicToModify->operation =
         graphicToModify->operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
 
+    if (!screenFrameOrbit.inFrame)
+    {
+        graphicToModify->operation = Tx::GRAPHIC_DELETE;
+    }
+
     RefSerialTransmitter::configLine(
         1,
         TRACER_LINE_ORIGIN.x,
@@ -190,6 +195,11 @@ void DriverAssistanceIndicator::drawPlateTargetBox()
 
     graphicToModify->operation =
         graphicToModify->operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+
+    if (!screenFrameTopRight.inFrame)
+    {
+        graphicToModify->operation = Tx::GRAPHIC_DELETE;
+    }
 
     RefSerialTransmitter::configRectangle(
         3,

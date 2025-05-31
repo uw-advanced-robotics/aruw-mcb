@@ -99,10 +99,7 @@ void InterRobotTransmitter::updateState()
             .timestamp = tap::arch::clock::getTimeMilliseconds()};
 
         // Update the outgoing message, broadcasts data as if the index is the robot type
-        memcpy(
-            &outgoingMessage.robot[i],
-            &incomingRobotState,
-            sizeof(EnemyRobotState::RobotState));
+        memcpy(&outgoingMessage.robot[i], &incomingRobotState, sizeof(EnemyRobotState::RobotState));
 
         // Update the current state estimate
         incomingRobotState.current = false;
