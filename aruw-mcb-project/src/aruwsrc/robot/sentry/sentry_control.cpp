@@ -320,15 +320,17 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     rightBackMotor,
     {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
 
-tap::encoder::CanEncoder parallelOmni(
+aruwsrc::virtualMCB::VirtualCanEncoder parallelOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
+    &drivers()->chassisMcbLite,
     tap::can::CanBus::CAN_BUS2,
     true);
 
-tap::encoder::CanEncoder perpendicularOmni(
+aruwsrc::virtualMCB::VirtualCanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID0,
+    &drivers()->chassisMcbLite,
     tap::can::CanBus::CAN_BUS2);
 
 aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
@@ -340,7 +342,7 @@ aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     deadwheels,
     chassisYawObserver,
-    drivers()->mpu6500,
+    drivers()->chassisMcbLite.imu,
     INITIAL_CHASSIS_POSITION_X,
     INITIAL_CHASSIS_POSITION_Y,
     CENTER_TO_WHEELBASE_RADIUS,
