@@ -320,7 +320,6 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     rightBackMotor,
     {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
 
-
 tap::encoder::CanEncoder parallelOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
@@ -347,7 +346,7 @@ aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
     CENTER_TO_WHEELBASE_RADIUS,
     PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
     PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
-    
+
 // aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
 //     leftFrontMotor.getEncoder(),
 //     leftBackMotor.getEncoder(),
@@ -590,8 +589,8 @@ NoteSequenceCommand imuCalibrateDoneBuzzCommand(
     MARIO_MUSHROOM_NOTES,
     MARIO_MUSHROOM_NOTE_LENGTH_MS);
 
-SequentialCommand<2> imuCalibrateAndBuzzCommand(std::array<Command *, 2>{
-    {&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
+SequentialCommand<2> imuCalibrateAndBuzzCommand(
+    std::array<Command *, 2>{{&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
@@ -944,6 +943,7 @@ void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateAndBuzzCommand);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
+    drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
 }
 
 /* register io mappings here ------------------------------------------------*/

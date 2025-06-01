@@ -21,6 +21,7 @@
 #define SENTRY_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -71,6 +72,14 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .maxAngle = M_TWOPI,
     .limitMotorAngles = false,
 };
+
+static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TRANSFORM(
+    0,
+    0,
+    0,
+    M_PI,
+    0,
+    0);
 
 namespace chassisFrameController
 {
