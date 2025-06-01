@@ -75,7 +75,7 @@ void TurretMajorWorldFrameController::runController(
 {
     worldFrameSetpoint = desiredSetpoint;
 
-    float vel = -turretMajorIMU.getGz();
+    float vel = turretMajorIMU.getGz();
 
     const float positionControllerError =
         turretMotor.getValidMinError(worldFrameSetpoint, Angle(worldToMajor.getYaw()));
