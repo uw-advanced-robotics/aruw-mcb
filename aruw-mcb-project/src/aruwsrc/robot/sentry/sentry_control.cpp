@@ -348,20 +348,6 @@ aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
     CENTER_TO_WHEELBASE_RADIUS,
     PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
     PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
-    
-// aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-//     leftFrontMotor.getEncoder(),
-//     leftBackMotor.getEncoder(),
-//     DEADWHEEL_RADIUS);
-
-// SentryKFOdometry2DSubsystem odometrySubsystem(
-//     *drivers(),
-//     deadwheels,
-//     chassisYawObserver,
-//     drivers()->chassisMcbLite.imu,
-//     INITIAL_CHASSIS_POSITION_X,
-//     INITIAL_CHASSIS_POSITION_Y,
-//     CENTER_TO_WHEELBASE_RADIUS);
 
 SentryTransforms transformer(
     odometrySubsystem,
