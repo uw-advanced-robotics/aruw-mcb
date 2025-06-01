@@ -40,7 +40,7 @@ DeadwheelKFOdometry2DSubsystem::DeadwheelKFOdometry2DSubsystem(
     : Subsystem(&drivers),
       DeadwheelChassisKFOdometry(
           deadwheels,
-          chassisYawObserver,
+          yawObserver,
           imu,
           modm::Vector2f(initialXPos, initialYPos),
           centerToWheelDistance,
