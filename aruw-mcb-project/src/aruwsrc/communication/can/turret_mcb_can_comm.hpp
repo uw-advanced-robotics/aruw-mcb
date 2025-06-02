@@ -130,11 +130,7 @@ public:
      */
     mockable inline float getPitchUnwrapped() const
     {
-#if defined(TARGET_SENTRY_ECLIPSE)
-        return -lastCompleteImuData.pitch - M_TWOPI * static_cast<float>(pitchRevolutions);
-#else
         return lastCompleteImuData.pitch + M_TWOPI * static_cast<float>(pitchRevolutions);
-#endif
     }
 
     /**
