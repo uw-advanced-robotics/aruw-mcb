@@ -190,10 +190,12 @@ public:
         txCommandMsgBitmask.update(TxCommandMsgBitmask::TURN_LASER_ON, isOn);
     }
 
-    mockable inline void requestCalibration()
+    mockable inline void sendImuCalibrationRequest()
     {
         txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
     }
+
+    inline void requestCalibration() override { sendImuCalibrationRequest(); }
 
     mockable void sendData();
 
