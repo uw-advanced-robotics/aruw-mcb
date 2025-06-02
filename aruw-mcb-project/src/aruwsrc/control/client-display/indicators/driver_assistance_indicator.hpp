@@ -72,8 +72,8 @@ private:
         HERO_HP = 2,
         STANDARD_TRACER = 3,
         STANDARD_HP = 4,
-        SENTRY_HP = 5,
-        SENTRY_TRACER = 6
+        SENTRY_TRACER = 5,
+        SENTRY_HP = 6,
     };
 
     void deleteGraphic(GraphicIndex index);
