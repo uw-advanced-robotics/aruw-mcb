@@ -134,7 +134,7 @@ void ImuCalibrateCommand::execute()
 
                 for (auto &config : turretsAndControllers)
                 {
-                    config.turretMCBCanComm->requestCalibration();
+                    config.turretMCBCanComm->sendImuCalibrationRequest();
                 }
 
                 drivers->mpu6500.requestCalibration();
