@@ -69,10 +69,9 @@
 #include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
-#include "aruwsrc/control/client-display/indicators/driver_assistance_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -550,7 +549,7 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformer.getWorldToVTM());
 
-DriverAssistanceIndicator driverAssistanceIndicator(
+VisionAssisstanceIndicator VisionAssisstanceIndicator(
     drivers()->visionCoprocessor,
     refSerialTransmitter,
     drivers()->refSerial,
@@ -564,7 +563,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &driverAssistanceIndicator};
+    &VisionAssisstanceIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 

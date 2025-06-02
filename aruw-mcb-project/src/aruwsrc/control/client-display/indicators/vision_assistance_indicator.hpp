@@ -41,10 +41,10 @@ using namespace aruwsrc::communication::inter_robot_comm;
  * Draws bars above robots to indicate the HP of the target.
  * Draws a line to the target.
  */
-class DriverAssistanceIndicator : public HudIndicator, protected modm::Resumable<2>
+class VisionAssisstanceIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
-    DriverAssistanceIndicator(
+    VisionAssisstanceIndicator(
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         RefSerialTransmitter &refSerialTransmitter,
         RefSerial &refSerial,

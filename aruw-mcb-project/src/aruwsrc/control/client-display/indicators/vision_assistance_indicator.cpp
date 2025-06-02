@@ -17,11 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "driver_assistance_indicator.hpp"
+#include "vision_assistance_indicator.hpp"
 
 namespace aruwsrc::control::client_display
 {
-DriverAssistanceIndicator::DriverAssistanceIndicator(
+VisionAssisstanceIndicator::VisionAssisstanceIndicator(
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     tap::communication::serial::RefSerial &refSerial,
@@ -35,7 +35,7 @@ DriverAssistanceIndicator::DriverAssistanceIndicator(
 {
 }
 
-void DriverAssistanceIndicator::initialize()
+void VisionAssisstanceIndicator::initialize()
 {
     configureGraphic(GraphicIndex::TARGET, Tx::GraphicColor::GREEN);
 
@@ -49,7 +49,7 @@ void DriverAssistanceIndicator::initialize()
     // configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
 }
 
-modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
+modm::ResumableResult<void> VisionAssisstanceIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0);
 
@@ -59,7 +59,7 @@ modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
     RF_END();
 }
 
-modm::ResumableResult<void> DriverAssistanceIndicator::update()
+modm::ResumableResult<void> VisionAssisstanceIndicator::update()
 {
     // Variable definitions because protothread can't
     bool visionHasTarget;
@@ -109,7 +109,7 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
     RF_END();
 }
 
-void DriverAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicIndex index)
+void VisionAssisstanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicIndex index)
 {
     Position cameraFrameOrbit = worldToCameraTransform.apply(orbit);
     ProjectedResult screenFrameOrbit =
@@ -159,7 +159,7 @@ void DriverAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicInd
     }
 };
 
-void DriverAssistanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicIndex index, int ID)
+void VisionAssisstanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicIndex index, int ID)
 {
     Position cameraFrameOrbit = worldToCameraTransform.apply(orbit);
     ProjectedResult screenFrameOrbit =
@@ -204,7 +204,7 @@ void DriverAssistanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicInde
         graphicToModify);
 }
 
-void DriverAssistanceIndicator::drawPlateTargetBox()
+void VisionAssisstanceIndicator::drawPlateTargetBox()
 {
     auto aimData = visionCoprocessor.getLastAimData(0);
 
@@ -237,7 +237,7 @@ void DriverAssistanceIndicator::drawPlateTargetBox()
         graphicToModify);
 }
 
-void DriverAssistanceIndicator::configureGraphic(GraphicIndex index, Tx::GraphicColor color)
+void VisionAssisstanceIndicator::configureGraphic(GraphicIndex index, Tx::GraphicColor color)
 {
     uint8_t idx = static_cast<uint8_t>(index);
     uint8_t graphicName[3];
@@ -250,7 +250,7 @@ void DriverAssistanceIndicator::configureGraphic(GraphicIndex index, Tx::Graphic
         color);
 }
 
-void DriverAssistanceIndicator::deleteGraphic(GraphicIndex index)
+void VisionAssisstanceIndicator::deleteGraphic(GraphicIndex index)
 {
     uint8_t idx = static_cast<uint8_t>(index);
     graphic.graphicData[idx].operation = Tx::GRAPHIC_DELETE;
