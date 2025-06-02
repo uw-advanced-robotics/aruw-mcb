@@ -48,7 +48,7 @@ public:
         aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         RefSerialTransmitter &refSerialTransmitter,
         RefSerial &refSerial,
-        const Transform &worldToTurretTransform,
+        const Transform &worldToCameraTransform,
         InterRobotTransmitter &interRobotTransmitter);
 
     void initialize() override;

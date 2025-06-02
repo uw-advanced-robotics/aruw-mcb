@@ -25,12 +25,12 @@ DriverAssistanceIndicator::DriverAssistanceIndicator(
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     tap::communication::serial::RefSerial &refSerial,
-    const Transform &worldToTurretTransform,
+    const Transform &worldToCameraTransform,
     InterRobotTransmitter &interRobotTransmitter)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),
       refSerial(refSerial),
-      worldToCameraTransform(worldToTurretTransform),
+      worldToCameraTransform(worldToCameraTransform),
       interRobotTransmitter(interRobotTransmitter)
 {
 }
@@ -120,7 +120,8 @@ void DriverAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicInd
 
     if (!screenFrameOrbit.inFrame)
     {
-        graphicToModify->operation = Tx::GRAPHIC_DELETE;
+       // If the orbit is not in frame, draw a line offscreen to where they should be. Take angle between chassis position
+       // and camera frame 
     }
 
     RefSerialTransmitter::configLine(
