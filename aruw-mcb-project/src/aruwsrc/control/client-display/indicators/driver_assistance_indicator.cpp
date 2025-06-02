@@ -43,9 +43,9 @@ void DriverAssistanceIndicator::initialize()
     configureGraphic(GraphicIndex::STANDARD_TRACER, Tx::GraphicColor::ORANGE);
     configureGraphic(GraphicIndex::SENTRY_TRACER, Tx::GraphicColor::ORANGE);
 
-    configureGraphic(GraphicIndex::HERO_HP, Tx::GraphicColor::PURPLISH_RED);
-    configureGraphic(GraphicIndex::STANDARD_HP, Tx::GraphicColor::PURPLISH_RED);
-    configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
+    // configureGraphic(GraphicIndex::HERO_HP, Tx::GraphicColor::PURPLISH_RED);
+    // configureGraphic(GraphicIndex::STANDARD_HP, Tx::GraphicColor::PURPLISH_RED);
+    // configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
 }
 
 modm::ResumableResult<void> DriverAssistanceIndicator::sendInitialGraphics()
@@ -83,8 +83,8 @@ modm::ResumableResult<void> DriverAssistanceIndicator::update()
     {
         bool valid = (tap::arch::clock::getTimeMilliseconds() - robotOrbits.robot[i].timestamp) <
                      TIME_CUTOFF_MS;
-        GraphicIndex tracerIndex = static_cast<GraphicIndex>(i + 1);
-        GraphicIndex healthBarIndex = static_cast<GraphicIndex>(i + 4);
+        GraphicIndex tracerIndex = static_cast<GraphicIndex>(i * 2 + 1);
+        GraphicIndex healthBarIndex = static_cast<GraphicIndex>(i * 2 + 2);
         if (valid)
         {
             Position orbit =
@@ -120,6 +120,9 @@ void DriverAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicInd
 
     if (screenFrameOrbit.inFrame)
     {
+        // Make it ORANGE
+        graphicToModify->color = static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
+
         RefSerialTransmitter::configLine(
             1,
             TRACER_LINE_ORIGIN.x,
@@ -132,17 +135,20 @@ void DriverAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicInd
     {
         // If the orbit is not in frame, draw a line offscreen to where they should be. Take angle
         // between 0,0 in xy and position
-        float angle = atan2(cameraFrameOrbit.y(), cameraFrameOrbit.x()) +
-                      M_PI_2;  // Add 90 degrees to point up
+        float angle = atan2(cameraFrameOrbit.y(), cameraFrameOrbit.x()) + M_PI_2;
         angle = modm::Angle::normalize(angle);
 
         // Calculate the end point of the line, 10,000 pixels away from the origin cuz we want it to
         // go offscreen
-        uint16_t x = TRACER_LINE_ORIGIN.x + 10000 * cos(angle);
-        uint16_t y = TRACER_LINE_ORIGIN.y + 10000 * sin(angle);
+        uint16_t x = TRACER_LINE_ORIGIN.x + 200 * cos(angle);
+        uint16_t y = TRACER_LINE_ORIGIN.y + 200 * sin(angle);
 
         x = tap::algorithms::limitVal(x, static_cast<uint16_t>(0), SCREEN_WIDTH);
         y = tap::algorithms::limitVal(y, static_cast<uint16_t>(0), SCREEN_HEIGHT);
+
+        // Make it PORPLE
+        graphicToModify->color = static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
+
         RefSerialTransmitter::configLine(
             1,
             TRACER_LINE_ORIGIN.x,
