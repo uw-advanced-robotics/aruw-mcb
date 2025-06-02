@@ -84,6 +84,8 @@ static void initializeIo(Drivers *drivers);
 // called as frequently.
 static void updateIo(Drivers *drivers);
 
+static void initializeI2C(Drivers *drivers);
+
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers *drivers);
@@ -154,6 +156,10 @@ int main()
 #endif
             analogPin = drivers->analog.read(tap::gpio::Analog::Pin::OledJoystick);
 
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+            PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
+#endif
         }
         modm::delay_us(10);
     }
@@ -171,6 +177,8 @@ static void initializeIo(Drivers *drivers)
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
+
+    initializeI2C(drivers);
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || \
     defined(TARGET_SENTRY_HYDRA)
@@ -200,6 +208,10 @@ static void initializeIo(Drivers *drivers)
 #endif
 #if defined(TARGET_ENGINEER)
     drivers->engineerCVCommunication.initializeCV();
+#endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+    drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
 }
 
@@ -237,6 +249,10 @@ static void updateIo(Drivers *drivers)
     drivers->rmulStateMachine.updateState();
 
 #endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+    drivers->ism330.read();
+#endif
 }
 
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO)
@@ -255,3 +271,16 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
     }
 }
 #endif
+
+static void initializeI2C(Drivers *drivers)
+{
+    // Turn off the digital pins used for I2C devices
+    drivers->digital.set(tap::gpio::Digital::OutputPin::E, false);
+
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+
+    // Turn on the digital pins used for I2C devices
+    drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
+}
