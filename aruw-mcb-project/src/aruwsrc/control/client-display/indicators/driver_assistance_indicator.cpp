@@ -134,8 +134,7 @@ void DriverAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicInd
     }
     else
     {
-        // If the orbit is not in frame, draw a line offscreen to where they should be. Take angle
-        // between 0,0 in xy and position
+        // If the orbit is not in frame, draw a line offscreen to where they should be.
         float angle = atan2(cameraFrameOrbit.y(), cameraFrameOrbit.x()) + M_PI_2;
         angle = modm::Angle::normalize(angle);
 
