@@ -119,13 +119,13 @@ inline RefSerialTransmitter::RobotId InterRobotTransmitter::getAllyRobotId() con
     if (isBlue)
     {
         return (robotData.robotId == RefSerialData::RobotId::BLUE_HERO)
-                   ? RefSerialData::RobotId::BLUE_SOLDIER_3
+                   ? RefSerialData::RobotId::BLUE_SOLDIER_1
                    : RefSerialData::RobotId::BLUE_HERO;
     }
     else
     {
         return (robotData.robotId == RefSerialData::RobotId::RED_HERO)
-                   ? RefSerialData::RobotId::RED_SOLDIER_3
+                   ? RefSerialData::RobotId::RED_SOLDIER_1
                    : RefSerialData::RobotId::RED_HERO;
     }
 }
