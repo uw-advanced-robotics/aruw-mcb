@@ -520,12 +520,7 @@ TextHudIndicators textHudIndicators(
     {&beybladeCommand},
     refSerialTransmitter);
 
-VisionTargetIndicator visionTargetIndicator(
-    drivers()->visionCoprocessor,
-    refSerialTransmitter,
-    transformer.getWorldToVTM());
-
-VisionAssisstanceIndicator VisionAssisstanceIndicator(
+VisionAssistanceIndicator visionAssistanceIndicator(
     drivers()->visionCoprocessor,
     refSerialTransmitter,
     drivers()->refSerial,
@@ -539,7 +534,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &VisionAssisstanceIndicator};
+    &visionAssistanceIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 

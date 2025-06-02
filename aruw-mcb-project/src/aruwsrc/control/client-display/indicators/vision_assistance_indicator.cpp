@@ -21,7 +21,7 @@
 
 namespace aruwsrc::control::client_display
 {
-VisionAssisstanceIndicator::VisionAssisstanceIndicator(
+VisionAssistanceIndicator::VisionAssistanceIndicator(
     aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     tap::communication::serial::RefSerial &refSerial,
@@ -35,7 +35,7 @@ VisionAssisstanceIndicator::VisionAssisstanceIndicator(
 {
 }
 
-void VisionAssisstanceIndicator::initialize()
+void VisionAssistanceIndicator::initialize()
 {
     configureGraphic(GraphicIndex::TARGET, Tx::GraphicColor::GREEN);
 
@@ -49,7 +49,7 @@ void VisionAssisstanceIndicator::initialize()
     // configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
 }
 
-modm::ResumableResult<void> VisionAssisstanceIndicator::sendInitialGraphics()
+modm::ResumableResult<void> VisionAssistanceIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0);
 
@@ -59,7 +59,7 @@ modm::ResumableResult<void> VisionAssisstanceIndicator::sendInitialGraphics()
     RF_END();
 }
 
-modm::ResumableResult<void> VisionAssisstanceIndicator::update()
+modm::ResumableResult<void> VisionAssistanceIndicator::update()
 {
     // Variable definitions because protothread can't
     bool visionHasTarget;
@@ -109,7 +109,7 @@ modm::ResumableResult<void> VisionAssisstanceIndicator::update()
     RF_END();
 }
 
-void VisionAssisstanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicIndex index)
+void VisionAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicIndex index)
 {
     Position cameraFrameOrbit = worldToCameraTransform.apply(orbit);
     ProjectedResult screenFrameOrbit =
@@ -159,7 +159,7 @@ void VisionAssisstanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicIn
     }
 };
 
-void VisionAssisstanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicIndex index, int ID)
+void VisionAssistanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicIndex index, int ID)
 {
     Position cameraFrameOrbit = worldToCameraTransform.apply(orbit);
     ProjectedResult screenFrameOrbit =
@@ -204,7 +204,7 @@ void VisionAssisstanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicInd
         graphicToModify);
 }
 
-void VisionAssisstanceIndicator::drawPlateTargetBox()
+void VisionAssistanceIndicator::drawPlateTargetBox()
 {
     auto aimData = visionCoprocessor.getLastAimData(0);
 
@@ -237,7 +237,7 @@ void VisionAssisstanceIndicator::drawPlateTargetBox()
         graphicToModify);
 }
 
-void VisionAssisstanceIndicator::configureGraphic(GraphicIndex index, Tx::GraphicColor color)
+void VisionAssistanceIndicator::configureGraphic(GraphicIndex index, Tx::GraphicColor color)
 {
     uint8_t idx = static_cast<uint8_t>(index);
     uint8_t graphicName[3];
@@ -250,7 +250,7 @@ void VisionAssisstanceIndicator::configureGraphic(GraphicIndex index, Tx::Graphi
         color);
 }
 
-void VisionAssisstanceIndicator::deleteGraphic(GraphicIndex index)
+void VisionAssistanceIndicator::deleteGraphic(GraphicIndex index)
 {
     uint8_t idx = static_cast<uint8_t>(index);
     graphic.graphicData[idx].operation = Tx::GRAPHIC_DELETE;
