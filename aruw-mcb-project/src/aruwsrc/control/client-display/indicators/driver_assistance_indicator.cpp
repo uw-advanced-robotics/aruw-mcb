@@ -118,19 +118,37 @@ void DriverAssistanceIndicator::drawTracerLineToOrbit(Position orbit, GraphicInd
     graphicToModify->operation =
         graphicToModify->operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
 
-    if (!screenFrameOrbit.inFrame)
+    if (screenFrameOrbit.inFrame)
     {
-       // If the orbit is not in frame, draw a line offscreen to where they should be. Take angle between chassis position
-       // and camera frame 
+        RefSerialTransmitter::configLine(
+            1,
+            TRACER_LINE_ORIGIN.x,
+            TRACER_LINE_ORIGIN.y,
+            screenFrameOrbit.screenX,
+            screenFrameOrbit.screenY,
+            graphicToModify);
     }
+    else
+    {
+        // If the orbit is not in frame, draw a line offscreen to where they should be. Take angle
+        // between 0,0 in xy and position
+        float angle = atan2(cameraFrameOrbit.y(), cameraFrameOrbit.x()) + M_PI_2;  // Add 90 degrees to point up
+        angle = modm::Angle::normalize(angle);
+        
+        // Calculate the end point of the line, 10,000 pixels away from the origin cuz we want it to go offscreen
+        uint16_t x = TRACER_LINE_ORIGIN.x + 10000 * cos(angle);
+        uint16_t y = TRACER_LINE_ORIGIN.y + 10000 * sin(angle);
 
-    RefSerialTransmitter::configLine(
-        1,
-        TRACER_LINE_ORIGIN.x,
-        TRACER_LINE_ORIGIN.y,
-        screenFrameOrbit.screenX,
-        screenFrameOrbit.screenY,
-        graphicToModify);
+        x = tap::algorithms::limitVal(x, static_cast<uint16_t>(0), SCREEN_WIDTH);
+        y = tap::algorithms::limitVal(y, static_cast<uint16_t>(0), SCREEN_HEIGHT);
+        RefSerialTransmitter::configLine(
+            1,
+            TRACER_LINE_ORIGIN.x,
+            TRACER_LINE_ORIGIN.y,
+            x,
+            y,
+            graphicToModify);
+    }
 };
 
 void DriverAssistanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicIndex index, int ID)
