@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DRIVER_ASSISTANCE_INDICATOR_HPP_
-#define DRIVER_ASSISTANCE_INDICATOR_HPP_
+#ifndef VISION_ASSISTANCE_INDICATOR_HPP_
+#define VISION_ASSISTANCE_INDICATOR_HPP_
 
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
@@ -96,4 +96,4 @@ private:
 
 }  // namespace aruwsrc::control::client_display
 
-#endif  // DRIVER_ASSISTANCE_INDICATOR_HPP_
+#endif  // VISION_ASSISTANCE_INDICATOR_HPP_
