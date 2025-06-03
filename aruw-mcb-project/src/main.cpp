@@ -207,7 +207,7 @@ static void initializeIo(Drivers *drivers)
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-    drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    // drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
 }
 
@@ -242,7 +242,7 @@ static void updateIo(Drivers *drivers)
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-    drivers->ism330.read();
+    // drivers->ism330.read();
 #endif
 }
 
