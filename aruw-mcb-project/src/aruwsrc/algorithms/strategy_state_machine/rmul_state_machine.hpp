@@ -45,17 +45,17 @@
  * |             |            |               |
  * |-------      |   Capture  |        -------|
  * |             |   Point    |               |
- * | SIDE         ------------                |
- * | WALL              X                      |
- * |______            (MIDDLE)                |
+ * |  X           ------------                |
+ * | (POINT 4)         X                      |
+ * |______            (POINT 3)               |
  * |      |                                   |
  * |      |                                   |
  * |      ------------------------     X      |
- * |Elevated platform        |     (MID_RIGHT)|
+ * |Elevated platform        |     (POINT 2)  |
  * |_________________________|                |
  * |                                          |
  * |___________             X                 |
- * | Red      |     (BOTTOM_MIDDLE)           |
+ * | Red      |     (POINT 1)                 |
  * | Loading  |                               |
  * +------------------------------------------+
  *
@@ -86,9 +86,8 @@ private:
     {
         HEALING,
         ATTACKING,
-        FIRST_PUSH
     };
-    State state = State::FIRST_PUSH;
+    State state = State::ATTACKING;
 
     void updatePath();
 
@@ -101,27 +100,23 @@ private:
     int ATTACKING_THRESHOLD = 90;
 
     // Speed at which the robot moves when healing, in m/s
-    float SPEED = 1.0f;
+    float SPEED = 0.1f;
 
     const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
-    const Position BOTTOM_MIDDLE = Position(1.2, 2.1, 0);
-    const Position MIDDLE_RIGHT = Position(3.2, 2.0, 0);
-    // const Position MIDDLE = Position(4.5, 4.0, 0);
-    // const Position SIDE_WALL = Position(5.25, 7.5, 0);
-    // const Position CAPTURE_POINT = Position(6, 4, 0);
-    const Position MIDDLE = Position(4, 4.0, 0);
-    const Position SIDE_WALL = Position(4, 7.5, 0);
-    const Position CAPTURE_POINT = Position(4, 4, 0);
+    const Position POINT_1 = Position(1.2, 2.1, 0); // BOTTOM_MIDDLE
+    const Position POINT_2 = Position(3.5, 2.0, 0); // MIDDLE_RIGHT
+    // const Position POINT_3 = Position(4.5, 4.0, 0); // MIDDLE
+    // const Position POINT_4 = Position(5.25, 7.5, 0); // SIDE_WALL
 
+
+    const Position POINT_3 = Position(4.15, 4.0, 0); // MIDDLE
+    const Position POINT_4 = Position(3.8, 7.5, 0); // SIDE_WALL
 
     const std::array<Position, 5> ATTACKING_PATH =
-        {RESUPPLY_ZONE, BOTTOM_MIDDLE, MIDDLE_RIGHT, MIDDLE, SIDE_WALL};
+        {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3, POINT_4};
 
     const std::array<Position, 5> HEALING_PATH =
-        {SIDE_WALL, MIDDLE, MIDDLE_RIGHT, BOTTOM_MIDDLE, RESUPPLY_ZONE};
-
-    const std::array<Position, 5> FIRST_PUSH_PATH =
-        {RESUPPLY_ZONE, BOTTOM_MIDDLE, MIDDLE_RIGHT, MIDDLE, CAPTURE_POINT};
+        {POINT_4, POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
 };
 }  // namespace aruwsrc::algorithms::strategy_state_machine
 
