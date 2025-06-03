@@ -91,8 +91,6 @@ static void initializeI2C(Drivers *drivers);
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
 
-float analogPin;
-
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -154,7 +152,6 @@ int main()
 #if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_ZERO)
             checkTurretMcbDisconnection(drivers);
 #endif
-            analogPin = drivers->analog.read(tap::gpio::Analog::Pin::OledJoystick);
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
             PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
@@ -242,11 +239,6 @@ static void updateIo(Drivers *drivers)
 
 #ifdef TARGET_TESTBED
     drivers->lite.updateSerial();
-#endif
-
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
-    drivers->rmulStateMachine.updateState();
-
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)

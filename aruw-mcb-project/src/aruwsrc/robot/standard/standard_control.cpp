@@ -61,7 +61,6 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
-#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
@@ -287,27 +286,7 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-static constexpr aruwsrc::chassis::BeybladeConfig BEYBLADE_CONFIG{
-    .beybladeRotationalSpeedFractionOfMax = 0.45f,
-    .beybladeTranslationalSpeedMultiplier = 0.1f,
-    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
-    .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
-    .beybladeRampRate = 45,
-};
-
-aruwsrc::chassis::ChassisAutoNavController autoNavController(
-    *drivers(),
-    chassis,
-    transformer.getWorldToChassis(),
-    BEYBLADE_CONFIG);
-
 /* define commands ----------------------------------------------------------*/
-aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
-    *drivers(),
-    chassis,
-    autoNavController,
-    false);
-
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
@@ -598,7 +577,7 @@ HoldRepeatCommandMapping rightSwitchUp(
 
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&autoNavBeybladeCommand},
+    {&beybladeSlowWhenOutOfCombatCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 HoldCommandMapping leftSwitchUp(
@@ -746,7 +725,6 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
-    drivers->rmulStateMachine.attachAutoNavController(&autoNavController);
 }
 
 /* register io mappings here ------------------------------------------------*/
