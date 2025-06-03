@@ -150,11 +150,7 @@ tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
     CAN_BUS_MOTORS,
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
     false,
-#else
-#error "did not define standard!"
-#endif
     "Yaw Turret",
     true,
     1,
