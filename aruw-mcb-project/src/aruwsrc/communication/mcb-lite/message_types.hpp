@@ -1,20 +1,20 @@
 /*
- * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
- * This file is part of aruw-mcb.
+ * This file is part of aruw-mcb-lite.
  *
- * aruw-mcb is free software: you can redistribute it and/or modify
+ * aruw-mcb-lite is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * aruw-mcb is distributed in the hope that it will be useful,
+ * aruw-mcb-lite is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ * along with aruw-mcb-lite.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef MESSAGE_TYPES_HPP_
@@ -42,6 +42,21 @@ enum MessageTypes : uint8_t
     LED_CONTROL_MESSAGE = 11,
     CAN1_ENCODER_MESSAGE = 12,
     CAN2_ENCODER_MESSAGE = 13,
+    VOLTAGE_CURRENT_MESSAGE = 14,
+};
+
+// CAN Bus message Lite -> MCB
+struct MCBCanBusMessage
+{
+    uint8_t message[8][8];
+    uint8_t online;
+} modm_packed;
+
+// CAN Bus message MCB -> Lite
+// Not packed because message isn't and that is a compile warning
+struct LiteCanBusMessage
+{
+    modm::can::Message message;
 };
 
 // IMU message Lite -> MCB
@@ -148,6 +163,13 @@ struct CANEncoderMessage
     } encoders[8];
 } modm_packed;
 
-}  // namespace aruwsrc::virtualMCB
+// Voltage Current messages Lite -> MCB
+struct VoltageCurrentMessage
+{
+    uint16_t voltage;
+    uint16_t current;
+} modm_packed;
+
+}  // namespace src::virtualMCB
 
 #endif

@@ -36,6 +36,7 @@
 #include "virtual_imu_interface.hpp"
 #include "virtual_leds.hpp"
 #include "virtual_pwm.hpp"
+#include "virtual_voltage_current_sensor.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
@@ -58,6 +59,7 @@ class MCBLite : public tap::communication::serial::DJISerial
 {
     friend class aruwsrc::display::MCBLiteMenu;
     friend class VirtualCanEncoder;
+    friend class VirtualVoltageCurrentSensor;
 
 public:
     MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
@@ -87,6 +89,8 @@ private:
         const ReceivedSerialMessage& completeMessage,
         VirtualCanEncoder** encoders);
 
+    void processVoltageCurrentMessage(const ReceivedSerialMessage& completeMessage);
+
     tap::communication::serial::Uart::UartPort port;
 
     IMUMessage currentIMUData;
@@ -97,6 +101,8 @@ private:
 
     VirtualCanEncoder* can1Encoders[8];
     VirtualCanEncoder* can2Encoders[8];
+
+    VirtualVoltageCurrentSensor* voltageCurrentSensor;
 
     bool initialized = false;
 };
