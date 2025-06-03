@@ -56,6 +56,7 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
@@ -89,7 +90,6 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
 using namespace tap::communication::serial;
@@ -251,7 +251,6 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver);
 
 aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
-
 
 static constexpr aruwsrc::chassis::BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRotationalSpeedFractionOfMax = 0.45f,

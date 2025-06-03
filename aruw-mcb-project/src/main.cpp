@@ -156,7 +156,6 @@ int main()
 #endif
             analogPin = drivers->analog.read(tap::gpio::Analog::Pin::OledJoystick);
 
-
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
             PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
 #endif
