@@ -65,9 +65,8 @@ DjiMotor::DjiMotor(
       encoder(
           {externalEncoder != nullptr ? externalEncoder
                                       : const_cast<Encoder*>(&this->getInternalEncoder()),
-           //    externalEncoder != nullptr ? const_cast<Encoder*>(&this->getInternalEncoder())
-           //                               : nullptr})
-           nullptr})
+           externalEncoder != nullptr ? const_cast<Encoder*>(&this->getInternalEncoder())
+                                      : nullptr})
 {
     motorDisconnectTimeout.stop();
 }
