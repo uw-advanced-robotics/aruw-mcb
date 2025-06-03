@@ -47,7 +47,7 @@ float EngineerControlOperatorInterface::getCubeLiftVelocity()
         return 0.0f;
 }
 
-float EngineerControlOperatorInterface::getArmLiftVelocity()
+float EngineerControlOperatorInterface::getGantryLiftVelocity()
 {
     if (isGantryControlMode())
         return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
@@ -55,7 +55,7 @@ float EngineerControlOperatorInterface::getArmLiftVelocity()
         return 0.0f;
 }
 
-float EngineerControlOperatorInterface::getArmExtensionVelocity()
+float EngineerControlOperatorInterface::getGantryExtensionVelocity()
 {
     if (isGantryControlMode())
         return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
@@ -63,7 +63,7 @@ float EngineerControlOperatorInterface::getArmExtensionVelocity()
         return 0.0f;
 }
 
-float EngineerControlOperatorInterface::getArmWristPitchVelocity()
+float EngineerControlOperatorInterface::getWristPitchVelocity()
 {
     if (isWristControlMode())
         return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
@@ -71,7 +71,7 @@ float EngineerControlOperatorInterface::getArmWristPitchVelocity()
         return 0.0f;
 }
 
-float EngineerControlOperatorInterface::getArmWristYawVelocity()
+float EngineerControlOperatorInterface::getWristYawVelocity()
 {
     if (isWristControlMode())
         return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
@@ -79,7 +79,7 @@ float EngineerControlOperatorInterface::getArmWristYawVelocity()
         return 0.0f;
 }
 
-float EngineerControlOperatorInterface::getArmWristRollVelocity()
+float EngineerControlOperatorInterface::getWristRollVelocity()
 {
     if (isWristControlMode())
         return drivers->remote.getChannel(Remote::Channel::WHEEL);

@@ -17,19 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WRIST_FOLD_IN_COMMAND_HPP_
-#define WRIST_FOLD_IN_COMMAND_HPP_
+#ifndef WRIST_FOLD_OUT_COMMAND_HPP_
+#define WRIST_FOLD_OUT_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/arm/wrist_subsystem.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
-class WristFoldInCommand : public tap::control::Command
+class WristFoldOutCommand : public tap::control::Command
 {
 public:
-    WristFoldInCommand(WristSubsystem &wrist);
+    WristFoldOutCommand(WristSubsystem &wrist);
 
     void initialize() override;
 
@@ -39,19 +39,19 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Wrist Fold In Command"; }
+    const char *getName() const override { return "Wrist Fold Out Command"; }
 
 private:
     WristSubsystem &wrist;
 
     enum
     {
-        BOTTOM,
         TOP,
-        IN,
+        BOTTOM,
+        OUT,
         COMPLETED
-    } state = BOTTOM;  // state machine for folding in
-};                     // class WristFoldInCommand
+    } state = TOP;  // state machine for folding in
+};                  // class WristFoldOutCommand
 
 }  // namespace aruwsrc::engineer
 

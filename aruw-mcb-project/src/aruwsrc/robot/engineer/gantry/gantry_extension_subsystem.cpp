@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/arm/arm_extension_subsystem.hpp"
+#include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 
@@ -25,7 +25,7 @@ namespace aruwsrc
 {
 namespace engineer
 {
-ArmExtensionSubsystem::ArmExtensionSubsystem(
+GantryExtensionSubsystem::GantryExtensionSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& motor,
     const tap::algorithms::SmoothPidConfig& config,
@@ -52,22 +52,22 @@ ArmExtensionSubsystem::ArmExtensionSubsystem(
 {
 }
 
-void ArmExtensionSubsystem::initialize()
+void GantryExtensionSubsystem::initialize()
 {
     motor.initialize();
     motor.getEncoder()->resetEncoderValue();
 }
 
-void ArmExtensionSubsystem::setDesiredOutput(int16_t power) { motor.setDesiredOutput(power); }
+void GantryExtensionSubsystem::setDesiredOutput(int16_t power) { motor.setDesiredOutput(power); }
 
-void ArmExtensionSubsystem::resetEncoderValue() { motor.getEncoder()->resetEncoderValue(); }
+void GantryExtensionSubsystem::resetEncoderValue() { motor.getEncoder()->resetEncoderValue(); }
 
-float ArmExtensionSubsystem::getEncoderValue()
+float GantryExtensionSubsystem::getEncoderValue()
 {
     return motor.getEncoder()->getPosition().getUnwrappedValue();
 }
 
-float ArmExtensionSubsystem::getEncoderVelocity() { return motor.getEncoder()->getVelocity(); }
+float GantryExtensionSubsystem::getEncoderVelocity() { return motor.getEncoder()->getVelocity(); }
 
 }  // namespace engineer
 }  // namespace aruwsrc

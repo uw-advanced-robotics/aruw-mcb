@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/arm/joint_subsystem.hpp"
+#include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 

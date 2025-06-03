@@ -52,27 +52,27 @@ public:
     /**
      * @return The arm lift velocity
      */
-    mockable float getArmLiftVelocity();
+    mockable float getGantryLiftVelocity();
 
     /**
      * @return The arm horizontal stage velocity
      */
-    mockable float getArmExtensionVelocity();
+    mockable float getGantryExtensionVelocity();
 
     /**
      * @return The arm wrist pitch velocity
      */
-    mockable float getArmWristPitchVelocity();
+    mockable float getWristPitchVelocity();
 
     /**
      * @return The arm wrist yaw velocity
      */
-    mockable float getArmWristYawVelocity();
+    mockable float getWristYawVelocity();
 
     /**
      * @return The arm wrist roll velocity
      */
-    mockable float getArmWristRollVelocity();
+    mockable float getWristRollVelocity();
 
     /**
      * @return whether or not the control switch is set to drive mode.

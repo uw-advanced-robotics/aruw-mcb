@@ -17,24 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARM_LIFT_SUBSYSTEM_HPP_
-#define ARM_LIFT_SUBSYSTEM_HPP_
+#ifndef gantry_lift_subsystem_HPP_
+#define gantry_lift_subsystem_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-#include "limit_switch_setpoint_interface.hpp"
+#include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
 namespace aruwsrc
 {
 namespace engineer
 {
-class ArmLiftSubsystem : public LimitSwitchSetpointInterface
+class GantryLiftSubsystem : public LimitSwitchSetpointInterface
 {
 public:
-    ArmLiftSubsystem(
+    GantryLiftSubsystem(
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motorLeft,
         tap::motor::MotorInterface &motorRight,
@@ -78,4 +78,4 @@ private:
 }  // namespace engineer
 }  // namespace aruwsrc
 
-#endif  // ARM_LIFT_SUBSYSTEM_HPP_
+#endif  // gantry_lift_subsystem_HPP_

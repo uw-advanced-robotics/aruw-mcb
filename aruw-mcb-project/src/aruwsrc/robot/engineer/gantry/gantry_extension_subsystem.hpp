@@ -17,22 +17,22 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARM_EXTENSION_SUBSYSTEM_HPP_
-#define ARM_EXTENSION_SUBSYSTEM_HPP_
+#ifndef gantry_extension_subSYSTEM_HPP_
+#define gantry_extension_subSYSTEM_HPP_
 
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/robot/engineer/arm/limit_switch_setpoint_interface.hpp"
+#include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
 namespace aruwsrc
 {
 namespace engineer
 {
-class ArmExtensionSubsystem : public LimitSwitchSetpointInterface
+class GantryExtensionSubsystem : public LimitSwitchSetpointInterface
 {
 public:
-    ArmExtensionSubsystem(
+    GantryExtensionSubsystem(
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motor,
         const tap::algorithms::SmoothPidConfig &config,
@@ -61,4 +61,4 @@ private:
 }  // namespace engineer
 }  // namespace aruwsrc
 
-#endif  // ARM_EXTENSION_SUBSYSTEM_HPP_
+#endif  // gantry_extension_subSYSTEM_HPP_

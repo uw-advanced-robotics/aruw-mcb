@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/arm/wrist_fold_in_command.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_fold_in_command.hpp"
 
 namespace aruwsrc::engineer
 {

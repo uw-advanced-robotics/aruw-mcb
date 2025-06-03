@@ -35,17 +35,17 @@
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/engineer/arm/arm_controller_command.hpp"
-#include "aruwsrc/robot/engineer/arm/arm_extension_subsystem.hpp"
-#include "aruwsrc/robot/engineer/arm/arm_lift_subsystem.hpp"
-#include "aruwsrc/robot/engineer/arm/joint_subsystem.hpp"
-#include "aruwsrc/robot/engineer/arm/wrist_subsystem.hpp"
-#include "aruwsrc/robot/engineer/cube_lift/cube_move_manual_command.hpp"
-#include "aruwsrc/robot/engineer/cube_lift/cube_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
-#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_lift_constants.hpp"
+#include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
+#include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
+#include "aruwsrc/robot/engineer/joint_subsystem.hpp"
+#include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
+#include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 using namespace tap::gpio;
 using tap::communication::serial::Remote;
@@ -250,7 +250,7 @@ WristSubsystem wristSubsystem(
     aruwsrc::engineer::WRIST_MAX_YAW,
     aruwsrc::engineer::WRIST_RATIO);
 
-ArmLiftSubsystem armLiftSubsystem(
+GantryLiftSubsystem gantryLiftSubsystem(
     drivers(),
     engineerGantryLiftLeftMotor,
     engineerGantryLiftRightMotor,
@@ -264,7 +264,7 @@ ArmLiftSubsystem armLiftSubsystem(
     GANTRY_LIFT_KS,
     GANTRY_LIFT_EPSILON);
 
-ArmExtensionSubsystem armExtensionSubsystem(
+GantryExtensionSubsystem gantryExtensionSubsystem(
     drivers(),
     engineerGantryExtensionMotor,
     aruwsrc::engineer::GANTRY_EXTENSION_CONFIG,
@@ -283,30 +283,37 @@ JointSubsystem wristRollSubsystem(
 
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
-HomingCommand gantryLiftHome(armLiftSubsystem);
-HomingCommand gantryExtensionHome(armExtensionSubsystem);
+HomingCommand gantryLiftHome(gantryLiftSubsystem);
+HomingCommand gantryExtensionHome(gantryExtensionSubsystem);
 
-CubeMoveManualCommand cubeManualControl(
+SetpointMoveManualCommand cubeManualControl(
     cubeLift,
     &drivers()->controlOperatorInterface,
     MANUAL_MOVE_SPEED);
-CubeMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
-CubeMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
-CubeMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
+
+SetpointMoveManualCommand gantryLiftManualControl(
+    gantryLiftSubsystem,
+    &drivers()->controlOperatorInterface,
+    MANUAL_MOVE_SPEED);
+
+SetpointMoveManualCommand gantryExtensionManualControl(
+    gantryExtensionSubsystem,
+    &drivers()->controlOperatorInterface,
+    MANUAL_MOVE_SPEED);
+
+SetpointMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
+SetpointMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
+SetpointMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
 
 aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &chassis);
 
-control::engineer::ArmControllerCommand armControllerCommand(
-    armLiftSubsystem,
-    armExtensionSubsystem,
+control::engineer::WristControllerCommand wristControllerCommand(
     wristRollSubsystem,
     wristSubsystem,
     &drivers()->controlOperatorInterface,
-    aruwsrc::engineer::GANTRY_LIFT_SCALING_FACTOR,
-    aruwsrc::engineer::GANTRY_EXTENSION_SCALING_FACTOR,
     aruwsrc::engineer::WRIST_ROLL_SCALING_FACTOR,
     aruwsrc::engineer::WRIST_PITCH_SCALING_FACTOR,
     aruwsrc::engineer::WRIST_YAW_SCALING_FACTOR);
@@ -343,8 +350,8 @@ tap::control::HoldCommandMapping rightUp(
 void initializeSubsystems()
 {
     chassis.initialize();
-    armLiftSubsystem.initialize();
-    armExtensionSubsystem.initialize();
+    gantryLiftSubsystem.initialize();
+    gantryExtensionSubsystem.initialize();
     wristRollSubsystem.initialize();
     wristSubsystem.initialize();
     cubeLift.initialize();
@@ -354,8 +361,8 @@ void initializeSubsystems()
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
-    drivers->commandScheduler.registerSubsystem(&armLiftSubsystem);
-    drivers->commandScheduler.registerSubsystem(&armExtensionSubsystem);
+    drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
+    drivers->commandScheduler.registerSubsystem(&gantryExtensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
@@ -365,19 +372,15 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
     chassis.setDefaultCommand(&chassisDriveCommand);
-    armLiftSubsystem.setDefaultCommand(&armControllerCommand);
-    armExtensionSubsystem.setDefaultCommand(&armControllerCommand);
-    wristSubsystem.setDefaultCommand(&armControllerCommand);
-    wristRollSubsystem.setDefaultCommand(&armControllerCommand);
+    // gantryLiftSubsystem.setDefaultCommand(&wristControllerCommand);
+    // gantryExtensionSubsystem.setDefaultCommand(&WristControllerCommand);
+    wristSubsystem.setDefaultCommand(&wristControllerCommand);
+    wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeLift.setDefaultCommand(&cubeManualControl);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers *)
-{
-    // drivers()->commandScheduler.addCommand(&armControllerCommand);
-    // drivers()->commandScheduler.addCommand(&chassisDriveCommand);
-}
+void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)

@@ -24,7 +24,7 @@
 
 #include "aruwsrc/control/bounded-subsystem/one_sided_bounded_subsystem_interface.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
-#include "aruwsrc/robot/engineer/arm/linear_joint_interface.hpp"
+#include "aruwsrc/robot/engineer/linear_joint_interface.hpp"
 
 namespace aruwsrc::engineer
 {

@@ -16,26 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef CUBE_MOVE_MANUAL_COMMAND_HPP_
-#define CUBE_MOVE_MANUAL_COMMAND_HPP_
+#ifndef CUBE_MOVE_POSITION_COMMAND_HPP_
+#define CUBE_MOVE_POSITION_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/arm/limit_switch_setpoint_interface.hpp"
-#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+#include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
 using namespace aruwsrc::engineer;
 
 namespace aruwsrc::robot::engineer
 
 {
-class CubeMoveManualCommand : public tap::control::Command
+class SetpointMovePositionCommand : public tap::control::Command
 {
 public:
-    CubeMoveManualCommand(
-        LimitSwitchSetpointInterface &cubeLift,
-        aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface,
-        float moveSpeed);
+    SetpointMovePositionCommand(LimitSwitchSetpointInterface &cubeLift, float setpoint);
 
     void initialize() override;
 
@@ -45,14 +41,13 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Cube Move Manual Command"; }
+    const char *getName() const override { return "Cube Move Position Command"; }
 
 private:
     LimitSwitchSetpointInterface &cubeLift;
-    aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface;
-    float setpoint, moveSpeed;
+    float setpoint;
 
-};  // class CubeMovePositionCommand
+};  // class SetpointMovePositionCommand
 
 }  // namespace aruwsrc::robot::engineer
-#endif  // CUBE_MOVE_MANUAL_COMMAND_HPP_
+#endif  // CUBE_MOVE_POSITION_COMMAND_HPP_

@@ -25,7 +25,7 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-#include "linear_joint_interface.hpp"
+#include "aruwsrc/robot/engineer/linear_joint_interface.hpp"
 
 namespace aruwsrc
 {

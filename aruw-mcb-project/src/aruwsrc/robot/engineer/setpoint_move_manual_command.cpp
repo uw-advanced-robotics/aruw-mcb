@@ -17,10 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cube_move_manual_command.hpp"
+#include "setpoint_move_manual_command.hpp"
+
 namespace aruwsrc::robot::engineer
 {
-CubeMoveManualCommand::CubeMoveManualCommand(
+SetpointMoveManualCommand::SetpointMoveManualCommand(
     LimitSwitchSetpointInterface& cubeLift,
     aruwsrc::control::engineer::EngineerControlOperatorInterface* operatorInterface,
     float moveSpeed)
@@ -31,13 +32,13 @@ CubeMoveManualCommand::CubeMoveManualCommand(
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeMoveManualCommand::initialize()
+void SetpointMoveManualCommand::initialize()
 {
     setpoint = cubeLift.getSetpoint();
     cubeLift.setPIDState(PIDState::POSITION_PID);
 }
 
-void CubeMoveManualCommand::execute()
+void SetpointMoveManualCommand::execute()
 {
     if (!operatorInterface->isGantryControlMode()) return;
 
@@ -45,7 +46,7 @@ void CubeMoveManualCommand::execute()
     cubeLift.setSetpoint(setpoint);
 }
 
-void CubeMoveManualCommand::end(bool) { cubeLift.setDesiredOutput(0); }
+void SetpointMoveManualCommand::end(bool) { cubeLift.setDesiredOutput(0); }
 
-bool CubeMoveManualCommand::isFinished() const { return false; }
+bool SetpointMoveManualCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::robot::engineer

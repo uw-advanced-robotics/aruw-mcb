@@ -16,22 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef CUBE_MOVE_POSITION_COMMAND_HPP_
-#define CUBE_MOVE_POSITION_COMMAND_HPP_
+
+#ifndef WRIST_FOLD_IN_COMMAND_HPP_
+#define WRIST_FOLD_IN_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/arm/limit_switch_setpoint_interface.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
-using namespace aruwsrc::engineer;
-
-namespace aruwsrc::robot::engineer
-
+namespace aruwsrc::engineer
 {
-class CubeMovePositionCommand : public tap::control::Command
+class WristFoldInCommand : public tap::control::Command
 {
 public:
-    CubeMovePositionCommand(LimitSwitchSetpointInterface &cubeLift, float setpoint);
+    WristFoldInCommand(WristSubsystem &wrist);
 
     void initialize() override;
 
@@ -41,13 +39,20 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Cube Move Position Command"; }
+    const char *getName() const override { return "Wrist Fold In Command"; }
 
 private:
-    LimitSwitchSetpointInterface &cubeLift;
-    float setpoint;
+    WristSubsystem &wrist;
 
-};  // class CubeMovePositionCommand
+    enum
+    {
+        BOTTOM,
+        TOP,
+        IN,
+        COMPLETED
+    } state = BOTTOM;  // state machine for folding in
+};                     // class WristFoldInCommand
 
-}  // namespace aruwsrc::robot::engineer
-#endif  // CUBE_MOVE_POSITION_COMMAND_HPP_
+}  // namespace aruwsrc::engineer
+
+#endif

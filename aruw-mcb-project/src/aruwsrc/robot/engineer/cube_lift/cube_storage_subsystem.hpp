@@ -25,9 +25,8 @@
 
 #include "aruwsrc/control/bounded-subsystem/one_sided_bounded_subsystem_interface.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
-#include "aruwsrc/robot/engineer/arm/limit_switch_setpoint_interface.hpp"
-#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
+#include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
 using namespace aruwsrc::engineer;
 

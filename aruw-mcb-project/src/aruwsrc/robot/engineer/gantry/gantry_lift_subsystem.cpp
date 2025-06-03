@@ -17,12 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/arm/arm_lift_subsystem.hpp"
+#include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
 namespace aruwsrc
 {
 namespace engineer
 {
-ArmLiftSubsystem::ArmLiftSubsystem(
+GantryLiftSubsystem::GantryLiftSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& motorLeft,
     tap::motor::MotorInterface& motorRight,
@@ -53,7 +53,7 @@ ArmLiftSubsystem::ArmLiftSubsystem(
 {
 }
 
-void ArmLiftSubsystem::initialize()
+void GantryLiftSubsystem::initialize()
 {
     motorLeft.initialize();
     motorRight.initialize();
@@ -62,7 +62,7 @@ void ArmLiftSubsystem::initialize()
     motorRight.getEncoder()->resetEncoderValue();
 }
 
-void ArmLiftSubsystem::setDesiredOutput(int16_t output)
+void GantryLiftSubsystem::setDesiredOutput(int16_t output)
 {
     float errorAlignment = getPositionDifference();
 
@@ -72,7 +72,7 @@ void ArmLiftSubsystem::setDesiredOutput(int16_t output)
     motorRight.setDesiredOutput(output - outputAlign + kS);
 }
 
-void ArmLiftSubsystem::resetEncoderValue()
+void GantryLiftSubsystem::resetEncoderValue()
 {
     motorLeft.getEncoder()->resetEncoderValue();
     motorRight.getEncoder()->resetEncoderValue();
@@ -80,7 +80,7 @@ void ArmLiftSubsystem::resetEncoderValue()
 
 float LiftPosition;
 
-float ArmLiftSubsystem::getEncoderValue()
+float GantryLiftSubsystem::getEncoderValue()
 {
     LiftPosition = (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
                     motorRight.getEncoder()->getPosition().getUnwrappedValue()) /
@@ -90,27 +90,27 @@ float ArmLiftSubsystem::getEncoderValue()
            2;
 }
 
-float ArmLiftSubsystem::getEncoderVelocity()
+float GantryLiftSubsystem::getEncoderVelocity()
 {
     return (motorLeft.getEncoder()->getVelocity() + motorRight.getEncoder()->getVelocity()) / 2;
 }
 
-float ArmLiftSubsystem::getPositionDifference()
+float GantryLiftSubsystem::getPositionDifference()
 {
     return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() -
             motorRight.getEncoder()->getPosition().getUnwrappedValue()) *
            radius;
 }
 
-float ArmLiftSubsystem::getVelocityDifference()
+float GantryLiftSubsystem::getVelocityDifference()
 {
     return (motorLeft.getEncoder()->getVelocity() - motorRight.getEncoder()->getVelocity()) *
            radius;
 }
 
-void ArmLiftSubsystem::stopDuringHoming() { refreshSafeDisconnect(); }
+void GantryLiftSubsystem::stopDuringHoming() { refreshSafeDisconnect(); }
 
-void ArmLiftSubsystem::refreshSafeDisconnect()
+void GantryLiftSubsystem::refreshSafeDisconnect()
 {
     motorLeft.setDesiredOutput(0);
     motorRight.setDesiredOutput(0);

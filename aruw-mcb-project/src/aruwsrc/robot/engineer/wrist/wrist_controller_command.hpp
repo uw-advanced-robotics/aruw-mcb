@@ -22,11 +22,11 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/arm/arm_extension_subsystem.hpp"
-#include "aruwsrc/robot/engineer/arm/arm_lift_subsystem.hpp"
-#include "aruwsrc/robot/engineer/arm/joint_subsystem.hpp"
-#include "aruwsrc/robot/engineer/arm/wrist_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+#include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
+#include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
+#include "aruwsrc/robot/engineer/joint_subsystem.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 namespace aruwsrc::control::engineer
 {
@@ -34,20 +34,16 @@ using namespace aruwsrc::engineer;
 /**
  * A command that moves the engineer arm based on the control operator interface.
  */
-class ArmControllerCommand : public tap::control::Command
+class WristControllerCommand : public tap::control::Command
 {
 public:
-    ArmControllerCommand(
-        ArmLiftSubsystem &lift,
-        ArmExtensionSubsystem &extension,
-        JointSubsystem &wristRoll,
+    WristControllerCommand(
+        JointSubsystem &roll,
         WristSubsystem &wrist,
         EngineerControlOperatorInterface *operatorInterface,
-        float liftScalingFactor,
-        float extensionScalingFactor,
-        float wristRollScalingFactor,
-        float wristPitchScalingFactor,
-        float wristYawScalingFactor);
+        float rollScalingFactor,
+        float pitchScalingFactor,
+        float yawScalingFactor);
 
     void initialize() override;
 
@@ -63,17 +59,13 @@ public:
     virtual bool isFinished() const override { return false; }
 
 private:
-    ArmLiftSubsystem &lift;
-    ArmExtensionSubsystem &extension;
-    JointSubsystem &wristRoll;
+    JointSubsystem &roll;
     WristSubsystem &wrist;
 
     EngineerControlOperatorInterface *operatorInterface;
-    const float liftScalingFactor;
-    const float extensionScalingFactor;
-    const float wristRollScalingFactor;
-    const float wristPitchScalingFactor;
-    const float wristYawScalingFactor;
+    const float rollScalingFactor;
+    const float pitchScalingFactor;
+    const float yawScalingFactor;
 };
 
 }  // namespace aruwsrc::control::engineer

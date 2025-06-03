@@ -17,14 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cube_move_position_command.hpp"
+#include "setpoint_move_position_command.hpp"
 
-#include <cstdlib>
-
-#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
 namespace aruwsrc::robot::engineer
 {
-CubeMovePositionCommand::CubeMovePositionCommand(
+SetpointMovePositionCommand::SetpointMovePositionCommand(
     LimitSwitchSetpointInterface &cubeLift,
     float setpoint)
     : cubeLift(cubeLift),
@@ -33,15 +30,15 @@ CubeMovePositionCommand::CubeMovePositionCommand(
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeMovePositionCommand::initialize()
+void SetpointMovePositionCommand::initialize()
 {
     cubeLift.setSetpoint(setpoint);
     cubeLift.setPIDState(PIDState::POSITION_PID);
 }
 
-void CubeMovePositionCommand::execute() {}
+void SetpointMovePositionCommand::execute() {}
 
-void CubeMovePositionCommand::end(bool) {}
+void SetpointMovePositionCommand::end(bool) {}
 
-bool CubeMovePositionCommand::isFinished() const { return cubeLift.atSetpoint(); }
+bool SetpointMovePositionCommand::isFinished() const { return cubeLift.atSetpoint(); }
 }  // namespace aruwsrc::robot::engineer
