@@ -24,9 +24,7 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-namespace aruwsrc
-{
-namespace engineer
+namespace aruwsrc::engineer
 {
 class LinearJointInterface
 {
@@ -79,7 +77,6 @@ protected:
           epsilon(epsilon){};
 };
 
-}  // namespace engineer
-}  // namespace aruwsrc
+}  // namespace aruwsrc::engineer
 
 #endif  // LINEAR_JOINT_INTERFACE_HPP_

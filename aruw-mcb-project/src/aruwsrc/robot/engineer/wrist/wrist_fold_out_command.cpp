@@ -19,7 +19,7 @@
 
 #include "aruwsrc/robot/engineer/wrist/wrist_fold_out_command.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::wrist
 {
 WristFoldOutCommand::WristFoldOutCommand(WristSubsystem &wrist) : wrist(wrist)
 {
@@ -55,4 +55,4 @@ void WristFoldOutCommand::execute()
 void WristFoldOutCommand::end(bool) {}
 
 bool WristFoldOutCommand::isFinished() const { return state == COMPLETED; }
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::wrist

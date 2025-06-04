@@ -24,7 +24,7 @@
 
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::wrist
 {
 class WristFoldOutCommand : public tap::control::Command
 {
@@ -53,6 +53,6 @@ private:
     } state = TOP;  // state machine for folding in
 };                  // class WristFoldOutCommand
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::wrist
 
 #endif

@@ -18,7 +18,7 @@
  */
 
 #include "wrist_move_position_command.hpp"
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::wrist
 {
 WristMovePositionCommand::WristMovePositionCommand(
     WristSubsystem &wrist,
@@ -42,4 +42,4 @@ void WristMovePositionCommand::execute() {}
 void WristMovePositionCommand::end(bool) {}
 
 bool WristMovePositionCommand::isFinished() const { return wrist.atSetpoint(); }
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::wrist

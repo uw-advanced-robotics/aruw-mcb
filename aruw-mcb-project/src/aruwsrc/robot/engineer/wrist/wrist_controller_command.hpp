@@ -28,9 +28,9 @@
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
-namespace aruwsrc::control::engineer
+namespace aruwsrc::engineer::wrist
 {
-using namespace aruwsrc::engineer;
+using namespace aruwsrc::control::engineer;
 /**
  * A command that moves the engineer arm based on the control operator interface.
  */
@@ -68,6 +68,6 @@ private:
     const float yawScalingFactor;
 };
 
-}  // namespace aruwsrc::control::engineer
+}  // namespace aruwsrc::engineer::wrist
 
 #endif  // WRIST_CONTROLLER_COMMAND_HPP_

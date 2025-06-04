@@ -21,9 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-namespace aruwsrc
-{
-namespace engineer
+namespace aruwsrc::engineer
 {
 JointSubsystem::JointSubsystem(
     tap::Drivers* drivers,
@@ -57,5 +55,4 @@ void JointSubsystem::refresh()
 
 void JointSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 
-}  // namespace engineer
-}  // namespace aruwsrc
+}  // namespace aruwsrc::engineer

@@ -21,7 +21,7 @@
 
 #include "tap/motor/dji_motor.hpp"
 
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer::lift
 {
 CubeStorageSubsystem::CubeStorageSubsystem(
     tap::Drivers* drivers,
@@ -76,4 +76,4 @@ float CubeStorageSubsystem::getEncoderVelocity() { return motor.getEncoder()->ge
 // float CubeStorageSubsystem::getVelocitySetpoint() { return velocitySetpoint; }
 /*potentially use if whicher controls lead/aiden wants us to (we forgot which)*/
 
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer::lift

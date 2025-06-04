@@ -27,9 +27,7 @@
 
 #include "aruwsrc/robot/engineer/linear_joint_interface.hpp"
 
-namespace aruwsrc
-{
-namespace engineer
+namespace aruwsrc::engineer
 {
 /**
  * Subsystem code for each engineer arm joint.
@@ -61,7 +59,6 @@ private:
     float kS;
 };
 
-}  // namespace engineer
-}  // namespace aruwsrc
+}  // namespace aruwsrc::engineer
 
 #endif  // JOINT_SUBSYSTEM_HPP_

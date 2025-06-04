@@ -19,10 +19,8 @@
 
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 
-namespace aruwsrc::control::engineer
+namespace aruwsrc::engineer::wrist
 {
-using namespace aruwsrc::engineer;
-
 WristControllerCommand::WristControllerCommand(
     JointSubsystem &roll,
     WristSubsystem &wrist,
@@ -57,4 +55,4 @@ void WristControllerCommand::execute()
     wrist.setSetpointYaw(wrist.getSetpointYaw() + yawVelocity);
 }
 
-}  // namespace aruwsrc::control::engineer
+}  // namespace aruwsrc::engineer::wrist

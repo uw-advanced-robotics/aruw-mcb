@@ -24,9 +24,7 @@
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 #include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
-using namespace aruwsrc::engineer;
-
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer
 
 {
 class SetpointMoveManualCommand : public tap::control::Command
@@ -54,5 +52,5 @@ private:
 
 };  // class SetpointMovePositionCommand
 
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer
 #endif  // SETPOINT_MOVE_MANUAL_COMMAND_HPP_

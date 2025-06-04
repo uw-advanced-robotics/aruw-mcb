@@ -26,11 +26,7 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-namespace aruwsrc
-{
-class Drivers;
-
-namespace engineer
+namespace aruwsrc::engineer::wrist
 {
 class WristSubsystem : public tap::control::Subsystem
 {
@@ -88,6 +84,6 @@ private:
     const float epsilon;
     float setpointPitch, setpointYaw;
 };
-}  // namespace engineer
-}  // namespace aruwsrc
+}  // namespace aruwsrc::engineer::wrist
+
 #endif  // WRIST_SUBSYSTEM_HPP_

@@ -19,9 +19,7 @@
 
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace engineer
+namespace aruwsrc::engineer::wrist
 {
 WristSubsystem::WristSubsystem(
     tap::Drivers *drivers,
@@ -128,5 +126,4 @@ void WristSubsystem::refreshSafeDisconnect()
     motorLeft.setDesiredOutput(0);
     motorRight.setDesiredOutput(0);
 }
-}  // namespace engineer
-}  // namespace aruwsrc
+}  // namespace aruwsrc::engineer::wrist

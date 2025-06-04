@@ -21,9 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-namespace aruwsrc
-{
-namespace engineer
+namespace aruwsrc::engineer::gantry
 {
 GantryExtensionSubsystem::GantryExtensionSubsystem(
     tap::Drivers* drivers,
@@ -69,5 +67,4 @@ float GantryExtensionSubsystem::getEncoderValue()
 
 float GantryExtensionSubsystem::getEncoderVelocity() { return motor.getEncoder()->getVelocity(); }
 
-}  // namespace engineer
-}  // namespace aruwsrc
+}  // namespace aruwsrc::engineer::gantry

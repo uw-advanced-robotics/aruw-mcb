@@ -30,7 +30,7 @@
 
 using namespace aruwsrc::engineer;
 
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer::lift
 {
 class CubeStorageSubsystem : public LimitSwitchSetpointInterface
 {
@@ -64,5 +64,5 @@ private:
     int16_t homingOutput = 1000;
 };  // class CUBE_STORAGE
 
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer::lift
 #endif  // CUBE_STORAGE_SUBSYSTEM_HPP_

@@ -25,7 +25,7 @@
 
 using namespace aruwsrc::engineer;
 
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer
 
 {
 class SetpointMovePositionCommand : public tap::control::Command
@@ -49,5 +49,5 @@ private:
 
 };  // class SetpointMovePositionCommand
 
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer
 #endif  // SETPOINT_MOVE_POSITION_COMMAND_HPP_

@@ -25,9 +25,7 @@
 
 #include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
-namespace aruwsrc
-{
-namespace engineer
+namespace aruwsrc::engineer::gantry
 {
 class GantryExtensionSubsystem : public LimitSwitchSetpointInterface
 {
@@ -58,7 +56,6 @@ private:
     tap::motor::MotorInterface &motor;
 };
 
-}  // namespace engineer
-}  // namespace aruwsrc
+}  // namespace aruwsrc::engineer::gantry
 
 #endif  // GANTRY_EXTENSION_SUBSYSTEM_HPP_

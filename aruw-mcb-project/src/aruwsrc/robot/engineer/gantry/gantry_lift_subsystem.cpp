@@ -18,9 +18,7 @@
  */
 
 #include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
-namespace aruwsrc
-{
-namespace engineer
+namespace aruwsrc::engineer::gantry
 {
 GantryLiftSubsystem::GantryLiftSubsystem(
     tap::Drivers* drivers,
@@ -116,5 +114,4 @@ void GantryLiftSubsystem::refreshSafeDisconnect()
     motorRight.setDesiredOutput(0);
 }
 
-}  // namespace engineer
-}  // namespace aruwsrc
+}  // namespace aruwsrc::engineer::gantry

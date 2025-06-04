@@ -24,7 +24,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer
 {
 static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID = tap::motor::MOTOR7;
 
@@ -64,5 +64,5 @@ static constexpr float ONE_CUBE_SETPOINT = -40;
 static constexpr float TWO_CUBE_SETPOINT = -220;
 static constexpr float THREE_CUBE_SETPOINT = -310;
 
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer
 #endif

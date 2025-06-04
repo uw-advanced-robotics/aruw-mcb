@@ -52,8 +52,11 @@
 using namespace tap::gpio;
 using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
+using namespace aruwsrc::control::engineer;
 using namespace aruwsrc::engineer;
-using namespace aruwsrc::robot::engineer;
+using namespace aruwsrc::engineer::gantry;
+using namespace aruwsrc::engineer::lift;
+using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
 
 /*
@@ -312,7 +315,7 @@ aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
     &drivers()->controlOperatorInterface,
     &chassis);
 
-control::engineer::WristControllerCommand wristControllerCommand(
+WristControllerCommand wristControllerCommand(
     wristRollSubsystem,
     wristSubsystem,
     &drivers()->controlOperatorInterface,
@@ -327,6 +330,8 @@ tap::control::HoldCommandMapping rightUp(
     drivers(),
     {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+// tap::control::PressCommandMapping oneCube(drivers(), {&oneCubePosition}, Keybo); //todo
 
 // tap::control::HoldCommandMapping leftMidRightMid(
 //     drivers(),

@@ -19,7 +19,7 @@
 
 #include "setpoint_move_manual_command.hpp"
 
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer
 {
 SetpointMoveManualCommand::SetpointMoveManualCommand(
     LimitSwitchSetpointInterface& cubeLift,
@@ -49,4 +49,4 @@ void SetpointMoveManualCommand::execute()
 void SetpointMoveManualCommand::end(bool) { cubeLift.setDesiredOutput(0); }
 
 bool SetpointMoveManualCommand::isFinished() const { return false; }
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer

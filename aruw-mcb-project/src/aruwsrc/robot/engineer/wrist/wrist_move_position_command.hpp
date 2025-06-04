@@ -23,7 +23,7 @@
 
 #include "wrist_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::wrist
 
 {
 class WristMovePositionCommand : public tap::control::Command
@@ -47,5 +47,5 @@ private:
 
 };  // class WristMovePositionCommand
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::wrist
 #endif  // WRIST_MOVE_POSITION_COMMAND_HPP_
