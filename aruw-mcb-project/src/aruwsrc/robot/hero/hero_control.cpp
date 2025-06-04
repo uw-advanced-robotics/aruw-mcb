@@ -41,6 +41,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
+#include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -413,6 +414,14 @@ LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(
     getTurretMCBCanComm(),
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
 
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak digitalBeamBreak(
+    &(drivers()->digital),
+    tap::gpio::Digital::InputPin::B,
+    false);  // not inverted
+
+LimitSwitchDepressedGovernor blueBallsGovernor(
+    digitalBeamBreak,
+    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED);
 // rotates agitator if friction wheels are spinning fast
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
@@ -432,20 +441,20 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     rotateWaterwheel,
     unjamWaterwheel);
 
-GovernorLimitedCommand<2> feedWaterwheelWhenBallNotReady(
+GovernorLimitedCommand<3> feedWaterwheelWhenBallNotReady(
     {&waterwheelAgitator},
     rotateAndUnjamWaterwheel,
-    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
+    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor, &blueBallsGovernor});
 }  // namespace waterwheel
 
 namespace kicker
 {
 MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 
-GovernorLimitedCommand<2> feedKickerWhenBallNotReady(
+GovernorLimitedCommand<3> feedKickerWhenBallNotReady(
     {&kickerAgitator},
     loadKicker,
-    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
+    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor, &blueBallsGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
 HeatLimitGovernor heatLimitGovernor(
