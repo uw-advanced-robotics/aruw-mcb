@@ -195,13 +195,18 @@ void VisionAssistanceIndicator::drawHealthBarToOrbit(Position orbit, GraphicInde
             robotHP = robotHPData.blue.sentry7;
     }
 
-    RefSerialTransmitter::configInteger(
-        20,
-        3,
-        screenFrameOrbit.screenX,
-        screenFrameOrbit.screenY,
-        robotHP,
-        graphicToModify);
+    if (screenFrameOrbit.inFrame) {
+        RefSerialTransmitter::configInteger(
+            20,
+            3,
+            screenFrameOrbit.screenX,
+            screenFrameOrbit.screenY,
+            robotHP,
+            graphicToModify);
+    } else {
+        deleteGraphic(index);
+    }
+   
 }
 
 void VisionAssistanceIndicator::drawPlateTargetBox()
