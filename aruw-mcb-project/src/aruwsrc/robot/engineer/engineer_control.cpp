@@ -47,6 +47,7 @@
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 using namespace tap::gpio;
@@ -312,6 +313,18 @@ WristControllerCommand wristControllerCommand(
     aruwsrc::engineer::WRIST_ROLL_SCALING_FACTOR,
     aruwsrc::engineer::WRIST_PITCH_SCALING_FACTOR,
     aruwsrc::engineer::WRIST_YAW_SCALING_FACTOR);
+
+WristSetpointsCommand wristFoldInCommand(
+    wristSubsystem,
+    {aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
+     aruwsrc::engineer::WRIST_TOP_SETPOINT,
+     aruwsrc::engineer::WRIST_IN_SETPOINT});
+
+WristSetpointsCommand wristFoldOutCommand(
+    wristSubsystem,
+    {aruwsrc::engineer::WRIST_TOP_SETPOINT,
+     aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
+     aruwsrc::engineer::WRIST_OUT_SETPOINT});
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());

@@ -24,6 +24,8 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
+
 namespace aruwsrc::engineer
 {
 static constexpr tap::can::CanBus CAN_BUS_WRIST = tap::can::CanBus::CAN_BUS1;
@@ -91,6 +93,31 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_CONFIG(
 static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
+
+static constexpr wrist::Setpoint WRIST_IN_SETPOINT{
+    0,
+    0,
+    0.1f,  // epsilonPitch
+    0.1f   // epsilonYaw
+};
+static constexpr wrist::Setpoint WRIST_TOP_SETPOINT{
+    1.5f,
+    0,
+    0.1f,  // epsilonPitch
+    0.1f   // epsilonYaw
+};
+static constexpr wrist::Setpoint WRIST_BOTTOM_SETPOINT{
+    1.5f,
+    M_PI,
+    0.1f,  // epsilonPitch
+    0.1f   // epsilonYaw
+};
+static constexpr wrist::Setpoint WRIST_OUT_SETPOINT{
+    0,
+    M_PI,
+    0.1f,  // epsilonPitch
+    0.1f   // epsilonYaw
+};
 
 }  // namespace aruwsrc::engineer
 #endif  // ENGINEER_WRIST_CONSTANTS_HPP_   `
