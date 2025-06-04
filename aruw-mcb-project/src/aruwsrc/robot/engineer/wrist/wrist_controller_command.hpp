@@ -32,7 +32,7 @@ namespace aruwsrc::engineer::wrist
 {
 using namespace aruwsrc::control::engineer;
 /**
- * A command that moves the engineer arm based on the control operator interface.
+ * A command that moves the engineer wrist based on the control operator interface.
  */
 class WristControllerCommand : public tap::control::Command
 {
@@ -54,7 +54,7 @@ public:
 
     void end(bool) override{};
 
-    const char *getName() const override { return "Engineer Arm Controller Command"; };
+    const char *getName() const override { return "Engineer Wrist Controller Command"; };
 
     virtual bool isFinished() const override { return false; }
 

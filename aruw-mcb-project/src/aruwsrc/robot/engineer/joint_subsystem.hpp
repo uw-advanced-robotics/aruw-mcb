@@ -30,7 +30,7 @@
 namespace aruwsrc::engineer
 {
 /**
- * Subsystem code for each engineer arm joint.
+ * Subsystem code for rotational joints.
  */
 class JointSubsystem : public LinearJointInterface, public tap::control::Subsystem
 {

@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "tap/control/command.hpp"
+
 #include "wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer::wrist
@@ -53,7 +54,7 @@ public:
 private:
     WristSubsystem &wrist;
     std::vector<Setpoint> setpoints;
-    int currentSetpointIndex;
+    unsigned int currentSetpointIndex;
 
 };  // class WristSetpointsCommand
 

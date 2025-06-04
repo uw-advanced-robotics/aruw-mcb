@@ -116,17 +116,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-aruwsrc::chassis::MecanumChassisSubsystem chassis(
-    drivers(),
-    &currentSensor,
-    &voltageSensor,
-    leftFrontChassisMotor,
-    leftBackChassisMotor,
-    rightFrontChassisMotor,
-    rightBackChassisMotor,
-    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
-
-tap::motor::DjiMotor storageLiftMotor(
+tap::motor::DjiMotor cubeLiftMotor(
     drivers(),
     CUBE_LIFT_MOTOR_ID,
     LIFT_MOTOR_CAN_BUS,
@@ -139,18 +129,10 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
     &(drivers()->digital),
     CUBELIFT_LIMITSWITCH_PORT,
     true);
-LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
-/* define subsystems --------------------------------------------------------*/
-CubeStorageSubsystem cubeLift(
-    drivers(),
-    storageLiftMotor,
-    LIFT_MOTOR_PID_CONFIG,
-    LIFT_HOMING_PID_CONFIG,
-    cubeLiftTrigger,
-    ONE_CUBE_SETPOINT,
-    MM_PER_REVOLUTION);
 
-tap::motor::DjiMotor engineerWristRollMotor(
+LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
+
+tap::motor::DjiMotor wristRollMotor(
     drivers(),
     aruwsrc::engineer::WRIST_ROLL_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_WRIST,
@@ -159,7 +141,7 @@ tap::motor::DjiMotor engineerWristRollMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-tap::motor::DjiMotor engineerWristLeftMotor(
+tap::motor::DjiMotor wristLeftMotor(
     drivers(),
     aruwsrc::engineer::WRIST_LEFT_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_WRIST,
@@ -168,7 +150,7 @@ tap::motor::DjiMotor engineerWristLeftMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-tap::motor::DjiMotor engineerWristRightMotor(
+tap::motor::DjiMotor wristRightMotor(
     drivers(),
     aruwsrc::engineer::WRIST_RIGHT_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_WRIST,
@@ -177,7 +159,7 @@ tap::motor::DjiMotor engineerWristRightMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-tap::encoder::CanEncoder engineerWristPitchEncoder(
+tap::encoder::CanEncoder wristPitchEncoder(
     drivers(),
     aruwsrc::engineer::WRIST_PITCH_ENCODER_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
@@ -185,7 +167,7 @@ tap::encoder::CanEncoder engineerWristPitchEncoder(
     1,
     WRIST_HOME_PITCH * 4096.0f / (M_PI * 2));
 
-tap::encoder::CanEncoder engineerWristYawEncoder(
+tap::encoder::CanEncoder wristYawEncoder(
     drivers(),
     aruwsrc::engineer::WRIST_YAW_ENCODER_ID,
     aruwsrc::chassis::CAN_BUS_MOTORS,
@@ -193,7 +175,7 @@ tap::encoder::CanEncoder engineerWristYawEncoder(
     1,
     WRIST_HOME_YAW * 4096.0f / (M_PI * 2));
 
-tap::motor::DjiMotor engineerGantryLiftLeftMotor(
+tap::motor::DjiMotor gantryLiftLeftMotor(
     drivers(),
     aruwsrc::engineer::GANTRY_LIFT_LEFT_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_GANTRY,
@@ -202,7 +184,7 @@ tap::motor::DjiMotor engineerGantryLiftLeftMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-tap::motor::DjiMotor engineerGantryLiftRightMotor(
+tap::motor::DjiMotor gantryLiftRightMotor(
     drivers(),
     aruwsrc::engineer::GANTRY_LIFT_RIGHT_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_GANTRY,
@@ -211,22 +193,13 @@ tap::motor::DjiMotor engineerGantryLiftRightMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak liftLimitSwitch(
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryLiftLimit(
     &drivers()->digital,
     aruwsrc::engineer::GANTRY_LIFT_LIMIT_SWITCH_PIN);
 
-LimitSwitchTrigger liftLimitSwitchTrigger(&liftLimitSwitch);
+LimitSwitchTrigger gantryLiftTrigger(&gantryLiftLimit);
 
-tap::motor::DjiMotor cubeStorageLiftMotor(
-    drivers(),
-    tap::motor::MotorId::MOTOR7,
-    tap::can::CanBus::CAN_BUS2,
-    false,
-    "Cube Storage Lift Motor",
-    false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
-tap::motor::DjiMotor engineerGantryExtensionMotor(
+tap::motor::DjiMotor gantryExtensionMotor(
     drivers(),
     aruwsrc::engineer::GANTRY_EXTENSION_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_GANTRY,
@@ -235,18 +208,38 @@ tap::motor::DjiMotor engineerGantryExtensionMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimitSwitch(
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryExtensionLimit(
     &drivers()->digital,
     aruwsrc::engineer::GANTRY_EXTENSION_LIMIT_SWITCH_PIN);
 
-LimitSwitchTrigger extensionLimitSwitchTrigger(&extensionLimitSwitch);
+LimitSwitchTrigger gantryExtensionTrigger(&gantryExtensionLimit);
+
+/* define subsystems --------------------------------------------------------*/
+aruwsrc::chassis::MecanumChassisSubsystem chassis(
+    drivers(),
+    &currentSensor,
+    &voltageSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
+
+CubeStorageSubsystem cubeLift(
+    drivers(),
+    cubeLiftMotor,
+    LIFT_MOTOR_PID_CONFIG,
+    LIFT_HOMING_PID_CONFIG,
+    cubeLiftTrigger,
+    ONE_CUBE_SETPOINT,
+    MM_PER_REVOLUTION);
 
 WristSubsystem wristSubsystem(
     drivers(),
-    engineerWristLeftMotor,
-    engineerWristRightMotor,
-    engineerWristPitchEncoder,
-    engineerWristYawEncoder,
+    wristLeftMotor,
+    wristRightMotor,
+    wristPitchEncoder,
+    wristYawEncoder,
     aruwsrc::engineer::WRIST_PITCH_CONFIG,
     aruwsrc::engineer::WRIST_YAW_CONFIG,
     aruwsrc::engineer::WRIST_MIN_PITCH,
@@ -257,11 +250,11 @@ WristSubsystem wristSubsystem(
 
 GantryLiftSubsystem gantryLiftSubsystem(
     drivers(),
-    engineerGantryLiftLeftMotor,
-    engineerGantryLiftRightMotor,
+    gantryLiftLeftMotor,
+    gantryLiftRightMotor,
     aruwsrc::engineer::GANTRY_LIFT_POS_CONFIG,
     aruwsrc::engineer::GANTRY_LIFT_BALANCE_CONFIG,
-    liftLimitSwitchTrigger,
+    gantryLiftTrigger,
     GANTRY_LIFT_RADIUS,
     GANTRY_LIFT_LOWER_BOUND,
     GANTRY_LIFT_UPPER_BOUND,
@@ -271,9 +264,9 @@ GantryLiftSubsystem gantryLiftSubsystem(
 
 GantryExtensionSubsystem gantryExtensionSubsystem(
     drivers(),
-    engineerGantryExtensionMotor,
+    gantryExtensionMotor,
     aruwsrc::engineer::GANTRY_EXTENSION_CONFIG,
-    extensionLimitSwitchTrigger,
+    gantryExtensionTrigger,
     GANTRY_EXTENSION_RADIUS,
     GANTRY_EXTENSION_LOWER_BOUND,
     GANTRY_EXTENSION_UPPER_BOUND,
@@ -281,10 +274,7 @@ GantryExtensionSubsystem gantryExtensionSubsystem(
     GANTRY_EXTENSION_KS,
     GANTRY_EXTENSION_EPSILON);
 
-JointSubsystem wristRollSubsystem(
-    drivers(),
-    engineerWristRollMotor,
-    aruwsrc::engineer::WRIST_ROLL_CONFIG);
+JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, aruwsrc::engineer::WRIST_ROLL_CONFIG);
 
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);

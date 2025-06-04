@@ -50,27 +50,27 @@ public:
     mockable float getCubeLiftVelocity();
 
     /**
-     * @return The arm lift velocity
+     * @return The gantry lift velocity
      */
     mockable float getGantryLiftVelocity();
 
     /**
-     * @return The arm horizontal stage velocity
+     * @return The gantry extension velocity
      */
     mockable float getGantryExtensionVelocity();
 
     /**
-     * @return The arm wrist pitch velocity
+     * @return The wrist pitch velocity
      */
     mockable float getWristPitchVelocity();
 
     /**
-     * @return The arm wrist yaw velocity
+     * @return The wrist yaw velocity
      */
     mockable float getWristYawVelocity();
 
     /**
-     * @return The arm wrist roll velocity
+     * @return The wrist roll velocity
      */
     mockable float getWristRollVelocity();
 
