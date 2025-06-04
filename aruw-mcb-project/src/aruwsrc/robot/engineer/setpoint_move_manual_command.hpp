@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef CUBE_MOVE_MANUAL_COMMAND_HPP_
-#define CUBE_MOVE_MANUAL_COMMAND_HPP_
+#ifndef SETPOINT_MOVE_MANUAL_COMMAND_HPP_
+#define SETPOINT_MOVE_MANUAL_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -55,4 +55,4 @@ private:
 };  // class SetpointMovePositionCommand
 
 }  // namespace aruwsrc::robot::engineer
-#endif  // CUBE_MOVE_MANUAL_COMMAND_HPP_
+#endif  // SETPOINT_MOVE_MANUAL_COMMAND_HPP_
