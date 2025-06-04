@@ -84,6 +84,7 @@ void InterRobotTransmitter::updateState()
     auto robotOrbits = visionCoprocessor->getLastRobotOrbitData();
     for (int i = 0; i < VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
     {
+        
         // If all zeros, skip this orbit
         if (robotOrbits.data[i].x == 0.0f && robotOrbits.data[i].y == 0.0f &&
             robotOrbits.data[i].z == 0.0f)
@@ -96,6 +97,7 @@ void InterRobotTransmitter::updateState()
             .x = robotOrbits.data[i].x,
             .y = robotOrbits.data[i].y,
             .z = robotOrbits.data[i].z,
+            .robotType = robotOrbits.data[i].robotType,
             .timestamp = tap::arch::clock::getTimeMilliseconds()};
 
         // Update the outgoing message, broadcasts data as if the index is the robot type
@@ -134,8 +136,10 @@ void InterRobotTransmitter::updateNearestRobotState(EnemyRobotState::RobotState&
 {
     int nearestIndex = -1;
     int oldestIndex = 0;
+    int robotTypeIndex = -1;
     float nearestDistance = FLT_MAX;
     uint32_t oldestTimestamp = UINT32_MAX;
+    
     for (int i = 0; i < VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
     {
         const auto& currentState = stateEstimate.robot[i];
@@ -143,6 +147,11 @@ void InterRobotTransmitter::updateNearestRobotState(EnemyRobotState::RobotState&
             (currentState.x - state.x) * (currentState.x - state.x) +
             (currentState.y - state.y) * (currentState.y - state.y) +
             (currentState.z - state.z) * (currentState.z - state.z));
+        
+        
+        if (state.robotType == currentState.robotType && state.robotType != 0) {
+            robotTypeIndex = i;
+        }
 
         if (distance < nearestDistance && distance < POSITION_TOLERANCE)
         {
@@ -157,14 +166,16 @@ void InterRobotTransmitter::updateNearestRobotState(EnemyRobotState::RobotState&
         }
     }
 
-    if (nearestIndex != -1)
-    {
+    
+    if (robotTypeIndex != -1) { 
+        // update the iconed state
+        stateEstimate.robot[robotTypeIndex] = state;
+        stateEstimate.robot[robotTypeIndex].timestamp = tap::arch::clock::getTimeMilliseconds();
+    } else if (nearestIndex != -1)     {
         // Update the nearest state
         stateEstimate.robot[nearestIndex] = state;
         stateEstimate.robot[nearestIndex].timestamp = tap::arch::clock::getTimeMilliseconds();
-    }
-    else
-    {
+    } else {
         // Update the oldest state
         stateEstimate.robot[oldestIndex] = state;
         stateEstimate.robot[oldestIndex].timestamp = tap::arch::clock::getTimeMilliseconds();

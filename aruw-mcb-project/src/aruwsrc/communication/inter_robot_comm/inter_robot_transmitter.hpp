@@ -64,6 +64,7 @@ public:
             float x;
             float y;
             float z;
+            uint16_t robotType; // icon if it has one
             uint32_t timestamp;  // Timestamp in milliseconds, used for processing "active" robots
         };
         RobotState robot[VisionCoprocessor::MAX_NUM_ROBOT_ORBITS];
