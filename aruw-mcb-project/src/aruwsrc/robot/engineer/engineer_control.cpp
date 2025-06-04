@@ -285,7 +285,9 @@ SuctionSubsystem suction(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Z,
-    tap::gpio::Digital::OutputPin::Y);
+    tap::gpio::Digital::OutputPin::Y,
+    true,
+    true);
 
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
