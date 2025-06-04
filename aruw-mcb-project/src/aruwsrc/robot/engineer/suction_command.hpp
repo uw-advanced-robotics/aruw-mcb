@@ -17,42 +17,44 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DIGITAL_OUT_COMMAND_HPP_
-#define DIGITAL_OUT_COMMAND_HPP_
+#ifndef SUCTION_COMMAND_HPP_
+#define SUCTION_COMMAND_HPP_
 
 #include <vector>
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/command.hpp"
 
+#include "suction_subsystem.hpp"
+
 namespace aruwsrc::engineer::wrist
 {
-class DigitalOutCommand : public tap::control::Command
+class SuctionCommand : public tap::control::Command
 {
 public:
-    DigitalOutCommand(tap::gpio::Digital &digital, tap::gpio::Digital::OutputPin pin, bool state)
-        : digital(digital),
-          pin(pin),
-          state(state)
+    SuctionCommand(SuctionSubsystem &subsystem, bool suckState, bool releaseState)
+        : subsystem(subsystem),
+          suckState(suckState),
+          releaseState(releaseState)
     {
+        addSubsystemRequirement(&subsystem);
     }
 
-    void initialize() override { digital.set(pin, state); }
+    void initialize() override {}
 
-    void execute() override{};
+    void execute() override { subsystem.set(suckState, releaseState); };
 
-    void end(bool) override{};
+    void end(bool) override { subsystem.refreshSafeDisconnect(); };
 
-    bool isFinished() const override { return true; };
+    bool isFinished() const override { return false; };
 
     const char *getName() const override { return "Digital Out Command"; }
 
 private:
-    tap::gpio::Digital &digital;
-    tap::gpio::Digital::OutputPin pin;
-    bool state;
-};  // class WristSetpointsCommand
+    SuctionSubsystem &subsystem;
+    bool suckState, releaseState;
+};  // class SuctionCommand
 
 }  // namespace aruwsrc::engineer::wrist
 
-#endif  // DIGITAL_OUT_COMMAND_HPP_
+#endif  // SUCTION_COMMAND_HPP_

@@ -35,7 +35,7 @@ static constexpr float GANTRY_LIFT_POS_PID_KI = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KD = 10.0f;
 static constexpr float GANTRY_LIFT_POS_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KS = 0.0;
-static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 1200.0f;
+static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 2000.0f;
 
 static constexpr float GANTRY_LIFT_LOWER_BOUND = -5.0f;
 static constexpr float GANTRY_LIFT_UPPER_BOUND = 360.0f;

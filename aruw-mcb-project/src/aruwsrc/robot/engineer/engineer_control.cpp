@@ -37,7 +37,6 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
-#include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_lift_constants.hpp"
@@ -47,6 +46,8 @@
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
+#include "aruwsrc/robot/engineer/suction_command.hpp"
+#include "aruwsrc/robot/engineer/suction_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
@@ -280,6 +281,12 @@ GantryExtensionSubsystem gantryExtensionSubsystem(
 
 JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, aruwsrc::engineer::WRIST_ROLL_CONFIG);
 
+SuctionSubsystem suction(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::Z,
+    tap::gpio::Digital::OutputPin::Y);
+
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
 HomingCommand gantryLiftHome(gantryLiftSubsystem);
@@ -333,13 +340,13 @@ WristSetpointsCommand wristFoldOutCommand(
      aruwsrc::engineer::WRIST_OUT_SETPOINT});
 
 // todo
-DigitalOutCommand suctionOnCommand(drivers()->digital, tap::gpio::Digital::OutputPin::Z, false);
+SuctionCommand lowLow(suction, false, false);
 
-DigitalOutCommand blowOnCommand(drivers()->digital, tap::gpio::Digital::OutputPin::Y, true);
+SuctionCommand lowHigh(suction, false, true);
 
-DigitalOutCommand suctionOffCommand(drivers()->digital, tap::gpio::Digital::OutputPin::Z, true);
+SuctionCommand highLow(suction, true, false);
 
-DigitalOutCommand blowOffCommand(drivers()->digital, tap::gpio::Digital::OutputPin::Y, false);
+SuctionCommand highHigh(suction, true, true);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -349,22 +356,32 @@ tap::control::PressCommandMapping rightUp(
     {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-tap::control::PressCommandMapping rightMid(
+tap::control::HoldCommandMapping leftMidRightMid(
     drivers(),
-    {&suctionOffCommand, &blowOffCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+    {&lowLow},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
-tap::control::PressCommandMapping rightDown(
+tap::control::HoldCommandMapping leftMidRightUp(
     drivers(),
-    {&suctionOnCommand, &blowOnCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    {&lowHigh},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
-tap::control::PressCommandMapping oneCube(
+tap::control::HoldCommandMapping leftUpRightMid(
+    drivers(),
+    {&highLow},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
+
+tap::control::HoldCommandMapping leftUpRightUp(
+    drivers(),
+    {&highHigh},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+
+tap::control::HoldCommandMapping oneCube(
     drivers(),
     {&oneCubePosition},
     RemoteMapState({Remote::Key::Z}));  // todo
 
-tap::control::PressCommandMapping twoCube(
+tap::control::HoldCommandMapping twoCube(
     drivers(),
     {&twoCubePosition},
     RemoteMapState({Remote::Key::X}));
@@ -384,16 +401,6 @@ tap::control::PressCommandMapping wristFoldOut(
     {&wristFoldOutCommand},
     RemoteMapState({Remote::Key::B}));
 
-tap::control::PressCommandMapping suctionOn(
-    drivers(),
-    {&suctionCupOn},
-    RemoteMapState({Remote::Key::F}));
-
-tap::control::PressCommandMapping suctionOff(
-    drivers(),
-    {&suctionCupOff},
-    RemoteMapState({Remote::Key::G}));
-
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -403,6 +410,7 @@ void initializeSubsystems()
     wristRollSubsystem.initialize();
     wristSubsystem.initialize();
     cubeLift.initialize();
+    suction.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -434,8 +442,10 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightUp);
-    drivers->commandMapper.addMap(&rightMid);
-    drivers->commandMapper.addMap(&rightDown);
+    drivers->commandMapper.addMap(&leftMidRightMid);
+    drivers->commandMapper.addMap(&leftMidRightUp);
+    drivers->commandMapper.addMap(&leftUpRightMid);
+    drivers->commandMapper.addMap(&leftUpRightUp);
 
     drivers->commandMapper.addMap(&oneCube);
     drivers->commandMapper.addMap(&twoCube);
@@ -443,9 +453,6 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 
     drivers->commandMapper.addMap(&wristFoldIn);
     drivers->commandMapper.addMap(&wristFoldOut);
-
-    drivers->commandMapper.addMap(&suctionOn);
-    drivers->commandMapper.addMap(&suctionOff);
 }
 }  // namespace control
 }  // namespace aruwsrc
