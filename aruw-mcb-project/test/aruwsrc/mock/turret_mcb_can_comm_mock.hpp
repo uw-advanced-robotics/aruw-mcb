@@ -43,7 +43,7 @@ public:
     MOCK_METHOD(bool, isConnected, (), (const override));
     MOCK_METHOD(void, setOpenHopperCover, (bool), (override));
     MOCK_METHOD(void, setLaserStatus, (bool), (override));
-    MOCK_METHOD(void, sendImuCalibrationRequest, (), (override));
+    MOCK_METHOD(void, requestCalibration, (), (override));
     MOCK_METHOD(void, sendData, (), (override));
     MOCK_METHOD(uint32_t, getIMUDataTimestamp, (), (const override));
 };
