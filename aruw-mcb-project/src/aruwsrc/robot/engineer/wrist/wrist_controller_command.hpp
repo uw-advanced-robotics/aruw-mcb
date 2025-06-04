@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARM_CONTROLLER_COMMAND_HPP_
-#define ARM_CONTROLLER_COMMAND_HPP_
+#ifndef WRIST_CONTROLLER_COMMAND_HPP_
+#define WRIST_CONTROLLER_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -70,4 +70,4 @@ private:
 
 }  // namespace aruwsrc::control::engineer
 
-#endif  // ARM_CONTROLLER_COMMAND_HPP_
+#endif  // WRIST_CONTROLLER_COMMAND_HPP_

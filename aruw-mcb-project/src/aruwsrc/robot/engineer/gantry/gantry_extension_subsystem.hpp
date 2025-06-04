@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef gantry_extension_subSYSTEM_HPP_
-#define gantry_extension_subSYSTEM_HPP_
+#ifndef GANTRY_EXTENSION_SUBSYSTEM_HPP_
+#define GANTRY_EXTENSION_SUBSYSTEM_HPP_
 
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
@@ -61,4 +61,4 @@ private:
 }  // namespace engineer
 }  // namespace aruwsrc
 
-#endif  // gantry_extension_subSYSTEM_HPP_
+#endif  // GANTRY_EXTENSION_SUBSYSTEM_HPP_
