@@ -34,6 +34,7 @@
 
 #include "aruwsrc/algorithms/plate_hit_tracker.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/sensors/imu/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
@@ -85,6 +86,7 @@ public:
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     can::capbank::CapacitorBank capacitorBank;
     algorithms::PlateHitTracker plateHitTracker;
+    aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
 #endif
 };  // class aruwsrc::HeroDrivers
 }  // namespace aruwsrc::hero
