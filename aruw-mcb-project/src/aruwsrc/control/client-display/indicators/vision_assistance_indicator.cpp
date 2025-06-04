@@ -44,9 +44,9 @@ void VisionAssistanceIndicator::initialize()
     configureGraphic(GraphicIndex::SENTRY_TRACER, Tx::GraphicColor::ORANGE);
 
     // Don't set these up till we have icon data
-    // configureGraphic(GraphicIndex::HERO_HP, Tx::GraphicColor::PURPLISH_RED);
-    // configureGraphic(GraphicIndex::STANDARD_HP, Tx::GraphicColor::PURPLISH_RED);
-    // configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
+    configureGraphic(GraphicIndex::HERO_HP, Tx::GraphicColor::PURPLISH_RED);
+    configureGraphic(GraphicIndex::STANDARD_HP, Tx::GraphicColor::PURPLISH_RED);
+    configureGraphic(GraphicIndex::SENTRY_HP, Tx::GraphicColor::PURPLISH_RED);
 }
 
 modm::ResumableResult<void> VisionAssistanceIndicator::sendInitialGraphics()
@@ -95,7 +95,7 @@ modm::ResumableResult<void> VisionAssistanceIndicator::update()
             drawTracerLineToOrbit(orbit, tracerIndex);
 
             // Don't draw health bars for not, with no icon data it will just show 0
-            // drawHealthBarToOrbit(orbit, healthBarIndex, 0);
+            drawHealthBarToOrbit(orbit, healthBarIndex, robotOrbits.robot[i].robotType);
         }
         else
         {
