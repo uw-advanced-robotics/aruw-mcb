@@ -162,12 +162,10 @@ using AnalogInPins = SoftwareGpioPort<AnalogInPinS, AnalogInPinU, AnalogInPinV, 
         
 using PWMOutPinW = GpioI5;
 using PWMOutPinX = GpioI6;
-using PWMOutPinY = GpioI7;
-using PWMOutPinZ = GpioI2;
 using PWMOutPinBuzzer = GpioH6;
 using PWMOutPinImuHeater = GpioB5;
         
-using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinY, PWMOutPinZ, PWMOutPinBuzzer, PWMOutPinImuHeater>;
+using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinBuzzer, PWMOutPinImuHeater>;
 
 // Initialize digital input pins
         
@@ -185,9 +183,11 @@ using DigitalOutPinE = GpioD15;
 using DigitalOutPinF = GpioD14;
 using DigitalOutPinG = GpioD13;
 using DigitalOutPinH = GpioD12;
+using DigitalOutPinY = GpioI7;
+using DigitalOutPinZ = GpioI2;
 using DigitalOutPinLaser = GpioG13;
         
-using DigitalOutPins = SoftwareGpioPort<DigitalOutPinE, DigitalOutPinF, DigitalOutPinG, DigitalOutPinH, DigitalOutPinLaser>;
+using DigitalOutPins = SoftwareGpioPort<DigitalOutPinE, DigitalOutPinF, DigitalOutPinG, DigitalOutPinH, DigitalOutPinY, DigitalOutPinZ, DigitalOutPinLaser>;
 
 // gpio pins used for SPI communication to the onboard MPU6500 IMU
 

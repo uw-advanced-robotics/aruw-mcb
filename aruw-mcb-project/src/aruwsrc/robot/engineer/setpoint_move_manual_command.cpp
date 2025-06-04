@@ -24,25 +24,37 @@ namespace aruwsrc::engineer
 SetpointMoveManualCommand::SetpointMoveManualCommand(
     LimitSwitchSetpointInterface& cubeLift,
     aruwsrc::control::engineer::EngineerControlOperatorInterface* operatorInterface,
-    float moveSpeed)
+    float moveSpeed,
+    SetpointType setpointType)
     : cubeLift(cubeLift),
       operatorInterface(operatorInterface),
-      moveSpeed(moveSpeed)
+      moveSpeed(moveSpeed),
+      setpointType(setpointType)
 {
     addSubsystemRequirement(&cubeLift);
 }
 
-void SetpointMoveManualCommand::initialize()
-{
-    setpoint = cubeLift.getSetpoint();
-    cubeLift.setPIDState(PIDState::POSITION_PID);
-}
+void SetpointMoveManualCommand::initialize() {}
 
 void SetpointMoveManualCommand::execute()
 {
     if (!operatorInterface->isGantryControlMode()) return;
 
-    setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;
+    float setpoint = cubeLift.getSetpoint();
+    switch (setpointType)
+    {
+        case SetpointType::CUBE_LIFT:
+            setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;
+            break;
+        case SetpointType::GANTRY_LIFT:
+            setpoint += operatorInterface->getGantryLiftVelocity() * moveSpeed;
+            break;
+        case SetpointType::GANTRY_EXTENSION:
+            setpoint += operatorInterface->getGantryExtensionVelocity() * moveSpeed;
+            break;
+        default:
+            break;  // Invalid setpoint type
+    }
     cubeLift.setSetpoint(setpoint);
 }
 

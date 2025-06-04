@@ -63,6 +63,15 @@ public:
 
     void setHome(float home) override { this->home = home; };
 
+    void setSetpoint(float setpoint) override
+    {
+        if (tap::algorithms::compareFloatClose(minSetpoint, maxSetpoint, epsilon) ||
+            calibrationState != CalibrationState::CALIBRATION_COMPLETE)
+            this->setpoint = setpoint;
+        else
+            this->setpoint = std::clamp(setpoint, minSetpoint, maxSetpoint);
+    };
+
     bool homedAndBounded() const
     {
         return calibrationState == CalibrationState::CALIBRATION_COMPLETE;
@@ -84,8 +93,8 @@ public:
             }
             else
             {
-                moveTowardLowerBound();
                 pidState = PIDState::NONE;
+                moveTowardLowerBound();
             }
         }
 
@@ -97,7 +106,7 @@ public:
             float timeDifference = (newTime - lastTime) / 1000.0f;  // (s)
             lastTime = newTime;
             motorDesiredOutput = pid.runController(error, errorDerivative, timeDifference) + kS;
-            setDesiredOutput(motorDesiredOutput);
+            setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
         }
         else if (pidState == PIDState::VELOCITY_PID)
         {
@@ -112,7 +121,7 @@ public:
         }
         else
         {
-            setDesiredOutput(motorDesiredOutput + kS);
+            setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
         }
     }
 
@@ -120,7 +129,7 @@ public:
 
     void moveTowardLowerBound() override
     {
-        motorDesiredOutput = homingReversed ? homingSpeed : -homingSpeed;
+        motorDesiredOutput = (homingReversed ? homingSpeed : -homingSpeed) + kS;
     }
 
     void stopDuringHoming() override
@@ -141,7 +150,8 @@ protected:
         float kS = 0,
         float epsilon = 0.5f,
         float homingSpeed = 1000.0f,
-        bool homingReversed = false)
+        bool homingReversed = false,
+        float maxOutput = 6000.0f)
         : OneSidedBoundedSubsystemInterface(drivers, trigger, 0),
           LinearJointInterface(lowerBound, upperBound, epsilon),
           pid(pidConfig),
@@ -149,7 +159,8 @@ protected:
           home(home),
           kS(kS),
           homingSpeed(homingSpeed),
-          homingReversed(homingReversed)
+          homingReversed(homingReversed),
+          maxOutput(maxOutput)
     {
     }
 
@@ -160,6 +171,7 @@ protected:
     float kS;
     float homingSpeed;
     bool homingReversed;
+    float maxOutput;
     float lastTime = 0;
     float motorPos = 0;
     float motorDesiredOutput = 0;

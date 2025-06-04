@@ -37,6 +37,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_lift_constants.hpp"
@@ -196,7 +197,8 @@ tap::motor::DjiMotor gantryLiftRightMotor(
 
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryLiftLimit(
     &drivers()->digital,
-    aruwsrc::engineer::GANTRY_LIFT_LIMIT_SWITCH_PIN);
+    aruwsrc::engineer::GANTRY_LIFT_LIMIT_SWITCH_PIN,
+    true);
 
 LimitSwitchTrigger gantryLiftTrigger(&gantryLiftLimit);
 
@@ -211,7 +213,8 @@ tap::motor::DjiMotor gantryExtensionMotor(
 
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryExtensionLimit(
     &drivers()->digital,
-    aruwsrc::engineer::GANTRY_EXTENSION_LIMIT_SWITCH_PIN);
+    aruwsrc::engineer::GANTRY_EXTENSION_LIMIT_SWITCH_PIN,
+    true);
 
 LimitSwitchTrigger gantryExtensionTrigger(&gantryExtensionLimit);
 
@@ -285,17 +288,20 @@ HomingCommand gantryExtensionHome(gantryExtensionSubsystem);
 SetpointMoveManualCommand cubeManualControl(
     cubeLift,
     &drivers()->controlOperatorInterface,
-    MANUAL_MOVE_SPEED);
+    CUBE_LIFT_MOVE_SPEED,
+    SetpointType::CUBE_LIFT);
 
 SetpointMoveManualCommand gantryLiftManualControl(
     gantryLiftSubsystem,
     &drivers()->controlOperatorInterface,
-    MANUAL_MOVE_SPEED);
+    GANTRY_LIFT_MOVE_SPEED,
+    SetpointType::GANTRY_LIFT);
 
 SetpointMoveManualCommand gantryExtensionManualControl(
     gantryExtensionSubsystem,
     &drivers()->controlOperatorInterface,
-    MANUAL_MOVE_SPEED);
+    GANTRY_EXTENSION_MOVE_SPEED,
+    SetpointType::GANTRY_EXTENSION);
 
 SetpointMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 SetpointMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
@@ -326,13 +332,32 @@ WristSetpointsCommand wristFoldOutCommand(
      aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
      aruwsrc::engineer::WRIST_OUT_SETPOINT});
 
+// todo
+DigitalOutCommand suctionOnCommand(drivers()->digital, tap::gpio::Digital::OutputPin::Z, false);
+
+DigitalOutCommand blowOnCommand(drivers()->digital, tap::gpio::Digital::OutputPin::Y, true);
+
+DigitalOutCommand suctionOffCommand(drivers()->digital, tap::gpio::Digital::OutputPin::Z, true);
+
+DigitalOutCommand blowOffCommand(drivers()->digital, tap::gpio::Digital::OutputPin::Y, false);
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-tap::control::HoldCommandMapping rightUp(
+tap::control::PressCommandMapping rightUp(
     drivers(),
     {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+tap::control::PressCommandMapping rightMid(
+    drivers(),
+    {&suctionOffCommand, &blowOffCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+
+tap::control::PressCommandMapping rightDown(
+    drivers(),
+    {&suctionOnCommand, &blowOnCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 tap::control::PressCommandMapping oneCube(
     drivers(),
@@ -358,6 +383,16 @@ tap::control::PressCommandMapping wristFoldOut(
     drivers(),
     {&wristFoldOutCommand},
     RemoteMapState({Remote::Key::B}));
+
+tap::control::PressCommandMapping suctionOn(
+    drivers(),
+    {&suctionCupOn},
+    RemoteMapState({Remote::Key::F}));
+
+tap::control::PressCommandMapping suctionOff(
+    drivers(),
+    {&suctionCupOff},
+    RemoteMapState({Remote::Key::G}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -399,6 +434,8 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightUp);
+    drivers->commandMapper.addMap(&rightMid);
+    drivers->commandMapper.addMap(&rightDown);
 
     drivers->commandMapper.addMap(&oneCube);
     drivers->commandMapper.addMap(&twoCube);
@@ -406,6 +443,9 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 
     drivers->commandMapper.addMap(&wristFoldIn);
     drivers->commandMapper.addMap(&wristFoldOut);
+
+    drivers->commandMapper.addMap(&suctionOn);
+    drivers->commandMapper.addMap(&suctionOff);
 }
 }  // namespace control
 }  // namespace aruwsrc

@@ -44,7 +44,7 @@ GantryLiftSubsystem::GantryLiftSubsystem(
           kS,
           epsilon,
           1000,
-          true),
+          false),
       pidAlign(configAlign),
       motorLeft(motorLeft),
       motorRight(motorRight)

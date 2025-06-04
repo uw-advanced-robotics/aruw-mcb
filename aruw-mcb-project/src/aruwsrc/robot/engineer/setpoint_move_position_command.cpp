@@ -30,11 +30,7 @@ SetpointMovePositionCommand::SetpointMovePositionCommand(
     addSubsystemRequirement(&cubeLift);
 }
 
-void SetpointMovePositionCommand::initialize()
-{
-    cubeLift.setSetpoint(setpoint);
-    cubeLift.setPIDState(PIDState::POSITION_PID);
-}
+void SetpointMovePositionCommand::initialize() { cubeLift.setSetpoint(setpoint); }
 
 void SetpointMovePositionCommand::execute() {}
 

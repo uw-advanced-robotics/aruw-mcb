@@ -72,6 +72,8 @@ public:
         F,
         G,
         H,
+        Y,
+        Z,
         Laser,
     };
 

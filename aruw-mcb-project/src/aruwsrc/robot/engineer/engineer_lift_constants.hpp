@@ -58,7 +58,7 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_HOMING_PID_CONFIG = {
     .maxOutput = 0.0f,
     .errorDerivativeFloor = 0.0f};
 
-static constexpr float MANUAL_MOVE_SPEED = -2;  // TODO: choose value alter
+static constexpr float CUBE_LIFT_MOVE_SPEED = -2;  // TODO: choose value alter
 
 static constexpr float ONE_CUBE_SETPOINT = -40;
 static constexpr float TWO_CUBE_SETPOINT = -220;

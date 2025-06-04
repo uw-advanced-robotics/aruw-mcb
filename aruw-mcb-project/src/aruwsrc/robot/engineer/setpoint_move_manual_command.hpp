@@ -25,15 +25,21 @@
 #include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
 namespace aruwsrc::engineer
-
 {
+enum SetpointType
+{
+    CUBE_LIFT,
+    GANTRY_LIFT,
+    GANTRY_EXTENSION
+};
 class SetpointMoveManualCommand : public tap::control::Command
 {
 public:
     SetpointMoveManualCommand(
         LimitSwitchSetpointInterface &cubeLift,
         aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface,
-        float moveSpeed);
+        float moveSpeed,
+        SetpointType setpointType = CUBE_LIFT);
 
     void initialize() override;
 
@@ -48,7 +54,8 @@ public:
 private:
     LimitSwitchSetpointInterface &cubeLift;
     aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface;
-    float setpoint, moveSpeed;
+    float moveSpeed;
+    SetpointType setpointType;
 
 };  // class SetpointMovePositionCommand
 

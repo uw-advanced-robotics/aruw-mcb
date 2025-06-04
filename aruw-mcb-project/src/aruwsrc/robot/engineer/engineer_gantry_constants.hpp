@@ -35,12 +35,12 @@ static constexpr float GANTRY_LIFT_POS_PID_KI = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KD = 10.0f;
 static constexpr float GANTRY_LIFT_POS_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KS = 0.0;
-static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 3000.0f;
+static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 1200.0f;
 
-static constexpr float GANTRY_LIFT_LOWER_BOUND = 0.0f;
-static constexpr float GANTRY_LIFT_UPPER_BOUND = 0.0f;
+static constexpr float GANTRY_LIFT_LOWER_BOUND = -5.0f;
+static constexpr float GANTRY_LIFT_UPPER_BOUND = 360.0f;
 static constexpr float GANTRY_LIFT_RADIUS = 11.877733f;
-static constexpr float GANTRY_LIFT_HOME = 360.0f;  // length ~360mm I think?
+static constexpr float GANTRY_LIFT_HOME = 0.0f;  // length ~360mm I think?
 static constexpr float GANTRY_LIFT_KS = 0.0f;
 static constexpr float GANTRY_LIFT_EPSILON = 1.0f;
 
@@ -49,10 +49,10 @@ static constexpr float GANTRY_LIFT_BALANCE_PID_KI = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_KD = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_KS = 0.0;
-static constexpr float GANTRY_LIFT_BALANCE_MAX_OUTPUT = 3000.0f;
+static constexpr float GANTRY_LIFT_BALANCE_MAX_OUTPUT = 1000.0f;
 
 static constexpr tap::gpio::Digital::InputPin GANTRY_LIFT_LIMIT_SWITCH_PIN =
-    tap::gpio::Digital::InputPin::C;  // TODO: Update to correct pin
+    tap::gpio::Digital::InputPin::D;
 
 static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_POS_CONFIG(
     GANTRY_LIFT_POS_PID_KP,
@@ -73,7 +73,7 @@ static constexpr float GANTRY_EXTENSION_PID_KI = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_KD = 4.0f;
 static constexpr float GANTRY_EXTENSION_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_KS = 0.0;
-static constexpr float GANTRY_EXTENSION_MAX_OUTPUT = 4000.0f;
+static constexpr float GANTRY_EXTENSION_MAX_OUTPUT = 1000.0f;
 
 static constexpr float GANTRY_EXTENSION_LOWER_BOUND = 0.0f;
 static constexpr float GANTRY_EXTENSION_UPPER_BOUND = 0.0f;  // length ~360 mm
@@ -92,8 +92,8 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_CONFIG(
 static constexpr tap::gpio::Digital::InputPin GANTRY_EXTENSION_LIMIT_SWITCH_PIN =
     tap::gpio::Digital::InputPin::T;  // TODO: Update to correct pin
 
-static constexpr float GANTRY_LIFT_SCALING_FACTOR = 0.6f;
-static constexpr float GANTRY_EXTENSION_SCALING_FACTOR = 0.6f;
+static constexpr float GANTRY_LIFT_MOVE_SPEED = 0.6f;
+static constexpr float GANTRY_EXTENSION_MOVE_SPEED = 0.6f;
 
 }  // namespace aruwsrc::engineer
 #endif  // ENGINEER_GANTRY_CONSTANTS_HPP_   `
