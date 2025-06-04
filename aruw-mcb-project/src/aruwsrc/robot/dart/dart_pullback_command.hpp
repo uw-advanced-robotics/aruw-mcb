@@ -32,7 +32,7 @@ public:
 
     void initialize() override;
 
-    int32_t power = 1;
+    int32_t power = -5000;
 
     void execute() override;
 
