@@ -71,7 +71,7 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -544,10 +544,12 @@ TextHudIndicators textHudIndicators(
     {&wiggleCommand, &beybladeSlowWhenOutOfCombatCommand},
     refSerialTransmitter);
 
-VisionTargetIndicator visionTargetIndicator(
+VisionAssistanceIndicator visionAssistanceIndicator(
     drivers()->visionCoprocessor,
     refSerialTransmitter,
-    transformer.getWorldToVTM());
+    drivers()->refSerial,
+    transformAdapter.getWorldToVTM(),
+    drivers()->interRobotTransmitter);
 
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
@@ -556,8 +558,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &visionTargetIndicator,
-};
+    &visionAssistanceIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
