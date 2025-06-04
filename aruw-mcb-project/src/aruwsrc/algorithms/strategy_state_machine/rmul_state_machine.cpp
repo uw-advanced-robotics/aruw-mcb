@@ -53,13 +53,6 @@ void RMULStateMachine::updateState()
                 state = State::HEALING;
             }
             break;
-        case State::FIRST_PUSH:
-            // If we're low on health, go to healing
-            if (health < HEALING_THRESHOLD)
-            {
-                state = State::HEALING;
-            }
-            break;
         default:
             break;
     }
@@ -84,12 +77,6 @@ void RMULStateMachine::updatePath()
             break;
         case State::ATTACKING:
             for (auto &point : ATTACKING_PATH)
-            {
-                path.pushPoint(point);
-            }
-            break;
-        case State::FIRST_PUSH:
-            for (auto &point : FIRST_PUSH_PATH)
             {
                 path.pushPoint(point);
             }
