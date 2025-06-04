@@ -76,13 +76,8 @@ void GantryLiftSubsystem::resetEncoderValue()
     motorRight.getEncoder()->resetEncoderValue();
 }
 
-float LiftPosition;
-
 float GantryLiftSubsystem::getEncoderValue()
 {
-    LiftPosition = (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
-                    motorRight.getEncoder()->getPosition().getUnwrappedValue()) /
-                   2;
     return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
             motorRight.getEncoder()->getPosition().getUnwrappedValue()) /
            2;
