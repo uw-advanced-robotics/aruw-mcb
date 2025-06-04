@@ -20,4 +20,43 @@
 #ifndef WRIST_SETPOINTS_COMMAND_HPP_
 #define WRIST_SETPOINTS_COMMAND_HPP_
 
+#include <vector>
+
+#include "tap/control/command.hpp"
+#include "wrist_subsystem.hpp"
+
+namespace aruwsrc::engineer::wrist
+{
+struct Setpoint
+{
+    float pitch;
+    float yaw;
+    float epsilonPitch;
+    float epsilonYaw;
+};
+
+class WristSetpointsCommand : public tap::control::Command
+{
+public:
+    WristSetpointsCommand(WristSubsystem &wrist, std::vector<Setpoint> setpoints);
+
+    void initialize() override;
+
+    void execute() override;
+
+    void end(bool interrupted) override;
+
+    bool isFinished() const override;
+
+    const char *getName() const override { return "Wrist Setpoints Command"; }
+
+private:
+    WristSubsystem &wrist;
+    std::vector<Setpoint> setpoints;
+    int currentSetpointIndex;
+
+};  // class WristSetpointsCommand
+
+}  // namespace aruwsrc::engineer::wrist
+
 #endif
