@@ -95,8 +95,6 @@ void WristSubsystem::initialize()
     encoderYaw.initialize();
 }
 
-float ErrorPitch;
-
 void WristSubsystem::refresh()
 {
     if (!encoderPitch.isOnline() || !encoderYaw.isOnline())
@@ -110,9 +108,7 @@ void WristSubsystem::refresh()
         encoderPitch.getPosition().minDifference(setpointPitch),
         encoderPitch.getVelocity(),
         2.0f);
-    ErrorPitch = encoderPitch.getPosition().minDifference(setpointPitch);
-    float outYaw =
-        pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f);  // todo ks
+    float outYaw = pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f);
 
     float outLeft = ratio * outYaw + outPitch;
     float outRight = ratio * outYaw - outPitch;

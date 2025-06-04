@@ -17,47 +17,42 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WRIST_SETPOINTS_COMMAND_HPP_
-#define WRIST_SETPOINTS_COMMAND_HPP_
+#ifndef DIGITAL_OUT_COMMAND_HPP_
+#define DIGITAL_OUT_COMMAND_HPP_
 
 #include <vector>
 
+#include "tap/communication/gpio/digital.hpp"
 #include "tap/control/command.hpp"
-
-#include "wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer::wrist
 {
-struct Setpoint
-{
-    float pitch;
-    float yaw;
-    float epsilonPitch;
-    float epsilonYaw;
-};
-
-class WristSetpointsCommand : public tap::control::Command
+class DigitalOutCommand : public tap::control::Command
 {
 public:
-    WristSetpointsCommand(WristSubsystem &wrist, std::vector<Setpoint> setpoints);
+    DigitalOutCommand(tap::gpio::Digital &digital, tap::gpio::Digital::OutputPin pin, bool state)
+        : digital(digital),
+          pin(pin),
+          state(state)
+    {
+    }
 
-    void initialize() override;
+    void initialize() override { digital.set(pin, state); }
 
-    void execute() override;
+    void execute() override{};
 
-    void end(bool interrupted) override;
+    void end(bool interrupted) override{};
 
-    bool isFinished() const override;
+    bool isFinished() const override { return true; };
 
-    const char *getName() const override { return "Wrist Setpoints Command"; }
+    const char *getName() const override { return "Digital Out Command"; }
 
 private:
-    WristSubsystem &wrist;
-    std::vector<Setpoint> setpoints;
-    unsigned int currentSetpointIndex;
-
+    tap::gpio::Digital &digital;
+    tap::gpio::Digital::OutputPin pin;
+    bool state;
 };  // class WristSetpointsCommand
 
 }  // namespace aruwsrc::engineer::wrist
 
-#endif  // WRIST_SETPOINTS_COMMAND_HPP_
+#endif  // DIGITAL_OUT_COMMAND_HPP_

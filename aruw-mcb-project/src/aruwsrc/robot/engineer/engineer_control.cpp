@@ -334,27 +334,30 @@ tap::control::HoldCommandMapping rightUp(
     {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-// tap::control::PressCommandMapping oneCube(drivers(), {&oneCubePosition}, Keybo); //todo
+tap::control::PressCommandMapping oneCube(
+    drivers(),
+    {&oneCubePosition},
+    RemoteMapState({Remote::Key::Z}));  // todo
 
-// tap::control::HoldCommandMapping leftMidRightMid(
-//     drivers(),
-//     {&cubeManualControl},
-//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+tap::control::PressCommandMapping twoCube(
+    drivers(),
+    {&twoCubePosition},
+    RemoteMapState({Remote::Key::X}));
 
-// tap::control::HoldCommandMapping leftDownRightUp(
-//     drivers(),
-//     {&oneCubePosition},
-//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+tap::control::PressCommandMapping threeCube(
+    drivers(),
+    {&threeCubePosition},
+    RemoteMapState({Remote::Key::C}));
 
-// tap::control::HoldCommandMapping leftDownRightMid(
-//     drivers(),
-//     {&twoCubePosition},
-//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
+tap::control::PressCommandMapping wristFoldIn(
+    drivers(),
+    {&wristFoldInCommand},
+    RemoteMapState({Remote::Key::V}));
 
-// tap::control::HoldCommandMapping leftDownRightDown(
-//     drivers(),
-//     {&threeCubePosition},
-//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+tap::control::PressCommandMapping wristFoldOut(
+    drivers(),
+    {&wristFoldOutCommand},
+    RemoteMapState({Remote::Key::B}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -396,6 +399,13 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightUp);
+
+    drivers->commandMapper.addMap(&oneCube);
+    drivers->commandMapper.addMap(&twoCube);
+    drivers->commandMapper.addMap(&threeCube);
+
+    drivers->commandMapper.addMap(&wristFoldIn);
+    drivers->commandMapper.addMap(&wristFoldOut);
 }
 }  // namespace control
 }  // namespace aruwsrc
