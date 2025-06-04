@@ -25,6 +25,7 @@
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
 
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -373,8 +374,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
     chassis.setDefaultCommand(&chassisDriveCommand);
-    // gantryLiftSubsystem.setDefaultCommand(&wristControllerCommand);
-    // gantryExtensionSubsystem.setDefaultCommand(&WristControllerCommand);
+    gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
+    gantryExtensionSubsystem.setDefaultCommand(&gantryExtensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeLift.setDefaultCommand(&cubeManualControl);
@@ -387,7 +388,6 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightUp);
-    // drivers->commandMapper.addMap(&leftMidRightMid);
 }
 }  // namespace control
 }  // namespace aruwsrc
