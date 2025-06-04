@@ -419,7 +419,7 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak digitalBeamBreak(
     tap::gpio::Digital::InputPin::B,
     false);  // not inverted
 
-LimitSwitchDepressedGovernor blueBallsGovernor(
+LimitSwitchDepressedGovernor lowAmmoGovernor(
     digitalBeamBreak,
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED);
 // rotates agitator if friction wheels are spinning fast
@@ -444,7 +444,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
 GovernorLimitedCommand<3> feedWaterwheelWhenBallNotReady(
     {&waterwheelAgitator},
     rotateAndUnjamWaterwheel,
-    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor, &blueBallsGovernor});
+    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor, &lowAmmoGovernor});
 }  // namespace waterwheel
 
 namespace kicker
@@ -454,7 +454,7 @@ MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_R
 GovernorLimitedCommand<3> feedKickerWhenBallNotReady(
     {&kickerAgitator},
     loadKicker,
-    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor, &blueBallsGovernor});
+    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor, &lowAmmoGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
 HeatLimitGovernor heatLimitGovernor(
