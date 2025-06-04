@@ -69,7 +69,6 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -511,20 +510,13 @@ TextHudIndicators textHudIndicators(
     {&wiggleCommand, &beybladeSlowWhenOutOfCombatCommand},
     refSerialTransmitter);
 
-VisionTargetIndicator visionTargetIndicator(
-    drivers()->visionCoprocessor,
-    refSerialTransmitter,
-    transformer.getWorldToVTM());
-
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
     &ammoIndicator,
     &circleCrosshair,
     &damageIndicator,
-    &textHudIndicators,
-    &visionTargetIndicator,
-};
+    &textHudIndicators};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 

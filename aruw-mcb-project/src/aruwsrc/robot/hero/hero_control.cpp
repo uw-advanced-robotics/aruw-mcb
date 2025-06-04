@@ -66,7 +66,7 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
@@ -228,7 +228,13 @@ HeroTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+OttoKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    turret,
+    chassis,
+    modm::Vector2f(
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -514,10 +520,12 @@ TextHudIndicators textHudIndicators(
     {&beybladeCommand},
     refSerialTransmitter);
 
-VisionTargetIndicator visionTargetIndicator(
+VisionAssistanceIndicator visionAssistanceIndicator(
     drivers()->visionCoprocessor,
     refSerialTransmitter,
-    transformer.getWorldToVTM());
+    drivers()->refSerial,
+    transformAdapter.getWorldToVTM(),
+    drivers()->interRobotTransmitter);
 
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
@@ -526,8 +534,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &visionTargetIndicator,
-};
+    &visionAssistanceIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 

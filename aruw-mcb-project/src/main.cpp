@@ -241,6 +241,11 @@ static void updateIo(Drivers *drivers)
     drivers->lite.updateSerial();
 #endif
 
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+    drivers->interRobotTransmitter.updateState();
+    drivers->interRobotTransmitter.sendMessage();
+#endif
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
     drivers->ism330.read();
 #endif
