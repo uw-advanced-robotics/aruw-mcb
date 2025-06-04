@@ -321,7 +321,7 @@ aruwsrc::virtualMCB::VirtualCanEncoder parallelOmni(
 
 aruwsrc::virtualMCB::VirtualCanEncoder perpendicularOmni(
     drivers(),
-    tap::encoder::CanEncoderId::ID0,
+    tap::encoder::CanEncoderId::ID4,
     &drivers()->chassisMcbLite,
     tap::can::CanBus::CAN_BUS2);
 
