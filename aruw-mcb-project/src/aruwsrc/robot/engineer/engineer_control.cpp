@@ -39,6 +39,7 @@
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_lift_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
 #include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
@@ -148,7 +149,7 @@ CubeStorageSubsystem cubeLift(
 tap::motor::DjiMotor engineerWristRollMotor(
     drivers(),
     aruwsrc::engineer::WRIST_ROLL_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_GANTRY,
+    aruwsrc::engineer::CAN_BUS_WRIST,
     false,
     "Wrist Roll Motor",
     false,
@@ -157,7 +158,7 @@ tap::motor::DjiMotor engineerWristRollMotor(
 tap::motor::DjiMotor engineerWristLeftMotor(
     drivers(),
     aruwsrc::engineer::WRIST_LEFT_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_GANTRY,
+    aruwsrc::engineer::CAN_BUS_WRIST,
     false,
     "Wrist Left Motor",
     false,
@@ -166,7 +167,7 @@ tap::motor::DjiMotor engineerWristLeftMotor(
 tap::motor::DjiMotor engineerWristRightMotor(
     drivers(),
     aruwsrc::engineer::WRIST_RIGHT_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_GANTRY,
+    aruwsrc::engineer::CAN_BUS_WRIST,
     false,
     "Wrist Right Motor",
     false,
