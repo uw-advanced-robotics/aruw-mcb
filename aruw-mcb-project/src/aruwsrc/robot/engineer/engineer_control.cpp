@@ -37,6 +37,8 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/digital_out_command.hpp"
+#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_lift_constants.hpp"
@@ -46,8 +48,6 @@
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/suction_command.hpp"
-#include "aruwsrc/robot/engineer/suction_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
@@ -281,13 +281,15 @@ GantryExtensionSubsystem gantryExtensionSubsystem(
 
 JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, aruwsrc::engineer::WRIST_ROLL_CONFIG);
 
-SuctionSubsystem suction(
+aruwsrc::engineer::DigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
-    tap::gpio::Digital::OutputPin::Z,
-    tap::gpio::Digital::OutputPin::Y,
-    true,
-    true);
+    tap::gpio::Digital::OutputPin::Y);
+
+aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::Z);
 
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
@@ -342,13 +344,11 @@ WristSetpointsCommand wristFoldOutCommand(
      aruwsrc::engineer::WRIST_OUT_SETPOINT});
 
 // todo
-SuctionCommand lowLow(suction, false, false);
 
-SuctionCommand lowHigh(suction, false, true);
-
-SuctionCommand highLow(suction, true, false);
-
-SuctionCommand highHigh(suction, true, true);
+aruwsrc::engineer::DigitalOutCommand suckOffCommand(suckSubsystem, true);
+aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, false);
+aruwsrc::engineer::DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
+aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -358,25 +358,10 @@ tap::control::PressCommandMapping rightUp(
     {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-tap::control::HoldCommandMapping leftMidRightMid(
+tap::control::HoldCommandMapping rightDown(
     drivers(),
-    {&lowLow},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
-
-tap::control::HoldCommandMapping leftMidRightUp(
-    drivers(),
-    {&lowHigh},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
-
-tap::control::HoldCommandMapping leftUpRightMid(
-    drivers(),
-    {&highLow},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
-
-tap::control::HoldCommandMapping leftUpRightUp(
-    drivers(),
-    {&highHigh},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    {&suckOnCommand, &releaseOnCommand},
+    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 tap::control::HoldCommandMapping oneCube(
     drivers(),
@@ -412,7 +397,8 @@ void initializeSubsystems()
     wristRollSubsystem.initialize();
     wristSubsystem.initialize();
     cubeLift.initialize();
-    suction.initialize();
+    suckSubsystem.initialize();
+    releaseSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -424,6 +410,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
+    drivers->commandScheduler.registerSubsystem(&suckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -435,6 +423,9 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeLift.setDefaultCommand(&cubeManualControl);
+
+    suckSubsystem.setDefaultCommand(&suckOffCommand);
+    releaseSubsystem.setDefaultCommand(&releaseOffCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -444,10 +435,7 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightUp);
-    drivers->commandMapper.addMap(&leftMidRightMid);
-    drivers->commandMapper.addMap(&leftMidRightUp);
-    drivers->commandMapper.addMap(&leftUpRightMid);
-    drivers->commandMapper.addMap(&leftUpRightUp);
+    drivers->commandMapper.addMap(&rightDown);
 
     drivers->commandMapper.addMap(&oneCube);
     drivers->commandMapper.addMap(&twoCube);
