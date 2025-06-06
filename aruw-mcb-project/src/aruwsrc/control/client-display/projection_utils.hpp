@@ -34,7 +34,7 @@ namespace aruwsrc::control::client_display
 static constexpr int HORIZONTAL_FOV = 169;
 static constexpr int VERTICAL_FOV = 160;
 
-static constexpr float NEAR_CUTOFF_M = 0.3;
+static constexpr float NEAR_CUTOFF_M = 0.1;
 static constexpr float FAR_CUTOFF_M = 100;
 
 // clang-format off
@@ -58,6 +58,8 @@ struct ProjectedResult
 static Transform VTM_OFFSET = Transform(Position(0, 0, 0.125), Orientation(0, 0, 0));
 #elif defined(TARGET_HERO_ZERO)
 static Transform VTM_OFFSET = Transform(Position(0, 0.02, 0.25), Orientation(0, 0, 0));
+#elif defined(TARGET_STANDARD_NULL)
+static Transform VTM_OFFSET = Transform(Position(0, 0.065, 0.09), Orientation(0, 0, 0));
 #else
 static Transform VTM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
 #endif
