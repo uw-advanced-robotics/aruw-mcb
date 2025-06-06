@@ -48,7 +48,21 @@ static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
 };
 
 static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
-    tap::algorithms::transforms::Transform(0.1426, 0.14385, 0, M_PI_2, 0, 0);
+    tap::algorithms::transforms::Transform(
+        0.1426,
+        0.0245,
+        0,
+        0,
+        modm::toRadian(-90),
+        modm::toRadian(-135));
+static const tap::algorithms::transforms::Transform ISM330_MCB_MOUNTING_TRANSFORM =
+    tap::algorithms::transforms::Transform(
+        0.131,
+        0.011,
+        0,
+        modm::toRadian(90),
+        0,
+        modm::toRadian(135));
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -125,6 +139,9 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.54f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.54f;
 
 static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.

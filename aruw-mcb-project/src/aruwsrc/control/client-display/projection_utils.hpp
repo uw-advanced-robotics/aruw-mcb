@@ -34,7 +34,7 @@ namespace aruwsrc::control::client_display
 static constexpr int HORIZONTAL_FOV = 169;
 static constexpr int VERTICAL_FOV = 160;
 
-static constexpr float NEAR_CUTOFF_M = 0.1;
+static constexpr float NEAR_CUTOFF_M = 0.3;
 static constexpr float FAR_CUTOFF_M = 100;
 
 // clang-format off

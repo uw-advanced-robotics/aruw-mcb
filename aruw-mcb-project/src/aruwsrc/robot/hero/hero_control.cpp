@@ -66,7 +66,7 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
@@ -135,7 +135,7 @@ tap::motor::DjiMotor leftFrontChassisMotor(
     false,
     "Left Front Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
@@ -144,7 +144,7 @@ tap::motor::DjiMotor leftBackChassisMotor(
     false,
     "Left Back Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
@@ -153,7 +153,7 @@ tap::motor::DjiMotor rightFrontChassisMotor(
     false,
     "Right Front Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
@@ -162,7 +162,7 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     "Right Back Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 XDriveChassisSubsystem chassis(
     drivers(),
@@ -217,7 +217,7 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     false,
-    1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508,
     0,
     &yawEncoder);
 HeroTurretSubsystem turret(
@@ -228,7 +228,13 @@ HeroTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+OttoKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    turret,
+    chassis,
+    modm::Vector2f(
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -381,7 +387,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassis,
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-    &odometrySubsystem);
+    &odometrySubsystem,
+    {&drivers()->ism330});
 
 // beyblade governors
 
@@ -513,10 +520,12 @@ TextHudIndicators textHudIndicators(
     {&beybladeCommand},
     refSerialTransmitter);
 
-VisionTargetIndicator visionTargetIndicator(
+VisionAssistanceIndicator visionAssistanceIndicator(
     drivers()->visionCoprocessor,
     refSerialTransmitter,
-    transformer.getWorldToVTM());
+    drivers()->refSerial,
+    transformAdapter.getWorldToVTM(),
+    drivers()->interRobotTransmitter);
 
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
@@ -525,8 +534,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &visionTargetIndicator,
-};
+    &visionAssistanceIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
@@ -666,6 +674,7 @@ void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->mpu6500.setMountingTransform(aruwsrc::chassis::MPU6500_MCB_MOUNTING_TRANSFORM);
+    drivers->ism330.setMountingTransform(aruwsrc::chassis::ISM330_MCB_MOUNTING_TRANSFORM);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);

@@ -72,7 +72,7 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -178,7 +178,7 @@ tap::motor::DjiMotor leftFrontChassisMotor(
     false,
     "Left Front Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
@@ -187,7 +187,7 @@ tap::motor::DjiMotor leftBackChassisMotor(
     false,
     "Left Back Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
@@ -196,7 +196,7 @@ tap::motor::DjiMotor rightFrontChassisMotor(
     false,
     "Right Front Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
@@ -205,7 +205,7 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     "Right Back Chassis Motor",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::chassis::XDriveChassisSubsystem chassis(
     drivers(),
@@ -419,7 +419,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassis,
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-    &odometrySubsystem);
+    &odometrySubsystem,
+    {&drivers()->mpu6500});
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
@@ -551,10 +552,12 @@ TextHudIndicators textHudIndicators(
     {&wiggleCommand, &beybladeSlowWhenOutOfCombatCommand},
     refSerialTransmitter);
 
-VisionTargetIndicator visionTargetIndicator(
+VisionAssistanceIndicator visionAssistanceIndicator(
     drivers()->visionCoprocessor,
     refSerialTransmitter,
-    transformer.getWorldToVTM());
+    drivers()->refSerial,
+    transformAdapter.getWorldToVTM(),
+    drivers()->interRobotTransmitter);
 
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
@@ -563,8 +566,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &visionTargetIndicator,
-};
+    &visionAssistanceIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
