@@ -39,8 +39,13 @@ static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
 
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+#if defined(TARGET_STANDARD_NULL)
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
+#else
+static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR6;
+#endif
 
 #if defined(TARGET_STANDARD_NULL)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
@@ -62,7 +67,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #elif defined(TARGET_STANDARD_VOID)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 8146,
+    .startEncoderValue = 8184,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -70,7 +75,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 8956,
+    .startEncoderValue = 5191,
     .minAngle = modm::toRadian(-18),
     .maxAngle = modm::toRadian(28),
     .limitMotorAngles = true,
