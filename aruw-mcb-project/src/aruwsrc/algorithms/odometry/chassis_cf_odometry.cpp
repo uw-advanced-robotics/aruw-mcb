@@ -24,11 +24,13 @@
 namespace aruwsrc::algorithms::odometry
 {
 ChassisCFOdometry::ChassisCFOdometry(
+    tap::Drivers* drivers,
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos)
-    : chassisSubsystem(chassisSubsystem),
+    : Subsystem(drivers),
+      chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos)
@@ -71,14 +73,32 @@ void ChassisCFOdometry::update()
     computeAccVelocities(&acc_x_vel, &acc_y_vel, dt);
 
     // Complementary filter time!
-    float velocity_x = 0.5f * chassis_x_vel + 0.5f * acc_x_vel;
-    float velocity_y = 0.5f * chassis_y_vel + 0.5f * acc_y_vel;
+    float velocity_x = chassisTrust * chassis_x_vel + (1.0 - chassisTrust) * acc_x_vel;
+    float velocity_y = chassisTrust * chassis_y_vel + (1.0 - chassisTrust) * acc_y_vel;
 
     velocity = modm::Vector2f(velocity_x, velocity_y);
     float position_x = location.getX() + velocity.x * dt;
     float position_y = location.getY() + velocity.y * dt;
     location.setPosition(position_x, position_y);
     location.setOrientation(chassisYaw);
+}
+
+void ChassisCFOdometry::computeAccVelocities(float* acc_x_vel, float* acc_y_vel, const float dt)
+{
+    // Get IMU acceleration data
+    float acc_x = imu.getAx();
+    float acc_y = imu.getAy();
+
+    // Rotate to world frame
+    tap::algorithms::rotateVector(&acc_x, &acc_y, imu.getYaw());
+
+    // Get current velocity
+    float curr_x_vel = velocity.x;
+    float curr_y_vel = velocity.y;
+
+    // Update velocity
+    *acc_x_vel = curr_x_vel + acc_x * dt;
+    *acc_y_vel = curr_y_vel + acc_y * dt;
 }
 
 }  // namespace aruwsrc::algorithms::odometry

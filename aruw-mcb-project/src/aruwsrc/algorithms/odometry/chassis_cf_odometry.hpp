@@ -47,6 +47,7 @@ public:
      * @param initPos Initial position of chassis when robot boots
      */
     ChassisCFOdometry(
+        tap::Drivers* drivers,
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
@@ -92,7 +93,7 @@ private:
 
     float chassisTrust = 0.5f;  // Trust in deadwheel odometry vs IMU
 
-    void computeAccVelocities(float* acc_x_vel, float* acc_y_vel, const float dt) const;
+    void computeAccVelocities(float* acc_x_vel, float* acc_y_vel, float dt);
 };
 }  // namespace aruwsrc::algorithms::odometry
 

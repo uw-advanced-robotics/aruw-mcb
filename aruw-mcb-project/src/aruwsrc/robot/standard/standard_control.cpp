@@ -247,6 +247,7 @@ aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+    drivers(),
     chassis,
     yawObserver,
     drivers()->ism330,
