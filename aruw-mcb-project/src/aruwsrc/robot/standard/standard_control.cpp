@@ -245,12 +245,14 @@ aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
 //     aruwsrc::chassis::PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
 //     aruwsrc::chassis::PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
 
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     chassis,
-    turret,
+    yawObserver,
     drivers()->ism330,
-    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
-    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y);
+    modm::Vector2f(
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
