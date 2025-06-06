@@ -34,7 +34,8 @@ namespace aruwsrc::algorithms::odometry
 /**
  * An odometry interface that uses a complementary filter to measure odometry.
  */
-class ChassisCFOdometry : public tap::algorithms::odometry::Odometry2DInterface
+class ChassisCFOdometry : public tap::algorithms::odometry::Odometry2DInterface,
+                          public tap::control::Subsystem
 {
 public:
     /**
@@ -65,6 +66,8 @@ public:
     void reset();
 
     void update();
+
+    void refresh() override { update(); }
 
     void overrideOdometryPosition(const float positionX, const float positionY)
     {
