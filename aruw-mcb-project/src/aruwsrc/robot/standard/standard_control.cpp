@@ -310,20 +310,13 @@ aruwsrc::chassis::WiggleDriveCommand wiggleCommand(
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface));
+
 aruwsrc::chassis::BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
     (drivers()->controlOperatorInterface),
     aruwsrc::chassis::BEYBLADE_CONFIG);
-
-aruwsrc::chassis::BeybladeCommand slowBeybladeCommand(
-    drivers(),
-    &chassis,
-    &turret.yawMotor,
-    (drivers()->controlOperatorInterface),
-    aruwsrc::chassis::BEYBLADE_CONFIG,
-    0.5f);  // Multiplier for slow beyblade speed
 
 // Turret controllers
 algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
@@ -428,12 +421,6 @@ MovedFastRecentlyGovernor movedRecentlyGovernor(
     5000.0f,
     5000);
 
-GovernorWithFallbackCommand<3> beybladeSlowWhenOutOfCombatCommand(
-    {&chassis},
-    slowBeybladeCommand,
-    beybladeCommand,
-    {&firedRecentlyGovernor, &plateHitGovernor, &movedRecentlyGovernor},
-    true);
 GovernorLimitedCommand<1> turretUTurnCommandLimited(
     {&turret},
     turretUTurnCommand,
@@ -541,7 +528,7 @@ TextHudIndicators textHudIndicators(
     *drivers(),
     agitator,
     imuCalibrateCommand,
-    {&wiggleCommand, &beybladeSlowWhenOutOfCombatCommand},
+    {&wiggleCommand, &beybladeCommand},
     refSerialTransmitter);
 
 VisionAssistanceIndicator visionAssistanceIndicator(
@@ -578,7 +565,7 @@ HoldRepeatCommandMapping rightSwitchUp(
 
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeSlowWhenOutOfCombatCommand},
+    {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 HoldCommandMapping leftSwitchUp(
@@ -593,10 +580,7 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     &cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
-ToggleCommandMapping fToggled(
-    drivers(),
-    {&beybladeSlowWhenOutOfCombatCommand},
-    RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
