@@ -536,7 +536,7 @@ TextHudIndicators textHudIndicators(
     *drivers(),
     agitator,
     imuCalibrateCommand,
-    {&wiggleCommand, &beybladeSlowWhenOutOfCombatCommand},
+    {&wiggleCommand, &beybladeCommand},
     refSerialTransmitter);
 
 VisionTargetIndicator visionTargetIndicator(
@@ -572,7 +572,7 @@ HoldRepeatCommandMapping rightSwitchUp(
 
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeSlowWhenOutOfCombatCommand},
+    {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 HoldCommandMapping leftSwitchUp(
@@ -589,7 +589,7 @@ CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
 
 ToggleCommandMapping fToggled(
     drivers(),
-    {&beybladeSlowWhenOutOfCombatCommand},
+    {&beybladeCommand},
     RemoteMapState({Remote::Key::F}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
