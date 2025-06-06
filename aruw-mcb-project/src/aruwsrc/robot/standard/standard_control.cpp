@@ -35,6 +35,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
@@ -233,16 +234,23 @@ aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
     &perpendicularOmni,
     aruwsrc::chassis::DEADWHEEL_RADIUS);
 
-aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
-    *drivers(),
-    deadwheels,
+// aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
+//     *drivers(),
+//     deadwheels,
+//     turret,
+//     drivers()->mpu6500,
+//     aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
+//     aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
+//     aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+//     aruwsrc::chassis::PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
+//     aruwsrc::chassis::PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
+
+aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+    chassis,
     turret,
-    drivers()->mpu6500,
+    drivers()->ism330,
     aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
-    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
-    aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    aruwsrc::chassis::PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
-    aruwsrc::chassis::PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
+    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
