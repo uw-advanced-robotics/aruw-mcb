@@ -655,7 +655,7 @@ CycleStateCommandMapping<
     vPressed(
         drivers(),
         RemoteMapState({Remote::Key::V}),
-        MultiShotCvCommandMapping::SINGLE,
+        MultiShotCvCommandMapping::LIMITED_20HZ,
         &leftMousePressedBNotPressed,
         &MultiShotCvCommandMapping::setShooterState,
         RemoteMapState({Remote::Key::E}));
