@@ -275,6 +275,8 @@ static void initializeI2C(Drivers *drivers)
     Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
     Board::I2CMaster::reset();
 
+    modm::delay_ms(1000);
+
     // Turn on the digital pins used for I2C devices
     drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
 }
