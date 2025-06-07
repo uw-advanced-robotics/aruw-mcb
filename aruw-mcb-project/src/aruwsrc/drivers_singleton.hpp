@@ -27,9 +27,6 @@
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 namespace aruwsrc::standard
-#elif defined(OLD_STANDARDS)
-#include "aruwsrc/robot/old_standard/old_standard_drivers.hpp"
-namespace aruwsrc::old_standard
 #elif defined(ALL_SENTRIES)
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 namespace aruwsrc::sentry
