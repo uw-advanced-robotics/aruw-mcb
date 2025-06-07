@@ -284,7 +284,8 @@ JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, aruwsrc::engineer::
 aruwsrc::engineer::DigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
-    tap::gpio::Digital::OutputPin::Y);
+    tap::gpio::Digital::OutputPin::Y,
+    true);
 
 aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
     drivers(),
@@ -345,8 +346,8 @@ WristSetpointsCommand wristFoldOutCommand(
 
 // todo
 
-aruwsrc::engineer::DigitalOutCommand suckOffCommand(suckSubsystem, true);
-aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, false);
+aruwsrc::engineer::DigitalOutCommand suckOffCommand(suckSubsystem, false);
+aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, true);
 aruwsrc::engineer::DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
 aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 
