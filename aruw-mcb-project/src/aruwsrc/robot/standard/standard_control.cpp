@@ -520,7 +520,6 @@ TextHudIndicators textHudIndicators(
     agitator,
     imuCalibrateCommand,
     {&wiggleCommand, &beybladeCommand},
-    {&wiggleCommand, &beybladeCommand},
     refSerialTransmitter);
 
 VisionAssistanceIndicator visionAssistanceIndicator(
