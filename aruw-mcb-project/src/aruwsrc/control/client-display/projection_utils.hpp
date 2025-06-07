@@ -59,6 +59,8 @@ static Transform VTM_OFFSET =
     Transform(Position(0, 0, 0.125), Orientation(0, 0, 0));  // TODO: Sumedh update for all robots
 #elif defined(TARGET_HERO_ZERO)
 static Transform VTM_OFFSET = Transform(Position(0, 0.02, 0.25), Orientation(0, 0, 0));
+#elif defined(TARGET_STANDARD_NULL)
+static Transform VTM_OFFSET = Transform(Position(0, 0.065, 0.09), Orientation(0, 0, 0));
 #else
 static Transform VTM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
 #endif
