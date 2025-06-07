@@ -91,7 +91,7 @@ private:
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
 
-    float chassisTrust = 0.5f;  // Trust in deadwheel odometry vs IMU
+    float chassisTrust = 1.0f;  // Trust in deadwheel odometry vs IMU
 
     void computeAccVelocities(float* acc_x_vel, float* acc_y_vel, float dt);
 };
