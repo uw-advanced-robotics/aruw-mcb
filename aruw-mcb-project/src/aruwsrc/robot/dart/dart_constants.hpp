@@ -37,9 +37,9 @@ static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 //  * @param[in] minimumPwm The minimum allowable PWM output. This is limited between 0 and 1.
 //  * @param[in] pwmRampSpeed The speed in PWM percent per millisecond.
 
-static constexpr float SERVO_MIN = 0.0f;    // TODO: figure out real values
-static constexpr float SERVO_MAX = 0.3f;    // TODO: figure out real values
-static constexpr float SERVO_SPEED = 1.0f;  // TODO: figure out real values
+static constexpr float SERVO_MIN = 0.5f;
+static constexpr float SERVO_MAX = 0.99f;
+static constexpr float SERVO_SPEED = 1.0f;
 static constexpr tap::gpio::Pwm::Pin SERVO_PORT = tap::gpio::Pwm::Pin::X;  // TODO: figure out real
 // port value
 static constexpr tap::gpio::Digital::InputPin BEAMBREAK_PORT = tap::gpio::Digital::InputPin::B;

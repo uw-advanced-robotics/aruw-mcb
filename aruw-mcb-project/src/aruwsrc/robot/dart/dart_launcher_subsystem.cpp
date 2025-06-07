@@ -38,7 +38,8 @@ DartLauncherSubsystem::DartLauncherSubsystem(
     servo.setTargetPwm(SERVO_MAX);
 };
 
-void DartLauncherSubsystem::initialize() { motor.initialize(); }
+void DartLauncherSubsystem::initialize() {drivers->pwm.setTimerFrequency(tap::gpio::Pwm::TIMER8, 500);
+    motor.initialize(); }
 
 void DartLauncherSubsystem::moveMotor(int32_t power) { motor.setDesiredOutput(power); }
 
