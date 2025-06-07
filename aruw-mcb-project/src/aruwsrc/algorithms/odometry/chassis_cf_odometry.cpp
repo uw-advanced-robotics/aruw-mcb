@@ -46,6 +46,8 @@ void ChassisCFOdometry::reset()
     prevTime = tap::arch::clock::getTimeMicroseconds();
 }
 
+float log_chassis_x, log_chassis_y, log_acc_x, log_acc_y;
+
 void ChassisCFOdometry::update()
 {
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
@@ -67,6 +69,9 @@ void ChassisCFOdometry::update()
 
     chassis_x_vel = chassisVelocity[0][0];
     chassis_y_vel = chassisVelocity[1][0];
+
+    log_chassis_x = chassis_x_vel;
+    log_chassis_y = chassis_y_vel;
 
     // Get IMU acceleration data
     float acc_x_vel, acc_y_vel;
@@ -91,6 +96,9 @@ void ChassisCFOdometry::computeAccVelocities(float* acc_x_vel, float* acc_y_vel,
 
     // Rotate to world frame
     tap::algorithms::rotateVector(&acc_x, &acc_y, imu.getYaw());
+
+    log_acc_x = acc_x;
+    log_acc_y = acc_y;
 
     // Get current velocity
     float curr_x_vel = velocity.x;
