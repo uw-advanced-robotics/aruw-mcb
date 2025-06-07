@@ -229,22 +229,6 @@ tap::encoder::CanEncoder perpendicularOmni(
     tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2);
 
-aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-    &parallelOmni,
-    &perpendicularOmni,
-    aruwsrc::chassis::DEADWHEEL_RADIUS);
-
-// aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
-//     *drivers(),
-//     deadwheels,
-//     turret,
-//     drivers()->mpu6500,
-//     aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
-//     aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
-//     aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-//     aruwsrc::chassis::PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
-//     aruwsrc::chassis::PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
-
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers(),
