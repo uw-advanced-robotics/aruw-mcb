@@ -171,8 +171,7 @@ static void initializeIo(Drivers *drivers)
 
     initializeI2C(drivers);
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
