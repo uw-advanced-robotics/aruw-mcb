@@ -35,6 +35,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
@@ -228,21 +229,15 @@ tap::encoder::CanEncoder perpendicularOmni(
     tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2);
 
-aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-    &parallelOmni,
-    &perpendicularOmni,
-    aruwsrc::chassis::DEADWHEEL_RADIUS);
-
-aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
-    *drivers(),
-    deadwheels,
-    turret,
-    drivers()->mpu6500,
-    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
-    aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y,
-    aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    aruwsrc::chassis::PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
-    aruwsrc::chassis::PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
+aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+    drivers(),
+    chassis,
+    yawObserver,
+    drivers()->ism330,
+    modm::Vector2f(
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -405,7 +400,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &odometrySubsystem,
-    {&drivers()->mpu6500});
+    {&drivers()->ism330});
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
@@ -710,6 +705,8 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
+    drivers->ism330.setMountingTransform(
+        tap::algorithms::transforms::Transform(0.02578, 0.09607, 0, 0, 0, 0));
 }
 
 /* register io mappings here ------------------------------------------------*/

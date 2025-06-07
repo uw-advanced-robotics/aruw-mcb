@@ -34,6 +34,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
@@ -228,10 +229,12 @@ HeroTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-OttoKFOdometry2DSubsystem odometrySubsystem(
-    *drivers(),
-    turret,
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
+aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+    drivers(),
     chassis,
+    yawObserver,
+    drivers()->ism330,
     modm::Vector2f(
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));

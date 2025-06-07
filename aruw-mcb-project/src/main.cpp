@@ -207,6 +207,7 @@ static void initializeIo(Drivers *drivers)
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+    modm::delay_ms(1000);  // Wait for the I2C bus to stabilize
     drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
 }
@@ -276,6 +277,7 @@ static void initializeI2C(Drivers *drivers)
     Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
         Board::I2CMaster::PullUps::External);
     Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+    Board::I2CMaster::reset();
 
     // Turn on the digital pins used for I2C devices
     drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
