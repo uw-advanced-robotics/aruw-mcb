@@ -272,7 +272,7 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
 static void initializeI2C(Drivers *drivers)
 {
     // Turn off the digital pins used for I2C devices
-    drivers->digital.set(tap::gpio::Digital::OutputPin::Z, false);
+    drivers->digital.set(tap::gpio::Digital::OutputPin::E, false);
 
     Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
         Board::I2CMaster::PullUps::External);
@@ -280,5 +280,5 @@ static void initializeI2C(Drivers *drivers)
     Board::I2CMaster::reset();
 
     // Turn on the digital pins used for I2C devices
-    drivers->digital.set(tap::gpio::Digital::OutputPin::Z, true);
+    drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
 }

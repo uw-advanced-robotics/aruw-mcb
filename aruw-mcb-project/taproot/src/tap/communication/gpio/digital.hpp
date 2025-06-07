@@ -67,7 +67,6 @@ public:
      */
     enum OutputPin
     {
-        Z,
         E,
         F,
         G,
