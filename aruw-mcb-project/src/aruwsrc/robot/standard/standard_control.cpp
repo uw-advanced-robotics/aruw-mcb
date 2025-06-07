@@ -407,7 +407,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &odometrySubsystem,
-    {&drivers()->mpu6500});
+    {&drivers()->ism330});
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
@@ -721,7 +721,8 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
-    drivers->ism330.setMountingTransform(tap::algorithms::transforms::Transform(0.02578, 0.09607, 0, 0, 0, 0));
+    drivers->ism330.setMountingTransform(
+        tap::algorithms::transforms::Transform(0.02578, 0.09607, 0, 0, 0, 0));
 }
 
 /* register io mappings here ------------------------------------------------*/
