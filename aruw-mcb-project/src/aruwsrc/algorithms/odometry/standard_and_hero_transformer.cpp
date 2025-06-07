@@ -30,6 +30,9 @@ namespace aruwsrc::algorithms::transforms
 #if defined(TARGET_STANDARD_NULL)
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.08, 0.1, 0.056), Orientation(0, 0, 0));
+#elif defined(TARGET_STANDARD_VOID)
+static Transform TURRET_TO_ARDUCAM_OFFSET =
+    Transform(Position(0.08, 0.1, 0.056), Orientation(0, 0, 0));
 #else
 static Transform TURRET_TO_ARDUCAM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
 #endif

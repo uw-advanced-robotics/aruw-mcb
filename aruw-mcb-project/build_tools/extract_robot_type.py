@@ -21,7 +21,7 @@ from build_tools.parse_args import USAGE
 
 # TODO: Make this sync up with check.py and c_cpp_properties.json if possible
 VALID_ROBOT_TYPES   = [ "STANDARD_NULL",
-                        "STANDARD_ORION",
+                        "STANDARD_VOID",
                         "DRONE",
                         "ENGINEER",
                         "SENTRY_HYDRA",
@@ -34,7 +34,7 @@ VALID_ROBOT_TYPES   = [ "STANDARD_NULL",
 
 ROBOT_CLASS = {
     "STANDARD_NULL": "standard",
-    "STANDARD_ORION": "old_standard",
+    "STANDARD_VOID": "standard",
     "DRONE": "drone",
     "ENGINEER": "engineer",
     "SENTRY_HYDRA": "sentry",
