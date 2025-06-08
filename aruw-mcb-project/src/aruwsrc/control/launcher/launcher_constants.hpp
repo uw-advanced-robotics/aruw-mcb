@@ -61,7 +61,7 @@ static constexpr float LAUNCHER_PID_KP = 30.0f;
 static constexpr float LAUNCHER_PID_KI = 0.4f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = 0.0f;  // tap::motor::DjiMotor::MAX_OUTPUT_C610;
+static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;
 #else
 static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 0.2f;
