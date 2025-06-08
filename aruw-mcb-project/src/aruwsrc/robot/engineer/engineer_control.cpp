@@ -245,8 +245,8 @@ WristSubsystem wristSubsystem(
     wristRightMotor,
     wristPitchEncoder,
     wristYawEncoder,
-    aruwsrc::engineer::WRIST_PITCH_CONFIG,
-    aruwsrc::engineer::WRIST_YAW_CONFIG,
+    aruwsrc::engineer::WRIST_PITCH_PID_CONFIG,
+    aruwsrc::engineer::WRIST_YAW_PID_CONFIG,
     aruwsrc::engineer::WRIST_MIN_PITCH,
     aruwsrc::engineer::WRIST_MAX_PITCH,
     aruwsrc::engineer::WRIST_MIN_YAW,
@@ -279,7 +279,10 @@ GantryExtensionSubsystem gantryExtensionSubsystem(
     GANTRY_EXTENSION_KS,
     GANTRY_EXTENSION_EPSILON);
 
-JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, aruwsrc::engineer::WRIST_ROLL_CONFIG);
+JointSubsystem wristRollSubsystem(
+    drivers(),
+    wristRollMotor,
+    aruwsrc::engineer::WRIST_ROLL_PID_CONFIG);
 
 aruwsrc::engineer::DigitalOutSubsystem suckSubsystem(
     drivers(),

@@ -36,99 +36,84 @@ static constexpr tap::encoder::CanEncoderId WRIST_PITCH_ENCODER_ID =
     tap::encoder::CanEncoderId::ID0;
 static constexpr tap::encoder::CanEncoderId WRIST_YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID1;
 
-static constexpr float WRIST_PITCH_PID_KP = 8000.0f;
-static constexpr float WRIST_PITCH_PID_KI = 1.0f;
-static constexpr float WRIST_PITCH_PID_KD = 800.0f;
-static constexpr float WRIST_PITCH_PID_MAX_ERROR_SUM = 1000.0f;
 static constexpr float WRIST_PITCH_PID_KS = 0.0;
-static constexpr float WRIST_PITCH_MAX_OUTPUT = 4000.0f;
-static constexpr float WRIST_PITCH_DERIVATIVE_FLOOR = 0.025f;
+static constexpr tap::algorithms::SmoothPidConfig WRIST_PITCH_PID_CONFIG{
+    .kp = 8000.0f,
+    .ki = 1.0f,
+    .kd = 800.0f,
+    .maxICumulative = 1000.0f,
+    .maxOutput = 4000.0f,
+    .tQDerivativeKalman = 1,
+    .tRDerivativeKalman = .001,
+    .tQProportionalKalman = 1,
+    .tRProportionalKalman = 0,
+    .errDeadzone = 0.025f,
+    .errorDerivativeFloor = 0,
+};
 
 // units of radians
 static constexpr float WRIST_MIN_PITCH = -M_PI_2;
 static constexpr float WRIST_MAX_PITCH = M_PI * 3.0f / 2.0f;  // todo
 static constexpr uint32_t WRIST_HOME_PITCH = 1419;
 
-static constexpr float WRIST_YAW_PID_KP = 6000.0f;
-static constexpr float WRIST_YAW_PID_KI = 1.0f;
-static constexpr float WRIST_YAW_PID_KD = 500.0f;
-static constexpr float WRIST_YAW_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float WRIST_YAW_PID_KS = 0.0;
-static constexpr float WRIST_YAW_MAX_OUTPUT = 4000.0f;
-static constexpr float WRIST_YAW_DERIVATIVE_FLOOR = 0.025f;
+static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_PID_CONFIG{
+    .kp = 6000.0f,
+    .ki = 1.0f,
+    .kd = 500.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 4000.0f,
+    .tQDerivativeKalman = 1,
+    .tRDerivativeKalman = .001,
+    .tQProportionalKalman = 1,
+    .tRProportionalKalman = 0,
+    .errDeadzone = 0.025f,
+    .errorDerivativeFloor = 0,
+};
 
 // units of radians
 static constexpr float WRIST_MIN_YAW = -M_PI * 2;
 static constexpr float WRIST_MAX_YAW = M_PI * 2;  // todo
 static constexpr float WRIST_HOME_YAW = 1.23485458f;
 
-static constexpr float WRIST_ROLL_PID_KP = 200.0f;
-static constexpr float WRIST_ROLL_PID_KI = 0.0f;
-static constexpr float WRIST_ROLL_PID_KD = 15.0f;
-static constexpr float WRIST_ROLL_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float WRIST_ROLL_PID_KS = 0.0;
-static constexpr float WRIST_ROLL_MAX_OUTPUT = 3000.0f;
+static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
+    .kp = 200.0f,
+    .ki = 0.0f,
+    .kd = 15.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 3000.0f,
+};
 
 static constexpr float WRIST_RATIO = 30.0f / 40.0f;
-
-static constexpr tap::algorithms::SmoothPidConfig WRIST_PITCH_CONFIG(
-    WRIST_PITCH_PID_KP,
-    WRIST_PITCH_PID_KI,
-    WRIST_PITCH_PID_KD,
-    WRIST_PITCH_PID_MAX_ERROR_SUM,
-    WRIST_PITCH_MAX_OUTPUT,
-    1,
-    .001,
-    1,
-    0,
-    WRIST_PITCH_DERIVATIVE_FLOOR);
-
-static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_CONFIG(
-    WRIST_YAW_PID_KP,
-    WRIST_YAW_PID_KI,
-    WRIST_YAW_PID_KD,
-    WRIST_YAW_PID_MAX_ERROR_SUM,
-    WRIST_YAW_MAX_OUTPUT,
-    1,
-    .001,
-    1,
-    0,
-    WRIST_YAW_DERIVATIVE_FLOOR);
-
-static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_CONFIG(
-    WRIST_ROLL_PID_KP,
-    WRIST_ROLL_PID_KI,
-    WRIST_ROLL_PID_KD,
-    WRIST_ROLL_PID_MAX_ERROR_SUM,
-    WRIST_ROLL_MAX_OUTPUT);
 
 static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
 
 static constexpr wrist::Setpoint WRIST_IN_SETPOINT{
-    0,
-    0,
-    0.1f,  // epsilonPitch
-    0.1f   // epsilonYaw
+    .pitch = 0,
+    .yaw = 0,
+    .epsilonPitch = 0.1f,
+    .epsilonYaw = 0.1f,
 };
 static constexpr wrist::Setpoint WRIST_TOP_SETPOINT{
-    1.5f,
-    0,
-    0.1f,  // epsilonPitch
-    0.1f   // epsilonYaw
+    .pitch = 1.5f,
+    .yaw = 0,
+    .epsilonPitch = 0.1f,
+    .epsilonYaw = 0.1f,
 };
 static constexpr wrist::Setpoint WRIST_BOTTOM_SETPOINT{
-    1.5f,
-    M_PI,
-    0.1f,  // epsilonPitch
-    0.1f   // epsilonYaw
+    .pitch = 1.5f,
+    .yaw = M_PI,
+    .epsilonPitch = 0.1f,
+    .epsilonYaw = 0.1f,
 };
 static constexpr wrist::Setpoint WRIST_OUT_SETPOINT{
-    0,
-    M_PI,
-    0.1f,  // epsilonPitch
-    0.1f   // epsilonYaw
+    .pitch = 0,
+    .yaw = M_PI,
+    .epsilonPitch = 0.1f,
+    .epsilonYaw = 0.1f,
 };
 
 }  // namespace aruwsrc::engineer
