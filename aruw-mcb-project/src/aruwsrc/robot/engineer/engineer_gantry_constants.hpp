@@ -30,12 +30,12 @@ static constexpr tap::motor::MotorId GANTRY_LIFT_LEFT_MOTOR_ID = tap::motor::Mot
 static constexpr tap::motor::MotorId GANTRY_LIFT_RIGHT_MOTOR_ID = tap::motor::MotorId::MOTOR2;
 static constexpr tap::motor::MotorId GANTRY_EXTENSION_MOTOR_ID = tap::motor::MotorId::MOTOR3;
 
-static constexpr float GANTRY_LIFT_POS_PID_KP = 60.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KP = 80.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KI = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KD = 10.0f;
 static constexpr float GANTRY_LIFT_POS_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KS = 0.0;
-static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 2000.0f;
+static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 3000.0f;
 
 static constexpr float GANTRY_LIFT_LOWER_BOUND = -5.0f;
 static constexpr float GANTRY_LIFT_UPPER_BOUND = 360.0f;
@@ -68,12 +68,12 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_BALANCE_CONFIG(
     GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM,
     GANTRY_LIFT_BALANCE_MAX_OUTPUT);
 
-static constexpr float GANTRY_EXTENSION_PID_KP = 75.0f;
+static constexpr float GANTRY_EXTENSION_PID_KP = 300.0f;
 static constexpr float GANTRY_EXTENSION_PID_KI = 0.0f;
-static constexpr float GANTRY_EXTENSION_PID_KD = 4.0f;
+static constexpr float GANTRY_EXTENSION_PID_KD = 40.0f;
 static constexpr float GANTRY_EXTENSION_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_KS = 0.0;
-static constexpr float GANTRY_EXTENSION_MAX_OUTPUT = 1000.0f;
+static constexpr float GANTRY_EXTENSION_MAX_OUTPUT = 2000.0f;
 
 static constexpr float GANTRY_EXTENSION_LOWER_BOUND = 0.0f;
 static constexpr float GANTRY_EXTENSION_UPPER_BOUND = 0.0f;  // length ~360 mm

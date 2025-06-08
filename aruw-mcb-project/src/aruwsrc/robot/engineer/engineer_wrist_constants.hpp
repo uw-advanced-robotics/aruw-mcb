@@ -36,24 +36,26 @@ static constexpr tap::encoder::CanEncoderId WRIST_PITCH_ENCODER_ID =
     tap::encoder::CanEncoderId::ID0;
 static constexpr tap::encoder::CanEncoderId WRIST_YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID1;
 
-static constexpr float WRIST_PITCH_PID_KP = 2500.0f;
-static constexpr float WRIST_PITCH_PID_KI = 0.1f;
-static constexpr float WRIST_PITCH_PID_KD = 30.0f;
+static constexpr float WRIST_PITCH_PID_KP = 8000.0f;
+static constexpr float WRIST_PITCH_PID_KI = 1.0f;
+static constexpr float WRIST_PITCH_PID_KD = 800.0f;
 static constexpr float WRIST_PITCH_PID_MAX_ERROR_SUM = 1000.0f;
 static constexpr float WRIST_PITCH_PID_KS = 0.0;
-static constexpr float WRIST_PITCH_MAX_OUTPUT = 3000.0f;
+static constexpr float WRIST_PITCH_MAX_OUTPUT = 4000.0f;
+static constexpr float WRIST_PITCH_DERIVATIVE_FLOOR = 0.025f;
 
 // units of radians
 static constexpr float WRIST_MIN_PITCH = -M_PI_2;
 static constexpr float WRIST_MAX_PITCH = M_PI * 3.0f / 2.0f;  // todo
 static constexpr float WRIST_HOME_PITCH = 2.46817517f;        // todo
 
-static constexpr float WRIST_YAW_PID_KP = 2000.0f;
-static constexpr float WRIST_YAW_PID_KI = 0.0f;
-static constexpr float WRIST_YAW_PID_KD = 60.0f;
+static constexpr float WRIST_YAW_PID_KP = 6000.0f;
+static constexpr float WRIST_YAW_PID_KI = 1.0f;
+static constexpr float WRIST_YAW_PID_KD = 500.0f;
 static constexpr float WRIST_YAW_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float WRIST_YAW_PID_KS = 0.0;
-static constexpr float WRIST_YAW_MAX_OUTPUT = 1000.0f;
+static constexpr float WRIST_YAW_MAX_OUTPUT = 4000.0f;
+static constexpr float WRIST_YAW_DERIVATIVE_FLOOR = 0.025f;
 
 // units of radians
 static constexpr float WRIST_MIN_YAW = -M_PI * 2;
@@ -74,14 +76,24 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_PITCH_CONFIG(
     WRIST_PITCH_PID_KI,
     WRIST_PITCH_PID_KD,
     WRIST_PITCH_PID_MAX_ERROR_SUM,
-    WRIST_PITCH_MAX_OUTPUT);
+    WRIST_PITCH_MAX_OUTPUT,
+    1,
+    .001,
+    1,
+    0,
+    WRIST_PITCH_DERIVATIVE_FLOOR);
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_CONFIG(
     WRIST_YAW_PID_KP,
     WRIST_YAW_PID_KI,
     WRIST_YAW_PID_KD,
     WRIST_YAW_PID_MAX_ERROR_SUM,
-    WRIST_YAW_MAX_OUTPUT);
+    WRIST_YAW_MAX_OUTPUT,
+    1,
+    .001,
+    1,
+    0,
+    WRIST_YAW_DERIVATIVE_FLOOR);
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_CONFIG(
     WRIST_ROLL_PID_KP,
