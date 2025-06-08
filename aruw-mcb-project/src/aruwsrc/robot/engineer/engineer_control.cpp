@@ -168,7 +168,7 @@ tap::encoder::CanEncoder wristPitchEncoder(
     aruwsrc::chassis::CAN_BUS_MOTORS,
     false,
     1,
-    WRIST_HOME_PITCH * 4096.0f / (M_PI * 2));
+    WRIST_HOME_PITCH);
 
 tap::encoder::CanEncoder wristYawEncoder(
     drivers(),

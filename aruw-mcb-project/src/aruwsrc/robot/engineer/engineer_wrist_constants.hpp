@@ -47,7 +47,7 @@ static constexpr float WRIST_PITCH_DERIVATIVE_FLOOR = 0.025f;
 // units of radians
 static constexpr float WRIST_MIN_PITCH = -M_PI_2;
 static constexpr float WRIST_MAX_PITCH = M_PI * 3.0f / 2.0f;  // todo
-static constexpr float WRIST_HOME_PITCH = 2.46817517f;        // todo
+static constexpr uint32_t WRIST_HOME_PITCH = 1419;
 
 static constexpr float WRIST_YAW_PID_KP = 6000.0f;
 static constexpr float WRIST_YAW_PID_KI = 1.0f;
@@ -69,7 +69,7 @@ static constexpr float WRIST_ROLL_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float WRIST_ROLL_PID_KS = 0.0;
 static constexpr float WRIST_ROLL_MAX_OUTPUT = 3000.0f;
 
-static constexpr float WRIST_RATIO = 1.0f;
+static constexpr float WRIST_RATIO = 30.0f / 40.0f;
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_PITCH_CONFIG(
     WRIST_PITCH_PID_KP,
