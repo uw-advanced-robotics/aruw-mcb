@@ -129,7 +129,9 @@ public:
 
     void moveTowardLowerBound() override
     {
-        motorDesiredOutput = (homingReversed ? homingSpeed : -homingSpeed) + kS;
+        // motorDesiredOutput = (homingReversed ? homingSpeed : -homingSpeed) + kS;
+        pidState = PIDState::POSITION_PID;
+        setSetpoint(getPosition() + (homingReversed ? homingSpeed : -homingSpeed));
     }
 
     void stopDuringHoming() override
@@ -149,7 +151,7 @@ protected:
         float home = 0.0f,
         float kS = 0,
         float epsilon = 0.5f,
-        float homingSpeed = 1000.0f,
+        float homingSpeed = 0.25f,
         bool homingReversed = false,
         float maxOutput = 6000.0f)
         : OneSidedBoundedSubsystemInterface(drivers, trigger, 0),

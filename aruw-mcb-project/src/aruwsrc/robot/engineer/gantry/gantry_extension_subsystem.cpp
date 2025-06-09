@@ -44,7 +44,7 @@ GantryExtensionSubsystem::GantryExtensionSubsystem(
           home,
           kS,
           epsilon,
-          1500,
+          0.25f,
           false),
       motor(motor)
 {
