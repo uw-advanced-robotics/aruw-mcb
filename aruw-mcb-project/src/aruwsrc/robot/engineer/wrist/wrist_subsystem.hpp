@@ -21,6 +21,7 @@
 #define WRIST_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
@@ -83,6 +84,19 @@ private:
     float kS;
     const float epsilon;
     float setpointPitch, setpointYaw;
+
+    const tap::algorithms::transforms::Position COM_POS =
+        tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static
+    static constexpr float WRIST_MASS_KG = 0.4;
+    static constexpr float M3508_TORQUE_CONSTANT =
+        (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
+    float PITCH_GRAVITY_SCALAR = 0.0f;                            // debug
+    float YAW_GRAVITY_SCALAR = 0.0f;                              // debug
+
+    tap::algorithms::transforms::Transform computeWristToCOM(
+        float yawJoint,
+        float pitchJoint,
+        tap::algorithms::transforms::Position COMPos) const;
 };
 }  // namespace aruwsrc::engineer::wrist
 
