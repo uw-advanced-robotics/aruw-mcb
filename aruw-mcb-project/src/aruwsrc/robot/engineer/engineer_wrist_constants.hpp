@@ -38,16 +38,16 @@ static constexpr tap::encoder::CanEncoderId WRIST_YAW_ENCODER_ID = tap::encoder:
 
 static constexpr float WRIST_PITCH_PID_KS = 0.0;
 static constexpr tap::algorithms::SmoothPidConfig WRIST_PITCH_PID_CONFIG{
-    .kp = 8000.0f,
-    .ki = 1.0f,
-    .kd = 800.0f,
+    .kp = 10000.0f,
+    .ki = 10.0f,
+    .kd = 700.0f,
     .maxICumulative = 1000.0f,
-    .maxOutput = 4000.0f,
-    .tQDerivativeKalman = 1,
-    .tRDerivativeKalman = .001,
-    .tQProportionalKalman = 1,
-    .tRProportionalKalman = 0,
-    .errDeadzone = 0,
+    .maxOutput = 5000.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 30.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.025f,
 };
 
@@ -58,17 +58,17 @@ static constexpr uint32_t WRIST_HOME_PITCH = 2454;
 
 static constexpr float WRIST_YAW_PID_KS = 0.0;
 static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_PID_CONFIG{
-    .kp = 6000.0f,
-    .ki = 1.0f,
-    .kd = 500.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 4000.0f,
-    .tQDerivativeKalman = 1,
-    .tRDerivativeKalman = .001,
-    .tQProportionalKalman = 1,
-    .tRProportionalKalman = 0,
-    .errDeadzone = 0,
-    .errorDerivativeFloor = 0.025f,
+    .kp = 16000.0f,
+    .ki = 500.0f,
+    .kd = 1000.0f,
+    .maxICumulative = 500.0f,
+    .maxOutput = 5500.0f,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 30.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0,
 };
 
 // units of radians

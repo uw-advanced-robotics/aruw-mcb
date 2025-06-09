@@ -30,17 +30,17 @@ static constexpr tap::motor::MotorId GANTRY_LIFT_LEFT_MOTOR_ID = tap::motor::Mot
 static constexpr tap::motor::MotorId GANTRY_LIFT_RIGHT_MOTOR_ID = tap::motor::MotorId::MOTOR2;
 static constexpr tap::motor::MotorId GANTRY_EXTENSION_MOTOR_ID = tap::motor::MotorId::MOTOR3;
 
-static constexpr float GANTRY_LIFT_POS_PID_KP = 80.0f;
-static constexpr float GANTRY_LIFT_POS_PID_KI = 0.0f;
-static constexpr float GANTRY_LIFT_POS_PID_KD = 10.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KP = 2000.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KI = 30.0f;
+static constexpr float GANTRY_LIFT_POS_PID_KD = 100.0f;
 static constexpr float GANTRY_LIFT_POS_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_LIFT_POS_PID_KS = 0.0;
-static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 3000.0f;
+static constexpr float GANTRY_LIFT_POS_MAX_OUTPUT = 3500.0f;
 
-static constexpr float GANTRY_LIFT_LOWER_BOUND = -5.0f;
-static constexpr float GANTRY_LIFT_UPPER_BOUND = 360.0f;
-static constexpr float GANTRY_LIFT_RADIUS = 11.877733f;
-static constexpr float GANTRY_LIFT_HOME = 0.0f;  // length ~360mm I think?
+static constexpr float GANTRY_LIFT_LOWER_BOUND = 5.0f;
+static constexpr float GANTRY_LIFT_UPPER_BOUND = 320.0f;
+static constexpr float GANTRY_LIFT_RADIUS = 5 * 24 / M_TWOPI;  // 5mm per tooth, 24 teeth
+static constexpr float GANTRY_LIFT_HOME = 0.0f;
 static constexpr float GANTRY_LIFT_KS = 0.0f;
 static constexpr float GANTRY_LIFT_EPSILON = 1.0f;
 
@@ -75,9 +75,9 @@ static constexpr float GANTRY_EXTENSION_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_KS = 0.0;
 static constexpr float GANTRY_EXTENSION_MAX_OUTPUT = 2000.0f;
 
-static constexpr float GANTRY_EXTENSION_LOWER_BOUND = 0.0f;
-static constexpr float GANTRY_EXTENSION_UPPER_BOUND = 0.0f;  // length ~360 mm
-static constexpr float GANTRY_EXTENSION_RADIUS = 11.877733f;
+static constexpr float GANTRY_EXTENSION_LOWER_BOUND = 5.0f;
+static constexpr float GANTRY_EXTENSION_UPPER_BOUND = 300.0f;
+static constexpr float GANTRY_EXTENSION_RADIUS = 5 * 14 / M_TWOPI;  // 5mm per tooth, 14 teeth
 static constexpr float GANTRY_EXTENSION_HOME = 0.0f;
 static constexpr float GANTRY_EXTENSION_KS = 0.0f;
 static constexpr float GANTRY_EXTENSION_EPSILON = 1.0f;
