@@ -19,6 +19,9 @@
 
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
+using namespace tap::algorithms::transforms;
+using tap::algorithms::CMSISMat;
+
 namespace aruwsrc::engineer::wrist
 {
 WristSubsystem::WristSubsystem(
@@ -95,6 +98,9 @@ void WristSubsystem::initialize()
     encoderYaw.initialize();
 }
 
+CMSISMat<3, 1> gantryToCOMTranslation({0, 0, 0});
+float gravityPitchTorque, gravityYawTorque;
+Vector yawAxis(0, 0, 0);
 void WristSubsystem::refresh()
 {
     if (!encoderPitch.isOnline() || !encoderYaw.isOnline())
@@ -104,14 +110,40 @@ void WristSubsystem::refresh()
         return;
     }
 
-    float outPitch = pidPitch.runController(
-        encoderPitch.getPosition().minDifference(setpointPitch),
-        encoderPitch.getVelocity(),
-        2.0f);
-    float outYaw = pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f);
+    // gravity compensation
+    gantryToCOMTranslation =
+        computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
 
-    float outLeft = ratio * outYaw + outPitch;
-    float outRight = ratio * outYaw - outPitch;
+    Vector gravityTorque(
+        tap::algorithms::cross(
+            gantryToCOMTranslation,
+            CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
+
+    // we can compute the torque exerted on each joint by projecting the robot-space gravity torque
+    // into the joint axis subspace
+    Vector pitchAxis(0, 1, 0);
+    yawAxis = Transform(0, 0, 0, 0, getPitch(), 0).apply(Vector(1, 0, 0));
+
+    gravityPitchTorque = gravityTorque.dot(pitchAxis);
+    gravityYawTorque = gravityTorque.dot(yawAxis);
+
+    // pid
+
+    // gravity torque halved because we have two motors
+    float outPitch = pidPitch.runController(
+                         encoderPitch.getPosition().minDifference(setpointPitch),
+                         encoderPitch.getVelocity(),
+                         2.0f) -
+                     gravityPitchTorque / 2 * M3508_TORQUE_CONSTANT * PITCH_GRAVITY_SCALAR;
+
+    // gear ratio only applied to gravity compensation here because pid was tuned without it
+    // gravity torque halved because we have two motors
+    float outYaw = pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f) -
+                   gravityYawTorque / 2 * M3508_TORQUE_CONSTANT / ratio * YAW_GRAVITY_SCALAR;
+
+    // differential
+    float outLeft = outYaw + outPitch;
+    float outRight = outYaw - outPitch;
 
     motorLeft.setDesiredOutput(outLeft + kS);
     motorRight.setDesiredOutput(outRight + kS);
@@ -121,5 +153,26 @@ void WristSubsystem::refreshSafeDisconnect()
 {
     motorLeft.setDesiredOutput(0);
     motorRight.setDesiredOutput(0);
+}
+
+Transform WristSubsystem::computeWristToCOM(
+    float yawJoint,
+    float pitchJoint,
+    tap::algorithms::transforms::Position COMPos) const
+{
+    Transform wristOrientation(
+        tap::algorithms::CMSISMat<3, 1>({0, 0, 0}),
+        tap::algorithms::CMSISMat<3, 3>(
+            {cosf(pitchJoint) * cosf(yawJoint),
+             -cosf(yawJoint) * sinf(pitchJoint),
+             sinf(pitchJoint),
+             sinf(yawJoint),
+             cosf(yawJoint),
+             0,
+             -sinf(pitchJoint) * cosf(yawJoint),
+             -sinf(pitchJoint) * sinf(yawJoint),
+             cosf(pitchJoint)}));
+
+    return wristOrientation.compose(Transform(COMPos, Orientation(0, 0, 0)));
 }
 }  // namespace aruwsrc::engineer::wrist
