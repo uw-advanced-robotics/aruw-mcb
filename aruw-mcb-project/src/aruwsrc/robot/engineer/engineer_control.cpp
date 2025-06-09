@@ -176,7 +176,7 @@ tap::encoder::CanEncoder wristYawEncoder(
     aruwsrc::chassis::CAN_BUS_MOTORS,
     false,
     1,
-    WRIST_HOME_YAW * 4096.0f / (M_PI * 2));
+    WRIST_HOME_YAW);
 
 tap::motor::DjiMotor gantryLiftLeftMotor(
     drivers(),

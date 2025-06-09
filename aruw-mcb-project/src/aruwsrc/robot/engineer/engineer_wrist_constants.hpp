@@ -47,14 +47,14 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_PITCH_PID_CONFIG{
     .tRDerivativeKalman = .001,
     .tQProportionalKalman = 1,
     .tRProportionalKalman = 0,
-    .errDeadzone = 0.025f,
-    .errorDerivativeFloor = 0,
+    .errDeadzone = 0,
+    .errorDerivativeFloor = 0.025f,
 };
 
 // units of radians
-static constexpr float WRIST_MIN_PITCH = -M_PI_2;
-static constexpr float WRIST_MAX_PITCH = M_PI * 3.0f / 2.0f;  // todo
-static constexpr uint32_t WRIST_HOME_PITCH = 1419;
+static constexpr float WRIST_MIN_PITCH = 0.0f;
+static constexpr float WRIST_MAX_PITCH = M_PI_2;
+static constexpr uint32_t WRIST_HOME_PITCH = 2454;
 
 static constexpr float WRIST_YAW_PID_KS = 0.0;
 static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_PID_CONFIG{
@@ -67,14 +67,14 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_PID_CONFIG{
     .tRDerivativeKalman = .001,
     .tQProportionalKalman = 1,
     .tRProportionalKalman = 0,
-    .errDeadzone = 0.025f,
-    .errorDerivativeFloor = 0,
+    .errDeadzone = 0,
+    .errorDerivativeFloor = 0.025f,
 };
 
 // units of radians
 static constexpr float WRIST_MIN_YAW = -M_PI * 2;
 static constexpr float WRIST_MAX_YAW = M_PI * 2;  // todo
-static constexpr float WRIST_HOME_YAW = 1.23485458f;
+static constexpr uint32_t WRIST_HOME_YAW = 1961;
 
 static constexpr float WRIST_ROLL_PID_KS = 0.0;
 static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
