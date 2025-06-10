@@ -84,12 +84,12 @@ static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 100'000.0f,
-    .ki = 0.0f,  // 500.0f,
-    .kd = 0.0f,  // 12'000.0f,
+    .kp = 80'000.0f,
+    .ki = 0.0f,     // 500.0f,
+    .kd = 8000.0f,  // 12'000.0f,
     .maxICumulative = 8'000.0f,
     .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.6),
-    .tRDerivativeKalman = 40.0f,
+    .tRDerivativeKalman = 30.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
