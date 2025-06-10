@@ -66,7 +66,7 @@ TEST(TurretMCBCanComm, sendData_calibrate_imu_data)
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, filledMsg));
 
     clock.time = 10'000;
-    dut.sendImuCalibrationRequest();
+    dut.requestCalibration();
     dut.sendData();
 
     clock.time = 20'000;

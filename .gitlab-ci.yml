@@ -68,7 +68,6 @@ before_script:
             aruwsrc/robot/engineer/engineer_control.cpp
             aruwsrc/robot/sentry/sentry_control.cpp
             aruwsrc/robot/standard/standard_control.cpp
-            aruwsrc/robot/old_standard/old_standard_control.cpp
             aruwsrc/robot/drone/drone_control.cpp
             aruwsrc/robot/dart/dart_control.cpp
             aruwsrc/robot/hero/hero_control.cpp
@@ -155,7 +154,7 @@ before_script:
     GIT_SUBMODULE_STRATEGY: none
   script:
     - cd aruw-mcb-project
-    - scons build robot=STANDARD_ORION compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
+    - scons build robot=STANDARD_VOID compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
   cache:
     key: mcb-libs-$CI_COMMIT_REF_SLUG
     paths:
@@ -172,7 +171,7 @@ before_script:
   needs: []
   script:
     - cd aruw-mcb-project
-    - scons build robot=STANDARD_ORION compile_lib_only=test profile=fast -j${NUM_JOBS}
+    - scons build robot=STANDARD_VOID compile_lib_only=test profile=fast -j${NUM_JOBS}
   cache:
     key: mcb-test-libs-$CI_COMMIT_REF_SLUG
     paths:
@@ -198,23 +197,23 @@ before_script:
   variables:
     ROBOT: STANDARD_NULL
 
-# Standard (Orion) build
+# Standard (Void) build
 
-"Standard (Orion): MCB Build":
+"Standard (Void): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: STANDARD_ORION
+    ROBOT: STANDARD_VOID
 
 # Test build script is different from the others since we use this one to track test coverage for the repo
-"Standard (Orion): Test Build":
+"Standard (Void): Test Build":
   stage: Tests
   needs: []
   only: *default_only
   script:
     - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=STANDARD_ORION -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_ORION/aruw-mcb-tests.elf
+    - scons run-tests-gcov profile=fast robot=STANDARD_VOID -j${NUM_JOBS}
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_VOID/aruw-mcb-tests.elf
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
@@ -227,11 +226,11 @@ before_script:
         path: cobertura.xml
     expire_in: 2 weeks
   cache:
-    key: robot-STANDARD_ORION-$CI_COMMIT_REF_SLUG-tests
+    key: robot-STANDARD_VOID-$CI_COMMIT_REF_SLUG-tests
     paths:
       - aruw-mcb-project/build/tests/scons-fast/
     fallback_keys:
-      - robot-STANDARD_ORION-develop-tests
+      - robot-STANDARD_VOID-develop-tests
     when: 'always'
 
 # Drone build
