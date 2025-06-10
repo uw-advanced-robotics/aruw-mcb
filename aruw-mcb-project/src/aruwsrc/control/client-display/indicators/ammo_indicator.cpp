@@ -38,17 +38,16 @@ modm::ResumableResult<void> AmmoIndicator::update()
     if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HERO ||
         refSerial.getRobotData().robotId == RefSerialData::RobotId::RED_HERO)
     {
-        bulletCount = refSerial.getRobotData().turret.bulletsRemaining42;
+        bulletCount = static_cast<int16_t>(refSerial.getRobotData().turret.bulletsRemaining42);
     }
     else
     {
-        bulletCount = refSerial.getRobotData().turret.bulletsRemaining17;
+        bulletCount = static_cast<int16_t>(refSerial.getRobotData().turret.bulletsRemaining17);
     }
-
-    numberIndicator.setIndicatorState(bulletCount);
 
     RF_BEGIN(1);
 
+    numberIndicator.setIndicatorState(bulletCount);
     RF_CALL(numberIndicator.draw());
 
     RF_END();
