@@ -41,14 +41,14 @@ void RMULStateMachine::updateState()
     {
         case State::HEALING:
             // If we've healed enough, go back to attacking
-            if (health >= ATTACKING_THRESHOLD)
+            if (health >= ATTACKING_THRESHOLD && safeToAttack())
             {
                 state = State::ATTACKING;
             }
             break;
         case State::ATTACKING:
             // If we're low on health, go to healing
-            if (health < HEALING_THRESHOLD)
+            if (health < HEALING_THRESHOLD || !safeToAttack())
             {
                 state = State::HEALING;
             }
@@ -94,6 +94,14 @@ void RMULStateMachine::attachAutoNavController(ChassisAutoNavController *autoNav
 
     // Load initial path
     updatePath();
+}
+
+bool RMULStateMachine::safeToAttack()
+{
+    bool projectilesSufficient =
+        refSerial.getRobotData().turret.bulletsRemaining42 >= PROJECTILE_COUNT_THRESHOLD;
+    bool visionOnline = visionCoprocessor.isCvOnline();
+    return projectilesSufficient && visionOnline;
 }
 
 }  // namespace aruwsrc::algorithms::strategy_state_machine
