@@ -25,6 +25,7 @@
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 
 /**
@@ -70,7 +71,11 @@ using namespace tap::algorithms::transforms;
 class RMULStateMachine
 {
 public:
-    RMULStateMachine(RefSerial& refSerial) : refSerial(refSerial) {}
+    RMULStateMachine(RefSerial& refSerial, aruwsrc::serial::VisionCoprocessor& visionCoprocessor)
+        : refSerial(refSerial),
+          visionCoprocessor(visionCoprocessor)
+    {
+    }
 
     void updateState();
 
@@ -78,6 +83,7 @@ public:
 
 private:
     RefSerial& refSerial;
+    aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     ChassisAutoNavController* autoNavController;
 
     AutoNavPath path;
@@ -91,11 +97,15 @@ private:
 
     void updatePath();
 
+    bool safeToAttack();
+
     // Threshold at which the robot goes to heal due to low health
     int HEALING_THRESHOLD = 250;
 
     // Threshold at which the robot goes back to fight having healed
     int ATTACKING_THRESHOLD = 550;
+
+    int PROJECTILE_COUNT_THRESHOLD = 100;  // Minimum number of projectiles to attack
 
     // Speed at which the robot moves when healing, in m/s
     float SPEED = 1.0f;
