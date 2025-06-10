@@ -207,6 +207,7 @@ static void initializeIo(Drivers *drivers)
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+    modm::delay_ms(2000);
     drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
 }
