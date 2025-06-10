@@ -48,6 +48,9 @@ private:
 #ifdef TARGET_STANDARD_NULL
     static constexpr int16_t OFFSET_X = 25;
     static constexpr int16_t OFFSET_Y = -75;
+#elif defined(TARGET_HERO_ZERO)
+    static constexpr int16_t OFFSET_X = 2;
+    static constexpr int16_t OFFSET_Y = -42;
 #else
     static constexpr int16_t OFFSET_X = 0;
     static constexpr int16_t OFFSET_Y = 0;
@@ -56,7 +59,7 @@ private:
     // X position of the circle
     static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2 + OFFSET_X;
     // Y position of the circle
-    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2 - OFFSET_Y;
+    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2 + OFFSET_Y;
     // SIZE of the circle
     static constexpr uint16_t CRICLE_SIZE = 2;
     // Thickness of the line
