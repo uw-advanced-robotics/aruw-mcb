@@ -95,7 +95,7 @@ public:
      * controlled by `MAX_ACCELERATION_X` and `MAX_DECELERATION_X`. A linear combination of keyboard
      * and remote joystick information.
      */
-    mockable float getChassisXInput();
+    virtual float getChassisXInput();
 
     /**
      * @return The value used for chassis movement side to side, between `[-getMaxUserWheelSpeed,
@@ -103,7 +103,7 @@ public:
      * `MAX_ACCELERATION_Y` and `MAX_DECELERATION_Y`. A linear combination of keyboard and remote
      * joystick information.
      */
-    mockable float getChassisYInput();
+    virtual float getChassisYInput();
 
     /**
      * @return The value used for chassis rotation, between `[-getMaxUserWheelSpeed,
@@ -111,7 +111,7 @@ public:
      * `MAX_ACCELERATION_R` and `MAX_DECELERATION_R`. A linear combination of keyboard and remote
      * joystick information.
      */
-    mockable float getChassisRInput();
+    virtual float getChassisRInput();
 
     /**
      * @return the value used for turret yaw rotation, between about -1 and 1

@@ -35,7 +35,7 @@ public:
     OneSidedBoundedSubsystemInterface(
         tap::Drivers* drivers,
         TriggerInterface& trigger,
-        uint64_t length)
+        float length)
         : BoundedSubsystemInterface(drivers),
           trigger(trigger),
           length(length)
@@ -53,7 +53,7 @@ protected:
     /**
      * The length of the subsystem. Used to calculate the motor's upper bound.
      */
-    uint64_t length;
+    float length;
 };  // class OneSidedBoundedSubsystemInterface
 }  // namespace aruwsrc::control
 
