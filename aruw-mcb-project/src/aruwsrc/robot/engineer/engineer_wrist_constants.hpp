@@ -25,6 +25,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
@@ -36,44 +37,44 @@ static constexpr tap::encoder::CanEncoderId WRIST_PITCH_ENCODER_ID =
     tap::encoder::CanEncoderId::ID0;
 static constexpr tap::encoder::CanEncoderId WRIST_YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID1;
 
-static constexpr float WRIST_PITCH_PID_KS = 0.0;
-static constexpr tap::algorithms::SmoothPidConfig WRIST_PITCH_PID_CONFIG{
-    .kp = 10000.0f,
-    .ki = 10.0f,
-    .kd = 700.0f,
-    .maxICumulative = 1000.0f,
-    .maxOutput = 5000.0f,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 30.0f,
-    .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.0f,
-    .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.025f,
+static constexpr wrist::WristConfig WRIST_CONFIG{
+    .pitchPidConfig =
+        {
+            .kp = 10000.0f,
+            .ki = 10.0f,
+            .kd = 700.0f,
+            .maxICumulative = 1000.0f,
+            .maxOutput = 5000.0f,
+            .tQDerivativeKalman = 1.0f,
+            .tRDerivativeKalman = 30.0f,
+            .tQProportionalKalman = 1.0f,
+            .tRProportionalKalman = 0.0f,
+            .errDeadzone = 0.0f,
+            .errorDerivativeFloor = 0.025f,
+        },
+    .yawPidConfig =
+        {
+            .kp = 16000.0f,
+            .ki = 500.0f,
+            .kd = 1000.0f,
+            .maxICumulative = 500.0f,
+            .maxOutput = 5500.0f,
+            .tQDerivativeKalman = 1.0f,
+            .tRDerivativeKalman = 30.0f,
+            .tQProportionalKalman = 1.0f,
+            .tRProportionalKalman = 0.0f,
+            .errDeadzone = 0.0f,
+            .errorDerivativeFloor = 0.0,
+        },
+    .minPitch = 0.0f,
+    .maxPitch = M_PI_2,
+    .minYaw = -M_PI_2,
+    .maxYaw = M_PI,
+    .ratio = 30.0f / 40.0f,
+    .maxMotorDesiredOutput = 5500,
 };
 
-// units of radians
-static constexpr float WRIST_MIN_PITCH = 0.0f;
-static constexpr float WRIST_MAX_PITCH = M_PI_2;
 static constexpr uint32_t WRIST_HOME_PITCH = 2454;
-
-static constexpr float WRIST_YAW_PID_KS = 0.0;
-static constexpr tap::algorithms::SmoothPidConfig WRIST_YAW_PID_CONFIG{
-    .kp = 16000.0f,
-    .ki = 500.0f,
-    .kd = 1000.0f,
-    .maxICumulative = 500.0f,
-    .maxOutput = 5500.0f,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 30.0f,
-    .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.0f,
-    .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.0,
-};
-
-// units of radians
-static constexpr float WRIST_MIN_YAW = -M_PI * 2;
-static constexpr float WRIST_MAX_YAW = M_PI * 2;  // todo
 static constexpr uint32_t WRIST_HOME_YAW = 1961;
 
 static constexpr float WRIST_ROLL_PID_KS = 0.0;
@@ -84,8 +85,6 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
     .maxICumulative = 0.0f,
     .maxOutput = 3000.0f,
 };
-
-static constexpr float WRIST_RATIO = 30.0f / 40.0f;
 
 static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;

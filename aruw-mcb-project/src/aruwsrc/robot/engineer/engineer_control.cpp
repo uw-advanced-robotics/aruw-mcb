@@ -245,13 +245,7 @@ WristSubsystem wristSubsystem(
     wristRightMotor,
     wristPitchEncoder,
     wristYawEncoder,
-    aruwsrc::engineer::WRIST_PITCH_PID_CONFIG,
-    aruwsrc::engineer::WRIST_YAW_PID_CONFIG,
-    aruwsrc::engineer::WRIST_MIN_PITCH,
-    aruwsrc::engineer::WRIST_MAX_PITCH,
-    aruwsrc::engineer::WRIST_MIN_YAW,
-    aruwsrc::engineer::WRIST_MAX_YAW,
-    aruwsrc::engineer::WRIST_RATIO);
+    aruwsrc::engineer::WRIST_CONFIG);
 
 GantryLiftSubsystem gantryLiftSubsystem(
     drivers(),

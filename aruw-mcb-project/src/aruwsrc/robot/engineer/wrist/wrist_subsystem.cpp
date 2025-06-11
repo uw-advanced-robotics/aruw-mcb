@@ -30,48 +30,34 @@ WristSubsystem::WristSubsystem(
     tap::motor::MotorInterface &motorRight,
     tap::encoder::EncoderInterface &encoderPitch,
     tap::encoder::EncoderInterface &encoderYaw,
-    const tap::algorithms::SmoothPidConfig configPitch,
-    const tap::algorithms::SmoothPidConfig configYaw,
-    float minPitch,
-    float maxPitch,
-    float minYaw,
-    float maxYaw,
-    float ratio,
-    float kS,
-    float epsilon)
+    const WristConfig config)
     : tap::control::Subsystem(drivers),
       motorLeft(motorLeft),
       motorRight(motorRight),
       encoderPitch(encoderPitch),
       encoderYaw(encoderYaw),
-      pidPitch(configPitch),
-      pidYaw(configYaw),
-      minPitch(minPitch),
-      maxPitch(maxPitch),
-      minYaw(minYaw),
-      maxYaw(maxYaw),
-      ratio(ratio),
-      kS(kS),
-      epsilon(epsilon)
+      pidPitch(config.pitchPidConfig),
+      pidYaw(config.yawPidConfig),
+      config(config),
+      setpointPitch(0),
+      setpointYaw(0)
 {
-    setpointPitch = 0;
-    setpointYaw = 0;
 }
 
 void WristSubsystem::setSetpointPitch(float setpoint)
 {
-    if (minPitch == maxPitch)
+    if (config.minPitch == config.maxPitch)
         setpointPitch = setpoint;
     else
-        setpointPitch = std::clamp(setpoint, minPitch, maxPitch);
+        setpointPitch = std::clamp(setpoint, config.minPitch, config.maxPitch);
 }
 
 void WristSubsystem::setSetpointYaw(float setpoint)
 {
-    if (minYaw == maxYaw)
+    if (config.minYaw == config.maxYaw)
         setpointYaw = setpoint;
     else
-        setpointYaw = std::clamp(setpoint, minYaw, maxYaw);
+        setpointYaw = std::clamp(setpoint, config.minYaw, config.maxYaw);
 }
 
 float WristSubsystem::getPitch() { return encoderPitch.getPosition().getUnwrappedValue(); }
@@ -88,7 +74,10 @@ bool WristSubsystem::atSetpointYaw(float epsilon)
     return tap::algorithms::compareFloatClose(setpointYaw, getYaw(), epsilon);
 }
 
-bool WristSubsystem::atSetpoint() { return atSetpointPitch(epsilon) && atSetpointYaw(epsilon); }
+bool WristSubsystem::atSetpoint()
+{
+    return atSetpointPitch(config.epsilon) && atSetpointYaw(config.epsilon);
+}
 
 void WristSubsystem::initialize()
 {
@@ -98,9 +87,6 @@ void WristSubsystem::initialize()
     encoderYaw.initialize();
 }
 
-CMSISMat<3, 1> gantryToCOMTranslation({0, 0, 0});
-float gravityPitchTorque, gravityYawTorque;
-Vector yawAxis(0, 0, 0);
 void WristSubsystem::refresh()
 {
     if (!encoderPitch.isOnline() || !encoderYaw.isOnline())
@@ -110,7 +96,7 @@ void WristSubsystem::refresh()
         return;
     }
 
-    gantryToCOMTranslation =
+    CMSISMat<3, 1> gantryToCOMTranslation =
         computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
 
     Vector gravityTorque(
@@ -121,11 +107,11 @@ void WristSubsystem::refresh()
     // we can compute the torque exerted on each joint by projecting the robot-space gravity torque
     // into the joint axis subspace
     Vector pitchAxis(0, 1, 0);
-    yawAxis = Transform(0, 0, 0, 0, -getPitch(), 0).apply(Vector(0, 0, 1));
+    Vector yawAxis = Transform(0, 0, 0, 0, -getPitch(), 0).apply(Vector(0, 0, 1));
 
     // torque applied on each joint by gravity
-    gravityPitchTorque = gravityTorque.dot(pitchAxis);
-    gravityYawTorque = gravityTorque.dot(yawAxis);
+    float gravityPitchTorque = gravityTorque.dot(pitchAxis);
+    float gravityYawTorque = gravityTorque.dot(yawAxis);
 
     // gravity torque halved because we have two motors
     float outPitch = pidPitch.runController(
@@ -137,14 +123,16 @@ void WristSubsystem::refresh()
     // gear ratio only applied to gravity compensation here because pid was tuned without it
     // gravity torque halved because we have two motors
     float outYaw = pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f) -
-                   gravityYawTorque / 2 * M3508_TORQUE_CONSTANT * ratio;
+                   gravityYawTorque / 2 * M3508_TORQUE_CONSTANT * config.ratio;
 
     // differential
     float outLeft = outYaw + outPitch;
     float outRight = outYaw - outPitch;
 
-    motorLeft.setDesiredOutput(outLeft + kS);
-    motorRight.setDesiredOutput(outRight + kS);
+    motorLeft.setDesiredOutput(
+        std::clamp<int32_t>(outLeft, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
+    motorRight.setDesiredOutput(
+        std::clamp<int32_t>(outRight, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
 }
 
 void WristSubsystem::refreshSafeDisconnect()
