@@ -26,9 +26,8 @@
 #include "../projection_utils.hpp"
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "modm/processing/resumable.hpp"
-
-#include "hud_indicator.hpp"
 
 using namespace aruwsrc::algorithms::transforms;
 
@@ -79,8 +78,8 @@ private:
     RefSerialData::Tx::GraphicColor INDICATOR_COLOR = RefSerialData::Tx::GraphicColor::GREEN;
 
     static constexpr float SMALL_PLATE_LENGTH_M = 0.135;
-    const Position plateCornerOffset =
-        Position(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
+    const Vector PLATE_CORNER_OFFSET =
+        Vector(0, SMALL_PLATE_LENGTH_M / 2, SMALL_PLATE_LENGTH_M / 2);
 
     // In world frame
     Position enemyPosition;

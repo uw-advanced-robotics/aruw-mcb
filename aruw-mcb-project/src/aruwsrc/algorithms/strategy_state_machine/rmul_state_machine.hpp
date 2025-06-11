@@ -25,6 +25,7 @@
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 
 /**
@@ -45,17 +46,17 @@
  * |             |            |               |
  * |-------      |   Capture  |        -------|
  * |             |   Point    |               |
- * | SIDE         ------------                |
- * | WALL              X                      |
- * |______            (MIDDLE)                |
+ * |  X           ------------                |
+ * | (POINT 4)         X                      |
+ * |______            (POINT 3)               |
  * |      |                                   |
  * |      |                                   |
  * |      ------------------------     X      |
- * |Elevated platform        |     (MID_RIGHT)|
+ * |Elevated platform        |     (POINT 2)  |
  * |_________________________|                |
  * |                                          |
  * |___________             X                 |
- * | Red      |     (BOTTOM_MIDDLE)           |
+ * | Red      |     (POINT 1)                 |
  * | Loading  |                               |
  * +------------------------------------------+
  *
@@ -70,7 +71,11 @@ using namespace tap::algorithms::transforms;
 class RMULStateMachine
 {
 public:
-    RMULStateMachine(RefSerial& refSerial) : refSerial(refSerial) {}
+    RMULStateMachine(RefSerial& refSerial, aruwsrc::serial::VisionCoprocessor& visionCoprocessor)
+        : refSerial(refSerial),
+          visionCoprocessor(visionCoprocessor)
+    {
+    }
 
     void updateState();
 
@@ -78,6 +83,7 @@ public:
 
 private:
     RefSerial& refSerial;
+    aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
     ChassisAutoNavController* autoNavController;
 
     AutoNavPath path;
@@ -86,11 +92,12 @@ private:
     {
         HEALING,
         ATTACKING,
-        FIRST_PUSH
     };
-    State state = State::FIRST_PUSH;
+    State state = State::ATTACKING;
 
     void updatePath();
+
+    bool safeToAttack();
 
     // Threshold at which the robot goes to heal due to low health
     int HEALING_THRESHOLD = 250;
@@ -98,26 +105,22 @@ private:
     // Threshold at which the robot goes back to fight having healed
     int ATTACKING_THRESHOLD = 550;
 
+    int PROJECTILE_COUNT_THRESHOLD = 100;  // Minimum number of projectiles to attack
+
     // Speed at which the robot moves when healing, in m/s
     float SPEED = 1.0f;
 
-    float DEBUG_SCALAR = 1.0f;
-
-    const Position RESUPPLY_ZONE = Position(0.75, 7, 0) * DEBUG_SCALAR;
-    const Position BOTTOM_MIDDLE = Position(1.2, 2.1, 0) * DEBUG_SCALAR;
-    const Position MIDDLE_RIGHT = Position(3.2, 2.0, 0) * DEBUG_SCALAR;
-    const Position MIDDLE = Position(4.5, 4.0, 0) * DEBUG_SCALAR;
-    const Position SIDE_WALL = Position(5, 7.5, 0) * DEBUG_SCALAR;
-    const Position CAPTURE_POINT = Position(6, 4, 0) * DEBUG_SCALAR;
+    const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
+    const Position POINT_1 = Position(1.2, 2.1, 0);   // BOTTOM_MIDDLE
+    const Position POINT_2 = Position(3.5, 2.0, 0);   // MIDDLE_RIGHT
+    const Position POINT_3 = Position(4.5, 4.0, 0);   // MIDDLE
+    const Position POINT_4 = Position(5.25, 7.5, 0);  // SIDE_WALL
 
     const std::array<Position, 5> ATTACKING_PATH =
-        {RESUPPLY_ZONE, BOTTOM_MIDDLE, MIDDLE_RIGHT, MIDDLE, SIDE_WALL};
+        {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3, POINT_4};
 
     const std::array<Position, 5> HEALING_PATH =
-        {SIDE_WALL, MIDDLE, MIDDLE_RIGHT, BOTTOM_MIDDLE, RESUPPLY_ZONE};
-
-    const std::array<Position, 5> FIRST_PUSH_PATH =
-        {RESUPPLY_ZONE, BOTTOM_MIDDLE, MIDDLE_RIGHT, MIDDLE, CAPTURE_POINT};
+        {POINT_4, POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
 };
 }  // namespace aruwsrc::algorithms::strategy_state_machine
 
