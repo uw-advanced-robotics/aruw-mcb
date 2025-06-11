@@ -26,10 +26,12 @@
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
+
 #else
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 #endif
 
 namespace aruwsrc::engineer
@@ -56,10 +58,9 @@ public:
     serial::EngineerCVCommunication engineerCVCommunication;
 #else
 public:
-    control::ControlOperatorInterface controlOperatorInterface;
+    control::engineer::EngineerControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
     serial::EngineerCVCommunication engineerCVCommunication;
-
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer

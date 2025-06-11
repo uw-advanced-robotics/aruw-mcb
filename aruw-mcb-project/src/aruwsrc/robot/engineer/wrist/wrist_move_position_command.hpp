@@ -16,28 +16,36 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef WRIST_MOVE_POSITION_COMMAND_HPP_
+#define WRIST_MOVE_POSITION_COMMAND_HPP_
 
-#include "cube_move_manual_command.hpp"
-namespace aruwsrc::robot::engineer
+#include "tap/control/command.hpp"
+
+#include "wrist_subsystem.hpp"
+
+namespace aruwsrc::engineer::wrist
+
 {
-CubeMoveManualCommand::CubeMoveManualCommand(
-    CubeStorageSubsystem& cubeLift,
-    aruwsrc::control::ControlOperatorInterface* operatorInterface)
-    : cubeLift(cubeLift),
-      operatorInterface(operatorInterface)
+class WristMovePositionCommand : public tap::control::Command
 {
-    addSubsystemRequirement(&cubeLift);
-}
+public:
+    WristMovePositionCommand(WristSubsystem &wrist, float pitchSetpoint, float yawSetpoint);
 
-void CubeMoveManualCommand::initialize() { setpoint = cubeLift.getPositionSetpoint(); }
+    void initialize() override;
 
-void CubeMoveManualCommand::execute()
-{
-    setpoint += operatorInterface->getTurretPitchInput(0) * MANUAL_MOVE_SPEED;  // right up
-    cubeLift.setPositionSetpoint(setpoint);
-}
+    void execute() override;
 
-void CubeMoveManualCommand::end(bool) { cubeLift.setDesiredOutput(0); }
+    void end(bool interrupted) override;
 
-bool CubeMoveManualCommand::isFinished() const { return false; }
-}  // namespace aruwsrc::robot::engineer
+    bool isFinished() const override;
+
+    const char *getName() const override { return "Wrist Move Position Command"; }
+
+private:
+    WristSubsystem &wrist;
+    float pitchSetpoint, yawSetpoint;
+
+};  // class WristMovePositionCommand
+
+}  // namespace aruwsrc::engineer::wrist
+#endif  // WRIST_MOVE_POSITION_COMMAND_HPP_
