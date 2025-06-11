@@ -99,7 +99,7 @@ void WristSubsystem::refresh()
     CMSISMat<3, 1> gantryToCOMTranslation =
         computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
 
-    Vector gravityTorque( tap::algorithms::cross(
+    Vector gravityTorque(tap::algorithms::cross(
         gantryToCOMTranslation,
         CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
 
