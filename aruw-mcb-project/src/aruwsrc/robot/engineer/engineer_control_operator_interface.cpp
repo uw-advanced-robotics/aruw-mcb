@@ -17,7 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+#include "engineer_control_operator_interface.hpp"
+
+#include "tap/algorithms/math_user_utils.hpp"
+
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+
+using namespace tap::algorithms;
+using namespace tap::communication::serial;
 
 namespace aruwsrc::control::engineer
 {
@@ -89,38 +96,110 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
 
 float EngineerControlOperatorInterface::getChassisXInput()
 {
-    if (isDriveMode())
+    uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisXInputCalledTime;
+    prevChassisXInputCalledTime = currTime;
+
+    if (prevUpdateCounterX != updateCounter)
     {
-        return ControlOperatorInterface::getChassisXInput();
+        chassisXInput.update(
+            drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * isDriveMode(),
+            currTime);
+        prevUpdateCounterX = updateCounter;
     }
-    else
-    {
-        return 0.0f;
-    }
+
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
+
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+
+    float finalX = maxChassisSpeed *
+                   limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisXInputRamp.setTarget(applyChassisSpeedScaling(finalX));
+
+    applyAccelerationToRamp(
+        chassisXInputRamp,
+        MAX_ACCELERATION_X,
+        MAX_DECELERATION_X,
+        static_cast<float>(dt) / 1E3F);
+
+    return chassisXInputRamp.getValue();
 }
 
 float EngineerControlOperatorInterface::getChassisYInput()
 {
-    if (isDriveMode())
+    uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisYInputCalledTime;
+    prevChassisYInputCalledTime = currTime;
+
+    if (prevUpdateCounterY != updateCounter)
     {
-        return ControlOperatorInterface::getChassisYInput();
+        chassisYInput.update(
+            -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * isDriveMode(),
+            currTime);
+        prevUpdateCounterY = updateCounter;
     }
-    else
-    {
-        return 0.0f;
-    }
+
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::A) - drivers->remote.keyPressed(Remote::Key::D);
+
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+
+    float finalY = maxChassisSpeed *
+                   limitVal(chassisYInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisYInputRamp.setTarget(applyChassisSpeedScaling(finalY));
+
+    applyAccelerationToRamp(
+        chassisYInputRamp,
+        MAX_ACCELERATION_Y,
+        MAX_DECELERATION_Y,
+        static_cast<float>(dt) / 1E3F);
+
+    return chassisYInputRamp.getValue();
 }
 
 float EngineerControlOperatorInterface::getChassisRInput()
 {
-    if (isDriveMode())
+    uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisRInputCalledTime;
+    prevChassisRInputCalledTime = currTime;
+
+    if (prevUpdateCounterR != updateCounter)
     {
-        return ControlOperatorInterface::getChassisRInput();
+        chassisRInput.update(
+            -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) * isDriveMode(),
+            currTime);
+        prevUpdateCounterR = updateCounter;
     }
-    else
-    {
-        return 0.0f;
-    }
+
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
+
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+
+    float finalR = maxChassisSpeed *
+                   limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisRInputRamp.setTarget(finalR);
+
+    applyAccelerationToRamp(
+        chassisRInputRamp,
+        MAX_ACCELERATION_R,
+        MAX_DECELERATION_R,
+        static_cast<float>(dt) / 1E3);
+
+    return chassisRInputRamp.getValue();
 }
 
 }  // namespace aruwsrc::control::engineer
