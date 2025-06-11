@@ -99,10 +99,9 @@ void WristSubsystem::refresh()
     CMSISMat<3, 1> gantryToCOMTranslation =
         computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
 
-    Vector gravityTorque(
-        tap::algorithms::cross(
-            gantryToCOMTranslation,
-            CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
+    Vector gravityTorque( tap::algorithms::cross(
+        gantryToCOMTranslation,
+        CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
 
     // we can compute the torque exerted on each joint by projecting the robot-space gravity torque
     // into the joint axis subspace
