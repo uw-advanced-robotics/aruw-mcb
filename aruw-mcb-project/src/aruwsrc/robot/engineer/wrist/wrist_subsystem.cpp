@@ -110,7 +110,6 @@ void WristSubsystem::refresh()
         return;
     }
 
-    // gravity compensation
     gantryToCOMTranslation =
         computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
 
@@ -122,24 +121,23 @@ void WristSubsystem::refresh()
     // we can compute the torque exerted on each joint by projecting the robot-space gravity torque
     // into the joint axis subspace
     Vector pitchAxis(0, 1, 0);
-    yawAxis = Transform(0, 0, 0, 0, getPitch(), 0).apply(Vector(1, 0, 0));
+    yawAxis = Transform(0, 0, 0, 0, -getPitch(), 0).apply(Vector(0, 0, 1));
 
+    // torque applied on each joint by gravity
     gravityPitchTorque = gravityTorque.dot(pitchAxis);
     gravityYawTorque = gravityTorque.dot(yawAxis);
-
-    // pid
 
     // gravity torque halved because we have two motors
     float outPitch = pidPitch.runController(
                          encoderPitch.getPosition().minDifference(setpointPitch),
                          encoderPitch.getVelocity(),
                          2.0f) -
-                     gravityPitchTorque / 2 * M3508_TORQUE_CONSTANT * PITCH_GRAVITY_SCALAR;
+                     gravityPitchTorque / 2 * M3508_TORQUE_CONSTANT;
 
     // gear ratio only applied to gravity compensation here because pid was tuned without it
     // gravity torque halved because we have two motors
     float outYaw = pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f) -
-                   gravityYawTorque / 2 * M3508_TORQUE_CONSTANT / ratio * YAW_GRAVITY_SCALAR;
+                   gravityYawTorque / 2 * M3508_TORQUE_CONSTANT * ratio;
 
     // differential
     float outLeft = outYaw + outPitch;

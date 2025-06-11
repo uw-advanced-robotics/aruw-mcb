@@ -90,8 +90,6 @@ private:
     static constexpr float WRIST_MASS_KG = 0.4;
     static constexpr float M3508_TORQUE_CONSTANT =
         (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
-    float PITCH_GRAVITY_SCALAR = 0.0f;                            // debug
-    float YAW_GRAVITY_SCALAR = 0.0f;                              // debug
 
     tap::algorithms::transforms::Transform computeWristToCOM(
         float yawJoint,
