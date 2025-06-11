@@ -439,8 +439,8 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
     drivers->commandMapper.addMap(&twoCube);
     drivers->commandMapper.addMap(&threeCube);
 
-    drivers->commandMapper.addMap(&wristFoldIn);
-    drivers->commandMapper.addMap(&wristFoldOut);
+    // drivers->commandMapper.addMap(&wristFoldIn);
+    // drivers->commandMapper.addMap(&wristFoldOut);
 }
 }  // namespace control
 }  // namespace aruwsrc

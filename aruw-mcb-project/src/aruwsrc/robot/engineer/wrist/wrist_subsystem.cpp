@@ -122,7 +122,10 @@ void WristSubsystem::refresh()
 
     // gear ratio only applied to gravity compensation here because pid was tuned without it
     // gravity torque halved because we have two motors
-    float outYaw = pidYaw.runController(setpointYaw - getYaw(), encoderYaw.getVelocity(), 2.0f) -
+    float outYaw = pidYaw.runController(
+                       encoderYaw.getPosition().minDifference(setpointYaw),
+                       encoderYaw.getVelocity(),
+                       2.0f) -
                    gravityYawTorque / 2 * M3508_TORQUE_CONSTANT * config.ratio;
 
     // differential
