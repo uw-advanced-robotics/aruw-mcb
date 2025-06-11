@@ -20,23 +20,13 @@
 #ifndef CLIENT_DISPLAY_REFRESH_COMMAND_HPP_
 #define CLIENT_DISPLAY_REFRESH_COMMAND_HPP_
 
-#include <vector>
-
-#include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
-#include "tap/drivers.hpp"
-
-#include "indicators/hud_indicator.hpp"
-#include "modm/processing/protothread.hpp"
 
 #include "client_display_subsystem.hpp"
 
 namespace aruwsrc::control::client_display
 {
-using namespace tap::communication::serial;
-
-class ClientDisplaySubsystem;
-
 /**
  * A No-Op commmand that utilizes the ClientDisplaySubsystem to refresh the client display.
  */
@@ -50,13 +40,18 @@ public:
 
     const char *getName() const override { return "Client Display Refresh"; }
 
-    void initialize() override {}
+    void initialize() override {
+        timeout.restart(500);
+    }
 
     void execute() override {};
 
     void end(bool) override {}
 
-    bool isFinished() const override { return true; }
+    bool isFinished() const override { return timeout.isExpired(); }
+
+private:
+    tap::arch::MilliTimeout timeout{500};
 };
 }  // namespace aruwsrc::control::client_display
 
