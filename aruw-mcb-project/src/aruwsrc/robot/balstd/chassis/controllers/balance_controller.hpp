@@ -1,6 +1,8 @@
 #ifndef BALANCE_CONTROLLER_HPP_
 #define BALANCE_CONTROLLER_HPP_
 
+// #include "tap/algorithms/kalman_filter.hpp"
+
 #include "tap/algorithms/smooth_pid.hpp"
 
 #include "chassis_controller_interface.hpp"
@@ -11,11 +13,15 @@ class BalanceController : public BalstdChassisControllerInterface
 {
 public:
     float chassisWeight = 9 * 9.8;  // f = ma
-    float heightSetpoint = 0.12;
+
+    float heightSetpoint = 0.11;
+    float heightSetpointTarget = 0.17;
+    float heightSetpointRampRate = 0.05f / 2.0f / 500.0f;  // 0.05m / 5s / 500ticks/s=
+
     float rollSetpoint = 0;
     float yawSetpoint = 0;
 
-    float LQRScalar = 0.0;
+    float LQRScalar = 0.5;
     float LQRWheelScalar = 1.0;
     float LQRHipScalar = 1.0;
     float gravityScalar = 0.55;
@@ -32,16 +38,25 @@ public:
           splitController(splitControllerConfig),
           rollController(rollControllerConfig),
           yawController(yawControllerConfig),
-          vmState({{0, 0, 0, 0, 0, 0}})
+          vmState({{0, 0, 0, 0, 0, 0}}),
+          vmRef({{0, 0, 0, 0, 0, 0}})
     {
     }
 
     BalstdChassisOutput runController(const BalstdChassisState& state, float dt) override;
 
+    // void initialize() override
+    // {
+    //     heightSetpoint = 0.11;
+    //     vmRef.data = {0, 0, 0, 0, 0, 0};
+    // }
+
 private:
     tap::algorithms::SmoothPid heightController, splitController, rollController, yawController;
 
-    tap::algorithms::CMSISMat<6, 1> vmState;
+    tap::algorithms::CMSISMat<6, 1> vmState, vmRef;
+
+    // tap::algorithms::KalmanFilter<6, 6> stateFilter;
 
     tap::algorithms::CMSISMat<2, 6> getLQRGains(const float legLength) const;
 

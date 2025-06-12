@@ -33,6 +33,8 @@ public:
 
     mockable float getXVel() const;
 
+    mockable float getYawVel() const;
+
     // ====================
     // testing input modes
     // ====================
@@ -52,7 +54,8 @@ public:
     mockable float getManualWheelTorque() const;
 
 private:
-    static constexpr float MAX_X_VEL = 1.0f;  // m/s
+    static constexpr float MAX_X_VEL = 0.4f;    // m/s
+    static constexpr float MAX_YAW_VEL = 0.3f;  // rad/s
 
     static constexpr float LEG_FORCE_SCALAR = 95.0f;
     static constexpr float WHEEL_TORQUE_SCALAR = 10.0f;

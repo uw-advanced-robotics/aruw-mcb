@@ -11,23 +11,30 @@ using tap::algorithms::WrappedFloat;
 namespace aruwsrc::control::balstd
 {
 
+float hipTorque;
+float wheelTorque;
+
 BalstdChassisOutput BalanceController::runController(const BalstdChassisState& currState, float dt)
 {
+    vmRef.data[2] += controlOperatorInterface.getXVel() * 0.002f;
+    yawSetpoint += controlOperatorInterface.getYawVel() * 0.002f;
+
+    if (heightSetpoint < heightSetpointTarget) heightSetpoint += heightSetpointRampRate;
+
     // LQR
     this->vmState.data = {
-        -currState.virtualPendTheta,
-        -currState.virtualPendThetaDot,
+        currState.virtualPendTheta,
+        currState.virtualPendThetaDot,
         currState.virtualWheelPos,
         currState.virtualWheelVel,
-        currState.pitch,
-        currState.pitchVel};
-    CMSISMat<6, 1> vmRef = CMSISMat<6, 1>({0, 0, 0, 0, 0, 0});
+        -currState.pitch,
+        -currState.pitchVel};
 
     // u = K(x_d - x)
     CMSISMat<2, 1> vmOuts = getLQRGains(currState.virtualLegState.L) * (vmRef - vmState);
-    float hipTorque = -vmOuts.data[0] / 2 * LQRHipScalar;
+    hipTorque = -vmOuts.data[1] / 2 * LQRHipScalar;
     // hipTorque = hipTorqueOverride;
-    float wheelTorque = vmOuts.data[1] / 2 * LQRWheelScalar;
+    wheelTorque = vmOuts.data[0] / 2 * LQRWheelScalar;
     // virtual model has 1 hip/wheel, so we divide by 2 because we have 2
 
     float heightControllerOut =
@@ -76,8 +83,8 @@ CMSISMat<2, 6> BalanceController::getLQRGains(const float) const
 {
     // clang-format off
     return CMSISMat<2, 6>({
-              -26.87 ,    -3.1818 ,     -16.432  ,    -13.545 ,      54.018   ,    6.4121,
-       32.997    ,    4.693      , 30.331  ,     23.121   ,    100.92   ,     4.841,
+       -37.831,       -5.031,      -20.811 ,     -17.182    ,    31.92   ,    5.0632,
+       12.604,       1.6434 ,      8.1786  ,     6.2358   ,    68.298    ,   6.4245
            }) * LQRScalar;
     // clang-format on
 }

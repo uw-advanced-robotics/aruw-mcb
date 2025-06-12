@@ -128,7 +128,7 @@ void BalstdImuCalibrateCommand::execute()
 
                 for (auto &config : turretsAndControllers)
                 {
-                    config.turretMCBCanComm->sendImuCalibrationRequest();
+                    config.turretMCBCanComm->requestCalibration();
                 }
 
                 drivers->mpu6500.requestCalibration();

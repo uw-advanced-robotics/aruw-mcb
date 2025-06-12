@@ -19,6 +19,8 @@
 #ifndef BALSTD_CHASSIS_SUBSYSTEM_HPP_
 #define BALSTD_CHASSIS_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/butterworth.hpp"
+#include "tap/algorithms/discrete_filter.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
@@ -83,6 +85,9 @@ private:
     BalstdChassisState currState;
 
     BalstdChassisOutput currOutput;
+
+    tap::algorithms::filter::DiscreteFilter<3> chassisPitchDotLP;
+    tap::algorithms::filter::DiscreteFilter<3> thetaDotLP;
 
     static constexpr float WHEEL_RADIUS_M = 0.0762f;
 

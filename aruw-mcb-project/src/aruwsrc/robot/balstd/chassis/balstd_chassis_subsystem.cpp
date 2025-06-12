@@ -34,7 +34,9 @@ BalstdChassisSubsystem::BalstdChassisSubsystem(
       chassisImu(chassisImu),
       controller(nullptr),
       currState(ZERO_STATE),
-      currOutput(ZERO_OUTPUT)
+      currOutput(ZERO_OUTPUT),
+      chassisPitchDotLP(tap::algorithms::filter::butterworth<2>(100, 0.002)),
+      thetaDotLP(tap::algorithms::filter::butterworth<2>(100, 0.002))
 {
 }
 
@@ -91,7 +93,7 @@ void BalstdChassisSubsystem::updateState()
     currState.roll = -chassisImu.getRoll();
     currState.rollVel = -chassisImu.getGx();
     currState.pitch = -chassisImu.getPitch();
-    currState.pitchVel = -chassisImu.getGy();
+    currState.pitchVel = chassisPitchDotLP.filterData(-chassisImu.getGy());
     currState.yaw = chassisImu.getYaw();
     currState.yawVel = chassisImu.getGz();
 

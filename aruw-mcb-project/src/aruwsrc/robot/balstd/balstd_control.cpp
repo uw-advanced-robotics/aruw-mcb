@@ -106,7 +106,7 @@ tap::motor::DjiMotor leftWheelMotor(
     false,
     "left wheel",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::control::motor::Tmotor_AK809 rightFrontHipMotor(
     drivers(),
@@ -129,7 +129,7 @@ tap::motor::DjiMotor rightWheelMotor(
     true,
     "right wheel",
     false,
-    1.0f / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 BalstdLeg leftLeg(leftFrontHipMotor, leftBackHipMotor, leftWheelMotor, LEG_CONFIG);
 BalstdLeg rightLeg(rightFrontHipMotor, rightBackHipMotor, rightWheelMotor, LEG_CONFIG);

@@ -28,7 +28,12 @@ namespace control::balstd
 
 float BalstdControlOperatorInterface::getXVel() const
 {
-    return drivers->remote.getChannel(Channel::LEFT_VERTICAL) * LEG_FORCE_SCALAR;
+    return drivers->remote.getChannel(Channel::LEFT_VERTICAL) * MAX_X_VEL;
+}
+
+float BalstdControlOperatorInterface::getYawVel() const
+{
+    return drivers->remote.getChannel(Channel::RIGHT_HORIZONTAL) * WHEEL_TORQUE_SCALAR;
 }
 
 float BalstdControlOperatorInterface::getManualLegXForce() const
