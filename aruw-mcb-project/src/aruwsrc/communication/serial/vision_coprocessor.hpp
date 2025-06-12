@@ -73,7 +73,7 @@ public:
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
-#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION)
+#if defined(TARGET_HERO_PERSEUS)
     /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
      *  The IMU Faces to the left of the 'R' on the Type A MCB
      *  0 Rotation corresponds with a 0 rotation of the chassis
@@ -279,7 +279,15 @@ public:
 
     mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
 
-    mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
+    mockable inline const ArucoResetData& getLastRealsenseArucoData() const
+    {
+        return lastRealsenseArucoData;
+    }
+
+    mockable inline const ArucoResetData& getLastArducamArucoData() const
+    {
+        return lastArducamArucoData;
+    }
 
     mockable inline bool getSomeTurretHasTarget() const
     {
@@ -337,7 +345,11 @@ public:
      * This signals that the message has been consumed and should not be used
      * for future resets.
      */
-    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+    inline void invalidateRealsenseArucoResetData()
+    {
+        this->lastRealsenseArucoData.updated = false;
+    }
+    inline void invalidateArducamArucoResetData() { this->lastArducamArucoData.updated = false; }
 
     mockable inline void attachAutoNavController(
         aruwsrc::chassis::ChassisAutoNavController* autoNavController)
@@ -364,20 +376,21 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
+        CV_MESSAGE_TYPE_REALSENSE_ARUCO = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
         CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
         CV_MESSAGE_TYPE_ROBOT_ORBIT = 15,
+        CV_MESSAGE_TYPE_ARDUCAM_ARUCO = 17,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
     static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1'000;
 
     /** Time in ms between sending the robot ID message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
+    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 2'000;
 
     /** Time in ms between sending the robot health message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 500;
+    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 350;
 
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
@@ -431,7 +444,12 @@ private:
         .numSetpoints = 0,
         .setpoints = {}};
 
-    ArucoResetData lastArucoData{
+    ArucoResetData lastRealsenseArucoData{
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .updated = false,
+    };
+
+    ArucoResetData lastArducamArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
     };
@@ -474,7 +492,9 @@ private:
 
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
 
-    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+    bool decodeToRealsenseArucoData(const ReceivedSerialMessage& message);
+
+    bool decodeToArducamArucoData(const ReceivedSerialMessage& message);
 
     bool decodeToRobotOrbitData(const ReceivedSerialMessage& message);
 

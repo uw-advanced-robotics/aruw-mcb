@@ -26,8 +26,6 @@
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_turret_constants.hpp"
-#elif defined(OLD_STANDARDS)
-#include "aruwsrc/robot/old_standard/old_standard_turret_constants.hpp"
 #elif defined(TARGET_BALSTD)
 #include "aruwsrc/robot/balstd/turret/balstd_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
@@ -41,7 +39,7 @@ static constexpr float TURRET_CG_X = 0.0f;
 static constexpr float TURRET_CG_Z = 0.0f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 }  // namespace aruwsrc::control::turret
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"

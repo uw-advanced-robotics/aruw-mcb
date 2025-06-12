@@ -49,7 +49,7 @@ public:
     static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
     static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
 
-#if defined(TARGET_HERO_PERSEUS) && not defined(PLATFORM_HOSTED) && not defined(ENV_UNIT_TESTS)
+#if defined(TARGET_HERO_ZERO) && not defined(PLATFORM_HOSTED) && not defined(ENV_UNIT_TESTS)
     static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_NORMAL = 2.0f;
     static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_LOW_DPI = 0.1f;
     /**
@@ -95,7 +95,7 @@ public:
      * controlled by `MAX_ACCELERATION_X` and `MAX_DECELERATION_X`. A linear combination of keyboard
      * and remote joystick information.
      */
-    mockable float getChassisXInput();
+    virtual float getChassisXInput();
 
     /**
      * @return The value used for chassis movement side to side, between `[-getMaxUserWheelSpeed,
@@ -103,7 +103,7 @@ public:
      * `MAX_ACCELERATION_Y` and `MAX_DECELERATION_Y`. A linear combination of keyboard and remote
      * joystick information.
      */
-    mockable float getChassisYInput();
+    virtual float getChassisYInput();
 
     /**
      * @return The value used for chassis rotation, between `[-getMaxUserWheelSpeed,
@@ -111,7 +111,7 @@ public:
      * `MAX_ACCELERATION_R` and `MAX_DECELERATION_R`. A linear combination of keyboard and remote
      * joystick information.
      */
-    mockable float getChassisRInput();
+    virtual float getChassisRInput();
 
     /**
      * @return the value used for turret yaw rotation, between about -1 and 1

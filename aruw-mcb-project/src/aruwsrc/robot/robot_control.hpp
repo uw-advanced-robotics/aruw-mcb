@@ -23,15 +23,13 @@
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 namespace aruwsrc::standard
-#elif defined(OLD_STANDARDS)
-#include "aruwsrc/robot/standard/standard_drivers.hpp"
-namespace aruwsrc::old_standard
 #elif defined(TARGET_BALSTD)
+#include "aruwsrc/robot/balstd/balstd_drivers.hpp"
 namespace aruwsrc::balstd
 #elif defined(ALL_SENTRIES)
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
 namespace aruwsrc::hero
 #elif defined(TARGET_DRONE)

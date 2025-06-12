@@ -42,6 +42,7 @@ public:
         overrideOdometryPosition,
         (const float positionX, const float positionY),
         (override));
+    MOCK_METHOD(void, reset, (), (override));
 };
 }  // namespace tap::mock
 

@@ -23,13 +23,11 @@
 
 #if defined(ALL_STANDARDS)
 namespace aruwsrc::standard
-#elif defined(OLD_STANDARDS)
-namespace aruwsrc::old_standard
 #elif defined(TARGET_BALSTD)
 namespace aruwsrc::balstd
 #elif defined(ALL_SENTRIES)
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_ZERO)
 namespace aruwsrc::hero
 #elif defined(TARGET_DRONE)
 namespace aruwsrc::drone
