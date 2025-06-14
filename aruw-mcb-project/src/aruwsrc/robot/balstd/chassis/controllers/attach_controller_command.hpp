@@ -44,7 +44,7 @@ public:
 
     void execute() override {}
 
-    void end(bool interrupted) override {}
+    void end(bool) override {}
 
     bool isFinished() const override { return true; }
 
