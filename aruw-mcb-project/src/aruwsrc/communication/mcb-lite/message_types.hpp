@@ -170,6 +170,6 @@ struct VoltageCurrentMessage
     uint16_t current;
 } modm_packed;
 
-}  // namespace src::virtualMCB
+}  // namespace aruwsrc::virtualMCB
 
 #endif

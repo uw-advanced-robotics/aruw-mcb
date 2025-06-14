@@ -17,14 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "mcb_lite.hpp"
 #include "virtual_voltage_current_sensor.hpp"
+
+#include "mcb_lite.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-    VirtualVoltageCurrentSensor::VirtualVoltageCurrentSensor(MCBLite* lite)
-    {
-        lite->voltageCurrentSensor = this;
-    }
+VirtualVoltageCurrentSensor::VirtualVoltageCurrentSensor(MCBLite* lite)
+{
+    lite->voltageCurrentSensor = this;
+}
 
 }  // namespace aruwsrc::virtualMCB

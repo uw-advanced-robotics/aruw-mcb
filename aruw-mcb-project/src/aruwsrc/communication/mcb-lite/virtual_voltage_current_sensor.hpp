@@ -22,28 +22,25 @@
 
 #include <cstdint>
 
-#include "tap/communication/sensors/voltage/voltage_sensor_interface.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
+#include "tap/communication/sensors/voltage/voltage_sensor_interface.hpp"
 
 namespace aruwsrc::virtualMCB
 {
-class VirtualVoltageCurrentSensor : 
-      public tap::communication::sensors::voltage::VoltageSensorInterface,
+class VirtualVoltageCurrentSensor
+    : public tap::communication::sensors::voltage::VoltageSensorInterface,
       public tap::communication::sensors::current::CurrentSensorInterface
 {
     friend class MCBLite;
+
 public:
     VirtualVoltageCurrentSensor(MCBLite* lite);
 
     void update() {}
 
-    float getVoltageMv() const {
-        return this->voltage;
-    }
+    float getVoltageMv() const { return this->voltage; }
 
-    float getCurrentMa() const {
-        return this->current;
-    }
+    float getCurrentMa() const { return this->current; }
 
 private:
     uint16_t voltage, current;

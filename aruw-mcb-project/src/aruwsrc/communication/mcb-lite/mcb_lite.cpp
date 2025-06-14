@@ -229,7 +229,8 @@ void MCBLite::processCanEncoderMessage(
 
 void MCBLite::processVoltageCurrentMessage(const ReceivedSerialMessage& completeMessage)
 {
-    const VoltageCurrentMessage* message = reinterpret_cast<const VoltageCurrentMessage*>(completeMessage.data);
+    const VoltageCurrentMessage* message =
+        reinterpret_cast<const VoltageCurrentMessage*>(completeMessage.data);
 
     if (this->voltageCurrentSensor != nullptr)
     {
