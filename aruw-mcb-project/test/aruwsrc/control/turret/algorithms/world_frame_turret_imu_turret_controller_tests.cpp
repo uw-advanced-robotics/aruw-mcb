@@ -74,7 +74,7 @@ protected:
             turretMotor.TurretMotor::setChassisFrameSetpoint(setpoint);
         });
 
-        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault([&]() { 
+        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault([&]() {
             return turretMotor.TurretMotor::getChassisFrameSetpoint();
         });
     }
