@@ -33,7 +33,7 @@ float BalstdControlOperatorInterface::getXVel() const
 
 float BalstdControlOperatorInterface::getYawVel() const
 {
-    return drivers->remote.getChannel(Channel::RIGHT_HORIZONTAL) * WHEEL_TORQUE_SCALAR;
+    return -drivers->remote.getChannel(Channel::RIGHT_HORIZONTAL) * WHEEL_TORQUE_SCALAR;
 }
 
 float BalstdControlOperatorInterface::getManualLegXForce() const
