@@ -97,7 +97,6 @@ public:
     int getAvailableEnergy() const { return this->availableEnergy; };
     float getCurrent() const { return this->current; };
     float getVoltage() const { return this->voltage; };
-    float getBatteryVoltage() const { return this->batteryVoltage; };
     int getPowerLimit() const { return this->powerLimit; };
     State getState() const { return this->state; };
 
@@ -133,7 +132,6 @@ private:
     float availableEnergy = 0;
     float current = 0;
     float voltage = 0;
-    float batteryVoltage = 0;
     State state = State::UNKNOWN;
 
     SprintMode sprint = SprintMode::NO_SPRINT;
