@@ -353,7 +353,9 @@ SentryTransforms transformer(
     odometrySubsystem,
     turretMajor,
     turretLeft,
+    getTurretMCBCanComm2(),
     turretRight,
+    getTurretMCBCanComm1(),
     {.turretMinorOffset = TURRET_MINOR_OFFSET});
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
@@ -392,13 +394,13 @@ SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_
 
 TurretMinorWorldControllers turretRightWorldControllers{
     .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
+        transformer.getWorldToTurretRight(),
         turretRight.pitchMotor,
         turretRightWorldPitchPosPid,
         turretRightWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus1,
+        transformer.getWorldToTurretRight(),
         turretRight.yawMotor,
         turretRightWorldYawPosPid,
         turretRightWorldYawVelPid)
@@ -407,13 +409,13 @@ TurretMinorWorldControllers turretRightWorldControllers{
 
 TurretMinorWorldControllers turretLeftWorldControllers{
     .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
+        transformer.getWorldToTurretLeft(),
         turretLeft.pitchMotor,
         turretLeftWorldPitchPosPid,
         turretLeftWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
-        drivers()->turretMCBCanCommBus2,
+        transformer.getWorldToTurretLeft(),
         turretLeft.yawMotor,
         turretLeftWorldYawPosPid,
         turretLeftWorldYawVelPid)
