@@ -44,13 +44,12 @@ float CapacitorSelectingSensor::getCurrentMa() const
 
 float CapacitorSelectingSensor::getVoltageMv() const
 {
-    // TODO: See capactior_bank.cpp:47-49
-    // if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline())
-    // {
-    return this->voltageSensor->getVoltageMv();
-    // }
+    if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline())
+    {
+        return this->voltageSensor->getVoltageMv();
+    }
 
-    // return this->capacitorBank->getBatteryVoltage() * 1000;
+    return aruwsrc::can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE * 1000;
 }
 
 CapBankPowerLimiter::CapBankPowerLimiter(

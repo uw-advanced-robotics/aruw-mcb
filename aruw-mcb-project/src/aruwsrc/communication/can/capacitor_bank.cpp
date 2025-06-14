@@ -44,9 +44,6 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
             this->voltage =
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[4])) / 1000.0;
             this->powerLimit = message.data[6];
-            // TODO: Update the cap bank to also send this information.
-            //       Remove the power limit status? Is 100mV good enough resolution?
-            // this->batteryVoltage = message.data[7] / 10.0f;
             this->availableEnergy = tap::algorithms::limitVal(
                 1.0 / 2.0 * this->capacitance *
                     (powf(this->voltage, 2) - powf(CAPACITOR_BANK_MIN_VOLTAGE, 2)),

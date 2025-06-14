@@ -53,11 +53,9 @@ tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
 #if defined(ALL_STANDARDS)
 using namespace aruwsrc::standard;
-#elif defined(OLD_STANDARDS)
-using namespace aruwsrc::old_standard;
 #elif defined(ALL_SENTRIES)
 using namespace aruwsrc::sentry;
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_ZERO)
 using namespace aruwsrc::hero;
 #elif defined(TARGET_DRONE)
 using namespace aruwsrc::drone;
@@ -84,7 +82,9 @@ static void initializeIo(Drivers *drivers);
 // called as frequently.
 static void updateIo(Drivers *drivers);
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS)
+static void initializeI2C(Drivers *drivers);
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
@@ -117,15 +117,17 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
+#endif
+
+#if defined(TARGET_ENGINEER)
+            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
 #if defined(TARGET_SENTRY_HYDRA)
@@ -138,13 +140,16 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
             checkTurretMcbDisconnection(drivers);
+#endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+            PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
 #endif
         }
         modm::delay_us(10);
@@ -164,19 +169,20 @@ static void initializeIo(Drivers *drivers)
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
 
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || \
-    defined(TARGET_SENTRY_HYDRA)
+    initializeI2C(drivers);
+
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA) || \
+    defined(TARGET_ENGINEER)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(OLD_STANDARDS)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_HYDRA)
@@ -193,6 +199,11 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_ENGINEER)
     drivers->engineerCVCommunication.initializeCV();
 #endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+    modm::delay_ms(2000);
+    drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+#endif
 }
 
 static void updateIo(Drivers *drivers)
@@ -202,13 +213,12 @@ static void updateIo(Drivers *drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA) || \
+    defined(TARGET_ENGINEER)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS) || \
-    defined(TARGET_SENTRY_HYDRA)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_HYDRA)
     drivers->visionCoprocessor.updateSerial();
 #endif
 
@@ -224,9 +234,18 @@ static void updateIo(Drivers *drivers)
 #ifdef TARGET_TESTBED
     drivers->lite.updateSerial();
 #endif
+
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+    drivers->interRobotTransmitter.updateState();
+    drivers->interRobotTransmitter.sendMessage();
+#endif
+
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+    drivers->ism330.read();
+#endif
 }
 
-#if defined(ALL_STANDARDS) || defined(OLD_STANDARDS) || defined(TARGET_HERO_PERSEUS)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
 static void checkTurretMcbDisconnection(Drivers *drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
@@ -242,3 +261,14 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
     }
 }
 #endif
+
+static void initializeI2C(Drivers *drivers)
+{
+    drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
+    modm::delay_ms(2000);  // Wait for the SDA and SCL lines to be pulled high
+
+    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+        Board::I2CMaster::PullUps::External);
+    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+    Board::I2CMaster::reset();
+}

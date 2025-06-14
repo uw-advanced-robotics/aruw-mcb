@@ -57,8 +57,6 @@ public:
     {
         W,
         X,
-        Y,
-        Z,
         Buzzer,
         ImuHeater,
     };
@@ -103,8 +101,6 @@ private:
     {
         Ch1 = 1,
         Ch2 = 2,
-        Ch3 = 3,
-        Ch4 = 4,
     };
 
     /**

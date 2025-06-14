@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,19 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "old_standard_turret_subsystem.hpp"
+#include "setpoint_move_position_command.hpp"
 
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-
-namespace aruwsrc::control::turret
+namespace aruwsrc::engineer
 {
-float OldStandardTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
-
-float OldStandardTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
-
-uint32_t OldStandardTurretSubsystem::getLastMeasurementTimeMicros() const
+SetpointMovePositionCommand::SetpointMovePositionCommand(
+    LimitSwitchSetpointInterface &cubeLift,
+    float setpoint)
+    : cubeLift(cubeLift),
+      setpoint(setpoint)
 {
-    return getTurretMCB()->getIMUDataTimestamp();
+    addSubsystemRequirement(&cubeLift);
 }
 
-}  // namespace aruwsrc::control::turret
+void SetpointMovePositionCommand::initialize() { cubeLift.setSetpoint(setpoint); }
+
+void SetpointMovePositionCommand::execute() {}
+
+void SetpointMovePositionCommand::end(bool) {}
+
+bool SetpointMovePositionCommand::isFinished() const { return cubeLift.atSetpoint(); }
+}  // namespace aruwsrc::engineer
