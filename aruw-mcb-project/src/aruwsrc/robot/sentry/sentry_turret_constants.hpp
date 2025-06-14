@@ -67,7 +67,7 @@ namespace turretMajor
 {
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 745,
+    .startEncoderValue = 3817,
     .minAngle = 0,
     .maxAngle = M_TWOPI,
     .limitMotorAngles = false,

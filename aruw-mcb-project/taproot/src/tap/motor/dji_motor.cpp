@@ -62,7 +62,7 @@ DjiMotor::DjiMotor(
       motorInverted(isInverted),
       currentControl(currentControl),
       internalEncoder(isInverted, gearRatio, encoderHomePosition),
-      encoder(externalEncoder)
+      encoder(externalEncoder != nullptr ? externalEncoder : &internalEncoder)
 {
     motorDisconnectTimeout.stop();
 }
