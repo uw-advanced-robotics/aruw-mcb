@@ -24,7 +24,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer
 {
 static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID = tap::motor::MOTOR7;
 
@@ -37,9 +37,9 @@ static constexpr float LIFT_UPPER_BOUND = 1000;  // TODO: UPDATE
 
 static constexpr int16_t FEEDFORWARD = 1000;
 
-static constexpr float HOMING_SPEED = 25;
+static constexpr float HOMING_SPEED = 1000;  // 25
 
-static constexpr float MM_PER_REVOLUTION = 74.63f;
+static constexpr float MM_PER_REVOLUTION = 74.63f / M_TWOPI;
 
 static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .kp = 300.0f,
@@ -58,11 +58,11 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_HOMING_PID_CONFIG = {
     .maxOutput = 0.0f,
     .errorDerivativeFloor = 0.0f};
 
-static constexpr float MANUAL_MOVE_SPEED = -10;  // TODO: choose value alter
+static constexpr float CUBE_LIFT_MOVE_SPEED = -2;  // TODO: choose value alter
 
 static constexpr float ONE_CUBE_SETPOINT = -40;
 static constexpr float TWO_CUBE_SETPOINT = -220;
 static constexpr float THREE_CUBE_SETPOINT = -310;
 
-}  // namespace aruwsrc::robot::engineer
+}  // namespace aruwsrc::engineer
 #endif

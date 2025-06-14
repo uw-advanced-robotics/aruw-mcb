@@ -16,20 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef CUBE_MOVE_POSITION_COMMAND_HPP_
-#define CUBE_MOVE_POSITION_COMMAND_HPP_
+#ifndef SETPOINT_MOVE_POSITION_COMMAND_HPP_
+#define SETPOINT_MOVE_POSITION_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
-namespace aruwsrc::robot::engineer
+using namespace aruwsrc::engineer;
+
+namespace aruwsrc::engineer
 
 {
-class CubeMovePositionCommand : public tap::control::Command
+class SetpointMovePositionCommand : public tap::control::Command
 {
 public:
-    CubeMovePositionCommand(CubeStorageSubsystem &cubeLift, float setpoint);
+    SetpointMovePositionCommand(LimitSwitchSetpointInterface &cubeLift, float setpoint);
 
     void initialize() override;
 
@@ -42,10 +44,10 @@ public:
     const char *getName() const override { return "Cube Move Position Command"; }
 
 private:
-    CubeStorageSubsystem &cubeLift;
+    LimitSwitchSetpointInterface &cubeLift;
     float setpoint;
 
-};  // class CubeMovePositionCommand
+};  // class SetpointMovePositionCommand
 
-}  // namespace aruwsrc::robot::engineer
-#endif  // CUBE_MOVE_POSITION_COMMAND_HPP_
+}  // namespace aruwsrc::engineer
+#endif  // SETPOINT_MOVE_POSITION_COMMAND_HPP_

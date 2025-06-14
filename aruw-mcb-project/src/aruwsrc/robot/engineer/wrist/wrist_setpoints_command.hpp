@@ -16,24 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef CUBE_MOVE_MANUAL_COMMAND_HPP_
-#define CUBE_MOVE_MANUAL_COMMAND_HPP_
+
+#ifndef WRIST_SETPOINTS_COMMAND_HPP_
+#define WRIST_SETPOINTS_COMMAND_HPP_
+
+#include <vector>
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "wrist_subsystem.hpp"
 
-#include "cube_storage_subsystem.hpp"
-
-namespace aruwsrc::robot::engineer
-
+namespace aruwsrc::engineer::wrist
 {
-class CubeMoveManualCommand : public tap::control::Command
+struct Setpoint
+{
+    float pitch;
+    float yaw;
+    float epsilonPitch;
+    float epsilonYaw;
+};
+
+class WristSetpointsCommand : public tap::control::Command
 {
 public:
-    CubeMoveManualCommand(
-        CubeStorageSubsystem &cubeLift,
-        aruwsrc::control::ControlOperatorInterface *operatorInterface);
+    WristSetpointsCommand(WristSubsystem &wrist, std::vector<Setpoint> setpoints);
 
     void initialize() override;
 
@@ -43,14 +49,15 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Cube Move Manual Command"; }
+    const char *getName() const override { return "Wrist Setpoints Command"; }
 
 private:
-    CubeStorageSubsystem &cubeLift;
-    aruwsrc::control::ControlOperatorInterface *operatorInterface;
-    float setpoint;
+    WristSubsystem &wrist;
+    std::vector<Setpoint> setpoints;
+    unsigned int currentSetpointIndex;
 
-};  // class CubeMovePositionCommand
+};  // class WristSetpointsCommand
 
-}  // namespace aruwsrc::robot::engineer
-#endif  // CUBE_MOVE_MANUAL_COMMAND_HPP_
+}  // namespace aruwsrc::engineer::wrist
+
+#endif  // WRIST_SETPOINTS_COMMAND_HPP_

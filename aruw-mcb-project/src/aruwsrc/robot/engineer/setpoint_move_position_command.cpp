@@ -17,32 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cube_move_position_command.hpp"
+#include "setpoint_move_position_command.hpp"
 
-#include <cstdlib>
-
-#include "aruwsrc/robot/engineer/cube_lift/engineer_lift_constants.hpp"
-namespace aruwsrc::robot::engineer
+namespace aruwsrc::engineer
 {
-CubeMovePositionCommand::CubeMovePositionCommand(CubeStorageSubsystem &cubeLift, float setpoint)
+SetpointMovePositionCommand::SetpointMovePositionCommand(
+    LimitSwitchSetpointInterface &cubeLift,
+    float setpoint)
     : cubeLift(cubeLift),
       setpoint(setpoint)
 {
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeMovePositionCommand::initialize()
-{
-    cubeLift.setPIDState(PIDState::POSITION_PID);
-    cubeLift.setPositionSetpoint(setpoint);
-}
+void SetpointMovePositionCommand::initialize() { cubeLift.setSetpoint(setpoint); }
 
-void CubeMovePositionCommand::execute() {}
+void SetpointMovePositionCommand::execute() {}
 
-void CubeMovePositionCommand::end(bool) {}
+void SetpointMovePositionCommand::end(bool) {}
 
-bool CubeMovePositionCommand::isFinished() const
-{
-    return abs(setpoint - cubeLift.getMotorPosition()) < 0.5;
-}
-}  // namespace aruwsrc::robot::engineer
+bool SetpointMovePositionCommand::isFinished() const { return cubeLift.atSetpoint(); }
+}  // namespace aruwsrc::engineer
