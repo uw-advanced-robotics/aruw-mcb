@@ -165,6 +165,10 @@ void SentryImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
+                
+                // reset odometry
+                yawObserver.overrideChassisYaw(0);
+                odometryInterface.reset();
             }
             break;
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
