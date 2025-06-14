@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
- * This file is part of aruw-mcb-lite.
+ * This file is part of aruw-mcb.
  *
  * aruw-mcb-lite is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -172,4 +172,4 @@ struct VoltageCurrentMessage
 
 }  // namespace aruwsrc::virtualMCB
 
-#endif
+#endif // MESSAGE_TYPES_HPP_
