@@ -27,6 +27,8 @@
 
 namespace aruwsrc::virtualMCB
 {
+class MCBLite;
+
 class VirtualVoltageCurrentSensor
     : public tap::communication::sensors::voltage::VoltageSensorInterface,
       public tap::communication::sensors::current::CurrentSensorInterface
