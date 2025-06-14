@@ -70,12 +70,13 @@ protected:
 
         ON_CALL(turretMotor, getConfig).WillByDefault(ReturnRef(motorConfig));
 
-        ON_CALL(turretMotor, setChassisFrameSetpoint)
-            .WillByDefault([&](WrappedFloat setpoint)
-                           { turretMotor.TurretMotor::setChassisFrameSetpoint(setpoint); });
+        ON_CALL(turretMotor, setChassisFrameSetpoint).WillByDefault([&](WrappedFloat setpoint) {
+            turretMotor.TurretMotor::setChassisFrameSetpoint(setpoint);
+        });
 
-        ON_CALL(turretMotor, getChassisFrameSetpoint)
-            .WillByDefault([&]() { return turretMotor.TurretMotor::getChassisFrameSetpoint(); });
+        ON_CALL(turretMotor, getChassisFrameSetpoint).WillByDefault([&]() { 
+            return turretMotor.TurretMotor::getChassisFrameSetpoint();
+        });
     }
 
     tap::Drivers drivers;
