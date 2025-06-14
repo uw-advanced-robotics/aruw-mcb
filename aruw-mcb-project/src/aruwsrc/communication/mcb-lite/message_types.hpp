@@ -172,4 +172,4 @@ struct VoltageCurrentMessage
 
 }  // namespace aruwsrc::virtualMCB
 
-#endif // MESSAGE_TYPES_HPP_
+#endif  // MESSAGE_TYPES_HPP_
