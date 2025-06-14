@@ -31,8 +31,8 @@ static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;         // 41.275mm 
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
 
 static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS =
     M_PI_4;  // 45 degrees relative to chassis forward
