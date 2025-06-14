@@ -245,6 +245,10 @@ static void updateIo(Drivers *drivers)
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
     drivers->ism330.read();
 #endif
+
+#if defined(TARGET_SENTRY_ECLIPSE)
+    drivers->stateMachine.updateState();
+#endif
 }
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)

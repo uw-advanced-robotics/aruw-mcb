@@ -901,7 +901,8 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
-    drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
+    // drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
+    drivers->stateMachine.attachAutoNavController(&autoNavController);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

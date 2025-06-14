@@ -39,6 +39,7 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
+#include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
 #endif
 
 namespace aruwsrc::sentry
@@ -66,7 +67,8 @@ public:
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
           turretMajorImu(),
-          plateHitTracker(this)
+          plateHitTracker(this),
+          stateMachine(refSerial, visionCoprocessor)
     {
     }
 
@@ -88,6 +90,7 @@ public:
     aruwsrc::virtualMCB::MCBLite chassisMcbLite;
     aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
+    aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 #endif
 };  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc::sentry
