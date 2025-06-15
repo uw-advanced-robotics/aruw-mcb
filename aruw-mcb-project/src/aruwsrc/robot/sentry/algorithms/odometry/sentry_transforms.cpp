@@ -73,17 +73,17 @@ void SentryTransforms::updateTransforms()
         turretRight.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
 
     // World transforms
-    worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);
+    worldToTurretMajor = worldToChassis.composeStatic(chassisToTurretMajor);
 
-    worldToTurretLeft = worldToTurretMajor.compose(turretMajorToTurretLeft);
-    worldToTurretRight = worldToTurretMajor.compose(turretMajorToTurretRight);
+    worldToTurretLeft = worldToTurretMajor.composeStatic(turretMajorToTurretLeft);
+    worldToTurretRight = worldToTurretMajor.composeStatic(turretMajorToTurretRight);
     worldToVTM = worldToTurretMajor;
 
     // Chassis to Arducam
-    chassisToArducam0 = chassisToTurretMajor.compose(ARDUCAM1_OFFSET);
-    chassisToArducam1 = chassisToTurretMajor.compose(ARDUCAM2_OFFSET);
-    chassisToArducam2 = chassisToTurretMajor.compose(ARDUCAM3_OFFSET);
-    chassisToArducam3 = chassisToTurretMajor.compose(ARDUCAM4_OFFSET);
+    chassisToArducam0 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM1);
+    chassisToArducam1 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM2);
+    chassisToArducam2 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM3);
+    chassisToArducam3 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM4);
 }
 
 }  // namespace aruwsrc::sentry::algorithms::odometry
