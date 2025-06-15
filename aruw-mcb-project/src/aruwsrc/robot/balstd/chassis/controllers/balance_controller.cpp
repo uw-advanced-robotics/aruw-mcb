@@ -16,6 +16,7 @@ float wheelTorque;
 
 BalstdChassisOutput BalanceController::runController(const BalstdChassisState& currState, float dt)
 {
+    // update state references
     vmRef.data[2] += controlOperatorInterface.getXVel() * 0.002f;
     yawSetpoint += controlOperatorInterface.getYawVel() * 0.002f;
 
