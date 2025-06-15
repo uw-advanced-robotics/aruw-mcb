@@ -33,6 +33,7 @@
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
 #include "aruwsrc/algorithms/plate_hit_tracker.hpp"
+#include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
 #include "aruwsrc/communication/can/capacitor_bank.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/inter_robot_comm/inter_robot_transmitter.hpp"
@@ -69,7 +70,8 @@ public:
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
           plateHitTracker(this),
           refSerialTransmitter(this),
-          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
+          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor),
+          stateMachine(refSerial, visionCoprocessor)
     {
     }
 
@@ -93,6 +95,7 @@ public:
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
+    algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard

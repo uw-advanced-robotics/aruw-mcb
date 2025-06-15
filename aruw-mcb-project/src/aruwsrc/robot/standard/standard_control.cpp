@@ -80,6 +80,7 @@
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
+#include "aruwsrc/control/governor/match_running_governor.hpp"
 #include "aruwsrc/control/governor/moved_fast_recently_governor.hpp"
 #include "aruwsrc/control/governor/plate_hit_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
@@ -460,10 +461,12 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
+
+GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-    {&heatLimitGovernor, &cvOnTargetGovernor});
+    {&heatLimitGovernor, &cvOnTargetGovernor, &matchRunningGovernor});
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
