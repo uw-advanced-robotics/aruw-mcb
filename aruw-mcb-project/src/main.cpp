@@ -149,7 +149,7 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-            // PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
+            PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
 #endif
         }
         modm::delay_us(10);
@@ -201,8 +201,8 @@ static void initializeIo(Drivers *drivers)
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-    // modm::delay_ms(2000);
-    // drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    modm::delay_ms(2000);
+    drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
 }
 
@@ -241,7 +241,7 @@ static void updateIo(Drivers *drivers)
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-    // drivers->ism330.read();
+    drivers->ism330.read();
 #endif
 }
 
