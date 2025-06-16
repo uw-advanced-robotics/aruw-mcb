@@ -17,58 +17,57 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #ifndef ENEMY_INDICATOR_HPP_
- #define ENEMY_INDICATOR_HPP_
- 
- #include "tap/communication/referee/state_hud_indicator.hpp"
- #include "tap/communication/serial/ref_serial.hpp"
- 
- #include "modm/processing/resumable.hpp"
- 
- #include "hud_indicator.hpp"
- 
- using namespace tap::communication::serial;
- 
- namespace aruwsrc::control::client_display
- {
- /**
-  * Adds text to show "ENEMY" in bright yellow under the enemy team's side.
-  * Displays ENEMY under red side if we're blue team, and vice versa.
-  */
- class EnemyIndicator : public HudIndicator, protected modm::Resumable<2>
- {
- public:
-     /**
-      * Construct a EnemyIndicator object.
-      *
-      * @param[in] refSerialTransmitter RefSerialTransmitter instance.
-      */
-     EnemyIndicator(
-         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-         const tap::communication::serial::RefSerial &refSerial);
- 
-     void initialize() override final;
- 
-     modm::ResumableResult<void> sendInitialGraphics() override final;
- 
-     //modm::ResumableResult<void> update() override final;
- 
- private:
-     // X position of the text (will be set based on team)
-     uint16_t textX;
-     // Y position of the text
-     static constexpr uint16_t TEXT_Y = 865; 
-     // WIDTH of the text
-     static constexpr uint16_t WIDTH = 4;
-     // SIZE of the text
-     static constexpr uint16_t SIZE = 40;
- 
-     Tx::GraphicCharacterMessage enemyGraphic;
- 
-     const tap::communication::serial::RefSerial &refSerial;
-    
- };
- 
- }  // namespace aruwsrc::control::client_display
- 
- #endif  // ENEMY_INDICATOR_HPP_
+#ifndef ENEMY_INDICATOR_HPP_
+#define ENEMY_INDICATOR_HPP_
+
+#include "tap/communication/referee/state_hud_indicator.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
+
+#include "modm/processing/resumable.hpp"
+
+#include "hud_indicator.hpp"
+
+using namespace tap::communication::serial;
+
+namespace aruwsrc::control::client_display
+{
+/**
+ * Adds text to show "ENEMY" in bright yellow under the enemy team's side.
+ * Displays ENEMY under red side if we're blue team, and vice versa.
+ */
+class EnemyIndicator : public HudIndicator, protected modm::Resumable<2>
+{
+public:
+    /**
+     * Construct a EnemyIndicator object.
+     *
+     * @param[in] refSerialTransmitter RefSerialTransmitter instance.
+     */
+    EnemyIndicator(
+        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
+        const tap::communication::serial::RefSerial &refSerial);
+
+    void initialize() override final;
+
+    modm::ResumableResult<void> sendInitialGraphics() override final;
+
+    // modm::ResumableResult<void> update() override final;
+
+private:
+    // X position of the text (will be set based on team)
+    uint16_t textX;
+    // Y position of the text
+    static constexpr uint16_t TEXT_Y = 865;
+    // WIDTH of the text
+    static constexpr uint16_t WIDTH = 4;
+    // SIZE of the text
+    static constexpr uint16_t SIZE = 40;
+
+    Tx::GraphicCharacterMessage enemyGraphic;
+
+    const tap::communication::serial::RefSerial &refSerial;
+};
+
+}  // namespace aruwsrc::control::client_display
+
+#endif  // ENEMY_INDICATOR_HPP_
