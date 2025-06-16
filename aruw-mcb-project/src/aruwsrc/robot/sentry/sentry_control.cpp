@@ -71,7 +71,6 @@
 #include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/chassis/sentry_beyblade_command.hpp"
 #include "aruwsrc/robot/sentry/chassis/sentry_manual_drive_command.hpp"
-#include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
@@ -100,6 +99,7 @@ using namespace aruwsrc::control::sentry;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::sentry;
+using namespace aruwsrc::chassis;
 using namespace aruwsrc::sentry::chassis;
 using namespace aruwsrc::sentry::algorithms;
 using namespace aruwsrc::sentry::algorithms::odometry;
@@ -324,10 +324,10 @@ aruwsrc::virtualMCB::VirtualCanEncoder perpendicularOmni(
     &drivers()->chassisMcbLite,
     tap::can::CanBus::CAN_BUS2);
 
-aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-    &parallelOmni,
-    &perpendicularOmni,
-    DEADWHEEL_RADIUS);
+// aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
+//     &parallelOmni,
+//     &perpendicularOmni,
+//     DEADWHEEL_RADIUS);
 
 // aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
 //     *drivers(),
@@ -367,7 +367,7 @@ aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
     transformer.getWorldToChassis(),
-    aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
+    aruwsrc::chassis::BEYBLADE_CONFIG);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -537,7 +537,7 @@ SentryBeybladeCommand beybladeCommand(
     &turretMajor.getReadOnlyMotor(),
     drivers()->controlOperatorInterface,
     transformer.getWorldToChassis(),
-    aruwsrc::sentry::chassis::BEYBLADE_CONFIG);
+    aruwsrc::chassis::BEYBLADE_CONFIG);
 
 SentryManualDriveCommand chassisDriveCommand(
     drivers(),
