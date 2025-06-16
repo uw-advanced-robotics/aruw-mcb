@@ -507,7 +507,6 @@ void setDefaultStandardCommands(Drivers *)
 /* add any starting commands to the scheduler here --------------------------*/
 void startStandardCommands(Drivers *drivers)
 {
-    // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
 }
