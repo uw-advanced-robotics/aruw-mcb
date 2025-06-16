@@ -188,11 +188,13 @@ static inline float runWorldFrameTurretImuController(
 
 WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadePidTurretController(
     const transforms::Transform &worldToTurret,
+    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
     TurretMotor &yawMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid)
     : TurretYawControllerInterface(yawMotor),
       worldToTurret(worldToTurret),
+      turretMCBCanComm(turretMCBCanComm),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(Angle(0))
@@ -257,7 +259,7 @@ WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::getMeasurement() 
 
 bool WorldFrameYawTurretImuCascadePidTurretController::isOnline() const
 {
-    return turretMotor.isOnline();
+    return turretMotor.isOnline() && turretMCBCanComm.isConnected();
 }
 
 WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::convertControllerAngleToChassisFrame(
@@ -285,11 +287,13 @@ WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::convertChassisAng
 WorldFramePitchTurretImuCascadePidTurretController::
     WorldFramePitchTurretImuCascadePidTurretController(
         const transforms::Transform &worldToTurret,
+        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &turretMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid)
     : TurretPitchControllerInterface(turretMotor),
       worldToTurret(worldToTurret),
+      turretMCBCanComm(turretMCBCanComm),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(Angle(0))
@@ -360,7 +364,7 @@ WrappedFloat WorldFramePitchTurretImuCascadePidTurretController::getMeasurement(
 
 bool WorldFramePitchTurretImuCascadePidTurretController::isOnline() const
 {
-    return turretMotor.isOnline();
+    return turretMotor.isOnline() && turretMCBCanComm.isConnected();
 }
 
 WrappedFloat WorldFramePitchTurretImuCascadePidTurretController::

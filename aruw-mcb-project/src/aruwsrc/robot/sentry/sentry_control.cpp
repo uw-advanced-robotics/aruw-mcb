@@ -395,12 +395,14 @@ SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_
 TurretMinorWorldControllers turretRightWorldControllers{
     .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
         transformer.getWorldToTurretRight(),
+        drivers()->turretMCBCanCommBus1,
         turretRight.pitchMotor,
         turretRightWorldPitchPosPid,
         turretRightWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
         transformer.getWorldToTurretRight(),
+        drivers()->turretMCBCanCommBus1,
         turretRight.yawMotor,
         turretRightWorldYawPosPid,
         turretRightWorldYawVelPid)
@@ -410,12 +412,14 @@ TurretMinorWorldControllers turretRightWorldControllers{
 TurretMinorWorldControllers turretLeftWorldControllers{
     .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
         transformer.getWorldToTurretLeft(),
+        drivers()->turretMCBCanCommBus2,
         turretLeft.pitchMotor,
         turretLeftWorldPitchPosPid,
         turretLeftWorldPitchVelPid),
 
     .yawController = WorldFrameYawTurretImuCascadePidTurretController(
         transformer.getWorldToTurretLeft(),
+        drivers()->turretMCBCanCommBus2,
         turretLeft.yawMotor,
         turretLeftWorldYawPosPid,
         turretLeftWorldYawVelPid)
