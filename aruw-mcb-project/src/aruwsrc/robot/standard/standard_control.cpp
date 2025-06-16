@@ -212,26 +212,14 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     leftBackChassisMotor,
     rightFrontChassisMotor,
     rightBackChassisMotor,
-    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
-    &drivers()->capacitorBank);
-
-tap::encoder::CanEncoder parallelOmni(
-    drivers(),
-    tap::encoder::CanEncoderId::ID1,
-    tap::can::CanBus::CAN_BUS2,
-    true);
-
-tap::encoder::CanEncoder perpendicularOmni(
-    drivers(),
-    tap::encoder::CanEncoderId::ID0,
-    tap::can::CanBus::CAN_BUS2);
+    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers(),
     chassis,
     yawObserver,
-    drivers()->ism330,
+    drivers()->mpu6500,
     modm::Vector2f(
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
@@ -270,8 +258,6 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
-
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
     drivers()->visionCoprocessor,
@@ -296,12 +282,6 @@ aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &chassis,
     &turret.yawMotor,
     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
-
-aruwsrc::chassis::WiggleDriveCommand wiggleCommand(
-    drivers(),
-    &chassis,
-    &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
 
 aruwsrc::chassis::BeybladeCommand beybladeCommand(
     drivers(),
@@ -396,27 +376,9 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassis,
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-    &odometrySubsystem,
-    {&drivers()->ism330});
+    &odometrySubsystem);
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
-
-user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
-
-// beyblade governors
-PlateHitGovernor plateHitGovernor(&(drivers()->plateHitTracker), 5000);
-
-FiredRecentlyGovernor firedRecentlyGovernor(drivers(), 5000);
-
-MovedFastRecentlyGovernor movedRecentlyGovernor(
-    (drivers()->controlOperatorInterface),
-    5000.0f,
-    5000);
-
-GovernorLimitedCommand<1> turretUTurnCommandLimited(
-    {&turret},
-    turretUTurnCommand,
-    {&imuCalibrateDoneGovernor});
 
 // base rotate/unjam commands
 ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
@@ -482,67 +444,6 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-
-// Cap Bank
-aruwsrc::control::capbank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
-aruwsrc::control::capbank::CapBankSprintCommand capBankSprintCommand(
-    drivers(),
-    capBankSubsystem,
-    aruwsrc::can::capbank::SprintMode::SPRINT);
-aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
-    drivers(),
-    capBankSubsystem,
-    aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
-
-/* define client display / HUD related items --------------------------------*/
-
-ClientDisplaySubsystem clientDisplay(drivers());
-tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
-
-CapBankIndicator capBankIndicator(refSerialTransmitter, &drivers()->capacitorBank);
-
-extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
-MatrixHudIndicators positionHudIndicators(
-    *drivers(),
-    drivers()->visionCoprocessor,
-    refSerialTransmitter,
-    frictionWheels,
-    turret,
-    &leftMousePressedBNotPressed,
-    &cvOnTargetGovernor);
-
-AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
-
-CircleCrosshair circleCrosshair(refSerialTransmitter);
-
-DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTransmitter);
-
-TextHudIndicators textHudIndicators(
-    *drivers(),
-    agitator,
-    imuCalibrateCommand,
-    {&wiggleCommand, &beybladeCommand},
-    refSerialTransmitter);
-
-VisionAssistanceIndicator visionAssistanceIndicator(
-    drivers()->visionCoprocessor,
-    refSerialTransmitter,
-    drivers()->refSerial,
-    transformAdapter.getWorldToVTM(),
-    drivers()->interRobotTransmitter);
-
-std::vector<HudIndicator *> hudIndicators = {
-    &capBankIndicator,
-    &positionHudIndicators,
-    &ammoIndicator,
-    &circleCrosshair,
-    &damageIndicator,
-    &textHudIndicators,
-    &visionAssistanceIndicator};
-
-ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
-
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
@@ -567,91 +468,6 @@ HoldCommandMapping leftSwitchUp(
     {&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
-    drivers(),
-    RemoteMapState({Remote::Key::R}),
-    true,
-    &cvOnTargetGovernor,
-    &CvOnTargetGovernor::setGovernorEnabled);
-
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
-
-MultiShotCvCommandMapping leftMousePressedBNotPressed(
-    *drivers(),
-    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-    &manualFireRateReselectionManager,
-    cvOnTargetGovernor,
-    &rotateAgitator);
-
-HoldRepeatCommandMapping leftMousePressedBPressed(
-    drivers(),
-    {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
-    false);
-HoldCommandMapping rightMousePressed(
-    drivers(),
-    {&turretCVCommand},
-    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-
-PressCommandMapping zPressed(
-    drivers(),
-    {&turretUTurnCommandLimited},
-    RemoteMapState({Remote::Key::Z}));
-// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
-PressCommandMapping bNotCtrlPressedRightSwitchDown(
-    drivers(),
-    {&imuCalibrateCommand},
-    RemoteMapState(
-        Remote::SwitchState::UNKNOWN,
-        Remote::SwitchState::DOWN,
-        {Remote::Key::B},
-        {Remote::Key::CTRL},
-        false,
-        false));
-// The user can press b+ctrl when the remote right switch is in the down position to restart the
-// client display command. This is necessary since we don't know when the robot is connected to the
-// server and thus don't know when to start sending the initial HUD graphics.
-PressCommandMapping bCtrlPressed(
-    drivers(),
-    {&clientDisplayCommand},
-    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
-
-// The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
-// automatically once a different drive mode is chosen.
-ToggleCommandMapping qPressed(drivers(), {&wiggleCommand}, RemoteMapState({Remote::Key::Q}));
-
-PressCommandMapping xPressed(
-    drivers(),
-    {&chassisAutorotateCommand},
-    RemoteMapState({Remote::Key::X}));
-
-CycleStateCommandMapping<
-    MultiShotCvCommandMapping::LaunchMode,
-    MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
-    MultiShotCvCommandMapping>
-    vPressed(
-        drivers(),
-        RemoteMapState({Remote::Key::V}),
-        MultiShotCvCommandMapping::LIMITED_20HZ,
-        &leftMousePressedBNotPressed,
-        &MultiShotCvCommandMapping::setShooterState,
-        RemoteMapState({Remote::Key::E}));
-
-// cap bank
-PressCommandMapping cShiftPressed(
-    drivers(),
-    {&capBankToggleCommand},
-    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
-HoldCommandMapping shiftPressed(
-    drivers(),
-    {&capBankSprintCommand},
-    RemoteMapState({Remote::Key::SHIFT}));
-HoldCommandMapping ctrlPressed(
-    drivers(),
-    {&capBankHalfSprintCommand},
-    RemoteMapState({Remote::Key::CTRL}));
-
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -662,11 +478,8 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
-    drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
-    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 }
 
@@ -679,13 +492,8 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
     agitator.initialize();
     frictionWheels.initialize();
-    clientDisplay.initialize();
-    buzzer.initialize();
     transformSubsystem.initialize();
-    capBankSubsystem.initialize();
     arucoResetSubsystem.initialize();
-    perpendicularOmni.initialize();
-    parallelOmni.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -694,7 +502,6 @@ void setDefaultStandardCommands(Drivers *)
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -703,9 +510,6 @@ void startStandardCommands(Drivers *drivers)
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
-    drivers->plateHitTracker.attachTransformer(&transformAdapter);
-    drivers->ism330.setMountingTransform(
-        tap::algorithms::transforms::Transform(0.02578, 0.09607, 0, 0, 0, 0));
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -715,20 +519,6 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&rPressed);
-    drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedBPressed);
-    drivers->commandMapper.addMap(&rightMousePressed);
-    drivers->commandMapper.addMap(&zPressed);
-    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-    drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qPressed);
-    drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&vPressed);
-    drivers->commandMapper.addMap(&cShiftPressed);
-    drivers->commandMapper.addMap(&shiftPressed);
-    drivers->commandMapper.addMap(&ctrlPressed);
 }
 }  // namespace standard_control
 

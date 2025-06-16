@@ -63,14 +63,10 @@ public:
               &turretMCBCanCommBus2,
               nullptr,
               nullptr,
-              &capacitorBank),
+              nullptr),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
-          plateHitTracker(this),
-          refSerialTransmitter(this),
-          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor),
           stateMachine(refSerial, visionCoprocessor)
     {
     }
@@ -90,11 +86,6 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
-    can::capbank::CapacitorBank capacitorBank;
-    algorithms::PlateHitTracker plateHitTracker;
-    RefSerialTransmitter refSerialTransmitter;
-    aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
-    aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
     algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 #endif
 };  // class aruwsrc::StandardDrivers
