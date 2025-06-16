@@ -92,7 +92,7 @@ public:
     algorithms::PlateHitTracker plateHitTracker;
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
-    aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
+    // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard
