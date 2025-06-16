@@ -21,6 +21,7 @@
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
@@ -47,7 +48,9 @@ public:
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
         const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretLeft,
+        const tap::communication::sensors::imu::ImuInterface& turretLeftImu,
         const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretRight,
+        const tap::communication::sensors::imu::ImuInterface& turretRightImu,
         const SentryTransformConfig& config);
 
     void updateTransforms();
@@ -132,7 +135,9 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
     const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretLeft;
+    const tap::communication::sensors::imu::ImuInterface& turretLeftImu;
     const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretRight;
+    const tap::communication::sensors::imu::ImuInterface& turretRightImu;
 
     // Transforms
     Transform worldToChassis;

@@ -65,6 +65,7 @@
 #include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/enemy_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
@@ -234,7 +235,8 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers(),
     chassis,
     yawObserver,
-    drivers()->ism330,
+    // drivers()->ism330,
+    drivers()->mpu6500,
     modm::Vector2f(
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
@@ -312,6 +314,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YA
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.yawMotor,
     worldFrameYawTurretImuPosPid,
@@ -328,6 +331,7 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
@@ -343,12 +347,14 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidCv(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.yawMotor,
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPidCv,
@@ -391,7 +397,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &odometrySubsystem,
-    {&drivers()->ism330});
+    // {&drivers()->ism330});
+    {&drivers()->mpu6500});
 
 // beyblade governors
 
@@ -511,7 +518,7 @@ MatrixHudIndicators positionHudIndicators(
     &kicker::cvOnTargetGovernor);
 
 AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
-
+EnemyIndicator enemyIndicator(refSerialTransmitter, drivers()->refSerial);
 CircleCrosshair circleCrosshair(refSerialTransmitter);
 
 DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTransmitter);
@@ -534,6 +541,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
     &ammoIndicator,
+    &enemyIndicator,
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
@@ -677,7 +685,7 @@ void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->mpu6500.setMountingTransform(aruwsrc::chassis::MPU6500_MCB_MOUNTING_TRANSFORM);
-    drivers->ism330.setMountingTransform(aruwsrc::chassis::ISM330_MCB_MOUNTING_TRANSFORM);
+    // drivers->ism330.setMountingTransform(aruwsrc::chassis::ISM330_MCB_MOUNTING_TRANSFORM);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);

@@ -24,19 +24,25 @@ using namespace tap::algorithms::transforms;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::sentry::turret;
 
+using tap::communication::sensors::imu::ImuInterface;
+
 namespace aruwsrc::sentry::algorithms::odometry
 {
 SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
     const YawTurretSubsystem& turretMajor,
     const SentryTurretMinorSubsystem& turretLeft,
+    const ImuInterface& turretLeftImu,
     const SentryTurretMinorSubsystem& turretRight,
+    const ImuInterface& turretRightImu,
     const SentryTransforms::SentryTransformConfig& config)
     : config(config),
       chassisOdometry(chassisOdometry),
       turretMajor(turretMajor),
       turretLeft(turretLeft),
+      turretLeftImu(turretLeftImu),
       turretRight(turretRight),
+      turretRightImu(turretRightImu),
       worldToChassis(Transform::identity()),
       worldToTurretMajor(Transform::identity()),
       worldToTurretLeft(Transform::identity()),
@@ -74,10 +80,15 @@ void SentryTransforms::updateTransforms()
 
     // World transforms
     worldToTurretMajor = worldToChassis.composeStatic(chassisToTurretMajor);
+    worldToVTM = worldToTurretMajor;
 
     worldToTurretLeft = worldToTurretMajor.composeStatic(turretMajorToTurretLeft);
+    worldToTurretLeft.updateRotation(0, turretLeftImu.getPitch(), turretLeftImu.getYaw());
+    worldToTurretLeft.updateAngularVelocity(0, turretLeftImu.getGy(), turretLeftImu.getGz());
+
     worldToTurretRight = worldToTurretMajor.composeStatic(turretMajorToTurretRight);
-    worldToVTM = worldToTurretMajor;
+    worldToTurretRight.updateRotation(0, turretRightImu.getPitch(), turretRightImu.getYaw());
+    worldToTurretRight.updateAngularVelocity(0, turretRightImu.getGy(), turretRightImu.getGz());
 
     // Chassis to Arducam
     chassisToArducam0 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM1);
