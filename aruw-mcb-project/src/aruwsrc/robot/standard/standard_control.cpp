@@ -458,15 +458,11 @@ HoldRepeatCommandMapping rightSwitchUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
-HoldRepeatCommandMapping leftSwitchDown(
+// imu calibrate
+HoldCommandMapping leftUpRightDown(
     drivers(),
-    {&beybladeCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-    true);
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&turretCVCommand, &chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    {&imuCalibrateCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -516,8 +512,8 @@ void registerStandardIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
+
+    drivers->commandMapper.addMap(&leftUpRightDown); // imu calibrate
 }
 }  // namespace standard_control
 
