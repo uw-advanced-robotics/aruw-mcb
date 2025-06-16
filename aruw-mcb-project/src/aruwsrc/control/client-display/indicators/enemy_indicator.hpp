@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CIRCLE_CROSSHAIR_HPP_
-#define CIRCLE_CROSSHAIR_HPP_
+#ifndef ENEMY_INDICATOR_HPP_
+#define ENEMY_INDICATOR_HPP_
 
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
@@ -27,50 +27,47 @@
 
 #include "hud_indicator.hpp"
 
+using namespace tap::communication::serial;
+
 namespace aruwsrc::control::client_display
 {
-class CircleCrosshair : public HudIndicator, protected modm::Resumable<2>
+/**
+ * Adds text to show "ENEMY" in bright yellow under the enemy team's side.
+ * Displays ENEMY under red side if we're blue team, and vice versa.
+ */
+class EnemyIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     /**
-     * Makes a dot circle crosshair on the screen.
+     * Construct a EnemyIndicator object.
      *
      * @param[in] refSerialTransmitter RefSerialTransmitter instance.
      */
-    CircleCrosshair(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
+    EnemyIndicator(
+        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
+        const tap::communication::serial::RefSerial &refSerial);
 
     void initialize() override final;
 
     modm::ResumableResult<void> sendInitialGraphics() override final;
 
+    // modm::ResumableResult<void> update() override final;
+
 private:
-    // Offset from the center of the screen for the crosshair
-#ifdef TARGET_STANDARD_NULL
-    static constexpr int16_t OFFSET_X = 25;
-    static constexpr int16_t OFFSET_Y = -75;
-#elif defined(TARGET_STANDARD_VOID)
-    static constexpr int16_t OFFSET_X = -5;
-    static constexpr int16_t OFFSET_Y = -50;
-#elif defined(TARGET_HERO_ZERO)
-    static constexpr int16_t OFFSET_X = 2;
-    static constexpr int16_t OFFSET_Y = -42;
-#else
-    static constexpr int16_t OFFSET_X = 0;
-    static constexpr int16_t OFFSET_Y = 0;
-#endif
+    // X position of the text (will be set based on team)
+    uint16_t textX;
+    // Y position of the text
+    static constexpr uint16_t TEXT_Y = 865;
+    // WIDTH of the text
+    static constexpr uint16_t WIDTH = 4;
+    // SIZE of the text
+    static constexpr uint16_t SIZE = 40;
 
-    // X position of the circle
-    static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2 + OFFSET_X;
-    // Y position of the circle
-    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2 + OFFSET_Y;
-    // SIZE of the circle
-    static constexpr uint16_t CRICLE_SIZE = 2;
-    // Thickness of the line
-    static constexpr uint16_t LINE_THICKNESS = 5;
+    Tx::GraphicCharacterMessage enemyGraphic;
 
-    Tx::Graphic1Message crosshairGraphics;
+    const tap::communication::serial::RefSerial &refSerial;
 };
 
 }  // namespace aruwsrc::control::client_display
 
-#endif  // CIRCLE_CROSSHAIR_HPP_
+#endif  // ENEMY_INDICATOR_HPP_
