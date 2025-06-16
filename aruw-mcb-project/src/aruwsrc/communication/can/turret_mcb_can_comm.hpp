@@ -85,6 +85,8 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
+    static constexpr float CORRECT_VELOCITY_SCALAR = 2000.0f / 32767.0f;  // Temp ask Sumedh
+
     /**
      * @return turret yaw angle in radians, normalized between [-pi, pi]
      */
@@ -95,8 +97,7 @@ public:
      */
     mockable inline float getGx() const override
     {
-        return static_cast<float>(lastCompleteImuData.rawRollVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+        return static_cast<float>(lastCompleteImuData.rawRollVelocity) * CORRECT_VELOCITY_SCALAR;
     }
 
     /**
@@ -119,8 +120,7 @@ public:
      */
     mockable inline float getGy() const override
     {
-        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) * CORRECT_VELOCITY_SCALAR;
     }
 
     /**
@@ -143,8 +143,7 @@ public:
      */
     mockable inline float getGz() const override
     {
-        return static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+        return static_cast<float>(lastCompleteImuData.rawYawVelocity) * CORRECT_VELOCITY_SCALAR;
     }
 
     /**
