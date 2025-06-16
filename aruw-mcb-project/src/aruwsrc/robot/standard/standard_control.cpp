@@ -70,7 +70,6 @@
 #include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
-#include "aruwsrc/control/client-display/indicators/enemy_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
@@ -511,7 +510,7 @@ MatrixHudIndicators positionHudIndicators(
     &cvOnTargetGovernor);
 
 AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
-EnemyIndicator enemyIndicator(refSerialTransmitter, drivers()->refSerial);
+
 CircleCrosshair circleCrosshair(refSerialTransmitter);
 
 DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTransmitter);
@@ -534,7 +533,6 @@ std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
     &ammoIndicator,
-    &enemyIndicator,
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
