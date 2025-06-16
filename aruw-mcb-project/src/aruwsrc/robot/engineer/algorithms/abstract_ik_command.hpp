@@ -49,8 +49,6 @@ public:
 
     void end(bool) override {};
 
-    const char* getName() const override { return "Engineer IK Controller Command"; };
-
     bool isFinished() const override { return false; }
 
     virtual tap::algorithms::transforms::Transform getWorldToEEDesired();

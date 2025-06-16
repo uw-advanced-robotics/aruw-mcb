@@ -66,17 +66,17 @@ void AbstractIKCommand::execute()
 
     Transform wristToEEDesired =
         wrist.computeWristOrientation(wristYawDesired, wristPitchDesired)
-            .compose(Transform(WRIST_TO_EE_TRANSLATION, Orientation(wristRollDesired, 0, 0)));
-    ;
+            .composeStatic(Transform(WRIST_TO_EE_TRANSLATION, Orientation(wristRollDesired, 0, 0)));
 
-    Transform chassisToWrist = chassisToEEDesired.compose(wristToEEDesired.getInverse());
+    Transform chassisToWristDesired =
+        chassisToEEDesired.composeStatic(wristToEEDesired.getInverse());
 
     // Set the desired setpoints
     roll.setSetpoint(wristRollDesired);
     wrist.setSetpointPitch(wristPitchDesired);
     wrist.setSetpointYaw(wristYawDesired);
-    gantryExtension.setSetpoint(chassisToWrist.getX() - EXTENSION_BASE_OFFSET_M);
-    gantryLift.setSetpoint(chassisToWrist.getZ() - LIFT_BASE_OFFSET_M);
+    gantryExtension.setSetpoint(chassisToWristDesired.getX() - EXTENSION_BASE_OFFSET_M);
+    gantryLift.setSetpoint(chassisToWristDesired.getZ() - LIFT_BASE_OFFSET_M);
     // todo: doesn't handle chassis y axis control
 }
 
