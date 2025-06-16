@@ -22,15 +22,13 @@
 using namespace tap::algorithms::odometry;
 using namespace tap::algorithms::transforms;
 
-namespace aruwsrc::algorithms::odometry
+namespace aruwsrc::engineer::algorithms::odometry
 {
 EngineerTransforms::EngineerTransforms(
-    const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
-    const EngineerTransforms::EngineerTransformConfig& config)
-    : config(config),
-      chassisOdometry(chassisOdometry),
+    const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry)
+    : chassisOdometry(chassisOdometry),
       worldToChassis(Transform::identity()),
-      chassisToArducam(Transform::identity())
+      worldToArducam(Transform::identity())
 {
 }
 
@@ -41,8 +39,7 @@ void EngineerTransforms::updateTransforms()
     worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
     worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
 
-    // Chassis to Arducam
-    // chassisToArducam = chassisToTurretMajor.compose(ARDUCAM_OFFSET);
+    worldToArducam = worldToArducam.composeStatic(CHASSIS_TO_ARDUCAM);
 }
 
-}  // namespace aruwsrc::algorithms::odometry
+}  // namespace aruwsrc::engineer::algorithms::odometry

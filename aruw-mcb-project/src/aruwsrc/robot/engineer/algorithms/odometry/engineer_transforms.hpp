@@ -24,7 +24,7 @@
 
 #include "modm/math/geometry/location_2d.hpp"
 
-namespace aruwsrc::algorithms::odometry
+namespace aruwsrc::engineer::algorithms::odometry
 {
 class EngineerTransforms
 {
@@ -34,16 +34,7 @@ class EngineerTransforms
     friend class EngineerTransformAdapter;
 
 public:
-    struct EngineerTransformConfig
-    {
-        // Offset from turret minor yaw axis to turret major yaw axis (should only be in the
-        // y-direction of the turret major frame)
-        const float turretMinorOffset;
-    };
-
-    EngineerTransforms(
-        const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
-        const EngineerTransformConfig& config);
+    EngineerTransforms(const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry);
 
     void updateTransforms();
 
@@ -61,10 +52,9 @@ public:
         return chassisOdometry.getCurrentVelocity2D();
     }
 
-    inline const Transform& getChassisToArducam() const
-    {
-        return chassisToArducam;
-    }
+    inline const Transform& getChassisToArducam() const { return CHASSIS_TO_ARDUCAM; }
+
+    inline const Transform& getWorldToArducam() const { return worldToArducam; }
 
 protected:
     inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
@@ -73,18 +63,16 @@ protected:
     }
 
 private:
-    EngineerTransformConfig config;
-
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
 
     // Transforms
     Transform worldToChassis;
-    Transform chassisToArducam;
+    Transform worldToArducam;
 
-    // Arducam offsets
-    Transform ARDUCAM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+    // Arducam offset
+    const Transform CHASSIS_TO_ARDUCAM = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
 };
 
-}  // namespace aruwsrc::algorithms::odometry
+}  // namespace aruwsrc::engineer::algorithms::odometry
 
 #endif  // ENGINEER_TRANSFORMS_HPP_

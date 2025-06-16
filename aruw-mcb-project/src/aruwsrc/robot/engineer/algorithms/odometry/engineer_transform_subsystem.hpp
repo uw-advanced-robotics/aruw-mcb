@@ -21,14 +21,14 @@
 
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/odometry/engineer_transforms.hpp"
+#include "engineer_transforms.hpp"
 
-namespace aruwsrc::algorithms::odometry
+namespace aruwsrc::engineer::algorithms::odometry
 {
-class EngineerTransformSubystem : public tap::control::Subsystem
+class EngineerTransformSubsystem : public tap::control::Subsystem
 {
 public:
-    EngineerTransformSubystem(tap::Drivers& drivers, EngineerTransforms& transformer)
+    EngineerTransformSubsystem(tap::Drivers& drivers, EngineerTransforms& transformer)
         : tap::control::Subsystem(&drivers),
           transformer(transformer)
     {
@@ -41,6 +41,6 @@ private:
     EngineerTransforms& transformer;
 };
 
-}  // namespace aruwsrc::algorithms::odometry
+}  // namespace aruwsrc::engineer::algorithms::odometry
 
 #endif  // ENGINEER_TRANSFORM_SUBSYSTEM_HPP_
