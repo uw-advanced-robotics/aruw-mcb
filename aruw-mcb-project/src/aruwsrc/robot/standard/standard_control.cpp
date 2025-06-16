@@ -332,12 +332,14 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
     worldFramePitchTurretImuVelPid);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPidCv,
@@ -347,6 +349,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YA
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.yawMotor,
     worldFrameYawTurretImuPosPid,
@@ -357,6 +360,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.yawMotor,
     worldFrameYawTurretImuPosPidCv,
