@@ -96,12 +96,15 @@ void WristSubsystem::refresh()
         return;
     }
 
-    CMSISMat<3, 1> gantryToCOMTranslation =
-        computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
+    CMSISMat<3, 1> gantryToCOMTranslation = computeWristOrientation(getYaw(), getPitch())
+                                                .compose(Transform(COM_POS, Orientation(0, 0, 0)))
+                                                .getTranslation()
+                                                .coordinates();
 
-    Vector gravityTorque(tap::algorithms::cross(
-        gantryToCOMTranslation,
-        CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
+    Vector gravityTorque(
+        tap::algorithms::cross(
+            gantryToCOMTranslation,
+            CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
 
     // we can compute the torque exerted on each joint by projecting the robot-space gravity torque
     // into the joint axis subspace
@@ -143,12 +146,9 @@ void WristSubsystem::refreshSafeDisconnect()
     motorRight.setDesiredOutput(0);
 }
 
-Transform WristSubsystem::computeWristToCOM(
-    float yawJoint,
-    float pitchJoint,
-    tap::algorithms::transforms::Position COMPos) const
+Transform WristSubsystem::computeWristOrientation(float yawJoint, float pitchJoint) const
 {
-    Transform wristOrientation(
+    return Transform(
         tap::algorithms::CMSISMat<3, 1>({0, 0, 0}),
         tap::algorithms::CMSISMat<3, 3>(
             {cosf(pitchJoint) * cosf(yawJoint),
@@ -160,7 +160,5 @@ Transform WristSubsystem::computeWristToCOM(
              -sinf(pitchJoint) * cosf(yawJoint),
              -sinf(pitchJoint) * sinf(yawJoint),
              cosf(pitchJoint)}));
-
-    return wristOrientation.compose(Transform(COMPos, Orientation(0, 0, 0)));
 }
 }  // namespace aruwsrc::engineer::wrist

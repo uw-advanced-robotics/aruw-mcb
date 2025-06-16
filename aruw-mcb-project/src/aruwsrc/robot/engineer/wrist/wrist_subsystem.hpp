@@ -81,6 +81,9 @@ public:
 
     virtual void refreshSafeDisconnect() override;
 
+    tap::algorithms::transforms::Transform computeWristOrientation(float yawJoint, float pitchJoint)
+        const;
+
 private:
     tap::motor::MotorInterface &motorLeft, &motorRight;
     tap::encoder::EncoderInterface &encoderPitch, &encoderYaw;
@@ -94,11 +97,6 @@ private:
     static constexpr float WRIST_MASS_KG = 0.4;
     static constexpr float M3508_TORQUE_CONSTANT =
         (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
-
-    tap::algorithms::transforms::Transform computeWristToCOM(
-        float yawJoint,
-        float pitchJoint,
-        tap::algorithms::transforms::Position COMPos) const;
 };
 }  // namespace aruwsrc::engineer::wrist
 
