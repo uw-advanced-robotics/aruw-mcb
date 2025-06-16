@@ -112,7 +112,7 @@ public:
 
     tap::encoder::EncoderInterface* getEncoder() const override
     {
-        return const_cast<tap::encoder::MultiEncoder<2>*>(&this->encoder);
+        return const_cast<tap::encoder::EncoderInterface*>(this->encoder);
     }
 
     /**
@@ -210,8 +210,7 @@ private:
     Encoder internalEncoder;
 #endif
 
-    tap::encoder::MultiEncoder<2> encoder;
-
+    tap::encoder::EncoderInterface* encoder;
     tap::arch::MilliTimeout motorDisconnectTimeout;
 };
 

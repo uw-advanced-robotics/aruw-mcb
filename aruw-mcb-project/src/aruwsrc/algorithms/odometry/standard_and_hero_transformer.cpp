@@ -66,15 +66,16 @@ void StandardAndHeroTransformer::updateTransforms()
     if (turretMCB != nullptr) roll = turretMCB->getRoll();
 
     worldToTurret.updateRotation(roll, turret.getWorldPitch(), turret.getWorldYaw());
+    worldToTurret.updateAngularVelocity(0, turretMCB->getGy(), turretMCB->getGz());
 
     worldToTurret.updateTranslation(worldToChassis.getTranslation());
-    chassisToTurret = worldToChassis.getInverse().compose(worldToTurret);
+    chassisToTurret = worldToChassis.getInverse().composeStatic(worldToTurret);
 
     Transform chassisToTurretNoPitch = chassisToTurret;
     chassisToTurretNoPitch.updateRotation(Orientation(0, 0, chassisToTurret.getRotation().yaw()));
-    chassisToArducam = chassisToTurretNoPitch.compose(TURRET_TO_ARDUCAM_OFFSET);
+    chassisToArducam = chassisToTurretNoPitch.composeStatic(TURRET_TO_ARDUCAM_OFFSET);
 
-    worldToVTM = worldToTurret.compose(VTM_OFFSET);
+    worldToVTM = worldToTurret.composeStatic(VTM_OFFSET);
 }
 
 }  // namespace aruwsrc::algorithms::transforms
