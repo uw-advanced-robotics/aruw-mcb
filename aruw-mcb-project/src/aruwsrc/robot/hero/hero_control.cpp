@@ -234,7 +234,8 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers(),
     chassis,
     yawObserver,
-    drivers()->ism330,
+    // drivers()->ism330,
+    drivers()->mpu6500,
     modm::Vector2f(
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
@@ -391,7 +392,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &odometrySubsystem,
-    {&drivers()->ism330});
+    // {&drivers()->ism330});
+    {&drivers()->mpu6500});
 
 // beyblade governors
 
@@ -676,8 +678,8 @@ void setDefaultHeroCommands()
 void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
-    drivers->mpu6500.setMountingTransform(aruwsrc::chassis::MPU6500_MCB_MOUNTING_TRANSFORM);
-    drivers->ism330.setMountingTransform(aruwsrc::chassis::ISM330_MCB_MOUNTING_TRANSFORM);
+    // drivers->mpu6500.setMountingTransform(aruwsrc::chassis::MPU6500_MCB_MOUNTING_TRANSFORM);
+    // drivers->ism330.setMountingTransform(aruwsrc::chassis::ISM330_MCB_MOUNTING_TRANSFORM);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
