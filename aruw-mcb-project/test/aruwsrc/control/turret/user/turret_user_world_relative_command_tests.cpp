@@ -47,6 +47,7 @@ protected:
         : turret(&drivers),
           controlOperatorInterface(&drivers),
           worldToTurret(Transform::identity()),
+          turretMCBCanCommBus1(&drivers, tap::can::CanBus::CAN_BUS1),
           chassisFramePitchTurretController(turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFrameYawChassisImuController(
               drivers,
@@ -54,8 +55,18 @@ protected:
               {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           posPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           velPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          worldFramePitchTurretImuController(worldToTurret, turret.pitchMotor, posPid, velPid),
-          worldFrameYawTurretImuController(worldToTurret, turret.yawMotor, posPid, velPid),
+          worldFramePitchTurretImuController(
+              worldToTurret,
+              turretMCBCanCommBus1,
+              turret.pitchMotor,
+              posPid,
+              velPid),
+          worldFrameYawTurretImuController(
+              worldToTurret,
+              turretMCBCanCommBus1,
+              turret.yawMotor,
+              posPid,
+              velPid),
           turretCmd(
               &drivers,
               controlOperatorInterface,
@@ -81,6 +92,8 @@ protected:
             .WillByDefault(ReturnRef(currentPitchValue));
         ON_CALL(turret.yawMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
         ON_CALL(turret.pitchMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
+        ON_CALL(turretMCBCanCommBus1, isConnected)
+            .WillByDefault(ReturnPointee(&turretMcbCanCommConnected));
         ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
             .WillByDefault(ReturnPointee(&yawSetpoint));
         ON_CALL(turret.pitchMotor, getChassisFrameSetpoint)
@@ -93,6 +106,7 @@ protected:
     NiceMock<TurretSubsystemMock> turret;
     NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
     Transform worldToTurret;
+    NiceMock<aruwsrc::mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
     ChassisFramePitchTurretController chassisFramePitchTurretController;
     WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController;
     tap::algorithms::SmoothPid posPid;
@@ -148,7 +162,7 @@ TEST_F(
     turretCmd.initialize();
     turretCmd.execute();
 }
-    */
+*/
 
 TEST_F(TurretUserWorldRelativeCommandTest, end_doesnt_set_des_out_when_no_cmds_scheduled)
 {
