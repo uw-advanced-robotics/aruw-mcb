@@ -56,78 +56,75 @@ modm::ResumableResult<void> CapBankTextIndicator::update()
 
     RF_BEGIN(1);
 
-    if (capBank != nullptr)
+    if (capBank == nullptr || !capBank->isOnline())
     {
-        if (capBank->isOnline())
-        {
-            capBankVoltageLevel.graphicData.operation =
-                capBankVoltageLevel.graphicData.operation == Tx::GRAPHIC_DELETE
-                    ? Tx::GRAPHIC_ADD
-                    : Tx::GRAPHIC_MODIFY;
-            capBankTextGraphic.graphicData.operation =
-                capBankTextGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
-                                                                               : Tx::GRAPHIC_MODIFY;
+        RF_RETURN();
+    }
 
-            // Update the voltage
-            voltage_squared = pow(capBank->getVoltage(), 2);
+    capBankVoltageLevel.graphicData.operation =
+        capBankVoltageLevel.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                        : Tx::GRAPHIC_MODIFY;
+    capBankTextGraphic.graphicData.operation =
+        capBankTextGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                       : Tx::GRAPHIC_MODIFY;
 
-            if (voltage_squared < VOLTAGE_SQUARED_MIN)
-            {
-                voltage_squared = VOLTAGE_SQUARED_MIN;
-            }
+    // Update the voltage
+    voltage_squared = pow(capBank->getVoltage(), 2);
 
-            RefSerialTransmitter::configInteger(
-                SIZE,
-                WIDTH,
-                NUMBER_X,
-                TEXT_Y,
-                (voltage_squared - VOLTAGE_SQUARED_MIN) /
-                    (VOLTAGE_SQUARED_MAX - VOLTAGE_SQUARED_MIN) * 100,
-                &capBankVoltageLevel.graphicData);
+    if (voltage_squared < VOLTAGE_SQUARED_MIN)
+    {
+        voltage_squared = VOLTAGE_SQUARED_MIN;
+    }
 
-            // Update the status
-            state = capBank->getState();
-            switch (state)
-            {
-                case can::capbank::State::RESET:
-                    strncpy(capBankTextGraphic.msg, "RST ", 5);
-                    break;
-                case can::capbank::State::SAFE:
-                    strncpy(capBankTextGraphic.msg, "SAFE", 5);
-                    break;
-                case can::capbank::State::CHARGE:
-                    strncpy(capBankTextGraphic.msg, "CHRG", 5);
-                    break;
-                case can::capbank::State::CHARGE_DISCHARGE:
-                    strncpy(capBankTextGraphic.msg, "CHDS", 5);
-                    break;
-                case can::capbank::State::DISCHARGE:
-                    strncpy(capBankTextGraphic.msg, "DSCH", 5);
-                    break;
-                case can::capbank::State::BATTERY_OFF:
-                    strncpy(capBankTextGraphic.msg, "BOFF", 5);
-                    break;
-                case can::capbank::State::DISABLED:
-                    strncpy(capBankTextGraphic.msg, "OFF ", 5);
-                    break;
-                default:
-                    strncpy(capBankTextGraphic.msg, "UNK ", 5);
-                    break;
-            }
-            // Update the text
-            capBankTextGraphic.graphicData.endAngle = 5;  // Sets the length of the string
+    RefSerialTransmitter::configInteger(
+        SIZE,
+        WIDTH,
+        NUMBER_X,
+        TEXT_Y,
+        (voltage_squared - VOLTAGE_SQUARED_MIN) / (VOLTAGE_SQUARED_MAX - VOLTAGE_SQUARED_MIN) * 100,
+        &capBankVoltageLevel.graphicData);
 
-            // Send data
-            if (state != this->previousState)
-            {
-                this->previousState = state;
-                RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
-            }
-            if (voltageUpdateTimer.execute())
-            {
-                RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
-            }
-        }
+    // Update the status
+    state = capBank->getState();
+    switch (state)
+    {
+        case can::capbank::State::RESET:
+            strncpy(capBankTextGraphic.msg, "RST ", 5);
+            break;
+        case can::capbank::State::SAFE:
+            strncpy(capBankTextGraphic.msg, "SAFE", 5);
+            break;
+        case can::capbank::State::CHARGE:
+            strncpy(capBankTextGraphic.msg, "CHRG", 5);
+            break;
+        case can::capbank::State::CHARGE_DISCHARGE:
+            strncpy(capBankTextGraphic.msg, "CHDS", 5);
+            break;
+        case can::capbank::State::DISCHARGE:
+            strncpy(capBankTextGraphic.msg, "DSCH", 5);
+            break;
+        case can::capbank::State::BATTERY_OFF:
+            strncpy(capBankTextGraphic.msg, "BOFF", 5);
+            break;
+        case can::capbank::State::DISABLED:
+            strncpy(capBankTextGraphic.msg, "OFF ", 5);
+            break;
+        default:
+            strncpy(capBankTextGraphic.msg, "UNK ", 5);
+            break;
+    }
+    // Update the text
+    capBankTextGraphic.graphicData.endAngle = 5;  // Sets the length of the string
+
+    // Send data
+    if (state != this->previousState)
+    {
+        this->previousState = state;
+        RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
+    }
+    if (voltageUpdateTimer.execute())
+    {
+        RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
     }
 
     RF_END();
