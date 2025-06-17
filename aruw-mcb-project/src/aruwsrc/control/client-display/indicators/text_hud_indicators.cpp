@@ -19,9 +19,6 @@
 
 #include "text_hud_indicators.hpp"
 
-#include "tap/communication/serial/ref_serial_data.hpp"
-#include "tap/drivers.hpp"
-
 using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
