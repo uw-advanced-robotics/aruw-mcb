@@ -63,7 +63,7 @@ private:
     // X position of the text
     static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 150;
     // Y position of the text
-    static constexpr uint16_t TEXT_Y = 320;
+    static constexpr uint16_t TEXT_Y = 100;
     // WIDTH of the text
     static constexpr uint16_t WIDTH = 4;
     // SIZE of the text
@@ -93,6 +93,8 @@ private:
     Tx::GraphicCharacterMessage capBankTextGraphic;
 
     can::capbank::State previousState;
+
+    int32_t voltage;
 };
 }  // namespace aruwsrc::control::client_display
 

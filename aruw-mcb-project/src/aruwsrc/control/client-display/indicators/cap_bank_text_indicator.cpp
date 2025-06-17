@@ -76,12 +76,14 @@ modm::ResumableResult<void> CapBankTextIndicator::update()
         voltage_squared = VOLTAGE_SQUARED_MIN;
     }
 
+    voltage =
+        (voltage_squared - VOLTAGE_SQUARED_MIN) / (VOLTAGE_SQUARED_MAX - VOLTAGE_SQUARED_MIN) * 100;
     RefSerialTransmitter::configInteger(
         SIZE,
         WIDTH,
         NUMBER_X,
         TEXT_Y,
-        (voltage_squared - VOLTAGE_SQUARED_MIN) / (VOLTAGE_SQUARED_MAX - VOLTAGE_SQUARED_MIN) * 100,
+        voltage,
         &capBankVoltageLevel.graphicData);
 
     // Update the status
@@ -138,17 +140,17 @@ void CapBankTextIndicator::initialize()
     RefSerialTransmitter::configGraphicGenerics(
         &capBankVoltageLevel.graphicData,
         capBankName,
-        Tx::GRAPHIC_DELETE,
-        DEFAULT_GRAPHIC_LAYER + 1,
-        Tx::GraphicColor::WHITE);
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        Tx::GraphicColor::ORANGE);
 
     getUnusedGraphicName(capBankName);
     RefSerialTransmitter::configGraphicGenerics(
         &capBankTextGraphic.graphicData,
         capBankName,
-        Tx::GRAPHIC_DELETE,
+        Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::WHITE);
+        Tx::GraphicColor::ORANGE);
 
     if (capBank != nullptr)
     {
