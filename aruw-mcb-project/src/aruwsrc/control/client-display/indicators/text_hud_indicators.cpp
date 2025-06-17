@@ -111,24 +111,8 @@ bool TextHudIndicators::checkIfSentryLow()
 {
     RefSerialData::RobotId ourRobot = drivers.refSerial.getRobotData().robotId;
     bool isBlue = RefSerialData::isBlueTeam(ourRobot);
-    uint16_t sentryHP;
-    if (isBlue)
-    {
-        sentryHP = drivers.refSerial.getRobotData().allRobotHp.blue.sentry7;
-    }
-    else
-    {
-        sentryHP = drivers.refSerial.getRobotData().allRobotHp.red.sentry7;
-    }
-
-    if (sentryHP < 200)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    auto allRobotHp = drivers.refSerial.getRobotData().allRobotHp;
+    return (isBlue ? allRobotHp.blue.sentry7 : allRobotHp.red.sentry7) < SENTRY_LOW_LIMIT;
 }
 
 }  // namespace aruwsrc::control::client_display

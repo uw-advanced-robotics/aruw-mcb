@@ -106,6 +106,7 @@ private:
     const std::vector<tap::control::Command *> validChassisCommands;
 
     static constexpr uint16_t JAM_TIMEOUT_MS = 1000;
+    static constexpr uint16_t SENTRY_LOW_LIMIT = 200;
     tap::arch::MilliTimeout jamTimeout;
 
     // Resumeable function thing
