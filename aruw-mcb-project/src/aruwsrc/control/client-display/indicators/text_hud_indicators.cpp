@@ -19,6 +19,9 @@
 
 #include "text_hud_indicators.hpp"
 
+#include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/drivers.hpp"
+
 using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
@@ -62,6 +65,7 @@ modm::ResumableResult<void> TextHudIndicators::update()
 
     // Check if we are actually in a match
     states[NOT_SPINNING] &= drivers.refSerial.getGameData().gameStage == Rx::GameStage::IN_GAME;
+    states[SENTRY_LOW] = checkIfSentryLow();
 
     for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {
@@ -100,6 +104,30 @@ void TextHudIndicators::initialize()
             textIndicator.y,
             textIndicator.text,
             &textHudIndicatorGraphics[i]);
+    }
+}
+
+bool TextHudIndicators::checkIfSentryLow()
+{
+    RefSerialData::RobotId ourRobot = drivers.refSerial.getRobotData().robotId;
+    bool isBlue = RefSerialData::isBlueTeam(ourRobot);
+    uint16_t sentryHP;
+    if (isBlue)
+    {
+        sentryHP = drivers.refSerial.getRobotData().allRobotHp.blue.sentry7;
+    }
+    else
+    {
+        sentryHP = drivers.refSerial.getRobotData().allRobotHp.red.sentry7;
+    }
+
+    if (sentryHP < 200)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
