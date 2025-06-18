@@ -296,9 +296,9 @@ namespace chassis_rel
 #if defined(TARGET_STANDARD_NULL)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 25'000.0f,
-    .ki = 0.0f,
+    .ki = 200.0f,
     .kd = 5'000.2f,
-    .maxICumulative = 0.0f,
+    .maxICumulative = 5000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 70.0f,
@@ -325,9 +325,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 #elif defined(TARGET_STANDARD_VOID)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 25'000.0f,
-    .ki = 0.0f,
+    .ki = 200.0f,
     .kd = 5'000.2f,
-    .maxICumulative = 0.0f,
+    .maxICumulative = 5000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 70.0f,

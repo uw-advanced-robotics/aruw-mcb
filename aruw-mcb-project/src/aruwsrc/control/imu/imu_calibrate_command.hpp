@@ -87,8 +87,8 @@ public:
      */
     const float positionZeroThreshold;
 
-    static constexpr float DEFAULT_VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-2);
-    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
+    static constexpr float DEFAULT_VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4f);
+    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
 
     struct TurretIMUCalibrationConfig
     {
@@ -189,9 +189,24 @@ protected:
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
 
+    bool yawPosReached = false;
+    bool pitchPosReached = false;
+    bool yawVelReached = false;
+    bool pitchVelReached = false;
     inline bool turretReachedCenterAndNotMoving(turret::TurretSubsystem *turret, bool ignorePitch)
-        const
     {
+        yawPosReached = turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0) <
+                      positionZeroThreshold;
+        yawVelReached = compareFloatClose(
+            0.0f,
+            turret->yawMotor.getChassisFrameVelocity(),
+            velocityZeroThreshold);
+        pitchPosReached = turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(0) <
+                          positionZeroThreshold;
+        pitchVelReached = compareFloatClose(
+            0.0f,
+            turret->pitchMotor.getChassisFrameVelocity(),
+            velocityZeroThreshold);
         return compareFloatClose(
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
