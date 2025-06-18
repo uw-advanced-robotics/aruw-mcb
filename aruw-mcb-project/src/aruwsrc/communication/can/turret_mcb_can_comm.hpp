@@ -85,6 +85,8 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
+    static constexpr float IMU_SCALING_FACTOR = 2000.0 / 32768.0;
+
     /**
      * @return turret yaw angle in radians, normalized between [-pi, pi]
      */
@@ -95,8 +97,7 @@ public:
      */
     mockable inline float getGx() const override
     {
-        return static_cast<float>(lastCompleteImuData.rawRollVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+        return static_cast<float>(lastCompleteImuData.rawRollVelocity) * IMU_SCALING_FACTOR;
     }
 
     /**
@@ -119,8 +120,7 @@ public:
      */
     mockable inline float getGy() const override
     {
-        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) * IMU_SCALING_FACTOR;
     }
 
     /**
@@ -143,8 +143,7 @@ public:
      */
     mockable inline float getGz() const override
     {
-        return static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-               tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+        return static_cast<float>(lastCompleteImuData.rawYawVelocity) * IMU_SCALING_FACTOR;
     }
 
     /**
@@ -154,13 +153,7 @@ public:
      */
     mockable inline float getYawUnwrapped() const
     {
-        // @todo this is dumb
-#ifdef TARGET_SENTRY_ECLIPSE
-        // return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions) - M_PI;
         return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
-#else
-        return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
-#endif
     }
 
     mockable inline float getAx() const override { return lastCompleteImuData.xAcceleration; }
