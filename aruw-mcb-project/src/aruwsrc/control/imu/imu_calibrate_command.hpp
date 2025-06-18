@@ -189,24 +189,8 @@ protected:
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
 
-    bool yawPosReached = false;
-    bool pitchPosReached = false;
-    bool yawVelReached = false;
-    bool pitchVelReached = false;
     inline bool turretReachedCenterAndNotMoving(turret::TurretSubsystem *turret, bool ignorePitch)
     {
-        yawPosReached = turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0) <
-                      positionZeroThreshold;
-        yawVelReached = compareFloatClose(
-            0.0f,
-            turret->yawMotor.getChassisFrameVelocity(),
-            velocityZeroThreshold);
-        pitchPosReached = turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(0) <
-                          positionZeroThreshold;
-        pitchVelReached = compareFloatClose(
-            0.0f,
-            turret->pitchMotor.getChassisFrameVelocity(),
-            velocityZeroThreshold);
         return compareFloatClose(
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
