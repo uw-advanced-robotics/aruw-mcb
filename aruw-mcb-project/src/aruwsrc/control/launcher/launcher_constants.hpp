@@ -55,7 +55,7 @@ static constexpr float LAUNCHER_PID_KP = 30.0f;
 static constexpr float LAUNCHER_PID_KI = 0.3f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_GM3510;
+static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
 #elif defined(TARGET_SENTRY_HYDRA)
 static constexpr float LAUNCHER_PID_KP = 30.0f;
 static constexpr float LAUNCHER_PID_KI = 0.4f;
@@ -119,7 +119,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 #endif
 
 #if defined(ALL_STANDARDS)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #elif defined(TARGET_HERO_ZERO)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
 #elif defined(TARGET_SENTRY_HYDRA)
