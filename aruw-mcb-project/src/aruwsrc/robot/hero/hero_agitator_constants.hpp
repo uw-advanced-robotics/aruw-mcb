@@ -37,22 +37,23 @@ namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
-    .kp = 7'000.0f,
+    .kp = 15'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 16000.0f,
+    .maxOutput = 5'000.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float DESIRED_LOAD_TIME_S = 1.0f;
+static constexpr float DESIRED_LOAD_TIME_S = 0.25f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 12.0f;
 static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
 static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 5.0f;
 static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.1f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
-    .gearRatio = 1.0f / (19.2f * 152.0f / 24.0f),  // M3508 * Agitator Teeth / Pully Teeth
+    .gearRatio = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *
+                 (24.0f / 152.0f),  // M3508 * (Pulley Teeth / Agitator Teeth)
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -63,7 +64,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
     .jammingVelocityDifference = 0.75f * (WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S),
     .jammingTime = 500,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 7000.0f,
+    .velocityPIDFeedForwardGain = 0.0f,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
