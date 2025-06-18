@@ -52,7 +52,8 @@ static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_
 static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.1f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
-    .gearRatio = 1.0f / (19.2f * 152.0f / 24.0f),  // M3508 * Agitator Teeth / Pully Teeth
+    .gearRatio = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *
+                 (24.0f / 152.0f),  // M3508 * (Pulley Teeth / Agitator Teeth)
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
