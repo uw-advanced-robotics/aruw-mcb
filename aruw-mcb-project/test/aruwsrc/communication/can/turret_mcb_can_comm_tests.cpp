@@ -172,27 +172,27 @@ TEST(TurretMCBCanComm, receive_turret_data)
     messageToSend = &zAxisMessage;
     drivers.canRxHandler.CanRxHandler::pollCanData();
 
-    VELOCITY_SCALAR 
+    VELOCITY_SCALAR
 
     EXPECT_NEAR(
         modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x1234),
         dut.getRoll(),
         1E-5);
-    EXPECT_NEAR(static_cast<int16_t>(0x4567) * IMU_SCALING_FACTOR, dut.getGx(), 1E-5);
+    EXPECT_NEAR(static_cast<int16_t>(0x4567) * TurretMCBCanComm::IMU_SCALING_FACTOR, dut.getGx(), 1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x4321) * 0.01, dut.getAx(), 1E-5);
 
     EXPECT_NEAR(
         modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x2345),
         dut.getPitch(),
         1E-5);
-    EXPECT_NEAR(static_cast<int16_t>(0x5678) * IMU_SCALING_FACTOR, dut.getGy(), 1E-5);
+    EXPECT_NEAR(static_cast<int16_t>(0x5678) * TurretMCBCanComm::IMU_SCALING_FACTOR, dut.getGy(), 1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x5432) * 0.01, dut.getAy(), 1E-5);
 
     EXPECT_NEAR(
         modm::toRadian(360.0f / UINT16_MAX) * static_cast<int16_t>(0x3456),
         dut.getYaw(),
         1E-5);
-    EXPECT_NEAR(static_cast<int16_t>(0x6789) * IMU_SCALING_FACTOR, dut.getGz(), 1E-5);
+    EXPECT_NEAR(static_cast<int16_t>(0x6789) * TurretMCBCanComm::IMU_SCALING_FACTOR, dut.getGz(), 1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x6543) * 0.01, dut.getAz(), 1E-4);
 
     EXPECT_TRUE(dut.isConnected());
