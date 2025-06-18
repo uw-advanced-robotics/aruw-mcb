@@ -53,7 +53,7 @@ private:
     TransformerInterface& transformer;
 
     // Higher value here means we trust AruCo measurements more
-    float VISION_TRUST = 0.1f;
+    float VISION_TRUST = 0.025f;
 
     void processRealsenseData();
     void processArducamData();
