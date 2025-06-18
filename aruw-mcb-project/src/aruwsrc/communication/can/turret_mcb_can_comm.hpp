@@ -85,8 +85,12 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
+#if defined(TARGET_SENTRY_ECLIPSE)
+    static constexpr float IMU_SCALING_FACTOR =
+        1 / tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+#else
     static constexpr float IMU_SCALING_FACTOR = 2000.0 / 32768.0;
-
+#endif
     /**
      * @return turret yaw angle in radians, normalized between [-pi, pi]
      */
