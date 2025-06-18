@@ -190,6 +190,7 @@ protected:
     tap::arch::MilliTimeout calibrationLongTimeout;
 
     inline bool turretReachedCenterAndNotMoving(turret::TurretSubsystem *turret, bool ignorePitch)
+        const
     {
         return compareFloatClose(
                    0.0f,
