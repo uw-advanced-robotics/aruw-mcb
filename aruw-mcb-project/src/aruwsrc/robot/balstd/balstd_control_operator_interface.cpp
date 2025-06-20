@@ -33,22 +33,27 @@ float BalstdControlOperatorInterface::getXVel() const
 
 float BalstdControlOperatorInterface::getYawVel() const
 {
-    return -drivers->remote.getChannel(Channel::RIGHT_HORIZONTAL) * WHEEL_TORQUE_SCALAR;
+    return -drivers->remote.getChannel(Channel::RIGHT_HORIZONTAL) * MAX_YAW_VEL;
+}
+
+float BalstdControlOperatorInterface::getHeightVel() const
+{
+    return drivers->remote.getChannel(Channel::WHEEL) * MAX_HEIGHT_VEL;
 }
 
 float BalstdControlOperatorInterface::getManualLegXForce() const
 {
-    return drivers->remote.getChannel(Channel::LEFT_HORIZONTAL) * LEG_FORCE_SCALAR;
+    return drivers->remote.getChannel(Channel::LEFT_HORIZONTAL) * MAX_LEG_FORCE;
 }
 
 float BalstdControlOperatorInterface::getManualLegYForce() const
 {
-    return -drivers->remote.getChannel(Channel::LEFT_VERTICAL) * LEG_FORCE_SCALAR;
+    return -drivers->remote.getChannel(Channel::LEFT_VERTICAL) * MAX_LEG_FORCE;
 }
 
 float BalstdControlOperatorInterface::getManualWheelTorque() const
 {
-    return drivers->remote.getChannel(Channel::WHEEL) * WHEEL_TORQUE_SCALAR;
+    return drivers->remote.getChannel(Channel::WHEEL) * MAX_WHEEL_TORQUE;
 }
 
 }  // namespace control::balstd

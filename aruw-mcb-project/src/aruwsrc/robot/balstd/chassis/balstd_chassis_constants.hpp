@@ -112,6 +112,8 @@ aruwsrc::control::balstd::BalanceController::Config BALANCE_CONTROLLER_CONFIG{
     .splitControllerConfig = SPLIT_CONTROLLER_PID_CONFIG,
     .rollControllerConfig = ROLL_CONTROLLER_PID_CONFIG,
     .yawControllerConfig = YAW_CONTROLLER_PID_CONFIG,
+    .minHeight = 0.11,
+    .maxHeight = 0.2,  // lowball until tested
 };
 
 }  // namespace aruwsrc::control::balstd

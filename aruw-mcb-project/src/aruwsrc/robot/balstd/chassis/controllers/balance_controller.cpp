@@ -11,13 +11,34 @@ using tap::algorithms::WrappedFloat;
 namespace aruwsrc::control::balstd
 {
 
+BalanceController::BalanceController(
+    const BalstdControlOperatorInterface& controlOperatorInterface,
+    const Config config)
+    : BalstdChassisControllerInterface(controlOperatorInterface),
+      config(config),
+      heightController(config.heightControllerConfig),
+      splitController(config.splitControllerConfig),
+      rollController(config.rollControllerConfig),
+      yawController(config.yawControllerConfig),
+      vmState({{0, 0, 0, 0, 0, 0}}),
+      vmRef({{0, 0, 0, 0, 0, 0}}),
+      heightSetpoint(config.minHeight)
+{
+    heightSetpoint.setTarget(0.17);
+}
+
 BalstdChassisOutput BalanceController::runController(const BalstdChassisState& currState, float dt)
 {
     // update state references
-    vmRef.data[2] += controlOperatorInterface.getXVel() * 0.002f;
-    yawSetpoint += controlOperatorInterface.getYawVel() * 0.002f;
+    vmRef.data[2] += controlOperatorInterface.getXVel() * dt;
+    yawSetpoint += controlOperatorInterface.getYawVel() * dt;
 
-    if (heightSetpoint < heightSetpointTarget) heightSetpoint += heightSetpointRampRate;
+    heightSetpoint.setTarget(
+        std::clamp(
+            heightSetpoint.getTarget() + controlOperatorInterface.getHeightVel() * dt,
+            config.minHeight,
+            config.maxHeight));
+    heightSetpoint.update(heightSetpointRampRate);
 
     // LQR
     this->vmState.data = {
@@ -34,8 +55,9 @@ BalstdChassisOutput BalanceController::runController(const BalstdChassisState& c
     float wheelTorque = vmOuts.data[0] / 2 * LQRWheelScalar;
     // virtual model has 1 hip/wheel, so we divide by 2 because we have 2
 
-    float heightControllerOut =
-        heightController.runControllerDerivateError(currState.height - heightSetpoint, dt);
+    float heightControllerOut = heightController.runControllerDerivateError(
+        currState.height - heightSetpoint.getValue(),
+        dt);
 
     float splitControllerOut = splitController.runController(
         currState.leftLegState.alpha - currState.rightLegState.alpha,
