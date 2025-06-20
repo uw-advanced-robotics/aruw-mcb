@@ -31,18 +31,15 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-#include "aruwsrc/control/safe_disconnect.hpp"
-
-#include "balstd_imu_calibrate_command.hpp"
-// #include "aruwsrc/control/motor/tmotor_ak80_9_encoder.hpp"
-#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/balstd/balstd_drivers.hpp"
+#include "aruwsrc/robot/balstd/balstd_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_constants.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_subsystem.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
@@ -142,18 +139,7 @@ BuzzerSubsystem buzzer(drivers());
 
 ManualLegController manualLegController(drivers()->controlOperatorInterface);
 
-BalanceController balanceController(
-    drivers()->controlOperatorInterface,
-    HEIGHT_CONTROLLER_PID_CONFIG,
-    SPLIT_CONTROLLER_PID_CONFIG,
-    ROLL_CONTROLLER_PID_CONFIG,
-    YAW_CONTROLLER_PID_CONFIG);
-
-// transforms
-// StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-// StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
-
-// StandardAndHeroTransformAdapter transformAdapter(transformer);
+BalanceController balanceController(drivers()->controlOperatorInterface, BALANCE_CONTROLLER_CONFIG);
 
 BalstdOpStateMachine stateMachine(drivers(), chassis.getChassisState());
 

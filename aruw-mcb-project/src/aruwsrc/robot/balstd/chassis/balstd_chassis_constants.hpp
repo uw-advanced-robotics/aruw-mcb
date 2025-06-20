@@ -24,6 +24,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/motor/tmotor_ak80_9_encoder.hpp"
+#include "controllers/balance_controller.hpp"
 
 #include "balstd_leg.hpp"
 
@@ -104,6 +105,13 @@ tap::algorithms::SmoothPidConfig YAW_CONTROLLER_PID_CONFIG{
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
+};
+
+aruwsrc::control::balstd::BalanceController::Config BALANCE_CONTROLLER_CONFIG{
+    .heightControllerConfig = HEIGHT_CONTROLLER_PID_CONFIG,
+    .splitControllerConfig = SPLIT_CONTROLLER_PID_CONFIG,
+    .rollControllerConfig = ROLL_CONTROLLER_PID_CONFIG,
+    .yawControllerConfig = YAW_CONTROLLER_PID_CONFIG,
 };
 
 }  // namespace aruwsrc::control::balstd

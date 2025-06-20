@@ -11,9 +11,6 @@ using tap::algorithms::WrappedFloat;
 namespace aruwsrc::control::balstd
 {
 
-float hipTorque;
-float wheelTorque;
-
 BalstdChassisOutput BalanceController::runController(const BalstdChassisState& currState, float dt)
 {
     // update state references
@@ -33,9 +30,8 @@ BalstdChassisOutput BalanceController::runController(const BalstdChassisState& c
 
     // u = K(x_d - x)
     CMSISMat<2, 1> vmOuts = getLQRGains(currState.virtualLegState.L) * (vmRef - vmState);
-    hipTorque = -vmOuts.data[1] / 2 * LQRHipScalar;
-    // hipTorque = hipTorqueOverride;
-    wheelTorque = vmOuts.data[0] / 2 * LQRWheelScalar;
+    float hipTorque = -vmOuts.data[1] / 2 * LQRHipScalar;
+    float wheelTorque = vmOuts.data[0] / 2 * LQRWheelScalar;
     // virtual model has 1 hip/wheel, so we divide by 2 because we have 2
 
     float heightControllerOut =
