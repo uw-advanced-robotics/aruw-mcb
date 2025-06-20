@@ -27,13 +27,9 @@ public:
         const BalstdControlOperatorInterface& controlOperatorInterface,
         const Config config);
 
-    BalstdChassisOutput runController(const BalstdChassisState& state, float dt) override;
+    void initialize(const BalstdChassisState& state) override;
 
-    // void initialize() override
-    // {
-    //     heightSetpoint = 0.11;
-    //     vmRef.data = {0, 0, 0, 0, 0, 0};
-    // }
+    BalstdChassisOutput runController(const BalstdChassisState& state, float dt) override;
 
 private:
     Config config;

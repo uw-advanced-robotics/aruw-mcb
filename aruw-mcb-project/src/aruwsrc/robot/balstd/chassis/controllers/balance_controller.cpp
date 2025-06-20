@@ -27,6 +27,12 @@ BalanceController::BalanceController(
     heightSetpoint.setTarget(0.17);
 }
 
+void BalanceController::initialize(const BalstdChassisState& state)
+{
+    heightSetpoint.setValue(state.height);
+    vmRef.data = {0, 0, state.virtualWheelPos, 0, 0, 0};
+}
+
 BalstdChassisOutput BalanceController::runController(const BalstdChassisState& currState, float dt)
 {
     // update state references

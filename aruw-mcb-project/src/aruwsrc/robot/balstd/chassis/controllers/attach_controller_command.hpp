@@ -40,7 +40,11 @@ public:
         this->addSubsystemRequirement(&chassis);
     }
 
-    void initialize() override { chassis.attachController(controller); }
+    void initialize() override
+    {
+        controller->initialize(chassis.getChassisState());
+        chassis.attachController(controller);
+    }
 
     void execute() override {}
 
