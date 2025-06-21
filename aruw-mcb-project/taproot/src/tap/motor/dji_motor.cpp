@@ -62,11 +62,8 @@ DjiMotor::DjiMotor(
       motorInverted(isInverted),
       currentControl(currentControl),
       internalEncoder(isInverted, gearRatio, encoderHomePosition),
-      encoder(
-          {externalEncoder != nullptr ? externalEncoder
-                                      : const_cast<Encoder*>(&this->getInternalEncoder()),
-           externalEncoder != nullptr ? const_cast<Encoder*>(&this->getInternalEncoder())
-                                      : nullptr})
+      encoder(externalEncoder != nullptr ? externalEncoder 
+                                         : const_cast<Encoder*>(&this->getInternalEncoder()))
 {
     motorDisconnectTimeout.stop();
 }
@@ -75,7 +72,7 @@ void DjiMotor::initialize()
 {
     drivers->djiMotorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
-    this->encoder.initialize();
+    this->encoder->initialize();
 }
 
 void DjiMotor::processMessage(const modm::can::Message& message)
