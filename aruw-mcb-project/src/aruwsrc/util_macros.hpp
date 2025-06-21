@@ -36,8 +36,4 @@
 #define ALL_SENTRIES
 #endif
 
-#if 0
-#define SSH1106_OLED
-#endif
-
 #endif  // UTIL_MACROS_HPP_
