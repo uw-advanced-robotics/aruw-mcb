@@ -56,7 +56,7 @@ public:
     void setODR(OutputDataRate odr);
 
     virtual inline const char *getName() const { return "ISM330DHCX"; }
-    virtual inline float getAccelerationSensitivity() const { return GRAVITY_MPS2; }
+    virtual inline float getAccelerationSensitivity() const override { return GRAVITY_MPS2; }
 
 private:
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)

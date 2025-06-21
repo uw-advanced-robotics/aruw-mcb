@@ -72,7 +72,8 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+#include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -332,12 +333,14 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPid,
     worldFramePitchTurretImuVelPid);
 
 algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.pitchMotor,
     worldFramePitchTurretImuPosPidCv,
@@ -347,6 +350,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YA
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.yawMotor,
     worldFrameYawTurretImuPosPid,
@@ -357,6 +361,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
+    transformer.getWorldToTurret(),
     getTurretMCBCanComm(),
     turret.yawMotor,
     worldFrameYawTurretImuPosPidCv,
@@ -524,12 +529,17 @@ TextHudIndicators textHudIndicators(
     {&wiggleCommand, &beybladeCommand},
     refSerialTransmitter);
 
-VisionAssistanceIndicator visionAssistanceIndicator(
+// VisionAssistanceIndicator visionAssistanceIndicator(
+//     drivers()->visionCoprocessor,
+//     refSerialTransmitter,
+//     drivers()->refSerial,
+//     transformAdapter.getWorldToVTM(),
+//     drivers()->interRobotTransmitter);
+
+VisionTargetIndicator visionTargetIndicator(
     drivers()->visionCoprocessor,
     refSerialTransmitter,
-    drivers()->refSerial,
-    transformAdapter.getWorldToVTM(),
-    drivers()->interRobotTransmitter);
+    transformAdapter.getWorldToVTM());
 
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
@@ -538,7 +548,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &visionAssistanceIndicator};
+    &visionTargetIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 

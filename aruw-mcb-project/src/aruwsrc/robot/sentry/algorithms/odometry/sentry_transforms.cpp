@@ -24,19 +24,25 @@ using namespace tap::algorithms::transforms;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::sentry::turret;
 
+using tap::communication::sensors::imu::ImuInterface;
+
 namespace aruwsrc::sentry::algorithms::odometry
 {
 SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
     const YawTurretSubsystem& turretMajor,
     const SentryTurretMinorSubsystem& turretLeft,
+    const ImuInterface& turretLeftImu,
     const SentryTurretMinorSubsystem& turretRight,
+    const ImuInterface& turretRightImu,
     const SentryTransforms::SentryTransformConfig& config)
     : config(config),
       chassisOdometry(chassisOdometry),
       turretMajor(turretMajor),
       turretLeft(turretLeft),
+      turretLeftImu(turretLeftImu),
       turretRight(turretRight),
+      turretRightImu(turretRightImu),
       worldToChassis(Transform::identity()),
       worldToTurretMajor(Transform::identity()),
       worldToTurretLeft(Transform::identity()),
@@ -73,17 +79,22 @@ void SentryTransforms::updateTransforms()
         turretRight.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
 
     // World transforms
-    worldToTurretMajor = worldToChassis.compose(chassisToTurretMajor);
-
-    worldToTurretLeft = worldToTurretMajor.compose(turretMajorToTurretLeft);
-    worldToTurretRight = worldToTurretMajor.compose(turretMajorToTurretRight);
+    worldToTurretMajor = worldToChassis.composeStatic(chassisToTurretMajor);
     worldToVTM = worldToTurretMajor;
 
+    worldToTurretLeft = worldToTurretMajor.composeStatic(turretMajorToTurretLeft);
+    worldToTurretLeft.updateRotation(0, turretLeftImu.getPitch(), turretLeftImu.getYaw());
+    worldToTurretLeft.updateAngularVelocity(0, turretLeftImu.getGy(), turretLeftImu.getGz());
+
+    worldToTurretRight = worldToTurretMajor.composeStatic(turretMajorToTurretRight);
+    worldToTurretRight.updateRotation(0, turretRightImu.getPitch(), turretRightImu.getYaw());
+    worldToTurretRight.updateAngularVelocity(0, turretRightImu.getGy(), turretRightImu.getGz());
+
     // Chassis to Arducam
-    chassisToArducam0 = chassisToTurretMajor.compose(ARDUCAM1_OFFSET);
-    chassisToArducam1 = chassisToTurretMajor.compose(ARDUCAM2_OFFSET);
-    chassisToArducam2 = chassisToTurretMajor.compose(ARDUCAM3_OFFSET);
-    chassisToArducam3 = chassisToTurretMajor.compose(ARDUCAM4_OFFSET);
+    chassisToArducam0 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM1);
+    chassisToArducam1 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM2);
+    chassisToArducam2 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM3);
+    chassisToArducam3 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM4);
 }
 
 }  // namespace aruwsrc::sentry::algorithms::odometry

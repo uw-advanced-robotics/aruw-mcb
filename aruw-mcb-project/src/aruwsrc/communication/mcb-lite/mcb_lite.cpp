@@ -176,6 +176,9 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
             case MessageTypes::CAN2_ENCODER_MESSAGE:
                 processCanEncoderMessage(completeMessage, can2Encoders);
                 break;
+            case MessageTypes::VOLTAGE_CURRENT_MESSAGE:
+                processVoltageCurrentMessage(completeMessage);
+                break;
             default:
                 break;
         }
@@ -221,6 +224,18 @@ void MCBLite::processCanEncoderMessage(
             memcpy(message.data, completeMessage.data + 1 + i * 4, 4);
             encoders[i]->processMessage(message);
         }
+    }
+}
+
+void MCBLite::processVoltageCurrentMessage(const ReceivedSerialMessage& completeMessage)
+{
+    const VoltageCurrentMessage* message =
+        reinterpret_cast<const VoltageCurrentMessage*>(completeMessage.data);
+
+    if (this->voltageCurrentSensor != nullptr)
+    {
+        this->voltageCurrentSensor->voltage = message->voltage;
+        this->voltageCurrentSensor->current = message->current;
     }
 }
 
