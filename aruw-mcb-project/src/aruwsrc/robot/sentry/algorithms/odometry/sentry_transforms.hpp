@@ -153,10 +153,14 @@ private:
     Transform turretMajorToTurretRight;
 
     // Arducam offsets
-    Transform ARDUCAM1_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
-    Transform ARDUCAM2_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
-    Transform ARDUCAM3_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
-    Transform ARDUCAM4_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+    const Transform MAJOR_TO_ARDUCAM1 =
+        Transform(Position(-0.3, -0.18, 0), Orientation(0, 0, modm::toRadian(-145)));  // Back right
+    const Transform MAJOR_TO_ARDUCAM2 =
+        Transform(Position(0.3, -0.18, 0), Orientation(0, 0, modm::toRadian(-35)));  // Front right
+    const Transform MAJOR_TO_ARDUCAM3 =
+        Transform(Position(-0.3, 0.18, 0), Orientation(0, 0, modm::toRadian(145)));  // Back left
+    const Transform MAJOR_TO_ARDUCAM4 =
+        Transform(Position(0.3, 0.18, 0), Orientation(0, 0, modm::toRadian(35)));  // Front left
 };
 
 }  // namespace aruwsrc::sentry::algorithms::odometry

@@ -61,7 +61,7 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_SENTRY_HYDRA)
+#if defined(TARGET_SENTRY_ECLIPSE)
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
 #else
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
@@ -80,7 +80,7 @@ public:
      */
     // MCB has power inlet facing forward
     static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
-#elif defined(TARGET_SENTRY_HYDRA)
+#elif defined(TARGET_SENTRY_ECLIPSE)
     // MCB is on a diagonal
     // @todo: ensure this is correct
     static constexpr float MCB_ROTATION_OFFSET = 0;
