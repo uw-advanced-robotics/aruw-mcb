@@ -43,7 +43,7 @@ static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
 #endif
 
-#ifndef TARGET_SENTRY_HYDRA
+#ifndef TARGET_SENTRY_ECLIPSE
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #endif
 
@@ -55,8 +55,8 @@ static constexpr float LAUNCHER_PID_KP = 30.0f;
 static constexpr float LAUNCHER_PID_KI = 0.3f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_GM3510;
-#elif defined(TARGET_SENTRY_HYDRA)
+static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
+#elif defined(TARGET_SENTRY_ECLIPSE)
 static constexpr float LAUNCHER_PID_KP = 30.0f;
 static constexpr float LAUNCHER_PID_KI = 0.4f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
@@ -95,11 +95,11 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {10.0f, 3750.0f},
-    {24.0f, 6200.0f},
+    {24.5f, 6500.0f},
     {30.0f, 7000.0f},
     {32.0f, 7900.0f},
 };
-#elif defined(TARGET_SENTRY_HYDRA)
+#elif defined(TARGET_SENTRY_ECLIPSE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {15.0f, 4900.0f},
@@ -119,10 +119,10 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 #endif
 
 #if defined(ALL_STANDARDS)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #elif defined(TARGET_HERO_ZERO)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
-#elif defined(TARGET_SENTRY_HYDRA)
+#elif defined(TARGET_SENTRY_ECLIPSE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #endif
 

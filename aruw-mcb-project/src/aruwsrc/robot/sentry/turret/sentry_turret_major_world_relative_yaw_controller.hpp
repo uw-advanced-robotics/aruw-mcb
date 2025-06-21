@@ -23,9 +23,9 @@
 
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -77,7 +77,7 @@ public:
         const tap::algorithms::transforms::Transform& worldToMajor,
         const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
-        aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU,
+        tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
         const SentryTurretMinorSubsystem& turretLeft,
         const SentryTurretMinorSubsystem& turretRight,
         tap::algorithms::SmoothPid& positionPid,
@@ -126,7 +126,7 @@ private:
 
     aruwsrc::control::turret::TurretMotor& yawMotor;
 
-    aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU;
+    tap::communication::sensors::imu::ImuInterface& turretMajorIMU;
 
     const SentryTurretMinorSubsystem& turretLeft;
     const SentryTurretMinorSubsystem& turretRight;

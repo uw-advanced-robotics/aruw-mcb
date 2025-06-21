@@ -27,7 +27,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const transforms::Transform& worldToMajor,
     const HolonomicChassisSubsystem& chassis,
     aruwsrc::control::turret::TurretMotor& yawMotor,
-    aruwsrc::virtualMCB::VirtualIMUInterface& turretMajorIMU,
+    tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
     const SentryTurretMinorSubsystem& turretLeft,
     const SentryTurretMinorSubsystem& turretRight,
     SmoothPid& positionPid,
@@ -75,14 +75,15 @@ void TurretMajorWorldFrameController::runController(
 {
     worldFrameSetpoint = desiredSetpoint;
 
+    float vel = turretMajorIMU.getGz();
+
     const float positionControllerError =
         turretMotor.getValidMinError(worldFrameSetpoint, Angle(worldToMajor.getYaw()));
 
-    positionPidOutput =
-        positionPid.runController(positionControllerError, turretMajorIMU.getGz(), dt);
+    positionPidOutput = positionPid.runController(positionControllerError, vel, dt);
 
     const float velocityControllerError =
-        limitVal(positionPidOutput - turretMajorIMU.getGz(), -maxVelErrorInput, maxVelErrorInput);
+        limitVal(positionPidOutput - vel, -maxVelErrorInput, maxVelErrorInput);
 
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);

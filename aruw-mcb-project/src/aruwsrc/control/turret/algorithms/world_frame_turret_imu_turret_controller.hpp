@@ -23,6 +23,7 @@
 #include <cstdint>
 
 #include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
@@ -53,13 +54,14 @@ class WorldFrameYawTurretImuCascadePidTurretController final : public TurretYawC
 {
 public:
     /**
-     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * @param[in] worldToTurret A Transform object that will be queried for orientation
      * information.
      * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
+        const transforms::Transform &worldToTurret,
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &yawMotor,
         SmoothPid &positionPid,
@@ -92,6 +94,7 @@ public:
     WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
+    const transforms::Transform &worldToTurret;
     const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     SmoothPid &positionPid;
@@ -116,13 +119,14 @@ class WorldFramePitchTurretImuCascadePidTurretController final
 {
 public:
     /**
-     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * @param[in] worldToTurret A Transform object that will be queried for orientation
      * information.
      * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
+        const transforms::Transform &worldToTurret,
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &pitchMotor,
         SmoothPid &positionPid,
@@ -154,6 +158,7 @@ public:
     WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
+    const transforms::Transform &worldToTurret;
     const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
     SmoothPid &positionPid;

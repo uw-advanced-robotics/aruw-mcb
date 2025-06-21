@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,23 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UTIL_MACROS_HPP_
-#define UTIL_MACROS_HPP_
+#include "virtual_voltage_current_sensor.hpp"
 
-/**
- * Define a helper macro that makes it easier to specify at compile time something that should be
- * true for all standards.
- */
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
-#define ALL_STANDARDS
-#endif
+#include "mcb_lite.hpp"
 
-/**
- * A helper macro that makes it easier to specify at compile time something that should be true for
- * all sentries.
- */
-#if defined(TARGET_SENTRY_ECLIPSE)
-#define ALL_SENTRIES
-#endif
+namespace aruwsrc::virtualMCB
+{
+VirtualVoltageCurrentSensor::VirtualVoltageCurrentSensor(MCBLite* lite)
+{
+    lite->voltageCurrentSensor = this;
+}
 
-#endif  // UTIL_MACROS_HPP_
+}  // namespace aruwsrc::virtualMCB

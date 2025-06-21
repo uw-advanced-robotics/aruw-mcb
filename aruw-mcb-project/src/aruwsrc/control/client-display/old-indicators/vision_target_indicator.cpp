@@ -38,13 +38,15 @@ modm::ResumableResult<void> VisionTargetIndicator::update()
 {
     auto aimData = visionCoprocessor.getLastAimData(0);
     bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
+    bool shotTimingMode = visionCoprocessor.getSomeTurretUsingTimedShots();
+    auto visionIndicatorColor = shotTimingMode ? Tx::GraphicColor::ORANGE : Tx::GraphicColor::GREEN;
 
     // Get position
     enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 
     enemyPositionScreenFrame = getEnemyPlatePosition(enemyPosition);
 
-    uint32_t prevOperation = visionTargetGraphic.graphicData.operation;
+    RF_BEGIN(0);
 
     // If the target is not in frame, delete the graphic
     if (!enemyPositionScreenFrame.inFrame || !visionHasTarget)
@@ -54,16 +56,18 @@ modm::ResumableResult<void> VisionTargetIndicator::update()
     else
     {
         visionTargetGraphic.graphicData.operation =
-            prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+            visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                            : Tx::GRAPHIC_MODIFY;
     }
 
-    RF_BEGIN(0);
-    // If the graphic is already deleted, don't delete it again
-    if (prevOperation == Tx::GRAPHIC_DELETE &&
-        visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
-    {
-        RF_RETURN();
-    }
+    visionTargetGraphic.graphicData.color = static_cast<uint32_t>(visionIndicatorColor);
+
+    // If the graphic is already deleted, don't delete it again. Currently disabled due to HUD
+    // quirks if (prevOperation == Tx::GRAPHIC_DELETE &&
+    //     visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
+    // {
+    //     RF_RETURN();
+    // }
 
     RefSerialTransmitter::configRectangle(
         INDICATOR_LINE_THICKNESS,
@@ -103,7 +107,6 @@ VisionTargetIndicator::ProjectedPlateResult VisionTargetIndicator::getEnemyPlate
     output.inFrame = screenFrame.inFrame;
 
     ProjectedResult topRight = convertCameraFrameToScreenFrame(cameraFrame + PLATE_CORNER_OFFSET);
-
     ProjectedResult bottomLeft = convertCameraFrameToScreenFrame(cameraFrame - PLATE_CORNER_OFFSET);
 
     output.bottomLeftX = bottomLeft.screenX;
