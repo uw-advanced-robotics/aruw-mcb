@@ -101,7 +101,7 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 /**
  * Radius of the wheels (m)
  */
-static constexpr float WHEEL_RADIUS = 0.1016 * 1.413; // This is being fudged
+static constexpr float WHEEL_RADIUS = 0.1016 * 1.413;  // This is being fudged
 /**
  * Distance from center of the two front wheels (m)
  */
