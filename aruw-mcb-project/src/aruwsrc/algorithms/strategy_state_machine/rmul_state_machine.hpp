@@ -100,10 +100,10 @@ private:
     bool safeToAttack();
 
     // Threshold at which the robot goes to heal due to low health
-    int HEALING_THRESHOLD = 250;
+    int HEALING_THRESHOLD = 200;
 
     // Threshold at which the robot goes back to fight having healed
-    int ATTACKING_THRESHOLD = 550;
+    int ATTACKING_THRESHOLD = 375;
 
     int PROJECTILE_COUNT_THRESHOLD = 100;  // Minimum number of projectiles to attack
 

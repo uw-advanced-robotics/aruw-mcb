@@ -86,7 +86,7 @@ void MainMenu::initialize()
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addCVMenuCallback));
-#ifdef TARGET_SENTRY_HYDRA
+#ifdef TARGET_SENTRY_ECLIPSE
     addEntry(
         SentryStrategyMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(

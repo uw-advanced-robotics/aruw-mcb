@@ -40,8 +40,8 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
     chassis::HolonomicChassisSubsystem &chassis,
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
-    algorithms::odometry::SentryKFOdometry2DSubsystem &odometryInterface,
-    aruwsrc::virtualMCB::MCBLite &majorMCBLite,
+    tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite)
     : aruwsrc::control::imu::ImuCalibrateCommand(
           drivers,
@@ -53,7 +53,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       turretMajorController(turretMajorController),
       yawObserver(yawObserver),
       odometryInterface(odometryInterface),
-      majorMCBLite(majorMCBLite),
+      turretMajorImu(turretMajorImu),
       chassisMCBLite(chassisMCBLite)
 {
     for (auto &config : turretsAndControllers)
@@ -149,7 +149,7 @@ void SentryImuCalibrateCommand::execute()
                 drivers->mpu6500.requestCalibration();
 
                 chassisMCBLite.imu.requestCalibration();
-                majorMCBLite.imu.requestCalibration();
+                turretMajorImu.requestCalibration();
 
                 calibrationState = CalibrationState::CALIBRATING_IMU;
             }
@@ -164,19 +164,16 @@ void SentryImuCalibrateCommand::execute()
                 // TODO to handle the case where the turret MCB doesn't receive information,
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
-                calibrationState = CalibrationState::BUZZING;
-            }
-            buzzerTimer.restart(1000);
-            break;
-        case CalibrationState::BUZZING:
-            if (buzzerTimer.isExpired())
-            {
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
+
+                // reset odometry
+                yawObserver.overrideChassisYaw(0);
+                odometryInterface.reset();
             }
-            tap::buzzer::playNote(&drivers->pwm, 1000);
             break;
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
-            tap::buzzer::silenceBuzzer(&drivers->pwm);
+            break;
+        default:
             break;
     }
 
@@ -203,7 +200,6 @@ void SentryImuCalibrateCommand::execute()
 
 void SentryImuCalibrateCommand::end(bool)
 {
-    tap::buzzer::silenceBuzzer(&drivers->pwm);
     // TODO: this being commented out causes turrets to hold position when this deschedules
     // change if you want
     // for (auto &config : turretsAndControllers)
