@@ -6,7 +6,7 @@
 
 #include "balstd_leg.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis
 {
 
 struct BalstdChassisOutput
@@ -37,6 +37,6 @@ struct BalstdChassisOutput
 
 const BalstdChassisOutput ZERO_OUTPUT(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis
 
 #endif  // BALSTD_CHASSIS_OUTPUT_HPP_

@@ -1,7 +1,7 @@
 #ifndef TORQUE_CONTROLLED_MOTOR_HPP_
 #define TORQUE_CONTROLLED_MOTOR_HPP_
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd
 {
 
 }

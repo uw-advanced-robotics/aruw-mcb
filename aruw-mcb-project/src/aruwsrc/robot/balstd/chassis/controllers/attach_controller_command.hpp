@@ -25,7 +25,7 @@
 
 #include "chassis_controller_interface.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis::controllers
 {
 
 class AttachControllerCommand : public tap::control::Command
@@ -59,5 +59,5 @@ private:
     BalstdChassisControllerInterface* controller;
 };  // class AttachControllerCommand
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis::controllers
 #endif  // ATTACH_CONTROLLER_COMMAND_HPP_

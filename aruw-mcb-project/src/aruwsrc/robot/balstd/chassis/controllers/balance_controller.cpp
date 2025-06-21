@@ -8,7 +8,7 @@ using tap::algorithms::Angle;
 using tap::algorithms::CMSISMat;
 using tap::algorithms::WrappedFloat;
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis::controllers
 {
 
 BalanceController::BalanceController(
@@ -114,4 +114,4 @@ CMSISMat<2, 6> BalanceController::getLQRGains(const float) const
     // clang-format on
 }
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis::controllers

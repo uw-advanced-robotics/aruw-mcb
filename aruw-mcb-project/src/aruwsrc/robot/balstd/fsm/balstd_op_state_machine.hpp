@@ -8,13 +8,13 @@
 
 #include "balstd_op_states.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd
 {
 
 class BalstdOpStateMachine : public tap::control::Subsystem
 {
 public:
-    BalstdOpStateMachine(tap::Drivers* drivers, const BalstdChassisState& chassisState);
+    BalstdOpStateMachine(tap::Drivers* drivers, const chassis::BalstdChassisState& chassisState);
 
     void initialize() override;
 
@@ -24,11 +24,11 @@ public:
 
 private:
     BalstdOpState currentState;
-    const BalstdChassisState& chassisState;
+    const chassis::BalstdChassisState& chassisState;
 
     static constexpr float CONTROLLABLE_CHASSIS_PITCH_LIMIT = M_PI_4;
 };
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd
 
 #endif  // BALSTD_OP_STATE_MACHINE_HPP_

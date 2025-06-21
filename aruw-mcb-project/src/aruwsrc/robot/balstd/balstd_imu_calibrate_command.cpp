@@ -27,12 +27,12 @@ using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
 using namespace tap::communication::sensors::imu;
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd
 {
 BalstdImuCalibrateCommand::BalstdImuCalibrateCommand(
     aruwsrc::balstd::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-    BalstdChassisSubsystem *chassis,
+    chassis::BalstdChassisSubsystem *chassis,
     float velocityZeroThreshold,
     float positionZeroThreshold)
     : tap::control::Command(),
@@ -198,4 +198,4 @@ bool BalstdImuCalibrateCommand::isFinished() const
            calibrationLongTimeout.isExpired();
 }
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd

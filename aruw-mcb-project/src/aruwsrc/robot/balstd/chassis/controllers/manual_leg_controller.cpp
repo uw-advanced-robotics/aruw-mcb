@@ -1,6 +1,6 @@
 #include "manual_leg_controller.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis::controllers
 {
 float mlx, mly;
 BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&, float)
@@ -16,4 +16,4 @@ BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&
         controlOperatorInterface.getManualWheelTorque());
 }
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis::controllers

@@ -19,7 +19,7 @@ using tap::algorithms::CMSISMat;
  *    ──> x
  */
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis
 {
 
 void BalstdLeg::initialize()
@@ -161,4 +161,4 @@ float BalstdLeg::updateCBF(BalstdLegState leg)
     }
 }
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis

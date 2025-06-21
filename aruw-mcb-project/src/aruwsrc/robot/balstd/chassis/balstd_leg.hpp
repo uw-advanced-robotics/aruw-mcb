@@ -24,7 +24,7 @@
  *    ──> x
  */
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis
 {
 using tap::algorithms::CMSISMat;
 using tap::algorithms::transforms::Vector;
@@ -285,6 +285,6 @@ private:
     float maxTorque;
 };
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis
 
 #endif  // BALSTD_LEG_HPP_

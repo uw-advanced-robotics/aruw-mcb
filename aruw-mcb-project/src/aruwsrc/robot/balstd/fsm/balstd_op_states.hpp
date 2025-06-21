@@ -2,7 +2,7 @@
 #ifndef BALSTD_OP_STATES_HPP_
 #define BALSTD_OP_STATES_HPP_
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd
 {
 
 enum class BalstdOpState
@@ -16,6 +16,6 @@ enum class BalstdOpState
     NUM_STATES
 };
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd
 
 #endif  // BALSTD_OP_STATES_HPP_

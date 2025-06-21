@@ -24,9 +24,9 @@
 
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd
 {
-class BalstdControlOperatorInterface : public ControlOperatorInterface
+class BalstdControlOperatorInterface : public aruwsrc::control::ControlOperatorInterface
 {
 public:
     BalstdControlOperatorInterface(tap::Drivers *drivers) : ControlOperatorInterface(drivers) {}
@@ -64,6 +64,6 @@ private:
     static constexpr float MAX_WHEEL_TORQUE = 10.0f;  // N*m
 };
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd
 
 #endif  // BALSTD_CONTROL_OPERATOR_INTERFACE_HPP__

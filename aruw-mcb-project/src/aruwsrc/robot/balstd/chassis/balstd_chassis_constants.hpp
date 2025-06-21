@@ -28,7 +28,7 @@
 
 #include "balstd_leg.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis
 {
 static constexpr float OUTER_HARD_STOP = modm::toRadian(-20);
 static constexpr float OUTER_SOFT_STOP = modm::toRadian(-15);
@@ -107,7 +107,7 @@ tap::algorithms::SmoothPidConfig YAW_CONTROLLER_PID_CONFIG{
     .errorDerivativeFloor = 0.0f,
 };
 
-aruwsrc::control::balstd::BalanceController::Config BALANCE_CONTROLLER_CONFIG{
+controllers::BalanceController::Config BALANCE_CONTROLLER_CONFIG{
     .heightControllerConfig = HEIGHT_CONTROLLER_PID_CONFIG,
     .splitControllerConfig = SPLIT_CONTROLLER_PID_CONFIG,
     .rollControllerConfig = ROLL_CONTROLLER_PID_CONFIG,
@@ -116,6 +116,6 @@ aruwsrc::control::balstd::BalanceController::Config BALANCE_CONTROLLER_CONFIG{
     .maxHeight = 0.2,  // lowball until tested
 };
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis
 
 #endif  // BALSTD_CHASSIS_CONSTANTS_HPP_

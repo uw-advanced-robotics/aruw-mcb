@@ -1,11 +1,11 @@
 #include "balstd_op_state_machine.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd
 {
 
 BalstdOpStateMachine::BalstdOpStateMachine(
     tap::Drivers* drivers,
-    const BalstdChassisState& chassisState)
+    const chassis::BalstdChassisState& chassisState)
     : Subsystem(drivers),
       currentState(BalstdOpState::UNKNOWN),
       chassisState(chassisState)
@@ -43,4 +43,4 @@ void BalstdOpStateMachine::refresh()
     }
 }
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd

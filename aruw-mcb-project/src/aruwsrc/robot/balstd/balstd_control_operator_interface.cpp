@@ -21,9 +21,7 @@
 
 using Channel = tap::communication::serial::Remote::Channel;
 
-namespace aruwsrc
-{
-namespace control::balstd
+namespace aruwsrc::balstd
 {
 
 float BalstdControlOperatorInterface::getXVel() const
@@ -56,5 +54,4 @@ float BalstdControlOperatorInterface::getManualWheelTorque() const
     return drivers->remote.getChannel(Channel::WHEEL) * MAX_WHEEL_TORQUE;
 }
 
-}  // namespace control::balstd
-}  // namespace aruwsrc
+}  // namespace aruwsrc::balstd

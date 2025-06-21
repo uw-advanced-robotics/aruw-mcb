@@ -21,7 +21,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis
 {
 BalstdChassisSubsystem::BalstdChassisSubsystem(
     tap::Drivers* drivers,
@@ -108,4 +108,4 @@ void BalstdChassisSubsystem::updateState()
     currState.virtualWheelPos += currState.virtualWheelVel * 0.002f;
 }
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis

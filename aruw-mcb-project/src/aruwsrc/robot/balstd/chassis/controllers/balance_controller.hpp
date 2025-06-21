@@ -8,7 +8,7 @@
 
 #include "chassis_controller_interface.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis::controllers
 {
 class BalanceController : public BalstdChassisControllerInterface
 {
@@ -55,6 +55,6 @@ private:
     float LQRHipScalar = 1.0;
     float gravityScalar = 0.55;
 };
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis::controllers
 
 #endif  // BALANCE_CONTROLLER_HPP_

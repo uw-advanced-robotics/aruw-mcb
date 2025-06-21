@@ -53,15 +53,16 @@
 #include "tap/communication/can/can.hpp"
 #endif
 
+using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::transforms;
 using namespace aruwsrc::balstd;
+using namespace aruwsrc::balstd::chassis;
+using namespace aruwsrc::balstd::chassis::controllers;
 using namespace aruwsrc::control;
-using namespace aruwsrc::control::balstd;
 using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::motor;
 using namespace aruwsrc::control::turret;
-using namespace aruwsrc::algorithms;
-// using namespace aruwsrc::algorithms::odometry;
-using namespace aruwsrc::algorithms::transforms;
+
 using namespace tap::control::setpoint;
 using namespace tap::control;
 using namespace tap::communication::serial;

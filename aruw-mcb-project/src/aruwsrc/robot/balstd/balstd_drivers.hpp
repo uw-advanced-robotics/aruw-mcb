@@ -77,7 +77,7 @@ public:
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
-    aruwsrc::control::balstd::BalstdControlOperatorInterface controlOperatorInterface;
+    aruwsrc::balstd::BalstdControlOperatorInterface controlOperatorInterface;
     serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanCommBus1;

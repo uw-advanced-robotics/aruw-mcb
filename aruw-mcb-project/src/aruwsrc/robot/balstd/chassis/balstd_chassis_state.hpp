@@ -6,7 +6,7 @@
 
 #include "balstd_leg.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis
 {
 
 struct BalstdChassisState
@@ -35,6 +35,6 @@ const BalstdChassisState ZERO_STATE{
     .virtualWheelVel = 0,
 };
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis
 
 #endif  // BALSTD_CHASSIS_STATE_HPP_

@@ -3,7 +3,7 @@
 
 #include "chassis_controller_interface.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis::controllers
 {
 class ManualLegController : public BalstdChassisControllerInterface
 {
@@ -15,6 +15,6 @@ public:
 
     BalstdChassisOutput runController(const BalstdChassisState& state, float dt) override;
 };
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis::controllers
 
 #endif  // MANUAL_LEG_CONTROLLER_HPP_

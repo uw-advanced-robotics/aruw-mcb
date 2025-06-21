@@ -26,7 +26,7 @@
 #include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
 #include "aruwsrc/robot/balstd/chassis/controllers/chassis_controller_interface.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis
 {
 
 class BalstdChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
@@ -48,7 +48,7 @@ public:
 
     void setOutputs(const BalstdChassisOutput& output);
 
-    inline void attachController(BalstdChassisControllerInterface* newController)
+    inline void attachController(controllers::BalstdChassisControllerInterface* newController)
     {
         this->controller = newController;
     }
@@ -80,7 +80,7 @@ private:
 
     tap::communication::sensors::imu::ImuInterface& chassisImu;
 
-    BalstdChassisControllerInterface* controller;
+    controllers::BalstdChassisControllerInterface* controller;
 
     BalstdChassisState currState;
 
@@ -93,5 +93,5 @@ private:
 
 };  // class BalstdChassisSubsystem
 
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis
 #endif  // BALSTD_CHASSIS_SUBSYSTEM_HPP_

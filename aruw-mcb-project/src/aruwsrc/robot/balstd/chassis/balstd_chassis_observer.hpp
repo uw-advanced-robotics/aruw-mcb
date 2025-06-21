@@ -21,7 +21,7 @@
 
 // #include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
 
-// namespace aruwsrc::control::balstd
+// namespace aruwsrc::balstd::chassis
 // {
 
 // class BalstdChassisObserver : public tap::control::chassis::ChassisSubsystemInterface
@@ -43,5 +43,5 @@
 
 // };  // class BalstdChassisObserver
 
-// }  // namespace aruwsrc::control::balstd
+// }  // namespace aruwsrc::balstd::chassis
 // #endif  // BALSTD_CHASSIS_OBSERVER_HPP_

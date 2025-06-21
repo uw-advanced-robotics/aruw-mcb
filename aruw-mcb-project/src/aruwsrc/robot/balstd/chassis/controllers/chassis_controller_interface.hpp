@@ -5,7 +5,7 @@
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_output.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_state.hpp"
 
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd::chassis::controllers
 {
 class BalstdChassisControllerInterface
 {
@@ -22,6 +22,6 @@ public:
 protected:
     const BalstdControlOperatorInterface& controlOperatorInterface;
 };
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd::chassis::controllers
 
 #endif  // CHASSIS_CONTROLLER_INTERFACE_HPP_

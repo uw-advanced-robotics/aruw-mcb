@@ -34,9 +34,7 @@
 
 #include "balstd_drivers.hpp"
 
-using namespace tap::algorithms;
-
-namespace aruwsrc::control::balstd
+namespace aruwsrc::balstd
 {
 /**
  * A command whose job is to perform a calibration of the turret and chassis IMUs. Requires that the
@@ -94,11 +92,11 @@ public:
         /// The turret mounted IMU to be calibrated.
         aruwsrc::can::TurretMCBCanComm *turretMCBCanComm;
         /// A `TurretSubsystem` that this command will control (will lock the turret).
-        turret::TurretSubsystem *turret;
+        aruwsrc::control::turret::TurretSubsystem *turret;
         /// A chassis relative yaw controller used to lock the turret.
-        turret::algorithms::ChassisFrameYawTurretController *yawController;
+        aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *yawController;
         /// A chassis relative pitch controller used to lock the turret.
-        turret::algorithms::ChassisFramePitchTurretController *pitchController;
+        aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *pitchController;
         /**
          * `true` if the turret IMU is mounted on the pitch axis of the
          * turret. In this case the pitch controller doesn't have to reach the horizontal setpoint
@@ -121,7 +119,7 @@ public:
     BalstdImuCalibrateCommand(
         aruwsrc::balstd::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-        BalstdChassisSubsystem *chassis,
+        chassis::BalstdChassisSubsystem *chassis,
         float velocityZeroThreshold = BalstdImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
         float positionZeroThreshold = BalstdImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD);
 
@@ -161,7 +159,7 @@ protected:
 
     aruwsrc::balstd::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
-    BalstdChassisSubsystem *chassis;
+    chassis::BalstdChassisSubsystem *chassis;
 
     CalibrationState calibrationState;
 
@@ -183,8 +181,9 @@ protected:
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
 
-    inline bool turretReachedCenterAndNotMoving(turret::TurretSubsystem *turret, bool ignorePitch)
-        const
+    inline bool turretReachedCenterAndNotMoving(
+        aruwsrc::control::turret::TurretSubsystem *turret,
+        bool ignorePitch) const
     {
         return compareFloatClose(
                    0.0f,
@@ -200,6 +199,6 @@ protected:
                                      0) < positionZeroThreshold)));
     }
 };
-}  // namespace aruwsrc::control::balstd
+}  // namespace aruwsrc::balstd
 
 #endif  // BALSTD_IMU_CALIBRATE_COMMAND_HPP_
