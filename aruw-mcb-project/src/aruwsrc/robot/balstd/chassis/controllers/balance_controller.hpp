@@ -32,24 +32,23 @@ public:
     BalstdChassisOutput runController(const BalstdChassisState& state, float dt) override;
 
 private:
-    Config config;
+    const Config config;
     tap::algorithms::SmoothPid heightController, splitController, rollController, yawController;
 
     tap::algorithms::CMSISMat<6, 1> vmState, vmRef;
 
     // tap::algorithms::KalmanFilter<6, 6> stateFilter;
 
-    tap::algorithms::CMSISMat<2, 6> getLQRGains(const float legLength) const;
-
-    Vector vmLegForces(float hipTorque, float downwardForce, const BalstdLegState& currState) const;
-
-    static constexpr float chassisWeight = 9 * 9.8;  // f = ma
-
     tap::algorithms::Ramp heightSetpoint;
     float rollSetpoint = 0;
     float yawSetpoint = 0;
 
+    tap::algorithms::CMSISMat<2, 6> getLQRGains(const float legLength) const;
+
+    Vector vmLegForces(float hipTorque, float downwardForce, const BalstdLegState& currState) const;
+
     // this should all be const but isn't for ozonability
+    static constexpr float chassisWeight = 9 * 9.8;        // f = ma
     float heightSetpointRampRate = 0.05f / 2.0f / 500.0f;  // 0.05m / 2s * 1s/500ticks
     float LQRScalar = 0.5;  // still no idea why everything has to be halved
     float LQRWheelScalar = 1.0;

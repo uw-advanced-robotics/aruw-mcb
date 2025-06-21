@@ -15,7 +15,7 @@ public:
     {
     }
 
-    virtual void initialize(const BalstdChassisState& state) {}
+    virtual void initialize(const BalstdChassisState&) {}
 
     virtual BalstdChassisOutput runController(const BalstdChassisState& state, float dt);
 
