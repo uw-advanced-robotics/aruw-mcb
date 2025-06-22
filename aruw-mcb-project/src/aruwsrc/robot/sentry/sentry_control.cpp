@@ -776,17 +776,10 @@ ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, indicators)
 
 /* define command mappings --------------------------------------------------*/
 
-HoldRepeatCommandMapping rightUp(
+HoldCommandMapping rightUp(
     drivers(),
     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    true);
-
-HoldRepeatCommandMapping leftMidRightMidFW(
-    drivers(),
-    {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID),
-    true);
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // auto nav + auto aim + cv gated fire
 HoldCommandMapping leftUpRightUp(
@@ -816,7 +809,7 @@ HoldCommandMapping leftUpRightDown(
 // manual aim and shoot
 HoldCommandMapping leftMidRightUp(
     drivers(),
-    {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
+    {&turretLeftManualCommand, &turretRightManualCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
 // manual aim and shoot
@@ -829,7 +822,10 @@ HoldRepeatCommandMapping leftMidRightUpAg(
 // auto drive & auto aim
 HoldCommandMapping leftMidRightMid(
     drivers(),
-    {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand},
+    {&majorManualCommand,
+     &turretLeftManualCommand,
+     &turretRightManualCommand,
+     &autoNavBeybladeCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // manual aim
@@ -956,7 +952,6 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
 
     drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
-    // drivers->commandMapper.addMap(&leftMidRightMidFW);
     drivers->commandMapper.addMap(&leftMidRightUpAg);
     drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
     drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim

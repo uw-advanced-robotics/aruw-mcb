@@ -23,11 +23,11 @@
 
 namespace aruwsrc::control::turret
 {
-float BalstdTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
+float StandardTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
 
-float BalstdTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
+float StandardTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
 
-uint32_t BalstdTurretSubsystem::getLastMeasurementTimeMicros() const
+uint32_t StandardTurretSubsystem::getLastMeasurementTimeMicros() const
 {
     return getTurretMCB()->getIMUDataTimestamp();
 }
