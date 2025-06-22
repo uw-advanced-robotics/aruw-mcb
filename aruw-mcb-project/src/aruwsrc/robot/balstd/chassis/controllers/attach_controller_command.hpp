@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef ATTACH_CONTROLLER_COMMAND_HPP_
 #define ATTACH_CONTROLLER_COMMAND_HPP_
 
