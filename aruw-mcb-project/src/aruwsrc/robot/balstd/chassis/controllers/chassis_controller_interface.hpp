@@ -14,10 +14,11 @@ public:
         : controlOperatorInterface(controlOperatorInterface)
     {
     }
+    virtual ~BalstdChassisControllerInterface() = default;
 
     virtual void initialize(const BalstdChassisState&) {}
 
-    virtual BalstdChassisOutput runController(const BalstdChassisState& state, float dt);
+    virtual BalstdChassisOutput runController(const BalstdChassisState& state, float dt) = 0;
 
 protected:
     const BalstdControlOperatorInterface& controlOperatorInterface;

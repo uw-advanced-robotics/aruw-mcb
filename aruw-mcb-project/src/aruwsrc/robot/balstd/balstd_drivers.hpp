@@ -64,7 +64,12 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+          chassisIsm330(this)
+#else
           chassisIsm330()
+#endif
+
     {
     }
 
@@ -75,6 +80,7 @@ public:
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
+    testing::NiceMock<tap::mock::Mpu6500Mock> chassisIsm330;
 #else
 public:
     aruwsrc::balstd::BalstdControlOperatorInterface controlOperatorInterface;

@@ -31,6 +31,8 @@ public:
 
     BalstdChassisOutput runController(const BalstdChassisState& state, float dt) override;
 
+    tap::algorithms::CMSISMat<2, 6> getLQRGains(const float legLength) const;
+
 private:
     const Config config;
     tap::algorithms::SmoothPid heightController, splitController, rollController, yawController;
@@ -42,8 +44,6 @@ private:
     tap::algorithms::Ramp heightSetpoint;
     float rollSetpoint = 0;
     float yawSetpoint = 0;
-
-    tap::algorithms::CMSISMat<2, 6> getLQRGains(const float legLength) const;
 
     Vector vmLegForces(float hipTorque, float downwardForce, const BalstdLegState& currState) const;
 
