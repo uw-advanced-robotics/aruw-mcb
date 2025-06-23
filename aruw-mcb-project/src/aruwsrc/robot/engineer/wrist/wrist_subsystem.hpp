@@ -27,6 +27,8 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
+
 namespace aruwsrc::engineer::wrist
 {
 struct WristConfig
@@ -55,6 +57,7 @@ public:
         tap::motor::MotorInterface &motorRight,
         tap::encoder::EncoderInterface &encoderPitch,
         tap::encoder::EncoderInterface &encoderYaw,
+        const aruwsrc::engineer::DigitalOutSubsystem &suction,
         const WristConfig config);
 
     float getPitch();
@@ -85,6 +88,7 @@ private:
     tap::motor::MotorInterface &motorLeft, &motorRight;
     tap::encoder::EncoderInterface &encoderPitch, &encoderYaw;
     tap::algorithms::SmoothPid pidPitch, pidYaw;
+    const aruwsrc::engineer::DigitalOutSubsystem &suction;
     const WristConfig config;
 
     float setpointPitch, setpointYaw;
@@ -92,6 +96,9 @@ private:
     const tap::algorithms::transforms::Position COM_POS =
         tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static
     static constexpr float WRIST_MASS_KG = 0.4;
+    const tap::algorithms::transforms::Position COM_POS_W_CUBE = COM_POS;
+    static constexpr float WRIST_MASS_W_CUBE_KG = WRIST_MASS_KG;
+
     static constexpr float M3508_TORQUE_CONSTANT =
         (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
 
@@ -99,6 +106,9 @@ private:
         float yawJoint,
         float pitchJoint,
         tap::algorithms::transforms::Position COMPos) const;
+
+    const tap::algorithms::transforms::Position getPosCOM() const;
+    float getMass() const;
 };
 }  // namespace aruwsrc::engineer::wrist
 

@@ -30,6 +30,7 @@ WristSubsystem::WristSubsystem(
     tap::motor::MotorInterface &motorRight,
     tap::encoder::EncoderInterface &encoderPitch,
     tap::encoder::EncoderInterface &encoderYaw,
+    const aruwsrc::engineer::DigitalOutSubsystem &suction,
     const WristConfig config)
     : tap::control::Subsystem(drivers),
       motorLeft(motorLeft),
@@ -38,6 +39,7 @@ WristSubsystem::WristSubsystem(
       encoderYaw(encoderYaw),
       pidPitch(config.pitchPidConfig),
       pidYaw(config.yawPidConfig),
+      suction(suction),
       config(config),
       setpointPitch(0),
       setpointYaw(0)
@@ -97,11 +99,10 @@ void WristSubsystem::refresh()
     }
 
     CMSISMat<3, 1> gantryToCOMTranslation =
-        computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
+        computeWristToCOM(getYaw(), getPitch(), getPosCOM()).getTranslation().coordinates();
 
-    Vector gravityTorque(tap::algorithms::cross(
-        gantryToCOMTranslation,
-        CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
+    Vector gravityTorque(
+        tap::algorithms::cross(gantryToCOMTranslation, CMSISMat<3, 1>({0, 0, -9.8f * getMass()})));
 
     // we can compute the torque exerted on each joint by projecting the robot-space gravity torque
     // into the joint axis subspace
@@ -162,5 +163,15 @@ Transform WristSubsystem::computeWristToCOM(
              cosf(pitchJoint)}));
 
     return wristOrientation.compose(Transform(COMPos, Orientation(0, 0, 0)));
+}
+
+const tap::algorithms::transforms::Position WristSubsystem::getPosCOM() const
+{
+    return suction.getState() ? COM_POS_W_CUBE : COM_POS;
+}
+
+float WristSubsystem::getMass() const
+{
+    return suction.getState() ? WRIST_MASS_W_CUBE_KG : WRIST_MASS_KG;
 }
 }  // namespace aruwsrc::engineer::wrist

@@ -230,6 +230,17 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
     rightBackChassisMotor,
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
+aruwsrc::engineer::DigitalOutSubsystem suckSubsystem(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::Y,
+    true);
+
+aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::Z);
+
 CubeStorageSubsystem cubeLift(
     drivers(),
     cubeLiftMotor,
@@ -245,6 +256,7 @@ WristSubsystem wristSubsystem(
     wristRightMotor,
     wristPitchEncoder,
     wristYawEncoder,
+    suckSubsystem,
     aruwsrc::engineer::WRIST_CONFIG);
 
 GantryLiftSubsystem gantryLiftSubsystem(
@@ -277,17 +289,6 @@ JointSubsystem wristRollSubsystem(
     drivers(),
     wristRollMotor,
     aruwsrc::engineer::WRIST_ROLL_PID_CONFIG);
-
-aruwsrc::engineer::DigitalOutSubsystem suckSubsystem(
-    drivers(),
-    drivers()->digital,
-    tap::gpio::Digital::OutputPin::Y,
-    true);
-
-aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
-    drivers(),
-    drivers()->digital,
-    tap::gpio::Digital::OutputPin::Z);
 
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);

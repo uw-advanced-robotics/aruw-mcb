@@ -48,6 +48,8 @@ public:
 
     inline void set(bool s) { state = s; }
 
+    inline float getState() const { return state; }
+
     const char* getName() const override { return "Digital Out Subsystem"; }
 
 private:
