@@ -47,6 +47,7 @@ AbstractIKCommand::AbstractIKCommand(
     addSubsystemRequirement(&wrist);
     addSubsystemRequirement(&roll);
 }
+AbstractIKCommand::~AbstractIKCommand() = default;
 
 void AbstractIKCommand::initialize() {}
 

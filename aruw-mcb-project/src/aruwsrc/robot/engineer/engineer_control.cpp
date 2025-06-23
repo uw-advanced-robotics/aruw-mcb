@@ -26,6 +26,7 @@
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/toggle_command_mapping.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
@@ -51,6 +52,7 @@
 #include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
 #include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
+#include "aruwsrc/robot/engineer/manual_ik_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
@@ -331,6 +333,14 @@ SetpointMoveManualCommand gantryExtensionManualControl(
     GANTRY_EXTENSION_MOVE_SPEED,
     SetpointType::GANTRY_EXTENSION);
 
+ManualIKCommand manualIKCommand(
+    chassis,
+    gantryLiftSubsystem,
+    gantryExtensionSubsystem,
+    wristSubsystem,
+    wristRollSubsystem,
+    transformer.getWorldToChassis());
+
 SetpointMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 SetpointMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
 SetpointMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
@@ -370,10 +380,15 @@ aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-tap::control::PressCommandMapping rightUp(
+tap::control::PressCommandMapping leftMidRightUp(
     drivers(),
     {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+
+tap::control::PressCommandMapping leftUpRightUp(
+    drivers(),
+    {&manualIKCommand},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 tap::control::HoldCommandMapping rightDown(
     drivers(),
@@ -404,6 +419,11 @@ tap::control::PressCommandMapping wristFoldOut(
     drivers(),
     {&wristFoldOutCommand},
     RemoteMapState({Remote::Key::B}));
+
+tap::control::ToggleCommandMapping cToggled(
+    drivers(),
+    {&manualIKCommand},
+    RemoteMapState({Remote::Key::C}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -451,12 +471,15 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightUp);
+    drivers->commandMapper.addMap(&leftMidRightUp);
+    drivers->commandMapper.addMap(&leftUpRightUp);
     drivers->commandMapper.addMap(&rightDown);
 
     drivers->commandMapper.addMap(&oneCube);
     drivers->commandMapper.addMap(&twoCube);
     drivers->commandMapper.addMap(&threeCube);
+
+    drivers->commandMapper.addMap(&cToggled);
 
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);

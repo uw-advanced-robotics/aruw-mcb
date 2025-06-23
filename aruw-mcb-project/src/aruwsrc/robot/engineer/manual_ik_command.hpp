@@ -27,19 +27,27 @@ namespace aruwsrc::engineer
 class ManualIKCommand : public algorithms::AbstractIKCommand
 {
 public:
-    ManualIKCommand();
+    ManualIKCommand(
+        aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+        aruwsrc::engineer::gantry::GantryLiftSubsystem& gantryLift,
+        aruwsrc::engineer::gantry::GantryExtensionSubsystem& gantryExtension,
+        aruwsrc::engineer::wrist::WristSubsystem& wrist,
+        aruwsrc::engineer::JointSubsystem& roll,
+        const tap::algorithms::transforms::Transform& worldToChassis);
+
+    const char* getName() const override { return "Manual IK Command"; }
 
     void initialize() override;
 
     void execute() override;
 
-    void end(bool interrupted) override;
+    tap::algorithms::transforms::Transform getWorldToEEDesired() override
+    {
+        return worldToChassis.composeStatic(chassisToEEDesired);
+    }
 
-    bool isFinished() const override;
-
-    const char* getName() const override { return "Manual IK Command"; }
-
-    tap::algorithms::transforms::Transform getWorldToEEDesired() override;
+private:
+    tap::algorithms::transforms::Transform chassisToEEDesired;
 };  // class ManualIKCommand
 
 }  // namespace aruwsrc::engineer

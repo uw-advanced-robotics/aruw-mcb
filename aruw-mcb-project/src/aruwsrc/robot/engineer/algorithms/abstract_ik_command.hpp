@@ -42,18 +42,19 @@ public:
         aruwsrc::engineer::wrist::WristSubsystem& wrist,
         aruwsrc::engineer::JointSubsystem& roll,
         const tap::algorithms::transforms::Transform& worldToChassis);
+    virtual ~AbstractIKCommand() override;
 
-    void initialize() override;
+    virtual void initialize() override = 0;
 
-    void execute() override;
+    virtual void execute() override = 0;
 
     void end(bool) override {};
 
     bool isFinished() const override { return false; }
 
-    virtual tap::algorithms::transforms::Transform getWorldToEEDesired();
+    virtual tap::algorithms::transforms::Transform getWorldToEEDesired() = 0;
 
-private:
+protected:
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::engineer::gantry::GantryLiftSubsystem& gantryLift;
     aruwsrc::engineer::gantry::GantryExtensionSubsystem& gantryExtension;
@@ -62,9 +63,9 @@ private:
     const tap::algorithms::transforms::Transform& worldToChassis;
 
     const tap::algorithms::transforms::Position WRIST_TO_EE_TRANSLATION =
-        tap::algorithms::transforms::Position(1, 0, 0);
-    static constexpr float EXTENSION_BASE_OFFSET_M = 0.0f;
-    static constexpr float LIFT_BASE_OFFSET_M = 0.0f;
+        tap::algorithms::transforms::Position(0.23757f, 0, 0.02585);
+    static constexpr float EXTENSION_BASE_OFFSET_M = 0.26353f;
+    static constexpr float LIFT_BASE_OFFSET_M = 0.45669f;  // +-10mm
 };
 
 }  // namespace aruwsrc::engineer::algorithms
