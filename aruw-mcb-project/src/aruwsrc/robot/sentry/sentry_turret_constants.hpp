@@ -49,7 +49,7 @@ static constexpr float TURRET_CG_X = 14.72264593f;
 static constexpr float TURRET_CG_Z = 34.51638903f - 40.0f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -5000.0f;
 
-static constexpr float TURRET_MINOR_OFFSET = 0.132f;
+static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
 
 static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .kp = 0,
