@@ -22,12 +22,15 @@
 
 #include <vector>
 
+#include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
 
 #include "wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer::wrist
 {
+static constexpr float WRIST_SETPOINTS_COMMAND_RAMP_RATE = 0.1f;
+
 struct Setpoint
 {
     float pitch;
@@ -53,6 +56,7 @@ public:
 
 private:
     WristSubsystem &wrist;
+    tap::algorithms::Ramp rampPitch, rampYaw;
     std::vector<Setpoint> setpoints;
     unsigned int currentSetpointIndex;
 

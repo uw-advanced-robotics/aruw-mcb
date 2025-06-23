@@ -28,19 +28,38 @@ WristSetpointsCommand::WristSetpointsCommand(WristSubsystem &wrist, std::vector<
     addSubsystemRequirement(&wrist);
 }
 
-void WristSetpointsCommand::initialize() {}
+void WristSetpointsCommand::initialize()
+{
+    rampPitch.reset(wrist.getPitch());
+    rampPitch.setTarget(setpoints[0].pitch);
+
+    rampYaw.reset(wrist.getYaw());
+    rampYaw.setTarget(setpoints[0].yaw);
+}
 
 void WristSetpointsCommand::execute()
 {
     if (currentSetpointIndex < setpoints.size())
     {
-        const auto &setpoint = setpoints[currentSetpointIndex];
-        wrist.setSetpointPitch(setpoint.pitch);
-        wrist.setSetpointYaw(setpoint.yaw);
+        Setpoint &setpoint = setpoints[currentSetpointIndex];
+
+        if (!rampPitch.isTargetReached()) rampPitch.update(WRIST_SETPOINTS_COMMAND_RAMP_RATE);
+        if (!rampYaw.isTargetReached()) rampYaw.update(WRIST_SETPOINTS_COMMAND_RAMP_RATE);
+
+        wrist.setSetpointPitch(rampPitch.getValue());
+        wrist.setSetpointYaw(rampYaw.getValue());
+
         if (wrist.atSetpointPitch(setpoint.epsilonPitch) &&
             wrist.atSetpointYaw(setpoint.epsilonYaw))
         {
-            currentSetpointIndex++;
+            if (++currentSetpointIndex >= setpoints.size()) return;  // All setpoints processed
+
+            setpoint = setpoints[currentSetpointIndex];
+            rampPitch.reset(wrist.getPitch());
+            rampPitch.setTarget(setpoint.pitch);
+
+            rampYaw.reset(wrist.getYaw());
+            rampYaw.setTarget(setpoint.yaw);
         }
     }
 }
