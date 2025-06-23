@@ -27,6 +27,8 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 
+#include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
+#include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
@@ -36,6 +38,9 @@
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/algorithms/odometry/engineer_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/robot/engineer/algorithms/odometry/engineer_transform_subsystem.hpp"
+#include "aruwsrc/robot/engineer/algorithms/odometry/engineer_transforms.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
@@ -57,6 +62,8 @@ using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
 using namespace aruwsrc::control::engineer;
 using namespace aruwsrc::engineer;
+using namespace aruwsrc::engineer::algorithms;
+using namespace aruwsrc::engineer::algorithms::odometry;
 using namespace aruwsrc::engineer::gantry;
 using namespace aruwsrc::engineer::lift;
 using namespace aruwsrc::engineer::wrist;
@@ -229,6 +236,18 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
     rightFrontChassisMotor,
     rightBackChassisMotor,
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
+
+EngineerChassisWorldYawObserver yawObserver(drivers()->mpu6500);
+aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+    drivers(),
+    chassis,
+    yawObserver,
+    drivers()->mpu6500,
+    modm::Vector2f(0, 0));
+
+// transforms
+EngineerTransforms transformer(odometrySubsystem);
+EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
 CubeStorageSubsystem cubeLift(
     drivers(),
