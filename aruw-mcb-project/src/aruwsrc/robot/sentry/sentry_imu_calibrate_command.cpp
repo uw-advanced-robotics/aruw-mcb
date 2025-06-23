@@ -42,7 +42,8 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-    aruwsrc::virtualMCB::MCBLite &chassisMCBLite)
+    aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
+    aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer)
     : aruwsrc::control::imu::ImuCalibrateCommand(
           drivers,
           turretsAndControllers,
@@ -54,7 +55,8 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       yawObserver(yawObserver),
       odometryInterface(odometryInterface),
       turretMajorImu(turretMajorImu),
-      chassisMCBLite(chassisMCBLite)
+      chassisMCBLite(chassisMCBLite),
+      transformer(transformer)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -69,6 +71,7 @@ void SentryImuCalibrateCommand::initialize()
     // reset odometry
     yawObserver.overrideChassisYaw(0);
     odometryInterface.reset();
+    transformer.initialize();
 
     ImuCalibrateCommand::initialize();
 

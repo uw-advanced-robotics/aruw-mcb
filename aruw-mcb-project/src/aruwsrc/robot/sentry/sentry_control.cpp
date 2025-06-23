@@ -354,7 +354,10 @@ SentryTransforms transformer(
     getTurretMCBCanComm2(),
     turretRight,
     getTurretMCBCanComm1(),
-    {.turretMinorOffset = TURRET_MINOR_OFFSET});
+    {
+        .turretMinorOffset = TURRET_MINOR_OFFSET,
+        .imuSyncConfig = IMU_SYNC_PID_CONFIG,
+    });
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 SentryTransformAdapter transformAdapter(transformer);
@@ -574,15 +577,16 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     chassisYawObserver,
     odometrySubsystem,
     drivers()->turretMajorImu,
-    drivers()->chassisMcbLite);
+    drivers()->chassisMcbLite,
+    transformer);
 
 NoteSequenceCommand imuCalibrateDoneBuzzCommand(
     buzzer,
     MARIO_MUSHROOM_NOTES,
     MARIO_MUSHROOM_NOTE_LENGTH_MS);
 
-SequentialCommand<2> imuCalibrateAndBuzzCommand(std::array<Command *, 2>{
-    {&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
+SequentialCommand<2> imuCalibrateAndBuzzCommand(
+    std::array<Command *, 2>{{&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
