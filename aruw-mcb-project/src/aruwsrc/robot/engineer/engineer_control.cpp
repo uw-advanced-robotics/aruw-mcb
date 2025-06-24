@@ -26,6 +26,7 @@
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/sequential_command.hpp"
 
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -45,7 +46,7 @@
 #include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_lift_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
 #include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
@@ -296,20 +297,20 @@ aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
 
 /* define client display / HUD related items --------------------------------*/
 
-ClientDisplaySubsystem clientDisplay(drivers());
-tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
+// ClientDisplaySubsystem clientDisplay(drivers());
+// tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
-SlidersIndicator slidersIndicator(
-    refSerialTransmitter,
-    gantryLiftSubsystem,
-    gantryExtensionSubsystem,
-    wristSubsystem,
-    aruwsrc::engineer::WRIST_CONFIG);
+// SlidersIndicator slidersIndicator(
+//     refSerialTransmitter,
+//     gantryLiftSubsystem,
+//     gantryExtensionSubsystem,
+//     wristSubsystem,
+//     aruwsrc::engineer::WRIST_CONFIG);
 
-aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
-    clientDisplay,
-    {&slidersIndicator});
+// aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
+//     *drivers(),
+//     clientDisplay,
+//     {&slidersIndicator});
 
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
@@ -373,6 +374,14 @@ aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 
 aruwsrc::engineer::DigitalOutToggleCommand suckToggleCommand(suckSubsystem);
 
+aruwsrc::engineer::SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
+aruwsrc::engineer::SetpointMovePositionCommand liftDownCommand(gantryLiftSubsystem, 2);
+aruwsrc::engineer::SetpointMovePositionCommand gantryRetractCommand(gantryExtensionSubsystem, 2);
+aruwsrc::engineer::SetpointMovePositionCommand gantryExtendCommand(gantryExtensionSubsystem, 2);
+
+SequentialCommand<9> storeCubeCommand(std::array<Command *, 9>{
+    {&liftUpCommand, &gantryRetractCommand, &wristFoldInCommand, &liftDownCommand, &suckOffCommand, &releaseOffCommand, &gantryExtendCommand, &liftUpCommand, &gantryRetractCommand}});
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -397,7 +406,7 @@ void initializeSubsystems()
     cubeLift.initialize();
     suckSubsystem.initialize();
     releaseSubsystem.initialize();
-    clientDisplay.initialize();
+    // clientDisplay.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -411,7 +420,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
     drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
-    drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -425,9 +434,9 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
     cubeLift.setDefaultCommand(&cubeManualControl);
 
     // suckSubsystem.setDefaultCommand(&suckOffCommand);
-    releaseSubsystem.setDefaultCommand(&releaseOffCommand);
+    // releaseSubsystem.setDefaultCommand(&releaseOffCommand);
 
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    // clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -456,5 +465,4 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
     aruwsrc::control::registerEngineerIoMappings(drivers);
 }
 }  // namespace aruwsrc::engineer
-
 #endif

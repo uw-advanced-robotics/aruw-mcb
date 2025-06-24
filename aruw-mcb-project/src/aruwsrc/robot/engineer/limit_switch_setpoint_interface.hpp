@@ -59,6 +59,8 @@ public:
 
     float getPosition() override { return getEncoderValue() * radius; }
 
+    float getSetpoint() {return setpoint;}
+
     float getVelocity() { return getEncoderVelocity() * radius; }
 
     void setHome(float home) override { this->home = home; };

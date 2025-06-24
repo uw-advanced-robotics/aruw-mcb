@@ -16,30 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SETPOINT_MOVE_MANUAL_COMMAND_HPP_
-#define SETPOINT_MOVE_MANUAL_COMMAND_HPP_
+#ifndef CUBELIFT_SWITCH_COMMAND_HPP_
+#define CUBELIFT_SWITCH_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 #include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
+
 
 namespace aruwsrc::engineer
 {
-enum SetpointType
-{
-    CUBE_LIFT,
-    GANTRY_LIFT,
-    GANTRY_EXTENSION
-};
-class SetpointMoveManualCommand : public tap::control::Command
+class CubeliftSwitchCommand : public tap::control::Command
 {
 public:
-    SetpointMoveManualCommand(
-        LimitSwitchSetpointInterface &cubeLift,
-        aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface,
-        float moveSpeed,
-        SetpointType setpointType = CUBE_LIFT);
+    CubeliftSwitchCommand(
+        LimitSwitchSetpointInterface &cubeLift, bool isDirectionUp);
 
     void initialize() override;
 
@@ -49,15 +40,13 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Setpoint Move Manual Command"; } 
+    const char *getName() const override { return "Cube Move Manual Command"; }
 
 private:
     LimitSwitchSetpointInterface &cubeLift;
-    aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface;
-    float moveSpeed;
-    SetpointType setpointType;
+    bool isDirectionUp;
 
-};  // class SetpointMovePositionCommand
+};  // class CubeliftSwitchCommand
 
 }  // namespace aruwsrc::engineer
-#endif  // SETPOINT_MOVE_MANUAL_COMMAND_HPP_
+#endif  // CUBELIFT_SWITCH_COMMAND_HPP_
