@@ -34,6 +34,7 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 namespace aruwsrc::sentry
 {
 /**
@@ -82,7 +83,8 @@ public:
         algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-        aruwsrc::virtualMCB::MCBLite &chassisMCBLite);
+        aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
+        aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer);
 
     const char *getName() const override { return "Sentry calibrate IMU"; }
 
@@ -101,6 +103,7 @@ protected:
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu;
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite;
+    aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
 
     // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
 };
