@@ -46,7 +46,7 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 1678,
+    .startEncoderValue = 1824,
     .minAngle = 0,     ///< Doesn't matter since yaw not limited
     .maxAngle = M_PI,  ///< Doesn't matter since yaw not limited
     .limitMotorAngles = false,
@@ -190,7 +190,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 100'000.0f,
     .ki = 1000.0f,
     .kd = 16'000.0f,
-    .maxICumulative = 3000.0f,
+    .maxICumulative = 7000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 400.0f,
