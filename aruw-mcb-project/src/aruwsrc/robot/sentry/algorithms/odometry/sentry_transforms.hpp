@@ -20,6 +20,7 @@
 #define SENTRY_TRANSFORMS_HPP_
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 
@@ -42,6 +43,7 @@ public:
         // Offset from turret minor yaw axis to turret major yaw axis (should only be in the
         // y-direction of the turret major frame)
         const float turretMinorOffset;
+        tap::algorithms::SmoothPidConfig imuSyncConfig;
     };
 
     SentryTransforms(
@@ -55,7 +57,13 @@ public:
 
     void updateTransforms();
 
-    inline void initialize() {}
+    inline void initialize()
+    {
+        turretLeftYawSyncPid.reset();
+        turretLeftYawCorrection = 0;
+        turretRightYawSyncPid.reset();
+        turretRightYawCorrection = 0;
+    }
 
     inline const Transform& getWorldToChassis() const { return worldToChassis; };
     inline const Transform& getWorldToTurretMajor() const { return worldToTurretMajor; };
@@ -143,7 +151,11 @@ private:
     Transform worldToChassis;
     Transform worldToTurretMajor;
     Transform worldToTurretLeft;
+    tap::algorithms::SmoothPid turretLeftYawSyncPid;
+    float turretLeftYawCorrection;
     Transform worldToTurretRight;
+    tap::algorithms::SmoothPid turretRightYawSyncPid;
+    float turretRightYawCorrection;
     Transform worldToVTM;
     Transform chassisToArducam0, chassisToArducam1, chassisToArducam2, chassisToArducam3;
 

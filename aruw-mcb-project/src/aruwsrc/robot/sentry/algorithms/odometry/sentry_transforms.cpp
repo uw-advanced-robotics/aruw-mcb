@@ -46,7 +46,11 @@ SentryTransforms::SentryTransforms(
       worldToChassis(Transform::identity()),
       worldToTurretMajor(Transform::identity()),
       worldToTurretLeft(Transform::identity()),
+      turretLeftYawSyncPid(config.imuSyncConfig),
+      turretLeftYawCorrection(0),
       worldToTurretRight(Transform::identity()),
+      turretRightYawSyncPid(config.imuSyncConfig),
+      turretRightYawCorrection(0),
       worldToVTM(Transform::identity()),
       chassisToArducam0(Transform::identity()),
       chassisToArducam1(Transform::identity()),
@@ -83,11 +87,25 @@ void SentryTransforms::updateTransforms()
     worldToVTM = worldToTurretMajor;
 
     worldToTurretLeft = worldToTurretMajor.composeStatic(turretMajorToTurretLeft);
-    worldToTurretLeft.updateRotation(0, turretLeftImu.getPitch(), turretLeftImu.getYaw());
+    turretLeftYawCorrection += turretLeftYawSyncPid.runControllerDerivateError(
+        Angle(turretLeftImu.getYaw() + turretLeftYawCorrection)
+            .minDifference(worldToTurretLeft.getYaw()),
+        0.002f);
+    worldToTurretLeft.updateRotation(
+        0,
+        turretLeftImu.getPitch(),
+        turretLeftImu.getYaw() + turretLeftYawCorrection);
     worldToTurretLeft.updateAngularVelocity(0, turretLeftImu.getGy(), turretLeftImu.getGz());
 
     worldToTurretRight = worldToTurretMajor.composeStatic(turretMajorToTurretRight);
-    worldToTurretRight.updateRotation(0, turretRightImu.getPitch(), turretRightImu.getYaw());
+    turretRightYawCorrection += turretRightYawSyncPid.runControllerDerivateError(
+        Angle(turretRightImu.getYaw() + turretRightYawCorrection)
+            .minDifference(worldToTurretRight.getYaw()),
+        0.002f);
+    worldToTurretRight.updateRotation(
+        0,
+        turretRightImu.getPitch(),
+        turretRightImu.getYaw() + turretRightYawCorrection);
     worldToTurretRight.updateAngularVelocity(0, turretRightImu.getGy(), turretRightImu.getGz());
 
     // Chassis to Arducam

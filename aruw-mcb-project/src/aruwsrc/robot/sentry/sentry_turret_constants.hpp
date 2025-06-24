@@ -49,10 +49,10 @@ static constexpr float TURRET_CG_X = 14.72264593f;
 static constexpr float TURRET_CG_Z = 34.51638903f - 40.0f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -5000.0f;
 
-static constexpr float TURRET_MINOR_OFFSET = 0.132f;
+static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
 
 static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
-    .kp = 0,
+    .kp = 0.042f,
     .ki = 0,
     .kd = 0,
     .maxICumulative = M_PI,
@@ -151,7 +151,7 @@ static constexpr float CENTER_OF_FREEDOM = modm::toRadian(90);
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 7238,
+    .startEncoderValue = 3142,  // 7238,
     .minAngle = CENTER_OF_FREEDOM - ANGLES_OF_FREEDOM / 2.f + PADDING,
     .maxAngle = CENTER_OF_FREEDOM + ANGLES_OF_FREEDOM / 2.f - PADDING,
     .limitMotorAngles = true,

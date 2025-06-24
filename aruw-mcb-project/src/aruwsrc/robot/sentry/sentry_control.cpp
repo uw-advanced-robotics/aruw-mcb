@@ -354,7 +354,10 @@ SentryTransforms transformer(
     getTurretMCBCanComm2(),
     turretRight,
     getTurretMCBCanComm1(),
-    {.turretMinorOffset = TURRET_MINOR_OFFSET});
+    {
+        .turretMinorOffset = TURRET_MINOR_OFFSET,
+        .imuSyncConfig = IMU_SYNC_PID_CONFIG,
+    });
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 SentryTransformAdapter transformAdapter(transformer);
@@ -574,7 +577,8 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     chassisYawObserver,
     odometrySubsystem,
     drivers()->turretMajorImu,
-    drivers()->chassisMcbLite);
+    drivers()->chassisMcbLite,
+    transformer);
 
 NoteSequenceCommand imuCalibrateDoneBuzzCommand(
     buzzer,
