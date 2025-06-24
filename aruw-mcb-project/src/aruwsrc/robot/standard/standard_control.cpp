@@ -549,8 +549,7 @@ std::vector<HudIndicator *> hudIndicators = {
     &damageIndicator,
     &textHudIndicators,
     &visionTargetIndicator,
-    &visionAssistanceIndicator
-};
+    &visionAssistanceIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
