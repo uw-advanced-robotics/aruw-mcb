@@ -34,12 +34,15 @@
 #include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
+#include "aruwsrc/control/client-display/client_display_command.hpp"
+#include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/engineer/sliders_indicator.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
-#include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
+#include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_lift_constants.hpp"
@@ -50,9 +53,9 @@
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 
 using namespace tap::gpio;
 using tap::communication::serial::Remote;
@@ -291,6 +294,23 @@ aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Z);
 
+/* define client display / HUD related items --------------------------------*/
+
+ClientDisplaySubsystem clientDisplay(drivers());
+tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
+
+SlidersIndicator slidersIndicator(
+    refSerialTransmitter,
+    gantryLiftSubsystem,
+    gantryExtensionSubsystem,
+    wristSubsystem,
+    aruwsrc::engineer::WRIST_CONFIG);
+
+aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    clientDisplay,
+    {&slidersIndicator});
+
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
 HomingCommand gantryLiftHome(gantryLiftSubsystem);
@@ -316,7 +336,6 @@ SetpointMoveManualCommand gantryExtensionManualControl(
 
 WristMovePositionCommand pickupDown(wristSubsystem, 0, 0);
 WristMovePositionCommand straightScore(wristSubsystem, 0, M_PI / 2);
-
 
 SetpointMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 SetpointMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
@@ -347,7 +366,6 @@ WristSetpointsCommand wristFoldOutCommand(
      aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
      aruwsrc::engineer::WRIST_OUT_SETPOINT});
 
-
 aruwsrc::engineer::DigitalOutCommand suckOffCommand(suckSubsystem, false);
 aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, true);
 aruwsrc::engineer::DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
@@ -363,12 +381,10 @@ tap::control::PressCommandMapping wristFoldOut(
     {&wristFoldOutCommand},
     RemoteMapState({Remote::Key::B}));
 
-
 tap::control::PressCommandMapping suckToggle(
     drivers(),
     {&suckToggleCommand},
     RemoteMapState({Remote::Key::CTRL}));
-
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -381,6 +397,7 @@ void initializeSubsystems()
     cubeLift.initialize();
     suckSubsystem.initialize();
     releaseSubsystem.initialize();
+    clientDisplay.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -394,6 +411,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
     drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
+    drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -406,8 +424,10 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
     wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeLift.setDefaultCommand(&cubeManualControl);
 
-    //suckSubsystem.setDefaultCommand(&suckOffCommand);
+    // suckSubsystem.setDefaultCommand(&suckOffCommand);
     releaseSubsystem.setDefaultCommand(&releaseOffCommand);
+
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
