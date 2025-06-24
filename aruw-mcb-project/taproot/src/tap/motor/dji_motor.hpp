@@ -77,8 +77,9 @@ public:
     static constexpr uint16_t MAX_OUTPUT_C620 = 16384;
     // Controller for the M3510, in mA output (Not known if mapped to 20A range)
     static constexpr uint16_t MAX_OUTPUT_820R = 32767;
-
-    // Output is in mV
+    // Output is in mA, for use with current control mode
+    static constexpr uint16_t MAX_OUTPUT_GM6020_mA = 16384;
+    // Output is in mV, for use with voltage control mode
     static constexpr uint16_t MAX_OUTPUT_GM6020 = 25000;
     // Output is in mV
     static constexpr uint16_t MAX_OUTPUT_GM3510 = 29000;
