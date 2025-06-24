@@ -49,7 +49,8 @@ void WristSetpointsCommand::execute()
         wrist.setSetpointPitch(rampPitch.getValue());
         wrist.setSetpointYaw(rampYaw.getValue());
 
-        if (wrist.atSetpointPitch(setpoint.epsilonPitch) &&
+        if (rampPitch.isTargetReached() && rampYaw.isTargetReached() &&
+            wrist.atSetpointPitch(setpoint.epsilonPitch) &&
             wrist.atSetpointYaw(setpoint.epsilonYaw))
         {
             if (++currentSetpointIndex >= setpoints.size()) return;  // All setpoints processed
