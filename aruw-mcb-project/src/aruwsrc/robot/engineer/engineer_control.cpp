@@ -52,6 +52,7 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 
 using namespace tap::gpio;
 using tap::communication::serial::Remote;
@@ -312,6 +313,10 @@ SetpointMoveManualCommand gantryExtensionManualControl(
     &drivers()->controlOperatorInterface,
     GANTRY_EXTENSION_MOVE_SPEED,
     SetpointType::GANTRY_EXTENSION);
+
+WristMovePositionCommand pickupDown(wristSubsystem, 0, 0);
+WristMovePositionCommand straightScore(wristSubsystem, 0, M_PI / 2);
+
 
 SetpointMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 SetpointMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
