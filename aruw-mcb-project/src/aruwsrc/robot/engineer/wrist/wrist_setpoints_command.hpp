@@ -29,8 +29,6 @@
 
 namespace aruwsrc::engineer::wrist
 {
-static constexpr float WRIST_SETPOINTS_COMMAND_RAMP_RATE = 0.1f;
-
 struct Setpoint
 {
     float pitch;
@@ -42,6 +40,8 @@ struct Setpoint
 class WristSetpointsCommand : public tap::control::Command
 {
 public:
+    static constexpr float WRIST_SETPOINTS_COMMAND_RAMP_RATE = 0.1f;
+
     WristSetpointsCommand(WristSubsystem &wrist, std::vector<Setpoint> setpoints);
 
     void initialize() override;

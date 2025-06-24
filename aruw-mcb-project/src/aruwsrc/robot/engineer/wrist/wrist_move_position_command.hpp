@@ -19,6 +19,7 @@
 #ifndef WRIST_MOVE_POSITION_COMMAND_HPP_
 #define WRIST_MOVE_POSITION_COMMAND_HPP_
 
+#include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
 
 #include "wrist_subsystem.hpp"
@@ -29,6 +30,8 @@ namespace aruwsrc::engineer::wrist
 class WristMovePositionCommand : public tap::control::Command
 {
 public:
+    static constexpr float WRIST_MOVE_POSITION_COMMAND_RAMP_RATE = 0.1f;
+
     WristMovePositionCommand(WristSubsystem &wrist, float pitchSetpoint, float yawSetpoint);
 
     void initialize() override;
@@ -43,6 +46,7 @@ public:
 
 private:
     WristSubsystem &wrist;
+    tap::algorithms::Ramp rampPitch, rampYaw;
     float pitchSetpoint, yawSetpoint;
 
 };  // class WristMovePositionCommand

@@ -33,13 +33,26 @@ WristMovePositionCommand::WristMovePositionCommand(
 
 void WristMovePositionCommand::initialize()
 {
-    wrist.setSetpointPitch(pitchSetpoint);
-    wrist.setSetpointYaw(yawSetpoint);
+    rampPitch.reset(wrist.getPitch());
+    rampYaw.reset(wrist.getYaw());
+
+    rampPitch.setTarget(pitchSetpoint);
+    rampYaw.setTarget(yawSetpoint);
 }
 
-void WristMovePositionCommand::execute() {}
+void WristMovePositionCommand::execute()
+{
+    if (!rampPitch.isTargetReached()) rampPitch.update(WRIST_MOVE_POSITION_COMMAND_RAMP_RATE);
+    if (!rampYaw.isTargetReached()) rampYaw.update(WRIST_MOVE_POSITION_COMMAND_RAMP_RATE);
+
+    wrist.setSetpointPitch(rampPitch.getValue());
+    wrist.setSetpointYaw(rampYaw.getValue());
+}
 
 void WristMovePositionCommand::end(bool) {}
 
-bool WristMovePositionCommand::isFinished() const { return wrist.atSetpoint(); }
+bool WristMovePositionCommand::isFinished() const
+{
+    return rampPitch.isTargetReached() && rampYaw.isTargetReached() && wrist.atSetpoint();
+}
 }  // namespace aruwsrc::engineer::wrist
