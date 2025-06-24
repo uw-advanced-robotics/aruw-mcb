@@ -512,7 +512,7 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     *drivers(),
     chassis,
     autoNavController,
-    false);
+    true);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -585,8 +585,8 @@ NoteSequenceCommand imuCalibrateDoneBuzzCommand(
     MARIO_MUSHROOM_NOTES,
     MARIO_MUSHROOM_NOTE_LENGTH_MS);
 
-SequentialCommand<2> imuCalibrateAndBuzzCommand(std::array<Command *, 2>{
-    {&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
+SequentialCommand<2> imuCalibrateAndBuzzCommand(
+    std::array<Command *, 2>{{&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
