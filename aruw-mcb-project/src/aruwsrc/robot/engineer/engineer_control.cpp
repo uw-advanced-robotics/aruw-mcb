@@ -38,6 +38,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
+#include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
@@ -341,50 +342,28 @@ WristSetpointsCommand wristFoldOutCommand(
      aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
      aruwsrc::engineer::WRIST_OUT_SETPOINT});
 
-// todo
 
 aruwsrc::engineer::DigitalOutCommand suckOffCommand(suckSubsystem, false);
 aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, true);
 aruwsrc::engineer::DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
 aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 
+aruwsrc::engineer::DigitalOutToggleCommand suckToggleCommand(suckSubsystem);
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
-
-tap::control::PressCommandMapping rightUp(
-    drivers(),
-    {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-
-tap::control::HoldCommandMapping rightDown(
-    drivers(),
-    {&suckOnCommand, &releaseOnCommand},
-    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
-tap::control::HoldCommandMapping oneCube(
-    drivers(),
-    {&oneCubePosition},
-    RemoteMapState({Remote::Key::Z}));  // todo
-
-tap::control::HoldCommandMapping twoCube(
-    drivers(),
-    {&twoCubePosition},
-    RemoteMapState({Remote::Key::X}));
-
-tap::control::PressCommandMapping threeCube(
-    drivers(),
-    {&threeCubePosition},
-    RemoteMapState({Remote::Key::C}));
-
-tap::control::PressCommandMapping wristFoldIn(
-    drivers(),
-    {&wristFoldInCommand},
-    RemoteMapState({Remote::Key::V}));
 
 tap::control::PressCommandMapping wristFoldOut(
     drivers(),
     {&wristFoldOutCommand},
     RemoteMapState({Remote::Key::B}));
+
+
+tap::control::PressCommandMapping suckToggle(
+    drivers(),
+    {&suckToggleCommand},
+    RemoteMapState({Remote::Key::CTRL}));
+
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -422,7 +401,7 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
     wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeLift.setDefaultCommand(&cubeManualControl);
 
-    suckSubsystem.setDefaultCommand(&suckOffCommand);
+    //suckSubsystem.setDefaultCommand(&suckOffCommand);
     releaseSubsystem.setDefaultCommand(&releaseOffCommand);
 }
 
@@ -432,13 +411,7 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightUp);
-    drivers->commandMapper.addMap(&rightDown);
-
-    drivers->commandMapper.addMap(&oneCube);
-    drivers->commandMapper.addMap(&twoCube);
-    drivers->commandMapper.addMap(&threeCube);
-
+    drivers->commandMapper.addMap(&suckToggle);
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }

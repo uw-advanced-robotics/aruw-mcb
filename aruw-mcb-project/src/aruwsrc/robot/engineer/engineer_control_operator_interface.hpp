@@ -54,6 +54,19 @@ public:
      */
     mockable float getGantryLiftVelocity();
 
+    bool getGantryKeyUp();
+
+    bool getGantryKeyDown();
+
+    bool getGantryKeyIn();
+
+    bool getGantryKeyOut();
+
+    bool getSprintKey();
+
+    bool getShiftKey();
+
+
     /**
      * @return The gantry extension velocity
      */
