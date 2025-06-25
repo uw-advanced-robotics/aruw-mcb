@@ -105,9 +105,7 @@ void FrictionWheelSubsystem::refresh()
         prevShotTime = drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
         speedCorrectionPid.update(drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED);
     }  
-    float speedCorrection = speedCorrectionPid.getValue();
-#else
-    float speedCorrection = 0.0f;
+    speedCorrection = speedCorrectionPid.getValue();
 #endif
 
     prevTime = currTime;
@@ -122,6 +120,6 @@ void FrictionWheelSubsystem::refresh()
 
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
 {
-    return launchSpeedLinearInterpolator.interpolate(launchSpeed);
+    return launchSpeedLinearInterpolator.interpolate(launchSpeed) ;
 }
 }  // namespace aruwsrc::control::launcher
