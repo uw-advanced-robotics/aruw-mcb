@@ -71,6 +71,7 @@ using namespace aruwsrc::engineer::gantry;
 using namespace aruwsrc::engineer::lift;
 using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
+using namespace aruwsrc::control::client_display;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -301,20 +302,22 @@ aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
 
 /* define client display / HUD related items --------------------------------*/
 
-// ClientDisplaySubsystem clientDisplay(drivers());
-// tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
+ClientDisplaySubsystem clientDisplay(drivers());
+tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
-// SlidersIndicator slidersIndicator(
-//     refSerialTransmitter,
-//     gantryLiftSubsystem,
-//     gantryExtensionSubsystem,
-//     wristSubsystem,
-//     aruwsrc::engineer::WRIST_CONFIG);
+SlidersIndicator slidersIndicator(
+    refSerialTransmitter,
+    gantryLiftSubsystem,
+    gantryExtensionSubsystem,
+    wristSubsystem,
+    aruwsrc::engineer::WRIST_CONFIG);
 
-// aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
-//     *drivers(),
-//     clientDisplay,
-//     {&slidersIndicator});
+std::vector<HudIndicator *> hudIndicators = {&slidersIndicator};
+
+aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    clientDisplay,
+    hudIndicators);
 
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
