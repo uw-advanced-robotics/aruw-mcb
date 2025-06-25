@@ -39,6 +39,7 @@
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/client-display/engineer/sliders_indicator.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
@@ -48,9 +49,11 @@
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
+#include "aruwsrc/robot/engineer/score_position_command.hpp"
 #include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
 #include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
+#include "aruwsrc/robot/engineer/engineer_constants.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/cubelift_switch_command.hpp"
@@ -386,6 +389,7 @@ SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
     {&liftUpCommand, &gantryRetractCommand, &wristFoldInCommand, &liftDownCommand, &suckOffCommand, &releaseOnCommand, &gantryExtendCommand, &liftUpCommand, &gantryRetractCommand, &cubeLiftSwitchDownCommand}});
 SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
     {&liftDownCommand, &gantryExtendCommand, &wristFoldInCommand, &gantryRetractCommand, &suckOnCommand, &releaseOffCommand, &liftUpCommand, &wristFoldOutCommand, &liftDownCommand, &cubeLiftSwitchUpCommand}});
+ScorePositionCommand scorePositionCommand(gantryLiftSubsystem, wristSubsystem, wristRollSubsystem);
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -399,6 +403,19 @@ tap::control::PressCommandMapping retrieveCube(drivers(), {&retrieveCubeCommand}
 
 tap::control::PressCommandMapping cubeLiftUp(drivers(), {&cubeLiftSwitchUpCommand}, RemoteMapState({Remote::Key::Z, Remote::Key::SHIFT}));
 tap::control::PressCommandMapping cubeLiftDown(drivers(), {&cubeLiftSwitchUpCommand}, RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
+
+tap::control::PressCommandMapping cyclePositions(drivers(), {&scorePositionCommand}, RemoteMapState({Remote::Key::C})); //should it be not shfit or not
+
+CycleStateCommandMapping<
+    ScorePositions,
+    3,
+    ScorePositionCommand>
+    cPressed(
+        drivers(),
+        RemoteMapState({Remote::Key::C}, {Remote::Key::SHIFT}),
+        ScorePositions::three,
+        &scorePositionCommand,
+        &ScorePositionCommand::cyclePositions, RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -455,6 +472,8 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
     drivers->commandMapper.addMap(&cubeLiftDown);
     drivers->commandMapper.addMap(&storeCube);
     drivers->commandMapper.addMap(&retrieveCube);
+    drivers->commandMapper.addMap(&cyclePositions);
+    drivers->commandMapper.addMap(&cPressed);
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }
