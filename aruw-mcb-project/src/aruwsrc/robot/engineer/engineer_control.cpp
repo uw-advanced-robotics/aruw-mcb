@@ -306,6 +306,7 @@ SlidersIndicator slidersIndicator(
     refSerialTransmitter,
     gantryLiftSubsystem,
     gantryExtensionSubsystem,
+    cubeLift,
     wristSubsystem,
     aruwsrc::engineer::WRIST_CONFIG);
 

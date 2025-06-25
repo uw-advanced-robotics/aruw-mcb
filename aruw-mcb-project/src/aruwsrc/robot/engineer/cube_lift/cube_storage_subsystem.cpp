@@ -29,7 +29,7 @@ CubeStorageSubsystem::CubeStorageSubsystem(
     const tap::algorithms::SmoothPidConfig& configPos,
     const tap::algorithms::SmoothPidConfig& configHoming,
     aruwsrc::control::TriggerInterface& trigger,
-    float home,
+    float setpoint,
     float radius,
     float kS,
     float epsilon)
@@ -40,7 +40,7 @@ CubeStorageSubsystem::CubeStorageSubsystem(
           radius,
           -320.0f,
           -40.0f,
-          home,
+          setpoint,
           kS,
           epsilon,
           20.0f,

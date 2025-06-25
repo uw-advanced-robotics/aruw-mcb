@@ -41,7 +41,7 @@ public:
         const tap::algorithms::SmoothPidConfig& configPos,
         const tap::algorithms::SmoothPidConfig& configHoming,
         aruwsrc::control::TriggerInterface& trigger,
-        float home,
+        float setpoint,
         float radius = 1.0f,
         float kS = 0,
         float epsilon = 0.5f);

@@ -40,6 +40,7 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         LimitSwitchSetpointInterface &gantryLift,
         LimitSwitchSetpointInterface &gantryExtension,
+        LimitSwitchSetpointInterface &cubeLift,
         WristSubsystem &wristSubsystem,
         wrist::WristConfig wristConfig);
 
@@ -52,6 +53,7 @@ public:
 private:
     LimitSwitchSetpointInterface &gantryLift;
     LimitSwitchSetpointInterface &gantryExtension;
+    LimitSwitchSetpointInterface &cubeLift;
     WristSubsystem &wristSubsystem;
     wrist::WristConfig wristConfig;
 
@@ -59,9 +61,10 @@ private:
     {
         GANTRY_LIFT = 0,
         GANTRY_EXTENSION = 1,
-        WRIST_PITCH = 2,
-        WRIST_YAW = 3,
-        NUM_GRAPHICS = 4
+        CUBE_LIFT = 2,
+        WRIST_PITCH = 3,
+        WRIST_YAW = 4,
+        NUM_GRAPHICS = 5
     };
 
     static constexpr uint16_t NUM_GRAPHICS = static_cast<uint8_t>(GraphicType::NUM_GRAPHICS);
@@ -72,6 +75,9 @@ private:
 
     static constexpr uint16_t BOUNDING_BOX_WIDTH = 350;
     static constexpr uint16_t BOUNDING_BOX_HEIGHT = 50;
+
+    // static constexpr uint16_t VER_BOUNDING_BOX_WIDTH = 50;
+    // static constexpr uint16_t VER_BOUNDING_BOX_HEIGHT = 350;
 
     static constexpr uint16_t BOUNDING_BOX_LINE_WIDTH = 10;
     static constexpr uint16_t CIRCLE_SIZE = 13;
