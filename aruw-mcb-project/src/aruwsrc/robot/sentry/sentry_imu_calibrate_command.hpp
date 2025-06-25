@@ -95,6 +95,8 @@ public:
 
     void execute() override;
 
+    bool isFinished() const override;
+
     void end(bool interrupted) override;
 
 protected:

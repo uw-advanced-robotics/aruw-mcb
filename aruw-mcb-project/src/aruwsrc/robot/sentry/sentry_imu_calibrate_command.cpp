@@ -44,8 +44,8 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
-    aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
-    aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
+    aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
+    aruwsrc::control::buzzer::NoteSequenceCommand *failChime)
     : aruwsrc::control::imu::ImuCalibrateCommand(
           drivers,
           turretsAndControllers,
@@ -109,6 +109,12 @@ void SentryImuCalibrateCommand::execute()
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
         {
+            if (calibrationLongTimeout.isExpired())
+            {
+                if (failChime) drivers->commandScheduler.addCommand(failChime);
+                calibrationState = CalibrationState::CALIBRATION_FAILED;
+            }
+
             // Only start calibrating if the turret is online and if there is an IMU online to be
             // calibrated. The onboard Mpu6500 will never be in the `IMU_NOT_CONNECTED` state unless
             // the Mpu6500 is shorted (which has never happened). The turret MCB will only be
@@ -134,6 +140,12 @@ void SentryImuCalibrateCommand::execute()
         }
         case CalibrationState::LOCKING_TURRET:
         {
+            if (calibrationLongTimeout.isExpired())
+            {
+                if (failChime) drivers->commandScheduler.addCommand(failChime);
+                calibrationState = CalibrationState::CALIBRATION_FAILED;
+            }
+
             bool turretsNotMoving = true;
             for (auto &config : turretsAndControllers)
             {
@@ -164,6 +176,12 @@ void SentryImuCalibrateCommand::execute()
             break;
         }
         case CalibrationState::CALIBRATING_IMU:
+            if (calibrationLongTimeout.isExpired())
+            {
+                if (failChime) drivers->commandScheduler.addCommand(failChime);
+                calibrationState = CalibrationState::CALIBRATION_FAILED;
+            }
+
             if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED)
             {
                 // assume turret MCB takes approximately as long as the onboard IMU to calibrate,
@@ -172,8 +190,7 @@ void SentryImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
-                // drivers->commandScheduler.
-                //     scheduleCommand(successChime, tap::arch::clock::getTimeMilliseconds() + 1000);
+                if (successChime) drivers->commandScheduler.addCommand(successChime);
 
                 // reset odometry
                 yawObserver.overrideChassisYaw(0);
@@ -181,6 +198,8 @@ void SentryImuCalibrateCommand::execute()
             }
             break;
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
+            break;
+        case CalibrationState::CALIBRATION_FAILED:
             break;
         default:
             break;
@@ -210,6 +229,13 @@ void SentryImuCalibrateCommand::execute()
     } else {
         turretMajor.getMutableMotor().setMotorOutput(0);
     }
+}
+
+bool SentryImuCalibrateCommand::isFinished() const
+{
+    return (calibrationState == CalibrationState::WAITING_CALIBRATION_COMPLETE &&
+            calibrationTimer.isExpired()) ||
+           calibrationState == CalibrationState::CALIBRATION_FAILED;
 }
 
 void SentryImuCalibrateCommand::end(bool)

@@ -75,6 +75,7 @@ public:
         /** While in this state, the command waits a small time after calibration is complete to
            handle any latency associated with sending messages to the TurretMCBCanComm. */
         WAITING_CALIBRATION_COMPLETE,
+        CALIBRATION_FAILED,
     };
 
     /**
@@ -139,7 +140,7 @@ public:
 
     void end(bool interrupted) override;
 
-    bool isFinished() const override;
+    virtual bool isFinished() const override;
 
     /**
      * @return The current calibration state of the command.
