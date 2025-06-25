@@ -73,7 +73,7 @@ static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KP = 0.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KI = 5.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KD = 0.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM = 500.0f;
-static constexpr float LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT = 500.0f;
+static constexpr float LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT = 750.0f;
 /**
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.

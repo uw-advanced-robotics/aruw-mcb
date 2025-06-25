@@ -85,10 +85,7 @@ public:
         return launchSpeedToFrictionWheelRpm(desiredLaunchSpeed) - speedCorrection;
     }
 
-    float getCurrentCorrectionValue() const
-    {
-        return speedCorrection;
-    }
+    float getCurrentCorrectionValue() const { return speedCorrection; }
     /**
      * @return The average measured friction wheel speed of the launcher in RPM.
      */
