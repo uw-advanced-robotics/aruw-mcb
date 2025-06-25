@@ -44,8 +44,8 @@ void SetpointMoveManualCommand::execute()
     switch (setpointType)
     {
         case SetpointType::CUBE_LIFT:
-            setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;
-            break;
+            //setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;
+            //break; //Carson gets no more freedom
         case SetpointType::GANTRY_LIFT:
             setpoint += operatorInterface->getGantryLiftVelocity() * moveSpeed;
             if (operatorInterface->getGantryKeyUp())

@@ -79,7 +79,7 @@ public:
         return calibrationState == CalibrationState::CALIBRATION_COMPLETE;
     }
 
-    // Let the record show Acacia and Swara did this first
+    // Acacia and Swara's setpoint interface logic
     void refresh() override
     {
         motorPos = getPosition();
