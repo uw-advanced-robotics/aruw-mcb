@@ -88,7 +88,7 @@ modm::ResumableResult<void> SlidersIndicator::sendInitialGraphics()
 
 modm::ResumableResult<void> SlidersIndicator::update()
 {
-    // Update gantry lift 
+    // Update gantry lift
     float gantryLiftPosition = gantryLift.getPosition();
     float gantryLiftPositionPercent =
         getPercentage(gantryLiftPosition, gantryLift.getLowerBound(), gantryLift.getUpperBound());
@@ -105,17 +105,23 @@ modm::ResumableResult<void> SlidersIndicator::update()
     // Update cube lift
     float cubeLiftSetpoint = cubeLift.getSetpoint();
     float cubeLiftPositionPercent;
-    if (cubeLiftSetpoint == -40) {
-        cubeLiftPositionPercent = 1/3;
-    } else if (cubeLiftSetpoint == -220) {
-        cubeLiftPositionPercent = 2/3;
-    } else if (cubeLiftSetpoint == -310) {
+    if (cubeLiftSetpoint == -40)
+    {
+        cubeLiftPositionPercent = 1 / 3;
+    }
+    else if (cubeLiftSetpoint == -220)
+    {
+        cubeLiftPositionPercent = 2 / 3;
+    }
+    else if (cubeLiftSetpoint == -310)
+    {
         cubeLiftPositionPercent = 1;
-    } else {
+    }
+    else
+    {
         cubeLiftPositionPercent = 0;
     }
     uint16_t cubeLiftCircleX = START_X + BOUNDING_BOX_WIDTH * cubeLiftPositionPercent;
-
 
     // Update wrist pitch
     float wristPitchPosition = wristSubsystem.getPitch();

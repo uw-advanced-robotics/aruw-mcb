@@ -48,17 +48,23 @@ void SetpointMoveManualCommand::execute()
             break;
         case SetpointType::GANTRY_LIFT:
             setpoint += operatorInterface->getGantryLiftVelocity() * moveSpeed;
-            if(operatorInterface->getGantryKeyUp()) {
+            if (operatorInterface->getGantryKeyUp())
+            {
                 setpoint += moveSpeed;
-            } else if (operatorInterface->getGantryKeyDown()) {
+            }
+            else if (operatorInterface->getGantryKeyDown())
+            {
                 setpoint -= moveSpeed;
             }
             break;
         case SetpointType::GANTRY_EXTENSION:
             setpoint += operatorInterface->getGantryExtensionVelocity() * moveSpeed;
-            if(operatorInterface->getGantryKeyOut()) {
+            if (operatorInterface->getGantryKeyOut())
+            {
                 setpoint += moveSpeed;
-            } else if (operatorInterface->getGantryKeyIn()) {
+            }
+            else if (operatorInterface->getGantryKeyIn())
+            {
                 setpoint -= moveSpeed;
             }
             break;

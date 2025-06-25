@@ -17,38 +17,48 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "score_position_command.hpp"
+#include "score_position_command.hpp"
 
- namespace aruwsrc::engineer
- {
-    ScorePositionCommand::ScorePositionCommand(
-        GantryLiftSubsystem& gantryLift, WristSubsystem& wrist, JointSubsystem& roll) : gantryLift(gantryLift), wrist(wrist), roll(roll){
-            addSubsystemRequirement(&gantryLift);
-            addSubsystemRequirement(&wrist);
-            addSubsystemRequirement(&roll);
-        };
+namespace aruwsrc::engineer
+{
+ScorePositionCommand::ScorePositionCommand(
+    GantryLiftSubsystem& gantryLift,
+    WristSubsystem& wrist,
+    JointSubsystem& roll)
+    : gantryLift(gantryLift),
+      wrist(wrist),
+      roll(roll)
+{
+    addSubsystemRequirement(&gantryLift);
+    addSubsystemRequirement(&wrist);
+    addSubsystemRequirement(&roll);
+};
 
-void ScorePositionCommand::cyclePositions(ScorePositions scorePos) {
-    scoringPosition = scorePos;
-}
+void ScorePositionCommand::cyclePositions(ScorePositions scorePos) { scoringPosition = scorePos; }
 
- void ScorePositionCommand::initialize() {
+void ScorePositionCommand::initialize()
+{
     float gantryLiftSetpoint;
     float wristYawSetpoint;
     float wristPitchSetpoint;
-    float wristRollSetpoint; 
+    float wristRollSetpoint;
 
-    if (scoringPosition == ScorePositions::one) {
+    if (scoringPosition == ScorePositions::one)
+    {
         gantryLiftSetpoint = gantryLiftScoreOneSetpoint;
         wristYawSetpoint = wristYawScoreOneSetpoint;
         wristPitchSetpoint = wristPitchScoreOneSetpoint;
         wristRollSetpoint = wristRollScoreOneSetpoint;
-    } else if (scoringPosition == ScorePositions::two) {
+    }
+    else if (scoringPosition == ScorePositions::two)
+    {
         gantryLiftSetpoint = gantryLiftScoreTwoSetpoint;
         wristYawSetpoint = wristYawScoreTwoSetpoint;
         wristPitchSetpoint = wristPitchScoreTwoSetpoint;
         wristRollSetpoint = wristRollScoreTwoSetpoint;
-    } else {
+    }
+    else
+    {
         gantryLiftSetpoint = gantryLiftScoreThreeSetpoint;
         wristYawSetpoint = wristYawScoreThreeSetpoint;
         wristPitchSetpoint = wristPitchScoreThreeSetpoint;
@@ -59,12 +69,14 @@ void ScorePositionCommand::cyclePositions(ScorePositions scorePos) {
     wrist.setSetpointYaw(wristYawSetpoint);
     wrist.setSetpointPitch(wristPitchSetpoint);
     roll.setSetpoint(wristRollSetpoint);
- }
- 
- void ScorePositionCommand::execute()
- {}
- 
- void ScorePositionCommand::end(bool) {}
- 
- bool ScorePositionCommand::isFinished() const { return gantryLift.atSetpoint() && wrist.atSetpoint() && roll.atSetpoint(); }
- }  // namespace aruwsrc::engineer 
+}
+
+void ScorePositionCommand::execute() {}
+
+void ScorePositionCommand::end(bool) {}
+
+bool ScorePositionCommand::isFinished() const
+{
+    return gantryLift.atSetpoint() && wrist.atSetpoint() && roll.atSetpoint();
+}
+}  // namespace aruwsrc::engineer

@@ -17,39 +17,51 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "cubelift_switch_command.hpp"
- #include "engineer_cube_lift_constants.hpp"
+#include "cubelift_switch_command.hpp"
 
- namespace aruwsrc::engineer
- {
-    CubeliftSwitchCommand::CubeliftSwitchCommand(
-     LimitSwitchSetpointInterface& cubeLift, bool isDirectionUp)
-     : cubeLift(cubeLift), isDirectionUp(isDirectionUp)
- {
-     addSubsystemRequirement(&cubeLift);
- }
+#include "engineer_cube_lift_constants.hpp"
 
- void CubeliftSwitchCommand::initialize() {}
- 
- void CubeliftSwitchCommand::execute()
- {
-     float setpoint = cubeLift.getSetpoint();
-     if (isDirectionUp) {
-        if (setpoint == TWO_CUBE_SETPOINT) {
+namespace aruwsrc::engineer
+{
+CubeliftSwitchCommand::CubeliftSwitchCommand(
+    LimitSwitchSetpointInterface& cubeLift,
+    bool isDirectionUp)
+    : cubeLift(cubeLift),
+      isDirectionUp(isDirectionUp)
+{
+    addSubsystemRequirement(&cubeLift);
+}
+
+void CubeliftSwitchCommand::initialize() {}
+
+void CubeliftSwitchCommand::execute()
+{
+    float setpoint = cubeLift.getSetpoint();
+    if (isDirectionUp)
+    {
+        if (setpoint == TWO_CUBE_SETPOINT)
+        {
             cubeLift.setSetpoint(ONE_CUBE_SETPOINT);
-        } else if (setpoint == THREE_CUBE_SETPOINT) {
+        }
+        else if (setpoint == THREE_CUBE_SETPOINT)
+        {
             cubeLift.setSetpoint(TWO_CUBE_SETPOINT);
         }
-     } else {
-        if (setpoint == ONE_CUBE_SETPOINT) {
+    }
+    else
+    {
+        if (setpoint == ONE_CUBE_SETPOINT)
+        {
             cubeLift.setSetpoint(TWO_CUBE_SETPOINT);
-        } else if (setpoint == TWO_CUBE_SETPOINT) {
+        }
+        else if (setpoint == TWO_CUBE_SETPOINT)
+        {
             cubeLift.setSetpoint(THREE_CUBE_SETPOINT);
         }
-     }
- }
- 
- void CubeliftSwitchCommand::end(bool) {}
- 
- bool CubeliftSwitchCommand::isFinished() const { return false; }
- }  // namespace aruwsrc::engineer 
+    }
+}
+
+void CubeliftSwitchCommand::end(bool) {}
+
+bool CubeliftSwitchCommand::isFinished() const { return false; }
+}  // namespace aruwsrc::engineer

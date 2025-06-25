@@ -49,7 +49,7 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Setpoint Move Manual Command"; } 
+    const char *getName() const override { return "Setpoint Move Manual Command"; }
 
 private:
     LimitSwitchSetpointInterface &cubeLift;

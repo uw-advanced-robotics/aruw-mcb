@@ -23,14 +23,12 @@
 
 #include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
-
 namespace aruwsrc::engineer
 {
 class CubeliftSwitchCommand : public tap::control::Command
 {
 public:
-    CubeliftSwitchCommand(
-        LimitSwitchSetpointInterface &cubeLift, bool isDirectionUp);
+    CubeliftSwitchCommand(LimitSwitchSetpointInterface &cubeLift, bool isDirectionUp);
 
     void initialize() override;
 

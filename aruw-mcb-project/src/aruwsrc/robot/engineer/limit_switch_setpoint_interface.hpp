@@ -59,7 +59,7 @@ public:
 
     float getPosition() override { return getEncoderValue() * radius; }
 
-    float getSetpoint() {return setpoint;}
+    float getSetpoint() { return setpoint; }
 
     float getVelocity() { return getEncoderVelocity() * radius; }
 

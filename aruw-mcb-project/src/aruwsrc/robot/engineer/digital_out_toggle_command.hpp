@@ -28,22 +28,16 @@ namespace aruwsrc::engineer
 class DigitalOutToggleCommand : public tap::control::Command
 {
 public:
-    DigitalOutToggleCommand(DigitalOutSubsystem& subsystem)
-        : subsystem(subsystem)
+    DigitalOutToggleCommand(DigitalOutSubsystem& subsystem) : subsystem(subsystem)
     {
         addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(&subsystem));
     }
 
-    inline void initialize() override {
-        subsystem.set(!subsystem.getState());
-    }
+    inline void initialize() override { subsystem.set(!subsystem.getState()); }
 
-    inline void execute() override
-    {    }
+    inline void execute() override {}
 
-    inline void end(bool) override
-    {
-    }
+    inline void end(bool) override {}
 
     inline bool isFinished() const override { return true; }
 

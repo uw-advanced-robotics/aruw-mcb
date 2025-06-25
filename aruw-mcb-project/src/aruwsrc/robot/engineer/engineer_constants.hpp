@@ -44,4 +44,4 @@
     static constexpr float wristPitchScoreThreeSetpoint = 1;
     static constexpr float wristRollScoreThreeSetpoint = 1;
  } //namespace aruwsrc::engineer
- #endif ENGINEER_CONSTANTS_HPP_
+ #endif //ENGINEER_CONSTANTS_HPP_

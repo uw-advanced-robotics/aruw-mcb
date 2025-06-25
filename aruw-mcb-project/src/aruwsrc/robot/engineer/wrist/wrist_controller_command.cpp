@@ -50,7 +50,7 @@ void WristControllerCommand::execute()
     float pitchVelocity = operatorInterface->getWristPitchVelocity() * pitchScalingFactor;
     float yawVelocity = operatorInterface->getWristYawVelocity() * yawScalingFactor;
 
-    // Set the desired positions 
+    // Set the desired positions
     roll.setSetpoint(roll.getSetpoint() + rollVelocity);
     wrist.setSetpointPitch(wrist.getSetpointPitch() + pitchVelocity);
     wrist.setSetpointYaw(wrist.getSetpointYaw() + yawVelocity);

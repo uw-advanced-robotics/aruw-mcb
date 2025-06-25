@@ -43,7 +43,7 @@ public:
     inline void initialize() override {}
 
     inline void refresh() override { digital.set(pin, state ^ offState); }
-    
+
     inline bool getState() { return state; }
 
     inline void refreshSafeDisconnect() override { digital.set(pin, offState); }

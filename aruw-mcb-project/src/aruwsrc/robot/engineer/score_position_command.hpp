@@ -21,10 +21,10 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
-#include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_constants.hpp"
+#include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
+#include "aruwsrc/robot/engineer/joint_subsystem.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 using namespace aruwsrc::engineer::gantry;
 using namespace aruwsrc::engineer::wrist;
@@ -35,7 +35,9 @@ class ScorePositionCommand : public tap::control::Command
 {
 public:
     ScorePositionCommand(
-        GantryLiftSubsystem& gantryLift, WristSubsystem& wrist, JointSubsystem& roll);
+        GantryLiftSubsystem &gantryLift,
+        WristSubsystem &wrist,
+        JointSubsystem &roll);
 
     void initialize() override;
 
@@ -50,10 +52,10 @@ public:
     void cyclePositions(ScorePositions scorePos);
 
 private:
-GantryLiftSubsystem &gantryLift; 
-WristSubsystem &wrist;
-JointSubsystem &roll;
-ScorePositions scoringPosition;
+    GantryLiftSubsystem &gantryLift;
+    WristSubsystem &wrist;
+    JointSubsystem &roll;
+    ScorePositions scoringPosition;
 
 };  // class ScorePositionCommand
 

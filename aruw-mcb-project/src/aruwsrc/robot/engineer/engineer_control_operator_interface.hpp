@@ -66,7 +66,6 @@ public:
 
     bool getShiftKey();
 
-
     /**
      * @return The gantry extension velocity
      */

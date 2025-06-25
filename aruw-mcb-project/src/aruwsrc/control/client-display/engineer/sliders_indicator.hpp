@@ -89,12 +89,10 @@ private:
     Tx::Graphic7Message sliderOutside;
     Tx::Graphic7Message sliderInside;
 
-    float getPercentage(
-        float value,
-        float minValue,
-        float maxValue) const {
-            return (value - minValue) / (maxValue - minValue);
-        }
+    float getPercentage(float value, float minValue, float maxValue) const
+    {
+        return (value - minValue) / (maxValue - minValue);
+    }
 };
 
 }  // namespace aruwsrc::control::client_display
