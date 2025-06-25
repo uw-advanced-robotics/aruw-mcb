@@ -43,7 +43,9 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
-    aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer)
+    aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
+    aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
+    aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
     : aruwsrc::control::imu::ImuCalibrateCommand(
           drivers,
           turretsAndControllers,
@@ -56,7 +58,9 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       odometryInterface(odometryInterface),
       turretMajorImu(turretMajorImu),
       chassisMCBLite(chassisMCBLite),
-      transformer(transformer)
+      transformer(transformer),
+      successChime(successChime),
+      failChime(failChime)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -168,6 +172,8 @@ void SentryImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
+                // drivers->commandScheduler.
+                //     scheduleCommand(successChime, tap::arch::clock::getTimeMilliseconds() + 1000);
 
                 // reset odometry
                 yawObserver.overrideChassisYaw(0);
@@ -196,9 +202,14 @@ void SentryImuCalibrateCommand::execute()
         config.yawController->runController(dt, config.turret->yawMotor.getChassisFrameSetpoint());
     }
 
+    if (calibrationState == CalibrationState::LOCKING_TURRET)
+    {
     turretMajorController.runController(
         dt,
         turretMajor.getReadOnlyMotor().getChassisFrameSetpoint());
+    } else {
+        turretMajor.getMutableMotor().setMotorOutput(0);
+    }
 }
 
 void SentryImuCalibrateCommand::end(bool)

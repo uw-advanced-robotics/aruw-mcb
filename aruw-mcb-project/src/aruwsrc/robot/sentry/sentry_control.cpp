@@ -552,6 +552,16 @@ SentryManualDriveCommand chassisDriveCommand(
     drivers(),
     &(drivers()->controlOperatorInterface),
     &chassis);
+    
+NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_SUCCESS_NOTES,
+    IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
+
+NoteSequenceCommand imuCalibrateFailBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_FAIL_NOTES,
+    IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
 SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
@@ -579,14 +589,6 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     drivers()->turretMajorImu,
     drivers()->chassisMcbLite,
     transformer);
-
-NoteSequenceCommand imuCalibrateDoneBuzzCommand(
-    buzzer,
-    MARIO_MUSHROOM_NOTES,
-    MARIO_MUSHROOM_NOTE_LENGTH_MS);
-
-SequentialCommand<2> imuCalibrateAndBuzzCommand(std::array<Command *, 2>{
-    {&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
