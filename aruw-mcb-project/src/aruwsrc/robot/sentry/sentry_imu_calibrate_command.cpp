@@ -223,10 +223,12 @@ void SentryImuCalibrateCommand::execute()
 
     if (calibrationState == CalibrationState::LOCKING_TURRET)
     {
-    turretMajorController.runController(
-        dt,
-        turretMajor.getReadOnlyMotor().getChassisFrameSetpoint());
-    } else {
+        turretMajorController.runController(
+            dt,
+            turretMajor.getReadOnlyMotor().getChassisFrameSetpoint());
+    }
+    else
+    {
         turretMajor.getMutableMotor().setMotorOutput(0);
     }
 }
