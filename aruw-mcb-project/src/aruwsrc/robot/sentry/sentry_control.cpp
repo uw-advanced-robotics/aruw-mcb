@@ -512,7 +512,7 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     *drivers(),
     chassis,
     autoNavController,
-    false);
+    true);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -606,6 +606,7 @@ SentryTurretCVCommand::TurretConfig turretRightCVConfig(
 
 SentryTurretCVCommand turretCVCommand(
     drivers()->visionCoprocessor,
+    drivers()->refSerial,
     turretMajor,
     turretMajorWorldYawController,
     turretLeftCVConfig,
