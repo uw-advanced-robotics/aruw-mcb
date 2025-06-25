@@ -21,7 +21,6 @@
 #define CAP_BANK_INDICATOR_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
-#include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 #include "aruwsrc/communication/can/capacitor_bank.hpp"

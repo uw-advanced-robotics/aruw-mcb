@@ -191,7 +191,7 @@ void CapBankIndicator::initialize()
         &capBankVoltageLevel.graphicData,
         capBankName,
         Tx::GRAPHIC_DELETE,
-        DEFAULT_GRAPHIC_LAYER + 1,
+        DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::GREEN);
 
     getUnusedGraphicName(capBankName);
