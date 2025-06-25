@@ -17,31 +17,34 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #ifndef ENGINEER_CONSTANTS_HPP_
- #define ENGINEER_CONSTANTS_HPP_
+#ifndef ENGINEER_CONSTANTS_HPP_
+#define ENGINEER_CONSTANTS_HPP_
 
- namespace aruwsrc::engineer {
-    //fyi, some positions/constants should be here but are in the the individual subsystem constants bc :(((((
-    enum ScorePositions {
-        one, 
-        two, 
-        three 
-    };
+namespace aruwsrc::engineer
+{
+// fyi, some positions/constants should be here but are in the the individual subsystem constants bc
+// :(((((
+enum ScorePositions
+{
+    one,
+    two,
+    three
+};
 
-    //score positions
-    static constexpr float gantryLiftScoreOneSetpoint = 1; //TODO: find positions
-    static constexpr float wristYawScoreOneSetpoint = 1;
-    static constexpr float wristPitchScoreOneSetpoint = 1;
-    static constexpr float wristRollScoreOneSetpoint = 1;
+// score positions
+static constexpr float gantryLiftScoreOneSetpoint = 1;  // TODO: find positions
+static constexpr float wristYawScoreOneSetpoint = 1;
+static constexpr float wristPitchScoreOneSetpoint = 1;
+static constexpr float wristRollScoreOneSetpoint = 1;
 
-    static constexpr float gantryLiftScoreTwoSetpoint = 1; //TODO: find positions
-    static constexpr float wristYawScoreTwoSetpoint = 1;
-    static constexpr float wristPitchScoreTwoSetpoint = 1;
-    static constexpr float wristRollScoreTwoSetpoint = 1;
+static constexpr float gantryLiftScoreTwoSetpoint = 1;  // TODO: find positions
+static constexpr float wristYawScoreTwoSetpoint = 1;
+static constexpr float wristPitchScoreTwoSetpoint = 1;
+static constexpr float wristRollScoreTwoSetpoint = 1;
 
-    static constexpr float gantryLiftScoreThreeSetpoint = 1; //TODO: find positions
-    static constexpr float wristYawScoreThreeSetpoint = 1;
-    static constexpr float wristPitchScoreThreeSetpoint = 1;
-    static constexpr float wristRollScoreThreeSetpoint = 1;
- } //namespace aruwsrc::engineer
- #endif //ENGINEER_CONSTANTS_HPP_
+static constexpr float gantryLiftScoreThreeSetpoint = 1;  // TODO: find positions
+static constexpr float wristYawScoreThreeSetpoint = 1;
+static constexpr float wristPitchScoreThreeSetpoint = 1;
+static constexpr float wristRollScoreThreeSetpoint = 1;
+}  // namespace aruwsrc::engineer
+#endif  // ENGINEER_CONSTANTS_HPP_
