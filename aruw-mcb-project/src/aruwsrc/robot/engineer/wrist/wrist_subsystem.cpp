@@ -87,6 +87,8 @@ void WristSubsystem::initialize()
     encoderYaw.initialize();
 }
 
+float valPitch, valYaw;
+
 void WristSubsystem::refresh()
 {
     if (!encoderPitch.isOnline() || !encoderYaw.isOnline())
@@ -95,6 +97,9 @@ void WristSubsystem::refresh()
         motorRight.setDesiredOutput(0);
         return;
     }
+
+    valPitch = getPitch();
+    valYaw = getYaw();
 
     CMSISMat<3, 1> gantryToCOMTranslation =
         computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();

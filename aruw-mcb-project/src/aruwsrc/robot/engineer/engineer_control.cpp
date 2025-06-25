@@ -26,6 +26,7 @@
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/sequential_command.hpp"
 
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -49,7 +50,7 @@
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 using namespace tap::gpio;
@@ -329,19 +330,28 @@ WristControllerCommand wristControllerCommand(
     aruwsrc::engineer::WRIST_PITCH_SCALING_FACTOR,
     aruwsrc::engineer::WRIST_YAW_SCALING_FACTOR);
 
-WristSetpointsCommand wristFoldInCommand(
+WristMovePositionCommand wristMoveTopCommand(
     wristSubsystem,
-    {aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
-     aruwsrc::engineer::WRIST_TOP_SETPOINT,
-     aruwsrc::engineer::WRIST_IN_SETPOINT});
-
-WristSetpointsCommand wristFoldOutCommand(
+    WRIST_TOP_SETPOINT_PITCH,
+    WRIST_TOP_SETPOINT_YAW);
+WristMovePositionCommand wristMoveBottomCommand(
     wristSubsystem,
-    {aruwsrc::engineer::WRIST_TOP_SETPOINT,
-     aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
-     aruwsrc::engineer::WRIST_OUT_SETPOINT});
+    WRIST_BOTTOM_SETPOINT_PITCH,
+    WRIST_BOTTOM_SETPOINT_YAW);
+WristMovePositionCommand wristMoveInCommand(
+    wristSubsystem,
+    WRIST_IN_SETPOINT_PITCH,
+    WRIST_IN_SETPOINT_YAW);
+WristMovePositionCommand wristMoveOutCommand(
+    wristSubsystem,
+    WRIST_OUT_SETPOINT_PITCH,
+    WRIST_OUT_SETPOINT_YAW);
 
-// todo
+SequentialCommand<3> wristFoldOutCommand(
+    {&wristMoveTopCommand, &wristMoveBottomCommand, &wristMoveOutCommand});
+
+SequentialCommand<3> wristFoldInCommand(
+    {&wristMoveBottomCommand, &wristMoveTopCommand, &wristMoveInCommand});
 
 aruwsrc::engineer::DigitalOutCommand suckOffCommand(suckSubsystem, false);
 aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, true);
@@ -351,10 +361,10 @@ aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-tap::control::PressCommandMapping rightUp(
-    drivers(),
-    {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+// tap::control::PressCommandMapping rightUp(
+//     drivers(),
+//     {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 tap::control::HoldCommandMapping rightDown(
     drivers(),
@@ -385,6 +395,11 @@ tap::control::PressCommandMapping wristFoldOut(
     drivers(),
     {&wristFoldOutCommand},
     RemoteMapState({Remote::Key::B}));
+
+tap::control::HoldCommandMapping tempFoldIn(
+    drivers(),
+    {&wristMoveTopCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -432,12 +447,14 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightUp);
+    // drivers->commandMapper.addMap(&rightUp);
     drivers->commandMapper.addMap(&rightDown);
 
     drivers->commandMapper.addMap(&oneCube);
     drivers->commandMapper.addMap(&twoCube);
     drivers->commandMapper.addMap(&threeCube);
+
+    drivers->commandMapper.addMap(&tempFoldIn);
 
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);

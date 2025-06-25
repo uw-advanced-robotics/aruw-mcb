@@ -30,7 +30,7 @@ namespace aruwsrc::engineer::wrist
 class WristMovePositionCommand : public tap::control::Command
 {
 public:
-    static constexpr float WRIST_MOVE_POSITION_COMMAND_RAMP_RATE = 0.1f;
+    static constexpr float WRIST_MOVE_POSITION_COMMAND_RAMP_RATE = 0.001f;
 
     WristMovePositionCommand(WristSubsystem &wrist, float pitchSetpoint, float yawSetpoint);
 

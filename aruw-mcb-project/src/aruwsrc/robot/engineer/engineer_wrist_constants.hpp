@@ -24,7 +24,6 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer
@@ -71,6 +70,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
     .minYaw = -M_PI_2,
     .maxYaw = M_PI,
     .ratio = 30.0f / 40.0f,
+    .epsilon = 0.01f,
     .maxMotorDesiredOutput = 5500,
 };
 
@@ -90,30 +90,17 @@ static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
 
-static constexpr wrist::Setpoint WRIST_IN_SETPOINT{
-    .pitch = 0,
-    .yaw = 0,
-    .epsilonPitch = 0.1f,
-    .epsilonYaw = 0.1f,
-};
-static constexpr wrist::Setpoint WRIST_TOP_SETPOINT{
-    .pitch = 1.5f,
-    .yaw = 0,
-    .epsilonPitch = 0.1f,
-    .epsilonYaw = 0.1f,
-};
-static constexpr wrist::Setpoint WRIST_BOTTOM_SETPOINT{
-    .pitch = 1.5f,
-    .yaw = M_PI,
-    .epsilonPitch = 0.1f,
-    .epsilonYaw = 0.1f,
-};
-static constexpr wrist::Setpoint WRIST_OUT_SETPOINT{
-    .pitch = 0,
-    .yaw = M_PI,
-    .epsilonPitch = 0.1f,
-    .epsilonYaw = 0.1f,
-};
+static constexpr float WRIST_TOP_SETPOINT_PITCH = 1.5f;
+static constexpr float WRIST_TOP_SETPOINT_YAW = M_PI;
+
+static constexpr float WRIST_BOTTOM_SETPOINT_PITCH = 1.5f;
+static constexpr float WRIST_BOTTOM_SETPOINT_YAW = 0.0f;
+
+static constexpr float WRIST_IN_SETPOINT_PITCH = 0.0f;
+static constexpr float WRIST_IN_SETPOINT_YAW = M_PI;
+
+static constexpr float WRIST_OUT_SETPOINT_PITCH = 0.0f;
+static constexpr float WRIST_OUT_SETPOINT_YAW = 0.0f;
 
 }  // namespace aruwsrc::engineer
 #endif  // ENGINEER_WRIST_CONSTANTS_HPP_   `
