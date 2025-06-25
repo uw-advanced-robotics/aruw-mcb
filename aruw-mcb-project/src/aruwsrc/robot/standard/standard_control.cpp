@@ -263,7 +263,7 @@ OttoBallisticsSolver ballisticsSolver(
     odometrySubsystem,
     turret,
     frictionWheels,
-    25.0f,  // defaultLaunchSpeed
+    aruwsrc::control::launcher::LAUNCHER_SPEED,  // defaultLaunchSpeed
     0       // turretID
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
