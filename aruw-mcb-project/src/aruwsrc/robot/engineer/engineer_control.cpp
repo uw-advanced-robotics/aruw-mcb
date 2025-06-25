@@ -53,6 +53,7 @@
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
+#include "aruwsrc/robot/engineer/cubelift_switch_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
@@ -378,22 +379,26 @@ aruwsrc::engineer::SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem
 aruwsrc::engineer::SetpointMovePositionCommand liftDownCommand(gantryLiftSubsystem, 2);
 aruwsrc::engineer::SetpointMovePositionCommand gantryRetractCommand(gantryExtensionSubsystem, 2);
 aruwsrc::engineer::SetpointMovePositionCommand gantryExtendCommand(gantryExtensionSubsystem, 2);
+aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
+aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
-SequentialCommand<9> storeCubeCommand(std::array<Command *, 9>{
-    {&liftUpCommand, &gantryRetractCommand, &wristFoldInCommand, &liftDownCommand, &suckOffCommand, &releaseOffCommand, &gantryExtendCommand, &liftUpCommand, &gantryRetractCommand}});
-
+SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
+    {&liftUpCommand, &gantryRetractCommand, &wristFoldInCommand, &liftDownCommand, &suckOffCommand, &releaseOnCommand, &gantryExtendCommand, &liftUpCommand, &gantryRetractCommand, &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
+    {&liftDownCommand, &gantryExtendCommand, &wristFoldInCommand, &gantryRetractCommand, &suckOnCommand, &releaseOffCommand, &liftUpCommand, &wristFoldOutCommand, &liftDownCommand, &cubeLiftSwitchUpCommand}});
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
-
-tap::control::PressCommandMapping wristFoldOut(
-    drivers(),
-    {&wristFoldOutCommand},
-    RemoteMapState({Remote::Key::B}));
 
 tap::control::PressCommandMapping suckToggle(
     drivers(),
     {&suckToggleCommand},
     RemoteMapState({Remote::Key::CTRL}));
+
+tap::control::PressCommandMapping storeCube(drivers(), {&storeCubeCommand}, RemoteMapState({Remote::Key::Z}, {Remote::Key::SHIFT}));
+tap::control::PressCommandMapping retrieveCube(drivers(), {&retrieveCubeCommand}, RemoteMapState({Remote::Key::X}, {Remote::Key::SHIFT}));
+
+tap::control::PressCommandMapping cubeLiftUp(drivers(), {&cubeLiftSwitchUpCommand}, RemoteMapState({Remote::Key::Z, Remote::Key::SHIFT}));
+tap::control::PressCommandMapping cubeLiftDown(drivers(), {&cubeLiftSwitchUpCommand}, RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -446,6 +451,10 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&suckToggle);
+    drivers->commandMapper.addMap(&cubeLiftUp);
+    drivers->commandMapper.addMap(&cubeLiftDown);
+    drivers->commandMapper.addMap(&storeCube);
+    drivers->commandMapper.addMap(&retrieveCube);
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ENGINEER_LIFT_CONSTANTS_HPP_
-#define ENGINEER_LIFT_CONSTANTS_HPP_
+#ifndef ENGINEER_CUBE_LIFT_CONSTANTS_HPP_
+#define ENGINEER_CUBE_LIFT_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/digital.hpp"
@@ -32,8 +32,6 @@ static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS
 
 static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::B;
-
-static constexpr float LIFT_UPPER_BOUND = 1000;  // TODO: UPDATE
 
 static constexpr int16_t FEEDFORWARD = 1000;
 
@@ -63,6 +61,8 @@ static constexpr float CUBE_LIFT_MOVE_SPEED = -2;  // TODO: choose value alter
 static constexpr float ONE_CUBE_SETPOINT = -40;
 static constexpr float TWO_CUBE_SETPOINT = -220;
 static constexpr float THREE_CUBE_SETPOINT = -310;
+
+static constexpr float LIFT_UPPER_BOUND = THREE_CUBE_SETPOINT;
 
 }  // namespace aruwsrc::engineer
 #endif
