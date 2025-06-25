@@ -86,14 +86,14 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 
 #if defined(TARGET_STANDARD_NULL)
 // Actual CAD value is 55.76, decreased for balls in hopper
-static constexpr float TURRET_CG_X = 33.83;
-static constexpr float TURRET_CG_Z = 26.68;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
+static constexpr float TURRET_CG_X = 0;
+static constexpr float TURRET_CG_Z = 30.0;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = -6'000;
 
 #elif defined(TARGET_STANDARD_VOID)
-static constexpr float TURRET_CG_X = 33.83;
-static constexpr float TURRET_CG_Z = 26.68;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
+static constexpr float TURRET_CG_X = 0;
+static constexpr float TURRET_CG_Z = 30.0;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = -6'000;
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif
@@ -309,12 +309,12 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 80'000.0f,
-    .ki = 200.0f,
-    .kd = 7'000.0f,
-    .maxICumulative = 7000.0f,
+    .kp = 250'000.0f,
+    .ki = 1'000.0f,
+    .kd = 10'000.0f,
+    .maxICumulative = 5'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
-    .tQDerivativeKalman = 1.0f,
+    .tQDerivativeKalman = 0.25f,
     .tRDerivativeKalman = 10.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 2.0f,
@@ -341,9 +341,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 80'000.0f,
     .ki = 200.0f,
     .kd = 7'000.0f,
-    .maxICumulative = 7000.0f,
+    .maxICumulative = 5'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
-    .tQDerivativeKalman = 1.0f,
+    .tQDerivativeKalman = 0.25f,
     .tRDerivativeKalman = 10.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 2.0f,
