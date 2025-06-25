@@ -125,6 +125,8 @@ private:
 
     modm::Pid<float> velocityPidRightWheel;
 
+    modm::Pid<float> speedCorrectionPid;
+
     float desiredLaunchSpeed;
 
     uint32_t prevTime = 0;
@@ -145,6 +147,8 @@ private:
 #endif
 
     aruwsrc::can::TurretMCBCanComm *turretMCB;
+
+    float prevShotTime = 0.0f;
 
     FrictionWheelTestCommand frictionTestCommand;
 
