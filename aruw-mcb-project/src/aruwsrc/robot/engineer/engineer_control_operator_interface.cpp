@@ -134,9 +134,11 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
     {
         return -wristRollVelocity;  // TODO: fix
     }
-    else
+    else if (drivers->remote.getMouseR() && drivers->remote.keyPressed(Remote::Key::SHIFT))
     {
         return wristRollVelocity;
+    } else {
+        return 0;
     }
 }
 

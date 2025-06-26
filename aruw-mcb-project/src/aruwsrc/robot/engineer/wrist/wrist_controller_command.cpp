@@ -42,11 +42,12 @@ WristControllerCommand::WristControllerCommand(
 
 void WristControllerCommand::initialize() {}
 
+float rollScale = 0.01;
 void WristControllerCommand::execute()
 {
     // Get the desired velocities from the operator interface
     // to add/subtract from position setpoint
-    float rollVelocity = operatorInterface->getWristRollVelocity() * rollScalingFactor;
+    float rollVelocity = operatorInterface->getWristRollVelocity() * rollScale;//* rollScalingFactor;
     float pitchVelocity = operatorInterface->getWristPitchVelocity() * pitchScalingFactor;
     float yawVelocity = operatorInterface->getWristYawVelocity() * yawScalingFactor;
 
