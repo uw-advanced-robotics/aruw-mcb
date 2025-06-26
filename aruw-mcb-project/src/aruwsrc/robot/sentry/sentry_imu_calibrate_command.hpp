@@ -58,14 +58,14 @@ public:
     /**
      * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in radians/s
      */
-    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-3);
+    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1);
     /**
      * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
      * in radians.
      *
      * @note is 0 for max precision on sentry, which chassis-rel controllers can reach.
      */
-    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.08f);
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(1);
 
     /**
      * @param[in] drivers A pointer to the global drivers object.
