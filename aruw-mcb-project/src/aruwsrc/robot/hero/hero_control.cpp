@@ -396,7 +396,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     }},
     &chassis,
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD * 10, // Because of backlash
+    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD * 10,  // Because of backlash
     &odometrySubsystem,
     // {&drivers()->ism330});
     {&drivers()->mpu6500});
