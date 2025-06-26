@@ -38,7 +38,7 @@ void SetpointMoveManualCommand::initialize() {}
 
 void SetpointMoveManualCommand::execute()
 {
-    if (!operatorInterface->isGantryControlMode()) return;
+    if (!operatorInterface->isGantryWristControlMode()) return;
 
     float setpoint = cubeLift.getSetpoint();
     switch (setpointType)

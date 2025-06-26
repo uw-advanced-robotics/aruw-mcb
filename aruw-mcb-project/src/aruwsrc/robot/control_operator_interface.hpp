@@ -143,7 +143,6 @@ public:
      */
     mockable float getSentrySpeedInput();
 
-
 protected:
     tap::Drivers *drivers;
 
@@ -167,7 +166,7 @@ protected:
      * Scales `value` when ctrl/shift are pressed and returns the scaled value.
      */
     float applyChassisSpeedScaling(float value);
-    
+
     void applyAccelerationToRamp(
         tap::algorithms::Ramp &ramp,
         float maxAcceleration,

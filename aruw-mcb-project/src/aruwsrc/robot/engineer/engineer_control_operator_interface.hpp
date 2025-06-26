@@ -95,12 +95,7 @@ public:
      * @return whether or not the control switch is set to gantry (lift + horizontal extension)
      * control mode.
      */
-    bool isGantryControlMode();
-
-    /**
-     * @return whether or not the control switch is set to wrist control mode.
-     */
-    bool isWristControlMode();
+    bool isGantryWristControlMode();
 
 private:
     tap::Drivers *drivers;
