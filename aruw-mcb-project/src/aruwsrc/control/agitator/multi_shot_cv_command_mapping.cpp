@@ -46,16 +46,19 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
     switch (launchMode)
     {
         case SINGLE:
-            timesToReschedule = 1;
+            timesToReschedule = -1;
             fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+            enableConstantRotation = true;
             break;
         case NO_HEATING:
             timesToReschedule = -1;
-            fireRate = getCurrentBarrelCoolingRate();
+            fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+            enableConstantRotation = true;
             break;
         case LIMITED_10HZ:
             timesToReschedule = -1;
-            fireRate = 10;
+            fireRate = ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
+            enableConstantRotation = true;
             break;
         case LIMITED_20HZ:
             timesToReschedule = -1;
