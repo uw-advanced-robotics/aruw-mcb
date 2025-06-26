@@ -68,7 +68,7 @@
 #include "aruwsrc/control/client-display/indicators/enemy_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -474,7 +474,7 @@ CvOnTargetGovernor cvOnTargetGovernor(
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
-    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+    CvOnTargetGovernorMode::ON_TARGET);
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 GovernorLimitedCommand<1> launchKickerNoHeatLimiting(
     {&kickerAgitator},
