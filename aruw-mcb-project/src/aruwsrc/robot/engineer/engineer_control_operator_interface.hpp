@@ -44,6 +44,7 @@ public:
 
     virtual float getChassisRInput() override;
 
+
     /**
      * @return The cube lift velocity.
      */
@@ -95,12 +96,12 @@ public:
      * @return whether or not the control switch is set to gantry (lift + horizontal extension)
      * control mode.
      */
-    bool isGantryControlMode();
+    bool isGantryWristControlMode();
 
     /**
      * @return whether or not the control switch is set to wrist control mode.
      */
-    bool isWristControlMode();
+    // bool isWristControlMode();
 
 private:
     tap::Drivers *drivers;
