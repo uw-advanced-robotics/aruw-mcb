@@ -62,6 +62,7 @@
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
@@ -72,7 +73,7 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -97,6 +98,7 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/standard/autostandard_turret_cv_command.hpp"
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
@@ -243,6 +245,15 @@ StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
+OttoBallisticsSolver ballisticsSolver(
+    drivers()->visionCoprocessor,
+    odometrySubsystem,
+    turret,
+    frictionWheels,
+    aruwsrc::control::launcher::LAUNCHER_SPEED,  // defaultLaunchSpeed
+    0                                            // turretID
+);
+
 VelocityAgitatorSubsystem agitator(
     drivers(),
     constants::AGITATOR_PID_CONFIG,
@@ -258,14 +269,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-OttoBallisticsSolver ballisticsSolver(
-    drivers()->visionCoprocessor,
-    odometrySubsystem,
-    turret,
-    frictionWheels,
-    aruwsrc::control::launcher::LAUNCHER_SPEED,  // defaultLaunchSpeed
-    0                                            // turretID
-);
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
@@ -297,6 +300,12 @@ aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &chassis,
     &turret.yawMotor,
     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+
+aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
+    *drivers(),
+    chassis,
+    autoNavController,
+    false);
 
 aruwsrc::chassis::WiggleDriveCommand wiggleCommand(
     drivers(),
@@ -366,6 +375,23 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     turret.yawMotor,
     worldFrameYawTurretImuPosPidCv,
     worldFrameYawTurretImuVelPidCv);
+
+aruwsrc::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    transformer.getWorldToChassis(),
+    aruwsrc::chassis::BEYBLADE_CONFIG);
+
+AutostandardTurretCVCommand::TurretConfig autoTurretCVConfig(
+    turrett,
+    worldFrameYawTurretImuControllerCv,
+    worldFramePitchTurretImuControllerCv,
+    ballisticsSolver);
+
+AutostandardTurretCVCommand autoTurretCVCommand(
+    drivers()->visionCoprocessor,
+    autoTurretCVConfig,
+    transformer);
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
