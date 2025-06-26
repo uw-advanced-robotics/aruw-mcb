@@ -95,7 +95,7 @@ float EngineerControlOperatorInterface::getWristPitchVelocity()
 {
     if (isWristControlMode())
     {
-        return drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) +
+        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
                drivers->remote.getMouseY();
     }
     else
@@ -135,7 +135,42 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
 
 float EngineerControlOperatorInterface::getChassisXInput()
 {
-    float xInput = ControlOperatorInterface::getChassisXInput();
+    uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisXInputCalledTime;
+    prevChassisXInputCalledTime = currTime;
+
+    if (prevUpdateCounterX != updateCounter)
+    {
+        if (isDriveMode) {
+            chassisXInput.update(drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL), currTime);
+        } else {
+            chassisXInput.update(0, currTime);
+        }
+        prevUpdateCounterX = updateCounter;
+    }
+
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
+
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+
+    float finalX = maxChassisSpeed *
+                   limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisXInputRamp.setTarget(applyChassisSpeedScaling(finalX));
+
+    applyAccelerationToRamp(
+        chassisXInputRamp,
+        MAX_ACCELERATION_X,
+        MAX_DECELERATION_X,
+        static_cast<float>(dt) / 1E3F);
+
+    
+    float xInput = ChassisXInputRamp.getValue();
+    
     if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
         return xInput;
