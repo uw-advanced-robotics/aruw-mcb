@@ -42,7 +42,25 @@ float ControlOperatorInterface::applyChassisSpeedScaling(float value) { return v
  * @param[in] maxDeceleration Negative acceleration value to apply to the ramp, in units/time^2.
  * @param[in] dt Change in time since this function was last called, in units of some time.
  */
-static inline void applyAccelerationToRamp(
+// static inline void applyAccelerationToRamp(
+//     tap::algorithms::Ramp &ramp,
+//     float maxAcceleration,
+//     float maxDeceleration,
+//     float dt)
+// {
+//     if (getSign(ramp.getTarget()) == getSign(ramp.getValue()) &&
+//         abs(ramp.getTarget()) > abs(ramp.getValue()))
+//     {
+//         // we are trying to speed up
+//         ramp.update(maxAcceleration * dt);
+//     }
+//     else
+//     {
+//         // we are trying to slow down
+//         ramp.update(maxDeceleration * dt);
+//     }
+// }
+void ControlOperatorInterface::applyAccelerationToRamp(
     tap::algorithms::Ramp &ramp,
     float maxAcceleration,
     float maxDeceleration,
@@ -86,7 +104,7 @@ float ControlOperatorInterface::getChassisXInput()
 
     chassisXInputRamp.setTarget(applyChassisSpeedScaling(finalX));
 
-    applyAccelerationToRamp(
+    this->applyAccelerationToRamp(
         chassisXInputRamp,
         MAX_ACCELERATION_X,
         MAX_DECELERATION_X,
@@ -122,7 +140,7 @@ float ControlOperatorInterface::getChassisYInput()
 
     chassisYInputRamp.setTarget(applyChassisSpeedScaling(finalY));
 
-    applyAccelerationToRamp(
+    this->applyAccelerationToRamp(
         chassisYInputRamp,
         MAX_ACCELERATION_Y,
         MAX_DECELERATION_Y,
@@ -158,7 +176,7 @@ float ControlOperatorInterface::getChassisRInput()
 
     chassisRInputRamp.setTarget(finalR);
 
-    applyAccelerationToRamp(
+    this->applyAccelerationToRamp(
         chassisRInputRamp,
         MAX_ACCELERATION_R,
         MAX_DECELERATION_R,
