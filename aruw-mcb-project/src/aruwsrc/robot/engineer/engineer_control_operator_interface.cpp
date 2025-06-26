@@ -41,28 +41,30 @@ bool EngineerControlOperatorInterface::isWristControlMode()
 
 float EngineerControlOperatorInterface::getCubeLiftVelocity()
 {
-    return drivers->remote.getChannel(Remote::Channel::WHEEL);
-    // if (isGantryControlMode())
-    //     return drivers->remote.getChannel(Remote::Channel::WHEEL);
+    //return drivers->remote.getChannel(Remote::Channel::WHEEL);
+    if (isGantryControlMode())
+        return drivers->remote.getChannel(Remote::Channel::WHEEL);
+    return 0;
 }
 
 float EngineerControlOperatorInterface::getGantryLiftVelocity()
 {
-    return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
-    // if (isGantryControlMode())
-    //     return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
+    // return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
+    if (isGantryControlMode())
+        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
+    return 0;
 }
 
 float EngineerControlOperatorInterface::getGantryExtensionVelocity()
 {
     if (isGantryControlMode())
     {
-        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) +
-               drivers->remote.getMouseX();
+        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL); //+
+              // drivers->remote.getMouseX();
     }
     else
     {
-        return drivers->remote.getMouseX();
+        return 0;//drivers->remote.getMouseX();
     }
 }
 
@@ -95,24 +97,24 @@ float EngineerControlOperatorInterface::getWristPitchVelocity()
 {
     if (isWristControlMode())
     {
-        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
-               drivers->remote.getMouseY();
+        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL); //+
+              // drivers->remote.getMouseY();
     }
     else
     {
-        return drivers->remote.getMouseY();
+        return 0;//drivers->remote.getMouseY();
     }
 }
 float EngineerControlOperatorInterface::getWristYawVelocity()
 {
     if (isWristControlMode())
     {
-        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) +
-               drivers->remote.getMouseX();
+        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL); //+
+               //drivers->remote.getMouseX();
     }
     else
     {
-        return drivers->remote.getMouseX();
+        return 0;//drivers->remote.getMouseX();
     }
 }
 
@@ -179,6 +181,8 @@ float EngineerControlOperatorInterface::getChassisXInput()
     {
         return xInput / 2;
     }
+
+    return 0;  
 }
 
 float EngineerControlOperatorInterface::getChassisYInput()
