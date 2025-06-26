@@ -108,7 +108,7 @@ private:
     int PROJECTILE_COUNT_THRESHOLD = 100;  // Minimum number of projectiles to attack
 
     // Speed at which the robot moves when healing, in m/s
-    float SPEED = 1.0f;
+    float SPEED = 5.0f;
 
     const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
     const Position POINT_1 = Position(1.2, 2.1, 0);   // BOTTOM_MIDDLE
