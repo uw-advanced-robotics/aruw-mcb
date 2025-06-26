@@ -86,7 +86,7 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
     .maxOutput = 3000.0f,
 };
 
-static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
+static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
 

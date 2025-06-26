@@ -31,12 +31,13 @@ public:
         tap::Drivers* drivers,
         tap::gpio::Digital& digital,
         const tap::gpio::Digital::OutputPin pin,
-        const bool offState = false)
+        const bool offState = false, const bool safeDisconnectState = false)
         : Subsystem(drivers),
           digital(digital),
           pin(pin),
           offState(offState),
-          state(offState)
+          state(offState), 
+          safeDisconnectState(safeDisconnectState)
     {
     }
 
@@ -46,7 +47,13 @@ public:
 
     inline bool getState() { return state; }
 
-    inline void refreshSafeDisconnect() override { digital.set(pin, offState); }
+    inline void refreshSafeDisconnect() override { 
+        // if (isRelease) {
+        //     digital.set(pin, true);
+        // }
+        // digital.set(pin, offState);
+        digital.set(pin, safeDisconnectState);
+     }
 
     inline void set(bool s) { state = s; }
 
@@ -57,6 +64,7 @@ private:
     const tap::gpio::Digital::OutputPin pin;
     const bool offState;
     bool state;
+    bool safeDisconnectState;
 };  // class DigitalOutSubsystem
 
 }  // namespace aruwsrc::engineer

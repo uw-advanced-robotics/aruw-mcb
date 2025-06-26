@@ -293,12 +293,12 @@ aruwsrc::engineer::DigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true);
+    true, true);
 
 aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
     drivers(),
     drivers()->digital,
-    tap::gpio::Digital::OutputPin::Z);
+    tap::gpio::Digital::OutputPin::Z, false, false);
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -415,6 +415,21 @@ ScorePositionCommand scorePositionCommand(gantryLiftSubsystem, wristSubsystem, w
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+tap::control::PressCommandMapping rightUp(
+    drivers(),
+    {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+    tap::control::HoldCommandMapping rightMid(
+        drivers(),
+        {&suckOffCommand, &releaseOffCommand},
+        tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+
+tap::control::HoldCommandMapping rightDown(
+    drivers(),
+    {&suckOnCommand, &releaseOnCommand},
+    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+
 tap::control::PressCommandMapping suckToggle(
     drivers(),
     {&suckToggleCommand},
@@ -508,6 +523,9 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
     drivers->commandMapper.addMap(&retrieveCube);
     drivers->commandMapper.addMap(&cyclePositions);
     drivers->commandMapper.addMap(&cPressed);
+    drivers->commandMapper.addMap(&rightUp);
+    drivers->commandMapper.addMap(&rightMid);
+    drivers->commandMapper.addMap(&rightDown);
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }

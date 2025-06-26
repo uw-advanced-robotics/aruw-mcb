@@ -66,12 +66,12 @@ float EngineerControlOperatorInterface::getGantryExtensionVelocity()
 {
     if (isGantryWristControlMode())
     {
-        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) +
-               drivers->remote.getMouseX();
+        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL); //+
+              // drivers->remote.getMouseX();
     }
     else
     {
-        return drivers->remote.getMouseX();
+        return 0;//drivers->remote.getMouseX();
     }
 }
 
@@ -104,24 +104,26 @@ float EngineerControlOperatorInterface::getWristPitchVelocity()
 {
     if (isGantryWristControlMode())
     {
-        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
-               drivers->remote.getMouseY();
+        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL); //+
+              // drivers->remote.getMouseY();
     }
     else
     {
-        return drivers->remote.getMouseY();
+        return 0;//drivers->remote.getMouseY();
     }
 }
 float EngineerControlOperatorInterface::getWristYawVelocity()
 {
     if (isGantryWristControlMode())
     {
+        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL); //+
+               //drivers->remote.getMouseX();
         return drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) +
                drivers->remote.getMouseX();
     }
     else
     {
-        return drivers->remote.getMouseX();
+        return 0;//drivers->remote.getMouseX();
     }
 }
 
@@ -136,9 +138,11 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
     {
         return -wristRollVelocity;  // TODO: fix
     }
-    else
+    else if (drivers->remote.getMouseR() && drivers->remote.keyPressed(Remote::Key::SHIFT))
     {
         return wristRollVelocity;
+    } else {
+        return 0;
     }
 }
 
@@ -188,6 +192,8 @@ float EngineerControlOperatorInterface::getChassisXInput()
     {
         return xInput / 2;
     }
+
+    return 0;  
 }
 
 float EngineerControlOperatorInterface::getChassisYInput()
