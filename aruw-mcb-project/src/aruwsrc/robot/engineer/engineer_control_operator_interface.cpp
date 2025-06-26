@@ -18,6 +18,11 @@
  */
 
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+
+using namespace tap::algorithms;
+using namespace aruwsrc::chassis;
 
 namespace aruwsrc::control::engineer
 {
@@ -142,7 +147,7 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
     if (prevUpdateCounterX != updateCounter)
     {
-        if (isDriveMode) {
+        if (isDriveMode()) {
             chassisXInput.update(drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL), currTime);
         } else {
             chassisXInput.update(0, currTime);
@@ -162,14 +167,14 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
     chassisXInputRamp.setTarget(applyChassisSpeedScaling(finalX));
 
-    applyAccelerationToRamp(
+    ControlOperatorInterface::applyAccelerationToRamp(
         chassisXInputRamp,
         MAX_ACCELERATION_X,
         MAX_DECELERATION_X,
         static_cast<float>(dt) / 1E3F);
 
     
-    float xInput = ChassisXInputRamp.getValue();
+    float xInput = chassisXInputRamp.getValue();
     
     if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
@@ -183,7 +188,41 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
 float EngineerControlOperatorInterface::getChassisYInput()
 {
-    float yInput = ControlOperatorInterface::getChassisYInput();
+    uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisYInputCalledTime;
+    prevChassisYInputCalledTime = currTime;
+
+    if (prevUpdateCounterY != updateCounter)
+    {
+        if (isDriveMode()) {
+            chassisYInput.update(-drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL), currTime);
+        } else {
+            chassisXInput.update(0, currTime);
+        }
+        
+        prevUpdateCounterY = updateCounter;
+    }
+
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::A) - drivers->remote.keyPressed(Remote::Key::D);
+
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+
+    float finalY = maxChassisSpeed *
+                   limitVal(chassisYInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisYInputRamp.setTarget(applyChassisSpeedScaling(finalY));
+
+    applyAccelerationToRamp(
+        chassisYInputRamp,
+        MAX_ACCELERATION_Y,
+        MAX_DECELERATION_Y,
+        static_cast<float>(dt) / 1E3F);
+
+    float yInput = chassisYInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
         return yInput;
@@ -196,7 +235,42 @@ float EngineerControlOperatorInterface::getChassisYInput()
 
 float EngineerControlOperatorInterface::getChassisRInput()
 {
-    float rInput = ControlOperatorInterface::getChassisRInput();
+    uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisRInputCalledTime;
+    prevChassisRInputCalledTime = currTime;
+
+    if (prevUpdateCounterR != updateCounter)
+    {
+        if (isDriveMode()) {
+            chassisRInput.update(
+                -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
+                currTime);
+        } else {
+            chassisXInput.update(0, currTime);
+        }
+        prevUpdateCounterR = updateCounter;
+    }
+
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
+
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+
+    float finalR = maxChassisSpeed *
+                   limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisRInputRamp.setTarget(finalR);
+
+    applyAccelerationToRamp(
+        chassisRInputRamp,
+        MAX_ACCELERATION_R,
+        MAX_DECELERATION_R,
+        static_cast<float>(dt) / 1E3);
+    
+    float rInput = chassisRInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
         return rInput;

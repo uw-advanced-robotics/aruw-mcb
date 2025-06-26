@@ -143,7 +143,8 @@ public:
      */
     mockable float getSentrySpeedInput();
 
-private:
+
+protected:
     tap::Drivers *drivers;
 
     uint32_t prevUpdateCounterX = 0;
@@ -166,6 +167,12 @@ private:
      * Scales `value` when ctrl/shift are pressed and returns the scaled value.
      */
     float applyChassisSpeedScaling(float value);
+    
+    void applyAccelerationToRamp(
+        tap::algorithms::Ramp &ramp,
+        float maxAcceleration,
+        float maxDeceleration,
+        float dt);
 };  // class ControlOperatorInterface
 
 }  // namespace control
