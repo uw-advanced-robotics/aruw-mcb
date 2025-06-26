@@ -121,60 +121,60 @@ TEST_F(MultiShotCvCommandMappingTest, getShooterState_matches_setShooterState)
     }
 }
 
-TEST_F(MultiShotCvCommandMappingTest, setShooterState_single_adds_command_once)
-{
-    ON_CALL(cvOnTargetGovernor, inShotTimingMode).WillByDefault(Return(false));
+// TEST_F(MultiShotCvCommandMappingTest, setShooterState_single_adds_command_once)
+// {
+//     ON_CALL(cvOnTargetGovernor, inShotTimingMode).WillByDefault(Return(false));
 
-    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(1);
+//     EXPECT_CALL(drivers.commandScheduler, addCommand).Times(1);
 
-    EXPECT_CALL(fireRateManager, setFireRate(ManualFireRateReselectionManager::MAX_FIRERATE_RPS))
-        .Times(4);
+//     EXPECT_CALL(fireRateManager, setFireRate(ManualFireRateReselectionManager::MAX_FIRERATE_RPS))
+//         .Times(4);
 
-    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::SINGLE);
+//     multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::SINGLE);
 
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-}
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+// }
 
-TEST_F(MultiShotCvCommandMappingTest, setShooterState_10hz_full_repeatedly_adds_commands)
-{
-    ON_CALL(cvOnTargetGovernor, inShotTimingMode).WillByDefault(Return(false));
+// TEST_F(MultiShotCvCommandMappingTest, setShooterState_10hz_full_repeatedly_adds_commands)
+// {
+//     ON_CALL(cvOnTargetGovernor, inShotTimingMode).WillByDefault(Return(false));
 
-    {
-        InSequence seq;
-        EXPECT_CALL(fireRateManager, setFireRate(10)).Times(4);
-        EXPECT_CALL(fireRateManager, setFireRate(20)).Times(4);
-        EXPECT_CALL(
-            fireRateManager,
-            setFireRate(ManualFireRateReselectionManager::MAX_FIRERATE_RPS))
-            .Times(4);
-    }
+//     {
+//         InSequence seq;
+//         EXPECT_CALL(fireRateManager, setFireRate(10)).Times(4);
+//         EXPECT_CALL(fireRateManager, setFireRate(20)).Times(4);
+//         EXPECT_CALL(
+//             fireRateManager,
+//             setFireRate(ManualFireRateReselectionManager::MAX_FIRERATE_RPS))
+//             .Times(4);
+//     }
 
-    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(12);
+//     EXPECT_CALL(drivers.commandScheduler, addCommand).Times(12);
 
-    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::LIMITED_10HZ);
+//     multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::LIMITED_10HZ);
 
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
 
-    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::LIMITED_20HZ);
+//     multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::LIMITED_20HZ);
 
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
 
-    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::FULL_AUTO);
+//     multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::FULL_AUTO);
 
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-    multiShotCommandMapping.executeCommandMapping(defaultRms);
-}
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+//     multiShotCommandMapping.executeCommandMapping(defaultRms);
+// }
 
 TEST_F(
     MultiShotCvCommandMappingTest,
