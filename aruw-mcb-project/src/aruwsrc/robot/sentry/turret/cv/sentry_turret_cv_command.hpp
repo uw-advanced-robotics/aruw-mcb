@@ -22,7 +22,6 @@
 
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/timeout.hpp"
-#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
@@ -108,7 +107,6 @@ public:
      */
     SentryTurretCVCommand(
         serial::VisionCoprocessor &visionCoprocessor,
-        const tap::communication::serial::RefSerial &refSerial,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
         TurretConfig &turretLeftConfig,
@@ -155,7 +153,6 @@ private:
         bool *withinAimingTolerance);
 
     serial::VisionCoprocessor &visionCoprocessor;
-    const tap::communication::serial::RefSerial &refSerial;
 
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;
