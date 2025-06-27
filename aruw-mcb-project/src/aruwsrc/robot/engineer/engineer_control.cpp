@@ -27,6 +27,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/sequential_command.hpp"
+#include "tap/control/concurrent_command.hpp"
 
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -293,15 +294,12 @@ aruwsrc::engineer::DigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true,
-    true);
+    true, true);
 
 aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
     drivers(),
     drivers()->digital,
-    tap::gpio::Digital::OutputPin::Z,
-    false,
-    false);
+    tap::gpio::Digital::OutputPin::Z, false, false);
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -415,6 +413,15 @@ SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
      &liftDownCommand,
      &cubeLiftSwitchUpCommand}});
 ScorePositionCommand scorePositionCommand(gantryLiftSubsystem, wristSubsystem, wristRollSubsystem);
+
+//testing stuff for now
+SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 70);
+SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
+SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
+WristMovePositionCommand wristDown(wristSubsystem, 1.5f, 0);
+WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
+SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -428,9 +435,24 @@ tap::control::HoldCommandMapping rightMid(
     {&suckOffCommand, &releaseOffCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 
+// tap::control::HoldCommandMapping rightDown(
+//     drivers(),
+//     {&suckOnCommand, &releaseOnCommand},
+//     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+
+tap::control::HoldCommandMapping leftDown(
+    drivers(),
+    {&liftCommand, &wristDown},
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+tap::control::HoldCommandMapping rightUp(
+    drivers(),
+    {&gantryOut, &liftScore, &wristOut},
+    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
 tap::control::HoldCommandMapping rightDown(
     drivers(),
-    {&suckOnCommand, &releaseOnCommand},
+    {&gantryOut, &liftPickup, &wristDown},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 tap::control::PressCommandMapping suckToggle(
@@ -519,18 +541,23 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&suckToggle);
-    drivers->commandMapper.addMap(&cubeLiftUp);
-    drivers->commandMapper.addMap(&cubeLiftDown);
-    drivers->commandMapper.addMap(&storeCube);
-    drivers->commandMapper.addMap(&retrieveCube);
-    drivers->commandMapper.addMap(&cyclePositions);
-    drivers->commandMapper.addMap(&cPressed);
+    //delete when done
+
+
+    // TODO: uncomment when done
+    // drivers->commandMapper.addMap(&suckToggle);
+    // drivers->commandMapper.addMap(&cubeLiftUp);
+    // drivers->commandMapper.addMap(&cubeLiftDown);
+    // drivers->commandMapper.addMap(&storeCube);
+    // drivers->commandMapper.addMap(&retrieveCube);
+    // drivers->commandMapper.addMap(&cyclePositions);
+    // drivers->commandMapper.addMap(&cPressed);
     drivers->commandMapper.addMap(&leftUp);
-    drivers->commandMapper.addMap(&rightMid);
+    // drivers->commandMapper.addMap(&rightMid);
+    // drivers->commandMapper.addMap(&rightDown);
+    drivers->commandMapper.addMap(&leftDown);
+    drivers->commandMapper.addMap(&rightUp);
     drivers->commandMapper.addMap(&rightDown);
-    // drivers->commandMapper.addMap(&wristFoldIn);
-    // drivers->commandMapper.addMap(&wristFoldOut);
 }
 }  // namespace control
 }  // namespace aruwsrc
