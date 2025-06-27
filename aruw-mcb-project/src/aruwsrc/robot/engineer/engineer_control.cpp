@@ -383,7 +383,8 @@ aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, true);
 aruwsrc::engineer::DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
 aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 
-aruwsrc::engineer::DigitalOutToggleCommand suckToggleCommand(suckSubsystem);
+aruwsrc::engineer::DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
+//aruwsrc::engineer::DigitalOutToggleCommand releaseToggleCommand(releaseSubsystem);
 
 aruwsrc::engineer::SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
 aruwsrc::engineer::SetpointMovePositionCommand liftDownCommand(gantryLiftSubsystem, 2);
@@ -433,10 +434,10 @@ tap::control::HoldCommandMapping rightDown(
     {&suckOnCommand, &releaseOnCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
-tap::control::PressCommandMapping suckToggle(
+tap::control::PressCommandMapping suctionToggle(
     drivers(),
-    {&suckToggleCommand},
-    RemoteMapState({Remote::Key::CTRL}));
+    {&suctionToggleCommand},
+    RemoteMapState({Remote::Key::F}));
 
 tap::control::PressCommandMapping storeCube(
     drivers(),
@@ -519,7 +520,7 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&suckToggle);
+    drivers->commandMapper.addMap(&suctionToggle);
     drivers->commandMapper.addMap(&cubeLiftUp);
     drivers->commandMapper.addMap(&cubeLiftDown);
     drivers->commandMapper.addMap(&storeCube);

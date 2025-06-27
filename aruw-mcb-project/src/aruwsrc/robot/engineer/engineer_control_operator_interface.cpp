@@ -70,7 +70,7 @@ float EngineerControlOperatorInterface::getGantryExtensionVelocity()
 
 bool EngineerControlOperatorInterface::getGantryKeyUp()
 {
-    return drivers->remote.keyPressed(Remote::Key::F);
+    return drivers->remote.keyPressed(Remote::Key::X);
 }
 
 bool EngineerControlOperatorInterface::getGantryKeyDown()
@@ -97,26 +97,24 @@ float EngineerControlOperatorInterface::getWristPitchVelocity()
 {
     if (isGantryWristControlMode())
     {
-        return -drivers->remote.getChannel(
-            Remote::Channel::RIGHT_VERTICAL);  //+
-                                               // drivers->remote.getMouseY();
+        return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) + (drivers->remote.getMouseX() / divideValYaw); 
     }
     else
     {
-        return 0;  // drivers->remote.getMouseY();
+        return drivers->remote.getMouseY() / divideValPitch;  
     }
 }
+
 float EngineerControlOperatorInterface::getWristYawVelocity()
 {
     if (isGantryWristControlMode())
     {
         return -drivers->remote.getChannel(
-            Remote::Channel::RIGHT_HORIZONTAL);  //+
-                                                 // drivers->remote.getMouseX();
+            Remote::Channel::RIGHT_HORIZONTAL) - (drivers->remote.getMouseX() / divideValYaw);
     }
     else
     {
-        return 0;  // drivers->remote.getMouseX();
+        return -drivers->remote.getMouseX() / divideValYaw;
     }
 }
 
@@ -127,19 +125,22 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
     {
         return drivers->remote.getChannel(Remote::Channel::WHEEL);
     }
-    else if (drivers->remote.getMouseL() && drivers->remote.keyPressed(Remote::Key::SHIFT))
-    {
-        return -wristRollVelocity;  // TODO: fix
-    }
-    else if (drivers->remote.getMouseR() && drivers->remote.keyPressed(Remote::Key::SHIFT))
-    {
-        return wristRollVelocity;
-    }
+    // else if (drivers->remote.getMouseL() && drivers->remote.keyPressed(Remote::Key::SHIFT))
+    // {
+    //     return -wristRollVelocity;  // TODO: fix
+    // }
+    // else if (drivers->remote.getMouseR() && drivers->remote.keyPressed(Remote::Key::SHIFT))
+    // {
+    //     return wristRollVelocity;
+    // }
     else
     {
         return 0;
     }
 }
+
+float chassisSpeed = 8;
+float chassisSpeedNormal = 4;
 
 float EngineerControlOperatorInterface::getChassisXInput()
 {
@@ -183,13 +184,13 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
     float xInput = chassisXInputRamp.getValue();
 
-    if (drivers->remote.keyPressed(Remote::Key::CTRL))
+    if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return xInput;
+        return xInput / chassisSpeedNormal;
     }
     else
     {
-        return xInput / 2;
+        return xInput / chassisSpeed;
     }
 
     return 0;
@@ -212,7 +213,7 @@ float EngineerControlOperatorInterface::getChassisYInput()
         }
         else
         {
-            chassisXInput.update(0, currTime);
+            chassisYInput.update(0, currTime);
         }
 
         prevUpdateCounterY = updateCounter;
@@ -237,13 +238,13 @@ float EngineerControlOperatorInterface::getChassisYInput()
         static_cast<float>(dt) / 1E3F);
 
     float yInput = chassisYInputRamp.getValue();
-    if (drivers->remote.keyPressed(Remote::Key::CTRL))
+    if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return yInput;
+        return yInput / chassisSpeedNormal;
     }
     else
     {
-        return yInput / 2;
+        return yInput / 10;
     }
 }
 
@@ -264,7 +265,7 @@ float EngineerControlOperatorInterface::getChassisRInput()
         }
         else
         {
-            chassisXInput.update(0, currTime);
+            chassisRInput.update(0, currTime);
         }
         prevUpdateCounterR = updateCounter;
     }
@@ -288,13 +289,13 @@ float EngineerControlOperatorInterface::getChassisRInput()
         static_cast<float>(dt) / 1E3);
 
     float rInput = chassisRInputRamp.getValue();
-    if (drivers->remote.keyPressed(Remote::Key::CTRL))
+    if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return rInput;
+        return rInput / chassisSpeedNormal;
     }
     else
     {
-        return rInput / 2;
+        return rInput / chassisSpeed;
     }
 }
 

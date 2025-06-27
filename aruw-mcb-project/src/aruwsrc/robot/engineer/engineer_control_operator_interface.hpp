@@ -99,6 +99,9 @@ public:
 
 private:
     tap::Drivers *drivers;
+    float divideValPitch = 750.0f;
+    float divideValYaw = 750.0f;
+
 };
 }  // namespace aruwsrc::control::engineer
 
