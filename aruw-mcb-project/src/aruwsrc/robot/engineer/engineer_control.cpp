@@ -416,11 +416,11 @@ ScorePositionCommand scorePositionCommand(gantryLiftSubsystem, wristSubsystem, w
 
 //testing stuff for now
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 70);
-SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
-SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
+// SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
+// SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
 WristMovePositionCommand wristDown(wristSubsystem, 1.5f, 0);
-WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
-SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);
+// WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
+// SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -442,18 +442,18 @@ tap::control::HoldCommandMapping rightMid(
 
 tap::control::HoldCommandMapping leftDown(
     drivers(),
-    {&liftCommand, &wristDown},
+    {&gantryOut, &wristDown},
     tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-tap::control::HoldCommandMapping rightUp(
-    drivers(),
-    {&gantryOut, &liftScore, &wristOut},
-    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+// tap::control::HoldCommandMapping rightUp(
+//     drivers(),
+//     {&gantryOut, &liftScore, &wristOut},
+//     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-tap::control::HoldCommandMapping rightDown(
-    drivers(),
-    {&gantryOut, &liftPickup, &wristDown},
-    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+// tap::control::HoldCommandMapping rightDown(
+//     drivers(),
+//     {&gantryOut, &liftPickup, &wristDown},
+//     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 tap::control::PressCommandMapping suckToggle(
     drivers(),
@@ -556,8 +556,8 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
     // drivers->commandMapper.addMap(&rightMid);
     // drivers->commandMapper.addMap(&rightDown);
     drivers->commandMapper.addMap(&leftDown);
-    drivers->commandMapper.addMap(&rightUp);
-    drivers->commandMapper.addMap(&rightDown);
+    // drivers->commandMapper.addMap(&rightUp);
+    // drivers->commandMapper.addMap(&rightDown);
 }
 }  // namespace control
 }  // namespace aruwsrc
