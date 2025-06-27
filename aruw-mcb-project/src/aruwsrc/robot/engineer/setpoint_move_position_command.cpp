@@ -29,12 +29,14 @@ SetpointMovePositionCommand::SetpointMovePositionCommand(
 {
     addSubsystemRequirement(&cubeLift);
 }
+float liftPos = 100;
+void SetpointMovePositionCommand::initialize() {/* cubeLift.setSetpoint(setpoint); */}
 
-void SetpointMovePositionCommand::initialize() { cubeLift.setSetpoint(setpoint); }
-
-void SetpointMovePositionCommand::execute() {}
+void SetpointMovePositionCommand::execute() {
+    cubeLift.setSetpoint(liftPos);
+}
 
 void SetpointMovePositionCommand::end(bool) {}
 
-bool SetpointMovePositionCommand::isFinished() const { return cubeLift.atSetpoint(); }
+bool SetpointMovePositionCommand::isFinished() const { return false;/*cubeLift.atSetpoint();*/ }
 }  // namespace aruwsrc::engineer
