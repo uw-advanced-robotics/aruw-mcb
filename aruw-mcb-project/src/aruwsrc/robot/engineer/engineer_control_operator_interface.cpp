@@ -121,10 +121,10 @@ float EngineerControlOperatorInterface::getWristYawVelocity()
 float wristRollVelocity = 0.5;
 float EngineerControlOperatorInterface::getWristRollVelocity()
 {
-    if (isGantryWristControlMode())
-    {
-        return drivers->remote.getChannel(Remote::Channel::WHEEL);
-    }
+    // if (isGantryWristControlMode())
+    // {
+        return -drivers->remote.getChannel(Remote::Channel::WHEEL);
+    //}
     // else if (drivers->remote.getMouseL() && drivers->remote.keyPressed(Remote::Key::SHIFT))
     // {
     //     return -wristRollVelocity;  // TODO: fix
@@ -133,10 +133,10 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
     // {
     //     return wristRollVelocity;
     // }
-    else
-    {
-        return 0;
-    }
+    // else
+    // {
+    //     return 0;
+    // }
 }
 
 float chassisSpeed = 8;
