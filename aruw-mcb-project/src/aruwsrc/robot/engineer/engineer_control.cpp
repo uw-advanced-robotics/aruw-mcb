@@ -386,19 +386,20 @@ tap::control::PressCommandMapping threeCube(
     {&threeCubePosition},
     RemoteMapState({Remote::Key::C}));
 
-tap::control::PressCommandMapping wristFoldIn(
-    drivers(),
-    {&wristFoldInCommand},
-    RemoteMapState({Remote::Key::V}));
+// tap::control::PressCommandMapping wristFoldIn(
+//     drivers(),
+//     {&wristFoldInCommand},
+//     RemoteMapState({Remote::Key::V}));
 
-tap::control::PressCommandMapping wristFoldOut(
-    drivers(),
-    {&wristFoldOutCommand},
-    RemoteMapState({Remote::Key::B}));
+// tap::control::PressCommandMapping wristFoldOut(
+//     drivers(),
+//     {&wristFoldOutCommand},
+//     RemoteMapState({Remote::Key::B}));
 
 tap::control::HoldCommandMapping tempFoldIn(
     drivers(),
-    {&wristMoveTopCommand},
+    {&wristFoldInCommand},
+    // {&wristMoveBottomCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 /* initialize subsystems ----------------------------------------------------*/

@@ -26,33 +26,60 @@ WristMovePositionCommand::WristMovePositionCommand(
     float yawSetpoint)
     : wrist(wrist),
       pitchSetpoint(pitchSetpoint),
-      yawSetpoint(yawSetpoint)
+      yawSetpoint(yawSetpoint),
+      currPitchSetpoint(0, 0, M_TWOPI),
+      currYawSetpoint(0, 0, M_TWOPI)
 {
     addSubsystemRequirement(&wrist);
 }
 
 void WristMovePositionCommand::initialize()
 {
-    rampPitch.reset(wrist.getPitch());
-    rampYaw.reset(wrist.getYaw());
-
-    rampPitch.setTarget(pitchSetpoint);
-    rampYaw.setTarget(yawSetpoint);
+    currPitchSetpoint = wrist.getPitchWrapped();
+    currYawSetpoint = wrist.getYawWrapped();
 }
+
+int Counter;
+float erPitch, erYaw;
 
 void WristMovePositionCommand::execute()
 {
-    if (!rampPitch.isTargetReached()) rampPitch.update(WRIST_MOVE_POSITION_COMMAND_RAMP_RATE);
-    if (!rampYaw.isTargetReached()) rampYaw.update(WRIST_MOVE_POSITION_COMMAND_RAMP_RATE);
+    Counter++;
 
-    wrist.setSetpointPitch(rampPitch.getValue());
-    wrist.setSetpointYaw(rampYaw.getValue());
+    float errorPitch = currPitchSetpoint.minDifference(pitchSetpoint);
+    erPitch = errorPitch;
+    if (fabs(errorPitch) > WRIST_MOVE_POSITION_COMMAND_RAMP_EPSILON)
+        currPitchSetpoint +=
+            WRIST_MOVE_POSITION_COMMAND_RAMP_RATE * tap::algorithms::getSign(errorPitch);
+    else
+        currYawSetpoint.setWrappedValue(yawSetpoint);
+
+    float errorYaw = currYawSetpoint.minDifference(yawSetpoint);
+    erYaw = errorYaw;
+    if (fabs(errorYaw) > WRIST_MOVE_POSITION_COMMAND_RAMP_EPSILON)
+        currYawSetpoint +=
+            WRIST_MOVE_POSITION_COMMAND_RAMP_RATE * tap::algorithms::getSign(errorYaw);
+    else
+        currYawSetpoint.setWrappedValue(yawSetpoint);
+
+    wrist.setSetpointPitch(currPitchSetpoint.getWrappedValue());
+    wrist.setSetpointYaw(currYawSetpoint.getWrappedValue());
 }
 
-void WristMovePositionCommand::end(bool) {}
+bool EndState;
+
+void WristMovePositionCommand::end(bool a) { EndState = a; }
+
+int commandsCompleted;
 
 bool WristMovePositionCommand::isFinished() const
 {
-    return rampPitch.isTargetReached() && rampYaw.isTargetReached() && wrist.atSetpoint();
+    bool complete = wrist.atSetpoint() &&
+                    (fabs(currPitchSetpoint.minDifference(pitchSetpoint)) <
+                     WRIST_MOVE_POSITION_COMMAND_RAMP_EPSILON) &&
+                    (fabs(currYawSetpoint.minDifference(yawSetpoint)) <
+                     WRIST_MOVE_POSITION_COMMAND_RAMP_EPSILON);
+    if (complete) commandsCompleted++;
+    return complete;
 }
 }  // namespace aruwsrc::engineer::wrist

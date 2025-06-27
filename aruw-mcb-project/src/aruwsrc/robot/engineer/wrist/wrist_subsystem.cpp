@@ -49,7 +49,7 @@ void WristSubsystem::setSetpointPitch(float setpoint)
     if (config.minPitch == config.maxPitch)
         setpointPitch = setpoint;
     else
-        setpointPitch = std::clamp(setpoint, config.minPitch, config.maxPitch);
+        setpointPitch = tap::algorithms::limitVal(setpoint, config.minPitch, config.maxPitch);
 }
 
 void WristSubsystem::setSetpointYaw(float setpoint)
@@ -64,19 +64,33 @@ float WristSubsystem::getPitch() { return encoderPitch.getPosition().getUnwrappe
 
 float WristSubsystem::getYaw() { return encoderYaw.getPosition().getUnwrappedValue(); }
 
+tap::algorithms::WrappedFloat WristSubsystem::getPitchWrapped()
+{
+    return encoderPitch.getPosition();
+}
+
+tap::algorithms::WrappedFloat WristSubsystem::getYawWrapped() { return encoderYaw.getPosition(); }
+
+float errP, errY;
+
 bool WristSubsystem::atSetpointPitch(float epsilon)
 {
-    return tap::algorithms::compareFloatClose(setpointPitch, getPitch(), epsilon);
+    errP = encoderPitch.getPosition().minDifference(setpointPitch);
+    return errP <= epsilon;
 }
 
 bool WristSubsystem::atSetpointYaw(float epsilon)
 {
-    return tap::algorithms::compareFloatClose(setpointYaw, getYaw(), epsilon);
+    errY = encoderYaw.getPosition().minDifference(setpointYaw);
+    return errY <= epsilon;
 }
+
+bool complete = false;
 
 bool WristSubsystem::atSetpoint()
 {
-    return atSetpointPitch(config.epsilon) && atSetpointYaw(config.epsilon);
+    complete = atSetpointPitch(config.epsilon) && atSetpointYaw(config.epsilon);
+    return complete;
 }
 
 void WristSubsystem::initialize()

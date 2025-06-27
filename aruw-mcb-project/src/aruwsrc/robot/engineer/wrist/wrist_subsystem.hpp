@@ -20,6 +20,7 @@
 #ifndef WRIST_SUBSYSTEM_HPP_
 #define WRIST_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/control/subsystem.hpp"
@@ -60,6 +61,10 @@ public:
     float getPitch();
 
     float getYaw();
+
+    tap::algorithms::WrappedFloat getPitchWrapped();
+
+    tap::algorithms::WrappedFloat getYawWrapped();
 
     float getSetpointPitch() { return setpointPitch; }
 

@@ -39,8 +39,8 @@ static constexpr tap::encoder::CanEncoderId WRIST_YAW_ENCODER_ID = tap::encoder:
 static constexpr wrist::WristConfig WRIST_CONFIG{
     .pitchPidConfig =
         {
-            .kp = 10000.0f,
-            .ki = 10.0f,
+            .kp = 8000.0f,
+            .ki = 0.0f,
             .kd = 700.0f,
             .maxICumulative = 1000.0f,
             .maxOutput = 5000.0f,
@@ -53,8 +53,8 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
         },
     .yawPidConfig =
         {
-            .kp = 16000.0f,
-            .ki = 500.0f,
+            .kp = 12000.0f,
+            .ki = 0.0f,
             .kd = 1000.0f,
             .maxICumulative = 500.0f,
             .maxOutput = 5500.0f,
@@ -70,8 +70,8 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
     .minYaw = -M_PI_2,
     .maxYaw = M_PI,
     .ratio = 30.0f / 40.0f,
-    .epsilon = 0.01f,
-    .maxMotorDesiredOutput = 5500,
+    .epsilon = 0.1f,
+    .maxMotorDesiredOutput = 3000,
 };
 
 static constexpr uint32_t WRIST_HOME_PITCH = 2454;
