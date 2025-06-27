@@ -415,6 +415,14 @@ SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
      &wristFoldOutCommand,
      &liftDownCommand,
      &cubeLiftSwitchUpCommand}});
+
+SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 70);
+SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
+SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
+WristMovePositionCommand wristDown(wristSubsystem, 1.5f, 0);
+WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
+SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);     
+
 ScorePositionCommand scorePositionCommand(gantryLiftSubsystem, wristSubsystem, wristRollSubsystem);
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -456,6 +464,15 @@ tap::control::PressCommandMapping cubeLiftDown(
     drivers(),
     {&cubeLiftSwitchUpCommand},
     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
+
+tap::control::PressCommandMapping vPressed(
+    drivers(),
+    {&gantryOut, &liftPickup, &wristDown},
+    RemoteMapState({Remote::Key::V}));
+tap::control::PressCommandMapping bPressed(
+    drivers(),
+    {&gantryOut, &liftScore, &wristOut},
+    RemoteMapState({Remote::Key::B}));
 
 tap::control::PressCommandMapping cyclePositions(
     drivers(),
@@ -530,6 +547,8 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
     drivers->commandMapper.addMap(&leftUp);
     drivers->commandMapper.addMap(&rightMid);
     drivers->commandMapper.addMap(&rightDown);
+    drivers->commandMapper.addMap(&vPressed);
+    drivers->commandMapper.addMap(&bPressed);
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }
