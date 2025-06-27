@@ -66,7 +66,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
             .errDeadzone = 0.0f,
             .errorDerivativeFloor = 0.0,
         },
-    .minPitch = 0.0f,
+    .minPitch = 0.0f - M_PI_4,
     .maxPitch = M_PI_2,
     .minYaw = -M_PI_2,
     .maxYaw = M_PI,
