@@ -41,9 +41,9 @@ class AutoAimFireRateReselectionManager
 {
 public:
     // @todo move this to passed-in config
-    static constexpr float LOW_RPS = 5;
-    static constexpr float MID_RPS = 10;
-    static constexpr float HIGH_RPS = 15;
+    static constexpr float LOW_RPS = 30;
+    static constexpr float MID_RPS = 30;
+    static constexpr float HIGH_RPS = 30;
 
     /**
      * @param[in] visionCoprocessor reference to the vision coprocessor

@@ -131,7 +131,7 @@ static constexpr float LAUNCHER_SPEED =
     tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - .5;
 #else
 static constexpr float LAUNCHER_SPEED =
-    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 1;
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 4;
 #endif
 
 }  // namespace aruwsrc::control::launcher
