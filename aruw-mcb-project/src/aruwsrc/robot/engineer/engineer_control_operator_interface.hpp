@@ -99,8 +99,10 @@ public:
 
 private:
     tap::Drivers *drivers;
-    float divideValPitch = 750.0f;
-    float divideValYaw = 750.0f;
+    float divideValPitch = 375.0f;
+    float divideValYaw = 375.0f;
+    float divideGantryLift = 375.0f;
+    float divideGantryExtension = 375.0f;
 
 };
 }  // namespace aruwsrc::control::engineer

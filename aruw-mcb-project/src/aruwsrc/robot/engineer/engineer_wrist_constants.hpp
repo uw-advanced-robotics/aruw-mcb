@@ -44,7 +44,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
             .ki = 10.0f,
             .kd = 700.0f,
             .maxICumulative = 1000.0f,
-            .maxOutput = 1000.0f, //5000
+            .maxOutput = 5000.0f,
             .tQDerivativeKalman = 1.0f,
             .tRDerivativeKalman = 30.0f,
             .tQProportionalKalman = 1.0f,
@@ -58,7 +58,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
             .ki = 500.0f,
             .kd = 1000.0f,
             .maxICumulative = 500.0f,
-            .maxOutput = 1000.0f, //5500
+            .maxOutput = 5500.0f,
             .tQDerivativeKalman = 1.0f,
             .tRDerivativeKalman = 30.0f,
             .tQProportionalKalman = 1.0f,

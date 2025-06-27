@@ -416,7 +416,7 @@ SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
      &liftDownCommand,
      &cubeLiftSwitchUpCommand}});
 
-SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 70);
+SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 110);
 SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
 SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
 WristMovePositionCommand wristDown(wristSubsystem, 1.5f, 0);
