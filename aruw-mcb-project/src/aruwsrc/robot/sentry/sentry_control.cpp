@@ -790,10 +790,11 @@ HoldCommandMapping rightUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // auto nav + auto aim + cv gated fire
-HoldCommandMapping leftUpRightUp(
+HoldRepeatCommandMapping leftUpRightUp(
     drivers(),
     {&autoNavBeybladeCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    true);
 
 HoldRepeatCommandMapping leftUpRightUpAg(
     drivers(),
