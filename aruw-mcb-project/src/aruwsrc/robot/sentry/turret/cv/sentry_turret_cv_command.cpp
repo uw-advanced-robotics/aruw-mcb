@@ -83,13 +83,13 @@ void SentryTurretCVCommand::computeAimSetpoints(
 
 void SentryTurretCVCommand::execute()
 {
-
     if (!turretLeftConfig.pitchController.isOnline() ||
-           !turretLeftConfig.yawController.isOnline() ||
-           !turretRightConfig.pitchController.isOnline() ||
-           !turretRightConfig.yawController.isOnline()) {
-            return;
-           }
+        !turretLeftConfig.yawController.isOnline() ||
+        !turretRightConfig.pitchController.isOnline() ||
+        !turretRightConfig.yawController.isOnline())
+    {
+        return;
+    }
 
     // setpoints are in chassis frame
     WrappedFloat majorSetpoint = yawControllerMajor.getSetpoint();
@@ -135,7 +135,7 @@ void SentryTurretCVCommand::execute()
         WrappedFloat majorDirection = leftYawSetpoint.minInterpolate(rightYawSetpoint, 0.5);
 
         // utilize major's 180˚ symmetry
-        majorSetpoint = majorSetpoint.minDifference(majorDirection) < M_PI_2
+        majorSetpoint = fabs(majorSetpoint.minDifference(majorDirection)) < M_PI_2
                             ? majorDirection
                             : majorDirection + M_PI;
     }
