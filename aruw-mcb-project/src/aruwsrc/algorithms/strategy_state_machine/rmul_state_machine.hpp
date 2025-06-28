@@ -127,7 +127,9 @@ private:
     // const Position POINT_4 = Position(5.25, 7.5, 0);  // SIDE_WALL
     const Position POINT_3 = Position(5.25, 1.1, 0);  // RIGHT SIDE_WALL
     // const Position RESUPPLY_ZONE = Position(0.34, 6.34, 0);
-    const Position PATROL_POINTS[2]{POINT_3, Position(4.25, 1.1, 0)};  // BIT BEHIND RIGHT SIDE_WALL
+    const Position PATROL_POINTS[2]{
+        POINT_3,
+        POINT_3 - Vector(1, 0, 0)};  // BIT BEHIND RIGHT SIDE_WALL
 
     const std::array<const Position, 4> ATTACKING_PATH = {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3};
 

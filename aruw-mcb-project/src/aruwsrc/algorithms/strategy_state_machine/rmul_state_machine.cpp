@@ -46,9 +46,9 @@ void RMULStateMachine::updateState()
                 state = State::ATTACKING;
                 updatePath(ATTACKING_PATH);
                 pathTimeout.restart(PATH_LENGTH_MILLIS);
+                patrolTimer.stop();
                 patrolState = 0;
             }
-            patrolTimer.stop();
             break;
         case State::ATTACKING:
             // If we're low on health, go to healing
