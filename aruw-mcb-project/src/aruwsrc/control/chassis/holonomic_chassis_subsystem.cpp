@@ -84,21 +84,22 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
     // the x and y movement will be slowed by a fraction of auto rotation amount for maximizing
     // power consumption when the wheel rotation speed for chassis rotation is greater than the
     // MIN_ROTATION_THRESHOLD
-    if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
-    {
-        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+    // if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
+    // {
+    //     const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+    //         drivers->refSerial.getRefSerialReceivingData(),
+    //         HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
-        // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
-        // power(max revolve speed, 2)
-        rTranslationalGain = powf(
-            (maxWheelSpeed + MIN_ROTATION_THRESHOLD - fabsf(chassisRotationDesiredWheelspeed)) /
-                maxWheelSpeed,
-            2.0f);
+        
+    //     // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
+    //     // power(max revolve speed, 2)
+    //     rTranslationalGain = powf(
+    //         (maxWheelSpeed + MIN_ROTATION_THRESHOLD - fabsf(chassisRotationDesiredWheelspeed)) /
+    //             maxWheelSpeed,
+    //         2.0f);
 
-        rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
-    }
+    //     rTranslationalGain = limitVal(rTranslationalGain, 0.0f, 1.0f);
+    // }
     return rTranslationalGain;
 }
 

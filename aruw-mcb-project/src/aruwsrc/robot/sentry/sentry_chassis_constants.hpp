@@ -26,8 +26,8 @@
 namespace aruwsrc::chassis
 {
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.34f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 6.34f;
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -35,7 +35,7 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
  * Since the engineer has no power limiting, this lookup table doesn't matter much, just set some
  * high values.
  */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1, 8'000}};
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1, 12'000}};
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -124,9 +124,9 @@ static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
-    .beybladeRotationalSpeedFractionOfMax = 0.75f,
+    .beybladeRotationalSpeedFractionOfMax = 0.65f,
     .beybladeTranslationalSpeedMultiplier = 0.5f,
-    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.6f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.25f,
     .beybladeRampRate = 100,
 };

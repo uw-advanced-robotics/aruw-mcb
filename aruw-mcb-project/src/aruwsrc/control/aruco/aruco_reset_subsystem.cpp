@@ -41,6 +41,10 @@ void ArucoResetSubsystem::refresh()
 {
     processRealsenseData();
     processArducamData();
+    if (buzzerTimer.isExpired())
+    {
+        tap::buzzer::silenceBuzzer(&drivers->pwm);
+    }
 }
 
 void ArucoResetSubsystem::processRealsenseData()
@@ -91,6 +95,8 @@ void ArucoResetSubsystem::processArducamData()
     newY = lowPassFilter(prevY, newY, VISION_TRUST);
 
     odometry.overrideOdometryPosition(newX, newY);
-}
+    buzzerTimer.restart(200);
+    tap::buzzer::playNote(&drivers->pwm, 1000);
+    }
 
 }  // namespace aruwsrc::control::aruco

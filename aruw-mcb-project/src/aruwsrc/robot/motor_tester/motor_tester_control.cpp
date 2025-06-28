@@ -149,19 +149,19 @@ void initializeSubsystems()
 
 void registerSubsystems(Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
-    drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wheelMotorSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&wheelMotorSubsystem);
 }
 
 void registerIoMappings(Drivers* drivers)
 {
     drivers->commandMapper.addMap(&leftSwitchUp);
 
-    wheelMotorSubsystem.setDefaultCommand(&wheelManual);
-    leftMotorSubsystem.setDefaultCommand(&leftManual);
-    rightMotorSubsystem.setDefaultCommand(&rightManual);
+    // wheelMotorSubsystem.setDefaultCommand(&wheelManual);
+    // leftMotorSubsystem.setDefaultCommand(&leftManual);
+    // rightMotorSubsystem.setDefaultCommand(&rightManual);
 }
 
 }  // namespace motor_tester_control

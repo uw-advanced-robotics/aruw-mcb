@@ -27,6 +27,7 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -57,14 +58,14 @@ public:
     /**
      * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in radians/s
      */
-    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4);
+    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1);
     /**
      * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
      * in radians.
      *
      * @note is 0 for max precision on sentry, which chassis-rel controllers can reach.
      */
-    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(1);
 
     /**
      * @param[in] drivers A pointer to the global drivers object.
@@ -84,13 +85,17 @@ public:
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
         aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
-        aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer);
+        aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
+        aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
+        aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
     const char *getName() const override { return "Sentry calibrate IMU"; }
 
     void initialize() override;
 
     void execute() override;
+
+    bool isFinished() const override;
 
     void end(bool interrupted) override;
 
@@ -104,6 +109,8 @@ protected:
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu;
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite;
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
+    aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
+    aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
     // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
 };

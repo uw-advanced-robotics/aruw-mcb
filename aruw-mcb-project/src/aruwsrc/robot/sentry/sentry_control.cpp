@@ -512,7 +512,7 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     *drivers(),
     chassis,
     autoNavController,
-    false);
+    true);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -553,6 +553,16 @@ SentryManualDriveCommand chassisDriveCommand(
     &(drivers()->controlOperatorInterface),
     &chassis);
 
+NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_SUCCESS_NOTES,
+    IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
+
+NoteSequenceCommand imuCalibrateFailBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_FAIL_NOTES,
+    IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
+
 SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
@@ -578,15 +588,9 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     odometrySubsystem,
     drivers()->turretMajorImu,
     drivers()->chassisMcbLite,
-    transformer);
-
-NoteSequenceCommand imuCalibrateDoneBuzzCommand(
-    buzzer,
-    MARIO_MUSHROOM_NOTES,
-    MARIO_MUSHROOM_NOTE_LENGTH_MS);
-
-SequentialCommand<2> imuCalibrateAndBuzzCommand(std::array<Command *, 2>{
-    {&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
+    transformer,
+    &imuCalibrateSuccessBuzzCommand,
+    &imuCalibrateFailBuzzCommand);
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
@@ -660,7 +664,7 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretLeft(
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimerTurretLeft,
-    SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+    SentryCvOnTargetGovernorMode::ON_TARGET,
     turretLeft::turretID);
 
 // TODO:: see if this actually does stuff, test later.
@@ -739,7 +743,7 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretRight(
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimerTurretRight,
-    SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
+    SentryCvOnTargetGovernorMode::ON_TARGET,
     turretRight::turretID);
 
 RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRight(
@@ -786,10 +790,11 @@ HoldCommandMapping rightUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // auto nav + auto aim + cv gated fire
-HoldCommandMapping leftUpRightUp(
+HoldRepeatCommandMapping leftUpRightUp(
     drivers(),
     {&autoNavBeybladeCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    true);
 
 HoldRepeatCommandMapping leftUpRightUpAg(
     drivers(),
@@ -807,7 +812,7 @@ HoldCommandMapping leftUpRightMid(
 // imu calibrate
 HoldCommandMapping leftUpRightDown(
     drivers(),
-    {&imuCalibrateAndBuzzCommand},
+    {&imuCalibrateCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
 // manual aim and shoot
@@ -938,7 +943,7 @@ void setDefaultSentryCommands(Drivers *)
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentryCommands(Drivers *drivers)
 {
-    drivers->commandScheduler.addCommand(&imuCalibrateAndBuzzCommand);
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
     drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
 }
