@@ -420,9 +420,10 @@ SequentialCommand<10> retrieveCubeCommand(
          &cubeLiftSwitchUpCommand}});
 
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 240);
+SetpointMovePositionCommand gantryIn(gantryExtensionSubsystem, 20);
 SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
 SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
-WristMovePositionCommand wristDown(wristSubsystem, M_PI_2 - 0.001, 0);
+WristMovePositionCommand wristDown(wristSubsystem, 1.605495333, 0);
 WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
 SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);
 
@@ -475,13 +476,13 @@ tap::control::PressCommandMapping vPressed(
 
 tap::control::PressCommandMapping bPressed(
     drivers(),
-    {&gantryOut, &liftScore, &wristOut},
+    {&gantryIn, &liftScore},
     RemoteMapState({Remote::Key::B}));
 
 tap::control::PressCommandMapping cyclePositions(
     drivers(),
     {&scorePositionCommand},
-    RemoteMapState({Remote::Key::C}));  // should it be not shfit or not
+    RemoteMapState({Remote::Key::C}));  // should it be not shift or not
 
 CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
     drivers(),

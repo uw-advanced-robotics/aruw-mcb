@@ -40,7 +40,7 @@ public:
         float upperBound,
         float home = 0,
         float kS = 0,
-        float epsilon = 1e-4f);
+        float epsilon = 5.0f);
 
     virtual void initialize() override;
 
