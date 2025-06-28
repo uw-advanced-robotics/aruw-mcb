@@ -44,23 +44,46 @@ void RMULStateMachine::updateState()
             if (health >= ATTACKING_THRESHOLD && safeToAttack())
             {
                 state = State::ATTACKING;
+                updatePath(ATTACKING_PATH);
+                pathTimeout.restart(PATH_LENGTH_MILLIS);
+                patrolState = 0;
             }
+            patrolTimer.stop();
             break;
         case State::ATTACKING:
             // If we're low on health, go to healing
             if (health < HEALING_THRESHOLD || !safeToAttack())
             {
                 state = State::HEALING;
+                updatePath(HEALING_PATH);
+                pathTimeout.restart(PATH_LENGTH_MILLIS);
+            }
+            else if (pathTimeout.isExpired())
+            {
+                // Patrol
+                if (patrolTimer.isStopped())
+                {
+                    patrolTimer.restart(PATROL_SEGMENT_LENGTH_MILLIS);
+                }
+
+                if (patrolTimer.execute())
+                {
+                    uint8_t newPatrolState = (patrolState + 1) % MODM_ARRAY_SIZE(PATROL_POINTS);
+                    updatePath(
+                        std::array<const Position, 2>(
+                            {PATROL_POINTS[patrolState], PATROL_POINTS[newPatrolState]}));
+                    patrolState = newPatrolState;
+                }
             }
             break;
         default:
             break;
     }
 
-    if (state != prevState)
-    {
-        updatePath();
-    }
+    // if (state != prevState)
+    // {
+    //     updatePath();
+    // }
 }
 
 void RMULStateMachine::updatePath()
@@ -83,6 +106,15 @@ void RMULStateMachine::updatePath()
             break;
         default:
             break;
+    }
+}
+
+void RMULStateMachine::updatePath(const std::span<const Position> points)
+{
+    path.resetPath();
+    for (const Position &point : points)
+    {
+        path.pushPoint(point);
     }
 }
 

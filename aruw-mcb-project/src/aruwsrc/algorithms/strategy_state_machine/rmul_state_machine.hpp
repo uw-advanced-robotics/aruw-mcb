@@ -22,6 +22,10 @@
 
 #include <array>
 
+#include <span>
+
+#include "tap/architecture/periodic_timer.hpp"
+#include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
@@ -88,14 +92,20 @@ private:
 
     AutoNavPath path;
 
+    tap::arch::MilliTimeout pathTimeout;
+    tap::arch::PeriodicMilliTimer patrolTimer;
+
     enum State
     {
         HEALING,
         ATTACKING,
     };
     State state = State::ATTACKING;
+    uint8_t patrolState{0};
 
     void updatePath();
+
+    void updatePath(const std::span<const Position> points);
 
     bool safeToAttack();
 
@@ -111,19 +121,20 @@ private:
     float SPEED = 5.0f;
 
     const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
-    const Position POINT_1 = Position(1.2, 2.1, 0);   // BOTTOM_MIDDLE
-    const Position POINT_2 = Position(3.5, 1.5, 0);   // MIDDLE_RIGHT
+    const Position POINT_1 = Position(1.2, 2.1, 0);  // BOTTOM_MIDDLE
+    const Position POINT_2 = Position(3.5, 1.5, 0);  // MIDDLE_RIGHT
     // const Position POINT_3 = Position(5, 4.0, 0);     // MIDDLE
     // const Position POINT_4 = Position(5.25, 7.5, 0);  // SIDE_WALL
     const Position POINT_3 = Position(5.25, 1.1, 0);  // RIGHT SIDE_WALL
     // const Position RESUPPLY_ZONE = Position(0.34, 6.34, 0);
+    const Position PATROL_POINTS[2]{POINT_3, Position(4.25, 1.1, 0)};  // BIT BEHIND RIGHT SIDE_WALL
 
+    const std::array<const Position, 4> ATTACKING_PATH = {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3};
 
-    const std::array<Position, 4> ATTACKING_PATH =
-        {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3};
+    const std::array<const Position, 4> HEALING_PATH = {POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
 
-    const std::array<Position, 4> HEALING_PATH =
-        {POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
+    static constexpr uint16_t PATH_LENGTH_MILLIS = 7000;
+    static constexpr uint16_t PATROL_SEGMENT_LENGTH_MILLIS = 3000;
 };
 }  // namespace aruwsrc::algorithms::strategy_state_machine
 
