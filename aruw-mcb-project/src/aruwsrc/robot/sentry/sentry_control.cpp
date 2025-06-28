@@ -386,11 +386,11 @@ struct TurretMinorWorldControllers
 // // @todo surely there's a better way to construct this
 SmoothPid turretLeftWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretLeftWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::LEFT_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretLeftWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 SmoothPid turretRightWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretRightWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretRightWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretRightWorldYawVelPid(minorPidConfigs::RIGHT_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 
 TurretMinorWorldControllers turretRightWorldControllers{

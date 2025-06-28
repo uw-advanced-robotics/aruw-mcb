@@ -35,7 +35,9 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 6.34f;
  * Since the engineer has no power limiting, this lookup table doesn't matter much, just set some
  * high values.
  */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1, 12'000}};
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
+    {1, 8'000},
+    {1, 12'000}};
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -124,9 +126,9 @@ static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
-    .beybladeRotationalSpeedFractionOfMax = 0.65f,
+    .beybladeRotationalSpeedFractionOfMax = 0.4f,
     .beybladeTranslationalSpeedMultiplier = 0.5f,
-    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.6f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.8f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.25f,
     .beybladeRampRate = 100,
 };
