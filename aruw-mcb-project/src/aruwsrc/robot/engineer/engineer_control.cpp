@@ -476,7 +476,7 @@ tap::control::PressCommandMapping vPressed(
 
 tap::control::PressCommandMapping bPressed(
     drivers(),
-    {&gantryIn, &liftScore},
+    {&gantryIn, &liftScore, &wristOut},
     RemoteMapState({Remote::Key::B}));
 
 tap::control::PressCommandMapping cyclePositions(
