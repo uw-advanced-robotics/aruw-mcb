@@ -107,6 +107,9 @@ void FrictionWheelSubsystem::refresh()
             drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED);
     }
     speedCorrection = speedCorrectionPid.getValue();
+    speedCorrection = limitVal(
+        speedCorrection, 0.0f,
+        LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT);
 #endif
 
     prevTime = currTime;
