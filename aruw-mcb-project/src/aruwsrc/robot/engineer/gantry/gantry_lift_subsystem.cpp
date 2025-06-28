@@ -46,6 +46,7 @@ GantryLiftSubsystem::GantryLiftSubsystem(
           epsilon,
           5.0f,
           false,
+          6000.0f,
           maxSetpointIncrement),
       pidAlign(configAlign),
       motorLeft(motorLeft),

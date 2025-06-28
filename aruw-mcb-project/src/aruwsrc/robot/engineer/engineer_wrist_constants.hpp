@@ -41,7 +41,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
     .pitchPidConfig =
         {
             .kp = 10000.0f,
-            .ki = 10.0f,
+            .ki = 0.0f,  // 10.0f,
             .kd = 700.0f,
             .maxICumulative = 1000.0f,
             .maxOutput = 5000.0f,
@@ -55,7 +55,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
     .yawPidConfig =
         {
             .kp = 16000.0f,
-            .ki = 500.0f,
+            .ki = 0.0f,  // 500.0f,
             .kd = 1000.0f,
             .maxICumulative = 500.0f,
             .maxOutput = 5500.0f,

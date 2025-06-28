@@ -271,7 +271,7 @@ GantryLiftSubsystem gantryLiftSubsystem(
     GANTRY_LIFT_HOME,
     GANTRY_LIFT_KS,
     GANTRY_LIFT_EPSILON,
-    1.0f / 400.0f);
+    0.7f);
 
 GantryExtensionSubsystem gantryExtensionSubsystem(
     drivers(),
@@ -422,7 +422,7 @@ SequentialCommand<10> retrieveCubeCommand(
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 240);
 SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
 SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
-WristMovePositionCommand wristDown(wristSubsystem, M_PI_2, 0);
+WristMovePositionCommand wristDown(wristSubsystem, M_PI_2 - 0.001, 0);
 WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
 SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);
 
