@@ -158,7 +158,7 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
 }
 
 float chassisSpeed = 8;
-float chassisSpeedNormal = 2.5;
+float chassisSpeedNormal = 3.5;
 
 float EngineerControlOperatorInterface::getChassisXInput()
 {
