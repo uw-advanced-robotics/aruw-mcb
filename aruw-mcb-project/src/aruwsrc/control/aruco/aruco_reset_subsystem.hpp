@@ -29,7 +29,6 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/timeout.hpp"
-#include "tap/communication/sensors/buzzer/buzzer.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
@@ -62,7 +61,6 @@ private:
     VisionCoprocessor& vision;
     Odometry2DInterface& odometry;
     TransformerInterface& transformer;
-    tap::arch::MilliTimeout buzzerTimer;
 
     // Higher value here means we trust AruCo measurements more
     float VISION_TRUST = 0.025f;
