@@ -32,7 +32,8 @@ GantryLiftSubsystem::GantryLiftSubsystem(
     float upperBound,
     float home,
     float kS,
-    float epsilon)
+    float epsilon,
+    float maxSetpointIncrement)
     : LimitSwitchSetpointInterface(
           drivers,
           trigger,
@@ -44,7 +45,8 @@ GantryLiftSubsystem::GantryLiftSubsystem(
           kS,
           epsilon,
           5.0f,
-          false),
+          false,
+          maxSetpointIncrement),
       pidAlign(configAlign),
       motorLeft(motorLeft),
       motorRight(motorRight)

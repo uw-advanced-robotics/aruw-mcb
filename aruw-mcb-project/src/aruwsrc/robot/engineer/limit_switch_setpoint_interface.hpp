@@ -59,8 +59,6 @@ public:
 
     float getPosition() override { return getEncoderValue() * radius; }
 
-    float getSetpoint() { return setpoint; }
-
     float getVelocity() { return getEncoderVelocity() * radius; }
 
     void setHome(float home) override { this->home = home; };
@@ -69,9 +67,9 @@ public:
     {
         if (tap::algorithms::compareFloatClose(minSetpoint, maxSetpoint, epsilon) ||
             calibrationState != CalibrationState::CALIBRATION_COMPLETE)
-            this->setpoint = setpoint;
+            this->setpoint.setTarget(setpoint);
         else
-            this->setpoint = std::clamp(setpoint, minSetpoint, maxSetpoint);
+            this->setpoint.setTarget(std::clamp(setpoint, minSetpoint, maxSetpoint));
     };
 
     bool homedAndBounded() const
@@ -82,6 +80,7 @@ public:
     // Let the record show Acacia and Swara did this first
     void refresh() override
     {
+        this->updateSetpoint();
         motorPos = getPosition();
 
         if (calibrationState == CalibrationState::CALIBRATING_LOWER_BOUND)
@@ -102,7 +101,7 @@ public:
 
         if (pidState == PIDState::POSITION_PID)
         {
-            float error = setpoint - motorPos;
+            float error = setpoint.getValue() - motorPos;
             float errorDerivative = getVelocity();
             float newTime = tap::arch::clock::getTimeMilliseconds();
             float timeDifference = (newTime - lastTime) / 1000.0f;  // (s)
@@ -155,9 +154,10 @@ protected:
         float epsilon = 0.5f,
         float homingSpeed = 0.25f,
         bool homingReversed = false,
-        float maxOutput = 6000.0f)
+        float maxOutput = 6000.0f,
+        float maxSetpointIncrement = FLT_MAX)
         : OneSidedBoundedSubsystemInterface(drivers, trigger, 0),
-          LinearJointInterface(lowerBound, upperBound, epsilon),
+          LinearJointInterface(lowerBound, upperBound, epsilon, 0, maxSetpointIncrement),
           pid(pidConfig),
           radius(radius),
           home(home),

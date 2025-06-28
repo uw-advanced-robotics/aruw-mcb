@@ -270,7 +270,8 @@ GantryLiftSubsystem gantryLiftSubsystem(
     GANTRY_LIFT_UPPER_BOUND,
     GANTRY_LIFT_HOME,
     GANTRY_LIFT_KS,
-    GANTRY_LIFT_EPSILON);
+    GANTRY_LIFT_EPSILON,
+    1.0f / 400.0f);
 
 GantryExtensionSubsystem gantryExtensionSubsystem(
     drivers(),
@@ -384,7 +385,7 @@ aruwsrc::engineer::DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
 aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 
 aruwsrc::engineer::DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
-//aruwsrc::engineer::DigitalOutToggleCommand releaseToggleCommand(releaseSubsystem);
+// aruwsrc::engineer::DigitalOutToggleCommand releaseToggleCommand(releaseSubsystem);
 
 aruwsrc::engineer::SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
 aruwsrc::engineer::SetpointMovePositionCommand liftDownCommand(gantryLiftSubsystem, 2);
@@ -393,35 +394,37 @@ aruwsrc::engineer::SetpointMovePositionCommand gantryExtendCommand(gantryExtensi
 aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
-SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
-    {&liftUpCommand,
-     &gantryRetractCommand,
-     &wristFoldInCommand,
-     &liftDownCommand,
-     &suckOffCommand,
-     &releaseOnCommand,
-     &gantryExtendCommand,
-     &liftUpCommand,
-     &gantryRetractCommand,
-     &cubeLiftSwitchDownCommand}});
-SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
-    {&liftDownCommand,
-     &gantryExtendCommand,
-     &wristFoldInCommand,
-     &gantryRetractCommand,
-     &suckOnCommand,
-     &releaseOffCommand,
-     &liftUpCommand,
-     &wristFoldOutCommand,
-     &liftDownCommand,
-     &cubeLiftSwitchUpCommand}});
+SequentialCommand<10> storeCubeCommand(
+    std::array<Command *, 10>{
+        {&liftUpCommand,
+         &gantryRetractCommand,
+         &wristFoldInCommand,
+         &liftDownCommand,
+         &suckOffCommand,
+         &releaseOnCommand,
+         &gantryExtendCommand,
+         &liftUpCommand,
+         &gantryRetractCommand,
+         &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(
+    std::array<Command *, 10>{
+        {&liftDownCommand,
+         &gantryExtendCommand,
+         &wristFoldInCommand,
+         &gantryRetractCommand,
+         &suckOnCommand,
+         &releaseOffCommand,
+         &liftUpCommand,
+         &wristFoldOutCommand,
+         &liftDownCommand,
+         &cubeLiftSwitchUpCommand}});
 
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 240);
 SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
 SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
 WristMovePositionCommand wristDown(wristSubsystem, M_PI_2, 0);
 WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
-SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);     
+SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);
 
 ScorePositionCommand scorePositionCommand(gantryLiftSubsystem, wristSubsystem, wristRollSubsystem);
 // Safe disconnect function

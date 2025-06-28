@@ -48,7 +48,8 @@ float JointSubsystem::getPosition()
 
 void JointSubsystem::refresh()
 {
-    float error = setpoint - getPosition();
+    this->updateSetpoint();
+    float error = setpoint.getValue() - getPosition();
     float output = pid.runController(error, motor.getEncoder()->getVelocity(), 2.0f) + kS;
     motor.setDesiredOutput(output);
 }

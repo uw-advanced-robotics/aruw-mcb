@@ -20,6 +20,7 @@
 #ifndef LINEAR_JOINT_INTERFACE_HPP_
 #define LINEAR_JOINT_INTERFACE_HPP_
 
+#include "tap/algorithms/ramp.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
@@ -32,17 +33,20 @@ public:
     virtual void setSetpoint(float setpoint)
     {
         if (tap::algorithms::compareFloatClose(minSetpoint, maxSetpoint, epsilon))
-            this->setpoint = setpoint;
+            this->setpoint.setTarget(setpoint);
         else
-            this->setpoint = std::clamp(setpoint, minSetpoint, maxSetpoint);
+            this->setpoint.setTarget(std::clamp(setpoint, minSetpoint, maxSetpoint));
     };
 
-    virtual float getSetpoint() { return setpoint; }
+    inline void updateSetpoint() { setpoint.update(maxSetpointIncrement); }
+
+    virtual float getSetpoint() { return setpoint.getValue(); }
 
     virtual float getPosition() = 0;
+
     virtual bool atSetpoint()
     {
-        return tap::algorithms::compareFloatClose(setpoint, getPosition(), epsilon);
+        return tap::algorithms::compareFloatClose(setpoint.getTarget(), getPosition(), epsilon);
     };
 
     float getLowerBound() const { return minSetpoint; }
@@ -62,19 +66,21 @@ public:
     }
 
 protected:
-    float setpoint;
+    tap::algorithms::Ramp setpoint;
     float minSetpoint, maxSetpoint;
-    const float epsilon;
+    const float epsilon, maxSetpointIncrement;
 
     LinearJointInterface(
         float minPosition = 0.0f,
         float maxSetpoint = 0.0f,
         float epsilon = 1e-4f,
-        float setpoint = 0)
-        : setpoint(setpoint),
+        float initSetpoint = 0,
+        float maxSetpointIncrement = FLT_MAX)
+        : setpoint(initSetpoint),
           minSetpoint(minPosition),
           maxSetpoint(maxSetpoint),
-          epsilon(epsilon){};
+          epsilon(epsilon),
+          maxSetpointIncrement(maxSetpointIncrement) {};
 };
 
 }  // namespace aruwsrc::engineer

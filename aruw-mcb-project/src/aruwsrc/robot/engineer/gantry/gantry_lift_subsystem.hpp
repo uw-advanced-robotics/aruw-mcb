@@ -44,7 +44,8 @@ public:
         float upperBound = 0.0f,
         float home = 0,
         float kS = 0.0f,
-        float epsilon = 1e-4f);
+        float epsilon = 1e-4f,
+        float maxSetpointIncrement = FLT_MAX);
 
     void setDesiredOutput(int16_t power) override;
 
