@@ -419,7 +419,7 @@ SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 240);
 SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
 SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
-WristMovePositionCommand wristDown(wristSubsystem, 1.5f, 0);
+WristMovePositionCommand wristDown(wristSubsystem, M_PI_2, 0);
 WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
 SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);     
 
@@ -469,6 +469,7 @@ tap::control::PressCommandMapping vPressed(
     drivers(),
     {&gantryOut, &liftPickup, &wristDown},
     RemoteMapState({Remote::Key::V}));
+
 tap::control::PressCommandMapping bPressed(
     drivers(),
     {&gantryOut, &liftScore, &wristOut},
