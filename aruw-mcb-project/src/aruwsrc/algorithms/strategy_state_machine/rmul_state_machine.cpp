@@ -35,7 +35,6 @@ void RMULStateMachine::updateState()
     }
 
     uint16_t health = refSerial.getRobotData().currentHp;
-    State prevState = state;
 
     switch (state)
     {

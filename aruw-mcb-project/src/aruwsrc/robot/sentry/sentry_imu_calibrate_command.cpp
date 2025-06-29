@@ -96,12 +96,11 @@ static inline bool turretMajorReachedCenterAndNotMoving(
     aruwsrc::control::turret::YawTurretSubsystem &turret)
 {
     return compareFloatClose(
-            0.0f,
-            turret.getReadOnlyMotor().getChassisFrameVelocity(),
-            SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-        (turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0) <
-        SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
-
+               0.0f,
+               turret.getReadOnlyMotor().getChassisFrameVelocity(),
+               SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
+           (turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0) <
+            SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
 void SentryImuCalibrateCommand::execute()
@@ -150,13 +149,6 @@ void SentryImuCalibrateCommand::execute()
             bool turretsNotMoving = true;
             for (auto &config : turretsAndControllers)
             {
-                if (failChime) drivers->commandScheduler.addCommand(failChime);
-                calibrationState = CalibrationState::CALIBRATION_FAILED;
-            }
-
-            bool turretsNotMoving = true;
-            for (auto &config : turretsAndControllers)
-            {
                 turretsNotMoving &=
                     turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
             }
@@ -198,7 +190,6 @@ void SentryImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
-                if (successChime) drivers->commandScheduler.addCommand(successChime);
 
                 // reset odometry
                 yawObserver.overrideChassisYaw(0);
@@ -211,8 +202,6 @@ void SentryImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_SUCCESS;
                 if (successChime) drivers->commandScheduler.addCommand(successChime);
             }
-            break;
-        case CalibrationState::CALIBRATION_FAILED:
             break;
         default:
             break;
