@@ -78,9 +78,9 @@ public:
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
     /// The width of a small armor plate, in m
-    static constexpr float PLATE_WIDTH = 0.135f * 2.5f;
+    static constexpr float PLATE_WIDTH = 0.135f * 4.0f;
     /// The height of a small armor plate, in m
-    static constexpr float PLATE_HEIGHT = 0.125f  * 2.5f;
+    static constexpr float PLATE_HEIGHT = 0.125f  * 4.0f;
 
     /**
      * @return true if the specified yaw and pitch angle errors are small enough such that if a
