@@ -91,6 +91,6 @@ void ArucoResetSubsystem::processArducamData()
     newY = lowPassFilter(prevY, newY, VISION_TRUST);
 
     odometry.overrideOdometryPosition(newX, newY);
-    }
+}
 
 }  // namespace aruwsrc::control::aruco

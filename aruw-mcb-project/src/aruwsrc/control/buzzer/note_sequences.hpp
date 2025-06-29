@@ -52,7 +52,7 @@ static constexpr uint32_t SEVEN_NATION_ARMY_NOTE_LENGTH_MS = 121;
 static constexpr std::array<uint8_t, 32> SEVEN_NATION_ARMY_NOTES{
     {27, 27, 27, 27, 27, 0,  27, 27, 30, 0,  0,  27, 0,  0,  25, 0,
      23, 23, 23, 23, 23, 23, 0,  0,  22, 22, 22, 22, 22, 22, 0,  0}};
-     
+
 static constexpr uint32_t IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS = MARIO_MUSHROOM_NOTE_LENGTH_MS;
 static constexpr auto& IMU_CALIBRATE_SUCCESS_NOTES = MARIO_MUSHROOM_NOTES;
 

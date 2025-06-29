@@ -121,8 +121,8 @@ private:
     float SPEED = 5.0f;
 
     const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
-    const Position POINT_1 = Position(1.2, 2.1, 0);  // BOTTOM_MIDDLE
-    const Position POINT_2 = Position(3.5, 1.5, 0);  // MIDDLE_RIGHT
+    const Position POINT_1 = Position(1.2, 2.1, 0);   // BOTTOM_MIDDLE
+    const Position POINT_2 = Position(3.5, 1.5, 0);   // MIDDLE_RIGHT
     const Position POINT_3 = Position(5.25, 1.1, 0);  // RIGHT SIDE_WALL
     // Alternative Path
     // const Position POINT_3 = Position(5, 4.0, 0);     // MIDDLE

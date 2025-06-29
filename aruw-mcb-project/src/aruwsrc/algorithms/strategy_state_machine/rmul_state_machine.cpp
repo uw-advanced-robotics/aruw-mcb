@@ -68,9 +68,8 @@ void RMULStateMachine::updateState()
                 if (patrolTimer.execute())
                 {
                     uint8_t newPatrolState = (patrolState + 1) % MODM_ARRAY_SIZE(PATROL_POINTS);
-                    updatePath(
-                        std::array<const Position, 2>(
-                            {PATROL_POINTS[patrolState], PATROL_POINTS[newPatrolState]}));
+                    updatePath(std::array<const Position, 2>(
+                        {PATROL_POINTS[patrolState], PATROL_POINTS[newPatrolState]}));
                     patrolState = newPatrolState;
                 }
             }

@@ -90,7 +90,6 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
             drivers->refSerial.getRefSerialReceivingData(),
             HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
-        
         // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
         // power(max revolve speed, 2)
         rTranslationalGain = powf(
