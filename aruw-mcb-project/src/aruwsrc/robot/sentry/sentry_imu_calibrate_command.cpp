@@ -116,7 +116,7 @@ void SentryImuCalibrateCommand::execute()
             if (calibrationLongTimeout.isExpired())
             {
                 if (failChime) drivers->commandScheduler.addCommand(failChime);
-                calibrationState = CalibrationState::CALIBRATION_FAILED;
+                calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
             // Only start calibrating if the turret is online and if there is an IMU online to be
@@ -145,6 +145,13 @@ void SentryImuCalibrateCommand::execute()
         case CalibrationState::LOCKING_TURRET:
         {
             if (calibrationLongTimeout.isExpired())
+            {
+                if (failChime) drivers->commandScheduler.addCommand(failChime);
+                calibrationState = CalibrationState::CALIBRATION_FAIL;
+            }
+
+            bool turretsNotMoving = true;
+            for (auto &config : turretsAndControllers)
             {
                 if (failChime) drivers->commandScheduler.addCommand(failChime);
                 calibrationState = CalibrationState::CALIBRATION_FAILED;
@@ -186,7 +193,7 @@ void SentryImuCalibrateCommand::execute()
             if (calibrationLongTimeout.isExpired())
             {
                 if (failChime) drivers->commandScheduler.addCommand(failChime);
-                calibrationState = CalibrationState::CALIBRATION_FAILED;
+                calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
             if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED)
@@ -205,6 +212,11 @@ void SentryImuCalibrateCommand::execute()
             }
             break;
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
+            if (calibrationTimer.isExpired())
+            {
+                calibrationState = CalibrationState::CALIBRATION_SUCCESS;
+                if (successChime) drivers->commandScheduler.addCommand(successChime);
+            }
             break;
         case CalibrationState::CALIBRATION_FAILED:
             break;
@@ -242,9 +254,8 @@ void SentryImuCalibrateCommand::execute()
 
 bool SentryImuCalibrateCommand::isFinished() const
 {
-    return (calibrationState == CalibrationState::WAITING_CALIBRATION_COMPLETE &&
-            calibrationTimer.isExpired()) ||
-           calibrationState == CalibrationState::CALIBRATION_FAILED;
+    return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
+           calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
 
 void SentryImuCalibrateCommand::end(bool)
