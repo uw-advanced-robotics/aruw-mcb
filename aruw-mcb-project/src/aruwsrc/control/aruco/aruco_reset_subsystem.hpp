@@ -19,21 +19,11 @@
 #ifndef ARUCO_RESET_SUBSYSTEM_HPP_
 #define ARUCO_RESET_SUBSYSTEM_HPP_
 
-#include <vector>
-
-#include "tap/algorithms/math_user_utils.hpp"
-#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-#include "tap/architecture/timeout.hpp"
-#include "tap/communication/sensors/imu/imu_interface.hpp"
-#include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
-#include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-
-using namespace tap::algorithms;
 
 namespace aruwsrc::control::aruco
 {
@@ -41,6 +31,7 @@ using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::serial;
 using namespace aruwsrc::algorithms::transforms;
 using namespace tap::algorithms::odometry;
+using namespace tap::algorithms;
 
 class ArucoResetSubsystem : public tap::control::Subsystem
 {
