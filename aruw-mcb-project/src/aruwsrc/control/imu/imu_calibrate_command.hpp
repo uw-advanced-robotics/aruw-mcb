@@ -31,6 +31,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -70,12 +71,11 @@ public:
         LOCKING_TURRET,
         /** While in this state, the command waits until calibration of the IMUs are complete. */
         CALIBRATING_IMU,
-        /** While in this state, turn on buzzer so people know we are done*/
-        BUZZING,
         /** While in this state, the command waits a small time after calibration is complete to
            handle any latency associated with sending messages to the TurretMCBCanComm. */
         WAITING_CALIBRATION_COMPLETE,
-        CALIBRATION_FAILED,
+        CALIBRATION_SUCCESS,
+        CALIBRATION_FAIL,
     };
 
     /**
@@ -127,6 +127,8 @@ public:
         chassis::HolonomicChassisSubsystem *chassis,
         float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
         float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+        aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
+        aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr,
         tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr,
         const std::vector<tap::communication::sensors::imu::ImuInterface *> &externalIMUs = {});
 
@@ -168,8 +170,10 @@ protected:
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
     std::vector<tap::communication::sensors::imu::ImuInterface *> externalIMUs;
     chassis::HolonomicChassisSubsystem *chassis;
-
     tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface;
+    aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
+    aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
+
     CalibrationState calibrationState;
 
     uint32_t prevTime = 0;
@@ -182,8 +186,6 @@ protected:
      * enough time to successfully calibrate.
      */
     tap::arch::MilliTimeout calibrationTimer;
-
-    tap::arch::MilliTimeout buzzerTimer;
 
     /**
      * Timeout used to determine if we should give up on calibration.

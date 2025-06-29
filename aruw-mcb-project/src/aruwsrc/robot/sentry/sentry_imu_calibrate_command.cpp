@@ -112,7 +112,7 @@ void SentryImuCalibrateCommand::execute()
             if (calibrationLongTimeout.isExpired())
             {
                 if (failChime) drivers->commandScheduler.addCommand(failChime);
-                calibrationState = CalibrationState::CALIBRATION_FAILED;
+                calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
             // Only start calibrating if the turret is online and if there is an IMU online to be
@@ -143,7 +143,7 @@ void SentryImuCalibrateCommand::execute()
             if (calibrationLongTimeout.isExpired())
             {
                 if (failChime) drivers->commandScheduler.addCommand(failChime);
-                calibrationState = CalibrationState::CALIBRATION_FAILED;
+                calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
             bool turretsNotMoving = true;
@@ -179,7 +179,7 @@ void SentryImuCalibrateCommand::execute()
             if (calibrationLongTimeout.isExpired())
             {
                 if (failChime) drivers->commandScheduler.addCommand(failChime);
-                calibrationState = CalibrationState::CALIBRATION_FAILED;
+                calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
             if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED)
@@ -190,7 +190,6 @@ void SentryImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
-                if (successChime) drivers->commandScheduler.addCommand(successChime);
 
                 // reset odometry
                 yawObserver.overrideChassisYaw(0);
@@ -198,8 +197,11 @@ void SentryImuCalibrateCommand::execute()
             }
             break;
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
-            break;
-        case CalibrationState::CALIBRATION_FAILED:
+            if (calibrationTimer.isExpired())
+            {
+                calibrationState = CalibrationState::CALIBRATION_SUCCESS;
+                if (successChime) drivers->commandScheduler.addCommand(successChime);
+            }
             break;
         default:
             break;
@@ -223,19 +225,20 @@ void SentryImuCalibrateCommand::execute()
 
     if (calibrationState == CalibrationState::LOCKING_TURRET)
     {
-    turretMajorController.runController(
-        dt,
-        turretMajor.getReadOnlyMotor().getChassisFrameSetpoint());
-    } else {
+        turretMajorController.runController(
+            dt,
+            turretMajor.getReadOnlyMotor().getChassisFrameSetpoint());
+    }
+    else
+    {
         turretMajor.getMutableMotor().setMotorOutput(0);
     }
 }
 
 bool SentryImuCalibrateCommand::isFinished() const
 {
-    return (calibrationState == CalibrationState::WAITING_CALIBRATION_COMPLETE &&
-            calibrationTimer.isExpired()) ||
-           calibrationState == CalibrationState::CALIBRATION_FAILED;
+    return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
+           calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
 
 void SentryImuCalibrateCommand::end(bool)
