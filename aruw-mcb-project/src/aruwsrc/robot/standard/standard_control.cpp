@@ -55,6 +55,8 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
@@ -107,6 +109,7 @@
 
 using namespace tap::communication::serial;
 using namespace tap::control;
+
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace aruwsrc::algorithms::odometry;
@@ -117,6 +120,7 @@ using namespace aruwsrc::algorithms::transforms;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::auto_aim;
+using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
@@ -138,6 +142,8 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 }
 
 /* define subsystems --------------------------------------------------------*/
+BuzzerSubsystem buzzer(drivers());
+
 tap::motor::DjiMotor pitchMotor(
     drivers(),
     PITCH_MOTOR_ID,
@@ -389,6 +395,16 @@ cv::TurretCVCommand turretCVCommand(
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
+NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_SUCCESS_NOTES,
+    IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
+
+NoteSequenceCommand imuCalibrateFailBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_FAIL_NOTES,
+    IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
+
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
@@ -401,6 +417,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     &chassis,
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    &imuCalibrateSuccessBuzzCommand,
+    &imuCalibrateFailBuzzCommand,
     &odometrySubsystem,
     // {&drivers()->ism330});
     {&drivers()->mpu6500});
@@ -485,8 +503,6 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     0.0f,
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
 
 // Cap Bank
 aruwsrc::control::capbank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
