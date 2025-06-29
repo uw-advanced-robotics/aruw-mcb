@@ -86,7 +86,7 @@ namespace chassisFrameController
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 120'000.0f,
     .ki = 500.0f,
-    .kd = 2000.0f,  // 8'000.0f,
+    .kd = 2000.0f,
     .maxICumulative = 8'000.0f,
     .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.6),
     .tRDerivativeKalman = 100.0f,
@@ -151,7 +151,7 @@ static constexpr float CENTER_OF_FREEDOM = modm::toRadian(90);
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 3142,  // 7238,
+    .startEncoderValue = 3142,
     .minAngle = CENTER_OF_FREEDOM - ANGLES_OF_FREEDOM / 2.f + PADDING,
     .maxAngle = CENTER_OF_FREEDOM + ANGLES_OF_FREEDOM / 2.f - PADDING,
     .limitMotorAngles = true,

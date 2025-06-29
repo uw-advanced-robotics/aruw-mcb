@@ -92,21 +92,18 @@ void SentryImuCalibrateCommand::initialize()
     prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
-bool majorVelZero, majorPosZero;
 static inline bool turretMajorReachedCenterAndNotMoving(
     aruwsrc::control::turret::YawTurretSubsystem &turret)
 {
-    majorVelZero = compareFloatClose(
-        0.0f,
-        turret.getReadOnlyMotor().getChassisFrameVelocity(),
-        SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD);
-    majorPosZero =
+    return compareFloatClose(
+            0.0f,
+            turret.getReadOnlyMotor().getChassisFrameVelocity(),
+            SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
         (turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0) <
-         SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
-    return majorVelZero && majorPosZero;
+        SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
+
 }
 
-bool minorsOnTarget[2];
 void SentryImuCalibrateCommand::execute()
 {
     switch (calibrationState)
@@ -151,11 +148,8 @@ void SentryImuCalibrateCommand::execute()
             }
 
             bool turretsNotMoving = true;
-            for (size_t i = 0; i < turretsAndControllers.size(); i++)
+            for (auto &config : turretsAndControllers)
             {
-                auto &config = turretsAndControllers[i];
-                minorsOnTarget[i] =
-                    turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
                 turretsNotMoving &=
                     turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
             }

@@ -83,14 +83,6 @@ void SentryTurretCVCommand::computeAimSetpoints(
 
 void SentryTurretCVCommand::execute()
 {
-    if (!turretLeftConfig.pitchController.isOnline() ||
-        !turretLeftConfig.yawController.isOnline() ||
-        !turretRightConfig.pitchController.isOnline() ||
-        !turretRightConfig.yawController.isOnline())
-    {
-        return;
-    }
-
     // setpoints are in chassis frame
     WrappedFloat majorSetpoint = yawControllerMajor.getSetpoint();
     WrappedFloat leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();

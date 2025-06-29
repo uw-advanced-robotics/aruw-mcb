@@ -79,11 +79,6 @@ void RMULStateMachine::updateState()
         default:
             break;
     }
-
-    // if (state != prevState)
-    // {
-    //     updatePath();
-    // }
 }
 
 void RMULStateMachine::updatePath()

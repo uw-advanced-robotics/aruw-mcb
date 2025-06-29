@@ -41,8 +41,8 @@ class AutoAimFireRateReselectionManager
 {
 public:
     // @todo move this to passed-in config
-    static constexpr float LOW_RPS = 30;
-    static constexpr float MID_RPS = 30;
+    static constexpr float LOW_RPS = 10;
+    static constexpr float MID_RPS = 20;
     static constexpr float HIGH_RPS = 30;
 
     /**
