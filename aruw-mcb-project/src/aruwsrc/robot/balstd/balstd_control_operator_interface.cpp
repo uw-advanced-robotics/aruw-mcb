@@ -34,6 +34,11 @@ float BalstdControlOperatorInterface::getYawVel() const
     return -drivers->remote.getChannel(Channel::RIGHT_HORIZONTAL) * MAX_YAW_VEL;
 }
 
+float BalstdControlOperatorInterface::getRoll() const
+{
+    return -drivers->remote.getChannel(Channel::LEFT_HORIZONTAL) * MAX_ROLL;
+}
+
 float BalstdControlOperatorInterface::getHeightVel() const
 {
     return drivers->remote.getChannel(Channel::WHEEL) * MAX_HEIGHT_VEL;

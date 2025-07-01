@@ -114,6 +114,8 @@ controllers::BalanceController::Config BALANCE_CONTROLLER_CONFIG{
     .yawControllerConfig = YAW_CONTROLLER_PID_CONFIG,
     .minHeight = 0.11,
     .maxHeight = 0.2,  // lowball until tested
+    .maxHeightSetpointVel = 0.025f,
+    .maxRollSetpointVel = 1.0f,
 };
 
 }  // namespace aruwsrc::balstd::chassis

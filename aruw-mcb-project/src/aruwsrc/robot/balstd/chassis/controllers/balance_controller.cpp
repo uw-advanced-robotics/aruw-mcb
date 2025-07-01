@@ -43,7 +43,8 @@ BalanceController::BalanceController(
       yawController(config.yawControllerConfig),
       vmState({{0, 0, 0, 0, 0, 0}}),
       vmRef({{0, 0, 0, 0, 0, 0}}),
-      heightSetpoint(config.minHeight)
+      heightSetpoint(config.minHeight),
+      rollSetpoint(0)
 {
     heightSetpoint.setTarget(0.17);
 }
@@ -65,7 +66,10 @@ BalstdChassisOutput BalanceController::runController(const BalstdChassisState& c
             heightSetpoint.getTarget() + controlOperatorInterface.getHeightVel() * dt,
             config.minHeight,
             config.maxHeight));
-    heightSetpoint.update(heightSetpointRampRate);
+    heightSetpoint.update(config.maxHeightSetpointVel * dt);
+
+    rollSetpoint.setTarget(controlOperatorInterface.getRoll());
+    rollSetpoint.update(config.maxRollSetpointVel * dt);
 
     // LQR
     this->vmState.data = {
@@ -91,8 +95,10 @@ BalstdChassisOutput BalanceController::runController(const BalstdChassisState& c
         currState.rightLegState.alphaDot - currState.leftLegState.alphaDot,
         dt);
 
-    float rollControllerOut =
-        rollController.runController(currState.roll - rollSetpoint, -currState.rollVel, dt);
+    float rollControllerOut = rollController.runController(
+        currState.roll - rollSetpoint.getValue(),
+        -currState.rollVel,
+        dt);
 
     float yawControllerOut = yawController.runController(
         Angle(currState.yaw).minDifference(yawSetpoint),

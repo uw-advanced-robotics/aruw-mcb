@@ -35,6 +35,8 @@ public:
 
     mockable float getYawVel() const;
 
+    mockable float getRoll() const;
+
     mockable float getHeightVel() const;
 
     // ====================
@@ -58,6 +60,7 @@ public:
 private:
     static constexpr float MAX_X_VEL = 0.4f;         // m/s
     static constexpr float MAX_YAW_VEL = 1.0f;       // rad/s
+    static constexpr float MAX_ROLL = M_PI / 6;      // rad
     static constexpr float MAX_HEIGHT_VEL = 0.025f;  // m/s
 
     static constexpr float MAX_LEG_FORCE = 95.0f;     // N
