@@ -49,6 +49,20 @@ BalstdLegConfig LEG_CONFIG{
     .frontHipInnerLimit = INNER_SOFT_STOP,
     .backHipOuterLimit = M_PI - OUTER_SOFT_STOP,
     .backHipInnerLimit = INNER_SOFT_STOP,
+
+    .frontUpperLegLinkInertia = 0.00055695479f,  // kg*m^2
+    .backUpperLegLinkInertia = 0.00055695479f,   // kg*m^2
+    .frontLowerLegLinkInertia = 0.00186463491f,  // kg*m^2
+    .backLowerLegLinkInertia = 0.00199923398f,   // kg*m^2
+
+    .frontUpperLegLinkMass = 0.18382f,  // kg
+    .backUpperLegLinkMass = 0.18382f,   // kg
+    .frontLowerLegLinkMass = 0.25195f,  // kg
+    .backLowerLegLinkMass = 0.24639,    // kg
+
+    .wheelMass = 0.339,  // kg
+
+    .balstdMass = 16,  // kg
 };
 
 tap::algorithms::SmoothPidConfig HEIGHT_CONTROLLER_PID_CONFIG{

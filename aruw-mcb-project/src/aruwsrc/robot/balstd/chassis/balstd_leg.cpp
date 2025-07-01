@@ -178,6 +178,7 @@ float BalstdLeg::updateCBF(BalstdLegState leg)
     {
         return maxTorque;
     }
+    return 0;  // TODO: should pass though requested torque, this method structure should be
+               // rethought
 }
-
 }  // namespace aruwsrc::balstd::chassis
