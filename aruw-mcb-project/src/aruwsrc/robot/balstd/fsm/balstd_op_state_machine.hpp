@@ -29,7 +29,6 @@
 
 namespace aruwsrc::balstd
 {
-
 class BalstdOpStateMachine : public tap::control::Subsystem
 {
 public:

@@ -26,7 +26,6 @@
 
 namespace aruwsrc::balstd::chassis
 {
-
 struct BalstdChassisState
 {
     BalstdLegState leftLegState, rightLegState, virtualLegState;

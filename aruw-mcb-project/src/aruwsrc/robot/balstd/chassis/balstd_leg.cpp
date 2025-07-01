@@ -40,7 +40,6 @@ using tap::algorithms::CMSISMat;
 
 namespace aruwsrc::balstd::chassis
 {
-
 void BalstdLeg::initialize()
 {
     frontHipMotor.initialize();

@@ -23,7 +23,6 @@ using Channel = tap::communication::serial::Remote::Channel;
 
 namespace aruwsrc::balstd
 {
-
 float BalstdControlOperatorInterface::getXVel() const
 {
     return drivers->remote.getChannel(Channel::LEFT_VERTICAL) * MAX_X_VEL;

@@ -28,7 +28,6 @@
 
 namespace aruwsrc::balstd::chassis::controllers
 {
-
 class AttachControllerCommand : public tap::control::Command
 {
 public:

@@ -26,7 +26,6 @@
 
 namespace aruwsrc::balstd::chassis
 {
-
 struct BalstdChassisOutput
 {
     tap::algorithms::transforms::Vector leftForce, rightForce;

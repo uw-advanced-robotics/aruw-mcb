@@ -22,7 +22,6 @@
 
 namespace aruwsrc::balstd
 {
-
 enum class BalstdOpState
 {
     UNKNOWN,

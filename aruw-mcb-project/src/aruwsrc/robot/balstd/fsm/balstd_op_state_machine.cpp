@@ -21,7 +21,6 @@
 
 namespace aruwsrc::balstd
 {
-
 BalstdOpStateMachine::BalstdOpStateMachine(
     tap::Drivers* drivers,
     const chassis::BalstdChassisState& chassisState)

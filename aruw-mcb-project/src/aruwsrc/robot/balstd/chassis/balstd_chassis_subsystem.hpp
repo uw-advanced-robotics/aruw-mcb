@@ -28,7 +28,6 @@
 
 namespace aruwsrc::balstd::chassis
 {
-
 class BalstdChassisSubsystem : public tap::control::chassis::ChassisSubsystemInterface
 {
 public:

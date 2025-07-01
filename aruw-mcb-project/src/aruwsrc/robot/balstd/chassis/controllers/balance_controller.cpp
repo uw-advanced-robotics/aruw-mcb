@@ -31,7 +31,6 @@ using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::balstd::chassis::controllers
 {
-
 BalanceController::BalanceController(
     const BalstdControlOperatorInterface& controlOperatorInterface,
     const Config config)
@@ -61,11 +60,10 @@ BalstdChassisOutput BalanceController::runController(const BalstdChassisState& c
     vmRef.data[2] += controlOperatorInterface.getXVel() * dt;
     yawSetpoint += controlOperatorInterface.getYawVel() * dt;
 
-    heightSetpoint.setTarget(
-        std::clamp(
-            heightSetpoint.getTarget() + controlOperatorInterface.getHeightVel() * dt,
-            config.minHeight,
-            config.maxHeight));
+    heightSetpoint.setTarget(std::clamp(
+        heightSetpoint.getTarget() + controlOperatorInterface.getHeightVel() * dt,
+        config.minHeight,
+        config.maxHeight));
     heightSetpoint.update(config.maxHeightSetpointVel * dt);
 
     rollSetpoint.setTarget(controlOperatorInterface.getRoll());
