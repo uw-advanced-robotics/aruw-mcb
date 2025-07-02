@@ -132,7 +132,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 };
 
 /// How much extra heat must be available beyond how much it takes to fire the next shot
-static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 0;
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // HERO_AGITATOR_CONSTANTS_HPP_

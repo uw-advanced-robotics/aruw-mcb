@@ -50,13 +50,13 @@ public:
     static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
 
 #if defined(TARGET_HERO_ZERO) && not defined(PLATFORM_HOSTED) && not defined(ENV_UNIT_TESTS)
-    static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_NORMAL = 2.0f;
+    static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_NORMAL = 5.0f;
     static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_LOW_DPI = 0.1f;
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
-    static constexpr float MAX_ACCELERATION_X = 7'000.0f;
-    static constexpr float MAX_DECELERATION_X = 20'000.0f;
+    static constexpr float MAX_ACCELERATION_X = 100'000.0f;
+    static constexpr float MAX_DECELERATION_X = 100'000.0f;
 
     /**
      * Max acceleration in rpm/s^2 of the chassis in the y direction
