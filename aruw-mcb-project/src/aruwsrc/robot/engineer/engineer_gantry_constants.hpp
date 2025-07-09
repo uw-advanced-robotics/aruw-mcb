@@ -90,7 +90,7 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_CONFIG(
     GANTRY_EXTENSION_MAX_OUTPUT);
 
 static constexpr tap::gpio::Digital::InputPin GANTRY_EXTENSION_LIMIT_SWITCH_PIN =
-    tap::gpio::Digital::InputPin::T;  // TODO: Update to correct pin
+    tap::gpio::Digital::InputPin::T;
 
 static constexpr float GANTRY_LIFT_MOVE_SPEED = 0.6f;
 static constexpr float GANTRY_EXTENSION_MOVE_SPEED = 0.6f;

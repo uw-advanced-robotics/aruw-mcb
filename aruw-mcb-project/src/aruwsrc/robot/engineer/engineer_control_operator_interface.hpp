@@ -103,7 +103,6 @@ private:
     float divideValYaw = 375.0f;
     float divideGantryLift = 375.0f;
     float divideGantryExtension = 375.0f;
-
 };
 }  // namespace aruwsrc::control::engineer
 

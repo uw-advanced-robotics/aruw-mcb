@@ -32,6 +32,7 @@ enum ScorePositions
 };
 
 // score positions
+// while the code for this exists, none of it been tested lol 
 static constexpr float gantryLiftScoreOneSetpoint = 1;  // TODO: find positions
 static constexpr float wristYawScoreOneSetpoint = 1;
 static constexpr float wristPitchScoreOneSetpoint = 1;

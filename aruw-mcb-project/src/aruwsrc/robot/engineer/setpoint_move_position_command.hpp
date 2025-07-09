@@ -31,7 +31,7 @@ namespace aruwsrc::engineer
 class SetpointMovePositionCommand : public tap::control::Command
 {
 public:
-    SetpointMovePositionCommand(LimitSwitchSetpointInterface &cubeLift, float setpoint);
+    SetpointMovePositionCommand(LimitSwitchSetpointInterface &subsystem, float setpoint);
 
     void initialize() override;
 
@@ -44,7 +44,7 @@ public:
     const char *getName() const override { return "Setpoint Move Position Command"; }
 
 private:
-    LimitSwitchSetpointInterface &cubeLift;
+    LimitSwitchSetpointInterface &subsystem;
     float setpoint;
 
 };  // class SetpointMovePositionCommand

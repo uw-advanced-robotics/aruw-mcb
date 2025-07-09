@@ -22,19 +22,19 @@
 namespace aruwsrc::engineer
 {
 SetpointMovePositionCommand::SetpointMovePositionCommand(
-    LimitSwitchSetpointInterface &cubeLift,
+    LimitSwitchSetpointInterface &subystem,
     float setpoint)
-    : cubeLift(cubeLift),
+    : subsystem(subsystem),
       setpoint(setpoint)
 {
-    addSubsystemRequirement(&cubeLift);
+    addSubsystemRequirement(&subsystem);
 }
 
-void SetpointMovePositionCommand::initialize() { cubeLift.setSetpoint(setpoint); }
+void SetpointMovePositionCommand::initialize() { subsystem.setSetpoint(setpoint); }
 
 void SetpointMovePositionCommand::execute() {}
 
 void SetpointMovePositionCommand::end(bool) {}
 
-bool SetpointMovePositionCommand::isFinished() const { return cubeLift.atSetpoint(); }
+bool SetpointMovePositionCommand::isFinished() const { return subsystem.atSetpoint(); }
 }  // namespace aruwsrc::engineer

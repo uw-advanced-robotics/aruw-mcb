@@ -80,7 +80,7 @@ protected:
           minSetpoint(minPosition),
           maxSetpoint(maxSetpoint),
           epsilon(epsilon),
-          maxSetpointIncrement(maxSetpointIncrement) {};
+          maxSetpointIncrement(maxSetpointIncrement){};
 };
 
 }  // namespace aruwsrc::engineer

@@ -394,30 +394,28 @@ aruwsrc::engineer::SetpointMovePositionCommand gantryExtendCommand(gantryExtensi
 aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
-SequentialCommand<10> storeCubeCommand(
-    std::array<Command *, 10>{
-        {&liftUpCommand,
-         &gantryRetractCommand,
-         &wristFoldInCommand,
-         &liftDownCommand,
-         &suckOffCommand,
-         &releaseOnCommand,
-         &gantryExtendCommand,
-         &liftUpCommand,
-         &gantryRetractCommand,
-         &cubeLiftSwitchDownCommand}});
-SequentialCommand<10> retrieveCubeCommand(
-    std::array<Command *, 10>{
-        {&liftDownCommand,
-         &gantryExtendCommand,
-         &wristFoldInCommand,
-         &gantryRetractCommand,
-         &suckOnCommand,
-         &releaseOffCommand,
-         &liftUpCommand,
-         &wristFoldOutCommand,
-         &liftDownCommand,
-         &cubeLiftSwitchUpCommand}});
+SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
+    {&liftUpCommand,
+     &gantryRetractCommand,
+     &wristFoldInCommand,
+     &liftDownCommand,
+     &suckOffCommand,
+     &releaseOnCommand,
+     &gantryExtendCommand,
+     &liftUpCommand,
+     &gantryRetractCommand,
+     &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
+    {&liftDownCommand,
+     &gantryExtendCommand,
+     &wristFoldInCommand,
+     &gantryRetractCommand,
+     &suckOnCommand,
+     &releaseOffCommand,
+     &liftUpCommand,
+     &wristFoldOutCommand,
+     &liftDownCommand,
+     &cubeLiftSwitchUpCommand}});
 
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 240);
 SetpointMovePositionCommand gantryIn(gantryExtensionSubsystem, 20);

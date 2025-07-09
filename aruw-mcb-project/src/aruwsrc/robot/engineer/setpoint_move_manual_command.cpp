@@ -22,16 +22,16 @@
 namespace aruwsrc::engineer
 {
 SetpointMoveManualCommand::SetpointMoveManualCommand(
-    LimitSwitchSetpointInterface& cubeLift,
+    LimitSwitchSetpointInterface& subsystem,
     aruwsrc::control::engineer::EngineerControlOperatorInterface* operatorInterface,
     float moveSpeed,
     SetpointType setpointType)
-    : cubeLift(cubeLift),
+    : subsystem(subsystem),
       operatorInterface(operatorInterface),
       moveSpeed(moveSpeed),
       setpointType(setpointType)
 {
-    addSubsystemRequirement(&cubeLift);
+    addSubsystemRequirement(&subsystem);
 }
 
 void SetpointMoveManualCommand::initialize() {}
@@ -40,7 +40,7 @@ void SetpointMoveManualCommand::execute()
 {
     if (!operatorInterface->isGantryWristControlMode()) return;
 
-    float setpoint = cubeLift.getSetpoint();
+    float setpoint = subsystem.getSetpoint();
     switch (setpointType)
     {
         case SetpointType::CUBE_LIFT:
@@ -71,10 +71,10 @@ void SetpointMoveManualCommand::execute()
         default:
             break;  // Invalid setpoint type
     }
-    cubeLift.setSetpoint(setpoint);
+    subsystem.setSetpoint(setpoint);
 }
 
-void SetpointMoveManualCommand::end(bool) { cubeLift.setDesiredOutput(0); }
+void SetpointMoveManualCommand::end(bool) { subsystem.setDesiredOutput(0); }
 
 bool SetpointMoveManualCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::engineer

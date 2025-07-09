@@ -49,10 +49,15 @@ float EngineerControlOperatorInterface::getCubeLiftVelocity()
 float EngineerControlOperatorInterface::getGantryLiftVelocity()
 {
     // return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
-    if (getShiftKey()) {
-        return -(drivers->remote.getMouseY() / divideGantryLift) + drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);  
-    } else {
-        if (isGantryWristControlMode()) {
+    if (getShiftKey())
+    {
+        return -(drivers->remote.getMouseY() / divideGantryLift) +
+               drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+    }
+    else
+    {
+        if (isGantryWristControlMode())
+        {
             return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
         }
         return 0;
@@ -70,10 +75,15 @@ float EngineerControlOperatorInterface::getGantryExtensionVelocity()
     // }
     // return 0;
 
-    if (getShiftKey()) {
-        return drivers->remote.getMouseX() / divideGantryExtension + drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);  
-    } else {
-        if (isGantryWristControlMode()) {
+    if (getShiftKey())
+    {
+        return drivers->remote.getMouseX() / divideGantryExtension +
+               drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+    }
+    else
+    {
+        if (isGantryWristControlMode())
+        {
             return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
         }
         return 0;
@@ -107,31 +117,34 @@ bool EngineerControlOperatorInterface::getShiftKey()
 
 float EngineerControlOperatorInterface::getWristPitchVelocity()
 {
-    if (!getShiftKey()) {
-    if (isGantryWristControlMode())
+    if (!getShiftKey())
     {
-        return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) + (drivers->remote.getMouseY() / divideValPitch); 
-    }
-    else
-    {   
-            return drivers->remote.getMouseY() / divideValPitch;  
-    }
+        if (isGantryWristControlMode())
+        {
+            return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
+                   (drivers->remote.getMouseY() / divideValPitch);
+        }
+        else
+        {
+            return drivers->remote.getMouseY() / divideValPitch;
+        }
     }
     return 0;
 }
 
 float EngineerControlOperatorInterface::getWristYawVelocity()
 {
-    if (!getShiftKey()) {
-    if (isGantryWristControlMode())
+    if (!getShiftKey())
     {
-        return -drivers->remote.getChannel(
-            Remote::Channel::RIGHT_HORIZONTAL) - (drivers->remote.getMouseX() / divideValYaw);
-    }
-    else
-    {
+        if (isGantryWristControlMode())
+        {
+            return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) -
+                   (drivers->remote.getMouseX() / divideValYaw);
+        }
+        else
+        {
             return -drivers->remote.getMouseX() / divideValYaw;
-    }
+        }
     }
     return 0;
 }
@@ -139,7 +152,6 @@ float EngineerControlOperatorInterface::getWristYawVelocity()
 float wristRollVelocity = 0.5;
 float EngineerControlOperatorInterface::getWristRollVelocity()
 {
-    
     if (drivers->remote.getMouseL())
     {
         return -wristRollVelocity;  // TODO: fix
@@ -147,9 +159,10 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
     else if (drivers->remote.getMouseR())
     {
         return wristRollVelocity;
-    } else if (isGantryWristControlMode())
+    }
+    else if (isGantryWristControlMode())
     {
-       return -drivers->remote.getChannel(Remote::Channel::WHEEL);
+        return -drivers->remote.getChannel(Remote::Channel::WHEEL);
     }
     else
     {

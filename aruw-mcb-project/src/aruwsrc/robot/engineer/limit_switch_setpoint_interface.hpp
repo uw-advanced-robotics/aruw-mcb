@@ -77,7 +77,7 @@ public:
         return calibrationState == CalibrationState::CALIBRATION_COMPLETE;
     }
 
-    // Let the record show Acacia and Swara did this first
+    // AcaciaSwara's calibration logic
     void refresh() override
     {
         this->updateSetpoint();
@@ -94,7 +94,6 @@ public:
             }
             else
             {
-                pidState = PIDState::NONE;
                 moveTowardLowerBound();
             }
         }

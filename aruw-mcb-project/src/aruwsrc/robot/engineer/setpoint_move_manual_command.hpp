@@ -36,7 +36,7 @@ class SetpointMoveManualCommand : public tap::control::Command
 {
 public:
     SetpointMoveManualCommand(
-        LimitSwitchSetpointInterface &cubeLift,
+        LimitSwitchSetpointInterface &subsystem,
         aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface,
         float moveSpeed,
         SetpointType setpointType = CUBE_LIFT);
@@ -52,7 +52,7 @@ public:
     const char *getName() const override { return "Setpoint Move Manual Command"; }
 
 private:
-    LimitSwitchSetpointInterface &cubeLift;
+    LimitSwitchSetpointInterface &subsystem;
     aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface;
     float moveSpeed;
     SetpointType setpointType;
