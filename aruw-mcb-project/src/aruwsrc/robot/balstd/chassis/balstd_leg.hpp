@@ -250,19 +250,10 @@ private:
 
     BalstdLegState currState;
 
-    inline float getFrontHipAngle() const
+    inline float getHipAngle(const aruwsrc::control::motor::Tmotor_AK809& hipMotor) const
     {
         return tap::algorithms::WrappedFloat(
-                   frontHipMotor.getEncoder()->getPosition().getWrappedValue(),
-                   -M_PI_2,
-                   3 * M_PI_2)
-            .getWrappedValue();
-    }
-
-    inline float getBackHipAngle() const
-    {
-        return tap::algorithms::WrappedFloat(
-                   backHipMotor.getEncoder()->getPosition().getWrappedValue(),
+                   hipMotor.getEncoder()->getPosition().getWrappedValue(),
                    -M_PI_2,
                    3 * M_PI_2)
             .getWrappedValue();

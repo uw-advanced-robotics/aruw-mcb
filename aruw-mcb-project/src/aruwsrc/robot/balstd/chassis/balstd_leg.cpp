@@ -88,8 +88,8 @@ void BalstdLeg::setHipTorques(float front, float back)
 
 void BalstdLeg::updateState()
 {
-    currState.qFront = getFrontHipAngle();
-    currState.qBack = getBackHipAngle();
+    currState.qFront = getHipAngle(frontHipMotor);
+    currState.qBack = getHipAngle(backHipMotor);
 
     // TODO: why negative
     currState.qFrontVelo = -frontHipMotor.getEncoder()->getVelocity();
