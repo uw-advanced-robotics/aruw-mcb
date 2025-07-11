@@ -82,7 +82,7 @@ struct BalstdLegState
 
     CMSISMat<3, 1> P1, P2, P3, P4, P5;  // Positions of joints (x, y, z)
 
-    float vxc, vyc;  // Velocity of the wheel transitionally
+    float vxc, vyc;  // Translational velocity of the wheel
 
     float kneesWidthX, kneesWidthY;  // components of distance between knees
 
