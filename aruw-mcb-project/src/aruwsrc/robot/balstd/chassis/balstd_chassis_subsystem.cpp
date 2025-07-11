@@ -90,6 +90,7 @@ void BalstdChassisSubsystem::updateState()
     currState.virtualLegState.vyc = (currState.leftLegState.vyc + currState.rightLegState.vyc) / 2;
     currState.virtualLegState.calculatePendulumState();
 
+    // negatives here are to manually account for the mounting transform (180˚ yaw)
     currState.roll = -chassisImu.getRoll();
     currState.rollVel = -chassisImu.getGx();
     currState.pitch = -chassisImu.getPitch();

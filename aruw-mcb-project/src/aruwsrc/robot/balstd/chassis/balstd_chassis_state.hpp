@@ -31,8 +31,8 @@ struct BalstdChassisState
     BalstdLegState leftLegState, rightLegState, virtualLegState;
     float roll, rollVel, pitch, pitchVel, yaw, yawVel;
     float height;
-    float virtualPendTheta, virtualPendThetaDot;
-    float virtualWheelPos, virtualWheelVel;  // x pos/vel of the 2d robot model's wheel
+    float virtualPendTheta, virtualPendThetaDot;  // angle between pendulum and vertical
+    float virtualWheelPos, virtualWheelVel;       // x pos/vel of the 2d robot model's wheel
 };
 
 const BalstdChassisState ZERO_STATE{};
