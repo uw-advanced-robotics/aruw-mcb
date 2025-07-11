@@ -96,14 +96,14 @@ void BalstdLeg::updateState()
     currState.qBackVelo = -backHipMotor.getEncoder()->getVelocity();
 
     currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
-    currState.calculateForwardKinematics(config);
+    currState.calculateForwardKinematics();
 
-    currState.calculateJacobian(config);
+    currState.calculateJacobian();
     currState.calculateWheelTranslationVelocity();
     currState.calculatePendulumState();
 }
 
-std::array<float, 2> BalstdLegState::calculateLegEnergy(BalstdLegConfig config)
+std::array<float, 2> BalstdLegState::calculateLegEnergy()
 {
     // 1/2 I * w^2 Upper link energy
     float Ta = .5 * config.frontUpperLegLinkInertia * (qFrontVelo) * (qFrontVelo);
@@ -168,7 +168,7 @@ float BalstdLeg::updateCBF(BalstdLegState leg)
        Ta + Tb + Tc + Td + Tw, however we only are going to consider the energy from the
        corresponding half of the link coming to Ta + Tb + 1/2 * Tw.
     */
-    std::array<float, 2> energy = leg.calculateLegEnergy(config);
+    std::array<float, 2> energy = leg.calculateLegEnergy();
 
     if (energy[0] - CBF_ENERGY_LIMIT > availableEnergy)
     {

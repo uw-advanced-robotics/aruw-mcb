@@ -90,7 +90,9 @@ struct BalstdLegState
 
     CMSISMat<2, 2> jacobian, jacobianT;
 
-    void calculateJacobian(BalstdLegConfig config)
+    BalstdLegConfig config;
+
+    void calculateJacobian()
     {
         float p1x2 = -config.upperLinkLength * sin(qFront);
         float p1y2 = config.upperLinkLength * cos(qFront);
@@ -114,7 +116,7 @@ struct BalstdLegState
         jacobianT = CMSISMat<2, 2>({p1x3, p1y3, p5x3, p5y3});
     }
 
-    void calculateForwardKinematics(BalstdLegConfig config)
+    void calculateForwardKinematics()
     {
         // knee coordinates
         P2 = CMSISMat<3, 1>(
@@ -173,7 +175,7 @@ struct BalstdLegState
         vyc = wheel_velo.data[1];
     }
 
-    void calculateLowerLegVelocity(BalstdLegConfig config)
+    void calculateLowerLegVelocity()
     {
         // ||P2 - P3|| / l
         CMSISMat<3, 1> VP2 = tap::algorithms::cross({{0.0f, 0.0f, qFrontVelo}}, P3);
@@ -207,7 +209,7 @@ struct BalstdLegState
         qLowerBack = atan(deltaX_2 / deltaY_2);
     }
 
-    std::array<float, 2> calculateLegEnergy(BalstdLegConfig config);
+    std::array<float, 2> calculateLegEnergy();
 };
 
 class BalstdLeg
@@ -223,6 +225,7 @@ public:
           wheelMotor(wheelMotor),
           config(config)
     {
+        currState.config = config;
     }
 
     void initialize();
