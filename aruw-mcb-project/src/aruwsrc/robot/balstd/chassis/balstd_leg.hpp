@@ -100,17 +100,18 @@ struct BalstdLegState
         float p5y4 = config.upperLinkLength * cos(qBack);
 
         float d = sqrt(kneesWidthX * kneesWidthX + kneesWidthY * kneesWidthY);
-        float h = sqrt(config.lowerLinkLength * config.lowerLinkLength - d * d / 4);
+        float d_sq = d * d;
+        float h = sqrt(config.lowerLinkLength * config.lowerLinkLength - d_sq / 4);
 
         float p1d = -(kneesWidthX * p1x2 + kneesWidthY * p1y2) / d;
         float p5d = (kneesWidthX * p5x4 + kneesWidthY * p5y4) / d;
         float p1h = -d * p1d / h / 4;
         float p5h = -d * p5d / h / 4;
 
-        float p1x3 = p1x2 / 2 - h / d * p1y2 + (p1h * d - p1d * h) / (d * d) * kneesWidthY;
-        float p1y3 = p1y2 / 2 + h / d * p1x2 - (p1h * d - p1d * h) / (d * d) * kneesWidthX;
-        float p5x3 = p5x4 / 2 + h / d * p5y4 + (p5h * d - p5d * h) / (d * d) * kneesWidthY;
-        float p5y3 = p5y4 / 2 - h / d * p5x4 - (p5h * d - p5d * h) / (d * d) * kneesWidthX;
+        float p1x3 = p1x2 / 2 - h / d * p1y2 + (p1h * d - p1d * h) / d_sq * kneesWidthY;
+        float p1y3 = p1y2 / 2 + h / d * p1x2 - (p1h * d - p1d * h) / d_sq * kneesWidthX;
+        float p5x3 = p5x4 / 2 + h / d * p5y4 + (p5h * d - p5d * h) / d_sq * kneesWidthY;
+        float p5y3 = p5y4 / 2 - h / d * p5x4 - (p5h * d - p5d * h) / d_sq * kneesWidthX;
 
         jacobian = CMSISMat<2, 2>({p1x3, p5x3, p1y3, p5y3});
         jacobianT = CMSISMat<2, 2>({p1x3, p1y3, p5x3, p5y3});
