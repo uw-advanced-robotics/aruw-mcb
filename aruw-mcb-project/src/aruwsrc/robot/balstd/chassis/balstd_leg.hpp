@@ -90,34 +90,7 @@ struct BalstdLegState
 
     tap::algorithms::CMSISMat<2, 2> jacobianTranspose;
 
-    // todo: this is completely unnecessary idk why tf i ever put it in
-    BalstdLegState()
-        : qFront(0),
-          qBack(0),
-          qFrontVelo(0),
-          qBackVelo(0),
-          qLowerFront(0),
-          qLowerBack(0),
-          qLowerFrontVelo(0),
-          qLowerBackVelo(0),
-          wheelVel(0),
-          P1({0, 0, 0}),
-          P2({0, 0, 0}),
-          P3({0, 0, 0}),
-          P4({0, 0, 0}),
-          P5({0, 0, 0}),
-          vxc(0),
-          vyc(0),
-          kneesWidthX(0),
-          kneesWidthY(0),
-          L(0),
-          alpha(0),
-          alphaDot(0),
-          jacobianTranspose({0, 0, 0, 0})
-    {
-    }
-
-    void calculateJacobianTranspose(BalstdLegConfig config)
+    void calculateJacobian(BalstdLegConfig config)
     {
         float p1x2 = -config.upperLinkLength * sin(qFront);
         float p1y2 = config.upperLinkLength * cos(qFront);

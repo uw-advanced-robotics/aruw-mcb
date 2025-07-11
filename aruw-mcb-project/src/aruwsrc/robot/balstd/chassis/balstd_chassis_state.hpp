@@ -35,22 +35,7 @@ struct BalstdChassisState
     float virtualWheelPos, virtualWheelVel;  // x pos/vel of the 2d robot model's wheel
 };
 
-const BalstdChassisState ZERO_STATE{
-    .leftLegState = BalstdLegState(),
-    .rightLegState = BalstdLegState(),
-    .virtualLegState = BalstdLegState(),
-    .roll = 0,
-    .rollVel = 0,
-    .pitch = 0,
-    .pitchVel = 0,
-    .yaw = 0,
-    .yawVel = 0,
-    .height = 0,
-    .virtualPendTheta = 0,
-    .virtualPendThetaDot = 0,
-    .virtualWheelPos = 0,
-    .virtualWheelVel = 0,
-};
+const BalstdChassisState ZERO_STATE{};
 
 }  // namespace aruwsrc::balstd::chassis
 
