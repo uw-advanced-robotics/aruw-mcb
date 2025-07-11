@@ -20,8 +20,6 @@
 #ifndef BALANCE_CONTROLLER_HPP_
 #define BALANCE_CONTROLLER_HPP_
 
-// #include "tap/algorithms/kalman_filter.hpp"
-
 #include "tap/algorithms/ramp.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 
@@ -59,8 +57,6 @@ private:
     tap::algorithms::SmoothPid heightController, splitController, rollController, yawController;
 
     tap::algorithms::CMSISMat<6, 1> vmState, vmRef;
-
-    // tap::algorithms::KalmanFilter<6, 6> stateFilter;
 
     tap::algorithms::Ramp heightSetpoint;
     tap::algorithms::Ramp rollSetpoint;
