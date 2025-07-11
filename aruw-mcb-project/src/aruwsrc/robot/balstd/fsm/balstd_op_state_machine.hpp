@@ -21,18 +21,30 @@
 #define BALSTD_OP_STATE_MACHINE_HPP_
 
 #include "tap/algorithms/transforms/transform.hpp"
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 #include "tap/control/subsystem.hpp"
 
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_state.hpp"
+#include "aruwsrc/robot/balstd/chassis/balstd_chassis_subsystem.hpp"
+#include "aruwsrc/robot/balstd/chassis/controllers/chassis_controller_interface.hpp"
 
 #include "balstd_op_states.hpp"
 
-namespace aruwsrc::balstd
+namespace aruwsrc::balstd::fsm
 {
 class BalstdOpStateMachine : public tap::control::Subsystem
 {
 public:
-    BalstdOpStateMachine(tap::Drivers* drivers, const chassis::BalstdChassisState& chassisState);
+    BalstdOpStateMachine(
+        tap::Drivers* drivers,
+        aruwsrc::balstd::chassis::BalstdChassisSubsystem& chassis,
+        const std::array<
+            aruwsrc::balstd::chassis::controllers::BalstdChassisControllerInterface*,
+            static_cast<size_t>(BalstdOpState::NUM_STATES)> controllers,
+        tap::communication::sensors::imu::AbstractIMU& chassisImu,
+        aruwsrc::control::buzzer::NoteSequenceCommand* stateTransitionFailChime = nullptr,
+        aruwsrc::control::buzzer::NoteSequenceCommand* watchdogInterventionChime = nullptr);
 
     void initialize() override;
 
@@ -40,13 +52,46 @@ public:
 
     inline const BalstdOpState& getCurrentState() const { return currentState; }
 
+    inline void updateState(BalstdOpState newState)
+    {
+        if (currentState == newState) return;
+
+        auto* controller = controllers[static_cast<size_t>(currentState)];
+        controller->initialize(chassisState);
+        chassis.attachController(controller);
+        currentState = newState;
+    }
+
+    inline bool isImuCalibrated() const
+    {
+        return chassisImu.getImuState() ==
+               tap::communication::sensors::imu::AbstractIMU::ImuState::IMU_CALIBRATED;
+    }
+
+    bool watchdogTriggered() const;
+
+    inline void requestGetUp() { getUpRequested = true; }
+    inline void requestDisarm() { disarmRequested = true; }
+
 private:
     BalstdOpState currentState;
-    const chassis::BalstdChassisState& chassisState;
+
+    aruwsrc::balstd::chassis::BalstdChassisSubsystem& chassis;
+    const aruwsrc::balstd::chassis::BalstdChassisState& chassisState;
+    const std::array<
+        aruwsrc::balstd::chassis::controllers::BalstdChassisControllerInterface*,
+        static_cast<size_t>(BalstdOpState::NUM_STATES)>
+        controllers;
+    tap::communication::sensors::imu::AbstractIMU& chassisImu;
+
+    aruwsrc::control::buzzer::NoteSequenceCommand* stateTransitionFailChime;
+    aruwsrc::control::buzzer::NoteSequenceCommand* watchdogInterventionChime;
+
+    bool getUpRequested{0}, disarmRequested{0};
 
     static constexpr float CONTROLLABLE_CHASSIS_PITCH_LIMIT = M_PI_4;
 };
 
-}  // namespace aruwsrc::balstd
+}  // namespace aruwsrc::balstd::fsm
 
 #endif  // BALSTD_OP_STATE_MACHINE_HPP_

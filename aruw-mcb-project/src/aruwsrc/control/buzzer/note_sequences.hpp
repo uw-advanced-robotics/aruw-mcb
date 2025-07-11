@@ -58,6 +58,14 @@ static constexpr auto& IMU_CALIBRATE_SUCCESS_NOTES = MARIO_MUSHROOM_NOTES;
 
 static constexpr uint32_t IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS = MARIO_PIPE_NOTE_LENGTH_MS;
 static constexpr auto& IMU_CALIBRATE_FAIL_NOTES = MARIO_PIPE_NOTES;
+
+#ifdef TARGET_BALSTD
+static constexpr uint32_t STATE_TRANSITION_FAIL_NOTE_LENGTH_MS = 100;
+static constexpr std::array<uint8_t, 4> STATE_TRANSITION_FAIL_NOTES{{37, 0, 31, 0}};
+
+static constexpr uint32_t WATCHDOG_INTERVENTION_NOTE_LENGTH_MS = 80;
+static constexpr std::array<uint8_t, 8> WATCHDOG_INTERVENTION_NOTES{{40, 0, 40, 0, 40, 0, 40, 0}};
+#endif
 }  // namespace aruwsrc::control::buzzer
 
 #endif  // NOTE_SEQUENCES_HPP_

@@ -19,46 +19,81 @@
 
 #include "balstd_op_state_machine.hpp"
 
-namespace aruwsrc::balstd
+using namespace tap::communication::sensors::imu;
+
+namespace aruwsrc::balstd::fsm
 {
 BalstdOpStateMachine::BalstdOpStateMachine(
     tap::Drivers* drivers,
-    const chassis::BalstdChassisState& chassisState)
+    aruwsrc::balstd::chassis::BalstdChassisSubsystem& chassis,
+    std::array<
+        aruwsrc::balstd::chassis::controllers::BalstdChassisControllerInterface*,
+        static_cast<size_t>(BalstdOpState::NUM_STATES)> controllers,
+    AbstractIMU& chassisImu,
+    aruwsrc::control::buzzer::NoteSequenceCommand* stateTransitionFailChime,
+    aruwsrc::control::buzzer::NoteSequenceCommand* watchdogInterventionChime)
     : Subsystem(drivers),
-      currentState(BalstdOpState::UNKNOWN),
-      chassisState(chassisState)
+      currentState(BalstdOpState::FALLEN),
+      chassis(chassis),
+      chassisState(chassis.getChassisState()),
+      controllers(controllers),
+      chassisImu(chassisImu),
+      stateTransitionFailChime(stateTransitionFailChime),
+      watchdogInterventionChime(watchdogInterventionChime)
 {
 }
 
 void BalstdOpStateMachine::initialize()
 {
-    // assume we startup fallen forward
-    currentState = BalstdOpState::FALLEN_FORWARD;
+    currentState = BalstdOpState::FALLEN;
+    updateState(BalstdOpState::SITTING);  // assumed starting state, must be satisfied on startup
 }
 
 void BalstdOpStateMachine::refresh()
 {
-    // TODO: consider imu calibrate state when allowing get up
-
-    float chassisPitch = 0;  // chassisState.leftLegState;
-
-    // TODO: use pendulum angle
-    if (chassisPitch > CONTROLLABLE_CHASSIS_PITCH_LIMIT)
+    if (watchdogTriggered() && currentState != BalstdOpState::FALLEN && isImuCalibrated())
     {
-        currentState = BalstdOpState::FALLEN_FORWARD;
+        updateState(BalstdOpState::FALLEN);
+        if (watchdogInterventionChime)
+            drivers->commandScheduler.addCommand(watchdogInterventionChime);
+        return;
     }
-    else if (chassisPitch < -CONTROLLABLE_CHASSIS_PITCH_LIMIT)
+
+    if (disarmRequested && currentState != BalstdOpState::FALLEN)
     {
-        currentState = BalstdOpState::FALLEN_BACKWARD;
+        updateState(BalstdOpState::SITTING);
+        disarmRequested = false;
+        return;
     }
-    else  // within controllable chassis pitch range
+
+    if (getUpRequested)
     {
-        if (currentState == BalstdOpState::GETTING_UP_BACKWARD ||
-            currentState == BalstdOpState::GETTING_UP_FORWARD)
+        if (currentState == BalstdOpState::SITTING && isImuCalibrated())
         {
-            currentState = BalstdOpState::BALANCING;
+            updateState(BalstdOpState::BALANCING);
         }
+        else if (stateTransitionFailChime)
+        {
+            drivers->commandScheduler.addCommand(stateTransitionFailChime);
+        }
+        getUpRequested = false;
+        return;
     }
 }
 
-}  // namespace aruwsrc::balstd
+bool BalstdOpStateMachine::watchdogTriggered() const
+{
+    // E-stop if chassis has tilted too much
+    if (fabs(chassisState.pitch) > CONTROLLABLE_CHASSIS_PITCH_LIMIT) return true;
+
+    // E-stop if legs have hyperextended
+    if (chassisState.leftLegState.qFront > chassisState.leftLegState.config.frontHipInnerLimit ||
+        chassisState.leftLegState.qBack < chassisState.leftLegState.config.backHipInnerLimit ||
+        chassisState.rightLegState.qFront > chassisState.rightLegState.config.frontHipInnerLimit ||
+        chassisState.rightLegState.qBack < chassisState.rightLegState.config.backHipInnerLimit)
+        return true;
+
+    return false;
+}
+
+}  // namespace aruwsrc::balstd::fsm

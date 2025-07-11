@@ -47,6 +47,7 @@
 #include "aruwsrc/robot/balstd/chassis/controllers/balance_controller.hpp"
 #include "aruwsrc/robot/balstd/chassis/controllers/manual_leg_controller.hpp"
 #include "aruwsrc/robot/balstd/fsm/balstd_op_state_machine.hpp"
+#include "aruwsrc/robot/balstd/fsm/fsm_event_trigger_command.hpp"
 #include "aruwsrc/robot/balstd/turret/balstd_turret_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
@@ -58,6 +59,7 @@ using namespace aruwsrc::algorithms::transforms;
 using namespace aruwsrc::balstd;
 using namespace aruwsrc::balstd::chassis;
 using namespace aruwsrc::balstd::chassis::controllers;
+using namespace aruwsrc::balstd::fsm;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::motor;
@@ -136,13 +138,34 @@ BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg, drivers()->chassisI
 
 BuzzerSubsystem buzzer(drivers());
 
+NoteSequenceCommand startupChime(buzzer, MEGALOVANIA_NOTES, MEGALOVANIA_NOTE_LENGTH_MS);
+NoteSequenceCommand stateTransitionFailChime(
+    buzzer,
+    STATE_TRANSITION_FAIL_NOTES,
+    STATE_TRANSITION_FAIL_NOTE_LENGTH_MS);
+NoteSequenceCommand watchdogInterventionChime(
+    buzzer,
+    WATCHDOG_INTERVENTION_NOTES,
+    WATCHDOG_INTERVENTION_NOTE_LENGTH_MS);
+
 // controllers
 
 ManualLegController manualLegController(drivers()->controlOperatorInterface);
 
 BalanceController balanceController(drivers()->controlOperatorInterface, BALANCE_CONTROLLER_CONFIG);
 
-BalstdOpStateMachine stateMachine(drivers(), chassis.getChassisState());
+BalstdOpStateMachine stateMachine(
+    drivers(),
+    chassis,
+    {&manualLegController,  // SITTING
+     nullptr,               // FALLEN
+     &balanceController},   // BALANCING
+    drivers()->chassisIsm330,
+    &stateTransitionFailChime,
+    &watchdogInterventionChime);
+
+FSMEventTriggerCommand getUpCommand(&stateMachine, &BalstdOpStateMachine::requestGetUp);
+FSMEventTriggerCommand disarmCommand(&stateMachine, &BalstdOpStateMachine::requestDisarm);
 
 // turret
 tap::motor::DjiMotor pitchMotor(
@@ -204,8 +227,6 @@ BalstdImuCalibrateCommand imuCalibrateCommand(
     },
     &chassis);
 
-NoteSequenceCommand startupChime(buzzer, MEGALOVANIA_NOTES, MEGALOVANIA_NOTE_LENGTH_MS);
-
 AttachControllerCommand attachManualController(chassis, &manualLegController);
 AttachControllerCommand attachBalanceController(chassis, &balanceController);
 
@@ -222,13 +243,13 @@ HoldCommandMapping leftUpRightDown(
 // manual
 HoldCommandMapping leftMidRightDown(
     drivers(),
-    {&attachManualController},
+    {&disarmCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
 // balancing
 HoldCommandMapping leftMidRightMid(
     drivers(),
-    {&attachBalanceController},
+    {&getUpCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // Safe disconnect function
@@ -237,18 +258,18 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* register subsystems here -------------------------------------------------*/
 void registerStandardSubsystems(Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&stateMachine);
     // drivers->commandScheduler.registerSubsystem(&turret);
-    // drivers->commandScheduler.registerSubsystem(&stateMachine);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    chassis.initialize();
     buzzer.initialize();
-    // stateMachine.initialize();
+    chassis.initialize();
+    stateMachine.initialize();
     // turret.initialize();
     // odometrySubsystem.initialize();
     // transformSubsystem.initialize();
@@ -277,8 +298,8 @@ void startStandardCommands(Drivers *drivers)
 void registerStandardIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&leftUpRightDown);   // imu calibrate
-    drivers->commandMapper.addMap(&leftMidRightDown);  // manual controller
-    drivers->commandMapper.addMap(&leftMidRightMid);   // balance controller
+    drivers->commandMapper.addMap(&leftMidRightDown);  // disarm (manual controller)
+    drivers->commandMapper.addMap(&leftMidRightMid);   // get up (balance controller)
 }
 }  // namespace balstd_control
 

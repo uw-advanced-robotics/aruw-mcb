@@ -20,19 +20,16 @@
 #ifndef BALSTD_OP_STATES_HPP_
 #define BALSTD_OP_STATES_HPP_
 
-namespace aruwsrc::balstd
+namespace aruwsrc::balstd::fsm
 {
 enum class BalstdOpState
 {
-    UNKNOWN,
-    FALLEN_FORWARD,
-    FALLEN_BACKWARD,
-    GETTING_UP_FORWARD,
-    GETTING_UP_BACKWARD,
+    SITTING = 0,  // legs fully retracted
+    FALLEN,       // any other grounded state, currently all treated as irrecoverable
     BALANCING,
     NUM_STATES
 };
 
-}  // namespace aruwsrc::balstd
+}  // namespace aruwsrc::balstd::fsm
 
 #endif  // BALSTD_OP_STATES_HPP_
