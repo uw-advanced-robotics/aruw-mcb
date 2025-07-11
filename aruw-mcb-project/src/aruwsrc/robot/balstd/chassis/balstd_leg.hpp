@@ -88,7 +88,7 @@ struct BalstdLegState
 
     float L, alpha, alphaDot;  // pendulum length and angle wrt hip center
 
-    tap::algorithms::CMSISMat<2, 2> jacobianTranspose;
+    CMSISMat<2, 2> jacobian, jacobianT;
 
     void calculateJacobian(BalstdLegConfig config)
     {
@@ -110,7 +110,8 @@ struct BalstdLegState
         float p5x3 = p5x4 / 2 + h / d * p5y4 + (p5h * d - p5d * h) / (d * d) * kneesWidthY;
         float p5y3 = p5y4 / 2 - h / d * p5x4 - (p5h * d - p5d * h) / (d * d) * kneesWidthX;
 
-        jacobianTranspose = CMSISMat<2, 2>({p1x3, p1y3, p5x3, p5y3});
+        jacobian = CMSISMat<2, 2>({p1x3, p5x3, p1y3, p5y3});
+        jacobianT = CMSISMat<2, 2>({p1x3, p1y3, p5x3, p5y3});
     }
 
     void calculateForwardKinematics(BalstdLegConfig config)
@@ -167,8 +168,7 @@ struct BalstdLegState
 
     void calculateWheelTranslationVelocity()
     {
-        const CMSISMat<2, 1> wheel_velo =
-            jacobianTranspose.transpose() * CMSISMat<2, 1>({qFrontVelo, qBackVelo});
+        const CMSISMat<2, 1> wheel_velo = jacobian * CMSISMat<2, 1>({qFrontVelo, qBackVelo});
         vxc = wheel_velo.data[0];
         vyc = wheel_velo.data[1];
     }

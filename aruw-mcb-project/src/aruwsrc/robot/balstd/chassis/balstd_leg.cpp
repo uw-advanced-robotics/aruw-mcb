@@ -61,7 +61,7 @@ bool BalstdLeg::allMotorsOnline() const
 
 void BalstdLeg::setThrust(const Vector thrust)
 {
-    CMSISMat<2, 1> torques = currState.jacobianTranspose * CMSISMat<2, 1>({thrust.x(), thrust.y()});
+    CMSISMat<2, 1> torques = currState.jacobianT * CMSISMat<2, 1>({thrust.x(), thrust.y()});
 
     setHipTorques(torques.data[0], torques.data[1]);
 }
@@ -98,7 +98,7 @@ void BalstdLeg::updateState()
     currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
     currState.calculateForwardKinematics(config);
 
-    currState.calculateJacobianTranspose(config);
+    currState.calculateJacobian(config);
     currState.calculateWheelTranslationVelocity();
     currState.calculatePendulumState();
 }
@@ -150,7 +150,7 @@ float BalstdLeg::updateCBF(BalstdLegState leg)
     // calculate the available torque from the motors
     // assume that gravity is the only force acting on the end effector
     CMSISMat<2, 1> endEffectorTorque =
-        currState.jacobianTranspose * CMSISMat<2, 1>({0, 9.8f * config.balstdMass / 4});
+        currState.jacobianT * CMSISMat<2, 1>({0, 9.8f * config.balstdMass / 4});
 
     // Right half of the linkage (per the paper orientation)
     float torque_available = maxTorque - endEffectorTorque.data[0];
