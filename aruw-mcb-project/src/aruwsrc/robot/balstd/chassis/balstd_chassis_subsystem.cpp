@@ -97,11 +97,11 @@ void BalstdChassisSubsystem::updateState()
     currState.yaw = chassisImu.getYaw();
     currState.yawVel = chassisImu.getGz();
 
-    currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.alpha);
-
     // should be __ - pitch/vel, but matlab's pitch is positive up instead of down
     currState.virtualPendTheta = currState.virtualLegState.alpha + currState.pitch;
     currState.virtualPendThetaDot = currState.virtualLegState.alphaDot + currState.pitchVel;
+
+    currState.height = currState.virtualLegState.L * cos(currState.virtualPendTheta);
 
     currState.virtualWheelVel =
         (currState.leftLegState.wheelVel + currState.rightLegState.wheelVel) / 2 * WHEEL_RADIUS_M;
