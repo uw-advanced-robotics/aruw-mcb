@@ -36,7 +36,8 @@ BalstdChassisSubsystem::BalstdChassisSubsystem(
       currState(ZERO_STATE),
       currOutput(ZERO_OUTPUT),
       chassisPitchDotLP(tap::algorithms::filter::butterworth<2>(100, 0.002)),
-      thetaDotLP(tap::algorithms::filter::butterworth<2>(100, 0.002))
+      thetaDotLP(tap::algorithms::filter::butterworth<2>(100, 0.002)),
+      wheelFilter(W_KF_A, W_KF_C, W_KF_Q, W_KF_R, W_KF_P0)
 {
 }
 
@@ -57,8 +58,7 @@ void BalstdChassisSubsystem::refresh()
 {
     updateState();
 
-    currOutput =
-        (controller == nullptr) ? ZERO_OUTPUT : controller->runController(currState, 0.002f);
+    currOutput = (controller == nullptr) ? ZERO_OUTPUT : controller->runController(currState, DT);
 
     setOutputs(currOutput);
 

@@ -21,6 +21,7 @@
 
 #include "tap/algorithms/butterworth.hpp"
 #include "tap/algorithms/discrete_filter.hpp"
+#include "tap/algorithms/kalman_filter.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #include "aruwsrc/robot/balstd/chassis/balstd_leg.hpp"
@@ -88,7 +89,34 @@ private:
     tap::algorithms::filter::DiscreteFilter<3> chassisPitchDotLP;
     tap::algorithms::filter::DiscreteFilter<3> thetaDotLP;
 
+    tap::algorithms::KalmanFilter<2, 1> wheelFilter;
+
     static constexpr float WHEEL_RADIUS_M = 0.0762f;
+
+    /// Assumed time difference between calls to `update`, in seconds
+    static constexpr float DT = 0.002f;
+
+    // clang-format off
+    static constexpr float W_KF_A[4] = {
+        1, DT, 
+        0, 1 , 
+    };
+    static constexpr float W_KF_C[2] = {
+        1, 0,
+    };
+    static constexpr float W_KF_Q[4] = {
+        1E1, 0  ,
+        0  , 1E1,
+    };
+    static constexpr float W_KF_R[1] = {
+        1.0,
+    };
+    static constexpr float W_KF_P0[4] = {
+        1E3, 0  ,
+        0  , 1E3,
+
+    };
+    // clang-format on
 
 };  // class BalstdChassisSubsystem
 
