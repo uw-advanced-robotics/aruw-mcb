@@ -96,8 +96,8 @@ void BalstdLeg::updateState()
     currState.qBackVelo = -backHipMotor.getEncoder()->getVelocity();
 
     currState.wheelVel = wheelMotor.getEncoder()->getVelocity();
-    currState.calculateForwardKinematics();
 
+    currState.calculateForwardKinematics();
     currState.calculateJacobian();
     currState.calculateWheelTranslationVelocity();
     currState.calculatePendulumState();
