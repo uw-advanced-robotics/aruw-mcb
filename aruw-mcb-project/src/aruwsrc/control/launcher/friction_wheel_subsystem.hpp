@@ -21,6 +21,7 @@
 #define FRICTION_WHEEL_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/ramp.hpp"
+#include "tap/algorithms/velocity_smooth_pid.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/util_macros.hpp"
 
@@ -44,7 +45,6 @@ namespace aruwsrc::can
 {
 class TurretMCBCanComm;
 }
-
 namespace aruwsrc::control::launcher
 {
 /**
@@ -122,9 +122,11 @@ protected:
 private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
-    modm::Pid<float> velocityPidLeftWheel;
+    // modm::Pid<float> velocityPidLeftWheel;
+    tap::algorithms::VelocitySmoothPid velocityPidLeftWheel;
 
-    modm::Pid<float> velocityPidRightWheel;
+    // modm::Pid<float> velocityPidRightWheel;
+    tap::algorithms::VelocitySmoothPid velocityPidRightWheel;
 
     modm::Pid<float> speedCorrectionPid;
 

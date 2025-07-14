@@ -22,6 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
+#include "tap/algorithms/velocity_smooth_pid.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
@@ -40,18 +41,8 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
       launchSpeedLinearInterpolator(
           LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
-      velocityPidLeftWheel(
-          LAUNCHER_PID_KP,
-          LAUNCHER_PID_KI,
-          LAUNCHER_PID_KD,
-          LAUNCHER_PID_MAX_ERROR_SUM,
-          LAUNCHER_PID_MAX_OUTPUT),
-      velocityPidRightWheel(
-          LAUNCHER_PID_KP,
-          LAUNCHER_PID_KI,
-          LAUNCHER_PID_KD,
-          LAUNCHER_PID_MAX_ERROR_SUM,
-          LAUNCHER_PID_MAX_OUTPUT),
+      velocityPidLeftWheel(LAUNCHER_PID_CONFIG),
+      velocityPidRightWheel(LAUNCHER_PID_CONFIG),
       speedCorrectionPid(
           LAUNCHER_SPEED_CORRECTION_PID_KP,
           LAUNCHER_SPEED_CORRECTION_PID_KI,
@@ -111,14 +102,14 @@ void FrictionWheelSubsystem::refresh()
 
     prevTime = currTime;
 
-    velocityPidLeftWheel.update(
+    velocityPidLeftWheel.runControllerDerivateError(
         desiredRpmRamp.getValue() - leftWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI -
-        speedCorrection);
-    leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
-    velocityPidRightWheel.update(
+        speedCorrection, 1/500.0f);
+    leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getOutput()));
+    velocityPidRightWheel.runControllerDerivateError(
         desiredRpmRamp.getValue() - rightWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI -
-        speedCorrection);
-    rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
+        speedCorrection, 1/500.0f);
+    rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getOutput()));
 }
 
 float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const

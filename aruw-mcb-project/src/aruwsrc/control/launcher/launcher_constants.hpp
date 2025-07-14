@@ -22,6 +22,7 @@
 
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/algorithms/velocity_smooth_pid.hpp"
 
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
@@ -50,18 +51,26 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
-#if defined(TARGET_STANDARD_VOID)
-static constexpr float LAUNCHER_PID_KP = 30.0f;
-static constexpr float LAUNCHER_PID_KI = 0.3f;
-static constexpr float LAUNCHER_PID_KD = 0.0f;
-static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
+#if defined(TARGET_STANDARD_VOID) || defined(TARGET_STANDARD_NULL)
+static constexpr tap::algorithms::VelocitySmoothPidConfig LAUNCHER_PID_CONFIG = {
+    .kp = 0.03f,
+    .ki = 3.0f,
+    .kd = 0.01f,
+    .maxICumulative = 4'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_820R,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 0.1f,
+    .tRProportionalKalman = 0.1f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f
+};
 #elif defined(TARGET_SENTRY_ECLIPSE)
 static constexpr float LAUNCHER_PID_KP = 30.0f;
 static constexpr float LAUNCHER_PID_KI = 0.4f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;
+static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
 #else
 static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 0.2f;
