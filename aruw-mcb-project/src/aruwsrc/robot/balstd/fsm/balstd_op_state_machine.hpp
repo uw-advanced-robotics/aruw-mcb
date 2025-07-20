@@ -56,8 +56,8 @@ public:
     {
         if (currentState == newState) return;
 
-        auto* controller = controllers[static_cast<size_t>(currentState)];
-        controller->initialize(chassisState);
+        auto* controller = controllers[static_cast<size_t>(newState)];
+        if (controller) controller->initialize(chassisState);
         chassis.attachController(controller);
         currentState = newState;
     }
