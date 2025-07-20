@@ -68,6 +68,11 @@ public:
                tap::communication::sensors::imu::AbstractIMU::ImuState::IMU_CALIBRATED;
     }
 
+    inline void playChime(aruwsrc::control::buzzer::NoteSequenceCommand* chime)
+    {
+        if (chime) drivers->commandScheduler.addCommand(chime);
+    }
+
     bool watchdogTriggered() const;
 
     inline void requestGetUp() { getUpRequested = true; }

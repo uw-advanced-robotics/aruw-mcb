@@ -54,8 +54,7 @@ void BalstdOpStateMachine::refresh()
     if (watchdogTriggered() && currentState != BalstdOpState::FALLEN && isImuCalibrated())
     {
         updateState(BalstdOpState::FALLEN);
-        if (watchdogInterventionChime)
-            drivers->commandScheduler.addCommand(watchdogInterventionChime);
+        playChime(watchdogInterventionChime);
         return;
     }
 
@@ -72,9 +71,9 @@ void BalstdOpStateMachine::refresh()
         {
             updateState(BalstdOpState::BALANCING);
         }
-        else if (stateTransitionFailChime)
+        else
         {
-            drivers->commandScheduler.addCommand(stateTransitionFailChime);
+            playChime(stateTransitionFailChime);
         }
         getUpRequested = false;
         return;
