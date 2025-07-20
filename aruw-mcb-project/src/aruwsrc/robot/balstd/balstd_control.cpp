@@ -158,7 +158,7 @@ BalstdOpStateMachine stateMachine(
     drivers(),
     chassis,
     {&manualLegController,  // SITTING
-     nullptr,               // FALLEN
+     &manualLegController,  // FALLEN
      &balanceController},   // BALANCING
     drivers()->chassisIsm330,
     &stateTransitionFailChime,
