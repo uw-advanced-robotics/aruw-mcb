@@ -50,14 +50,14 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override { currentState = BalstdOpState::SITTING; }
+
     inline const BalstdOpState& getCurrentState() const { return currentState; }
 
     inline void updateState(BalstdOpState newState)
     {
-        if (currentState == newState) return;
-
         auto* controller = controllers[static_cast<size_t>(newState)];
-        if (controller) controller->initialize(chassisState);
+        if (currentState != newState && controller) controller->initialize(chassisState);
         chassis.attachController(controller);
         currentState = newState;
     }

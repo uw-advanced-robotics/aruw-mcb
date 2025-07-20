@@ -78,6 +78,8 @@ void BalstdOpStateMachine::refresh()
         getUpRequested = false;
         return;
     }
+
+    updateState(currentState);
 }
 
 bool BalstdOpStateMachine::watchdogTriggered() const
