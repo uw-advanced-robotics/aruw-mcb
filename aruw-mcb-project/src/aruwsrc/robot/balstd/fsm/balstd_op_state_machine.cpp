@@ -59,7 +59,7 @@ void BalstdOpStateMachine::refresh()
         return;
     }
 
-    if (disarmRequested && currentState != BalstdOpState::FALLEN)
+    if (disarmRequested)
     {
         updateState(BalstdOpState::SITTING);
         disarmRequested = false;
