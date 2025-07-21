@@ -38,7 +38,7 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Cube Move Manual Command"; }
+    const char *getName() const override { return "Cube Lift Switch Command"; }
 
 private:
     LimitSwitchSetpointInterface &cubeLift;

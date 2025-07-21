@@ -56,4 +56,4 @@ private:
 };  // class DigitalOutToggleCommand
 
 }  // namespace aruwsrc::engineer
-#endif  // DIGITAL_OUT_COMMAND_HPP_
+#endif  // DIGITAL_OUT_TOGGLE_COMMAND_HPP_

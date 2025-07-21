@@ -305,7 +305,7 @@ aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
     false);
 
 /* define client display / HUD related items --------------------------------*/
-
+// engineer hud stuff doesn't actually work, but we don't know why
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
@@ -367,6 +367,7 @@ WristControllerCommand wristControllerCommand(
     aruwsrc::engineer::WRIST_PITCH_SCALING_FACTOR,
     aruwsrc::engineer::WRIST_YAW_SCALING_FACTOR);
 
+// wrist fold in commands are not fully tuned yet
 WristSetpointsCommand wristFoldInCommand(
     wristSubsystem,
     {aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
@@ -383,17 +384,18 @@ aruwsrc::engineer::DigitalOutCommand suckOffCommand(suckSubsystem, false);
 aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, true);
 aruwsrc::engineer::DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
 aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
-
 aruwsrc::engineer::DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
-// aruwsrc::engineer::DigitalOutToggleCommand releaseToggleCommand(releaseSubsystem);
 
+// commands here for sequences, but setpoints never tuned
 aruwsrc::engineer::SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
 aruwsrc::engineer::SetpointMovePositionCommand liftDownCommand(gantryLiftSubsystem, 2);
 aruwsrc::engineer::SetpointMovePositionCommand gantryRetractCommand(gantryExtensionSubsystem, 2);
 aruwsrc::engineer::SetpointMovePositionCommand gantryExtendCommand(gantryExtensionSubsystem, 2);
+// never tested
 aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
+// sequences planned, but never finished and tuned
 SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
     {&liftUpCommand,
      &gantryRetractCommand,
@@ -417,15 +419,22 @@ SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
      &liftDownCommand,
      &cubeLiftSwitchUpCommand}});
 
+// commands for pickup/scoring positions
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 240);
 SetpointMovePositionCommand gantryIn(gantryExtensionSubsystem, 20);
 SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
 SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
-WristMovePositionCommand wristDown(wristSubsystem, 1.605495333, 0);
+WristMovePositionCommand wristDown(
+    wristSubsystem,
+    1.605495333,
+    0);  // tuned to align for better suction
 WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
 SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);
 
-ScorePositionCommand scorePositionCommand(gantryLiftSubsystem, wristSubsystem, wristRollSubsystem);
+ScorePositionCommand scorePositionCommand(
+    gantryLiftSubsystem,
+    wristSubsystem,
+    wristRollSubsystem);  // TODO: test that this works
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -449,6 +458,17 @@ tap::control::PressCommandMapping suctionToggle(
     {&suctionToggleCommand},
     RemoteMapState({Remote::Key::F}));
 
+tap::control::PressCommandMapping vPressed(
+    drivers(),
+    {&gantryOut, &liftPickup, &wristDown},
+    RemoteMapState({Remote::Key::V}));
+
+tap::control::PressCommandMapping bPressed(
+    drivers(),
+    {&gantryIn, &liftScore, &wristOut},
+    RemoteMapState({Remote::Key::B}));
+
+// following commands never tested, and still need to get working
 tap::control::PressCommandMapping storeCube(
     drivers(),
     {&storeCubeCommand},
@@ -467,20 +487,10 @@ tap::control::PressCommandMapping cubeLiftDown(
     {&cubeLiftSwitchUpCommand},
     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
 
-tap::control::PressCommandMapping vPressed(
-    drivers(),
-    {&gantryOut, &liftPickup, &wristDown},
-    RemoteMapState({Remote::Key::V}));
-
-tap::control::PressCommandMapping bPressed(
-    drivers(),
-    {&gantryIn, &liftScore, &wristOut},
-    RemoteMapState({Remote::Key::B}));
-
 tap::control::PressCommandMapping cyclePositions(
     drivers(),
     {&scorePositionCommand},
-    RemoteMapState({Remote::Key::C}));  // should it be not shift or not
+    RemoteMapState({Remote::Key::C}));
 
 CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
     drivers(),
@@ -501,7 +511,7 @@ void initializeSubsystems()
     cubeLift.initialize();
     suckSubsystem.initialize();
     releaseSubsystem.initialize();
-    // clientDisplay.initialize();
+    // clientDicsplay.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -541,12 +551,12 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&suctionToggle);
-    drivers->commandMapper.addMap(&cubeLiftUp);
-    drivers->commandMapper.addMap(&cubeLiftDown);
-    drivers->commandMapper.addMap(&storeCube);
-    drivers->commandMapper.addMap(&retrieveCube);
-    drivers->commandMapper.addMap(&cyclePositions);
-    drivers->commandMapper.addMap(&cPressed);
+    // drivers->commandMapper.addMap(&cubeLiftUp);
+    // drivers->commandMapper.addMap(&cubeLiftDown);
+    // drivers->commandMapper.addMap(&storeCube);
+    // drivers->commandMapper.addMap(&retrieveCube);
+    // drivers->commandMapper.addMap(&cyclePositions);
+    // drivers->commandMapper.addMap(&cPressed);
     drivers->commandMapper.addMap(&leftUp);
     drivers->commandMapper.addMap(&rightMid);
     drivers->commandMapper.addMap(&rightDown);

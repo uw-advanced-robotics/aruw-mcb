@@ -40,7 +40,7 @@ bool EngineerControlOperatorInterface::isGantryWristControlMode()
 
 float EngineerControlOperatorInterface::getCubeLiftVelocity()
 {
-    // return drivers->remote.getChannel(Remote::Channel::WHEEL);
+    // CubeLift_Switch_Command might break if manual cubelift adjustment is added back
     // if (isGantryWristControlMode())
     //     return drivers->remote.getChannel(Remote::Channel::WHEEL);
     return 0;
@@ -48,7 +48,6 @@ float EngineerControlOperatorInterface::getCubeLiftVelocity()
 
 float EngineerControlOperatorInterface::getGantryLiftVelocity()
 {
-    // return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
     if (getShiftKey())
     {
         return -(drivers->remote.getMouseY() / divideGantryLift) +
@@ -170,9 +169,10 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
     }
 }
 
-float chassisSpeed = 8;
-float chassisSpeedNormal = 3.5;
-
+float chassisSpeedSprint = 3.5;
+float chassisSpeedNormal = 8;
+// this is basically the same thing as getChassisXInput in the basic control operator interface, but
+// uh... we wanted sprint to work so hopefully the two don't get too out of sync
 float EngineerControlOperatorInterface::getChassisXInput()
 {
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
@@ -217,11 +217,11 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return xInput / chassisSpeedNormal;
+        return xInput / chassisSpeedSprint;
     }
     else
     {
-        return xInput / chassisSpeed;
+        return xInput / chassisSpeedNormal;
     }
 
     return 0;
@@ -271,11 +271,11 @@ float EngineerControlOperatorInterface::getChassisYInput()
     float yInput = chassisYInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return yInput / chassisSpeedNormal;
+        return yInput / chassisSpeedSprint;
     }
     else
     {
-        return yInput / 10;
+        return yInput / chassisSpeedNormal;
     }
 }
 
@@ -322,11 +322,11 @@ float EngineerControlOperatorInterface::getChassisRInput()
     float rInput = chassisRInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return rInput / chassisSpeedNormal;
+        return rInput / chassisSpeedSprint;
     }
     else
     {
-        return rInput / chassisSpeed;
+        return rInput / chassisSpeedNormal;
     }
 }
 

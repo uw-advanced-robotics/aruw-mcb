@@ -32,9 +32,7 @@ CubeliftSwitchCommand::CubeliftSwitchCommand(
     addSubsystemRequirement(&cubeLift);
 }
 
-void CubeliftSwitchCommand::initialize() {}
-
-void CubeliftSwitchCommand::execute()
+void CubeliftSwitchCommand::initialize()
 {
     float setpoint = cubeLift.getSetpoint();
     if (isDirectionUp)
@@ -61,7 +59,9 @@ void CubeliftSwitchCommand::execute()
     }
 }
 
+void CubeliftSwitchCommand::execute() {}
+
 void CubeliftSwitchCommand::end(bool) {}
 
-bool CubeliftSwitchCommand::isFinished() const { return false; }
+bool CubeliftSwitchCommand::isFinished() const { return true; }
 }  // namespace aruwsrc::engineer
