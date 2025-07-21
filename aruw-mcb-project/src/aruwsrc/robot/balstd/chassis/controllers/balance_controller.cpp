@@ -60,10 +60,11 @@ BalstdChassisOutput BalanceController::runController(const BalstdChassisState& c
     vmRef.data[2] += controlOperatorInterface.getXVel() * dt;
     yawSetpoint += controlOperatorInterface.getYawVel() * dt;
 
-    heightSetpoint.setTarget(std::clamp(
-        heightSetpoint.getTarget() + controlOperatorInterface.getHeightVel() * dt,
-        config.minHeight,
-        config.maxHeight));
+    heightSetpoint.setTarget(
+        std::clamp(
+            heightSetpoint.getTarget() + controlOperatorInterface.getHeightVel() * dt,
+            config.minHeight,
+            config.maxHeight));
     heightSetpoint.update(config.maxHeightSetpointVel * dt);
 
     rollSetpoint.setTarget(controlOperatorInterface.getRoll());
@@ -133,12 +134,11 @@ CMSISMat<2, 6> BalanceController::getLQRGains(const float legLength) const
 {
     // TODO: use config for all this stuff
     // clang-format off
-    return CMSISMat<2, 6>({  // for length = 0.17m
+    float coeffs[1][12] {{  // for length = 0.17m
        -37.831, -5.031, -20.811, -17.182, 31.92, 5.0632,
-       12.604, 1.6434, 8.1786, 6.2358, 68.298, 6.4245
-           }) * LQRScalar;
+       12.604, 1.6434, 8.1786, 6.2358, 68.298, 6.4245}};
     
-    // float coeffs[5][12] {s
+    // float coeffs[5][12] {
     //   {-9.0447, -1.6074, -16.313, -14.196,  61.599,  9.5572,
     //     6.3627, 0.92331,  15.717,  11.688,  49.341,  3.1599},
     //   {-204.39, -8.0768, -47.927, -15.125, -261.93, -45.14,
@@ -151,17 +151,17 @@ CMSISMat<2, 6> BalanceController::getLQRGains(const float legLength) const
     //     -788.7,  -12.93, -59.553,  62.965, -1061.1, -202.77}};
     // // clang-format on
 
-    // CMSISMat<2, 6> K(coeffs[0]);
-    // float x = legLength;
-    // for (unsigned int i = 1; i < MODM_ARRAY_SIZE(coeffs); i++, x *= legLength)
-    // {
-    //     for (int j = 0; j < 12; j++)
-    //     {
-    //         K.data[j] += coeffs[i][j] * x;
-    //     }
-    // }
+    CMSISMat<2, 6> K(coeffs[0]);
+    float x = legLength;
+    for (unsigned int i = 1; i < MODM_ARRAY_SIZE(coeffs); i++, x *= legLength)
+    {
+        for (int j = 0; j < 12; j++)
+        {
+            K.data[j] += coeffs[i][j] * x;
+        }
+    }
 
-    // return K;
+    return K * LQRScalar;
 }
 
 }  // namespace aruwsrc::balstd::chassis::controllers
