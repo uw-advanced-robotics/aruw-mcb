@@ -27,7 +27,6 @@ CubeStorageSubsystem::CubeStorageSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& storageLiftMotor,
     const tap::algorithms::SmoothPidConfig& configPos,
-    const tap::algorithms::SmoothPidConfig& configHoming,
     aruwsrc::control::TriggerInterface& trigger,
     float setpoint,
     float radius,
@@ -45,8 +44,7 @@ CubeStorageSubsystem::CubeStorageSubsystem(
           epsilon,
           20.0f,
           true),
-      motor(storageLiftMotor),
-      homingPID(configHoming)
+      motor(storageLiftMotor)
 {
     calibrationState = CalibrationState::AWAITING_CALIBRATE;
 };

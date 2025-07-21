@@ -245,7 +245,6 @@ CubeStorageSubsystem cubeLift(
     drivers(),
     cubeLiftMotor,
     LIFT_MOTOR_PID_CONFIG,
-    LIFT_HOMING_PID_CONFIG,
     cubeLiftTrigger,
     ONE_CUBE_SETPOINT,
     MM_PER_REVOLUTION);

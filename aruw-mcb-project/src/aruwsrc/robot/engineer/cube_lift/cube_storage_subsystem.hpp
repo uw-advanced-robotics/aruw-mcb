@@ -39,7 +39,6 @@ public:
         tap::Drivers* drivers,
         tap::motor::MotorInterface& storageLiftMotor,
         const tap::algorithms::SmoothPidConfig& configPos,
-        const tap::algorithms::SmoothPidConfig& configHoming,
         aruwsrc::control::TriggerInterface& trigger,
         float setpoint,
         float radius = 1.0f,
@@ -56,13 +55,11 @@ public:
 
     float getEncoderVelocity() override;
 
-    const char* getName() const override { return "Cube Storage"; }
+    const char* getName() const override { return "Cube Storage Subsystem"; }
 
 private:
     tap::motor::MotorInterface& motor;
-    tap::algorithms::SmoothPid homingPID;
-    int16_t homingOutput = 1000;
-};  // class CUBE_STORAGE
+};  // class CUBE_STORAGE_SUBSYSTEM
 
 }  // namespace aruwsrc::engineer::lift
 #endif  // CUBE_STORAGE_SUBSYSTEM_HPP_
