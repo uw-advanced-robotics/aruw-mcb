@@ -52,7 +52,9 @@ public:
 
     tap::algorithms::CMSISMat<2, 6> getLQRGains(const float legLength) const;
 
+#if not defined(PLATFORM_HOSTED) || not defined(ENV_UNIT_TESTS)
 private:
+#endif
     const Config config;
     tap::algorithms::SmoothPid heightController, splitController, rollController, yawController;
 

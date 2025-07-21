@@ -67,6 +67,6 @@ TEST_F(BalanceControllerTest, lqr_gain_scheduling)
 
     for (int i = 0; i < 12; i++)
     {
-        EXPECT_NEAR(gains.data[i], expected.data[i], 1e-2);
+        EXPECT_NEAR(gains.data[i], expected.data[i] * controller.LQRScalar, 1e-2);
     }
 }
