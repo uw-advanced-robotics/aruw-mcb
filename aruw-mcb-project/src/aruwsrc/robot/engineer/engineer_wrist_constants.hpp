@@ -67,7 +67,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
             .errorDerivativeFloor = 0.0,
         },
     .minPitch = 0.0f - M_PI_4,
-    .maxPitch = M_PI_2 + 0.04f,
+    .maxPitch = M_PI_2 + 0.04f, // allow wrist to pitch down a bit more to allow more adjustment for scoring
     .minYaw = -M_PI_2,
     .maxYaw = M_PI,
     .ratio = 30.0f / 40.0f,

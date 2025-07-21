@@ -33,10 +33,6 @@ static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS
 static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::B;
 
-static constexpr int16_t FEEDFORWARD = 1000;
-
-static constexpr float HOMING_SPEED = 1000;  // 25
-
 static constexpr float MM_PER_REVOLUTION = 74.63f / M_TWOPI;
 
 static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
