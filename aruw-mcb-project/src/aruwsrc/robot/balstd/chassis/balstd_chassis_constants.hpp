@@ -66,11 +66,11 @@ BalstdLegConfig LEG_CONFIG{
 };
 
 tap::algorithms::SmoothPidConfig HEIGHT_CONTROLLER_PID_CONFIG{
-    .kp = 500.0f,
+    .kp = 800.0f,
     .ki = 0.0f,
     .kd = -20.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 90.0f,
+    .maxOutput = 140.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -127,9 +127,9 @@ controllers::BalanceController::Config BALANCE_CONTROLLER_CONFIG{
     .rollControllerConfig = ROLL_CONTROLLER_PID_CONFIG,
     .yawControllerConfig = YAW_CONTROLLER_PID_CONFIG,
     .minHeight = 0.11,
-    .maxHeight = 0.2,  // lowball until tested
+    .maxHeight = 0.3,  // lowball until tested
     .maxHeightSetpointVel = 0.025f,
-    .maxRollSetpointVel = 1.0f,
+    .maxRollSetpointVel = 0.5f,
 };
 
 }  // namespace aruwsrc::balstd::chassis

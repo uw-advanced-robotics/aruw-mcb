@@ -105,8 +105,8 @@ private:
         1, 0,
     };
     static constexpr float W_KF_Q[4] = {
-        1E1, 0  ,
-        0  , 1E1,
+        4, 0,
+        0, 5,
     };
     static constexpr float W_KF_R[1] = {
         1.0,

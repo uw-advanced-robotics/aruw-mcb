@@ -64,7 +64,7 @@ static constexpr uint32_t STATE_TRANSITION_FAIL_NOTE_LENGTH_MS = 100;
 static constexpr std::array<uint8_t, 4> STATE_TRANSITION_FAIL_NOTES{{37, 0, 31, 0}};
 
 static constexpr uint32_t WATCHDOG_INTERVENTION_NOTE_LENGTH_MS = 80;
-static constexpr std::array<uint8_t, 8> WATCHDOG_INTERVENTION_NOTES{{40, 0, 40, 0, 40, 0, 40, 0}};
+static constexpr std::array<uint8_t, 8> WATCHDOG_INTERVENTION_NOTES{{52, 0, 52, 0, 52, 0, 52, 0}};
 #endif
 }  // namespace aruwsrc::control::buzzer
 

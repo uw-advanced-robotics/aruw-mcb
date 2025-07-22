@@ -49,8 +49,9 @@ BalanceController::BalanceController(
 
 void BalanceController::initialize(const BalstdChassisState& state)
 {
-    heightSetpoint.setTarget(0.17);
+    heightSetpoint.setTarget(state.height);  // 0.17
     heightSetpoint.setValue(state.height);
+    yawSetpoint = state.yaw;
     vmRef.data = {0, 0, state.virtualWheelPos, 0, 0, 0};
 }
 

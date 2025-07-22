@@ -40,7 +40,7 @@ float BalstdControlOperatorInterface::getRoll() const
 
 float BalstdControlOperatorInterface::getHeightVel() const
 {
-    return drivers->remote.getChannel(Channel::WHEEL) * MAX_HEIGHT_VEL;
+    return -drivers->remote.getChannel(Channel::WHEEL) * MAX_HEIGHT_VEL;
 }
 
 float BalstdControlOperatorInterface::getManualLegXForce() const

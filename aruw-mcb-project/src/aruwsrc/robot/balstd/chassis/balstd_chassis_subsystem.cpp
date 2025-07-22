@@ -35,8 +35,8 @@ BalstdChassisSubsystem::BalstdChassisSubsystem(
       controller(nullptr),
       currState(ZERO_STATE),
       currOutput(ZERO_OUTPUT),
-      chassisPitchDotLP(tap::algorithms::filter::butterworth<2>(100, 0.002)),
-      thetaDotLP(tap::algorithms::filter::butterworth<2>(100, 0.002)),
+      chassisPitchDotLP(tap::algorithms::filter::butterworth<2>(200, 0.002)),
+      thetaDotLP(tap::algorithms::filter::butterworth<2>(200, 0.002)),
       wheelFilter(W_KF_A, W_KF_C, W_KF_Q, W_KF_R, W_KF_P0)
 {
 }
@@ -45,6 +45,9 @@ void BalstdChassisSubsystem::initialize()
 {
     leftLeg.initialize();
     rightLeg.initialize();
+
+    float initialX[2] = {0.0f, 0.0f};
+    wheelFilter.init(initialX);
 }
 
 bool BalstdChassisSubsystem::allMotorsOnline() const
@@ -94,7 +97,7 @@ void BalstdChassisSubsystem::updateState()
     currState.roll = -chassisImu.getRoll();
     currState.rollVel = -chassisImu.getGx();
     currState.pitch = -chassisImu.getPitch();
-    currState.pitchVel = chassisPitchDotLP.filterData(-chassisImu.getGy());
+    currState.pitchVel = -chassisImu.getGy();
     currState.yaw = chassisImu.getYaw();
     currState.yawVel = chassisImu.getGz();
 
@@ -102,11 +105,13 @@ void BalstdChassisSubsystem::updateState()
     currState.virtualPendTheta = currState.virtualLegState.alpha + currState.pitch;
     currState.virtualPendThetaDot = currState.virtualLegState.alphaDot + currState.pitchVel;
 
-    currState.height = currState.virtualLegState.L * cos(currState.virtualPendTheta);
+    currState.height = currState.virtualLegState.L * cos(currState.virtualLegState.alpha);
 
     currState.virtualWheelVel =
         (currState.leftLegState.wheelVel + currState.rightLegState.wheelVel) / 2 * WHEEL_RADIUS_M;
-    currState.virtualWheelPos += currState.virtualWheelVel * 0.002f;
+    currState.virtualWheelPos += currState.virtualWheelVel * DT;
+    wheelFilter.performUpdate(CMSISMat<1, 1>({currState.virtualWheelVel}));
+    currState.virtualWheelVel = wheelFilter.getStateVectorAsMatrix()[0];
 }
 
 }  // namespace aruwsrc::balstd::chassis
