@@ -44,7 +44,7 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float CUBE_LIFT_MOVE_SPEED = -2;  // TODO: choose value alter
+static constexpr float CUBE_LIFT_MOVE_SPEED = -2; 
 
 static constexpr float ONE_CUBE_SETPOINT = -40;
 static constexpr float TWO_CUBE_SETPOINT = -220;

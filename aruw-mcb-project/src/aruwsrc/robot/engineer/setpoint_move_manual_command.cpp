@@ -74,7 +74,7 @@ void SetpointMoveManualCommand::execute()
     subsystem.setSetpoint(setpoint);
 }
 
-void SetpointMoveManualCommand::end(bool) { subsystem.setDesiredOutput(0); }
+void SetpointMoveManualCommand::end(bool) {}
 
 bool SetpointMoveManualCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::engineer
