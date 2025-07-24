@@ -18,12 +18,11 @@
  */
 
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
-#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 
 using namespace tap::algorithms;
 using namespace aruwsrc::chassis;
@@ -154,7 +153,7 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
 {
     if (drivers->remote.getMouseL())
     {
-        return -aruwsrc::engineer::WRIST_ROLL_CLICK_VELOCITY; 
+        return -aruwsrc::engineer::WRIST_ROLL_CLICK_VELOCITY;
     }
     else if (drivers->remote.getMouseR())
     {
@@ -216,11 +215,11 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return xInput / aruwsrc::chassis::CHASSIS_SPEED_DIVSOR_SPRINT;
+        return xInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return xInput / aruwsrc::chassis::CHASSIS_SPEED_DIVSOR_NORMAL;
+        return xInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 
     return 0;
@@ -270,11 +269,11 @@ float EngineerControlOperatorInterface::getChassisYInput()
     float yInput = chassisYInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return yInput / aruwsrc::chassis::CHASSIS_SPEED_DIVSOR_SPRINT;
+        return yInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return yInput / aruwsrc::chassis::CHASSIS_SPEED_DIVSOR_NORMAL;
+        return yInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 }
 
@@ -321,11 +320,11 @@ float EngineerControlOperatorInterface::getChassisRInput()
     float rInput = chassisRInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return rInput / aruwsrc::chassis::CHASSIS_SPEED_DIVSOR_SPRINT;
+        return rInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return rInput / aruwsrc::chassis::CHASSIS_SPEED_DIVSOR_NORMAL;
+        return rInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 }
 
