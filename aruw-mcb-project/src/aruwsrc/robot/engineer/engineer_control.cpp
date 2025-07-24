@@ -434,6 +434,7 @@ ScorePositionCommand scorePositionCommand(
     gantryLiftSubsystem,
     wristSubsystem,
     wristRollSubsystem);  // TODO: test that this works
+    
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
