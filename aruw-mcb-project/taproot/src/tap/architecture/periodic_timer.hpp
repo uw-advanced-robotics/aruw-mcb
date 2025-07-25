@@ -80,8 +80,7 @@ public:
     {
         if (timeout.execute())
         {
-            uint32_t now = T::TimeFunc();
-
+            now = T::TimeFunc();
             do
             {
                 timeout.expireTime += period;
@@ -91,6 +90,7 @@ public:
             timeout.isExecuted = false;
             return true;
         }
+        remainingTime = timeout.expireTime - T::TimeFunc();
         return false;
     }
 
@@ -101,6 +101,8 @@ public:
 
 private:
     uint32_t period;
+    uint32_t remainingTime;
+    uint32_t now;
     T timeout;
 };
 

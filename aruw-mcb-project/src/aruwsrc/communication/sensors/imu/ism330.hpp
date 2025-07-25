@@ -21,6 +21,7 @@
 #define ISM330_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/architecture/timeout.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 
 #include "modm/architecture/interface/i2c_device.hpp"
@@ -59,14 +60,39 @@ public:
     virtual inline float getAccelerationSensitivity() const override { return GRAVITY_MPS2; }
 
 private:
+    modm::ResumableResult<bool> configureWriteReadWithTimeout(
+        const uint8_t *writeBuffer,
+        std::size_t writeSize,
+        uint8_t *readBuffer,
+        std::size_t readSize)
+    {
+        bool success;
+        RF_BEGIN();
+
+        // if (errorTimeout.execute())
+        // if (true)
+        // {
+        //     erroredOut = true;
+        //     RF_RETURN(true);
+        // }
+        success =
+            this->transaction.configureWriteRead(writeBuffer, writeSize, readBuffer, readSize);
+        // if (success)
+        // {
+        //     erroredOut = false;
+        //     errorTimeout.restart(errorTimeoutTime);
+        // }
+        RF_END_RETURN(success);
+    };
+
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
     {
         txBuff[0] = reg;
 
         RF_BEGIN();
 
-        RF_WAIT_WHILE(!this->transaction.configureWriteRead(txBuff, 1, rxBuffer, length));
-
+        // errorTimeout.restart(errorTimeoutTime);
+        RF_WAIT_UNTIL(RF_CALL(this->configureWriteReadWithTimeout(txBuff, 1, rxBuffer, length)));
         RF_END_RETURN_CALL(this->runTransaction());
     };
 
@@ -77,7 +103,7 @@ private:
 
         RF_BEGIN();
 
-        RF_WAIT_WHILE(!this->transaction.configureWrite(txBuff, 2));
+        RF_WAIT_UNTIL(this->transaction.configureWrite(txBuff, 2));
 
         RF_END_RETURN_CALL(this->runTransaction());
     };
@@ -87,7 +113,12 @@ private:
     uint8_t rxBuff[15];
     uint8_t txBuff[2];
 
-    int timeout = 1200;
+    uint32_t timeout = 1200;
+    uint32_t errorTimeoutTime = timeout * 400;
+
+    // tap::arch::PeriodicMicroTimer errorTimeout;
+    // bool erroredOut = false;
+    bool debug = false;
 
     uint8_t current_reg_G;
     uint8_t current_reg_XL;
