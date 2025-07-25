@@ -43,8 +43,9 @@ static constexpr float GANTRY_LIFT_RADIUS = 5 * 24 / M_TWOPI;  // 5mm per tooth,
 static constexpr float GANTRY_LIFT_HOME = 0.0f;
 static constexpr float GANTRY_LIFT_KS = 0.0f;
 static constexpr float GANTRY_LIFT_EPSILON = 1.0f;
+static constexpr float GANTRY_LIFT_MAX_INCREMENT = 0.7f;
 
-static constexpr float GANTRY_LIFT_BALANCE_PID_KP = 100.0f;  // todo
+static constexpr float GANTRY_LIFT_BALANCE_PID_KP = 100.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_KI = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_KD = 0.0f;
 static constexpr float GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM = 0.0f;
