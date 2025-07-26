@@ -45,6 +45,16 @@ void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float 
 }
 
 template <class I2cMaster>
+void ISM330<I2cMaster>::reinitialize(){
+
+    RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxBuff));
+    
+    setODR(ODR_833HZ);
+    setGyroRange(DPS1000_CONFIG);
+    setAccelRange(G4_CONFIG);
+}
+
+template <class I2cMaster>
 bool ISM330<I2cMaster>::read()
 {
     // Defined here as protothreads cannot have local variables
@@ -70,6 +80,8 @@ bool ISM330<I2cMaster>::read()
                 Board::I2CMaster::PullUps::External);
             Board::I2CMaster::initialize<Board::SystemClock, 360000>();
             Board::I2CMaster::reset();
+
+            reinitialize();
         }
         PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
 

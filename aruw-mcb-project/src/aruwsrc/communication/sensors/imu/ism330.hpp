@@ -49,6 +49,7 @@ public:
     ISM330();
 
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
+    virtual void reinitialize();
 
     bool read();
 
