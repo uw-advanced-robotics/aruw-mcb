@@ -52,33 +52,29 @@ bool ISM330<I2cMaster>::read()
     PT_BEGIN();
     while (true)
     {
-        pinged = false;
         PT_WAIT_UNTIL(readTimeout.execute());
-        pinged = PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
-        
+        PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
+
         // we have started to read actual data so set to proper timeout
-        if (!erroredOut && imuData.temperature != 0){
+        if (!erroredOut && imuData.temperature != 0)
+        {
             errorTimeout.restart(errorTimeoutTime);
         }
         if (erroredOut)
         {
-            debug = true;
+            hasErrored = true;
             erroredOut = false;
+            
+            // // Errored, try and restart
+            // I2C2->CR1 &= ~I2C_CR1_PE;  // Disable I2C peripheral
+            // modm::delay_us(5);
+            // I2C2->CR1 |= I2C_CR1_PE;  // Enable I2C peripheral
+            // Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+            //     Board::I2CMaster::PullUps::External);
+            // Board::I2CMaster::initialize<Board::SystemClock, 360000>();
+            // Board::I2CMaster::reset();
         }
-        // const bool success = readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff).getResult();
-        // pinged = readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff).getResult();
-        // const bool success = pinged;
-        // if (!success)
-        // {
-        //     // Errored, try and restart
-        //     I2C2->CR1 &= ~I2C_CR1_PE;  // Disable I2C peripheral
-        //     modm::delay_us(5);
-        //     I2C2->CR1 |= I2C_CR1_PE;  // Enable I2C peripheral
-        //     Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-        //         Board::I2CMaster::PullUps::External);
-        //     Board::I2CMaster::initialize<Board::SystemClock, 360000>();
-        //     Board::I2CMaster::reset();
-        // }
+
         imuData.temperature = tempValueToCelsius(rxBuff);
 
         gyroX = gyroValueToRadPerSec(rxBuff + 2);

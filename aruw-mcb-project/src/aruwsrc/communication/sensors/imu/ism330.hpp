@@ -83,10 +83,7 @@ private:
 
         RF_WAIT_UNTIL(this->startTransaction() || safetyTimeout());
 
-        while (this->isTransactionRunning() && !safetyTimeout())
-        {
-            ;
-        };
+        RF_WAIT_WHILE(this->isTransactionRunning() && !safetyTimeout());
 
         RF_END_RETURN(this->wasTransactionSuccessful());
     };
@@ -102,12 +99,10 @@ private:
 
         RF_WAIT_UNTIL(this->startTransaction() || safetyTimeout());
 
-        RF_WAIT_UNTIL(!this->isTransactionRunning());  // || safetyTimeout());
+        RF_WAIT_WHILE(this->isTransactionRunning() && !safetyTimeout());
 
         RF_END_RETURN(this->wasTransactionSuccessful());
     };
-
-    bool pinged;
 
     uint8_t rxBuff[15];
     uint8_t txBuff[2];
@@ -117,7 +112,7 @@ private:
     uint32_t BeginningErrorTimeoutTime = 1'000'000 * 15;
 
     tap::arch::PeriodicMicroTimer errorTimeout;
-    bool debug = false;
+    bool hasErrored = false;
 
     uint8_t current_reg_G;
     uint8_t current_reg_XL;
