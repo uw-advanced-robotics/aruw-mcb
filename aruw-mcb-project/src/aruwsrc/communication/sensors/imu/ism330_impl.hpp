@@ -23,11 +23,13 @@
 namespace aruwsrc::communication::sensors::imu::ism330
 {
 template <class I2cMaster>
-ISM330<I2cMaster>::ISM330()
+ISM330<I2cMaster>::ISM330(tap::Drivers *drivers)
     : modm::I2cDevice<I2cMaster>(DEVICE_ADDRESS),
       AbstractIMU(),
       modm::pt::Protothread(),
-      errorTimeout(BeginningErrorTimeoutTime)
+      drivers(drivers),
+      errorTimeout(BeginningErrorTimeoutTime),
+      errorTimeoutPower(BeginningErrorTimeoutTime)
 {
 }
 
@@ -45,10 +47,10 @@ void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float 
 }
 
 template <class I2cMaster>
-void ISM330<I2cMaster>::reinitialize(){
-
+void ISM330<I2cMaster>::reinitialize()
+{
     RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxBuff));
-    
+
     setODR(ODR_833HZ);
     setGyroRange(DPS1000_CONFIG);
     setAccelRange(G4_CONFIG);
@@ -80,7 +82,16 @@ bool ISM330<I2cMaster>::read()
                 Board::I2CMaster::PullUps::External);
             Board::I2CMaster::initialize<Board::SystemClock, 360000>();
             Board::I2CMaster::reset();
-
+            if (errorTimeoutPower.execute())
+            {
+                // Power cycle the IMU
+                errorTimeoutPower.restart(errorTimeoutPowerTime);
+                drivers->digital.set(tap::gpio::Digital::OutputPin::E, false);
+                modm::delay_ms(500);
+                drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
+                modm::delay_ms(100);
+                errorTimeout.restart(errorTimeoutTime);
+            }
             reinitialize();
         }
         PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
@@ -89,6 +100,7 @@ bool ISM330<I2cMaster>::read()
         if (!erroredOut && imuData.temperature != 0)
         {
             errorTimeout.restart(errorTimeoutTime);
+            errorTimeoutPower.restart(errorTimeoutPowerTime);
         }
 
         imuData.temperature = tempValueToCelsius(rxBuff);

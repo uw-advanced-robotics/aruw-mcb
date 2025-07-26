@@ -67,7 +67,7 @@ public:
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
           chassisIsm330(this)
 #else
-          chassisIsm330()
+          chassisIsm330(this)
 #endif
 
     {

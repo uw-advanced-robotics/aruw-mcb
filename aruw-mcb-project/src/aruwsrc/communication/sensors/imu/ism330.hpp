@@ -46,7 +46,7 @@ template <class I2cMaster>
 class ISM330 : public modm::I2cDevice<I2cMaster>, public AbstractIMU, public modm::pt::Protothread
 {
 public:
-    ISM330();
+    ISM330(tap::Drivers *drivers);
 
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
     virtual void reinitialize();
@@ -63,6 +63,8 @@ public:
     bool erroredOut = false;
 
 private:
+    tap::Drivers *drivers;
+
     bool safetyTimeout()
     {
         if (errorTimeout.execute() || erroredOut || this->transaction.getState() == modm::I2cTransaction::TransactionState::Error)
@@ -116,9 +118,11 @@ private:
 
     uint32_t timeout = 1200;
     uint32_t errorTimeoutTime = timeout * 4;
+    uint32_t errorTimeoutPowerTime = 1'000'000;
     uint32_t BeginningErrorTimeoutTime = 1'000'000 * 15;
 
     tap::arch::PeriodicMicroTimer errorTimeout;
+    tap::arch::PeriodicMicroTimer errorTimeoutPower;
     bool hasErrored = false;
 
     uint8_t current_reg_G;
