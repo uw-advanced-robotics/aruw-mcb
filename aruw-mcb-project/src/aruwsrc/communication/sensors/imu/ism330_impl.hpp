@@ -49,30 +49,34 @@ bool ISM330<I2cMaster>::read()
 {
     // Defined here as protothreads cannot have local variables
     float gyroX, gyroY, gyroZ, accX, accY, accZ;
+    // if (this->transaction.getState() != modm::I2cTransaction::TransactionState::Idle)
+    // {
+    //     return false;  // Transaction is still running, cannot read
+    // }
     PT_BEGIN();
     while (true)
     {
         PT_WAIT_UNTIL(readTimeout.execute());
+        if (erroredOut)
+        {
+            hasErrored = true;
+            erroredOut = false;
+            this->transaction.resetState();
+            // Errored, try and restart
+            I2C2->CR1 &= ~I2C_CR1_PE;  // Disable I2C peripheral
+            modm::delay_us(5);
+            I2C2->CR1 |= I2C_CR1_PE;  // Enable I2C peripheral
+            Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+                Board::I2CMaster::PullUps::External);
+            Board::I2CMaster::initialize<Board::SystemClock, 360000>();
+            Board::I2CMaster::reset();
+        }
         PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
 
         // we have started to read actual data so set to proper timeout
         if (!erroredOut && imuData.temperature != 0)
         {
             errorTimeout.restart(errorTimeoutTime);
-        }
-        if (erroredOut)
-        {
-            hasErrored = true;
-            erroredOut = false;
-            
-            // // Errored, try and restart
-            // I2C2->CR1 &= ~I2C_CR1_PE;  // Disable I2C peripheral
-            // modm::delay_us(5);
-            // I2C2->CR1 |= I2C_CR1_PE;  // Enable I2C peripheral
-            // Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-            //     Board::I2CMaster::PullUps::External);
-            // Board::I2CMaster::initialize<Board::SystemClock, 360000>();
-            // Board::I2CMaster::reset();
         }
 
         imuData.temperature = tempValueToCelsius(rxBuff);

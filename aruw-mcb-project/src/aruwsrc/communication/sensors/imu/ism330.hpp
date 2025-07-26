@@ -64,7 +64,7 @@ public:
 private:
     bool safetyTimeout()
     {
-        if (errorTimeout.execute() || erroredOut)
+        if (errorTimeout.execute() || erroredOut || this->transaction.getState() == modm::I2cTransaction::TransactionState::Error)
         {
             erroredOut = true;
             return true;
@@ -77,6 +77,9 @@ private:
         txBuff[0] = reg;
 
         RF_BEGIN();
+
+        RF_WAIT_UNTIL(this->transaction.getState() == modm::I2cTransaction::TransactionState::Idle ||
+                      safetyTimeout());
 
         RF_WAIT_UNTIL(
             this->transaction.configureWriteRead(txBuff, 1, rxBuffer, length) || safetyTimeout());
@@ -94,6 +97,9 @@ private:
         txBuff[1] = data;
 
         RF_BEGIN();
+
+        RF_WAIT_UNTIL(this->transaction.getState() == modm::I2cTransaction::TransactionState::Idle ||
+                      safetyTimeout());
 
         RF_WAIT_UNTIL(this->transaction.configureWrite(txBuff, 2) || safetyTimeout());
 
