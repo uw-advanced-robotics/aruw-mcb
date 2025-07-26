@@ -26,8 +26,8 @@ template <class I2cMaster>
 ISM330<I2cMaster>::ISM330()
     : modm::I2cDevice<I2cMaster>(DEVICE_ADDRESS),
       AbstractIMU(),
-      modm::pt::Protothread()//,
-    //   errorTimeout(errorTimeoutTime)
+      modm::pt::Protothread(),
+      errorTimeout(BeginningErrorTimeoutTime)
 {
 }
 
@@ -49,18 +49,22 @@ bool ISM330<I2cMaster>::read()
 {
     // Defined here as protothreads cannot have local variables
     float gyroX, gyroY, gyroZ, accX, accY, accZ;
-    if (prevIMUDataReceivedTime - tap::arch::clock::getTimeMicroseconds() > errorTimeoutTime)
-    {
-        debug = true;
-        PT_RESTART();
-    }
     PT_BEGIN();
     while (true)
     {
         pinged = false;
         PT_WAIT_UNTIL(readTimeout.execute());
-        // pinged = PT_CALL(this->ping());
         pinged = PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
+        
+        // we have started to read actual data so set to proper timeout
+        if (!erroredOut && imuData.temperature != 0){
+            errorTimeout.restart(errorTimeoutTime);
+        }
+        if (erroredOut)
+        {
+            debug = true;
+            erroredOut = false;
+        }
         // const bool success = readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff).getResult();
         // pinged = readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff).getResult();
         // const bool success = pinged;

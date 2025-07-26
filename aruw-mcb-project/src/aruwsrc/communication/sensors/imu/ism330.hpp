@@ -59,31 +59,18 @@ public:
     virtual inline const char *getName() const { return "ISM330DHCX"; }
     virtual inline float getAccelerationSensitivity() const override { return GRAVITY_MPS2; }
 
-private:
-    modm::ResumableResult<bool> configureWriteReadWithTimeout(
-        const uint8_t *writeBuffer,
-        std::size_t writeSize,
-        uint8_t *readBuffer,
-        std::size_t readSize)
-    {
-        bool success;
-        RF_BEGIN();
+    bool erroredOut = false;
 
-        // if (errorTimeout.execute())
-        // if (true)
-        // {
-        //     erroredOut = true;
-        //     RF_RETURN(true);
-        // }
-        success =
-            this->transaction.configureWriteRead(writeBuffer, writeSize, readBuffer, readSize);
-        // if (success)
-        // {
-        //     erroredOut = false;
-        //     errorTimeout.restart(errorTimeoutTime);
-        // }
-        RF_END_RETURN(success);
-    };
+private:
+    bool safetyTimeout()
+    {
+        if (errorTimeout.execute() || erroredOut)
+        {
+            erroredOut = true;
+            return true;
+        }
+        return false;
+    }
 
     modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
     {
@@ -91,9 +78,17 @@ private:
 
         RF_BEGIN();
 
-        // errorTimeout.restart(errorTimeoutTime);
-        RF_WAIT_UNTIL(RF_CALL(this->configureWriteReadWithTimeout(txBuff, 1, rxBuffer, length)));
-        RF_END_RETURN_CALL(this->runTransaction());
+        RF_WAIT_UNTIL(
+            this->transaction.configureWriteRead(txBuff, 1, rxBuffer, length) || safetyTimeout());
+
+        RF_WAIT_UNTIL(this->startTransaction() || safetyTimeout());
+
+        while (this->isTransactionRunning() && !safetyTimeout())
+        {
+            ;
+        };
+
+        RF_END_RETURN(this->wasTransactionSuccessful());
     };
 
     modm::ResumableResult<bool> writeRegister(uint8_t reg, uint8_t data)
@@ -103,9 +98,13 @@ private:
 
         RF_BEGIN();
 
-        RF_WAIT_UNTIL(this->transaction.configureWrite(txBuff, 2));
+        RF_WAIT_UNTIL(this->transaction.configureWrite(txBuff, 2) || safetyTimeout());
 
-        RF_END_RETURN_CALL(this->runTransaction());
+        RF_WAIT_UNTIL(this->startTransaction() || safetyTimeout());
+
+        RF_WAIT_UNTIL(!this->isTransactionRunning());  // || safetyTimeout());
+
+        RF_END_RETURN(this->wasTransactionSuccessful());
     };
 
     bool pinged;
@@ -114,10 +113,10 @@ private:
     uint8_t txBuff[2];
 
     uint32_t timeout = 1200;
-    uint32_t errorTimeoutTime = timeout * 400;
+    uint32_t errorTimeoutTime = timeout * 4;
+    uint32_t BeginningErrorTimeoutTime = 1'000'000 * 15;
 
-    // tap::arch::PeriodicMicroTimer errorTimeout;
-    // bool erroredOut = false;
+    tap::arch::PeriodicMicroTimer errorTimeout;
     bool debug = false;
 
     uint8_t current_reg_G;

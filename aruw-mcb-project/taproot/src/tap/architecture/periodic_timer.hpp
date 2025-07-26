@@ -98,10 +98,10 @@ public:
      * @return `true` if the timer is stopped
      */
     inline bool isStopped() const { return timeout.isStopped(); }
-
+    
+    uint32_t remainingTime;
 private:
     uint32_t period;
-    uint32_t remainingTime;
     uint32_t now;
     T timeout;
 };
