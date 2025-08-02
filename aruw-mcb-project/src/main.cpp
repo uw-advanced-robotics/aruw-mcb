@@ -290,9 +290,23 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
 static void initializeI2C(Drivers *drivers)
 {
     drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
-    modm::delay_ms(2000);  // Wait for the SDA and SCL lines to be pulled high
+    modm::delay_ms(500);  // Wait for the SDA and SCL lines to be pulled high
     Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-        Board::I2CMaster::PullUps::External);
+        Board::I2CMaster::PullUps::Internal);
     Board::I2CMaster::initialize<Board::SystemClock, 360000>();
     Board::I2CMaster::reset();
+}
+
+extern void raiseError(const char *errorMessage)
+{
+    Drivers *drivers = DoNotUse_getDrivers();
+    RAISE_ERROR(drivers, errorMessage);
+}
+
+extern void raiseError(const char *errorMessage, uint32_t data)
+{
+    char formatted[100];
+    snprintf(formatted, sizeof(formatted), "%s%lu", errorMessage, data);
+    Drivers *drivers = DoNotUse_getDrivers();
+    RAISE_ERROR(drivers, formatted);
 }

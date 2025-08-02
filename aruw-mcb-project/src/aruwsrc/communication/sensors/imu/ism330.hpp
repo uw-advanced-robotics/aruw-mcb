@@ -116,17 +116,9 @@ private:
         RF_END_RETURN(this->wasTransactionSuccessful());
     };
 
-    modm::ResumableResult<bool> handleDisconnect()
+    modm::ResumableResult<bool> attemptReconnect()
     {
         RF_BEGIN();
-        if (errorTimeoutPower.execute())
-        {
-            // Power cycle the IMU
-            errorTimeoutPower.restart(errorTimeoutPowerTime);
-            drivers->digital.set(tap::gpio::Digital::OutputPin::E, false);
-            RF_WAIT_UNTIL(errorTimeoutPower.execute());
-            drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
-        }
         this->transaction.resetState();
         // Errored, try and restart
         I2C2->CR1 &= ~I2C_CR1_PE;  // Disable I2C peripheral
@@ -135,12 +127,20 @@ private:
         modm::delay_us(5);
         I2C2->CR1 |= I2C_CR1_SWRST;  // Reset I2C peripheral
         Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-            Board::I2CMaster::PullUps::External);
+            Board::I2CMaster::PullUps::Internal);
         Board::I2CMaster::initialize<Board::SystemClock, 360000>();
         Board::I2CMaster::reset();
+        if (errorTimeoutPower.execute())
+        {
+            // Power cycle the IMU
+            errorTimeoutPower.restart(errorTimeoutPowerTime);
+            drivers->digital.set(tap::gpio::Digital::OutputPin::E, false);
+            RF_WAIT_UNTIL(errorTimeoutPower.execute());
+            drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
+            RF_WAIT_UNTIL(errorTimeoutPower.execute());
+            errorTimeout.restart(errorTimeoutTime);
+        }
         reinitialize();
-        hasErrored = true;
-        erroredOut = false;
         RF_END_RETURN(true);
     }
 
@@ -149,7 +149,7 @@ private:
 
     uint32_t timeout = 1200;
     uint32_t errorTimeoutTime = timeout * 4;
-    uint32_t errorTimeoutPowerTime = 1'000'000;
+    uint32_t errorTimeoutPowerTime = 500'000;
     uint32_t BeginningErrorTimeoutTime = 1'000'000 * 15;
 
     tap::arch::PeriodicMicroTimer errorTimeout;

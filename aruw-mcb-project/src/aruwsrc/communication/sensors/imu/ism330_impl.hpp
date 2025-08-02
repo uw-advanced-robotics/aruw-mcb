@@ -66,30 +66,9 @@ bool ISM330<I2cMaster>::read()
         {
             hasErrored = true;
             erroredOut = false;
-            this->transaction.resetState();
-            // Errored, try and restart
-            I2C2->CR1 &= ~I2C_CR1_PE;  // Disable I2C peripheral
-            modm::delay_us(5);
-            I2C2->CR1 |= I2C_CR1_PE;  // Enable I2C peripheral
-            modm::delay_us(5);
-            I2C2->CR1 |= I2C_CR1_SWRST; // Reset I2C peripheral
-            Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-                Board::I2CMaster::PullUps::External);
-            Board::I2CMaster::initialize<Board::SystemClock, 360000>();
-            Board::I2CMaster::reset();
-            if (errorTimeoutPower.execute())
-            {
-                // Power cycle the IMU
-                errorTimeoutPower.restart(errorTimeoutPowerTime);
-                drivers->digital.set(tap::gpio::Digital::OutputPin::E, false);
-                modm::delay_ms(500);
-                drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
-                modm::delay_ms(100);
-                errorTimeout.restart(errorTimeoutTime);
-            }
-            reinitialize();
+            PT_CALL(attemptReconnect());
         }
-        
+
         PT_CALL(readRegister(WHO_AM_I, 1, rxBuff));
         imuData.deviceId = rxBuff[0];
 
