@@ -67,7 +67,8 @@ private:
 
     bool safetyTimeout()
     {
-        if (errorTimeout.execute() || erroredOut || this->transaction.getState() == modm::I2cTransaction::TransactionState::Error)
+        if (errorTimeout.execute() || erroredOut ||
+            this->transaction.getState() == modm::I2cTransaction::TransactionState::Error)
         {
             erroredOut = true;
             return true;
@@ -81,8 +82,9 @@ private:
 
         RF_BEGIN();
 
-        RF_WAIT_UNTIL(this->transaction.getState() == modm::I2cTransaction::TransactionState::Idle ||
-                      safetyTimeout());
+        RF_WAIT_UNTIL(
+            this->transaction.getState() == modm::I2cTransaction::TransactionState::Idle ||
+            safetyTimeout());
 
         RF_WAIT_UNTIL(
             this->transaction.configureWriteRead(txBuff, 1, rxBuffer, length) || safetyTimeout());
@@ -101,8 +103,9 @@ private:
 
         RF_BEGIN();
 
-        RF_WAIT_UNTIL(this->transaction.getState() == modm::I2cTransaction::TransactionState::Idle ||
-                      safetyTimeout());
+        RF_WAIT_UNTIL(
+            this->transaction.getState() == modm::I2cTransaction::TransactionState::Idle ||
+            safetyTimeout());
 
         RF_WAIT_UNTIL(this->transaction.configureWrite(txBuff, 2) || safetyTimeout());
 
@@ -112,6 +115,34 @@ private:
 
         RF_END_RETURN(this->wasTransactionSuccessful());
     };
+
+    modm::ResumableResult<bool> handleDisconnect()
+    {
+        RF_BEGIN();
+        if (errorTimeoutPower.execute())
+        {
+            // Power cycle the IMU
+            errorTimeoutPower.restart(errorTimeoutPowerTime);
+            drivers->digital.set(tap::gpio::Digital::OutputPin::E, false);
+            RF_WAIT_UNTIL(errorTimeoutPower.execute());
+            drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
+        }
+        this->transaction.resetState();
+        // Errored, try and restart
+        I2C2->CR1 &= ~I2C_CR1_PE;  // Disable I2C peripheral
+        modm::delay_us(5);
+        I2C2->CR1 |= I2C_CR1_PE;  // Enable I2C peripheral
+        modm::delay_us(5);
+        I2C2->CR1 |= I2C_CR1_SWRST;  // Reset I2C peripheral
+        Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+            Board::I2CMaster::PullUps::External);
+        Board::I2CMaster::initialize<Board::SystemClock, 360000>();
+        Board::I2CMaster::reset();
+        reinitialize();
+        hasErrored = true;
+        erroredOut = false;
+        RF_END_RETURN(true);
+    }
 
     uint8_t rxBuff[15];
     uint8_t txBuff[2];

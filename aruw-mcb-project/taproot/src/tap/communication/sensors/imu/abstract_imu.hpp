@@ -106,6 +106,7 @@ public:
         tap::algorithms::transforms::Vector gyroRadPerSec = {0, 0, 0};
 
         float temperature = 0;
+        char deviceId = 0;
     };
 
     void setCalibrationSamples(int sampleCount) { offsetSampleCount = sampleCount; }

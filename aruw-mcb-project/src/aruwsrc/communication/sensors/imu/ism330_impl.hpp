@@ -37,13 +37,6 @@ template <class I2cMaster>
 void ISM330<I2cMaster>::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 {
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
-
-    // Check Who Am I
-    RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxBuff));
-
-    setODR(ODR_833HZ);
-    setGyroRange(DPS1000_CONFIG);
-    setAccelRange(G4_CONFIG);
 }
 
 template <class I2cMaster>
@@ -61,14 +54,14 @@ bool ISM330<I2cMaster>::read()
 {
     // Defined here as protothreads cannot have local variables
     float gyroX, gyroY, gyroZ, accX, accY, accZ;
-    // if (this->transaction.getState() != modm::I2cTransaction::TransactionState::Idle)
-    // {
-    //     return false;  // Transaction is still running, cannot read
-    // }
     PT_BEGIN();
+
+    reinitialize();
+
     while (true)
     {
         PT_WAIT_UNTIL(readTimeout.execute());
+
         if (erroredOut)
         {
             hasErrored = true;
@@ -78,6 +71,8 @@ bool ISM330<I2cMaster>::read()
             I2C2->CR1 &= ~I2C_CR1_PE;  // Disable I2C peripheral
             modm::delay_us(5);
             I2C2->CR1 |= I2C_CR1_PE;  // Enable I2C peripheral
+            modm::delay_us(5);
+            I2C2->CR1 |= I2C_CR1_SWRST; // Reset I2C peripheral
             Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
                 Board::I2CMaster::PullUps::External);
             Board::I2CMaster::initialize<Board::SystemClock, 360000>();
@@ -94,10 +89,14 @@ bool ISM330<I2cMaster>::read()
             }
             reinitialize();
         }
+        
+        PT_CALL(readRegister(WHO_AM_I, 1, rxBuff));
+        imuData.deviceId = rxBuff[0];
+
         PT_CALL(readRegister(OUT_TEMP_L, READ_LENGTH, rxBuff));
 
         // we have started to read actual data so set to proper timeout
-        if (!erroredOut && imuData.temperature != 0)
+        if (!erroredOut && imuData.deviceId == 0x6B)
         {
             errorTimeout.restart(errorTimeoutTime);
             errorTimeoutPower.restart(errorTimeoutPowerTime);
