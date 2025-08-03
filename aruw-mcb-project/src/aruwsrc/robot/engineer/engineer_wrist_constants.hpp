@@ -91,6 +91,8 @@ static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
 
+static constexpr float WRIST_ROLL_CLICK_VELOCITY = 0.5f;
+
 static constexpr wrist::Setpoint WRIST_IN_SETPOINT{
     .pitch = 0,
     .yaw = 0,

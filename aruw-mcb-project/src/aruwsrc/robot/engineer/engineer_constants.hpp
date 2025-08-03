@@ -31,6 +31,17 @@ enum ScorePositions
     three
 };
 
+// pickup position
+static constexpr float WRIST_PITCH_PICKUP = 1.605495333f;
+static constexpr float WRIST_YAW_PICKUP = 0.0f;
+static constexpr float GANTRY_EXTENSION_PICKUP = 20.0f;
+static constexpr float GANTRY_LIFT_PICKUP = 60.0f;
+// score position (almost reaching 1st setpoint), what we used in competition
+static constexpr float WRIST_PITCH_SCORE = 0.0f;
+static constexpr float WRIST_YAW_SCORE = 0.0f;
+static constexpr float GANTRY_EXTENSION_SCORE = 240.0f;
+static constexpr float GANTRY_LIFT_SCORE = 320.0f;
+
 // score positions
 // while the code for this exists, none of it been tested lol
 static constexpr float gantryLiftScoreOneSetpoint = 1;  // TODO: find positions

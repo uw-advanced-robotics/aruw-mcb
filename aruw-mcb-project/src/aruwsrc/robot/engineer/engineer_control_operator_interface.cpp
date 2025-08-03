@@ -22,6 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 
 using namespace tap::algorithms;
 using namespace aruwsrc::chassis;
@@ -43,7 +44,7 @@ float EngineerControlOperatorInterface::getCubeLiftVelocity()
     // CubeLift_Switch_Command might break if manual cubelift adjustment is added back
     // if (isGantryWristControlMode())
     //     return drivers->remote.getChannel(Remote::Channel::WHEEL);
-    return 0;
+    return 0.0f;
 }
 
 float EngineerControlOperatorInterface::getGantryLiftVelocity()
@@ -59,7 +60,7 @@ float EngineerControlOperatorInterface::getGantryLiftVelocity()
         {
             return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
         }
-        return 0;
+        return 0.0f;
     }
 }
 
@@ -72,7 +73,7 @@ float EngineerControlOperatorInterface::getGantryExtensionVelocity()
     //         return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
     //     }
     // }
-    // return 0;
+    // return 0.0f;
 
     if (getShiftKey())
     {
@@ -85,7 +86,7 @@ float EngineerControlOperatorInterface::getGantryExtensionVelocity()
         {
             return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
         }
-        return 0;
+        return 0.0f;
     }
 }
 
@@ -128,7 +129,7 @@ float EngineerControlOperatorInterface::getWristPitchVelocity()
             return drivers->remote.getMouseY() / divideValPitch;
         }
     }
-    return 0;
+    return 0.0f;
 }
 
 float EngineerControlOperatorInterface::getWristYawVelocity()
@@ -145,19 +146,18 @@ float EngineerControlOperatorInterface::getWristYawVelocity()
             return -drivers->remote.getMouseX() / divideValYaw;
         }
     }
-    return 0;
+    return 0.0f;
 }
 
-float wristRollVelocity = 0.5;
 float EngineerControlOperatorInterface::getWristRollVelocity()
 {
     if (drivers->remote.getMouseL())
     {
-        return -wristRollVelocity;  // TODO: fix
+        return -aruwsrc::engineer::WRIST_ROLL_CLICK_VELOCITY;
     }
     else if (drivers->remote.getMouseR())
     {
-        return wristRollVelocity;
+        return aruwsrc::engineer::WRIST_ROLL_CLICK_VELOCITY;
     }
     else if (isGantryWristControlMode())
     {
@@ -165,12 +165,10 @@ float EngineerControlOperatorInterface::getWristRollVelocity()
     }
     else
     {
-        return 0;
+        return 0.0f;
     }
 }
 
-float chassisSpeedSprint = 3.5;
-float chassisSpeedNormal = 8;
 // this is basically the same thing as getChassisXInput in the basic control operator interface, but
 // uh... we wanted sprint to work so hopefully the two don't get too out of sync
 float EngineerControlOperatorInterface::getChassisXInput()
@@ -217,11 +215,11 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return xInput / chassisSpeedSprint;
+        return xInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return xInput / chassisSpeedNormal;
+        return xInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 
     return 0;
@@ -271,11 +269,11 @@ float EngineerControlOperatorInterface::getChassisYInput()
     float yInput = chassisYInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return yInput / chassisSpeedSprint;
+        return yInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return yInput / chassisSpeedNormal;
+        return yInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 }
 
@@ -322,11 +320,11 @@ float EngineerControlOperatorInterface::getChassisRInput()
     float rInput = chassisRInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return rInput / chassisSpeedSprint;
+        return rInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return rInput / chassisSpeedNormal;
+        return rInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 }
 

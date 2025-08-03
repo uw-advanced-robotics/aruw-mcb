@@ -270,7 +270,7 @@ GantryLiftSubsystem gantryLiftSubsystem(
     GANTRY_LIFT_HOME,
     GANTRY_LIFT_KS,
     GANTRY_LIFT_EPSILON,
-    0.7f);
+    GANTRY_LIFT_MAX_INCREMENT);
 
 GantryExtensionSubsystem gantryExtensionSubsystem(
     drivers(),
@@ -346,9 +346,6 @@ SetpointMoveManualCommand gantryExtensionManualControl(
     GANTRY_EXTENSION_MOVE_SPEED,
     SetpointType::GANTRY_EXTENSION);
 
-WristMovePositionCommand pickupDown(wristSubsystem, 0, 0);
-WristMovePositionCommand straightScore(wristSubsystem, 0, M_PI / 2);
-
 SetpointMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 SetpointMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
 SetpointMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
@@ -419,21 +416,21 @@ SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
      &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
-SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, 240);
-SetpointMovePositionCommand gantryIn(gantryExtensionSubsystem, 20);
-SetpointMovePositionCommand liftScore(gantryLiftSubsystem, 320);
-SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, 60);
+SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
+SetpointMovePositionCommand gantryIn(gantryExtensionSubsystem, GANTRY_EXTENSION_PICKUP);
+SetpointMovePositionCommand liftScore(gantryLiftSubsystem, GANTRY_LIFT_SCORE);
+SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, GANTRY_LIFT_PICKUP);
 WristMovePositionCommand wristDown(
     wristSubsystem,
-    1.605495333,
-    0);  // tuned to align for better suction
-WristMovePositionCommand wristOut(wristSubsystem, 0, 0);
-SetpointMovePositionCommand liftCommand(gantryLiftSubsystem, 0);
+    WRIST_PITCH_PICKUP,
+    WRIST_YAW_PICKUP);  // tuned to align for better suction
+WristMovePositionCommand wristOut(wristSubsystem, WRIST_PITCH_SCORE, WRIST_YAW_SCORE);
 
 ScorePositionCommand scorePositionCommand(
     gantryLiftSubsystem,
     wristSubsystem,
     wristRollSubsystem);  // TODO: test that this works
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
