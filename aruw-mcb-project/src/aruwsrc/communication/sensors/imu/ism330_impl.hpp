@@ -98,8 +98,9 @@ bool ISM330<I2cMaster>::read()
 
         imuData.gyroRadPerSec = imuData.gyroRaw - imuData.gyroOffsetRaw;
         imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
-
+        uint32_t oldTime = prevIMUDataReceivedTime;
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
+        refreshRate = 1.0 / ((prevIMUDataReceivedTime - oldTime) / 1'000'000.0);
     }
     PT_END();
 }

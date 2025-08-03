@@ -139,6 +139,7 @@ protected:
     tap::arch::PeriodicMicroTimer readTimeout;
 
     uint32_t prevIMUDataReceivedTime = 0;
+    float refreshRate = 0.0f;  // Hz
 };
 
 }  // namespace tap::communication::sensors::imu
