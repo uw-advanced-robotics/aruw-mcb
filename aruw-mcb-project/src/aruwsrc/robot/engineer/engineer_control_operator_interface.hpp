@@ -99,7 +99,7 @@ public:
 
 private:
     tap::Drivers *drivers;
-    float divideValPitch = 375.0f;
+    float divideValPitch = 375.0f; // these are all scaling factors for driver control
     float divideValYaw = 375.0f;
     float divideGantryLift = 375.0f;
     float divideGantryExtension = 375.0f;
