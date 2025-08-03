@@ -296,17 +296,3 @@ static void initializeI2C(Drivers *drivers)
     Board::I2CMaster::initialize<Board::SystemClock, 360000>();
     Board::I2CMaster::reset();
 }
-
-extern void raiseError(const char *errorMessage)
-{
-    Drivers *drivers = DoNotUse_getDrivers();
-    RAISE_ERROR(drivers, errorMessage);
-}
-
-extern void raiseError(const char *errorMessage, uint32_t data)
-{
-    char formatted[100];
-    snprintf(formatted, sizeof(formatted), "%s%lu", errorMessage, data);
-    Drivers *drivers = DoNotUse_getDrivers();
-    RAISE_ERROR(drivers, formatted);
-}
