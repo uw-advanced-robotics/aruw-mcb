@@ -44,7 +44,7 @@ void ISM330<I2cMaster>::reinitialize()
 {
     RF_CALL_BLOCKING(readRegister(WHO_AM_I, 3, rxBuff));
 
-    setODR(ODR_833HZ);
+    setODR(ODR_1660HZ);
     setGyroRange(DPS1000_CONFIG);
     setAccelRange(G4_CONFIG);
 }
@@ -60,7 +60,7 @@ bool ISM330<I2cMaster>::read()
 
     while (true)
     {
-        PT_WAIT_UNTIL(readTimeout.execute());
+        // PT_WAIT_UNTIL(readTimeout.execute());
 
         if (erroredOut)
         {
