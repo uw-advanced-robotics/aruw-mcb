@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- //add comments for why we made this for future ppls reference & why it isnt opposite
+// add comments for why we made this for future ppls reference & why it isnt opposite
 #ifndef DIGITAL_OUT_TOGGLE_COMMAND_HPP_
 #define DIGITAL_OUT_TOGGLE_COMMAND_HPP_
 

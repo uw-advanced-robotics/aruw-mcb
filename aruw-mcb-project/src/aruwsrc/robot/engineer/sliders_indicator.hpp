@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- //does not work rn lol i make attempts to fix soon after midterms :)
+// does not work rn lol i make attempts to fix soon after midterms :)
 #ifndef SLIDERS_INDICATOR_HPP_
 #define SLIDERS_INDICATOR_HPP_
 
