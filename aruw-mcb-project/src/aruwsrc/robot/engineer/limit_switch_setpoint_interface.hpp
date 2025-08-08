@@ -57,11 +57,11 @@ public:
 
     float getUpperBound() const override { return maxSetpoint; }
 
-    float getPosition() override { return getEncoderValue() * radius; }
+    float getPosition() override { return getEncoderValue() * limitSwitchConfig.radius; }
 
-    float getVelocity() { return getEncoderVelocity() * radius; }
+    float getVelocity() { return getEncoderVelocity() * limitSwitchConfig.radius; }
 
-    void setHome(float home) override { this->home = home; };
+    void setHome(float home) override { this->limitSwitchConfig.home = home; };
 
     void setSetpoint(float setpoint) override
     {
@@ -90,7 +90,7 @@ public:
                 calibrationState = CalibrationState::CALIBRATION_COMPLETE;
                 resetEncoderValue();
                 pidState = PIDState::POSITION_PID;
-                setSetpoint(home);
+                setSetpoint(limitSwitchConfig.home);
             }
             else
             {
@@ -105,8 +105,8 @@ public:
             float newTime = tap::arch::clock::getTimeMilliseconds();
             float timeDifference = (newTime - lastTime) / 1000.0f;  // (s)
             lastTime = newTime;
-            motorDesiredOutput = pid.runController(error, errorDerivative, timeDifference) + kS;
-            setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
+            motorDesiredOutput = pid.runController(error, errorDerivative, timeDifference) + limitSwitchConfig.kS;
+            setDesiredOutput(std::clamp(motorDesiredOutput, -limitSwitchConfig.maxOutput, limitSwitchConfig.maxOutput));
         }
         else if (pidState == PIDState::VELOCITY_PID)
         {
@@ -121,7 +121,7 @@ public:
         }
         else
         {
-            setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
+            setDesiredOutput(std::clamp(motorDesiredOutput, -limitSwitchConfig.maxOutput, limitSwitchConfig.maxOutput));
         }
     }
 
@@ -131,7 +131,7 @@ public:
     {
         // motorDesiredOutput = (homingReversed ? homingSpeed : -homingSpeed) + kS;
         pidState = PIDState::POSITION_PID;
-        setSetpoint(getPosition() + (homingReversed ? homingSpeed : -homingSpeed));
+        setSetpoint(getPosition() + (limitSwitchConfig.homingReversed ? limitSwitchConfig.homingSpeed : -limitSwitchConfig.homingSpeed));
     }
 
     void stopDuringHoming() override
@@ -140,41 +140,35 @@ public:
         setDesiredOutput(0);
     }
 
+    struct LimitSwitchConfig {
+        float radius = 1.0f;
+        float lowerBound = 0.0f;
+        float upperBound = 0.0f;
+        float home = 0.0f;
+        float kS = 0;
+        float epsilon = 0.5f;
+        float homingSpeed = 0.25f;
+        bool homingReversed = false;
+        float maxOutput = 6000.0f;
+        float maxSetpointIncrement = FLT_MAX;
+    };
+
 protected:
     LimitSwitchSetpointInterface(
         tap::Drivers *drivers,
         aruwsrc::control::TriggerInterface &trigger,
         const tap::algorithms::SmoothPidConfig &pidConfig,
-        float radius = 1.0f,
-        float lowerBound = 0.0f,
-        float upperBound = 0.0f,
-        float home = 0.0f,
-        float kS = 0,
-        float epsilon = 0.5f,
-        float homingSpeed = 0.25f,
-        bool homingReversed = false,
-        float maxOutput = 6000.0f,
-        float maxSetpointIncrement = FLT_MAX)
+        LimitSwitchConfig limitSwitchConfig)
         : OneSidedBoundedSubsystemInterface(drivers, trigger, 0),
-          LinearJointInterface(lowerBound, upperBound, epsilon, 0, maxSetpointIncrement),
+          LinearJointInterface(limitSwitchConfig.lowerBound, limitSwitchConfig.upperBound, limitSwitchConfig.epsilon, 0, limitSwitchConfig.maxSetpointIncrement),
           pid(pidConfig),
-          radius(radius),
-          home(home),
-          kS(kS),
-          homingSpeed(homingSpeed),
-          homingReversed(homingReversed),
-          maxOutput(maxOutput)
+          limitSwitchConfig(limitSwitchConfig)
     {
     }
 
     PIDState pidState = PIDState::POSITION_PID;
     tap::algorithms::SmoothPid pid;
-    float radius;
-    float home;
-    float kS;
-    float homingSpeed;
-    bool homingReversed;
-    float maxOutput;
+    LimitSwitchConfig limitSwitchConfig;
     float lastTime = 0;
     float motorPos = 0;
     float motorDesiredOutput = 0;
