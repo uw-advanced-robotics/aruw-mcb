@@ -53,7 +53,7 @@ modm::ResumableResult<void> ISM330<I2cMaster>::reinitialize()
 
 template <class I2cMaster>
 bool ISM330<I2cMaster>::read()
-{    
+{
     PT_BEGIN();
     PT_CALL(reinitialize());
 
@@ -89,8 +89,8 @@ void ISM330<I2cMaster>::processData()
     imuData.temperature = tempValueToCelsius(rxBuff);
 
     imuData.gyroRaw = {
-        gyroValueToRadPerSec(rxBuff + 2), 
-        gyroValueToRadPerSec(rxBuff + 4), 
+        gyroValueToRadPerSec(rxBuff + 2),
+        gyroValueToRadPerSec(rxBuff + 4),
         gyroValueToRadPerSec(rxBuff + 6)};
 
     imuData.accRaw = {

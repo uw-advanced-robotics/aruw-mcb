@@ -160,7 +160,7 @@ private:
         drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
         RF_WAIT_UNTIL(errorTimeoutPower.execute());
 
-        errorTimeout.restart(timeout*4);
+        errorTimeout.restart(timeout * 4);
 
         RF_END();
     }
