@@ -49,13 +49,14 @@ public:
     ISM330(tap::Drivers *drivers);
 
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
-    virtual void reinitialize();
+    virtual modm::ResumableResult<void> reinitialize();
 
     bool read();
+    void processData();
 
-    void setAccelRange(AccelerometerRangeConfig xl_config);
-    void setGyroRange(GyroscopeRangeConfig g_config);
-    void setODR(OutputDataRate odr);
+    modm::ResumableResult<void> setAccelRange(AccelerometerRangeConfig xl_config);
+    modm::ResumableResult<void> setGyroRange(GyroscopeRangeConfig g_config);
+    modm::ResumableResult<void> setODR(OutputDataRate odr);
 
     virtual inline const char *getName() const { return "ISM330DHCX"; }
     virtual inline float getAccelerationSensitivity() const override { return GRAVITY_MPS2; }
@@ -119,42 +120,61 @@ private:
     modm::ResumableResult<bool> attemptReconnect()
     {
         RF_BEGIN();
+        resetI2cPeripheral();
+        if (errorTimeoutPower.execute()) RF_CALL(powerCycleImu());
+        RF_CALL(reinitialize());
+        RF_END_RETURN(true);
+    }
+
+    void resetI2cPeripheral()
+    {
         this->transaction.resetState();
-        // Errored, try and restart
-        I2C2->CR1 &= ~I2C_CR1_PE;  // Disable I2C peripheral
+
+        // Disable and enable I2C to reset
+        I2C2->CR1 &= ~I2C_CR1_PE;
         modm::delay_us(5);
-        I2C2->CR1 |= I2C_CR1_PE;  // Enable I2C peripheral
+        I2C2->CR1 |= I2C_CR1_PE;
         modm::delay_us(5);
-        I2C2->CR1 |= I2C_CR1_SWRST;  // Reset I2C peripheral
+
+        // Full software reset
+        I2C2->CR1 |= I2C_CR1_SWRST;
+
+        // Reconnect and re-init I2C
         Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
             Board::I2CMaster::PullUps::Internal);
         Board::I2CMaster::initialize<Board::SystemClock, 360000>();
         Board::I2CMaster::reset();
-        if (errorTimeoutPower.execute())
-        {
-            // Power cycle the IMU
-            errorTimeoutPower.restart(errorTimeoutPowerTime);
-            drivers->digital.set(tap::gpio::Digital::OutputPin::E, false);
-            RF_WAIT_UNTIL(errorTimeoutPower.execute());
-            drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
-            RF_WAIT_UNTIL(errorTimeoutPower.execute());
-            errorTimeout.restart(errorTimeoutTime);
-        }
-        reinitialize();
-        RF_END_RETURN(true);
+    }
+
+    modm::ResumableResult<void> powerCycleImu()
+    {
+        RF_BEGIN();
+
+        errorTimeoutPower.restart(errorTimeoutPowerTime);
+
+        // Turn off IMU
+        drivers->digital.set(tap::gpio::Digital::OutputPin::E, false);
+        RF_WAIT_UNTIL(errorTimeoutPower.execute());
+
+        // Turn on IMU
+        drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
+        RF_WAIT_UNTIL(errorTimeoutPower.execute());
+
+        errorTimeout.restart(timeout*4);
+
+        RF_END();
     }
 
     uint8_t rxBuff[15];
     uint8_t txBuff[2];
 
     uint32_t timeout = 1200;
-    uint32_t errorTimeoutTime = timeout * 4;
     uint32_t errorTimeoutPowerTime = 500'000;
     uint32_t BeginningErrorTimeoutTime = 1'000'000 * 15;
 
     tap::arch::PeriodicMicroTimer errorTimeout;
     tap::arch::PeriodicMicroTimer errorTimeoutPower;
-    bool hasErrored = false;
+    uint32_t hasErrored = 0;
 
     uint8_t current_reg_G;
     uint8_t current_reg_XL;
