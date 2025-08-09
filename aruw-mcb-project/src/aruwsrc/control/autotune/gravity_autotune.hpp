@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AUTOTUNE_HPP_
-#define AUTOTUNE_HPP_
+#ifndef GRAVITY_AUTOTUNE_HPP_
+#define GRAVITY_AUTOTUNE_HPP_
 
 // #include <Eign/Dense>
 
@@ -30,32 +30,38 @@
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
-namespace aruwsrc
+namespace aruwsrc::control::autotune
 {
-namespace autotune
-{
-/**
- * A command for automatically tuning a subsystem
- */
-template <uint32_t numTestPoints, uint8_t Turrets = 1>
-class GravityAutotune : public tap::control::Command
+class GravityAutotuneBase : public tap::control::Command
 {
 public:
     enum CalibrationState
     {
-        /** While in this state, the command waits for the turret to be online */
         WAITING_FOR_SYSTEMS_ONLINE,
-        /** While in this state, the command "locks" the turret at the desired location */
         LOCKING_TURRET,
-        /** While in this state, the command waits until calibration of the IMUs are complete. */
         MEASURING_TORQUE,
-        /** While in this state, the command waits a small time after calibration is complete to
-           handle any latency associated with sending messages to the TurretMCBCanComm. */
         NEXT_LOCATION,
         CALIBRATION_SUCCESS,
         CALIBRATION_FAIL,
         DONE
     };
+
+    virtual ~GravityAutotuneBase() = default;
+
+    /**
+     * Get the current calibration state.
+     */
+    virtual CalibrationState getCalibrationState() const = 0;
+};
+
+/**
+ * A command for automatically tuning a subsystem
+ */
+template <uint32_t numTestPoints, uint8_t Turrets = 1>
+class GravityAutotune : public GravityAutotuneBase
+{
+public:
+    using CalibrationState = GravityAutotuneBase::CalibrationState;
 
     GravityAutotune(
         tap::Drivers *drivers,
@@ -68,6 +74,8 @@ public:
             control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
+
+    CalibrationState getCalibrationState() const override { return calibrationState; }
 
     void initialize() override;
 
@@ -96,7 +104,7 @@ private:
     // Current point being measured
     size_t pointMeasuring = 0;
     float setpoint = 0.0f;
-    
+
     uint32_t prevTime = 0;
 
     uint32_t samplePointCount = 0;
@@ -139,7 +147,7 @@ private:
 
     std::array<std::array<float, Turrets>, numTestPoints> torqueMeasurements{};
 
-    inline bool turretReachedCenterAndNotMoving(
+    inline bool turretReachedPointAndNotMoving(
         control::turret::TurretSubsystem *turret,
         const WrappedFloat setpoint) const
     {
@@ -162,8 +170,6 @@ private:
 
 };  // class autotune
 
-}  // namespace autotune
+}  // namespace aruwsrc::control::autotune
 
-}  // namespace aruwsrc
-
-#endif  // AUTOTUNE_HPP_
+#endif  // GRAVITY_AUTOTUNE_HPP_
