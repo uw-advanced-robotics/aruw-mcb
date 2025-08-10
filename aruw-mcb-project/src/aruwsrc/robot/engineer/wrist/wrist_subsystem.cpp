@@ -40,7 +40,13 @@ WristSubsystem::WristSubsystem(
       pidYaw(config.yawPidConfig),
       config(config),
       setpointPitch(0),
-      setpointYaw(0)
+      setpointYaw(0),
+      leadControllerPitch(
+          tap::algorithms::filter::phaseLagLeadCoefficients(10000, 5, 25, 1 / 500.0)),
+      lagControllerPitch(
+          tap::algorithms::filter::phaseLagLeadCoefficients(1.75, 24, 25, 1 / 500.0)),
+      leadControllerYaw(tap::algorithms::filter::phaseLagLeadCoefficients(10000, 5, 25, 1 / 500.0)),
+      lagControllerYaw(tap::algorithms::filter::phaseLagLeadCoefficients(1.75, 24, 25, 1 / 500.0))
 {
 }
 
@@ -113,20 +119,20 @@ void WristSubsystem::refresh()
     float gravityYawTorque = gravityTorque.dot(yawAxis);
 
     // gravity torque halved because we have two motors
-    float outPitch = pidPitch.runController(
-                         encoderPitch.getPosition().minDifference(setpointPitch),
-                         encoderPitch.getVelocity(),
-                         2.0f) -
-                     gravityPitchTorque / 2 * M3508_TORQUE_CONSTANT;
+    float lead =
+        leadControllerPitch.filterData(encoderPitch.getPosition().minDifference(setpointPitch));
+
+    float outPitch =
+        lagControllerPitch.filterData(lead) - gravityPitchTorque / 2 * M3508_TORQUE_CONSTANT;
 
     // gear ratio only applied to gravity compensation here because pid was tuned without it
     // gravity torque halved because we have two motors
-    float outYaw = pidYaw.runController(
-                       encoderYaw.getPosition().minDifference(setpointYaw),
-                       encoderYaw.getVelocity(),
-                       2.0f) -
-                   gravityYawTorque / 2 * M3508_TORQUE_CONSTANT * config.ratio;
 
+    float yawLead =
+        leadControllerYaw.filterData(encoderYaw.getPosition().minDifference(setpointYaw));
+
+    float outYaw = lagControllerYaw.filterData(yawLead) -
+                   gravityYawTorque / 2 * M3508_TORQUE_CONSTANT * config.ratio;
     // differential
     float outLeft = outYaw + outPitch;
     float outRight = outYaw - outPitch;
