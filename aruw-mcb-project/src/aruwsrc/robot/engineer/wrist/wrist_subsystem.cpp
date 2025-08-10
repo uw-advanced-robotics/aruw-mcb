@@ -36,8 +36,6 @@ WristSubsystem::WristSubsystem(
       motorRight(motorRight),
       encoderPitch(encoderPitch),
       encoderYaw(encoderYaw),
-      pidPitch(config.pitchPidConfig),
-      pidYaw(config.yawPidConfig),
       config(config),
       setpointPitch(0),
       setpointYaw(0),

@@ -20,14 +20,14 @@
 #ifndef WRIST_SUBSYSTEM_HPP_
 #define WRIST_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/discrete_filter.hpp"
+#include "tap/algorithms/lag_lead.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
-#include "tap/algorithms/discrete_filter.hpp"
-#include "tap/algorithms/lag_lead.hpp"
 
 namespace aruwsrc::engineer::wrist
 {
@@ -87,13 +87,13 @@ private:
     tap::motor::MotorInterface &motorLeft, &motorRight;
     tap::encoder::EncoderInterface &encoderPitch, &encoderYaw;
     const WristConfig config;
-    
+
     float setpointPitch, setpointYaw;
     tap::algorithms::filter::DiscreteFilter<2> leadControllerPitch;
     tap::algorithms::filter::DiscreteFilter<2> lagControllerPitch;
     tap::algorithms::filter::DiscreteFilter<2> leadControllerYaw;
     tap::algorithms::filter::DiscreteFilter<2> lagControllerYaw;
-    
+
     const tap::algorithms::transforms::Position COM_POS =
         tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static
     static constexpr float WRIST_MASS_KG = 0.4;
