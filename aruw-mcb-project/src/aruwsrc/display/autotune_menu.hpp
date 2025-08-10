@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef IMU_CALIBRATE_MENU_HPP_
-#define IMU_CALIBRATE_MENU_HPP_
+#ifndef AUTOTUNE_MENU_HPP_
+#define AUTOTUNE_MENU_HPP_
 
 #include "tap/display/dummy_allocator.hpp"
 
@@ -82,4 +82,4 @@ private:
 };
 }  // namespace aruwsrc::display
 
-#endif  // IMU_CALIBRATE_MENU_HPP_
+#endif  // AUTOTUNE_MENU_HPP_

@@ -39,6 +39,7 @@
 #include "mcb_lite_menu.hpp"
 #include "sentry_strategy_menu.hpp"
 #include "turret_mcb_menu.hpp"
+#include "autotune_menu.hpp"
 
 namespace aruwsrc
 {
@@ -75,6 +76,7 @@ private:
     tap::Drivers *drivers;
 
     ImuCalibrateMenu imuCalibrateMenu;
+    AutotuneMenu autotuneMenu;
     CVMenu cvMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
@@ -97,6 +99,7 @@ private:
     can::capbank::CapacitorBank *capacitorBank;
 
     void addImuCalibrateMenuCallback();
+    void addAutotuneMenuCallback();
     void addCVMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();
