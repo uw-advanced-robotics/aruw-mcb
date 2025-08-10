@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ENGINEER_CONSTANTS_HPP_
-#define ENGINEER_CONSTANTS_HPP_
+#ifndef ENGINEER_SETPOINT_CONSTANTS_HPP_
+#define ENGINEER_SETPOINT_CONSTANTS_HPP_
 
 namespace aruwsrc::engineer
 {
@@ -59,4 +59,4 @@ static constexpr float wristYawScoreThreeSetpoint = 1;
 static constexpr float wristPitchScoreThreeSetpoint = 1;
 static constexpr float wristRollScoreThreeSetpoint = 1;
 }  // namespace aruwsrc::engineer
-#endif  // ENGINEER_CONSTANTS_HPP_
+#endif  // ENGINEER_SETPOINT_CONSTANTS_HPP_
