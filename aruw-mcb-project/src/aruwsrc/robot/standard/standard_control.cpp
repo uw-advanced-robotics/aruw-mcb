@@ -75,6 +75,7 @@
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 //#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+#include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -98,6 +99,7 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
+#include "aruwsrc/display/autotune_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
@@ -424,6 +426,17 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     {&drivers()->mpu6500});
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
+
+autotune::GravityAutotune<3> gravityAutotuneCommand(
+    drivers(),
+    {{
+        &getTurretMCBCanComm(),
+        &turret,
+        &chassisFrameYawTurretController,
+        &chassisFramePitchTurretController,
+        true,
+    }},
+    {0, M_PI_4, M_PI_2});
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
@@ -776,6 +789,10 @@ imu::ImuCalibrateCommand *getImuCalibrateCommand()
 {
     return &standard_control::imuCalibrateCommand;
 }
+autotune::GravityAutotuneBase *getGravityAutotuneCommand(){
+    return &standard_control::gravityAutotuneCommand;
+}
+
 #endif
 
 #endif

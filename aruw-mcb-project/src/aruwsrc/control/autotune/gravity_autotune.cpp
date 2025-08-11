@@ -23,19 +23,17 @@
 
 using namespace aruwsrc::control::autotune;
 
-template <uint32_t numTestPoints, uint8_t Turrets>
-GravityAutotune<numTestPoints, Turrets>::GravityAutotune(
+template <uint32_t numTestPoints>
+GravityAutotune<numTestPoints>::GravityAutotune(
     tap::Drivers *drivers,
-    const std::array<control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig, Turrets>
-        &turretsAndControllers,
+    const control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig &turretAndControllers,
     std::array<float, numTestPoints> points,
     float velocityZeroThreshold,
     float positionZeroThreshold,
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime)
-    : tap::control::Command(),
-      drivers(drivers),
-      turretsAndControllers(turretsAndControllers),
+    : drivers(drivers),
+      turretAndControllers(turretAndControllers),
       points(points),
       velocityZeroThreshold(velocityZeroThreshold),
       positionZeroThreshold(positionZeroThreshold),
@@ -44,20 +42,20 @@ GravityAutotune<numTestPoints, Turrets>::GravityAutotune(
 {
 }
 
-template <uint32_t numTestPoints, uint8_t Turrets>
-void GravityAutotune<numTestPoints, Turrets>::initialize()
+template <uint32_t numTestPoints>
+void GravityAutotune<numTestPoints>::initialize()
 {
     samplePointCount = 0;
     pointMeasuring = 0;
     for (auto &config : turretsAndControllers)
     {
         config.pitchController->initialize();
-        config.turret->pitchMotor.setChassisFrameSetpoint(points[pointMeasuring]);
+        config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[pointMeasuring]));
     }
 }
 
-template <uint32_t numTestPoints, uint8_t Turrets>
-void GravityAutotune<numTestPoints, Turrets>::execute()
+template <uint32_t numTestPoints>
+void GravityAutotune<numTestPoints>::execute()
 {
     switch (calibrationState)
     {
@@ -118,7 +116,7 @@ void GravityAutotune<numTestPoints, Turrets>::execute()
 
             for (auto &config : turretsAndControllers)
             {
-                config.turret->pitchMotor.setChassisFrameSetpoint(points[pointMeasuring]);
+                config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[pointMeasuring]));
             }
 
             calibrationState = CalibrationState::LOCKING_TURRET;
@@ -169,8 +167,8 @@ void GravityAutotune<numTestPoints, Turrets>::execute()
     }
 };
 
-template <uint32_t numTestPoints, uint8_t Turrets>
-void GravityAutotune<numTestPoints, Turrets>::end(bool)
+template <uint32_t numTestPoints>
+void GravityAutotune<numTestPoints>::end(bool)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -183,9 +181,11 @@ void GravityAutotune<numTestPoints, Turrets>::end(bool)
         drivers->commandScheduler.addCommand(failChime);
 }
 
-template <uint32_t numTestPoints, uint8_t Turrets>
-bool GravityAutotune<numTestPoints, Turrets>::isFinished() const
+template <uint32_t numTestPoints>
+bool GravityAutotune<numTestPoints>::isFinished() const
 {
     return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
            calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
+
+template class aruwsrc::control::autotune::GravityAutotune<3UL>;

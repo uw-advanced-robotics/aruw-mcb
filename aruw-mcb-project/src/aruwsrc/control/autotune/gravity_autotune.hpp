@@ -57,7 +57,7 @@ public:
 /**
  * A command for automatically tuning a subsystem
  */
-template <uint32_t numTestPoints, uint8_t Turrets = 1>
+template <uint32_t numTestPoints>
 class GravityAutotune : public GravityAutotuneBase
 {
 public:
@@ -65,8 +65,7 @@ public:
 
     GravityAutotune(
         tap::Drivers *drivers,
-        const std::array<control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig, Turrets>
-            &turretsAndControllers,
+        const control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig &turretAndControllers,
         std::array<float, numTestPoints> points,
         float velocityZeroThreshold =
             control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
@@ -89,15 +88,14 @@ public:
 
 private:
     tap::Drivers *drivers;
-    std::array<control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig, Turrets>
-        turretsAndControllers;
+    control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig turretAndControllers;
     std::array<float, numTestPoints> points;
-
-    aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
-    aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
     float velocityZeroThreshold;
     float positionZeroThreshold;
+
+    aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
+    aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
     CalibrationState calibrationState;
 
