@@ -53,15 +53,14 @@ static constexpr float THREE_CUBE_SETPOINT = -310.0f;
 static constexpr float LIFT_UPPER_BOUND = THREE_CUBE_SETPOINT;
 
 static constexpr LimitSwitchSetpointInterface::LimitSwitchConfig CUBE_LIFT_LIMIT_CONFIG = {
-    .radius = MM_PER_REVOLUTION, 
+    .radius = MM_PER_REVOLUTION,
     .lowerBound = -320.0f,
     .upperBound = -40.0f,
     .home = ONE_CUBE_SETPOINT,
     .kS = 0.0f,
     .epsilon = 0.5f,
     .homingSpeed = 20.0f,
-    .homingReversed = true
-};
+    .homingReversed = true};
 
 }  // namespace aruwsrc::engineer
 #endif

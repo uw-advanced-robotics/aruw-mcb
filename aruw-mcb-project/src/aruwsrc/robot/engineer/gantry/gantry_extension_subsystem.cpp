@@ -28,12 +28,8 @@ GantryExtensionSubsystem::GantryExtensionSubsystem(
     tap::motor::MotorInterface& motor,
     const tap::algorithms::SmoothPidConfig& pidConfig,
     control::TriggerInterface& trigger,
-    const LimitSwitchSetpointInterface::LimitSwitchConfig &limitConfig)
-    : LimitSwitchSetpointInterface(
-          drivers,
-          trigger,
-          pidConfig,
-          limitConfig),
+    const LimitSwitchSetpointInterface::LimitSwitchConfig& limitConfig)
+    : LimitSwitchSetpointInterface(drivers, trigger, pidConfig, limitConfig),
       motor(motor)
 {
 }

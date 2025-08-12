@@ -79,8 +79,7 @@ static constexpr LimitSwitchSetpointInterface::LimitSwitchConfig GANTRY_LIFT_LIM
     .homingSpeed = 5.0f,
     .homingReversed = false,
     .maxOutput = 6000.0f,
-    .maxSetpointIncrement = GANTRY_LIFT_MAX_INCREMENT
-};
+    .maxSetpointIncrement = GANTRY_LIFT_MAX_INCREMENT};
 
 static constexpr float GANTRY_EXTENSION_PID_KP = 300.0f;
 static constexpr float GANTRY_EXTENSION_PID_KI = 0.0f;
@@ -117,8 +116,7 @@ static constexpr LimitSwitchSetpointInterface::LimitSwitchConfig GANTRY_EXTENSIO
     .kS = GANTRY_EXTENSION_KS,
     .epsilon = GANTRY_EXTENSION_EPSILON,
     .homingSpeed = 10.0f,
-    .homingReversed = false
-};
+    .homingReversed = false};
 
 }  // namespace aruwsrc::engineer
 #endif  // ENGINEER_GANTRY_CONSTANTS_HPP_   `

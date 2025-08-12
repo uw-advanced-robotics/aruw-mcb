@@ -29,11 +29,7 @@ CubeStorageSubsystem::CubeStorageSubsystem(
     const tap::algorithms::SmoothPidConfig& configPos,
     aruwsrc::control::TriggerInterface& trigger,
     const LimitSwitchSetpointInterface::LimitSwitchConfig& limitConfig)
-    : LimitSwitchSetpointInterface(
-          drivers,
-          trigger,
-          configPos,
-          limitConfig),
+    : LimitSwitchSetpointInterface(drivers, trigger, configPos, limitConfig),
       motor(storageLiftMotor)
 {
     calibrationState = CalibrationState::AWAITING_CALIBRATE;

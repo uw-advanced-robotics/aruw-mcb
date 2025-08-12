@@ -27,12 +27,8 @@ GantryLiftSubsystem::GantryLiftSubsystem(
     const tap::algorithms::SmoothPidConfig& configPos,
     const tap::algorithms::SmoothPidConfig& configAlign,
     control::TriggerInterface& trigger,
-    const LimitSwitchSetpointInterface::LimitSwitchConfig &limitConfig)
-    : LimitSwitchSetpointInterface(
-          drivers,
-          trigger,
-          configPos,
-          limitConfig),
+    const LimitSwitchSetpointInterface::LimitSwitchConfig& limitConfig)
+    : LimitSwitchSetpointInterface(drivers, trigger, configPos, limitConfig),
       pidAlign(configAlign),
       motorLeft(motorLeft),
       motorRight(motorRight)
