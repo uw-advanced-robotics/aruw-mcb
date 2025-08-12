@@ -21,7 +21,7 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/engineer_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
 #include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"

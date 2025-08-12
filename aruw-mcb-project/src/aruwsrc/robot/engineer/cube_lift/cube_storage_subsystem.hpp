@@ -40,10 +40,7 @@ public:
         tap::motor::MotorInterface& storageLiftMotor,
         const tap::algorithms::SmoothPidConfig& configPos,
         aruwsrc::control::TriggerInterface& trigger,
-        float setpoint,
-        float radius = 1.0f,
-        float kS = 0,
-        float epsilon = 0.5f);
+        const LimitSwitchSetpointInterface::LimitSwitchConfig& limitConfig);
 
     void initialize() override;
 

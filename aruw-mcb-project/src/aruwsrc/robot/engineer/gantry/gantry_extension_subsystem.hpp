@@ -33,14 +33,9 @@ public:
     GantryExtensionSubsystem(
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motor,
-        const tap::algorithms::SmoothPidConfig &config,
+        const tap::algorithms::SmoothPidConfig &pidConfig,
         control::TriggerInterface &trigger,
-        float radius,
-        float lowerBound,
-        float upperBound,
-        float home = 0,
-        float kS = 0,
-        float epsilon = 5.0f);
+        const LimitSwitchSetpointInterface::LimitSwitchConfig &limitConfig);
 
     virtual void initialize() override;
 

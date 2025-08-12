@@ -45,7 +45,7 @@
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
-#include "aruwsrc/robot/engineer/engineer_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
@@ -133,9 +133,9 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 tap::motor::DjiMotor cubeLiftMotor(
     drivers(),
     CUBE_LIFT_MOTOR_ID,
-    LIFT_MOTOR_CAN_BUS,
+    CUBE_LIFT_MOTOR_CAN_BUS,
     true,
-    "Lifting Motor",
+    "Cube Lift Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
@@ -246,8 +246,7 @@ CubeStorageSubsystem cubeLift(
     cubeLiftMotor,
     LIFT_MOTOR_PID_CONFIG,
     cubeLiftTrigger,
-    ONE_CUBE_SETPOINT,
-    MM_PER_REVOLUTION);
+    CUBE_LIFT_LIMIT_CONFIG);
 
 WristSubsystem wristSubsystem(
     drivers(),
@@ -264,25 +263,14 @@ GantryLiftSubsystem gantryLiftSubsystem(
     aruwsrc::engineer::GANTRY_LIFT_POS_CONFIG,
     aruwsrc::engineer::GANTRY_LIFT_BALANCE_CONFIG,
     gantryLiftTrigger,
-    GANTRY_LIFT_RADIUS,
-    GANTRY_LIFT_LOWER_BOUND,
-    GANTRY_LIFT_UPPER_BOUND,
-    GANTRY_LIFT_HOME,
-    GANTRY_LIFT_KS,
-    GANTRY_LIFT_EPSILON,
-    GANTRY_LIFT_MAX_INCREMENT);
+    GANTRY_LIFT_LIMIT_CONFIG);
 
 GantryExtensionSubsystem gantryExtensionSubsystem(
     drivers(),
     gantryExtensionMotor,
-    aruwsrc::engineer::GANTRY_EXTENSION_CONFIG,
+    aruwsrc::engineer::GANTRY_EXTENSION_PID_CONFIG,
     gantryExtensionTrigger,
-    GANTRY_EXTENSION_RADIUS,
-    GANTRY_EXTENSION_LOWER_BOUND,
-    GANTRY_EXTENSION_UPPER_BOUND,
-    GANTRY_EXTENSION_HOME,
-    GANTRY_EXTENSION_KS,
-    GANTRY_EXTENSION_EPSILON);
+    GANTRY_EXTENSION_LIMIT_CONFIG);
 
 JointSubsystem wristRollSubsystem(
     drivers(),

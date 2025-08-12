@@ -26,26 +26,14 @@ namespace aruwsrc::engineer::gantry
 GantryExtensionSubsystem::GantryExtensionSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& motor,
-    const tap::algorithms::SmoothPidConfig& config,
+    const tap::algorithms::SmoothPidConfig& pidConfig,
     control::TriggerInterface& trigger,
-    float radius,
-    float lowerBound,
-    float upperBound,
-    float home,
-    float kS,
-    float epsilon)
+    const LimitSwitchSetpointInterface::LimitSwitchConfig &limitConfig)
     : LimitSwitchSetpointInterface(
           drivers,
           trigger,
-          config,
-          radius,
-          lowerBound,
-          upperBound,
-          home,
-          kS,
-          epsilon,
-          10.0f,
-          false),
+          pidConfig,
+          limitConfig),
       motor(motor)
 {
 }
