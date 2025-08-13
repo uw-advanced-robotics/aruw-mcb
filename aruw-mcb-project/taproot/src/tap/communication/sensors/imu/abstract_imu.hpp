@@ -106,7 +106,6 @@ public:
         tap::algorithms::transforms::Vector gyroRadPerSec = {0, 0, 0};
 
         float temperature = 0;
-        char deviceId = 0;
     };
 
     void setCalibrationSamples(int sampleCount) { offsetSampleCount = sampleCount; }
@@ -139,7 +138,6 @@ protected:
     tap::arch::PeriodicMicroTimer readTimeout;
 
     uint32_t prevIMUDataReceivedTime = 0;
-    float refreshRate = 0.0f;  // Hz
 };
 
 }  // namespace tap::communication::sensors::imu

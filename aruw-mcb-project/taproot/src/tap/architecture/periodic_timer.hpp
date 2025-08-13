@@ -80,7 +80,8 @@ public:
     {
         if (timeout.execute())
         {
-            now = T::TimeFunc();
+            uint32_t now = T::TimeFunc();
+
             do
             {
                 timeout.expireTime += period;
@@ -90,7 +91,6 @@ public:
             timeout.isExecuted = false;
             return true;
         }
-        remainingTime = timeout.expireTime - T::TimeFunc();
         return false;
     }
 
@@ -98,11 +98,9 @@ public:
      * @return `true` if the timer is stopped
      */
     inline bool isStopped() const { return timeout.isStopped(); }
-    
-    uint32_t remainingTime;
+
 private:
     uint32_t period;
-    uint32_t now;
     T timeout;
 };
 
