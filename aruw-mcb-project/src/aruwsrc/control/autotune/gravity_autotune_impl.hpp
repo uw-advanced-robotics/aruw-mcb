@@ -45,7 +45,10 @@ GravityAutotune<numTestPoints>::GravityAutotune(
 }
 
 template <uint32_t numTestPoints>
-bool GravityAutotune<numTestPoints>::isReady() { return true; }
+bool GravityAutotune<numTestPoints>::isReady()
+{
+    return true;
+}
 
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::initialize()
@@ -65,6 +68,37 @@ void GravityAutotune<numTestPoints>::initialize()
     calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
 }
 
+/**
+ * @brief Executes one cycle of the gravity calibration state machine.
+ *
+ * This method drives the calibration process by moving the turret to
+ * predetermined angles, measuring motor torque at each point, and determining
+ * when calibration is complete.
+ *
+ * @details
+ * The calibration process is implemented as a state machine with the following states:
+ *
+ * - **WAITING_FOR_SYSTEMS_ONLINE**
+ *   Waits until the turret is online and a short wait timer expires.
+ *   Once ready, restarts a long calibration timeout and transitions to
+ *   `LOCKING_TURRET`.
+ *
+ * - **LOCKING_TURRET**
+ *   Waits until the turret has reached its target angle and is no longer moving.
+ *   If movement is detected, restarts the short wait timer.
+ *   When stable and the timer expires, transitions to `MEASURING_TORQUE`.
+ *
+ * - **MEASURING_TORQUE**
+ *   Collects a fixed number of torque samples from the turret's pitch motor,
+ *   averaging.
+ *   After samples are collected:
+ *     - If more points remain, transitions to `NEXT_LOCATION`.
+ *     - If all points are measured, transitions to `CALIBRATION_SUCCESS`.
+ *
+ * - **NEXT_LOCATION**
+ *   Moves the turret to the next target angle for measurement,
+ *   restarts the long calibration timeout, and returns to `LOCKING_TURRET`.
+ */
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::execute()
 {
@@ -116,13 +150,14 @@ void GravityAutotune<numTestPoints>::execute()
 
                 torqueMeasurements += (value - torqueMeasurements) / (samplePointCount);
             }
-            else    
+            else
             {
                 // Exit measuring when done taking samples
                 calibrationState = CalibrationState::NEXT_LOCATION;
                 measuredTorques[pointMeasuring] = torqueMeasurements;
                 samplePointCount = 0;
 
+                // Finished going through all points
                 if (pointMeasuring == points.size() - 1)
                 {
                     calibrationState = CalibrationState::CALIBRATION_SUCCESS;
@@ -137,6 +172,7 @@ void GravityAutotune<numTestPoints>::execute()
             pointMeasuring++;
             turretAndControllers.turret->pitchMotor.setChassisFrameSetpoint(
                 Angle(points[pointMeasuring]));
+            calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
             calibrationState = CalibrationState::LOCKING_TURRET;
         }
         break;
