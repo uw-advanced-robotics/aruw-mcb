@@ -17,12 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/control/autotune/gravity_autotune.hpp"
+#ifndef GRAVITY_AUTOTUNE_IMPL
+#define GRAVITY_AUTOTUNE_IMPL
 
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "gravity_autotune.hpp"
 
-using namespace aruwsrc::control::autotune;
-
+namespace aruwsrc::control::autotune
+{
 template <uint32_t numTestPoints>
 GravityAutotune<numTestPoints>::GravityAutotune(
     tap::Drivers *drivers,
@@ -40,18 +41,25 @@ GravityAutotune<numTestPoints>::GravityAutotune(
       successChime(successChime),
       failChime(failChime)
 {
+    addSubsystemRequirement(turretAndControllers.turret);
 }
 
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::initialize()
 {
+    calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
+    calibrationLongTimeout.stop();
+    calibrationTimer.stop();
+    prevTime = tap::arch::clock::getTimeMilliseconds();
+
     samplePointCount = 0;
     pointMeasuring = 0;
-    for (auto &config : turretsAndControllers)
-    {
-        config.pitchController->initialize();
-        config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[pointMeasuring]));
-    }
+
+    turretAndControllers.pitchController->initialize();
+    turretAndControllers.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[pointMeasuring]));
+
+    calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
+    calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
 }
 
 template <uint32_t numTestPoints>
@@ -62,49 +70,60 @@ void GravityAutotune<numTestPoints>::execute()
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
         {
             checkSafetyTimeout();
+            const bool turretsOnline = turretAndControllers.turret->isOnline();
 
-            bool turretsOnline = true;
-
-            for (auto &config : turretsAndControllers)
-            {
-                turretsOnline &= config.turret->isOnline();
-            }
-            // wait a bit for the calibration timer to give people a chance to move out of the way
-            // of the turret
             if (turretsOnline && calibrationTimer.execute())
             {
                 calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
                 calibrationState = CalibrationState::LOCKING_TURRET;
             }
-
             break;
         }
         case CalibrationState::LOCKING_TURRET:
         {
             checkSafetyTimeout();
+            const bool turretNotMoving = turretReachedPointAndNotMoving(
+                turretAndControllers.turret,
+                turretAndControllers.turret->pitchMotor.getChassisFrameSetpoint());
 
-            bool turretsNotMoving = true;
-
-            // set setpoint to go to
-            for (auto &config : turretsAndControllers)
-            {
-                turretsNotMoving &= turretReachedPointAndNotMoving(
-                    config.turret,
-                    config.turret->pitchMotor.getChassisFrameSetpoint());
-            }
-
-            // requires you to be still for two seconds before entering calibration
-            if (!turretsNotMoving)
+            if (!turretNotMoving)
             {
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
             }
 
-            if (calibrationTimer.isExpired() && turretsNotMoving)
+            // Exit Locking Turret
+            if (calibrationTimer.isExpired() && turretNotMoving)
             {
-                // enter calibration phase
                 calibrationState = CalibrationState::MEASURING_TORQUE;
                 samplePointCount = 0;
+            }
+        }
+        break;
+
+        case CalibrationState::MEASURING_TORQUE:
+        {
+            checkSafetyTimeout();
+
+            if (samplePointCount < NUM_SAMPLE_POINTS)
+            {
+                samplePointCount++;
+                const float value =
+                    static_cast<float>(turretAndControllers.turret->pitchMotor.getMotorOutput());
+
+                torqueMeasurements += (value - torqueMeasurements) / (samplePointCount);
+            }
+            else    
+            {
+                // Exit measuring when done taking samples
+                calibrationState = CalibrationState::NEXT_LOCATION;
+                measuredTorques{pointMeasuring} = torqueMeasurements;
+                samplePointCount = 0;
+
+                if (pointMeasuring == points.size() - 1)
+                {
+                    calibrationState = CalibrationState::CALIBRATION_SUCCESS;
+                }
             }
         }
         break;
@@ -113,68 +132,31 @@ void GravityAutotune<numTestPoints>::execute()
         {
             checkSafetyTimeout();
             pointMeasuring++;
-
-            for (auto &config : turretsAndControllers)
-            {
-                config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[pointMeasuring]));
-            }
-
+            turretAndControllers.turret->pitchMotor.setChassisFrameSetpoint(
+                Angle(points[pointMeasuring]));
             calibrationState = CalibrationState::LOCKING_TURRET;
         }
         break;
-        case CalibrationState::MEASURING_TORQUE:
-        {
-            checkSafetyTimeout();
 
-            for (size_t j = 0; j < turretsAndControllers.size(); ++j)
-            {
-                std::array<float, Turrets> torqueMeasurementTurret{};
-                if (samplePointCount < NUM_SAMPLE_POINTS)
-                {
-                    torqueMeasurements[pointMeasuring][j] +=
-                        static_cast<float>(
-                            turretsAndControllers[j].turret->pitchMotor.getMotorOutput()) /
-                        NUM_SAMPLE_POINTS;
-                    samplePointCount++;
-                }
-                else
-                {
-                    calibrationState = CalibrationState::LOCKING_TURRET;
-
-                    if (pointMeasuring >= points.size() - 1)
-                    {
-                        // If we have reached the end of the test points, we can stop measuring
-                        calibrationState = CalibrationState::CALIBRATION_SUCCESS;
-                    }
-                    samplePointCount = 0;
-                }
-            }
-        }
-        break;
         default:
             break;
     }
 
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    float dt = (currTime - prevTime);  // Have to use ms to be compatible with the turret controller
+    float dt = (currTime - prevTime);  // Have to use ms to share turret controller
     prevTime = currTime;
 
-    for (auto &config : turretsAndControllers)
-    {
-        config.pitchController->runController(
-            dt,
-            config.turret->pitchMotor.getChassisFrameSetpoint());
-    }
-};
+    turretAndControllers.pitchController->runController(
+        dt,
+        turretAndControllers.turret->pitchMotor.getChassisFrameSetpoint());
+}
 
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::end(bool)
 {
-    for (auto &config : turretsAndControllers)
-    {
-        config.turret->yawMotor.setMotorOutput(0);
-        config.turret->pitchMotor.setMotorOutput(0);
-    }
+    turretAndControllers.turret->yawMotor.setMotorOutput(0);
+    turretAndControllers.turret->pitchMotor.setMotorOutput(0);
+
     if (calibrationState == CalibrationState::CALIBRATION_SUCCESS && successChime)
         drivers->commandScheduler.addCommand(successChime);
     if (calibrationState == CalibrationState::CALIBRATION_FAIL && failChime)
@@ -188,4 +170,6 @@ bool GravityAutotune<numTestPoints>::isFinished() const
            calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
 
-template class aruwsrc::control::autotune::GravityAutotune<3UL>;
+}  // namespace aruwsrc::control::autotune
+
+#endif  // GRAVITY_AUTOTUNE_IMPL

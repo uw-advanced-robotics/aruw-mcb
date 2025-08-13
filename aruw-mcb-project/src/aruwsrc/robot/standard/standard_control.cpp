@@ -429,13 +429,13 @@ IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand
 
 autotune::GravityAutotune<3> gravityAutotuneCommand(
     drivers(),
-    {{
+    {
         &getTurretMCBCanComm(),
         &turret,
         &chassisFrameYawTurretController,
         &chassisFramePitchTurretController,
         true,
-    }},
+    },
     {0, M_PI_4, M_PI_2});
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
@@ -602,7 +602,8 @@ HoldRepeatCommandMapping leftSwitchDown(
     true);
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&turretCVCommand, &chassisDriveCommand},
+    // {&turretCVCommand, &chassisDriveCommand},
+    {&gravityAutotuneCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(

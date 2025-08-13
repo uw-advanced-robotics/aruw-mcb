@@ -20,7 +20,7 @@
 #ifndef GRAVITY_AUTOTUNE_HPP_
 #define GRAVITY_AUTOTUNE_HPP_
 
-// #include <Eign/Dense>
+#include <Eigen/Dense>
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/command.hpp"
@@ -90,23 +90,27 @@ private:
     tap::Drivers *drivers;
     control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig turretAndControllers;
     std::array<float, numTestPoints> points;
-
+    
     float velocityZeroThreshold;
     float positionZeroThreshold;
-
+    
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
-
+    
     CalibrationState calibrationState;
-
+    
     // Current point being measured
     size_t pointMeasuring = 0;
     float setpoint = 0.0f;
-
+    
     uint32_t prevTime = 0;
-
+    
     uint32_t samplePointCount = 0;
 
+    // Value to store the averaging torque values
+    double torqueMeasurements = 0;
+
+    std::array<float, numTestPoints> measuredTorques{};
     /**
      * Wait a minimum of this time to allow the turret to settle at a locked position (in ms).
      */
@@ -143,7 +147,7 @@ private:
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
 
-    std::array<std::array<float, Turrets>, numTestPoints> torqueMeasurements{};
+    // std::array<float, numTestPoints> torqueMeasurements{};
 
     inline bool turretReachedPointAndNotMoving(
         control::turret::TurretSubsystem *turret,
@@ -169,5 +173,7 @@ private:
 };  // class autotune
 
 }  // namespace aruwsrc::control::autotune
+
+#include "gravity_autotune_impl.hpp"
 
 #endif  // GRAVITY_AUTOTUNE_HPP_
