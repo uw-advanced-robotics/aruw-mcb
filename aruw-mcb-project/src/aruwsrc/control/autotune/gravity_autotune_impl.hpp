@@ -190,6 +190,8 @@ void GravityAutotune<numTestPoints>::end(bool)
     turretAndControllers.turret->yawMotor.setMotorOutput(0);
     turretAndControllers.turret->pitchMotor.setMotorOutput(0);
 
+    calculateCOM();
+
     if (calibrationState == CalibrationState::CALIBRATION_SUCCESS && successChime)
         drivers->commandScheduler.addCommand(successChime);
     if (calibrationState == CalibrationState::CALIBRATION_FAIL && failChime)
