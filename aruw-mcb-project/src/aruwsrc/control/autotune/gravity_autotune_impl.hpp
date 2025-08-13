@@ -45,6 +45,9 @@ GravityAutotune<numTestPoints>::GravityAutotune(
 }
 
 template <uint32_t numTestPoints>
+bool GravityAutotune<numTestPoints>::isReady() { return true; }
+
+template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::initialize()
 {
     calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
@@ -117,7 +120,7 @@ void GravityAutotune<numTestPoints>::execute()
             {
                 // Exit measuring when done taking samples
                 calibrationState = CalibrationState::NEXT_LOCATION;
-                measuredTorques{pointMeasuring} = torqueMeasurements;
+                measuredTorques[pointMeasuring] = torqueMeasurements;
                 samplePointCount = 0;
 
                 if (pointMeasuring == points.size() - 1)

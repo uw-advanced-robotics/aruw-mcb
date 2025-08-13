@@ -427,7 +427,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
-autotune::GravityAutotune<3> gravityAutotuneCommand(
+autotune::GravityAutotune<5> gravityAutotuneCommand(
     drivers(),
     {
         &getTurretMCBCanComm(),
@@ -436,7 +436,7 @@ autotune::GravityAutotune<3> gravityAutotuneCommand(
         &chassisFramePitchTurretController,
         true,
     },
-    {0, M_PI_4, M_PI_2});
+    {-M_PI / 2, -M_PI / 4, 0, M_PI / 4, M_PI / 2});
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 

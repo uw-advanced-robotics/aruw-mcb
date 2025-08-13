@@ -76,6 +76,8 @@ public:
 
     CalibrationState getCalibrationState() const override { return calibrationState; }
 
+    bool isReady() override;
+
     void initialize() override;
 
     void execute() override;
@@ -90,21 +92,21 @@ private:
     tap::Drivers *drivers;
     control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig turretAndControllers;
     std::array<float, numTestPoints> points;
-    
+
     float velocityZeroThreshold;
     float positionZeroThreshold;
-    
+
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
-    
+
     CalibrationState calibrationState;
-    
+
     // Current point being measured
     size_t pointMeasuring = 0;
     float setpoint = 0.0f;
-    
+
     uint32_t prevTime = 0;
-    
+
     uint32_t samplePointCount = 0;
 
     // Value to store the averaging torque values
@@ -171,8 +173,7 @@ private:
     }
 
 };  // class autotune
-
-}  // namespace aruwsrc::control::autotune
+}
 
 #include "gravity_autotune_impl.hpp"
 
