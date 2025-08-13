@@ -62,7 +62,8 @@ void AutotuneMenu::update() {}
 
 void AutotuneMenu::shortButtonPress(modm::MenuButtons::Button button)
 {
-    aruwsrc::control::autotune::GravityAutotuneBase *gravityAutotuneCommand = getGravityAutotuneCommand();
+    aruwsrc::control::autotune::GravityAutotuneBase *gravityAutotuneCommand =
+        getGravityAutotuneCommand();
 
     switch (button)
     {
@@ -91,7 +92,7 @@ bool AutotuneMenu::hasChanged()
 {
     using namespace aruwsrc::control::autotune;
 
-    GravityAutotuneBase* gravityAutotuneCommand = getGravityAutotuneCommand();
+    GravityAutotuneBase *gravityAutotuneCommand = getGravityAutotuneCommand();
 
     if (gravityAutotuneCommand == nullptr)
     {

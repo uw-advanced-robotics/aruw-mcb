@@ -169,7 +169,8 @@ void MainMenu::addImuCalibrateMenuCallback()
     getViewStack()->push(icm);
 }
 
-void MainMenu::addAutotuneMenuCallback(){
+void MainMenu::addAutotuneMenuCallback()
+{
     AutotuneMenu* atm = new (&autotuneMenu) AutotuneMenu(getViewStack(), drivers);
     getViewStack()->push(atm);
 }

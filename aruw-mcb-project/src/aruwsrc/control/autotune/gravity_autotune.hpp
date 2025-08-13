@@ -173,7 +173,7 @@ private:
     }
 
 };  // class autotune
-}
+}  // namespace aruwsrc::control::autotune
 
 #include "gravity_autotune_impl.hpp"
 

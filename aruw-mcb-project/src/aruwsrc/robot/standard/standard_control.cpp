@@ -98,8 +98,8 @@
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
-#include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/display/autotune_menu.hpp"
+#include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
@@ -790,7 +790,8 @@ imu::ImuCalibrateCommand *getImuCalibrateCommand()
 {
     return &standard_control::imuCalibrateCommand;
 }
-autotune::GravityAutotuneBase *getGravityAutotuneCommand(){
+autotune::GravityAutotuneBase *getGravityAutotuneCommand()
+{
     return &standard_control::gravityAutotuneCommand;
 }
 
