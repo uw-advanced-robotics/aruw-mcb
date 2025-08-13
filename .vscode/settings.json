@@ -83,7 +83,8 @@
         "sparseqr": "cpp",
         "mprealsupport": "cpp",
         "matrixfunctions": "cpp",
-        "polynomials": "cpp"
+        "polynomials": "cpp",
+        "future": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [

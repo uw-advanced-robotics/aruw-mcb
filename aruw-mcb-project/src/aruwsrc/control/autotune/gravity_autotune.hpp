@@ -76,19 +76,17 @@ public:
 
     CalibrationState getCalibrationState() const override { return calibrationState; }
 
-    bool isReady() override;
-
     void initialize() override;
-
+    
     void execute() override;
-
+    
     void end(bool) override;
-
+    
     virtual bool isFinished() const override;
-
+    
     const char *getName() const override { return "Autotune subsystem"; }
-
-private:
+    
+    private:
     tap::Drivers *drivers;
     control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig turretAndControllers;
     std::array<float, numTestPoints> points;
@@ -110,7 +108,7 @@ private:
     uint32_t samplePointCount = 0;
 
     // Value to store the averaging torque values
-    double torqueMeasurements = 0;
+    float torqueMeasurements = 0;
 
     std::array<float, numTestPoints> measuredTorques{};
     /**
@@ -149,7 +147,7 @@ private:
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
 
-    // std::array<float, numTestPoints> torqueMeasurements{};
+    std::array<float,2> calculateCOM();
 
     inline bool turretReachedPointAndNotMoving(
         control::turret::TurretSubsystem *turret,
