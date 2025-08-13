@@ -430,11 +430,8 @@ IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand
 autotune::GravityAutotune<5> gravityAutotuneCommand(
     drivers(),
     {
-        &getTurretMCBCanComm(),
         &turret,
-        &chassisFrameYawTurretController,
         &chassisFramePitchTurretController,
-        true,
     },
     {-M_PI / 2, -M_PI / 4, 0, M_PI / 4, M_PI / 2});
 

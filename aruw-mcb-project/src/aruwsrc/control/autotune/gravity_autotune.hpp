@@ -48,24 +48,27 @@ public:
 
     virtual ~GravityAutotuneBase() = default;
 
-    /**
-     * Get the current calibration state.
-     */
     virtual CalibrationState getCalibrationState() const = 0;
+
+    virtual std::array<float,2> getCalibrationResult() const;
 };
 
-/**
- * A command for automatically tuning a subsystem
- */
 template <uint32_t numTestPoints>
 class GravityAutotune : public GravityAutotuneBase
 {
 public:
-    using CalibrationState = GravityAutotuneBase::CalibrationState;
+
+    struct TurretCalibrationConfig
+    {
+        /// A `TurretSubsystem` that this command will control (will lock the turret).
+        turret::TurretSubsystem *turret;
+        /// A chassis relative pitch controller used to lock the turret.
+        turret::algorithms::ChassisFramePitchTurretController *pitchController;
+    };
 
     GravityAutotune(
         tap::Drivers *drivers,
-        const control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig &turretAndControllers,
+        const TurretCalibrationConfig &turretAndControllers,
         std::array<float, numTestPoints> points,
         float velocityZeroThreshold =
             control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
@@ -74,7 +77,9 @@ public:
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
-    CalibrationState getCalibrationState() const override { return calibrationState; }
+    GravityAutotuneBase::CalibrationState getCalibrationState() const override { return calibrationState; }
+
+    std::array<float,2> getCalibrationResult() const override {return calibrationResult;}
 
     void initialize() override;
     
@@ -84,7 +89,7 @@ public:
     
     virtual bool isFinished() const override;
     
-    const char *getName() const override { return "Autotune subsystem"; }
+    const char *getName() const override { return "Gravity Autotune Command"; }
     
     private:
     tap::Drivers *drivers;
@@ -97,7 +102,7 @@ public:
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
-    CalibrationState calibrationState;
+    GravityAutotuneBase::CalibrationState calibrationState;
 
     // Current point being measured
     size_t pointMeasuring = 0;
@@ -148,6 +153,8 @@ public:
     tap::arch::MilliTimeout calibrationLongTimeout;
 
     std::array<float,2> calculateCOM();
+
+    std::array<float,2> calibrationResult{};
 
     inline bool turretReachedPointAndNotMoving(
         control::turret::TurretSubsystem *turret,
