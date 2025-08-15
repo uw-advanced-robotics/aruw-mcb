@@ -50,14 +50,13 @@ public:
 
     virtual CalibrationState getCalibrationState() const = 0;
 
-    virtual std::array<float,2> getCalibrationResult() const;
+    virtual std::array<float, 2> getCalibrationResult() const = 0;
 };
 
 template <uint32_t numTestPoints>
 class GravityAutotune : public GravityAutotuneBase
 {
 public:
-
     struct TurretCalibrationConfig
     {
         /// A `TurretSubsystem` that this command will control (will lock the turret).
@@ -69,35 +68,40 @@ public:
     GravityAutotune(
         tap::Drivers *drivers,
         const TurretCalibrationConfig &turretAndControllers,
-        std::array<float, numTestPoints> points,
-        float velocityZeroThreshold =
+        chassis::HolonomicChassisSubsystem *chassis,
+        const std::array<float, numTestPoints> points,
+        const float velocityZeroThreshold =
             control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-        float positionZeroThreshold =
+        const float positionZeroThreshold =
             control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
-    GravityAutotuneBase::CalibrationState getCalibrationState() const override { return calibrationState; }
+    GravityAutotuneBase::CalibrationState getCalibrationState() const override
+    {
+        return calibrationState;
+    }
 
-    std::array<float,2> getCalibrationResult() const override {return calibrationResult;}
+    std::array<float, 2> getCalibrationResult() const override { return calibrationResult; }
 
     void initialize() override;
-    
+
     void execute() override;
-    
+
     void end(bool) override;
-    
+
     virtual bool isFinished() const override;
-    
+
     const char *getName() const override { return "Gravity Autotune Command"; }
-    
-    private:
+
+private:
     tap::Drivers *drivers;
-    control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig turretAndControllers;
+    TurretCalibrationConfig turretAndControllers;
+    chassis::HolonomicChassisSubsystem *chassis;
     std::array<float, numTestPoints> points;
 
-    float velocityZeroThreshold;
-    float positionZeroThreshold;
+    const float velocityZeroThreshold;
+    const float positionZeroThreshold;
 
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
@@ -120,11 +124,6 @@ public:
      * Wait a minimum of this time to allow the turret to settle at a locked position (in ms).
      */
     static constexpr uint32_t WAIT_TIME_TURRET_RESPONSE_MS = 1000;
-    /**
-     * Wait this time after the mpu6500 is done calibrating to ensure the turret MCB's IMU is
-     * calibrated.
-     */
-    static constexpr uint32_t TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS = 2000;
 
     /**
      * Wait timeout (after state `WAITING_FOR_SYSTEMS_ONLINE` is complete) for the command to wait
@@ -136,14 +135,11 @@ public:
     /**
      * Number of sample points per test point to average the torque measurement.
      */
-    static constexpr uint32_t NUM_SAMPLE_POINTS = 1000;
+    static constexpr uint32_t NUM_SAMPLE_POINTS = 500;
 
     /**
      * Timeout that we set after initially starting the turret PID controller to allow any residual
      * movement from starting the new PID controller to be resolved.
-     *
-     * Also the delay that we set after onboard mpu6500 is calibrated to ensure that turret IMU has
-     * enough time to successfully calibrate.
      */
     tap::arch::MilliTimeout calibrationTimer;
 
@@ -152,9 +148,17 @@ public:
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
 
-    std::array<float,2> calculateCOM();
+    /**
+     * @brief Calculates the center of mass with least squares
+     *
+     * @return std::array<float,2> X,Z position of the center of mass
+     */
+    std::array<float, 2> calculateCOM();
 
-    std::array<float,2> calibrationResult{};
+    /**
+     * @brief Place to store the last calibration result
+     */
+    std::array<float, 2> calibrationResult{};
 
     inline bool turretReachedPointAndNotMoving(
         control::turret::TurretSubsystem *turret,

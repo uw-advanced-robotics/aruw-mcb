@@ -27,14 +27,16 @@ namespace aruwsrc::control::autotune
 template <uint32_t numTestPoints>
 GravityAutotune<numTestPoints>::GravityAutotune(
     tap::Drivers *drivers,
-    const control::imu::ImuCalibrateCommand::TurretIMUCalibrationConfig &turretAndControllers,
-    std::array<float, numTestPoints> points,
-    float velocityZeroThreshold,
-    float positionZeroThreshold,
+    const TurretCalibrationConfig &turretAndControllers,
+    chassis::HolonomicChassisSubsystem *chassis,
+    const std::array<float, numTestPoints> points,
+    const float velocityZeroThreshold,
+    const float positionZeroThreshold,
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime)
     : drivers(drivers),
       turretAndControllers(turretAndControllers),
+      chassis(chassis),
       points(points),
       velocityZeroThreshold(velocityZeroThreshold),
       positionZeroThreshold(positionZeroThreshold),
@@ -42,11 +44,17 @@ GravityAutotune<numTestPoints>::GravityAutotune(
       failChime(failChime)
 {
     addSubsystemRequirement(turretAndControllers.turret);
+    addSubsystemRequirement(chassis);
 }
 
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::initialize()
 {
+    if (chassis != nullptr)
+    {
+        chassis->setDesiredOutput(0, 0, 0);
+    }
+
     calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
@@ -149,10 +157,12 @@ void GravityAutotune<numTestPoints>::execute()
                 // Exit measuring when done taking samples
                 calibrationState = CalibrationState::NEXT_LOCATION;
                 measuredTorques[pointMeasuring] = torqueMeasurements;
+                pointMeasuring++;
+                torqueMeasurements = 0;
                 samplePointCount = 0;
 
                 // Finished going through all points
-                if (pointMeasuring == points.size() - 1)
+                if (pointMeasuring == points.size())
                 {
                     calibrationState = CalibrationState::CALIBRATION_SUCCESS;
                 }
@@ -163,10 +173,10 @@ void GravityAutotune<numTestPoints>::execute()
         case CalibrationState::NEXT_LOCATION:
         {
             checkSafetyTimeout();
-            pointMeasuring++;
             turretAndControllers.turret->pitchMotor.setChassisFrameSetpoint(
                 Angle(points[pointMeasuring]));
             calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
+            calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
             calibrationState = CalibrationState::LOCKING_TURRET;
         }
         break;
@@ -211,7 +221,7 @@ std::array<float, 2> GravityAutotune<numTestPoints>::calculateCOM()
     Eigen::MatrixXd X(numTestPoints, 2);
     Eigen::VectorXd Y(2);
 
-    for (int i = 0; i < numTestPoints; ++i)
+    for (uint32_t i = 0; i < numTestPoints; ++i)
     {
         float theta = points[i];
         X(i, 0) = std::sin(theta);  // corresponds to C (m·g·x)
@@ -222,7 +232,9 @@ std::array<float, 2> GravityAutotune<numTestPoints>::calculateCOM()
     float C = params(0);
     float D = params(1);
 
-    return {C / 9.81, D / 9.81};
+    const float m = 1;  // kg
+
+    return {C / 9.81 / m, D / 9.81 / m};
 }
 
 }  // namespace aruwsrc::control::autotune

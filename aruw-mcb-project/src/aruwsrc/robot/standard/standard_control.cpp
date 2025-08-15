@@ -433,7 +433,8 @@ autotune::GravityAutotune<5> gravityAutotuneCommand(
         &turret,
         &chassisFramePitchTurretController,
     },
-    {-M_PI / 2, -M_PI / 4, 0, M_PI / 4, M_PI / 2});
+    &chassis,
+    {-M_PI / 8, -M_PI / 16, 0, M_PI / 16, M_PI / 8});
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
