@@ -111,6 +111,7 @@ void GravityAutotune<numTestPoints>::execute()
             checkSafetyTimeout();
             const bool turretsOnline = turretAndControllers.turret->isOnline();
 
+            // Calibration timer to give people a chance to move out of the way
             if (turretsOnline && calibrationTimer.execute())
             {
                 calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
@@ -149,7 +150,6 @@ void GravityAutotune<numTestPoints>::execute()
                 samplePointCount++;
                 const float value =
                     static_cast<float>(turretAndControllers.turret->pitchMotor.getMotorOutput());
-
                 torqueMeasurements += (value - torqueMeasurements) / (samplePointCount);
             }
             else
@@ -157,6 +157,7 @@ void GravityAutotune<numTestPoints>::execute()
                 // Exit measuring when done taking samples
                 calibrationState = CalibrationState::NEXT_LOCATION;
                 measuredTorques[pointMeasuring] = torqueMeasurements;
+
                 pointMeasuring++;
                 torqueMeasurements = 0;
                 samplePointCount = 0;
@@ -164,7 +165,7 @@ void GravityAutotune<numTestPoints>::execute()
                 // Finished going through all points
                 if (pointMeasuring == points.size())
                 {
-                    calibrationState = CalibrationState::CALIBRATION_SUCCESS;
+                    calibrationState = CalibrationState::DONE;
                 }
             }
         }
@@ -178,6 +179,15 @@ void GravityAutotune<numTestPoints>::execute()
             calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
             calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
             calibrationState = CalibrationState::LOCKING_TURRET;
+        }
+        break;
+
+        case CalibrationState::DONE:
+        {
+            // Turn off in case calculation takes awhile
+            turretAndControllers.turret->yawMotor.setMotorOutput(0);
+            turretAndControllers.turret->pitchMotor.setMotorOutput(0);
+            calibrationState = CalibrationState::CalibrationSuccess;
         }
         break;
 
@@ -197,9 +207,6 @@ void GravityAutotune<numTestPoints>::execute()
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::end(bool)
 {
-    turretAndControllers.turret->yawMotor.setMotorOutput(0);
-    turretAndControllers.turret->pitchMotor.setMotorOutput(0);
-
     calibrationResult = calculateCOM();
 
     if (calibrationState == CalibrationState::CALIBRATION_SUCCESS && successChime)
@@ -215,22 +222,25 @@ bool GravityAutotune<numTestPoints>::isFinished() const
            calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
 
+/**
+ * @return std:array<float,2> In units of mm for x,z respectively
+ */
 template <uint32_t numTestPoints>
 std::array<float, 2> GravityAutotune<numTestPoints>::calculateCOM()
 {
     Eigen::MatrixXd X(numTestPoints, 2);
-    Eigen::VectorXd Y(2);
+    Eigen::VectorXd Y(numTestPoints);
 
     for (uint32_t i = 0; i < numTestPoints; ++i)
     {
         float theta = points[i];
-        X(i, 0) = std::sin(theta);  // corresponds to C (m·g·x)
-        X(i, 1) = std::cos(theta);  // corresponds to D (−m·g·y)
+        X(i, 0) = std::cos(theta);  // corresponds to C (m·g·x)
+        X(i, 1) = std::sin(theta);  // corresponds to D (−m·g·z)
         Y(i) = measuredTorques[i];
     }
     Eigen::Vector2d params = X.colPivHouseholderQr().solve(Y);
-    float C = params(0);
-    float D = params(1);
+    float C = params(0) * 1000;  // m to mm
+    float D = params(1) * 1000;  // m to mm
 
     const float m = 1;  // kg
 
