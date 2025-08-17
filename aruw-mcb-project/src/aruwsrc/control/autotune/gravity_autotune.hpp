@@ -50,7 +50,7 @@ public:
 
     virtual CalibrationState getCalibrationState() const = 0;
 
-    virtual std::array<float, 2> getCalibrationResult() const = 0;
+    virtual std::array<float, 3> getCalibrationResult() const = 0;
 };
 
 template <uint32_t numTestPoints>
@@ -63,17 +63,19 @@ public:
         turret::TurretSubsystem *turret;
         /// A chassis relative pitch controller used to lock the turret.
         turret::algorithms::ChassisFramePitchTurretController *pitchController;
-    };
+        float turretMass; // Kg
+        float torqueToDesiredOut; // Nm/desOut
+        float gravity = 9.81; // m/s^2
+       };
+
 
     GravityAutotune(
         tap::Drivers *drivers,
-        const TurretCalibrationConfig &turretAndControllers,
+        const TurretCalibrationConfig &config,
         chassis::HolonomicChassisSubsystem *chassis,
         const std::array<float, numTestPoints> points,
-        const float velocityZeroThreshold =
-            control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-        const float positionZeroThreshold =
-            control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+        const float velocityZeroThreshold,
+        const float positionZeroThreshold,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
@@ -82,7 +84,7 @@ public:
         return calibrationState;
     }
 
-    std::array<float, 2> getCalibrationResult() const override { return calibrationResult; }
+    std::array<float, 3> getCalibrationResult() const override { return calibrationResult; }
 
     void initialize() override;
 
@@ -96,7 +98,7 @@ public:
 
 private:
     tap::Drivers *drivers;
-    TurretCalibrationConfig turretAndControllers;
+    TurretCalibrationConfig config;
     chassis::HolonomicChassisSubsystem *chassis;
     std::array<float, numTestPoints> points;
 
@@ -119,7 +121,11 @@ private:
     // Value to store the averaging torque values
     float torqueMeasurements = 0;
 
+    float angleMeasurements = 0;
+
     std::array<float, numTestPoints> measuredTorques{};
+
+    std::array<float, numTestPoints> measuredAngles{};
     /**
      * Wait a minimum of this time to allow the turret to settle at a locked position (in ms).
      */
@@ -135,7 +141,7 @@ private:
     /**
      * Number of sample points per test point to average the torque measurement.
      */
-    static constexpr uint32_t NUM_SAMPLE_POINTS = 500;
+    static constexpr uint32_t NUM_SAMPLE_POINTS = 2000;
 
     /**
      * Timeout that we set after initially starting the turret PID controller to allow any residual
@@ -151,14 +157,14 @@ private:
     /**
      * @brief Calculates the center of mass with least squares
      *
-     * @return std::array<float,2> X,Z position of the center of mass
+     * @return std::array<float,3> X,Z, and magnitude position of the center of mass
      */
-    std::array<float, 2> calculateCOM();
+    std::array<float, 3> calculateCOM();
 
     /**
      * @brief Place to store the last calibration result
      */
-    std::array<float, 2> calibrationResult{};
+    std::array<float, 3> calibrationResult{};
 
     inline bool turretReachedPointAndNotMoving(
         control::turret::TurretSubsystem *turret,
@@ -179,6 +185,11 @@ private:
             if (failChime) drivers->commandScheduler.addCommand(failChime);
             calibrationState = CalibrationState::CALIBRATION_FAIL;
         }
+    }
+
+    inline float calibrationResultToMM(float calibrationNum){
+        // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm 
+        return calibrationNum * 1000 * config.torqueToDesiredOut / config.gravity / config.turretMass; 
     }
 
 };  // class autotune

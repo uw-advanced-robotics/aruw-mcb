@@ -27,7 +27,7 @@ namespace aruwsrc::control::autotune
 template <uint32_t numTestPoints>
 GravityAutotune<numTestPoints>::GravityAutotune(
     tap::Drivers *drivers,
-    const TurretCalibrationConfig &turretAndControllers,
+    const TurretCalibrationConfig &config,
     chassis::HolonomicChassisSubsystem *chassis,
     const std::array<float, numTestPoints> points,
     const float velocityZeroThreshold,
@@ -35,7 +35,7 @@ GravityAutotune<numTestPoints>::GravityAutotune(
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime)
     : drivers(drivers),
-      turretAndControllers(turretAndControllers),
+      config(config),
       chassis(chassis),
       points(points),
       velocityZeroThreshold(velocityZeroThreshold),
@@ -43,7 +43,7 @@ GravityAutotune<numTestPoints>::GravityAutotune(
       successChime(successChime),
       failChime(failChime)
 {
-    addSubsystemRequirement(turretAndControllers.turret);
+    addSubsystemRequirement(config.turret);
     addSubsystemRequirement(chassis);
 }
 
@@ -63,8 +63,8 @@ void GravityAutotune<numTestPoints>::initialize()
     samplePointCount = 0;
     pointMeasuring = 0;
 
-    turretAndControllers.pitchController->initialize();
-    turretAndControllers.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[pointMeasuring]));
+    config.pitchController->initialize();
+    config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[pointMeasuring]));
 
     calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
     calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -109,7 +109,7 @@ void GravityAutotune<numTestPoints>::execute()
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
         {
             checkSafetyTimeout();
-            const bool turretsOnline = turretAndControllers.turret->isOnline();
+            const bool turretsOnline = config.turret->isOnline();
 
             // Calibration timer to give people a chance to move out of the way
             if (turretsOnline && calibrationTimer.execute())
@@ -124,8 +124,8 @@ void GravityAutotune<numTestPoints>::execute()
         {
             checkSafetyTimeout();
             const bool turretNotMoving = turretReachedPointAndNotMoving(
-                turretAndControllers.turret,
-                turretAndControllers.turret->pitchMotor.getChassisFrameSetpoint());
+                config.turret,
+                config.turret->pitchMotor.getChassisFrameSetpoint());
 
             if (!turretNotMoving)
             {
@@ -148,18 +148,24 @@ void GravityAutotune<numTestPoints>::execute()
             if (samplePointCount < NUM_SAMPLE_POINTS)
             {
                 samplePointCount++;
-                const float value =
-                    static_cast<float>(turretAndControllers.turret->pitchMotor.getMotorOutput());
-                torqueMeasurements += (value - torqueMeasurements) / (samplePointCount);
+                const float motorValue =
+                    static_cast<float>(config.turret->pitchMotor.getMotorOutput());
+                torqueMeasurements += (motorValue - torqueMeasurements) / (samplePointCount);
+
+                const float angleValue = config.turret->pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue();
+                angleMeasurements += (angleValue - angleMeasurements) / samplePointCount;
+
             }
             else
             {
                 // Exit measuring when done taking samples
                 calibrationState = CalibrationState::NEXT_LOCATION;
                 measuredTorques[pointMeasuring] = torqueMeasurements;
+                measuredAngles[pointMeasuring] = angleMeasurements;
 
                 pointMeasuring++;
                 torqueMeasurements = 0;
+                angleMeasurements = 0;
                 samplePointCount = 0;
 
                 // Finished going through all points
@@ -174,7 +180,7 @@ void GravityAutotune<numTestPoints>::execute()
         case CalibrationState::NEXT_LOCATION:
         {
             checkSafetyTimeout();
-            turretAndControllers.turret->pitchMotor.setChassisFrameSetpoint(
+            config.turret->pitchMotor.setChassisFrameSetpoint(
                 Angle(points[pointMeasuring]));
             calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
             calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -185,9 +191,9 @@ void GravityAutotune<numTestPoints>::execute()
         case CalibrationState::DONE:
         {
             // Turn off in case calculation takes awhile
-            turretAndControllers.turret->yawMotor.setMotorOutput(0);
-            turretAndControllers.turret->pitchMotor.setMotorOutput(0);
-            calibrationState = CalibrationState::CalibrationSuccess;
+            config.turret->yawMotor.setMotorOutput(0);
+            config.turret->pitchMotor.setMotorOutput(0);
+            calibrationState = CalibrationState::CALIBRATION_SUCCESS;
         }
         break;
 
@@ -199,9 +205,9 @@ void GravityAutotune<numTestPoints>::execute()
     float dt = (currTime - prevTime);  // Have to use ms to share turret controller
     prevTime = currTime;
 
-    turretAndControllers.pitchController->runController(
+    config.pitchController->runController(
         dt,
-        turretAndControllers.turret->pitchMotor.getChassisFrameSetpoint());
+        config.turret->pitchMotor.getChassisFrameSetpoint());
 }
 
 template <uint32_t numTestPoints>
@@ -226,25 +232,25 @@ bool GravityAutotune<numTestPoints>::isFinished() const
  * @return std:array<float,2> In units of mm for x,z respectively
  */
 template <uint32_t numTestPoints>
-std::array<float, 2> GravityAutotune<numTestPoints>::calculateCOM()
+std::array<float, 3> GravityAutotune<numTestPoints>::calculateCOM()
 {
     Eigen::MatrixXd X(numTestPoints, 2);
     Eigen::VectorXd Y(numTestPoints);
 
     for (uint32_t i = 0; i < numTestPoints; ++i)
     {
-        float theta = points[i];
+        const float theta = measuredAngles[i];
         X(i, 0) = std::cos(theta);  // corresponds to C (m·g·x)
         X(i, 1) = std::sin(theta);  // corresponds to D (−m·g·z)
         Y(i) = measuredTorques[i];
     }
     Eigen::Vector2d params = X.colPivHouseholderQr().solve(Y);
-    float C = params(0) * 1000;  // m to mm
-    float D = params(1) * 1000;  // m to mm
 
-    const float m = 1;  // kg
-
-    return {C / 9.81 / m, D / 9.81 / m};
+    const float C = params(0);
+    const float D = params(1);
+    const float magnitude = std::sqrt(C*C + D*D);
+    
+    return {calibrationResultToMM(C), calibrationResultToMM(D), magnitude};
 }
 
 }  // namespace aruwsrc::control::autotune

@@ -56,11 +56,15 @@ void AutotuneMenu::draw()
     {
         display << CALI_STATE_TO_CHAR_STR[static_cast<int>(currCalibrationState)] << modm::endl;
 
-        if (currCalibrationState == aruwsrc::control::autotune::GravityAutotuneBase::CalibrationState::CALIBRATION_SUCCESS){
+        if (currCalibrationState ==
+            aruwsrc::control::autotune::GravityAutotuneBase::CalibrationState::CALIBRATION_SUCCESS)
+        {
             const auto result = getGravityAutotuneCommand()->getCalibrationResult();
             const float X = result[0];
-            const float Y = result[1];
-            display << "Center of mass position: " << "\n\tX: " << X << "\n\tY: " << Y;
+            const float Z = result[1];
+            display << "Center of mass position: "
+                    << "\n\tcgX: " << X << "\n\tcgZ: " << Z << modm::endl;
+            display << "Gravity Compensation\n Scalar: -" << result[2];
         }
     }
 }

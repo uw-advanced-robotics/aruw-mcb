@@ -91,9 +91,9 @@ static constexpr float TURRET_CG_Z = 26.68;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
 
 #elif defined(TARGET_STANDARD_VOID)
-static constexpr float TURRET_CG_X = 33.83;
-static constexpr float TURRET_CG_Z = 26.68;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
+static constexpr float TURRET_CG_X = 20.0f;
+static constexpr float TURRET_CG_Z = 16.5f;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'200;
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif

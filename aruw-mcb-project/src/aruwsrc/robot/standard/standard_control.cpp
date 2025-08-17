@@ -427,14 +427,13 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
-autotune::GravityAutotune<5> gravityAutotuneCommand(
+autotune::GravityAutotune<9> gravityAutotuneCommand(
     drivers(),
-    {
-        &turret,
-        &chassisFramePitchTurretController,
-    },
+    {&turret, &chassisFramePitchTurretController, 1.646f, 1.3f / 16384},
     &chassis,
-    {-M_PI / 8, -M_PI / 16, 0, M_PI / 16, M_PI / 8});
+    {-M_PI / 12, -M_PI / 14, -M_PI / 16, -M_PI / 32, 0, M_PI / 32, M_PI / 16, M_PI / 14, M_PI / 12},
+    modm::toRadian(1e-4f),
+    modm::toRadian(2.5f));
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 

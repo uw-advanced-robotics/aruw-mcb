@@ -21,6 +21,7 @@
 #define AUTOTUNE_MENU_HPP_
 
 #include "tap/display/dummy_allocator.hpp"
+#include <modm/io/iostream.hpp>   // for IOStream, manipulators
 
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
@@ -66,10 +67,10 @@ private:
     static constexpr int AUTOTUNE_MENU_ID = 15;
 
     static constexpr const char *CALI_STATE_TO_CHAR_STR[] = {
-        "WAIT SYSTEMS ONLINE",
-        "LOCKING TURRET",
+        "WAITING_FOR_SYSTEMS_ONLINE",
+        "LOCKING_TURRET",
         "MEASURING_TORQUE",
-        "NEXT_LOCATION"
+        "NEXT_LOCATION",
         "CALIBRATION_SUCCESS",
         "CALIBRATION_FAIL",
         "DONE"};
