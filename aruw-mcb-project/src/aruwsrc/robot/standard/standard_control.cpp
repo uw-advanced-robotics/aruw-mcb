@@ -599,8 +599,7 @@ HoldRepeatCommandMapping leftSwitchDown(
     true);
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    // {&turretCVCommand, &chassisDriveCommand},
-    {&gravityAutotuneCommand},
+    {&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
