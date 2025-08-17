@@ -104,11 +104,11 @@ void GravityAutotune<numTestPoints>::initialize()
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::execute()
 {
+    checkSafetyTimeout();
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
         {
-            checkSafetyTimeout();
             const bool turretsOnline = config.turret->isOnline();
 
             // Calibration timer to give people a chance to move out of the way
@@ -122,7 +122,6 @@ void GravityAutotune<numTestPoints>::execute()
         break;
         case CalibrationState::LOCKING_TURRET:
         {
-            checkSafetyTimeout();
             const bool turretNotMoving = turretReachedPointAndNotMoving(
                 config.turret,
                 config.turret->pitchMotor.getChassisFrameSetpoint());
@@ -143,8 +142,6 @@ void GravityAutotune<numTestPoints>::execute()
 
         case CalibrationState::MEASURING_TORQUE:
         {
-            checkSafetyTimeout();
-
             if (samplePointCount < NUM_SAMPLE_POINTS)
             {
                 samplePointCount++;
@@ -179,7 +176,6 @@ void GravityAutotune<numTestPoints>::execute()
 
         case CalibrationState::NEXT_LOCATION:
         {
-            checkSafetyTimeout();
             config.turret->pitchMotor.setChassisFrameSetpoint(
                 Angle(points[pointMeasuring]));
             calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
@@ -229,7 +225,7 @@ bool GravityAutotune<numTestPoints>::isFinished() const
 }
 
 /**
- * @return std:array<float,2> In units of mm for x,z respectively
+ * @return std:array<float,3> In units of mm for x,z respectively
  */
 template <uint32_t numTestPoints>
 std::array<float, 3> GravityAutotune<numTestPoints>::calculateCOM()
@@ -244,6 +240,7 @@ std::array<float, 3> GravityAutotune<numTestPoints>::calculateCOM()
         X(i, 1) = std::sin(theta);  // corresponds to D (−m·g·z)
         Y(i) = measuredTorques[i];
     }
+    // Solve least squares: torque = C·cos(theta) + D·sin(theta)
     Eigen::Vector2d params = X.colPivHouseholderQr().solve(Y);
 
     const float C = params(0);

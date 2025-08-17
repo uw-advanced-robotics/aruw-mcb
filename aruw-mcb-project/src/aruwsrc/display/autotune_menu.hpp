@@ -21,7 +21,7 @@
 #define AUTOTUNE_MENU_HPP_
 
 #include "tap/display/dummy_allocator.hpp"
-#include <modm/io/iostream.hpp>   // for IOStream, manipulators
+#include <modm/io/iostream.hpp>
 
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
@@ -32,15 +32,15 @@ class Drivers;
 }  // namespace aruwsrc
 
 /**
- * Weak function that you should define in `*_control.cpp` if an `ImuCalibrateCommand` exists.
+ * Weak function that you should define in `*_control.cpp` if an `gravityAutotuneCommand` exists.
  */
 aruwsrc::control::autotune::GravityAutotuneBase *getGravityAutotuneCommand();
 
 namespace aruwsrc::display
 {
 /**
- * Menu that allows the user to schedule an `ImuCalibrateCommand` in the `CommandScheduler`. Also
- * displays the current calibration state of the `ImuCalibrationCommand`.
+ * Menu that allows the user to schedule an `gravityAutotuneCommand` in the `CommandScheduler`. Also
+ * displays the current calibration state of the `gravityAutotuneCommand`.
  */
 class AutotuneMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
