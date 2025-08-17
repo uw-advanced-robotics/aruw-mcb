@@ -105,8 +105,12 @@ public:
             float newTime = tap::arch::clock::getTimeMilliseconds();
             float timeDifference = (newTime - lastTime) / 1000.0f;  // (s)
             lastTime = newTime;
-            motorDesiredOutput = pid.runController(error, errorDerivative, timeDifference) + limitSwitchConfig.kS;
-            setDesiredOutput(std::clamp(motorDesiredOutput, -limitSwitchConfig.maxOutput, limitSwitchConfig.maxOutput));
+            motorDesiredOutput =
+                pid.runController(error, errorDerivative, timeDifference) + limitSwitchConfig.kS;
+            setDesiredOutput(std::clamp(
+                motorDesiredOutput,
+                -limitSwitchConfig.maxOutput,
+                limitSwitchConfig.maxOutput));
         }
         else if (pidState == PIDState::VELOCITY_PID)
         {
@@ -121,7 +125,10 @@ public:
         }
         else
         {
-            setDesiredOutput(std::clamp(motorDesiredOutput, -limitSwitchConfig.maxOutput, limitSwitchConfig.maxOutput));
+            setDesiredOutput(std::clamp(
+                motorDesiredOutput,
+                -limitSwitchConfig.maxOutput,
+                limitSwitchConfig.maxOutput));
         }
     }
 
@@ -131,7 +138,9 @@ public:
     {
         // motorDesiredOutput = (homingReversed ? homingSpeed : -homingSpeed) + kS;
         pidState = PIDState::POSITION_PID;
-        setSetpoint(getPosition() + (limitSwitchConfig.homingReversed ? limitSwitchConfig.homingSpeed : -limitSwitchConfig.homingSpeed));
+        setSetpoint(
+            getPosition() + (limitSwitchConfig.homingReversed ? limitSwitchConfig.homingSpeed
+                                                              : -limitSwitchConfig.homingSpeed));
     }
 
     void stopDuringHoming() override
@@ -140,7 +149,8 @@ public:
         setDesiredOutput(0);
     }
 
-    struct LimitSwitchConfig {
+    struct LimitSwitchConfig
+    {
         float radius = 1.0f;
         float lowerBound = 0.0f;
         float upperBound = 0.0f;
@@ -160,7 +170,12 @@ protected:
         const tap::algorithms::SmoothPidConfig &pidConfig,
         LimitSwitchConfig limitSwitchConfig)
         : OneSidedBoundedSubsystemInterface(drivers, trigger, 0),
-          LinearJointInterface(limitSwitchConfig.lowerBound, limitSwitchConfig.upperBound, limitSwitchConfig.epsilon, 0, limitSwitchConfig.maxSetpointIncrement),
+          LinearJointInterface(
+              limitSwitchConfig.lowerBound,
+              limitSwitchConfig.upperBound,
+              limitSwitchConfig.epsilon,
+              0,
+              limitSwitchConfig.maxSetpointIncrement),
           pid(pidConfig),
           limitSwitchConfig(limitSwitchConfig)
     {

@@ -69,6 +69,18 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_BALANCE_CONFIG(
     GANTRY_LIFT_BALANCE_PID_MAX_ERROR_SUM,
     GANTRY_LIFT_BALANCE_MAX_OUTPUT);
 
+static constexpr LimitSwitchSetpointInterface::LimitSwitchConfig GANTRY_LIFT_LIMIT_CONFIG = {
+    .radius = GANTRY_LIFT_RADIUS,
+    .lowerBound = GANTRY_LIFT_LOWER_BOUND,
+    .upperBound = GANTRY_LIFT_UPPER_BOUND,
+    .home = GANTRY_LIFT_HOME,
+    .kS = GANTRY_LIFT_KS,
+    .epsilon = GANTRY_LIFT_EPSILON,
+    .homingSpeed = 5.0f,
+    .homingReversed = false,
+    .maxOutput = 6000.0f,
+    .maxSetpointIncrement = GANTRY_LIFT_MAX_INCREMENT};
+
 static constexpr float GANTRY_EXTENSION_PID_KP = 300.0f;
 static constexpr float GANTRY_EXTENSION_PID_KI = 0.0f;
 static constexpr float GANTRY_EXTENSION_PID_KD = 40.0f;
@@ -83,7 +95,7 @@ static constexpr float GANTRY_EXTENSION_HOME = 0.0f;
 static constexpr float GANTRY_EXTENSION_KS = 0.0f;
 static constexpr float GANTRY_EXTENSION_EPSILON = 1.0f;
 
-static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_CONFIG(
+static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_PID_CONFIG(
     GANTRY_EXTENSION_PID_KP,
     GANTRY_EXTENSION_PID_KI,
     GANTRY_EXTENSION_PID_KD,
@@ -95,6 +107,16 @@ static constexpr tap::gpio::Digital::InputPin GANTRY_EXTENSION_LIMIT_SWITCH_PIN 
 
 static constexpr float GANTRY_LIFT_MOVE_SPEED = 0.6f;
 static constexpr float GANTRY_EXTENSION_MOVE_SPEED = 0.6f;
+
+static constexpr LimitSwitchSetpointInterface::LimitSwitchConfig GANTRY_EXTENSION_LIMIT_CONFIG = {
+    .radius = GANTRY_EXTENSION_RADIUS,
+    .lowerBound = GANTRY_EXTENSION_LOWER_BOUND,
+    .upperBound = GANTRY_EXTENSION_UPPER_BOUND,
+    .home = GANTRY_EXTENSION_HOME,
+    .kS = GANTRY_EXTENSION_KS,
+    .epsilon = GANTRY_EXTENSION_EPSILON,
+    .homingSpeed = 10.0f,
+    .homingReversed = false};
 
 }  // namespace aruwsrc::engineer
 #endif  // ENGINEER_GANTRY_CONSTANTS_HPP_   `

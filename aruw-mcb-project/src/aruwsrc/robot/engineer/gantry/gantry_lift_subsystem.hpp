@@ -39,13 +39,7 @@ public:
         const tap::algorithms::SmoothPidConfig &configPos,
         const tap::algorithms::SmoothPidConfig &configAlign,
         control::TriggerInterface &trigger,
-        float radius,
-        float lowerBound = 0.0f,
-        float upperBound = 0.0f,
-        float home = 0,
-        float kS = 0.0f,
-        float epsilon = 1e-4f,
-        float maxSetpointIncrement = FLT_MAX);
+        const LimitSwitchSetpointInterface::LimitSwitchConfig &limitConfig);
 
     void setDesiredOutput(int16_t power) override;
 

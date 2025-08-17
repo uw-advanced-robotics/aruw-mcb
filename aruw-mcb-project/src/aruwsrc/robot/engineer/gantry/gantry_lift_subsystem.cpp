@@ -27,27 +27,8 @@ GantryLiftSubsystem::GantryLiftSubsystem(
     const tap::algorithms::SmoothPidConfig& configPos,
     const tap::algorithms::SmoothPidConfig& configAlign,
     control::TriggerInterface& trigger,
-    float radius,
-    float lowerBound,
-    float upperBound,
-    float home,
-    float kS,
-    float epsilon,
-    float maxSetpointIncrement)
-    : LimitSwitchSetpointInterface(
-          drivers,
-          trigger,
-          configPos,
-          radius,
-          lowerBound,
-          upperBound,
-          home,
-          kS,
-          epsilon,
-          5.0f,
-          false,
-          6000.0f,
-          maxSetpointIncrement),
+    const LimitSwitchSetpointInterface::LimitSwitchConfig& limitConfig)
+    : LimitSwitchSetpointInterface(drivers, trigger, configPos, limitConfig),
       pidAlign(configAlign),
       motorLeft(motorLeft),
       motorRight(motorRight)
@@ -69,8 +50,8 @@ void GantryLiftSubsystem::setDesiredOutput(int16_t output)
 
     float outputAlign = pidAlign.runController(errorAlignment, getVelocityDifference(), 2.0f);
 
-    motorLeft.setDesiredOutput(output + outputAlign + kS);
-    motorRight.setDesiredOutput(output - outputAlign + kS);
+    motorLeft.setDesiredOutput(output + outputAlign + limitSwitchConfig.kS);
+    motorRight.setDesiredOutput(output - outputAlign + limitSwitchConfig.kS);
 }
 
 void GantryLiftSubsystem::resetEncoderValue()
@@ -95,13 +76,13 @@ float GantryLiftSubsystem::getPositionDifference()
 {
     return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() -
             motorRight.getEncoder()->getPosition().getUnwrappedValue()) *
-           radius;
+           limitSwitchConfig.radius;
 }
 
 float GantryLiftSubsystem::getVelocityDifference()
 {
     return (motorLeft.getEncoder()->getVelocity() - motorRight.getEncoder()->getVelocity()) *
-           radius;
+           limitSwitchConfig.radius;
 }
 
 void GantryLiftSubsystem::stopDuringHoming() { refreshSafeDisconnect(); }

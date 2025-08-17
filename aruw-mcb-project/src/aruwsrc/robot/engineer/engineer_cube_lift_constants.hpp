@@ -28,7 +28,7 @@ namespace aruwsrc::engineer
 {
 static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID = tap::motor::MOTOR7;
 
-static constexpr tap::can::CanBus LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::can::CanBus CUBE_LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::B;
@@ -44,13 +44,23 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float CUBE_LIFT_MOVE_SPEED = -2;
+static constexpr float CUBE_LIFT_MOVE_SPEED = -2.0f;
 
-static constexpr float ONE_CUBE_SETPOINT = -40;
-static constexpr float TWO_CUBE_SETPOINT = -220;
-static constexpr float THREE_CUBE_SETPOINT = -310;
+static constexpr float ONE_CUBE_SETPOINT = -40.0f;
+static constexpr float TWO_CUBE_SETPOINT = -220.0f;
+static constexpr float THREE_CUBE_SETPOINT = -310.0f;
 
 static constexpr float LIFT_UPPER_BOUND = THREE_CUBE_SETPOINT;
+
+static constexpr LimitSwitchSetpointInterface::LimitSwitchConfig CUBE_LIFT_LIMIT_CONFIG = {
+    .radius = MM_PER_REVOLUTION,
+    .lowerBound = -320.0f,
+    .upperBound = -40.0f,
+    .home = ONE_CUBE_SETPOINT,
+    .kS = 0.0f,
+    .epsilon = 0.5f,
+    .homingSpeed = 20.0f,
+    .homingReversed = true};
 
 }  // namespace aruwsrc::engineer
 #endif
