@@ -17,6 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file gravity_autotune.hpp
+ *
+ * @brief   Implements gravity-based center-of-mass autotuning for turret calibration.
+ *
+ * Defines the GravityAutotune command, which locks the turret at specified
+ * test points, measures torque/angle, and estimates the turret's center of
+ * mass using least squares regression.
+ */
+
 #ifndef GRAVITY_AUTOTUNE_HPP_
 #define GRAVITY_AUTOTUNE_HPP_
 
@@ -35,7 +45,7 @@ namespace aruwsrc::control::autotune
 class GravityAutotuneBase : public tap::control::Command
 {
 public:
-    enum CalibrationState
+    enum class CalibrationState
     {
         WAITING_FOR_SYSTEMS_ONLINE,
         LOCKING_TURRET,
@@ -63,11 +73,14 @@ public:
         turret::TurretSubsystem *turret;
         /// A chassis relative pitch controller used to lock the turret.
         turret::algorithms::ChassisFramePitchTurretController *pitchController;
-        float turretMass; // Kg
-        float torqueToDesiredOut; // Nm/desOut
-        float gravity = 9.81; // m/s^2
-       };
-
+        /// Mass of the pitching part of the turret in units of Kg
+        const float turretMass;
+        /// A constant that relates the motor units to Nm of torque, would only work with current
+        /// controlled motors. In units of Nm / desOut
+        const float torqueToDesiredOut;
+        /// Force of gravity. Unlikely to change. m / s^2
+        const float gravity = 9.81;
+    };
 
     GravityAutotune(
         tap::Drivers *drivers,
@@ -79,11 +92,19 @@ public:
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
+    /**
+     * @brief   Returns the current calibration state.
+     * @return  The active CalibrationState.
+     */
     GravityAutotuneBase::CalibrationState getCalibrationState() const override
     {
         return calibrationState;
     }
 
+    /**
+     * @brief   Retrieves the last computed center of mass calibration result.
+     * @return  Array containing {cgX_mm, cgZ_mm, magnitude_desOut}.
+     */
     std::array<float, 3> getCalibrationResult() const override { return calibrationResult; }
 
     void initialize() override;
@@ -110,38 +131,42 @@ private:
 
     GravityAutotuneBase::CalibrationState calibrationState;
 
-    // Current point being measured
-    size_t pointMeasuring = 0;
-    float setpoint = 0.0f;
+    // Current point in the sequence being measured
+    size_t currentPointIndex = 0;
 
+    // Previous time, used for the controller's dt
     uint32_t prevTime = 0;
 
+    // Value to store what sample number we're currently at
     uint32_t samplePointCount = 0;
 
     // Value to store the averaging torque values
-    float torqueMeasurements = 0;
+    float averagingTorques = 0;
 
-    float angleMeasurements = 0;
+    // Value to store the averaging angle values
+    float averagingAngles = 0;
 
+    // Array of torque measurements received post averaging
     std::array<float, numTestPoints> measuredTorques{};
 
+    // Array of angle measurements received post averaging
     std::array<float, numTestPoints> measuredAngles{};
+
     /**
-     * Wait a minimum of this time to allow the turret to settle at a locked position (in ms).
+     * Amount of time the turret has to have passed `turretReachedPointAndNotMoving()`
      */
     static constexpr uint32_t WAIT_TIME_TURRET_RESPONSE_MS = 1000;
 
     /**
-     * Wait timeout (after state `WAITING_FOR_SYSTEMS_ONLINE` is complete) for the command to wait
-     * until it gives up. Should never happen but is a safety precaution to avoid
-     * getting stuck in calibration forever.
+     * Wait timeout for the command to wait until it gives up.
+     * Is a safety precaution to avoid getting stuck in calibration forever.
      */
     static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 1000 * 20;
 
     /**
      * Number of sample points per test point to average the torque measurement.
      */
-    static constexpr uint32_t NUM_SAMPLE_POINTS = 2000;
+    static constexpr uint32_t NUM_SAMPLE_POINTS = 1000;
 
     /**
      * Timeout that we set after initially starting the turret PID controller to allow any residual
@@ -150,21 +175,24 @@ private:
     tap::arch::MilliTimeout calibrationTimer;
 
     /**
-     * Timeout used to determine if we should give up on calibration.
+     * Timeout used to determine if we should give up on tuning.
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
 
     /**
-     * @brief Calculates the center of mass with least squares
-     *
-     * @return std::array<float,3> X,Z, and magnitude position of the center of mass
-     */
-    std::array<float, 3> calculateCOM();
-
-    /**
-     * @brief Place to store the last calibration result
+     * Place to store the last calibration result
      */
     std::array<float, 3> calibrationResult{};
+
+    /**
+     * @brief Calculates the center of mass with least squares
+     *
+     * @return std::array<float,3> cgX, cgZ, and magnitude of the center of mass
+     * with cgX, and cgZ in units of mm and magnitude in units of desOut.
+     */
+    std::array<float, 3> calculateCOM(
+        std::array<float, numTestPoints> Angles,
+        std::array<float, numTestPoints> Torques);
 
     inline bool turretReachedPointAndNotMoving(
         control::turret::TurretSubsystem *turret,
@@ -178,6 +206,9 @@ private:
                 positionZeroThreshold);
     }
 
+    /**
+     * @brief Helper function to check if the safety timer is expired
+     */
     inline void checkSafetyTimeout()
     {
         if (calibrationLongTimeout.isExpired())
@@ -187,9 +218,18 @@ private:
         }
     }
 
-    inline float calibrationResultToMM(float calibrationNum){
-        // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm 
-        return calibrationNum * 1000 * config.torqueToDesiredOut / config.gravity / config.turretMass; 
+    /**
+     * @brief Helper function that turns the calibration result into 
+     * units of mm.
+     *  
+     * @param calibrationNum Value from the COM calculation
+     * @return float `COMLocation` in mm
+     */
+    inline float calibrationResultToMM(float calibrationNum)
+    {
+        // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm
+        return calibrationNum * 1000 * config.torqueToDesiredOut / config.gravity /
+               config.turretMass;
     }
 
 };  // class autotune

@@ -20,8 +20,9 @@
 #ifndef AUTOTUNE_MENU_HPP_
 #define AUTOTUNE_MENU_HPP_
 
-#include "tap/display/dummy_allocator.hpp"
 #include <modm/io/iostream.hpp>
+
+#include "tap/display/dummy_allocator.hpp"
 
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"

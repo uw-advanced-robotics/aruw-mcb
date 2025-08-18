@@ -61,10 +61,10 @@ void GravityAutotune<numTestPoints>::initialize()
     prevTime = tap::arch::clock::getTimeMilliseconds();
 
     samplePointCount = 0;
-    pointMeasuring = 0;
+    currentPointIndex = 0;
 
     config.pitchController->initialize();
-    config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[pointMeasuring]));
+    config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[currentPointIndex]));
 
     calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
     calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -91,20 +91,29 @@ void GravityAutotune<numTestPoints>::initialize()
  *   When stable and the timer expires, transitions to `MEASURING_TORQUE`.
  *
  * - **MEASURING_TORQUE**
- *   Collects a fixed number of torque samples from the turret's pitch motor,
+ *   Collects a fixed number of torque and location samples from the turret's pitch motor,
  *   averaging.
  *   After samples are collected:
  *     - If more points remain, transitions to `NEXT_LOCATION`.
- *     - If all points are measured, transitions to `CALIBRATION_SUCCESS`.
+ *     - If all points are measured, transitions to `DONE`.
  *
  * - **NEXT_LOCATION**
  *   Moves the turret to the next target angle for measurement,
  *   restarts the long calibration timeout, and returns to `LOCKING_TURRET`.
+ * 
+ * - **DONE**
+ *   Turns off the motors as to be sure that in the case of the robot hanging during
+ *   the calculation it won't become uncontrolled (should never happen) and transitions
+ *   into `CALIBRATION_SUCCESS` 
+ * 
+ * - **CALIBRATION_FAIL**
+ *   Calibration fail is called if the turret is unable to lock at a single position
+ *   over the period of the `calibrationLongTimeout` to ensure the user can regain
+ *   control. 
  */
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::execute()
 {
-    checkSafetyTimeout();
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
@@ -144,29 +153,34 @@ void GravityAutotune<numTestPoints>::execute()
         {
             if (samplePointCount < NUM_SAMPLE_POINTS)
             {
-                samplePointCount++;
+                // Add to the running average of the motors value and angle measurements
                 const float motorValue =
-                    static_cast<float>(config.turret->pitchMotor.getMotorOutput());
-                torqueMeasurements += (motorValue - torqueMeasurements) / (samplePointCount);
+                static_cast<float>(config.turret->pitchMotor.getMotorOutput());
+                averagingTorques += (motorValue - averagingTorques) / (samplePointCount);
+                
+                const float angleValue =
+                config.turret->pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue();
+                averagingAngles += (angleValue - averagingAngles) / samplePointCount;
 
-                const float angleValue = config.turret->pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue();
-                angleMeasurements += (angleValue - angleMeasurements) / samplePointCount;
-
+                samplePointCount++;
             }
             else
             {
-                // Exit measuring when done taking samples
-                calibrationState = CalibrationState::NEXT_LOCATION;
-                measuredTorques[pointMeasuring] = torqueMeasurements;
-                measuredAngles[pointMeasuring] = angleMeasurements;
-
-                pointMeasuring++;
-                torqueMeasurements = 0;
-                angleMeasurements = 0;
+                // Store averaged values
+                measuredTorques[currentPointIndex] = averagingTorques;
+                measuredAngles[currentPointIndex] = averagingAngles;
+                
+                // Switch to next point and reset averaging
+                currentPointIndex++;
+                averagingTorques = 0;
+                averagingAngles = 0;
                 samplePointCount = 0;
 
+                // Exit measuring when done taking samples
+                calibrationState = CalibrationState::NEXT_LOCATION;
+                
                 // Finished going through all points
-                if (pointMeasuring == points.size())
+                if (currentPointIndex == points.size())
                 {
                     calibrationState = CalibrationState::DONE;
                 }
@@ -176,8 +190,7 @@ void GravityAutotune<numTestPoints>::execute()
 
         case CalibrationState::NEXT_LOCATION:
         {
-            config.turret->pitchMotor.setChassisFrameSetpoint(
-                Angle(points[pointMeasuring]));
+            config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[currentPointIndex]));
             calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
             calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
             calibrationState = CalibrationState::LOCKING_TURRET;
@@ -197,24 +210,36 @@ void GravityAutotune<numTestPoints>::execute()
             break;
     }
 
+    checkSafetyTimeout();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    float dt = (currTime - prevTime);  // Have to use ms to share turret controller
+    // Have to use ms to share turret controller
+    float dt = (currTime - prevTime);
     prevTime = currTime;
 
-    config.pitchController->runController(
-        dt,
-        config.turret->pitchMotor.getChassisFrameSetpoint());
+    config.pitchController->runController(dt, config.turret->pitchMotor.getChassisFrameSetpoint());
 }
 
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::end(bool)
 {
-    calibrationResult = calculateCOM();
+    switch (calibrationState)
+    {
+        case CalibrationState::CALIBRATION_SUCCESS:
+        {
+            calibrationResult = calculateCOM(measuredAngles, measuredTorques);
+            if (successChime) drivers->commandScheduler.addCommand(successChime);
+        }
+        break;
 
-    if (calibrationState == CalibrationState::CALIBRATION_SUCCESS && successChime)
-        drivers->commandScheduler.addCommand(successChime);
-    if (calibrationState == CalibrationState::CALIBRATION_FAIL && failChime)
-        drivers->commandScheduler.addCommand(failChime);
+        case CalibrationState::CALIBRATION_FAIL:
+        {
+            if (failChime) drivers->commandScheduler.addCommand(failChime);
+        }
+        break;
+
+        default:
+            break;
+    }
 }
 
 template <uint32_t numTestPoints>
@@ -224,30 +249,26 @@ bool GravityAutotune<numTestPoints>::isFinished() const
            calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
 
-/**
- * @return std:array<float,3> In units of mm for x,z respectively
- */
 template <uint32_t numTestPoints>
-std::array<float, 3> GravityAutotune<numTestPoints>::calculateCOM()
+std::array<float, 3> GravityAutotune<numTestPoints>::calculateCOM(std::array<float, numTestPoints> Angles, std::array<float, numTestPoints> Torques)
 {
     Eigen::MatrixXd X(numTestPoints, 2);
     Eigen::VectorXd Y(numTestPoints);
 
     for (uint32_t i = 0; i < numTestPoints; ++i)
     {
-        const float theta = measuredAngles[i];
-        X(i, 0) = std::cos(theta);  // corresponds to C (m·g·x)
-        X(i, 1) = std::sin(theta);  // corresponds to D (−m·g·z)
-        Y(i) = measuredTorques[i];
+        X(i, 0) = std::cos(Angles[i]);  // corresponds to A (m·g·x)
+        X(i, 1) = std::sin(Angles[i]);  // corresponds to B (−m·g·z)
+        Y(i) = Torques[i];
     }
-    // Solve least squares: torque = C·cos(theta) + D·sin(theta)
+    // Solve least squares: torque = A·cos(theta) + B·sin(theta)
     Eigen::Vector2d params = X.colPivHouseholderQr().solve(Y);
 
-    const float C = params(0);
-    const float D = params(1);
-    const float magnitude = std::sqrt(C*C + D*D);
-    
-    return {calibrationResultToMM(C), calibrationResultToMM(D), magnitude};
+    const float A = params(0);
+    const float B = params(1);
+    const float magnitude = std::sqrt(A * A + B * B);
+
+    return {calibrationResultToMM(A), calibrationResultToMM(B), magnitude};
 }
 
 }  // namespace aruwsrc::control::autotune

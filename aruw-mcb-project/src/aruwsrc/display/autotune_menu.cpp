@@ -62,9 +62,13 @@ void AutotuneMenu::draw()
             const auto result = getGravityAutotuneCommand()->getCalibrationResult();
             const float X = result[0];
             const float Z = result[1];
-            display << "Center of mass position: "
-                    << "\n\tcgX: " << X << "\n\tcgZ: " << Z << modm::endl;
-            display << "Gravity Compensation\n Scalar: -" << result[2];
+            const float scalar = result[2];
+
+            display.printf(
+                "Center of mass position:\n\tcgX: %.2f\n\tcgZ: %.2f\n",
+                static_cast<double>(X),
+                static_cast<double>(Z));
+            display.printf("Gravity Compensation\n Scalar: - %.1f\n", static_cast<double>(scalar));
         }
     }
 }
