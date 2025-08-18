@@ -40,7 +40,6 @@
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
-
 namespace aruwsrc::control::autotune
 {
 class GravityAutotuneBase : public tap::control::Command

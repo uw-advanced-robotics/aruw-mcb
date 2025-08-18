@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAVITY_AUTOTUNE_IMPL
-#define GRAVITY_AUTOTUNE_IMPL
+#ifndef GRAVITY_AUTOTUNE_IMPL_HPP_
+#define GRAVITY_AUTOTUNE_IMPL_HPP_
 
 #include "gravity_autotune.hpp"
 
@@ -100,16 +100,16 @@ void GravityAutotune<numTestPoints>::initialize()
  * - **NEXT_LOCATION**
  *   Moves the turret to the next target angle for measurement,
  *   restarts the long calibration timeout, and returns to `LOCKING_TURRET`.
- * 
+ *
  * - **DONE**
  *   Turns off the motors as to be sure that in the case of the robot hanging during
  *   the calculation it won't become uncontrolled (should never happen) and transitions
- *   into `CALIBRATION_SUCCESS` 
- * 
+ *   into `CALIBRATION_SUCCESS`
+ *
  * - **CALIBRATION_FAIL**
  *   Calibration fail is called if the turret is unable to lock at a single position
  *   over the period of the `calibrationLongTimeout` to ensure the user can regain
- *   control. 
+ *   control.
  */
 template <uint32_t numTestPoints>
 void GravityAutotune<numTestPoints>::execute()
@@ -155,11 +155,11 @@ void GravityAutotune<numTestPoints>::execute()
             {
                 // Add to the running average of the motors value and angle measurements
                 const float motorValue =
-                static_cast<float>(config.turret->pitchMotor.getMotorOutput());
+                    static_cast<float>(config.turret->pitchMotor.getMotorOutput());
                 averagingTorques += (motorValue - averagingTorques) / (samplePointCount);
-                
+
                 const float angleValue =
-                config.turret->pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue();
+                    config.turret->pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue();
                 averagingAngles += (angleValue - averagingAngles) / samplePointCount;
 
                 samplePointCount++;
@@ -169,7 +169,7 @@ void GravityAutotune<numTestPoints>::execute()
                 // Store averaged values
                 measuredTorques[currentPointIndex] = averagingTorques;
                 measuredAngles[currentPointIndex] = averagingAngles;
-                
+
                 // Switch to next point and reset averaging
                 currentPointIndex++;
                 averagingTorques = 0;
@@ -178,7 +178,7 @@ void GravityAutotune<numTestPoints>::execute()
 
                 // Exit measuring when done taking samples
                 calibrationState = CalibrationState::NEXT_LOCATION;
-                
+
                 // Finished going through all points
                 if (currentPointIndex == points.size())
                 {
@@ -250,7 +250,9 @@ bool GravityAutotune<numTestPoints>::isFinished() const
 }
 
 template <uint32_t numTestPoints>
-std::array<float, 3> GravityAutotune<numTestPoints>::calculateCOM(std::array<float, numTestPoints> Angles, std::array<float, numTestPoints> Torques)
+std::array<float, 3> GravityAutotune<numTestPoints>::calculateCOM(
+    std::array<float, numTestPoints> Angles,
+    std::array<float, numTestPoints> Torques)
 {
     Eigen::MatrixXd X(numTestPoints, 2);
     Eigen::VectorXd Y(numTestPoints);
@@ -273,4 +275,4 @@ std::array<float, 3> GravityAutotune<numTestPoints>::calculateCOM(std::array<flo
 
 }  // namespace aruwsrc::control::autotune
 
-#endif  // GRAVITY_AUTOTUNE_IMPL
+#endif  // GRAVITY_AUTOTUNE_IMPL_HPP_
