@@ -65,10 +65,10 @@ void AutotuneMenu::draw()
             const float scalar = result[2];
 
             display.printf(
-                "Center of mass position:\n\tcgX: %.2f\n\tcgZ: %.2f\n",
+                "Center of mass position:\n\tcgX: %.2f mm\n\tcgZ: %.2f mm\n",
                 static_cast<double>(X),
                 static_cast<double>(Z));
-            display.printf("Gravity Compensation\n Scalar: - %.1f\n", static_cast<double>(scalar));
+            display.printf("Gravity Compensation\n Scalar: -%.1f\n", static_cast<double>(scalar));
         }
     }
 }

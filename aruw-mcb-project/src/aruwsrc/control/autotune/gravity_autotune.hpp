@@ -166,7 +166,7 @@ private:
     /**
      * Number of sample points per test point to average the torque measurement.
      */
-    static constexpr uint32_t NUM_SAMPLE_POINTS = 1000;
+    static constexpr uint32_t NUM_SAMPLE_POINTS = 2000;
 
     /**
      * Timeout that we set after initially starting the turret PID controller to allow any residual
