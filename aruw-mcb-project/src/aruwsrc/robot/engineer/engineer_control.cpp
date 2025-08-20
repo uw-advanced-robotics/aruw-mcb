@@ -254,37 +254,37 @@ WristSubsystem wristSubsystem(
     wristRightMotor,
     wristPitchEncoder,
     wristYawEncoder,
-    aruwsrc::engineer::WRIST_CONFIG);
+    WRIST_CONFIG);
 
 GantryLiftSubsystem gantryLiftSubsystem(
     drivers(),
     gantryLiftLeftMotor,
     gantryLiftRightMotor,
-    aruwsrc::engineer::GANTRY_LIFT_POS_CONFIG,
-    aruwsrc::engineer::GANTRY_LIFT_BALANCE_CONFIG,
+    GANTRY_LIFT_POS_CONFIG,
+    GANTRY_LIFT_BALANCE_CONFIG,
     gantryLiftTrigger,
     GANTRY_LIFT_LIMIT_CONFIG);
 
 GantryExtensionSubsystem gantryExtensionSubsystem(
     drivers(),
     gantryExtensionMotor,
-    aruwsrc::engineer::GANTRY_EXTENSION_PID_CONFIG,
+    GANTRY_EXTENSION_PID_CONFIG,
     gantryExtensionTrigger,
     GANTRY_EXTENSION_LIMIT_CONFIG);
 
 JointSubsystem wristRollSubsystem(
     drivers(),
     wristRollMotor,
-    aruwsrc::engineer::WRIST_ROLL_PID_CONFIG);
+    WRIST_ROLL_PID_CONFIG);
 
-aruwsrc::engineer::DigitalOutSubsystem suckSubsystem(
+DigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
     true,
     true);
 
-aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
+DigitalOutSubsystem releaseSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Z,
@@ -302,7 +302,7 @@ SlidersIndicator slidersIndicator(
     gantryExtensionSubsystem,
     cubeLift,
     wristSubsystem,
-    aruwsrc::engineer::WRIST_CONFIG);
+    WRIST_CONFIG);
 
 std::vector<HudIndicator *> hudIndicators = {&slidersIndicator};
 
@@ -347,37 +347,37 @@ WristControllerCommand wristControllerCommand(
     wristRollSubsystem,
     wristSubsystem,
     &drivers()->controlOperatorInterface,
-    aruwsrc::engineer::WRIST_ROLL_SCALING_FACTOR,
-    aruwsrc::engineer::WRIST_PITCH_SCALING_FACTOR,
-    aruwsrc::engineer::WRIST_YAW_SCALING_FACTOR);
+    WRIST_ROLL_SCALING_FACTOR,
+    WRIST_PITCH_SCALING_FACTOR,
+    WRIST_YAW_SCALING_FACTOR);
 
 // wrist fold in commands are not fully tuned yet
 WristSetpointsCommand wristFoldInCommand(
     wristSubsystem,
-    {aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
-     aruwsrc::engineer::WRIST_TOP_SETPOINT,
-     aruwsrc::engineer::WRIST_IN_SETPOINT});
+    {WRIST_BOTTOM_SETPOINT,
+     WRIST_TOP_SETPOINT,
+     WRIST_IN_SETPOINT});
 
 WristSetpointsCommand wristFoldOutCommand(
     wristSubsystem,
-    {aruwsrc::engineer::WRIST_TOP_SETPOINT,
-     aruwsrc::engineer::WRIST_BOTTOM_SETPOINT,
-     aruwsrc::engineer::WRIST_OUT_SETPOINT});
+    {WRIST_TOP_SETPOINT,
+     WRIST_BOTTOM_SETPOINT,
+     WRIST_OUT_SETPOINT});
 
-aruwsrc::engineer::DigitalOutCommand suckOffCommand(suckSubsystem, false);
-aruwsrc::engineer::DigitalOutCommand suckOnCommand(suckSubsystem, true);
-aruwsrc::engineer::DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
-aruwsrc::engineer::DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
-aruwsrc::engineer::DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
+DigitalOutCommand suckOffCommand(suckSubsystem, false);
+DigitalOutCommand suckOnCommand(suckSubsystem, true);
+DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
+DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
+DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
 
 // commands here for sequences, but setpoints never tuned
-aruwsrc::engineer::SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
-aruwsrc::engineer::SetpointMovePositionCommand liftDownCommand(gantryLiftSubsystem, 2);
-aruwsrc::engineer::SetpointMovePositionCommand gantryRetractCommand(gantryExtensionSubsystem, 2);
-aruwsrc::engineer::SetpointMovePositionCommand gantryExtendCommand(gantryExtensionSubsystem, 2);
+SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
+SetpointMovePositionCommand liftDownCommand(gantryLiftSubsystem, 2);
+SetpointMovePositionCommand gantryRetractCommand(gantryExtensionSubsystem, 2);
+SetpointMovePositionCommand gantryExtendCommand(gantryExtensionSubsystem, 2);
 // never tested
-aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
-aruwsrc::engineer::CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
+CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
+CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
 SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
