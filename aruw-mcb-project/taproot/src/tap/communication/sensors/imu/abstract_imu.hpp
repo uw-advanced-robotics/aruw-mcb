@@ -105,6 +105,7 @@ public:
         tap::algorithms::transforms::Vector accG = {0, 0, 0};
         tap::algorithms::transforms::Vector gyroRadPerSec = {0, 0, 0};
 
+        uint8_t deviceId;
         float temperature = 0;
     };
 

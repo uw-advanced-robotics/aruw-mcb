@@ -128,7 +128,7 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_ENGINEER)
+#if defined(TARGET_ENGINEER) || defined(TARGET_BALSTD)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
@@ -185,7 +185,7 @@ static void initializeIo(Drivers *drivers)
     drivers->turretMCBCanCommBus1.init();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
+    defined(TARGET_ENGINEER) || defined(TARGET_BALSTD)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
@@ -232,7 +232,7 @@ static void updateIo(Drivers *drivers)
     drivers->mpu6500.read();
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
+    defined(TARGET_ENGINEER) || defined(TARGET_BALSTD)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
