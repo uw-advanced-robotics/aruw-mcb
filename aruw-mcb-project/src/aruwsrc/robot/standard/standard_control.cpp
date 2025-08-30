@@ -786,11 +786,14 @@ imu::ImuCalibrateCommand *getImuCalibrateCommand()
 {
     return &standard_control::imuCalibrateCommand;
 }
-autotune::GravityAutotuneBase *getGravityAutotuneCommand()
-{
-    return &standard_control::gravityAutotuneCommand;
-}
 
+aruwsrc::control::autotune::GravityAutotuneBase **getGravityAutotuneCommands()
+{
+    // Static array of pointers, terminated by nullptr
+    static aruwsrc::control::autotune::GravityAutotuneBase* commands[] = { &standard_control::gravityAutotuneCommand, nullptr };
+
+    return commands;
+}
 #endif
 
 #endif

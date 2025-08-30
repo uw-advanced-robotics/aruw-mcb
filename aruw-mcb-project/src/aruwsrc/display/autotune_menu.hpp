@@ -21,11 +21,15 @@
 #define AUTOTUNE_MENU_HPP_
 
 #include <modm/io/iostream.hpp>
+#include <modm/ui/menu/menu_entry_callback.hpp>
 
 #include "tap/display/dummy_allocator.hpp"
+#include "tap/display/vertical_scroll_logic_handler.hpp"
 
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
-#include "modm/ui/menu/abstract_menu.hpp"
+#include "modm/ui/menu/standard_menu.hpp"
+
+#include "gravity_autotune_menu.hpp"
 
 namespace aruwsrc
 {
@@ -34,16 +38,12 @@ class Drivers;
 
 /**
  * Weak function that you should define in `*_control.cpp` if an `gravityAutotuneCommand` exists.
+ * Must be a null-terminated array of pointers to `GravityAutotuneBase` objects.
  */
-aruwsrc::control::autotune::GravityAutotuneBase *getGravityAutotuneCommand();
-
+aruwsrc::control::autotune::GravityAutotuneBase **getGravityAutotuneCommand();
 namespace aruwsrc::display
 {
-/**
- * Menu that allows the user to schedule an `gravityAutotuneCommand` in the `CommandScheduler`. Also
- * displays the current calibration state of the `gravityAutotuneCommand`.
- */
-class AutotuneMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class AutotuneMenu : public modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>
 {
 public:
     /**
@@ -51,36 +51,28 @@ public:
      * @param[in] drivers A pointer to the global drivers object.
      */
     AutotuneMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
         tap::Drivers *drivers);
 
-    void draw() override;
-
-    void update() override;
-
-    void shortButtonPress(modm::MenuButtons::Button button) override;
-
-    bool hasChanged() override;
+    virtual ~AutotuneMenu() = default;
+    /**
+     * Adds entries to the menu to the necessary submenus.
+     */
+    void initialize();
 
     static const char *getMenuName() { return "Autotune Calibrate Menu"; }
+
+    void openGravityAutotuneMenu0();
+    void openGravityAutotuneMenu1();
 
 private:
     static constexpr int AUTOTUNE_MENU_ID = 15;
 
-    static constexpr const char *CALI_STATE_TO_CHAR_STR[] = {
-        "WAITING_FOR_SYSTEMS_ONLINE",
-        "LOCKING_TURRET",
-        "MEASURING_TORQUE",
-        "NEXT_LOCATION",
-        "CALIBRATION_SUCCESS",
-        "CALIBRATION_FAIL",
-        "DONE"};
-
     tap::Drivers *drivers;
+    std::vector<GravityAutotuneMenu> gravityMenus;  // holds all submenus
+    std::vector<std::size_t> submenuIndices;        // parallel array
+    void openSubMenu(size_t index);
 
-    aruwsrc::control::autotune::GravityAutotuneBase::CalibrationState currCalibrationState =
-        aruwsrc::control::autotune::GravityAutotuneBase::CalibrationState::
-            WAITING_FOR_SYSTEMS_ONLINE;
 };
 }  // namespace aruwsrc::display
 

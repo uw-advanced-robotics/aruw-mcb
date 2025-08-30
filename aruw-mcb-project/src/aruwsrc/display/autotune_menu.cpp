@@ -23,103 +23,51 @@
 
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 
-/**
- * Default function if getImuCalibrateCommand not defined by the user.
- */
-modm_weak aruwsrc::control::autotune::GravityAutotuneBase *getGravityAutotuneCommand()
+// weak function defined if not specifed by user
+modm_weak aruwsrc::control::autotune::GravityAutotuneBase **getGravityAutotuneCommand()
 {
     return nullptr;
 }
-
 namespace aruwsrc::display
 {
 AutotuneMenu::AutotuneMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
     tap::Drivers *drivers)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, AUTOTUNE_MENU_ID),
+    : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(vs, AUTOTUNE_MENU_ID),
       drivers(drivers)
 {
-}
-
-void AutotuneMenu::draw()
-{
-    modm::GraphicDisplay &display = getViewStack()->getDisplay();
-    display.clear();
-    display.setCursor(0, 2);
-    display << getMenuName() << modm::endl;
-
-    if (getGravityAutotuneCommand() == nullptr)
+    // Currently needs to have unfortunate boilerplate to add a higher amount of submenus, 
+    // supports two gravity autotune commands, to add more, just copy and paste the pattern below
+    for (auto cmdPtr = getGravityAutotuneCommand(); cmdPtr && *cmdPtr; ++cmdPtr)
     {
-        display << "No gravity calibrate command";
-    }
-    else
-    {
-        display << CALI_STATE_TO_CHAR_STR[static_cast<int>(currCalibrationState)] << modm::endl;
+        auto &menu = gravityMenus.emplace_back(vs, drivers, *cmdPtr);
+        const std::size_t idx = gravityMenus.size() - 1;
 
-        if (currCalibrationState ==
-            aruwsrc::control::autotune::GravityAutotuneBase::CalibrationState::CALIBRATION_SUCCESS)
+        switch (idx)
         {
-            const auto result = getGravityAutotuneCommand()->getCalibrationResult();
-            const float X = result[0];
-            const float Z = result[1];
-            const float scalar = result[2];
-
-            display.printf(
-                "Center of mass position:\n\tcgX: %.2f mm\n\tcgZ: %.2f mm\n",
-                static_cast<double>(X),
-                static_cast<double>(Z));
-            display.printf("Gravity Compensation\n Scalar: -%.1f\n", static_cast<double>(scalar));
+            case 0:
+                addEntry(
+                    menu.getMenuName(),
+                    modm::MenuEntryCallback<tap::display::DummyAllocator<modm::IAbstractView>>(
+                        this,
+                        &AutotuneMenu::openGravityAutotuneMenu0));
+                break;
+            case 1:
+                addEntry(
+                    menu.getMenuName(),
+                    modm::MenuEntryCallback<tap::display::DummyAllocator<modm::IAbstractView>>(
+                        this,
+                        &AutotuneMenu::openGravityAutotuneMenu1));
+                break;
         }
     }
 }
 
-void AutotuneMenu::update() {}
+void AutotuneMenu::initialize() { setTitle(getMenuName()); }
 
-void AutotuneMenu::shortButtonPress(modm::MenuButtons::Button button)
-{
-    aruwsrc::control::autotune::GravityAutotuneBase *gravityAutotuneCommand =
-        getGravityAutotuneCommand();
+void AutotuneMenu::openSubMenu(size_t index) { getViewStack()->push(&gravityMenus[index]); }
 
-    switch (button)
-    {
-        case modm::MenuButtons::LEFT:
-            this->remove();
-            if (gravityAutotuneCommand != nullptr)
-            {
-                drivers->commandScheduler.removeCommand(gravityAutotuneCommand, true);
-            }
-            break;
-        case modm::MenuButtons::OK:
-            if (gravityAutotuneCommand != nullptr)
-            {
-                drivers->commandScheduler.addCommand(gravityAutotuneCommand);
-            }
-            break;
-        case modm::MenuButtons::RIGHT:
-        case modm::MenuButtons::DOWN:
-        case modm::MenuButtons::UP:
-        default:
-            break;
-    }
-}
+void AutotuneMenu::openGravityAutotuneMenu0() { openSubMenu(0); }
+void AutotuneMenu::openGravityAutotuneMenu1() { openSubMenu(1); }
 
-bool AutotuneMenu::hasChanged()
-{
-    using namespace aruwsrc::control::autotune;
-
-    GravityAutotuneBase *gravityAutotuneCommand = getGravityAutotuneCommand();
-
-    if (gravityAutotuneCommand == nullptr)
-    {
-        return false;
-    }
-
-    auto newCalibrationState = gravityAutotuneCommand->getCalibrationState();
-    if (newCalibrationState != currCalibrationState)
-    {
-        currCalibrationState = newCalibrationState;
-        return true;
-    }
-    return false;
-}
 }  // namespace aruwsrc::display
