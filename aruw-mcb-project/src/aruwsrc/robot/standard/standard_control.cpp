@@ -102,6 +102,7 @@
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/wheel_kf_odometry_2d_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -232,13 +233,51 @@ tap::encoder::CanEncoder perpendicularOmni(
     tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2);
 
+const tap::motor::DjiMotor* chassisMotors[4] = {
+    &leftFrontChassisMotor,
+    &leftBackChassisMotor,
+    &rightFrontChassisMotor,
+    &rightBackChassisMotor
+};
+
+
+FourWheelKFOdometry::ChassisWheelConfig LEFT_FRONT_WHEEL_CONFIG = {
+    .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
+    .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+    .wheelOrientationToForwardRadians = M_PI_4
+};
+FourWheelKFOdometry::ChassisWheelConfig LEFT_BACK_WHEEL_CONFIG = {
+    .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
+    .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+    .wheelOrientationToForwardRadians = -M_PI_4
+};
+
+FourWheelKFOdometry::ChassisWheelConfig RIGHT_FRONT_WHEEL_CONFIG = {
+    .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
+    .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+    .wheelOrientationToForwardRadians = -M_PI_4
+};
+
+FourWheelKFOdometry::ChassisWheelConfig RIGHT_BACK_WHEEL_CONFIG = {
+    .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
+    .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+    .wheelOrientationToForwardRadians = M_PI_4
+};
+
+const FourWheelKFOdometry::ChassisWheelConfig *chassisWheelConfigs[4] = {
+    &LEFT_FRONT_WHEEL_CONFIG,
+    &LEFT_BACK_WHEEL_CONFIG,
+    &RIGHT_FRONT_WHEEL_CONFIG,
+    &RIGHT_BACK_WHEEL_CONFIG
+};
+
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
-aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
-    drivers(),
-    chassis,
-    yawObserver,
-    // drivers()->ism330,
-    drivers()->mpu6500,
+
+aruwsrc::algorithms::odometry::WheelKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    chassisMotors,
+    chassisWheelConfigs,
+    turret,
     modm::Vector2f(
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
