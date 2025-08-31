@@ -45,7 +45,7 @@ MainMenu::MainMenu(
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
-      autotuneMenu(stack, drivers),
+      autotuneMenu(stack, drivers, ENTRIES),
       cvMenu(stack, drivers, visionCoprocessor),
       errorMenu(stack),
       hardwareTestMenu(stack, drivers),
@@ -171,7 +171,7 @@ void MainMenu::addImuCalibrateMenuCallback()
 
 void MainMenu::addAutotuneMenuCallback()
 {
-    AutotuneMenu* atm = new (&autotuneMenu) AutotuneMenu(getViewStack(), drivers);
+    AutotuneMenu* atm = new (&autotuneMenu) AutotuneMenu(getViewStack(), drivers, ENTRIES);
     getViewStack()->push(atm);
 }
 

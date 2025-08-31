@@ -791,7 +791,6 @@ aruwsrc::control::autotune::GravityAutotuneBase **getGravityAutotuneCommands()
 {
     // Static array of pointers, terminated by nullptr
     static aruwsrc::control::autotune::GravityAutotuneBase* commands[] = { &standard_control::gravityAutotuneCommand, nullptr };
-
     return commands;
 }
 #endif

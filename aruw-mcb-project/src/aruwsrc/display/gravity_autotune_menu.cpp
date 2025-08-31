@@ -34,7 +34,7 @@ GravityAutotuneMenu::GravityAutotuneMenu(
           vs,
           GRAVITY_AUTOTUNE_MENU_ID),
       drivers(drivers),
-      gravityAutotuneCommand(gravityAutotuneCommand)
+      gravityAutotuneCommand(GravityAutotune)
 {
 }
 

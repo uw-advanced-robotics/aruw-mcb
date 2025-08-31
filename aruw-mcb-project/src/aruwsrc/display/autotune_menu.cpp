@@ -24,50 +24,86 @@
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 
 // weak function defined if not specifed by user
-modm_weak aruwsrc::control::autotune::GravityAutotuneBase **getGravityAutotuneCommand()
+modm_weak aruwsrc::control::autotune::GravityAutotuneBase** getGravityAutotuneCommands()
 {
     return nullptr;
 }
 namespace aruwsrc::display
 {
 AutotuneMenu::AutotuneMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
-    tap::Drivers *drivers)
-    : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(vs, AUTOTUNE_MENU_ID),
-      drivers(drivers)
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+    tap::Drivers* drivers,
+    int entriesToDisplay)
+    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, 1),
+      drivers(drivers),
+      verticalScroll(drivers, 0, entriesToDisplay)
 {
-    // Currently needs to have unfortunate boilerplate to add a higher amount of submenus, 
-    // supports two gravity autotune commands, to add more, just copy and paste the pattern below
-    for (auto cmdPtr = getGravityAutotuneCommand(); cmdPtr && *cmdPtr; ++cmdPtr)
-    {
-        auto &menu = gravityMenus.emplace_back(vs, drivers, *cmdPtr);
-        const std::size_t idx = gravityMenus.size() - 1;
+    verticalScroll.setSize(getCommandNumber());
+}
 
-        switch (idx)
-        {
-            case 0:
-                addEntry(
-                    menu.getMenuName(),
-                    modm::MenuEntryCallback<tap::display::DummyAllocator<modm::IAbstractView>>(
-                        this,
-                        &AutotuneMenu::openGravityAutotuneMenu0));
-                break;
-            case 1:
-                addEntry(
-                    menu.getMenuName(),
-                    modm::MenuEntryCallback<tap::display::DummyAllocator<modm::IAbstractView>>(
-                        this,
-                        &AutotuneMenu::openGravityAutotuneMenu1));
-                break;
-        }
+void AutotuneMenu::draw()
+{
+    modm::GraphicDisplay& display = getViewStack()->getDisplay();
+    display.clear();
+    display.setCursor(0, 2);
+    display << getMenuName() << modm::endl;
+    if (getCommandNumber() == 0)
+    {
+        display << "No autotune commands";
+        return;
+    }
+
+    auto commandMinIndex = verticalScroll.getSmallestIndexDisplayed();
+    auto commandMaxIndex = std::min(
+        getCommandNumber() - 1,
+        static_cast<int>(verticalScroll.getLargestIndexDisplayed()));
+
+    for (int8_t commandId = commandMinIndex; commandId <= commandMaxIndex; ++commandId)
+    {
+        display << (verticalScroll.getCursorIndex() == commandId ? "> " : "  ");
+        display << "Gravity Autotune Command " << (commandId + 1) << modm::endl;
     }
 }
 
-void AutotuneMenu::initialize() { setTitle(getMenuName()); }
+void AutotuneMenu::update() {}
 
-void AutotuneMenu::openSubMenu(size_t index) { getViewStack()->push(&gravityMenus[index]); }
+bool AutotuneMenu::hasChanged() { return verticalScroll.acknowledgeCursorChanged(); }
 
-void AutotuneMenu::openGravityAutotuneMenu0() { openSubMenu(0); }
-void AutotuneMenu::openGravityAutotuneMenu1() { openSubMenu(1); }
+void AutotuneMenu::shortButtonPress(modm::MenuButtons::Button button)
+{
+    switch (button)
+    {
+        case modm::MenuButtons::LEFT:
+            this->remove();
+            break;
+        case modm::MenuButtons::RIGHT:
+        {
+            // If there are no commands, do nothing.
+            if (getCommandNumber() == 0)
+            {
+                break;
+            }
+            
+            int8_t idx = verticalScroll.getCursorIndex();
+            // Index is selecting a gravity autotune command, so push the corresponding menu.
+            if (idx < getGravityAutotuneCommandNumber())
+            {
+                this->getViewStack()->push(new GravityAutotuneMenu(
+                    getViewStack(),
+                    drivers,
+                    getGravityAutotuneCommands()[idx]));
+            }
+            break;
+        }
+        case modm::MenuButtons::DOWN:
+            verticalScroll.onShortButtonPress(modm::MenuButtons::DOWN);
+            break;
+        case modm::MenuButtons::UP:
+            verticalScroll.onShortButtonPress(modm::MenuButtons::UP);
+            break;
+        case modm::MenuButtons::OK:
+            break;
+    }
+}
 
 }  // namespace aruwsrc::display

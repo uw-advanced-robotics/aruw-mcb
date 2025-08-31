@@ -27,7 +27,7 @@
 #include "tap/display/vertical_scroll_logic_handler.hpp"
 
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
-#include "modm/ui/menu/standard_menu.hpp"
+#include "modm/ui/menu/abstract_menu.hpp"
 
 #include "gravity_autotune_menu.hpp"
 
@@ -40,10 +40,10 @@ class Drivers;
  * Weak function that you should define in `*_control.cpp` if an `gravityAutotuneCommand` exists.
  * Must be a null-terminated array of pointers to `GravityAutotuneBase` objects.
  */
-aruwsrc::control::autotune::GravityAutotuneBase **getGravityAutotuneCommand();
+aruwsrc::control::autotune::GravityAutotuneBase **getGravityAutotuneCommands();
 namespace aruwsrc::display
 {
-class AutotuneMenu : public modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>
+class AutotuneMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>
 {
 public:
     /**
@@ -52,27 +52,49 @@ public:
      */
     AutotuneMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
-        tap::Drivers *drivers);
+        tap::Drivers *drivers,
+        int entriesToDisplay);
 
-    virtual ~AutotuneMenu() = default;
     /**
      * Adds entries to the menu to the necessary submenus.
      */
-    void initialize();
+
+    void draw() override;
+
+    void update() override;
+
+    bool hasChanged() override;
+
+    void shortButtonPress(modm::MenuButtons::Button button) override;
 
     static const char *getMenuName() { return "Autotune Calibrate Menu"; }
 
-    void openGravityAutotuneMenu0();
-    void openGravityAutotuneMenu1();
-
 private:
     static constexpr int AUTOTUNE_MENU_ID = 15;
+    static constexpr int DISPLAY_MAX_ENTRIES = 7;
 
     tap::Drivers *drivers;
-    std::vector<GravityAutotuneMenu> gravityMenus;  // holds all submenus
-    std::vector<std::size_t> submenuIndices;        // parallel array
-    void openSubMenu(size_t index);
 
+    tap::display::VerticalScrollLogicHandler verticalScroll;
+
+    uint8_t getCommandNumber() const { return getGravityAutotuneCommandNumber(); }
+
+    uint8_t getGravityAutotuneCommandNumber() const
+    {
+        if (getGravityAutotuneCommands() == nullptr)
+        {
+            return 0;
+        }
+        else
+        {
+            uint8_t count = 0;
+            while (getGravityAutotuneCommands()[count] != nullptr)
+            {
+                count++;
+            }
+            return count;
+        }
+    }
 };
 }  // namespace aruwsrc::display
 

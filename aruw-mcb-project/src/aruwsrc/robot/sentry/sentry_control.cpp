@@ -40,6 +40,7 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
@@ -592,6 +593,22 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
+autotune::GravityAutotune<9> gravityAutotuneCommandLeft(
+    drivers(),
+    {&turretLeft, &turretLeftChassisControllers.pitchController, 1.646f, 1.3f / 16384},
+    &chassis,
+    {-M_PI / 12, -M_PI / 14, -M_PI / 16, -M_PI / 32, 0, M_PI / 32, M_PI / 16, M_PI / 14, M_PI / 12},
+    modm::toRadian(1e-4f),
+    modm::toRadian(2.5f));
+
+autotune::GravityAutotune<9> gravityAutotuneCommandRight(
+    drivers(),
+    {&turretRight, &turretRightChassisControllers.pitchController, 1.646f, 1.3f / 16384},
+    &chassis,
+    {-M_PI / 12, -M_PI / 14, -M_PI / 16, -M_PI / 32, 0, M_PI / 32, M_PI / 16, M_PI / 14, M_PI / 12},
+    modm::toRadian(1e-4f),
+    modm::toRadian(2.5f));
+
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
     turretLeftWorldControllers.yawController,
@@ -985,8 +1002,19 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::registerSentryIoMappings(drivers);
 }
 }  // namespace aruwsrc::sentry
-// #ifndef PLATFORM_HOSTED
+
+#ifndef PLATFORM_HOSTED
+aruwsrc::control::autotune::GravityAutotuneBase **getGravityAutotuneCommands()
+{
+    // Static array of pointers, terminated by nullptr
+    static aruwsrc::control::autotune::GravityAutotuneBase *commands[] = {
+        &sentry_control::gravityAutotuneCommandLeft,
+        &sentry_control::gravityAutotuneCommandRight,
+        nullptr};
+    return commands;
+}
 // imu::ImuCalibrateCommand *getImuCalibrateCommand() { return
 // &sentry_control::imuCalibrateCommand; } #endif
+#endif
 
 #endif
