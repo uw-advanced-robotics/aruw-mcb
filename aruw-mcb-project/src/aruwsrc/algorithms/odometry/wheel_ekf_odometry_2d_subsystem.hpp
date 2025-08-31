@@ -59,7 +59,6 @@ public:
     /**
      * @param[in] drivers pointer to aruwsrc drivers
      * @param[in] chassisMotors array of 4 chassis motor pointers
-     * @param[in] chassisWheelConfigs array of 4 wheel configuration pointers
      * @param[in] turret pointer to a TurretMotor object, @see OttoChassisWorldYawObserver for how
      * it is used
      * @param[in] initPos initial position of chassis on boot
@@ -67,7 +66,6 @@ public:
     WheelEKFOdometry2DSubsystem(
         tap::Drivers& drivers,
         const tap::motor::DjiMotor* chassisMotors[4],
-        const FourWheelEKFOdometry::ChassisWheelConfig* chassisWheelConfigs[4],
         const aruwsrc::control::turret::TurretSubsystem& turret,
         const modm::Vector2f initPos);
 

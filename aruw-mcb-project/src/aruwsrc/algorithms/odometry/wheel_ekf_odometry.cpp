@@ -29,7 +29,6 @@ namespace aruwsrc::algorithms::odometry
 
 FourWheelEKFOdometry::FourWheelEKFOdometry(
     const tap::motor::DjiMotor *chassisMotors[4],
-    const ChassisWheelConfig *chassisWheelConfigs[4],
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos)
@@ -47,10 +46,9 @@ FourWheelEKFOdometry::FourWheelEKFOdometry(
           CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
           MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT))
 {
-    // Copy motor and config pointers to member arrays
+    // Copy motor pointers to member array
     for (int i = 0; i < 4; i++) {
         this->chassisMotors[i] = chassisMotors[i];
-        this->chassisWheelConfigs[i] = chassisWheelConfigs[i];
     }
     reset();
 }
@@ -87,10 +85,10 @@ void FourWheelEKFOdometry::update()
     for (int i = 0; i < 4; i++)
     {
         motorVel = chassisMotors[i]->getEncoder()->getVelocity(); // rad/s
-        wheelLinearVel = motorVel * chassisWheelConfigs[i]->wheelRadius; // m/s
+        wheelLinearVel = (motorVel / WHEEL_CONFIGS[i].gearRatio) * WHEEL_CONFIGS[i].wheelRadius; // m/s
         
         // Calculate wheel velocity components in chassis frame based on wheel orientation
-        float wheelAngle = chassisWheelConfigs[i]->wheelOrientationToForwardRadians;
+        float wheelAngle = WHEEL_CONFIGS[i].wheelOrientationToForwardRadians;
         
         z[int(OdomInput::VEL_X_1) + i * 2] = wheelLinearVel * cos(wheelAngle);
         z[int(OdomInput::VEL_Y_1) + i * 2] = wheelLinearVel * sin(wheelAngle);
@@ -198,7 +196,7 @@ void FourWheelEKFOdometry::stateTransitionFunction(
     
     // Position: Enhanced kinematic model with velocity-dependent corrections
     // Include second-order effects for high-speed motion
-    float vel_correction_factor = 1.0f + 0.01f * vel_magnitude; // Small nonlinear term
+    float vel_correction_factor = 1.0f + VELOCITY_CORRECTION_COEFFICIENT * vel_magnitude;
     x_pred.data[int(OdomState::POS_X)] = x_prev.data[int(OdomState::POS_X)] + 
                                          vel_x * dt * vel_correction_factor + 
                                          0.5f * acc_x * dt * dt;
@@ -209,16 +207,16 @@ void FourWheelEKFOdometry::stateTransitionFunction(
     
     // Velocity: Enhanced model with acceleration constraints
     // Limit unrealistic acceleration changes
-    float max_acc_change = 15.0f; // m/s² per second (reasonable for robot dynamics)
     float acc_change_x = acc_x * dt;
     float acc_change_y = acc_y * dt;
     
     // Apply acceleration limits (nonlinear constraint)
-    if (std::abs(acc_change_x) > max_acc_change * dt) {
-        acc_change_x = std::copysign(max_acc_change * dt, acc_change_x);
+    float max_acc_change_dt = MAX_ACCELERATION_CHANGE_RATE * dt;
+    if (std::abs(acc_change_x) > max_acc_change_dt) {
+        acc_change_x = std::copysign(max_acc_change_dt, acc_change_x);
     }
-    if (std::abs(acc_change_y) > max_acc_change * dt) {
-        acc_change_y = std::copysign(max_acc_change * dt, acc_change_y);
+    if (std::abs(acc_change_y) > max_acc_change_dt) {
+        acc_change_y = std::copysign(max_acc_change_dt, acc_change_y);
     }
     
     x_pred.data[int(OdomState::VEL_X)] = vel_x + acc_change_x;
@@ -226,24 +224,24 @@ void FourWheelEKFOdometry::stateTransitionFunction(
     
     // Acceleration: Nonlinear decay model based on velocity
     // Higher velocities tend to have more drag/resistance
-    float drag_factor = 1.0f - 0.02f * vel_magnitude; // Velocity-dependent drag
-    drag_factor = std::max(0.85f, std::min(1.0f, drag_factor)); // Clamp to reasonable range
+    float drag_factor = 1.0f - DRAG_COEFFICIENT * vel_magnitude;
+    drag_factor = std::max(MIN_DRAG_FACTOR, std::min(MAX_DRAG_FACTOR, drag_factor));
     
     x_pred.data[int(OdomState::ACC_X)] = acc_x * drag_factor;
     x_pred.data[int(OdomState::ACC_Y)] = acc_y * drag_factor;
     
-    // Bias: Enhanced random walk with temperature/aging effects
-    // In a real implementation, this could incorporate temperature sensors
-    float aging_factor = 0.999f; // Very slow bias drift
-    x_pred.data[int(OdomState::BIAS_ACC_X)] = x_prev.data[int(OdomState::BIAS_ACC_X)] * aging_factor;
-    x_pred.data[int(OdomState::BIAS_ACC_Y)] = x_prev.data[int(OdomState::BIAS_ACC_Y)] * aging_factor;
+    // Bias: Random walk with temperature/aging effects
+    // In a real implementation, this could incorporate temperature sensors from the IMU
+    // TODO: Tune based on IMU expected drift following calibration
+    x_pred.data[int(OdomState::BIAS_ACC_X)] = x_prev.data[int(OdomState::BIAS_ACC_X)] * IMU_BIAS_AGING_FACTOR;
+    x_pred.data[int(OdomState::BIAS_ACC_Y)] = x_prev.data[int(OdomState::BIAS_ACC_Y)] * IMU_BIAS_AGING_FACTOR;
 }
 
 void FourWheelEKFOdometry::observationFunction(
     const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x,
     ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector& h_x)
 {
-    // Enhanced nonlinear observation model for X-drive kinematics
+    // Nonlinear observation model for X-drive kinematics
     
     float chassis_vel_x = x.data[int(OdomState::VEL_X)];
     float chassis_vel_y = x.data[int(OdomState::VEL_Y)];
@@ -252,29 +250,27 @@ void FourWheelEKFOdometry::observationFunction(
     // Nonlinear scaling factor based on velocity magnitude
     // At low speeds, wheel slippage becomes more significant
     float slip_factor = 1.0f;
-    if (vel_magnitude > 0.1f) { // Above minimum threshold
-        slip_factor = 1.0f + 0.05f * std::tanh(vel_magnitude - 2.0f); // Saturating nonlinearity
+    if (vel_magnitude > SLIP_VELOCITY_THRESHOLD) {
+        slip_factor = 1.0f + SLIP_SCALING_FACTOR * std::tanh(vel_magnitude - SLIP_TANH_OFFSET);
     } else {
-        slip_factor = 0.95f; // Reduced effectiveness at very low speeds
+        slip_factor = LOW_VELOCITY_SLIP_FACTOR;
     }
     
-    // X-drive wheel velocity mapping with nonlinear corrections
+    // X-drive wheel velocity mapping with nonlinear corrections using wheel configurations
     // Each wheel sees the chassis velocity transformed by its orientation and position
-    // Wheel 1 (LF): +45° orientation
-    h_x.data[int(OdomInput::VEL_X_1)] = (chassis_vel_x * 0.707f - chassis_vel_y * 0.707f) * slip_factor;
-    h_x.data[int(OdomInput::VEL_Y_1)] = (chassis_vel_x * 0.707f + chassis_vel_y * 0.707f) * slip_factor;
-    
-    // Wheel 2 (LB): -45° orientation  
-    h_x.data[int(OdomInput::VEL_X_2)] = (chassis_vel_x * 0.707f + chassis_vel_y * 0.707f) * slip_factor;
-    h_x.data[int(OdomInput::VEL_Y_2)] = (-chassis_vel_x * 0.707f + chassis_vel_y * 0.707f) * slip_factor;
-    
-    // Wheel 3 (RF): -45° orientation
-    h_x.data[int(OdomInput::VEL_X_3)] = (-chassis_vel_x * 0.707f + chassis_vel_y * 0.707f) * slip_factor;
-    h_x.data[int(OdomInput::VEL_Y_3)] = (-chassis_vel_x * 0.707f - chassis_vel_y * 0.707f) * slip_factor;
-    
-    // Wheel 4 (RB): +45° orientation
-    h_x.data[int(OdomInput::VEL_X_4)] = (-chassis_vel_x * 0.707f - chassis_vel_y * 0.707f) * slip_factor;
-    h_x.data[int(OdomInput::VEL_Y_4)] = (chassis_vel_x * 0.707f - chassis_vel_y * 0.707f) * slip_factor;
+    for (int i = 0; i < 4; i++) {
+        float wheel_angle = WHEEL_CONFIGS[i].wheelOrientationToForwardRadians;
+        float cos_angle = std::cos(wheel_angle);
+        float sin_angle = std::sin(wheel_angle);
+        
+        // Apply per-wheel slip and friction coefficients
+        float wheel_slip_factor = slip_factor * WHEEL_CONFIGS[i].slipCoefficient;
+        float wheel_friction_factor = WHEEL_CONFIGS[i].frictionCoefficient;
+        
+        // Transform chassis velocity to wheel velocity components
+        h_x.data[int(OdomInput::VEL_X_1) + i * 2] = (chassis_vel_x * cos_angle + chassis_vel_y * sin_angle) * wheel_slip_factor * wheel_friction_factor;
+        h_x.data[int(OdomInput::VEL_Y_1) + i * 2] = (-chassis_vel_x * sin_angle + chassis_vel_y * cos_angle) * wheel_slip_factor * wheel_friction_factor;
+    }
     
     // IMU acceleration measurements with nonlinear bias correction
     // Bias correction depends on acceleration magnitude (sensor nonlinearity)
@@ -284,7 +280,7 @@ void FourWheelEKFOdometry::observationFunction(
     float bias_y = x.data[int(OdomState::BIAS_ACC_Y)];
     
     float acc_magnitude = std::sqrt(acc_x * acc_x + acc_y * acc_y);
-    float bias_scaling = 1.0f + 0.1f * acc_magnitude; // Bias becomes more significant at high accelerations
+    float bias_scaling = 1.0f + BIAS_ACCELERATION_SCALING * acc_magnitude;
     
     h_x.data[int(OdomInput::ACC_X)] = acc_x + bias_x * bias_scaling;
     h_x.data[int(OdomInput::ACC_Y)] = acc_y + bias_y * bias_scaling;
@@ -306,7 +302,7 @@ void FourWheelEKFOdometry::stateJacobianFunction(
     float vel_x = x.data[int(OdomState::VEL_X)];
     float vel_y = x.data[int(OdomState::VEL_Y)];
     float vel_magnitude = std::sqrt(vel_x * vel_x + vel_y * vel_y);
-    float vel_correction_factor = 1.0f + 0.01f * vel_magnitude;
+    float vel_correction_factor = 1.0f + VELOCITY_CORRECTION_COEFFICIENT * vel_magnitude;
     
     // Position derivatives (now velocity-dependent due to correction factor)
     F.data[int(OdomState::POS_X) * int(OdomState::NUM_STATES) + int(OdomState::POS_X)] = 1.0f;
@@ -315,8 +311,8 @@ void FourWheelEKFOdometry::stateJacobianFunction(
     
     // Nonlinear correction term: ∂(vel_x * dt * correction)/∂vel_x and ∂/∂vel_y
     if (vel_magnitude > 1e-6f) {
-        float correction_derivative_x = dt * (0.01f * vel_x / vel_magnitude);
-        float correction_derivative_y = dt * (0.01f * vel_y / vel_magnitude);
+        float correction_derivative_x = dt * (VELOCITY_CORRECTION_COEFFICIENT * vel_x / vel_magnitude);
+        float correction_derivative_y = dt * (VELOCITY_CORRECTION_COEFFICIENT * vel_y / vel_magnitude);
         F.data[int(OdomState::POS_X) * int(OdomState::NUM_STATES) + int(OdomState::VEL_X)] += correction_derivative_x * vel_x;
         F.data[int(OdomState::POS_X) * int(OdomState::NUM_STATES) + int(OdomState::VEL_Y)] = correction_derivative_y * vel_x;
     }
@@ -326,8 +322,8 @@ void FourWheelEKFOdometry::stateJacobianFunction(
     F.data[int(OdomState::POS_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] = 0.5f * dt * dt;
     
     if (vel_magnitude > 1e-6f) {
-        float correction_derivative_x = dt * (0.01f * vel_x / vel_magnitude);
-        float correction_derivative_y = dt * (0.01f * vel_y / vel_magnitude);
+        float correction_derivative_x = dt * (VELOCITY_CORRECTION_COEFFICIENT * vel_x / vel_magnitude);
+        float correction_derivative_y = dt * (VELOCITY_CORRECTION_COEFFICIENT * vel_y / vel_magnitude);
         F.data[int(OdomState::POS_Y) * int(OdomState::NUM_STATES) + int(OdomState::VEL_X)] = correction_derivative_x * vel_y;
         F.data[int(OdomState::POS_Y) * int(OdomState::NUM_STATES) + int(OdomState::VEL_Y)] += correction_derivative_y * vel_y;
     }
@@ -340,16 +336,16 @@ void FourWheelEKFOdometry::stateJacobianFunction(
     F.data[int(OdomState::VEL_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] = dt;
     
     // Acceleration derivatives (velocity-dependent drag)
-    float drag_factor = 1.0f - 0.02f * vel_magnitude;
-    drag_factor = std::max(0.85f, std::min(1.0f, drag_factor));
+    float drag_factor = 1.0f - DRAG_COEFFICIENT * vel_magnitude;
+    drag_factor = std::max(MIN_DRAG_FACTOR, std::min(MAX_DRAG_FACTOR, drag_factor));
     
     F.data[int(OdomState::ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] = drag_factor;
     F.data[int(OdomState::ACC_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] = drag_factor;
     
     // Drag derivatives with respect to velocity
     if (vel_magnitude > 1e-6f) {
-        float drag_derivative_x = -0.02f * vel_x / vel_magnitude;
-        float drag_derivative_y = -0.02f * vel_y / vel_magnitude;
+        float drag_derivative_x = -DRAG_COEFFICIENT * vel_x / vel_magnitude;
+        float drag_derivative_y = -DRAG_COEFFICIENT * vel_y / vel_magnitude;
         float acc_x = x.data[int(OdomState::ACC_X)];
         float acc_y = x.data[int(OdomState::ACC_Y)];
         
@@ -360,9 +356,8 @@ void FourWheelEKFOdometry::stateJacobianFunction(
     }
     
     // Bias derivatives (aging factor)
-    float aging_factor = 0.999f;
-    F.data[int(OdomState::BIAS_ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::BIAS_ACC_X)] = aging_factor;
-    F.data[int(OdomState::BIAS_ACC_Y) * int(OdomState::NUM_STATES) + int(OdomState::BIAS_ACC_Y)] = aging_factor;
+    F.data[int(OdomState::BIAS_ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::BIAS_ACC_X)] = IMU_BIAS_AGING_FACTOR;
+    F.data[int(OdomState::BIAS_ACC_Y) * int(OdomState::NUM_STATES) + int(OdomState::BIAS_ACC_Y)] = IMU_BIAS_AGING_FACTOR;
 }
 
 void FourWheelEKFOdometry::observationJacobianFunction(
@@ -385,36 +380,53 @@ void FourWheelEKFOdometry::observationJacobianFunction(
     float slip_factor = 1.0f;
     float slip_derivative_x = 0.0f, slip_derivative_y = 0.0f;
     
-    if (vel_magnitude > 0.1f) {
-        float tanh_arg = vel_magnitude - 2.0f;
+    if (vel_magnitude > SLIP_VELOCITY_THRESHOLD) {
+        float tanh_arg = vel_magnitude - SLIP_TANH_OFFSET;
         float tanh_val = std::tanh(tanh_arg);
         float sech_squared = 1.0f - tanh_val * tanh_val;
         
-        slip_factor = 1.0f + 0.05f * tanh_val;
+        slip_factor = 1.0f + SLIP_SCALING_FACTOR * tanh_val;
         
         if (vel_magnitude > 1e-6f) {
-            float slip_mag_derivative = 0.05f * sech_squared;
+            float slip_mag_derivative = SLIP_SCALING_FACTOR * sech_squared;
             slip_derivative_x = slip_mag_derivative * chassis_vel_x / vel_magnitude;
             slip_derivative_y = slip_mag_derivative * chassis_vel_y / vel_magnitude;
         }
     } else {
-        slip_factor = 0.95f;
+        slip_factor = LOW_VELOCITY_SLIP_FACTOR;
         // slip_derivatives remain 0 for low velocity region
     }
     
-    // X-drive wheel velocity Jacobians
-    // Wheel 1 (LF): h = (vx * 0.707 - vy * 0.707) * slip_factor
-    float base_coeff_1_x = 0.707f;
-    float base_coeff_1_y = -0.707f;
-    H.data[int(OdomInput::VEL_X_1) * int(OdomState::NUM_STATES) + int(OdomState::VEL_X)] = 
-        base_coeff_1_x * slip_factor + (chassis_vel_x * base_coeff_1_x - chassis_vel_y * base_coeff_1_y) * slip_derivative_x;
-    H.data[int(OdomInput::VEL_X_1) * int(OdomState::NUM_STATES) + int(OdomState::VEL_Y)] = 
-        base_coeff_1_y * slip_factor + (chassis_vel_x * base_coeff_1_x - chassis_vel_y * base_coeff_1_y) * slip_derivative_y;
-    
-    // Similar pattern for other wheels and components...
-    // (Abbreviated for brevity - in practice, implement all 8 wheel velocity components)
-    
-    // For wheel velocity Y components and other wheels, follow similar pattern with appropriate coefficients
+    // X-drive wheel velocity Jacobians using wheel configurations
+    for (int i = 0; i < 4; i++) {
+        float wheel_angle = WHEEL_CONFIGS[i].wheelOrientationToForwardRadians;
+        float cos_angle = std::cos(wheel_angle);
+        float sin_angle = std::sin(wheel_angle);
+        
+        // Per-wheel coefficients
+        float wheel_slip_factor = slip_factor * WHEEL_CONFIGS[i].slipCoefficient;
+        float wheel_friction_factor = WHEEL_CONFIGS[i].frictionCoefficient;
+        float wheel_slip_derivative_x = slip_derivative_x * WHEEL_CONFIGS[i].slipCoefficient;
+        float wheel_slip_derivative_y = slip_derivative_y * WHEEL_CONFIGS[i].slipCoefficient;
+        
+        // Jacobian for wheel X component: ∂(vx*cos + vy*sin)/∂[vx, vy]
+        float base_coeff_x = cos_angle;
+        float base_coeff_y = sin_angle;
+        int vel_x_row = int(OdomInput::VEL_X_1) + i * 2;
+        H.data[vel_x_row * int(OdomState::NUM_STATES) + int(OdomState::VEL_X)] = 
+            (base_coeff_x * wheel_slip_factor + (chassis_vel_x * base_coeff_x + chassis_vel_y * base_coeff_y) * wheel_slip_derivative_x) * wheel_friction_factor;
+        H.data[vel_x_row * int(OdomState::NUM_STATES) + int(OdomState::VEL_Y)] = 
+            (base_coeff_y * wheel_slip_factor + (chassis_vel_x * base_coeff_x + chassis_vel_y * base_coeff_y) * wheel_slip_derivative_y) * wheel_friction_factor;
+        
+        // Jacobian for wheel Y component: ∂(-vx*sin + vy*cos)/∂[vx, vy]
+        float base_coeff_y_comp_x = -sin_angle;
+        float base_coeff_y_comp_y = cos_angle;
+        int vel_y_row = int(OdomInput::VEL_Y_1) + i * 2;
+        H.data[vel_y_row * int(OdomState::NUM_STATES) + int(OdomState::VEL_X)] = 
+            (base_coeff_y_comp_x * wheel_slip_factor + (chassis_vel_x * base_coeff_y_comp_x + chassis_vel_y * base_coeff_y_comp_y) * wheel_slip_derivative_x) * wheel_friction_factor;
+        H.data[vel_y_row * int(OdomState::NUM_STATES) + int(OdomState::VEL_Y)] = 
+            (base_coeff_y_comp_y * wheel_slip_factor + (chassis_vel_x * base_coeff_y_comp_x + chassis_vel_y * base_coeff_y_comp_y) * wheel_slip_derivative_y) * wheel_friction_factor;
+    }
     
     // IMU acceleration observations with nonlinear bias scaling
     float acc_x = x.data[int(OdomState::ACC_X)];
@@ -423,20 +435,20 @@ void FourWheelEKFOdometry::observationJacobianFunction(
     float bias_y = x.data[int(OdomState::BIAS_ACC_Y)];
     
     float acc_magnitude = std::sqrt(acc_x * acc_x + acc_y * acc_y);
-    float bias_scaling = 1.0f + 0.1f * acc_magnitude;
+    float bias_scaling = 1.0f + BIAS_ACCELERATION_SCALING * acc_magnitude;
     
     // ∂(acc_x + bias_x * scaling)/∂acc_x
     H.data[int(OdomInput::ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] = 
-        1.0f + bias_x * 0.1f * (acc_magnitude > 1e-6f ? acc_x / acc_magnitude : 0.0f);
+        1.0f + bias_x * BIAS_ACCELERATION_SCALING * (acc_magnitude > 1e-6f ? acc_x / acc_magnitude : 0.0f);
     H.data[int(OdomInput::ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] = 
-        bias_x * 0.1f * (acc_magnitude > 1e-6f ? acc_y / acc_magnitude : 0.0f);
+        bias_x * BIAS_ACCELERATION_SCALING * (acc_magnitude > 1e-6f ? acc_y / acc_magnitude : 0.0f);
     H.data[int(OdomInput::ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::BIAS_ACC_X)] = bias_scaling;
     
     // Similar for ACC_Y
     H.data[int(OdomInput::ACC_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] = 
-        bias_y * 0.1f * (acc_magnitude > 1e-6f ? acc_x / acc_magnitude : 0.0f);
+        bias_y * BIAS_ACCELERATION_SCALING * (acc_magnitude > 1e-6f ? acc_x / acc_magnitude : 0.0f);
     H.data[int(OdomInput::ACC_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] = 
-        1.0f + bias_y * 0.1f * (acc_magnitude > 1e-6f ? acc_y / acc_magnitude : 0.0f);
+        1.0f + bias_y * BIAS_ACCELERATION_SCALING * (acc_magnitude > 1e-6f ? acc_y / acc_magnitude : 0.0f);
     H.data[int(OdomInput::ACC_Y) * int(OdomState::NUM_STATES) + int(OdomState::BIAS_ACC_Y)] = bias_scaling;
 }
 

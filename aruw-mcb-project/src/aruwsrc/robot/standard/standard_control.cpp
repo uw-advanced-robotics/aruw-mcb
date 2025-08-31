@@ -242,42 +242,42 @@ const tap::motor::DjiMotor* chassisMotors[4] = {
 };
 
 
-FourWheelEKFOdometry::ChassisWheelConfig LEFT_FRONT_WHEEL_CONFIG = {
-    .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
-    .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    .wheelOrientationToForwardRadians = M_PI_4  // +45°, contributes +X, -Y
-};
-FourWheelEKFOdometry::ChassisWheelConfig LEFT_BACK_WHEEL_CONFIG = {
-    .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
-    .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    .wheelOrientationToForwardRadians = -M_PI_4  // -45°, contributes +X, +Y
-};
+// FourWheelEKFOdometry::ChassisWheelConfig LEFT_FRONT_WHEEL_CONFIG = {
+//     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
+//     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+//     .wheelOrientationToForwardRadians = M_PI_4  // +45°, contributes +X, -Y
+// };
+// FourWheelEKFOdometry::ChassisWheelConfig LEFT_BACK_WHEEL_CONFIG = {
+//     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
+//     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+//     .wheelOrientationToForwardRadians = -M_PI_4  // -45°, contributes +X, +Y
+// };
 
-FourWheelEKFOdometry::ChassisWheelConfig RIGHT_FRONT_WHEEL_CONFIG = {
-    .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
-    .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    .wheelOrientationToForwardRadians = 3*M_PI_4  // +135°, contributes -X, -Y
-};
+// FourWheelEKFOdometry::ChassisWheelConfig RIGHT_FRONT_WHEEL_CONFIG = {
+//     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
+//     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+//     .wheelOrientationToForwardRadians = 3*M_PI_4  // +135°, contributes -X, -Y
+// };
 
-FourWheelEKFOdometry::ChassisWheelConfig RIGHT_BACK_WHEEL_CONFIG = {
-    .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
-    .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    .wheelOrientationToForwardRadians = -3*M_PI_4  // -135°, contributes -X, +Y
-};
+// FourWheelEKFOdometry::ChassisWheelConfig RIGHT_BACK_WHEEL_CONFIG = {
+//     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
+//     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
+//     .wheelOrientationToForwardRadians = -3*M_PI_4  // -135°, contributes -X, +Y
+// };
 
-const FourWheelEKFOdometry::ChassisWheelConfig *chassisWheelConfigs[4] = {
-    &LEFT_FRONT_WHEEL_CONFIG,
-    &LEFT_BACK_WHEEL_CONFIG,
-    &RIGHT_FRONT_WHEEL_CONFIG,
-    &RIGHT_BACK_WHEEL_CONFIG
-};
+// static const FourWheelEKFOdometry::ChassisWheelConfig *chassisWheelConfigs[4] = {
+//     &LEFT_FRONT_WHEEL_CONFIG,
+//     &LEFT_BACK_WHEEL_CONFIG,
+//     &RIGHT_FRONT_WHEEL_CONFIG,
+//     &RIGHT_BACK_WHEEL_CONFIG
+// };
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 
 aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     chassisMotors,
-    chassisWheelConfigs,
+    // chassisWheelConfigs,
     turret,
     modm::Vector2f(
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,

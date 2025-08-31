@@ -26,12 +26,11 @@ namespace aruwsrc::algorithms::odometry
 WheelEKFOdometry2DSubsystem::WheelEKFOdometry2DSubsystem(
     tap::Drivers &drivers,
     const tap::motor::DjiMotor* chassisMotors[4],
-    const FourWheelEKFOdometry::ChassisWheelConfig* chassisWheelConfigs[4],
     const aruwsrc::control::turret::TurretSubsystem &turret,
     const modm::Vector2f initPos)
     : Subsystem(&drivers),
       orientationObserver(turret),
-      FourWheelEKFOdometry(chassisMotors, chassisWheelConfigs, orientationObserver, drivers.mpu6500, initPos)
+      FourWheelEKFOdometry(chassisMotors, orientationObserver, drivers.mpu6500, initPos)
 {
 }
 

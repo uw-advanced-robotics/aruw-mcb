@@ -74,10 +74,6 @@ public:
 
     inline float getYaw() const override { return chassisYaw; }
 
-    /**
-     * @brief Resets the KF back to the robot's boot position.
-     */
-
     void reset();
 
     void update();
@@ -153,7 +149,6 @@ private:
         0, 0, 1, 0, 0, 0,         // ACC_X maps to chassis acceleration X
         0, 0, 0, 0, 0, 1,         // ACC_Y maps to chassis acceleration Y
     };
-    // clang-format on
     static constexpr float KF_Q[STATES_SQUARED] = {
         1E2, 0  , 0  , 0  , 0  , 0  ,
         0  , 1E1, 0  , 0  , 0  , 0  ,
