@@ -1,0 +1,237 @@
+/*
+ * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef WHEEL_EKF_ODOMETRY_HPP_
+#define WHEEL_EKF_ODOMETRY_HPP_
+
+#include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
+#include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "tap/control/chassis/chassis_subsystem_interface.hpp"
+#include "tap/motor/dji_motor.hpp"
+
+#include "modm/math/geometry/location_2d.hpp"
+#include "modm/math/interpolation/linear.hpp"
+
+#include "aruwsrc/algorithms/extended_kalman_filter.hpp"
+
+namespace aruwsrc::algorithms::odometry
+{
+/**
+ * An Extended Kalman Filter (EKF) based odometry interface that uses nonlinear motion models
+ * for more accurate state prediction. This class is designed specifically for robots whose 
+ * chassis does not measure absolute position (i.e. all ground robots).
+ * 
+ * The EKF provides better handling of nonlinear dynamics and can incorporate more complex
+ * motion models compared to the linear Kalman filter.
+ */
+class FourWheelEKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
+{
+public:
+    struct ChassisWheelConfig {
+        float wheelRadius;
+        float wheelbaseDistance;
+        float wheelOrientationToForwardRadians;
+    };
+
+    /**
+     * Constructor.
+     *
+     * @param chassisMotors The motors of the robot for odometry measurements
+     * @param chassisWheelConfigs Configuration of the wheels on the chassis
+     * @param chassisYawObserver Interface that computes the yaw of the chassis externally
+     * @param imu IMU mounted on the chassis to measure chassis acceleration
+     * @param initPos Initial position of chassis when robot boots
+     */
+    FourWheelEKFOdometry(
+        const tap::motor::DjiMotor *chassisMotors[4],
+        const ChassisWheelConfig *chassisWheelConfigs[4],
+        tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
+        tap::communication::sensors::imu::ImuInterface& imu,
+        const modm::Vector2f initPos);
+
+    inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
+
+    inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
+
+    inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
+
+    inline float getYaw() const override { return chassisYaw; }
+
+    /**
+     * @brief Resets the EKF back to the robot's boot position.
+     */
+    void reset();
+
+    void update();
+
+    void overrideOdometryPosition(const float positionX, const float positionY);
+
+protected:
+    enum class OdomState
+    {
+        POS_X = 0,      // X position
+        VEL_X,          // X velocity
+        ACC_X,          // X acceleration
+        POS_Y,          // Y position
+        VEL_Y,          // Y velocity
+        ACC_Y,          // Y acceleration
+        BIAS_ACC_X,     // IMU acceleration bias X
+        BIAS_ACC_Y,     // IMU acceleration bias Y
+        NUM_STATES,
+    };
+
+    enum class OdomInput
+    {
+        VEL_X_1 = 0,    // Wheel 1 X velocity component
+        VEL_Y_1,        // Wheel 1 Y velocity component
+        VEL_X_2,        // Wheel 2 X velocity component
+        VEL_Y_2,        // Wheel 2 Y velocity component
+        VEL_X_3,        // Wheel 3 X velocity component
+        VEL_Y_3,        // Wheel 3 Y velocity component
+        VEL_X_4,        // Wheel 4 X velocity component
+        VEL_Y_4,        // Wheel 4 Y velocity component
+        ACC_X,          // IMU acceleration X
+        ACC_Y,          // IMU acceleration Y
+        NUM_INPUTS,
+    };
+
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> ekf;
+
+private:
+    static constexpr int STATES_SQUARED =
+        static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
+    static constexpr int INPUTS_SQUARED =
+        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
+    static constexpr int INPUTS_MULT_STATES =
+        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
+
+    /// Assumed time difference between calls to `update`, in seconds
+    static constexpr float DT = 0.002f;
+
+    /// Max chassis acceleration magnitude measured on the standard when at 120W power mode, in
+    /// m/s^2. Also works for hero since it has an acceleration on the same order of magnitude.
+    static constexpr float MAX_ACCELERATION = 8.0f;
+
+    static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
+        {
+            {0, 1E0},
+            {MAX_ACCELERATION, 1E2},
+        };
+
+    static constexpr float CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA = 0.01f;
+
+    // Process noise covariance matrix (Q)
+    static constexpr float EKF_Q[STATES_SQUARED] = {
+        1E2, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,    // POS_X
+        0  , 1E1, 0  , 0  , 0  , 0  , 0  , 0  ,    // VEL_X
+        0  , 0  , 5E0, 0  , 0  , 0  , 0  , 0  ,    // ACC_X
+        0  , 0  , 0  , 1E2, 0  , 0  , 0  , 0  ,    // POS_Y
+        0  , 0  , 0  , 0  , 1E1, 0  , 0  , 0  ,    // VEL_Y
+        0  , 0  , 0  , 0  , 0  , 5E0, 0  , 0  ,    // ACC_Y
+        0  , 0  , 0  , 0  , 0  , 0  , 1E-3, 0  ,   // BIAS_ACC_X
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E-3,   // BIAS_ACC_Y
+    };
+
+    // Measurement noise covariance matrix (R)
+    static constexpr float EKF_R[INPUTS_SQUARED] = {
+        1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  // VEL_X_1
+        0  , 1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  // VEL_Y_1
+        0  , 0  , 1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  // VEL_X_2
+        0  , 0  , 0  , 1.0, 0  , 0  , 0  , 0  , 0  , 0  ,  // VEL_Y_2
+        0  , 0  , 0  , 0  , 1.0, 0  , 0  , 0  , 0  , 0  ,  // VEL_X_3
+        0  , 0  , 0  , 0  , 0  , 1.0, 0  , 0  , 0  , 0  ,  // VEL_Y_3
+        0  , 0  , 0  , 0  , 0  , 0  , 1.0, 0  , 0  , 0  ,  // VEL_X_4
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.0, 0  , 0  ,  // VEL_Y_4
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.2, 0  ,  // ACC_X
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.2,  // ACC_Y
+    };
+
+    // Initial covariance matrix (P0)
+    static constexpr float EKF_P0[STATES_SQUARED] = {
+        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 1E0, 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E0,
+    };
+
+    const tap::motor::DjiMotor *chassisMotors[4];
+    const ChassisWheelConfig *chassisWheelConfigs[4];
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
+    tap::communication::sensors::imu::ImuInterface& imu;
+
+    const modm::Vector2f initPos;
+
+    /// Chassis location in the world frame
+    modm::Location2D<float> location;
+    /// Chassis velocity in the world frame
+    modm::Vector2f velocity;
+    // Chassis yaw orientation in world frame (radians)
+    float chassisYaw = 0;
+
+    /// Chassis measured change in velocity since the last time `update` was called, in the chassis
+    /// frame
+    modm::Vector2f chassisMeasuredDeltaVelocity;
+
+    modm::interpolation::Linear<modm::Pair<float, float>>
+        chassisAccelerationToMeasurementCovarianceInterpolator;
+
+    /// Previous time `update` was called, in microseconds
+    uint32_t prevTime = 0;
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector prevChassisVelocity;
+
+    /// Measurement vector for the EKF
+    float z[int(OdomInput::NUM_INPUTS)];
+
+    void updateChassisStateFromEKF(float chassisYaw);
+
+    void updateMeasurementCovariance(const modm::Vector2f& chassisVelocity);
+
+    // EKF function definitions
+    static void stateTransitionFunction(
+        const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x_prev,
+        ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x_pred,
+        float dt);
+
+    static void observationFunction(
+        const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x,
+        ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector& h_x);
+
+    static void stateJacobianFunction(
+        const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x,
+        ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateMatrix& F,
+        float dt);
+
+    static void observationJacobianFunction(
+        const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x,
+        ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::ObservationMatrix& H);
+
+    // Temporary variables for calculations
+    float motorVel = 0;
+    float wheelLinearVel = 0;
+};
+
+}  // namespace aruwsrc::algorithms::odometry
+
+#endif  // WHEEL_EKF_ODOMETRY_HPP_

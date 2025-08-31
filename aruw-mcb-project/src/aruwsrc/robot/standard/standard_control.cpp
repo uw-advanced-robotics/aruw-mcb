@@ -103,6 +103,7 @@
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/wheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -241,30 +242,30 @@ const tap::motor::DjiMotor* chassisMotors[4] = {
 };
 
 
-FourWheelKFOdometry::ChassisWheelConfig LEFT_FRONT_WHEEL_CONFIG = {
+FourWheelEKFOdometry::ChassisWheelConfig LEFT_FRONT_WHEEL_CONFIG = {
     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
     .wheelOrientationToForwardRadians = M_PI_4  // +45°, contributes +X, -Y
 };
-FourWheelKFOdometry::ChassisWheelConfig LEFT_BACK_WHEEL_CONFIG = {
+FourWheelEKFOdometry::ChassisWheelConfig LEFT_BACK_WHEEL_CONFIG = {
     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
     .wheelOrientationToForwardRadians = -M_PI_4  // -45°, contributes +X, +Y
 };
 
-FourWheelKFOdometry::ChassisWheelConfig RIGHT_FRONT_WHEEL_CONFIG = {
+FourWheelEKFOdometry::ChassisWheelConfig RIGHT_FRONT_WHEEL_CONFIG = {
     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
     .wheelOrientationToForwardRadians = 3*M_PI_4  // +135°, contributes -X, -Y
 };
 
-FourWheelKFOdometry::ChassisWheelConfig RIGHT_BACK_WHEEL_CONFIG = {
+FourWheelEKFOdometry::ChassisWheelConfig RIGHT_BACK_WHEEL_CONFIG = {
     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
     .wheelOrientationToForwardRadians = -3*M_PI_4  // -135°, contributes -X, +Y
 };
 
-const FourWheelKFOdometry::ChassisWheelConfig *chassisWheelConfigs[4] = {
+const FourWheelEKFOdometry::ChassisWheelConfig *chassisWheelConfigs[4] = {
     &LEFT_FRONT_WHEEL_CONFIG,
     &LEFT_BACK_WHEEL_CONFIG,
     &RIGHT_FRONT_WHEEL_CONFIG,
@@ -273,7 +274,7 @@ const FourWheelKFOdometry::ChassisWheelConfig *chassisWheelConfigs[4] = {
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 
-aruwsrc::algorithms::odometry::WheelKFOdometry2DSubsystem odometrySubsystem(
+aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     chassisMotors,
     chassisWheelConfigs,
