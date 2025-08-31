@@ -211,10 +211,6 @@ namespace
 	static modm::I2cTransaction::Writing writing(nullptr, 0, modm::I2c::OperationAfterWrite::Stop);
 	static modm::I2cTransaction::Reading reading(nullptr, 0, modm::I2c::OperationAfterRead::Stop);
 
-	// watchdog counter for detecting stuck EV ISR
-	static uint32_t i2c2_ev_stuckCounter = 0;
-	static uint16_t lastSr1 = 0;
-
 	// helper functions
 	static inline void
 	callStarting()
@@ -292,41 +288,6 @@ MODM_ISR(I2C2_EV)
 	DEBUG_STREAM("\n--- interrupt ---");
 
 	uint16_t sr1 = I2C2->SR1;
-
-	    // --- Watchdog: check if we are stuck in the same state ---
-    if (sr1 == lastSr1) {
-        if (++i2c2_ev_stuckCounter > 100'000) {   // adjust threshold for your CPU speed
-            // Force recovery if stuck too long
-            DEBUG_STREAM("I2C2_EV stuck, forcing reset");
-
-            I2C2->CR1 |= I2C_CR1_SWRST;
-			modm::delay_us(10);
-            I2C2->CR1 &= ~I2C_CR1_SWRST;
-			modm::delay_us(10);
-            I2C2->CR1 |= I2C_CR1_PE;
-			modm::delay_us(10);
-			
-            I2C2->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
-			modm::delay_us(10);
-
-            if (transaction) transaction->detaching(modm::I2c::DetachCause::ErrorCondition);
-
-            I2C2->CR2 |= (I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN | I2C_CR2_ITERREN);
-            transaction = nullptr;
-
-            writing.length = 0;
-            reading.length = 0;
-            checkNextOperation = CheckNextOperation::NO;
-
-            callNextTransaction();
-
-            i2c2_ev_stuckCounter = 0;
-            return; // exit ISR early
-        }
-    } else {
-        i2c2_ev_stuckCounter = 0; // reset when progress is made
-        lastSr1 = sr1;
-    }
 
 	if (sr1 & I2C_SR1_SB)
 	{
