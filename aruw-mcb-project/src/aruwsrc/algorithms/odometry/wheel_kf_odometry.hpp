@@ -138,20 +138,20 @@ private:
         0, 0 , 0            , 0, 0 , 1            ,
     };
     // clang-format off
-    // This C matrix assumes a simple holonomic chassis where individual wheel velocities
-    // contribute to chassis velocity. The coefficients may need adjustment based on
-    // actual wheel configuration (mecanum, omni, etc.)
+    // This C matrix implements X-drive kinematics for 4 omni wheels
+    // Wheel order: LF, LB, RF, RB with orientations: +45°, -45°, -45°, +45°
+    // Each wheel contributes both X and Y components based on cos/sin of wheel angle
     static constexpr float KF_C[INPUTS_MULT_STATES] = {
-        0, 0.25, 0, 0, 0, 0,  // VEL_X_1 contributes 1/4 to chassis velocity X
-        0, 0, 0, 0, 0.25, 0,  // VEL_Y_1 contributes 1/4 to chassis velocity Y  
-        0, 0.25, 0, 0, 0, 0,  // VEL_X_2 contributes 1/4 to chassis velocity X
-        0, 0, 0, 0, 0.25, 0,  // VEL_Y_2 contributes 1/4 to chassis velocity Y
-        0, 0.25, 0, 0, 0, 0,  // VEL_X_3 contributes 1/4 to chassis velocity X
-        0, 0, 0, 0, 0.25, 0,  // VEL_Y_3 contributes 1/4 to chassis velocity Y
-        0, 0.25, 0, 0, 0, 0,  // VEL_X_4 contributes 1/4 to chassis velocity X
-        0, 0, 0, 0, 0.25, 0,  // VEL_Y_4 contributes 1/4 to chassis velocity Y
-        0, 0, 1, 0, 0, 0,     // ACC_X maps to chassis acceleration X
-        0, 0, 0, 0, 0, 1,     // ACC_Y maps to chassis acceleration Y
+        0, 0.25, 0, 0, 0, 0,      // VEL_X_1 (LF X-component): contributes to chassis X
+        0, 0, 0, 0, 0.25, 0,      // VEL_Y_1 (LF Y-component): contributes to chassis Y
+        0, 0.25, 0, 0, 0, 0,      // VEL_X_2 (LB X-component): contributes to chassis X
+        0, 0, 0, 0, 0.25, 0,      // VEL_Y_2 (LB Y-component): contributes to chassis Y
+        0, 0.25, 0, 0, 0, 0,      // VEL_X_3 (RF X-component): contributes to chassis X
+        0, 0, 0, 0, 0.25, 0,      // VEL_Y_3 (RF Y-component): contributes to chassis Y
+        0, 0.25, 0, 0, 0, 0,      // VEL_X_4 (RB X-component): contributes to chassis X
+        0, 0, 0, 0, 0.25, 0,      // VEL_Y_4 (RB Y-component): contributes to chassis Y
+        0, 0, 1, 0, 0, 0,         // ACC_X maps to chassis acceleration X
+        0, 0, 0, 0, 0, 1,         // ACC_Y maps to chassis acceleration Y
     };
     // clang-format on
     static constexpr float KF_Q[STATES_SQUARED] = {
@@ -227,6 +227,34 @@ private:
     void updateChassisStateFromKF(float chassisYaw);
 
     void updateMeasurementCovariance(const modm::Matrix<float, 3, 1>& chassisVelocity);
+
+    float motorVel = 0;
+
+    // Motor velocities
+    float leftFrontMotorVel = 0;
+    float leftBackMotorVel = 0;
+    float rightFrontMotorVel = 0;
+    float rightBackMotorVel = 0;
+
+    // Wheel linear velocities
+    float wheelLinearVel = 0;
+    float leftFrontWheelLinearVel = 0;
+    float leftBackWheelLinearVel = 0;
+    float rightFrontWheelLinearVel = 0;
+    float rightBackWheelLinearVel = 0;
+
+    // X component velocities
+    float leftFrontMotorLinearVelX = 0;
+    float leftBackMotorLinearVelX = 0;
+    float rightFrontMotorLinearVelX = 0;
+    float rightBackMotorLinearVelX = 0;
+
+    // Y component velocities
+    float leftFrontMotorLinearVelY = 0;
+    float leftBackMotorLinearVelY = 0;
+    float rightFrontMotorLinearVelY = 0;
+    float rightBackMotorLinearVelY = 0;
+
 };
 }  // namespace aruwsrc::algorithms::odometry
 

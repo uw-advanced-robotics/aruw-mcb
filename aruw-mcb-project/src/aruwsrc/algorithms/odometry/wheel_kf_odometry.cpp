@@ -60,17 +60,54 @@ void FourWheelKFOdometry::update()
     }
 
     // Get individual wheel velocities and convert to linear velocities
-    for (int i = 0; i < 4; i++)
-    {
-        float motorVel = chassisMotors[i]->getEncoder()->getVelocity(); // rad/s
-        float wheelLinearVel = motorVel * chassisWheelConfigs[i]->wheelRadius; // m/s
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     motorVel = chassisMotors[i]->getEncoder()->getVelocity(); // rad/s
+    //     wheelLinearVel = motorVel * chassisWheelConfigs[i]->wheelRadius; // m/s
         
-        // Calculate wheel velocity components in chassis frame based on wheel orientation
-        float wheelAngle = chassisWheelConfigs[i]->wheelOrientationToForwardRadians;
-        
-        y[int(OdomInput::VEL_X_1) + i * 2] = wheelLinearVel * cos(wheelAngle);
-        y[int(OdomInput::VEL_Y_1) + i * 2 + 1] = wheelLinearVel * sin(wheelAngle);
-    }
+    //     // Calculate wheel velocity components in chassis frame based on wheel orientation
+    //     float wheelAngle = chassisWheelConfigs[i]->wheelOrientationToForwardRadians;
+
+    //     float wheelVectorX = wheelLinearVel * cos(wheelAngle);
+    //     float wheelVectorY = wheelLinearVel * sin(wheelAngle);
+
+    //     tap::algorithms::rotateVector(&wheelVectorX, &wheelVectorY, serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+
+    //     y[int(OdomInput::VEL_X_1) + i * 2] = wheelVectorX;
+    //     y[int(OdomInput::VEL_Y_1) + i * 2] = wheelVectorY;
+    // }
+
+    leftFrontMotorVel = chassisMotors[0]->getEncoder()->getVelocity();
+    leftFrontWheelLinearVel = leftFrontMotorVel * chassisWheelConfigs[0]->wheelRadius;
+    float leftFrontWheelAngle = chassisWheelConfigs[0]->wheelOrientationToForwardRadians;
+    leftFrontMotorLinearVelX = leftFrontWheelLinearVel * cos(leftFrontWheelAngle);
+    leftFrontMotorLinearVelY = leftFrontWheelLinearVel * sin(leftFrontWheelAngle);
+    y[int(OdomInput::VEL_X_1)] = leftFrontMotorLinearVelX;
+    y[int(OdomInput::VEL_Y_1)] = leftFrontMotorLinearVelY;
+
+    leftBackMotorVel = chassisMotors[1]->getEncoder()->getVelocity();
+    leftBackWheelLinearVel = leftBackMotorVel * chassisWheelConfigs[1]->wheelRadius;
+    float leftBackWheelAngle = chassisWheelConfigs[1]->wheelOrientationToForwardRadians;
+    leftBackMotorLinearVelX = leftBackWheelLinearVel * cos(leftBackWheelAngle);
+    leftBackMotorLinearVelY = leftBackWheelLinearVel * sin(leftBackWheelAngle);
+    y[int(OdomInput::VEL_X_2)] = leftBackMotorLinearVelX;
+    y[int(OdomInput::VEL_Y_2)] = leftBackMotorLinearVelY;
+
+    rightFrontMotorVel = chassisMotors[2]->getEncoder()->getVelocity();
+    rightFrontWheelLinearVel = rightFrontMotorVel * chassisWheelConfigs[2]->wheelRadius;
+    float rightFrontWheelAngle = chassisWheelConfigs[2]->wheelOrientationToForwardRadians;
+    rightFrontMotorLinearVelX = rightFrontWheelLinearVel * cos(rightFrontWheelAngle);
+    rightFrontMotorLinearVelY = rightFrontWheelLinearVel * sin(rightFrontWheelAngle);
+    y[int(OdomInput::VEL_X_3)] = rightFrontMotorLinearVelX;
+    y[int(OdomInput::VEL_Y_3)] = rightFrontMotorLinearVelY;
+
+    rightBackMotorVel = chassisMotors[3]->getEncoder()->getVelocity();
+    rightBackWheelLinearVel = rightBackMotorVel * chassisWheelConfigs[3]->wheelRadius;
+    float rightBackWheelAngle = chassisWheelConfigs[3]->wheelOrientationToForwardRadians;
+    rightBackMotorLinearVelX = rightBackWheelLinearVel * cos(rightBackWheelAngle);
+    rightBackMotorLinearVelY = rightBackWheelLinearVel * sin(rightBackWheelAngle);
+    y[int(OdomInput::VEL_X_4)] = rightBackMotorLinearVelX;
+    y[int(OdomInput::VEL_Y_4)] = rightBackMotorLinearVelY;
 
     // Get IMU acceleration data in chassis frame
     y[int(OdomInput::ACC_X)] = imu.getAx();

@@ -244,24 +244,24 @@ const tap::motor::DjiMotor* chassisMotors[4] = {
 FourWheelKFOdometry::ChassisWheelConfig LEFT_FRONT_WHEEL_CONFIG = {
     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    .wheelOrientationToForwardRadians = M_PI_4
+    .wheelOrientationToForwardRadians = M_PI_4  // +45°, contributes +X, -Y
 };
 FourWheelKFOdometry::ChassisWheelConfig LEFT_BACK_WHEEL_CONFIG = {
     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    .wheelOrientationToForwardRadians = -M_PI_4
+    .wheelOrientationToForwardRadians = -M_PI_4  // -45°, contributes +X, +Y
 };
 
 FourWheelKFOdometry::ChassisWheelConfig RIGHT_FRONT_WHEEL_CONFIG = {
     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    .wheelOrientationToForwardRadians = -M_PI_4
+    .wheelOrientationToForwardRadians = 3*M_PI_4  // +135°, contributes -X, -Y
 };
 
 FourWheelKFOdometry::ChassisWheelConfig RIGHT_BACK_WHEEL_CONFIG = {
     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,
     .wheelbaseDistance = aruwsrc::chassis::CENTER_TO_WHEELBASE_RADIUS,
-    .wheelOrientationToForwardRadians = M_PI_4
+    .wheelOrientationToForwardRadians = -3*M_PI_4  // -135°, contributes -X, +Y
 };
 
 const FourWheelKFOdometry::ChassisWheelConfig *chassisWheelConfigs[4] = {
