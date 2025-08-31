@@ -42,8 +42,4 @@
 *.out   binary
 *.app   binary
 
-# Ensure headers are never marked executable
-*.h   -executable
-*.hpp -executable
-
 ############# C++ .gitattributes template end
