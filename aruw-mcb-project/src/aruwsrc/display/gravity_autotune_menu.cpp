@@ -23,7 +23,6 @@
 
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 
-
 namespace aruwsrc::display
 {
 GravityAutotuneMenu::GravityAutotuneMenu(

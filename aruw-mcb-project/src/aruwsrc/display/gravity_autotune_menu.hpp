@@ -80,7 +80,6 @@ private:
     aruwsrc::control::autotune::GravityAutotuneBase::CalibrationState currCalibrationState =
         aruwsrc::control::autotune::GravityAutotuneBase::CalibrationState::
             WAITING_FOR_SYSTEMS_ONLINE;
-
 };
 }  // namespace aruwsrc::display
 

@@ -83,7 +83,7 @@ void AutotuneMenu::shortButtonPress(modm::MenuButtons::Button button)
             {
                 break;
             }
-            
+
             int8_t idx = verticalScroll.getCursorIndex();
             // Index is selecting a gravity autotune command, so push the corresponding menu.
             if (idx < getGravityAutotuneCommandNumber())

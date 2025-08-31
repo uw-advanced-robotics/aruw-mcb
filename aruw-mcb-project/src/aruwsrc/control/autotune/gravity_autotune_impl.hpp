@@ -153,7 +153,7 @@ void GravityAutotune<numTestPoints>::execute()
         {
             if (samplePointCount < NUM_SAMPLE_POINTS)
             {
-                // Increment sample point first so it's not 0 when first average 
+                // Increment sample point first so it's not 0 when first average
                 samplePointCount++;
 
                 // Add to the running average of the motors value and angle measurements
