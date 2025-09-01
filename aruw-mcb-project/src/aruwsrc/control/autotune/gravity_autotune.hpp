@@ -74,10 +74,10 @@ public:
         /// A chassis relative pitch controller used to lock the turret.
         turret::algorithms::ChassisFramePitchTurretController *pitchController;
         /// Mass of the pitching part of the turret in units of Kg
-        const float turretMass;
+        float turretMass = 1.0f;
         /// A constant that relates the motor units to Nm of torque, would only work with current
         /// controlled motors. In units of Nm / desOut
-        const float torqueToDesiredOut;
+        float torqueToDesiredOut = 1.0f;
         /// Force of gravity. Unlikely to change. m / s^2
         const float gravity = 9.81;
     };
@@ -122,10 +122,6 @@ public:
                 this->points[i] = minAngle + i * (maxAngle - minAngle) / (numTestPoints - 1);
             }
         }
-
-        // prevent divide by zero
-        config.turretMass ? config.turretMass : 1.0f;
-        config.torqueToDesiredOut ? config.torqueToDesiredOut : 1.0f;
     }
 
     /**
