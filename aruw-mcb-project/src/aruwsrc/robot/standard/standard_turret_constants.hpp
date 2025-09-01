@@ -85,12 +85,20 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #endif
 
 #if defined(TARGET_STANDARD_NULL)
+static constexpr float TORQUE_TO_DESIRED_OUT =
+    1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
+static constexpr float TURRET_WEIGHT_KG = 1.646f;       // 1.646kg from CAD
+
 // Actual CAD value is 55.76, decreased for balls in hopper
 static constexpr float TURRET_CG_X = 33.83;
 static constexpr float TURRET_CG_Z = 26.68;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
 
 #elif defined(TARGET_STANDARD_VOID)
+static constexpr float TORQUE_TO_DESIRED_OUT =
+    1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
+static constexpr float TURRET_WEIGHT_KG = 1.646f;       // 1.646kg from CAD
+
 static constexpr float TURRET_CG_X = 20.0f;
 static constexpr float TURRET_CG_Z = 16.5f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'200;

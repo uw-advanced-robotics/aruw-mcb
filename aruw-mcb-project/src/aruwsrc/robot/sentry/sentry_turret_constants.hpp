@@ -45,6 +45,10 @@ static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.008f;
 static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.008f;
 
+static constexpr float TORQUE_TO_DESIRED_OUT =
+    1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
+static constexpr float TURRET_WEIGHT_KG = 1.44730f;     // From CAD
+
 static constexpr float TURRET_CG_X = 14.72264593f;
 static constexpr float TURRET_CG_Z = 34.51638903f - 40.0f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -5000.0f;

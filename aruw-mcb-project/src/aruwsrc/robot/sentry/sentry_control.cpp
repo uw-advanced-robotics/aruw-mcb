@@ -595,19 +595,19 @@ SentryImuCalibrateCommand imuCalibrateCommand(
 
 autotune::GravityAutotune<9> gravityAutotuneCommandLeft(
     drivers(),
-    {&turretLeft, &turretLeftChassisControllers.pitchController, 1.646f, 1.3f / 16384},
-    &chassis,
-    {-M_PI / 12, -M_PI / 14, -M_PI / 16, -M_PI / 32, 0, M_PI / 32, M_PI / 16, M_PI / 14, M_PI / 12},
-    modm::toRadian(1e-4f),
-    modm::toRadian(2.5f));
+    {&turretLeft,
+     &turretLeftChassisControllers.pitchController,
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &chassis);
 
 autotune::GravityAutotune<9> gravityAutotuneCommandRight(
     drivers(),
-    {&turretRight, &turretRightChassisControllers.pitchController, 1.646f, 1.3f / 16384},
-    &chassis,
-    {-M_PI / 12, -M_PI / 14, -M_PI / 16, -M_PI / 32, 0, M_PI / 32, M_PI / 16, M_PI / 14, M_PI / 12},
-    modm::toRadian(1e-4f),
-    modm::toRadian(2.5f));
+    {&turretRight,
+     &turretRightChassisControllers.pitchController,
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &chassis);
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
