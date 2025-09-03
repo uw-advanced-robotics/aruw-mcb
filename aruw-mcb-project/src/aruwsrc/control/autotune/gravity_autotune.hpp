@@ -32,6 +32,7 @@
 
 #include <Eigen/Dense>
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
@@ -79,7 +80,7 @@ public:
         /// controlled motors. In units of Nm / desOut
         float torqueToDesiredOut = 1.0f;
         /// Force of gravity. Unlikely to change. m / s^2
-        const float gravity = 9.81;
+        const float gravity = ACCELERATION_GRAVITY;
     };
 
     GravityAutotune(
