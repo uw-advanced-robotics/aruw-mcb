@@ -272,10 +272,7 @@ GantryExtensionSubsystem gantryExtensionSubsystem(
     gantryExtensionTrigger,
     GANTRY_EXTENSION_LIMIT_CONFIG);
 
-JointSubsystem wristRollSubsystem(
-    drivers(),
-    wristRollMotor,
-    WRIST_ROLL_PID_CONFIG);
+JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_PID_CONFIG);
 
 DigitalOutSubsystem suckSubsystem(
     drivers(),
@@ -354,15 +351,11 @@ WristControllerCommand wristControllerCommand(
 // wrist fold in commands are not fully tuned yet
 WristSetpointsCommand wristFoldInCommand(
     wristSubsystem,
-    {WRIST_BOTTOM_SETPOINT,
-     WRIST_TOP_SETPOINT,
-     WRIST_IN_SETPOINT});
+    {WRIST_BOTTOM_SETPOINT, WRIST_TOP_SETPOINT, WRIST_IN_SETPOINT});
 
 WristSetpointsCommand wristFoldOutCommand(
     wristSubsystem,
-    {WRIST_TOP_SETPOINT,
-     WRIST_BOTTOM_SETPOINT,
-     WRIST_OUT_SETPOINT});
+    {WRIST_TOP_SETPOINT, WRIST_BOTTOM_SETPOINT, WRIST_OUT_SETPOINT});
 
 DigitalOutCommand suckOffCommand(suckSubsystem, false);
 DigitalOutCommand suckOnCommand(suckSubsystem, true);
