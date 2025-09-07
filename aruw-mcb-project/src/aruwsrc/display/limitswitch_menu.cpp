@@ -73,11 +73,6 @@ void LimitSwitchMenu::drawLimitSwitch(tap::gpio::Digital::InputPin pin)
         pins[pin] = 0;  
     }
 
-    // if (beamBreak.getLimitSwitchDepressed()) {
-    //     pins[pin] = 1;  
-    // } else {
-    //     pins[pin] = 0;  
-    // }
     
     getViewStack()->getDisplay() << modm::endl;
 }
