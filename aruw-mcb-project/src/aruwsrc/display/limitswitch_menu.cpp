@@ -41,8 +41,26 @@ LimitSwitchMenu::LimitSwitchMenu(
 void LimitSwitchMenu::drawLimitSwitch(tap::gpio::Digital::InputPin pin)
 {
     DigitalBeamBreak beamBreak(&drivers->digital, pin, false);
-    
-    getViewStack()->getDisplay() << "Pin " << pin << ": ";
+    const char* pinName = "";
+    switch(pin) {
+        case tap::gpio::Digital::InputPin::B: 
+            pinName = "B"; 
+            break;
+        case tap::gpio::Digital::InputPin::C: 
+            pinName = "C"; 
+            break;
+        case tap::gpio::Digital::InputPin::T: 
+            pinName = "T"; 
+            break;
+        case tap::gpio::Digital::InputPin::D: 
+            pinName = "D"; 
+            break;
+        case tap::gpio::Digital::InputPin::Button: 
+            pinName = "Button"; 
+            break; 
+    }
+
+    getViewStack()->getDisplay() << "Pin " << pinName << ": ";
     
     if (beamBreak.getLimitSwitchDepressed())
     {
@@ -54,6 +72,12 @@ void LimitSwitchMenu::drawLimitSwitch(tap::gpio::Digital::InputPin pin)
         getViewStack()->getDisplay() << "0";
         pins[pin] = 0;  
     }
+
+    // if (beamBreak.getLimitSwitchDepressed()) {
+    //     pins[pin] = 1;  
+    // } else {
+    //     pins[pin] = 0;  
+    // }
     
     getViewStack()->getDisplay() << modm::endl;
 }
@@ -74,30 +98,26 @@ void LimitSwitchMenu::draw()
 
 }
 
-void LimitSwitchMenu::update()
-{
-    if (this->hasChanged())
-    {
-        this->draw();
-    }
-}
+void LimitSwitchMenu::update() {}
 
 bool LimitSwitchMenu::hasChanged()
 {
-    bool statusChanged = false;
-    
     for (auto& [pin, status] : pins) {
         
         DigitalBeamBreak beamBreak(&(drivers->digital), pin, false);
-        bool currState = beamBreak.getLimitSwitchDepressed();
+        int currState = -1;
+        if (beamBreak.getLimitSwitchDepressed() == true) {
+            currState = 1;
+        } else {
+            currState = 0;
+        }
         
         if (currState != status) {
-            status = currState;  
-            statusChanged = true;
+            return true;
         }
     }
     
-    return statusChanged;
+    return true;
 }
 
 void LimitSwitchMenu::shortButtonPress(modm::MenuButtons::Button button)

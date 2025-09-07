@@ -66,11 +66,11 @@ private:
     void drawLimitSwitch(tap::gpio::Digital::InputPin pin);
     
     std::map<tap::gpio::Digital::InputPin, int> pins = {  //theres prolly a way to not hardcode it i assume but idk rn
-        {tap::gpio::Digital::InputPin::B, 0},
-        {tap::gpio::Digital::InputPin::C, 0},
-        {tap::gpio::Digital::InputPin::D, 0},
-        {tap::gpio::Digital::InputPin::T, 0},
-        {tap::gpio::Digital::InputPin::Button, 0}
+        {tap::gpio::Digital::InputPin::B, -1},
+        {tap::gpio::Digital::InputPin::C, -1},
+        {tap::gpio::Digital::InputPin::D, -1}, 
+        {tap::gpio::Digital::InputPin::T, -1},
+        {tap::gpio::Digital::InputPin::Button, -1}
     };
     
 };
