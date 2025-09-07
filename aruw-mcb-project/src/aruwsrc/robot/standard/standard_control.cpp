@@ -429,7 +429,11 @@ IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand
 
 autotune::GravityAutotune<9> gravityAutotuneCommand(
     drivers(),
-    {&turret, &chassisFramePitchTurretController, TURRET_WEIGHT_KG, TORQUE_TO_DESIRED_OUT},
+    {&turret,
+     &chassisFramePitchTurretController,
+     pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
     &chassis);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);

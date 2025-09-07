@@ -49,9 +49,9 @@ static constexpr float TORQUE_TO_DESIRED_OUT =
     1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
 static constexpr float TURRET_WEIGHT_KG = 1.44730f;     // From CAD
 
-static constexpr float TURRET_CG_X = 14.72264593f;
-static constexpr float TURRET_CG_Z = 34.51638903f - 40.0f;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -5000.0f;
+static constexpr float TURRET_CG_X = -18.24;
+static constexpr float TURRET_CG_Z = 20.35;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 5118.6f;
 
 static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
 

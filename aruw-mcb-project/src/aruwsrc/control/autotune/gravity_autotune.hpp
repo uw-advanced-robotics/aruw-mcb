@@ -74,6 +74,8 @@ public:
         turret::TurretSubsystem *turret;
         /// A chassis relative pitch controller used to lock the turret.
         turret::algorithms::ChassisFramePitchTurretController *pitchController;
+        /// If the pitch motor is inverted
+        bool isMotorInverted;
         /// Mass of the pitching part of the turret in units of Kg
         float turretMass = 1.0f;
         /// A constant that relates the motor units to Nm of torque, would only work with current
@@ -323,6 +325,8 @@ public:
             case CalibrationState::CALIBRATION_SUCCESS:
             {
                 calibrationResult = calculateCOM(measuredAngles, measuredTorques);
+                // Adjust magnitude sign based on motor inversion
+                calibrationResult[2] *= config.isMotorInverted ? -1.0f : 1.0f;
                 if (successChime) drivers->commandScheduler.addCommand(successChime);
             }
             break;

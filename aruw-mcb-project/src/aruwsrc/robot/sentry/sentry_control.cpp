@@ -597,6 +597,7 @@ autotune::GravityAutotune<9> gravityAutotuneCommandLeft(
     drivers(),
     {&turretLeft,
      &turretLeftChassisControllers.pitchController,
+     turretLeftMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &chassis);
@@ -605,6 +606,7 @@ autotune::GravityAutotune<9> gravityAutotuneCommandRight(
     drivers(),
     {&turretRight,
      &turretRightChassisControllers.pitchController,
+     turretRightMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &chassis);
