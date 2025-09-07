@@ -23,15 +23,16 @@
 #include <cmath>
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/drivers.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
 
 using namespace aruwsrc::communication::sensors::beam_break;
-
+//driversFunc drivers = DoNotUse_getDrivers;
 namespace aruwsrc::display
 {
 
 LimitSwitchMenu::LimitSwitchMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* stack,
-    Drivers* drivers)
+    tap::Drivers *drivers)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, LIMITSWITCH_MENU_ID),
       drivers(drivers)
 {
@@ -39,7 +40,7 @@ LimitSwitchMenu::LimitSwitchMenu(
 
 void LimitSwitchMenu::drawLimitSwitch(tap::gpio::Digital::InputPin pin)
 {
-    DigitalBeamBreak beamBreak(&(drivers->digital), pin, false);
+    DigitalBeamBreak beamBreak(&drivers->digital, pin, false);
     
     getViewStack()->getDisplay() << "Pin " << pin << ": ";
     

@@ -40,7 +40,7 @@ class LimitSwitchMenu : public modm::AbstractMenu<tap::display::DummyAllocator<m
 public:
     LimitSwitchMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *stack,
-        Drivers *drivers);
+        tap::Drivers *drivers);
 
     // virtual ~LimitSwitchMenu() = default;
 
@@ -56,7 +56,7 @@ public:
 
 private:
     static constexpr int LIMITSWITCH_MENU_ID = 15; // idk if theres a system for this, i j picked one that wasn't used
-    Drivers *drivers;
+    tap::Drivers *drivers;
 
     //tap::display::VerticalScrollLogicHandler verticalScroll;
 
