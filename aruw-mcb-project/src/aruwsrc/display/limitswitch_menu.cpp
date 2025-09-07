@@ -26,7 +26,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 
 using namespace aruwsrc::communication::sensors::beam_break;
-//driversFunc drivers = DoNotUse_getDrivers;
+
 namespace aruwsrc::display
 {
 
