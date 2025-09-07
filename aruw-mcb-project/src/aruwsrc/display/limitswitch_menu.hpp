@@ -58,10 +58,7 @@ private:
     static constexpr int LIMITSWITCH_MENU_ID = 15; // idk if theres a system for this, i j picked one that wasn't used
     tap::Drivers *drivers;
 
-    //tap::display::VerticalScrollLogicHandler verticalScroll;
-
-    // uint8_t can1PrevDisplayedStatus;
-    // uint8_t can2PrevDisplayedStatus;
+    
 
     void drawLimitSwitch(tap::gpio::Digital::InputPin pin);
     
