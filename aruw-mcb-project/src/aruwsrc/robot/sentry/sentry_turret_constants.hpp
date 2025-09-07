@@ -45,9 +45,9 @@ static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.008f;
 static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.008f;
 
-static constexpr float TURRET_CG_X = 14.72264593f;
-static constexpr float TURRET_CG_Z = 34.51638903f - 40.0f;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -5000.0f;
+static constexpr float TURRET_CG_X = -15.55f;
+static constexpr float TURRET_CG_Z = 9.4f;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = -3697.7f;
 
 static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
 
