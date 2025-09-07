@@ -222,7 +222,10 @@ tap::motor::DjiMotor gantryExtensionMotor(
     "Gantry Extension Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
+// i need to find where to actually put this
+//&drivers()->digital.configureInputPullMode(tap::gpio::Digital::B, tap::gpio::Digital::InputPullMode::PullUp);
+//drivers->digital.configureInputPullMode(tap::gpio::Digital::D, tap::gpio::Digital::InputPullMode::PullUp);    
+//drivers->digital.configureInputPullMode(tap::gpio::Digital::T, tap::gpio::Digital::InputPullMode::PullUp);
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryExtensionLimit(
     &drivers()->digital,
     aruwsrc::engineer::GANTRY_EXTENSION_LIMIT_SWITCH_PIN,
@@ -292,7 +295,7 @@ aruwsrc::engineer::DigitalOutSubsystem releaseSubsystem(
     false);
 
 /* define client display / HUD related items --------------------------------*/
-// engineer hud stuff doesn't actually work, but we don't know why
+// engineer hud stuff doesn't actually work, but we don't know why (and we dont care)
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
