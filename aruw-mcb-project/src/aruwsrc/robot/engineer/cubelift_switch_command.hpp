@@ -21,14 +21,14 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
+#include "joint_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
 class CubeliftSwitchCommand : public tap::control::Command
 {
 public:
-    CubeliftSwitchCommand(LimitSwitchSetpointInterface &cubeLift, bool isDirectionUp);
+    CubeliftSwitchCommand(JointSubsystem &cubeLift, bool isDirectionUp);
 
     void initialize() override;
 
@@ -41,7 +41,7 @@ public:
     const char *getName() const override { return "Cube Lift Switch Command"; }
 
 private:
-    LimitSwitchSetpointInterface &cubeLift;
+    JointSubsystem &cubeLift;
     bool isDirectionUp;
 
 };  // class CubeliftSwitchCommand

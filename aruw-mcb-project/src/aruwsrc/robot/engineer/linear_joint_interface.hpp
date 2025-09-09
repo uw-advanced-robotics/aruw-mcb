@@ -30,57 +30,62 @@ namespace aruwsrc::engineer
 class LinearJointInterface
 {
 public:
+    struct Config
+    {
+        float lowerBound = 0.0f, upperBound = 0.0f;
+        float epsilon = 1e-4;
+        float maxSetpointIncrement = FLT_MAX;
+        float initSetpoint = 0;  // is this needed
+    };
+
+    LinearJointInterface(Config config)
+        : setpoint(config.initSetpoint),
+          lowerBound(config.lowerBound),
+          upperBound(config.upperBound),
+          epsilon(config.epsilon),
+          maxSetpointIncrement(config.maxSetpointIncrement) {};
+
     virtual void setSetpoint(float setpoint)
     {
-        if (tap::algorithms::compareFloatClose(minSetpoint, maxSetpoint, epsilon))
+        if (tap::algorithms::compareFloatClose(lowerBound, upperBound, epsilon))
             this->setpoint.setTarget(setpoint);
         else
-            this->setpoint.setTarget(std::clamp(setpoint, minSetpoint, maxSetpoint));
+            this->setpoint.setTarget(std::clamp(setpoint, lowerBound, upperBound));
     };
 
     inline void updateSetpoint() { setpoint.update(maxSetpointIncrement); }
 
-    virtual float getSetpoint() { return setpoint.getValue(); }
+    float getSetpoint() const { return setpoint.getValue(); }
 
-    virtual float getPosition() = 0;
+    virtual float getPosition() const = 0;
+
+    virtual float getVelocity() const = 0;
 
     virtual bool atSetpoint()
     {
         return tap::algorithms::compareFloatClose(setpoint.getTarget(), getPosition(), epsilon);
     };
 
-    float getLowerBound() const { return minSetpoint; }
+    float getLowerBound() const { return lowerBound; }
 
-    float getUpperBound() const { return maxSetpoint; }
+    float getUpperBound() const { return upperBound; }
 
-    void setLowerBound(float minSetpoint)
+    void setLowerBound(float lowerBound)
     {
-        if (minSetpoint > this->maxSetpoint) return;
-        this->minSetpoint = minSetpoint;
+        if (lowerBound > this->upperBound) return;
+        this->lowerBound = lowerBound;
     }
 
-    void setUpperBound(float maxSetpoint)
+    void setUpperBound(float upperBound)
     {
-        if (maxSetpoint < this->minSetpoint) return;
-        this->maxSetpoint = maxSetpoint;
+        if (upperBound < this->lowerBound) return;
+        this->upperBound = upperBound;
     }
 
 protected:
     tap::algorithms::Ramp setpoint;
-    float minSetpoint, maxSetpoint;
+    float lowerBound, upperBound;
     const float epsilon, maxSetpointIncrement;
-
-    LinearJointInterface(
-        float minPosition = 0.0f,
-        float maxSetpoint = 0.0f,
-        float epsilon = 1e-4f,
-        float initSetpoint = 0,
-        float maxSetpointIncrement = FLT_MAX)
-        : setpoint(initSetpoint),
-          minSetpoint(minPosition),
-          maxSetpoint(maxSetpoint),
-          epsilon(epsilon),
-          maxSetpointIncrement(maxSetpointIncrement){};
 };
 
 }  // namespace aruwsrc::engineer

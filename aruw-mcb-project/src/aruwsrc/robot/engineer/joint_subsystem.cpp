@@ -26,32 +26,33 @@ namespace aruwsrc::engineer
 JointSubsystem::JointSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& motor,
-    const tap::algorithms::SmoothPidConfig& config,
-    float lowerBound,
-    float upperBound,
-    float kS,
-    float epsilon)
-    : LinearJointInterface(lowerBound, upperBound, epsilon),
+    Config config)
+    : LinearJointInterface(config.super),
       tap::control::Subsystem(drivers),
-      pid(config),
       motor(motor),
-      kS(kS)
+      posPid(config.posPidConfig),
+      encoderRatio(config.encoderRatio),
+      staticFeedforward(config.staticFeedforward),
+      maxOutput(config.maxOutput)
 {
 }
 
 void JointSubsystem::initialize() { motor.initialize(); }
 
-float JointSubsystem::getPosition()
+float JointSubsystem::getPosition() const
 {
-    return motor.getEncoder()->getPosition().getUnwrappedValue();
+    return motor.getEncoder()->getPosition().getUnwrappedValue() * encoderRatio;
+}
+
+float JointSubsystem::getVelocity() const
+{
+    return motor.getEncoder()->getVelocity() * encoderRatio;
 }
 
 void JointSubsystem::refresh()
 {
     this->updateSetpoint();
-    float error = setpoint.getValue() - getPosition();
-    float output = pid.runController(error, motor.getEncoder()->getVelocity(), 2.0f) + kS;
-    motor.setDesiredOutput(output);
+    runPosPidController(2.0f);  // todo: should be 0.002 but would requires retune
 }
 
 void JointSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }

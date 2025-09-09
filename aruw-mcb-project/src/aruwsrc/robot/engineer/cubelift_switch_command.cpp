@@ -23,9 +23,7 @@
 
 namespace aruwsrc::engineer
 {
-CubeliftSwitchCommand::CubeliftSwitchCommand(
-    LimitSwitchSetpointInterface& cubeLift,
-    bool isDirectionUp)
+CubeliftSwitchCommand::CubeliftSwitchCommand(JointSubsystem& cubeLift, bool isDirectionUp)
     : cubeLift(cubeLift),
       isDirectionUp(isDirectionUp)
 {
