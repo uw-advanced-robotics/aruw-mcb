@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GANTRY_LIFT_SUBSYSTEM_HPP_
-#define GANTRY_LIFT_SUBSYSTEM_HPP_
+#ifndef TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_
+#define TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
@@ -71,4 +71,4 @@ private:
 
 }  // namespace aruwsrc::engineer
 
-#endif  // GANTRY_LIFT_SUBSYSTEM_HPP_
+#endif  // TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_

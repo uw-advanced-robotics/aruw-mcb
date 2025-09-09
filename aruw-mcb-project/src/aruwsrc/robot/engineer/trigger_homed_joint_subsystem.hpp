@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LINEAR_TRIGGER_HOMED_SUBSYSTEM_HPP_
-#define LINEAR_TRIGGER_HOMED_SUBSYSTEM_HPP_
+#ifndef TRIGGER_HOMED_JOINT_SUBSYSTEM_HPP_
+#define TRIGGER_HOMED_JOINT_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/motor_interface.hpp"
@@ -116,4 +116,4 @@ protected:
 };
 }  // namespace aruwsrc::engineer
 
-#endif  // LINEAR_TRIGGER_HOMED_SUBSYSTEM_HPP_
+#endif  // TRIGGER_HOMED_JOINT_SUBSYSTEM_HPP_
