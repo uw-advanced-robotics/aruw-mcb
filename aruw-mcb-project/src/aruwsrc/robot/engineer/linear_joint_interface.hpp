@@ -43,7 +43,7 @@ public:
           lowerBound(config.lowerBound),
           upperBound(config.upperBound),
           epsilon(config.epsilon),
-          maxSetpointIncrement(config.maxSetpointIncrement) {};
+          maxSetpointIncrement(config.maxSetpointIncrement){};
 
     virtual void setSetpoint(float setpoint)
     {

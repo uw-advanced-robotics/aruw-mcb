@@ -50,7 +50,7 @@ public:
      */
     void execute() override;
 
-    void end(bool) override {};
+    void end(bool) override{};
 
     const char *getName() const override { return "Engineer Wrist Controller Command"; };
 
