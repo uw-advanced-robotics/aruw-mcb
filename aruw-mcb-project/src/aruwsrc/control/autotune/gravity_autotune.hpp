@@ -39,7 +39,6 @@
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
 namespace aruwsrc::control::autotune
 {
@@ -153,7 +152,7 @@ public:
         }
 
         calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
-        calibrationLongTimeout.stop();
+        calibrationFailTimeout.stop();
         calibrationTimer.stop();
         prevTime = tap::arch::clock::getTimeMilliseconds();
 
@@ -163,7 +162,7 @@ public:
         config.pitchController->initialize();
         config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[currentPointIndex]));
 
-        calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
+        calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
         calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
     };
 
@@ -205,7 +204,7 @@ public:
      *
      * - **CALIBRATION_FAIL**
      *   Calibration fail is called if the turret is unable to lock at a single position
-     *   over the period of the `calibrationLongTimeout` to ensure the user can regain
+     *   over the period of the `calibrationFailTimeout` to ensure the user can regain
      *   control.
      */
     void execute() override
@@ -214,12 +213,20 @@ public:
         {
             case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
             {
+                bool allOnline = true;
                 const bool turretsOnline = config.turret->isOnline();
 
-                // Calibration timer to give people a chance to move out of the way
-                if (turretsOnline && calibrationTimer.execute())
+                if (chassis != nullptr)
                 {
-                    calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
+                    allOnline &= chassis->allMotorsOnline();
+                }
+
+                allOnline &= turretsOnline;
+
+                // Calibration timer to give people a chance to move out of the way
+                if (allOnline && calibrationTimer.execute())
+                {
+                    calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                     calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
                     calibrationState = CalibrationState::LOCKING_TURRET;
                 }
@@ -288,7 +295,7 @@ public:
             case CalibrationState::NEXT_LOCATION:
             {
                 config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[currentPointIndex]));
-                calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
+                calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
                 calibrationState = CalibrationState::LOCKING_TURRET;
             }
@@ -330,14 +337,8 @@ public:
                 if (successChime) drivers->commandScheduler.addCommand(successChime);
             }
             break;
-
-            case CalibrationState::CALIBRATION_FAIL:
-            {
-                if (failChime) drivers->commandScheduler.addCommand(failChime);
-            }
-            break;
-
             default:
+                if (failChime) drivers->commandScheduler.addCommand(failChime);
                 break;
         }
     };
@@ -414,7 +415,7 @@ private:
     /**
      * Timeout used to determine if we should give up on tuning.
      */
-    tap::arch::MilliTimeout calibrationLongTimeout;
+    tap::arch::MilliTimeout calibrationFailTimeout;
 
     /**
      * Place to store the last calibration result
@@ -467,7 +468,7 @@ private:
      */
     inline void checkSafetyTimeout()
     {
-        if (calibrationLongTimeout.isExpired())
+        if (calibrationFailTimeout.isExpired())
         {
             if (failChime) drivers->commandScheduler.addCommand(failChime);
             calibrationState = CalibrationState::CALIBRATION_FAIL;

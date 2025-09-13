@@ -39,7 +39,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -55,7 +56,7 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "${workspaceFolder}/aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -70,7 +71,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -85,7 +87,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -100,7 +103,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -115,7 +119,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -130,7 +135,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -145,7 +151,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -160,7 +167,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -175,7 +183,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -190,7 +199,8 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
