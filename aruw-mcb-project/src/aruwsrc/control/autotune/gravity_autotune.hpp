@@ -39,6 +39,7 @@
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 namespace aruwsrc::control::autotune
 {
