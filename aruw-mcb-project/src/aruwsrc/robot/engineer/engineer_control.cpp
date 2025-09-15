@@ -224,7 +224,7 @@ tap::motor::DjiMotor gantryExtensionMotor(
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 // i need to find where to actually put this
 //&drivers()->digital.configureInputPullMode(tap::gpio::Digital::B,
-//tap::gpio::Digital::InputPullMode::PullUp);
+// tap::gpio::Digital::InputPullMode::PullUp);
 // drivers->digital.configureInputPullMode(tap::gpio::Digital::D,
 // tap::gpio::Digital::InputPullMode::PullUp);
 // drivers->digital.configureInputPullMode(tap::gpio::Digital::T,
