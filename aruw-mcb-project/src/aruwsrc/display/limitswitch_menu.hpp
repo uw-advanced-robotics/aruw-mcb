@@ -42,8 +42,6 @@ public:
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *stack,
         tap::Drivers *drivers);
 
-    // virtual ~LimitSwitchMenu() = default;
-
     void draw() override;
 
     void update() override;
@@ -55,7 +53,7 @@ public:
     static const char *getMenuName() { return "LimitSwitch Menu"; }
 
 private:
-    static constexpr int LIMITSWITCH_MENU_ID = 15; // idk if theres a system for this, i j picked one that wasn't used
+    static constexpr int LIMITSWITCH_MENU_ID = 16; // idk if theres a system for this, i j picked one that wasn't used
     tap::Drivers *drivers;
 
     

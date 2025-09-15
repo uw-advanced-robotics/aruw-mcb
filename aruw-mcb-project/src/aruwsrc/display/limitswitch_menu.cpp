@@ -101,7 +101,7 @@ bool LimitSwitchMenu::hasChanged()
         
         DigitalBeamBreak beamBreak(&(drivers->digital), pin, false);
         int currState = -1;
-        if (beamBreak.getLimitSwitchDepressed() == true) {
+        if (beamBreak.getLimitSwitchDepressed()) {
             currState = 1;
         } else {
             currState = 0;
