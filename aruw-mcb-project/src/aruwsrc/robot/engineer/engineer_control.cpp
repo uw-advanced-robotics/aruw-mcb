@@ -278,14 +278,12 @@ DigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true,
     true);
 
 DigitalOutSubsystem releaseSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Z,
-    false,
     false);
 
 /* define client display / HUD related items --------------------------------*/
