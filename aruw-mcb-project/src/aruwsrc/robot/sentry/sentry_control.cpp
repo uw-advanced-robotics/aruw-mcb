@@ -553,6 +553,16 @@ SentryManualDriveCommand chassisDriveCommand(
     &(drivers()->controlOperatorInterface),
     &chassis);
 
+NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_SUCCESS_NOTES,
+    IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
+
+NoteSequenceCommand imuCalibrateFailBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_FAIL_NOTES,
+    IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
+
 SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
@@ -578,15 +588,9 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     odometrySubsystem,
     drivers()->turretMajorImu,
     drivers()->chassisMcbLite,
-    transformer);
-
-NoteSequenceCommand imuCalibrateDoneBuzzCommand(
-    buzzer,
-    MARIO_MUSHROOM_NOTES,
-    MARIO_MUSHROOM_NOTE_LENGTH_MS);
-
-SequentialCommand<2> imuCalibrateAndBuzzCommand(std::array<Command *, 2>{
-    {&imuCalibrateCommand, &imuCalibrateDoneBuzzCommand}});
+    transformer,
+    &imuCalibrateSuccessBuzzCommand,
+    &imuCalibrateFailBuzzCommand);
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
@@ -807,7 +811,7 @@ HoldCommandMapping leftUpRightMid(
 // imu calibrate
 HoldCommandMapping leftUpRightDown(
     drivers(),
-    {&imuCalibrateAndBuzzCommand},
+    {&imuCalibrateCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
 // manual aim and shoot
@@ -938,7 +942,7 @@ void setDefaultSentryCommands(Drivers *)
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentryCommands(Drivers *drivers)
 {
-    drivers->commandScheduler.addCommand(&imuCalibrateAndBuzzCommand);
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
     drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
 }
