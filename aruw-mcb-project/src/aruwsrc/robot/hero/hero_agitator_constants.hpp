@@ -46,6 +46,9 @@ static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
 };
 
 static constexpr float DESIRED_LOAD_TIME_S = 0.25f;
+static constexpr float KICKER_DESIRED_LOAD_TIME_S = 0.1f;
+static constexpr float KICKER_FIRE_DISTANCE = M_TWOPI * 0.5f;
+static constexpr float KICKER_FIRE_TIME_S = 0.075f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 12.0f;
 static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
 static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 5.0f;
@@ -111,8 +114,8 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITA
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_LOAD_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = M_PI / 8.0f,
-        .desiredSetpoint = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
+        .targetIntegralChange = M_TWOPI / 32.0f,
+        .desiredSetpoint = (M_TWOPI / 32.0f) / KICKER_DESIRED_LOAD_TIME_S,
         .integralSetpointTolerance = 0,  /// This tolerance can be 0 since the command considers
                                          /// itself done when the integral setpoint is >= initial
                                          /// integral + targetIntegralChange -
@@ -122,8 +125,8 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = M_TWOPI,
-        .desiredSetpoint = 6.0 * M_PI,
+        .targetIntegralChange = KICKER_FIRE_DISTANCE,
+        .desiredSetpoint = KICKER_FIRE_DISTANCE / KICKER_FIRE_TIME_S,
         .integralSetpointTolerance = 0,  /// This tolerance can be 0 since the command considers
                                          /// itself done when the integral setpoint is >= initial
                                          /// integral + targetIntegralChange -
