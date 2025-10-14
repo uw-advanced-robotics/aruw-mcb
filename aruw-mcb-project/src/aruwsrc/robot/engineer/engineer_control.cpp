@@ -219,13 +219,7 @@ tap::motor::DjiMotor gantryExtensionMotor(
     "Gantry Extension Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-// i need to find where to actually put this
-//&drivers()->digital.configureInputPullMode(tap::gpio::Digital::B,
-// tap::gpio::Digital::InputPullMode::PullUp);
-// drivers->digital.configureInputPullMode(tap::gpio::Digital::D,
-// tap::gpio::Digital::InputPullMode::PullUp);
-// drivers->digital.configureInputPullMode(tap::gpio::Digital::T,
-// tap::gpio::Digital::InputPullMode::PullUp);
+
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryExtensionLimit(
     &drivers()->digital,
     aruwsrc::engineer::GANTRY_EXTENSION_LIMIT_SWITCH_PIN,
@@ -274,14 +268,12 @@ DigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true,
     true);
 
 DigitalOutSubsystem releaseSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Z,
-    false,
     false);
 
 /* define client display / HUD related items --------------------------------*/
@@ -369,28 +361,30 @@ CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
-SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
-    {&liftUpCommand,
-     &gantryRetractCommand,
-     &wristFoldInCommand,
-     &liftDownCommand,
-     &suckOffCommand,
-     &releaseOnCommand,
-     &gantryExtendCommand,
-     &liftUpCommand,
-     &gantryRetractCommand,
-     &cubeLiftSwitchDownCommand}});
-SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
-    {&liftDownCommand,
-     &gantryExtendCommand,
-     &wristFoldInCommand,
-     &gantryRetractCommand,
-     &suckOnCommand,
-     &releaseOffCommand,
-     &liftUpCommand,
-     &wristFoldOutCommand,
-     &liftDownCommand,
-     &cubeLiftSwitchUpCommand}});
+SequentialCommand<10> storeCubeCommand(
+    std::array<Command *, 10>{
+        {&liftUpCommand,
+         &gantryRetractCommand,
+         &wristFoldInCommand,
+         &liftDownCommand,
+         &suckOffCommand,
+         &releaseOnCommand,
+         &gantryExtendCommand,
+         &liftUpCommand,
+         &gantryRetractCommand,
+         &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(
+    std::array<Command *, 10>{
+        {&liftDownCommand,
+         &gantryExtendCommand,
+         &wristFoldInCommand,
+         &gantryRetractCommand,
+         &suckOnCommand,
+         &releaseOffCommand,
+         &liftUpCommand,
+         &wristFoldOutCommand,
+         &liftDownCommand,
+         &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
