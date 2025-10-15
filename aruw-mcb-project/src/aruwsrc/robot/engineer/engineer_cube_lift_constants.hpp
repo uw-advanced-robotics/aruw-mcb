@@ -56,7 +56,7 @@ static constexpr float LIFT_UPPER_BOUND = THREE_CUBE_SETPOINT;
 static constexpr TriggerHomedJointSubsystem::Config CUBE_LIFT_CONFIG{
     .super =  // JointSubsystem::Config
     {
-        .super =  // LinearJointInterface::Config
+        .super =  // LinearPIDInterface::Config
         {
             .lowerBound = -320.0f,
             .upperBound = -40.0f,

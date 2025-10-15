@@ -55,7 +55,7 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_ALIGN_PID_CONFIG =
 static constexpr TriggerHomedJointSubsystem::Config GANTRY_LIFT_CONFIG{
     .super =  // JointSubsystem::Config
     {
-        .super =  // LinearJointInterface::Config
+        .super =  // LinearPIDInterface::Config
         {
             .lowerBound = 5.0f,
             .upperBound = 320.0f,
@@ -88,7 +88,7 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_PID_CONFIG = 
 static constexpr TriggerHomedJointSubsystem::Config GANTRY_EXTENSION_CONFIG{
     .super =  // JointSubsystem::Config
     {
-        .super =  // LinearJointInterface::Config
+        .super =  // LinearPIDInterface::Config
         {
             .lowerBound = 5.0f,
             .upperBound = 300.0f,

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LINEAR_JOINT_INTERFACE_HPP_
-#define LINEAR_JOINT_INTERFACE_HPP_
+#ifndef LINEAR_PID_INTERFACE_HPP_
+#define LINEAR_PID_INTERFACE_HPP_
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/subsystem.hpp"
@@ -27,7 +27,7 @@
 
 namespace aruwsrc::engineer
 {
-class LinearJointInterface
+class LinearPIDInterface
 {
 public:
     struct Config
@@ -38,7 +38,7 @@ public:
         float initSetpoint = 0;  // is this needed
     };
 
-    LinearJointInterface(Config config)
+    LinearPIDInterface(Config config)
         : setpoint(config.initSetpoint),
           lowerBound(config.lowerBound),
           upperBound(config.upperBound),

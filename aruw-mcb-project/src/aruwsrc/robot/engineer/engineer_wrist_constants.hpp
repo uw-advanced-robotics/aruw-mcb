@@ -90,7 +90,7 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
 };
 
 static constexpr JointSubsystem::Config WRIST_ROLL_CONFIG{
-    .super =  // LinearJointInterface::Config
+    .super =  // LinearPIDInterface::Config
     {
         .epsilon = 1e-2,
     },

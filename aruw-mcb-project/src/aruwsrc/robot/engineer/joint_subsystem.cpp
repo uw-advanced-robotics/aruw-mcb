@@ -28,7 +28,7 @@ JointSubsystem::JointSubsystem(
     tap::motor::MotorInterface& motor,
     Config config)
     : tap::control::Subsystem(drivers),
-      LinearJointInterface(config.super),
+      LinearPIDInterface(config.super),
       motor(motor),
       posPid(config.posPidConfig),
       encoderRatio(config.encoderRatio),
