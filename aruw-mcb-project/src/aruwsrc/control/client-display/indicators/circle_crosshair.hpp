@@ -59,6 +59,7 @@ private:
     static constexpr int16_t OFFSET_Y = 0;
 #endif
 
+    // TODO (EDU): Modify these constants or add new ones to mess with your new graphic!
     // X position of the circle
     static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2 + OFFSET_X;
     // Y position of the circle

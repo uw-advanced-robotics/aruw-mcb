@@ -557,6 +557,7 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 
+// TODO (EDU): Add your new HUD Indicator here to draw it onto the screen!
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
