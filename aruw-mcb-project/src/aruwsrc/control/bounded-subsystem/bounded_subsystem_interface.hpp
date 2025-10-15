@@ -34,7 +34,7 @@ namespace aruwsrc::control
  * opposite direction.
  */
 
-class BoundedSubsystemInterface : public tap::control::Subsystem
+class BoundedSubsystemInterface : public virtual tap::control::Subsystem
 {
 public:
     BoundedSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}

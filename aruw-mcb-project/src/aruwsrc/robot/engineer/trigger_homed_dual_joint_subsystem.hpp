@@ -17,41 +17,41 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GANTRY_LIFT_SUBSYSTEM_HPP_
-#define GANTRY_LIFT_SUBSYSTEM_HPP_
+#ifndef TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_
+#define TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
+#include "trigger_homed_joint_subsystem.hpp"
 
-namespace aruwsrc::engineer::gantry
+namespace aruwsrc::engineer
 {
-class GantryLiftSubsystem : public LimitSwitchSetpointInterface
+class TriggerHomedDualJointSubsystem : public TriggerHomedJointSubsystem
 {
 public:
-    GantryLiftSubsystem(
+    TriggerHomedDualJointSubsystem(
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motorLeft,
         tap::motor::MotorInterface &motorRight,
-        const tap::algorithms::SmoothPidConfig &configPos,
-        const tap::algorithms::SmoothPidConfig &configAlign,
         control::TriggerInterface &trigger,
-        const LimitSwitchSetpointInterface::LimitSwitchConfig &limitConfig);
-
-    void setDesiredOutput(int16_t power) override;
+        const tap::algorithms::SmoothPidConfig
+            &alignPidConfig,  // could put this in another layer of struct but seems unnecessary
+        const Config &config);
 
     void resetEncoderValue() override;
 
-    float getEncoderValue() override;
+    float getPosition() const override;
 
-    float getEncoderVelocity() override;
+    float getVelocity() const override;
 
     float getPositionDifference();
 
     float getVelocityDifference();
+
+    void runPosPidController(float dt) override;
 
     void initialize() override;
 
@@ -61,13 +61,14 @@ protected:
     /**
      * Stops the motor from moving. Only to be used during calibration.
      */
-    virtual void stopDuringHoming() override;
+    void stopDuringHoming() override;
 
 private:
-    tap::algorithms::SmoothPid pidAlign;
+    // todo: technically don't need to store both motors here since `JointSubsystem` already has one
     tap::motor::MotorInterface &motorLeft, &motorRight;
+    tap::algorithms::SmoothPid alignPid;
 };
 
-}  // namespace aruwsrc::engineer::gantry
+}  // namespace aruwsrc::engineer
 
-#endif  // GANTRY_LIFT_SUBSYSTEM_HPP_
+#endif  // TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_

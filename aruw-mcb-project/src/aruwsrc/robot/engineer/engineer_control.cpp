@@ -40,7 +40,6 @@
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/engineer/cube_lift/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cubelift_switch_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
@@ -50,28 +49,26 @@
 #include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
-#include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
-#include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/sliders_indicator.hpp"
+#include "aruwsrc/robot/engineer/trigger_homed_dual_joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
-using namespace tap::gpio;
-using tap::communication::serial::Remote;
-using tap::control::CommandMapper;
+using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::engineer;
 using namespace aruwsrc::engineer;
-using namespace aruwsrc::engineer::gantry;
-using namespace aruwsrc::engineer::lift;
 using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
-using namespace aruwsrc::control::client_display;
+using namespace tap::gpio;
+
+using tap::communication::serial::Remote;
+using tap::control::CommandMapper;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -241,12 +238,7 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
     rightBackChassisMotor,
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
-CubeStorageSubsystem cubeLift(
-    drivers(),
-    cubeLiftMotor,
-    LIFT_MOTOR_PID_CONFIG,
-    cubeLiftTrigger,
-    CUBE_LIFT_LIMIT_CONFIG);
+TriggerHomedJointSubsystem cubeLift(drivers(), cubeLiftMotor, cubeLiftTrigger, CUBE_LIFT_CONFIG);
 
 WristSubsystem wristSubsystem(
     drivers(),
@@ -256,23 +248,21 @@ WristSubsystem wristSubsystem(
     wristYawEncoder,
     WRIST_CONFIG);
 
-GantryLiftSubsystem gantryLiftSubsystem(
+TriggerHomedDualJointSubsystem gantryLiftSubsystem(
     drivers(),
     gantryLiftLeftMotor,
     gantryLiftRightMotor,
-    GANTRY_LIFT_POS_CONFIG,
-    GANTRY_LIFT_BALANCE_CONFIG,
     gantryLiftTrigger,
-    GANTRY_LIFT_LIMIT_CONFIG);
+    GANTRY_LIFT_ALIGN_PID_CONFIG,
+    GANTRY_LIFT_CONFIG);
 
-GantryExtensionSubsystem gantryExtensionSubsystem(
+TriggerHomedJointSubsystem gantryExtensionSubsystem(
     drivers(),
     gantryExtensionMotor,
-    GANTRY_EXTENSION_PID_CONFIG,
     gantryExtensionTrigger,
-    GANTRY_EXTENSION_LIMIT_CONFIG);
+    GANTRY_EXTENSION_CONFIG);
 
-JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_PID_CONFIG);
+JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_CONFIG);
 
 DigitalOutSubsystem suckSubsystem(
     drivers(),

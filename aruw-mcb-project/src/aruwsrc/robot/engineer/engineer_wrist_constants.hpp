@@ -24,8 +24,10 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "wrist/wrist_setpoints_command.hpp"
+#include "wrist/wrist_subsystem.hpp"
+
+#include "joint_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
@@ -85,6 +87,15 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
     .kd = 15.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 3000.0f,
+};
+
+static constexpr JointSubsystem::Config WRIST_ROLL_CONFIG{
+    .super =  // LinearJointInterface::Config
+    {
+        .epsilon = 1e-2,
+    },
+    .posPidConfig = WRIST_ROLL_PID_CONFIG,
+    .maxOutput = WRIST_ROLL_PID_CONFIG.maxOutput,
 };
 
 static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.01f;

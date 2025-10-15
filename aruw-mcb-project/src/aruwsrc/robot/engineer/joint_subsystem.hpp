@@ -30,33 +30,51 @@
 namespace aruwsrc::engineer
 {
 /**
- * Subsystem code for rotational joints.
+ * Subsystem code for joints that don't need to be homed.
  */
-class JointSubsystem : public LinearJointInterface, public tap::control::Subsystem
+class JointSubsystem : public LinearJointInterface, public virtual tap::control::Subsystem
 {
 public:
-    JointSubsystem(
-        tap::Drivers *drivers,
-        tap::motor::MotorInterface &motor,
-        const tap::algorithms::SmoothPidConfig &config,
-        float lowerBound = 0.0f,
-        float upperBound = 0.0f,
-        float kS = 0,
-        float epsilon = 1e-4f);
+    struct Config
+    {
+        LinearJointInterface::Config super;
+
+        // Conversion factor from encoder measurement to joint position, assuming linear
+        // relationship (e.g. pulley radius for a prismatic joint, gear ratio for a rotary joint,
+        // etc.)
+        float encoderRatio = 1.0f;
+
+        tap::algorithms::SmoothPidConfig posPidConfig;
+        float maxOutput;
+        float staticFeedforward = 0.0f;
+    };
+
+    JointSubsystem(tap::Drivers *drivers, tap::motor::MotorInterface &motor, Config config);
 
     virtual void initialize() override;
 
-    virtual float getPosition() override;
+    virtual float getPosition() const override;
+
+    virtual float getVelocity() const override;
+
+    virtual void runPosPidController(float dt)
+    {
+        float error = setpoint.getValue() - getPosition();
+        float motorDesiredOutput =
+            posPid.runController(error, getVelocity(), dt) + staticFeedforward;
+        motor.setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
+    }
 
     virtual void refresh() override;
 
     virtual void refreshSafeDisconnect() override;
 
-private:
-    tap::algorithms::SmoothPid pid;
+protected:
     tap::motor::MotorInterface &motor;
-    // Constant added to output to overcome static friction
-    float kS;
+    tap::algorithms::SmoothPid posPid;
+    float encoderRatio;
+    float staticFeedforward;
+    float maxOutput;
 };
 
 }  // namespace aruwsrc::engineer
