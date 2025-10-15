@@ -21,9 +21,7 @@
 
 namespace aruwsrc::engineer
 {
-SetpointMovePositionCommand::SetpointMovePositionCommand(
-    LimitSwitchSetpointInterface &subsystem,
-    float setpoint)
+SetpointMovePositionCommand::SetpointMovePositionCommand(JointSubsystem &subsystem, float setpoint)
     : subsystem(subsystem),
       setpoint(setpoint)
 {

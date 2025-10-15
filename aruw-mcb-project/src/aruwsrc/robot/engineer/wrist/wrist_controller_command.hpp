@@ -23,8 +23,6 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
-#include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
-#include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
 #include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
