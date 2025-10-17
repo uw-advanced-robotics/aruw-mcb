@@ -55,7 +55,8 @@ TurretUserControlCommand::TurretUserControlCommand(
 }
 
 // STEP 4A (Turret User Control): Implement isReady
-bool TurretUserControlCommand::isReady() {
+bool TurretUserControlCommand::isReady()
+{
     // TODO: Check if command can safely execute
     // IF command is not finished AND controllers are online:
     //     RETURN true (ready to run)
@@ -71,37 +72,37 @@ void TurretUserControlCommand::initialize()
     // FOR each controller (yaw and pitch):
     // CALL the controller's initialize method
     // This resets internal state like accumulated error and previous setpoints
-    
+
     // SET prevTime to current system time in milliseconds
     // CALL the clock utility function that returns current time
     // This gives execute() a starting point for calculating time deltas
 }
 
-// STEP 3 (Turret User Control): Implement execute method  
+// STEP 3 (Turret User Control): Implement execute method
 void TurretUserControlCommand::execute()
 {
     // TODO: Calculate time delta
     // DECLARE current_time = get current system time in milliseconds
-    // CALCULATE dt = current_time - prevTime 
+    // CALCULATE dt = current_time - prevTime
     // UPDATE prevTime = current_time for next iteration
-    
+
     // TODO: Get user input from operator interface
     // DECLARE yaw_input = get turret yaw input for this turret ID
     // DECLARE pitch_input = get turret pitch input for this turret ID
     // The operator interface returns processed, scaled input values
-    
+
     // TODO: Calculate new setpoints based on current position + user input
     // DECLARE yaw_setpoint = current yaw setpoint + (yaw_sensitivity * yaw_input)
     // DECLARE pitch_setpoint = current pitch setpoint + (pitch_sensitivity * pitch_input)
     // Use WrappedFloat for angle arithmetic to handle wrapping
-    
+
     // TODO: Command controllers to track new setpoints
     // FOR each controller (yaw and pitch):
     //     CALL runController with time delta and new setpoint
     //     This updates motor outputs to track the desired position
 }
 
-// STEP 4B (Turret User Control): Implement isFinished  
+// STEP 4B (Turret User Control): Implement isFinished
 bool TurretUserControlCommand::isFinished() const
 {
     // TODO: Determine if command should stop
@@ -122,7 +123,7 @@ void TurretUserControlCommand::end(bool)
     // - Stop motor outputs by setting them to zero
     // - Reset controller states
     // - Log why the command ended (normal vs interrupted)
-    
+
     // The 'interrupted' parameter tells you if the command was forcibly stopped
     // interrupted == true: Another command took control
     // interrupted == false: Command finished naturally (unlikely for user control)

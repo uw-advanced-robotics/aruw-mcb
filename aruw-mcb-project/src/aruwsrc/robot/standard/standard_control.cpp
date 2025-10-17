@@ -136,7 +136,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace standard_control
 {
-
 // sensitivity constants
 static constexpr float USER_YAW_INPUT_SCALAR = 0.05f;    // Radians per input unit
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.03f;  // Typically lower than yaw
@@ -380,14 +379,14 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
 
 // turret commands
 user::TurretUserControlCommand turretUserControlCommand(
-    drivers(),                                    // Global drivers object
-    drivers()->controlOperatorInterface,          // Input processing system
-    &turret,                                     // Turret subsystem instance
-    &chassisFrameYawController,                  // Yaw control algorithm  
-    &chassisFramePitchController,                // Pitch control algorithm
-    USER_YAW_INPUT_SCALAR,                       // Yaw sensitivity scaling
-    USER_PITCH_INPUT_SCALAR,                     // Pitch sensitivity scaling
-    0); 
+    drivers(),                            // Global drivers object
+    drivers()->controlOperatorInterface,  // Input processing system
+    &turret,                              // Turret subsystem instance
+    &chassisFrameYawController,           // Yaw control algorithm
+    &chassisFramePitchController,         // Pitch control algorithm
+    USER_YAW_INPUT_SCALAR,                // Yaw sensitivity scaling
+    USER_PITCH_INPUT_SCALAR,              // Pitch sensitivity scaling
+    0);
 
 // Existing commands in actual mcb
 // user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -705,7 +704,7 @@ void registerStandardSubsystems(Drivers *drivers)
     // CALL the register subsystem method
     // PASS a pointer to the turret subsystem
     // This makes the turret available for command scheduling
-    
+
     // Other subsystems are registered here too...
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -737,7 +736,7 @@ void initializeSubsystems()
     parallelOmni.initialize();
 }
 
-// STEP 7B (Turret User Control): Set default command 
+// STEP 7B (Turret User Control): Set default command
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
@@ -745,11 +744,11 @@ void setDefaultStandardCommands(Drivers *)
     // CALL the setDefaultCommand method on the turret subsystem
     // PASS a pointer to your turret user control command
     // This command will run whenever no other command is using the turret
-    
+
     // Other default commands are set here too...
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     // in actual mcb, but we are using a simplfied version
-    // turret.setDefaultCommand(&turretUserWorldRelativeCommand); 
+    // turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
