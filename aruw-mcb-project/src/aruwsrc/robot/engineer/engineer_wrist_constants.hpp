@@ -24,10 +24,9 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
 #include "wrist/wrist_setpoints_command.hpp"
 #include "wrist/wrist_subsystem.hpp"
-
-#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {

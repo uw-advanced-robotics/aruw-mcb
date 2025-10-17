@@ -69,6 +69,6 @@ private:
     tap::algorithms::SmoothPid alignPid;
 };
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::control
 
 #endif  // TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_

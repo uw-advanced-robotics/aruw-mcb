@@ -102,4 +102,4 @@ void TriggerHomedDualJointSubsystem::refreshSafeDisconnect()
     motorRight.setDesiredOutput(0);
 }
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::control

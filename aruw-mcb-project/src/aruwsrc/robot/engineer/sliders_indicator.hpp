@@ -25,8 +25,8 @@
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
-#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/control/engineer-joint/linear_pid_interface.hpp"
+#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
 

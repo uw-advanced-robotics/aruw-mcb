@@ -114,6 +114,6 @@ protected:
     float homingSpeed;
     bool homingReversed;
 };
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::control
 
 #endif  // TRIGGER_HOMED_JOINT_SUBSYSTEM_HPP_

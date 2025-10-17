@@ -21,7 +21,6 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-
 namespace aruwsrc::control
 {
 JointSubsystem::JointSubsystem(
