@@ -19,11 +19,15 @@
 
 #if defined(TARGET_BLANK)
 
+// TODO: import buzzer subsystem
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/blank/blank_drivers.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
 using namespace aruwsrc::blank;
+using namespace aruwsrc::control::buzzer;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -35,7 +39,18 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace blank_control
 {
-void initializeSubsystems() {}
+
+// TODO: instantiate buzzer subsystem
+// BuzzerSubsystem buzzer(...)
+
+NoteSequenceCommand hesAPirateCommand(buzzer, HES_A_PIRATE_NOTES, HES_A_PIRATE_NOTE_LENGTH_MS);
+
+void initializeSubsystems()
+{
+    // TODO: register initialize buzzer subsystem
+
+    buzzer.setDefaultCommand(&hesAPirateCommand);
+}
 
 }  // namespace blank_control
 
