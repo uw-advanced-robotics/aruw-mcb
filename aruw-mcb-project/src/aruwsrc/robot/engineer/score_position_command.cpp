@@ -18,6 +18,7 @@
  */
 
 #include "score_position_command.hpp"
+using namespace aruwsrc::control;
 
 namespace aruwsrc::engineer
 {

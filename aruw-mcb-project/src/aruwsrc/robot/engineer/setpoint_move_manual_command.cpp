@@ -18,6 +18,7 @@
  */
 
 #include "setpoint_move_manual_command.hpp"
+using namespace aruwsrc::control;
 
 namespace aruwsrc::engineer
 {

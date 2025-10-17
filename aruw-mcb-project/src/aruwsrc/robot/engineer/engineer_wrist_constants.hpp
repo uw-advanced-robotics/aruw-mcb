@@ -27,7 +27,7 @@
 #include "wrist/wrist_setpoints_command.hpp"
 #include "wrist/wrist_subsystem.hpp"
 
-#include "joint_subsystem.hpp"
+#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
@@ -89,7 +89,7 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
     .maxOutput = 3000.0f,
 };
 
-static constexpr JointSubsystem::Config WRIST_ROLL_CONFIG{
+static constexpr aruwsrc::control::JointSubsystem::Config WRIST_ROLL_CONFIG{
     .super =  // LinearPIDInterface::Config
     {
         .epsilon = 1e-2,

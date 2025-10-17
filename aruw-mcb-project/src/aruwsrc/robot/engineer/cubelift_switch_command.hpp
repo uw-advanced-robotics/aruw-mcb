@@ -21,14 +21,14 @@
 
 #include "tap/control/command.hpp"
 
-#include "joint_subsystem.hpp"
+#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
 class CubeliftSwitchCommand : public tap::control::Command
 {
 public:
-    CubeliftSwitchCommand(JointSubsystem &cubeLift, bool isDirectionUp);
+    CubeliftSwitchCommand(aruwsrc::control::JointSubsystem &cubeLift, bool isDirectionUp);
 
     void initialize() override;
 
@@ -41,7 +41,7 @@ public:
     const char *getName() const override { return "Cube Lift Switch Command"; }
 
 private:
-    JointSubsystem &cubeLift;
+    aruwsrc::control::JointSubsystem &cubeLift;
     bool isDirectionUp;
 
 };  // class CubeliftSwitchCommand

@@ -20,6 +20,7 @@
 #include "cubelift_switch_command.hpp"
 
 #include "engineer_cube_lift_constants.hpp"
+using namespace aruwsrc::control;
 
 namespace aruwsrc::engineer
 {

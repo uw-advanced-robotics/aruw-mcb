@@ -27,7 +27,7 @@
 
 #include "trigger_homed_joint_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::control
 {
 class TriggerHomedDualJointSubsystem : public TriggerHomedJointSubsystem
 {

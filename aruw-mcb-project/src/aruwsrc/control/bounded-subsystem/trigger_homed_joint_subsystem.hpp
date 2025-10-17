@@ -25,9 +25,9 @@
 
 #include "aruwsrc/control/bounded-subsystem/one_sided_bounded_subsystem_interface.hpp"
 #include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
-#include "aruwsrc/robot/engineer/joint_subsystem.hpp"
+#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::control
 {
 class TriggerHomedJointSubsystem : public aruwsrc::control::OneSidedBoundedSubsystemInterface,
                                    public JointSubsystem

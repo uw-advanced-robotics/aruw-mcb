@@ -24,7 +24,8 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "trigger_homed_joint_subsystem.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger_homed_joint_subsystem.hpp"
+using namespace aruwsrc::control;
 
 namespace aruwsrc::engineer
 {

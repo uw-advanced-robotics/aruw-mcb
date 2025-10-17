@@ -25,9 +25,9 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/robot/engineer/linear_pid_interface.hpp"
+#include "aruwsrc/control/engineer-joint/linear_pid_interface.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::control
 {
 /**
  * Subsystem code for joints that don't need to be homed.
@@ -77,6 +77,6 @@ protected:
     float maxOutput;
 };
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::control
 
 #endif  // JOINT_SUBSYSTEM_HPP_

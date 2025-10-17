@@ -19,7 +19,7 @@
 
 #include "trigger_homed_dual_joint_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::control
 {
 TriggerHomedDualJointSubsystem::TriggerHomedDualJointSubsystem(
     tap::Drivers* drivers,

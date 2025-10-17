@@ -25,7 +25,7 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::control
 {
 class LinearPIDInterface
 {
@@ -88,6 +88,6 @@ protected:
     const float epsilon, maxSetpointIncrement;
 };
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::control
 
 #endif  // LINEAR_JOINT_INTERFACE_HPP_
