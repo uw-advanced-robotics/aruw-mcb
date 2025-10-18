@@ -148,6 +148,7 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 /* define subsystems --------------------------------------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
+
 tap::motor::DjiMotor pitchMotor(
     drivers(),
     PITCH_MOTOR_ID,
@@ -707,6 +708,7 @@ void registerStandardSubsystems(Drivers *drivers)
 
     // Other subsystems are registered here too...
     drivers->commandScheduler.registerSubsystem(&agitator);
+    drivers->commandScheduler.registerSubsystem(&turret);
     // drivers->commandScheduler.registerSubsystem(&chassis);
     // chassis commented out for edu module
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
@@ -744,6 +746,7 @@ void setDefaultStandardCommands(Drivers *)
     // CALL the setDefaultCommand method on the turret subsystem
     // PASS a pointer to your turret user control command
     // This command will run whenever no other command is using the turret
+    turret.setDefaultCommand(&turretUserControlCommand);
 
     // Other default commands are set here too...
     // chassis.setDefaultCommand(&chassisAutorotateCommand);

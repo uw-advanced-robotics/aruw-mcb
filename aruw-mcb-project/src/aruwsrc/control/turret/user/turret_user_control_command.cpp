@@ -152,6 +152,10 @@ void TurretUserControlCommand::end(bool)
     // The 'interrupted' parameter tells you if the command was forcibly stopped
     // interrupted == true: Another command took control
     // interrupted == false: Command finished naturally (unlikely for user control)
+
+    // CHAT HOW DO WE LOG GIVE ME BACK EPILOGUE IN FRC
+    // interrupted.log()
+    // @clementine can you make it this easy :) 
 }
 
 }  // namespace aruwsrc::control::turret::user
