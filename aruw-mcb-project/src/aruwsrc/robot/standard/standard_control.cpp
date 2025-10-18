@@ -136,6 +136,10 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace standard_control
 {
+// sensitivity constants
+static constexpr float USER_YAW_INPUT_SCALAR = 0.05f;    // Radians per input unit
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.03f;  // Typically lower than yaw
+
 inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
@@ -374,26 +378,37 @@ algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurret
     worldFrameYawTurretImuVelPidCv);
 
 // turret commands
-user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
-    drivers(),
-    drivers()->controlOperatorInterface,
-    &turret,
-    &worldFrameYawChassisImuController,
-    &chassisFramePitchTurretController,
-    &worldFrameYawTurretImuController,
-    &worldFramePitchTurretImuController,
-    USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+user::TurretUserControlCommand turretUserControlCommand(
+    drivers(),                            // Global drivers object
+    drivers()->controlOperatorInterface,  // Input processing system
+    &turret,                              // Turret subsystem instance
+    &chassisFrameYawTurretController,     // Yaw control algorithm
+    &chassisFramePitchTurretController,   // Pitch control algorithm
+    USER_YAW_INPUT_SCALAR,                // Yaw sensitivity scaling
+    USER_PITCH_INPUT_SCALAR,              // Pitch sensitivity scaling
+    0);
 
-cv::TurretCVCommand turretCVCommand(
-    &drivers()->visionCoprocessor,
-    &drivers()->controlOperatorInterface,
-    &turret,
-    &worldFrameYawTurretImuControllerCv,
-    &worldFramePitchTurretImuControllerCv,
-    &ballisticsSolver,
-    USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+// Existing commands in actual mcb
+// user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
+//     drivers(),
+//     drivers()->controlOperatorInterface,
+//     &turret,
+//     &worldFrameYawChassisImuController,
+//     &chassisFramePitchTurretController,
+//     &worldFrameYawTurretImuController,
+//     &worldFramePitchTurretImuController,
+//     USER_YAW_INPUT_SCALAR,
+//     USER_PITCH_INPUT_SCALAR);
+
+// cv::TurretCVCommand turretCVCommand(
+//     &drivers()->visionCoprocessor,
+//     &drivers()->controlOperatorInterface,
+//     &turret,
+//     &worldFrameYawTurretImuControllerCv,
+//     &worldFramePitchTurretImuControllerCv,
+//     &ballisticsSolver,
+//     USER_YAW_INPUT_SCALAR,
+//     USER_PITCH_INPUT_SCALAR);
 
 NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
     buzzer,
@@ -478,17 +493,17 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&heatLimitGovernor});
 
 // rotates agitator when aiming at target and within heat limit
-CvOnTargetGovernor cvOnTargetGovernor(
-    ((tap::Drivers *)(drivers())),
-    drivers()->visionCoprocessor,
-    turretCVCommand,
-    autoAimLaunchTimer,
-    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
+// CvOnTargetGovernor cvOnTargetGovernor(
+//     ((tap::Drivers *)(drivers())),
+//     drivers()->visionCoprocessor,
+//     turretCVCommand,
+//     autoAimLaunchTimer,
+//     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
-    {&agitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-    {&heatLimitGovernor, &cvOnTargetGovernor});
+// GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+//     {&agitator},
+//     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+//     {&heatLimitGovernor, &cvOnTargetGovernor});
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -522,15 +537,15 @@ tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers())
 
 CapBankIndicator capBankIndicator(refSerialTransmitter, &drivers()->capacitorBank);
 
-extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
-MatrixHudIndicators positionHudIndicators(
-    *drivers(),
-    drivers()->visionCoprocessor,
-    refSerialTransmitter,
-    frictionWheels,
-    turret,
-    &leftMousePressedBNotPressed,
-    &cvOnTargetGovernor);
+// extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
+// MatrixHudIndicators positionHudIndicators(
+//     *drivers(),
+//     drivers()->visionCoprocessor,
+//     refSerialTransmitter,
+//     frictionWheels,
+//     turret,
+//     &leftMousePressedBNotPressed,
+//     &cvOnTargetGovernor);
 
 AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
 
@@ -557,16 +572,16 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 
-std::vector<HudIndicator *> hudIndicators = {
-    &capBankIndicator,
-    &positionHudIndicators,
-    &ammoIndicator,
-    &circleCrosshair,
-    &damageIndicator,
-    &textHudIndicators,
-    &visionTargetIndicator};
+// std::vector<HudIndicator *> hudIndicators = {
+//     &capBankIndicator,
+//     &positionHudIndicators,
+//     &ammoIndicator,
+//     &circleCrosshair,
+//     &damageIndicator,
+//     &textHudIndicators,
+//     &visionTargetIndicator};
 
-ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
+// ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
 /* define command mappings --------------------------------------------------*/
 
@@ -576,48 +591,48 @@ HoldRepeatCommandMapping rightSwitchMiddle(
     {&spinFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
     true);
-HoldRepeatCommandMapping rightSwitchUp(
-    drivers(),
-    {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    true);
+// HoldRepeatCommandMapping rightSwitchUp(
+//     drivers(),
+//     {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+//     true);
 
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&turretCVCommand, &chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+// HoldCommandMapping leftSwitchUp(
+//     drivers(),
+//     {&turretCVCommand, &chassisDriveCommand},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
-    drivers(),
-    RemoteMapState({Remote::Key::R}),
-    true,
-    &cvOnTargetGovernor,
-    &CvOnTargetGovernor::setGovernorEnabled);
+// CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+//     drivers(),
+//     RemoteMapState({Remote::Key::R}),
+//     true,
+//     &cvOnTargetGovernor,
+//     &CvOnTargetGovernor::setGovernorEnabled);
 
 ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
-MultiShotCvCommandMapping leftMousePressedBNotPressed(
-    *drivers(),
-    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-    &manualFireRateReselectionManager,
-    cvOnTargetGovernor,
-    &rotateAgitator);
+// MultiShotCvCommandMapping leftMousePressedBNotPressed(
+//     *drivers(),
+//     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+//     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
+//     &manualFireRateReselectionManager,
+//     cvOnTargetGovernor,
+//     &rotateAgitator);
 
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
     false);
-HoldCommandMapping rightMousePressed(
-    drivers(),
-    {&turretCVCommand},
-    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+// HoldCommandMapping rightMousePressed(
+//     drivers(),
+//     {&turretCVCommand},
+//     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
 
 PressCommandMapping zPressed(
     drivers(),
@@ -637,10 +652,10 @@ PressCommandMapping bNotCtrlPressedRightSwitchDown(
 // The user can press b+ctrl when the remote right switch is in the down position to restart the
 // client display command. This is necessary since we don't know when the robot is connected to the
 // server and thus don't know when to start sending the initial HUD graphics.
-PressCommandMapping bCtrlPressed(
-    drivers(),
-    {&clientDisplayCommand},
-    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+// PressCommandMapping bCtrlPressed(
+//     drivers(),
+//     {&clientDisplayCommand},
+//     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
 // The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
 // automatically once a different drive mode is chosen.
@@ -651,17 +666,17 @@ PressCommandMapping xPressed(
     {&chassisAutorotateCommand},
     RemoteMapState({Remote::Key::X}));
 
-CycleStateCommandMapping<
-    MultiShotCvCommandMapping::LaunchMode,
-    MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
-    MultiShotCvCommandMapping>
-    vPressed(
-        drivers(),
-        RemoteMapState({Remote::Key::V}),
-        MultiShotCvCommandMapping::LIMITED_20HZ,
-        &leftMousePressedBNotPressed,
-        &MultiShotCvCommandMapping::setShooterState,
-        RemoteMapState({Remote::Key::E}));
+// CycleStateCommandMapping<
+//     MultiShotCvCommandMapping::LaunchMode,
+//     MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
+//     MultiShotCvCommandMapping>
+//     vPressed(
+//         drivers(),
+//         RemoteMapState({Remote::Key::V}),
+//         MultiShotCvCommandMapping::LIMITED_20HZ,
+//         &leftMousePressedBNotPressed,
+//         &MultiShotCvCommandMapping::setShooterState,
+//         RemoteMapState({Remote::Key::E}));
 
 // cap bank
 PressCommandMapping cShiftPressed(
@@ -680,12 +695,20 @@ HoldCommandMapping ctrlPressed(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+// STEP 7A (Turret User Control): Register subsystem
 /* register subsystems here -------------------------------------------------*/
 void registerStandardSubsystems(Drivers *drivers)
 {
+    // TODO: Register the turret subsystem with command scheduler
+    // ACCESS the command scheduler through the drivers object
+    // CALL the register subsystem method
+    // PASS a pointer to the turret subsystem
+    // This makes the turret available for command scheduling
+
+    // Other subsystems are registered here too...
     drivers->commandScheduler.registerSubsystem(&agitator);
-    drivers->commandScheduler.registerSubsystem(&chassis);
-    drivers->commandScheduler.registerSubsystem(&turret);
+    // drivers->commandScheduler.registerSubsystem(&chassis);
+    // chassis commented out for edu module
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -700,7 +723,7 @@ void initializeSubsystems()
 {
     turret.initialize();
     voltageCurrentSensor.initialize();
-    chassis.initialize();
+    // chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();
     frictionWheels.initialize();
@@ -713,13 +736,21 @@ void initializeSubsystems()
     parallelOmni.initialize();
 }
 
+// STEP 7B (Turret User Control): Set default command
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    // TODO: Set turret default command
+    // CALL the setDefaultCommand method on the turret subsystem
+    // PASS a pointer to your turret user control command
+    // This command will run whenever no other command is using the turret
+
+    // Other default commands are set here too...
+    // chassis.setDefaultCommand(&chassisAutorotateCommand);
+    // in actual mcb, but we are using a simplfied version
+    // turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    // clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -734,26 +765,26 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *drivers)
+void registerStandardIoMappings(Drivers *)
 {
-    drivers->commandMapper.addMap(&rightSwitchMiddle);
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&rPressed);
-    drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedBPressed);
-    drivers->commandMapper.addMap(&rightMousePressed);
-    drivers->commandMapper.addMap(&zPressed);
-    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-    drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qPressed);
-    drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&vPressed);
-    drivers->commandMapper.addMap(&cShiftPressed);
-    drivers->commandMapper.addMap(&shiftPressed);
-    drivers->commandMapper.addMap(&ctrlPressed);
+    // drivers->commandMapper.addMap(&rightSwitchMiddle);
+    // drivers->commandMapper.addMap(&rightSwitchUp);
+    // drivers->commandMapper.addMap(&leftSwitchDown);
+    // drivers->commandMapper.addMap(&leftSwitchUp);
+    // drivers->commandMapper.addMap(&rPressed);
+    // drivers->commandMapper.addMap(&fToggled);
+    // drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
+    // drivers->commandMapper.addMap(&leftMousePressedBPressed);
+    // drivers->commandMapper.addMap(&rightMousePressed);
+    // drivers->commandMapper.addMap(&zPressed);
+    // drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+    // drivers->commandMapper.addMap(&bCtrlPressed);
+    // drivers->commandMapper.addMap(&qPressed);
+    // drivers->commandMapper.addMap(&xPressed);
+    // drivers->commandMapper.addMap(&vPressed);
+    // drivers->commandMapper.addMap(&cShiftPressed);
+    // drivers->commandMapper.addMap(&shiftPressed);
+    // drivers->commandMapper.addMap(&ctrlPressed);
 }
 }  // namespace standard_control
 
