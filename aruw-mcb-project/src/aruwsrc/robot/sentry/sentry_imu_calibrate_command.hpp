@@ -27,6 +27,7 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -34,6 +35,7 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 namespace aruwsrc::sentry
 {
 /**
@@ -82,13 +84,18 @@ public:
         algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-        aruwsrc::virtualMCB::MCBLite &chassisMCBLite);
+        aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
+        aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
+        aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
+        aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
     const char *getName() const override { return "Sentry calibrate IMU"; }
 
     void initialize() override;
 
     void execute() override;
+
+    bool isFinished() const override;
 
     void end(bool interrupted) override;
 
@@ -101,6 +108,9 @@ protected:
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu;
     aruwsrc::virtualMCB::MCBLite &chassisMCBLite;
+    aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
+    aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
+    aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
     // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
 };

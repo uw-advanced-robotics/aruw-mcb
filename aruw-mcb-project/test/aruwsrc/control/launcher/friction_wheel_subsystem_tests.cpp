@@ -28,6 +28,8 @@ using namespace testing;
 using namespace tap::arch::clock;
 using namespace aruwsrc::control::launcher;
 
+tap::communication::serial::RefSerial::Rx::RobotData ROBOT_DATA{};
+
 class FrictionWheelSubsystemTest : public Test
 {
 protected:
@@ -66,6 +68,7 @@ TEST_F(FrictionWheelSubsystemTest, refresh__0_output_when_desired_speed_0_shaft_
     EXPECT_CALL(frictionWheels.leftWheel, setDesiredOutput(0)).Times(2);
     ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(0)).Times(2);
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
 
     clock.time = 0;
     frictionWheels.initialize();
@@ -84,6 +87,7 @@ TEST_F(FrictionWheelSubsystemTest, refresh__positive_output_when_desired_speed_1
     EXPECT_CALL(frictionWheels.leftWheel, setDesiredOutput(Gt(0)));
     ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(Gt(0)));
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
 
     frictionWheels.setDesiredLaunchSpeed(10);
 
@@ -101,6 +105,7 @@ TEST_F(FrictionWheelSubsystemTest, refresh__negative_output_when_desired_speed_0
     ON_CALL(frictionWheels.rightWheel.getInternalEncoder(), getShaftRPM)
         .WillByDefault(Return(1000));
     EXPECT_CALL(frictionWheels.rightWheel, setDesiredOutput(Lt(0)));
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
 
     clock.time = 0;
     frictionWheels.initialize();
@@ -111,6 +116,8 @@ TEST_F(FrictionWheelSubsystemTest, refresh__negative_output_when_desired_speed_0
 
 TEST_F(FrictionWheelSubsystemTest, refresh_updates_desiredRpmRamp_when_target_not_reached)
 {
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
+
     frictionWheels.setDesiredLaunchSpeed(
         LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
             [MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT) - 1]

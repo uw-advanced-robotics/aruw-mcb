@@ -69,7 +69,11 @@ static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 #endif
-
+static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KP = 0.0f;
+static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KI = 5.0f;
+static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KD = 0.0f;
+static constexpr float LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM = 500.0f;
+static constexpr float LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT = 750.0f;
 /**
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.
@@ -87,7 +91,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {10.0f, 3750.0f},
-    {24.0f, 6200.0f},
+    {23.0f, 6300.0f},
     {30.0f, 7000.0f},
     {32.0f, 7900.0f},
 };
@@ -95,7 +99,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {10.0f, 3750.0f},
-    {24.5f, 6500.0f},
+    {23.0f, 6000.0f},
     {30.0f, 7000.0f},
     {32.0f, 7900.0f},
 };
@@ -128,10 +132,10 @@ static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 
 #if defined(TARGET_HERO_ZERO)
 static constexpr float LAUNCHER_SPEED =
-    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - .5;
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 1;
 #else
 static constexpr float LAUNCHER_SPEED =
-    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 1;
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 2;
 #endif
 
 }  // namespace aruwsrc::control::launcher
