@@ -18,14 +18,13 @@
  */
 
 #include "score_position_command.hpp"
-using namespace aruwsrc::control;
 
 namespace aruwsrc::engineer
 {
 ScorePositionCommand::ScorePositionCommand(
-    JointSubsystem& gantryLift,
+    aruwsrc::control::JointSubsystem& gantryLift,
     WristSubsystem& wrist,
-    JointSubsystem& roll)
+    aruwsrc::control::JointSubsystem& roll)
     : gantryLift(gantryLift),
       wrist(wrist),
       roll(roll)

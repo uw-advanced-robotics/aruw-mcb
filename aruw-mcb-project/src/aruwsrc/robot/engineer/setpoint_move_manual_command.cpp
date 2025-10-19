@@ -18,12 +18,11 @@
  */
 
 #include "setpoint_move_manual_command.hpp"
-using namespace aruwsrc::control;
 
 namespace aruwsrc::engineer
 {
 SetpointMoveManualCommand::SetpointMoveManualCommand(
-    JointSubsystem& subsystem,
+    aruwsrc::control::JointSubsystem& subsystem,
     aruwsrc::control::engineer::EngineerControlOperatorInterface* operatorInterface,
     float moveSpeed,
     SetpointType setpointType)

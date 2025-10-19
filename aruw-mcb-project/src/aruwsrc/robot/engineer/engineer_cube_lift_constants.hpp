@@ -25,7 +25,6 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/bounded-subsystem/trigger_homed_joint_subsystem.hpp"
-using namespace aruwsrc::control;
 
 namespace aruwsrc::engineer
 {
@@ -54,7 +53,7 @@ static constexpr float THREE_CUBE_SETPOINT = -310.0f;
 
 static constexpr float LIFT_UPPER_BOUND = THREE_CUBE_SETPOINT;
 
-static constexpr TriggerHomedJointSubsystem::Config CUBE_LIFT_CONFIG{
+static constexpr aruwsrc::control::TriggerHomedJointSubsystem::Config CUBE_LIFT_CONFIG{
     .super =  // JointSubsystem::Config
     {
         .super =  // LinearPIDInterface::Config

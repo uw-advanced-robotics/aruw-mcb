@@ -23,61 +23,61 @@ namespace aruwsrc::control
 {
 TriggerHomedDualJointSubsystem::TriggerHomedDualJointSubsystem(
     tap::Drivers* drivers,
-    tap::motor::MotorInterface& motorLeft,
-    tap::motor::MotorInterface& motorRight,
+    tap::motor::MotorInterface& motorOne,
+    tap::motor::MotorInterface& motorTwo,
     control::TriggerInterface& trigger,
     const tap::algorithms::SmoothPidConfig& configAlign,
     const TriggerHomedJointSubsystem::Config& config)
     : Subsystem(drivers),
       TriggerHomedJointSubsystem(
           drivers,
-          motorLeft,  // only left motor passed on bc we override everything that uses it anyway
+          motorOne,  // only left motor passed on bc we override everything that uses it anyway
                       // (jank but eh idk)
           trigger,
           config),
-      motorLeft(motorLeft),
-      motorRight(motorRight),
+          motorOne(motorOne),
+      motorTwo(motorTwo),
       alignPid(configAlign)
 {
 }
 
 void TriggerHomedDualJointSubsystem::initialize()
 {
-    motorLeft.initialize();
-    motorRight.initialize();
+    motorOne.initialize();
+    motorTwo.initialize();
 
     resetEncoderValue();
 }
 
 void TriggerHomedDualJointSubsystem::resetEncoderValue()
 {
-    motorLeft.getEncoder()->resetEncoderValue();
-    motorRight.getEncoder()->resetEncoderValue();
+    motorOne.getEncoder()->resetEncoderValue();
+    motorTwo.getEncoder()->resetEncoderValue();
 }
 
 float TriggerHomedDualJointSubsystem::getPosition() const
 {
-    return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() +
-            motorRight.getEncoder()->getPosition().getUnwrappedValue()) /
+    return (motorOne.getEncoder()->getPosition().getUnwrappedValue() +
+            motorTwo.getEncoder()->getPosition().getUnwrappedValue()) /
            2 * encoderRatio;
 }
 
 float TriggerHomedDualJointSubsystem::getVelocity() const
 {
-    return (motorLeft.getEncoder()->getVelocity() + motorRight.getEncoder()->getVelocity()) / 2 *
+    return (motorOne.getEncoder()->getVelocity() + motorTwo.getEncoder()->getVelocity()) / 2 *
            encoderRatio;
 }
 
 float TriggerHomedDualJointSubsystem::getPositionDifference()
 {
-    return (motorLeft.getEncoder()->getPosition().getUnwrappedValue() -
-            motorRight.getEncoder()->getPosition().getUnwrappedValue()) *
+    return (motorOne.getEncoder()->getPosition().getUnwrappedValue() -
+            motorTwo.getEncoder()->getPosition().getUnwrappedValue()) *
            encoderRatio;
 }
 
 float TriggerHomedDualJointSubsystem::getVelocityDifference()
 {
-    return (motorLeft.getEncoder()->getVelocity() - motorRight.getEncoder()->getVelocity()) *
+    return (motorOne.getEncoder()->getVelocity() - motorTwo.getEncoder()->getVelocity()) *
            encoderRatio;
 }
 
@@ -90,16 +90,16 @@ void TriggerHomedDualJointSubsystem::runPosPidController(float dt)
 
     float outputAlign = alignPid.runController(errorAlignment, getVelocityDifference(), 2.0f);
 
-    motorLeft.setDesiredOutput(std::clamp(outputPos + outputAlign, -maxOutput, maxOutput));
-    motorRight.setDesiredOutput(std::clamp(outputPos - outputAlign, -maxOutput, maxOutput));
+    motorOne.setDesiredOutput(std::clamp(outputPos + outputAlign, -maxOutput, maxOutput));
+    motorTwo.setDesiredOutput(std::clamp(outputPos - outputAlign, -maxOutput, maxOutput));
 }
 
 void TriggerHomedDualJointSubsystem::stopDuringHoming() { refreshSafeDisconnect(); }
 
 void TriggerHomedDualJointSubsystem::refreshSafeDisconnect()
 {
-    motorLeft.setDesiredOutput(0);
-    motorRight.setDesiredOutput(0);
+    motorOne.setDesiredOutput(0);
+    motorTwo.setDesiredOutput(0);
 }
 
 }  // namespace aruwsrc::control

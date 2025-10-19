@@ -20,11 +20,10 @@
 #include "cubelift_switch_command.hpp"
 
 #include "engineer_cube_lift_constants.hpp"
-using namespace aruwsrc::control;
 
 namespace aruwsrc::engineer
 {
-CubeliftSwitchCommand::CubeliftSwitchCommand(JointSubsystem& cubeLift, bool isDirectionUp)
+CubeliftSwitchCommand::CubeliftSwitchCommand(aruwsrc::control::JointSubsystem& cubeLift, bool isDirectionUp)
     : cubeLift(cubeLift),
       isDirectionUp(isDirectionUp)
 {

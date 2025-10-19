@@ -23,6 +23,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "aruwsrc/control/bounded-subsystem/trigger_homed_joint_subsystem.hpp"
 namespace aruwsrc::engineer
 {
 static constexpr tap::can::CanBus CAN_BUS_GANTRY = tap::can::CanBus::CAN_BUS1;
@@ -52,7 +53,7 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_ALIGN_PID_CONFIG =
     .maxOutput = 1000.0f,
 };
 
-static constexpr TriggerHomedJointSubsystem::Config GANTRY_LIFT_CONFIG{
+static constexpr aruwsrc::control::TriggerHomedJointSubsystem::Config GANTRY_LIFT_CONFIG{
     .super =  // JointSubsystem::Config
     {
         .super =  // LinearPIDInterface::Config
@@ -85,7 +86,7 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_PID_CONFIG = 
     .maxOutput = 2000.0f,
 };
 
-static constexpr TriggerHomedJointSubsystem::Config GANTRY_EXTENSION_CONFIG{
+static constexpr aruwsrc::control::TriggerHomedJointSubsystem::Config GANTRY_EXTENSION_CONFIG{
     .super =  // JointSubsystem::Config
     {
         .super =  // LinearPIDInterface::Config

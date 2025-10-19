@@ -28,7 +28,6 @@
 
 namespace aruwsrc::engineer::wrist
 {
-using namespace aruwsrc::control;
 using namespace aruwsrc::control::engineer;
 /**
  * A command that moves the engineer wrist based on the control operator interface.
@@ -37,7 +36,7 @@ class WristControllerCommand : public tap::control::Command
 {
 public:
     WristControllerCommand(
-        JointSubsystem &roll,
+        aruwsrc::control::JointSubsystem &roll,
         WristSubsystem &wrist,
         EngineerControlOperatorInterface *operatorInterface,
         float rollScalingFactor,
@@ -58,7 +57,7 @@ public:
     virtual bool isFinished() const override { return false; }
 
 private:
-    JointSubsystem &roll;
+    aruwsrc::control::JointSubsystem &roll;
     WristSubsystem &wrist;
 
     EngineerControlOperatorInterface *operatorInterface;

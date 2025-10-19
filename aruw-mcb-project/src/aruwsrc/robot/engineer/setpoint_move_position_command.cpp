@@ -21,7 +21,7 @@
 
 namespace aruwsrc::engineer
 {
-SetpointMovePositionCommand::SetpointMovePositionCommand(JointSubsystem &subsystem, float setpoint)
+SetpointMovePositionCommand::SetpointMovePositionCommand(aruwsrc::control::JointSubsystem &subsystem, float setpoint)
     : subsystem(subsystem),
       setpoint(setpoint)
 {

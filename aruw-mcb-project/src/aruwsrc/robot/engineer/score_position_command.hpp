@@ -26,14 +26,13 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 using namespace aruwsrc::engineer::wrist;
-using namespace aruwsrc::control;
 
 namespace aruwsrc::engineer
 {
 class ScorePositionCommand : public tap::control::Command
 {
 public:
-    ScorePositionCommand(JointSubsystem &gantryLift, WristSubsystem &wrist, JointSubsystem &roll);
+    ScorePositionCommand(aruwsrc::control::JointSubsystem &gantryLift, WristSubsystem &wrist, aruwsrc::control::JointSubsystem &roll);
 
     void initialize() override;
 
@@ -48,9 +47,9 @@ public:
     void cyclePositions(ScorePositions scorePos);
 
 private:
-    JointSubsystem &gantryLift;
+    aruwsrc::control::JointSubsystem &gantryLift;
     WristSubsystem &wrist;
-    JointSubsystem &roll;
+    aruwsrc::control::JointSubsystem &roll;
     ScorePositions scoringPosition;
 
 };  // class ScorePositionCommand

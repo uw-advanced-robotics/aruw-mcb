@@ -200,7 +200,6 @@ static void initializeIo(Drivers *drivers)
 #endif
 #if defined(TARGET_ENGINEER)
     drivers->engineerCVCommunication.initializeCV();
-    // i need to find where to actually put this
     drivers->digital.configureInputPullMode(
         tap::gpio::Digital::B,
         tap::gpio::Digital::InputPullMode::PullUp);

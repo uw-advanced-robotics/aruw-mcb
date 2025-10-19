@@ -277,7 +277,6 @@ DigitalOutSubsystem releaseSubsystem(
     false);
 
 /* define client display / HUD related items --------------------------------*/
-// engineer hud stuff doesn't actually work, but we don't know why (and we dont care)
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 

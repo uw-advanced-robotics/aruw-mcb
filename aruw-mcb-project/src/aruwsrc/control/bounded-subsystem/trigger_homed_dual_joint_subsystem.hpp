@@ -34,8 +34,8 @@ class TriggerHomedDualJointSubsystem : public TriggerHomedJointSubsystem
 public:
     TriggerHomedDualJointSubsystem(
         tap::Drivers *drivers,
-        tap::motor::MotorInterface &motorLeft,
-        tap::motor::MotorInterface &motorRight,
+        tap::motor::MotorInterface &motorOne,
+        tap::motor::MotorInterface &motorTwo,
         control::TriggerInterface &trigger,
         const tap::algorithms::SmoothPidConfig
             &alignPidConfig,  // could put this in another layer of struct but seems unnecessary
@@ -64,8 +64,7 @@ protected:
     void stopDuringHoming() override;
 
 private:
-    // todo: technically don't need to store both motors here since `JointSubsystem` already has one
-    tap::motor::MotorInterface &motorLeft, &motorRight;
+    tap::motor::MotorInterface &motorOne, &motorTwo; // motor one is stored as motor in parent class JointSubsystem
     tap::algorithms::SmoothPid alignPid;
 };
 

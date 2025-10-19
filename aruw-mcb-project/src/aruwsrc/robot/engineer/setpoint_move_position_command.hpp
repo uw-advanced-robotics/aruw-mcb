@@ -23,15 +23,13 @@
 
 #include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
 
-using namespace aruwsrc::control;
-
 namespace aruwsrc::engineer
 
 {
 class SetpointMovePositionCommand : public tap::control::Command
 {
 public:
-    SetpointMovePositionCommand(JointSubsystem &subsystem, float setpoint);
+    SetpointMovePositionCommand(aruwsrc::control::JointSubsystem &subsystem, float setpoint);
 
     void initialize() override;
 
@@ -44,7 +42,7 @@ public:
     const char *getName() const override { return "Setpoint Move Position Command"; }
 
 private:
-    JointSubsystem &subsystem;
+    aruwsrc::control::JointSubsystem &subsystem;
     float setpoint;
 
 };  // class SetpointMovePositionCommand

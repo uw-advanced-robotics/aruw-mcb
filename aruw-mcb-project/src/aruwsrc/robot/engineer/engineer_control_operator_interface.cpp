@@ -41,9 +41,7 @@ bool EngineerControlOperatorInterface::isGantryWristControlMode()
 
 float EngineerControlOperatorInterface::getCubeLiftVelocity()
 {
-    // CubeLift_Switch_Command might break if manual cubelift adjustment is added back
-    // if (isGantryWristControlMode())
-    //     return drivers->remote.getChannel(Remote::Channel::WHEEL);
+    // Note: CubeLiftSwitchCommand will break if cubelift is manually moved to the wrong place
     return 0.0f;
 }
 
