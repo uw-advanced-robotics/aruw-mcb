@@ -23,7 +23,6 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
-
 #include "aruwsrc/control/bounded-subsystem/trigger_homed_joint_subsystem.hpp"
 namespace aruwsrc::engineer
 {

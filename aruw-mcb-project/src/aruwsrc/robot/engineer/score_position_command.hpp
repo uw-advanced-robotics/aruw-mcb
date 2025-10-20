@@ -32,10 +32,7 @@ namespace aruwsrc::engineer
 class ScorePositionCommand : public tap::control::Command
 {
 public:
-    ScorePositionCommand(
-        aruwsrc::control::JointSubsystem &gantryLift,
-        WristSubsystem &wrist,
-        aruwsrc::control::JointSubsystem &roll);
+    ScorePositionCommand(aruwsrc::control::JointSubsystem &gantryLift, WristSubsystem &wrist, aruwsrc::control::JointSubsystem &roll);
 
     void initialize() override;
 
