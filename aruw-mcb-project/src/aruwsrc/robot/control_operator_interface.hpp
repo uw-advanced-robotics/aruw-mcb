@@ -144,7 +144,7 @@ public:
     mockable float getSentrySpeedInput();
 
 protected:
-    tap::Drivers *drivers;
+    tap::Drivers* drivers;
 
     uint32_t prevUpdateCounterX = 0;
     uint32_t prevUpdateCounterY = 0;

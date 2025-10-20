@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LINEAR_PID_INTERFACE_HPP_
-#define LINEAR_PID_INTERFACE_HPP_
+#ifndef LINEAR_SETPOINT_INTERFACE_HPP_
+#define LINEAR_SETPOINT_INTERFACE_HPP_
 
 #include "tap/algorithms/ramp.hpp"
 #include "tap/control/subsystem.hpp"
@@ -35,7 +35,7 @@ public:
         float lowerBound = 0.0f, upperBound = 0.0f;
         float epsilon = 1e-4;
         float maxSetpointIncrement = FLT_MAX;
-        float initSetpoint = 0; 
+        float initSetpoint = 0;
     };
 
     LinearSetpointInterface(Config config)
