@@ -85,7 +85,7 @@ public:
     static constexpr float MAX_ACCELERATION_R = 40'000.0f;
     static constexpr float MAX_DECELERATION_R = 50'000.0f;
 
-    ControlOperatorInterface(tap::Drivers *drivers) : drivers(drivers) {}
+    ControlOperatorInterface(tap::Drivers* drivers) : drivers(drivers) {}
     DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)
     mockable ~ControlOperatorInterface() = default;
 
@@ -167,8 +167,15 @@ protected:
      */
     float applyChassisSpeedScaling(float value);
 
+    /**
+     * @param[out] ramp Ramp that should have acceleration applied to. The ramp is updated some
+     * increment based on the passed in acceleration values. Ramp stores values in some units.
+     * @param[in] maxAcceleration Positive acceleration value to apply to the ramp in units/time^2.
+     * @param[in] maxDeceleration Negative acceleration value to apply to the ramp, in units/time^2.
+     * @param[in] dt Change in time since this function was last called, in units of some time.
+     */
     void applyAccelerationToRamp(
-        tap::algorithms::Ramp &ramp,
+        tap::algorithms::Ramp& ramp,
         float maxAcceleration,
         float maxDeceleration,
         float dt);
