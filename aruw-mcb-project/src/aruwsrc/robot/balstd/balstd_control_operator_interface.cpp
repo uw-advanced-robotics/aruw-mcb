@@ -55,7 +55,12 @@ float BalstdControlOperatorInterface::getManualLegYForce() const
 
 float BalstdControlOperatorInterface::getManualWheelTorque() const
 {
-    return drivers->remote.getChannel(Channel::WHEEL) * MAX_WHEEL_TORQUE;
+    return drivers->remote.getChannel(Channel::RIGHT_VERTICAL) * MAX_WHEEL_TORQUE;
+}
+
+float BalstdControlOperatorInterface::getManualSteerTorque() const
+{
+    return drivers->remote.getChannel(Channel::RIGHT_HORIZONTAL) * MAX_STEER_TORQUE;
 }
 
 }  // namespace aruwsrc::balstd
