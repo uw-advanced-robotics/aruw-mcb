@@ -42,7 +42,7 @@ namespace blank_control
 
 // TODO: instantiate buzzer subsystem
 // BuzzerSubsystem buzzer(...)
-BuzzerSubsystem buzzer(drivers);
+BuzzerSubsystem buzzer(drivers());
 
 NoteSequenceCommand hesAPirateCommand(buzzer, HES_A_PIRATE_NOTES, HES_A_PIRATE_NOTE_LENGTH_MS);
 
