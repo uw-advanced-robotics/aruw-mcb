@@ -25,19 +25,19 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/control/engineer-joint/linear_pid_interface.hpp"
+#include "aruwsrc/control/engineer-joint/linear_setpoint_interface.hpp"
 
 namespace aruwsrc::control
 {
 /**
  * Subsystem code for joints that don't need to be homed.
  */
-class JointSubsystem : public LinearPIDInterface, public virtual tap::control::Subsystem
+class JointSubsystem : public LinearSetpointInterface, public virtual tap::control::Subsystem
 {
 public:
     struct Config
     {
-        LinearPIDInterface::Config super;
+        LinearSetpointInterface::Config super;
 
         // Conversion factor from encoder measurement to joint position, assuming linear
         // relationship (e.g. pulley radius for a prismatic joint, gear ratio for a rotary joint,

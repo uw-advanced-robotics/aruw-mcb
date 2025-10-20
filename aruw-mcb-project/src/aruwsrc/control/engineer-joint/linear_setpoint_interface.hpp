@@ -27,7 +27,7 @@
 
 namespace aruwsrc::control
 {
-class LinearPIDInterface
+class LinearSetpointInterface
 {
 public:
     struct Config
@@ -35,10 +35,10 @@ public:
         float lowerBound = 0.0f, upperBound = 0.0f;
         float epsilon = 1e-4;
         float maxSetpointIncrement = FLT_MAX;
-        float initSetpoint = 0;  // is this needed
+        float initSetpoint = 0; 
     };
 
-    LinearPIDInterface(Config config)
+    LinearSetpointInterface(Config config)
         : setpoint(config.initSetpoint),
           lowerBound(config.lowerBound),
           upperBound(config.upperBound),
@@ -90,4 +90,4 @@ protected:
 
 }  // namespace aruwsrc::control
 
-#endif  // LINEAR_JOINT_INTERFACE_HPP_
+#endif  // LINEAR_SETPOINT_INTERFACE_HPP_
