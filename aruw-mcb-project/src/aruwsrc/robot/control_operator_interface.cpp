@@ -35,31 +35,6 @@ namespace control
 {
 float ControlOperatorInterface::applyChassisSpeedScaling(float value) { return value; }
 
-/**
- * @param[out] ramp Ramp that should have acceleration applied to. The ramp is updated some
- * increment based on the passed in acceleration values. Ramp stores values in some units.
- * @param[in] maxAcceleration Positive acceleration value to apply to the ramp in units/time^2.
- * @param[in] maxDeceleration Negative acceleration value to apply to the ramp, in units/time^2.
- * @param[in] dt Change in time since this function was last called, in units of some time.
- */
-// static inline void applyAccelerationToRamp(
-//     tap::algorithms::Ramp &ramp,
-//     float maxAcceleration,
-//     float maxDeceleration,
-//     float dt)
-// {
-//     if (getSign(ramp.getTarget()) == getSign(ramp.getValue()) &&
-//         abs(ramp.getTarget()) > abs(ramp.getValue()))
-//     {
-//         // we are trying to speed up
-//         ramp.update(maxAcceleration * dt);
-//     }
-//     else
-//     {
-//         // we are trying to slow down
-//         ramp.update(maxDeceleration * dt);
-//     }
-// }
 void ControlOperatorInterface::applyAccelerationToRamp(
     tap::algorithms::Ramp &ramp,
     float maxAcceleration,
