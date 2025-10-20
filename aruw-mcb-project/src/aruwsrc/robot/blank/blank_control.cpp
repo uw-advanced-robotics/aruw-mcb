@@ -49,6 +49,7 @@ NoteSequenceCommand hesAPirateCommand(buzzer, HES_A_PIRATE_NOTES, HES_A_PIRATE_N
 void initializeSubsystems()
 {
     // TODO: register initialize buzzer subsystem
+    drivers()->commandScheduler.registerSubsystem(&buzzer);
     buzzer.initialize();
 
     buzzer.setDefaultCommand(&hesAPirateCommand);
