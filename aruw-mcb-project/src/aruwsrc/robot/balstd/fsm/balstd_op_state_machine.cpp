@@ -71,9 +71,7 @@ void BalstdOpStateMachine::refresh()
 
     if (!chassis.allMotorsOnline())
     {
-        updateState(BalstdOpState::FALLEN);
         playChime(&chassisOfflineChime);
-        updateState(BalstdOpState::SITTING);
     }
 
     if (disarmRequested)
