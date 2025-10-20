@@ -24,6 +24,7 @@
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 #include "tap/control/subsystem.hpp"
 
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_state.hpp"
 #include "aruwsrc/robot/balstd/chassis/balstd_chassis_subsystem.hpp"
@@ -43,8 +44,7 @@ public:
             aruwsrc::balstd::chassis::controllers::BalstdChassisControllerInterface*,
             static_cast<size_t>(BalstdOpState::NUM_STATES)> controllers,
         tap::communication::sensors::imu::AbstractIMU& chassisImu,
-        aruwsrc::control::buzzer::NoteSequenceCommand* stateTransitionFailChime = nullptr,
-        aruwsrc::control::buzzer::NoteSequenceCommand* watchdogInterventionChime = nullptr);
+        aruwsrc::control::buzzer::BuzzerSubsystem& buzzer);
 
     void initialize() override;
 
@@ -89,8 +89,8 @@ private:
         controllers;
     tap::communication::sensors::imu::AbstractIMU& chassisImu;
 
-    aruwsrc::control::buzzer::NoteSequenceCommand* stateTransitionFailChime;
-    aruwsrc::control::buzzer::NoteSequenceCommand* watchdogInterventionChime;
+    aruwsrc::control::buzzer::NoteSequenceCommand stateTransitionFailChime,
+        watchdogInterventionChime, chassisOfflineChime;
 
     bool getUpRequested{0}, disarmRequested{0};
 

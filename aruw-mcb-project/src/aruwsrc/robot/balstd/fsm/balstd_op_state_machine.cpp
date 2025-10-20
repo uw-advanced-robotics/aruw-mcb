@@ -19,6 +19,8 @@
 
 #include "balstd_op_state_machine.hpp"
 
+#include "aruwsrc/control/buzzer/note_sequences.hpp"
+
 using namespace tap::communication::sensors::imu;
 
 namespace aruwsrc::balstd::fsm
@@ -30,16 +32,25 @@ BalstdOpStateMachine::BalstdOpStateMachine(
         aruwsrc::balstd::chassis::controllers::BalstdChassisControllerInterface*,
         static_cast<size_t>(BalstdOpState::NUM_STATES)> controllers,
     AbstractIMU& chassisImu,
-    aruwsrc::control::buzzer::NoteSequenceCommand* stateTransitionFailChime,
-    aruwsrc::control::buzzer::NoteSequenceCommand* watchdogInterventionChime)
+    aruwsrc::control::buzzer::BuzzerSubsystem& buzzer)
     : Subsystem(drivers),
       currentState(BalstdOpState::FALLEN),
       chassis(chassis),
       chassisState(chassis.getChassisState()),
       controllers(controllers),
       chassisImu(chassisImu),
-      stateTransitionFailChime(stateTransitionFailChime),
-      watchdogInterventionChime(watchdogInterventionChime)
+      stateTransitionFailChime(
+          buzzer,
+          aruwsrc::control::buzzer::STATE_TRANSITION_FAIL_NOTES,
+          aruwsrc::control::buzzer::STATE_TRANSITION_FAIL_NOTE_LENGTH_MS),
+      watchdogInterventionChime(
+          buzzer,
+          aruwsrc::control::buzzer::WATCHDOG_INTERVENTION_NOTES,
+          aruwsrc::control::buzzer::WATCHDOG_INTERVENTION_NOTE_LENGTH_MS),
+      chassisOfflineChime(
+          buzzer,
+          aruwsrc::control::buzzer::CHASSIS_OFFLINE_NOTES,
+          aruwsrc::control::buzzer::CHASSIS_OFFLINE_NOTE_LENGTH_MS)
 {
 }
 
@@ -54,8 +65,15 @@ void BalstdOpStateMachine::refresh()
     if (watchdogTriggered() && currentState != BalstdOpState::FALLEN && isImuCalibrated())
     {
         updateState(BalstdOpState::FALLEN);
-        playChime(watchdogInterventionChime);
+        playChime(&watchdogInterventionChime);
         return;
+    }
+
+    if (!chassis.allMotorsOnline())
+    {
+        updateState(BalstdOpState::FALLEN);
+        playChime(&chassisOfflineChime);
+        updateState(BalstdOpState::SITTING);
     }
 
     if (disarmRequested)
@@ -73,7 +91,7 @@ void BalstdOpStateMachine::refresh()
         }
         else
         {
-            playChime(stateTransitionFailChime);
+            playChime(&stateTransitionFailChime);
         }
         getUpRequested = false;
         return;

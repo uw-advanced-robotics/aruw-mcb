@@ -139,14 +139,6 @@ BalstdChassisSubsystem chassis(drivers(), leftLeg, rightLeg, drivers()->chassisI
 BuzzerSubsystem buzzer(drivers());
 
 NoteSequenceCommand startupChime(buzzer, MEGALOVANIA_NOTES, MEGALOVANIA_NOTE_LENGTH_MS);
-NoteSequenceCommand stateTransitionFailChime(
-    buzzer,
-    STATE_TRANSITION_FAIL_NOTES,
-    STATE_TRANSITION_FAIL_NOTE_LENGTH_MS);
-NoteSequenceCommand watchdogInterventionChime(
-    buzzer,
-    WATCHDOG_INTERVENTION_NOTES,
-    WATCHDOG_INTERVENTION_NOTE_LENGTH_MS);
 
 // controllers
 
@@ -161,8 +153,7 @@ BalstdOpStateMachine stateMachine(
      nullptr,               // FALLEN
      &balanceController},   // BALANCING
     drivers()->chassisIsm330,
-    &stateTransitionFailChime,
-    &watchdogInterventionChime);
+    buzzer);
 
 FSMEventTriggerCommand getUpCommand(&stateMachine, &BalstdOpStateMachine::requestGetUp);
 FSMEventTriggerCommand disarmCommand(&stateMachine, &BalstdOpStateMachine::requestDisarm);
