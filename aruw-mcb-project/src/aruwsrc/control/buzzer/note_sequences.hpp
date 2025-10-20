@@ -53,6 +53,14 @@ static constexpr std::array<uint8_t, 32> SEVEN_NATION_ARMY_NOTES{
     {27, 27, 27, 27, 27, 0,  27, 27, 30, 0,  0,  27, 0,  0,  25, 0,
      23, 23, 23, 23, 23, 23, 0,  0,  22, 22, 22, 22, 22, 22, 0,  0}};
 
+static constexpr uint32_t HES_A_PIRATE_NOTE_LENGTH_MS = 145;
+static constexpr std::array<uint8_t, 96> HES_A_PIRATE_NOTES{{
+    27, 30, 32, 0, 32, 0, 32, 34, 35, 0,  35, 0, 35, 37, 34, 0, 34, 0, 32, 30, 30, 32, 0, 0,
+    27, 30, 32, 0, 32, 0, 32, 34, 35, 0,  35, 0, 35, 37, 34, 0, 34, 0, 32, 30, 32, 0,  0, 0,
+    27, 30, 32, 0, 32, 0, 32, 35, 37, 0,  37, 0, 37, 39, 40, 0, 40, 0, 39, 37, 39, 32, 0, 0,
+    32, 34, 35, 0, 35, 0, 37, 0,  39, 32, 0,  0, 32, 35, 34, 0, 34, 0, 35, 32, 34, 0,  0, 0,
+}};
+
 static constexpr uint32_t IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS = MARIO_MUSHROOM_NOTE_LENGTH_MS;
 static constexpr auto& IMU_CALIBRATE_SUCCESS_NOTES = MARIO_MUSHROOM_NOTES;
 
