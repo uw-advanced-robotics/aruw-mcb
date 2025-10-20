@@ -32,10 +32,10 @@ TriggerHomedDualJointSubsystem::TriggerHomedDualJointSubsystem(
       TriggerHomedJointSubsystem(
           drivers,
           motorOne,  // only left motor passed on bc we override everything that uses it anyway
-                     // (jank but eh idk)
+                      // (jank but eh idk)
           trigger,
           config),
-      motorOne(motorOne),
+          motorOne(motorOne),
       motorTwo(motorTwo),
       alignPid(configAlign)
 {

@@ -64,8 +64,7 @@ protected:
     void stopDuringHoming() override;
 
 private:
-    tap::motor::MotorInterface &motorOne,
-        &motorTwo;  // motor one is stored as motor in parent class JointSubsystem
+    tap::motor::MotorInterface &motorOne, &motorTwo; // motor one is stored as motor in parent class JointSubsystem
     tap::algorithms::SmoothPid alignPid;
 };
 
