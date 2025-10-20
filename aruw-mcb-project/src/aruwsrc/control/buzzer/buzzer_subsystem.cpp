@@ -24,18 +24,6 @@
 namespace aruwsrc::control::buzzer
 {
 
-BuzzerSubsystem::BuzzerSubsystem(tap::Drivers* drivers) : Subsystem(drivers){};
-
-void BuzzerSubsystem::playFrequency(float frequency) {
-    tap::buzzer::playNote(&(drivers->pwm), frequency);
-}
-
-void BuzzerSubsystem::playNote(uint8_t note) {
-    playFrequency(NOTE_FREQUENCIES[note]);
-}
-
-void BuzzerSubsystem::stop() {
-    tap::buzzer::silenceBuzzer(&(drivers->pwm));
-}
+// TODO: Write function implementations
 
 }  // namespace aruwsrc::control::buzzer
