@@ -24,7 +24,6 @@
 
 namespace aruwsrc::communication::serial
 {
-
 RttTelemetry::RttTelemetry(tap::Drivers* drivers)
     : drivers(drivers),
       rtt(0),  // Use RTT channel 0
@@ -39,7 +38,7 @@ void RttTelemetry::initialize()
 {
     // RTT is automatically initialized by the modm framework
     // Send initialization message
-    rttStream << "{\"type\":\"init\",\"timestamp\":" << getTimestamp() 
+    rttStream << "{\"type\":\"init\",\"timestamp\":" << getTimestamp()
               << ",\"message\":\"RTT Telemetry Initialized\"}" << modm::endl;
 }
 
@@ -65,9 +64,8 @@ void RttTelemetry::sendLogMessage(const char* level, const char* message)
 {
     if (!isReady()) return;
 
-    rttStream << "{\"type\":\"log\",\"timestamp\":" << getTimestamp() 
-              << ",\"level\":\"" << level << "\",\"message\":\"" << message << "\"}" 
-              << modm::endl;
+    rttStream << "{\"type\":\"log\",\"timestamp\":" << getTimestamp() << ",\"level\":\"" << level
+              << "\",\"message\":\"" << message << "\"}" << modm::endl;
 }
 
 size_t RttTelemetry::sendRawData(const uint8_t* data, size_t length)
@@ -79,7 +77,8 @@ bool RttTelemetry::isReady() const
 {
     // Check if there's space in the transmit buffer
     // Cast away const since transmitBufferSize() is not const but doesn't modify state
-    return const_cast<modm::platform::Rtt&>(rtt).transmitBufferSize() > 100; // Keep some buffer space
+    return const_cast<modm::platform::Rtt&>(rtt).transmitBufferSize() >
+           100;  // Keep some buffer space
 }
 
 void RttTelemetry::update()
@@ -90,22 +89,18 @@ void RttTelemetry::update()
         rttStream << "{\"type\":\"heartbeat\",\"timestamp\":" << getTimestamp()
                   << ",\"counter\":" << messageCounter++ << ",\"data\":{"
                   << "\"uptime\":" << tap::arch::clock::getTimeMilliseconds() << ","
-                  << "\"bufferSize\":" << rtt.transmitBufferSize()
-                  << "}}" << modm::endl;
+                  << "\"bufferSize\":" << rtt.transmitBufferSize() << "}}" << modm::endl;
     }
 }
 
-uint32_t RttTelemetry::getTimestamp() const
-{
-    return tap::arch::clock::getTimeMilliseconds();
-}
+uint32_t RttTelemetry::getTimestamp() const { return tap::arch::clock::getTimeMilliseconds(); }
 
 void RttTelemetry::sendFormattedMessage(const char* type, const char* data)
 {
     if (!isReady()) return;
 
-    rttStream << "{\"type\":\"" << type << "\",\"timestamp\":" << getTimestamp()
-              << ",\"data\":\"" << data << "\"}" << modm::endl;
+    rttStream << "{\"type\":\"" << type << "\",\"timestamp\":" << getTimestamp() << ",\"data\":\""
+              << data << "\"}" << modm::endl;
 }
 
-} // namespace aruwsrc::communication::serial
+}  // namespace aruwsrc::communication::serial

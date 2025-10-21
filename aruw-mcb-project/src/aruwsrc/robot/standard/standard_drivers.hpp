@@ -37,8 +37,8 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/inter_robot_comm/inter_robot_transmitter.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330.hpp"
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/communication/serial/rtt_telemetry.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
 #endif

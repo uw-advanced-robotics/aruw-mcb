@@ -20,9 +20,10 @@
 #ifndef RTT_TELEMETRY_HPP_
 #define RTT_TELEMETRY_HPP_
 
-#include "modm/platform/rtt/rtt.hpp"
-#include "modm/io/iostream.hpp"
 #include "tap/architecture/periodic_timer.hpp"
+
+#include "modm/io/iostream.hpp"
+#include "modm/platform/rtt/rtt.hpp"
 
 namespace tap
 {
@@ -34,7 +35,7 @@ namespace aruwsrc::communication::serial
 /**
  * RTT (Real Time Transfer) telemetry handler for sending debug and diagnostic
  * information to the host through J-Link RTT protocol without halting the target.
- * 
+ *
  * This class provides a non-blocking interface for streaming telemetry data
  * through the J-Link RTT channel 0, which can be accessed via OpenOCD and
  * telnet on port 9090.
@@ -105,10 +106,10 @@ private:
     modm::platform::Rtt rtt;
     modm::IODeviceObjectWrapper<modm::platform::Rtt, modm::IOBuffer::DiscardIfFull> rttDevice;
     modm::IOStream rttStream;
-    
+
     // Timer for periodic telemetry updates
     tap::arch::PeriodicMilliTimer periodicTimer;
-    
+
     // Counter for periodic messages
     uint32_t messageCounter;
 
@@ -124,6 +125,6 @@ private:
     void sendFormattedMessage(const char* type, const char* data);
 };
 
-} // namespace aruwsrc::communication::serial
+}  // namespace aruwsrc::communication::serial
 
-#endif // RTT_TELEMETRY_HPP_
+#endif  // RTT_TELEMETRY_HPP_
