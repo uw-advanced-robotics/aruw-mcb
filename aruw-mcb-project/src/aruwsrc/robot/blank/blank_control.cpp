@@ -45,6 +45,9 @@ namespace blank_control
 
 NoteSequenceCommand hesAPirateCommand(buzzer, HES_A_PIRATE_NOTES, HES_A_PIRATE_NOTE_LENGTH_MS);
 
+BuzzerSubsystem buzzer(drivers());
+
+
 void initializeSubsystems()
 {
     // TODO: register initialize buzzer subsystem
