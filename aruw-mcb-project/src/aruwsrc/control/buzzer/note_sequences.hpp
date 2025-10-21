@@ -61,6 +61,22 @@ static constexpr std::array<uint8_t, 96> HES_A_PIRATE_NOTES{{
     32, 34, 35, 0, 35, 0, 37, 0,  39, 32, 0,  0, 32, 35, 34, 0, 34, 0, 35, 32, 34, 0,  0, 0,
 }};
 
+static constexpr uint32_t UNKNOWN_RM_THEME_NOTE_LENGTH_MS = 800;
+static constexpr std::array<uint8_t, 16> UNKNOWN_RM_THEME_NOTES{
+    {34, 42, 42, 42, 34, 39, 39, 39, 35, 44, 44, 44, 39, 41, 41, 41}};
+
+static constexpr uint32_t SUMMONING_GLORY_NOTE_LENGTH_MS = 215;
+static constexpr std::array<uint8_t, 64> SUMMONING_GLORY_NOTES{{
+    37, 37, 37, 37, 37, 39, 39, 40, 40, 40, 40, 40, 37, 37, 37, 37, 35, 35, 35, 35, 35, 37,
+    35, 34, 34, 34, 34, 34, 30, 30, 30, 30, 37, 37, 37, 37, 37, 39, 39, 40, 40, 40, 40, 35,
+    40, 40, 42, 42, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 0,  0,  0,  0,
+}};
+
+static constexpr uint32_t FUNK_IN_KINGDOM_NOTE_LENGTH_MS = 130;
+static constexpr std::array<uint8_t, 32> FUNK_IN_KINGDOM_NOTES{
+    {34, 0,  37, 0, 41, 0, 34, 32, 34, 0,  37, 41, 0,  0,  0,  34,
+     0,  34, 37, 0, 41, 0, 37, 0,  39, 39, 39, 0,  37, 37, 37, 0}};
+
 static constexpr uint32_t IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS = MARIO_MUSHROOM_NOTE_LENGTH_MS;
 static constexpr auto& IMU_CALIBRATE_SUCCESS_NOTES = MARIO_MUSHROOM_NOTES;
 
