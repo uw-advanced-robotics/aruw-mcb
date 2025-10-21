@@ -25,6 +25,7 @@
 #include "tap/board/board.hpp"
 
 #include "modm/architecture/interface/delay.hpp"
+#include "modm/platform/rtt/rtt.hpp"
 
 /* arch includes ------------------------------------------------------------*/
 #include "tap/architecture/periodic_timer.hpp"
@@ -146,6 +147,9 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
             checkTurretMcbDisconnection(drivers);
+#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
+            PROFILE(drivers->profiler, ((Drivers *)drivers)->rttTelemetry.update, ());
+#endif
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
@@ -184,6 +188,9 @@ static void initializeIo(Drivers *drivers)
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
+#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
+    ((Drivers *)drivers)->rttTelemetry.initialize();
+#endif
 #endif
 #if defined(TARGET_SENTRY_ECLIPSE)
     drivers->turretMCBCanCommBus2.init();
