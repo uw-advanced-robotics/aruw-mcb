@@ -21,14 +21,6 @@
 
 #include "tap/drivers.hpp"
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-#include "aruwsrc/robot/standard/standard_drivers.hpp"
-#elif defined(TARGET_SENTRY_ECLIPSE)
-#include "aruwsrc/robot/sentry/sentry_drivers.hpp"
-#elif defined(TARGET_ENGINEER)
-#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#endif
-
 #define STRINGIFYMACRO(s) MACROSTR(s)
 #define MACROSTR(s) #s
 
@@ -73,22 +65,6 @@ void AboutMenu::draw()
     display << "Sha: " << LAST_SHA << modm::endl;
     display << "Last Built: " << LAST_DATE << modm::endl;
     display << "Branch Name: " << BRANCH_NAME << modm::endl;
-
-    // Send telemetry data via RTT when about menu is displayed
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
-    auto *drivers = static_cast<aruwsrc::standard::Drivers *>(aruwsrc::DoNotUse_getDrivers());
-    if (drivers != nullptr)
-    {
-        drivers->rttTelemetry
-            .sendAboutInfo(ROBOT_NAME, LAST_USER, LAST_SHA, LAST_DATE, BRANCH_NAME);
-    }
-#endif
-#elif defined(TARGET_SENTRY_ECLIPSE)
-    // TODO: Add sentry RTT telemetry when implemented
-#elif defined(TARGET_ENGINEER)
-    // TODO: Add engineer RTT telemetry when implemented
-#endif
 
     drawn = true;
 }
