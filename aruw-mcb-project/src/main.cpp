@@ -149,9 +149,9 @@ int main()
             checkTurretMcbDisconnection(drivers);
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+#if defined(ALL_STANDARDS)
 #if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
-            PROFILE(drivers->profiler, ((Drivers *)drivers)->rttTelemetry.update, ());
+            PROFILE(drivers->profiler, ((Drivers *)drivers)->rttTelemetry.updateTelemetryAsync, ());
 #endif
 #endif
 
@@ -192,7 +192,7 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+#if defined(ALL_STANDARDS)
 #if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
     ((Drivers *)drivers)->rttTelemetry.initialize();
 #endif

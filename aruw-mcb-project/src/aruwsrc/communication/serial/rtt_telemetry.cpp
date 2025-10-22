@@ -108,7 +108,8 @@ static bool readFromSeggerRTT(uint8_t& data)
 namespace aruwsrc::communication::serial
 {
 RttTelemetry::RttTelemetry(tap::Drivers* drivers)
-    : drivers(drivers),
+    : modm::pt::Protothread(),
+      drivers(drivers),
       controlInterface(nullptr),
       refSerial(nullptr),
       visionProcessor(nullptr),
@@ -116,8 +117,18 @@ RttTelemetry::RttTelemetry(tap::Drivers* drivers)
       ledBlinkTimer(500),         // 500ms LED blink rate
       extendedLoggingTimer(200),  // 200ms extended logging (5Hz)
       messageCounter(0),
-      firstInputReceived(false)
+      firstInputReceived(false),
+      currentState(TelemetryState::IDLE),
+      queueHead(0),
+      queueTail(0),
+      queueCount(0)
 {
+    // Initialize message queue
+    for (size_t i = 0; i < MAX_QUEUED_MESSAGES; i++)
+    {
+        messageQueue[i].valid = false;
+        messageQueue[i].length = 0;
+    }
 }
 
 void RttTelemetry::setLoggingDependencies(
@@ -160,96 +171,70 @@ void RttTelemetry::initialize()
     writeToSeggerRTT(initMsg);
 }
 
-void RttTelemetry::update()
+bool RttTelemetry::updateTelemetryAsync()
 {
-    // Check for incoming RTT data from host
-    uint8_t receivedByte;
-    if (readFromSeggerRTT(receivedByte))
+    PT_BEGIN();
+
+    while (true)
     {
-        // First input received - change LED pattern to red blinking
-        if (!firstInputReceived)
+        // Process incoming RTT data from host
+        uint8_t receivedByte;
+        if (readFromSeggerRTT(receivedByte))
         {
-            firstInputReceived = true;
+            // First input received - change LED pattern to red blinking
+            if (!firstInputReceived)
+            {
+                firstInputReceived = true;
+            }
+
+            // Echo back the received character
+            char echoMsg[32];
+            snprintf(
+                echoMsg,
+                sizeof(echoMsg),
+                "ECHO: %c (0x%02X)\n",
+                (receivedByte >= 32 && receivedByte <= 126) ? receivedByte : '?',
+                receivedByte);
+            queueMessage(echoMsg);
         }
 
-        // Echo back the received character
-        char echoMsg[32];
-        snprintf(
-            echoMsg,
-            sizeof(echoMsg),
-            "ECHO: %c (0x%02X)\n",
-            (receivedByte >= 32 && receivedByte <= 126) ? receivedByte : '?',
-            receivedByte);
-        writeToSeggerRTT(echoMsg);
-    }
-
-    // Handle LED patterns
-    if (drivers && firstInputReceived)
-    {
-        // Red blinking pattern after first input received
-        if (ledBlinkTimer.execute())
+        // Handle LED patterns
+        if (drivers && firstInputReceived)
         {
-            static bool redLedState = false;
-            redLedState = !redLedState;
-            drivers->leds.set(tap::gpio::Leds::Red, !redLedState);  // Inverted logic
+            if (ledBlinkTimer.execute())
+            {
+                static bool redLedState = false;
+                redLedState = !redLedState;
+                drivers->leds.set(tap::gpio::Leds::Red, !redLedState);
+            }
         }
-    }
 
-    // Send periodic heartbeat
-    if (periodicTimer.execute())
-    {
-        // Get robot name
-#if defined(TARGET_DRONE)
-        const char* robotName = "TARGET_DRONE";
-#elif defined(TARGET_ENGINEER)
-        const char* robotName = "TARGET_ENGINEER";
-#elif defined(TARGET_SENTRY_ECLIPSE)
-        const char* robotName = "TARGET_SENTRY_ECLIPSE";
-#elif defined(TARGET_HERO_ZERO)
-        const char* robotName = "TARGET_HERO_ZERO";
-#elif defined(TARGET_STANDARD_NULL)
-        const char* robotName = "TARGET_STANDARD_NULL";
-#elif defined(TARGET_STANDARD_VOID)
-        const char* robotName = "TARGET_STANDARD_VOID";
-#else
-        const char* robotName = "TARGET_UNKNOWN";
-#endif
-
-        // Send simple heartbeat with robot info
-        char heartbeat[256];
-        snprintf(
-            heartbeat,
-            sizeof(heartbeat),
-            "{\"type\":\"heartbeat\",\"timestamp\":%lu,\"counter\":%lu,\"robot\":\"%s\",\"uptime\":"
-            "%lu}\n",
-            getTimestamp(),
-            messageCounter++,
-            robotName,
-            tap::arch::clock::getTimeMilliseconds());
-        writeToSeggerRTT(heartbeat);
-    }
-
-    // Send extended logging data at lower frequency
-    if (extendedLoggingTimer.execute())
-    {
-        // logControlOperatorData();
+        generateHeartbeatMessage();
+        logControlOperatorData();
         logRefereeData();
-        // logVisionData();
+        logVisionData();
+        // Send all queued messages
+        sendQueuedMessages();
+
+        // Yield to allow other protothreads to run
+        PT_YIELD();
     }
+
+    PT_END();
 }
 
 void RttTelemetry::logControlOperatorData()
 {
     if (!controlInterface)
     {
-        // Log that control interface is not available
+        // Queue message that control interface is not available
         char msg[128];
         snprintf(
             msg,
             sizeof(msg),
             "{\"type\":\"control\",\"timestamp\":%lu,\"data\":\"not_available\"}\n",
             getTimestamp());
-        writeToSeggerRTT(msg);
+        queueMessage(msg);
         return;
     }
 
@@ -289,21 +274,21 @@ void RttTelemetry::logControlOperatorData()
     ptr +=
         sprintf(ptr, "\"sentry_speed\":%d.%03d}}\n", sentry_speed / 1000, abs(sentry_speed % 1000));
 
-    writeToSeggerRTT(controlData);
+    queueMessage(controlData);
 }
 
 void RttTelemetry::logRefereeData()
 {
     if (!refSerial)
     {
-        // Log that ref serial is not available
+        // Queue message that ref serial is not available
         char msg[128];
         snprintf(
             msg,
             sizeof(msg),
             "{\"type\":\"referee\",\"timestamp\":%lu,\"data\":\"not_available\"}\n",
             getTimestamp());
-        writeToSeggerRTT(msg);
+        queueMessage(msg);
         return;
     }
 
@@ -333,21 +318,21 @@ void RttTelemetry::logRefereeData()
         rxData.chassis.powerBuffer,
         rxData.chassis.powerConsumptionLimit,
         rxData.robotLevel);
-    writeToSeggerRTT(refData);
+    queueMessage(refData);
 }
 
 void RttTelemetry::logVisionData()
 {
     if (!visionProcessor)
     {
-        // Log that vision processor is not available
+        // Queue message that vision processor is not available
         char msg[128];
         snprintf(
             msg,
             sizeof(msg),
             "{\"type\":\"vision\",\"timestamp\":%lu,\"data\":\"not_available\"}\n",
             getTimestamp());
-        writeToSeggerRTT(msg);
+        queueMessage(msg);
         return;
     }
 
@@ -401,7 +386,7 @@ void RttTelemetry::logVisionData()
         vel_z / 1000,
         abs(vel_z % 1000));
 
-    writeToSeggerRTT(visionData);
+    queueMessage(visionData);
 }
 
 void RttTelemetry::logOdometryState(
@@ -442,9 +427,87 @@ void RttTelemetry::logOdometryState(
     int orient_int = (int)(orientation * 1000);
     ptr += sprintf(ptr, "\"orientation\":%d.%03d}}\n", orient_int / 1000, abs(orient_int % 1000));
 
-    writeToSeggerRTT(odometryData);
+    queueMessage(odometryData);
 }
 
 uint32_t RttTelemetry::getTimestamp() const { return tap::arch::clock::getTimeMilliseconds(); }
+
+void RttTelemetry::queueMessage(const char* message)
+{
+    // Check if queue is full
+    if (queueCount >= MAX_QUEUED_MESSAGES)
+    {
+        // Drop oldest message to make room
+        queueHead = (queueHead + 1) % MAX_QUEUED_MESSAGES;
+        queueCount--;
+    }
+
+    // Add new message to tail - use snprintf for safe copying
+    size_t len = snprintf(messageQueue[queueTail].data, MAX_MESSAGE_SIZE, "%s", message);
+
+    // snprintf returns the number of characters that would have been written
+    // Clamp to actual buffer size
+    if (len >= MAX_MESSAGE_SIZE)
+    {
+        len = MAX_MESSAGE_SIZE - 1;  // Null terminator is already handled by snprintf
+    }
+
+    messageQueue[queueTail].length = len;
+    messageQueue[queueTail].valid = true;
+
+    queueTail = (queueTail + 1) % MAX_QUEUED_MESSAGES;
+    queueCount++;
+}
+
+void RttTelemetry::sendQueuedMessages()
+{
+    // Send all queued messages
+    while (queueCount > 0)
+    {
+        if (messageQueue[queueHead].valid)
+        {
+            writeToSeggerRTT(messageQueue[queueHead].data);
+            messageQueue[queueHead].valid = false;
+        }
+
+        queueHead = (queueHead + 1) % MAX_QUEUED_MESSAGES;
+        queueCount--;
+    }
+}
+
+void RttTelemetry::generateHeartbeatMessage()
+{
+    // Get robot name
+    const char* robotName;
+#if defined(TARGET_DRONE)
+    robotName = "TARGET_DRONE";
+#elif defined(TARGET_ENGINEER)
+    robotName = "TARGET_ENGINEER";
+#elif defined(TARGET_SENTRY_ECLIPSE)
+    robotName = "TARGET_SENTRY_ECLIPSE";
+#elif defined(TARGET_HERO_ZERO)
+    robotName = "TARGET_HERO_ZERO";
+#elif defined(TARGET_STANDARD_NULL)
+    robotName = "TARGET_STANDARD_NULL";
+#elif defined(TARGET_STANDARD_VOID)
+    robotName = "TARGET_STANDARD_VOID";
+#else
+    robotName = "TARGET_UNKNOWN";
+#endif
+
+    // Generate heartbeat message
+    char heartbeat[256];
+    snprintf(
+        heartbeat,
+        sizeof(heartbeat),
+        "{\"type\":\"heartbeat\",\"timestamp\":%lu,\"counter\":%lu,\"robot\":\"%s\",\"uptime\":%lu}"
+        "\n",
+        getTimestamp(),
+        messageCounter++,
+        robotName,
+        tap::arch::clock::getTimeMilliseconds());
+
+    queueMessage(heartbeat);
+}
 
 }  // namespace aruwsrc::communication::serial

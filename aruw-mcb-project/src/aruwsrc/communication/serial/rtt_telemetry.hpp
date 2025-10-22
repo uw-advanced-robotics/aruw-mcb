@@ -23,6 +23,7 @@
 #include "tap/architecture/periodic_timer.hpp"
 
 #include "modm/math/geometry/vector2.hpp"
+#include "modm/processing/protothread.hpp"
 
 // Forward declarations
 namespace tap
@@ -62,10 +63,13 @@ namespace aruwsrc::communication::serial
  * RTT (Real Time Transfer) telemetry handler for sending debug and diagnostic
  * information to the host through J-Link RTT protocol without halting the target.
  *
- * Provides simple heartbeat functionality and basic input detection for future
- * logging system expansion.
+ * Uses modm protothreads for asynchronous, non-blocking operation to prevent
+ * telemetry transmission from interfering with real-time robot control.
+ *
+ * Provides heartbeat functionality, input detection, and comprehensive logging
+ * of robot subsystem data.
  */
-class RttTelemetry
+class RttTelemetry : public modm::pt::Protothread
 {
 public:
     /**
@@ -91,10 +95,12 @@ public:
     void initialize();
 
     /**
-     * Update method to be called periodically to send periodic telemetry
-     * and check for incoming messages
+     * Asynchronous telemetry update using modm protothreads.
+     * Call this function repeatedly in your main loop.
+     *
+     * @return false when protothread completes (which never happens as this runs in infinite loop)
      */
-    void update();
+    bool updateTelemetryAsync();
 
     /**
      * Log control operator interface data (joystick inputs, button states)
@@ -144,6 +150,48 @@ private:
 
     // Flag to track if we've received first RTT input
     bool firstInputReceived;
+
+    // Protothread state management
+    enum class TelemetryState
+    {
+        IDLE,
+        SENDING_HEARTBEAT,
+        SENDING_EXTENDED_LOGGING,
+        PROCESSING_INPUT
+    };
+
+    TelemetryState currentState;
+
+    // Message queue for asynchronous transmission
+    static constexpr size_t MAX_QUEUED_MESSAGES = 10;
+    static constexpr size_t MAX_MESSAGE_SIZE = 512;
+
+    struct QueuedMessage
+    {
+        char data[MAX_MESSAGE_SIZE];
+        size_t length;
+        bool valid;
+    };
+
+    QueuedMessage messageQueue[MAX_QUEUED_MESSAGES];
+    size_t queueHead;
+    size_t queueTail;
+    size_t queueCount;
+
+    /**
+     * Queue a message for asynchronous transmission
+     */
+    void queueMessage(const char* message);
+
+    /**
+     * Send all queued messages (called by protothread)
+     */
+    void sendQueuedMessages();
+
+    /**
+     * Generate heartbeat message and queue it
+     */
+    void generateHeartbeatMessage();
 
     /**
      * Get current system timestamp in milliseconds
