@@ -38,9 +38,8 @@ namespace aruwsrc::communication::serial
  * RTT (Real Time Transfer) telemetry handler for sending debug and diagnostic
  * information to the host through J-Link RTT protocol without halting the target.
  *
- * This class provides a non-blocking interface for streaming telemetry data
- * through the J-Link RTT channel 0, which can be accessed via OpenOCD and
- * telnet on port 9090.
+ * Provides simple heartbeat functionality and basic input detection for future
+ * logging system expansion.
  */
 class RttTelemetry
 {
@@ -57,35 +56,8 @@ public:
     void initialize();
 
     /**
-     * Send about menu information as telemetry
-     * @param robotName The robot target name
-     * @param lastUser The username who built the code
-     * @param lastSha The git SHA of the build
-     * @param lastDate The build date
-     * @param branchName The git branch name
-     */
-    void sendAboutInfo(
-        const char* robotName,
-        const char* lastUser,
-        const char* lastSha,
-        const char* lastDate,
-        const char* branchName);
-
-    /**
-     * Send a formatted log message with timestamp
-     * @param level Log level (INFO, DEBUG, WARNING, ERROR)
-     * @param message The message to send
-     */
-    void sendLogMessage(const char* level, const char* message);
-
-    /**
-     * Check if RTT is ready to send more data
-     * @return true if transmit buffer has space available
-     */
-    bool isReady() const;
-
-    /**
      * Update method to be called periodically to send periodic telemetry
+     * and check for incoming messages
      */
     void update();
 
@@ -94,20 +66,21 @@ private:
 
     // Timer for periodic telemetry updates
     tap::arch::PeriodicMilliTimer periodicTimer;
+    
+    // Timer for LED blinking
+    tap::arch::PeriodicMilliTimer ledBlinkTimer;
 
     // Counter for periodic messages
     uint32_t messageCounter;
+    
+    // Flag to track if we've received first RTT input
+    bool firstInputReceived;
 
     /**
      * Get current system timestamp in milliseconds
      * @return Timestamp in milliseconds since startup
      */
     uint32_t getTimestamp() const;
-
-    /**
-     * Send a formatted message with JSON-like structure
-     */
-    void sendFormattedMessage(const char* type, const char* data);
 };
 
 }  // namespace aruwsrc::communication::serial

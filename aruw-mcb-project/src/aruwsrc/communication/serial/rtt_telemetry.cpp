@@ -104,15 +104,16 @@ namespace aruwsrc::communication::serial
 {
 RttTelemetry::RttTelemetry(tap::Drivers* drivers)
     : drivers(drivers),
-      periodicTimer(100),  // 100ms periodic updates for testing (was 1000)
-      messageCounter(0)
+      periodicTimer(1000),  // 1 second periodic heartbeat
+      ledBlinkTimer(500),   // 500ms LED blink rate
+      messageCounter(0),
+      firstInputReceived(false)
 {
 }
 
 void RttTelemetry::initialize()
 {
-    // RTT is automatically initialized by the modm framework
-    // Send initialization message with robot name
+    // Get robot name
 #if defined(TARGET_DRONE)
     const char* robotName = "TARGET_DRONE";
 #elif defined(TARGET_ENGINEER)
@@ -129,101 +130,25 @@ void RttTelemetry::initialize()
     const char* robotName = "TARGET_UNKNOWN";
 #endif
 
-    // Blink LED to indicate RTT telemetry is initializing
-    if (drivers) {
-        // Flash all LEDs in sequence to show initialization is happening
-        for (int i = 0; i < 5; i++) {
-            drivers->leds.set(tap::gpio::Leds::Green, false); // On
-            drivers->leds.set(tap::gpio::Leds::Red, false);   // On
-            // Small delay (not ideal but for debugging)
-            for (volatile int j = 0; j < 500000; j++);
-            drivers->leds.set(tap::gpio::Leds::Green, true);  // Off
-            drivers->leds.set(tap::gpio::Leds::Red, true);    // Off
-            for (volatile int j = 0; j < 500000; j++);
-        }
-        // Leave green on permanently to show we completed initialization
-        drivers->leds.set(tap::gpio::Leds::Green, false);
-    }
-
-    // Try multiple simple writes to test RTT functionality
-    const char* testStr1 = "RTT_INIT_TEST\n";
-    const char* testStr2 = "HELLO_RTT_WORLD\n";
-    const char* testStr3 = "==== RTT DEBUG START ====\n";
-    
-    // Write to SEGGER RTT for better compatibility
-    writeToSeggerRTT(testStr3);
-    writeToSeggerRTT(testStr1);
-    writeToSeggerRTT(testStr2);
-    
-    // Send JSON initialization message using SEGGER RTT
-    char jsonMsg[256];
-    snprintf(jsonMsg, sizeof(jsonMsg), 
-             "{\"type\":\"init\",\"timestamp\":%lu,\"robot\":\"%s\",\"message\":\"RTT Telemetry Initialized\"}\n",
+    // Send simple initialization message
+    char initMsg[128];
+    snprintf(initMsg, sizeof(initMsg), 
+             "{\"type\":\"init\",\"timestamp\":%lu,\"robot\":\"%s\"}\n",
              getTimestamp(), robotName);
-    writeToSeggerRTT(jsonMsg);
-              
-    // Send additional debug info
-    char debugMsg[128];
-    snprintf(debugMsg, sizeof(debugMsg), 
-             "RTT Init: Robot=%s, Time=%lu\n", 
-             robotName, getTimestamp());
-    writeToSeggerRTT(debugMsg);
-}
-
-void RttTelemetry::sendAboutInfo(
-    const char* robotName,
-    const char* lastUser,
-    const char* lastSha,
-    const char* lastDate,
-    const char* branchName)
-{
-    char aboutMsg[512];
-    snprintf(aboutMsg, sizeof(aboutMsg),
-             "{\"type\":\"about\",\"timestamp\":%lu,\"data\":{\"robotName\":\"%s\",\"lastUser\":\"%s\",\"lastSha\":\"%s\",\"lastDate\":\"%s\",\"branchName\":\"%s\"}}\n",
-             getTimestamp(), robotName, lastUser, lastSha, lastDate, branchName);
-    writeToSeggerRTT(aboutMsg);
-}
-
-void RttTelemetry::sendLogMessage(const char* level, const char* message)
-{
-    char logMsg[256];
-    snprintf(logMsg, sizeof(logMsg),
-             "{\"type\":\"log\",\"timestamp\":%lu,\"level\":\"%s\",\"message\":\"%s\"}\n",
-             getTimestamp(), level, message);
-    writeToSeggerRTT(logMsg);
-}
-
-
-bool RttTelemetry::isReady() const
-{
-    // Check if there's space in the transmit buffer
-    // Use a simple heuristic - if we can write at least one byte, we're ready
-    return true; // For now, always assume ready to avoid const cast issues
+    writeToSeggerRTT(initMsg);
 }
 
 void RttTelemetry::update()
 {
-    // Check for incoming RTT data from host using SEGGER RTT
+    // Check for incoming RTT data from host
     uint8_t receivedByte;
     if (readFromSeggerRTT(receivedByte)) {
-        // Process received data - change LED pattern based on input
-        if (drivers) {
-            if (receivedByte == '0') {
-                // Fast blinking pattern for '0' - use LED A for bidirectional feedback
-                static uint32_t fastBlinkCounter = 0;
-                fastBlinkCounter++;
-                bool fastBlink = (fastBlinkCounter % 5) < 3; // Fast blink every 50ms
-                drivers->leds.set(tap::gpio::Leds::A, !fastBlink); // Inverted logic
-            } else if (receivedByte == '1') {
-                // Solid LED A for '1'
-                drivers->leds.set(tap::gpio::Leds::A, false); // On (inverted)
-            } else {
-                // Turn off LED A for other characters
-                drivers->leds.set(tap::gpio::Leds::A, true); // Off (inverted)
-            }
+        // First input received - change LED pattern to red blinking
+        if (!firstInputReceived) {
+            firstInputReceived = true;
         }
         
-        // Echo back the received character using SEGGER RTT
+        // Echo back the received character
         char echoMsg[32];
         snprintf(echoMsg, sizeof(echoMsg), "ECHO: %c (0x%02X)\n", 
                 (receivedByte >= 32 && receivedByte <= 126) ? receivedByte : '?', 
@@ -231,17 +156,19 @@ void RttTelemetry::update()
         writeToSeggerRTT(echoMsg);
     }
 
+    // Handle LED patterns
+    if (drivers && firstInputReceived) {
+        // Red blinking pattern after first input received
+        if (ledBlinkTimer.execute()) {
+            static bool redLedState = false;
+            redLedState = !redLedState;
+            drivers->leds.set(tap::gpio::Leds::Red, !redLedState); // Inverted logic
+        }
+    }
+
+    // Send periodic heartbeat
     if (periodicTimer.execute())
     {
-        // Toggle LED to show RTT update is running - make it very obvious
-        if (drivers) {
-            static bool ledState = false;
-            ledState = !ledState;
-            drivers->leds.set(tap::gpio::Leds::Red, ledState);
-            // Also toggle LED A to make it super obvious
-            drivers->leds.set(tap::gpio::Leds::A, ledState);
-        }
-
         // Get robot name
 #if defined(TARGET_DRONE)
         const char* robotName = "TARGET_DRONE";
@@ -259,30 +186,15 @@ void RttTelemetry::update()
         const char* robotName = "TARGET_UNKNOWN";
 #endif
 
-        // Send a simple test message and JSON heartbeat using SEGGER RTT
-        char testMsg[64];
-        snprintf(testMsg, sizeof(testMsg), "HEARTBEAT_%lu from %s\n", 
-                messageCounter, robotName);
-        writeToSeggerRTT(testMsg);
-
-        // Send periodic JSON heartbeat
-        char jsonHeartbeat[256];
-        snprintf(jsonHeartbeat, sizeof(jsonHeartbeat),
-                "{\"type\":\"heartbeat\",\"timestamp\":%lu,\"counter\":%lu,\"robot\":\"%s\",\"data\":{\"uptime\":%lu}}\n",
+        // Send simple heartbeat with robot info
+        char heartbeat[256];
+        snprintf(heartbeat, sizeof(heartbeat),
+                "{\"type\":\"heartbeat\",\"timestamp\":%lu,\"counter\":%lu,\"robot\":\"%s\",\"uptime\":%lu}\n",
                 getTimestamp(), messageCounter++, robotName, tap::arch::clock::getTimeMilliseconds());
-        writeToSeggerRTT(jsonHeartbeat);
+        writeToSeggerRTT(heartbeat);
     }
 }
 
 uint32_t RttTelemetry::getTimestamp() const { return tap::arch::clock::getTimeMilliseconds(); }
-
-void RttTelemetry::sendFormattedMessage(const char* type, const char* data)
-{
-    char formattedMsg[256];
-    snprintf(formattedMsg, sizeof(formattedMsg),
-             "{\"type\":\"%s\",\"timestamp\":%lu,\"data\":\"%s\"}\n",
-             type, getTimestamp(), data);
-    writeToSeggerRTT(formattedMsg);
-}
 
 }  // namespace aruwsrc::communication::serial
