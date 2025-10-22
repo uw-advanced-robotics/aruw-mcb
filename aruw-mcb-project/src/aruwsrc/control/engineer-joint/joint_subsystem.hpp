@@ -20,12 +20,12 @@
 #ifndef JOINT_SUBSYSTEM_HPP_
 #define JOINT_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/ramp.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
-#include "tap/algorithms/ramp.hpp"
-#include "tap/control/subsystem.hpp"
 
 namespace aruwsrc::control
 {
@@ -35,8 +35,6 @@ namespace aruwsrc::control
 class JointSubsystem : public virtual tap::control::Subsystem
 {
 public:
-
-
     struct Config
     {
         float lowerBound = 0.0f, upperBound = 0.0f;

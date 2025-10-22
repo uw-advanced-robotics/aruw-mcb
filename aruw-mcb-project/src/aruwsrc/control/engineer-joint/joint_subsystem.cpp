@@ -51,37 +51,36 @@ float JointSubsystem::getVelocity() const
 }
 
 void JointSubsystem::setLowerBound(float lowerBound)
-    {
-        if (lowerBound > this->upperBound) return;
-        this->lowerBound = lowerBound;
-    }
+{
+    if (lowerBound > this->upperBound) return;
+    this->lowerBound = lowerBound;
+}
 
-    void JointSubsystem::setUpperBound(float upperBound)
-    {
-        if (upperBound < this->lowerBound) return;
-        this->upperBound = upperBound;
-    }
+void JointSubsystem::setUpperBound(float upperBound)
+{
+    if (upperBound < this->lowerBound) return;
+    this->upperBound = upperBound;
+}
 
 void JointSubsystem::setSetpoint(float setpoint)
-    {
-        if (tap::algorithms::compareFloatClose(lowerBound, upperBound, epsilon))
-            this->setpoint.setTarget(setpoint);
-        else
-            this->setpoint.setTarget(std::clamp(setpoint, lowerBound, upperBound));
-    };
+{
+    if (tap::algorithms::compareFloatClose(lowerBound, upperBound, epsilon))
+        this->setpoint.setTarget(setpoint);
+    else
+        this->setpoint.setTarget(std::clamp(setpoint, lowerBound, upperBound));
+};
 
 bool JointSubsystem::atSetpoint()
-    {
-        return tap::algorithms::compareFloatClose(setpoint.getTarget(), getPosition(), epsilon);
-    };
+{
+    return tap::algorithms::compareFloatClose(setpoint.getTarget(), getPosition(), epsilon);
+};
 
 void JointSubsystem::runPosPidController(float dt)
-    {
-        float error = setpoint.getValue() - getPosition();
-        float motorDesiredOutput =
-            posPid.runController(error, getVelocity(), dt) + staticFeedforward;
-        motor.setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
-    }
+{
+    float error = setpoint.getValue() - getPosition();
+    float motorDesiredOutput = posPid.runController(error, getVelocity(), dt) + staticFeedforward;
+    motor.setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
+}
 
 void JointSubsystem::refresh()
 {

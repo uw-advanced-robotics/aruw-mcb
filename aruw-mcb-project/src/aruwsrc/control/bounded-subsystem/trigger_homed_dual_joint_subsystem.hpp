@@ -37,8 +37,7 @@ public:
         tap::motor::MotorInterface &motorOne,
         tap::motor::MotorInterface &motorTwo,
         control::TriggerInterface &trigger,
-        const tap::algorithms::SmoothPidConfig
-            &alignPidConfig,
+        const tap::algorithms::SmoothPidConfig &alignPidConfig,
         const Config &config);
 
     void resetEncoderValue() override;
