@@ -26,9 +26,9 @@ DartCloseCommand::DartCloseCommand(DartLauncherSubsystem &dartLauncher) : dartLa
     addSubsystemRequirement(&dartLauncher);
 }
 
-void DartCloseCommand::initialize() {dartLauncher.setClose();}
+void DartCloseCommand::initialize() { dartLauncher.setClose(); }
 
-void DartCloseCommand::execute() {dartLauncher.getServo().updateSendPwmRamp();}
+void DartCloseCommand::execute() { dartLauncher.getServo().updateSendPwmRamp(); }
 
 void DartCloseCommand::end(bool) {}
 

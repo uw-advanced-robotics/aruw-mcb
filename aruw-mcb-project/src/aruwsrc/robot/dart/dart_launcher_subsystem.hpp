@@ -55,7 +55,7 @@ public:
     // return the angle defined as close as a PWM value
     float getClosePWM();
 
-    tap::motor::Servo& getServo() { return servo; }
+    tap::motor::Servo &getServo() { return servo; }
 
     const char *getName() const override { return "Dart Launcher Subsystem"; }
 

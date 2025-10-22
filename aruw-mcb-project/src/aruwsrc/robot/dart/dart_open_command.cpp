@@ -28,7 +28,7 @@ DartOpenCommand::DartOpenCommand(DartLauncherSubsystem &dartLauncher) : dartLaun
 
 void DartOpenCommand::initialize() { dartLauncher.setOpen(); }
 
-void DartOpenCommand::execute() {dartLauncher.getServo().updateSendPwmRamp(); }
+void DartOpenCommand::execute() { dartLauncher.getServo().updateSendPwmRamp(); }
 
 void DartOpenCommand::end(bool) {}
 
