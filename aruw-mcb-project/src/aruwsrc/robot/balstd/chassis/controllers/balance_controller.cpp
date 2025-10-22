@@ -154,7 +154,7 @@ CMSISMat<2, 6> BalanceController::getLQRGains(const float legLength) const
          936.1,  22.581, -42.063, -137.25,  1429.5,  262.33},
       { 111.38, -166.65,  212.08, -188.46,  387.98,  214.83,
         -788.7,  -12.93, -59.553,  62.965, -1061.1, -202.77}};
-    // // clang-format on
+    // clang-format on
 
     CMSISMat<2, 6> K(coeffs[0]);
     float x = legLength;
