@@ -22,8 +22,10 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 
-#include "modm/io/iostream.hpp"
-#include "modm/platform/rtt/rtt.hpp"
+// SEGGER RTT headers
+// extern "C" {
+// #include "SEGGER_RTT.h"
+// }
 
 namespace tap
 {
@@ -77,24 +79,10 @@ public:
     void sendLogMessage(const char* level, const char* message);
 
     /**
-     * Send raw telemetry data
-     * @param data Pointer to data buffer
-     * @param length Number of bytes to send
-     * @return Number of bytes actually sent
-     */
-    size_t sendRawData(const uint8_t* data, size_t length);
-
-    /**
      * Check if RTT is ready to send more data
      * @return true if transmit buffer has space available
      */
     bool isReady() const;
-
-    /**
-     * Get the RTT stream for direct access
-     * @return Reference to the RTT IO stream
-     */
-    modm::IOStream& getStream() { return rttStream; }
 
     /**
      * Update method to be called periodically to send periodic telemetry
@@ -103,9 +91,6 @@ public:
 
 private:
     tap::Drivers* drivers;
-    modm::platform::Rtt rtt;
-    modm::IODeviceObjectWrapper<modm::platform::Rtt, modm::IOBuffer::DiscardIfFull> rttDevice;
-    modm::IOStream rttStream;
 
     // Timer for periodic telemetry updates
     tap::arch::PeriodicMilliTimer periodicTimer;

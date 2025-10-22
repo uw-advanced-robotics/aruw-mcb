@@ -86,13 +86,24 @@ static void writeToSeggerRTT(const char* str) {
     }
 }
 
+// Helper function to read from SEGGER RTT
+static bool readFromSeggerRTT(uint8_t& data) {
+    extern SEGGER_RTT_CB _SEGGER_RTT;
+    auto& buffer = _SEGGER_RTT.aDown[0];
+    
+    if (buffer.RdOff == buffer.WrOff) {
+        return false; // Buffer empty
+    }
+    
+    data = static_cast<uint8_t>(buffer.pBuffer[buffer.RdOff]);
+    buffer.RdOff = (buffer.RdOff + 1) % buffer.SizeOfBuffer;
+    return true;
+}
+
 namespace aruwsrc::communication::serial
 {
 RttTelemetry::RttTelemetry(tap::Drivers* drivers)
     : drivers(drivers),
-      rtt(0),  // Use RTT channel 0
-      rttDevice(rtt),
-      rttStream(rttDevice),
       periodicTimer(100),  // 100ms periodic updates for testing (was 1000)
       messageCounter(0)
 {
@@ -144,27 +155,19 @@ void RttTelemetry::initialize()
     writeToSeggerRTT(testStr1);
     writeToSeggerRTT(testStr2);
     
-    // Also try the original modm RTT for comparison
-    rtt.write(reinterpret_cast<const uint8_t*>(testStr3), strlen(testStr3));
-    rtt.write(reinterpret_cast<const uint8_t*>(testStr1), strlen(testStr1));
-    rtt.write(reinterpret_cast<const uint8_t*>(testStr2), strlen(testStr2));
-    
-    // Send JSON initialization message
-    rttStream << "{\"type\":\"init\",\"timestamp\":" << getTimestamp() 
-              << ",\"robot\":\"" << robotName << "\",\"message\":\"RTT Telemetry Initialized\"}" 
-              << modm::endl;
+    // Send JSON initialization message using SEGGER RTT
+    char jsonMsg[256];
+    snprintf(jsonMsg, sizeof(jsonMsg), 
+             "{\"type\":\"init\",\"timestamp\":%lu,\"robot\":\"%s\",\"message\":\"RTT Telemetry Initialized\"}\n",
+             getTimestamp(), robotName);
+    writeToSeggerRTT(jsonMsg);
               
-    // Send additional debug info to both RTT systems
+    // Send additional debug info
     char debugMsg[128];
-    int debugLen = snprintf(debugMsg, sizeof(debugMsg), 
-                           "RTT Init: Robot=%s, Time=%lu\n", 
-                           robotName, getTimestamp());
-    
-    // Write to SEGGER RTT
+    snprintf(debugMsg, sizeof(debugMsg), 
+             "RTT Init: Robot=%s, Time=%lu\n", 
+             robotName, getTimestamp());
     writeToSeggerRTT(debugMsg);
-    
-    // Write to modm RTT
-    rtt.write(reinterpret_cast<const uint8_t*>(debugMsg), debugLen);
 }
 
 void RttTelemetry::sendAboutInfo(
@@ -174,29 +177,22 @@ void RttTelemetry::sendAboutInfo(
     const char* lastDate,
     const char* branchName)
 {
-    if (!isReady()) return;
-
-    rttStream << "{\"type\":\"about\",\"timestamp\":" << getTimestamp() << ",\"data\":{"
-              << "\"robotName\":\"" << robotName << "\","
-              << "\"lastUser\":\"" << lastUser << "\","
-              << "\"lastSha\":\"" << lastSha << "\","
-              << "\"lastDate\":\"" << lastDate << "\","
-              << "\"branchName\":\"" << branchName << "\""
-              << "}}" << modm::endl;
+    char aboutMsg[512];
+    snprintf(aboutMsg, sizeof(aboutMsg),
+             "{\"type\":\"about\",\"timestamp\":%lu,\"data\":{\"robotName\":\"%s\",\"lastUser\":\"%s\",\"lastSha\":\"%s\",\"lastDate\":\"%s\",\"branchName\":\"%s\"}}\n",
+             getTimestamp(), robotName, lastUser, lastSha, lastDate, branchName);
+    writeToSeggerRTT(aboutMsg);
 }
 
 void RttTelemetry::sendLogMessage(const char* level, const char* message)
 {
-    if (!isReady()) return;
-
-    rttStream << "{\"type\":\"log\",\"timestamp\":" << getTimestamp() << ",\"level\":\"" << level
-              << "\",\"message\":\"" << message << "\"}" << modm::endl;
+    char logMsg[256];
+    snprintf(logMsg, sizeof(logMsg),
+             "{\"type\":\"log\",\"timestamp\":%lu,\"level\":\"%s\",\"message\":\"%s\"}\n",
+             getTimestamp(), level, message);
+    writeToSeggerRTT(logMsg);
 }
 
-size_t RttTelemetry::sendRawData(const uint8_t* data, size_t length)
-{
-    return rtt.write(data, length);
-}
 
 bool RttTelemetry::isReady() const
 {
@@ -207,9 +203,9 @@ bool RttTelemetry::isReady() const
 
 void RttTelemetry::update()
 {
-    // Check for incoming RTT data from host
+    // Check for incoming RTT data from host using SEGGER RTT
     uint8_t receivedByte;
-    if (rtt.read(receivedByte)) {
+    if (readFromSeggerRTT(receivedByte)) {
         // Process received data - change LED pattern based on input
         if (drivers) {
             if (receivedByte == '0') {
@@ -217,22 +213,22 @@ void RttTelemetry::update()
                 static uint32_t fastBlinkCounter = 0;
                 fastBlinkCounter++;
                 bool fastBlink = (fastBlinkCounter % 5) < 3; // Fast blink every 50ms
-                drivers->leds.set(tap::gpio::Leds::A, fastBlink);
+                drivers->leds.set(tap::gpio::Leds::A, !fastBlink); // Inverted logic
             } else if (receivedByte == '1') {
                 // Solid LED A for '1'
-                drivers->leds.set(tap::gpio::Leds::A, true);
+                drivers->leds.set(tap::gpio::Leds::A, false); // On (inverted)
             } else {
                 // Turn off LED A for other characters
-                drivers->leds.set(tap::gpio::Leds::A, false);
+                drivers->leds.set(tap::gpio::Leds::A, true); // Off (inverted)
             }
         }
         
-        // Echo back the received character
+        // Echo back the received character using SEGGER RTT
         char echoMsg[32];
-        int echoLen = snprintf(echoMsg, sizeof(echoMsg), "ECHO: %c (0x%02X)\n", 
-                              (receivedByte >= 32 && receivedByte <= 126) ? receivedByte : '?', 
-                              receivedByte);
-        rtt.write(reinterpret_cast<const uint8_t*>(echoMsg), echoLen);
+        snprintf(echoMsg, sizeof(echoMsg), "ECHO: %c (0x%02X)\n", 
+                (receivedByte >= 32 && receivedByte <= 126) ? receivedByte : '?', 
+                receivedByte);
+        writeToSeggerRTT(echoMsg);
     }
 
     if (periodicTimer.execute())
@@ -263,21 +259,18 @@ void RttTelemetry::update()
         const char* robotName = "TARGET_UNKNOWN";
 #endif
 
-        // Send a simple test message first
+        // Send a simple test message and JSON heartbeat using SEGGER RTT
         char testMsg[64];
-        int len = snprintf(testMsg, sizeof(testMsg), "HEARTBEAT_%lu from %s\n", 
-                          messageCounter, robotName);
-        
-        // Write to both RTT systems
+        snprintf(testMsg, sizeof(testMsg), "HEARTBEAT_%lu from %s\n", 
+                messageCounter, robotName);
         writeToSeggerRTT(testMsg);
-        // rtt.write(reinterpret_cast<const uint8_t*>(testMsg), len);
 
-        // Send periodic heartbeat with robot name and system information
-        rttStream << "{\"type\":\"heartbeat\",\"timestamp\":" << getTimestamp()
-                  << ",\"counter\":" << messageCounter++ 
-                  << ",\"robot\":\"" << robotName << "\",\"data\":{"
-                  << "\"uptime\":" << tap::arch::clock::getTimeMilliseconds()
-                  << "}}" << modm::endl;
+        // Send periodic JSON heartbeat
+        char jsonHeartbeat[256];
+        snprintf(jsonHeartbeat, sizeof(jsonHeartbeat),
+                "{\"type\":\"heartbeat\",\"timestamp\":%lu,\"counter\":%lu,\"robot\":\"%s\",\"data\":{\"uptime\":%lu}}\n",
+                getTimestamp(), messageCounter++, robotName, tap::arch::clock::getTimeMilliseconds());
+        writeToSeggerRTT(jsonHeartbeat);
     }
 }
 
@@ -285,10 +278,11 @@ uint32_t RttTelemetry::getTimestamp() const { return tap::arch::clock::getTimeMi
 
 void RttTelemetry::sendFormattedMessage(const char* type, const char* data)
 {
-    if (!isReady()) return;
-
-    rttStream << "{\"type\":\"" << type << "\",\"timestamp\":" << getTimestamp() << ",\"data\":\""
-              << data << "\"}" << modm::endl;
+    char formattedMsg[256];
+    snprintf(formattedMsg, sizeof(formattedMsg),
+             "{\"type\":\"%s\",\"timestamp\":%lu,\"data\":\"%s\"}\n",
+             type, getTimestamp(), data);
+    writeToSeggerRTT(formattedMsg);
 }
 
 }  // namespace aruwsrc::communication::serial
