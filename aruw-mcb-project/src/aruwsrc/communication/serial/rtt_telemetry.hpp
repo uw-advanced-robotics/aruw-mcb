@@ -28,14 +28,23 @@
 namespace tap
 {
 class Drivers;
-namespace communication::serial { class RefSerial; }
+namespace communication::serial
+{
+class RefSerial;
 }
+}  // namespace tap
 
 namespace aruwsrc
 {
-namespace control { class ControlOperatorInterface; }
-namespace serial { class VisionCoprocessor; }
+namespace control
+{
+class ControlOperatorInterface;
 }
+namespace serial
+{
+class VisionCoprocessor;
+}
+}  // namespace aruwsrc
 
 // SEGGER RTT headers
 // extern "C" {
@@ -68,7 +77,7 @@ public:
     /**
      * Set optional logging dependencies (can be called after construction)
      * @param controlInterface Control operator interface for input logging
-     * @param refSerial Referee serial interface for game data logging  
+     * @param refSerial Referee serial interface for game data logging
      * @param visionProcessor Vision coprocessor for CV data logging
      */
     void setLoggingDependencies(
@@ -108,7 +117,10 @@ public:
      * @param velocity Robot velocity in world frame (vx, vy in m/s)
      * @param orientation Robot orientation in radians
      */
-    void logOdometryState(const modm::Vector2f& position, const modm::Vector2f& velocity, float orientation);
+    void logOdometryState(
+        const modm::Vector2f& position,
+        const modm::Vector2f& velocity,
+        float orientation);
 
 private:
     tap::Drivers* drivers;
@@ -120,16 +132,16 @@ private:
 
     // Timer for periodic telemetry updates
     tap::arch::PeriodicMilliTimer periodicTimer;
-    
+
     // Timer for LED blinking
     tap::arch::PeriodicMilliTimer ledBlinkTimer;
-    
+
     // Timer for extended logging data
     tap::arch::PeriodicMilliTimer extendedLoggingTimer;
 
     // Counter for periodic messages
     uint32_t messageCounter;
-    
+
     // Flag to track if we've received first RTT input
     bool firstInputReceived;
 

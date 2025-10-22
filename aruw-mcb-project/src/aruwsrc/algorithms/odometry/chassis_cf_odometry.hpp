@@ -29,7 +29,10 @@
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
-namespace aruwsrc::communication::serial { class RttTelemetry; }
+namespace aruwsrc::communication::serial
+{
+class RttTelemetry;
+}
 
 namespace aruwsrc::algorithms::odometry
 {

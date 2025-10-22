@@ -87,7 +87,8 @@ void ChassisCFOdometry::update()
     location.setOrientation(chassisYaw);
 
     // Log odometry data to RTT telemetry if available
-    if (rttTelemetry != nullptr) {
+    if (rttTelemetry != nullptr)
+    {
         rttTelemetry->logOdometryState(location.getPosition(), velocity, chassisYaw);
     }
 }
