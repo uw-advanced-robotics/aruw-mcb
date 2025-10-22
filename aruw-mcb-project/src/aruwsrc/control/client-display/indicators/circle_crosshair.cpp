@@ -23,7 +23,7 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display
 {
-CircleCrosshair::CircleCrosshair(RefSerialTransmitter &refSerialTransmitter)
+CircleCrosshair::CircleCrosshair(RefSerialTransmitter& refSerialTransmitter)
     : HudIndicator(refSerialTransmitter)
 {
 }
@@ -43,10 +43,10 @@ void CircleCrosshair::initialize()
         Tx::GraphicColor::GREEN);
 
     RefSerialTransmitter::configCircle(
-        LINE_THICKNESS,
+        LINE_THICKNESS + 2U,  // makes circle thicker
         CRICLE_X,
         CRICLE_Y,
-        CRICLE_SIZE,
+        CRICLE_SIZE + 1U,  // make radius larger
         &crosshairGraphics.graphicData);
 }
 
