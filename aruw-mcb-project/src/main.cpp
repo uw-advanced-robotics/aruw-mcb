@@ -128,7 +128,7 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_ENGINEER)
+#if defined(TARGET_ENGINEER) || defined(TARGET_BALSTD)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
@@ -185,7 +185,7 @@ static void initializeIo(Drivers *drivers)
     drivers->turretMCBCanCommBus1.init();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
+    defined(TARGET_ENGINEER) || defined(TARGET_BALSTD)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
@@ -232,7 +232,7 @@ static void updateIo(Drivers *drivers)
     drivers->mpu6500.read();
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
+    defined(TARGET_ENGINEER) || defined(TARGET_BALSTD)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
@@ -290,10 +290,9 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
 static void initializeI2C(Drivers *drivers)
 {
     drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
-    modm::delay_ms(2000);  // Wait for the SDA and SCL lines to be pulled high
-
+    modm::delay_ms(500);  // Wait for the SDA and SCL lines to be pulled high
     Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-        Board::I2CMaster::PullUps::External);
-    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+        Board::I2CMaster::PullUps::Internal);
+    Board::I2CMaster::initialize<Board::SystemClock, 360000>();
     Board::I2CMaster::reset();
 }

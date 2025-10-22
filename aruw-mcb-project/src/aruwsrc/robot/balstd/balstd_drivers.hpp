@@ -64,11 +64,7 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
           chassisIsm330(this)
-#else
-          chassisIsm330()
-#endif
 
     {
     }
