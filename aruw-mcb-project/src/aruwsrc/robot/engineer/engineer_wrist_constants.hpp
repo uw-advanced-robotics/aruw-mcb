@@ -89,10 +89,7 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
 };
 
 static constexpr aruwsrc::control::JointSubsystem::Config WRIST_ROLL_CONFIG{
-    .super =  // LinearSetpointInterface::Config
-    {
         .epsilon = 1e-2,
-    },
     .posPidConfig = WRIST_ROLL_PID_CONFIG,
     .maxOutput = WRIST_ROLL_PID_CONFIG.maxOutput,
 };

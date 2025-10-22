@@ -56,12 +56,9 @@ static constexpr float LIFT_UPPER_BOUND = THREE_CUBE_SETPOINT;
 static constexpr aruwsrc::control::TriggerHomedJointSubsystem::Config CUBE_LIFT_CONFIG{
     .super =  // JointSubsystem::Config
     {
-        .super =  // LinearSetpointInterface::Config
-        {
             .lowerBound = -320.0f,
             .upperBound = -40.0f,
             .epsilon = 0.5f,
-        },
         .encoderRatio = MM_PER_REVOLUTION,
         .posPidConfig = LIFT_MOTOR_PID_CONFIG,
         .maxOutput = LIFT_MOTOR_PID_CONFIG.maxOutput,

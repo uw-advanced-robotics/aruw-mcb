@@ -24,20 +24,25 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
-
-#include "aruwsrc/control/engineer-joint/linear_setpoint_interface.hpp"
+#include "tap/algorithms/ramp.hpp"
+#include "tap/control/subsystem.hpp"
 
 namespace aruwsrc::control
 {
 /**
  * Subsystem code for joints that don't need to be homed.
  */
-class JointSubsystem : public LinearSetpointInterface, public virtual tap::control::Subsystem
+class JointSubsystem : public virtual tap::control::Subsystem
 {
 public:
+
+
     struct Config
     {
-        LinearSetpointInterface::Config super;
+        float lowerBound = 0.0f, upperBound = 0.0f;
+        float epsilon = 1e-4;
+        float maxSetpointIncrement = FLT_MAX;
+        float initSetpoint = 0;
 
         // Conversion factor from encoder measurement to joint position, assuming linear
         // relationship (e.g. pulley radius for a prismatic joint, gear ratio for a rotary joint,
@@ -51,32 +56,44 @@ public:
 
     JointSubsystem(tap::Drivers *drivers, tap::motor::MotorInterface &motor, Config config);
 
-    virtual void initialize() override;
+    void initialize() override;
 
-    virtual float getPosition() const override;
+    virtual void runPosPidController(float dt);
 
-    virtual float getVelocity() const override;
+    void refresh() override;
 
-    virtual void runPosPidController(float dt)
-    {
-        float error = setpoint.getValue() - getPosition();
-        float motorDesiredOutput =
-            posPid.runController(error, getVelocity(), dt) + staticFeedforward;
-        motor.setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
-    }
+    void refreshSafeDisconnect() override;
 
-    virtual void refresh() override;
+    virtual void setSetpoint(float setpoint);
 
-    virtual void refreshSafeDisconnect() override;
+    inline void updateSetpoint() { setpoint.update(maxSetpointIncrement); }
+
+    float getSetpoint() const { return setpoint.getValue(); }
+
+    virtual float getPosition() const;
+
+    virtual float getVelocity() const;
+
+    bool atSetpoint();
+
+    float getLowerBound() const { return lowerBound; }
+
+    float getUpperBound() const { return upperBound; }
+
+    void setLowerBound(float lowerBound);
+
+    void setUpperBound(float upperBound);
 
 protected:
+    tap::algorithms::Ramp setpoint;
+    float lowerBound, upperBound;
     tap::motor::MotorInterface &motor;
+    const float epsilon, maxSetpointIncrement;
     tap::algorithms::SmoothPid posPid;
     float encoderRatio;
     float staticFeedforward;
     float maxOutput;
 };
-
 }  // namespace aruwsrc::control
 
 #endif  // JOINT_SUBSYSTEM_HPP_

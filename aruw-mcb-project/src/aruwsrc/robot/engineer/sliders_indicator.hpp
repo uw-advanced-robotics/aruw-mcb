@@ -25,7 +25,7 @@
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
-#include "aruwsrc/control/engineer-joint/linear_setpoint_interface.hpp"
+#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
@@ -39,9 +39,9 @@ class SlidersIndicator : public HudIndicator, protected modm::Resumable<2>
 public:
     SlidersIndicator(
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        LinearSetpointInterface &gantryLift,
-        LinearSetpointInterface &gantryExtension,
-        LinearSetpointInterface &cubeLift,
+        JointSubsystem &gantryLift,
+        JointSubsystem &gantryExtension,
+        JointSubsystem &cubeLift,
         WristSubsystem &wristSubsystem,
         wrist::WristConfig wristConfig);
 
@@ -52,9 +52,9 @@ public:
     modm::ResumableResult<void> update() override final;
 
 private:
-    LinearSetpointInterface &gantryLift;
-    LinearSetpointInterface &gantryExtension;
-    LinearSetpointInterface &cubeLift;
+    JointSubsystem &gantryLift;
+    JointSubsystem &gantryExtension;
+    JointSubsystem &cubeLift;
     WristSubsystem &wristSubsystem;
     wrist::WristConfig wristConfig;
 

@@ -38,7 +38,7 @@ public:
         tap::motor::MotorInterface &motorTwo,
         control::TriggerInterface &trigger,
         const tap::algorithms::SmoothPidConfig
-            &alignPidConfig,  // could put this in another layer of struct but seems unnecessary
+            &alignPidConfig,
         const Config &config);
 
     void resetEncoderValue() override;

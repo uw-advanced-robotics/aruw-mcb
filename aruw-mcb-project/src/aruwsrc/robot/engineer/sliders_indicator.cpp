@@ -25,9 +25,9 @@ namespace aruwsrc::control::client_display
 {
 SlidersIndicator::SlidersIndicator(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    LinearSetpointInterface &gantryLift,
-    LinearSetpointInterface &gantryExtension,
-    LinearSetpointInterface &cubeLift,
+    JointSubsystem &gantryLift,
+    JointSubsystem &gantryExtension,
+    JointSubsystem &cubeLift,
     WristSubsystem &wristSubsystem,
     WristConfig wristConfig)
     : HudIndicator(refSerialTransmitter),

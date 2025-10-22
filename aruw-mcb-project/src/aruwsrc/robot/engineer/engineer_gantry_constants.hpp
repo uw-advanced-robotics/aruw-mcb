@@ -57,13 +57,10 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_ALIGN_PID_CONFIG =
 static constexpr aruwsrc::control::TriggerHomedJointSubsystem::Config GANTRY_LIFT_CONFIG{
     .super =  // JointSubsystem::Config
     {
-        .super =  // LinearSetpointInterface::Config
-        {
             .lowerBound = 5.0f,
             .upperBound = 320.0f,
             .epsilon = 1.0f,
             .maxSetpointIncrement = 0.7f,
-        },
         .encoderRatio = 5 * 14 / M_TWOPI,  // 5mm per tooth, 14 teeth
         .posPidConfig = GANTRY_LIFT_POS_PID_CONFIG,
         .maxOutput = GANTRY_LIFT_POS_PID_CONFIG.maxOutput,
@@ -90,12 +87,9 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_PID_CONFIG = 
 static constexpr aruwsrc::control::TriggerHomedJointSubsystem::Config GANTRY_EXTENSION_CONFIG{
     .super =  // JointSubsystem::Config
     {
-        .super =  // LinearSetpointInterface::Config
-        {
             .lowerBound = 5.0f,
             .upperBound = 300.0f,
             .epsilon = 1.0f,
-        },
         .encoderRatio = 5 * 14 / M_TWOPI,  // 5mm per tooth, 14 teeth
         .posPidConfig = GANTRY_EXTENSION_PID_CONFIG,
         .maxOutput = GANTRY_EXTENSION_PID_CONFIG.maxOutput,
