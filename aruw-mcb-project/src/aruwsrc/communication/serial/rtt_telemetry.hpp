@@ -22,6 +22,21 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 
+#include "modm/math/geometry/vector2.hpp"
+
+// Forward declarations
+namespace tap
+{
+class Drivers;
+namespace communication::serial { class RefSerial; }
+}
+
+namespace aruwsrc
+{
+namespace control { class ControlOperatorInterface; }
+namespace serial { class VisionCoprocessor; }
+}
+
 // SEGGER RTT headers
 // extern "C" {
 // #include "SEGGER_RTT.h"
@@ -51,6 +66,17 @@ public:
     RttTelemetry(tap::Drivers* drivers);
 
     /**
+     * Set optional logging dependencies (can be called after construction)
+     * @param controlInterface Control operator interface for input logging
+     * @param refSerial Referee serial interface for game data logging  
+     * @param visionProcessor Vision coprocessor for CV data logging
+     */
+    void setLoggingDependencies(
+        aruwsrc::control::ControlOperatorInterface* controlInterface = nullptr,
+        tap::communication::serial::RefSerial* refSerial = nullptr,
+        aruwsrc::serial::VisionCoprocessor* visionProcessor = nullptr);
+
+    /**
      * Initialize the RTT telemetry system
      */
     void initialize();
@@ -61,14 +87,45 @@ public:
      */
     void update();
 
+    /**
+     * Log control operator interface data (joystick inputs, button states)
+     */
+    void logControlOperatorData();
+
+    /**
+     * Log referee system data (robot health, ammo, game state)
+     */
+    void logRefereeData();
+
+    /**
+     * Log vision coprocessor data (target detection, aim assist)
+     */
+    void logVisionData();
+
+    /**
+     * Log odometry state vector (position, velocity, orientation)
+     * @param position Robot position in world frame (x, y in meters)
+     * @param velocity Robot velocity in world frame (vx, vy in m/s)
+     * @param orientation Robot orientation in radians
+     */
+    void logOdometryState(const modm::Vector2f& position, const modm::Vector2f& velocity, float orientation);
+
 private:
     tap::Drivers* drivers;
+
+    // Optional logging dependencies (set via setLoggingDependencies)
+    aruwsrc::control::ControlOperatorInterface* controlInterface;
+    tap::communication::serial::RefSerial* refSerial;
+    aruwsrc::serial::VisionCoprocessor* visionProcessor;
 
     // Timer for periodic telemetry updates
     tap::arch::PeriodicMilliTimer periodicTimer;
     
     // Timer for LED blinking
     tap::arch::PeriodicMilliTimer ledBlinkTimer;
+    
+    // Timer for extended logging data
+    tap::arch::PeriodicMilliTimer extendedLoggingTimer;
 
     // Counter for periodic messages
     uint32_t messageCounter;

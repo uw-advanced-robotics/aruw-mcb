@@ -241,7 +241,13 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers()->mpu6500,
     modm::Vector2f(
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
-        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y),
+#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
+    &drivers()->rttTelemetry  // Pass RTT telemetry for odometry logging
+#else
+    nullptr  // RTT telemetry not available in unit tests
+#endif
+);
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);

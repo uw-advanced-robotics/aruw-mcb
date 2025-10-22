@@ -21,6 +21,8 @@
 
 #include "tap/architecture/clock.hpp"
 
+#include "aruwsrc/communication/serial/rtt_telemetry.hpp"
+
 namespace aruwsrc::algorithms::odometry
 {
 ChassisCFOdometry::ChassisCFOdometry(
@@ -28,12 +30,14 @@ ChassisCFOdometry::ChassisCFOdometry(
     const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
-    const modm::Vector2f initPos)
+    const modm::Vector2f initPos,
+    aruwsrc::communication::serial::RttTelemetry* rttTelemetry)
     : Subsystem(drivers),
       chassisSubsystem(chassisSubsystem),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
-      initPos(initPos)
+      initPos(initPos),
+      rttTelemetry(rttTelemetry)
 {
     reset();
 }
@@ -81,6 +85,11 @@ void ChassisCFOdometry::update()
     float position_y = location.getY() + velocity.y * dt;
     location.setPosition(position_x, position_y);
     location.setOrientation(chassisYaw);
+
+    // Log odometry data to RTT telemetry if available
+    if (rttTelemetry != nullptr) {
+        rttTelemetry->logOdometryState(location.getPosition(), velocity, chassisYaw);
+    }
 }
 
 void ChassisCFOdometry::computeAccVelocities(float* acc_x_vel, float* acc_y_vel, const float dt)
