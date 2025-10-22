@@ -49,8 +49,11 @@ float EngineerControlOperatorInterface::getGantryLiftVelocity()
 {
     if (getShiftKey())
     {
-        return -(drivers->remote.getMouseY() / divideGantryLift) +
+        if (isGantryWristControlMode) {
+            return -(drivers->remote.getMouseY() / divideGantryLift) +
                drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+        }
+        return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
     }
     else
     {
@@ -64,19 +67,15 @@ float EngineerControlOperatorInterface::getGantryLiftVelocity()
 
 float EngineerControlOperatorInterface::getGantryExtensionVelocity()
 {
-    // if (isGantryWristControlMode()) {
-    //     if (getShiftKey()) {
-    //         return drivers->remote.getMouseX() / divideGantryExtension;
-    //     } else {
-    //         return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
-    //     }
-    // }
-    // return 0.0f;
 
     if (getShiftKey())
     {
-        return drivers->remote.getMouseX() / divideGantryExtension +
+        if (isGantryWristControlMode) {
+            return drivers->remote.getMouseX() / divideGantryExtension +
                drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+        } else {
+            return drivers->remote.getMouseX() / divideGantryExtension;
+        }
     }
     else
     {
