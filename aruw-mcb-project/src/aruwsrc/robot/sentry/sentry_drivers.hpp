@@ -66,7 +66,7 @@ public:
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
-          turretMajorImu(),
+          turretMajorImu(this),
           plateHitTracker(this),
           stateMachine(refSerial, visionCoprocessor)
     {

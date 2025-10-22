@@ -129,7 +129,7 @@ controllers::BalanceController::Config BALANCE_CONTROLLER_CONFIG{
     .minHeight = 0.11,
     .maxHeight = 0.3,  // lowball until tested
     .maxHeightSetpointVel = 0.025f,
-    .maxRollSetpointVel = 0.5f,
+    .maxRollSetpointVel = 0.25f,
 };
 
 }  // namespace aruwsrc::balstd::chassis
