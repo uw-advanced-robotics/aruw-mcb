@@ -32,7 +32,7 @@ using tap::algorithms::WrappedFloat;
 namespace aruwsrc::balstd::chassis::controllers
 {
 BalanceController::BalanceController(
-    const BalstdControlOperatorInterface& controlOperatorInterface,
+    BalstdControlOperatorInterface& controlOperatorInterface,
     const Config config)
     : BalstdChassisControllerInterface(controlOperatorInterface),
       config(config),
@@ -53,6 +53,7 @@ void BalanceController::initialize(const BalstdChassisState& state)
     heightSetpoint.setValue(state.height);
     yawSetpoint = state.yaw;
     vmRef.data = {0, 0, state.virtualWheelPos, 0, 0, 0};
+    controlOperatorInterface.setMode(BalstdControlOperatorInterface::Mode::BALANCE);
 }
 
 float leftHipTorque = 0;

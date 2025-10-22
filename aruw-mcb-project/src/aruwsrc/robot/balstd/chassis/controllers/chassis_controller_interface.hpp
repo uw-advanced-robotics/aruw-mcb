@@ -29,7 +29,7 @@ namespace aruwsrc::balstd::chassis::controllers
 class BalstdChassisControllerInterface
 {
 public:
-    BalstdChassisControllerInterface(const BalstdControlOperatorInterface& controlOperatorInterface)
+    BalstdChassisControllerInterface(BalstdControlOperatorInterface& controlOperatorInterface)
         : controlOperatorInterface(controlOperatorInterface)
     {
     }
@@ -40,7 +40,7 @@ public:
     virtual BalstdChassisOutput runController(const BalstdChassisState& state, float dt) = 0;
 
 protected:
-    const BalstdControlOperatorInterface& controlOperatorInterface;
+    BalstdControlOperatorInterface& controlOperatorInterface;
 };
 }  // namespace aruwsrc::balstd::chassis::controllers
 

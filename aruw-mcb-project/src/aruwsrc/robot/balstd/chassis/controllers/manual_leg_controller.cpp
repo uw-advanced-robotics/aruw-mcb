@@ -21,7 +21,11 @@
 
 namespace aruwsrc::balstd::chassis::controllers
 {
-float mlx, mly;
+void ManualLegController::initialize(const BalstdChassisState&)
+{
+    controlOperatorInterface.setMode(BalstdControlOperatorInterface::Mode::MANUAL);
+}
+
 BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&, float)
 {
     return BalstdChassisOutput(

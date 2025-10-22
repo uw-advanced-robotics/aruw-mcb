@@ -27,10 +27,12 @@ namespace aruwsrc::balstd::chassis::controllers
 class ManualLegController : public BalstdChassisControllerInterface
 {
 public:
-    ManualLegController(const BalstdControlOperatorInterface& controlOperatorInterface)
+    ManualLegController(BalstdControlOperatorInterface& controlOperatorInterface)
         : BalstdChassisControllerInterface(controlOperatorInterface)
     {
     }
+
+    void initialize(const BalstdChassisState& state) override;
 
     BalstdChassisOutput runController(const BalstdChassisState& state, float dt) override;
 };

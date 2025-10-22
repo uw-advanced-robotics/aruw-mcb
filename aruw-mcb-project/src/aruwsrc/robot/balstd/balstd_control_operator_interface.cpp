@@ -23,44 +23,62 @@ using Channel = tap::communication::serial::Remote::Channel;
 
 namespace aruwsrc::balstd
 {
-float BalstdControlOperatorInterface::getXVel() const
+float BalstdControlOperatorInterface::getRemoteChannel(Channel channel)
 {
-    return drivers->remote.getChannel(Channel::LEFT_VERTICAL) * MAX_X_VEL;
+    float val = drivers->remote.getChannel(channel);
+    if (tap::algorithms::compareFloatClose(val, 0, 1e-3))
+    {
+        channelHeldOver[static_cast<size_t>(channel)] = false;
+    }
+    return channelHeldOver[static_cast<size_t>(channel)] ? 0.0f : val;
 }
 
-float BalstdControlOperatorInterface::getYawVel() const
+float BalstdControlOperatorInterface::getModeRestrictedInput(
+    tap::communication::serial::Remote::Channel channel,
+    Mode mode,
+    float max)
 {
-    return -drivers->remote.getChannel(Channel::RIGHT_HORIZONTAL) * MAX_YAW_VEL;
+    return (this->mode == mode) ? getRemoteChannel(channel) * max : 0.0f;
 }
 
-float BalstdControlOperatorInterface::getRoll() const
+float BalstdControlOperatorInterface::getXVel()
 {
-    return -drivers->remote.getChannel(Channel::LEFT_HORIZONTAL) * MAX_ROLL;
+    return getModeRestrictedInput(Channel::LEFT_VERTICAL, Mode::BALANCE, MAX_X_VEL);
 }
 
-float BalstdControlOperatorInterface::getHeightVel() const
+float BalstdControlOperatorInterface::getYawVel()
 {
-    return -drivers->remote.getChannel(Channel::WHEEL) * MAX_HEIGHT_VEL;
+    return -getModeRestrictedInput(Channel::RIGHT_HORIZONTAL, Mode::BALANCE, MAX_YAW_VEL);
 }
 
-float BalstdControlOperatorInterface::getManualLegXForce() const
+float BalstdControlOperatorInterface::getRoll()
 {
-    return drivers->remote.getChannel(Channel::LEFT_HORIZONTAL) * MAX_LEG_FORCE;
+    return -getModeRestrictedInput(Channel::LEFT_HORIZONTAL, Mode::BALANCE, MAX_ROLL);
 }
 
-float BalstdControlOperatorInterface::getManualLegYForce() const
+float BalstdControlOperatorInterface::getHeightVel()
 {
-    return -drivers->remote.getChannel(Channel::LEFT_VERTICAL) * MAX_LEG_FORCE;
+    return -getModeRestrictedInput(Channel::WHEEL, Mode::BALANCE, MAX_HEIGHT_VEL);
 }
 
-float BalstdControlOperatorInterface::getManualWheelTorque() const
+float BalstdControlOperatorInterface::getManualLegXForce()
 {
-    return drivers->remote.getChannel(Channel::RIGHT_VERTICAL) * MAX_WHEEL_TORQUE;
+    return getModeRestrictedInput(Channel::LEFT_HORIZONTAL, Mode::MANUAL, MAX_LEG_FORCE);
 }
 
-float BalstdControlOperatorInterface::getManualSteerTorque() const
+float BalstdControlOperatorInterface::getManualLegYForce()
 {
-    return drivers->remote.getChannel(Channel::RIGHT_HORIZONTAL) * MAX_STEER_TORQUE;
+    return -getModeRestrictedInput(Channel::LEFT_VERTICAL, Mode::MANUAL, MAX_LEG_FORCE);
+}
+
+float BalstdControlOperatorInterface::getManualWheelTorque()
+{
+    return getModeRestrictedInput(Channel::RIGHT_VERTICAL, Mode::MANUAL, MAX_WHEEL_TORQUE);
+}
+
+float BalstdControlOperatorInterface::getManualSteerTorque()
+{
+    return getModeRestrictedInput(Channel::RIGHT_HORIZONTAL, Mode::MANUAL, MAX_STEER_TORQUE);
 }
 
 }  // namespace aruwsrc::balstd

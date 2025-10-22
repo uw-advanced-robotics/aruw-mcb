@@ -20,8 +20,6 @@
 #ifndef BALSTD_CONTROL_OPERATOR_INTERFACE_HPP_
 #define BALSTD_CONTROL_OPERATOR_INTERFACE_HPP_
 
-#include "tap/drivers.hpp"
-
 #include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::balstd
@@ -29,15 +27,21 @@ namespace aruwsrc::balstd
 class BalstdControlOperatorInterface : public aruwsrc::control::ControlOperatorInterface
 {
 public:
+    enum class Mode
+    {
+        MANUAL = 0,
+        BALANCE
+    };
+
     BalstdControlOperatorInterface(tap::Drivers* drivers) : ControlOperatorInterface(drivers) {}
 
-    mockable float getXVel() const;
+    mockable float getXVel();
 
-    mockable float getYawVel() const;
+    mockable float getYawVel();
 
-    mockable float getRoll() const;
+    mockable float getRoll();
 
-    mockable float getHeightVel() const;
+    mockable float getHeightVel();
 
     // ====================
     // testing input modes
@@ -45,24 +49,41 @@ public:
     /**
      * @return The value used for testing leg VMC movement forward/backward
      */
-    mockable float getManualLegXForce() const;
+    mockable float getManualLegXForce();
 
     /**
      * @return The value used for testing leg VMC up/down movement
      */
-    mockable float getManualLegYForce() const;
+    mockable float getManualLegYForce();
 
     /**
      * @return The value used for testing leg wheel torque
      */
-    mockable float getManualWheelTorque() const;
+    mockable float getManualWheelTorque();
 
     /**
      * @return The value used for steering when manual driving
      */
-    mockable float getManualSteerTorque() const;
+    mockable float getManualSteerTorque();
+
+    inline void setMode(Mode newMode)
+    {
+        if (mode == newMode) return;
+        mode = newMode;
+        for (size_t i = 0; i < 6; i++) channelHeldOver[i] = true;
+    }
 
 private:
+    inline float getRemoteChannel(tap::communication::serial::Remote::Channel channel);
+
+    inline float getModeRestrictedInput(
+        tap::communication::serial::Remote::Channel channel,
+        Mode mode,
+        float max);
+
+    Mode mode;
+    bool channelHeldOver[6];
+
     static constexpr float MAX_X_VEL = 0.4f;         // m/s
     static constexpr float MAX_YAW_VEL = 1.0f;       // rad/s
     static constexpr float MAX_ROLL = M_PI / 6;      // rad

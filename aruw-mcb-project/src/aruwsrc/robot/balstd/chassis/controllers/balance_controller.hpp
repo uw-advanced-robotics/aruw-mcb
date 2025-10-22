@@ -43,7 +43,7 @@ public:
     };
 
     BalanceController(
-        const BalstdControlOperatorInterface& controlOperatorInterface,
+        BalstdControlOperatorInterface& controlOperatorInterface,
         const Config config);
 
     void initialize(const BalstdChassisState& state) override;
