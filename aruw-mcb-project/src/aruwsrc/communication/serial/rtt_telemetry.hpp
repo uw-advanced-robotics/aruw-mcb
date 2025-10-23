@@ -20,6 +20,11 @@
 #ifndef RTT_TELEMETRY_HPP_
 #define RTT_TELEMETRY_HPP_
 
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <type_traits>
+
 #include "tap/architecture/periodic_timer.hpp"
 
 #include "modm/math/geometry/vector2.hpp"
@@ -72,6 +77,15 @@ namespace aruwsrc::communication::serial
 class RttTelemetry : public modm::pt::Protothread
 {
 public:
+    // template <typename T, const char* L, size_t S>
+    // struct Signal
+    // {
+    //     T data[S];
+    // };
+
+    // inline static constexpr char ID[] = "example";
+    // Signal<float, ID, 3> sig;
+
     /**
      * Constructor
      * @param drivers Pointer to the global drivers instance
@@ -127,6 +141,18 @@ public:
         const modm::Vector2f& position,
         const modm::Vector2f& velocity,
         float orientation);
+
+    template <typename T, const char* L, size_t S>
+    void logSignal(const T (&data)[S])
+    {
+        emit_array_json_and_queue<T, L, S>(data);
+    }
+
+    template <typename T, const char* L>
+    void logSignal(const T& value)
+    {
+        emit_scalar_json_and_queue<T, L>(value);
+    }
 
 private:
     tap::Drivers* drivers;
@@ -198,7 +224,96 @@ private:
      * @return Timestamp in milliseconds since startup
      */
     uint32_t getTimestamp() const;
+
+    template <class T>
+    void append_json_value(std::string& out, const T& v)
+    {
+        if constexpr (std::is_floating_point_v<T>)
+        {
+            char buf[64];
+            // compact but precise enough; adjust if you need fixed decimals
+            int vq = static_cast<int32_t>(v * 1000);
+            std::snprintf(buf, sizeof(buf), "%d.%03d", vq / 1000, vq % 1000);
+            out += buf;
+        }
+        else if constexpr (std::is_integral_v<T> && !std::is_same_v<T, bool>)
+        {
+            char buf[64];
+            // print as signed long long to be safe
+            std::snprintf(buf, sizeof(buf), "%lld", static_cast<long long>(v));
+            out += buf;
+        }
+        else if constexpr (std::is_same_v<T, bool>)
+        {
+            out += (v ? "true" : "false");
+        }
+        else if constexpr (std::is_same_v<T, const char*> || std::is_same_v<T, char*>)
+        {
+            // minimal string escaping (quotes/backslashes); extend if needed
+            out += '"';
+            for (const char* p = v; *p; ++p)
+            {
+                char c = *p;
+                if (c == '"' || c == '\\') out += '\\';
+                out += c;
+            }
+            out += '"';
+        }
+        else if constexpr (std::is_same_v<T, char>)
+        {
+            // represent char as a small JSON string
+            out += '"';
+            if (v == '"' || v == '\\') out += '\\';
+            out += v;
+            out += '"';
+        }
+        else
+        {
+            static_assert(std::is_arithmetic_v<T>, "Unsupported type for JSON logging");
+        }
+    }
+
+    template <class T, const char* L>
+    void emit_scalar_json_and_queue(const T& v)
+    {
+        std::string msg;
+        msg.reserve(64);
+        msg += "{\"";
+        msg += L;
+        msg += "\":";
+        append_json_value(msg, v);
+        msg += '}';
+
+        // queue: assumes queueMessage copies the string
+        queueMessage(msg.c_str());
+    }
+
+    template <class T, const char* L, size_t S>
+    void emit_array_json_and_queue(const T (&arr)[S])
+    {
+        std::string msg;
+        msg.reserve(32 + S * 16);  // rough reserve
+
+        msg += "{\"";
+        msg += L;
+        msg += "\":[";
+
+        for (size_t i = 0; i < S; ++i)
+        {
+            if (i) msg += ',';
+            append_json_value(msg, arr[i]);
+        }
+        msg += "]}\n";
+
+        queueMessage(msg.c_str());
+    }
 };
+
+// template <typename T, const char* L>
+// void logSignal(T data)
+// {
+//     //
+// }
 
 }  // namespace aruwsrc::communication::serial
 

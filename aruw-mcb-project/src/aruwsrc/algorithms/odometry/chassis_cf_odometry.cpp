@@ -89,7 +89,8 @@ void ChassisCFOdometry::update()
     // Log odometry data to RTT telemetry if available
     if (rttTelemetry != nullptr)
     {
-        rttTelemetry->logOdometryState(location.getPosition(), velocity, chassisYaw);
+        float posArr[2] = {position_x, position_y};
+        rttTelemetry->logSignal<float, POS_LOG_ID, 2>(posArr);
     }
 }
 

@@ -102,6 +102,8 @@ private:
 
     float chassisTrust = 1.0f;  // Trust in deadwheel odometry vs IMU
 
+    inline static constexpr char POS_LOG_ID[] = "pos";
+
     void computeAccVelocities(float* acc_x_vel, float* acc_y_vel, float dt);
 };
 }  // namespace aruwsrc::algorithms::odometry

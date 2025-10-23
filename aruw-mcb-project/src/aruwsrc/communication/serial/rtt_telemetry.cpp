@@ -209,10 +209,10 @@ bool RttTelemetry::updateTelemetryAsync()
             }
         }
 
-        generateHeartbeatMessage();
-        logControlOperatorData();
-        logRefereeData();
-        logVisionData();
+        // generateHeartbeatMessage();
+        // logControlOperatorData();
+        // logRefereeData();
+        // logVisionData();
         // Send all queued messages
         sendQueuedMessages();
 
