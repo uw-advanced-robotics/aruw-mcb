@@ -704,6 +704,7 @@ void registerStandardSubsystems(Drivers *drivers)
     // CALL the register subsystem method
     // PASS a pointer to the turret subsystem
     // This makes the turret available for command scheduling
+    drivers->commandScheduler.registerSubsystem(&turret);
 
     // Other subsystems are registered here too...
     drivers->commandScheduler.registerSubsystem(&agitator);
@@ -744,6 +745,7 @@ void setDefaultStandardCommands(Drivers *)
     // CALL the setDefaultCommand method on the turret subsystem
     // PASS a pointer to your turret user control command
     // This command will run whenever no other command is using the turret
+    turret.setDefaultCommand(&turretUserControlCommand);
 
     // Other default commands are set here too...
     // chassis.setDefaultCommand(&chassisAutorotateCommand);
