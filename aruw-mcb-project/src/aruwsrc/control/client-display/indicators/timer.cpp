@@ -23,8 +23,8 @@ modm::ResumableResult<void> Timer::update()
 
     numberIndicator.setIndicatorState(timer);
 
-    RF_END();
     RF_CALL(numberIndicator.draw());
+    RF_END();
 }
 
 modm::ResumableResult<void> Timer::sendInitialGraphics()
