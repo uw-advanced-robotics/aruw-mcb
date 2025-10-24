@@ -43,11 +43,14 @@ namespace blank_control
 // TODO: instantiate buzzer subsystem
 // BuzzerSubsystem buzzer(...)
 
+BuzzerSubsystem buzzer;
+
 NoteSequenceCommand hesAPirateCommand(buzzer, HES_A_PIRATE_NOTES, HES_A_PIRATE_NOTE_LENGTH_MS);
 
 void initializeSubsystems()
 {
     // TODO: register initialize buzzer subsystem
+    buzzer.registerAndInitialize();
 
     buzzer.setDefaultCommand(&hesAPirateCommand);
 }

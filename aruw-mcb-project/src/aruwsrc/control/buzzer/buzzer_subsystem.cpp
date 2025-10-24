@@ -20,10 +20,23 @@
 #include "buzzer_subsystem.hpp"
 
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
+#include "tap/communication/gpio/pwm.hpp"
 
 namespace aruwsrc::control::buzzer
 {
 
-// TODO: Write function implementations
+    BuzzerSubsystem::BuzzerSubsystem(tap::Drivers* drivers) : tap::control::Subsystem(drivers) {}
+
+    void BuzzerSubsystem::playFrequency(float frequency) {
+        tap::buzzer::playNote(&drivers->pwm, frequency);
+    }
+
+    void BuzzerSubsystem::playNote(uint8_t note) {
+        tap::buzzer::playNote(&drivers->pwm, NOTE_FREQUENCIES[note]);
+    }
+
+    void BuzzerSubsystem::stop() {
+        tap::buzzer::silenceBuzzer(&drivers->pwm);
+    }
 
 }  // namespace aruwsrc::control::buzzer
