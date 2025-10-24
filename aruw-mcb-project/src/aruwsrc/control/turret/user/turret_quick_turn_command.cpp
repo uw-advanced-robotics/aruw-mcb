@@ -19,7 +19,10 @@
 
 #include "turret_quick_turn_command.hpp"
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/drivers.hpp"
+
+using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::control::turret::user
 {
@@ -36,15 +39,8 @@ bool TurretQuickTurnCommand::isReady() { return turretSubsystem->yawMotor.isOnli
 
 void TurretQuickTurnCommand::initialize()
 {
-    float newSetpoint =
-        tap::algorithms::WrappedFloat(
-            turretSubsystem->yawMotor.getChassisFrameMeasuredAngle().getWrappedValue() +
-                targetOffsetToTurn,
-            0,
-            M_TWOPI)
-            .getWrappedValue();
-
-    newSetpoint = turretSubsystem->yawMotor.unwrapTargetAngle(newSetpoint);
+    WrappedFloat newSetpoint =
+        turretSubsystem->yawMotor.getChassisFrameMeasuredAngle() + targetOffsetToTurn;
 
     turretSubsystem->yawMotor.setChassisFrameSetpoint(newSetpoint);
 

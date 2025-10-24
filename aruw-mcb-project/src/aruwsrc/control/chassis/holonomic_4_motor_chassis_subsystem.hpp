@@ -20,13 +20,17 @@
 #ifndef HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 #define HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 
-#include "tap/communication/gpio/analog.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
-#include "constants/chassis_constants.hpp"
-
 #include "holonomic_chassis_subsystem.hpp"
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <gmock/gmock.h>
+
+#include "tap/mock/motor_interface_mock.hpp"
+#endif
 
 namespace aruwsrc
 {
@@ -38,14 +42,22 @@ namespace chassis
 class Holonomic4MotorChassisSubsystem : public HolonomicChassisSubsystem
 {
 public:
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    using Motor = testing::NiceMock<tap::mock::MotorInterfaceMock>;
+#else
+    using Motor = tap::motor::MotorInterface;
+#endif
+
     Holonomic4MotorChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        can::capbank::CapacitorBank* capacitorBank = nullptr,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
+        Motor& leftFrontMotor,
+        Motor& leftBackMotor,
+        Motor& rightFrontMotor,
+        Motor& rightBackMotor,
+        tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+        can::capbank::CapacitorBank* capacitorBank = nullptr);
 
     inline bool allMotorsOnline() const override
     {
@@ -53,10 +65,22 @@ public:
                leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
 
-    virtual inline int16_t getLeftFrontRpmActual() const { return leftFrontMotor.getShaftRPM(); }
-    virtual inline int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
-    virtual inline int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
-    virtual inline int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
+    virtual inline float getLeftFrontRpmActual() const
+    {
+        return leftFrontMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
+    }
+    virtual inline float getLeftBackRpmActual() const
+    {
+        return leftBackMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
+    }
+    virtual inline float getRightFrontRpmActual() const
+    {
+        return rightFrontMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
+    }
+    virtual inline float getRightBackRpmActual() const
+    {
+        return rightBackMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
+    }
 
     inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 
@@ -120,32 +144,23 @@ private:
      */
     void calculateOutput(float x, float y, float r, float maxWheelSpeed);
 
-    void updateMotorRpmPid(
-        modm::Pid<float>* pid,
-        tap::motor::DjiMotor* const motor,
-        float desiredRpm);
+    void updateMotorRpmPid(int i);
 
     // wheel velocity PID variables
-    modm::Pid<float> velocityPid[4];
+    tap::algorithms::SmoothPid velocityPid[4];
+
+    float velocityPidErrors[4];
 
     // ✨ the motors ✨
-    tap::motor::DjiMotor* motors[4];
+    tap::motor::MotorInterface* motors[4];
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> leftBackMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightBackMotor;
-
-private:
-#else
-    // motors
-    tap::motor::DjiMotor leftFrontMotor;
-    tap::motor::DjiMotor leftBackMotor;
-    tap::motor::DjiMotor rightFrontMotor;
-    tap::motor::DjiMotor rightBackMotor;
 #endif
+    Motor& leftFrontMotor;
+    Motor& leftBackMotor;
+    Motor& rightFrontMotor;
+    Motor& rightBackMotor;
 };
 
 }  // namespace chassis

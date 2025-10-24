@@ -47,7 +47,7 @@ static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
+    .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR2,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -89,6 +89,9 @@ tap::algorithms::SmoothPidConfig rm3508VelocityPidConfig =
 // untuned!!
 tap::algorithms::SmoothPidConfig gm6020VelocityPidConfig =
     {.kp = 0.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+
+tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
+    {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
 }  // namespace aruwsrc::motor_tester::constants
 

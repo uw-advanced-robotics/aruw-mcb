@@ -22,9 +22,9 @@
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
-#elif defined(TARGET_SENTRY_HYDRA)
+#elif defined(TARGET_SENTRY_ECLIPSE)
 #include "aruwsrc/robot/sentry/sentry_agitator_constants.hpp"
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
 #endif
 

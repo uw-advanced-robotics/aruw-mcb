@@ -46,7 +46,7 @@ public:
     };
     struct PlateHitData
     {
-        u_int8_t plateID;
+        uint8_t plateID;
         float lastDps;
         WrappedFloat hitAngle_chassisRelative_radians;
         WrappedFloat hitAngle_worldRelative_radians;
@@ -125,7 +125,7 @@ private:
         B , 0 , 0 , 0 , 0 , 0 , B , A
     };
     // clang-format on
-    const float DECAY_FACTOR = 0.99995;
+    const float DECAY_FACTOR = 0.995;
 
     // Variables
     tap::Drivers *drivers;

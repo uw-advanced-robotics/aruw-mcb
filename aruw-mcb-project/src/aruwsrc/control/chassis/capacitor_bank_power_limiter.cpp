@@ -24,17 +24,15 @@
 
 namespace aruwsrc::chassis
 {
-CapacitorSelectingCurrentSensor::CapacitorSelectingCurrentSensor(
+CapacitorSelectingSensor::CapacitorSelectingSensor(
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
     can::capbank::CapacitorBank *capacitorBank)
-    :
+    : currentSensor(currentSensor),
+      voltageSensor(voltageSensor),
+      capacitorBank(capacitorBank){};
 
-      currentSensor(currentSensor),
-      capacitorBank(capacitorBank){
-
-      };
-
-float CapacitorSelectingCurrentSensor::getCurrentMa() const
+float CapacitorSelectingSensor::getCurrentMa() const
 {
     if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline())
     {
@@ -44,18 +42,30 @@ float CapacitorSelectingCurrentSensor::getCurrentMa() const
     return this->capacitorBank->getCurrent() * 1000;
 }
 
+float CapacitorSelectingSensor::getVoltageMv() const
+{
+    if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline())
+    {
+        return this->voltageSensor->getVoltageMv();
+    }
+
+    return aruwsrc::can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE * 1000;
+}
+
 CapBankPowerLimiter::CapBankPowerLimiter(
     const tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
     aruwsrc::can::capbank::CapacitorBank *capacitorBank,
     float startingEnergyBuffer,
     float energyBufferLimitThreshold,
     float energyBufferCritThreshold)
     : drivers(drivers),
       capacitorBank(capacitorBank),
-      sensor(currentSensor, capacitorBank),
+      sensor(currentSensor, voltageSensor, capacitorBank),
       fallback(
           drivers,
+          &sensor,
           &sensor,
           startingEnergyBuffer,
           energyBufferLimitThreshold,

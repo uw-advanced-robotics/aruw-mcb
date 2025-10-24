@@ -82,9 +82,10 @@ public:
 
     mockable float getDesiredFrictionWheelSpeed() const
     {
-        return launchSpeedToFrictionWheelRpm(desiredLaunchSpeed);
+        return launchSpeedToFrictionWheelRpm(desiredLaunchSpeed) - speedCorrection;
     }
 
+    float getCurrentCorrectionValue() const { return speedCorrection; }
     /**
      * @return The average measured friction wheel speed of the launcher in RPM.
      */
@@ -125,7 +126,11 @@ private:
 
     modm::Pid<float> velocityPidRightWheel;
 
+    modm::Pid<float> speedCorrectionPid;
+
     float desiredLaunchSpeed;
+
+    float speedCorrection = 0.0f;
 
     uint32_t prevTime = 0;
 
@@ -145,6 +150,8 @@ private:
 #endif
 
     aruwsrc::can::TurretMCBCanComm *turretMCB;
+
+    float prevShotTime = 0.0f;
 
     FrictionWheelTestCommand frictionTestCommand;
 

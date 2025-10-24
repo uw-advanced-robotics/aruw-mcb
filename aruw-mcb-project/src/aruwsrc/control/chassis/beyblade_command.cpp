@@ -20,6 +20,7 @@
 #include "beyblade_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/remote.hpp"
@@ -41,11 +42,15 @@ BeybladeCommand::BeybladeCommand(
     tap::Drivers* drivers,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::ControlOperatorInterface& operatorInterface)
+    aruwsrc::control::ControlOperatorInterface& operatorInterface,
+    const aruwsrc::chassis::BeybladeConfig config,
+    const float rotationMultiplier)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
-      operatorInterface(operatorInterface)
+      operatorInterface(operatorInterface),
+      config(config),
+      rotationMultiplier(rotationMultiplier)
 {
     addSubsystemRequirement(chassis);
 }
@@ -66,7 +71,7 @@ void BeybladeCommand::execute()
     if (yawMotor->isOnline())
     {
         // Gets current turret yaw angle
-        float turretYawAngle = yawMotor->getAngleFromCenter();
+        WrappedFloat turretYawAngle = yawMotor->getChassisFrameMeasuredAngle();
 
         float x = 0.0f;
         float y = 0.0f;
@@ -80,8 +85,8 @@ void BeybladeCommand::execute()
             0,
             &x,
             &y);
-        x *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
-        y *= BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER;
+        x *= config.beybladeTranslationalSpeedMultiplier;
+        y *= config.beybladeTranslationalSpeedMultiplier;
 
         const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
@@ -90,27 +95,27 @@ void BeybladeCommand::execute()
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
         // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)
         const float translationalSpeedThreshold =
-            BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE *
-            BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed;
+            config.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
+            config.beybladeTranslationalSpeedMultiplier * maxWheelSpeed * rotationMultiplier;
 
-        float rampTarget =
-            rotationDirection * BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX * maxWheelSpeed;
+        float rampTarget = rotationDirection * config.beybladeRotationalSpeedFractionOfMax *
+                           maxWheelSpeed * rotationMultiplier;
 
         // reduce the beyblade rotation when translating to allow for better translational speed
         // (otherwise it is likely that you will barely move unless
         // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
         if (fabsf(x) > translationalSpeedThreshold || fabsf(y) > translationalSpeedThreshold)
         {
-            rampTarget *= BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING;
+            rampTarget *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
         }
 
         rotateSpeedRamp.setTarget(rampTarget);
         // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
-        rotateSpeedRamp.update(BEYBLADE_RAMP_UPDATE_RAMP);
+        rotateSpeedRamp.update(config.beybladeRampRate);
         float r = rotateSpeedRamp.getValue();
 
         // Rotate X and Y depending on turret angle
-        tap::algorithms::rotateVector(&x, &y, turretYawAngle);
+        tap::algorithms::rotateVector(&x, &y, turretYawAngle.getWrappedValue());
 
         // set outputs
         chassis->setDesiredOutput(x, y, r);

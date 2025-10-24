@@ -90,7 +90,7 @@ void ChassisAutorotateCommand::execute()
     {
         updateAutorotateState();
 
-        float turretAngleFromCenter = yawMotor->getAngleFromCenter();
+        float turretAngleFromCenter = yawMotor->getChassisFrameMeasuredAngle().getWrappedValue();
 
         if (chassisAutorotating)
         {
@@ -116,7 +116,7 @@ void ChassisAutorotateCommand::execute()
             // PD controller to find desired rotational component of the chassis control
             float desiredRotation = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,
-                yawMotor->getChassisFrameVelocity() - modm::toRadian(drivers->mpu6500.getGz()));
+                yawMotor->getChassisFrameVelocity() - drivers->mpu6500.getGz());
 
             // find an alpha value to be used for the low pass filter, some value >
             // AUTOROTATION_MIN_SMOOTHING_ALPHA, inversely proportional to

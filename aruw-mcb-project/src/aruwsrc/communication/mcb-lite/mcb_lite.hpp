@@ -31,10 +31,12 @@
 
 #include "message_types.hpp"
 #include "virtual_analog.hpp"
+#include "virtual_can_encoder.hpp"
 #include "virtual_digital.hpp"
 #include "virtual_imu_interface.hpp"
 #include "virtual_leds.hpp"
 #include "virtual_pwm.hpp"
+#include "virtual_voltage_current_sensor.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
@@ -56,6 +58,8 @@ namespace aruwsrc::virtualMCB
 class MCBLite : public tap::communication::serial::DJISerial
 {
     friend class aruwsrc::display::MCBLiteMenu;
+    friend class VirtualCanEncoder;
+    friend class VirtualVoltageCurrentSensor;
 
 public:
     MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);
@@ -66,7 +70,7 @@ public:
 
     void initialize();
 
-    constexpr static int UART_BAUDRATE = 230'400;
+    constexpr static int UART_BAUDRATE = 1'000'000;
 
     VirtualCanRxHandler canRxHandler;
     VirtualDJIMotorTxHandler motorTxHandler;
@@ -81,6 +85,12 @@ private:
 
     void processCurrentSensorMessage(const ReceivedSerialMessage& completeMessage);
 
+    void processCanEncoderMessage(
+        const ReceivedSerialMessage& completeMessage,
+        VirtualCanEncoder** encoders);
+
+    void processVoltageCurrentMessage(const ReceivedSerialMessage& completeMessage);
+
     tap::communication::serial::Uart::UartPort port;
 
     IMUMessage currentIMUData;
@@ -88,6 +98,11 @@ private:
     uint8_t can2Data[64];
     AnalogInputPinMessage analogData;
     DigitalInputPinMessage digitalData;
+
+    VirtualCanEncoder* can1Encoders[8];
+    VirtualCanEncoder* can2Encoders[8];
+
+    VirtualVoltageCurrentSensor* voltageCurrentSensor;
 
     bool initialized = false;
 };

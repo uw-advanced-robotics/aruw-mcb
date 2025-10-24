@@ -39,8 +39,8 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
         - \"ozone\": builds the code and launches ozone, defaulting to using USB for robot connection.\n\
             - \"ip=<IP>\": sets the IP address of the robot to connect to.\
     \"<ROBOT_TYPE>\" enables the appropriate build flags for the hardware target that the code should be built for.\n\
-        - <ROBOT_TYPE> must be one of the following:\n\
-            - STANDARD_SPIDER, STANDARD_ORION, STANDARD_CYGNUS, DRONE, ENGINEER, SENTRY_HYDRA, HERO_PERSEUS, DART\n\
+        - <ROBOT_TYPE> must be one of or a unique substring from the following:\n\
+            - STANDARD_NULL, STANDARD_VOID, DRONE, ENGINEER, SENTRY_ECLIPSE, HERO_ZERO, DART\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
                           the sim libraries, for example, run `scons build compile_lib_only=sim`."
 
@@ -89,6 +89,9 @@ def parse_args():
     args["PROFILING"] = ARGUMENTS.get("profiling", "false")
     if args["PROFILING"] not in VALID_PROFILING_TYPES:
         raise Exception("You specified an invalid profiling type.\n" + USAGE)
+
+    if "test" in ARGUMENTS:
+        args["TEST"] = ARGUMENTS.get("test", None)
 
     # Extract the robot type from either the command line or robot_type.hpp
     args["ROBOT_TYPE"] = extract_robot_type.get_robot_type()

@@ -23,12 +23,15 @@
 #include <vector>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -68,11 +71,11 @@ public:
         LOCKING_TURRET,
         /** While in this state, the command waits until calibration of the IMUs are complete. */
         CALIBRATING_IMU,
-        /** While in this state, turn on buzzer so people know we are done*/
-        BUZZING,
         /** While in this state, the command waits a small time after calibration is complete to
            handle any latency associated with sending messages to the TurretMCBCanComm. */
         WAITING_CALIBRATION_COMPLETE,
+        CALIBRATION_SUCCESS,
+        CALIBRATION_FAIL,
     };
 
     /**
@@ -85,8 +88,8 @@ public:
      */
     const float positionZeroThreshold;
 
-    static constexpr float DEFAULT_VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-2);
-    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(3.0f);
+    static constexpr float DEFAULT_VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4f);
+    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
 
     struct TurretIMUCalibrationConfig
     {
@@ -117,12 +120,17 @@ public:
      * @param[in] positionZeroThreshold Threshold around 0 where turret pitch and yaw position from
      * the center considered to be 0, in radians.
      */
+
     ImuCalibrateCommand(
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         chassis::HolonomicChassisSubsystem *chassis,
         float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-        float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD);
+        float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+        aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
+        aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr,
+        tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr,
+        const std::vector<tap::communication::sensors::imu::ImuInterface *> &externalIMUs = {});
 
     const char *getName() const override { return "Calibrate IMU"; }
 
@@ -134,7 +142,7 @@ public:
 
     void end(bool interrupted) override;
 
-    bool isFinished() const override;
+    virtual bool isFinished() const override;
 
     /**
      * @return The current calibration state of the command.
@@ -160,7 +168,11 @@ protected:
 
     tap::Drivers *drivers;
     std::vector<TurretIMUCalibrationConfig> turretsAndControllers;
+    std::vector<tap::communication::sensors::imu::ImuInterface *> externalIMUs;
     chassis::HolonomicChassisSubsystem *chassis;
+    tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface;
+    aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
+    aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
     CalibrationState calibrationState;
 
@@ -175,8 +187,6 @@ protected:
      */
     tap::arch::MilliTimeout calibrationTimer;
 
-    tap::arch::MilliTimeout buzzerTimer;
-
     /**
      * Timeout used to determine if we should give up on calibration.
      */
@@ -189,18 +199,14 @@ protected:
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
                    velocityZeroThreshold) &&
-               compareFloatClose(
-                   0.0f,
-                   turret->yawMotor.getAngleFromCenter(),
-                   positionZeroThreshold) &&
+               (turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0) <
+                positionZeroThreshold) &&
                (ignorePitch || (compareFloatClose(
                                     0.0f,
                                     turret->pitchMotor.getChassisFrameVelocity(),
                                     velocityZeroThreshold) &&
-                                compareFloatClose(
-                                    0.0f,
-                                    turret->pitchMotor.getAngleFromCenter(),
-                                    positionZeroThreshold)));
+                                (turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(
+                                     0) < positionZeroThreshold)));
     }
 };
 }  // namespace aruwsrc::control::imu

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -39,7 +39,24 @@ enum MessageTypes : uint8_t
     PWM_PIN_DUTY_MESSAGE = 8,
     PWM_TIMER_FREQUENCY_MESSAGE = 9,
     PWM_TIMER_STARTED_MESSAGE = 10,
-    LED_CONTROL_MESSAGE = 11
+    LED_CONTROL_MESSAGE = 11,
+    CAN1_ENCODER_MESSAGE = 12,
+    CAN2_ENCODER_MESSAGE = 13,
+    VOLTAGE_CURRENT_MESSAGE = 14,
+};
+
+// CAN Bus message Lite -> MCB
+struct MCBCanBusMessage
+{
+    uint8_t message[8][8];
+    uint8_t online;
+} modm_packed;
+
+// CAN Bus message MCB -> Lite
+// Not packed because message isn't and that is a compile warning
+struct LiteCanBusMessage
+{
+    modm::can::Message message;
 };
 
 // IMU message Lite -> MCB
@@ -135,6 +152,24 @@ struct LEDControlMessage
     bool RedLedOn;
 } modm_packed;
 
+// CAN Encoder messages Lite -> MCB
+struct CANEncoderMessage
+{
+    uint8_t onlineEncoders;
+    struct EncoderData
+    {
+        uint16_t encoder;
+        uint16_t gauss;
+    } encoders[8];
+} modm_packed;
+
+// Voltage Current messages Lite -> MCB
+struct VoltageCurrentMessage
+{
+    uint16_t voltage;
+    uint16_t current;
+} modm_packed;
+
 }  // namespace aruwsrc::virtualMCB
 
-#endif
+#endif  // MESSAGE_TYPES_HPP_

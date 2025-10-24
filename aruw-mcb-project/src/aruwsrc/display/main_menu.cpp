@@ -23,6 +23,12 @@
 
 using namespace tap::display;
 
+#ifdef SSH1106_OLED
+#define ENTRIES 7
+#else
+#define ENTRIES 17
+#endif
+
 namespace aruwsrc
 {
 namespace display
@@ -42,8 +48,8 @@ MainMenu::MainMenu(
       cvMenu(stack, drivers, visionCoprocessor),
       errorMenu(stack),
       hardwareTestMenu(stack, drivers),
-      motorMenu(stack, drivers),
-      commandSchedulerMenu(stack, drivers),
+      motorMenu(stack, drivers, ENTRIES),
+      commandSchedulerMenu(stack, drivers, ENTRIES),
       refSerialMenu(stack, drivers),
       imuMenu(stack, &drivers->mpu6500),
       turretStatusMenuBus1(stack, turretMCBCanCommBus1),
@@ -69,13 +75,18 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addImuCalibrateMenuCallback));
+    // addEntry(
+    //     ErrorMenu::getMenuName(),
+    //     modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+    //         this,
+    //         &MainMenu::addErrorMenuCallback));
     if (this->visionCoprocessor != nullptr)
         addEntry(
             CVMenu::getMenuName(),
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addCVMenuCallback));
-#ifdef TARGET_SENTRY_HYDRA
+#ifdef TARGET_SENTRY_ECLIPSE
     addEntry(
         SentryStrategyMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
@@ -173,7 +184,7 @@ void MainMenu::addHardwareTestMenuCallback()
 
 void MainMenu::addMotorMenuCallback()
 {
-    MotorMenu* mm = new (&motorMenu) MotorMenu(getViewStack(), drivers);
+    MotorMenu* mm = new (&motorMenu) MotorMenu(getViewStack(), drivers, ENTRIES);
     getViewStack()->push(mm);
 }
 
@@ -185,7 +196,7 @@ void MainMenu::addPropertyTableCallback()
 void MainMenu::addCommandSchedulerCallback()
 {
     CommandSchedulerMenu* csm =
-        new (&commandSchedulerMenu) CommandSchedulerMenu(getViewStack(), drivers);
+        new (&commandSchedulerMenu) CommandSchedulerMenu(getViewStack(), drivers, ENTRIES);
     getViewStack()->push(csm);
 }
 

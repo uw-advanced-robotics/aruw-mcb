@@ -32,13 +32,9 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
-using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
 #else
 #include "tap/motor/dji_motor.hpp"
-using Motor = tap::motor::DjiMotor;
 #endif
-
-using Wheel = aruwsrc::algorithms::Wheel;
 
 namespace aruwsrc
 {
@@ -51,6 +47,14 @@ namespace chassis
  */
 class SwerveModule
 {
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+#else
+    using Motor = tap::motor::DjiMotor;
+#endif
+
+    using Wheel = aruwsrc::algorithms::Wheel;
+
 public:
     SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& swerveModuleConfig);
 
@@ -83,7 +87,7 @@ public:
     /**
      * This returns Radian position of azimuth motor, CCW+
      */
-    float getAngle() const;
+    tap::algorithms::WrappedFloat getAngle() const;
 
     /**
      * This returns deg/sec velocity of azimuth motor, CCW+
@@ -104,8 +108,8 @@ public:
     inline modm::Matrix<float, 2, 1> getActualModuleVelocity() const
     {
         modm::Matrix<float, 2, 1> velocity;
-        velocity[0][0] = getDriveVelocity() * cos(getAngle());
-        velocity[1][0] = getDriveVelocity() * sin(getAngle());
+        velocity[0][0] = getDriveVelocity() * cos(getAngle().getWrappedValue());
+        velocity[1][0] = getDriveVelocity() * sin(getAngle().getWrappedValue());
         return velocity;
     }
 

@@ -26,12 +26,13 @@ using namespace aruwsrc::chassis;
 HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
     Module* moduleOne,
     Module* moduleTwo,
     float wheelbaseRadius,
     const float forwardMatrixArray[12],
     can::capbank::CapacitorBank* capacitorBank)
-    : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
+    : HolonomicChassisSubsystem(drivers, currentSensor, voltageSensor, capacitorBank),
       modules{moduleOne, moduleTwo},
       wheelbaseRadius(wheelbaseRadius),
       forwardMatrix(forwardMatrixArray)

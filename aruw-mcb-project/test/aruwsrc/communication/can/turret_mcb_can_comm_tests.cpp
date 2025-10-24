@@ -66,7 +66,7 @@ TEST(TurretMCBCanComm, sendData_calibrate_imu_data)
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, filledMsg));
 
     clock.time = 10'000;
-    dut.sendImuCalibrationRequest();
+    dut.requestCalibration();
     dut.sendData();
 
     clock.time = 20'000;
@@ -177,8 +177,8 @@ TEST(TurretMCBCanComm, receive_turret_data)
         dut.getRoll(),
         1E-5);
     EXPECT_NEAR(
-        modm::toRadian(static_cast<int16_t>(0x4567) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
-        dut.getRollVelocity(),
+        static_cast<int16_t>(0x4567) * TurretMCBCanComm::IMU_SCALING_FACTOR,
+        dut.getGx(),
         1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x4321) * 0.01, dut.getAx(), 1E-5);
 
@@ -187,8 +187,8 @@ TEST(TurretMCBCanComm, receive_turret_data)
         dut.getPitch(),
         1E-5);
     EXPECT_NEAR(
-        modm::toRadian(static_cast<int16_t>(0x5678) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
-        dut.getPitchVelocity(),
+        static_cast<int16_t>(0x5678) * TurretMCBCanComm::IMU_SCALING_FACTOR,
+        dut.getGy(),
         1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x5432) * 0.01, dut.getAy(), 1E-5);
 
@@ -197,8 +197,8 @@ TEST(TurretMCBCanComm, receive_turret_data)
         dut.getYaw(),
         1E-5);
     EXPECT_NEAR(
-        modm::toRadian(static_cast<int16_t>(0x6789) / Mpu6500::LSB_D_PER_S_TO_D_PER_S),
-        dut.getYawVelocity(),
+        static_cast<int16_t>(0x6789) * TurretMCBCanComm::IMU_SCALING_FACTOR,
+        dut.getGz(),
         1E-5);
     EXPECT_NEAR(static_cast<int16_t>(0x6543) * 0.01, dut.getAz(), 1E-4);
 

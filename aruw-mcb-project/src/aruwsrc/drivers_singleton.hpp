@@ -30,7 +30,7 @@ namespace aruwsrc::standard
 #elif defined(ALL_SENTRIES)
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
 namespace aruwsrc::hero
 #elif defined(TARGET_DRONE)
@@ -51,6 +51,9 @@ namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 namespace aruwsrc::motor_tester
+#elif defined(TARGET_CHARACTERIZER)
+#include "aruwsrc/robot/characterizer/characterizer_drivers.hpp"
+namespace aruwsrc::characterizer
 #endif
 {
 /**

@@ -23,11 +23,14 @@
 #include <cstdint>
 
 #include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 #include "turret_controller_interface.hpp"
+
+using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
 {
@@ -51,17 +54,18 @@ class WorldFrameYawTurretImuCascadePidTurretController final : public TurretYawC
 {
 public:
     /**
-     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * @param[in] worldToTurret A Transform object that will be queried for orientation
      * information.
      * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFrameYawTurretImuCascadePidTurretController(
+        const transforms::Transform &worldToTurret,
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &yawMotor,
-        tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid);
+        SmoothPid &positionPid,
+        SmoothPid &velocityPid);
 
     void initialize() final;
 
@@ -70,31 +74,33 @@ public:
      * @param[in] desiredSetpoint The unwrapped yaw desired setpoint in the world frame. Clamped
      * within chassis frame turret angle limits if applicable.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) final;
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
 
     /// Sets the world frame yaw angle setpoint, refer to top level documentation for more details.
-    void setSetpoint(float desiredSetpoint) final;
+    void setSetpoint(WrappedFloat desiredSetpoint) final;
 
     /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
-    float getSetpoint() const final;
+    inline WrappedFloat getSetpoint() const final { return worldFrameSetpoint; }
 
     /// @return World frame yaw angle measurement, refer to top level documentation for more
     /// details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const final;
 
     bool isOnline() const final;
 
-    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final;
+    WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat controllerFrameAngle) const final;
 
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
+    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
+    const transforms::Transform &worldToTurret;
     const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
-    tap::algorithms::SmoothPid &positionPid;
-    tap::algorithms::SmoothPid &velocityPid;
+    SmoothPid &positionPid;
+    SmoothPid &velocityPid;
 
-    float worldFrameSetpoint;
+    WrappedFloat worldFrameSetpoint;
 };
 
 /**
@@ -113,17 +119,18 @@ class WorldFramePitchTurretImuCascadePidTurretController final
 {
 public:
     /**
-     * @param[in] turretMCBCanComm A TurretMCBCanComm object that will be queried for IMU
+     * @param[in] worldToTurret A Transform object that will be queried for orientation
      * information.
      * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      */
     WorldFramePitchTurretImuCascadePidTurretController(
+        const transforms::Transform &worldToTurret,
         const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &pitchMotor,
-        tap::algorithms::SmoothPid &positionPid,
-        tap::algorithms::SmoothPid &velocityPid);
+        SmoothPid &positionPid,
+        SmoothPid &velocityPid);
 
     void initialize() final;
 
@@ -131,31 +138,33 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The pitch desired setpoint in the world frame.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) final;
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
 
     /// Sets the world frame pitch angle setpoint, refer to top level documentation for more
     /// details.
-    void setSetpoint(float desiredSetpoint) final;
+    void setSetpoint(WrappedFloat desiredSetpoint) final;
 
     /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
-    float getSetpoint() const final;
+    inline WrappedFloat getSetpoint() const final { return worldFrameSetpoint; }
 
     /// @return World frame pitch angle setpoint, refer to top level documentation for more details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const final;
 
     bool isOnline() const final;
 
-    float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final;
+    WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat controllerFrameAngle) const final;
 
-    float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final;
+    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final;
 
 private:
+    const transforms::Transform &worldToTurret;
     const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
 
-    tap::algorithms::SmoothPid &positionPid;
-    tap::algorithms::SmoothPid &velocityPid;
+    SmoothPid &positionPid;
+    SmoothPid &velocityPid;
 
-    float worldFrameSetpoint;
+    WrappedFloat worldFrameSetpoint;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

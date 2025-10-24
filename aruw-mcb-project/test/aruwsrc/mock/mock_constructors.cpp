@@ -29,7 +29,6 @@
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "robot_turret_subsystem_mock.hpp"
-#include "sentry_drive_subsystem_mock.hpp"
 #include "sentry_request_subsystem_mock.hpp"
 #include "swerve_chassis_subsystem_mock.hpp"
 #include "swerve_module_mock.hpp"
@@ -75,8 +74,9 @@ BeybladeCommandMock::BeybladeCommandMock(
     tap::Drivers *drivers,
     chassis::MecanumChassisSubsystem *chassis,
     aruwsrc::control::turret::TurretMotor *yawMotor,
-    aruwsrc::control::ControlOperatorInterface &operatorInterface)
-    : BeybladeCommand(drivers, chassis, yawMotor, operatorInterface)
+    aruwsrc::control::ControlOperatorInterface &operatorInterface,
+    aruwsrc::chassis::BeybladeConfig config)
+    : BeybladeCommand(drivers, chassis, yawMotor, operatorInterface, config)
 {
 }
 BeybladeCommandMock::~BeybladeCommandMock() {}
@@ -101,16 +101,44 @@ ChassisDriveCommandMock::~ChassisDriveCommandMock() {}
 
 MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : MecanumChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : MecanumChassisSubsystem(
+          drivers,
+          currentSensor,
+          voltageSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
 
 XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
     tap::Drivers *drivers,
-    tap::communication::sensors::current::CurrentSensorInterface *currentSensor)
-    : XDriveChassisSubsystem(drivers, currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
+    testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    : XDriveChassisSubsystem(
+          drivers,
+          currentSensor,
+          voltageSensor,
+          leftFrontMotor,
+          leftBackMotor,
+          rightFrontMotor,
+          rightBackMotor,
+          wheelVelocityPidConfig)
 {
 }
 XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
@@ -118,11 +146,20 @@ XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}
 SwerveChassisSubsystemMock::SwerveChassisSubsystemMock(
     tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lf,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rf,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *lb,
     testing::NiceMock<aruwsrc::mock::SwerveModuleMock> *rb)
-    : SwerveChassisSubsystem(drivers, currentSensor, lf, rf, lb, rb, SWERVE_FORWARD_MATRIX)
+    : SwerveChassisSubsystem(
+          drivers,
+          currentSensor,
+          voltageSensor,
+          lf,
+          rf,
+          lb,
+          rb,
+          SWERVE_FORWARD_MATRIX)
 {
 }
 SwerveChassisSubsystemMock::~SwerveChassisSubsystemMock() {}
@@ -195,15 +232,6 @@ HopperSubsystemMock::HopperSubsystemMock(
 }
 HopperSubsystemMock::~HopperSubsystemMock() {}
 
-SentryDriveSubsystemMock::SentryDriveSubsystemMock(
-    tap::Drivers *drivers,
-    tap::gpio::Digital::InputPin leftLimitSwitch,
-    tap::gpio::Digital::InputPin rightLimitSwitch)
-    : control::sentry::drive::SentryDriveSubsystem(drivers, leftLimitSwitch, rightLimitSwitch)
-{
-}
-SentryDriveSubsystemMock::~SentryDriveSubsystemMock() {}
-
 SentryRequestSubsystemMock::SentryRequestSubsystemMock(tap::Drivers *drivers)
     : SentryRequestSubsystem(drivers)
 {
@@ -234,13 +262,11 @@ TurretMotorMock::TurretMotorMock(
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
     ON_CALL(*this, getValidMinError)
-        .WillByDefault([&](const float setpoint, const float measurement) {
-            return tap::algorithms::WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
+        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement) {
+            return measurement.minDifference(setpoint);
         });
     ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
-        return getValidMinError(
-            getChassisFrameSetpoint(),
-            getChassisFrameMeasuredAngle().getWrappedValue());
+        return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
     });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
 }

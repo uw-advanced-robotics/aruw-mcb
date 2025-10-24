@@ -99,7 +99,7 @@ if args["COMPILE_SRC"]:
         env.Alias("size", env.Size(program))
         env.Alias("gdb", env.DebugGdbRemote(program))
         env.Alias("run", [env.ProgramOpenOcd(program)])
-        env.Alias("ozone", env.RunOzoneConfig(program))
+        env.Alias("ozone", env.RunOzoneConfig(program, args["ROBOT_TYPE"]))
         env.Alias("all", ["build", "size"])
         env.Default("all")  # For the hardware target env, "all" runs if you don't
                             # specify anything (i.e. just type "scons")
@@ -114,7 +114,14 @@ if args["COMPILE_SRC"]:
         # Add target environment-specific SCons aliases
         # WARNING: all aliases must be checked during argument validation
         env.Alias("build-tests", program)
-        env.Alias("run-tests", env.Run(program))
+        env.Alias("run-tests", 
+            env.Command(
+                'thisfileshouldnotexist',
+                program,
+                '@"%s"' % program[0].abspath 
+                    + (f" --gtest_filter={args['TEST']}" if 'TEST' in args else "")
+                )
+            )
         env.Alias("run-tests-gcov", [env.RunGCOV(program, False, [])])
     else:
         program = env.Program(target=env["CONFIG_PROJECT_NAME"]+".elf", source=sources)

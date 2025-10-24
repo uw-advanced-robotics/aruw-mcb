@@ -36,7 +36,8 @@ public:
         tap::Drivers *drivers,
         chassis::MecanumChassisSubsystem *chassis,
         aruwsrc::control::turret::TurretMotor *yawMotor,
-        aruwsrc::control::ControlOperatorInterface &operatorInterface);
+        aruwsrc::control::ControlOperatorInterface &operatorInterface,
+        aruwsrc::chassis::BeybladeConfig config);
 
     virtual ~BeybladeCommandMock();
 

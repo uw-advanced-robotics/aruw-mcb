@@ -26,6 +26,8 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
+
 namespace aruwsrc::motor_tester
 {
 class MotorSubsystem : public tap::control::Subsystem
@@ -34,12 +36,10 @@ public:
     MotorSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface& motor,
-        tap::algorithms::SmoothPidConfig pidConfig,
-        float gearRatio)
+        tap::algorithms::SmoothPidConfig pidConfig)
         : Subsystem(drivers),
           motor(motor),
-          velocityPid(pidConfig),
-          gearRatio(gearRatio)
+          velocityPid(pidConfig)
     {
     }
 
@@ -58,10 +58,18 @@ public:
         velocityPid.runControllerDerivateError(velocityError, dt);
 
         motor.setDesiredOutput(velocityPid.getOutput());
+
+        if (akMotor)
+        {
+            static_cast<aruwsrc::control::motor::Tmotor_AK809*>(&motor)->sendCanMessage();
+        }
     };
 
     // in output shaft rpm
-    inline float getCurrentRPM() const { return (motor.getShaftRPM() * gearRatio); }
+    inline float getCurrentRPM() const
+    {
+        return motor.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    }
 
     inline void refreshSafeDisconnect() override { stop(); };
 
@@ -69,6 +77,10 @@ public:
     {
         desiredRPM = 0;
         this->motor.setDesiredOutput(0);
+        if (akMotor)
+        {
+            static_cast<aruwsrc::control::motor::Tmotor_AK809*>(&motor)->sendCanMessage();
+        }
     }
 
     const char* getName() const override { return "Motor"; }
@@ -76,10 +88,10 @@ public:
 private:
     tap::motor::MotorInterface& motor;
     tap::algorithms::SmoothPid velocityPid;
-    float gearRatio;
 
     float desiredRPM{0};
     uint32_t prevTime = 0;
+    bool akMotor = false;
 };
 
 }  // namespace aruwsrc::motor_tester

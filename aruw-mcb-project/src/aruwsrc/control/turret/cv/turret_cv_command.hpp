@@ -29,6 +29,7 @@
 
 #include "turret_cv_command_interface.hpp"
 
+using namespace tap::algorithms;
 namespace tap::control::odometry
 {
 class Odometry2DInterface;

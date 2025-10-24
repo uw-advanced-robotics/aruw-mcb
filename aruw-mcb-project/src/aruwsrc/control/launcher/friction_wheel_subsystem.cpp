@@ -52,6 +52,12 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
           LAUNCHER_PID_KD,
           LAUNCHER_PID_MAX_ERROR_SUM,
           LAUNCHER_PID_MAX_OUTPUT),
+      speedCorrectionPid(
+          LAUNCHER_SPEED_CORRECTION_PID_KP,
+          LAUNCHER_SPEED_CORRECTION_PID_KI,
+          LAUNCHER_SPEED_CORRECTION_PID_KD,
+          LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM,
+          LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT),
       desiredRpmRamp(0),
       leftWheel(drivers, leftMotorId, canBus, true, "Left flywheel"),
       rightWheel(drivers, rightMotorId, canBus, false, "Right flywheel"),
@@ -80,8 +86,8 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
 
 float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
 {
-    float leftWheelSpeed = leftWheel.getShaftRPM();
-    float rightWheelSpeed = rightWheel.getShaftRPM();
+    float leftWheelSpeed = leftWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    float rightWheelSpeed = rightWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
     return (leftWheelSpeed + rightWheelSpeed) / 2.0f;
 }
 
@@ -93,11 +99,25 @@ void FrictionWheelSubsystem::refresh()
         return;
     }
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
+#if defined(ALL_STANDARDS)
+    if (prevShotTime != drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp)
+    {
+        prevShotTime = drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
+        speedCorrectionPid.update(
+            drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED);
+    }
+    speedCorrection = speedCorrectionPid.getValue();
+#endif
+
     prevTime = currTime;
 
-    velocityPidLeftWheel.update(desiredRpmRamp.getValue() - leftWheel.getShaftRPM());
+    velocityPidLeftWheel.update(
+        desiredRpmRamp.getValue() - leftWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI -
+        speedCorrection);
     leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
-    velocityPidRightWheel.update(desiredRpmRamp.getValue() - rightWheel.getShaftRPM());
+    velocityPidRightWheel.update(
+        desiredRpmRamp.getValue() - rightWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI -
+        speedCorrection);
     rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
 }
 

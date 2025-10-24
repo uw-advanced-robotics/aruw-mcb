@@ -51,14 +51,14 @@ public:
     virtual bool homedAndBounded() const = 0;
 
     /**
-     * Returns the upper bound in motor encoder ticks.
+     * Returns the upper bound.
      */
-    virtual uint64_t getUpperBound() const = 0;
+    virtual float getUpperBound() const = 0;
 
     /**
-     * Returns the lower bound in motor encoder ticks.
+     * Returns the lower bound.
      */
-    virtual uint64_t getLowerBound() const = 0;
+    virtual float getLowerBound() const = 0;
 
 protected:
     /**
@@ -78,21 +78,10 @@ protected:
      * Stops the motor from moving. Only to be used during calibration.
      */
     virtual void stopDuringHoming() = 0;
-
     /**
-     * Sets the lower bound of this bounded subsystem to the given encoder position.
+     * Sets the given position to be the "home" of the subsystem's motor.
      */
-    virtual void setLowerBound(uint64_t encoderPosition) = 0;
-
-    /**
-     * Sets the upper bound of this bounded subsystem to the given encoder position.
-     */
-    virtual void setUpperBound(uint64_t encoderPosition) = 0;
-
-    /**
-     * Sets the given motor encoder position to be the "home" of the subsystem's motor.
-     */
-    virtual void setHome(uint64_t encoderPosition) = 0;
+    virtual void setHome(float encoderPosition) = 0;
 };  // class HomeableSubsystemInterface
 }  // namespace aruwsrc::control
 

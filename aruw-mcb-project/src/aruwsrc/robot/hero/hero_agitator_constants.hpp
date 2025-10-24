@@ -37,22 +37,26 @@ namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
-    .kp = 7'000.0f,
+    .kp = 15'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 16000.0f,
+    .maxOutput = 5'000.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float DESIRED_LOAD_TIME_S = 1.0f;
+static constexpr float DESIRED_LOAD_TIME_S = 0.25f;
+static constexpr float KICKER_DESIRED_LOAD_TIME_S = 0.1f;
+static constexpr float KICKER_FIRE_DISTANCE = M_TWOPI * 0.5f;
+static constexpr float KICKER_FIRE_TIME_S = 0.075f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 12.0f;
 static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
 static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 5.0f;
 static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.1f;
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
-    .gearRatio = 19.2f * 152.0f / 24.0f,  // M3508 * Agitator Teeth / Pully Teeth
+    .gearRatio = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *
+                 (24.0f / 152.0f),  // M3508 * (Pulley Teeth / Agitator Teeth)
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -63,7 +67,7 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_A
     .jammingVelocityDifference = 0.75f * (WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S),
     .jammingTime = 500,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 7000.0f,
+    .velocityPIDFeedForwardGain = 0.0f,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
@@ -98,8 +102,8 @@ static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
 };
 
 static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR8,
+    .gearRatio = 1.0f / 36.0f,
+    .agitatorMotorId = tap::motor::MOTOR3,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     .jammingVelocityDifference = 0,
@@ -110,8 +114,8 @@ static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITA
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_LOAD_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = M_PI / 8.0f,
-        .desiredSetpoint = (M_PI / 2.0f) / DESIRED_LOAD_TIME_S,
+        .targetIntegralChange = M_TWOPI / 32.0f,
+        .desiredSetpoint = (M_TWOPI / 32.0f) / KICKER_DESIRED_LOAD_TIME_S,
         .integralSetpointTolerance = 0,  /// This tolerance can be 0 since the command considers
                                          /// itself done when the integral setpoint is >= initial
                                          /// integral + targetIntegralChange -
@@ -121,8 +125,8 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
     KICKER_SHOOT_AGITATOR_ROTATE_CONFIG = {
-        .targetIntegralChange = M_TWOPI,
-        .desiredSetpoint = 6.0 * M_PI,
+        .targetIntegralChange = KICKER_FIRE_DISTANCE,
+        .desiredSetpoint = KICKER_FIRE_DISTANCE / KICKER_FIRE_TIME_S,
         .integralSetpointTolerance = 0,  /// This tolerance can be 0 since the command considers
                                          /// itself done when the integral setpoint is >= initial
                                          /// integral + targetIntegralChange -
@@ -131,7 +135,7 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 };
 
 /// How much extra heat must be available beyond how much it takes to fire the next shot
-static constexpr uint16_t HEAT_LIMIT_BUFFER = 20;
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 0;
 }  // namespace aruwsrc::control::agitator::constants
 
 #endif  // HERO_AGITATOR_CONSTANTS_HPP_

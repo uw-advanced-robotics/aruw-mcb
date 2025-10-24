@@ -22,22 +22,22 @@
 namespace aruwsrc::algorithms::odometry
 {
 TwoDeadwheelOdometryObserver::TwoDeadwheelOdometryObserver(
-    aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
-    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
+    tap::encoder::EncoderInterface* parallelWheel,
+    tap::encoder::EncoderInterface* perpendicularWheel,
     const float wheelRadius)
-    : WHEEL_RADIUS(wheelRadius),
+    : wheelRadius(wheelRadius),
       parallelWheel(parallelWheel),
       perpendicularWheel(perpendicularWheel)
 {
 }
 
-float TwoDeadwheelOdometryObserver::getParallelMotorRPM() const
+float TwoDeadwheelOdometryObserver::getParallelMotorVelocity() const
 {
-    return parallelWheel->getShaftRPM();
+    return parallelWheel->getVelocity() * wheelRadius;
 }
-float TwoDeadwheelOdometryObserver::getPerpendicularRPM() const
+float TwoDeadwheelOdometryObserver::getPerpendicularVelocity() const
 {
-    return perpendicularWheel->getShaftRPM();
+    return perpendicularWheel->getVelocity() * wheelRadius;
 }
 
 }  // namespace aruwsrc::algorithms::odometry

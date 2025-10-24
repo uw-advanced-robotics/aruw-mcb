@@ -39,6 +39,10 @@ public:
 
     const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t) const;
 
+    const tap::algorithms::transforms::Transform& getWorldToVTM() const;
+
+    const tap::algorithms::transforms::Transform& getChassisToArducam(uint8_t) const;
+
 private:
     const aruwsrc::algorithms::transforms::StandardAndHeroTransformer& transforms;
 };

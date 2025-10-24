@@ -36,10 +36,10 @@ namespace aruwsrc::control::turret::algorithms
  *      in the chassis frame.
  * @return A turret yaw angle in radians. `angleToTransform` transformed into the world frame.
  */
-static inline float transformChassisFrameYawToWorldFrame(
-    const float initChassisFrameImuAngle,
-    const float currChassisFrameImuAngle,
-    const float angleToTransform)
+static inline WrappedFloat transformChassisFrameYawToWorldFrame(
+    const WrappedFloat initChassisFrameImuAngle,
+    const WrappedFloat currChassisFrameImuAngle,
+    const WrappedFloat angleToTransform)
 {
     return angleToTransform + currChassisFrameImuAngle - initChassisFrameImuAngle;
 }
@@ -57,10 +57,10 @@ static inline float transformChassisFrameYawToWorldFrame(
  *      the world frame.
  * @return A turret yaw angle in radians. `angleToTransform` transformed into the chassis frame.
  */
-static inline float transformWorldFrameYawToChassisFrame(
-    const float initChassisFrameImuAngle,
-    const float currChassisFrameImuAngle,
-    const float angleToTransform)
+static inline WrappedFloat transformWorldFrameYawToChassisFrame(
+    const WrappedFloat initChassisFrameImuAngle,
+    const WrappedFloat currChassisFrameImuAngle,
+    const WrappedFloat angleToTransform)
 {
     return angleToTransform - currChassisFrameImuAngle + initChassisFrameImuAngle;
 }
@@ -84,10 +84,10 @@ static inline float transformWorldFrameYawToChassisFrame(
  *      updated by this function.
  */
 static inline void updateYawWorldFrameSetpoint(
-    const float desiredSetpoint,
-    const float chassisFrameInitImuYawAngle,
-    const float chassisFrameImuYawAngle,
-    float &worldFrameYawSetpoint,
+    const WrappedFloat desiredSetpoint,
+    const WrappedFloat chassisFrameInitImuYawAngle,
+    const WrappedFloat chassisFrameImuYawAngle,
+    WrappedFloat &worldFrameYawSetpoint,
     TurretMotor &yawMotor)
 {
     worldFrameYawSetpoint = desiredSetpoint;
@@ -115,7 +115,9 @@ WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController
     const tap::algorithms::SmoothPidConfig &pidConfig)
     : TurretYawControllerInterface(yawMotor),
       drivers(drivers),
-      pid(pidConfig)
+      pid(pidConfig),
+      worldFrameSetpoint(Angle(0)),
+      chassisFrameInitImuYawAngle(Angle(0))
 {
 }
 
@@ -125,10 +127,7 @@ void WorldFrameYawChassisImuTurretController::initialize()
     {
         pid.reset();
 
-        revolutions = 0;
-        prevYaw = getMpu6500YawUnwrapped();
-
-        chassisFrameInitImuYawAngle = prevYaw;
+        chassisFrameInitImuYawAngle = getMpu6500Yaw();
         worldFrameSetpoint = turretMotor.getChassisFrameSetpoint();
 
         turretMotor.attachTurretController(this);
@@ -137,11 +136,9 @@ void WorldFrameYawChassisImuTurretController::initialize()
 
 void WorldFrameYawChassisImuTurretController::runController(
     const uint32_t dt,
-    const float desiredSetpoint)
+    const WrappedFloat desiredSetpoint)
 {
-    updateRevolutionCounter();
-
-    const float chassisFrameImuYawAngle = getMpu6500YawUnwrapped();
+    const WrappedFloat chassisFrameImuYawAngle = getMpu6500Yaw();
 
     updateYawWorldFrameSetpoint(
         desiredSetpoint,
@@ -150,23 +147,23 @@ void WorldFrameYawChassisImuTurretController::runController(
         worldFrameSetpoint,
         turretMotor);
 
-    const float worldFrameYawAngle = transformChassisFrameYawToWorldFrame(
+    const WrappedFloat worldFrameYawAngle = transformChassisFrameYawToWorldFrame(
         chassisFrameInitImuYawAngle,
         chassisFrameImuYawAngle,
-        turretMotor.getChassisFrameUnwrappedMeasuredAngle());
+        turretMotor.getChassisFrameMeasuredAngle());
 
     // position controller based on imu and yaw gimbal angle
     const float positionControllerError =
         turretMotor.getValidMinError(worldFrameSetpoint, worldFrameYawAngle);
     const float pidOutput = pid.runController(
         positionControllerError,
-        turretMotor.getChassisFrameVelocity() + modm::toRadian(drivers.mpu6500.getGz()),
+        turretMotor.getChassisFrameVelocity() + drivers.mpu6500.getGz(),
         dt);
 
     turretMotor.setMotorOutput(pidOutput);
 }
 
-void WorldFrameYawChassisImuTurretController::setSetpoint(float desiredSetpoint)
+void WorldFrameYawChassisImuTurretController::setSetpoint(WrappedFloat desiredSetpoint)
 {
     updateYawWorldFrameSetpoint(
         desiredSetpoint,
@@ -176,16 +173,15 @@ void WorldFrameYawChassisImuTurretController::setSetpoint(float desiredSetpoint)
         turretMotor);
 }
 
-float WorldFrameYawChassisImuTurretController::getSetpoint() const { return worldFrameSetpoint; }
-
-float WorldFrameYawChassisImuTurretController::getMeasurement() const
+WrappedFloat WorldFrameYawChassisImuTurretController::getMeasurement() const
 {
-    const float chassisFrameImuYawAngle = drivers.mpu6500.getYaw();
+    const WrappedFloat chassisFrameImuYawAngle =
+        getMpu6500Yaw();  // NOTE THIS WAS NOT PREVIOUSLY IN RADIANS
 
     return transformChassisFrameYawToWorldFrame(
         chassisFrameInitImuYawAngle,
         chassisFrameImuYawAngle,
-        turretMotor.getChassisFrameUnwrappedMeasuredAngle());
+        turretMotor.getChassisFrameMeasuredAngle());
 }
 
 bool WorldFrameYawChassisImuTurretController::isOnline() const
@@ -193,10 +189,10 @@ bool WorldFrameYawChassisImuTurretController::isOnline() const
     return turretMotor.isOnline() && drivers.mpu6500.isRunning();
 }
 
-float WorldFrameYawChassisImuTurretController::convertControllerAngleToChassisFrame(
-    float controllerFrameAngle) const
+WrappedFloat WorldFrameYawChassisImuTurretController::convertControllerAngleToChassisFrame(
+    WrappedFloat controllerFrameAngle) const
 {
-    const float chassisFrameImuYawAngle = modm::toRadian(drivers.mpu6500.getYaw());
+    const WrappedFloat chassisFrameImuYawAngle = getMpu6500Yaw();
 
     return transformWorldFrameYawToChassisFrame(
         chassisFrameInitImuYawAngle,
@@ -204,10 +200,10 @@ float WorldFrameYawChassisImuTurretController::convertControllerAngleToChassisFr
         controllerFrameAngle);
 }
 
-float WorldFrameYawChassisImuTurretController::convertChassisAngleToControllerFrame(
-    float chassisFrameAngle) const
+WrappedFloat WorldFrameYawChassisImuTurretController::convertChassisAngleToControllerFrame(
+    WrappedFloat chassisFrameAngle) const
 {
-    const float chassisFrameImuYawAngle = modm::toRadian(drivers.mpu6500.getYaw());
+    const WrappedFloat chassisFrameImuYawAngle = getMpu6500Yaw();
 
     return transformChassisFrameYawToWorldFrame(
         chassisFrameInitImuYawAngle,

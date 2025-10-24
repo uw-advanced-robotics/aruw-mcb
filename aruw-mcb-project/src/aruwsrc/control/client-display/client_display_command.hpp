@@ -20,51 +20,25 @@
 #ifndef CLIENT_DISPLAY_COMMAND_HPP_
 #define CLIENT_DISPLAY_COMMAND_HPP_
 
-#include <array>
-#include <tuple>
+#include <vector>
 
-#include "tap/architecture/periodic_timer.hpp"
-#include "tap/communication/referee/state_hud_indicator.hpp"
-#include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
-#include "modm/math/geometry/polygon_2d.hpp"
-#include "modm/math/utils/misc.hpp"
+#include "indicators/hud_indicator.hpp"
 #include "modm/processing/protothread.hpp"
 
-#include "ammo_indicator.hpp"
-#include "boolean_hud_indicators.hpp"
-#include "cap_bank_indicator.hpp"
-#include "chassis_orientation_indicator.hpp"
-#include "circle_crosshair.hpp"
-#include "matrix_hud_indicators.hpp"
-#include "reticle_indicator.hpp"
-#include "vision_hud_indicators.hpp"
-
-namespace tap::control
-{
-class Subsystem;
-}
-
-namespace tap
-{
-class Drivers;
-}
+#include "client_display_subsystem.hpp"
 
 namespace aruwsrc::control::client_display
 {
+using namespace tap::communication::serial;
+
 class ClientDisplaySubsystem;
 
 /**
  * A command that controls what is displayed on the RoboMaster client's interactive HUD.
- *
- * The following graphic features are supported:
- * - Static reticle.
- * - Simulated chassis to represent chassis location.
- * - A list of boolean indicators.
- * - A table of selection indicators (where the graphic can be in one of multiple states).
- * - Turret pitch/yaw angles.
  *
  * @note Only a single ClientDisplayCommand should be instantiated. If more than one is
  * instantiated, this will lead to undefined behavior.
@@ -76,37 +50,13 @@ public:
      * Construct a ClientDisplayCommand.
      *
      * @param[in] drivers Global drivers instance.
-     * @param[in] commandScheduler CommandScheduler instance.
      * @param[in] clientDisplay The client display subsystem associated with the command.
-     * @param[in] frictionWheelSubsystem Friction wheels used when checking if the friction wheels
-     * are on or off.
-     * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
-     * @param[in] robotTurretSubsystem Turret used when updating chassis orientation relative
-     * to the turret and to print turret angles (if turret chassis relative angles are being
-     * printed).
-     * @param[in] avoidanceCommand Commands that indicate if the robot is in an avoidance drive
-     * mode, such as beyblade or wiggle.
-     * @param[in] imuCalibrateCommand IMU calibrate command used when checking if the IMU is being
-     * calibrated.
-     * @param[in] multiShotHandler Shot handler, used to determine which shooting mode the agitator
-     * is in. May be nullptr, if so multi shot mode defaults to single shot (as displayed on the
-     * HUD).
-     * @param[in] cvOnTargetManager @see MatrixHudIndicators
-     * @param[in] capBank A pointer to the capacitor bank for the robot.
+     * @param[in] hudIndicators A list of all the HUD indicators to be displayed.
      */
     ClientDisplayCommand(
         tap::Drivers &drivers,
-        tap::control::CommandScheduler &commandScheduler,
-        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         ClientDisplaySubsystem &clientDisplay,
-        const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-        tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
-        const aruwsrc::control::turret::RobotTurretSubsystem &robotTurretSubsystem,
-        const std::vector<tap::control::Command *> avoidanceCommands,
-        const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-        const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
-        const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
-        const can::capbank::CapacitorBank *capBank = nullptr);
+        std::vector<HudIndicator *> &hudIndicators);
 
     const char *getName() const override { return "client display"; }
 
@@ -120,19 +70,15 @@ public:
 
 private:
     tap::Drivers &drivers;
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
-    tap::control::CommandScheduler &commandScheduler;
-    tap::communication::serial::RefSerialTransmitter refSerialTransmitter;
-    BooleanHudIndicators booleanHudIndicators;
-    CapBankIndicator capBankIndicator;
-    ChassisOrientationIndicator chassisOrientationIndicator;
-    MatrixHudIndicators positionHudIndicators;
-    ReticleIndicator reticleIndicator;
-    VisionHudIndicators visionHudIndicators;
-    AmmoIndicator ammoIndicator;
-    CircleCrosshair circleCrosshair;
+    std::vector<HudIndicator *> &hudIndicators;
+    uint8_t index = 0;
+    RefSerialTransmitter refSerialTransmitter;
 
     bool restarting = true;
+
+    float fps = 0.0f;
+    uint32_t startTime = 0;
+    int numIndicators = 0;
 
     bool run();
     void restartHud();

@@ -22,6 +22,7 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
@@ -49,7 +50,8 @@ namespace aruwsrc::can
  * @note Since we use radians in this codebase, angle values that are sent from the turret MCB in
  * degrees are converted to radians by this object.
  */
-class TurretMCBCanComm : public tap::communication::sensors::limit_switch::LimitSwitchInterface
+class TurretMCBCanComm : public tap::communication::sensors::imu::ImuInterface,
+                         public tap::communication::sensors::limit_switch::LimitSwitchInterface
 {
 public:
     using ImuDataReceivedCallbackFunc = void (*)();
@@ -64,13 +66,13 @@ public:
 
     enum CanIDs
     {
+        TURRET_MCB_TX_CAN_ID = 0x1f7,
         SYNC_RX_CAN_ID = 0x1f8,
         SYNC_TX_CAN_ID = 0x1f9,
         TURRET_STATUS_RX_CAN_ID = 0x1fa,
         X_AXIS_RX_CAN_ID = 0x1fb,
         Y_AXIS_RX_CAN_ID = 0x1fc,
         Z_AXIS_RX_CAN_ID = 0x1fd,
-        TURRET_MCB_TX_CAN_ID = 0x1fe,
     };
 
     TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus);
@@ -83,19 +85,23 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
+#if defined(TARGET_SENTRY_ECLIPSE)
+    static constexpr float IMU_SCALING_FACTOR =
+        1 / tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
+#else
+    static constexpr float IMU_SCALING_FACTOR = 2000.0 / 32768.0;
+#endif
     /**
      * @return turret yaw angle in radians, normalized between [-pi, pi]
      */
-    mockable inline float getRoll() const { return lastCompleteImuData.roll; }
+    mockable inline float getRoll() const override { return lastCompleteImuData.roll; }
 
     /**
      * @return turret yaw angular velocity in rad/sec
      */
-    mockable inline float getRollVelocity() const
+    mockable inline float getGx() const override
     {
-        return modm::toRadian(
-            static_cast<float>(lastCompleteImuData.rawRollVelocity) /
-            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
+        return static_cast<float>(lastCompleteImuData.rawRollVelocity) * IMU_SCALING_FACTOR;
     }
 
     /**
@@ -111,16 +117,14 @@ public:
     /**
      * @return turret pitch angle in rad, a value normalized between [-pi, pi]
      */
-    mockable inline float getPitch() const { return lastCompleteImuData.pitch; }
+    mockable inline float getPitch() const override { return lastCompleteImuData.pitch; }
 
     /**
      * @return turret pitch angular velocity in rad/sec
      */
-    mockable inline float getPitchVelocity() const
+    mockable inline float getGy() const override
     {
-        return modm::toRadian(
-            static_cast<float>(lastCompleteImuData.rawPitchVelocity) /
-            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
+        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) * IMU_SCALING_FACTOR;
     }
 
     /**
@@ -141,11 +145,9 @@ public:
     /**
      * @return turret yaw angular velocity in rad/sec
      */
-    mockable inline float getYawVelocity() const
+    mockable inline float getGz() const override
     {
-        return modm::toRadian(
-            static_cast<float>(lastCompleteImuData.rawYawVelocity) /
-            tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_D_PER_S_TO_D_PER_S);
+        return static_cast<float>(lastCompleteImuData.rawYawVelocity) * IMU_SCALING_FACTOR;
     }
 
     /**
@@ -155,19 +157,14 @@ public:
      */
     mockable inline float getYawUnwrapped() const
     {
-        // @todo this is dumb
-#ifdef TARGET_SENTRY_HYDRA
-        return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions) - M_PI;
-#else
         return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
-#endif
     }
 
-    mockable inline float getAx() const { return lastCompleteImuData.xAcceleration; }
+    mockable inline float getAx() const override { return lastCompleteImuData.xAcceleration; }
 
-    mockable inline float getAy() const { return lastCompleteImuData.yAcceleration; }
+    mockable inline float getAy() const override { return lastCompleteImuData.yAcceleration; }
 
-    mockable inline float getAz() const { return lastCompleteImuData.zAcceleration; }
+    mockable inline float getAz() const override { return lastCompleteImuData.zAcceleration; }
 
     mockable inline uint32_t getIMUDataTimestamp() const
     {
@@ -191,12 +188,14 @@ public:
         txCommandMsgBitmask.update(TxCommandMsgBitmask::TURN_LASER_ON, isOn);
     }
 
-    mockable inline void sendImuCalibrationRequest()
+    mockable inline void requestCalibration()
     {
         txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
     }
 
     mockable void sendData();
+
+    inline const char* getName() const { return "Turret MCB Imu"; }
 
 private:
     using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
