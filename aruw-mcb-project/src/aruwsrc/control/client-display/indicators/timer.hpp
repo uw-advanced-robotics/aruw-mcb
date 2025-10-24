@@ -34,7 +34,7 @@ private:
     static constexpr uint16_t SIZE = 80;
 
     Tx::GraphicCharacterMessage textGraphic;
-    const char* text = "HELLO: ";
+    const char* text = "TIMER: ";
     Tx::Graphic1Message numberGraphic;
     tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
 
