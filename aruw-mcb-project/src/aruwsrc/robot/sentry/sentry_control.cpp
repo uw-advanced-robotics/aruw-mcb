@@ -40,6 +40,7 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
@@ -592,6 +593,24 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
+autotune::GravityAutotuneCommand<9> gravityAutotuneCommandLeft(
+    drivers(),
+    {&turretLeft,
+     &turretLeftChassisControllers.pitchController,
+     turretLeftMotors.pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &chassis);
+
+autotune::GravityAutotuneCommand<9> gravityAutotuneCommandRight(
+    drivers(),
+    {&turretRight,
+     &turretRightChassisControllers.pitchController,
+     turretRightMotors.pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &chassis);
+
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
     turretLeftWorldControllers.yawController,
@@ -986,8 +1005,17 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::registerSentryIoMappings(drivers);
 }
 }  // namespace aruwsrc::sentry
-// #ifndef PLATFORM_HOSTED
+
+#ifndef PLATFORM_HOSTED
+std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> getGravityAutotuneCommands()
+{
+    static std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> commands = {
+        &sentry_control::gravityAutotuneCommandLeft,
+        &sentry_control::gravityAutotuneCommandRight};
+    return commands;
+}
 // imu::ImuCalibrateCommand *getImuCalibrateCommand() { return
 // &sentry_control::imuCalibrateCommand; } #endif
+#endif
 
 #endif

@@ -32,6 +32,7 @@
 #include "modm/ui/menu/standard_menu.hpp"
 
 #include "about_menu.hpp"
+#include "autotune_menu.hpp"
 #include "capacitor_bank_menu.hpp"
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
@@ -75,6 +76,7 @@ private:
     tap::Drivers *drivers;
 
     ImuCalibrateMenu imuCalibrateMenu;
+    AutotuneMenu autotuneMenu;
     CVMenu cvMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
@@ -97,6 +99,7 @@ private:
     can::capbank::CapacitorBank *capacitorBank;
 
     void addImuCalibrateMenuCallback();
+    void addAutotuneMenuCallback();
     void addCVMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();
