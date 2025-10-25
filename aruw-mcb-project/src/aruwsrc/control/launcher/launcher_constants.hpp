@@ -35,6 +35,14 @@ static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 3;
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 #endif
 
+struct FlywheelConfig{
+    modm::Pid<float> velocityPID;
+    bool isInverted;
+    const char* name;
+    // modm::Pid<float> speedCorrectionPID;
+    // can add orientation and other stuff here later
+};
+
 #if defined(ALL_SENTRIES)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
