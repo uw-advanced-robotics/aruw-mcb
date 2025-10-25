@@ -99,7 +99,7 @@ void FrictionWheelSubsystem::refresh()
         return;
     }
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
-#if defined(ALL_STANDARDS)
+#if defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
     if (prevShotTime != drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp)
     {
         prevShotTime = drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
