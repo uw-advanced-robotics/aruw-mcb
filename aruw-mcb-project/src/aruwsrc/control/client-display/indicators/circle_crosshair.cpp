@@ -48,11 +48,29 @@ void CircleCrosshair::initialize()
         CRICLE_Y,
         CRICLE_SIZE,
         &crosshairGraphics.graphicData);
+
+    RefSerialTransmitter::configRectangle(
+        LINE_THICKNESS,
+        HBAR_X,
+        HBAR_Y,
+        HBAR_X + HBAR_W,
+        HBAR_Y + HBAR_H,
+        &crosshairGraphics.graphicData
+    );
+
+    RefSerialTransmitter::configRectangle(
+        LINE_THICKNESS,
+        VBAR_X,
+        VBAR_Y,
+        VBAR_X + VBAR_W,
+        VBAR_Y + VBAR_H,
+        &crosshairGraphics.graphicData
+    );
 }
 
 modm::ResumableResult<void> CircleCrosshair::sendInitialGraphics()
 {
-    RF_BEGIN(0)
+    RF_BEGIN(0);
 
     RF_CALL(refSerialTransmitter.sendGraphic(&crosshairGraphics));
 

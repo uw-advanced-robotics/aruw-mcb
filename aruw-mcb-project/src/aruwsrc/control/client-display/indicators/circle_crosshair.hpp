@@ -73,6 +73,26 @@ private:
     static constexpr uint16_t LINE_THICKNESS = 5;
 #endif
 
+    // Keep your existing center (matches CRICLE_X/CRICLE_Y)
+    static constexpr uint16_t CROSSHAIR_CX = SCREEN_WIDTH  / 2 + OFFSET_X;
+    static constexpr uint16_t CROSSHAIR_CY = SCREEN_HEIGHT / 2 + OFFSET_Y;
+
+    // Crosshair styling (tweak these two)
+    static constexpr uint16_t CROSSHAIR_THICKNESS = CRICLE_SIZE;      // stroke thickness (px)
+    static constexpr uint16_t CROSSHAIR_HALF_LEN  = CRICLE_SIZE * 8;  // half-length from center (px)
+
+    // ----- Horizontal bar (centered at CROSSHAIR_CX, CROSSHAIR_CY) -----
+    static constexpr uint16_t HBAR_X = CROSSHAIR_CX - CROSSHAIR_HALF_LEN;
+    static constexpr uint16_t HBAR_Y = CROSSHAIR_CY - (CROSSHAIR_THICKNESS / 2);
+    static constexpr uint16_t HBAR_W = CROSSHAIR_HALF_LEN * 2;
+    static constexpr uint16_t HBAR_H = CROSSHAIR_THICKNESS;
+
+    // ----- Vertical bar (centered at CROSSHAIR_CX, CROSSHAIR_CY) -----
+    static constexpr uint16_t VBAR_X = CROSSHAIR_CX - (CROSSHAIR_THICKNESS / 2);
+    static constexpr uint16_t VBAR_Y = CROSSHAIR_CY - CROSSHAIR_HALF_LEN;
+    static constexpr uint16_t VBAR_W = CROSSHAIR_THICKNESS;
+    static constexpr uint16_t VBAR_H = CROSSHAIR_HALF_LEN * 2;
+
     Tx::Graphic1Message crosshairGraphics;
 };
 
