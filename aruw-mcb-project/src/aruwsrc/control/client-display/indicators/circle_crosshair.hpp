@@ -60,12 +60,17 @@ private:
 #endif
 
     // TODO (EDU): Modify these constants or add new ones to mess with your new graphic!
-    // X position of the circle
-    static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2 + OFFSET_X;
-    // Y position of the circle
-    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2 + OFFSET_Y;
     // SIZE of the circle
     static constexpr uint16_t CRICLE_SIZE = 2;
+    // X position of the circle
+    static constexpr uint16_t CRICLE_START_X = SCREEN_WIDTH / 2  - CRICLE_SIZE / 2 + OFFSET_X;
+    // Y position of the circle
+    static constexpr uint16_t CRICLE_START_Y = SCREEN_HEIGHT / 2 - CRICLE_SIZE / 2 + OFFSET_Y;
+    // X position of the circle
+    static constexpr uint16_t CRICLE_END_X = SCREEN_WIDTH / 2  + CRICLE_SIZE / 2 + OFFSET_X;
+    // Y position of the circle
+    static constexpr uint16_t CRICLE_END_Y = SCREEN_HEIGHT / 2 + CRICLE_SIZE / 2 + OFFSET_Y;
+
 // Thickness of the line
 #if defined(TARGET_HERO_ZERO)
     static constexpr uint16_t LINE_THICKNESS = 10;

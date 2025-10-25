@@ -42,11 +42,12 @@ void CircleCrosshair::initialize()
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::GREEN);
 
-    RefSerialTransmitter::configCircle(
+    RefSerialTransmitter::configRectangle(
         LINE_THICKNESS,
-        CRICLE_X,
-        CRICLE_Y,
-        CRICLE_SIZE,
+        CRICLE_START_X,
+        CRICLE_START_Y,
+        CRICLE_END_X,
+        CRICLE_END_Y,
         &crosshairGraphics.graphicData);
 }
 
