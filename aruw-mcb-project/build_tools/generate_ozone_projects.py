@@ -50,8 +50,8 @@ def generate_ozone(env, robot=""):
         project_file_path = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"
 
         ip = ARGUMENTS.get("ip", "")
-        if ip == "" and robot in ROBOT_IPS.keys():
-            ip = ROBOT_IPS[robot]
+        # if ip == "" and robot in ROBOT_IPS.keys():
+        #     ip = ROBOT_IPS[robot]
 
         if ip != "":
             print(f"Using IP({ip}) connection...")
