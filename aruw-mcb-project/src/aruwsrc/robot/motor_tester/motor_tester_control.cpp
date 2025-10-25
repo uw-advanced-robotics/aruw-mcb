@@ -23,6 +23,7 @@
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_constants.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
@@ -30,7 +31,6 @@
 
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;
-using namespace tap::control::setpoint;
 // using namespace tap::control;
 
 /*
@@ -46,9 +46,16 @@ namespace motor_tester_control
 
 // motors, subsystems, commands, etc.
 
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 void initializeSubsystems() {}
 
-void registerSubsystems(Drivers* drivers) {}
+void registerSubsystems(Drivers* drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &motor_tester_control::remoteSafeDisconnectFunction);
+}
 
 void registerIoMappings(Drivers* drivers) {}
 

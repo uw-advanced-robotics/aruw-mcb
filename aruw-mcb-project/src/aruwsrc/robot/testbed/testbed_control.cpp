@@ -29,6 +29,7 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
@@ -142,15 +143,24 @@ aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
 
 // ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
     chassis.registerAndInitialize();
 }
 
-void setDefaultCommands(Drivers *) { chassis.setDefaultCommand(&chassisDriveCommand); }
+void registerSubsystems(Drivers* drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &testbed_control::remoteSafeDisconnectFunction);
+}
 
-void registerIoMappings(Drivers *)
+void setDefaultCommands(Drivers*) { chassis.setDefaultCommand(&chassisDriveCommand); }
+
+void registerIoMappings(Drivers*)
 {
     // drivers->commandMapper.addMap(&leftSwitchDown);
     // drivers->commandMapper.addMap(&leftSwitchUp);
@@ -161,7 +171,7 @@ void registerIoMappings(Drivers *)
 
 namespace aruwsrc::testbed
 {
-void initSubsystemCommands(aruwsrc::testbed::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::testbed::Drivers* drivers)
 {
     testbed_control::initializeSubsystems();
     testbed_control::setDefaultCommands(drivers);
