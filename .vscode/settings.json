@@ -1,6 +1,7 @@
 {
     "editor.tabSize": 4,
     "files.associations": {
+        "*.h": "c",
         "array": "cpp",
         "string": "cpp",
         "string_view": "cpp",
@@ -76,7 +77,14 @@
         "ranges": "cpp",
         "stop_token": "cpp",
         "numbers": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "dense": "cpp",
+        "hash_map": "cpp",
+        "sparseqr": "cpp",
+        "mprealsupport": "cpp",
+        "matrixfunctions": "cpp",
+        "polynomials": "cpp",
+        "future": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
