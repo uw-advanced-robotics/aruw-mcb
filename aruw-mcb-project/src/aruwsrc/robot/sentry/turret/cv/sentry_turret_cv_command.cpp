@@ -124,7 +124,13 @@ void SentryTurretCVCommand::execute()
         }
 
         // major averaging
-        majorSetpoint = leftYawSetpoint.minInterpolate(rightYawSetpoint, 0.5);
+        WrappedFloat majorDirection = leftYawSetpoint.minInterpolate(rightYawSetpoint, 0.5);
+
+        // utilize major's 180˚ symmetry
+        // majorSetpoint = fabs(majorSetpoint.minDifference(majorDirection)) < M_PI_2
+        //                     ? majorDirection
+        //                     : majorDirection + M_PI;
+        majorSetpoint = majorDirection;
     }
     else
     {
