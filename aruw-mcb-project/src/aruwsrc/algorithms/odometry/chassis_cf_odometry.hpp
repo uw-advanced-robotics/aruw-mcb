@@ -29,11 +29,6 @@
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
-namespace aruwsrc::communication::serial
-{
-class RttTelemetry;
-}
-
 namespace aruwsrc::algorithms::odometry
 {
 /**
@@ -46,20 +41,17 @@ public:
     /**
      * Constructor.
      *
-     * @param drivers The drivers instance
      * @param chassisSubsystem The chassis subsystem of the robot for odometry measurements
      * @param chassisYawObserver Interface that computes the yaw of the chassis externally
      * @param imu IMU mounted on the chassis to measure chassis acceleration
      * @param initPos Initial position of chassis when robot boots
-     * @param rttTelemetry Optional RTT telemetry for logging odometry data
      */
     ChassisCFOdometry(
         tap::Drivers* drivers,
         const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
-        const modm::Vector2f initPos,
-        aruwsrc::communication::serial::RttTelemetry* rttTelemetry = nullptr);
+        const modm::Vector2f initPos);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
@@ -88,7 +80,6 @@ private:
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
     const modm::Vector2f initPos;
-    aruwsrc::communication::serial::RttTelemetry* rttTelemetry;
 
     /// Chassis location in the world frame
     modm::Location2D<float> location;
@@ -101,8 +92,6 @@ private:
     uint32_t prevTime = 0;
 
     float chassisTrust = 1.0f;  // Trust in deadwheel odometry vs IMU
-
-    inline static constexpr char POS_LOG_ID[] = "pos";
 
     void computeAccVelocities(float* acc_x_vel, float* acc_y_vel, float dt);
 };

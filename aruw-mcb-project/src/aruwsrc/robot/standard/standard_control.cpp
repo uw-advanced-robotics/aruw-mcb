@@ -74,7 +74,7 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -136,7 +136,7 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace standard_control
 {
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -241,17 +241,14 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers()->mpu6500,
     modm::Vector2f(
         aruwsrc::chassis::INITIAL_CHASSIS_POSITION_X,
-        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y),
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
-    &drivers()->rttTelemetry  // Pass RTT telemetry for odometry logging
-#else
-    nullptr  // RTT telemetry not available in unit tests
-#endif
-);
+        aruwsrc::chassis::INITIAL_CHASSIS_POSITION_Y));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+StandardAnderHeroTransformerSubsystem transformSubsystem(
+    *drivers(),
+    transformer,
+    &drivers()->rttTelemetry);
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
@@ -485,7 +482,7 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(
-    ((tap::Drivers *)(drivers())),
+    ((tap::Drivers*)(drivers())),
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
@@ -563,7 +560,7 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 
-std::vector<HudIndicator *> hudIndicators = {
+std::vector<HudIndicator*> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
     &ammoIndicator,
@@ -687,7 +684,7 @@ HoldCommandMapping ctrlPressed(
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerStandardSubsystems(Drivers *drivers)
+void registerStandardSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -720,7 +717,7 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultStandardCommands(Drivers *)
+void setDefaultStandardCommands(Drivers*)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
@@ -729,7 +726,7 @@ void setDefaultStandardCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startStandardCommands(Drivers *drivers)
+void startStandardCommands(Drivers* drivers)
 {
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
@@ -740,7 +737,7 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *drivers)
+void registerStandardIoMappings(Drivers* drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -765,7 +762,7 @@ void registerStandardIoMappings(Drivers *drivers)
 
 namespace aruwsrc::standard
 {
-void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::standard::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &standard_control::remoteSafeDisconnectFunction);
@@ -778,7 +775,7 @@ void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
 }  // namespace aruwsrc::standard
 
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand()
+imu::ImuCalibrateCommand* getImuCalibrateCommand()
 {
     return &standard_control::imuCalibrateCommand;
 }

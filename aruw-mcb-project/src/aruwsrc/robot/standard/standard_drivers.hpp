@@ -77,10 +77,7 @@ public:
     {
 #if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
         // Set up RTT telemetry logging dependencies after construction
-        rttTelemetry.setLoggingDependencies(
-            &controlOperatorInterface,
-            &this->refSerial,
-            &visionCoprocessor);
+        rttTelemetry.setLoggingDependencies(&this->refSerial, &visionCoprocessor);
 #endif
     }
 

@@ -42,20 +42,11 @@ class RefSerial;
 
 namespace aruwsrc
 {
-namespace control
-{
-class ControlOperatorInterface;
-}
 namespace serial
 {
 class VisionCoprocessor;
 }
 }  // namespace aruwsrc
-
-// SEGGER RTT headers
-// extern "C" {
-// #include "SEGGER_RTT.h"
-// }
 
 namespace tap
 {
@@ -77,15 +68,6 @@ namespace aruwsrc::communication::serial
 class RttTelemetry : public modm::pt::Protothread
 {
 public:
-    // template <typename T, const char* L, size_t S>
-    // struct Signal
-    // {
-    //     T data[S];
-    // };
-
-    // inline static constexpr char ID[] = "example";
-    // Signal<float, ID, 3> sig;
-
     /**
      * Constructor
      * @param drivers Pointer to the global drivers instance
@@ -99,7 +81,6 @@ public:
      * @param visionProcessor Vision coprocessor for CV data logging
      */
     void setLoggingDependencies(
-        aruwsrc::control::ControlOperatorInterface* controlInterface = nullptr,
         tap::communication::serial::RefSerial* refSerial = nullptr,
         aruwsrc::serial::VisionCoprocessor* visionProcessor = nullptr);
 
@@ -110,55 +91,38 @@ public:
 
     /**
      * Asynchronous telemetry update using modm protothreads.
-     * Call this function repeatedly in your main loop.
      *
      * @return false when protothread completes (which never happens as this runs in infinite loop)
      */
     bool updateTelemetryAsync();
 
-    /**
-     * Log control operator interface data (joystick inputs, button states)
-     */
-    void logControlOperatorData();
-
-    /**
-     * Log referee system data (robot health, ammo, game state)
-     */
-    void logRefereeData();
-
-    /**
-     * Log vision coprocessor data (target detection, aim assist)
-     */
-    void logVisionData();
-
-    /**
-     * Log odometry state vector (position, velocity, orientation)
-     * @param position Robot position in world frame (x, y in meters)
-     * @param velocity Robot velocity in world frame (vx, vy in m/s)
-     * @param orientation Robot orientation in radians
-     */
-    void logOdometryState(
-        const modm::Vector2f& position,
-        const modm::Vector2f& velocity,
-        float orientation);
-
-    template <typename T, const char* L, size_t S>
-    void logSignal(const T (&data)[S])
+    template <typename T>
+    void logSignal(const char* label, const T& value)
     {
-        emit_array_json_and_queue<T, L, S>(data);
+        emit_scalar_json_and_queue(label, value);
     }
 
-    template <typename T, const char* L>
-    void logSignal(const T& value)
+    template <typename T, size_t N>
+    void logSignal(const char* label, const T (&values)[N])
     {
-        emit_scalar_json_and_queue<T, L>(value);
+        if constexpr (N == 1)
+            emit_scalar_json_and_queue(label, values[0]);
+        else
+            emit_array_json_and_queue(label, values);
+    }
+
+    template <typename T, typename... Ts>
+    void logSignal(const char* label, T v0, Ts... rest)
+    {
+        constexpr size_t N = sizeof...(rest) + 1;
+        T vals[N] = {v0, rest...};
+        logSignal(label, vals);
     }
 
 private:
     tap::Drivers* drivers;
 
     // Optional logging dependencies (set via setLoggingDependencies)
-    aruwsrc::control::ControlOperatorInterface* controlInterface;
     tap::communication::serial::RefSerial* refSerial;
     aruwsrc::serial::VisionCoprocessor* visionProcessor;
 
@@ -189,8 +153,8 @@ private:
     TelemetryState currentState;
 
     // Message queue for asynchronous transmission
-    static constexpr size_t MAX_QUEUED_MESSAGES = 10;
-    static constexpr size_t MAX_MESSAGE_SIZE = 512;
+    static constexpr size_t MAX_QUEUED_MESSAGES = 64;
+    static constexpr size_t MAX_MESSAGE_SIZE = 64;
 
     struct QueuedMessage
     {
@@ -215,9 +179,24 @@ private:
     void sendQueuedMessages();
 
     /**
-     * Generate heartbeat message and queue it
+     * Queue timestamp, robot type, and counter
      */
-    void generateHeartbeatMessage();
+    void logHeartbeatInfo();
+
+    /**
+     * Queue remote channel and switch state data
+     */
+    void logRemoteData();
+
+    /**
+     * Queue ref system data
+     */
+    void logRefereeData();
+
+    /**
+     * Queue vision coprocessor data
+     */
+    void logVisionData();
 
     /**
      * Get current system timestamp in milliseconds
@@ -231,40 +210,26 @@ private:
         if constexpr (std::is_floating_point_v<T>)
         {
             char buf[64];
-            // compact but precise enough; adjust if you need fixed decimals
             int vq = static_cast<int32_t>(v * 1000);
             std::snprintf(buf, sizeof(buf), "%d.%03d", vq / 1000, vq % 1000);
             out += buf;
         }
         else if constexpr (std::is_integral_v<T> && !std::is_same_v<T, bool>)
         {
-            char buf[64];
-            // print as signed long long to be safe
-            std::snprintf(buf, sizeof(buf), "%lld", static_cast<long long>(v));
-            out += buf;
+            out += std::to_string(static_cast<long long>(v));
         }
         else if constexpr (std::is_same_v<T, bool>)
         {
             out += (v ? "true" : "false");
         }
-        else if constexpr (std::is_same_v<T, const char*> || std::is_same_v<T, char*>)
+        else if constexpr (std::is_convertible_v<T, const char*>)
         {
-            // minimal string escaping (quotes/backslashes); extend if needed
             out += '"';
-            for (const char* p = v; *p; ++p)
+            for (const char* p = static_cast<const char*>(v); *p; ++p)
             {
-                char c = *p;
-                if (c == '"' || c == '\\') out += '\\';
-                out += c;
+                if (*p == '"' || *p == '\\') out += '\\';
+                out += *p;
             }
-            out += '"';
-        }
-        else if constexpr (std::is_same_v<T, char>)
-        {
-            // represent char as a small JSON string
-            out += '"';
-            if (v == '"' || v == '\\') out += '\\';
-            out += v;
             out += '"';
         }
         else
@@ -273,47 +238,36 @@ private:
         }
     }
 
-    template <class T, const char* L>
-    void emit_scalar_json_and_queue(const T& v)
+    template <typename T>
+    void emit_scalar_json_and_queue(const char* label, const T& v)
     {
         std::string msg;
         msg.reserve(64);
-        msg += "{\"";
-        msg += L;
+        msg += "\"";
+        msg += label;
         msg += "\":";
         append_json_value(msg, v);
-        msg += '}';
-
-        // queue: assumes queueMessage copies the string
         queueMessage(msg.c_str());
     }
 
-    template <class T, const char* L, size_t S>
-    void emit_array_json_and_queue(const T (&arr)[S])
+    template <typename T, size_t N>
+    void emit_array_json_and_queue(const char* label, const T (&arr)[N])
     {
         std::string msg;
-        msg.reserve(32 + S * 16);  // rough reserve
-
-        msg += "{\"";
-        msg += L;
+        msg.reserve(32 + N * 16);
+        msg += "\"";
+        msg += label;
         msg += "\":[";
 
-        for (size_t i = 0; i < S; ++i)
+        for (size_t i = 0; i < N; ++i)
         {
             if (i) msg += ',';
             append_json_value(msg, arr[i]);
         }
-        msg += "]}\n";
-
+        msg += "]";
         queueMessage(msg.c_str());
     }
 };
-
-// template <typename T, const char* L>
-// void logSignal(T data)
-// {
-//     //
-// }
 
 }  // namespace aruwsrc::communication::serial
 

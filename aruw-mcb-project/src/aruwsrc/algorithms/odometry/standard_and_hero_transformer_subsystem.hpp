@@ -22,6 +22,8 @@
 
 #include "tap/control/subsystem.hpp"
 
+#include "aruwsrc/communication/serial/rtt_telemetry.hpp"
+
 #include "standard_and_hero_transformer.hpp"
 
 namespace aruwsrc::algorithms::transforms
@@ -34,18 +36,35 @@ class StandardAnderHeroTransformerSubsystem : public tap::control::Subsystem
 public:
     StandardAnderHeroTransformerSubsystem(
         tap::Drivers& drivers,
-        StandardAndHeroTransformer& transformer)
+        StandardAndHeroTransformer& transformer,
+        aruwsrc::communication::serial::RttTelemetry* telemetry = nullptr)
         : tap::control::Subsystem(&drivers),
-          transformer(transformer)
+          transformer(transformer),
+          telemetry(telemetry)
     {
     }
 
-    inline void initialize() override{};
-    inline void refresh() override { transformer.updateTransforms(); };
+    inline void initialize() override {};
+    inline void refresh() override
+    {
+        transformer.updateTransforms();
+
+        if (telemetry != nullptr)
+        {
+            const Transform& worldToChassis = transformer.getWorldToChassis();
+            telemetry->logSignal("state:chassis:pos", worldToChassis.getX(), worldToChassis.getY());
+            telemetry->logSignal(
+                "state:chassis:vel",
+                worldToChassis.getXVel(),
+                worldToChassis.getYVel());
+            telemetry->logSignal("state:chassis:yaw", worldToChassis.getYaw());
+        }
+    };
     const char* getName() const { return "Standard and hero transformer subsystem"; }
 
 private:
     StandardAndHeroTransformer& transformer;
+    aruwsrc::communication::serial::RttTelemetry* telemetry;
 };
 
 }  // namespace aruwsrc::algorithms::transforms
