@@ -37,7 +37,7 @@ namespace display
 MotorSpecificMenu::MotorSpecificMenu(
     modm::ViewStack<DummyAllocator<modm::IAbstractView> > *stack,
     Drivers *drivers,
-    const DjiMotor *motor)
+    DjiMotor *motor)
     : modm::AbstractMenu<DummyAllocator<modm::IAbstractView> >(stack, 1),
       drivers(drivers),
       associatedMotor(motor)
@@ -63,19 +63,28 @@ void MotorSpecificMenu::draw()
     currIsInverted = associatedMotor->isMotorInverted();
     currEncoderWrapped = associatedMotor->getInternalEncoder().getEncoder().getWrappedValue();
     currRPM = associatedMotor->getInternalEncoder().getShaftRPM();
+    hasMotorBeenOffline = associatedMotor->hasMotorBeenOffline();
 
     display << "  Motor ID: " << associatedMotor->getMotorIdentifier() << modm::endl
             << "  Des. Output: " << currDesiredOutput << modm::endl
             << "  Enc. Wrapped: " << currEncoderWrapped << modm::endl
             << "  RPM: " << currRPM << modm::endl
-            << "  Inverted: " << currIsInverted;
+            << "  Inverted: " << currIsInverted << modm::endl
+            << "  Has motor been offline: " << (hasMotorBeenOffline ? "YES" : "NO");
 }
 
 void MotorSpecificMenu::shortButtonPress(modm::MenuButtons::Button button)
 {
-    if (button == modm::MenuButtons::LEFT)
+    switch (button)
     {
-        this->remove();
+        case modm::MenuButtons::LEFT:
+            this->remove();
+            break;
+        case modm::MenuButtons::RIGHT:
+            associatedMotor->resetHasBeenOffline();
+            break;
+        default:
+            break;
     }
 }
 
@@ -86,8 +95,9 @@ bool MotorSpecificMenu::hasChanged()
     bool sameEncoderWrapped =
         (associatedMotor->getInternalEncoder().getEncoder().getWrappedValue() ==
          currEncoderWrapped);
+    bool sameOfflineStatus = (associatedMotor->hasMotorBeenOffline() == hasMotorBeenOffline);
 
-    return !(sameOutputDesired && sameInverted && sameEncoderWrapped) &&
+    return !(sameOutputDesired && sameInverted && sameEncoderWrapped && sameOfflineStatus) &&
            updatePeriodicTimer.execute();
 }
 }  // namespace display

@@ -53,7 +53,7 @@ public:
     void terminalSerialStreamCallback(modm::IOStream& outputStream) override;
 
 private:
-    typedef DjiMotor const* (DjiMotorTxHandler::*getMotorByIdFunc)(MotorId);
+    typedef DjiMotor* (DjiMotorTxHandler::*getMotorByIdFunc)(MotorId);
 
     static constexpr char USAGE[] =
         "Usage: motorinfo <[-H] | [all] | [motor [mid]] [can [cid]]>\n"
@@ -74,7 +74,7 @@ private:
 
     bool printInfo(modm::IOStream& outputStream);
 
-    void getMotorInfoToString(const DjiMotor* motor, modm::IOStream& outputStream);
+    void getMotorInfoToString(DjiMotor* motor, modm::IOStream& outputStream);
 
     void printAllMotorInfo(getMotorByIdFunc func, modm::IOStream& outputStream);
 };  // class DjiMotorTerminalSerialHandler

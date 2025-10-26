@@ -48,7 +48,7 @@ public:
     MotorSpecificMenu(
         modm::ViewStack<DummyAllocator<modm::IAbstractView> >* stack,
         Drivers* drivers,
-        const motor::DjiMotor* motor);
+        motor::DjiMotor* motor);
 
     void draw() override;
 
@@ -60,7 +60,7 @@ public:
 
 private:
     Drivers* drivers;
-    const tap::motor::DjiMotor* associatedMotor;
+    tap::motor::DjiMotor* associatedMotor;
 
     arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 
@@ -68,6 +68,7 @@ private:
     bool currIsInverted = false;
     uint16_t currEncoderWrapped;
     int16_t currRPM = 0;
+    bool hasMotorBeenOffline = false;
 };
 }  // namespace display
 }  // namespace tap

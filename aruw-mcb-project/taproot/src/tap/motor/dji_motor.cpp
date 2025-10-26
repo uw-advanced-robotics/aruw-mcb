@@ -62,8 +62,9 @@ DjiMotor::DjiMotor(
       motorInverted(isInverted),
       currentControl(currentControl),
       internalEncoder(isInverted, gearRatio, encoderHomePosition),
-      encoder(externalEncoder != nullptr ? externalEncoder 
-                                         : const_cast<Encoder*>(&this->getInternalEncoder()))
+      encoder(
+          externalEncoder != nullptr ? externalEncoder
+                                     : const_cast<Encoder*>(&this->getInternalEncoder()))
 {
     motorDisconnectTimeout.stop();
 }
@@ -85,6 +86,7 @@ void DjiMotor::processMessage(const modm::can::Message& message)
     torque = motorInverted ? -torque : torque;
     temperature = static_cast<int8_t>(message.data[6]);  // temperature
 
+    if (motorDisconnectTimeout.isExpired()) offlineFlag = true;
     // restart disconnect timer, since you just received a message from the motor
     motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
 
@@ -107,6 +109,10 @@ bool DjiMotor::isMotorOnline() const
      */
     return !motorDisconnectTimeout.isExpired() && !motorDisconnectTimeout.isStopped();
 }
+
+bool DjiMotor::hasMotorBeenOffline() const { return !isMotorOnline() || offlineFlag; }
+
+void DjiMotor::resetHasBeenOffline() { offlineFlag = false; }
 
 void DjiMotor::serializeCanSendData(modm::can::Message* txMessage) const
 {

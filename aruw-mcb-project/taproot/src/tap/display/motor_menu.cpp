@@ -165,7 +165,7 @@ void MotorMenu::shortButtonPress(modm::MenuButtons::Button button)
             int8_t idx = verticalScroll.getCursorIndex();
             if (idx < DjiMotorTxHandler::DJI_MOTORS_PER_CAN)  // idx between [0, 8)
             {
-                const DjiMotor* motor =
+                DjiMotor* motor =
                     drivers->djiMotorTxHandler.getCan1Motor(NORMALIZED_ID_TO_DJI_MOTOR(idx));
                 if (motor != nullptr)
                 {
@@ -175,7 +175,7 @@ void MotorMenu::shortButtonPress(modm::MenuButtons::Button button)
             }
             else  // idx between [8, 16)
             {
-                const DjiMotor* motor = drivers->djiMotorTxHandler.getCan2Motor(
+                DjiMotor* motor = drivers->djiMotorTxHandler.getCan2Motor(
                     NORMALIZED_ID_TO_DJI_MOTOR(idx - DjiMotorTxHandler::DJI_MOTORS_PER_CAN));
                 if (motor != nullptr)
                 {

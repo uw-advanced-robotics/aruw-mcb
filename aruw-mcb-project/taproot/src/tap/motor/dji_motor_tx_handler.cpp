@@ -218,13 +218,13 @@ void DjiMotorTxHandler::removeFromMotorManager(const DjiMotor& motor, DjiMotor**
     motorStore[id] = nullptr;
 }
 
-DjiMotor const* DjiMotorTxHandler::getCan1Motor(MotorId motorId)
+DjiMotor* DjiMotorTxHandler::getCan1Motor(MotorId motorId)
 {
     uint32_t index = DJI_MOTOR_TO_NORMALIZED_ID(motorId);
     return index > DJI_MOTOR_TO_NORMALIZED_ID(tap::motor::MOTOR8) ? nullptr : can1MotorStore[index];
 }
 
-DjiMotor const* DjiMotorTxHandler::getCan2Motor(MotorId motorId)
+DjiMotor* DjiMotorTxHandler::getCan2Motor(MotorId motorId)
 {
     uint32_t index = DJI_MOTOR_TO_NORMALIZED_ID(motorId);
     return index > DJI_MOTOR_TO_NORMALIZED_ID(tap::motor::MOTOR8) ? nullptr : can2MotorStore[index];

@@ -184,7 +184,7 @@ bool DjiMotorTerminalSerialHandler::printInfo(modm::IOStream& outputStream)
 }
 
 void DjiMotorTerminalSerialHandler::getMotorInfoToString(
-    const DjiMotor* motor,
+    DjiMotor* motor,
     modm::IOStream& outputStream)
 {
     if (motor != nullptr)
@@ -203,7 +203,7 @@ void DjiMotorTerminalSerialHandler::printAllMotorInfo(
 {
     for (int i = static_cast<int>(MOTOR1); i <= static_cast<int>(MOTOR8); i++)
     {
-        const DjiMotor* motor = (drivers->djiMotorTxHandler.*(func))(static_cast<MotorId>(i));
+        DjiMotor* motor = (drivers->djiMotorTxHandler.*(func))(static_cast<MotorId>(i));
         getMotorInfoToString(motor, outputStream);
     }
 }

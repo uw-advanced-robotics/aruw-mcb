@@ -106,9 +106,9 @@ public:
      */
     mockable void removeFromMotorManager(const DjiMotor& motor);
 
-    mockable DjiMotor const* getCan1Motor(MotorId motorId);
+    mockable DjiMotor* getCan1Motor(MotorId motorId);
 
-    mockable DjiMotor const* getCan2Motor(MotorId motorId);
+    mockable DjiMotor* getCan2Motor(MotorId motorId);
 
 protected:
     Drivers* drivers;
