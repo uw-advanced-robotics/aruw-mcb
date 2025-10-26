@@ -71,7 +71,7 @@ private:
     float LQRScalar = 0.5;  // still no idea why everything has to be halved
     float LQRWheelScalar = 1.0;
     float LQRHipScalar = 1.0;
-    float gravityScalar = 1.0f;
+    float gravityScalar = 0.5f;
 };
 }  // namespace aruwsrc::balstd::chassis::controllers
 

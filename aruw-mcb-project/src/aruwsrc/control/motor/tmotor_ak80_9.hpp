@@ -107,7 +107,7 @@ class Tmotor_AK809 : public tap::can::CanRxListener, public tap::motor::MotorInt
 {
 public:
     static constexpr float GEAR_RATIO = 1.0f / 9.0f;
-    static constexpr float TORQUE_CONSTANT = 2000.0f / 2;  // desOut/Nm
+    static constexpr float TORQUE_CONSTANT = 1826.0f;  // desOut/Nm
 
     /**
      * @param drivers a pointer to the drivers struct
