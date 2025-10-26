@@ -29,10 +29,14 @@ void ManualLegController::initialize(const BalstdChassisState&)
 BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&, float)
 {
     return BalstdChassisOutput(
+        // controlOperatorInterface.getManualLegXForce(),
+        // controlOperatorInterface.getManualLegYForce() +
+        //     controlOperatorInterface.getManualGravCompForce(),
+        0.0f,
+        0.0f,
         controlOperatorInterface.getManualLegXForce(),
-        controlOperatorInterface.getManualLegYForce(),
-        controlOperatorInterface.getManualLegXForce(),
-        controlOperatorInterface.getManualLegYForce(),
+        controlOperatorInterface.getManualLegYForce() +
+            controlOperatorInterface.getManualGravCompForce(),
         controlOperatorInterface.getManualWheelTorque() +
             controlOperatorInterface.getManualSteerTorque(),
         controlOperatorInterface.getManualWheelTorque() -

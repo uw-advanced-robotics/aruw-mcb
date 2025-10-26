@@ -64,6 +64,11 @@ public:
     /**
      * @return The value used for steering when manual driving
      */
+    mockable float getManualGravCompForce();
+
+    /**
+     * @return The value used for steering when manual driving
+     */
     mockable float getManualSteerTorque();
 
     inline void setMode(Mode newMode)
@@ -89,9 +94,10 @@ private:
     static constexpr float MAX_ROLL = M_PI / 6;      // rad
     static constexpr float MAX_HEIGHT_VEL = 0.025f;  // m/s
 
-    static constexpr float MAX_LEG_FORCE = 95.0f;    // N
-    static constexpr float MAX_WHEEL_TORQUE = 5.0f;  // N*m
-    static constexpr float MAX_STEER_TORQUE = 2.0f;  // N*m
+    static constexpr float MAX_LEG_FORCE = 95.0f;               // N
+    static constexpr float MAX_WHEEL_TORQUE = 5.0f;             // N*m
+    static constexpr float MAX_STEER_TORQUE = 2.0f;             // N*m
+    static constexpr float MAX_MANUAL_GRAV_COMP_FORCE = 59.0f;  // N
 };
 
 }  // namespace aruwsrc::balstd

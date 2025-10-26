@@ -81,4 +81,9 @@ float BalstdControlOperatorInterface::getManualSteerTorque()
     return getModeRestrictedInput(Channel::RIGHT_HORIZONTAL, Mode::MANUAL, MAX_STEER_TORQUE);
 }
 
+float BalstdControlOperatorInterface::getManualGravCompForce()
+{
+    return getModeRestrictedInput(Channel::WHEEL, Mode::MANUAL, MAX_MANUAL_GRAV_COMP_FORCE);
+}
+
 }  // namespace aruwsrc::balstd
