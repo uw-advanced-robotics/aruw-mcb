@@ -245,6 +245,12 @@ public:
 
     float updateCBF(BalstdLegState leg);
 
+    inline void homeAks()
+    {
+        frontHipMotor.sendPositionHomeGetMessage();
+        backHipMotor.sendPositionHomeGetMessage();
+    }
+
 private:
     aruwsrc::control::motor::Tmotor_AK809& frontHipMotor;
     aruwsrc::control::motor::Tmotor_AK809& backHipMotor;

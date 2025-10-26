@@ -46,6 +46,7 @@
 #include "aruwsrc/robot/balstd/chassis/controllers/attach_controller_command.hpp"
 #include "aruwsrc/robot/balstd/chassis/controllers/balance_controller.hpp"
 #include "aruwsrc/robot/balstd/chassis/controllers/manual_leg_controller.hpp"
+#include "aruwsrc/robot/balstd/chassis/home_leg_command.hpp"
 #include "aruwsrc/robot/balstd/fsm/balstd_op_state_machine.hpp"
 #include "aruwsrc/robot/balstd/fsm/fsm_event_trigger_command.hpp"
 #include "aruwsrc/robot/balstd/turret/balstd_turret_subsystem.hpp"
@@ -221,27 +222,35 @@ BalstdImuCalibrateCommand imuCalibrateCommand(
 AttachControllerCommand attachManualController(chassis, &manualLegController);
 AttachControllerCommand attachBalanceController(chassis, &balanceController);
 
+HomeLegCommand homeLegs(chassis);
+
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
 
 // imu calibrate
-HoldCommandMapping leftUpRightDown(
+HoldCommandMapping leftUpRightMid(
     drivers(),
     {&imuCalibrateCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
+
+// home legs
+HoldCommandMapping leftDownRightMid(
+    drivers(),
+    {&homeLegs},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
 
 // manual
-HoldCommandMapping leftMidRightDown(
-    drivers(),
-    {&disarmCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
-
-// balancing
 HoldCommandMapping leftMidRightMid(
     drivers(),
-    {&getUpCommand},
+    {&disarmCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+
+// balancing
+HoldCommandMapping leftMidRightUp(
+    drivers(),
+    {&getUpCommand},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -286,11 +295,12 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *drivers)
+void registerStandardIoMappings(Drivers* drivers)
 {
-    drivers->commandMapper.addMap(&leftUpRightDown);   // imu calibrate
-    drivers->commandMapper.addMap(&leftMidRightDown);  // disarm (manual controller)
-    drivers->commandMapper.addMap(&leftMidRightMid);   // get up (balance controller)
+    drivers->commandMapper.addMap(&leftUpRightMid);    // imu calibrate
+    drivers->commandMapper.addMap(&leftDownRightMid);  // home legs
+    drivers->commandMapper.addMap(&leftMidRightMid);   // disarm (manual controller)
+    drivers->commandMapper.addMap(&leftMidRightUp);    // get up (balance controller)
 }
 }  // namespace balstd_control
 

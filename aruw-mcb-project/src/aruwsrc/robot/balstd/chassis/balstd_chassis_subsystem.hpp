@@ -65,6 +65,12 @@ public:
 
     inline void resetVirtualWheelPos() { currState.virtualWheelPos = 0; }
 
+    inline void homeLegs()
+    {
+        leftLeg.homeAks();
+        rightLeg.homeAks();
+    }
+
     inline modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override
     {
         return modm::Matrix<float, 3, 1>::zeroMatrix();
