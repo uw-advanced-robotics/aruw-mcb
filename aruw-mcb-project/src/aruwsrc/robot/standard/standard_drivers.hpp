@@ -27,6 +27,7 @@
 
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
+#include "aruwsrc/mock/rtt_telemetry_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 #else
@@ -56,9 +57,7 @@ public:
         : tap::Drivers(),
           controlOperatorInterface(this),
           visionCoprocessor(this),
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
           rttTelemetry(this),
-#endif
           oledDisplay(
               this,
               &visionCoprocessor,
@@ -75,16 +74,13 @@ public:
           refSerialTransmitter(this),
           interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
     {
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
-        // Set up RTT telemetry logging dependencies after construction
         rttTelemetry.setLoggingDependencies(&this->refSerial, &visionCoprocessor);
-#endif
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
-    // Note: RTT telemetry not available in unit tests (requires hardware RTT support)
+    testing::NiceMock<mock::RttTelemetryMock> rttTelemetry;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
@@ -93,9 +89,7 @@ public:
 public:
     control::ControlOperatorInterface controlOperatorInterface;
     serial::VisionCoprocessor visionCoprocessor;
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
     communication::serial::RttTelemetry rttTelemetry;
-#endif
     display::OledDisplay oledDisplay;
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;

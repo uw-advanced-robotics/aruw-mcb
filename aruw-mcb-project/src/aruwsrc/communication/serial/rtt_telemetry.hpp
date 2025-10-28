@@ -26,8 +26,8 @@
 #include <type_traits>
 
 #include "tap/architecture/periodic_timer.hpp"
+#include "tap/util_macros.hpp"
 
-#include "modm/math/geometry/vector2.hpp"
 #include "modm/processing/protothread.hpp"
 
 // Forward declarations
@@ -85,16 +85,11 @@ public:
         aruwsrc::serial::VisionCoprocessor* visionProcessor = nullptr);
 
     /**
-     * Initialize the RTT telemetry system
-     */
-    void initialize();
-
-    /**
      * Asynchronous telemetry update using modm protothreads.
      *
      * @return false when protothread completes (which never happens as this runs in infinite loop)
      */
-    bool updateTelemetryAsync();
+    mockable bool updateTelemetryAsync();
 
     template <typename T>
     void logSignal(const char* label, const T& value)
@@ -119,38 +114,47 @@ public:
         logSignal(label, vals);
     }
 
+    template <typename... Args>
+    void println(const char* first, Args... rest)
+    {
+        std::string msg;
+        msg.reserve(64);
+
+        auto append = [&](const char* s)
+        {
+            if (s) msg += s;
+        };
+
+        (append(first), ..., append(rest));
+
+        // msg += '\n';
+
+        // queueMessage(msg.c_str());  // TODO: this can't use the same buffer
+    }
+
+    /**
+     * Blocking function that's already called by protothread, so no need to call manually. Only
+     * public for use by `modm_abort()`.
+     */
+    mockable void sendQueuedMessages();
+
+#if !defined(ENV_UNIT_TESTS) || !defined(PLATFORM_HOSTED)
 private:
+#endif
     tap::Drivers* drivers;
 
     // Optional logging dependencies (set via setLoggingDependencies)
     tap::communication::serial::RefSerial* refSerial;
     aruwsrc::serial::VisionCoprocessor* visionProcessor;
 
-    // Timer for periodic telemetry updates
-    tap::arch::PeriodicMilliTimer periodicTimer;
-
     // Timer for LED blinking
     tap::arch::PeriodicMilliTimer ledBlinkTimer;
 
-    // Timer for extended logging data
-    tap::arch::PeriodicMilliTimer extendedLoggingTimer;
-
-    // Counter for periodic messages
+    // Total messages sent
     uint32_t messageCounter;
 
     // Flag to track if we've received first RTT input
     bool firstInputReceived;
-
-    // Protothread state management
-    enum class TelemetryState
-    {
-        IDLE,
-        SENDING_HEARTBEAT,
-        SENDING_EXTENDED_LOGGING,
-        PROCESSING_INPUT
-    };
-
-    TelemetryState currentState;
 
     // Message queue for asynchronous transmission
     static constexpr size_t MAX_QUEUED_MESSAGES = 64;
@@ -174,11 +178,6 @@ private:
     void queueMessage(const char* message);
 
     /**
-     * Send all queued messages (called by protothread)
-     */
-    void sendQueuedMessages();
-
-    /**
      * Queue timestamp, robot type, and counter
      */
     void logHeartbeatInfo();
@@ -197,12 +196,6 @@ private:
      * Queue vision coprocessor data
      */
     void logVisionData();
-
-    /**
-     * Get current system timestamp in milliseconds
-     * @return Timestamp in milliseconds since startup
-     */
-    uint32_t getTimestamp() const;
 
     template <class T>
     void append_json_value(std::string& out, const T& v)

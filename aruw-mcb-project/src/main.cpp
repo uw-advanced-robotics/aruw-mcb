@@ -90,6 +90,32 @@ static void initializeI2C(Drivers *drivers);
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
 
+namespace
+{
+Drivers* drivers_for_assert = nullptr;
+}
+
+#ifdef ALL_STANDARDS  // temp, bc logging only added for standard atm
+static modm::Abandonment log_assertion(const modm::AssertionInfo& info)
+{
+    if (drivers_for_assert)
+        drivers_for_assert->rttTelemetry.println("Assertion '%s' raised!", info.name);
+    return modm::Abandonment::DontCare;
+}
+MODM_ASSERTION_HANDLER(log_assertion);
+
+modm_extern_c modm_noreturn void modm_abandon(const modm::AssertionInfo& info)
+{
+    if (drivers_for_assert)
+    {
+        drivers_for_assert->rttTelemetry.println("ABORTING: Assertion '%s' raised!", info.name);
+
+        drivers_for_assert->rttTelemetry.sendQueuedMessages();
+        modm::delay_ms(1);  // maybe unnecessary / too long
+    }
+}
+#endif
+
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -102,6 +128,7 @@ int main()
      *      IO states and run the scheduler.
      */
     Drivers *drivers = DoNotUse_getDrivers();
+    drivers_for_assert = drivers;
 
     Board::initialize();
     initializeIo(drivers);
@@ -191,11 +218,6 @@ static void initializeIo(Drivers *drivers)
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
-#endif
-#if defined(ALL_STANDARDS)
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
-    ((Drivers *)drivers)->rttTelemetry.initialize();
-#endif
 #endif
 #if defined(TARGET_SENTRY_ECLIPSE)
     drivers->turretMCBCanCommBus2.init();

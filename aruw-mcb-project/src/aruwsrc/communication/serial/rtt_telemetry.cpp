@@ -110,12 +110,9 @@ RttTelemetry::RttTelemetry(tap::Drivers* drivers)
       drivers(drivers),
       refSerial(nullptr),
       visionProcessor(nullptr),
-      periodicTimer(1000),        // 1 second periodic heartbeat
-      ledBlinkTimer(500),         // 500ms LED blink rate
-      extendedLoggingTimer(200),  // 200ms extended logging (5Hz)
+      ledBlinkTimer(500),  // 500ms LED blink rate
       messageCounter(0),
       firstInputReceived(false),
-      currentState(TelemetryState::IDLE),
       queueHead(0),
       queueTail(0),
       queueCount(0)
@@ -134,36 +131,6 @@ void RttTelemetry::setLoggingDependencies(
 {
     this->refSerial = refSerial;
     this->visionProcessor = visionProcessor;
-}
-
-void RttTelemetry::initialize()
-{
-    // Get robot name
-#if defined(TARGET_DRONE)
-    const char* robotName = "TARGET_DRONE";
-#elif defined(TARGET_ENGINEER)
-    const char* robotName = "TARGET_ENGINEER";
-#elif defined(TARGET_SENTRY_ECLIPSE)
-    const char* robotName = "TARGET_SENTRY_ECLIPSE";
-#elif defined(TARGET_HERO_ZERO)
-    const char* robotName = "TARGET_HERO_ZERO";
-#elif defined(TARGET_STANDARD_NULL)
-    const char* robotName = "TARGET_STANDARD_NULL";
-#elif defined(TARGET_STANDARD_VOID)
-    const char* robotName = "TARGET_STANDARD_VOID";
-#else
-    const char* robotName = "TARGET_UNKNOWN";
-#endif
-
-    // Send simple initialization message
-    char initMsg[128];
-    std::snprintf(
-        initMsg,
-        sizeof(initMsg),
-        "{\"type\":\"init\",\"timestamp\":%lu,\"robot\":\"%s\"}\n",
-        getTimestamp(),
-        robotName);
-    writeToSeggerRTT(initMsg);
 }
 
 bool RttTelemetry::updateTelemetryAsync()
@@ -252,14 +219,8 @@ void RttTelemetry::logVisionData()
 {
     if (!visionProcessor) return;
 
-    // Get aim data for turret 0 (most robots have at least 1 turret)
+    // Even non-turret robots are required to declare a turret at the moment
     const auto& aimData = visionProcessor->getLastAimData(0);
-
-    // Use manual JSON building with integer conversion
-    char visionData[512];
-    char* ptr = visionData;
-
-    ptr += sprintf(ptr, "{\"type\":\"vision\",\"timestamp\":%lu,\"data\":{", getTimestamp());
 
     logSignal("online:cv", visionProcessor->isCvOnline());
     logSignal("cv:hasTarget", visionProcessor->getSomeTurretHasTarget());
@@ -270,8 +231,6 @@ void RttTelemetry::logVisionData()
     logSignal("cv:aimData:pos", aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
     logSignal("cv:aimData:vel", aimData.pva.xVel, aimData.pva.yVel, aimData.pva.zVel);
 }
-
-uint32_t RttTelemetry::getTimestamp() const { return tap::arch::clock::getTimeMilliseconds(); }
 
 void RttTelemetry::queueMessage(const char* message)
 {
@@ -337,7 +296,7 @@ void RttTelemetry::logHeartbeatInfo()
     robotName = "TARGET_UNKNOWN";
 #endif
 
-    logSignal("time", getTimestamp());
+    logSignal("time", tap::arch::clock::getTimeMilliseconds());
     logSignal("robot", robotName);
     logSignal("messageCount", messageCounter++);
 }
