@@ -19,11 +19,11 @@ namespace aruwsrc::control::client_display
         
 
         private:
-            static uint16_t TEXT_X = 100;
-            static uint16_t NUMBER_X = 500;
-            static uint16_t TEXT_Y = 100;
-            static uint16_t WIDTH = 10;
-            static uint16_t SIZE = 50;
+            static const uint16_t TEXT_X = 100;
+            static const uint16_t NUMBER_X = 500;
+            static const uint16_t TEXT_Y = 100;
+            static const uint16_t WIDTH = 10;
+            static const uint16_t SIZE = 50;
             
             Tx::GraphicCharacterMessage textGraphic;
             const char* text = "Timer: ";
@@ -41,9 +41,9 @@ namespace aruwsrc::control::client_display
                     WIDTH,
                     TEXT_X,
                     TEXT_Y,
-                    val,
+                    value,
                     &graphic -> graphicData
                 );
             }
-    }
+    };
 }
