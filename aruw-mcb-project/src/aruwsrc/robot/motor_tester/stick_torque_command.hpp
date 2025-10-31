@@ -70,12 +70,14 @@ private:
     MotorSubsystem *motorSubsystem;
     tap::communication::serial::Remote::Channel channel;
 
-    uint32_t prevTime;
+    // uint32_t prevTime;
 
     // algorithms::TurretYawControllerInterface *yawController;
     // algorithms::TurretPitchControllerInterface *pitchController;
 
-    const float scale;
+    // const float scale;
+
+    // float stickInput;
 
     // const uint8_t turretID;
 };

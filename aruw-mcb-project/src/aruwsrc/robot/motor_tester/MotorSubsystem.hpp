@@ -26,12 +26,15 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "tap/algorithms/smooth_pid.hpp"
+#include <tap/algorithms/wrapped_float.hpp>
+
 namespace aruwsrc::motor_tester
 {
 class MotorSubsystem : public tap::control::Subsystem
 {
 public:
-    MotorSubsystem(tap::Drivers* drivers, tap::motor::MotorInterface* motorInterface);
+    MotorSubsystem(tap::Drivers* drivers, tap::motor::MotorInterface* motorInterface, tap::algorithms::SmoothPidConfig config);
 
     const char* getName() const override { return "Motor DJI Edu"; }
 
@@ -40,14 +43,27 @@ public:
     void initialize() override;
     void refresh() override;
 
-    void setDesiredOutput(int32_t value);
-    int32_t getDesiredOutput();
+    // void setDesiredOutput(int32_t value);
+    // int32_t getDesiredOutput();
+
+    void setDesiredPosition(tap::algorithms::WrappedFloat radians);
+    tap::algorithms::WrappedFloat getDesiredPosition() const;
 
     bool isOnline() const;
 
+public:
+    // int32_t proportion;
 private:
     tap::motor::MotorInterface* motorInterface;
-    int32_t desiredOutput;
+    // int32_t desiredOutput;
+    // float desiredPosition;
+    tap::algorithms::WrappedFloat desiredPosition;
+
+    tap::algorithms::SmoothPid pid;
+
+    uint32_t prevTime;
+
+    
 };
 
 }  // namespace aruwsrc::control::motor
