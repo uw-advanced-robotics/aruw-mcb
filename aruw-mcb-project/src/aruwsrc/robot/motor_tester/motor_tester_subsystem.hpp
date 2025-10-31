@@ -34,6 +34,9 @@ public:
         : Subsystem(drivers), motor(motor){};
 
     void initialize() override {motor.initialize();}
+    bool isMotorOnline() {
+        return motor.isMotorOnline();
+    }
 
     int getDesiredOutput(){
         return desiredOutput;
