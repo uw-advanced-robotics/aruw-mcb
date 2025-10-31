@@ -84,7 +84,7 @@
 #include "aruwsrc/control/governor/yellow_carded_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "aruwsrc/control/launcher/n_flywheel/modular_referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -116,7 +116,6 @@ using namespace aruwsrc::control::turret;
 using namespace aruwsrc::hero;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
-using namespace aruwsrc::control::launcher::modular_flywheel;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -191,7 +190,7 @@ XDriveChassisSubsystem chassis(
           aruwsrc::control::launcher::LAUNCHER_PID_KD,
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-          modm::Pid<float> velocityPIDRight(aruwsrc::control::launcher::LAUNCHER_PID_KP,
+    modm::Pid<float> velocityPIDRight(aruwsrc::control::launcher::LAUNCHER_PID_KP,
           aruwsrc::control::launcher::LAUNCHER_PID_KI,
           aruwsrc::control::launcher::LAUNCHER_PID_KD,
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
@@ -203,7 +202,7 @@ XDriveChassisSubsystem chassis(
         velocityPIDRight, false, "Right Flywheel"
     };
     std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
-ModularRefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
+RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
     frictionWheels(
         drivers(),
         wheelIDs,

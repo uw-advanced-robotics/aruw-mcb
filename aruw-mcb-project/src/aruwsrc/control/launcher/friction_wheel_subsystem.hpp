@@ -47,11 +47,13 @@ class TurretMCBCanComm;
 
 namespace aruwsrc::control::launcher
 {
+
 /**
- * A subsystem which regulates the speed of a two wheel shooter system using velocity PID
+ * A subsystem which regulates the speed of an n-wheel shooter system using velocity PID
  * controllers. Allows the user to specify the desired launch speed of the shooter.
+ * Currently configured to work with hero and idk if it works for other robots. 
  */
-class FrictionWheelSubsystem : public tap::control::Subsystem
+template<std::size_t NUM_WHEELS> class FrictionWheelSubsystem : public tap::control::Subsystem
 {
     friend class FrictionWheelTestCommand;
 
@@ -61,8 +63,8 @@ public:
      */
     FrictionWheelSubsystem(
         tap::Drivers *drivers,
-        tap::motor::MotorId leftMotorId,
-        tap::motor::MotorId rightMotorId,
+        std::array<uint32_t, NUM_WHEELS> wheelIDs,
+        std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus canBus,
         aruwsrc::can::TurretMCBCanComm *turretMCB);
 
@@ -89,7 +91,12 @@ public:
     /**
      * @return The average measured friction wheel speed of the launcher in RPM.
      */
-    float getCurrentFrictionWheelSpeed() const;
+    float getCurrentAverageFrictionWheelSpeed() const;
+
+    /**
+     * @return The measured friction wheel speed of the nth flywheel in launcher in RPM.
+     */
+    float getCurrentIndividualFrictionWheelSpeed(int index) const;
 
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
@@ -98,8 +105,9 @@ public:
 
     void refreshSafeDisconnect() override
     {
-        leftWheel.setDesiredOutput(0);
-        rightWheel.setDesiredOutput(0);
+        for (tap::motor::DjiMotor wheel : wheels) {
+            wheel.setDesiredOutput(0);
+        }
     }
 
     const char *getName() const override { return "Friction wheels"; }
@@ -122,9 +130,7 @@ protected:
 private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
-    modm::Pid<float> velocityPidLeftWheel;
-
-    modm::Pid<float> velocityPidRightWheel;
+    FlywheelConfig flywheelConfigs[NUM_WHEELS];
 
     modm::Pid<float> speedCorrectionPid;
 
@@ -138,15 +144,13 @@ private:
 public:
     tap::algorithms::Ramp desiredRpmRamp;
 
-    testing::NiceMock<tap::mock::DjiMotorMock> leftWheel;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightWheel;
+    testing::NiceMock<tap::mock::DjiMotorMock>[NUM_WHEELS] wheels;
 
 private:
 #else
     tap::algorithms::Ramp desiredRpmRamp;
 
-    tap::motor::DjiMotor leftWheel;
-    tap::motor::DjiMotor rightWheel;
+    tap::motor::DjiMotor wheels[NUM_WHEELS];
 #endif
 
     aruwsrc::can::TurretMCBCanComm *turretMCB;

@@ -28,7 +28,8 @@
 #include "modm/container/deque.hpp"
 
 #include "friction_wheel_subsystem.hpp"
-#include "launch_speed_predictor_interface.hpp"
+#include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 
 namespace aruwsrc::control::launcher
 {
@@ -39,8 +40,8 @@ namespace aruwsrc::control::launcher
  * @tparam PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE Number of balls to average when estimating the
  * next projectile velocity.
  */
-template <size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE>
-class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem,
+template <size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE, std::size_t NUM_WHEELS>
+class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem<NUM_WHEELS>,
                                               public LaunchSpeedPredictorInterface
 {
 public:
@@ -53,12 +54,12 @@ public:
      */
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
-        tap::motor::MotorId leftMotorId,
-        tap::motor::MotorId rightMotorId,
+        std::array<uint32_t, NUM_WHEELS> wheelIDs,
+        std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus canBus,
         aruwsrc::can::TurretMCBCanComm *turretMCB,
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus, turretMCB),
+        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheelIDs, wheelConfigs, canBus, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }

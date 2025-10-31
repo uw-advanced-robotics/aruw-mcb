@@ -29,10 +29,11 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::launcher
 {
-FrictionWheelSubsystem::FrictionWheelSubsystem(
+template<std::size_t NUM_WHEELS>
+FrictionWheelSubsystem<NUM_WHEELS>::FrictionWheelSubsystem(
     tap::Drivers *drivers,
-    tap::motor::MotorId leftMotorId,
-    tap::motor::MotorId rightMotorId,
+    std::array<uint32_t, NUM_WHEELS> wheelIDs,
+    std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
     tap::can::CanBus canBus,
     aruwsrc::can::TurretMCBCanComm *turretMCB)
     : tap::control::Subsystem(drivers),
@@ -40,18 +41,6 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
       launchSpeedLinearInterpolator(
           LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
-      velocityPidLeftWheel(
-          LAUNCHER_PID_KP,
-          LAUNCHER_PID_KI,
-          LAUNCHER_PID_KD,
-          LAUNCHER_PID_MAX_ERROR_SUM,
-          LAUNCHER_PID_MAX_OUTPUT),
-      velocityPidRightWheel(
-          LAUNCHER_PID_KP,
-          LAUNCHER_PID_KI,
-          LAUNCHER_PID_KD,
-          LAUNCHER_PID_MAX_ERROR_SUM,
-          LAUNCHER_PID_MAX_OUTPUT),
       speedCorrectionPid(
           LAUNCHER_SPEED_CORRECTION_PID_KP,
           LAUNCHER_SPEED_CORRECTION_PID_KI,
@@ -59,22 +48,26 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
           LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM,
           LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT),
       desiredRpmRamp(0),
-      leftWheel(drivers, leftMotorId, canBus, true, "Left flywheel"),
-      rightWheel(drivers, rightMotorId, canBus, false, "Right flywheel"),
       turretMCB(turretMCB),
       frictionTestCommand(this)
 {
     this->setTestCommand(&frictionTestCommand);
+    for (int i = 0; i < NUM_WHEELS; i++) {
+        wheels[i](drivers, wheelIDs[i], canBus, wheelConfigs[i].isInverted, wheelConfigs[i].name);
+    }
 }
 
-void FrictionWheelSubsystem::initialize()
+template<std::size_t NUM_WHEELS>
+void FrictionWheelSubsystem<NUM_WHEELS>::initialize()
 {
-    leftWheel.initialize();
-    rightWheel.initialize();
+    for (tap::motor::DjiMotor wheel : wheels) {
+            wheel.initialize();
+        }
     prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
-void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
+template<std::size_t NUM_WHEELS>
+void FrictionWheelSubsystem<NUM_WHEELS>::setDesiredLaunchSpeed(float speed)
 {
     desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
     desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
@@ -84,14 +77,24 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
     }
 }
 
-float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
+template<std::size_t NUM_WHEELS>
+float FrictionWheelSubsystem<NUM_WHEELS>::getCurrentIndividualFrictionWheelSpeed(int index) const
 {
-    float leftWheelSpeed = leftWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
-    float rightWheelSpeed = rightWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
-    return (leftWheelSpeed + rightWheelSpeed) / 2.0f;
+    return wheels[index].getEncoder()->getVelocity() * 60.0f / M_TWOPI;
 }
 
-void FrictionWheelSubsystem::refresh()
+template<std::size_t NUM_WHEELS>
+float FrictionWheelSubsystem<NUM_WHEELS>::getCurrentAverageFrictionWheelSpeed() const
+{
+    float sum = 0;
+    for (int i = 0; i < NUM_WHEELS; i++) {
+        sum += wheels[i].getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    }
+    return sum / NUM_WHEELS;
+}
+
+template<std::size_t NUM_WHEELS>
+void FrictionWheelSubsystem<NUM_WHEELS>::refresh()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     if (currTime == prevTime)
@@ -111,17 +114,14 @@ void FrictionWheelSubsystem::refresh()
 
     prevTime = currTime;
 
-    velocityPidLeftWheel.update(
-        desiredRpmRamp.getValue() - leftWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI -
-        speedCorrection);
-    leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
-    velocityPidRightWheel.update(
-        desiredRpmRamp.getValue() - rightWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI -
-        speedCorrection);
-    rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
+    for (int i = 0; i < NUM_WHEELS; i++) {
+        wheels[i].velocityPID.update(desiredRpmRamp.getValue() - getCurrentIndividualFrictionWheelSpeed(i) - speedCorrection);
+        wheels[i].setDesiredOutput(static_cast<int32_t>(wheels[i].velocityPID.getValue()));
+    }
 }
 
-float FrictionWheelSubsystem::launchSpeedToFrictionWheelRpm(float launchSpeed) const
+template<std::size_t NUM_WHEELS>
+float FrictionWheelSubsystem<NUM_WHEELS>::launchSpeedToFrictionWheelRpm(float launchSpeed) const
 {
     return launchSpeedLinearInterpolator.interpolate(launchSpeed);
 }
