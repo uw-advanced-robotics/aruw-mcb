@@ -21,7 +21,7 @@
 
 // #include "tap/communication/sensors/motor/buzzer.hpp"
 
-namespace aruwsrc::control::motor
+namespace aruwsrc::motor_tester
 {
 MotorSubsystem::MotorSubsystem(tap::Drivers* drivers, tap::motor::MotorInterface* motorInterface) : 
     Subsystem(drivers), 
@@ -54,5 +54,9 @@ void MotorSubsystem::setDesiredOutput(int32_t value) {
 }
 
 int32_t MotorSubsystem::getDesiredOutput() { return desiredOutput; }
+
+bool MotorSubsystem::isOnline() const {
+    return motorInterface->isMotorOnline();
+}
 
 }  // namespace aruwsrc::control::buzzer

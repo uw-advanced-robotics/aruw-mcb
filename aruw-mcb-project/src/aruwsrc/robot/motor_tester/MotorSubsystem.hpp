@@ -26,7 +26,7 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-namespace aruwsrc::control::motor
+namespace aruwsrc::motor_tester
 {
 class MotorSubsystem : public tap::control::Subsystem
 {
@@ -42,6 +42,8 @@ public:
 
     void setDesiredOutput(int32_t value);
     int32_t getDesiredOutput();
+
+    bool isOnline() const;
 
 private:
     tap::motor::MotorInterface* motorInterface;
