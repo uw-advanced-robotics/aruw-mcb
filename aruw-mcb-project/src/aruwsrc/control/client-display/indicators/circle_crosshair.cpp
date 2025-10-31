@@ -31,7 +31,7 @@ CircleCrosshair::CircleCrosshair(RefSerialTransmitter &refSerialTransmitter)
 void CircleCrosshair::initialize()
 {
     uint8_t crosshairName[3];
-
+    
     getUnusedGraphicName(crosshairName);
 
     // TODO (EDU): Modify the lines below so you draw something different than a circle!!
@@ -42,11 +42,12 @@ void CircleCrosshair::initialize()
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::GREEN);
 
-    RefSerialTransmitter::configCircle(
-        LINE_THICKNESS,
-        CRICLE_X,
-        CRICLE_Y,
-        CRICLE_SIZE,
+    RefSerialTransmitter::configRectangle(
+        RECTANGLE_WIDTH,
+        RECTANGLE_STARTX,
+        RECTANGLE_STARTY,
+        RECTANGLE_ENDX,
+        RECTANGLE_ENDY,
         &crosshairGraphics.graphicData);
 }
 

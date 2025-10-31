@@ -61,11 +61,15 @@ private:
 
     // TODO (EDU): Modify these constants or add new ones to mess with your new graphic!
     // X position of the circle
-    static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2 + OFFSET_X;
+    static constexpr uint16_t RECTANGLE_WIDTH = SCREEN_WIDTH / 2 + OFFSET_X;
     // Y position of the circle
-    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2 + OFFSET_Y;
+    static constexpr uint16_t RECTANGLE_STARTX = SCREEN_HEIGHT / 2 + OFFSET_Y;
     // SIZE of the circle
-    static constexpr uint16_t CRICLE_SIZE = 2;
+    static constexpr uint16_t RECTANGLE_STARTY = 1;
+
+    static constexpr uint16_t RECTANGLE_ENDX = 1;
+
+    static constexpr uint16_t RECTANGLE_ENDY = 1;
 // Thickness of the line
 #if defined(TARGET_HERO_ZERO)
     static constexpr uint16_t LINE_THICKNESS = 10;
