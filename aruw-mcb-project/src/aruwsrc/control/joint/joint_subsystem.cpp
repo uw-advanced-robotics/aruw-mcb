@@ -17,11 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::joint
 {
 JointSubsystem::JointSubsystem(
     tap::Drivers* drivers,
@@ -90,4 +90,4 @@ void JointSubsystem::refresh()
 
 void JointSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::joint

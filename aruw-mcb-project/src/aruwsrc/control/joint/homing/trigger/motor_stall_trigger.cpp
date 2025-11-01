@@ -17,16 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "homing_command.hpp"
+#include "motor_stall_trigger.hpp"
 
-namespace aruwsrc::control
+#include "tap/motor/dji_motor.hpp"
+
+namespace aruwsrc::control::joint::homing::trigger
 {
-/**
- * Once the subsystem's calibration is finished, homedAndBounded will be true, and the subsystem's
- * motor will be at rest.
- */
-void HomingCommand::initialize() { subsystem.startCalibrate(); }
+MotorStallTrigger::MotorStallTrigger(
+    tap::motor::DjiMotor& motor,
+    float maxVelocity,
+    int16_t minTorque)
+    : motor(motor),
+      maxVelocity(maxVelocity),
+      minTorque(minTorque)
+{
+}
 
-bool HomingCommand::isFinished() const { return subsystem.homedAndBounded(); }
-
-}  // namespace aruwsrc::control
+bool MotorStallTrigger::isTriggered()
+{
+    return (
+        (fabs(motor.getEncoder()->getVelocity()) < maxVelocity) &&
+        (abs(motor.getTorque()) > minTorque));
+}
+}  // namespace aruwsrc::control::joint::homing::trigger

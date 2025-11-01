@@ -24,7 +24,7 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "wrist/wrist_setpoints_command.hpp"
 #include "wrist/wrist_subsystem.hpp"
 
@@ -88,7 +88,7 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
     .maxOutput = 3000.0f,
 };
 
-static constexpr aruwsrc::control::JointSubsystem::Config WRIST_ROLL_CONFIG{
+static constexpr aruwsrc::control::joint::JointSubsystem::Config WRIST_ROLL_CONFIG{
     .epsilon = 1e-2,
     .posPidConfig = WRIST_ROLL_PID_CONFIG,
     .maxOutput = WRIST_ROLL_PID_CONFIG.maxOutput,

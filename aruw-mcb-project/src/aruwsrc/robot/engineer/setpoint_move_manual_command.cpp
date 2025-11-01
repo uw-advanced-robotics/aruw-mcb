@@ -22,7 +22,7 @@
 namespace aruwsrc::engineer
 {
 SetpointMoveManualCommand::SetpointMoveManualCommand(
-    aruwsrc::control::JointSubsystem& subsystem,
+    aruwsrc::control::joint::JointSubsystem& subsystem,
     aruwsrc::control::engineer::EngineerControlOperatorInterface* operatorInterface,
     float moveSpeed,
     SetpointType setpointType)

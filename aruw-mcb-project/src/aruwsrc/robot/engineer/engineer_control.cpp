@@ -31,15 +31,15 @@
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
-#include "aruwsrc/control/bounded-subsystem/homing_command.hpp"
-#include "aruwsrc/control/bounded-subsystem/trigger/limit_switch_trigger.hpp"
-#include "aruwsrc/control/bounded-subsystem/trigger_homed_dual_joint_subsystem.hpp"
+#include "aruwsrc/control/joint/homing/homing_command.hpp"
+#include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
+#include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
-#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cubelift_switch_command.hpp"
@@ -61,6 +61,9 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::joint;
+using namespace aruwsrc::control::joint::homing;
+using namespace aruwsrc::control::joint::homing::trigger;
 using namespace aruwsrc::control::engineer;
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::engineer::wrist;
@@ -501,9 +504,6 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeLift.setDefaultCommand(&cubeManualControl);
-
-    // suckSubsystem.setDefaultCommand(&suckOffCommand);
-    // releaseSubsystem.setDefaultCommand(&releaseOffCommand);
 
     // clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }

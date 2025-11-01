@@ -27,7 +27,7 @@
 
 #include "trigger_homed_joint_subsystem.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::joint::homing
 {
 class TriggerHomedDualJointSubsystem : public TriggerHomedJointSubsystem
 {
@@ -36,7 +36,7 @@ public:
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motorOne,
         tap::motor::MotorInterface &motorTwo,
-        control::TriggerInterface &trigger,
+        trigger::TriggerInterface &trigger,
         const tap::algorithms::SmoothPidConfig &alignPidConfig,
         const Config &config);
 
@@ -68,6 +68,6 @@ private:
     tap::algorithms::SmoothPid alignPid;
 };
 
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::joint::homing
 
 #endif  // TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_

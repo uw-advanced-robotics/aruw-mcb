@@ -20,10 +20,10 @@
 #ifndef TWO_SIDED_BOUNDED_SUBSYSTEM_INTERFACE_HPP_
 #define TWO_SIDED_BOUNDED_SUBSYSTEM_INTERFACE_HPP_
 
-#include "aruwsrc/control/bounded-subsystem/bounded_subsystem_interface.hpp"
-#include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
+#include "bounded_subsystem_interface.hpp"
+#include "trigger/trigger_interface.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::joint::homing
 {
 /**
  * A Bounded Subsystem whose home and bounds are set upon sequentially activating two triggers
@@ -34,8 +34,8 @@ class TwoSidedBoundedSubsystemInterface : public BoundedSubsystemInterface
 public:
     TwoSidedBoundedSubsystemInterface(
         tap::Drivers* drivers,
-        TriggerInterface& lowerTrigger,
-        TriggerInterface& upperTrigger)
+        trigger::TriggerInterface& lowerTrigger,
+        trigger::TriggerInterface& upperTrigger)
         : BoundedSubsystemInterface(drivers),
           lowerTrigger(lowerTrigger),
           upperTrigger(upperTrigger)
@@ -53,9 +53,9 @@ protected:
      */
     virtual void moveTowardUpperBound() = 0;
 
-    TriggerInterface& lowerTrigger;
-    TriggerInterface& upperTrigger;
+    trigger::TriggerInterface& lowerTrigger;
+    trigger::TriggerInterface& upperTrigger;
 };  // class OneSidedBoundedSubsystemInterface
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::joint::homing
 
 #endif  // TWO_SIDED_BOUNDED_SUBSYSTEM_INTERFACE_HPP_

@@ -27,7 +27,7 @@
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::joint
 {
 /**
  * Subsystem code for joints that don't need to be homed.
@@ -92,6 +92,6 @@ protected:
     float staticFeedforward;
     float maxOutput;
 };
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::joint
 
 #endif  // JOINT_SUBSYSTEM_HPP_

@@ -19,13 +19,13 @@
 
 #include "trigger_homed_dual_joint_subsystem.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::joint::homing
 {
 TriggerHomedDualJointSubsystem::TriggerHomedDualJointSubsystem(
     tap::Drivers* drivers,
     tap::motor::MotorInterface& motorOne,
     tap::motor::MotorInterface& motorTwo,
-    control::TriggerInterface& trigger,
+    trigger::TriggerInterface& trigger,
     const tap::algorithms::SmoothPidConfig& configAlign,
     const TriggerHomedJointSubsystem::Config& config)
     : Subsystem(drivers),
@@ -102,4 +102,4 @@ void TriggerHomedDualJointSubsystem::refreshSafeDisconnect()
     motorTwo.setDesiredOutput(0);
 }
 
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::joint::homing

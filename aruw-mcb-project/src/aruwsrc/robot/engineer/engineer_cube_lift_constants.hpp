@@ -24,7 +24,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/bounded-subsystem/trigger_homed_joint_subsystem.hpp"
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {
@@ -53,7 +53,7 @@ static constexpr float THREE_CUBE_SETPOINT = -310.0f;
 
 static constexpr float LIFT_UPPER_BOUND = THREE_CUBE_SETPOINT;
 
-static constexpr aruwsrc::control::TriggerHomedJointSubsystem::Config CUBE_LIFT_CONFIG{
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config CUBE_LIFT_CONFIG{
     .super =  // JointSubsystem::Config
     {
         .lowerBound = -320.0f,

@@ -22,7 +22,7 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
@@ -36,7 +36,7 @@ class WristControllerCommand : public tap::control::Command
 {
 public:
     WristControllerCommand(
-        aruwsrc::control::JointSubsystem &roll,
+        aruwsrc::control::joint::JointSubsystem &roll,
         WristSubsystem &wrist,
         EngineerControlOperatorInterface *operatorInterface,
         float rollScalingFactor,
@@ -57,7 +57,7 @@ public:
     virtual bool isFinished() const override { return false; }
 
 private:
-    aruwsrc::control::JointSubsystem &roll;
+    aruwsrc::control::joint::JointSubsystem &roll;
     WristSubsystem &wrist;
 
     EngineerControlOperatorInterface *operatorInterface;

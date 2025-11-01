@@ -22,9 +22,9 @@
 namespace aruwsrc::engineer
 {
 ScorePositionCommand::ScorePositionCommand(
-    aruwsrc::control::JointSubsystem& gantryLift,
+    aruwsrc::control::joint::JointSubsystem& gantryLift,
     WristSubsystem& wrist,
-    aruwsrc::control::JointSubsystem& roll)
+    aruwsrc::control::joint::JointSubsystem& roll)
     : gantryLift(gantryLift),
       wrist(wrist),
       roll(roll)

@@ -22,7 +22,7 @@
 namespace aruwsrc::engineer::wrist
 {
 WristControllerCommand::WristControllerCommand(
-    aruwsrc::control::JointSubsystem &roll,
+    aruwsrc::control::joint::JointSubsystem &roll,
     WristSubsystem &wrist,
     EngineerControlOperatorInterface *operatorInterface,
     float rollScalingFactor,

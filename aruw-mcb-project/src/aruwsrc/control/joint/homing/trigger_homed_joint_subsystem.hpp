@@ -23,13 +23,13 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/motor_interface.hpp"
 
-#include "aruwsrc/control/bounded-subsystem/one_sided_bounded_subsystem_interface.hpp"
-#include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
-#include "aruwsrc/control/engineer-joint/joint_subsystem.hpp"
+#include "one_sided_bounded_subsystem_interface.hpp"
+#include "trigger/trigger_interface.hpp"
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::joint::homing
 {
-class TriggerHomedJointSubsystem : public aruwsrc::control::OneSidedBoundedSubsystemInterface,
+class TriggerHomedJointSubsystem : public OneSidedBoundedSubsystemInterface,
                                    public JointSubsystem
 {
 public:
@@ -44,7 +44,7 @@ public:
     TriggerHomedJointSubsystem(
         tap::Drivers *drivers,
         tap::motor::MotorInterface &motor,
-        aruwsrc::control::TriggerInterface &trigger,
+        trigger::TriggerInterface &trigger,
         Config config)
         : Subsystem(drivers),
           OneSidedBoundedSubsystemInterface(drivers, trigger, 0),
@@ -114,6 +114,6 @@ protected:
     float homingSpeed;
     bool homingReversed;
 };
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::joint::homing
 
 #endif  // TRIGGER_HOMED_JOINT_SUBSYSTEM_HPP_

@@ -17,34 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOTOR_STALL_TRIGGER_HPP_
-#define MOTOR_STALL_TRIGGER_HPP_
+#ifndef TRIGGER_INTERFACE_HPP_
+#define TRIGGER_INTERFACE_HPP_
 
-#include "tap/motor/dji_motor.hpp"
-
-#include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
-
-namespace aruwsrc::control
+namespace aruwsrc::control::joint::homing::trigger
 {
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
- * through the stalling of the motor when it is at an end of its axis.
+ * through a trigger when it is at an end of its axis.
  */
-class MotorStallTrigger : public TriggerInterface
+class TriggerInterface
 {
 public:
-    MotorStallTrigger(tap::motor::DjiMotor& motor, float maxVelocity, int16_t minTorque);
+    TriggerInterface() {}
 
     /**
-     * Detects whether the subsystem's motor is stalled, indicating that the trigger is triggered.
+     * Detects whether or not the trigger is triggered.
      */
-    bool isTriggered();
-
-private:
-    tap::motor::DjiMotor& motor;
-    float maxVelocity;
-    int16_t minTorque;
+    virtual bool isTriggered() = 0;
 };
-}  // namespace aruwsrc::control
-
-#endif  // MOTOR_STALL_TRIGGER_HPP_
+}  // namespace aruwsrc::control::joint::homing::trigger
+#endif

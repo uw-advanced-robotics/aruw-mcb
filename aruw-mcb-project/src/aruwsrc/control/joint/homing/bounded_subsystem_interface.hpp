@@ -23,7 +23,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::joint::homing
 {
 /**
  * Interface for a homeable and bounded subsystem, which is a subsytem where its motor
@@ -83,6 +83,6 @@ protected:
      */
     virtual void setHome(float encoderPosition) = 0;
 };  // class HomeableSubsystemInterface
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::joint::homing
 
 #endif  // HOMEABLE_SUBSYSYSTEM_INTERFACE_HPP

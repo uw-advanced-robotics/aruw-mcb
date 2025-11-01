@@ -20,10 +20,10 @@
 #ifndef ONE_SIDED_BOUNDED_SUBSYSTEM_INTERFACE_HPP_
 #define ONE_SIDED_BOUNDED_SUBSYSTEM_INTERFACE_HPP_
 
-#include "aruwsrc/control/bounded-subsystem/bounded_subsystem_interface.hpp"
-#include "aruwsrc/control/bounded-subsystem/trigger/trigger_interface.hpp"
+#include "bounded_subsystem_interface.hpp"
+#include "trigger/trigger_interface.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::joint::homing
 {
 /**
  * A bounded subsystem whose home and both of its bounds are set upon activating a single
@@ -34,7 +34,7 @@ class OneSidedBoundedSubsystemInterface : public BoundedSubsystemInterface
 public:
     OneSidedBoundedSubsystemInterface(
         tap::Drivers* drivers,
-        TriggerInterface& trigger,
+        trigger::TriggerInterface& trigger,
         float length)
         : BoundedSubsystemInterface(drivers),
           trigger(trigger),
@@ -48,13 +48,13 @@ protected:
      */
     virtual void moveTowardLowerBound() = 0;
 
-    TriggerInterface& trigger;
+    trigger::TriggerInterface& trigger;
 
     /**
      * The length of the subsystem. Used to calculate the motor's upper bound.
      */
     float length;
 };  // class OneSidedBoundedSubsystemInterface
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::joint::homing
 
 #endif  // ONE_SIDED_BOUNDED_SUBSYSTEM_INTERFACE_HPP_
