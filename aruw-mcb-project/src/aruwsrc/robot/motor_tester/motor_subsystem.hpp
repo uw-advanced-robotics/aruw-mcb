@@ -7,7 +7,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 
-namespace aruwsrc::robot::motor_tester {
+namespace aruwsrc::motor_tester {
 
 class MotorSubsystem : public tap::control::Subsystem {
 public:
@@ -20,6 +20,14 @@ public:
 
     float getTargetPosition() const {
         return targetPosition.getWrappedValue();
+    }
+
+    void initialize() override {
+        motor.initialize();
+    }
+
+    bool isOnline() {
+        return motor.isMotorOnline();
     }
 
     void refresh() override {
