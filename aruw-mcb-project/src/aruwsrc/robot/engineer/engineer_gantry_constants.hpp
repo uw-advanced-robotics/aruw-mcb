@@ -54,22 +54,23 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_LIFT_ALIGN_PID_CONFIG =
     .maxOutput = 1000.0f,
 };
 
-static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config GANTRY_LIFT_CONFIG{
-    .super =  // JointSubsystem::Config
-    {
-        .lowerBound = 5.0f,
-        .upperBound = 320.0f,
-        .epsilon = 1.0f,
-        .maxSetpointIncrement = 0.7f,
-        .encoderRatio = 5 * 14 / M_TWOPI,  // 5mm per tooth, 14 teeth
-        .posPidConfig = GANTRY_LIFT_POS_PID_CONFIG,
-        .maxOutput = GANTRY_LIFT_POS_PID_CONFIG.maxOutput,
-        .staticFeedforward = 0.0f,
-    },
-    .home = 0.0f,
-    .homingSpeed = 10.0f,
-    .homingReversed = false,
-};
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
+    GANTRY_LIFT_CONFIG{
+        .super =  // JointSubsystem::Config
+        {
+            .lowerBound = 5.0f,
+            .upperBound = 320.0f,
+            .epsilon = 1.0f,
+            .maxSetpointIncrement = 0.7f,
+            .encoderRatio = 5 * 14 / M_TWOPI,  // 5mm per tooth, 14 teeth
+            .posPidConfig = GANTRY_LIFT_POS_PID_CONFIG,
+            .maxOutput = GANTRY_LIFT_POS_PID_CONFIG.maxOutput,
+            .staticFeedforward = 0.0f,
+        },
+        .home = 0.0f,
+        .homingSpeed = 10.0f,
+        .homingReversed = false,
+    };
 
 static constexpr tap::gpio::Digital::InputPin GANTRY_EXTENSION_LIMIT_SWITCH_PIN =
     tap::gpio::Digital::InputPin::T;
@@ -84,21 +85,22 @@ static constexpr tap::algorithms::SmoothPidConfig GANTRY_EXTENSION_PID_CONFIG = 
     .maxOutput = 2000.0f,
 };
 
-static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config GANTRY_EXTENSION_CONFIG{
-    .super =  // JointSubsystem::Config
-    {
-        .lowerBound = 5.0f,
-        .upperBound = 300.0f,
-        .epsilon = 1.0f,
-        .encoderRatio = 5 * 14 / M_TWOPI,  // 5mm per tooth, 14 teeth
-        .posPidConfig = GANTRY_EXTENSION_PID_CONFIG,
-        .maxOutput = GANTRY_EXTENSION_PID_CONFIG.maxOutput,
-        .staticFeedforward = 0.0f,
-    },
-    .home = 0.0f,
-    .homingSpeed = 10.0f,
-    .homingReversed = false,
-};
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
+    GANTRY_EXTENSION_CONFIG{
+        .super =  // JointSubsystem::Config
+        {
+            .lowerBound = 5.0f,
+            .upperBound = 300.0f,
+            .epsilon = 1.0f,
+            .encoderRatio = 5 * 14 / M_TWOPI,  // 5mm per tooth, 14 teeth
+            .posPidConfig = GANTRY_EXTENSION_PID_CONFIG,
+            .maxOutput = GANTRY_EXTENSION_PID_CONFIG.maxOutput,
+            .staticFeedforward = 0.0f,
+        },
+        .home = 0.0f,
+        .homingSpeed = 10.0f,
+        .homingReversed = false,
+    };
 
 }  // namespace aruwsrc::engineer
 #endif  // ENGINEER_GANTRY_CONSTANTS_HPP_   `

@@ -53,21 +53,22 @@ static constexpr float THREE_CUBE_SETPOINT = -310.0f;
 
 static constexpr float LIFT_UPPER_BOUND = THREE_CUBE_SETPOINT;
 
-static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config CUBE_LIFT_CONFIG{
-    .super =  // JointSubsystem::Config
-    {
-        .lowerBound = -320.0f,
-        .upperBound = -40.0f,
-        .epsilon = 0.5f,
-        .encoderRatio = MM_PER_REVOLUTION,
-        .posPidConfig = LIFT_MOTOR_PID_CONFIG,
-        .maxOutput = LIFT_MOTOR_PID_CONFIG.maxOutput,
-        .staticFeedforward = 0.0f,
-    },
-    .home = ONE_CUBE_SETPOINT,
-    .homingSpeed = 20.0f,
-    .homingReversed = true,
-};
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
+    CUBE_LIFT_CONFIG{
+        .super =  // JointSubsystem::Config
+        {
+            .lowerBound = -320.0f,
+            .upperBound = -40.0f,
+            .epsilon = 0.5f,
+            .encoderRatio = MM_PER_REVOLUTION,
+            .posPidConfig = LIFT_MOTOR_PID_CONFIG,
+            .maxOutput = LIFT_MOTOR_PID_CONFIG.maxOutput,
+            .staticFeedforward = 0.0f,
+        },
+        .home = ONE_CUBE_SETPOINT,
+        .homingSpeed = 20.0f,
+        .homingReversed = true,
+    };
 
 }  // namespace aruwsrc::engineer
 #endif

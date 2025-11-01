@@ -23,14 +23,14 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/motor_interface.hpp"
 
-#include "one_sided_bounded_subsystem_interface.hpp"
-#include "trigger/trigger_interface.hpp"
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
+#include "trigger/trigger_interface.hpp"
+
+#include "one_sided_bounded_subsystem_interface.hpp"
 
 namespace aruwsrc::control::joint::homing
 {
-class TriggerHomedJointSubsystem : public OneSidedBoundedSubsystemInterface,
-                                   public JointSubsystem
+class TriggerHomedJointSubsystem : public OneSidedBoundedSubsystemInterface, public JointSubsystem
 {
 public:
     struct Config

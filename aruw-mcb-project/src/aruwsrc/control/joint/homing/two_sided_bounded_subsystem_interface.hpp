@@ -20,8 +20,9 @@
 #ifndef TWO_SIDED_BOUNDED_SUBSYSTEM_INTERFACE_HPP_
 #define TWO_SIDED_BOUNDED_SUBSYSTEM_INTERFACE_HPP_
 
-#include "bounded_subsystem_interface.hpp"
 #include "trigger/trigger_interface.hpp"
+
+#include "bounded_subsystem_interface.hpp"
 
 namespace aruwsrc::control::joint::homing
 {
