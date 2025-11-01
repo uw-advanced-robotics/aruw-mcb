@@ -102,7 +102,7 @@ private:
         display;
 #endif
 
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > viewStack;
+    modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > viewStack;
 
 #ifndef SSH1106_OLED
     const tap::display::AnalogConfig buttonConfig =

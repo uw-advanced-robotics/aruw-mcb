@@ -24,9 +24,9 @@
 namespace aruwsrc::display
 {
 CapacitorBankMenu::CapacitorBankMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+    modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
     can::capbank::CapacitorBank *capacitorBank)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
+    : AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
       capacitorBank(capacitorBank)
 {
 }

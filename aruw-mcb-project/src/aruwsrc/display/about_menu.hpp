@@ -20,7 +20,7 @@
 #ifndef ABOUT_MENU_HPP_
 #define ABOUT_MENU_HPP_
 
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 
 #include "modm/ui/menu/abstract_menu.hpp"
 
@@ -35,10 +35,10 @@ namespace aruwsrc::display
  * Menu that allows user to see information about the robot, who deployed the last code,
  * and the sha.
  */
-class AboutMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class AboutMenu : public modm::AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >
 {
 public:
-    AboutMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
+    AboutMenu(modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs);
     void draw() override;
 
     void update() override;

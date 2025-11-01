@@ -34,7 +34,7 @@ namespace aruwsrc
 namespace display
 {
 MainMenu::MainMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>>* stack,
+    modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView>>* stack,
     tap::Drivers* drivers,
     serial::VisionCoprocessor* visionCoprocessor,
     can::TurretMCBCanComm* turretMCBCanCommBus1,
@@ -42,7 +42,7 @@ MainMenu::MainMenu(
     aruwsrc::virtualMCB::MCBLite* mcbLite1,
     aruwsrc::virtualMCB::MCBLite* mcbLite2,
     can::capbank::CapacitorBank* capacitorBank)
-    : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
+    : modm::StandardMenu<tap::display::DynamicDummy<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
       autotuneMenu(stack, drivers, ENTRIES),

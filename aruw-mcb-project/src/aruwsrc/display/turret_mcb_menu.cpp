@@ -24,9 +24,9 @@
 namespace aruwsrc::display
 {
 TurretMCBMenu::TurretMCBMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+    modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
     aruwsrc::can::TurretMCBCanComm *turretMCBCanComm)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
+    : AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
       turretMCBCanComm(turretMCBCanComm)
 {
 }

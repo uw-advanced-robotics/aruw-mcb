@@ -20,7 +20,7 @@
 #ifndef IMU_CALIBRATE_MENU_HPP_
 #define IMU_CALIBRATE_MENU_HPP_
 
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
@@ -41,8 +41,7 @@ namespace aruwsrc::display
  * Menu that allows the user to schedule an `ImuCalibrateCommand` in the `CommandScheduler`. Also
  * displays the current calibration state of the `ImuCalibrationCommand`.
  */
-class ImuCalibrateMenu
-    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class ImuCalibrateMenu : public modm::AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >
 {
 public:
     /**
@@ -50,7 +49,7 @@ public:
      * @param[in] drivers A pointer to the global drivers object.
      */
     ImuCalibrateMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
         tap::Drivers *drivers);
 
     void draw() override;

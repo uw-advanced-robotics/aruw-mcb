@@ -20,7 +20,7 @@
 #ifndef AUTOTUNE_MENU_HPP_
 #define AUTOTUNE_MENU_HPP_
 
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 #include "tap/display/vertical_scroll_logic_handler.hpp"
 
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
@@ -43,7 +43,7 @@ class Drivers;
 std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> getGravityAutotuneCommands();
 namespace aruwsrc::display
 {
-class AutotuneMenu : public modm::AbstractMenu<modm::allocator::Dynamic<modm::IAbstractView>>
+class AutotuneMenu : public modm::AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView>>
 {
 public:
     /**
@@ -51,7 +51,7 @@ public:
      * @param[in] drivers A pointer to the global drivers object.
      */
     AutotuneMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
+        modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView>> *vs,
         tap::Drivers *drivers,
         int entriesToDisplay);
 

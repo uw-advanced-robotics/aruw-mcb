@@ -27,7 +27,7 @@ namespace aruwsrc
 namespace display
 {
 SplashScreen::SplashScreen(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+    modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> >* vs,
     tap::Drivers* drivers,
     serial::VisionCoprocessor* visionCoprocessor,
     can::TurretMCBCanComm* turretMCBCanCommBus1,
@@ -35,7 +35,7 @@ SplashScreen::SplashScreen(
     aruwsrc::virtualMCB::MCBLite* mcbLite1,
     aruwsrc::virtualMCB::MCBLite* mcbLite2,
     can::capbank::CapacitorBank* capacitorBank)
-    : modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(
+    : modm::AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >(
           vs,
           SPLASH_SCREEN_MENU_ID),
       drivers(drivers),

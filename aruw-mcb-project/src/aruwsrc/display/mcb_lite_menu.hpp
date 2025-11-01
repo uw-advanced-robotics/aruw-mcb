@@ -21,7 +21,7 @@
 #define MCB_LITE_MENU_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
@@ -31,13 +31,13 @@ namespace aruwsrc::display
 /**
  * Menu that allows the user to see data coming from an MCB-lite
  */
-class MCBLiteMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class MCBLiteMenu : public modm::AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >
 {
 public:
     static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
 
     MCBLiteMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
         aruwsrc::virtualMCB::MCBLite *mcbLite);
 
     void draw() override;

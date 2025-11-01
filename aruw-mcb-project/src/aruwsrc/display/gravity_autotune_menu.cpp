@@ -26,10 +26,10 @@
 namespace aruwsrc::display
 {
 GravityAutotuneMenu::GravityAutotuneMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+    modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
     tap::Drivers *drivers,
     aruwsrc::control::autotune::GravityAutotuneInterface *GravityAutotuneCommand)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(
+    : AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >(
           vs,
           GRAVITY_AUTOTUNE_MENU_ID),
       drivers(drivers),

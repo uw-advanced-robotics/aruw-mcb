@@ -21,7 +21,7 @@
 #define CV_MENU_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 #include "tap/display/vertical_scroll_logic_handler.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
@@ -38,7 +38,7 @@ namespace aruwsrc::display
  * Menu that allows a user to interact with the vision coprocessor. Currently, lets the user turn
  * off the vision coprocessor or reboot it. Also shows the current status of the vision coprocessor.
  */
-class CVMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class CVMenu : public modm::AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >
 {
 public:
     /** Time between calls to `draw`, which will redraw the referee serial menu. */
@@ -53,7 +53,7 @@ public:
      * @param[in] visionCoprocessor A pointer to the global visionCoprocessor object.
      */
     CVMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
         tap::Drivers *drivers,
         serial::VisionCoprocessor *visionCoprocessor);
 

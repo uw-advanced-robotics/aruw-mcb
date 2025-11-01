@@ -22,7 +22,7 @@
 
 #include "tap/communication/sensors/imu/imu_menu.hpp"
 #include "tap/display/command_scheduler_menu.hpp"
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 #include "tap/display/hardware_test_menu.hpp"
 #include "tap/display/motor_menu.hpp"
 #include "tap/display/ref_serial_menu.hpp"
@@ -50,11 +50,11 @@ namespace aruwsrc
 {
 namespace display
 {
-class MainMenu : public modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>
+class MainMenu : public modm::StandardMenu<tap::display::DynamicDummy<modm::IAbstractView>>
 {
 public:
     MainMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *stack,
+        modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView>> *stack,
         tap::Drivers *drivers,
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,

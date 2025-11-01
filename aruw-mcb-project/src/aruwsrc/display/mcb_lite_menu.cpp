@@ -26,9 +26,9 @@
 namespace aruwsrc::display
 {
 MCBLiteMenu::MCBLiteMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+    modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
     aruwsrc::virtualMCB::MCBLite *mcbLite)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, MCB_LITE_MENU_ID),
+    : AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >(vs, MCB_LITE_MENU_ID),
       mcbLite(mcbLite)
 {
 }

@@ -22,7 +22,7 @@
 
 #include <modm/io/iostream.hpp>
 
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
@@ -39,7 +39,7 @@ namespace aruwsrc::display
  * displays the current calibration state of the `gravityAutotuneCommand`.
  */
 class GravityAutotuneMenu
-    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+    : public modm::AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >
 {
 public:
     /**
@@ -47,7 +47,7 @@ public:
      * @param[in] drivers A pointer to the global drivers object.
      */
     GravityAutotuneMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
         tap::Drivers *drivers,
         aruwsrc::control::autotune::GravityAutotuneInterface *gravityAutotuneCommand);
 

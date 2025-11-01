@@ -20,7 +20,7 @@
 #ifndef SPLASH_SCREEN_HPP_
 #define SPLASH_SCREEN_HPP_
 
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/can/capacitor_bank.hpp"
@@ -37,11 +37,11 @@ namespace aruwsrc
 {
 namespace display
 {
-class SplashScreen : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class SplashScreen : public modm::AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >
 {
 public:
     SplashScreen(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
         tap::Drivers *drivers,
         serial::VisionCoprocessor *visionCoprocessor,
         can::TurretMCBCanComm *turretMCBCanCommBus1,

@@ -21,7 +21,7 @@
 #define CAPACITOR_BANK_MENU_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 
 #include "aruwsrc/communication/can/capacitor_bank.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
@@ -37,14 +37,14 @@ namespace aruwsrc::display
  * Menu that allows user to see information about the current state of the capacitor bank.
  */
 class CapacitorBankMenu
-    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+    : public modm::AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >
 {
 public:
     /** Time between calls to `draw`, which will redraw the cap bank menu. */
     static constexpr uint32_t DISPLAY_DRAW_PERIOD = 500;
 
     CapacitorBankMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+        modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> >* vs,
         can::capbank::CapacitorBank* capacitorBank);
     void draw() override;
 

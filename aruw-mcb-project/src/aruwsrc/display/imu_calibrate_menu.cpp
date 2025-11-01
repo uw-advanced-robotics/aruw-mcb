@@ -31,9 +31,9 @@ modm_weak aruwsrc::control::imu::ImuCalibrateCommand *getImuCalibrateCommand() {
 namespace aruwsrc::display
 {
 ImuCalibrateMenu::ImuCalibrateMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+    modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs,
     tap::Drivers *drivers)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, IMU_CALIBRATE_MENU_ID),
+    : AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >(vs, IMU_CALIBRATE_MENU_ID),
       drivers(drivers)
 {
 }

@@ -32,10 +32,10 @@ getGravityAutotuneCommands()
 namespace aruwsrc::display
 {
 AutotuneMenu::AutotuneMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+    modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> >* vs,
     tap::Drivers* drivers,
     int entriesToDisplay)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, 1),
+    : AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >(vs, 1),
       drivers(drivers),
       verticalScroll(drivers, 0, entriesToDisplay)
 {

@@ -47,8 +47,8 @@ static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
 static constexpr char LAST_DATE[] = STRINGIFYMACRO(BUILD_DATE);
 static constexpr char BRANCH_NAME[] = STRINGIFYMACRO(BUILD_BRANCH_NAME);
 
-AboutMenu::AboutMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID)
+AboutMenu::AboutMenu(modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView> > *vs)
+    : AbstractMenu<tap::display::DynamicDummy<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID)
 
 {
 }

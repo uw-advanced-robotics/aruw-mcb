@@ -22,7 +22,7 @@
 
 #include <aruwsrc/communication/serial/sentry_strategy_message_types.hpp>
 
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/display/dynamic_dummy_allocator.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/choice_menu.hpp"
@@ -35,11 +35,11 @@ using namespace aruwsrc::communication::serial;
 namespace aruwsrc::display
 {
 class SentryStrategyMenu
-    : public modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>
+    : public modm::ChoiceMenu<tap::display::DynamicDummy<modm::IAbstractView>>
 {
 public:
     SentryStrategyMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
+        modm::ViewStack<tap::display::DynamicDummy<modm::IAbstractView>> *vs,
         aruwsrc::serial::VisionCoprocessor *visionCoprocessor);
 
     void openNextScreen() override;
