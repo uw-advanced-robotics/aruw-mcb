@@ -40,6 +40,8 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
+
+#include "aruwsrc/communication/can/capacitor_bank.hpp"
 #endif
 
 namespace aruwsrc::sentry
@@ -61,10 +63,12 @@ public:
               &turretMCBCanCommBus1,
               &turretMCBCanCommBus2,
               &chassisMcbLite,
-              nullptr),
+              nullptr,
+              &capacitorBank),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358), // what canbus & capacitance should this be 
           chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
           turretMajorImu(),
           plateHitTracker(this),
@@ -91,6 +95,8 @@ public:
     aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
+
+    can::capbank::CapacitorBank capacitorBank;
 #endif
 };  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc::sentry

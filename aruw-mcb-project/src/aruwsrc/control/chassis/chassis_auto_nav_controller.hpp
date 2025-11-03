@@ -47,12 +47,14 @@ public:
         tap::Drivers& drivers,
         aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         const Transform& worldToChassis,
-        const aruwsrc::chassis::BeybladeConfig beybladeConfig)
+        const aruwsrc::chassis::BeybladeConfig beybladeConfig,
+        can::capbank::CapacitorBank& capacitorBank)
         : chassis(chassis),
           lastSetPoint(Position(-1, -1, 0)),
           drivers(drivers),
           worldToChassis(worldToChassis),
-          beybladeConfig(beybladeConfig)
+          beybladeConfig(beybladeConfig),
+          capacitorBank(capacitorBank)
     {
     }
 
@@ -86,6 +88,7 @@ private:
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;
+    can::capbank::CapacitorBank& capacitorBank;
 
     float desiredSpeed = 0;
 };

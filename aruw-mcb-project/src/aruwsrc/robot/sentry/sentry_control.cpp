@@ -82,6 +82,10 @@
 #include "aruwsrc/robot/sentry/turret/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret/turret_minor_control_command.hpp"
 
+#include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
+
+#include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
+
 using namespace tap::algorithms;
 using namespace tap::control;
 using namespace tap::communication::serial;
@@ -309,7 +313,8 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     leftBackMotor,
     rightFrontMotor,
     rightBackMotor,
-    {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
+    {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f},
+    &drivers()->capacitorBank);
 
 aruwsrc::virtualMCB::VirtualCanEncoder parallelOmni(
     drivers(),
@@ -372,7 +377,8 @@ aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
     transformer.getWorldToChassis(),
-    aruwsrc::chassis::BEYBLADE_CONFIG);
+    aruwsrc::chassis::BEYBLADE_CONFIG,
+    drivers()->capacitorBank);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -506,6 +512,7 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     &turretLeftSolver);
+
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
@@ -769,6 +776,7 @@ GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
      &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight});
 
+
 /* define client display / HUD related items --------------------------------*/
 
 // This shit is currently banned by DJI, but left for a hopeful future
@@ -778,7 +786,9 @@ tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers())
 CircleCrosshair circleCrosshair(refSerialTransmitter);
 ImageIndicator imageIndicator(refSerialTransmitter);
 
-std::vector<HudIndicator *> indicators = {&imageIndicator, &circleCrosshair};
+std::vector<HudIndicator *> indicators = {
+    &imageIndicator, 
+    &circleCrosshair};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, indicators);
 
@@ -877,6 +887,8 @@ PressCommandMapping bCtrlPressed(
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
+
+// safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()

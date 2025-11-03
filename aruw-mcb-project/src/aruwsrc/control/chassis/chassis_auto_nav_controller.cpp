@@ -24,6 +24,8 @@ namespace aruwsrc::chassis
 {
 void ChassisAutoNavController::initialize()
 {
+    // tell it to start charging
+    capacitorBank.start();
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 
     lastSetPoint = worldToChassis.getTranslation();
@@ -43,6 +45,15 @@ void ChassisAutoNavController::runController(
     Vector moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
 
     Vector posError = setpoint - currentPos;
+
+    // make if can sprint (above 25%)
+    // add a boolean for sprinting check posError over a threshold (make a constant in chassis constants)
+    if (posError.magnitude() > TRANSLATIONAL_MOTION_THRESHOLD && capacitorBank.getAvailableEnergy() > CAPBANK_ENERGY_THRESHOLD) { // is it translating
+        this->capacitorBank.setSprinting(can::capbank::SprintMode::SPRINT);
+        
+    } else {
+        this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
+    }
 
     if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
     {
