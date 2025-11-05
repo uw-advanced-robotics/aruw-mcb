@@ -19,7 +19,10 @@
 #if defined(TARGET_DART)
 
 #include "tap/control/command_mapper.hpp"
-#include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/hold_command_mapping.hpp"
+#include "tap/drivers.hpp"
+#include "tap/motor/double_dji_motor.hpp"
+#include "tap/motor/servo.hpp"
 
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -27,13 +30,18 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
+#include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
 
-using namespace aruwsrc::control::turret;
+#include "dart_close_command.hpp"
+#include "dart_open_command.hpp"
+#include "dart_pullback_command.hpp"
+#include "dart_release_command.hpp"
+
 using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::dart;
-
+using namespace aruwsrc::robot::dart;
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -45,24 +53,73 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace dart_control
 {
 /* define subsystems ----------------------------------------------*/
-tap::motor::DjiMotor pullMotor(drivers(), PULL_MOTOR_ID, CAN_BUS_MOTORS, false, "Pitch Turret");
+tap::motor::DoubleDjiMotor pullMotors(
+    drivers(),
+    UPPER_PULL_MOTOR_ID,
+    LOWER_PULL_MOTOR_ID,
+    LAUNCHER_CAN_BUS,
+    LAUNCHER_CAN_BUS,
+    true,
+    true,
+    "Upper Motor",
+    "Lower Motor");
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems() {}
+DartLauncherSubsystem dartLauncher(drivers(), pullMotors);
 
-void registerDartSubsystems(Drivers*) {}
+DartReleaseCommand dartRelease(dartLauncher, MANUAL_RELEASE_DESIRED_OUTPUT);
+DartPullbackCommand dartPullback(dartLauncher, MANUAL_PULLBACK_DESIRED_OUTPUT);
 
-void setDefaultDartCommands(Drivers*) {}
+DartOpenCommand servoOpen(dartLauncher);
+DartCloseCommand servoClose(dartLauncher);
 
-void startDartCommands(Drivers*) {}
+HoldCommandMapping rightSwitchUp(
+    drivers(),
+    {&dartPullback},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-void registerDartIoMappings(Drivers*) {}
+HoldCommandMapping rightSwitchDown(
+    drivers(),
+    {&dartRelease},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+
+HoldCommandMapping leftSwitchUp(
+    drivers(),
+    {&servoOpen},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+HoldCommandMapping leftSwitchDown(
+    drivers(),
+    {&servoClose},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+void initializeSubsystems() { dartLauncher.initialize(); }
+
+void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
+{
+    drivers->commandScheduler.registerSubsystem(&dartLauncher);
+    drivers->digital.configureInputPullMode(
+        tap::gpio::Digital::B,
+        tap::gpio::Digital::InputPullMode::PullUp);
+}
+
+void setDefaultDartCommands(aruwsrc::dart::Drivers*) {}
+
+void startDartCommands(aruwsrc::dart::Drivers*) {}
+
+void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
+{
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+}
 
 }  // namespace dart_control
 namespace aruwsrc::dart
 {
-void initSubsystemCommands(aruwsrc::dart::Drivers* drivers)
+void initSubsystemCommands(Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &dart_control::remoteSafeDisconnectFunction);
