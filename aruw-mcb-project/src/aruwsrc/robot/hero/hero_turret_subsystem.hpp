@@ -29,6 +29,7 @@ namespace aruwsrc::control::turret
  */
 class HeroTurretSubsystem final : public RobotTurretSubsystem
 {
+public:
     using RobotTurretSubsystem::RobotTurretSubsystem;
     float getWorldYaw() const override;
     float getWorldPitch() const override;

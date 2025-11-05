@@ -37,6 +37,7 @@ namespace aruwsrc::control::turret
 class DroneTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
                                    public aruwsrc::control::turret::TurretOrientationInterface
 {
+public:
     using TurretSubsystem::TurretSubsystem;
     float getWorldYaw() const override;
     float getWorldPitch() const override;

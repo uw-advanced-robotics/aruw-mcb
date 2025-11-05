@@ -74,7 +74,7 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -138,7 +138,7 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace standard_control
 {
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -269,11 +269,12 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     odometrySubsystem,
-    turret,
+    transformer.getWorldToTurret(),
     frictionWheels,
     aruwsrc::control::launcher::LAUNCHER_SPEED,  // defaultLaunchSpeed
-    0                                            // turretID
-);
+    0,                                           // turretID
+    turret.getPitchOffset());
+
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
@@ -490,7 +491,7 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(
-    ((tap::Drivers *)(drivers())),
+    ((tap::Drivers*)(drivers())),
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
@@ -568,7 +569,7 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 
-std::vector<HudIndicator *> hudIndicators = {
+std::vector<HudIndicator*> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
     &ammoIndicator,
@@ -692,7 +693,7 @@ HoldCommandMapping ctrlPressed(
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerStandardSubsystems(Drivers *drivers)
+void registerStandardSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -725,7 +726,7 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultStandardCommands(Drivers *)
+void setDefaultStandardCommands(Drivers*)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
@@ -734,7 +735,7 @@ void setDefaultStandardCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startStandardCommands(Drivers *drivers)
+void startStandardCommands(Drivers* drivers)
 {
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
@@ -745,7 +746,7 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *drivers)
+void registerStandardIoMappings(Drivers* drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -770,7 +771,7 @@ void registerStandardIoMappings(Drivers *drivers)
 
 namespace aruwsrc::standard
 {
-void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::standard::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &standard_control::remoteSafeDisconnectFunction);
@@ -783,15 +784,15 @@ void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
 }  // namespace aruwsrc::standard
 
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand()
+imu::ImuCalibrateCommand* getImuCalibrateCommand()
 {
     return &standard_control::imuCalibrateCommand;
 }
 
-std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> getGravityAutotuneCommands()
+std::vector<aruwsrc::control::autotune::GravityAutotuneInterface*> getGravityAutotuneCommands()
 {
     // Static array of pointers, terminated by nullptr
-    static std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> commands = {
+    static std::vector<aruwsrc::control::autotune::GravityAutotuneInterface*> commands = {
         &standard_control::gravityAutotuneCommand};
     return commands;
 }

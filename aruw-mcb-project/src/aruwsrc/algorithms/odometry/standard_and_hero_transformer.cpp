@@ -53,12 +53,15 @@ StandardAndHeroTransformer::StandardAndHeroTransformer(
 void StandardAndHeroTransformer::updateTransforms()
 {
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
-    worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
+    modm::Vector2f chassisVel = chassisOdometry.getCurrentVelocity2D();
+    worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.0f);
 
     // @note: here we are assuming that the chassis does not pitch or roll
     // This is fine for flat fields, but for an RMUC field with inclines
     // the state of the robot will not be properly tracked
     worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
+    Vector chassisVelVec(chassisVel.getX(), chassisVel.getY(), 0.0f);
+    worldToChassis.updateVelocity(chassisVelVec);
 
     float roll = 0.0f;
     const aruwsrc::can::TurretMCBCanComm* turretMCB = turret.getTurretMCB();

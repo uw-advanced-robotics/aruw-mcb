@@ -29,9 +29,9 @@ namespace aruwsrc::chassis
 class HolonomicChassisSubsystem;
 }
 
-namespace aruwsrc::control::turret
+namespace tap::algorithms::transforms
 {
-class RobotTurretSubsystem;
+class Transform;
 }
 
 namespace aruwsrc::serial
@@ -118,10 +118,11 @@ public:
     OttoBallisticsSolver(
         const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const tap::algorithms::transforms::Transform &worldToTurret,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
-        const uint8_t turretID);
+        const uint8_t turretID,
+        const float pitchOffset);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -138,7 +139,7 @@ public:
 private:
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const control::turret::RobotTurretSubsystem &turretSubsystem;
+    const tap::algorithms::transforms::Transform &worldToTurret;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
     modm::Vector3f turretOrigin;
@@ -149,6 +150,9 @@ private:
 
 public:
     const uint8_t turretID;
+
+private:
+    const float pitchOffset;
 };
 }  // namespace aruwsrc::algorithms
 
