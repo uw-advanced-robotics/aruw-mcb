@@ -22,6 +22,8 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "aruwsrc/robot/motor_tester/motor_tester_subsystem.hpp"
+#include "aruwsrc/robot/motor_tester/motor_tester_pid_command.hpp"
 
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -44,17 +46,44 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace motor_tester_control
 {
 
+    tap::motor::DjiMotor motor(
+        drivers(),
+        tap::motor::MOTOR3,
+        tap::can::CanBus::CAN_BUS1,
+        false,
+        "test",
+        true,
+        tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006
+    );
+
+    int32_t scaleFactor = 5;
+
+    aruwsrc::motor_tester::MotorSubsystem motorSubsystem(
+    drivers(),
+    motor
+);
+aruwsrc::motor_tester::MotorTesterPid motorTesterPid(
+    drivers(),
+    &motorSubsystem,
+    Remote::Channel::LEFT_HORIZONTAL,
+    scaleFactor,
+    MOTOR_TESTER_CONFIG,
+    0
+);
+
 // motors, subsystems, commands, etc.
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems() {}
+void initializeSubsystems() {motorSubsystem.initialize();}
 
 void registerSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &motor_tester_control::remoteSafeDisconnectFunction);
+    drivers->commandScheduler.registerSubsystem(&motorSubsystem);
+    motorSubsystem.setDefaultCommand(&motorTesterPid);
 }
 
 void registerIoMappings(Drivers* drivers) {}

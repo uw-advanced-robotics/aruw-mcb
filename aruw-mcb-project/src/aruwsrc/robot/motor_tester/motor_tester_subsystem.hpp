@@ -45,6 +45,17 @@ public:
         desiredOutput = std::clamp<uint32_t>(output, -tap::motor::DjiMotor::MAX_OUTPUT_C620, tap::motor::DjiMotor::MAX_OUTPUT_C620);
     }
 
+    tap::algorithms::WrappedFloat getMotorPosition(){
+        return motor.getEncoder()->getPosition();
+    }
+    float getMotorVelocity(){
+        return motor.getEncoder()->getVelocity();
+    }
+
+    void refreshSafeDisconnect() {
+        motor.setDesiredOutput(0);
+    }
+
     void refresh(){
         motor.setDesiredOutput(desiredOutput);
     }

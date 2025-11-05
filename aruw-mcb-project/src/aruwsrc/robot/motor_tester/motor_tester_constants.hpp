@@ -33,6 +33,15 @@ namespace aruwsrc::motor_tester::constants
 {
 // position PID terms
 // PID terms for standard
+static constexpr tap::algorithms::SmoothPidConfig MOTOR_TESTER_CONFIG = {
+    .kp = 0.000f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 16'000.0f,
+    .errDeadzone = M_PI / 10,
+    .errorDerivativeFloor = 0.0f,
+};
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .kp = 3'000.0f,
     .ki = 0.0f,
