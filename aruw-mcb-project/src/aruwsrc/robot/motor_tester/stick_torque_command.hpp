@@ -19,9 +19,10 @@ public:
             addSubsystemRequirement(&motor_subsystem);
         }
 
+    float input;
+
     void execute() override {
-        int32_t input = remote.getChannel(channel) * sensitivity 
-            * tap::motor::DjiMotor::MAX_OUTPUT_C620;
+        input = remote.getChannel(channel) * sensitivity;
 
         motor_subsystem.setTargetVelocity(input);
     }
@@ -36,11 +37,9 @@ public:
 
     void end(bool) override {
         motor_subsystem.setTargetVelocity(0);
-        motor_subsystem.initialize();
     }
 
     void initialize() override {
-        motor_subsystem.initialize();
     }
 
     char* getName() const override {

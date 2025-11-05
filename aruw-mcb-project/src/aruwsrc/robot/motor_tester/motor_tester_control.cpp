@@ -61,16 +61,14 @@ MotorSubsystem motor_subsystem(
     drivers(), 
     motor, 
     pidConfig, 
-    0.05
+    0.002
 );
 
-float sensitivity = 10;
-
-tap::communication::serial::Remote remote(drivers());
+float sensitivity = 5;
 
 StickTorqueCommand stick_command(
     motor_subsystem, 
-    remote,
+    drivers()->remote,
     tap::communication::serial::Remote::Channel::LEFT_HORIZONTAL, 
     sensitivity
 );
