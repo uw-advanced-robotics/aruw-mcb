@@ -70,7 +70,7 @@ static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 #endif
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KP = 0.0f;
-static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KI = 5.0f;
+static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KI = 0.682f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KD = 0.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM = 500.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT = 750.0f;

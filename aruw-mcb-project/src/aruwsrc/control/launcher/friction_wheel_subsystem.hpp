@@ -78,6 +78,8 @@ public:
      */
     mockable void setDesiredLaunchSpeed(float speed);
 
+    mockable void setDesiredRPM(float rpm);
+
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
     mockable float getDesiredFrictionWheelSpeed() const
@@ -132,7 +134,10 @@ private:
 
     float speedCorrection = 0.0f;
 
+    float currentRPM = 0.0f;
+
     uint32_t prevTime = 0;
+
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

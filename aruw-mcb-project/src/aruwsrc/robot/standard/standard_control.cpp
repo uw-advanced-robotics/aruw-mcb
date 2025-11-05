@@ -88,6 +88,7 @@
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_lut_finder_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -106,6 +107,7 @@
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
 #endif
+
 
 using namespace tap::communication::serial;
 using namespace tap::control;
@@ -504,6 +506,8 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
+aruwsrc::control::launcher::FrictionWheelLUTFinderCommand frictionWheelLutFinderCommand(&frictionWheels);
+
 // Cap Bank
 aruwsrc::control::capbank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
 aruwsrc::control::capbank::CapBankSprintCommand capBankSprintCommand(
@@ -718,7 +722,7 @@ void setDefaultStandardCommands(Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    frictionWheels.setDefaultCommand(&stopFrictionWheels);
+    frictionWheels.setDefaultCommand(&frictionWheelLutFinderCommand);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 

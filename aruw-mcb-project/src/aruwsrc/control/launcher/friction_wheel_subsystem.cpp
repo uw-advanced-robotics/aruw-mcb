@@ -84,6 +84,11 @@ void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
     }
 }
 
+void FrictionWheelSubsystem::setDesiredRPM(float rpm) {
+    leftWheel.setDesiredOutput(rpm);
+    rightWheel.setDesiredOutput(rpm);
+}
+
 float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
 {
     float leftWheelSpeed = leftWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
@@ -93,6 +98,7 @@ float FrictionWheelSubsystem::getCurrentFrictionWheelSpeed() const
 
 void FrictionWheelSubsystem::refresh()
 {
+    currentRPM = getCurrentFrictionWheelSpeed();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     if (currTime == prevTime)
     {
@@ -104,7 +110,7 @@ void FrictionWheelSubsystem::refresh()
     {
         prevShotTime = drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
         speedCorrectionPid.update(
-            drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED);
+            launchSpeedToFrictionWheelRpm(drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED)); 
     }
     speedCorrection = speedCorrectionPid.getValue();
 #endif
@@ -112,12 +118,10 @@ void FrictionWheelSubsystem::refresh()
     prevTime = currTime;
 
     velocityPidLeftWheel.update(
-        desiredRpmRamp.getValue() - leftWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI -
-        speedCorrection);
+        desiredRpmRamp.getValue() - leftWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI - speedCorrection);
     leftWheel.setDesiredOutput(static_cast<int32_t>(velocityPidLeftWheel.getValue()));
     velocityPidRightWheel.update(
-        desiredRpmRamp.getValue() - rightWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI -
-        speedCorrection);
+        desiredRpmRamp.getValue() - rightWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI - speedCorrection);
     rightWheel.setDesiredOutput(static_cast<int32_t>(velocityPidRightWheel.getValue()));
 }
 
