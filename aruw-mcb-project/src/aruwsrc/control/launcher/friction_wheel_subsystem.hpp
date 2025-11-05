@@ -20,8 +20,8 @@
 #ifndef FRICTION_WHEEL_SUBSYSTEM_HPP_
 #define FRICTION_WHEEL_SUBSYSTEM_HPP_
 
+#include "friction_wheel_interface.hpp"
 #include "tap/algorithms/ramp.hpp"
-#include "tap/control/subsystem.hpp"
 #include "tap/util_macros.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -53,7 +53,7 @@ namespace aruwsrc::control::launcher
  * controllers. Allows the user to specify the desired launch speed of the shooter.
  * Currently configured to work with hero and idk if it works for other robots. 
  */
-template<std::size_t NUM_WHEELS> class FrictionWheelSubsystem : public tap::control::Subsystem
+template<std::size_t NUM_WHEELS> class FrictionWheelSubsystem : public FrictionWheelInterface
 {
     friend class FrictionWheelTestCommand;
 

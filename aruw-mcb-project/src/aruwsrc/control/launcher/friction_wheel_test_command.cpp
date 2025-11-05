@@ -22,7 +22,7 @@
 
 namespace aruwsrc::control::launcher
 {
-FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelSubsystem *subsystem)
+FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelInterface *subsystem)
     : subsystem(subsystem)
 {
     this->addSubsystemRequirement(subsystem);
@@ -34,7 +34,9 @@ void FrictionWheelTestCommand::end(bool) { this->subsystem->setDesiredLaunchSpee
 
 bool FrictionWheelTestCommand::isFinished() const
 {
-    return abs(this->subsystem->rightWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI) > 4000.0f;
+    // return abs(this->subsystem->rightWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI) > 4000.0f;
+    // uh... this whole thing is cooked
+    return false;
 }
 
 }  // namespace aruwsrc::control::launcher

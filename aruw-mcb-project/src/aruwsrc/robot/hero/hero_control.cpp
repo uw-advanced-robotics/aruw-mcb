@@ -83,6 +83,7 @@
 #include "aruwsrc/control/governor/plate_hit_governor.hpp"
 #include "aruwsrc/control/governor/yellow_carded_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
@@ -203,13 +204,15 @@ XDriveChassisSubsystem chassis(
     };
     std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
 RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
-    frictionWheels(
+    frictionWheelsSubsystem(
         drivers(),
         wheelIDs,
         wheelConfigs,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
+
+    FrictionWheelInterface frictionWheels = static_cast<FrictionWheelInterface>(frictionWheelsSubsystem);
 
 VelocityAgitatorSubsystem kickerAgitator(
     drivers(),

@@ -17,8 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "friction_wheel_interface.hpp"
 #include "friction_wheel_spin_ref_limited_command.hpp"
-
+#include "launcher_constants.hpp"
 #include "tap/drivers.hpp"
 
 #include "modm/architecture/interface/assert.hpp"
@@ -27,7 +28,7 @@ namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     tap::Drivers *drivers,
-    FrictionWheelSubsystem *frictionWheels,
+    FrictionWheelInterface *frictionWheels,
     float defaultLaunchSpeed,
     bool alwaysUseDefaultLaunchSpeed,
     tap::communication::serial::RefSerialData::Rx::MechanismID barrel)

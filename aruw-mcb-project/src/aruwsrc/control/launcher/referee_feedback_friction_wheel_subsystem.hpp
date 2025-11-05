@@ -71,14 +71,14 @@ public:
      */
     inline float getPredictedLaunchSpeed() const override final_mockable
     {
-        return ballSpeedAveragingTracker.getSize() == 0
-                   ? getDesiredLaunchSpeed()
+        return this->ballSpeedAveragingTracker.getSize() == 0
+                   ? this->getDesiredLaunchSpeed()
                    : (pastProjectileVelocitySpeedSummed / ballSpeedAveragingTracker.getSize());
     }
 
     void refresh() override
     {
-        FrictionWheelSubsystem::refresh();
+        FrictionWheelSubsystem<NUM_WHEELS>::refresh();
         updatePredictedLaunchSpeed();
     }
 
@@ -95,7 +95,7 @@ private:
 
     void updatePredictedLaunchSpeed()
     {
-        const float desiredLaunchSpeed = getDesiredLaunchSpeed();
+        const float desiredLaunchSpeed = this->getDesiredLaunchSpeed();
 
         // reset averaging if desired launch speed has changed...if we change desired launch speed
         // from 15 to 30, we should predict the launch speed to be around 30, not 15.
@@ -103,12 +103,12 @@ private:
         {
             lastDesiredLaunchSpeed = desiredLaunchSpeed;
             pastProjectileVelocitySpeedSummed = 0;
-            ballSpeedAveragingTracker.clear();
+            this->ballSpeedAveragingTracker.clear();
         }
 
-        if (drivers->refSerial.getRefSerialReceivingData())
+        if (this->drivers->refSerial.getRefSerialReceivingData())
         {
-            const auto &turretData = drivers->refSerial.getRobotData().turret;
+            const auto &turretData = this->drivers->refSerial.getRobotData().turret;
 
             // compute average bullet speed if new firing data received from correct mech ID
             if (prevLaunchingDataReceiveTimestamp !=
@@ -125,7 +125,7 @@ private:
                 const float limitedProjectileSpeed = tap::algorithms::limitVal(
                     turretData.bulletSpeed,
                     0.0f,
-                    MAX_MEASURED_LAUNCH_SPEED);
+                    this->MAX_MEASURED_LAUNCH_SPEED);
 
                 // insert new element
                 pastProjectileVelocitySpeedSummed += limitedProjectileSpeed;

@@ -25,7 +25,7 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
+// #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
@@ -38,7 +38,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
-    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const control::launcher::FrictionWheelInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : visionCoprocessor(visionCoprocessor),

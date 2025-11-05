@@ -24,7 +24,8 @@
 #include "tap/control/governor/command_governor_interface.hpp"
 
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+// #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
 
 namespace aruwsrc::control::governor
 {
@@ -41,7 +42,7 @@ public:
      * @param[in] frictionWheel Reference to the friction wheel subsystem being used in the
      * governor's behavior.
      */
-    FrictionWheelsOnGovernor(aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel)
+    FrictionWheelsOnGovernor(aruwsrc::control::launcher::FrictionWheelInterface &frictionWheel)
         : frictionWheel(frictionWheel)
     {
     }
@@ -52,17 +53,17 @@ public:
                    frictionWheel.getDesiredFrictionWheelSpeed(),
                    0.0f,
                    1) &&
-               frictionWheel.getCurrentFrictionWheelSpeed() >=
+               frictionWheel.getCurrentAverageFrictionWheelSpeed() >=
                    frictionWheel.getDesiredFrictionWheelSpeed() *
                        MINIMUM_SPEED_THRESHOLD_FRACTION &&
-               frictionWheel.getCurrentFrictionWheelSpeed() <=
+               frictionWheel.getCurrentAverageFrictionWheelSpeed() <=
                    frictionWheel.getDesiredFrictionWheelSpeed() * MAXIMUM_SPEED_THRESHOLD_FRACTION;
     }
 
     bool isFinished() final { return !isReady(); }
 
 private:
-    aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheel;
+    aruwsrc::control::launcher::FrictionWheelInterface &frictionWheel;
 
     static constexpr float MINIMUM_SPEED_THRESHOLD_FRACTION = 0.9;
     static constexpr float MAXIMUM_SPEED_THRESHOLD_FRACTION = 1.02;
