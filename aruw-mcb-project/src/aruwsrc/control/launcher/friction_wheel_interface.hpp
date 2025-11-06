@@ -28,21 +28,21 @@ class FrictionWheelInterface : public tap::control::Subsystem {
     
     public: 
 
-    float getPredictedLaunchSpeed() const;
+    virtual float getPredictedLaunchSpeed() const = 0;
 
-    mockable void setDesiredLaunchSpeed(float speed);
+    virtual mockable void setDesiredLaunchSpeed(float speed) = 0;
 
-    mockable float getDesiredLaunchSpeed() const;
+    virtual mockable float getDesiredLaunchSpeed() const = 0;
 
-    mockable float getDesiredFrictionWheelSpeed() const;
+    virtual mockable float getDesiredFrictionWheelSpeed() const = 0;
 
-    float getCurrentCorrectionValue();
+    virtual float getCurrentCorrectionValue() const = 0;
 
-    float getCurrentAverageFrictionWheelSpeed() const;
+    virtual float getCurrentAverageFrictionWheelSpeed() const = 0;
 
-    float getCurrentIndividualFrictionWheelSpeed(int index) const;
+    virtual float getCurrentIndividualFrictionWheelSpeed(int index) const = 0;
 
-    const char *getName() const;
+    virtual const char *getName() const = 0;
 };
 } // namespace aruwsrc::control::launcher
 #endif

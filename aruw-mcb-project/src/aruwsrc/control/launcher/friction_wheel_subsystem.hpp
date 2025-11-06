@@ -21,7 +21,10 @@
 #define FRICTION_WHEEL_SUBSYSTEM_HPP_
 
 #include "friction_wheel_interface.hpp"
+#include "tap/architecture/clock.hpp"
 #include "tap/algorithms/ramp.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 #include "tap/util_macros.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -32,6 +35,7 @@
 
 #include "modm/math/filter/pid.hpp"
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "friction_wheel_test_command.hpp"
 #include "launcher_constants.hpp"
 
@@ -44,6 +48,8 @@ namespace aruwsrc::can
 {
 class TurretMCBCanComm;
 }
+
+using namespace tap::algorithms;
 
 namespace aruwsrc::control::launcher
 {
@@ -78,25 +84,25 @@ public:
      *
      * @param[in] speed The launch speed in m/s.
      */
-    mockable void setDesiredLaunchSpeed(float speed);
+    mockable void setDesiredLaunchSpeed(float speed) override;
 
-    mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
+    mockable float getDesiredLaunchSpeed() const override { return desiredLaunchSpeed; }
 
-    mockable float getDesiredFrictionWheelSpeed() const
+    mockable float getDesiredFrictionWheelSpeed() const override
     {
         return launchSpeedToFrictionWheelRpm(desiredLaunchSpeed) - speedCorrection;
     }
 
-    float getCurrentCorrectionValue() const { return speedCorrection; }
+    float getCurrentCorrectionValue() const override { return speedCorrection; }
     /**
      * @return The average measured friction wheel speed of the launcher in RPM.
      */
-    float getCurrentAverageFrictionWheelSpeed() const;
+    float getCurrentAverageFrictionWheelSpeed() const override;
 
     /**
      * @return The measured friction wheel speed of the nth flywheel in launcher in RPM.
      */
-    float getCurrentIndividualFrictionWheelSpeed(int index) const;
+    float getCurrentIndividualFrictionWheelSpeed(int index) const override;
 
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
@@ -105,7 +111,7 @@ public:
 
     void refreshSafeDisconnect() override
     {
-        for (tap::motor::DjiMotor wheel : wheels) {
+        for (tap::motor::MotorInterface& wheel : wheels) {
             wheel.setDesiredOutput(0);
         }
     }
