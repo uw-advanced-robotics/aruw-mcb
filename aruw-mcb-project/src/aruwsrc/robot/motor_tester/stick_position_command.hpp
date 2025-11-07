@@ -5,12 +5,14 @@
 
 #include "motor_subsystem.hpp"
 
+#ifndef STICK_POSITION_COMMAND
+#define STICK_POSITION_COMMAND
 namespace aruwsrc::robot::motor_tester
 {
-class StickTorqueCommand : public tap::control::Command
+class StickPositionCommand : public tap::control::Command
 {
 public:
-    StickTorqueCommand(
+    StickPositionCommand(
         tap::Drivers* drivers,
         tap::communication::serial::Remote::Channel channel,
         MotorSubsystem* motorSubsystem,
@@ -22,19 +24,18 @@ public:
     {
         addSubsystemRequirement(motorSubsystem);
     }
+    void initialize() override {}
 
     void execute() override
     {
-        motorSubsystem->setDesiredOutput(
-            drivers->remote.getChannel(channel) * tap::motor::DjiMotor::MAX_OUTPUT_C620 * scalar);
+        motorSubsystem->setDesiredPosition(drivers->remote.getChannel(channel) * scalar);
     }
-    void initialize() override {}
-
-    bool isFinished() const override { return false; }
 
     void end(bool) override { motorSubsystem->setDesiredOutput(0); }
 
-    const char* getName() const override { return "b"; }
+    bool isFinished() const override { return false; }
+
+    const char* getName() const override { return "a"; }
 
 private:
     tap::Drivers* drivers;
@@ -44,3 +45,4 @@ private:
 };
 
 }  // namespace aruwsrc::robot::motor_tester
+#endif  // STICK_POSITION_COMMAND

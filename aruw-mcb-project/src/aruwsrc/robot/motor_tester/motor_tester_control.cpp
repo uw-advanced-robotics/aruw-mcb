@@ -19,20 +19,24 @@
 
 #if defined(TARGET_MOTOR_TESTER)
 
+#include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/serial/remote.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/motor_tester/motor_subsystem.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_constants.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
+#include "aruwsrc/robot/motor_tester/stick_position_command.hpp"
+#include "aruwsrc/robot/motor_tester/stick_torque_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
-
-using namespace aruwsrc::motor_tester;
-using namespace aruwsrc::motor_tester::constants;
-using namespace tap::control::setpoint;
 // using namespace tap::control;
 
+using namespace aruwsrc::motor_tester;
+using namespace aruwsrc::robot::motor_tester;
+using namespace aruwsrc::control;
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -43,14 +47,37 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace motor_tester_control
 {
-
 // motors, subsystems, commands, etc.
 
-void initializeSubsystems() {}
+tap::motor::DjiMotor motor(
+    drivers(),
+    tap::motor::MotorId::MOTOR3,  // motor id
+    tap::can::CanBus::CAN_BUS1,   // can bus
+    false,
+    "MOTOR");
+MotorSubsystem motorsubsystem(drivers(), motor, tap::algorithms::SmoothPidConfig());
 
-void registerSubsystems(Drivers* drivers) {}
+// StickPositionCommand stickPositionCommand(
+//     drivers(),
+//     tap::communication::serial::Remote::Channel::RIGHT_HORIZONTAL,
+//     &motorsubsystem,
+//     1000.0f);
 
-void registerIoMappings(Drivers* drivers) {}
+StickTorqueCommand stickTorqueCommand(
+    drivers(),
+    tap::communication::serial::Remote::Channel::RIGHT_HORIZONTAL,
+    &motorsubsystem,
+    0.5f);
+
+void initializeSubsystems() { motorsubsystem.initialize(); }
+
+void registerSubsystems(Drivers* drivers)
+{
+    drivers->commandScheduler.registerSubsystem(&motorsubsystem);
+    motorsubsystem.setDefaultCommand(&stickTorqueCommand);
+}
+
+void registerIoMappings(Drivers*) {}
 
 }  // namespace motor_tester_control
 
