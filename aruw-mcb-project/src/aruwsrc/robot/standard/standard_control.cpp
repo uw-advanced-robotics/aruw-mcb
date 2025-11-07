@@ -89,6 +89,7 @@
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
@@ -254,15 +255,36 @@ VelocityAgitatorSubsystem agitator(
     constants::AGITATOR_PID_CONFIG,
     constants::AGITATOR_CONFIG);
 
+std::array<u_int32_t, 2> wheelIds = {aruwsrc::control::launcher::LEFT_MOTOR_ID, aruwsrc::control::launcher::RIGHT_MOTOR_ID};
+    modm::Pid<float> velocityPIDLeft(aruwsrc::control::launcher::LAUNCHER_PID_KP,
+          aruwsrc::control::launcher::LAUNCHER_PID_KI,
+          aruwsrc::control::launcher::LAUNCHER_PID_KD,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
+    modm::Pid<float> velocityPIDRight(aruwsrc::control::launcher::LAUNCHER_PID_KP,
+          aruwsrc::control::launcher::LAUNCHER_PID_KI,
+          aruwsrc::control::launcher::LAUNCHER_PID_KD,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
+    aruwsrc::control::launcher::FlywheelConfig wheelConfigLeft = {
+        velocityPIDLeft, true, "Left Flywheel"
+    };
+    aruwsrc::control::launcher::FlywheelConfig wheelConfigRight = {
+        velocityPIDRight, false, "Right Flywheel"
+    };
+    std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
+
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    frictionWheels(
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
+    frictionWheelsSubsystem(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        wheelIds,
+        wheelConfigs,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+
+aruwsrc::control::launcher::FrictionWheelInterface& frictionWheels = frictionWheelsSubsystem;
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
