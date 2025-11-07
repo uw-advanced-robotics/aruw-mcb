@@ -41,8 +41,8 @@ public:
     int getDesiredOutput(){
         return desiredOutput;
     }
-    void setDesiredOutput(int32_t output){
-        desiredOutput = std::clamp<uint32_t>(output, -tap::motor::DjiMotor::MAX_OUTPUT_C620, tap::motor::DjiMotor::MAX_OUTPUT_C620);
+    void setDesiredOutput(float output){
+        desiredOutput = std::clamp<int32_t>(output, -tap::motor::DjiMotor::MAX_OUTPUT_C620, tap::motor::DjiMotor::MAX_OUTPUT_C620);
     }
 
     tap::algorithms::WrappedFloat getMotorPosition(){
@@ -62,7 +62,7 @@ public:
 
 private:
     tap::motor::MotorInterface &motor;
-    int32_t desiredOutput;
+    float desiredOutput;
 };  // class CLASS_NAME
 
 }  // NAMESPACE
