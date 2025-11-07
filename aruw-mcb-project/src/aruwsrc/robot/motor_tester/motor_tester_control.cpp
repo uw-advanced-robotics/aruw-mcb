@@ -32,6 +32,8 @@
 #include "aruwsrc/robot/motor_tester/stick_position_command.hpp"
 #include "aruwsrc/robot/motor_tester/stick_torque_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
+#include <aruwsrc/control/safe_disconnect.hpp>
+
 // using namespace tap::control;
 
 using namespace aruwsrc::motor_tester;
@@ -54,8 +56,9 @@ tap::motor::DjiMotor motor(
     tap::motor::MotorId::MOTOR3,  // motor id
     tap::can::CanBus::CAN_BUS1,   // can bus
     false,
-    "MOTOR");
-MotorSubsystem motorsubsystem(drivers(), motor, tap::algorithms::SmoothPidConfig());
+    "MOTOR"
+);
+MotorSubsystem motorsubsystem(drivers(), motor, aruwsrc::motor_tester::constants::TESTER_CONFIG);
 
 // StickPositionCommand stickPositionCommand(
 //     drivers(),
@@ -63,18 +66,29 @@ MotorSubsystem motorsubsystem(drivers(), motor, tap::algorithms::SmoothPidConfig
 //     &motorsubsystem,
 //     1000.0f);
 
+
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 StickTorqueCommand stickTorqueCommand(
     drivers(),
     tap::communication::serial::Remote::Channel::RIGHT_HORIZONTAL,
     &motorsubsystem,
     0.5f);
 
+StickPositionCommand stickPositionCommand(
+    drivers(),
+    tap::communication::serial::Remote::Channel::RIGHT_HORIZONTAL,
+    &motorsubsystem,
+    1000.0f);
+
 void initializeSubsystems() { motorsubsystem.initialize(); }
 
 void registerSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&motorsubsystem);
-    motorsubsystem.setDefaultCommand(&stickTorqueCommand);
+    drivers->commandScheduler.setSafeDisconnectFunction(&motor_tester_control::remoteSafeDisconnectFunction);
+    motorsubsystem.setDefaultCommand(&stickPositionCommand);
+    
 }
 
 void registerIoMappings(Drivers*) {}

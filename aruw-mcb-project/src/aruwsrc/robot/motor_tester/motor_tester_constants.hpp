@@ -42,6 +42,16 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
+
+static constexpr tap::algorithms::SmoothPidConfig TESTER_CONFIG = {
+    .kp = 400.0f,
+    .ki = 0.0f,
+    .kd = -30.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 16'000.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 static constexpr int AGITATOR_NUM_POCKETS = 8;          // number of balls in one rotation
 static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots

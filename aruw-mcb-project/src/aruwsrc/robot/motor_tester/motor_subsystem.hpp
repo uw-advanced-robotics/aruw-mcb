@@ -28,7 +28,12 @@ public:
     void setDesiredOutput(float out) { desiredOutput = out; }
 
     void setDesiredPosition(float position) { desiredPosition = position; }
-    void refresh() override { motor.setDesiredOutput(desiredOutput); }
+    void refresh() override
+    {
+        refresh2();
+        motor.setDesiredOutput(desiredOutput);
+    }
+    void refreshSafeDisconnect() override { motor.setDesiredOutput(0); }
 
     void refresh2()
     {
