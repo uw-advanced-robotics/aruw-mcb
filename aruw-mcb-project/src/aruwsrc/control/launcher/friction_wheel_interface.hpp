@@ -21,12 +21,15 @@
 #define FRICTION_WHEEL_INTERFACE_HPP_
 
 #include "tap/control/subsystem.hpp"
+#include "tap/drivers.hpp"
 
 namespace aruwsrc::control::launcher {
 class FrictionWheelInterface : public tap::control::Subsystem {
     // holder interface to hide templates
     
     public: 
+    
+    FrictionWheelInterface(tap::Drivers* drivers) : tap::control::Subsystem(drivers) {}
 
     virtual float getPredictedLaunchSpeed() const = 0;
 

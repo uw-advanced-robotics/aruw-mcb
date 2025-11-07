@@ -68,13 +68,39 @@ public:
      * Creates a new friction wheel subsystem
      */
     FrictionWheelSubsystem(
-        tap::Drivers *drivers,
-        std::array<uint32_t, NUM_WHEELS> wheelIDs,
-        std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
-        tap::can::CanBus canBus,
-        aruwsrc::can::TurretMCBCanComm *turretMCB);
+    tap::Drivers *drivers,
+    std::array<uint32_t, NUM_WHEELS> wheelIDs,
+    std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
+    tap::can::CanBus canBus,
+    aruwsrc::can::TurretMCBCanComm *turretMCB)
+    : FrictionWheelInterface(drivers),
+      drivers(drivers),
+      launchSpeedLinearInterpolator(
+          LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+          MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
+      speedCorrectionPid(
+          LAUNCHER_SPEED_CORRECTION_PID_KP,
+          LAUNCHER_SPEED_CORRECTION_PID_KI,
+          LAUNCHER_SPEED_CORRECTION_PID_KD,
+          LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM,
+          LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT),
+      desiredRpmRamp(0),
+      turretMCB(turretMCB),
+      frictionTestCommand(this)
+{
+    this->setTestCommand(&frictionTestCommand);
+    for (uint8_t i = 0; i < NUM_WHEELS; i++) {
+        wheels[i] = new tap::motor::DjiMotor(drivers, tap::motor::MotorId(wheelIDs[i]), canBus, wheelConfigs[i].isInverted, wheelConfigs[i].name);
+    }
+}
 
-    void initialize() override;
+    void initialize() override
+{
+    for (tap::motor::DjiMotor* wheel : wheels) {
+            wheel->initialize();
+        }
+    prevTime = tap::arch::clock::getTimeMilliseconds();
+}
 
     /**
      * Set the projectile launch speed - at what speed the pellets
@@ -84,7 +110,15 @@ public:
      *
      * @param[in] speed The launch speed in m/s.
      */
-    mockable void setDesiredLaunchSpeed(float speed) override;
+    mockable void setDesiredLaunchSpeed(float speed) override
+{
+    desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
+    desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
+    if (turretMCB != nullptr)
+    {
+        turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
+    }
+};
 
     mockable float getDesiredLaunchSpeed() const override { return desiredLaunchSpeed; }
 
@@ -97,22 +131,55 @@ public:
     /**
      * @return The average measured friction wheel speed of the launcher in RPM.
      */
-    float getCurrentAverageFrictionWheelSpeed() const override;
+    float getCurrentAverageFrictionWheelSpeed() const override
+{
+    float sum = 0;
+    for (uint8_t i = 0; i < NUM_WHEELS; i++) {
+        sum += wheels[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    }
+    return sum / NUM_WHEELS;
+}
 
     /**
      * @return The measured friction wheel speed of the nth flywheel in launcher in RPM.
      */
-    float getCurrentIndividualFrictionWheelSpeed(int index) const override;
+    float getCurrentIndividualFrictionWheelSpeed(int index) const override
+{
+    return wheels[index]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+}
 
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
-    void refresh() override;
+    void refresh() override {
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    if (currTime == prevTime)
+    {
+        return;
+    }
+    desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
+#if defined(ALL_STANDARDS)
+    if (prevShotTime != drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp)
+    {
+        prevShotTime = drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
+        speedCorrectionPid.update(
+            drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED);
+    }
+    speedCorrection = speedCorrectionPid.getValue();
+#endif
+
+    prevTime = currTime;
+
+    for (uint8_t i = 0; i < NUM_WHEELS; i++) {
+        flywheelConfigs[i].velocityPID.update(desiredRpmRamp.getValue() - getCurrentIndividualFrictionWheelSpeed(i) - speedCorrection);
+        wheels[i]->setDesiredOutput(static_cast<int32_t>(flywheelConfigs[i].velocityPID.getValue()));
+    }
+}
 
     void refreshSafeDisconnect() override
     {
-        for (tap::motor::MotorInterface& wheel : wheels) {
-            wheel.setDesiredOutput(0);
+        for (tap::motor::DjiMotor* wheel : wheels) {
+            wheel->setDesiredOutput(0);
         }
     }
 
@@ -150,13 +217,13 @@ private:
 public:
     tap::algorithms::Ramp desiredRpmRamp;
 
-    testing::NiceMock<tap::mock::DjiMotorMock>[NUM_WHEELS] wheels;
+    testing::NiceMock<tap::mock::DjiMotorMock>* [NUM_WHEELS] wheels;
 
 private:
 #else
     tap::algorithms::Ramp desiredRpmRamp;
 
-    tap::motor::DjiMotor wheels[NUM_WHEELS];
+    tap::motor::DjiMotor* wheels [NUM_WHEELS];
 #endif
 
     aruwsrc::can::TurretMCBCanComm *turretMCB;
@@ -171,7 +238,10 @@ private:
      *      m/s, the speed will be rounded down to 0.
      * @return A friction wheel RPM that the given `launchSpeed` maps to.
      */
-    float launchSpeedToFrictionWheelRpm(float launchSpeed) const;
+    float launchSpeedToFrictionWheelRpm(float launchSpeed) const
+{
+    return launchSpeedLinearInterpolator.interpolate(launchSpeed);
+};
 };
 
 }  // namespace aruwsrc::control::launcher
