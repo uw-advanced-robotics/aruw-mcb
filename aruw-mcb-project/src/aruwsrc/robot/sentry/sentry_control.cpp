@@ -445,22 +445,57 @@ ChassisFrameYawTurretController turretMajorChassisYawController(
     turretMajor::chassisFrameController::YAW_PID_CONFIG);
 
 // Friction Wheels
+// both sentry turrets have the same wheelids ig
+std::array<u_int32_t, 2> wheelIds = {aruwsrc::control::launcher::LEFT_MOTOR_ID, aruwsrc::control::launcher::RIGHT_MOTOR_ID};
+    modm::Pid<float> leftTurretVelocityPIDLeft(aruwsrc::control::launcher::LAUNCHER_PID_KP,
+          aruwsrc::control::launcher::LAUNCHER_PID_KI,
+          aruwsrc::control::launcher::LAUNCHER_PID_KD,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
+    modm::Pid<float> leftTurretVelocityPIDRight(aruwsrc::control::launcher::LAUNCHER_PID_KP,
+          aruwsrc::control::launcher::LAUNCHER_PID_KI,
+          aruwsrc::control::launcher::LAUNCHER_PID_KD,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
+    aruwsrc::control::launcher::FlywheelConfig leftTurretWheelConfigLeft = {
+        leftTurretVelocityPIDLeft, true, "Left Flywheel"
+    };
+    aruwsrc::control::launcher::FlywheelConfig leftTurretWheelConfigRight = {
+        leftTurretVelocityPIDRight, false, "Right Flywheel"
+    };
+    std::array<aruwsrc::control::launcher::FlywheelConfig, 2> leftTurretWheelConfigs = {leftTurretWheelConfigLeft, leftTurretWheelConfigRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
     turretLeftFrictionWheels(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        wheelIds,
+        leftTurretWheelConfigs,
         turretLeft::CAN_BUS_MOTORS,
         &getTurretMCBCanComm2(),
         turretLeft::barrelID);
-
+modm::Pid<float> rightTurretVelocityPIDLeft(aruwsrc::control::launcher::LAUNCHER_PID_KP,
+          aruwsrc::control::launcher::LAUNCHER_PID_KI,
+          aruwsrc::control::launcher::LAUNCHER_PID_KD,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
+    modm::Pid<float> rightTurretVelocityPIDRight(aruwsrc::control::launcher::LAUNCHER_PID_KP,
+          aruwsrc::control::launcher::LAUNCHER_PID_KI,
+          aruwsrc::control::launcher::LAUNCHER_PID_KD,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
+    aruwsrc::control::launcher::FlywheelConfig rightTurretWheelConfigLeft = {
+        rightTurretVelocityPIDLeft, true, "Left Flywheel"
+    };
+    aruwsrc::control::launcher::FlywheelConfig rightTurretWheelConfigRight = {
+        rightTurretVelocityPIDRight, false, "Right Flywheel"
+    };
+    std::array<aruwsrc::control::launcher::FlywheelConfig, 2> rightTurretWheelConfigs = {rightTurretWheelConfigLeft, rightTurretWheelConfigRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
     turretRightFrictionWheels(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+        wheelIds,
+        rightTurretWheelConfigs,
         turretRight::CAN_BUS_MOTORS,
         &getTurretMCBCanComm1(),
         turretRight::barrelID);  // @todo idk what they actually are
