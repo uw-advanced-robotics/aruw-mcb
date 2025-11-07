@@ -29,6 +29,7 @@
 #include "tap/util_macros.hpp"
 
 #include "modm/processing/protothread.hpp"
+#include <cstdint>
 
 // Forward declarations
 namespace tap
@@ -149,6 +150,21 @@ private:
 
     // Timer for LED blinking
     tap::arch::PeriodicMilliTimer ledBlinkTimer;
+
+    // Deadline (ms) until which the message indicator keeps the row animation active
+    uint32_t messageIndicatorDeadlineMillis;
+    static constexpr uint32_t MESSAGE_INDICATOR_MS = 1000; // milliseconds (1s)
+
+    // Animation state for the A-H LED row
+    tap::arch::PeriodicMilliTimer animationTimer; // drives the moving 'bounce' animation
+    uint8_t animationIndex;   // current lit LED index 0..7
+    bool animationDirectionUp; // true = moving A->H, false = H->A
+    uint32_t animationStepMs; // ms between animation steps
+    // Group flash state used when no recent message has been received
+    bool groupFlashOn;
+    // Unidirectional pause state used when no messages are being received
+    bool unidirectionalPaused;
+    uint32_t unidirectionalPauseDeadlineMillis;
 
     // Total messages sent
     uint32_t messageCounter;

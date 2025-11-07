@@ -110,12 +110,20 @@ RttTelemetry::RttTelemetry(tap::Drivers* drivers)
       drivers(drivers),
       refSerial(nullptr),
       visionProcessor(nullptr),
-      ledBlinkTimer(500),  // 500ms LED blink rate
-      messageCounter(0),
-      firstInputReceived(false),
-      queueHead(0),
-      queueTail(0),
-      queueCount(0)
+            ledBlinkTimer(500),  // 500ms LED blink rate
+            messageIndicatorDeadlineMillis(0),
+            animationTimer(120), // 120ms per step
+            animationIndex(0),
+            animationDirectionUp(true),
+            animationStepMs(120),
+            groupFlashOn(false),
+            unidirectionalPaused(false),
+            unidirectionalPauseDeadlineMillis(0),
+            messageCounter(0),
+            firstInputReceived(false),
+            queueHead(0),
+            queueTail(0),
+            queueCount(0)
 {
     // Initialize message queue
     for (size_t i = 0; i < MAX_QUEUED_MESSAGES; i++)
@@ -129,8 +137,14 @@ void RttTelemetry::setLoggingDependencies(
     tap::communication::serial::RefSerial* refSerial,
     aruwsrc::serial::VisionCoprocessor* visionProcessor)
 {
+#ifndef TARGET_MOTOR_TESTER
     this->refSerial = refSerial;
     this->visionProcessor = visionProcessor;
+#else
+    // Motor tester doesn't have these components
+    (void)refSerial;
+    (void)visionProcessor;
+#endif
 }
 
 bool RttTelemetry::updateTelemetryAsync()
@@ -149,6 +163,9 @@ bool RttTelemetry::updateTelemetryAsync()
                 firstInputReceived = true;
             }
 
+            // Turn off red LED for a short indicator period to show message receipt
+            messageIndicatorDeadlineMillis = tap::arch::clock::getTimeMilliseconds() + MESSAGE_INDICATOR_MS;
+
             // Echo back the received character
             char echoMsg[32];
             std::snprintf(
@@ -160,21 +177,121 @@ bool RttTelemetry::updateTelemetryAsync()
             queueMessage(echoMsg);
         }
 
-        // Handle LED patterns
+        // Handle LED patterns for A-H row
         if (drivers && firstInputReceived)
         {
-            if (ledBlinkTimer.execute())
+            uint32_t now = tap::arch::clock::getTimeMilliseconds();
+
+            if (now <= messageIndicatorDeadlineMillis)
             {
-                static bool redLedState = false;
-                redLedState = !redLedState;
-                drivers->leds.set(tap::gpio::Leds::Red, !redLedState);
+                if (animationTimer.execute())
+                {
+                    if (animationDirectionUp)
+                    {
+                        if (animationIndex >= 7)
+                        {
+                            animationDirectionUp = false;
+                            animationIndex = 6;
+                        }
+                        else
+                        {
+                            animationIndex++;
+                        }
+                    }
+                    else
+                    {
+                        if (animationIndex == 0)
+                        {
+                            animationDirectionUp = true;
+                            animationIndex = 1;
+                        }
+                        else
+                        {
+                            animationIndex--;
+                        }
+                    }
+                }
+
+                // Clear A..H (turn off)
+                for (int i = 0; i < 8; ++i)
+                {
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), true);
+                }
+
+                // Lighting rule: at ends (0 or 7) light only one LED; otherwise light pair (index-1, index)
+                // Makes fun bouncy effect
+                if (animationIndex == 0)
+                {
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), false);
+                }
+                else if (animationIndex >= 7)
+                {
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), false);
+                }
+                else
+                {
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
+                }
+            }
+            else
+            {
+                const uint32_t sweepSteps = 7; // steps from 0 to 7
+                const uint32_t pauseMs = sweepSteps * animationStepMs;
+
+                if (unidirectionalPaused)
+                {
+                    if (now >= unidirectionalPauseDeadlineMillis)
+                    {
+                        unidirectionalPaused = false;
+                        animationIndex = 0; // restart at bottom
+                    }
+                }
+
+                if (!unidirectionalPaused)
+                {
+                    if (animationTimer.execute())
+                    {
+                        if (animationIndex < 7)
+                        {
+                            animationIndex++;
+                        }
+                        if (animationIndex >= 7)
+                        {
+                            unidirectionalPaused = true;
+                            unidirectionalPauseDeadlineMillis = now + pauseMs;
+                        }
+                    }
+                }
+
+                // Clear A..H
+                for (int i = 0; i < 8; ++i)
+                {
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), true);
+                }
+
+                if (animationIndex == 0)
+                {
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), false);
+                }
+                else if (animationIndex >= 7)
+                {
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), false);
+                }
+                else
+                {
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
+                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
+                }
             }
         }
 
         logHeartbeatInfo();
+#ifndef TARGET_MOTOR_TESTER
         logRemoteData();
         logRefereeData();
         logVisionData();
+#endif
 
         sendQueuedMessages();
 
@@ -292,6 +409,8 @@ void RttTelemetry::logHeartbeatInfo()
     robotName = "TARGET_STANDARD_NULL";
 #elif defined(TARGET_STANDARD_VOID)
     robotName = "TARGET_STANDARD_VOID";
+#elif defined(TARGET_MOTOR_TESTER)
+    robotName = "TARGET_MOTOR_TESTER";
 #else
     robotName = "TARGET_UNKNOWN";
 #endif
