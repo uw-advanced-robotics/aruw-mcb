@@ -24,6 +24,7 @@
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
 
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -63,6 +64,7 @@ tap::motor::DoubleDjiMotor pullMotors(
     true,
     "Upper Motor",
     "Lower Motor");
+
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 

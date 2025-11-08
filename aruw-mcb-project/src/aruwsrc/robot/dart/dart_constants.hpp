@@ -23,6 +23,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/servo.hpp"
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 
 namespace aruwsrc::robot::dart
 {
@@ -33,6 +34,30 @@ static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
+
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR3; // PLACEHOLDER
+static constexpr aruwsrc::control::joint::JointSubsystem::Config YAW_CONFIG = {
+    .lowerBound = 0.0f, 
+    .upperBound = 0.0f,
+    .epsilon = 0.01f,
+    .maxSetpointIncrement = upperbound - lowerbound, // is this chill?
+    .initSetpoint = 0.0f,
+
+    .encoderRatio = 1.0, //TODO: Actually get the ratio
+    .posPidConfig = YAW_PID_CONFIG,
+    .maxOutput = YAW_PID_CONFIG.maxOutput,
+    .staticFeedforward = 0,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 16'000.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 
 //  * @param[in] pwmPin The pin to attach the Servo class with.
 //  * @param[in] maximumPwm The maximum allowable PWM output. This is limited between 0 and 1.
