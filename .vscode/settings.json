@@ -122,5 +122,5 @@
             "pattern": "**/*_subsystem.hpp",
             "snippet": "declare-subsystem"
         },
-    ]
+    ],
 }
