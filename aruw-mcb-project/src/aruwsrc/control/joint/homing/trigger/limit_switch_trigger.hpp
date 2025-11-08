@@ -16,25 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef LIMIT_SWITCH_TRIGGER_HPP_
+#define LIMIT_SWITCH_TRIGGER_HPP_
 
-#ifndef TRIGGER_INTERFACE_HPP_
-#define TRIGGER_INTERFACE_HPP_
+#include "tap/communication/gpio/digital.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
+#include "tap/drivers.hpp"
 
-namespace aruwsrc::control
+#include "trigger_interface.hpp"
+
+namespace aruwsrc::control::joint::homing::trigger
 {
 /**
  * Represents a "trigger" used by Homeable Subsystems to detect
- * through a trigger when it is at an end of its axis.
+ * through the limit switch when it is at an end of its axis.
  */
-class TriggerInterface
+class LimitSwitchTrigger : public TriggerInterface
 {
 public:
-    TriggerInterface() {}
+    LimitSwitchTrigger(tap::communication::sensors::limit_switch::LimitSwitchInterface* limitSwitch)
+        : limitSwitch(limitSwitch)
+    {
+    }
+    bool isTriggered() { return limitSwitch->getLimitSwitchDepressed(); }
 
-    /**
-     * Detects whether or not the trigger is triggered.
-     */
-    virtual bool isTriggered() = 0;
+private:
+    tap::communication::sensors::limit_switch::LimitSwitchInterface* limitSwitch;
 };
-}  // namespace aruwsrc::control
-#endif
+}  // namespace aruwsrc::control::joint::homing::trigger
+
+#endif  // LIMIT_SWITCH_TRIGGER_HPP_

@@ -17,13 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BOUNDED_SUBSYSTEM_INTERFACE_HPP_
-#define BOUNDED_SUBSYSTEM_INTERFACE_HPP_
+#ifndef HOMEABLE_SUBSYSTEM_INTERFACE_HPP_
+#define HOMEABLE_SUBSYSTEM_INTERFACE_HPP_
 
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::control
+#include "trigger/trigger_interface.hpp"
+
+namespace aruwsrc::control::joint::homing
 {
 /**
  * Interface for a homeable and bounded subsystem, which is a subsytem where its motor
@@ -34,10 +36,21 @@ namespace aruwsrc::control
  * opposite direction.
  */
 
-class BoundedSubsystemInterface : public tap::control::Subsystem
+class HomeableSubsystemInterface : public virtual tap::control::Subsystem
 {
 public:
-    BoundedSubsystemInterface(tap::Drivers* drivers) : Subsystem(drivers) {}
+    // upper trigger is a pointer, so that it can be null if your subsystem is only bounded on one
+    // side
+    HomeableSubsystemInterface(
+        tap::Drivers* drivers,
+        trigger::TriggerInterface& lowerTrigger,
+        trigger::TriggerInterface* upperTrigger = nullptr)
+        : Subsystem(drivers),
+          lowerTrigger(lowerTrigger),
+          upperTrigger(upperTrigger),
+          trigger(lowerTrigger)
+    {
+    }
 
     /**
      * Starts the calibration. Sets CalibrationState to CALIBRATING_LOWER_BOUND.
@@ -75,6 +88,17 @@ protected:
     CalibrationState calibrationState;
 
     /**
+     * Moves the motor along its axis towards the lower bound.
+     */
+    virtual void moveTowardLowerBound() = 0;
+
+    /**
+     * Moves the motor along its axis towards the upper bound.
+     * Defaulted to empty so that one sided systems don't need to override.
+     */
+    void moveTowardUpperBound() {}
+
+    /**
      * Stops the motor from moving. Only to be used during calibration.
      */
     virtual void stopDuringHoming() = 0;
@@ -82,7 +106,11 @@ protected:
      * Sets the given position to be the "home" of the subsystem's motor.
      */
     virtual void setHome(float encoderPosition) = 0;
-};  // class HomeableSubsystemInterface
-}  // namespace aruwsrc::control
+
+    trigger::TriggerInterface& lowerTrigger;
+    trigger::TriggerInterface* upperTrigger;
+    trigger::TriggerInterface& trigger;  // same as lower trigger, but easier for one sided systems
+};                                       // class HomeableSubsystemInterface
+}  // namespace aruwsrc::control::joint::homing
 
 #endif  // HOMEABLE_SUBSYSYSTEM_INTERFACE_HPP

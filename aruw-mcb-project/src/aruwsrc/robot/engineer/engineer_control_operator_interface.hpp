@@ -54,6 +54,18 @@ public:
      */
     mockable float getGantryLiftVelocity();
 
+    bool getGantryKeyUp();
+
+    bool getGantryKeyDown();
+
+    bool getGantryKeyIn();
+
+    bool getGantryKeyOut();
+
+    bool getSprintKey();
+
+    bool getShiftKey();
+
     /**
      * @return The gantry extension velocity
      */
@@ -83,15 +95,14 @@ public:
      * @return whether or not the control switch is set to gantry (lift + horizontal extension)
      * control mode.
      */
-    bool isGantryControlMode();
-
-    /**
-     * @return whether or not the control switch is set to wrist control mode.
-     */
-    bool isWristControlMode();
+    bool isGantryWristControlMode();
 
 private:
     tap::Drivers *drivers;
+    float divideValPitch = 375.0f;  // these are all scaling factors for driver control
+    float divideValYaw = 375.0f;
+    float divideGantryLift = 375.0f;
+    float divideGantryExtension = 375.0f;
 };
 }  // namespace aruwsrc::control::engineer
 

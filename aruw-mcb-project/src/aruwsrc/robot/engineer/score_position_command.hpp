@@ -16,30 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SETPOINT_MOVE_MANUAL_COMMAND_HPP_
-#define SETPOINT_MOVE_MANUAL_COMMAND_HPP_
+#ifndef SCORE_POSITION_COMMAND_HPP_
+#define SCORE_POSITION_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
-#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+#include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+
+using namespace aruwsrc::engineer::wrist;
 
 namespace aruwsrc::engineer
 {
-enum SetpointType
-{
-    CUBE_LIFT,
-    GANTRY_LIFT,
-    GANTRY_EXTENSION
-};
-class SetpointMoveManualCommand : public tap::control::Command
+class ScorePositionCommand : public tap::control::Command
 {
 public:
-    SetpointMoveManualCommand(
-        aruwsrc::control::joint::JointSubsystem &subsystem,
-        aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface,
-        float moveSpeed,
-        SetpointType setpointType = CUBE_LIFT);
+    ScorePositionCommand(
+        aruwsrc::control::joint::JointSubsystem &gantryLift,
+        WristSubsystem &wrist,
+        aruwsrc::control::joint::JointSubsystem &roll);
 
     void initialize() override;
 
@@ -49,15 +45,17 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Setpoint Move Manual Command"; }
+    const char *getName() const override { return "Score Position Command"; }
+
+    void cyclePositions(ScorePositions scorePos);
 
 private:
-    aruwsrc::control::joint::JointSubsystem &subsystem;
-    aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface;
-    float moveSpeed;
-    SetpointType setpointType;
+    aruwsrc::control::joint::JointSubsystem &gantryLift;
+    WristSubsystem &wrist;
+    aruwsrc::control::joint::JointSubsystem &roll;
+    ScorePositions scoringPosition;
 
-};  // class SetpointMovePositionCommand
+};  // class ScorePositionCommand
 
 }  // namespace aruwsrc::engineer
-#endif  // SETPOINT_MOVE_MANUAL_COMMAND_HPP_
+#endif  // SCORE_POSITION_COMMAND_HPP_

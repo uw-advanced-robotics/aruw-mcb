@@ -22,10 +22,8 @@
 
 #include "tap/control/command.hpp"
 
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
-#include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
-#include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
-#include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer::wrist
@@ -38,7 +36,7 @@ class WristControllerCommand : public tap::control::Command
 {
 public:
     WristControllerCommand(
-        JointSubsystem &roll,
+        aruwsrc::control::joint::JointSubsystem &roll,
         WristSubsystem &wrist,
         EngineerControlOperatorInterface *operatorInterface,
         float rollScalingFactor,
@@ -59,7 +57,7 @@ public:
     virtual bool isFinished() const override { return false; }
 
 private:
-    JointSubsystem &roll;
+    aruwsrc::control::joint::JointSubsystem &roll;
     WristSubsystem &wrist;
 
     EngineerControlOperatorInterface *operatorInterface;

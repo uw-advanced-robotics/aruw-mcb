@@ -17,46 +17,40 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GANTRY_LIFT_SUBSYSTEM_HPP_
-#define GANTRY_LIFT_SUBSYSTEM_HPP_
+#ifndef TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_
+#define TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
+#include "trigger_homed_joint_subsystem.hpp"
 
-namespace aruwsrc::engineer::gantry
+namespace aruwsrc::control::joint::homing
 {
-class GantryLiftSubsystem : public LimitSwitchSetpointInterface
+class TriggerHomedDualJointSubsystem : public TriggerHomedJointSubsystem
 {
 public:
-    GantryLiftSubsystem(
+    TriggerHomedDualJointSubsystem(
         tap::Drivers *drivers,
-        tap::motor::MotorInterface &motorLeft,
-        tap::motor::MotorInterface &motorRight,
-        const tap::algorithms::SmoothPidConfig &configPos,
-        const tap::algorithms::SmoothPidConfig &configAlign,
-        control::TriggerInterface &trigger,
-        float radius,
-        float lowerBound = 0.0f,
-        float upperBound = 0.0f,
-        float home = 0,
-        float kS = 0.0f,
-        float epsilon = 1e-4f);
-
-    void setDesiredOutput(int16_t power) override;
+        tap::motor::MotorInterface &motorOne,
+        tap::motor::MotorInterface &motorTwo,
+        trigger::TriggerInterface &trigger,
+        const tap::algorithms::SmoothPidConfig &alignPidConfig,
+        const Config &config);
 
     void resetEncoderValue() override;
 
-    float getEncoderValue() override;
+    float getPosition() const override;
 
-    float getEncoderVelocity() override;
+    float getVelocity() const override;
 
     float getPositionDifference();
 
     float getVelocityDifference();
+
+    void runPosPidController(float dt) override;
 
     void initialize() override;
 
@@ -66,13 +60,14 @@ protected:
     /**
      * Stops the motor from moving. Only to be used during calibration.
      */
-    virtual void stopDuringHoming() override;
+    void stopDuringHoming() override;
 
 private:
-    tap::algorithms::SmoothPid pidAlign;
-    tap::motor::MotorInterface &motorLeft, &motorRight;
+    tap::motor::MotorInterface &motorOne,
+        &motorTwo;  // motor one is stored as motor in parent class JointSubsystem
+    tap::algorithms::SmoothPid alignPid;
 };
 
-}  // namespace aruwsrc::engineer::gantry
+}  // namespace aruwsrc::control::joint::homing
 
-#endif  // GANTRY_LIFT_SUBSYSTEM_HPP_
+#endif  // TRIGGER_HOMED_DUAL_JOINT_SUBSYSTEM_HPP_
