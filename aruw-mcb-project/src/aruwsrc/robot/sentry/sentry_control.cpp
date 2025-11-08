@@ -686,28 +686,26 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretLeft(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     turretLeft::turretID);
 
-// TODO:: see if this actually does stuff, test later.
-RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLeft(
-    drivers()->refSerial,
-    turretLeft::barrelID);
+// Unused, causes incosnistent fire rates due to suspected ref delay.
+// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLeft(
+//     drivers()->refSerial,
+//     turretLeft::barrelID);
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(turretLeftFrictionWheels);
 
-GovernorLimitedCommand<6> turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<5> turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
     {&fireRateLimitGovernorTurretLeft,
      &heatLimitGovernorTurretLeft,
-     &refSystemProjectileLaunchedGovernorTurretLeft,
      &frictionWheelsOnGovernorTurretLeft,
      &cvOnTargetGovernorTurretLeft,
      &matchRunningGovernor});
 
-GovernorLimitedCommand<3> turretLeftAgitatorManualSpin(
+GovernorLimitedCommand<2> turretLeftAgitatorManualSpin(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
     {&heatLimitGovernorTurretLeft,
-     &refSystemProjectileLaunchedGovernorTurretLeft,
      &frictionWheelsOnGovernorTurretLeft});
 
 // RIGHT shooting ======================
@@ -765,27 +763,26 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretRight(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     turretRight::turretID);
 
-RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRight(
-    drivers()->refSerial,
-    turretRight::barrelID);
+// Unused, causes incosnistent fire rates due to suspected ref delay.
+// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRight(
+//     drivers()->refSerial,
+//     turretRight::barrelID);
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretRight(turretRightFrictionWheels);
 
-GovernorLimitedCommand<6> turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<5> turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&turretRightAgitator},
     turretRightRotateAndUnjamAgitator,
     {&fireRateLimitGovernorTurretRight,
      &heatLimitGovernorTurretRight,
-     &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight,
      &cvOnTargetGovernorTurretRight,
      &matchRunningGovernor});
 
-GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
+GovernorLimitedCommand<2> turretRightAgitatorManualSpin(
     {&turretRightAgitator},
     turretRightRotateAndUnjamAgitator,
     {&heatLimitGovernorTurretRight,
-     &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight});
 
 /* define client display / HUD related items --------------------------------*/
