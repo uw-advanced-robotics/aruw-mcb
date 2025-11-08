@@ -110,7 +110,7 @@ RttTelemetry::RttTelemetry(tap::Drivers* drivers)
       drivers(drivers),
       refSerial(nullptr),
       visionProcessor(nullptr),
-            ledBlinkTimer(500),  // 500ms LED blink rate
+            ledBlinkTimer(800),  // for slow group flash
             messageIndicatorDeadlineMillis(0),
             animationTimer(120), // 120ms per step
             animationIndex(0),
@@ -178,12 +178,19 @@ bool RttTelemetry::updateTelemetryAsync()
         }
 
         // Handle LED patterns for A-H row
-        if (drivers && firstInputReceived)
+        // 1. If RTT message received within last 1s -> bidirectional bounce (two-way)
+        // 2. Else if actively sending telemetry -> unidirectional sweep (one-way, no heartbeat)
+        // 3. Else -> slow group flash (idle, not sending/receiving)
+        if (drivers)
         {
             uint32_t now = tap::arch::clock::getTimeMilliseconds();
+            
+            // Determine if we're actively sending telemetry
+            bool activelySendingTelemetry = (queueCount > 0) || firstInputReceived;
 
-            if (now <= messageIndicatorDeadlineMillis)
+            if (activelySendingTelemetry && now <= messageIndicatorDeadlineMillis)
             {
+                // State 1: Recent RTT input received - bidirectional bounce animation
                 if (animationTimer.execute())
                 {
                     if (animationDirectionUp)
@@ -234,8 +241,9 @@ bool RttTelemetry::updateTelemetryAsync()
                     drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
                 }
             }
-            else
+            else if (activelySendingTelemetry)
             {
+                // State 2: Sending telemetry but no recent RTT input - unidirectional sweep A->H
                 const uint32_t sweepSteps = 7; // steps from 0 to 7
                 const uint32_t pauseMs = sweepSteps * animationStepMs;
 
@@ -282,6 +290,20 @@ bool RttTelemetry::updateTelemetryAsync()
                 {
                     drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
                     drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
+                }
+            }
+            else
+            {
+                // State 3: Not sending telemetry - slow group flash
+                if (ledBlinkTimer.execute())
+                {
+                    groupFlashOn = !groupFlashOn;
+                }
+
+                for (int i = 0; i < 8; ++i)
+                {
+                    auto pin = static_cast<tap::gpio::Leds::LedPin>(i);
+                    drivers->leds.set(pin, !groupFlashOn);
                 }
             }
         }
