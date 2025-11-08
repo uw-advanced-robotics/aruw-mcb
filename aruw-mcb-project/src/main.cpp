@@ -200,6 +200,15 @@ static void initializeIo(Drivers *drivers)
 #endif
 #if defined(TARGET_ENGINEER)
     drivers->engineerCVCommunication.initializeCV();
+    drivers->digital.configureInputPullMode(
+        tap::gpio::Digital::B,
+        tap::gpio::Digital::InputPullMode::PullUp);
+    drivers->digital.configureInputPullMode(
+        tap::gpio::Digital::D,
+        tap::gpio::Digital::InputPullMode::PullUp);
+    drivers->digital.configureInputPullMode(
+        tap::gpio::Digital::T,
+        tap::gpio::Digital::InputPullMode::PullUp);
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)

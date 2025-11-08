@@ -134,6 +134,9 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
     .beybladeRampRate = 100,
 };
+
+static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
+static constexpr float CHASSIS_SPEED_DIVSOR_SPRINT = 8;
 }  // namespace aruwsrc::chassis
 
 #endif  // ENGINEER_CHASSIS_CONSTANTS_HPP_

@@ -23,9 +23,9 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/bounded-subsystem/bounded_subsystem_interface.hpp"
+#include "homeable_subsystem_interface.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::joint::homing
 {
 /**
  * A command that tells a bounded subsystem to calibrate.
@@ -33,7 +33,7 @@ namespace aruwsrc::control
 class HomingCommand : public tap::control::Command
 {
 public:
-    HomingCommand(aruwsrc::control::BoundedSubsystemInterface& subsystem) : subsystem(subsystem)
+    HomingCommand(HomeableSubsystemInterface& subsystem) : subsystem(subsystem)
     {
         addSubsystemRequirement(&subsystem);
     }
@@ -49,8 +49,8 @@ public:
     const char* getName() const override { return "Homing Command"; }
 
 protected:
-    aruwsrc::control::BoundedSubsystemInterface& subsystem;
+    HomeableSubsystemInterface& subsystem;
 };  // class HomingCommand
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::joint::homing
 
 #endif  // HOMING_COMMAND_HPP_
