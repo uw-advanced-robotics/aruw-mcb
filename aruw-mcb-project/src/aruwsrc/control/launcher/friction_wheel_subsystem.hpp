@@ -78,6 +78,7 @@ public:
       launchSpeedLinearInterpolator(
           LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
+          flywheelConfigs(wheelConfigs),
       speedCorrectionPid(
           LAUNCHER_SPEED_CORRECTION_PID_KP,
           LAUNCHER_SPEED_CORRECTION_PID_KI,
@@ -203,7 +204,7 @@ protected:
 private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
-    FlywheelConfig flywheelConfigs[NUM_WHEELS];
+    std::array<FlywheelConfig, NUM_WHEELS> flywheelConfigs;
 
     modm::Pid<float> speedCorrectionPid;
 
