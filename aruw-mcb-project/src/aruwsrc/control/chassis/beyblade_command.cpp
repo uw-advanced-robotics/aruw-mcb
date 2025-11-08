@@ -50,7 +50,8 @@ BeybladeCommand::BeybladeCommand(
       yawMotor(yawMotor),
       operatorInterface(operatorInterface),
       config(config),
-      rotationMultiplier(rotationMultiplier)
+      rotationMultiplier(rotationMultiplier),
+      rValue(100)
 {
     addSubsystemRequirement(chassis);
 }
@@ -118,6 +119,7 @@ void BeybladeCommand::execute()
         tap::algorithms::rotateVector(&x, &y, turretYawAngle.getWrappedValue());
 
         // set outputs
+        r = this->rValue;
         chassis->setDesiredOutput(x, y, r);
     }
     else

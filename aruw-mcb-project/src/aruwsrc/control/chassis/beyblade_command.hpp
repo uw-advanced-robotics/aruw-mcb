@@ -75,6 +75,8 @@ private:
 
     const float rotationMultiplier;
 
+    float rValue;
+
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::chassis

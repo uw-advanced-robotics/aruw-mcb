@@ -74,6 +74,8 @@ public:
         R = 2,
     };
 
+    // Suppose that we have 120 total watts availiable
+    // This method returns the maximum speed (desired speed) the wheels should turn to hit this limit.
     static inline float getMaxWheelSpeed(bool refSerialOnline, float chassisPowerLimit)
     {
         if (!refSerialOnline)
@@ -96,12 +98,28 @@ public:
 
     static inline float getChassisPowerLimit(tap::Drivers* drivers)
     {
+        // In 2025 season, there's modes:
+        // Sprinting mode, and regular walking mode
+        
+        // In sprinting mode, we need way more power than is allowed by the "PMM"
+        // The PMM is a "referee"; in robomasters, they don't allow your robot
+        // to use more power than the rule it can
+
+        // However, in sprinting mode, we are allowed to bypass PMM
+        // This means that we have to draw power from the capacitor bank instead,
+        // but this is quick discharge not suitable for normal driving.
+
+        // In this capacitor discharge mode (i.e. sprinting mode), this will return
+        // something huge (120 watts, 240 watts) and its dependent on the capacitor
         if (capacitorBank != nullptr && capacitorBank->isSprinting())
         {
             return capacitorBank->getMaximumOutputCurrent() *
                    can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
         }
 
+
+        // Otherwise, it'll just return a value which is for all intents and purposes, constant
+        // Its dependent on robot (so for standard, this will basically always return 90 watts)
         return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
     }
 
