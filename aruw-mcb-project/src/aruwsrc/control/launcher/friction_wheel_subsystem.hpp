@@ -75,8 +75,9 @@ public:
      * this subsystem.
      *
      * @param[in] speed The launch speed in m/s.
+     * @param[in] directRpm Whether to directly set rpm or set bullet speed.
      */
-    mockable void setDesiredLaunchSpeed(float speed);
+    mockable void setDesiredLaunchSpeed(float speed, bool directRpm = false);
 
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
@@ -131,6 +132,8 @@ private:
     float desiredLaunchSpeed;
 
     float speedCorrection = 0.0f;
+
+    float currentRPM = 0.0f;
 
     uint32_t prevTime = 0;
 
