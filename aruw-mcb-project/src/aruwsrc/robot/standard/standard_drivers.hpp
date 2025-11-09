@@ -40,6 +40,10 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/control_operator_interface.hpp"
+
+// for fake sentry
+#include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
+
 #endif
 
 namespace aruwsrc::standard
@@ -69,7 +73,9 @@ public:
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
           plateHitTracker(this),
           refSerialTransmitter(this),
-          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
+          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor),
+          // for fake sentry 
+          stateMachine(refSerial, visionCoprocessor)
     {
     }
 
@@ -93,6 +99,10 @@ public:
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
+    
+    // for fake sentry
+    aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
+
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard

@@ -29,6 +29,8 @@
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
+#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
+
 namespace aruwsrc::chassis
 {
 class ChassisAutoNavController
@@ -48,15 +50,14 @@ public:
         aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         const Transform& worldToChassis,
         const aruwsrc::chassis::BeybladeConfig beybladeConfig,
-        can::capbank::CapacitorBank& capacitorBank)
+        aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem)
         : chassis(chassis),
           lastSetPoint(Position(-1, -1, 0)),
           drivers(drivers),
           worldToChassis(worldToChassis),
           beybladeConfig(beybladeConfig),
-          capacitorBank(capacitorBank)
-    {
-    }
+           capBankSubsystem(capBankSubsystem)
+    {}
 
     void initialize();
 
@@ -88,7 +89,8 @@ private:
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;
-    can::capbank::CapacitorBank& capacitorBank;
+    
+    aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem;
 
     float desiredSpeed = 0;
 };
