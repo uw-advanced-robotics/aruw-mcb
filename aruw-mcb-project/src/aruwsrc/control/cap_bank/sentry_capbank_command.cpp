@@ -24,7 +24,7 @@
 
 #include "aruwsrc/communication/can/capacitor_bank.hpp"
 
-namespace aruwsrc::sentry::chassis
+namespace aruwsrc::control::capbank
 {
 SentryCapBankCommand::SentryCapBankCommand(
     tap::Drivers* drivers,
@@ -42,6 +42,6 @@ void SentryCapBankCommand::execute() {}
 
 void SentryCapBankCommand::end(bool) { capBankSubsystem.disableCapacitors(); }
 
-bool SentryCapBankCommand::isFinished() const { return capBankSubsystem.getAvailableEnergy() > CAPBANK_ENERGY_THRESHOLD; }
+bool SentryCapBankCommand::isFinished() const { return capBankSubsystem.getAvailableEnergy() > 500.0f; }
 
 }  // namespace aruwsrc::control::capbank

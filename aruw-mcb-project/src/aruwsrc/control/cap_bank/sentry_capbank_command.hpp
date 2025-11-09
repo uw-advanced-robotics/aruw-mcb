@@ -25,10 +25,7 @@
 
 #include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
 
-//using namespace aruwsrc::control::sentry;
-
-namespace aruwsrc::sentry::chassis
-{
+namespace aruwsrc::control::capbank {
 
 class SentryCapBankCommand : public tap::control::Command
 {

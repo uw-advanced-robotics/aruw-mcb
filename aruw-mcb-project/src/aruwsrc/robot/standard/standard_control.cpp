@@ -105,7 +105,7 @@
 
 // for fake sentry
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
-#include "aruwsrc/robot/sentry/chassis/sentry_capbank_command.hpp"
+#include "aruwsrc/control/cap_bank/sentry_capbank_command.hpp"
 
 
 #ifdef PLATFORM_HOSTED
@@ -132,7 +132,7 @@ using namespace aruwsrc::control::turret;
 using namespace aruwsrc::standard;
 
 //for fake sentry 
-using namespace aruwsrc::sentry::chassis;
+// using namespace aruwsrc::sentry::chassis;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -540,7 +540,7 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
 //     aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
 // ---------------fake sentry-----------------
-aruwsrc::sentry::chassis::SentryCapBankCommand capBankSentryCommand(
+aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(
     drivers(),
     capBankSubsystem
 );
