@@ -705,8 +705,7 @@ GovernorLimitedCommand<5> turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting(
 GovernorLimitedCommand<2> turretLeftAgitatorManualSpin(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretLeft,
-     &frictionWheelsOnGovernorTurretLeft});
+    {&heatLimitGovernorTurretLeft, &frictionWheelsOnGovernorTurretLeft});
 
 // RIGHT shooting ======================
 
@@ -782,8 +781,7 @@ GovernorLimitedCommand<5> turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting
 GovernorLimitedCommand<2> turretRightAgitatorManualSpin(
     {&turretRightAgitator},
     turretRightRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretRight,
-     &frictionWheelsOnGovernorTurretRight});
+    {&heatLimitGovernorTurretRight, &frictionWheelsOnGovernorTurretRight});
 
 /* define client display / HUD related items --------------------------------*/
 
