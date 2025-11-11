@@ -22,6 +22,8 @@
 
 #include "tap/algorithms/wrapped_float.hpp"
 
+#include "turret_feedforward_interface.hpp"
+
 using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
@@ -47,7 +49,14 @@ public:
     /**
      * @param[in] TurretMotor A `TurretMotor` object accessible for children objects to use.
      */
-    TurretControllerInterface(TurretMotor &turretMotor) : turretMotor(turretMotor) {}
+    TurretControllerInterface(
+        TurretMotor &pitch,
+        TurretMotor &yaw,
+        const std::vector<TurretFeedforwardInterface> &feedforwards = {})
+        : turretMotor(turretMotor),
+          feedforwards(feedforwards)
+    {
+    }
 
     /**
      * Initializes the controller, resetting any controllers and configuring any variables that need
@@ -66,6 +75,21 @@ public:
      * is operating. Units radians.
      */
     virtual void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) = 0;
+
+    /**
+     * Calculates the total feedforward output from all attached feedforwards.
+     * 
+     * @param[in] state The current turret feedforward state.
+     * @return The total feedforward output.
+     */
+    virtual float calculateFeedforward(TurretFeedforwardInterface::TurretFeedforwardState state)
+    {
+        if (feedforwards.empty()) return 0.0f;
+
+        float total = 0.0f;
+        for (const auto &ff : feedforwards) total += ff.calculateFeedforward(state);
+        return total;
+    }
 
     /**
      * Sets the controller setpoint, but doesn't run the controller.
@@ -120,24 +144,9 @@ public:
 
 protected:
     TurretMotor &turretMotor;
+    const std::vector<TurretFeedforwardInterface> &feedforwards;
 };
 
-class TurretPitchControllerInterface : public TurretControllerInterface
-{
-public:
-    TurretPitchControllerInterface(TurretMotor &turretMotor)
-        : TurretControllerInterface(turretMotor)
-    {
-    }
-};
-
-class TurretYawControllerInterface : public TurretControllerInterface
-{
-public:
-    TurretYawControllerInterface(TurretMotor &turretMotor) : TurretControllerInterface(turretMotor)
-    {
-    }
-};
 }  // namespace aruwsrc::control::turret::algorithms
 
 #endif  // TURRET_CONTROLLER_INTERFACE_HPP_

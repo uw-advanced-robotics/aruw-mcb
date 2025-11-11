@@ -25,6 +25,8 @@
 
 #include "modm/math/geometry/angle.hpp"
 
+#include "turret_feedforward_interface.hpp"
+
 namespace aruwsrc::control::turret::algorithms
 {
 /**
@@ -45,11 +47,21 @@ namespace aruwsrc::control::turret::algorithms
  *      The gravitational force offset is a function of the location of the CG and
  *      the current pitch angle.
  */
-float computeGravitationalForceOffset(
-    const float cgX,
-    const float cgZ,
-    const float pitchAngleFromCenter,
-    const float gravityCompensatorMax);
+class turretGravitationalForceOffset : TurretFeedforwardInterface
+{
+public:
+    turretGravitationalForceOffset(
+        const float cgX,
+        const float cgZ,
+        const float gravityCompensatorMax);
+
+    float calculateFeedforward(const TurretFeedforwardState state) const override;
+
+private:
+    const float cgX = 0.0f;
+    const float cgZ = 0.0f;
+    const float gravityCompensatorMax = 0.0f;
+};
 }  // namespace aruwsrc::control::turret::algorithms
 
 #endif  // GRAVITY_COMPENSATION_HPP_

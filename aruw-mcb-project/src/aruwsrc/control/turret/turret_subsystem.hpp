@@ -44,12 +44,6 @@ namespace aruwsrc::can
 class TurretMCBCanComm;
 }
 
-namespace aruwsrc::control::turret::algorithms
-{
-class TurretPitchControllerInterface;
-class TurretYawControllerInterface;
-}  // namespace aruwsrc::control::turret::algorithms
-
 namespace aruwsrc::control::turret
 {
 /**
