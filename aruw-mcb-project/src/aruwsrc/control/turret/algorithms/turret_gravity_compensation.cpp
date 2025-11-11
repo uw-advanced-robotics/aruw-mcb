@@ -24,11 +24,15 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret::algorithms
 {
-float computeGravitationalForceOffset(
+turretGravitationalForceOffset::turretGravitationalForceOffset(
     const float cgX,
     const float cgZ,
-    const float pitchAngleFromCenter,
     const float gravityCompensatorMax)
+    : cgX(cgX),
+      cgZ(cgZ),
+      gravityCompensatorMax(gravityCompensatorMax){};
+
+float turretGravitationalForceOffset::calculateFeedforward(TurretFeedforwardState state) const
 {
     bool cgXZero = compareFloatClose(cgX, 0.0f, 1E-5);
     bool cgZZero = compareFloatClose(cgZ, 0.0f, 1E-5);
@@ -51,6 +55,7 @@ float computeGravitationalForceOffset(
         turretCGPolarTheta = copysign(M_PI_2, cgZ);
     }
 
-    return gravityCompensatorMax * cosf(turretCGPolarTheta + pitchAngleFromCenter);
-}
+    return gravityCompensatorMax * cosf(turretCGPolarTheta - state.pitch);
+};
+
 }  // namespace aruwsrc::control::turret::algorithms

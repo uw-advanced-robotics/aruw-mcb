@@ -39,15 +39,15 @@ namespace aruwsrc::control::turret::algorithms
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-class ChassisFrameYawTurretController final : public TurretYawControllerInterface
+class ChassisFrameTurretController final : public TurretControllerInterface
 {
 public:
     /**
-     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] turretSubsystem A `turretSubsystem` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
-    ChassisFrameYawTurretController(
-        TurretMotor &yawMotor,
+    ChassisFrameTurretController(
+        TurretSubsystem &turretSubsystem,
         const tap::algorithms::SmoothPidConfig &pidConfig);
 
     void initialize() final;
@@ -95,55 +95,55 @@ private:
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-class ChassisFramePitchTurretController final : public TurretPitchControllerInterface
-{
-public:
-    /**
-     * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
-     * @param[in] pidConfig PID configuration struct for the controller.
-     */
-    ChassisFramePitchTurretController(
-        TurretMotor &pitchMotor,
-        const tap::algorithms::SmoothPidConfig &pidConfig);
+// class ChassisFramePitchTurretController final : public TurretControllerInterface
+// {
+// public:
+//     /**
+//      * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
+//      * @param[in] pidConfig PID configuration struct for the controller.
+//      */
+//     ChassisFramePitchTurretController(
+//         TurretMotor &pitchMotor,
+//         const tap::algorithms::SmoothPidConfig &pidConfig);
 
-    void initialize() final;
+//     void initialize() final;
 
-    /**
-     * @see TurretControllerInterface for more details.
-     * @param[in] desiredSetpoint The pitch desired setpoint in the chassis frame.
-     */
-    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
+//     /**
+//      * @see TurretControllerInterface for more details.
+//      * @param[in] desiredSetpoint The pitch desired setpoint in the chassis frame.
+//      */
+//     void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
 
-    void setSetpoint(WrappedFloat desiredSetpoint) final;
+//     void setSetpoint(WrappedFloat desiredSetpoint) final;
 
-    /**
-     * @return The pitch setpoint, in the chassis frame.
-     */
-    WrappedFloat getSetpoint() const final;
+//     /**
+//      * @return The pitch setpoint, in the chassis frame.
+//      */
+//     WrappedFloat getSetpoint() const final;
 
-    /// @return The chassis frame pitch turret measurement, refer to top level documentation for
-    /// more details.
-    WrappedFloat getMeasurement() const final;
+//     /// @return The chassis frame pitch turret measurement, refer to top level documentation for
+//     /// more details.
+//     WrappedFloat getMeasurement() const final;
 
-    bool isOnline() const final;
+//     bool isOnline() const final;
 
-    /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline WrappedFloat convertControllerAngleToChassisFrame(
-        WrappedFloat controllerFrameAngle) const final
-    {
-        return controllerFrameAngle;
-    }
+//     /// Since the controller is in the chassis frame, no frame transformation is required.
+//     inline WrappedFloat convertControllerAngleToChassisFrame(
+//         WrappedFloat controllerFrameAngle) const final
+//     {
+//         return controllerFrameAngle;
+//     }
 
-    /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline WrappedFloat convertChassisAngleToControllerFrame(
-        WrappedFloat chassisFrameAngle) const final
-    {
-        return chassisFrameAngle;
-    }
+//     /// Since the controller is in the chassis frame, no frame transformation is required.
+//     inline WrappedFloat convertChassisAngleToControllerFrame(
+//         WrappedFloat chassisFrameAngle) const final
+//     {
+//         return chassisFrameAngle;
+//     }
 
-private:
-    tap::algorithms::SmoothPid pid;
-};
+// private:
+//     tap::algorithms::SmoothPid pid;
+// };
 
 }  // namespace aruwsrc::control::turret::algorithms
 

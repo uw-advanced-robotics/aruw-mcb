@@ -326,7 +326,7 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         worldFrameSetpoint,
         turretMotor);
 
-    float pidOut = runWorldFrameTurretImuController(
+    float pidOutput = runWorldFrameTurretImuController(
         worldFrameSetpoint - worldFramePitchAngle,
         chassisFramePitch,
         worldFramePitchVelocity,
@@ -335,13 +335,12 @@ void WorldFramePitchTurretImuCascadePidTurretController::runController(
         positionPid,
         velocityPid);
 
-    pidOut += computeGravitationalForceOffset(
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        -turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
-        GRAVITY_COMPENSATION_SCALAR);
+    // .yaw is unused for pitch controller
+    pidOutput += calculateFeedforward(TurretFeedforwardInterface::TurretFeedforwardState{
+        .pitch = turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+        .yaw = 0.0f});
 
-    turretMotor.setMotorOutput(pidOut);
+    turretMotor.setMotorOutput(pidOutput);
 }
 
 void WorldFramePitchTurretImuCascadePidTurretController::setSetpoint(WrappedFloat desiredSetpoint)
