@@ -33,6 +33,7 @@ static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
+static constexpr int32_t PULLBACK_PULL_POSITION = 0; //TODO: FIND
 
 //  * @param[in] pwmPin The pin to attach the Servo class with.
 //  * @param[in] maximumPwm The maximum allowable PWM output. This is limited between 0 and 1.
@@ -47,12 +48,11 @@ static constexpr tap::gpio::Digital::InputPin BEAMBREAK_PORT = tap::gpio::Digita
 static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;  // TODO: update value when limit switch is installed on dart
 
-static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config PULL_MOTOR_CONFIG{ //TODO: TUNE VALUES
-    .home = 0.0f,
-    .homingSpeed = 10.0f,
-    .homingReversed = false
-};
-
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
+    PULL_MOTOR_CONFIG{// TODO: TUNE VALUES
+                      .home = 0.0f,
+                      .homingSpeed = 10.0f,
+                      .homingReversed = false};
 
 }  // namespace aruwsrc::robot::dart
 #endif

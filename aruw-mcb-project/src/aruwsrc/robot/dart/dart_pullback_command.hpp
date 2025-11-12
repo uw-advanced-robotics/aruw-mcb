@@ -28,20 +28,23 @@ namespace aruwsrc::robot::dart
 class DartPullbackCommand : public tap::control::Command
 {
 public:
-    DartPullbackCommand(DartLauncherSubsystem &dartLauncher, int32_t desiredOuput);
+    DartPullbackCommand(TriggerHomedJointSubsystem& pullMotorSubsystem, int32_t desiredOutput);
 
-    void initialize() override;
+    void initialize() override
+    {
+        pullMotorSubsystem.setSetpoint(aruwsrc::robot::dart::PULLBACK_PULL_POSITION);
+    }
 
     void execute() override;
 
     void end(bool interrupted) override;
 
-    bool isFinished() const override;
+    bool isFinished() const override { return pullMotorSubsystem.atSetpoint(); }
 
-    const char *getName() const override { return "DART PULLBACK"; }
+    const char* getName() const override { return "DART PULLBACK"; }
 
 private:
-    DartLauncherSubsystem &dartLauncher;
+    TriggerHomedJointSubsystem& pullMotorSubsystem;
     int32_t desiredOutput;
 };  // class DartPullbackCommand
 

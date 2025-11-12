@@ -88,7 +88,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 DartLauncherSubsystem dartLauncher(drivers(), pullMotors);
 
 DartReleaseCommand dartRelease(dartLauncher, MANUAL_RELEASE_DESIRED_OUTPUT);
-DartPullbackCommand dartPullback(dartLauncher, MANUAL_PULLBACK_DESIRED_OUTPUT);
+DartPullbackCommand dartPullback(pullMotorSubsystem, MANUAL_PULLBACK_DESIRED_OUTPUT);
 
 DartOpenCommand servoOpen(dartLauncher);
 DartCloseCommand servoClose(dartLauncher);
