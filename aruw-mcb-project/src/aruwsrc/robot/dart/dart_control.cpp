@@ -25,7 +25,10 @@
 #include "tap/motor/servo.hpp"
 
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
+#include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/dart/dart_constants.hpp"
@@ -42,6 +45,9 @@ using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::dart;
 using namespace aruwsrc::robot::dart;
+using namespace aruwsrc::control::joint;
+using namespace aruwsrc::control::joint::homing;
+using namespace aruwsrc::control::joint::homing::trigger;
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -63,6 +69,19 @@ tap::motor::DoubleDjiMotor pullMotors(
     true,
     "Upper Motor",
     "Lower Motor");
+
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak beamBreak(
+    &(drivers()->digital),
+    BEAMBREAK_PORT,
+    true);
+
+aruwsrc::control::joint::homing::trigger::LimitSwitchTrigger limit(&beamBreak);
+
+aruwsrc::control::joint::homing::TriggerHomedJointSubsystem pullMotorSubsystem(
+    drivers(),
+    pullMotors,
+    limit,
+    PULL_MOTOR_CONFIG);
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 

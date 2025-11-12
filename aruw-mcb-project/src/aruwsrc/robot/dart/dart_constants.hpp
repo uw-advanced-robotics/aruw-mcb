@@ -47,5 +47,12 @@ static constexpr tap::gpio::Digital::InputPin BEAMBREAK_PORT = tap::gpio::Digita
 static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;  // TODO: update value when limit switch is installed on dart
 
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config PULL_MOTOR_CONFIG{ //TODO: TUNE VALUES
+    .home = 0.0f,
+    .homingSpeed = 10.0f,
+    .homingReversed = false
+};
+
+
 }  // namespace aruwsrc::robot::dart
 #endif
