@@ -35,18 +35,26 @@ static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
 
+static constexpr tap::gpio::Digital::InputPin YAW_LIMITSWITCH_PORT = tap::gpio::Digital::InputPin::B; //TODO: correct constant
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR3; // PLACEHOLDER
-static constexpr aruwsrc::control::joint::JointSubsystem::Config YAW_CONFIG = {
-    .lowerBound = 0.0f, 
-    .upperBound = 0.0f,
-    .epsilon = 0.01f,
-    .maxSetpointIncrement = upperbound - lowerbound, // is this chill?
-    .initSetpoint = 0.0f,
 
-    .encoderRatio = 1.0, //TODO: Actually get the ratio
-    .posPidConfig = YAW_PID_CONFIG,
-    .maxOutput = YAW_PID_CONFIG.maxOutput,
-    .staticFeedforward = 0,
+
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config YAW_HOME_CONFIG = {
+    .super = {
+        .lowerBound = 0.0f, 
+        .upperBound = 0.0f,
+        .epsilon = 0.01f,
+        .maxSetpointIncrement = upperbound - lowerbound, // is this chill?
+        .initSetpoint = 0.0f,
+
+        .encoderRatio = 1.0, //TODO: Actually get the ratio
+        .posPidConfig = YAW_PID_CONFIG,
+        .maxOutput = YAW_PID_CONFIG.maxOutput,
+        .staticFeedforward = 0,
+    },
+    .home = 0.0f,
+    .homingSpeed = 10.0f, // MAYBE CHANGE
+    .homingReversed = false // TODO: CHANGE IF HOMES THE WRONG WAY
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {

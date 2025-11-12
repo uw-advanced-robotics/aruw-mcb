@@ -23,8 +23,9 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
-#include "aruwsrc/control/joint/joint_subsystem.hpp"
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -32,17 +33,25 @@
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 #include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
+#include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
+#include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
+#include "aruwsrc/control/joint/homing/homing_command.hpp"
+#include "aruwsrc/robot/dart/dart_yaw_velocity_command.hpp"
 
 #include "dart_close_command.hpp"
 #include "dart_open_command.hpp"
 #include "dart_pullback_command.hpp"
 #include "dart_release_command.hpp"
+#include <tap/control/press_command_mapping.hpp>
 
 using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::dart;
 using namespace aruwsrc::robot::dart;
+using namespace aruwsrc::communication::sensors;
+using namespace aruwsrc::control::joint::homing::trigger;
+using namespace aruwsrc::control::joint::homing;
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -68,6 +77,38 @@ tap::motor::DoubleDjiMotor pullMotors(
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    YAW_MOTOR_ID,
+    LAUNCHER_CAN_BUS,
+    false,
+    "Yaw Motor",
+    false
+);
+
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak yawLimitSwitch(
+    &drivers()->digital,
+    YAW_LIMITSWITCH_PORT,
+    false
+);
+
+LimitSwitchTrigger yawTrigger(
+    &yawLimitSwitch
+);
+
+aruwsrc::control::joint::homing::TriggerHomedJointSubsystem yawSubsystem(
+    drivers(),
+    yawMotor,
+    yawTrigger,
+    YAW_HOME_CONFIG
+);
+
+DartYawVelocityCommand dartYawVelocityCommand(
+    drivers(),
+    &yawSubsystem,
+    Remote::Channel::LEFT_HORIZONTAL
+);
+
 DartLauncherSubsystem dartLauncher(drivers(), pullMotors);
 
 DartReleaseCommand dartRelease(dartLauncher, MANUAL_RELEASE_DESIRED_OUTPUT);
@@ -75,6 +116,13 @@ DartPullbackCommand dartPullback(dartLauncher, MANUAL_PULLBACK_DESIRED_OUTPUT);
 
 DartOpenCommand servoOpen(dartLauncher);
 DartCloseCommand servoClose(dartLauncher);
+
+HomingCommand yawHome(yawSubsystem);
+
+tap::control::PressCommandMapping leftSwitchDown(
+    drivers(),
+    {&yawHome},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 HoldCommandMapping rightSwitchUp(
     drivers(),
@@ -91,22 +139,28 @@ HoldCommandMapping leftSwitchUp(
     {&servoOpen},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&servoClose},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+// HoldCommandMapping leftSwitchDown(
+//     drivers(),
+//     {&servoClose},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-void initializeSubsystems() { dartLauncher.initialize(); }
+void initializeSubsystems() { 
+    dartLauncher.initialize(); 
+    yawSubsystem.initialize();
+}
 
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
 {
+    drivers->commandScheduler.registerSubsystem(&yawSubsystem);
     drivers->commandScheduler.registerSubsystem(&dartLauncher);
     drivers->digital.configureInputPullMode(
         tap::gpio::Digital::B,
         tap::gpio::Digital::InputPullMode::PullUp);
 }
 
-void setDefaultDartCommands(aruwsrc::dart::Drivers*) {}
+void setDefaultDartCommands(aruwsrc::dart::Drivers*) {
+    yawSubsystem.setDefaultCommand(&dartYawVelocityCommand);
+}
 
 void startDartCommands(aruwsrc::dart::Drivers*) {}
 
