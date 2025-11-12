@@ -255,30 +255,19 @@ VelocityAgitatorSubsystem agitator(
     constants::AGITATOR_PID_CONFIG,
     constants::AGITATOR_CONFIG);
 
-std::array<u_int32_t, 2> wheelIds = {aruwsrc::control::launcher::LEFT_MOTOR_ID, aruwsrc::control::launcher::RIGHT_MOTOR_ID};
-    modm::Pid<float> velocityPIDLeft(aruwsrc::control::launcher::LAUNCHER_PID_KP,
-          aruwsrc::control::launcher::LAUNCHER_PID_KI,
-          aruwsrc::control::launcher::LAUNCHER_PID_KD,
-          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
-          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-    modm::Pid<float> velocityPIDRight(aruwsrc::control::launcher::LAUNCHER_PID_KP,
-          aruwsrc::control::launcher::LAUNCHER_PID_KI,
-          aruwsrc::control::launcher::LAUNCHER_PID_KD,
-          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
-          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-    aruwsrc::control::launcher::FlywheelConfig wheelConfigLeft = {
-        velocityPIDLeft, true, "Left Flywheel"
-    };
-    aruwsrc::control::launcher::FlywheelConfig wheelConfigRight = {
-        velocityPIDRight, false, "Right Flywheel"
-    };
-    std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
+tap::motor::DjiMotor leftWheel(drivers(), aruwsrc::control::launcher::LEFT_MOTOR_ID, aruwsrc::control::launcher::CAN_BUS_MOTORS, true, "Left flywheel");
+tap::motor::DjiMotor rightWheel(drivers(), aruwsrc::control::launcher::RIGHT_MOTOR_ID, aruwsrc::control::launcher::CAN_BUS_MOTORS, false, "Right flywheel");
+std::array<tap::motor::DjiMotor*, 2> wheels = {
+    &leftWheel,
+    &rightWheel
+};
+    std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {aruwsrc::control::launcher::wheelConfigLeft, aruwsrc::control::launcher::wheelConfigRight};
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
     frictionWheelsSubsystem(
         drivers(),
-        wheelIds,
+        wheels,
         wheelConfigs,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),

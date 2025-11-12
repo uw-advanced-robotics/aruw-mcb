@@ -37,8 +37,6 @@ static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 
 struct FlywheelConfig{
     modm::Pid<float> velocityPID;
-    bool isInverted;
-    const char* name;
     // modm::Pid<float> speedCorrectionPID;
     // can add orientation and other stuff here later
 };
@@ -77,6 +75,23 @@ static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 #endif
+
+static modm::Pid<float> velocityPIDLeft(LAUNCHER_PID_KP,
+          LAUNCHER_PID_KI,
+          LAUNCHER_PID_KD,
+          LAUNCHER_PID_MAX_ERROR_SUM,
+          LAUNCHER_PID_MAX_OUTPUT);
+static modm::Pid<float> velocityPIDRight(LAUNCHER_PID_KP,
+          LAUNCHER_PID_KI,
+          LAUNCHER_PID_KD,
+          LAUNCHER_PID_MAX_ERROR_SUM,
+          LAUNCHER_PID_MAX_OUTPUT);
+static FlywheelConfig wheelConfigLeft = {
+    velocityPIDLeft    };
+static FlywheelConfig wheelConfigRight = {
+    velocityPIDRight
+};
+
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KP = 0.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KI = 5.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KD = 0.0f;

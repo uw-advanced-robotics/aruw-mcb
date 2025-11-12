@@ -54,12 +54,12 @@ public:
      */
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
-        std::array<uint32_t, NUM_WHEELS> wheelIDs,
+        std::array<tap::motor::DjiMotor*, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus canBus,
         aruwsrc::can::TurretMCBCanComm *turretMCB,
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheelIDs, wheelConfigs, canBus, turretMCB),
+        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfigs, canBus, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }

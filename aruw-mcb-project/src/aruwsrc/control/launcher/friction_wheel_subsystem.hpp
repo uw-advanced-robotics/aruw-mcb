@@ -69,9 +69,9 @@ public:
      */
     FrictionWheelSubsystem(
     tap::Drivers *drivers,
-    std::array<uint32_t, NUM_WHEELS> wheelIDs,
+    std::array<tap::motor::DjiMotor*, NUM_WHEELS> wheels,
     std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
-    tap::can::CanBus canBus,
+    tap::can::CanBus,
     aruwsrc::can::TurretMCBCanComm *turretMCB)
     : FrictionWheelInterface(drivers),
       drivers(drivers),
@@ -86,13 +86,11 @@ public:
           LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM,
           LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT),
       desiredRpmRamp(0),
+      wheels(wheels),
       turretMCB(turretMCB),
       frictionTestCommand(this)
 {
     this->setTestCommand(&frictionTestCommand);
-    for (uint8_t i = 0; i < NUM_WHEELS; i++) {
-        wheels[i] = new tap::motor::DjiMotor(drivers, tap::motor::MotorId(wheelIDs[i]), canBus, wheelConfigs[i].isInverted, wheelConfigs[i].name);
-    }
 }
 
     void initialize() override
@@ -218,13 +216,13 @@ private:
 public:
     tap::algorithms::Ramp desiredRpmRamp;
 
-    testing::NiceMock<tap::mock::DjiMotorMock>* [NUM_WHEELS] wheels;
+    std::array<testing::NiceMock<tap::mock::DjiMotorMock>*, NUM_WHEELS> wheels;
 
 private:
 #else
     tap::algorithms::Ramp desiredRpmRamp;
 
-    tap::motor::DjiMotor* wheels [NUM_WHEELS];
+    std::array<tap::motor::DjiMotor*, NUM_WHEELS> wheels;
 #endif
 
     aruwsrc::can::TurretMCBCanComm *turretMCB;

@@ -60,6 +60,7 @@
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
@@ -445,8 +446,12 @@ ChassisFrameYawTurretController turretMajorChassisYawController(
     turretMajor::chassisFrameController::YAW_PID_CONFIG);
 
 // Friction Wheels
-// both sentry turrets have the same wheelids ig
-std::array<u_int32_t, 2> wheelIds = {aruwsrc::control::launcher::LEFT_MOTOR_ID, aruwsrc::control::launcher::RIGHT_MOTOR_ID};
+tap::motor::DjiMotor leftTurretLeftWheel(drivers(), aruwsrc::control::launcher::LEFT_MOTOR_ID, turretLeft::CAN_BUS_MOTORS, true, "Left flywheel");
+tap::motor::DjiMotor leftTurretRightWheel(drivers(), aruwsrc::control::launcher::RIGHT_MOTOR_ID, turretLeft::CAN_BUS_MOTORS, false, "Right flywheel");
+std::array<tap::motor::DjiMotor*, 2> leftTurretWheels = {
+    &leftTurretLeftWheel,
+    &leftTurretRightWheel
+};
     modm::Pid<float> leftTurretVelocityPIDLeft(aruwsrc::control::launcher::LAUNCHER_PID_KP,
           aruwsrc::control::launcher::LAUNCHER_PID_KI,
           aruwsrc::control::launcher::LAUNCHER_PID_KD,
@@ -458,21 +463,27 @@ std::array<u_int32_t, 2> wheelIds = {aruwsrc::control::launcher::LEFT_MOTOR_ID, 
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
     aruwsrc::control::launcher::FlywheelConfig leftTurretWheelConfigLeft = {
-        leftTurretVelocityPIDLeft, true, "Left Flywheel"
+        leftTurretVelocityPIDLeft
     };
     aruwsrc::control::launcher::FlywheelConfig leftTurretWheelConfigRight = {
-        leftTurretVelocityPIDRight, false, "Right Flywheel"
+        leftTurretVelocityPIDRight
     };
     std::array<aruwsrc::control::launcher::FlywheelConfig, 2> leftTurretWheelConfigs = {leftTurretWheelConfigLeft, leftTurretWheelConfigRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
     turretLeftFrictionWheels(
         drivers(),
-        wheelIds,
+        leftTurretWheels,
         leftTurretWheelConfigs,
         turretLeft::CAN_BUS_MOTORS,
         &getTurretMCBCanComm2(),
         turretLeft::barrelID);
+        tap::motor::DjiMotor rightTurretLeftWheel(drivers(), aruwsrc::control::launcher::LEFT_MOTOR_ID, turretRight::CAN_BUS_MOTORS, true, "Left flywheel");
+tap::motor::DjiMotor rightTurretRightWheel(drivers(), aruwsrc::control::launcher::RIGHT_MOTOR_ID, turretRight::CAN_BUS_MOTORS, false, "Right flywheel");
+std::array<tap::motor::DjiMotor*, 2> rightTurretWheels = {
+    &rightTurretLeftWheel,
+    &rightTurretRightWheel
+};
 modm::Pid<float> rightTurretVelocityPIDLeft(aruwsrc::control::launcher::LAUNCHER_PID_KP,
           aruwsrc::control::launcher::LAUNCHER_PID_KI,
           aruwsrc::control::launcher::LAUNCHER_PID_KD,
@@ -484,17 +495,17 @@ modm::Pid<float> rightTurretVelocityPIDLeft(aruwsrc::control::launcher::LAUNCHER
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
     aruwsrc::control::launcher::FlywheelConfig rightTurretWheelConfigLeft = {
-        rightTurretVelocityPIDLeft, true, "Left Flywheel"
+        rightTurretVelocityPIDLeft
     };
     aruwsrc::control::launcher::FlywheelConfig rightTurretWheelConfigRight = {
-        rightTurretVelocityPIDRight, false, "Right Flywheel"
+        rightTurretVelocityPIDRight
     };
     std::array<aruwsrc::control::launcher::FlywheelConfig, 2> rightTurretWheelConfigs = {rightTurretWheelConfigLeft, rightTurretWheelConfigRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
     turretRightFrictionWheels(
         drivers(),
-        wheelIds,
+        rightTurretWheels,
         rightTurretWheelConfigs,
         turretRight::CAN_BUS_MOTORS,
         &getTurretMCBCanComm1(),
