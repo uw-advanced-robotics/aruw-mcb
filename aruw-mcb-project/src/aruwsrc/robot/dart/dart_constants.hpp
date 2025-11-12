@@ -37,7 +37,8 @@ static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
 
 static constexpr tap::gpio::Digital::InputPin YAW_LIMITSWITCH_PORT = tap::gpio::Digital::InputPin::B; //TODO: correct constant
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR3; // PLACEHOLDER
-
+static constexpr float YAW_MOTOR_GEAR_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+static constexpr float YAW_LEADSCREW_RATIO = 0;
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config YAW_HOME_CONFIG = {
     .super = {
@@ -47,7 +48,7 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
         .maxSetpointIncrement = upperbound - lowerbound, // is this chill?
         .initSetpoint = 0.0f,
 
-        .encoderRatio = 1.0, //TODO: Actually get the ratio
+        .encoderRatio = YAW_MOTOR_GEAR_RATIO * , //TODO: Actually get the ratio
         .posPidConfig = YAW_PID_CONFIG,
         .maxOutput = YAW_PID_CONFIG.maxOutput,
         .staticFeedforward = 0,
