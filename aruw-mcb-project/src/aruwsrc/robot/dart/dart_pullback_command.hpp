@@ -32,9 +32,9 @@ class DartPullbackCommand : public tap::control::Command
 public:
     DartPullbackCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem, int32_t desiredOutput);
     void initialize() override;
-    void execute() override;
+    void execute() override {}
 
-    void end(bool interrupted) override;
+    void end(bool) override {}
 
     bool isFinished() const override;
 

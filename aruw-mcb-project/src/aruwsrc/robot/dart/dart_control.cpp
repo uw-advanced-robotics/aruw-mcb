@@ -118,6 +118,7 @@ void initializeSubsystems() { dartLauncher.initialize(); }
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&dartLauncher);
+    drivers->commandScheduler.registerSubsystem(&pullMotorSubsystem);
     drivers->digital.configureInputPullMode(
         tap::gpio::Digital::B,
         tap::gpio::Digital::InputPullMode::PullUp);
