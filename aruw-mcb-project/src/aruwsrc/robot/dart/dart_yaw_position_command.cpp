@@ -17,32 +17,38 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dart_yaw_velocity_command.hpp"
+#include "dart_yaw_position_command.hpp"
 
 #include "tap/control/command.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "tap/drivers.hpp"
+#include "aruwsrc/robot/dart/dart_constants.hpp"
 
-namespace aruwsrc::robot::dart{
-    DartYawVelocityCommand::DartYawVelocityCommand(
-        tap::Drivers *drivers,
-        TriggerHomedJointSubsystem *subsystem,
-        Remote::Channel channel
-    ) : drivers(drivers), subsystem(subsystem), channel(channel){
+using namespace aruwsrc::control::joint::homing;
+using tap::communication::serial::Remote;
+namespace aruwsrc::robot::dart
+{
+    DartYawPositionCommand::DartYawPositionCommand(
+        tap::Drivers *drivers, 
+        TriggerHomedJointSubsystem *subsystem, 
+        Remote::Channel channel,
+        tap::algorithms::SmoothPidConfig config,
+        float setpointDegrees
+    ) : drivers(drivers), subsystem(subsystem), channel(channel), pid(config), setpointDegrees(setpointDegrees){
         addSubsystemRequirement(subsystem);
     }
 
-    void DartYawVelocityCommand::initialize(){}
-
-    void DartYawVelocityCommand::execute(){
-        subsystem->setSetpoint(
-            subsystem->getSetpoint() + drivers->remote.getChannel(channel)
-        );
+    void DartYawPositionCommand::initialize(){
+        float setpointRotations = DART_LAUNCHER_YAW_RADIAL_LENGTH * tan(setpointDegrees*PI/180);
+        subsystem->setSetpoint(setpointRotations);
     }
 
-    bool DartYawVelocityCommand::isFinished() const {
-        return abs(drivers->remote.getChannel(channel)) < 0.05;
+    void DartYawPositionCommand::execute(){}
+
+    void DartYawPositionCommand::end(bool interrupted){}
+
+    bool DartYawPositionCommand::isFinished() const {
+        return subsystem->atSetpoint();
     }
 
-    void DartYawVelocityCommand::end(bool interrupted){}
 }
