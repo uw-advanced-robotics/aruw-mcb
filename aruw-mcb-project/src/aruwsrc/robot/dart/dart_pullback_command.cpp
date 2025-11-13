@@ -19,21 +19,24 @@
 
 #include "dart_pullback_command.hpp"
 
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
+
+#include "dart_constants.hpp"
+#include "dart_launcher_subsystem.hpp"
+
 namespace aruwsrc::robot::dart
 {
-DartPullbackCommand::DartPullbackCommand(DartLauncherSubsystem &dartLauncher, int32_t desiredOutput)
-    : dartLauncher(dartLauncher),
+DartPullbackCommand::DartPullbackCommand(
+    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem,
+    int32_t desiredOutput)
+    : pullMotorSubsystem(pullMotorSubsystem),
       desiredOutput(desiredOutput)
 {
-    addSubsystemRequirement(&dartLauncher);
+    addSubsystemRequirement(&pullMotorSubsystem);
 }
 
-void DartPullbackCommand::initialize() {}
+void DartPullbackCommand::initialize() { pullMotorSubsystem.setSetpoint(PULLBACK_PULL_POSITION); }
 
-void DartPullbackCommand::execute() { dartLauncher.moveMotor(desiredOutput); }
-
-void DartPullbackCommand::end(bool) { dartLauncher.moveMotor(0); }
-
-bool DartPullbackCommand::isFinished() const { return dartLauncher.isBeamBroken(); }
+bool DartPullbackCommand::isFinished() const { return pullMotorSubsystem.atSetpoint(); }
 
 }  // namespace aruwsrc::robot::dart

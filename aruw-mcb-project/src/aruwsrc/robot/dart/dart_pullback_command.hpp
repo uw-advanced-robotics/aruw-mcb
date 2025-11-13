@@ -31,17 +31,12 @@ class DartPullbackCommand : public tap::control::Command
 {
 public:
     DartPullbackCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem, int32_t desiredOutput);
-
-    void initialize() override
-    {
-        pullMotorSubsystem.setSetpoint(PULLBACK_PULL_POSITION);
-    }
-
+    void initialize() override;
     void execute() override;
 
     void end(bool interrupted) override;
 
-    bool isFinished() const override { return pullMotorSubsystem.atSetpoint(); }
+    bool isFinished() const override;
 
     const char* getName() const override { return "DART PULLBACK"; }
 

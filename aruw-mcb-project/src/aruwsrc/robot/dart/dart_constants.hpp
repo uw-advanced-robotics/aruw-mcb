@@ -24,6 +24,7 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/servo.hpp"
 
+#include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
 namespace aruwsrc::robot::dart
 {
 static constexpr tap::motor::MotorId UPPER_PULL_MOTOR_ID = tap::motor::MOTOR2;
@@ -33,7 +34,7 @@ static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
-static constexpr int32_t PULLBACK_PULL_POSITION = 0; //TODO: FIND
+static constexpr int32_t PULLBACK_PULL_POSITION = 0;  // TODO: FIND
 
 //  * @param[in] pwmPin The pin to attach the Servo class with.
 //  * @param[in] maximumPwm The maximum allowable PWM output. This is limited between 0 and 1.
@@ -49,10 +50,19 @@ static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;  // TODO: update value when limit switch is installed on dart
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
-    PULL_MOTOR_CONFIG{// TODO: TUNE VALUES
-                      .home = 0.0f,
-                      .homingSpeed = 10.0f,
-                      .homingReversed = false};
+    PULL_MOTOR_CONFIG{
+        // TODO: TUNE VALUES
+        .super{
+            .lowerBound = -10.0f,
+            .upperBound = 5000.0f,
+            .epsilon = 1.0,
+            .posPidConfig{.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f},
+            .maxOutput = 5000.0f,
+
+        },
+        .home = 0.0f,
+        .homingSpeed = 10.0f,
+        .homingReversed = false};
 
 }  // namespace aruwsrc::robot::dart
 #endif
