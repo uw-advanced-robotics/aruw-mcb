@@ -463,10 +463,10 @@ std::array<tap::motor::DjiMotor*, 2> leftTurretWheels = {
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
     aruwsrc::control::launcher::FlywheelConfig leftTurretWheelConfigLeft = {
-        leftTurretVelocityPIDLeft
+        leftTurretVelocityPIDLeft, 0.0f
     };
     aruwsrc::control::launcher::FlywheelConfig leftTurretWheelConfigRight = {
-        leftTurretVelocityPIDRight
+        leftTurretVelocityPIDRight, 0.0f
     };
     std::array<aruwsrc::control::launcher::FlywheelConfig, 2> leftTurretWheelConfigs = {leftTurretWheelConfigLeft, leftTurretWheelConfigRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -495,10 +495,10 @@ modm::Pid<float> rightTurretVelocityPIDLeft(aruwsrc::control::launcher::LAUNCHER
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
           aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
     aruwsrc::control::launcher::FlywheelConfig rightTurretWheelConfigLeft = {
-        rightTurretVelocityPIDLeft
+        rightTurretVelocityPIDLeft, 0.0f
     };
     aruwsrc::control::launcher::FlywheelConfig rightTurretWheelConfigRight = {
-        rightTurretVelocityPIDRight
+        rightTurretVelocityPIDRight, 0.0f
     };
     std::array<aruwsrc::control::launcher::FlywheelConfig, 2> rightTurretWheelConfigs = {rightTurretWheelConfigLeft, rightTurretWheelConfigRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
