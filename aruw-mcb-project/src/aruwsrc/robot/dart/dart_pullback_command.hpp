@@ -22,17 +22,19 @@
 #include "tap/control/command.hpp"
 
 #include "dart_launcher_subsystem.hpp"
-
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
+#include "dart_constants.hpp"
+using namespace aruwsrc::robot::dart;
 namespace aruwsrc::robot::dart
 {
 class DartPullbackCommand : public tap::control::Command
 {
 public:
-    DartPullbackCommand(TriggerHomedJointSubsystem& pullMotorSubsystem, int32_t desiredOutput);
+    DartPullbackCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem, int32_t desiredOutput);
 
     void initialize() override
     {
-        pullMotorSubsystem.setSetpoint(aruwsrc::robot::dart::PULLBACK_PULL_POSITION);
+        pullMotorSubsystem.setSetpoint(PULLBACK_PULL_POSITION);
     }
 
     void execute() override;
@@ -44,7 +46,7 @@ public:
     const char* getName() const override { return "DART PULLBACK"; }
 
 private:
-    TriggerHomedJointSubsystem& pullMotorSubsystem;
+    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem;
     int32_t desiredOutput;
 };  // class DartPullbackCommand
 
