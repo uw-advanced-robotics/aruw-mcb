@@ -85,8 +85,8 @@
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
@@ -184,30 +184,37 @@ XDriveChassisSubsystem chassis(
     rightBackChassisMotor,
     aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
-tap::motor::DjiMotor leftWheel(drivers(), aruwsrc::control::launcher::LEFT_MOTOR_ID, aruwsrc::control::launcher::CAN_BUS_MOTORS, true, "Left flywheel");
-tap::motor::DjiMotor rightWheel(drivers(), aruwsrc::control::launcher::RIGHT_MOTOR_ID, aruwsrc::control::launcher::CAN_BUS_MOTORS, false, "Right flywheel");
-std::array<tap::motor::DjiMotor*, 2> wheels = {
-    &leftWheel,
-    &rightWheel
-};
-    modm::Pid<float> velocityPIDLeft(aruwsrc::control::launcher::LAUNCHER_PID_KP,
-          aruwsrc::control::launcher::LAUNCHER_PID_KI,
-          aruwsrc::control::launcher::LAUNCHER_PID_KD,
-          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
-          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-    modm::Pid<float> velocityPIDRight(aruwsrc::control::launcher::LAUNCHER_PID_KP,
-          aruwsrc::control::launcher::LAUNCHER_PID_KI,
-          aruwsrc::control::launcher::LAUNCHER_PID_KD,
-          aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
-          aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-    FlywheelConfig wheelConfigLeft = {
-        velocityPIDLeft, 0.0f
-    };
-    FlywheelConfig wheelConfigRight = {
-        velocityPIDRight, 0.0f
-    };
-    std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
-RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
+tap::motor::DjiMotor leftWheel(
+    drivers(),
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    true,
+    "Left flywheel");
+tap::motor::DjiMotor rightWheel(
+    drivers(),
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    false,
+    "Right flywheel");
+std::array<tap::motor::DjiMotor *, 2> wheels = {&leftWheel, &rightWheel};
+modm::Pid<float> velocityPIDLeft(
+    aruwsrc::control::launcher::LAUNCHER_PID_KP,
+    aruwsrc::control::launcher::LAUNCHER_PID_KI,
+    aruwsrc::control::launcher::LAUNCHER_PID_KD,
+    aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+    aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
+modm::Pid<float> velocityPIDRight(
+    aruwsrc::control::launcher::LAUNCHER_PID_KP,
+    aruwsrc::control::launcher::LAUNCHER_PID_KI,
+    aruwsrc::control::launcher::LAUNCHER_PID_KD,
+    aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
+    aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
+FlywheelConfig wheelConfigLeft = {velocityPIDLeft, 0.0f};
+FlywheelConfig wheelConfigRight = {velocityPIDRight, 0.0f};
+std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
+RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
+    2>
     frictionWheelsSubsystem(
         drivers(),
         wheels,
@@ -216,7 +223,7 @@ RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_A
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
-FrictionWheelInterface& frictionWheels = frictionWheelsSubsystem;
+FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
 
 VelocityAgitatorSubsystem kickerAgitator(
     drivers(),

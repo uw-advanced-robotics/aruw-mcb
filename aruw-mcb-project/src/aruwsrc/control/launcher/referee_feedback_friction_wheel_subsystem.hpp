@@ -25,11 +25,11 @@
 #include "tap/drivers.hpp"
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "modm/container/deque.hpp"
 
 #include "friction_wheel_subsystem.hpp"
-#include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
-#include "aruwsrc/control/launcher/launcher_constants.hpp"
 
 namespace aruwsrc::control::launcher
 {
@@ -54,7 +54,7 @@ public:
      */
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
-        std::array<tap::motor::DjiMotor*, NUM_WHEELS> wheels,
+        std::array<tap::motor::DjiMotor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus canBus,
         aruwsrc::can::TurretMCBCanComm *turretMCB,

@@ -17,12 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "friction_wheel_interface.hpp"
 #include "friction_wheel_spin_ref_limited_command.hpp"
-#include "launcher_constants.hpp"
+
 #include "tap/drivers.hpp"
 
 #include "modm/architecture/interface/assert.hpp"
+
+#include "friction_wheel_interface.hpp"
+#include "launcher_constants.hpp"
 
 namespace aruwsrc::control::launcher
 {

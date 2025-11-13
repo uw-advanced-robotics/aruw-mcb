@@ -34,8 +34,8 @@ void FrictionWheelTestCommand::end(bool) { this->subsystem->setDesiredLaunchSpee
 
 bool FrictionWheelTestCommand::isFinished() const
 {
-    // return abs(this->subsystem->rightWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI) > 4000.0f;
-    // uh... this whole thing is cooked
+    // return abs(this->subsystem->rightWheel.getEncoder()->getVelocity() * 60.0f / M_TWOPI) >
+    // 4000.0f; uh... this whole thing is cooked
     return false;
 }
 

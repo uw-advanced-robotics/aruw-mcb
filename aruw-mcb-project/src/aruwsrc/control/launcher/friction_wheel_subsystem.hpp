@@ -20,12 +20,13 @@
 #ifndef FRICTION_WHEEL_SUBSYSTEM_HPP_
 #define FRICTION_WHEEL_SUBSYSTEM_HPP_
 
-#include "friction_wheel_interface.hpp"
-#include "tap/architecture/clock.hpp"
-#include "tap/algorithms/ramp.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/ramp.hpp"
+#include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 #include "tap/util_macros.hpp"
+
+#include "friction_wheel_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
@@ -33,9 +34,9 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "modm/math/filter/pid.hpp"
 
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "friction_wheel_test_command.hpp"
 #include "launcher_constants.hpp"
 
@@ -53,13 +54,13 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::launcher
 {
-
 /**
  * A subsystem which regulates the speed of an n-wheel shooter system using velocity PID
  * controllers. Allows the user to specify the desired launch speed of the shooter.
- * Currently configured to work with hero and idk if it works for other robots. 
+ * Currently configured to work with hero and idk if it works for other robots.
  */
-template<std::size_t NUM_WHEELS> class FrictionWheelSubsystem : public FrictionWheelInterface
+template <std::size_t NUM_WHEELS>
+class FrictionWheelSubsystem : public FrictionWheelInterface
 {
     friend class FrictionWheelTestCommand;
 
@@ -68,38 +69,39 @@ public:
      * Creates a new friction wheel subsystem
      */
     FrictionWheelSubsystem(
-    tap::Drivers *drivers,
-    std::array<tap::motor::DjiMotor*, NUM_WHEELS> wheels,
-    std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
-    tap::can::CanBus,
-    aruwsrc::can::TurretMCBCanComm *turretMCB)
-    : FrictionWheelInterface(drivers),
-      drivers(drivers),
-      launchSpeedLinearInterpolator(
-          LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
-          MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
+        tap::Drivers *drivers,
+        std::array<tap::motor::DjiMotor *, NUM_WHEELS> wheels,
+        std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
+        tap::can::CanBus,
+        aruwsrc::can::TurretMCBCanComm *turretMCB)
+        : FrictionWheelInterface(drivers),
+          drivers(drivers),
+          launchSpeedLinearInterpolator(
+              LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+              MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
           flywheelConfigs(wheelConfigs),
-      speedCorrectionPid(
-          LAUNCHER_SPEED_CORRECTION_PID_KP,
-          LAUNCHER_SPEED_CORRECTION_PID_KI,
-          LAUNCHER_SPEED_CORRECTION_PID_KD,
-          LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM,
-          LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT),
-      desiredRpmRamp(0),
-      wheels(wheels),
-      turretMCB(turretMCB),
-      frictionTestCommand(this)
-{
-    this->setTestCommand(&frictionTestCommand);
-}
+          speedCorrectionPid(
+              LAUNCHER_SPEED_CORRECTION_PID_KP,
+              LAUNCHER_SPEED_CORRECTION_PID_KI,
+              LAUNCHER_SPEED_CORRECTION_PID_KD,
+              LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM,
+              LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT),
+          desiredRpmRamp(0),
+          wheels(wheels),
+          turretMCB(turretMCB),
+          frictionTestCommand(this)
+    {
+        this->setTestCommand(&frictionTestCommand);
+    }
 
     void initialize() override
-{
-    for (tap::motor::DjiMotor* wheel : wheels) {
+    {
+        for (tap::motor::DjiMotor *wheel : wheels)
+        {
             wheel->initialize();
         }
-    prevTime = tap::arch::clock::getTimeMilliseconds();
-}
+        prevTime = tap::arch::clock::getTimeMilliseconds();
+    }
 
     /**
      * Set the projectile launch speed - at what speed the pellets
@@ -110,21 +112,23 @@ public:
      * @param[in] speed The launch speed in m/s.
      */
     mockable void setDesiredLaunchSpeed(float speed) override
-{
-    desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
-    desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
-    if (turretMCB != nullptr)
     {
-        turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
-    }
-};
+        desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
+        desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
+        if (turretMCB != nullptr)
+        {
+            turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
+        }
+    };
 
-    // also need to changeWheelVelocityState to index, true for this to be used 
-    void setIndividualVelocity(int index, float velocity) override {
+    // also need to changeWheelVelocityState to index, true for this to be used
+    void setIndividualVelocity(int index, float velocity) override
+    {
         individualWheelVelocities[index] = velocity;
     }
 
-    void changeWheelVelocityState(int index, bool hasIndividualVelocity) override {
+    void changeWheelVelocityState(int index, bool hasIndividualVelocity) override
+    {
         isWheelVelocityOverridden[index] = hasIndividualVelocity;
     }
 
@@ -140,56 +144,69 @@ public:
      * @return The average measured friction wheel speed of the launcher in RPM.
      */
     float getCurrentAverageFrictionWheelSpeed() const override
-{
-    float sum = 0;
-    for (uint8_t i = 0; i < NUM_WHEELS; i++) {
-        sum += wheels[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    {
+        float sum = 0;
+        for (uint8_t i = 0; i < NUM_WHEELS; i++)
+        {
+            sum += wheels[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+        }
+        return sum / NUM_WHEELS;
     }
-    return sum / NUM_WHEELS;
-}
 
     /**
      * @return The measured friction wheel speed of the nth flywheel in launcher in RPM.
      */
     float getCurrentIndividualFrictionWheelSpeed(int index) const override
-{
-    return wheels[index]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
-}
+    {
+        return wheels[index]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    }
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
-    void refresh() override {
-    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    if (currTime == prevTime)
+    void refresh() override
     {
-        return;
-    }
-    desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
+        uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+        if (currTime == prevTime)
+        {
+            return;
+        }
+        desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
 #if defined(ALL_STANDARDS)
-    if (prevShotTime != drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp)
-    {
-        prevShotTime = drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
-        speedCorrectionPid.update(
-            drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED);
-    }
-    speedCorrection = speedCorrectionPid.getValue();
+        if (prevShotTime !=
+            drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp)
+        {
+            prevShotTime =
+                drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
+            speedCorrectionPid.update(
+                drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED);
+        }
+        speedCorrection = speedCorrectionPid.getValue();
 #endif
 
-    prevTime = currTime;
+        prevTime = currTime;
 
-    for (uint8_t i = 0; i < NUM_WHEELS; i++) {
-        if (isWheelVelocityOverridden[i]) { 
-            flywheelConfigs[i].velocityPID.update(individualWheelVelocities[i] - getCurrentIndividualFrictionWheelSpeed(i));
-        } else {
-            flywheelConfigs[i].velocityPID.update(desiredRpmRamp.getValue() - getCurrentIndividualFrictionWheelSpeed(i) - speedCorrection);
+        for (uint8_t i = 0; i < NUM_WHEELS; i++)
+        {
+            if (isWheelVelocityOverridden[i])
+            {
+                flywheelConfigs[i].velocityPID.update(
+                    individualWheelVelocities[i] - getCurrentIndividualFrictionWheelSpeed(i));
+            }
+            else
+            {
+                flywheelConfigs[i].velocityPID.update(
+                    desiredRpmRamp.getValue() - getCurrentIndividualFrictionWheelSpeed(i) -
+                    speedCorrection);
+            }
+            wheels[i]->setDesiredOutput(
+                static_cast<int32_t>(flywheelConfigs[i].velocityPID.getValue()));
         }
-        wheels[i]->setDesiredOutput(static_cast<int32_t>(flywheelConfigs[i].velocityPID.getValue()));
     }
-}
 
     void refreshSafeDisconnect() override
     {
-        for (tap::motor::DjiMotor* wheel : wheels) {
+        for (tap::motor::DjiMotor *wheel : wheels)
+        {
             wheel->setDesiredOutput(0);
         }
     }
@@ -225,19 +242,20 @@ private:
     uint32_t prevTime = 0;
 
     bool isWheelVelocityOverridden[NUM_WHEELS] = {0};
-    float individualWheelVelocities[NUM_WHEELS] = {0}; // is zero if wheel is using shared desiredLaunchSpeed
+    float individualWheelVelocities[NUM_WHEELS] = {
+        0};  // is zero if wheel is using shared desiredLaunchSpeed
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
     tap::algorithms::Ramp desiredRpmRamp;
 
-    std::array<testing::NiceMock<tap::mock::DjiMotorMock>*, NUM_WHEELS> wheels;
+    std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, NUM_WHEELS> wheels;
 
 private:
 #else
     tap::algorithms::Ramp desiredRpmRamp;
 
-    std::array<tap::motor::DjiMotor*, NUM_WHEELS> wheels;
+    std::array<tap::motor::DjiMotor *, NUM_WHEELS> wheels;
 #endif
 
     aruwsrc::can::TurretMCBCanComm *turretMCB;
@@ -253,9 +271,9 @@ private:
      * @return A friction wheel RPM that the given `launchSpeed` maps to.
      */
     float launchSpeedToFrictionWheelRpm(float launchSpeed) const
-{
-    return launchSpeedLinearInterpolator.interpolate(launchSpeed);
-};
+    {
+        return launchSpeedLinearInterpolator.interpolate(launchSpeed);
+    };
 };
 
 }  // namespace aruwsrc::control::launcher

@@ -23,12 +23,13 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::control::launcher {
-class FrictionWheelInterface : public tap::control::Subsystem {
+namespace aruwsrc::control::launcher
+{
+class FrictionWheelInterface : public tap::control::Subsystem
+{
     // holder interface to hide templates
-    
-    public: 
-    
+
+public:
     FrictionWheelInterface(tap::Drivers* drivers) : tap::control::Subsystem(drivers) {}
 
     virtual float getPredictedLaunchSpeed() const = 0;
@@ -49,7 +50,7 @@ class FrictionWheelInterface : public tap::control::Subsystem {
 
     virtual float getCurrentIndividualFrictionWheelSpeed(int index) const = 0;
 
-    virtual const char *getName() const = 0;
+    virtual const char* getName() const = 0;
 };
-} // namespace aruwsrc::control::launcher
+}  // namespace aruwsrc::control::launcher
 #endif
