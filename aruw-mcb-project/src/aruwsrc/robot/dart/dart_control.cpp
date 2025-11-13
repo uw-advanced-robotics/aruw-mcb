@@ -27,6 +27,7 @@
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/joint/homing/homing_command.hpp"
 #include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -70,6 +71,18 @@ tap::motor::DoubleDjiMotor pullMotors(
     "Upper Motor",
     "Lower Motor");
 
+// aruwsrc::communication::sensors::beam_break::DigitalBeamBreak limitSwitch(
+//     &(drivers()->digital),
+//     LIMIT_SWITCH_PORT,
+//     true);
+
+// aruwsrc::control::joint::homing::trigger::LimitSwitchTrigger limit(&limitSwitch);
+
+/*
+ TODO: we will need to change to limit switch once it is added.
+    For now, we are using a beam break as a placeholder.
+*/
+
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak beamBreak(
     &(drivers()->digital),
     BEAMBREAK_PORT,
@@ -93,25 +106,40 @@ DartPullbackCommand dartPullback(pullMotorSubsystem, MANUAL_PULLBACK_DESIRED_OUT
 DartOpenCommand servoOpen(dartLauncher);
 DartCloseCommand servoClose(dartLauncher);
 
-HoldCommandMapping rightSwitchUp(
-    drivers(),
-    {&dartPullback},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
-HoldCommandMapping rightSwitchDown(
-    drivers(),
-    {&dartRelease},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+HomingCommand pullMotorHome(pullMotorSubsystem);
 
-HoldCommandMapping leftSwitchUp(
+
+
+// Left Up + Right Up -> Servo Open
+HoldCommandMapping leftUpRightUp(
     drivers(),
     {&servoOpen},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
-HoldCommandMapping leftSwitchDown(
+// Left Up + Right Down -> Servo Close
+HoldCommandMapping leftUpRightDown(
     drivers(),
     {&servoClose},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+
+// Left Mid + Right Up -> Home Pullback
+HoldCommandMapping leftMidRightUp(
+    drivers(),
+    {&pullMotorHome},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+
+// Left Mid + Right Down -> Pullback Dart
+HoldCommandMapping leftMidRightDown(
+    drivers(),
+    {&dartPullback},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
+
+// Left Down + Right Up -> Home Yaw (placeholder) TODO: CHANGE
+HoldCommandMapping leftDownRightUp(
+    drivers(),
+    {&pullMotorHome},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
 void initializeSubsystems() { dartLauncher.initialize(); }
 
@@ -130,10 +158,11 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftUpRightUp);
+    drivers->commandMapper.addMap(&leftUpRightDown);
+    drivers->commandMapper.addMap(&leftMidRightUp);
+    drivers->commandMapper.addMap(&leftMidRightDown);
+    drivers->commandMapper.addMap(&leftDownRightUp);
 }
 
 }  // namespace dart_control
