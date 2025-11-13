@@ -88,8 +88,8 @@
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
-#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
+#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
@@ -255,16 +255,26 @@ VelocityAgitatorSubsystem agitator(
     constants::AGITATOR_PID_CONFIG,
     constants::AGITATOR_CONFIG);
 
-tap::motor::DjiMotor leftWheel(drivers(), aruwsrc::control::launcher::LEFT_MOTOR_ID, aruwsrc::control::launcher::CAN_BUS_MOTORS, true, "Left flywheel");
-tap::motor::DjiMotor rightWheel(drivers(), aruwsrc::control::launcher::RIGHT_MOTOR_ID, aruwsrc::control::launcher::CAN_BUS_MOTORS, false, "Right flywheel");
-std::array<tap::motor::DjiMotor*, 2> wheels = {
-    &leftWheel,
-    &rightWheel
-};
-    std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {aruwsrc::control::launcher::wheelConfigLeft, aruwsrc::control::launcher::wheelConfigRight};
+tap::motor::DjiMotor leftWheel(
+    drivers(),
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    true,
+    "Left flywheel");
+tap::motor::DjiMotor rightWheel(
+    drivers(),
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    false,
+    "Right flywheel");
+std::array<tap::motor::DjiMotor *, 2> wheels = {&leftWheel, &rightWheel};
+std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {
+    aruwsrc::control::launcher::wheelConfigLeft,
+    aruwsrc::control::launcher::wheelConfigRight};
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE, 2>
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
+    2>
     frictionWheelsSubsystem(
         drivers(),
         wheels,
@@ -273,7 +283,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-aruwsrc::control::launcher::FrictionWheelInterface& frictionWheels = frictionWheelsSubsystem;
+aruwsrc::control::launcher::FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
