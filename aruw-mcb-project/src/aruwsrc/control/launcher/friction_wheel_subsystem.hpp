@@ -119,6 +119,15 @@ public:
     }
 };
 
+    // also need to changeWheelVelocityState to index, true for this to be used 
+    void setIndividualVelocity(int index, float velocity) override {
+        individualWheelVelocities[index] = velocity;
+    }
+
+    void changeWheelVelocityState(int index, bool hasIndividualVelocity) override {
+        isWheelVelocityOverridden[index] = hasIndividualVelocity;
+    }
+
     mockable float getDesiredLaunchSpeed() const override { return desiredLaunchSpeed; }
 
     mockable float getDesiredFrictionWheelSpeed() const override
@@ -146,7 +155,6 @@ public:
 {
     return wheels[index]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
 }
-
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
@@ -170,7 +178,11 @@ public:
     prevTime = currTime;
 
     for (uint8_t i = 0; i < NUM_WHEELS; i++) {
-        flywheelConfigs[i].velocityPID.update(desiredRpmRamp.getValue() - getCurrentIndividualFrictionWheelSpeed(i) - speedCorrection);
+        if (isWheelVelocityOverridden[i]) { 
+            flywheelConfigs[i].velocityPID.update(individualWheelVelocities[i] - getCurrentIndividualFrictionWheelSpeed(i));
+        } else {
+            flywheelConfigs[i].velocityPID.update(desiredRpmRamp.getValue() - getCurrentIndividualFrictionWheelSpeed(i) - speedCorrection);
+        }
         wheels[i]->setDesiredOutput(static_cast<int32_t>(flywheelConfigs[i].velocityPID.getValue()));
     }
 }
@@ -211,6 +223,9 @@ private:
     float speedCorrection = 0.0f;
 
     uint32_t prevTime = 0;
+
+    bool isWheelVelocityOverridden[NUM_WHEELS] = {0};
+    float individualWheelVelocities[NUM_WHEELS] = {0}; // is zero if wheel is using shared desiredLaunchSpeed
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

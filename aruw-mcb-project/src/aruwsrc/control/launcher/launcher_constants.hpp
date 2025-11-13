@@ -37,7 +37,7 @@ static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 
 struct FlywheelConfig{
     modm::Pid<float> velocityPID;
-    // modm::Pid<float> speedCorrectionPID;
+    float orientation;
     // can add orientation and other stuff here later
 };
 
@@ -87,9 +87,9 @@ static modm::Pid<float> velocityPIDRight(LAUNCHER_PID_KP,
           LAUNCHER_PID_MAX_ERROR_SUM,
           LAUNCHER_PID_MAX_OUTPUT);
 static FlywheelConfig wheelConfigLeft = {
-    velocityPIDLeft    };
+    velocityPIDLeft, 0.0f};
 static FlywheelConfig wheelConfigRight = {
-    velocityPIDRight
+    velocityPIDRight, 0.0f
 };
 
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KP = 0.0f;
