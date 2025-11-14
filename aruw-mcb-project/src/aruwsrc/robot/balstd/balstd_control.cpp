@@ -80,7 +80,7 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace balstd_control
 {
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -256,7 +256,7 @@ HoldCommandMapping leftMidRightUp(
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerStandardSubsystems(Drivers *drivers)
+void registerStandardSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -278,14 +278,14 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultStandardCommands(Drivers *)
+void setDefaultStandardCommands(Drivers*)
 {
     // turret.setDefaultCommand(&turretUserControlCommand);
     // chassis.setDefaultCommand(&chassisAutorotateCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startStandardCommands(Drivers *drivers)
+void startStandardCommands(Drivers* drivers)
 {
     drivers->commandScheduler.addCommand(&startupChime);
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
@@ -306,20 +306,20 @@ void registerStandardIoMappings(Drivers* drivers)
 
 namespace aruwsrc::balstd
 {
-void initSubsystemCommands(aruwsrc::balstd::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::balstd::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &balstd_control::remoteSafeDisconnectFunction);
     balstd_control::initializeSubsystems();
     balstd_control::registerStandardSubsystems(drivers);
     balstd_control::setDefaultStandardCommands(drivers);
-    balstd_control::startStandardCommands(drivers);
     balstd_control::registerStandardIoMappings(drivers);
+    balstd_control::startStandardCommands(drivers);
 }
 }  // namespace aruwsrc::balstd
 
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand()
+imu::ImuCalibrateCommand* getImuCalibrateCommand()
 {
     return nullptr;  //&balstd_control::imuCalibrateCommand;
 }

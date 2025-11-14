@@ -19,6 +19,8 @@
 
 #include "manual_leg_controller.hpp"
 
+using Input = aruwsrc::balstd::BalstdControlOperatorInterface::Input;
+
 namespace aruwsrc::balstd::chassis::controllers
 {
 void ManualLegController::initialize(const BalstdChassisState&)
@@ -29,18 +31,18 @@ void ManualLegController::initialize(const BalstdChassisState&)
 BalstdChassisOutput ManualLegController::runController(const BalstdChassisState&, float)
 {
     return BalstdChassisOutput(
-        // controlOperatorInterface.getManualLegXForce(),
-        // controlOperatorInterface.getManualLegYForce() +
-        //     controlOperatorInterface.getManualGravCompForce(),
+        // controlOperatorInterface.getInput<Input::MANUAL_LEG_X_FORCE>(),
+        // controlOperatorInterface.getInput<Input::MANUAL_LEG_Y_FORCE>() +
+        //     controlOperatorInterface.getInput<Input::MANUAL_GRAV_COMP>(),
         0.0f,
         0.0f,
-        controlOperatorInterface.getManualLegXForce(),
-        controlOperatorInterface.getManualLegYForce() +
-            controlOperatorInterface.getManualGravCompForce(),
-        controlOperatorInterface.getManualWheelTorque() +
-            controlOperatorInterface.getManualSteerTorque(),
-        controlOperatorInterface.getManualWheelTorque() -
-            controlOperatorInterface.getManualSteerTorque());
+        controlOperatorInterface.getInput<Input::MANUAL_LEG_X_FORCE>(),
+        controlOperatorInterface.getInput<Input::MANUAL_LEG_Y_FORCE>() +
+            controlOperatorInterface.getInput<Input::MANUAL_GRAV_COMP>(),
+        controlOperatorInterface.getInput<Input::MANUAL_WHEEL_TORQUE>() +
+            controlOperatorInterface.getInput<Input::MANUAL_STEER_TORQUE>(),
+        controlOperatorInterface.getInput<Input::MANUAL_WHEEL_TORQUE>() -
+            controlOperatorInterface.getInput<Input::MANUAL_STEER_TORQUE>());
 }
 
 }  // namespace aruwsrc::balstd::chassis::controllers

@@ -28,6 +28,7 @@
 using tap::algorithms::Angle;
 using tap::algorithms::CMSISMat;
 using tap::algorithms::WrappedFloat;
+using Input = aruwsrc::balstd::BalstdControlOperatorInterface::Input;
 
 namespace aruwsrc::balstd::chassis::controllers
 {
@@ -63,16 +64,18 @@ float hipTorque;
 BalstdChassisOutput BalanceController::runController(const BalstdChassisState& currState, float dt)
 {
     // update state references
-    vmRef.data[2] += controlOperatorInterface.getXVel() * dt;
-    yawSetpoint += controlOperatorInterface.getYawVel() * dt;
+    vmRef.data[2] += controlOperatorInterface.getInput<Input::X_VEL>() * dt;
+    yawSetpoint += controlOperatorInterface.getInput<Input::YAW_VEL>() * dt;
 
-    heightSetpoint.setTarget(std::clamp(
-        heightSetpoint.getTarget() + controlOperatorInterface.getHeightVel() * dt,
-        config.minHeight,
-        config.maxHeight));
+    heightSetpoint.setTarget(
+        std::clamp(
+            heightSetpoint.getTarget() +
+                controlOperatorInterface.getInput<Input::HEIGHT_VEL>() * dt,
+            config.minHeight,
+            config.maxHeight));
     heightSetpoint.update(config.maxHeightSetpointVel * dt);
 
-    rollSetpoint.setTarget(controlOperatorInterface.getRoll());
+    rollSetpoint.setTarget(controlOperatorInterface.getInput<Input::ROLL>());
     rollSetpoint.update(config.maxRollSetpointVel * dt);
 
     // LQR

@@ -19,8 +19,6 @@
 
 #include "balstd_control_operator_interface.hpp"
 
-using Channel = tap::communication::serial::Remote::Channel;
-
 namespace aruwsrc::balstd
 {
 float BalstdControlOperatorInterface::getRemoteChannel(Channel channel)
@@ -33,57 +31,9 @@ float BalstdControlOperatorInterface::getRemoteChannel(Channel channel)
     return channelHeldOver[static_cast<size_t>(channel)] ? 0.0f : val;
 }
 
-float BalstdControlOperatorInterface::getModeRestrictedInput(
-    tap::communication::serial::Remote::Channel channel,
-    Mode mode,
-    float max)
+float BalstdControlOperatorInterface::getModeRestrictedInput(Channel channel, Mode mode, float max)
 {
     return (this->mode == mode) ? getRemoteChannel(channel) * max : 0.0f;
-}
-
-float BalstdControlOperatorInterface::getXVel()
-{
-    return getModeRestrictedInput(Channel::LEFT_VERTICAL, Mode::BALANCE, MAX_X_VEL);
-}
-
-float BalstdControlOperatorInterface::getYawVel()
-{
-    return -getModeRestrictedInput(Channel::RIGHT_HORIZONTAL, Mode::BALANCE, MAX_YAW_VEL);
-}
-
-float BalstdControlOperatorInterface::getRoll()
-{
-    return -getModeRestrictedInput(Channel::LEFT_HORIZONTAL, Mode::BALANCE, MAX_ROLL);
-}
-
-float BalstdControlOperatorInterface::getHeightVel()
-{
-    return -getModeRestrictedInput(Channel::WHEEL, Mode::BALANCE, MAX_HEIGHT_VEL);
-}
-
-float BalstdControlOperatorInterface::getManualLegXForce()
-{
-    return getModeRestrictedInput(Channel::LEFT_HORIZONTAL, Mode::MANUAL, MAX_LEG_FORCE);
-}
-
-float BalstdControlOperatorInterface::getManualLegYForce()
-{
-    return -getModeRestrictedInput(Channel::LEFT_VERTICAL, Mode::MANUAL, MAX_LEG_FORCE);
-}
-
-float BalstdControlOperatorInterface::getManualWheelTorque()
-{
-    return getModeRestrictedInput(Channel::RIGHT_VERTICAL, Mode::MANUAL, MAX_WHEEL_TORQUE);
-}
-
-float BalstdControlOperatorInterface::getManualSteerTorque()
-{
-    return getModeRestrictedInput(Channel::RIGHT_HORIZONTAL, Mode::MANUAL, MAX_STEER_TORQUE);
-}
-
-float BalstdControlOperatorInterface::getManualGravCompForce()
-{
-    return getModeRestrictedInput(Channel::WHEEL, Mode::MANUAL, MAX_MANUAL_GRAV_COMP_FORCE);
 }
 
 }  // namespace aruwsrc::balstd

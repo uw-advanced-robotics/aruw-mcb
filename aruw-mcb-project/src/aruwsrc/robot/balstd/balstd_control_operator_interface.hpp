@@ -27,77 +27,117 @@ namespace aruwsrc::balstd
 class BalstdControlOperatorInterface : public aruwsrc::control::ControlOperatorInterface
 {
 public:
+    using Channel = tap::communication::serial::Remote::Channel;
+
     enum class Mode
     {
         MANUAL = 0,
         BALANCE
     };
 
+    enum class Input
+    {
+        X_VEL = 0,
+        YAW_VEL,
+        ROLL,
+        HEIGHT_VEL,
+        MANUAL_LEG_X_FORCE,
+        MANUAL_LEG_Y_FORCE,
+        MANUAL_WHEEL_TORQUE,
+        MANUAL_STEER_TORQUE,
+        MANUAL_GRAV_COMP,
+        NUM_INPUTS,
+    };
+
+    struct InputConfig
+    {
+        Channel channel;
+        Mode mode;
+        float max;
+    };
+
     BalstdControlOperatorInterface(tap::Drivers* drivers) : ControlOperatorInterface(drivers) {}
 
-    mockable float getXVel();
-
-    mockable float getYawVel();
-
-    mockable float getRoll();
-
-    mockable float getHeightVel();
-
-    // ====================
-    // testing input modes
-    // ====================
-    /**
-     * @return The value used for testing leg VMC movement forward/backward
-     */
-    mockable float getManualLegXForce();
-
-    /**
-     * @return The value used for testing leg VMC up/down movement
-     */
-    mockable float getManualLegYForce();
-
-    /**
-     * @return The value used for testing leg wheel torque
-     */
-    mockable float getManualWheelTorque();
-
-    /**
-     * @return The value used for steering when manual driving
-     */
-    mockable float getManualGravCompForce();
-
-    /**
-     * @return The value used for steering when manual driving
-     */
-    mockable float getManualSteerTorque();
+    template <Input I>
+    inline float getInput()
+    {
+        constexpr Channel channel = INPUTS[static_cast<size_t>(I)].channel;
+        constexpr Mode mode = INPUTS[static_cast<size_t>(I)].mode;
+        constexpr float max = INPUTS[static_cast<size_t>(I)].max;
+        return getModeRestrictedInput(channel, mode, max);
+    }
 
     inline void setMode(Mode newMode)
     {
         if (mode == newMode) return;
         mode = newMode;
-        for (size_t i = 0; i < 6; i++) channelHeldOver[i] = true;
+        for (size_t i = 0; i < 5; i++) channelHeldOver[i] = true;
     }
 
 private:
-    inline float getRemoteChannel(tap::communication::serial::Remote::Channel channel);
+    inline float getRemoteChannel(Channel channel);
 
-    inline float getModeRestrictedInput(
-        tap::communication::serial::Remote::Channel channel,
-        Mode mode,
-        float max);
+    float getModeRestrictedInput(Channel channel, Mode mode, float max);
 
     Mode mode;
-    bool channelHeldOver[6];
+    bool channelHeldOver[5];
 
-    static constexpr float MAX_X_VEL = 0.4f;         // m/s
-    static constexpr float MAX_YAW_VEL = 1.0f;       // rad/s
-    static constexpr float MAX_ROLL = M_PI / 6;      // rad
-    static constexpr float MAX_HEIGHT_VEL = 0.025f;  // m/s
-
-    static constexpr float MAX_LEG_FORCE = 95.0f;               // N
-    static constexpr float MAX_WHEEL_TORQUE = 5.0f;             // N*m
-    static constexpr float MAX_STEER_TORQUE = 2.0f;             // N*m
-    static constexpr float MAX_MANUAL_GRAV_COMP_FORCE = 59.0f;  // N
+    static constexpr InputConfig INPUTS[static_cast<size_t>(Input::NUM_INPUTS)]{
+        {
+            // x vel
+            .channel = Channel::LEFT_VERTICAL,
+            .mode = Mode::BALANCE,
+            .max = 0.4f,  // m/s
+        },
+        {
+            // yaw vel
+            .channel = Channel::RIGHT_HORIZONTAL,
+            .mode = Mode::BALANCE,
+            .max = -1.0f,  // rad/s
+        },
+        {
+            // roll
+            .channel = Channel::LEFT_HORIZONTAL,
+            .mode = Mode::BALANCE,
+            .max = -M_PI / 6,  // rad
+        },
+        {
+            // height vel
+            .channel = Channel::WHEEL,
+            .mode = Mode::BALANCE,
+            .max = -0.025f,  // m/s
+        },
+        {
+            // leg force x
+            .channel = Channel::LEFT_HORIZONTAL,
+            .mode = Mode::MANUAL,
+            .max = 95.0f,  // N
+        },
+        {
+            // leg force y
+            .channel = Channel::LEFT_VERTICAL,
+            .mode = Mode::MANUAL,
+            .max = -95.0f,  // N
+        },
+        {
+            // wheel torque
+            .channel = Channel::RIGHT_VERTICAL,
+            .mode = Mode::MANUAL,
+            .max = 5.0f,  // N*m
+        },
+        {
+            // steer torque
+            .channel = Channel::RIGHT_HORIZONTAL,
+            .mode = Mode::MANUAL,
+            .max = 2.0f,  // N*m
+        },
+        {
+            // manual grav comp
+            .channel = Channel::WHEEL,
+            .mode = Mode::MANUAL,
+            .max = 59.0f,  // N
+        },
+    };
 };
 
 }  // namespace aruwsrc::balstd
