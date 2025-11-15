@@ -80,15 +80,27 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         .targetCycleCount = 3,
 };
 
-tap::algorithms::SmoothPidConfig m2006VelocityPidConfig =
-    {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+tap::algorithms::SmoothPidConfig m2006VelocityPidConfig = {
+    .kp = 50.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610};
 
-tap::algorithms::SmoothPidConfig rm3508VelocityPidConfig =
-    {.kp = 12.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+tap::algorithms::SmoothPidConfig rm3508VelocityPidConfig = {
+    .kp = 12.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620};
 
 // untuned!!
-tap::algorithms::SmoothPidConfig gm6020VelocityPidConfig =
-    {.kp = 0.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+tap::algorithms::SmoothPidConfig gm6020VelocityPidConfig = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA};
 
 tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
     {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
