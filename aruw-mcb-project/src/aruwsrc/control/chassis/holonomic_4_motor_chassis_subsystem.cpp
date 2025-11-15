@@ -96,6 +96,7 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
     // use power limiting object to compute initial power limiting fraction
     currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
+    scaleFactor = powerLimitFrac;
 
     // total velocity error for all wheels
     float totalError = 0.0f;

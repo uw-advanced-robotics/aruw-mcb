@@ -54,6 +54,7 @@ public:
 private:
     float voltage = 0;
     float current = 0;
+    float wattage = 0;
 
     tap::arch::MilliTimeout heartbeat;
 };

@@ -150,6 +150,7 @@ private:
     tap::algorithms::SmoothPid velocityPid[4];
 
     float velocityPidErrors[4];
+    float scaleFactor;
 
     // ✨ the motors ✨
     tap::motor::MotorInterface* motors[4];
