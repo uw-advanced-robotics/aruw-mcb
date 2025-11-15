@@ -35,9 +35,7 @@ class DartYawPositionCommand : public tap::control::Command
 public: 
     DartYawPositionCommand(
         tap::Drivers *drivers, 
-        TriggerHomedJointSubsystem *subsystem, 
-        Remote::Channel channel,
-        tap::algorithms::SmoothPidConfig config,
+        TriggerHomedJointSubsystem *subsystem,
         float setpointDegrees);
 
     void initialize() override;
@@ -53,8 +51,6 @@ public:
 private:
     tap::Drivers *drivers;
     TriggerHomedJointSubsystem *subsystem;
-    Remote::Channel channel;
-    tap::algorithms::SmoothPid pid;
     float setpointDegrees;
 };  // class CLASS_NAME
 

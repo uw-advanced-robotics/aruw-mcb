@@ -19,6 +19,7 @@
 
 #include "dart_yaw_velocity_command.hpp"
 
+#include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "tap/control/command.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "tap/drivers.hpp"
@@ -36,7 +37,7 @@ namespace aruwsrc::robot::dart{
 
     void DartYawVelocityCommand::execute(){
         subsystem->setSetpoint(
-            subsystem->getSetpoint() + drivers->remote.getChannel(channel)
+            subsystem->getPosition() + drivers->remote.getChannel(channel) * YAW_INPUT_SENSITIVITY
         );
     }
 

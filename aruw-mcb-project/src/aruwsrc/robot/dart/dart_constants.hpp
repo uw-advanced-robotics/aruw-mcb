@@ -24,6 +24,7 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/servo.hpp"
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
 namespace aruwsrc::robot::dart
 {
@@ -35,18 +36,29 @@ static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
 
-static constexpr tap::gpio::Digital::InputPin YAW_LIMITSWITCH_PORT = tap::gpio::Digital::InputPin::B; //TODO: correct constant
-static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR3; // PLACEHOLDER
+static constexpr float YAW_INPUT_SENSITIVITY = 0.00;
+static constexpr tap::gpio::Digital::InputPin YAW_LIMITSWITCH_PORT = tap::gpio::Digital::InputPin::D; 
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5; 
 static constexpr float YAW_MOTOR_GEAR_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
 static constexpr float YAW_LEADSCREW_THREAD_PITCH = 0.002; // 2 mm
-static constexpr float DART_LAUNCHER_YAW_RADIAL_LENGTH = 0;
+static constexpr float DART_LAUNCHER_YAW_RADIAL_LENGTH = 0.763; // 76.3 cm
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config YAW_HOME_CONFIG = {
     .super = {
         .lowerBound = 0.0f, 
         .upperBound = 0.0f,
         .epsilon = 1.0f,
-        .maxSetpointIncrement = upperbound - lowerbound, // is this chill?
+        .maxSetpointIncrement = 1000.0f, //TODO: adjust
         .initSetpoint = 0.0f,
 
         .encoderRatio = YAW_MOTOR_GEAR_RATIO * YAW_LEADSCREW_THREAD_PITCH,
@@ -57,16 +69,6 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
     .home = 0.0f,
     .homingSpeed = 10.0f, // MAYBE CHANGE
     .homingReversed = false // TODO: CHANGE IF HOMES THE WRONG WAY
-};
-
-static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 16'000.0f,
-    .errDeadzone = 0.0f,
-    .errorDerivativeFloor = 0.0f,
 };
 
 //  * @param[in] pwmPin The pin to attach the Servo class with.

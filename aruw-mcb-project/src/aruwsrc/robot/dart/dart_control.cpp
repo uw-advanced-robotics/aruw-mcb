@@ -25,6 +25,7 @@
 #include "tap/motor/servo.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
+#include "aruwsrc/robot/dart/dart_yaw_position_command.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -119,25 +120,36 @@ DartCloseCommand servoClose(dartLauncher);
 
 HomingCommand yawHome(yawSubsystem);
 
+DartYawPositionCommand dartYawPositionCommand(
+    drivers(),
+    &yawSubsystem,
+    0.0f
+);
+
 tap::control::PressCommandMapping leftSwitchDown(
     drivers(),
     {&yawHome},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-HoldCommandMapping rightSwitchUp(
+tap::control::HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&dartPullback},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-
-HoldCommandMapping rightSwitchDown(
-    drivers(),
-    {&dartRelease},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&servoOpen},
+    {&dartYawPositionCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+// HoldCommandMapping rightSwitchUp(
+//     drivers(),
+//     {&dartPullback},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+// HoldCommandMapping rightSwitchDown(
+//     drivers(),
+//     {&dartRelease},
+//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+
+// HoldCommandMapping leftSwitchUp(
+//     drivers(),
+//     {&servoOpen},
+//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // HoldCommandMapping leftSwitchDown(
 //     drivers(),
@@ -166,8 +178,8 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rightSwitchDown);
+    // drivers->commandMapper.addMap(&rightSwitchUp);
+    // drivers->commandMapper.addMap(&rightSwitchDown);
     drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
 }
