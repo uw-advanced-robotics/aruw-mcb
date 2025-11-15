@@ -74,7 +74,6 @@ private:
     const aruwsrc::chassis::BeybladeConfig config;
 
     const float rotationMultiplier;
-    float wattage;
 
 };  // class BeybladeCommand
 

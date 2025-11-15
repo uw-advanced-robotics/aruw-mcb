@@ -31,7 +31,6 @@ void AruwVoltageCurrentSensor::processMessage(const modm::can::Message& message)
     this->heartbeat.restart(100);
     this->voltage = message.data[1] << 8 | message.data[0];
     this->current = message.data[3] << 8 | message.data[2];
-    this->wattage = (voltage / 1000.0) * (current / 1000.0);
 }
 
 void AruwVoltageCurrentSensor::initialize()
