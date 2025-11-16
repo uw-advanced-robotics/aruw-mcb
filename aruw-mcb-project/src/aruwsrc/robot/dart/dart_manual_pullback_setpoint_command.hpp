@@ -16,19 +16,19 @@ public:
     DartManualPullbackSetpointCommand(
         aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartSystem,
         float moveSpeed,
-        aruwsrc::control::dart::DartControlOperatorInterface& controlOperatorInterface);
+        aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface);
     void initialize() override;
     void execute() override;
-    void end(bool) override;
+    void end(bool interrupted) override;
 
     bool isFinished() const override;
 
     const char* getName() const override { return "DART MANUAL PULLBACK SETPOINT"; }
 
 private:
-    aruwsrc::control::joint::JointSubsystem& dartSystem;
+    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartSystem;
     float moveSpeed;
-    aruwsrc::control::dart::DartControlOperatorInterface& controlOperatorInterface;  // NOLINT
+    aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface;  // NOLINT
 };
 }  // namespace aruwsrc::robot::dart
 

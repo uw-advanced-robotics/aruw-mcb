@@ -16,6 +16,8 @@ public:
 
     float getPullbackVelocity();
 
+    float getYawVelocity();
+
 private:
     tap::Drivers* drivers;
 };
