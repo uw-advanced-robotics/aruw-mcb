@@ -33,8 +33,10 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/dart/dart_constants.hpp"
+#include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 #include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
+#include "aruwsrc/robot/dart/dart_manual_pullback_setpoint_command.hpp"
 
 #include "dart_close_command.hpp"
 #include "dart_open_command.hpp"
@@ -96,6 +98,12 @@ aruwsrc::control::joint::homing::TriggerHomedJointSubsystem pullMotorSubsystem(
     limit,
     PULL_MOTOR_CONFIG);
 
+HomingCommand pullMotorHomeCommand(pullMotorSubsystem);
+DartManualPullbackSetpointCommand manualPullbackCommand(
+    &pullMotorSubsystem,
+    MANUAL_PULLBACK_SPEED_MULTIPLIER,
+    &drivers()->controlOperatorInterface);
+
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 DartLauncherSubsystem dartLauncher(drivers(), pullMotors);
@@ -106,37 +114,34 @@ DartPullbackCommand dartPullback(pullMotorSubsystem, MANUAL_PULLBACK_DESIRED_OUT
 DartOpenCommand servoOpen(dartLauncher);
 DartCloseCommand servoClose(dartLauncher);
 
-
 HomingCommand pullMotorHome(pullMotorSubsystem);
 
-
-
 // Left Up + Right Up -> Servo Open
-HoldCommandMapping leftUpRightUp(
+HoldCommandMapping openServoMapping(
     drivers(),
     {&servoOpen},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 // Left Up + Right Down -> Servo Close
-HoldCommandMapping leftUpRightDown(
+HoldCommandMapping closeServoMapping(
     drivers(),
     {&servoClose},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
 // Left Mid + Right Up -> Home Pullback
-HoldCommandMapping leftMidRightUp(
+HoldCommandMapping homePullbackMapping(
     drivers(),
     {&pullMotorHome},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
 // Left Mid + Right Down -> Pullback Dart
-HoldCommandMapping leftMidRightDown(
+HoldCommandMapping pullbackMapping(
     drivers(),
     {&dartPullback},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
 // Left Down + Right Up -> Home Yaw (placeholder) TODO: CHANGE
-HoldCommandMapping leftDownRightUp(
+HoldCommandMapping homeYawMapping(
     drivers(),
     {&pullMotorHome},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
@@ -158,11 +163,11 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandMapper.addMap(&leftUpRightUp);
-    drivers->commandMapper.addMap(&leftUpRightDown);
-    drivers->commandMapper.addMap(&leftMidRightUp);
-    drivers->commandMapper.addMap(&leftMidRightDown);
-    drivers->commandMapper.addMap(&leftDownRightUp);
+    drivers->commandMapper.addMap(&openServoMapping);
+    drivers->commandMapper.addMap(&closeServoMapping);
+    drivers->commandMapper.addMap(&homePullbackMapping);
+    drivers->commandMapper.addMap(&pullbackMapping);
+    drivers->commandMapper.addMap(&homeYawMapping);
 }
 
 }  // namespace dart_control

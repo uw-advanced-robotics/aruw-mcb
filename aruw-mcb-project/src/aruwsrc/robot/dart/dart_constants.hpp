@@ -34,6 +34,7 @@ static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
+static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 1.0f;
 static constexpr int32_t PULLBACK_PULL_POSITION = 0;  // TODO: FIND
 
 //  * @param[in] pwmPin The pin to attach the Servo class with.

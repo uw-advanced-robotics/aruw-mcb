@@ -22,6 +22,9 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 
 #else
@@ -37,12 +40,13 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 
 #else
 public:
+    control::dart::DartControlOperatorInterface controlOperatorInterface;
 
 #endif
 };  // class aruwsrc::DartDrivers
