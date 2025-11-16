@@ -42,6 +42,6 @@ void SentryCapBankCommand::execute() {}
 
 void SentryCapBankCommand::end(bool) { capBankSubsystem.disableCapacitors(); }
 
-bool SentryCapBankCommand::isFinished() const { return capBankSubsystem.getAvailableEnergy() > 500.0f; }
+bool SentryCapBankCommand::isFinished() const { return false; }
 
 }  // namespace aruwsrc::control::capbank

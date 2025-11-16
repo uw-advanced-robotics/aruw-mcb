@@ -670,8 +670,13 @@ HoldCommandMapping leftUpRightDown(
 // auto drive & auto aim
 HoldCommandMapping leftMidRightMid(
     drivers(),
-    {&autoNavBeybladeCommand},
+    {&imuCalibrateCommand}, // added imucalibrate to this
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+
+HoldCommandMapping leftMidRightUp(
+    drivers(),
+    {&autoNavBeybladeCommand}, // added imucalibrate to this
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
 // // manual aim
 // HoldCommandMapping leftMidRightDown(
@@ -871,12 +876,12 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive & auto aim
     drivers->commandMapper.addMap(&leftDownRightUp);   // manual drive, auto aim, gated-fire
     //drivers->commandMapper.addMap(&leftDownRightUpAg);
-    drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
+    //drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
 
-    //drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
     //drivers->commandMapper.addMap(&leftMidRightUpAg);
     drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
-    // drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
+    //drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
     drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
     drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
