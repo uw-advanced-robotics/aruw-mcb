@@ -51,7 +51,7 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Driv     ers()
+    Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
           visionCoprocessor(this),
