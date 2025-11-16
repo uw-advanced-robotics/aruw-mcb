@@ -50,9 +50,8 @@ public:
      * @param[in] TurretMotor A `TurretMotor` object accessible for children objects to use.
      */
     TurretControllerInterface(
-        TurretMotor &pitch,
-        TurretMotor &yaw,
-        const std::vector<TurretFeedforwardInterface> &feedforwards = {})
+        TurretMotor &turretMotor,
+        const std::vector<TurretFeedforwardInterface *> feedforwards = {})
         : turretMotor(turretMotor),
           feedforwards(feedforwards)
     {
@@ -78,16 +77,17 @@ public:
 
     /**
      * Calculates the total feedforward output from all attached feedforwards.
-     * 
+     *
      * @param[in] state The current turret feedforward state.
      * @return The total feedforward output.
      */
     virtual float calculateFeedforward(TurretFeedforwardInterface::TurretFeedforwardState state)
     {
+        debugVar = feedforwards.size();
         if (feedforwards.empty()) return 0.0f;
 
         float total = 0.0f;
-        for (const auto &ff : feedforwards) total += ff.calculateFeedforward(state);
+        for (const auto &ff : feedforwards) total += ff->calculateFeedforward(state);
         return total;
     }
 
@@ -142,11 +142,30 @@ public:
     virtual WrappedFloat convertChassisAngleToControllerFrame(
         WrappedFloat chassisFrameAngle) const = 0;
 
+    float debugVar = 0.0f;
+
 protected:
     TurretMotor &turretMotor;
-    const std::vector<TurretFeedforwardInterface> &feedforwards;
+    const std::vector<TurretFeedforwardInterface *> feedforwards;
 };
 
+enum class Axis
+{
+    PITCH,
+    YAW
+};
+
+template <Axis AXIS>
+class TurretAxisControllerInterface : public TurretControllerInterface
+{
+public:
+    TurretAxisControllerInterface(
+        TurretMotor &turretMotor,
+        const std::vector<TurretFeedforwardInterface*> feedforwards = {})
+        : TurretControllerInterface(turretMotor, feedforwards)
+    {
+    }
+};
 }  // namespace aruwsrc::control::turret::algorithms
 
 #endif  // TURRET_CONTROLLER_INTERFACE_HPP_

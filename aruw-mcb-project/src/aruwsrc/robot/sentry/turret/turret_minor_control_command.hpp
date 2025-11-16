@@ -56,8 +56,10 @@ public:
         tap::Drivers *drivers,
         aruwsrc::control::sentry::SentryControlOperatorInterface &controlOperatorInterface,
         SentryTurretMinorSubsystem &turretMinorSubsystem,
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController,
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController,
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            aruwsrc::control::turret::algorithms::Axis::YAW> &yawController,
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            aruwsrc::control::turret::algorithms::Axis::PITCH> &pitchController,
         float userYawInputScalar,
         float userPitchInputScalar);
 
@@ -81,8 +83,10 @@ private:
 
     uint32_t prevTime = 0;
 
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController;
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::YAW> &yawController;
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::PITCH> &pitchController;
 
     const float userYawInputScalar;
     const float userPitchInputScalar;

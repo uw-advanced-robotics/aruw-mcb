@@ -79,7 +79,8 @@ public:
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            control::turret::algorithms::Axis::YAW> &turretMajorController,
         aruwsrc::chassis::HolonomicChassisSubsystem &chassis,
         algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
@@ -101,7 +102,8 @@ public:
 
 protected:
     aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController;
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        control::turret::algorithms::Axis::YAW> &turretMajorController;
 
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver;
 

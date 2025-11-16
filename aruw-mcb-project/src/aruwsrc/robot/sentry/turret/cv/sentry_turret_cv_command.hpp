@@ -70,8 +70,10 @@ public:
     struct TurretConfig
     {
         SentryTurretMinorSubsystem &turretSubsystem;
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController;
+        control::turret::algorithms::TurretAxisControllerInterface<
+            control::turret::algorithms::Axis::YAW> &yawController;
+        control::turret::algorithms::TurretAxisControllerInterface<
+            control::turret::algorithms::Axis::PITCH> &pitchController;
         aruwsrc::sentry::algorithms::SentryBallisticsSolver &ballisticsSolver;
     };
 
@@ -108,7 +110,8 @@ public:
     SentryTurretCVCommand(
         serial::VisionCoprocessor &visionCoprocessor,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
         TurretConfig &turretLeftConfig,
         TurretConfig &turretRightConfig,
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms);
@@ -155,7 +158,8 @@ private:
     serial::VisionCoprocessor &visionCoprocessor;
 
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor;
 
     TurretConfig &turretLeftConfig;
     TurretConfig &turretRightConfig;
