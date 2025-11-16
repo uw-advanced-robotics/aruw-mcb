@@ -29,7 +29,8 @@ TurretMajorSentryControlCommand::TurretMajorSentryControlCommand(
     tap::Drivers *drivers,
     SentryControlOperatorInterface &controlOperatorInterface,
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::YAW> &yawController,
     float userYawInputScalar)
     : drivers(drivers),
       controlOperatorInterface(controlOperatorInterface),

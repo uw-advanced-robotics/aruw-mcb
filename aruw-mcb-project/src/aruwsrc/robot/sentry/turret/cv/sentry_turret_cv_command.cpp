@@ -40,7 +40,8 @@ namespace aruwsrc::sentry::turret::cv
 SentryTurretCVCommand::SentryTurretCVCommand(
     communication::serial::VisionCoprocessor &visionCoprocessor,
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
     TurretConfig &turretLeftConfig,
     TurretConfig &turretRightConfig,
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms)
