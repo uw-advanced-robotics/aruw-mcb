@@ -49,16 +49,28 @@ def generate_ozone(env, robot=""):
 
         project_file_path = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"
 
-        ip = ARGUMENTS.get("ip", "")
-        if ip == "" and robot in ROBOT_IPS.keys():
-            ip = ROBOT_IPS[robot]
+        ip_arg = str(ARGUMENTS.get("ip", "")).lower()
 
-        if ip != "":
-            print(f"Using IP({ip}) connection...")
+        def use_ip(ip):
+            nonlocal project_content
+            print(f"Using IP({conn}) connection...")
             project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"IP\", \"{ip}\");")
-        else:
+
+        def use_usb():
+            nonlocal project_content
             print(f"Using USB connection...")
             project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"USB\", \"\");")
+
+        if not ip_arg:
+            if ip_arg in ROBOT_IPS:
+                use_ip(ROBOT_IPS[robot])
+            else:
+                print("Couldn't retrieve target IP")
+                use_usb()
+        elif ip_arg == "usb":
+            use_usb()
+        else:
+            use_ip(ip_arg)
 
         project_content = project_content.replace("${BUILD_DIR}", env['BUILDPATH'])
         project_content = project_content.replace("${BUILD_DIR_LOWER}", env['BUILDPATH'].lower())
