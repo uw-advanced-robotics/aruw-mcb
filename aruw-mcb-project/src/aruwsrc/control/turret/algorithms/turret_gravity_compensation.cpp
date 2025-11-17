@@ -56,7 +56,7 @@ float turretGravitationalForceOffset::calculateCompensationEffort(
         turretCGPolarTheta = copysign(M_PI_2, cgZ);
     }
 
-    return gravityCompensatorMax * cosf(turretCGPolarTheta - state.pitch);
+    return gravityCompensatorMax * cosf(turretCGPolarTheta - state.pitchWorldFrame);
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

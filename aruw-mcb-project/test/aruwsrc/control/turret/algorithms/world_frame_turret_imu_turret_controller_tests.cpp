@@ -373,7 +373,7 @@ TEST_F(
     turretController.runController(1, Angle(0));
 
     EXPECT_EQ(
-        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()),
+        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())),
         turretMotor.getMotorOutput());
 }
 
@@ -406,7 +406,7 @@ TEST_F(
 
     EXPECT_GT(
         turretMotor.getMotorOutput(),
-        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
+        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
 }
 
 TEST_F(
@@ -437,7 +437,7 @@ TEST_F(
 
     EXPECT_LT(
         turretMotor.getMotorOutput(),
-        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
+        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
 }
 
 TEST_F(
@@ -470,7 +470,7 @@ TEST_F(
 
     EXPECT_EQ(
         turretMotor.getMotorOutput(),
-        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
+        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
 }
 
 TEST_F(
@@ -501,7 +501,7 @@ TEST_F(
 
     EXPECT_EQ(
         turretMotor.getMotorOutput(),
-        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
+        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
 }
 
 TEST_F(
@@ -531,7 +531,7 @@ TEST_F(
 
     EXPECT_LT(
         turretMotor.getMotorOutput(),
-        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
+        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
 }
 
 TEST_F(
@@ -562,5 +562,5 @@ TEST_F(
 
     EXPECT_GT(
         turretMotor.getMotorOutput(),
-        computeCGOffset(turretMotor.getChassisFrameMeasuredAngle()));
+        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
 }

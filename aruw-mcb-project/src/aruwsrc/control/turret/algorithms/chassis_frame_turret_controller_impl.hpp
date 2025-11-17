@@ -66,16 +66,21 @@ void ChassisFrameTurretController<AXIS>::runController(
         pid.runController(positionControllerError, this->turretMotor.getChassisFrameVelocity(), dt);
     if constexpr (AXIS == Axis::PITCH)
     {
+        // WorldFrame is wrong, but it's the best estimate the robot has
         pidOutput +=
             this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
-                .pitch = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+                .pitchWorldFrame =
+                    this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+                .pitchChassisFrame =
+                    this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
                 .yaw = 0.0f});
     }
     else
     {
         pidOutput +=
             this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
-                .pitch = 0.0f,
+                .pitchWorldFrame = 0.0f,
+                .pitchChassisFrame = 0.0f,
                 .yaw = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue()});
     }
 
