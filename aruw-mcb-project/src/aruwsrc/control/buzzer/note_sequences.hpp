@@ -132,7 +132,7 @@ static constexpr uint32_t WATCHDOG_INTERVENTION_NOTE_LENGTH_MS = 80;
 static constexpr std::array<uint8_t, 8> WATCHDOG_INTERVENTION_NOTES{{52, 0, 52, 0, 52, 0, 52, 0}};
 
 static constexpr uint32_t CHASSIS_OFFLINE_NOTE_LENGTH_MS = 200;
-static constexpr std::array<uint8_t, 3> CHASSIS_OFFLINE_NOTES{{44, 37, 36}};
+static constexpr std::array<uint8_t, 7> CHASSIS_OFFLINE_NOTES{{40, 33, 32, 0, 40, 33, 32}};
 #endif
 }  // namespace aruwsrc::control::buzzer
 
