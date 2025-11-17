@@ -22,7 +22,7 @@
 
 #include "tap/algorithms/wrapped_float.hpp"
 
-#include "turret_feedforward_interface.hpp"
+#include "turret_compensator_interface.hpp"
 
 using namespace tap::algorithms;
 
@@ -51,9 +51,9 @@ public:
      */
     TurretControllerInterface(
         TurretMotor &turretMotor,
-        const std::vector<TurretFeedforwardInterface *> feedforwards = {})
+        const std::vector<TurretCompensatorInterface *> compensators = {})
         : turretMotor(turretMotor),
-          feedforwards(feedforwards)
+          compensators(compensators)
     {
     }
 
@@ -76,18 +76,18 @@ public:
     virtual void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) = 0;
 
     /**
-     * Calculates the total feedforward output from all attached feedforwards.
+     * Calculates the total output from all attached compensators.
      *
-     * @param[in] state The current turret feedforward state.
-     * @return The total feedforward output.
+     * @param[in] state The current turret state.
+     * @return The total output.
      */
-    virtual float calculateFeedforward(TurretFeedforwardInterface::TurretFeedforwardState state)
+    virtual float calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState state)
     {
-        debugVar = feedforwards.size();
-        if (feedforwards.empty()) return 0.0f;
+        debugVar = compensators.size();
+        if (compensators.empty()) return 0.0f;
 
         float total = 0.0f;
-        for (const auto &ff : feedforwards) total += ff->calculateFeedforward(state);
+        for (const auto &ff : compensators) total += ff->calculateCompensationEffort(state);
         return total;
     }
 
@@ -146,7 +146,7 @@ public:
 
 protected:
     TurretMotor &turretMotor;
-    const std::vector<TurretFeedforwardInterface *> feedforwards;
+    const std::vector<TurretCompensatorInterface *> compensators;
 };
 
 enum class Axis
@@ -161,8 +161,8 @@ class TurretAxisControllerInterface : public TurretControllerInterface
 public:
     TurretAxisControllerInterface(
         TurretMotor &turretMotor,
-        const std::vector<TurretFeedforwardInterface *> feedforwards = {})
-        : TurretControllerInterface(turretMotor, feedforwards)
+        const std::vector<TurretCompensatorInterface *> compensators = {})
+        : TurretControllerInterface(turretMotor, compensators)
     {
     }
 };

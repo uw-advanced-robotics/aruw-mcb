@@ -37,8 +37,8 @@ template <Axis AXIS>
 ChassisFrameTurretController<AXIS>::ChassisFrameTurretController(
     TurretMotor &Motor,
     const tap::algorithms::SmoothPidConfig &pidConfig,
-    const std::vector<TurretFeedforwardInterface *> feedforwards)
-    : TurretAxisControllerInterface<AXIS>(Motor, feedforwards),
+    const std::vector<TurretCompensatorInterface *> compensators)
+    : TurretAxisControllerInterface<AXIS>(Motor, compensators),
       pid(pidConfig)
 {
 }
@@ -66,15 +66,17 @@ void ChassisFrameTurretController<AXIS>::runController(
         pid.runController(positionControllerError, this->turretMotor.getChassisFrameVelocity(), dt);
     if constexpr (AXIS == Axis::PITCH)
     {
-        pidOutput += this->calculateFeedforward(TurretFeedforwardInterface::TurretFeedforwardState{
-            .pitch = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
-            .yaw = 0.0f});
+        pidOutput +=
+            this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
+                .pitch = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+                .yaw = 0.0f});
     }
     else
     {
-        pidOutput += this->calculateFeedforward(TurretFeedforwardInterface::TurretFeedforwardState{
-            .pitch = 0.0f,
-            .yaw = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue()});
+        pidOutput +=
+            this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
+                .pitch = 0.0f,
+                .yaw = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue()});
     }
 
     this->turretMotor.setMotorOutput(pidOutput);

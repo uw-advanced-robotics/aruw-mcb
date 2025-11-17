@@ -63,7 +63,7 @@ public:
         tap::Drivers &drivers,
         TurretMotor &yawMotor,
         const tap::algorithms::SmoothPidConfig &pidConfig,
-        const std::vector<TurretFeedforwardInterface *> feedforwards = {});
+        const std::vector<TurretCompensatorInterface *> compensators = {});
 
     void initialize() final;
 

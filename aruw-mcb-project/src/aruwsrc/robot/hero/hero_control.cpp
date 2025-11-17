@@ -310,8 +310,8 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
-// Turret Feedforwards
-algorithms::turretGravitationalForceOffset GravityFeedforward(
+// Turret Compensators
+algorithms::turretGravitationalForceOffset turretGravityCompensation(
     TURRET_CG_X,
     TURRET_CG_Y,
     TURRET_GRAVITY_COMPENSATION_SCALAR);
@@ -320,7 +320,7 @@ algorithms::turretGravitationalForceOffset GravityFeedforward(
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
     turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG,
-    {&GravityFeedforward});
+    {&turretGravityCompensation});
 
 algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
     turret.yawMotor,

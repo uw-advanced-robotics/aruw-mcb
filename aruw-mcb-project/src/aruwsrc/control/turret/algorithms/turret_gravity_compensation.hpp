@@ -25,11 +25,11 @@
 
 #include "modm/math/geometry/angle.hpp"
 
-#include "turret_feedforward_interface.hpp"
+#include "turret_compensator_interface.hpp"
 
 namespace aruwsrc::control::turret::algorithms
 {
-class turretGravitationalForceOffset : public TurretFeedforwardInterface
+class turretGravitationalForceOffset : public TurretCompensatorInterface
 {
 public:
     /**
@@ -55,7 +55,7 @@ public:
         const float cgZ,
         const float gravityCompensatorMax);
 
-    float calculateFeedforward(const TurretFeedforwardState state) const override;
+    float calculateCompensationEffort(const TurretCompensatorState state) const override;
 
 private:
     const float cgX = 0.0f;

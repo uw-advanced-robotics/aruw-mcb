@@ -194,8 +194,8 @@ WorldFrameTurretImuCascadePidTurretController<AXIS>::WorldFrameTurretImuCascadeP
     TurretMotor &turretMotor,
     SmoothPid &positionPid,
     SmoothPid &velocityPid,
-    const std::vector<TurretFeedforwardInterface *> feedforwards)
-    : TurretAxisControllerInterface<AXIS>(turretMotor, feedforwards),
+    const std::vector<TurretCompensatorInterface *> compensators)
+    : TurretAxisControllerInterface<AXIS>(turretMotor, compensators),
       worldToTurret(worldToTurret),
       turretMCBCanComm(turretMCBCanComm),
       positionPid(positionPid),
@@ -254,15 +254,17 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
 
     if constexpr (AXIS == Axis::PITCH)
     {
-        pidOutput += this->calculateFeedforward(TurretFeedforwardInterface::TurretFeedforwardState{
-            .pitch = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
-            .yaw = 0.0f});
+        pidOutput +=
+            this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
+                .pitch = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+                .yaw = 0.0f});
     }
     else
     {
-        pidOutput += this->calculateFeedforward(TurretFeedforwardInterface::TurretFeedforwardState{
-            .pitch = 0.0f,
-            .yaw = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue()});
+        pidOutput +=
+            this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
+                .pitch = 0.0f,
+                .yaw = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue()});
     }
 
     this->turretMotor.setMotorOutput(pidOutput);
