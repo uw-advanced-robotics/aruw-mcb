@@ -73,7 +73,8 @@ void Tmotor_AK809::resetEncoderValue() { return; }
 
 void Tmotor_AK809::processMessage(const modm::can::Message& message)
 {
-    torque = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);  // torque
+    currentDraw = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);
+    torque = currentDraw * FEEDBACK_CURRENT_TICKS_TO_AMPS / TORQUE_TO_AMPS;
     torque = motorInverted ? -torque : torque;
     temperature = static_cast<int8_t>(message.data[6]);  // temperature
     fault = static_cast<uint8_t>(message.data[7]);
@@ -166,7 +167,9 @@ uint32_t Tmotor_AK809::getMotorIdentifier() const { return motorIdentifier; }
 
 int8_t Tmotor_AK809::getTemperature() const { return temperature; }
 
-int16_t Tmotor_AK809::getTorque() const { return torque; }
+int16_t Tmotor_AK809::getTorque() const { return currentDraw; }
+
+float Tmotor_AK809::getTorqueFloat() const { return torque; }
 
 bool Tmotor_AK809::isMotorInverted() const { return motorInverted; }
 

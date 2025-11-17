@@ -107,7 +107,12 @@ class Tmotor_AK809 : public tap::can::CanRxListener, public tap::motor::MotorInt
 {
 public:
     static constexpr float GEAR_RATIO = 1.0f / 9.0f;
+    static constexpr float TORQUE_TO_AMPS = 1.826f;
     static constexpr float TORQUE_CONSTANT = 1826.0f;  // desOut/Nm
+    // A/Nm = desOut/Nm * A/desOut = 1826 /1000
+
+    // conversion factor from the received current integer to Amps
+    static constexpr float FEEDBACK_CURRENT_TICKS_TO_AMPS = 0.01f;
 
     /**
      * @param drivers a pointer to the drivers struct
@@ -211,7 +216,13 @@ public:
      */
     int8_t getTemperature() const override;
 
+    /**
+     * @return fixed-point current feedback value.
+     * @note use `getTorqueFloat()` for the actual torque value
+     */
     int16_t getTorque() const override;
+
+    float getTorqueFloat() const;
 
     mockable bool isMotorInverted() const;
 
@@ -235,9 +246,11 @@ private:
 
     int8_t temperature;
 
-    int16_t torque;
+    int16_t currentDraw;
 
     uint8_t fault;
+
+    float torque;
 
     /**
      * If `false` the positive rotation direction of the shaft is counter-clockwise when
