@@ -256,15 +256,17 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
     {
         pidOutput +=
             this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
-                .pitch = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+                .pitchWorldFrame = worldFrameAngle.getWrappedValue(),
+                .pitchChassisFrame = chassisFrame.getWrappedValue(),
                 .yaw = 0.0f});
     }
     else
     {
         pidOutput +=
             this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
-                .pitch = 0.0f,
-                .yaw = this->turretMotor.getChassisFrameMeasuredAngle().getWrappedValue()});
+                .pitchWorldFrame = 0.0f,
+                .pitchChassisFrame = 0.0f,
+                .yaw = chassisFrame.getWrappedValue()});
     }
 
     this->turretMotor.setMotorOutput(pidOutput);

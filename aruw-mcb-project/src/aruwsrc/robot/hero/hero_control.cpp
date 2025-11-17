@@ -309,8 +309,8 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 // Turret Compensators
 algorithms::turretGravitationalForceOffset turretGravityCompensation(
     TURRET_CG_X,
-    TURRET_CG_Y,
-    TURRET_GRAVITY_COMPENSATION_SCALAR);
+    TURRET_CG_Z,
+    GRAVITY_COMPENSATION_SCALAR);
 
 // Turret controllers
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(

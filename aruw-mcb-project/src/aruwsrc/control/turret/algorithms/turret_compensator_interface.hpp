@@ -34,7 +34,8 @@ class TurretCompensatorInterface
 public:
     struct TurretCompensatorState
     {
-        float pitch;
+        float pitchWorldFrame;
+        float pitchChassisFrame;
         float yaw;
     };
     /**
