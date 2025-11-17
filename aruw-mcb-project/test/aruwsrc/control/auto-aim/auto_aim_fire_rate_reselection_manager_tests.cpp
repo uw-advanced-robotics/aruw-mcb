@@ -75,8 +75,12 @@ private:
     NiceMock<tap::mock::MotorInterfaceMock> pitM;
     aruwsrc::mock::TurretMotorMock yawMotor;
     aruwsrc::mock::TurretMotorMock pitchMotor;
-    aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController yawController;
-    aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController pitchController;
+    aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+        aruwsrc::control::turret::algorithms::Axis::YAW>
+        yawController;
+    aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+        aruwsrc::control::turret::algorithms::Axis::PITCH>
+        pitchController;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;

@@ -104,7 +104,7 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runYawPidController_world_frame_
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFrameYawTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
@@ -141,7 +141,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFrameYawTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
@@ -160,7 +160,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFrameYawTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
@@ -184,7 +184,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFrameYawTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
@@ -208,7 +208,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFrameYawTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
@@ -233,7 +233,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFrameYawTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
@@ -257,7 +257,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFrameYawTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
@@ -280,7 +280,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFrameYawTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
@@ -300,11 +300,12 @@ TEST_F(
 
 static int16_t computeCGOffset(WrappedFloat pitchAngleFromCenter)
 {
-    return computeGravitationalForceOffset(
+    turretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
-        -pitchAngleFromCenter.getWrappedValue(),
         GRAVITY_COMPENSATION_SCALAR);
+    return gravityCompensation.calculateFeedforward(
+        {.pitch = pitchAngleFromCenter.getWrappedValue(), .yaw = 0.0f});
 }
 
 TEST_F(WorldFrameTurretImuTurretControllerTest, runPitchPidController_world_frame_setpoint_limited)
@@ -320,7 +321,7 @@ TEST_F(WorldFrameTurretImuTurretControllerTest, runPitchPidController_world_fram
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFramePitchTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
@@ -356,13 +357,18 @@ TEST_F(
 {
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
+    turretGravitationalForceOffset gravityCompensation(
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR);
 
-    WorldFramePitchTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
         posPid,
-        velPid);
+        velPid,
+        {&gravityCompensation});
 
     turretController.runController(1, Angle(0));
 
@@ -378,12 +384,18 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFramePitchTurretImuCascadePidTurretController turretController(
+    turretGravitationalForceOffset gravityCompensation(
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR);
+
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
         posPid,
-        velPid);
+        velPid,
+        {&gravityCompensation});
 
     // User input > current angle, output should be positive
     chassisFrameMeasurement = Angle::fromDegrees(80);
@@ -404,12 +416,17 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFramePitchTurretImuCascadePidTurretController turretController(
+    turretGravitationalForceOffset gravityCompensation(
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR);
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
         posPid,
-        velPid);
+        velPid,
+        {&gravityCompensation});
 
     // Setpoint < current angle, output should be negative
     chassisFrameMeasurement = Angle::fromDegrees(10);
@@ -430,12 +447,18 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFramePitchTurretImuCascadePidTurretController turretController(
+    turretGravitationalForceOffset gravityCompensation(
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR);
+
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
         posPid,
-        velPid);
+        velPid,
+        {&gravityCompensation});
 
     // chassis frame yaw value modm::toRadian(80), so chassis moved +10 degrees
     chassisFrameMeasurement = Angle::fromDegrees(80);
@@ -456,13 +479,18 @@ TEST_F(
 {
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
+    turretGravitationalForceOffset gravityCompensation(
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR);
 
-    WorldFramePitchTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
         posPid,
-        velPid);
+        velPid,
+        {&gravityCompensation});
 
     // yaw value modm::toRadian(100), so chassis moved -10 degrees
     chassisFrameMeasurement = Angle::fromDegrees(100);
@@ -482,13 +510,18 @@ TEST_F(
 {
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
+    turretGravitationalForceOffset gravityCompensation(
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR);
 
-    WorldFramePitchTurretImuCascadePidTurretController turretController(
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
         posPid,
-        velPid);
+        velPid,
+        {&gravityCompensation});
 
     chassisFrameMeasurement = Angle(0);
     turretMotor.updateMotorAngle();
@@ -508,12 +541,18 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    WorldFramePitchTurretImuCascadePidTurretController turretController(
+    turretGravitationalForceOffset gravityCompensation(
+        TURRET_CG_X,
+        TURRET_CG_Z,
+        GRAVITY_COMPENSATION_SCALAR);
+
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
         turretMotor,
         posPid,
-        velPid);
+        velPid,
+        {&gravityCompensation});
 
     chassisFrameMeasurement = Angle(M_PI_2);
     turretMotor.updateMotorAngle();
