@@ -33,7 +33,7 @@
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
-#error "Do not include this file directly! Use turret_controller_constants.hpp instead."
+#error "Do not include this file directly! Use turret_constants.hpp instead."
 #endif
 
 namespace aruwsrc::control::turret

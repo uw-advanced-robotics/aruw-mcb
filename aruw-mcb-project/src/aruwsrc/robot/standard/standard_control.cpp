@@ -93,6 +93,7 @@
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -322,10 +323,18 @@ aruwsrc::control::chassis::BeybladeCommand beybladeCommand(
     (drivers()->controlOperatorInterface),
     aruwsrc::control::chassis::BEYBLADE_CONFIG);
 
+// Turret feedforwards
+
+algorithms::turretGravitationalForceOffset turretGravityCompensation(
+    TURRET_CG_X,
+    TURRET_CG_Z,
+    GRAVITY_COMPENSATION_SCALAR);
+
 // Turret controllers
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
     turret.pitchMotor,
-    chassis_rel::PITCH_PID_CONFIG);
+    chassis_rel::PITCH_PID_CONFIG,
+    {&turretGravityCompensation});
 
 algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
     turret.yawMotor,
@@ -349,7 +358,8 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         getTurretMCBCanComm(),
         turret.pitchMotor,
         worldFramePitchTurretImuPosPid,
-        worldFramePitchTurretImuVelPid);
+        worldFramePitchTurretImuVelPid,
+        {&turretGravityCompensation});
 
 algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
     worldFramePitchTurretImuControllerCv(
@@ -357,7 +367,8 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         getTurretMCBCanComm(),
         turret.pitchMotor,
         worldFramePitchTurretImuPosPidCv,
-        worldFramePitchTurretImuVelPid);
+        worldFramePitchTurretImuVelPid,
+        {&turretGravityCompensation});
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);

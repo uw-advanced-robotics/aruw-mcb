@@ -310,23 +310,33 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
-// Turret controllers
-algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH>
-    chassisFramePitchTurretController(turret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
+// Turret Feedforwards
+algorithms::turretGravitationalForceOffset GravityFeedforward(
+    TURRET_CG_X,
+    TURRET_CG_Y,
+    TURRET_GRAVITY_COMPENSATION_SCALAR);
 
-algorithms::ChassisFrameTurretController<algorithms::Axis::YAW>
-    chassisFrameYawTurretController(turret.yawMotor, chassis_rel::YAW_PID_CONFIG);
+// Turret controllers
+algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
+    turret.pitchMotor,
+    chassis_rel::PITCH_PID_CONFIG,
+    {&GravityFeedforward});
+
+algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
+    turret.yawMotor,
+    chassis_rel::YAW_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW> worldFrameYawTurretImuController(
-    transformer.getWorldToTurret(),
-    getTurretMCBCanComm(),
-    turret.yawMotor,
-    worldFrameYawTurretImuPosPid,
-    worldFrameYawTurretImuVelPid);
+algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
+    worldFrameYawTurretImuController(
+        transformer.getWorldToTurret(),
+        getTurretMCBCanComm(),
+        turret.yawMotor,
+        worldFrameYawTurretImuPosPid,
+        worldFrameYawTurretImuVelPid);
 
 algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
     *drivers(),
@@ -344,7 +354,8 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         getTurretMCBCanComm(),
         turret.pitchMotor,
         worldFramePitchTurretImuPosPid,
-        worldFramePitchTurretImuVelPid);
+        worldFramePitchTurretImuVelPid,
+        {&turretGravityCompensation});
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
@@ -369,7 +380,8 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         getTurretMCBCanComm(),
         turret.pitchMotor,
         worldFramePitchTurretImuPosPidCv,
-        worldFramePitchTurretImuVelPidCv);
+        worldFramePitchTurretImuVelPidCv,
+        {&turretGravityCompensation});
 
 // turret commands
 // @todo: chassis MCB is mounted vertically so world frame chassis IMU controller cannot be used for

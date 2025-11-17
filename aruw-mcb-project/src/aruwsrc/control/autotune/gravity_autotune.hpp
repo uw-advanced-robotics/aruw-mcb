@@ -81,7 +81,8 @@ public:
         /// A `TurretSubsystem` that this command will control (will lock the turret).
         turret::TurretSubsystem *turret;
         /// A chassis relative pitch controller used to lock the turret.
-        turret::algorithms::ChassisFrameTurretController<turret::algorithms::Axis::PITCH> *pitchController;
+        turret::algorithms::ChassisFrameTurretController<turret::algorithms::Axis::PITCH>
+            *pitchController;
         /// If the pitch motor is inverted
         bool isMotorInverted;
         /// Mass of the pitching part of the turret in units of Kg

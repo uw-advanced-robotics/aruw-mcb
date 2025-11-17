@@ -76,9 +76,11 @@ public:
         ControlOperatorInterface &controlOperatorInterface,
         TurretSubsystem *turretSubsystem,
         algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *chassisImuYawController,
-        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *chassisImuPitchController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH>
+            *chassisImuPitchController,
         algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *turretImuYawController,
-        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *turretImuPitchController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH>
+            *turretImuPitchController,
         float userYawInputScalar,
         float userPitchInputScalar,
         uint8_t turretID = 0);

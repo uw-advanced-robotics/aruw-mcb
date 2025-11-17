@@ -161,7 +161,7 @@ class TurretAxisControllerInterface : public TurretControllerInterface
 public:
     TurretAxisControllerInterface(
         TurretMotor &turretMotor,
-        const std::vector<TurretFeedforwardInterface*> feedforwards = {})
+        const std::vector<TurretFeedforwardInterface *> feedforwards = {})
         : TurretControllerInterface(turretMotor, feedforwards)
     {
     }

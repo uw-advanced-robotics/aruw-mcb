@@ -194,7 +194,7 @@ WorldFrameTurretImuCascadePidTurretController<AXIS>::WorldFrameTurretImuCascadeP
     TurretMotor &turretMotor,
     SmoothPid &positionPid,
     SmoothPid &velocityPid,
-    const std::vector<TurretFeedforwardInterface*> feedforwards)
+    const std::vector<TurretFeedforwardInterface *> feedforwards)
     : TurretAxisControllerInterface<AXIS>(turretMotor, feedforwards),
       worldToTurret(worldToTurret),
       turretMCBCanComm(turretMCBCanComm),

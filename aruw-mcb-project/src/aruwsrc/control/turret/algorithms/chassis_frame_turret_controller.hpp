@@ -49,7 +49,7 @@ public:
     ChassisFrameTurretController(
         TurretMotor &Motor,
         const tap::algorithms::SmoothPidConfig &pidConfig,
-        const std::vector<TurretFeedforwardInterface*> feedforwards = {});
+        const std::vector<TurretFeedforwardInterface *> feedforwards = {});
 
     void initialize();
 
@@ -88,7 +88,6 @@ public:
 private:
     tap::algorithms::SmoothPid pid;
 };
-
 
 }  // namespace aruwsrc::control::turret::algorithms
 

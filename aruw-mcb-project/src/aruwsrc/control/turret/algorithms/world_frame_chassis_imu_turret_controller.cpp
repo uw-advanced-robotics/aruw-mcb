@@ -113,7 +113,7 @@ WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController
     tap::Drivers &drivers,
     TurretMotor &yawMotor,
     const tap::algorithms::SmoothPidConfig &pidConfig,
-    const std::vector<TurretFeedforwardInterface*> feedforwards)
+    const std::vector<TurretFeedforwardInterface *> feedforwards)
     : TurretAxisControllerInterface<Axis::YAW>(yawMotor, feedforwards),
       drivers(drivers),
       pid(pidConfig),
