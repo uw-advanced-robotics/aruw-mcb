@@ -33,6 +33,8 @@ struct BalstdChassisState
     float height;
     float virtualPendTheta, virtualPendThetaDot;  // angle between pendulum and vertical
     float virtualWheelPos, virtualWheelVel;       // x pos/vel of the 2d robot model's wheel
+    tap::algorithms::transforms::DynamicOrientation orientation;  // world->chassis rotation
+    tap::algorithms::transforms::Vector accel;  // world frame acceleration of the chassis
 };
 
 const BalstdChassisState ZERO_STATE{};

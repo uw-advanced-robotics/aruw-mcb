@@ -101,7 +101,22 @@ void BalstdChassisSubsystem::updateState()
     currState.yaw = chassisImu.getYaw();
     currState.yawVel = chassisImu.getGz();
 
-    // should be __ - pitch/vel, but matlab's pitch is positive up instead of down
+    // all of this should ideally be done by the imu class itself
+    currState.orientation = tap::algorithms::transforms::DynamicOrientation(
+        currState.roll,
+        currState.pitch,
+        currState.yaw,
+        currState.rollVel,
+        currState.pitchVel,
+        currState.yawVel);
+
+    currState.accel = currState.orientation.getOrientation().getInverse().apply(
+        tap::algorithms::transforms::Vector(
+            chassisImu.getAx(),
+            chassisImu.getAy(),
+            chassisImu.getAz() - tap::communication::sensors::imu::GRAVITY_MPS2));
+
+    // should be alpha[dot] - pitch/vel, but matlab's pitch is positive up instead of down
     currState.virtualPendTheta = currState.virtualLegState.alpha + currState.pitch;
     currState.virtualPendThetaDot = currState.virtualLegState.alphaDot + currState.pitchVel;
 

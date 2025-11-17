@@ -88,7 +88,7 @@ struct BalstdLegState
 
     float L, alpha, alphaDot;  // pendulum length and angle wrt hip center
 
-    CMSISMat<2, 2> jacobian, jacobianT;
+    CMSISMat<2, 2> jacobian, jacobianT, jacobianDot;
 
     BalstdLegConfig config;
 
@@ -115,6 +115,9 @@ struct BalstdLegState
 
         jacobian = CMSISMat<2, 2>({p1x3, p5x3, p1y3, p5y3});
         jacobianT = CMSISMat<2, 2>({p1x3, p1y3, p5x3, p5y3});
+
+        // jacobian time derivative (if this doesn't reuse any calcs i will move to separate method
+        // since this may not be needed for individual legs, only the virtual one)
     }
 
     void calculateForwardKinematics()
