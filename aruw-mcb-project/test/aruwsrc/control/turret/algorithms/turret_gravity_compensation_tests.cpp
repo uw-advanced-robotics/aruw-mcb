@@ -23,6 +23,19 @@
 
 using namespace aruwsrc::control::turret::algorithms;
 
+namespace
+{
+float computeGravitationalForceOffset(
+    const float cgX,
+    const float cgZ,
+    const float pitchAngleRad,
+    const float gravityCompensationMax)
+{
+    turretGravitationalForceOffset gravityCompensation(cgX, cgZ, gravityCompensationMax);
+    return gravityCompensation.calculateFeedforward({.pitch = pitchAngleRad, .yaw = 0.0f});
+};
+}  // namespace
+
 TEST(TurretGravityCompensation, computeGravitationalForceOffset_zero_cg_offsets_return_0)
 {
     EXPECT_NEAR(0, computeGravitationalForceOffset(0, 0, 0, 0), 1E-3);

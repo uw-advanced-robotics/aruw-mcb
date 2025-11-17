@@ -33,6 +33,23 @@ using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
+namespace
+{
+float computeGravitationalForceOffset(
+    const float cgX,
+    const float cgZ,
+    const float pitchAngleRad,
+    const float gravityCompensationMax)
+{
+    turretGravitationalForceOffset gravityCompensation(cgX, cgZ, gravityCompensationMax);
+    return gravityCompensation.calculateFeedforward({.pitch = pitchAngleRad, .yaw = 0.0f});
+};
+turretGravitationalForceOffset gravityCompensation(
+    TURRET_CG_X,
+    TURRET_CG_Z,
+    GRAVITY_COMPENSATION_SCALAR);
+}  // namespace
+
 class ChassisFrameTurretControllerTest : public Test
 {
 protected:
@@ -67,11 +84,14 @@ class PitchControllerTest : public ChassisFrameTurretControllerTest
 {
 protected:
     PitchControllerTest()
-        : turretController(turretSubsystem.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
+        : turretController(
+              turretSubsystem.pitchMotor,
+              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
+              {&gravityCompensation})
     {
     }
 
-    ChassisFramePitchTurretController turretController;
+    ChassisFrameTurretController<Axis::PITCH> turretController;
 };
 
 class YawControllerTest : public ChassisFrameTurretControllerTest
@@ -81,7 +101,7 @@ protected:
     {
     }
 
-    ChassisFrameYawTurretController turretController;
+    ChassisFrameTurretController<Axis::YAW> turretController;
 };
 
 TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match_p_controller)
@@ -116,7 +136,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match
                 computeGravitationalForceOffset(
                     TURRET_CG_X,
                     TURRET_CG_Z,
-                    -M_PI_2,
+                    M_PI_2,
                     GRAVITY_COMPENSATION_SCALAR),
                 1e-2)));
         EXPECT_CALL(
@@ -125,7 +145,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match
                 computeGravitationalForceOffset(
                     TURRET_CG_X,
                     TURRET_CG_Z,
-                    -modm::toRadian(150),
+                    modm::toRadian(150),
                     GRAVITY_COMPENSATION_SCALAR),
                 1e-2)));
     }
@@ -154,7 +174,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_positive_when_setpoint
         setMotorOutput(Gt(computeGravitationalForceOffset(
             TURRET_CG_X,
             TURRET_CG_Z,
-            -currentAngle.getWrappedValue(),
+            currentAngle.getWrappedValue(),
             GRAVITY_COMPENSATION_SCALAR))));
 
     turretController.runController(1, setpoint);
@@ -171,7 +191,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_negative_when_setpoint
         setMotorOutput(Lt(computeGravitationalForceOffset(
             TURRET_CG_X,
             TURRET_CG_Z,
-            -currentAngle.getWrappedValue(),
+            currentAngle.getWrappedValue(),
             GRAVITY_COMPENSATION_SCALAR))));
 
     turretController.runController(1, setpoint);
