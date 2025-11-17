@@ -37,7 +37,7 @@ template <Axis AXIS>
 ChassisFrameTurretController<AXIS>::ChassisFrameTurretController(
     TurretMotor &Motor,
     const tap::algorithms::SmoothPidConfig &pidConfig,
-    const std::vector<TurretFeedforwardInterface*> feedforwards)
+    const std::vector<TurretFeedforwardInterface *> feedforwards)
     : TurretAxisControllerInterface<AXIS>(Motor, feedforwards),
       pid(pidConfig)
 {

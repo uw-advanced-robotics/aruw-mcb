@@ -63,6 +63,7 @@
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -235,6 +236,12 @@ SentryTurretMinorSubsystem turretRight(
 
 SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
 
+// Turret Feedforwards
+turretGravitationalForceOffset GravityFeedforward(
+    TURRET_CG_X,
+    TURRET_GC_Z,
+    GRAVITY_COMPENSATION_SCALAR);
+
 struct TurretMinorChassisControllers
 {
     ChassisFrameTurretController<Axis::PITCH> pitchController;
@@ -245,7 +252,8 @@ struct TurretMinorChassisControllers
 TurretMinorChassisControllers turretLeftChassisControllers{
     .pitchController = ChassisFrameTurretController<Axis::PITCH>(
         turretLeft.pitchMotor,
-        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME),
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
+        {&GravityFeedforward}),
     .yawController = ChassisFrameTurretController<Axis::YAW>(
         turretLeft.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
@@ -254,7 +262,8 @@ TurretMinorChassisControllers turretLeftChassisControllers{
 TurretMinorChassisControllers turretRightChassisControllers{
     .pitchController = ChassisFrameTurretController<Axis::PITCH>(
         turretRight.pitchMotor,
-        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME),
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
+        {&GravityFeedforward}),
     .yawController = ChassisFrameTurretController<Axis::YAW>(
         turretRight.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
@@ -400,7 +409,8 @@ TurretMinorWorldControllers turretRightWorldControllers{
         drivers()->turretMCBCanCommBus1,
         turretRight.pitchMotor,
         turretRightWorldPitchPosPid,
-        turretRightWorldPitchVelPid),
+        turretRightWorldPitchVelPid,
+        {&GravityFeedforward}),
 
     .yawController = WorldFrameTurretImuCascadePidTurretController<Axis::YAW>(
         transformer.getWorldToTurretRight(),
@@ -417,7 +427,8 @@ TurretMinorWorldControllers turretLeftWorldControllers{
         drivers()->turretMCBCanCommBus2,
         turretLeft.pitchMotor,
         turretLeftWorldPitchPosPid,
-        turretLeftWorldPitchVelPid),
+        turretLeftWorldPitchVelPid,
+        {&GravityFeedforward}),
 
     .yawController = WorldFrameTurretImuCascadePidTurretController<Axis::YAW>(
         transformer.getWorldToTurretLeft(),
@@ -441,7 +452,7 @@ TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     turretMajor::TURRET_MINOR_TORQUE_RATIO,
     turretMajor::FEEDFORWARD_GAIN);
 
-ChassisFrameYawTurretController turretMajorChassisYawController(
+ChassisFrameTurretController<Axis::YAW> turretMajorChassisYawController(
     turretMajor.getMutableMotor(),
     turretMajor::chassisFrameController::YAW_PID_CONFIG);
 

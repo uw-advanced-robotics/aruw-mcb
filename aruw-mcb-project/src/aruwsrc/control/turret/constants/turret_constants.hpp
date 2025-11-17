@@ -33,9 +33,6 @@
 namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
-static constexpr float TURRET_CG_X = 0.0f;
-static constexpr float TURRET_CG_Z = 0.0f;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 }  // namespace aruwsrc::control::turret
 #elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
