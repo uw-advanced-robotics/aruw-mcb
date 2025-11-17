@@ -236,8 +236,8 @@ SentryTurretMinorSubsystem turretRight(
 
 SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
 
-// Turret Feedforwards
-turretGravitationalForceOffset GravityFeedforward(
+// Turret Compensators
+turretGravitationalForceOffset turretGravityCompensation(
     TURRET_CG_X,
     TURRET_GC_Z,
     GRAVITY_COMPENSATION_SCALAR);
@@ -253,7 +253,7 @@ TurretMinorChassisControllers turretLeftChassisControllers{
     .pitchController = ChassisFrameTurretController<Axis::PITCH>(
         turretLeft.pitchMotor,
         minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
-        {&GravityFeedforward}),
+        {&turretGravityCompensation}),
     .yawController = ChassisFrameTurretController<Axis::YAW>(
         turretLeft.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
@@ -263,7 +263,7 @@ TurretMinorChassisControllers turretRightChassisControllers{
     .pitchController = ChassisFrameTurretController<Axis::PITCH>(
         turretRight.pitchMotor,
         minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
-        {&GravityFeedforward}),
+        {&turretGravityCompensation}),
     .yawController = ChassisFrameTurretController<Axis::YAW>(
         turretRight.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
@@ -410,7 +410,7 @@ TurretMinorWorldControllers turretRightWorldControllers{
         turretRight.pitchMotor,
         turretRightWorldPitchPosPid,
         turretRightWorldPitchVelPid,
-        {&GravityFeedforward}),
+        {&turretGravityCompensation}),
 
     .yawController = WorldFrameTurretImuCascadePidTurretController<Axis::YAW>(
         transformer.getWorldToTurretRight(),
@@ -428,7 +428,7 @@ TurretMinorWorldControllers turretLeftWorldControllers{
         turretLeft.pitchMotor,
         turretLeftWorldPitchPosPid,
         turretLeftWorldPitchVelPid,
-        {&GravityFeedforward}),
+        {&turretGravityCompensation}),
 
     .yawController = WorldFrameTurretImuCascadePidTurretController<Axis::YAW>(
         transformer.getWorldToTurretLeft(),

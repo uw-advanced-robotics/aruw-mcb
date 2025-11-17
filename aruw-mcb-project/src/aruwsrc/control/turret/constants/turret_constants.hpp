@@ -26,30 +26,24 @@
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_turret_constants.hpp"
-#elif defined(TARGET_ENGINEER)
-// necessary to satiate vision_coprocessor and world turret pid controller which relies on this
-// header for number of turrets and gravity compensation values
-// @todo use template parameter, normal parameter, or other workaround in the future
-namespace aruwsrc::control::turret
-{
-static constexpr uint8_t NUM_TURRETS = 1;
-}  // namespace aruwsrc::control::turret
 #elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"
 #elif defined(TARGET_SENTRY_ECLIPSE)
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
-#elif defined(TARGET_DART)
-#include "aruwsrc/robot/dart/dart_turret_constants.hpp"
-#elif defined(TARGET_TESTBED)
-#include "aruwsrc/robot/testbed/testbed_turret_constants.hpp"
-#elif defined(TARGET_BLANK)
-#include "aruwsrc/robot/blank/blank_turret_constants.hpp"
-#elif defined(TARGET_MOTOR_TESTER)
-#include "aruwsrc/robot/motor_tester/motor_tester_turret_constants.hpp"
-#elif defined(TARGET_CHARACTERIZER)
-#include "aruwsrc/robot/characterizer/characterizer_turret_constants.hpp"
+#else
+// necessary to satiate vision_coprocessor and tests which relies on this
+// header for number of turrets and gravity compensation values
+// @todo use template parameter, normal parameter, or other workaround in the future
+namespace aruwsrc::control::turret
+{
+static constexpr uint8_t NUM_TURRETS = 1;
+static constexpr float TURRET_CG_X = 0.0f;
+static constexpr float TURRET_CG_Z = 0.0f;
+static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
+
+}  // namespace aruwsrc::control::turret
 #endif
 
 #endif  // TURRET_CONSTANTS_HPP_

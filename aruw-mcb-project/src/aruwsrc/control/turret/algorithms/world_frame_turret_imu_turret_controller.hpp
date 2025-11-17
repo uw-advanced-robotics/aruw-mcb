@@ -68,7 +68,7 @@ public:
         TurretMotor &turretMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid,
-        const std::vector<TurretFeedforwardInterface *> feedforwards = {});
+        const std::vector<TurretCompensatorInterface *> compensators = {});
 
     void initialize() final;
 

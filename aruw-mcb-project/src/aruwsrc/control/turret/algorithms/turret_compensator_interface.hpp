@@ -16,35 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef TURRET_FEED_FORWARD_INTERFACE_HPP_
-#define TURRET_FEED_FORWARD_INTERFACE_HPP_
+#ifndef TURRET_COMPENSATOR_INTERFACE_HPP_
+#define TURRET_COMPENSATOR_INTERFACE_HPP_
 
 #include <vector>
 
 /**
- * @brief Abstract interface for SISO feedforward control calculation
+ * @brief Abstract interface for SISO compensation control
  *
  * Derived classes should override the calculate() method to implement
- * their own feedforward logic.
+ * their own compensation logic.
  */
 namespace aruwsrc::control::turret::algorithms
 {
-class TurretFeedforwardInterface
+class TurretCompensatorInterface
 {
 public:
-    struct TurretFeedforwardState
+    struct TurretCompensatorState
     {
         float pitch;
         float yaw;
     };
     /**
-     * @brief Calculates the feedforward control output.
+     * @brief Calculates the compensator control output.
      *
-     * @param TurretFeedforwardState system state struct
-     * @return float Feedforward control output (SISO)
+     * @param TurretCompensatorState system state struct
+     * @return float compensator control output (SISO)
      */
-    virtual float calculateFeedforward(const TurretFeedforwardState state) const = 0;
+    virtual float calculateCompensationEffort(const TurretCompensatorState state) const = 0;
 };
 };  // namespace aruwsrc::control::turret::algorithms
 
-#endif  // FEED_FORWARD_INTERFACE_HPP_
+#endif // TURRET_COMPENSATOR_INTERFACE_HPP_

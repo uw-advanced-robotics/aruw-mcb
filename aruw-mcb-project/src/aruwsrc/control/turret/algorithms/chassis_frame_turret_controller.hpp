@@ -49,7 +49,7 @@ public:
     ChassisFrameTurretController(
         TurretMotor &Motor,
         const tap::algorithms::SmoothPidConfig &pidConfig,
-        const std::vector<TurretFeedforwardInterface *> feedforwards = {});
+        const std::vector<TurretCompensatorInterface *> compensators = {});
 
     void initialize();
 

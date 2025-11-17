@@ -320,7 +320,7 @@ aruwsrc::chassis::BeybladeCommand beybladeCommand(
     (drivers()->controlOperatorInterface),
     aruwsrc::chassis::BEYBLADE_CONFIG);
 
-// Turret feedforwards
+// Turret compensators
 
 algorithms::turretGravitationalForceOffset turretGravityCompensation(
     TURRET_CG_X,

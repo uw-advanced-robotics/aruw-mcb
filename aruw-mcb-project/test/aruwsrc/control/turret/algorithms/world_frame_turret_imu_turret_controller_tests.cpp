@@ -304,7 +304,7 @@ static int16_t computeCGOffset(WrappedFloat pitchAngleFromCenter)
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);
-    return gravityCompensation.calculateFeedforward(
+    return gravityCompensation.calculateCompensationEffort(
         {.pitch = pitchAngleFromCenter.getWrappedValue(), .yaw = 0.0f});
 }
 

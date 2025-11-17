@@ -32,7 +32,8 @@ turretGravitationalForceOffset::turretGravitationalForceOffset(
       cgZ(cgZ),
       gravityCompensatorMax(gravityCompensatorMax){};
 
-float turretGravitationalForceOffset::calculateFeedforward(TurretFeedforwardState state) const
+float turretGravitationalForceOffset::calculateCompensationEffort(
+    TurretCompensatorState state) const
 {
     bool cgXZero = compareFloatClose(cgX, 0.0f, 1E-5);
     bool cgZZero = compareFloatClose(cgZ, 0.0f, 1E-5);
