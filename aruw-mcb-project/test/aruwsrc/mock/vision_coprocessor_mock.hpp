@@ -28,7 +28,7 @@ namespace aruwsrc
 {
 namespace mock
 {
-class VisionCoprocessorMock : public serial::VisionCoprocessor
+class VisionCoprocessorMock : public communication::serial::VisionCoprocessor
 {
 public:
     VisionCoprocessorMock(tap::Drivers *drivers);
@@ -42,7 +42,7 @@ public:
     MOCK_METHOD(
         void,
         attachTransformer,
-        (aruwsrc::algorithms::transforms::TransformerInterface *),
+        (aruwsrc::algorithms::odometry::transforms::TransformerInterface *),
         (override));
     MOCK_METHOD(void, sendShutdownMessage, (), (override));
     MOCK_METHOD(void, sendRebootMessage, (), (override));

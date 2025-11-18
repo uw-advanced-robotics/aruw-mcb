@@ -20,7 +20,7 @@
 
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 void ChassisAutoNavController::initialize()
 {
@@ -110,4 +110,4 @@ Position ChassisAutoNavController::calculateSetPoint(
     return lookaheadPos;
 }
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

@@ -25,20 +25,18 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 modm::Pair<int, float> HolonomicChassisSubsystem::lastComputedMaxWheelSpeed =
     CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
 
-can::capbank::CapacitorBank* HolonomicChassisSubsystem::capacitorBank = nullptr;
+communication::can::cap_bank::CapacitorBank* HolonomicChassisSubsystem::capacitorBank = nullptr;
 
 HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
     tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
-    can::capbank::CapacitorBank* capacitorBank)
+    communication::can::cap_bank::CapacitorBank* capacitorBank)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       currentSensor(currentSensor),
       chassisPowerLimiter(
@@ -102,6 +100,4 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
     return rTranslationalGain;
 }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

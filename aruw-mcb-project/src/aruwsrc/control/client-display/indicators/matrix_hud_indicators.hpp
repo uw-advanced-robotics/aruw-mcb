@@ -35,7 +35,7 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * The matrix HUD will display a matrix of possible robot states. Each column is a different
@@ -73,7 +73,7 @@ public:
      */
     MatrixHudIndicators(
         tap::Drivers &drivers,
-        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
@@ -179,7 +179,7 @@ private:
 
     tap::Drivers &drivers;
 
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
 
     const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem;
 
@@ -222,6 +222,6 @@ private:
                MATRIX_HUD_INDICATOR_CHAR_SIZE - MATRIX_HUD_INDICATOR_SELECTOR_BOX_WIDTH - 1;
     }
 };
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  //  MATRIX_HUD_INDICATORS_HPP_

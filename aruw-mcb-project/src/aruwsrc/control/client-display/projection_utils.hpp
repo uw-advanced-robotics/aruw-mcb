@@ -27,7 +27,7 @@
 
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
-using aruwsrc::control::client_display::HudIndicator;
+using aruwsrc::control::client_display::indicators::HudIndicator;
 
 namespace aruwsrc::control::client_display
 {

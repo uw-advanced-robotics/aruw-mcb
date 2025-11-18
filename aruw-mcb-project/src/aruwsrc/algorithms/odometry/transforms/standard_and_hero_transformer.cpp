@@ -25,7 +25,7 @@ using namespace aruwsrc::control::turret;
 using namespace tap::algorithms::odometry;
 using namespace aruwsrc::control::client_display;
 
-namespace aruwsrc::algorithms::transforms
+namespace aruwsrc::algorithms::odometry::transforms
 {
 #if defined(TARGET_STANDARD_NULL)
 static Transform TURRET_TO_ARDUCAM_OFFSET =
@@ -61,7 +61,7 @@ void StandardAndHeroTransformer::updateTransforms()
     worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
 
     float roll = 0.0f;
-    const aruwsrc::can::TurretMCBCanComm* turretMCB = turret.getTurretMCB();
+    const aruwsrc::communication::can::TurretMCBCanComm* turretMCB = turret.getTurretMCB();
 
     if (turretMCB != nullptr) roll = turretMCB->getRoll();
 
@@ -78,4 +78,4 @@ void StandardAndHeroTransformer::updateTransforms()
     worldToVTM = worldToTurret.composeStatic(VTM_OFFSET);
 }
 
-}  // namespace aruwsrc::algorithms::transforms
+}  // namespace aruwsrc::algorithms::odometry::transforms

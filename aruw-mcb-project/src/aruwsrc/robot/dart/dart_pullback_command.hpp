@@ -23,7 +23,7 @@
 
 #include "dart_launcher_subsystem.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 class DartPullbackCommand : public tap::control::Command
 {
@@ -45,5 +45,5 @@ private:
     int32_t desiredOutput;
 };  // class DartPullbackCommand
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif  // DART_PULLBACK_COMMAND_HPP_

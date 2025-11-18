@@ -75,7 +75,7 @@ public:
      */
     TurretMajorWorldFrameController(
         const tap::algorithms::transforms::Transform& worldToMajor,
-        const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+        const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
         tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
         const SentryTurretMinorSubsystem& turretLeft,
@@ -122,7 +122,7 @@ public:
 private:
     const tap::algorithms::transforms::Transform& worldToMajor;
 
-    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
+    const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
 
     aruwsrc::control::turret::TurretMotor& yawMotor;
 

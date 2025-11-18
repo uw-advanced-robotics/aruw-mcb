@@ -40,7 +40,6 @@
 
 using namespace tap::control::setpoint;
 
-using namespace aruwsrc::agitator;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;

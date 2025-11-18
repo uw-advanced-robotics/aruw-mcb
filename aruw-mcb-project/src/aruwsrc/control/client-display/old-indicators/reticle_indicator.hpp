@@ -32,7 +32,7 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Draws a static reticle defined as a bunch of horizontal lines with a verticle line connecting
@@ -111,6 +111,6 @@ private:
     /** Index used when iterating through the reticleMsg in protothreads. */
     size_t reticleIndex = 0;
 };
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  //  RETICLE_INDICATOR_HPP_

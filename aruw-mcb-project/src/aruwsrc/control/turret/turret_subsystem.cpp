@@ -39,7 +39,7 @@ TurretSubsystem::TurretSubsystem(
     MotorInterface *yawMotor,
     const TurretMotorConfig &pitchMotorConfig,
     const TurretMotorConfig &yawMotorConfig,
-    const aruwsrc::can::TurretMCBCanComm *turretMCB)
+    const aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
     : tap::control::Subsystem(drivers),
       pitchMotor(pitchMotor, pitchMotorConfig),
       yawMotor(yawMotor, yawMotorConfig),

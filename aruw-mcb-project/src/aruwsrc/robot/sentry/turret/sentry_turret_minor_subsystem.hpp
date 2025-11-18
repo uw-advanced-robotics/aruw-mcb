@@ -34,7 +34,7 @@ public:
         tap::motor::MotorInterface& yawMotor,
         const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
         const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
-        const aruwsrc::can::TurretMCBCanComm* turretMCB,
+        const aruwsrc::communication::can::TurretMCBCanComm* turretMCB,
         uint8_t turretID);
 
     float getMajorFrameYaw() const;

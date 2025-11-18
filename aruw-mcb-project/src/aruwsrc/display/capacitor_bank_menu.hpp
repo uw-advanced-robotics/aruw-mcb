@@ -23,7 +23,7 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/display/dummy_allocator.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
 
 namespace aruwsrc
@@ -45,7 +45,7 @@ public:
 
     CapacitorBankMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
-        can::capbank::CapacitorBank* capacitorBank);
+        communication::can::cap_bank::CapacitorBank* capacitorBank);
     void draw() override;
 
     void update() override;
@@ -59,10 +59,10 @@ public:
 private:
     static constexpr int TURRET_MCB_MENU_ID = 13;
 
-    can::capbank::CapacitorBank* capacitorBank;
+    communication::can::cap_bank::CapacitorBank* capacitorBank;
 
     int milliVolts = 0, milliAmps = 0, powerLimit = 0, availableEnergy = 0;
-    can::capbank::State state;
+    communication::can::cap_bank::State state;
 
     bool changed;
 

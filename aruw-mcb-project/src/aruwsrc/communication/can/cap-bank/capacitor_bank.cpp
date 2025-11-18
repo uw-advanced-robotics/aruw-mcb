@@ -21,7 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-namespace aruwsrc::can::capbank
+namespace aruwsrc::communication::can::cap_bank
 {
 CapacitorBank::CapacitorBank(
     tap::Drivers* drivers,
@@ -122,4 +122,4 @@ float CapacitorBank::getMaximumOutputCurrent() const
     return maxOutput;
 }
 
-}  // namespace aruwsrc::can::capbank
+}  // namespace aruwsrc::communication::can::cap_bank

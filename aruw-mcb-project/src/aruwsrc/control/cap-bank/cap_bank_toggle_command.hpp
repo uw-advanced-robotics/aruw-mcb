@@ -22,17 +22,17 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
-namespace aruwsrc::control::capbank
+namespace aruwsrc::control::cap_bank
 {
 class CapBankToggleCommand : public tap::control::Command
 {
 public:
     CapBankToggleCommand(
         tap::Drivers* drivers,
-        aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem);
+        aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem);
 
     void initialize() override;
 
@@ -46,9 +46,9 @@ public:
 
 private:
     tap::Drivers* drivers;
-    aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem;
+    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
 };  // class CapBankToggleCommand
 
-}  // namespace aruwsrc::control::capbank
+}  // namespace aruwsrc::control::cap_bank
 
 #endif  // CAP_BANK_TOGGLE_COMMAND_HPP_

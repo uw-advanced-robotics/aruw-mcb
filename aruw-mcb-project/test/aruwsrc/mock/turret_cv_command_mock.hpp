@@ -30,7 +30,7 @@ class TurretCVCommandMock : public aruwsrc::control::turret::cv::TurretCVCommand
 {
 public:
     TurretCVCommandMock(
-        serial::VisionCoprocessor *visionCoprocessor,
+        communication::serial::VisionCoprocessor *visionCoprocessor,
         control::ControlOperatorInterface *controlOperatorInterface,
         aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,

@@ -19,7 +19,7 @@
 
 #include "dart_pullback_command.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 DartPullbackCommand::DartPullbackCommand(DartLauncherSubsystem &dartLauncher, int32_t desiredOutput)
     : dartLauncher(dartLauncher),
@@ -36,4 +36,4 @@ void DartPullbackCommand::end(bool) { dartLauncher.moveMotor(0); }
 
 bool DartPullbackCommand::isFinished() const { return dartLauncher.isBeamBroken(); }
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart

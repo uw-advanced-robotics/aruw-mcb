@@ -24,7 +24,7 @@
 
 #include "standard_and_hero_transformer.hpp"
 
-namespace aruwsrc::algorithms::transforms
+namespace aruwsrc::algorithms::odometry::transforms
 {
 /**
  * @brief a convenience subsystem for updating a StandardAndHeroTransformer each control loop
@@ -48,6 +48,6 @@ private:
     StandardAndHeroTransformer& transformer;
 };
 
-}  // namespace aruwsrc::algorithms::transforms
+}  // namespace aruwsrc::algorithms::odometry::transforms
 
 #endif  // STANDARD_AND_HERO_TRANSFORMER_SUBSYSTEM_HPP_

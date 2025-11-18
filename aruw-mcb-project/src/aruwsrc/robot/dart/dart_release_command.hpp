@@ -24,7 +24,7 @@
 
 #include "dart_launcher_subsystem.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 class DartReleaseCommand : public tap::control::Command
 {
@@ -46,5 +46,5 @@ private:
     int32_t desiredOutput;
 };  // class DART RELEASE
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif  // DART_RELEASE_COMMAND_HPP_

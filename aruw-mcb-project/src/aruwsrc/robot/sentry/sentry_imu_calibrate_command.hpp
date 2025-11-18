@@ -80,11 +80,11 @@ public:
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
-        aruwsrc::chassis::HolonomicChassisSubsystem &chassis,
+        aruwsrc::control::chassis::HolonomicChassisSubsystem &chassis,
         algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-        aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
+        aruwsrc::communication::mcb_lite::MCBLite &chassisMCBLite,
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
@@ -107,7 +107,7 @@ protected:
 
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu;
-    aruwsrc::virtualMCB::MCBLite &chassisMCBLite;
+    aruwsrc::communication::mcb_lite::MCBLite &chassisMCBLite;
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;

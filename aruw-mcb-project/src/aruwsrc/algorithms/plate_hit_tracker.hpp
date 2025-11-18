@@ -20,13 +20,13 @@
 #ifndef PLATE_HIT_TRACKER_HPP_
 #define PLATE_HIT_TRACKER_HPP_
 
-#include <aruwsrc/algorithms/odometry/transformer_interface.hpp>
 #include <tap/algorithms/wrapped_float.hpp>
 
 #include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "modm/math/matrix.hpp"
 
 using tap::algorithms::Angle;
@@ -102,7 +102,7 @@ public:
     void update();
 
     inline void attachTransformer(
-        aruwsrc::algorithms::transforms::TransformerInterface *transformer)
+        aruwsrc::algorithms::odometry::transforms::TransformerInterface *transformer)
     {
         this->transformer = transformer;
     }
@@ -131,7 +131,7 @@ private:
     tap::Drivers *drivers;
     PlateHitData lastHitData;
 
-    aruwsrc::algorithms::transforms::TransformerInterface *transformer;
+    aruwsrc::algorithms::odometry::transforms::TransformerInterface *transformer;
     CMSISMat<BIN_NUMBER, 1> bins{};
     const CMSISMat<BIN_NUMBER, BIN_NUMBER> BLUR_CONVOLVE_MATRIX;
     std::array<ProjectileType, BIN_NUMBER> lastProjectileTypePerBin = {ProjectileType::COLLISION};

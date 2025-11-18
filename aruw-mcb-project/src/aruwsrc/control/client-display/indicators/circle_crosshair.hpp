@@ -27,7 +27,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 class CircleCrosshair : public HudIndicator, protected modm::Resumable<2>
 {
@@ -75,6 +75,6 @@ private:
     Tx::Graphic1Message crosshairGraphics;
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // CIRCLE_CROSSHAIR_HPP_

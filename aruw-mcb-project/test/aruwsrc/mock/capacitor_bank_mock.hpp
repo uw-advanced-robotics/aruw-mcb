@@ -22,13 +22,13 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 
 namespace aruwsrc::mock
 {
 namespace
 {
-using namespace aruwsrc::can::capbank;
+using namespace aruwsrc::communication::can::cap_bank;
 }
 
 class CapacitorBankMock : public CapacitorBank

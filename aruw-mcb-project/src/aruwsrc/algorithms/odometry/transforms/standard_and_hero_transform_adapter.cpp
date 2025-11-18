@@ -25,7 +25,7 @@
 #include "transformer_interface.hpp"
 
 using namespace tap::algorithms::transforms;
-namespace aruwsrc::algorithms::transforms
+namespace aruwsrc::algorithms::odometry::transforms
 {
 StandardAndHeroTransformAdapter::StandardAndHeroTransformAdapter(
     const StandardAndHeroTransformer& transforms)
@@ -62,4 +62,4 @@ const Transform& StandardAndHeroTransformAdapter::getChassisToArducam(uint8_t) c
     return transforms.getChassisToArducam();
 }
 
-};  // namespace aruwsrc::algorithms::transforms
+};  // namespace aruwsrc::algorithms::odometry::transforms

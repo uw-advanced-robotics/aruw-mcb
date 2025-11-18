@@ -34,7 +34,7 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId,
     tap::can::CanBus canBus,
-    aruwsrc::can::TurretMCBCanComm *turretMCB)
+    aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
     : tap::control::Subsystem(drivers),
       drivers(drivers),
       launchSpeedLinearInterpolator(

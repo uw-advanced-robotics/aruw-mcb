@@ -23,7 +23,7 @@
 
 #include "dart_launcher_subsystem.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 class DartOpenCommand : public tap::control::Command
 {
@@ -44,5 +44,5 @@ private:
     DartLauncherSubsystem &dartLauncher;
 };  // class DartCloseCommand
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif  // DART_OPEN_COMMAND_HPP_

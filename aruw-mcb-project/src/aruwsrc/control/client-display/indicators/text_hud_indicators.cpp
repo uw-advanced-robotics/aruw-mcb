@@ -21,7 +21,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 TextHudIndicators::TextHudIndicators(
     tap::Drivers &drivers,
@@ -112,4 +112,4 @@ bool TextHudIndicators::checkIfSentryLow()
     return (isBlue ? allRobotHp.blue.sentry7 : allRobotHp.red.sentry7) < SENTRY_LOW_LIMIT;
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

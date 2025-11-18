@@ -28,7 +28,7 @@
 #include "modm/architecture/interface/can_message.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
-namespace aruwsrc::can::capbank
+namespace aruwsrc::communication::can::cap_bank
 {
 static constexpr float CAPACITOR_BANK_OUTPUT_VOLTAGE = 24.0f;
 static constexpr float CAPACITOR_BANK_EFFICIENCY = 0.9f;
@@ -138,6 +138,6 @@ private:
 
     tap::arch::MilliTimeout heartbeat;
 };
-}  // namespace aruwsrc::can::capbank
+}  // namespace aruwsrc::communication::can::cap_bank
 
 #endif  // CAPACITOR_BANK_HPP_

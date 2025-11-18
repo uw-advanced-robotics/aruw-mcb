@@ -28,7 +28,7 @@
 
 namespace aruwsrc::engineer::wrist
 {
-using namespace aruwsrc::control::engineer;
+using namespace aruwsrc::engineer;
 /**
  * A command that moves the engineer wrist based on the control operator interface.
  */

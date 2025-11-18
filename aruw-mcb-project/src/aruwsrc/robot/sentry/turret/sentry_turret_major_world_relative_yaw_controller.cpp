@@ -19,7 +19,7 @@
 #include "sentry_turret_major_world_relative_yaw_controller.hpp"
 
 using namespace tap::algorithms;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 
 namespace aruwsrc::sentry::turret
 {
