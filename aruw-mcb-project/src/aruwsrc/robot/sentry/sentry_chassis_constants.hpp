@@ -23,7 +23,7 @@
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 // Initial position of the chassis in the field (meters)
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0.34f;
@@ -131,5 +131,5 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 100,
 };
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_

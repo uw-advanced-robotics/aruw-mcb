@@ -35,7 +35,7 @@
 
 using namespace testing;
 using namespace aruwsrc::control::auto_aim;
-using namespace aruwsrc::serial;
+using namespace aruwsrc::communication::serial;
 using namespace aruwsrc::control::agitator;
 
 class AutoAimFireRateManagerTest : public Test

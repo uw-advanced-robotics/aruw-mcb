@@ -38,7 +38,7 @@ using namespace aruwsrc::algorithms;
 namespace aruwsrc::sentry::turret::cv
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
-    serial::VisionCoprocessor &visionCoprocessor,
+    communication::serial::VisionCoprocessor &visionCoprocessor,
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
     TurretConfig &turretLeftConfig,

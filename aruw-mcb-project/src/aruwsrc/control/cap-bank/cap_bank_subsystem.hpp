@@ -24,7 +24,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 
 #include "cap_bank_test_command.hpp"
 
@@ -33,19 +33,21 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::capbank
+namespace aruwsrc::control::cap_bank
 {
 class CapBankSubsystem : public tap::control::Subsystem
 {
     friend class CapBankTestCommand;
 
 public:
-    CapBankSubsystem(tap::Drivers* drivers, can::capbank::CapacitorBank& capacitorBank);
+    CapBankSubsystem(
+        tap::Drivers* drivers,
+        communication::can::cap_bank::CapacitorBank& capacitorBank);
 
     virtual ~CapBankSubsystem() {}
     const char* getName() const override { return "Capacitor Bank"; }
 
-    void changeSprintMode(aruwsrc::can::capbank::SprintMode mode) const
+    void changeSprintMode(aruwsrc::communication::can::cap_bank::SprintMode mode) const
     {
         this->capacitorBank.setSprinting(mode);
     }
@@ -65,7 +67,7 @@ public:
     bool enabled() const { return this->capacitorsEnabled; }
 
 private:
-    can::capbank::CapacitorBank& capacitorBank;
+    communication::can::cap_bank::CapacitorBank& capacitorBank;
 
     bool capacitorsEnabled;
 
@@ -73,6 +75,6 @@ private:
 
     CapBankTestCommand capBankTestCommand;
 };
-}  // namespace aruwsrc::control::capbank
+}  // namespace aruwsrc::control::cap_bank
 
 #endif  // CAPACITOR_BANK_SUBSYSTEM_HPP_

@@ -19,7 +19,7 @@
 
 #include "dart_open_command.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 DartOpenCommand::DartOpenCommand(DartLauncherSubsystem &dartLauncher) : dartLauncher(dartLauncher)
 {
@@ -34,4 +34,4 @@ void DartOpenCommand::end(bool) {}
 
 bool DartOpenCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart

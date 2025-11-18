@@ -69,13 +69,15 @@
 namespace aruwsrc::algorithms::strategy_state_machine
 {
 using namespace tap::communication::serial;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace aruwsrc::algorithms;
 using namespace tap::algorithms::transforms;
 class RMULStateMachine
 {
 public:
-    RMULStateMachine(RefSerial& refSerial, aruwsrc::serial::VisionCoprocessor& visionCoprocessor)
+    RMULStateMachine(
+        RefSerial& refSerial,
+        aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor)
         : refSerial(refSerial),
           visionCoprocessor(visionCoprocessor)
     {
@@ -87,7 +89,7 @@ public:
 
 private:
     RefSerial& refSerial;
-    aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor;
     ChassisAutoNavController* autoNavController;
 
     AutoNavPath path;

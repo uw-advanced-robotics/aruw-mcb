@@ -17,33 +17,31 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cap_bank_sprint_command.hpp"
+#include "cap_bank_toggle_command.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
 
-namespace aruwsrc::control::capbank
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
+
+namespace aruwsrc::control::cap_bank
 {
-CapBankSprintCommand::CapBankSprintCommand(
+CapBankToggleCommand::CapBankToggleCommand(
     tap::Drivers* drivers,
-    aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem,
-    const aruwsrc::can::capbank::SprintMode sprintOption)
-    : sprintOption(sprintOption),
-      drivers(drivers),
+    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem)
+    : drivers(drivers),
       capBankSubsystem(capBankSubsystem)
+
 {
     addSubsystemRequirement(&capBankSubsystem);
 }
 
-void CapBankSprintCommand::initialize() { capBankSubsystem.changeSprintMode(this->sprintOption); }
+void CapBankToggleCommand::initialize() { capBankSubsystem.toggleCapacitors(); }
 
-void CapBankSprintCommand::execute() {}
+void CapBankToggleCommand::execute() {}
 
-void CapBankSprintCommand::end(bool)
-{
-    capBankSubsystem.changeSprintMode(can::capbank::SprintMode::NO_SPRINT);
-}
+void CapBankToggleCommand::end(bool) {}
 
-bool CapBankSprintCommand::isFinished() const { return false; }
+bool CapBankToggleCommand::isFinished() const { return true; }
 
-}  // namespace aruwsrc::control::capbank
+}  // namespace aruwsrc::control::cap_bank

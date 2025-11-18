@@ -29,7 +29,7 @@
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
-using namespace aruwsrc::serial;
+using namespace aruwsrc::communication::serial;
 using tap::arch::clock::getTimeMicroseconds;
 
 VisionCoprocessor* VisionCoprocessor::visionCoprocessorInstance = nullptr;

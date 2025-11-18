@@ -16,37 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "cap_bank_test_command.hpp"
 
-#ifndef CAP_BANK_TEST_COMMAND_HPP_
-#define CAP_BANK_TEST_COMMAND_HPP_
+#include "cap_bank_subsystem.hpp"
 
-#include "tap/control/command.hpp"
-
-namespace aruwsrc::control::capbank
+namespace aruwsrc::control::cap_bank
 {
-class CapBankSubsystem;
-
-class CapBankTestCommand : public tap::control::Command
+CapBankTestCommand::CapBankTestCommand(CapBankSubsystem *subsystem) : subsystem(subsystem)
 {
-public:
-    CapBankTestCommand(CapBankSubsystem *subsystem);
+    this->addSubsystemRequirement(subsystem);
+}
 
-    bool isReady() override { return true; };
+void CapBankTestCommand::initialize() { this->subsystem->enableCapacitors(); }
 
-    void initialize() override;
+void CapBankTestCommand::end(bool) { this->subsystem->disableCapacitors(); }
 
-    void execute() override{};
+bool CapBankTestCommand::isFinished() const
+{
+    return this->subsystem->capacitorBank.getVoltage() > 12.0f;
+}
 
-    void end(bool) override;
-
-    bool isFinished() const override;
-
-    const char *getName() const override { return "cap bank test command"; }
-
-private:
-    CapBankSubsystem *subsystem;
-};  // class CapBankTestCommand
-
-}  // namespace aruwsrc::control::capbank
-
-#endif  // CAP_BANK_TEST_COMMAND_HPP_
+}  // namespace aruwsrc::control::cap_bank

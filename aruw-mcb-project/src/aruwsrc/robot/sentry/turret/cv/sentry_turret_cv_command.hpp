@@ -106,7 +106,7 @@ public:
      * # TODO: docstring
      */
     SentryTurretCVCommand(
-        serial::VisionCoprocessor &visionCoprocessor,
+        communication::serial::VisionCoprocessor &visionCoprocessor,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
         TurretConfig &turretLeftConfig,
@@ -152,7 +152,7 @@ private:
         WrappedFloat *desiredPitchSetpoint,
         bool *withinAimingTolerance);
 
-    serial::VisionCoprocessor &visionCoprocessor;
+    communication::serial::VisionCoprocessor &visionCoprocessor;
 
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;

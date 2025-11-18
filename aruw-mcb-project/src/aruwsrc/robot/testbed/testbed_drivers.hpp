@@ -27,7 +27,7 @@
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #else
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 #endif
 
 namespace aruwsrc::testbed
@@ -53,7 +53,7 @@ public:
     control::ControlOperatorInterface controlOperatorInterface;
 #endif
 
-    aruwsrc::virtualMCB::MCBLite lite;
+    aruwsrc::communication::mcb_lite::MCBLite lite;
 
 public:
 };  // class aruwsrc::TestbedDrivers

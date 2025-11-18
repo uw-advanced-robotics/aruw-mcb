@@ -29,7 +29,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Adds text to show in bright yellow the number of bullets currently the robot has.
@@ -95,6 +95,6 @@ private:
     }
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // AMMO_INDICATOR_HPP_

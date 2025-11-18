@@ -19,9 +19,7 @@
 
 #include "open_hopper_command_old.hpp"
 
-namespace aruwsrc
-{
-namespace control
+namespace aruwsrc::control::hopper_cover
 {
 OpenHopperCommand::OpenHopperCommand(HopperSubsystem* subsystem)
     : Command(),
@@ -40,6 +38,4 @@ void OpenHopperCommand::end(bool) { subsystemHopper->setClose(); }
 
 bool OpenHopperCommand::isFinished() const { return false; }
 
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::hopper_cover

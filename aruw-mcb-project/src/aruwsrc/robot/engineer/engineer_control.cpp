@@ -61,10 +61,10 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::joint;
 using namespace aruwsrc::control::joint::homing;
 using namespace aruwsrc::control::joint::homing::trigger;
-using namespace aruwsrc::control::engineer;
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
@@ -89,8 +89,8 @@ aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
-    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Left Front Chassis Motor",
     false,
@@ -98,8 +98,8 @@ tap::motor::DjiMotor leftFrontChassisMotor(
 
 tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
-    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Left Back Chassis Motor",
     false,
@@ -107,8 +107,8 @@ tap::motor::DjiMotor leftBackChassisMotor(
 
 tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
-    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Right Front Chassis Motor",
     false,
@@ -116,8 +116,8 @@ tap::motor::DjiMotor rightFrontChassisMotor(
 
 tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
-    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Right Back Chassis Motor",
     false,
@@ -125,7 +125,7 @@ tap::motor::DjiMotor rightBackChassisMotor(
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
-     aruwsrc::chassis::CURRENT_SENSOR_PIN,
+     aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
@@ -176,7 +176,7 @@ tap::motor::DjiMotor wristRightMotor(
 tap::encoder::CanEncoder wristPitchEncoder(
     drivers(),
     aruwsrc::engineer::WRIST_PITCH_ENCODER_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     1,
     WRIST_HOME_PITCH);
@@ -184,7 +184,7 @@ tap::encoder::CanEncoder wristPitchEncoder(
 tap::encoder::CanEncoder wristYawEncoder(
     drivers(),
     aruwsrc::engineer::WRIST_YAW_ENCODER_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     1,
     WRIST_HOME_YAW);
@@ -231,7 +231,7 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryExtensionLim
 LimitSwitchTrigger gantryExtensionTrigger(&gantryExtensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
-aruwsrc::chassis::MecanumChassisSubsystem chassis(
+chassis::MecanumChassisSubsystem mechanumChassis(
     drivers(),
     &currentSensor,
     &voltageSensor,
@@ -239,7 +239,7 @@ aruwsrc::chassis::MecanumChassisSubsystem chassis(
     leftBackChassisMotor,
     rightFrontChassisMotor,
     rightBackChassisMotor,
-    aruwsrc::chassis::WHEEL_VELOCITY_PID_CONFIG);
+    aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
 TriggerHomedJointSubsystem cubeLift(drivers(), cubeLiftMotor, cubeLiftTrigger, CUBE_LIFT_CONFIG);
 
@@ -325,10 +325,10 @@ SetpointMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 SetpointMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
 SetpointMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
 
-aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
-    &chassis);
+    &mechanumChassis);
 
 WristControllerCommand wristControllerCommand(
     wristRollSubsystem,
@@ -470,7 +470,7 @@ CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    chassis.initialize();
+    mechanumChassis.initialize();
     gantryLiftSubsystem.initialize();
     gantryExtensionSubsystem.initialize();
     wristRollSubsystem.initialize();
@@ -484,7 +484,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&mechanumChassis);
     drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
     drivers->commandScheduler.registerSubsystem(&gantryExtensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
@@ -498,7 +498,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisDriveCommand);
+    mechanumChassis.setDefaultCommand(&chassisDriveCommand);
     gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
     gantryExtensionSubsystem.setDefaultCommand(&gantryExtensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);

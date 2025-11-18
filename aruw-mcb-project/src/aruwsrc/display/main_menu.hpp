@@ -27,7 +27,7 @@
 #include "tap/display/motor_menu.hpp"
 #include "tap/display/ref_serial_menu.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/standard_menu.hpp"
 
@@ -56,12 +56,12 @@ public:
     MainMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *stack,
         tap::Drivers *drivers,
-        serial::VisionCoprocessor *visionCoprocessor,
-        can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2,
-        aruwsrc::virtualMCB::MCBLite *mcbLite1,
-        aruwsrc::virtualMCB::MCBLite *mcbLite2,
-        can::capbank::CapacitorBank *capacitorBank);
+        communication::serial::VisionCoprocessor *visionCoprocessor,
+        communication::can::TurretMCBCanComm *turretMCBCanCommBus1,
+        communication::can::TurretMCBCanComm *turretMCBCanCommBus2,
+        aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
+        aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
+        communication::can::cap_bank::CapacitorBank *capacitorBank);
 
     virtual ~MainMenu() = default;
 
@@ -91,12 +91,12 @@ private:
     AboutMenu aboutMenu;
     SentryStrategyMenu sentryStrategyMenu;
     CapacitorBankMenu capBankMenu;
-    serial::VisionCoprocessor *visionCoprocessor;
-    can::TurretMCBCanComm *turretMCBCanCommBus1;
-    can::TurretMCBCanComm *turretMCBCanCommBus2;
-    aruwsrc::virtualMCB::MCBLite *mcbLite1;
-    aruwsrc::virtualMCB::MCBLite *mcbLite2;
-    can::capbank::CapacitorBank *capacitorBank;
+    communication::serial::VisionCoprocessor *visionCoprocessor;
+    communication::can::TurretMCBCanComm *turretMCBCanCommBus1;
+    communication::can::TurretMCBCanComm *turretMCBCanCommBus2;
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite1;
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite2;
+    communication::can::cap_bank::CapacitorBank *capacitorBank;
 
     void addImuCalibrateMenuCallback();
     void addAutotuneMenuCallback();

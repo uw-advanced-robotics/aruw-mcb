@@ -39,7 +39,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 /**
  * A CAN message handler that handles sending and receiving data from the turret mounted
@@ -314,6 +314,6 @@ private:
         }
     }
 };
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::communication::can
 
 #endif  // TURRET_MCB_CAN_COMM_HPP_

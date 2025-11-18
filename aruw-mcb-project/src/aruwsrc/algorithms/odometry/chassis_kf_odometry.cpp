@@ -80,7 +80,7 @@ void ChassisKFOdometry::update()
     tap::algorithms::rotateVector(
         &y[int(OdomInput::ACC_X)],
         &y[int(OdomInput::ACC_Y)],
-        serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+        communication::serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
 #endif
 
     // perform the update, after this update a new state matrix is now available

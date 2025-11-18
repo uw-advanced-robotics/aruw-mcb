@@ -22,14 +22,14 @@
 #include "tap/control/subsystem.hpp"
 
 #include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::control::aruco
 {
 using namespace aruwsrc::algorithms::odometry;
-using namespace aruwsrc::serial;
-using namespace aruwsrc::algorithms::transforms;
+using namespace aruwsrc::communication::serial;
+using namespace aruwsrc::algorithms::odometry::transforms;
 using namespace tap::algorithms::odometry;
 
 class ArucoResetSubsystem : public tap::control::Subsystem

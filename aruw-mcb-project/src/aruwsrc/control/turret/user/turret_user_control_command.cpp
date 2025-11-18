@@ -23,7 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 using tap::algorithms::WrappedFloat;
 

@@ -19,18 +19,18 @@
 
 #include "cap_bank_subsystem.hpp"
 
-namespace aruwsrc::control::capbank
+namespace aruwsrc::control::cap_bank
 {
 CapBankSubsystem::CapBankSubsystem(
     tap::Drivers* drivers,
-    can::capbank::CapacitorBank& capacitorBank)
+    communication::can::cap_bank::CapacitorBank& capacitorBank)
     : Subsystem(drivers),
       capacitorBank(capacitorBank),
       capacitorsEnabled(false),
       capBankTestCommand(this)
 {
     this->setTestCommand(&this->capBankTestCommand);
-    this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
+    this->capacitorBank.setSprinting(communication::can::cap_bank::SprintMode::NO_SPRINT);
     this->messageTimer.restart(20);
 }
 
@@ -42,7 +42,7 @@ void CapBankSubsystem::refresh()
 
         if (!this->enabled() && !this->capacitorBank.isDisabled())
         {
-            this->capacitorBank.setSprinting(can::capbank::SprintMode::NO_SPRINT);
+            this->capacitorBank.setSprinting(communication::can::cap_bank::SprintMode::NO_SPRINT);
             this->capacitorBank.stop();
         }
         else if (this->enabled() && !this->capacitorBank.isEnabled())
@@ -55,4 +55,4 @@ void CapBankSubsystem::refresh()
         }
     }
 }
-}  // namespace aruwsrc::control::capbank
+}  // namespace aruwsrc::control::cap_bank

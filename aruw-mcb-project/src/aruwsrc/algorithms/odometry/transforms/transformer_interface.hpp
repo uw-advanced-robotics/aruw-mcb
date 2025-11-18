@@ -26,7 +26,7 @@
 
 #include "modm/math/geometry/location_2d.hpp"
 
-namespace aruwsrc::algorithms::transforms
+namespace aruwsrc::algorithms::odometry::transforms
 {
 class TransformerInterface
 {
@@ -52,6 +52,6 @@ public:
         uint8_t cameraID) const = 0;
 };
 
-}  // namespace aruwsrc::algorithms::transforms
+}  // namespace aruwsrc::algorithms::odometry::transforms
 
 #endif  // TRANSFORMER_INTERFACE
