@@ -16,16 +16,12 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 import os
 import subprocess
+from requests import get
+from datetime import datetime
 
 from SCons.Script import *
 
-ROBOT_IPS = {
-    "TARGET_STANDARD_NULL": "192.168.1.144",
-    "TARGET_STANDARD_VOID": "192.168.1.166",
-    "TARGET_SENTRY_ECLIPSE": "192.168.1.231",
-    "TARGET_HERO_ZERO": "192.168.1.169",
-    "TARGET_ENGINEER": "192.168.0.232",
-}
+FLEET_API_ENDPOINT = "https://fleet.aruw.org/fleet-api/"
 
 def run_ozone(env, source, robot=""):
     def call_run_ozone(target, source, env):
@@ -53,7 +49,7 @@ def generate_ozone(env, robot=""):
 
         def use_ip(ip):
             nonlocal project_content
-            print(f"Using IP({conn}) connection...")
+            print(f"Using IP({ip}) connection...")
             project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"IP\", \"{ip}\");")
 
         def use_usb():
@@ -61,12 +57,36 @@ def generate_ozone(env, robot=""):
             print(f"Using USB connection...")
             project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"USB\", \"\");")
 
-        if not ip_arg:
-            if ip_arg in ROBOT_IPS:
-                use_ip(ROBOT_IPS[robot])
-            else:
-                print("Couldn't retrieve target IP")
-                use_usb()
+        def fetch_robot_ip(robot):
+            try:
+                fleet_status = get(FLEET_API_ENDPOINT)
+                fleet_status = fleet_status.json()
+                fleet_status = fleet_status["robotPis"]
+            except:
+                print("Unable to query Fleet API")
+                return None
+                
+            pi_candidates = [
+                {
+                    **pi, 
+                    "mcbData": {
+                        **data,  #
+                        "lastUpdate": datetime.strptime(data["lastUpdate"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                    }
+                }
+                for pi in fleet_status
+                if (data := pi.get("mcbData")) and data.get("buildTarget") == robot and data.get("lastUpdate")
+            ]
+            if not pi_candidates:
+                print("No Pis with matching MCB build target")
+                return None
+
+            pi_match = max(pi_candidates, key=lambda p: p.get("lastUpdated"))
+            return pi_match.get("ip")
+
+        if not ip_arg and robot:
+            ip = fetch_robot_ip(robot)
+            use_ip(ip) if ip else use_usb()
         elif ip_arg == "usb":
             use_usb()
         else:
