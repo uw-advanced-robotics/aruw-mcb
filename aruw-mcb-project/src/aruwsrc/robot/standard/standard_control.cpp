@@ -630,10 +630,10 @@ HoldCommandMapping leftSwitchUp(
 //     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // auto nav + auto aim + cv gated fire
-HoldCommandMapping leftUpRightUp(
-    drivers(),
-    {&autoNavBeybladeCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+// HoldCommandMapping leftUpRightUp(
+//     drivers(),
+//     {&autoNavBeybladeCommand, &turretCVCommand},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 // HoldRepeatCommandMapping leftUpRightUpAg(
 //     drivers(),
@@ -643,16 +643,16 @@ HoldCommandMapping leftUpRightUp(
 //     false);
 
 // auto nav + auto aim
-HoldCommandMapping leftUpRightMid(
-    drivers(),
-    {&autoNavBeybladeCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
+// HoldCommandMapping leftUpRightMid(
+//     drivers(),
+//     {&autoNavBeybladeCommand, &turretCVCommand},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
 
-// imu calibrate
-HoldCommandMapping leftUpRightDown(
-    drivers(),
-    {&imuCalibrateCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+// // imu calibrate
+// HoldCommandMapping leftUpRightDown(
+//     drivers(),
+//     {&imuCalibrateCommand},
+//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
 // manual aim and shoot
 // HoldCommandMapping leftMidRightUp(
@@ -883,8 +883,8 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
     //drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
-    drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
-    drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
+    // drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
+    // drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
     // drivers->commandMapper.addMap(&leftUpRightUpAg);
 
     // --------------------- END FAKE SENTRY MAPPINGS ------------------

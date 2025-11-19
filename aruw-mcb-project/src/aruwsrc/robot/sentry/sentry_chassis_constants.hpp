@@ -25,9 +25,9 @@
 
 namespace aruwsrc::chassis
 {
-// Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
+// Initial position of the chassis in the field (meters) 
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f; // should be 0.5f 
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f; // should be 7.0f
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
