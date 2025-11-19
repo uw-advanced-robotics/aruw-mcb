@@ -56,7 +56,7 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace motor_tester_control
 {
-// m2006
+// 3508
 tap::motor::DjiMotor leftChannelMotor(
     drivers(),
     tap::motor::MOTOR3,          // id 3
@@ -64,7 +64,7 @@ tap::motor::DjiMotor leftChannelMotor(
     false,
     "LMotor",
     false,
-    (1.0f / 36.0f));
+    (187.0f / 3591.0f));
 
 VelocityAgitatorSubsystem agitator(drivers(), AGITATOR_PID_CONFIG, AGITATOR_CONFIG);
 
