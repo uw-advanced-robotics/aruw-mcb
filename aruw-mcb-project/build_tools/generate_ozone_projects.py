@@ -71,7 +71,8 @@ def generate_ozone(env, robot=""):
                     **pi, 
                     "mcbData": {
                         **data,  #
-                        "lastUpdate": datetime.strptime(data["lastUpdate"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                        "lastUpdate": datetime.strptime(data["lastUpdate"], "%Y-%m-%dT%H:%M:%S.%fZ"),
+                        "lastUpdate": datetime.strftime(mcbData["lastUpdate"], "%Y-%m-%dT%H:%M:%S.%fZ")
                     }
                 }
                 for pi in fleet_status
