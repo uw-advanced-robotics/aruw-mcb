@@ -38,7 +38,7 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
-    const control::launcher::FrictionWheelInterface &frictionWheels,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
     : visionCoprocessor(visionCoprocessor),

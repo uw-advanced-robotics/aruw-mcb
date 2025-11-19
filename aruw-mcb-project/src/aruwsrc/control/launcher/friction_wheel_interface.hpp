@@ -32,17 +32,17 @@ class FrictionWheelInterface : public tap::control::Subsystem
 public:
     FrictionWheelInterface(tap::Drivers* drivers) : tap::control::Subsystem(drivers) {}
 
-    virtual float getPredictedLaunchSpeed() const = 0;
+    float getPredictedLaunchSpeed() const;
 
-    virtual mockable void setDesiredLaunchSpeed(float speed) = 0;
+    mockable void setDesiredLaunchSpeed(float speed) = 0;
 
     virtual void setIndividualVelocity(int index, float velocity) = 0;
 
     virtual void changeWheelVelocityState(int index, bool hasIndividualVelocity) = 0;
 
-    virtual mockable float getDesiredLaunchSpeed() const = 0;
+    mockable float getDesiredLaunchSpeed() const = 0;
 
-    virtual mockable float getDesiredFrictionWheelSpeed() const = 0;
+    mockable float getDesiredFrictionWheelSpeed() const = 0;
 
     virtual float getCurrentCorrectionValue() const = 0;
 

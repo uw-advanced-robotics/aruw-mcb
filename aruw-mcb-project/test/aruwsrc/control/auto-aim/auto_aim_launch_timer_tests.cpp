@@ -44,7 +44,25 @@ class AutoAimLaunchTimerTest : public Test
 {
 protected:
     AutoAimLaunchTimerTest()
-        : frictionWheels(&drivers),
+        : leftFlywheel(&drivers,
+            tap::motor::MOTOR1,
+            tap::can::CanBus::CAN_BUS1,
+            true,
+            "Left flywheel",
+            false,
+            1.0f,
+            0u,
+            static_cast<tap::encoder::EncoderInterface*>(nullptr)), rightFlywheel(
+            &drivers,
+            tap::motor::MOTOR2,
+            tap::can::CanBus::CAN_BUS1,
+            false,
+            "Right flywheel",
+            false,
+            1.0f,
+            0u,
+            static_cast<tap::encoder::EncoderInterface*>(nullptr)), frictionWheels(&drivers,
+              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel }}),
           visionCoprocessor(&drivers),
           turretSubsystem(&drivers),
           ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};
@@ -52,6 +70,8 @@ protected:
     void SetUp() override {}
 
     // Contrived deps due to unfortunate mock structure
+    NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
+    NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
     tap::Drivers drivers;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;

@@ -20,6 +20,7 @@
 #ifndef LAUNCHER_CONSTANTS_HPP_
 #define LAUNCHER_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
 
@@ -37,7 +38,7 @@ static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 
 struct FlywheelConfig
 {
-    modm::Pid<float> velocityPID;
+    tap::algorithms::SmoothPidConfig velocityPIDConfig;
     float orientation;
     // can add orientation and other stuff here later
 };
@@ -77,20 +78,20 @@ static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 #endif
 
-static modm::Pid<float> velocityPIDLeft(
+static tap::algorithms::SmoothPidConfig velocityPIDConfigLeft(
     LAUNCHER_PID_KP,
     LAUNCHER_PID_KI,
     LAUNCHER_PID_KD,
     LAUNCHER_PID_MAX_ERROR_SUM,
     LAUNCHER_PID_MAX_OUTPUT);
-static modm::Pid<float> velocityPIDRight(
+static tap::algorithms::SmoothPidConfig velocityPIDConfigRight(
     LAUNCHER_PID_KP,
     LAUNCHER_PID_KI,
     LAUNCHER_PID_KD,
     LAUNCHER_PID_MAX_ERROR_SUM,
     LAUNCHER_PID_MAX_OUTPUT);
-static FlywheelConfig wheelConfigLeft = {velocityPIDLeft, 0.0f};
-static FlywheelConfig wheelConfigRight = {velocityPIDRight, 0.0f};
+static FlywheelConfig wheelConfigLeft = {velocityPIDConfigLeft, 0.0f};
+static FlywheelConfig wheelConfigRight = {velocityPIDConfigRight, 0.0f};
 
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KP = 0.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KI = 5.0f;

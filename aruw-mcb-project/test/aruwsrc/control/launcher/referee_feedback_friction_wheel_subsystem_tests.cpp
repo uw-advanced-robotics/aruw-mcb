@@ -31,11 +31,31 @@ using namespace testing;
 class RefereeFeedbackFrictionWheelSubsystemTest : public Test
 {
 protected:
+
+    NiceMock<tap::mock::DjiMotorMock> leftFlywheel, rightFlywheel;
+    std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
     RefereeFeedbackFrictionWheelSubsystemTest()
-        : frictionWheels(
+        : leftFlywheel(&drivers,
+            tap::motor::MOTOR1,
+            tap::can::CanBus::CAN_BUS1,
+            true,
+            "Left flywheel",
+            false,
+            1.0f,
+            0u,
+            static_cast<tap::encoder::EncoderInterface*>(nullptr)), rightFlywheel(
+            &drivers,
+            tap::motor::MOTOR2,
+            tap::can::CanBus::CAN_BUS1,
+            false,
+            "Right flywheel",
+            false,
+            1.0f,
+            0u,
+            static_cast<tap::encoder::EncoderInterface*>(nullptr)), frictionWheels(
               &drivers,
-              tap::motor::MOTOR1,
-              tap::motor::MOTOR2,
+              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel }},
+              wheelConfigs,
               tap::can::CanBus::CAN_BUS1,
               nullptr,
               tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
@@ -49,7 +69,7 @@ protected:
 
     tap::arch::clock::ClockStub clock;
     tap::Drivers drivers;
-    RefereeFeedbackFrictionWheelSubsystem<10> frictionWheels;
+    RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheels;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
@@ -121,10 +141,10 @@ TEST_F(
 
 TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rolling_average)
 {
-    RefereeFeedbackFrictionWheelSubsystem<10> frictionWheelAveraged(
+    RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheelAveraged(
         &drivers,
-        tap::motor::MOTOR1,
-        tap::motor::MOTOR2,
+        std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel }}, 
+        wheelConfigs,
         tap::can::CanBus::CAN_BUS1,
         nullptr,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);

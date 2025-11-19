@@ -224,6 +224,7 @@ RefereeFeedbackFrictionWheelSubsystem<
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
+LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor = frictionWheelsSubsystem;
 
 VelocityAgitatorSubsystem kickerAgitator(
     drivers(),
@@ -290,7 +291,7 @@ OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     odometrySubsystem,
     turret,
-    frictionWheels,
+    frictionWheelSpeedPredictor,
     15.0f,  // defaultLaunchSpeed
     0       // turretID
 );

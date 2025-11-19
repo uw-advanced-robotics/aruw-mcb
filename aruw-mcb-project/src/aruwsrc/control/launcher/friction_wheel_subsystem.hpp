@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/ramp.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 #include "tap/util_macros.hpp"
@@ -65,12 +66,17 @@ class FrictionWheelSubsystem : public FrictionWheelInterface
     friend class FrictionWheelTestCommand;
 
 public:
+    #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+        using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+    #else 
+        using Motor = tap::motor::DjiMotor;
+    #endif
     /**
      * Creates a new friction wheel subsystem
      */
     FrictionWheelSubsystem(
         tap::Drivers *drivers,
-        std::array<tap::motor::DjiMotor *, NUM_WHEELS> wheels,
+        std::array<Motor*, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus,
         aruwsrc::can::TurretMCBCanComm *turretMCB)
@@ -91,6 +97,9 @@ public:
           turretMCB(turretMCB),
           frictionTestCommand(this)
     {
+        for (int i = 0; i < NUM_WHEELS; i++) {
+            velocityPids[i] = new tap::algorithms::SmoothPid(wheelConfigs[i].velocityPidConfig);
+        }
         this->setTestCommand(&frictionTestCommand);
     }
 
@@ -183,24 +192,23 @@ public:
         speedCorrection = speedCorrectionPid.getValue();
 #endif
 
-        prevTime = currTime;
-
         for (uint8_t i = 0; i < NUM_WHEELS; i++)
         {
             if (isWheelVelocityOverridden[i])
             {
-                flywheelConfigs[i].velocityPID.update(
-                    individualWheelVelocities[i] - getCurrentIndividualFrictionWheelSpeed(i));
+                velocityPids[i].runControllerDerivateError(
+                    individualWheelVelocities[i] - getCurrentIndividualFrictionWheelSpeed(i), currTime - prevTime);
             }
             else
             {
-                flywheelConfigs[i].velocityPID.update(
+                velocityPids[i].runControllerDerivateError(
                     desiredRpmRamp.getValue() - getCurrentIndividualFrictionWheelSpeed(i) -
-                    speedCorrection);
+                    speedCorrection, currTime - prevTime);
             }
             wheels[i]->setDesiredOutput(
-                static_cast<int32_t>(flywheelConfigs[i].velocityPID.getValue()));
+                static_cast<int32_t>(velocityPids[i].getOutput()));
         }
+        prevTime = currTime;
     }
 
     void refreshSafeDisconnect() override
@@ -232,6 +240,7 @@ private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
     std::array<FlywheelConfig, NUM_WHEELS> flywheelConfigs;
+    tap::algorithms::SmoothPid velocityPids [NUM_WHEELS];
 
     modm::Pid<float> speedCorrectionPid;
 
@@ -249,13 +258,12 @@ private:
 public:
     tap::algorithms::Ramp desiredRpmRamp;
 
-    std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, NUM_WHEELS> wheels;
-
+    std::array<Motor*, NUM_WHEELS> wheels;
 private:
 #else
     tap::algorithms::Ramp desiredRpmRamp;
 
-    std::array<tap::motor::DjiMotor *, NUM_WHEELS> wheels;
+    std::array<Motor*, NUM_WHEELS> wheels;
 #endif
 
     aruwsrc::can::TurretMCBCanComm *turretMCB;
