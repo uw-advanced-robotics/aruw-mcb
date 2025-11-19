@@ -30,6 +30,7 @@
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
+#include <aruwsrc/algorithms/plate_hit_tracker.hpp>
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
@@ -39,12 +40,14 @@ namespace aruwsrc::sentry::turret::cv
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
     communication::serial::VisionCoprocessor &visionCoprocessor,
+    aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
     TurretConfig &turretLeftConfig,
     TurretConfig &turretRightConfig,
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
+      plateHitTracker(plateHitTracker),
       turretMajorSubsystem(turretMajorSubsystem),
       yawControllerMajor(yawControllerMajor),
       turretLeftConfig(turretLeftConfig),
@@ -172,6 +175,36 @@ void SentryTurretCVCommand::execute()
             leftYawSetpoint = majorSetpoint + SCAN_TURRET_LEFT_YAW;
             rightYawSetpoint = majorSetpoint + SCAN_TURRET_RIGHT_YAW;
         }
+    }
+
+    std::vector<PlateHitTracker::PlateHitBinData> hitData = plateHitTracker.getPeakAnglesRadians();
+    PlateHitTracker::PlateHitBinData maxHit = hitData.at(0);
+    switch (curHitState) {
+        case HitState::HIT:
+            if (lastHitState != curHitState) {
+                majorSetpoint = maxHit.radians;
+                if (scanning) {
+                    leftYawSetpoint = majorSetpoint + TURRET_OFFSET;
+                    rightYawSetpoint = majorSetpoint - TURRET_OFFSET;
+                }
+            }
+            lastHitState = curHitState;
+            uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
+            if (maxHit.magnitude < HIT_MAG_THRESH && curTime - lastHitTime > HIT_COUNT_DELAY_MILLISEC) {
+                curHitState = HitState::NOT_HIT;
+            } else if (maxHit.magnitude >= HIT_MAG_THRESH) {
+                lastHitMag = maxHit.magnitude;
+                lastHitTime = curTime;
+            }
+            break;
+        case HitState::NOT_HIT:
+            lastHitState = curHitState;
+            if (maxHit.magnitude >= HIT_MAG_THRESH) {
+                curHitState = HitState::HIT;
+            }
+            break;
+        default:
+            break;
     }
 
     uint32_t currTime = getTimeMilliseconds();

@@ -627,6 +627,7 @@ SentryTurretCVCommand::TurretConfig turretRightCVConfig(
 
 SentryTurretCVCommand turretCVCommand(
     drivers()->visionCoprocessor,
+    drivers()->plateHitTracker,
     turretMajor,
     turretMajorWorldYawController,
     turretLeftCVConfig,
@@ -937,12 +938,13 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
 
-    drivers->commandScheduler.registerSubsystem(&turretLeftFrictionWheels);
-    drivers->commandScheduler.registerSubsystem(&turretRightFrictionWheels);
+    //drivers->commandScheduler.registerSubsystem(&turretLeftFrictionWheels);
+    //drivers->commandScheduler.registerSubsystem(&turretRightFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretLeftAgitator);
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
+    drivers->plateHitTracker.attachTransformer(&transformAdapter);
     // drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
     drivers->stateMachine.attachAutoNavController(&autoNavController);
 }
@@ -965,7 +967,6 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->plateHitTracker.attachTransformer(&transformAdapter);
     drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
 }
 

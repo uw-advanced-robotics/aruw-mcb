@@ -34,6 +34,7 @@
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 #include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
+#include <aruwsrc/algorithms/plate_hit_tracker.hpp>
 
 namespace tap::control::odometry
 {
@@ -75,6 +76,11 @@ public:
         aruwsrc::sentry::algorithms::SentryBallisticsSolver &ballisticsSolver;
     };
 
+    enum HitState {
+        HIT,
+        NOT_HIT,
+    };
+
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
 
     static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(90.0f);
@@ -107,6 +113,7 @@ public:
      */
     SentryTurretCVCommand(
         communication::serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
         TurretConfig &turretLeftConfig,
@@ -153,6 +160,7 @@ private:
         bool *withinAimingTolerance);
 
     communication::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
 
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
     aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;
@@ -168,6 +176,15 @@ private:
      */
     bool scanning = false;
     bool targetFound = false;
+
+    HitState curHitState = HitState::NOT_HIT;
+    HitState lastHitState = HitState::NOT_HIT;
+    uint32_t lastHitTime = 0;
+    float lastHitMag = 0.0f;
+
+    static constexpr uint32_t HIT_COUNT_DELAY_MILLISEC = 1000; 
+    static constexpr float HIT_MAG_THRESH = 0.01f; // TODO figure out what actually counts as a hit
+    static constexpr float TURRET_OFFSET = modm::toRadian(20.0f);
 
     // scan direction
     static constexpr int SCAN_CLOCKWISE = -1;
