@@ -97,7 +97,7 @@ public:
           turretMCB(turretMCB),
           frictionTestCommand(this)
     {
-        for (int i = 0; i < NUM_WHEELS; i++) {
+        for (uint8_t i = 0; i < NUM_WHEELS; i++) {
             velocityPids[i] = new tap::algorithms::SmoothPid(wheelConfigs[i].velocityPidConfig);
         }
         this->setTestCommand(&frictionTestCommand);
@@ -196,17 +196,17 @@ public:
         {
             if (isWheelVelocityOverridden[i])
             {
-                velocityPids[i].runControllerDerivateError(
+                velocityPids[i]->runControllerDerivateError(
                     individualWheelVelocities[i] - getCurrentIndividualFrictionWheelSpeed(i), currTime - prevTime);
             }
             else
             {
-                velocityPids[i].runControllerDerivateError(
+                velocityPids[i]->runControllerDerivateError(
                     desiredRpmRamp.getValue() - getCurrentIndividualFrictionWheelSpeed(i) -
                     speedCorrection, currTime - prevTime);
             }
             wheels[i]->setDesiredOutput(
-                static_cast<int32_t>(velocityPids[i].getOutput()));
+                static_cast<int32_t>(velocityPids[i]->getOutput()));
         }
         prevTime = currTime;
     }
@@ -240,7 +240,7 @@ private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
     std::array<FlywheelConfig, NUM_WHEELS> flywheelConfigs;
-    tap::algorithms::SmoothPid velocityPids [NUM_WHEELS];
+    tap::algorithms::SmoothPid* velocityPids [NUM_WHEELS];
 
     modm::Pid<float> speedCorrectionPid;
 

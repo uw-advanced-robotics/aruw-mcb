@@ -38,7 +38,7 @@ static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 
 struct FlywheelConfig
 {
-    tap::algorithms::SmoothPidConfig velocityPIDConfig;
+    tap::algorithms::SmoothPidConfig velocityPidConfig;
     float orientation;
     // can add orientation and other stuff here later
 };
