@@ -30,9 +30,9 @@ DartReleaseCommand::DartReleaseCommand(DartLauncherSubsystem &dartLauncher, int3
     addSubsystemRequirement(&dartLauncher);
 }
 
-void DartReleaseCommand::initialize() { dartLauncher.moveMotor(desiredOutput); }
+void DartReleaseCommand::initialize() { }
 
-void DartReleaseCommand::end(bool) { dartLauncher.moveMotor(0); }
+void DartReleaseCommand::end(bool) { }
 
 bool DartReleaseCommand::isFinished() const
 {

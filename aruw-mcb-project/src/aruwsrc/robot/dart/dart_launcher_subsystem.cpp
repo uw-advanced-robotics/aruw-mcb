@@ -41,6 +41,10 @@ void DartLauncherSubsystem::initialize()
     drivers->pwm.setTimerFrequency(tap::gpio::Pwm::TIMER8, 500);
 }
 
+void DartLauncherSubsystem::refresh() { servo.updateSendPwmRamp(); }
+
+void DartLauncherSubsystem::refreshSafeDisconnect() { servo.setTargetPwm(0.0f); }
+
 void DartLauncherSubsystem::setOpen() { servo.setTargetPwm(servo.getMaxPWM()); }
 
 void DartLauncherSubsystem::setClose() { servo.setTargetPwm(servo.getMinPWM()); }

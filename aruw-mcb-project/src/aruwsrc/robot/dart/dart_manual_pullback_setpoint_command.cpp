@@ -7,7 +7,7 @@ namespace aruwsrc::robot::dart
 DartManualPullbackSetpointCommand::DartManualPullbackSetpointCommand(
     aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartSystem,
     float moveSpeed,
-    aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface)  // NOLINT
+    aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface)
     : dartSystem(dartSystem),
       moveSpeed(moveSpeed),
       controlOperatorInterface(controlOperatorInterface)

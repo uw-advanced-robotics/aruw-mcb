@@ -34,7 +34,7 @@ static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
-static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 1.0f;
+static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 30.0f;
 static constexpr int32_t PULLBACK_PULL_POSITION = 0;  // TODO: FIND
 
 //  * @param[in] pwmPin The pin to attach the Servo class with.
@@ -57,8 +57,13 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
             .lowerBound = -10.0f,
             .upperBound = 5000.0f,
             .epsilon = 1.0,
-            .posPidConfig{.kp = 1.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f},
-            .maxOutput = 5000.0f,
+            .posPidConfig{
+                .kp = 1.0f, //TODO: TUNE THIS
+                .ki = 0.0f,
+                .kd = 0.0f,
+                .maxICumulative = 0.0f,
+                .maxOutput = 500.0f}, // these max outs seem safe for now
+            .maxOutput = 500.0f,
 
         },
         .home = 0.0f,
