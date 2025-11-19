@@ -88,10 +88,21 @@ public:
         {
             lastComputedMaxWheelSpeed.first = (int)chassisPowerLimit;
             lastComputedMaxWheelSpeed.second =
-                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPowerLimit);
+                maxWheelSpeedModel(chassisPowerLimit);
         }
 
         return lastComputedMaxWheelSpeed.second;
+    }
+
+    // Models the relationship between chassis power limit in watts and max wheel speed in RPM.
+    static inline float maxWheelSpeedModel(float chassisPowerLimit)
+    {
+    #ifdef USE_POWER_TO_SPEED_MODEL
+        chassisPowerLimit = modm::max(chassisPowerLimit, MIN_WATTAGE);
+        return BASELINE_MOVEMENT_RPM + RPM_PER_WATT * chassisPowerLimit;
+    #else
+        return CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPowerLimit);
+    #endif
     }
 
     static inline float getChassisPowerLimit(tap::Drivers* drivers)

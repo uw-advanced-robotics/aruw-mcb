@@ -37,8 +37,10 @@ namespace aruwsrc::chassis
 {
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
+ * Outdated method for modeling power to speed relationship.
+ * Kept with updated constants for reference.
  */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
+/*static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {50, 1'966.01}, //{50, 4'500},
     {60, 2'287.41}, //{60, 5'700},
     {70, 2'608.81}, //{70, 6'400},
@@ -46,6 +48,22 @@ static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {100, 3573.01}, //{100, 7'000},
     {120, 4215.81}, //{120, 8'000},
 };
+
+static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
+    CHASSIS_POWER_TO_MAX_SPEED_LUT,
+    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));*/
+
+
+
+ /**
+ * Constants to model the relationship between chassis power and wheel speed.
+ * Used in maxWheelSpeedModel function.
+ * Replaces the old LUT-based interpolation method above.
+ */
+#define USE_POWER_TO_SPEED_MODEL
+static constexpr float BASELINE_MOVEMENT_RPM = 359.01f;
+static constexpr float RPM_PER_WATT = 32.140f;
+static constexpr float MIN_WATTAGE = 30.0f;
 
 static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
     tap::algorithms::transforms::Transform(
@@ -64,9 +82,8 @@ static const tap::algorithms::transforms::Transform ISM330_MCB_MOUNTING_TRANSFOR
         0,
         modm::toRadian(135));
 
-static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
-    CHASSIS_POWER_TO_MAX_SPEED_LUT,
-    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
+
+
 
 /**
  * The minimum desired wheel speed for chassis rotation when translational scaling via
