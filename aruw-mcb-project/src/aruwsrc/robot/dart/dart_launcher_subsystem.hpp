@@ -31,17 +31,12 @@ namespace aruwsrc::robot::dart
 class DartLauncherSubsystem : public tap::control::Subsystem
 {
 public:
-    DartLauncherSubsystem(tap::Drivers *drivers, tap::motor::MotorInterface &pullMotors);
+    DartLauncherSubsystem(tap::Drivers* drivers);
 
     void initialize() override;
-    void moveMotor(int32_t power);
     void refresh() override;
 
     void refreshSafeDisconnect() override;
-
-    void setSetpoint(float setpoint);
-    bool isBeamBroken();
-    bool isLimitSwitched();
 
     // set servo to the open angle
     void setOpen();
@@ -55,14 +50,12 @@ public:
     // return the angle defined as close as a PWM value
     float getClosePWM();
 
-    tap::motor::Servo &getServo() { return servo; }
+    tap::motor::Servo& getServo() { return servo; }
 
-    const char *getName() const override { return "Dart Launcher Subsystem"; }
+    const char* getName() const override { return "Dart Launcher Subsystem"; }
 
 protected:
-    tap::motor::MotorInterface &pullMotors;
     tap::motor::Servo servo;
-    bool beamBroken = false;
 
 };  // class DartLauncherSubsystem
 

@@ -29,10 +29,8 @@ using namespace aruwsrc::control::turret;
 namespace aruwsrc::robot::dart
 {
 DartLauncherSubsystem::DartLauncherSubsystem(
-    tap::Drivers* drivers,
-    tap::motor::MotorInterface& pullMotors)
+    tap::Drivers* drivers)
     : Subsystem(drivers),
-      pullMotors(pullMotors),
       servo(drivers, SERVO_PORT, SERVO_MAX, SERVO_MIN, SERVO_SPEED)
 {
     servo.setTargetPwm(SERVO_MAX);
@@ -41,18 +39,7 @@ DartLauncherSubsystem::DartLauncherSubsystem(
 void DartLauncherSubsystem::initialize()
 {
     drivers->pwm.setTimerFrequency(tap::gpio::Pwm::TIMER8, 500);
-    pullMotors.initialize();
 }
-
-void DartLauncherSubsystem::moveMotor(int32_t power) { pullMotors.setDesiredOutput(power); }
-
-bool DartLauncherSubsystem::isBeamBroken() { return beamBroken; }
-
-bool DartLauncherSubsystem::isLimitSwitched() { return drivers->digital.read(LIMITSWITCH_PORT); }
-
-void DartLauncherSubsystem::refresh() { beamBroken = !drivers->digital.read(BEAMBREAK_PORT); }
-
-void DartLauncherSubsystem::refreshSafeDisconnect() { pullMotors.setDesiredOutput(0); }
 
 void DartLauncherSubsystem::setOpen() { servo.setTargetPwm(servo.getMaxPWM()); }
 

@@ -110,7 +110,7 @@ DartManualPullbackSetpointCommand manualPullbackCommand(
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-DartLauncherSubsystem dartLauncher(drivers(), pullMotors);
+DartLauncherSubsystem dartLauncher(drivers());
 
 DartReleaseCommand dartRelease(dartLauncher, MANUAL_RELEASE_DESIRED_OUTPUT);
 DartPullbackCommand dartPullback(pullMotorSubsystem, MANUAL_PULLBACK_DESIRED_OUTPUT);
