@@ -106,9 +106,9 @@ public:
 
     void initialize() override
     {
-        for (tap::motor::DjiMotor *wheel : wheels)
+        for (uint8_t i = 0; i < NUM_WHEELS; i++)
         {
-            wheel->initialize();
+            wheels[i]->initialize();
         }
         prevTime = tap::arch::clock::getTimeMilliseconds();
     }
@@ -215,9 +215,9 @@ public:
 
     void refreshSafeDisconnect() override
     {
-        for (tap::motor::DjiMotor *wheel : wheels)
+        for (uint8_t i = 0; i < NUM_WHEELS; i++)
         {
-            wheel->setDesiredOutput(0);
+            wheels[i]->setDesiredOutput(0);
         }
     }
 

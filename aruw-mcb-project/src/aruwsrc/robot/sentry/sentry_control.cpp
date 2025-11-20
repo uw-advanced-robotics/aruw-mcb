@@ -461,13 +461,13 @@ tap::motor::DjiMotor leftTurretRightWheel(
 std::array<tap::motor::DjiMotor *, 2> leftTurretWheels = {
     &leftTurretLeftWheel,
     &leftTurretRightWheel};
-modm::Pid<float> leftTurretVelocityPIDLeft(
+tap::algorithms::SmoothPidConfig leftTurretVelocityPIDLeft(
     aruwsrc::control::launcher::LAUNCHER_PID_KP,
     aruwsrc::control::launcher::LAUNCHER_PID_KI,
     aruwsrc::control::launcher::LAUNCHER_PID_KD,
     aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
     aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-modm::Pid<float> leftTurretVelocityPIDRight(
+tap::algorithms::SmoothPidConfig leftTurretVelocityPIDRight(
     aruwsrc::control::launcher::LAUNCHER_PID_KP,
     aruwsrc::control::launcher::LAUNCHER_PID_KI,
     aruwsrc::control::launcher::LAUNCHER_PID_KD,
@@ -507,13 +507,13 @@ tap::motor::DjiMotor rightTurretRightWheel(
 std::array<tap::motor::DjiMotor *, 2> rightTurretWheels = {
     &rightTurretLeftWheel,
     &rightTurretRightWheel};
-modm::Pid<float> rightTurretVelocityPIDLeft(
+tap::algorithms::SmoothPidConfig rightTurretVelocityPIDLeft(
     aruwsrc::control::launcher::LAUNCHER_PID_KP,
     aruwsrc::control::launcher::LAUNCHER_PID_KI,
     aruwsrc::control::launcher::LAUNCHER_PID_KD,
     aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
     aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-modm::Pid<float> rightTurretVelocityPIDRight(
+tap::algorithms::SmoothPidConfig rightTurretVelocityPIDRight(
     aruwsrc::control::launcher::LAUNCHER_PID_KP,
     aruwsrc::control::launcher::LAUNCHER_PID_KI,
     aruwsrc::control::launcher::LAUNCHER_PID_KD,
