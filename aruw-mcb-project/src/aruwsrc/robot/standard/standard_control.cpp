@@ -74,6 +74,7 @@
 
 //#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
+#include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -460,6 +461,16 @@ autotune::GravityAutotuneCommand<9> gravityAutotuneCommand(
      TORQUE_TO_DESIRED_OUT},
     &chassis);
 
+autotune::SpringAutotuneCommand<9> springAutotuneCommand(
+    drivers(),
+    {&turret,
+     &chassisFramePitchTurretController,
+     pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &turretSpringCompensation,
+    &chassis);
+
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 // beyblade governors
@@ -818,12 +829,18 @@ imu::ImuCalibrateCommand *getImuCalibrateCommand()
 std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
 getGravityAutotuneCommands()
 {
-    // Static array of pointers, terminated by nullptr
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
         commands = {&standard_control::gravityAutotuneCommand};
     return commands;
 }
 
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 4>> *>
+getSpringGravityAutotuneCommands()
+{
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 4>> *>
+        commands = {};
+    return commands;
+}
 #endif
 
 #endif

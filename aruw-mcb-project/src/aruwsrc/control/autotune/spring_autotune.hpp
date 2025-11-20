@@ -43,8 +43,8 @@ public:
     SpringAutotuneCommand(
         tap::Drivers *drivers,
         const TurretAutoCommand::TurretCalibrationConfig &config,
-        const TurretSpringForceOffset &springForce,
-        const chassis::HolonomicChassisSubsystem *chassis = nullptr,
+        const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce,
+        chassis::HolonomicChassisSubsystem *chassis = nullptr,
         const std::array<float, numTestPoints> points = {},
         const float velocityZeroThreshold = TurretAutoCommand::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold = TurretAutoCommand::DEFAULT_POSITION_THRESHOLD,
@@ -78,9 +78,9 @@ public:
 
         for (uint32_t i = 0; i < numTestPoints; ++i)
         {
-            X(i, 0) = std::cos(Angles[i]);                         // corresponds to A (m·g·x)
-            X(i, 1) = std::sin(Angles[i]);                         // corresponds to B (−m·g·z)
-            X(i, 2) = springForce.calculateEffectiveX(Angles[i]);  // corresponds to K
+            X(i, 0) = std::cos(Angles[i]);                          // corresponds to A (m·g·x)
+            X(i, 1) = std::sin(Angles[i]);                          // corresponds to B (−m·g·z)
+            X(i, 2) = springForce->calculateEffectiveX(Angles[i]);  // corresponds to K
             Y(i) = Torques[i];
         }
         // Solve least squares: torque = A·cos(theta) + B·sin(theta) + K·x
@@ -97,7 +97,7 @@ public:
 private:
     const TurretAutoCommand::TurretCalibrationConfig &config;
 
-    const TurretSpringForceOffset &springForce;
+    const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce;
     /**
      * @brief Helper function that turns the calibration result into
      * units of mm.

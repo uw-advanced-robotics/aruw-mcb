@@ -34,9 +34,9 @@ class TurretCompensatorInterface
 public:
     struct TurretCompensatorState
     {
-        float pitchWorldFrame;
-        float pitchChassisFrame;
-        float yaw;
+        float pitchWorldFrame = 0.0f;
+        float pitchChassisFrame = 0.0f;
+        float yaw = 0.0f;
     };
     /**
      * @brief Calculates the compensator control output.

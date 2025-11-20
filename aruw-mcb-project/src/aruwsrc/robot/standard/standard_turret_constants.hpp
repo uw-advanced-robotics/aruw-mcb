@@ -94,6 +94,13 @@ static constexpr float TURRET_CG_X = 33.83;
 static constexpr float TURRET_CG_Z = 26.68;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
 
+static constexpr float TURRET_SPRING_PITCH_MOUNT_X = 0.0f;
+static constexpr float TURRET_SPRING_PITCH_MOUNT_Z = 0.0f;
+static constexpr float TURRET_SPRING_YAW_MOUNT_X = 0.0f;
+static constexpr float TURRET_SPRING_YAW_MOUNT_Z = 0.0f;
+static constexpr float TURRET_SPRING_CONSTANT = 0.0f;
+static constexpr float TURRET_SPRING_FREE_LENGTH = 0.0f;
+
 #elif defined(TARGET_STANDARD_VOID)
 static constexpr float TORQUE_TO_DESIRED_OUT =
     1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
