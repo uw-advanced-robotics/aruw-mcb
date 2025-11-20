@@ -120,7 +120,7 @@ public:
      *
      * @param[in] speed The launch speed in m/s.
      */
-    mockable void setDesiredLaunchSpeed(float speed) override
+    void setDesiredLaunchSpeed(float speed) override
     {
         desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
         desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
@@ -141,9 +141,9 @@ public:
         isWheelVelocityOverridden[index] = hasIndividualVelocity;
     }
 
-    mockable float getDesiredLaunchSpeed() const override { return desiredLaunchSpeed; }
+    float getDesiredLaunchSpeed() const override { return desiredLaunchSpeed; }
 
-    mockable float getDesiredFrictionWheelSpeed() const override
+    float getDesiredFrictionWheelSpeed() const override
     {
         return launchSpeedToFrictionWheelRpm(desiredLaunchSpeed) - speedCorrection;
     }

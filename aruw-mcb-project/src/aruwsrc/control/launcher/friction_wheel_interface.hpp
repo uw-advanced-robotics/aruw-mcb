@@ -34,15 +34,15 @@ public:
 
     float getPredictedLaunchSpeed() const;
 
-    mockable virtual void setDesiredLaunchSpeed(float speed) = 0;
+    virtual void setDesiredLaunchSpeed(float speed) = 0;
 
     virtual void setIndividualVelocity(int index, float velocity) = 0;
 
     virtual void changeWheelVelocityState(int index, bool hasIndividualVelocity) = 0;
 
-    mockable virtual float getDesiredLaunchSpeed() const = 0;
+    virtual float getDesiredLaunchSpeed() const = 0;
 
-    mockable  virtual float getDesiredFrictionWheelSpeed() const = 0;
+    virtual  float getDesiredFrictionWheelSpeed() const = 0;
 
     virtual float getCurrentCorrectionValue() const = 0;
 

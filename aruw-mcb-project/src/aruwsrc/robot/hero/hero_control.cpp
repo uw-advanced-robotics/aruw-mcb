@@ -209,8 +209,6 @@ modm::Pid<float> velocityPIDRight(
     aruwsrc::control::launcher::LAUNCHER_PID_KD,
     aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
     aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-FlywheelConfig wheelConfigLeft = {velocityPIDLeft, 0.0f};
-FlywheelConfig wheelConfigRight = {velocityPIDRight, 0.0f};
 std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
 RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
