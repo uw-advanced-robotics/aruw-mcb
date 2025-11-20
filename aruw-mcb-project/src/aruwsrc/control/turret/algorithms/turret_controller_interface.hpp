@@ -81,7 +81,8 @@ public:
      * @param[in] state The current turret state.
      * @return The total output.
      */
-    virtual float calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState state)
+    virtual float calculateCompensationEffort(
+        TurretCompensatorInterface::TurretCompensatorState state)
     {
         debugVar = compensators.size();
         if (compensators.empty()) return 0.0f;

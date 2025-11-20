@@ -36,9 +36,9 @@
 #define ALL_SENTRIES
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(TARGET_DRONE) || defined(TARGET_SENTRY_ECLIPSE) ||    \
+#if defined(TARGET_HERO_ZERO) || defined(TARGET_DRONE) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(ALL_STANDARDS)
 #define ALL_TURRETED_ROBOTS
-#endif 
+#endif
 
 #endif  // UTIL_MACROS_HPP_

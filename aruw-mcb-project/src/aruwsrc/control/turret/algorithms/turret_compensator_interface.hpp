@@ -48,4 +48,4 @@ public:
 };
 };  // namespace aruwsrc::control::turret::algorithms
 
-#endif // TURRET_COMPENSATOR_INTERFACE_HPP_
+#endif  // TURRET_COMPENSATOR_INTERFACE_HPP_
