@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TURRET_GRAVITY_COMPENSATION_HPP_
-#define TURRET_GRAVITY_COMPENSATION_HPP_
+#ifndef TURRET_SPRING_COMPENSATION_HPP_
+#define TURRET_SPRING_COMPENSATION_HPP_
 
 #include <cmath>
 #include <cstdint>
@@ -31,7 +31,7 @@
 
 namespace aruwsrc::control::turret::algorithms
 {
-class turretSpringForceOffset : public TurretCompensatorInterface
+class TurretSpringForceOffset : public TurretCompensatorInterface
 {
 public:
     /**
@@ -50,8 +50,11 @@ public:
      * downwards.
      * @param[in] springConstant spring constant in units of force per distance to be used when
      * calculating the spring effort.
+     * @param[in] springFreeLength the length to subtract from the overall spring distance to get
+     * the portion of distance that is actively applying force. The length of a spring when
+     * un-stretched
      */
-    turretSpringForceOffset(
+    TurretSpringForceOffset(
         const float turretPitchMountX,
         const float turretPitchMountZ,
         const float turretYawMountX,
@@ -76,4 +79,4 @@ private:
 };
 }  // namespace aruwsrc::control::turret::algorithms
 
-#endif  // GRAVITY_COMPENSATION_HPP_
+#endif  // SPRING_COMPENSATION_HPP_

@@ -29,7 +29,7 @@
 
 namespace aruwsrc::control::turret::algorithms
 {
-class turretGravitationalForceOffset : public TurretCompensatorInterface
+class TurretGravitationalForceOffset : public TurretCompensatorInterface
 {
 public:
     /**
@@ -44,7 +44,7 @@ public:
      * lies on the same xy-plane as the pivot (i.e.: when the turret's mass exerts the most torque
      * about it's pivot).
      */
-    turretGravitationalForceOffset(
+    TurretGravitationalForceOffset(
         const float cgX,
         const float cgZ,
         const float gravityCompensatorMax);

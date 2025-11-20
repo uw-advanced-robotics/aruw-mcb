@@ -300,7 +300,7 @@ TEST_F(
 
 static int16_t computeCGOffset(WrappedFloat pitchAngleFromCenter)
 {
-    turretGravitationalForceOffset gravityCompensation(
+    TurretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);
@@ -357,7 +357,7 @@ TEST_F(
 {
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
-    turretGravitationalForceOffset gravityCompensation(
+    TurretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);
@@ -384,7 +384,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    turretGravitationalForceOffset gravityCompensation(
+    TurretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);
@@ -416,7 +416,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    turretGravitationalForceOffset gravityCompensation(
+    TurretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);
@@ -447,7 +447,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    turretGravitationalForceOffset gravityCompensation(
+    TurretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);
@@ -479,7 +479,7 @@ TEST_F(
 {
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
-    turretGravitationalForceOffset gravityCompensation(
+    TurretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);
@@ -510,7 +510,7 @@ TEST_F(
 {
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
-    turretGravitationalForceOffset gravityCompensation(
+    TurretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);
@@ -541,7 +541,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    turretGravitationalForceOffset gravityCompensation(
+    TurretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);

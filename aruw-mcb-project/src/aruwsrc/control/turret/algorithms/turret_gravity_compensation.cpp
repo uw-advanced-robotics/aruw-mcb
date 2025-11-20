@@ -24,7 +24,7 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret::algorithms
 {
-turretGravitationalForceOffset::turretGravitationalForceOffset(
+TurretGravitationalForceOffset::TurretGravitationalForceOffset(
     const float cgX,
     const float cgZ,
     const float gravityCompensatorMax)
@@ -32,7 +32,7 @@ turretGravitationalForceOffset::turretGravitationalForceOffset(
       cgZ(cgZ),
       gravityCompensatorMax(gravityCompensatorMax){};
 
-float turretGravitationalForceOffset::calculateCompensationEffort(
+float TurretGravitationalForceOffset::calculateCompensationEffort(
     TurretCompensatorState state) const
 {
     bool cgXZero = compareFloatClose(cgX, 0.0f, 1E-5);

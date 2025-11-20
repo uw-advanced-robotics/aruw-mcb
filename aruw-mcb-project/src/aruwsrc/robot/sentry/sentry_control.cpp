@@ -237,7 +237,7 @@ SentryTurretMinorSubsystem turretRight(
 SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
 
 // Turret Compensators
-turretGravitationalForceOffset turretGravityCompensation(
+TurretGravitationalForceOffset turretGravityCompensation(
     TURRET_CG_X,
     TURRET_GC_Z,
     GRAVITY_COMPENSATION_SCALAR);
