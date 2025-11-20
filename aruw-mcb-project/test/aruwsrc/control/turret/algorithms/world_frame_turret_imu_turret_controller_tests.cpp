@@ -298,14 +298,14 @@ TEST_F(
 
 // Pitch controller tests
 
-static int16_t computeCGOffset(WrappedFloat pitchAngleFromCenter)
+static int16_t computeCGOffset(float pitchAngleFromCenter)
 {
     TurretGravitationalForceOffset gravityCompensation(
         TURRET_CG_X,
         TURRET_CG_Z,
         GRAVITY_COMPENSATION_SCALAR);
     return gravityCompensation.calculateCompensationEffort(
-        {.pitch = pitchAngleFromCenter.getWrappedValue(), .yaw = 0.0f});
+        {.pitchWorldFrame = pitchAngleFromCenter, .yaw = 0.0f});
 }
 
 TEST_F(WorldFrameTurretImuTurretControllerTest, runPitchPidController_world_frame_setpoint_limited)
@@ -373,7 +373,7 @@ TEST_F(
     turretController.runController(1, Angle(0));
 
     EXPECT_EQ(
-        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())),
+        computeCGOffset(turretMCBCanCommBus1.getPitchUnwrapped()),
         turretMotor.getMotorOutput());
 }
 
@@ -406,7 +406,7 @@ TEST_F(
 
     EXPECT_GT(
         turretMotor.getMotorOutput(),
-        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
+        computeCGOffset(turretMCBCanCommBus1.getPitchUnwrapped()));
 }
 
 TEST_F(
@@ -435,9 +435,7 @@ TEST_F(
 
     turretController.runController(1, Angle::fromDegrees(0));
 
-    EXPECT_LT(
-        turretMotor.getMotorOutput(),
-        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
+    EXPECT_LT(turretMotor.getMotorOutput(), computeCGOffset(worldToTurret.getPitch()));
 }
 
 TEST_F(
@@ -467,10 +465,7 @@ TEST_F(
     worldToTurret.updateRotation(0, M_PI_2, 0);
 
     turretController.runController(1, Angle(M_PI_2));
-
-    EXPECT_EQ(
-        turretMotor.getMotorOutput(),
-        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
+    EXPECT_EQ(turretMotor.getMotorOutput(), computeCGOffset(worldToTurret.getPitch()));
 }
 
 TEST_F(
@@ -499,9 +494,7 @@ TEST_F(
 
     turretController.runController(1, Angle(M_PI_2));
 
-    EXPECT_EQ(
-        turretMotor.getMotorOutput(),
-        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
+    EXPECT_EQ(turretMotor.getMotorOutput(), computeCGOffset(worldToTurret.getPitch()));
 }
 
 TEST_F(
@@ -529,9 +522,7 @@ TEST_F(
 
     turretController.runController(1, Angle(0));
 
-    EXPECT_LT(
-        turretMotor.getMotorOutput(),
-        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
+    EXPECT_LT(turretMotor.getMotorOutput(), computeCGOffset(worldToTurret.getPitch()));
 }
 
 TEST_F(
@@ -560,7 +551,5 @@ TEST_F(
 
     turretController.runController(1, Angle(M_PI_2));
 
-    EXPECT_GT(
-        turretMotor.getMotorOutput(),
-        computeCGOffset(Angle(turretMCBCanCommBus1.getPitchUnwrapped())));
+    EXPECT_GT(turretMotor.getMotorOutput(), computeCGOffset(worldToTurret.getPitch()));
 }

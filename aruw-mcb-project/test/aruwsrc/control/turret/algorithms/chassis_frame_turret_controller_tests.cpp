@@ -42,7 +42,8 @@ float computeGravitationalForceOffset(
     const float gravityCompensationMax)
 {
     TurretGravitationalForceOffset gravityCompensation(cgX, cgZ, gravityCompensationMax);
-    return gravityCompensation.calculateCompensationEffort({.pitch = pitchAngleRad, .yaw = 0.0f});
+    return gravityCompensation.calculateCompensationEffort(
+        {.pitchWorldFrame = pitchAngleRad, .yaw = 0.0f});
 };
 TurretGravitationalForceOffset gravityCompensation(
     TURRET_CG_X,
