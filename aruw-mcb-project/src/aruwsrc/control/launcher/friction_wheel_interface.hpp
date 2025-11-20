@@ -42,7 +42,7 @@ public:
 
     virtual float getDesiredLaunchSpeed() const = 0;
 
-    virtual  float getDesiredFrictionWheelSpeed() const = 0;
+    virtual float getDesiredFrictionWheelSpeed() const = 0;
 
     virtual float getCurrentCorrectionValue() const = 0;
 

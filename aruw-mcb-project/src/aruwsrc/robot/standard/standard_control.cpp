@@ -284,7 +284,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 aruwsrc::control::launcher::FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
-aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor = frictionWheelsSubsystem;
+aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor =
+    frictionWheelsSubsystem;
 
 OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,

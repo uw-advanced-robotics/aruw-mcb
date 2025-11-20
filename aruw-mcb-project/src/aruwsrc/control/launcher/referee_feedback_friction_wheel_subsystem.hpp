@@ -45,12 +45,12 @@ class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem<NUM_
                                               public LaunchSpeedPredictorInterface
 {
 public:
-    #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-        using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
-    #else 
-        using Motor = tap::motor::DjiMotor;
-    #endif
-    
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+#else
+    using Motor = tap::motor::DjiMotor;
+#endif
+
     /**
      * For all params but `firingSystemMechanismId` see the `FrictionWheelSubsystem`.
      * @param[in] firingSystemMechanismId The barrel ID associated with this friction wheel
@@ -60,7 +60,7 @@ public:
      */
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
-        std::array<Motor*, NUM_WHEELS> wheels,
+        std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus canBus,
         aruwsrc::can::TurretMCBCanComm *turretMCB,
