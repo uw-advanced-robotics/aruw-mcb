@@ -36,28 +36,31 @@ protected:
     NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
     NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
     std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
-    
+
     FrictionWheelSubsystemTest()
-        : leftFlywheel(&drivers,
-            tap::motor::MOTOR1,
-            tap::can::CanBus::CAN_BUS1,
-            true,
-            "Left flywheel",
-            false,
-            1.0f,
-            0u,
-            static_cast<tap::encoder::EncoderInterface*>(nullptr)), rightFlywheel(
-            &drivers,
-            tap::motor::MOTOR2,
-            tap::can::CanBus::CAN_BUS1,
-            false,
-            "Right flywheel",
-            false,
-            1.0f,
-            0u,
-            static_cast<tap::encoder::EncoderInterface*>(nullptr)), frictionWheels(
+        : leftFlywheel(
               &drivers,
-              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel }},
+              tap::motor::MOTOR1,
+              tap::can::CanBus::CAN_BUS1,
+              true,
+              "Left flywheel",
+              false,
+              1.0f,
+              0u,
+              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+          rightFlywheel(
+              &drivers,
+              tap::motor::MOTOR2,
+              tap::can::CanBus::CAN_BUS1,
+              false,
+              "Right flywheel",
+              false,
+              1.0f,
+              0u,
+              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+          frictionWheels(
+              &drivers,
+              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
               wheelConfigs,
               tap::can::CanBus::CAN_BUS1,
               nullptr)
@@ -121,7 +124,8 @@ TEST_F(FrictionWheelSubsystemTest, refresh__positive_output_when_desired_speed_1
 
 TEST_F(FrictionWheelSubsystemTest, refresh__negative_output_when_desired_speed_0_shaft_rpm_negative)
 {
-    ON_CALL(frictionWheels.wheels[0]->getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
+    ON_CALL(frictionWheels.wheels[0]->getInternalEncoder(), getShaftRPM)
+        .WillByDefault(Return(1000));
     EXPECT_CALL(*frictionWheels.wheels[0], setDesiredOutput(Lt(0)));
     ON_CALL(frictionWheels.wheels[1]->getInternalEncoder(), getShaftRPM)
         .WillByDefault(Return(1000));

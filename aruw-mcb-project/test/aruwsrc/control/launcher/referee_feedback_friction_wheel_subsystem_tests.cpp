@@ -31,30 +31,32 @@ using namespace testing;
 class RefereeFeedbackFrictionWheelSubsystemTest : public Test
 {
 protected:
-
     NiceMock<tap::mock::DjiMotorMock> leftFlywheel, rightFlywheel;
     std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
     RefereeFeedbackFrictionWheelSubsystemTest()
-        : leftFlywheel(&drivers,
-            tap::motor::MOTOR1,
-            tap::can::CanBus::CAN_BUS1,
-            true,
-            "Left flywheel",
-            false,
-            1.0f,
-            0u,
-            static_cast<tap::encoder::EncoderInterface*>(nullptr)), rightFlywheel(
-            &drivers,
-            tap::motor::MOTOR2,
-            tap::can::CanBus::CAN_BUS1,
-            false,
-            "Right flywheel",
-            false,
-            1.0f,
-            0u,
-            static_cast<tap::encoder::EncoderInterface*>(nullptr)), frictionWheels(
+        : leftFlywheel(
               &drivers,
-              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel }},
+              tap::motor::MOTOR1,
+              tap::can::CanBus::CAN_BUS1,
+              true,
+              "Left flywheel",
+              false,
+              1.0f,
+              0u,
+              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+          rightFlywheel(
+              &drivers,
+              tap::motor::MOTOR2,
+              tap::can::CanBus::CAN_BUS1,
+              false,
+              "Right flywheel",
+              false,
+              1.0f,
+              0u,
+              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+          frictionWheels(
+              &drivers,
+              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
               wheelConfigs,
               tap::can::CanBus::CAN_BUS1,
               nullptr,
@@ -143,7 +145,7 @@ TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rollin
 {
     RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheelAveraged(
         &drivers,
-        std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel }}, 
+        std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
         wheelConfigs,
         tap::can::CanBus::CAN_BUS1,
         nullptr,

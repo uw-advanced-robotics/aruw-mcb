@@ -173,20 +173,20 @@ SwerveModuleMock::SwerveModuleMock(
 }
 SwerveModuleMock::~SwerveModuleMock() {}
 
-std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {aruwsrc::control::launcher::wheelConfigLeft, aruwsrc::control::launcher::wheelConfigRight};
-FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(tap::Drivers *drivers, std::array<Motor*, 2> wheels)
-    : FrictionWheelSubsystem<2>(
-          drivers,
-          wheels,
-          wheelConfigs,
-          tap::can::CanBus::CAN_BUS1,
-          nullptr)
+std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {
+    aruwsrc::control::launcher::wheelConfigLeft,
+    aruwsrc::control::launcher::wheelConfigRight};
+FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
+    tap::Drivers *drivers,
+    std::array<Motor *, 2> wheels)
+    : FrictionWheelSubsystem<2>(drivers, wheels, wheelConfigs, tap::can::CanBus::CAN_BUS1, nullptr)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
 RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystemMock(
-    tap::Drivers *drivers, std::array<Motor*, 2> wheels)
+    tap::Drivers *drivers,
+    std::array<Motor *, 2> wheels)
     : RefereeFeedbackFrictionWheelSubsystem<10, 2>(
           drivers,
           wheels,

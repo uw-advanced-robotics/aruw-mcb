@@ -33,26 +33,34 @@ class FrictionWheelSpinRefLimitedCommandTest : public Test
 {
     NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
     NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
+
 protected:
-    FrictionWheelSpinRefLimitedCommandTest() : leftFlywheel(&drivers,
-            tap::motor::MOTOR1,
-            tap::can::CanBus::CAN_BUS1,
-            true,
-            "Left flywheel",
-            false,
-            1.0f,
-            0u,
-            static_cast<tap::encoder::EncoderInterface*>(nullptr)), rightFlywheel(
-            &drivers,
-            tap::motor::MOTOR2,
-            tap::can::CanBus::CAN_BUS1,
-            false,
-            "Right flywheel",
-            false,
-            1.0f,
-            0u,
-            static_cast<tap::encoder::EncoderInterface*>(nullptr)), frictionWheels(&drivers,
-              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel }}) {}
+    FrictionWheelSpinRefLimitedCommandTest()
+        : leftFlywheel(
+              &drivers,
+              tap::motor::MOTOR1,
+              tap::can::CanBus::CAN_BUS1,
+              true,
+              "Left flywheel",
+              false,
+              1.0f,
+              0u,
+              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+          rightFlywheel(
+              &drivers,
+              tap::motor::MOTOR2,
+              tap::can::CanBus::CAN_BUS1,
+              false,
+              "Right flywheel",
+              false,
+              1.0f,
+              0u,
+              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+          frictionWheels(
+              &drivers,
+              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}})
+    {
+    }
 
     void SetUp() override
     {
