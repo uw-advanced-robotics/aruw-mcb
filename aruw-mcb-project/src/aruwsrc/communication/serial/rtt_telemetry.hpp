@@ -21,6 +21,7 @@
 #define RTT_TELEMETRY_HPP_
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <string>
 #include <type_traits>
@@ -220,7 +221,14 @@ private:
         {
             char buf[64];
             int vq = static_cast<int32_t>(v * 1000);
-            std::snprintf(buf, sizeof(buf), "%d.%03d", vq / 1000, vq % 1000);
+            if (vq < 0)
+            {
+                std::snprintf(buf, sizeof(buf), "-%d.%03d", std::abs(vq) / 1000, std::abs(vq) % 1000);
+            }
+            else
+            {
+                std::snprintf(buf, sizeof(buf), "%d.%03d", vq / 1000, vq % 1000);
+            }
             out += buf;
         }
         else if constexpr (std::is_integral_v<T> && !std::is_same_v<T, bool>)
