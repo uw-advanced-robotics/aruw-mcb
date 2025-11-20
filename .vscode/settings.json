@@ -78,7 +78,8 @@
         "numbers": "cpp",
         "span": "cpp",
         "hash_map": "cpp",
-        "semaphore": "cpp"
+        "semaphore": "cpp",
+        "future": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
