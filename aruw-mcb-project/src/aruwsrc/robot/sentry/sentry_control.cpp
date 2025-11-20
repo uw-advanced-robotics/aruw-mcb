@@ -237,9 +237,9 @@ SentryTurretMinorSubsystem turretRight(
 SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
 
 // Turret Compensators
-turretGravitationalForceOffset turretGravityCompensation(
+TurretGravitationalForceOffset turretGravityCompensation(
     TURRET_CG_X,
-    TURRET_GC_Z,
+    TURRET_CG_Z,
     GRAVITY_COMPENSATION_SCALAR);
 
 struct TurretMinorChassisControllers
@@ -1018,11 +1018,13 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 }  // namespace aruwsrc::sentry
 
 #ifndef PLATFORM_HOSTED
-std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *> getGravityAutotuneCommands()
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
+getGravityAutotuneCommands()
 {
-    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *> commands = {
-        &sentry_control::gravityAutotuneCommandLeft,
-        &sentry_control::gravityAutotuneCommandRight};
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
+        commands = {
+            &sentry_control::gravityAutotuneCommandLeft,
+            &sentry_control::gravityAutotuneCommandRight};
     return commands;
 }
 // imu::ImuCalibrateCommand *getImuCalibrateCommand() { return
