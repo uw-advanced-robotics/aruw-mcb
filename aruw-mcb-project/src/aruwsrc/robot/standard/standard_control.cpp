@@ -815,11 +815,12 @@ imu::ImuCalibrateCommand *getImuCalibrateCommand()
     return &standard_control::imuCalibrateCommand;
 }
 
-std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> getGravityAutotuneCommands()
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
+getGravityAutotuneCommands()
 {
     // Static array of pointers, terminated by nullptr
-    static std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> commands = {
-        &standard_control::gravityAutotuneCommand};
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
+        commands = {&standard_control::gravityAutotuneCommand};
     return commands;
 }
 

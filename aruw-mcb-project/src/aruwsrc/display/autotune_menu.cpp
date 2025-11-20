@@ -24,18 +24,19 @@
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 
 // weak function defined if not specifed by user
-modm_weak std::vector<aruwsrc::control::autotune::GravityAutotuneInterface*>
+modm_weak std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>*>
 getGravityAutotuneCommands()
 {
-    return std::vector<aruwsrc::control::autotune::GravityAutotuneInterface*>{};
+    return std::vector<
+        aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>*>{};
 }
 namespace aruwsrc::display
 {
 AutotuneMenu::AutotuneMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>>* vs,
     tap::Drivers* drivers,
     int entriesToDisplay)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, 1),
+    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>(vs, 1),
       drivers(drivers),
       verticalScroll(drivers, 0, entriesToDisplay)
 {

@@ -39,7 +39,7 @@ namespace aruwsrc::display
  * displays the current calibration state of the `gravityAutotuneCommand`.
  */
 class GravityAutotuneMenu
-    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>
 {
 public:
     /**
@@ -47,9 +47,10 @@ public:
      * @param[in] drivers A pointer to the global drivers object.
      */
     GravityAutotuneMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
         tap::Drivers *drivers,
-        aruwsrc::control::autotune::GravityAutotuneInterface *gravityAutotuneCommand);
+        aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>
+            *gravityAutotuneCommand);
 
     void draw() override;
 
@@ -75,11 +76,12 @@ private:
 
     tap::Drivers *drivers;
 
-    aruwsrc::control::autotune::GravityAutotuneInterface *gravityAutotuneCommand;
+    aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>
+        *gravityAutotuneCommand;
 
-    aruwsrc::control::autotune::GravityAutotuneInterface::CalibrationState currCalibrationState =
-        aruwsrc::control::autotune::GravityAutotuneInterface::CalibrationState::
-            WAITING_FOR_SYSTEMS_ONLINE;
+    aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>::CalibrationState
+        currCalibrationState = aruwsrc::control::autotune::TurretAutotuneInterface<
+            std::array<float, 3>>::CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
 };
 }  // namespace aruwsrc::display
 

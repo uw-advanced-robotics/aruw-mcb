@@ -71,6 +71,8 @@ public:
      */
     float calculateCompensationEffort(const TurretCompensatorState state) const override;
 
+    float calculateEffectiveX(const float pitch) const;
+
 private:
     tap::algorithms::transforms::Position pitchPointPosition;
     tap::algorithms::transforms::Position yawPointPosition;
