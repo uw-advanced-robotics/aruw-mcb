@@ -311,7 +311,7 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 // Turret Compensators
-algorithms::turretGravitationalForceOffset turretGravityCompensation(
+algorithms::TurretGravitationalForceOffset turretGravityCompensation(
     TURRET_CG_X,
     TURRET_CG_Z,
     GRAVITY_COMPENSATION_SCALAR);

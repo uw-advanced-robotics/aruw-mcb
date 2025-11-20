@@ -44,9 +44,6 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
-#include "aruwsrc/communication/serial/sentry_request_commands.hpp"
-#include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
-#include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
@@ -94,6 +91,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -325,10 +323,18 @@ aruwsrc::control::chassis::BeybladeCommand beybladeCommand(
 
 // Turret compensators
 
-algorithms::turretGravitationalForceOffset turretGravityCompensation(
+algorithms::TurretGravitationalForceOffset turretGravityCompensation(
     TURRET_CG_X,
     TURRET_CG_Z,
     GRAVITY_COMPENSATION_SCALAR);
+
+algorithms::TurretSpringForceOffset turretSpringCompensation(
+    TURRET_SPRING_PITCH_MOUNT_X,
+    TURRET_SPRING_PITCH_MOUNT_Z,
+    TURRET_SPRING_YAW_MOUNT_X,
+    TURRET_SPRING_YAW_MOUNT_Z,
+    TURRET_SPRING_CONSTANT,
+    TURRET_SPRING_FREE_LENGTH);
 
 // Turret controllers
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(

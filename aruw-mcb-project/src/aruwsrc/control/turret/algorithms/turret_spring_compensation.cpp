@@ -21,7 +21,7 @@
 using namespace aruwsrc::control::turret::algorithms;
 using namespace tap::algorithms::transforms;
 
-turretSpringForceOffset::turretSpringForceOffset(
+TurretSpringForceOffset::TurretSpringForceOffset(
     const float turretPitchMountX,
     const float turretPitchMountZ,
     const float turretYawMountX,
@@ -33,7 +33,7 @@ turretSpringForceOffset::turretSpringForceOffset(
       springConstant(springConstant),
       springFreeLength(springFreeLength){};
 
-float turretSpringForceOffset::calculateCompensationEffort(const TurretCompensatorState state) const
+float TurretSpringForceOffset::calculateCompensationEffort(const TurretCompensatorState state) const
 {
     // apply rotation to pitch
     const Transform pitchTransform(0, 0, 0, 0, state.pitchChassisFrame, 0);
