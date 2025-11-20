@@ -18,39 +18,39 @@
  */
 
 /**
- * @file gravity_autotune.hpp
+ * @file spring_autotune.hpp
  *
- * @brief   Implements gravity-based center-of-mass autotuning for turret calibration.
+ * @brief   Implements spring auto-tuning for turret calibration.
  *
- * Defines the GravityAutotuneCommand command, which locks the turret at specified
- * test points, measures torque/angle, and estimates the turret's center of
- * mass using least squares regression.
  */
 
-#ifndef GRAVITY_AUTOTUNE_HPP_
-#define GRAVITY_AUTOTUNE_HPP_
+#ifndef SPRING_AUTOTUNE_HPP_
+#define SPRING_AUTOTUNE_HPP_
+
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 
 #include "autotune_command_interface.hpp"
 
 namespace aruwsrc::control::autotune
 {
 template <uint32_t numTestPoints>
-class GravityAutotuneCommand : public TurretAutotuneCommand<std::array<float, 3>, numTestPoints>
+class SpringAutotuneCommand : public TurretAutotuneCommand<std::array<float, 4>, numTestPoints>
 {
+private:
+    using TurretAutoCommand = TurretAutotuneCommand<std::array<float, 4>, numTestPoints>;
+
 public:
-    GravityAutotuneCommand(
+    SpringAutotuneCommand(
         tap::Drivers *drivers,
-        const TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::TurretCalibrationConfig
-            &config,
-        chassis::HolonomicChassisSubsystem *chassis = nullptr,
+        const TurretAutoCommand::TurretCalibrationConfig &config,
+        const TurretSpringForceOffset &springForce,
+        const chassis::HolonomicChassisSubsystem *chassis = nullptr,
         const std::array<float, numTestPoints> points = {},
-        const float velocityZeroThreshold =
-            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_VELOCITY_THRESHOLD,
-        const float positionZeroThreshold =
-            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_POSITION_THRESHOLD,
+        const float velocityZeroThreshold = TurretAutoCommand::DEFAULT_VELOCITY_THRESHOLD,
+        const float positionZeroThreshold = TurretAutoCommand::DEFAULT_POSITION_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
-        : TurretAutotuneCommand<std::array<float, 3>, numTestPoints>(
+        : TurretAutoCommand(
               drivers,
               config,
               chassis,
@@ -59,42 +59,45 @@ public:
               positionZeroThreshold,
               successChime,
               failChime),
-          config(config)
+          config(config),
+          springForce(springForce)
     {
     }
 
     /**
      * @brief Calculates the center of mass with least squares
      *
-     * @return std::array<float,3> cgX, cgZ, and magnitude of the center of mass
-     * with cgX, and cgZ in units of mm and magnitude in units of desOut.
+     * @return std::array<float,4> cgX, cgZ, magnitude, and K.
      */
-    std::array<float, 3> calculate(
+    std::array<float, 4> calculate(
         std::array<float, numTestPoints> Angles,
         std::array<float, numTestPoints> Torques) const override
     {
-        Eigen::MatrixXd X(numTestPoints, 2);
+        Eigen::MatrixXd X(numTestPoints, 3);
         Eigen::VectorXd Y(numTestPoints);
 
         for (uint32_t i = 0; i < numTestPoints; ++i)
         {
-            X(i, 0) = std::cos(Angles[i]);  // corresponds to A (m·g·x)
-            X(i, 1) = std::sin(Angles[i]);  // corresponds to B (−m·g·z)
+            X(i, 0) = std::cos(Angles[i]);                         // corresponds to A (m·g·x)
+            X(i, 1) = std::sin(Angles[i]);                         // corresponds to B (−m·g·z)
+            X(i, 2) = springForce.calculateEffectiveX(Angles[i]);  // corresponds to K
             Y(i) = Torques[i];
         }
-        // Solve least squares: torque = A·cos(theta) + B·sin(theta)
-        Eigen::Vector2d params = X.colPivHouseholderQr().solve(Y);
+        // Solve least squares: torque = A·cos(theta) + B·sin(theta) + K·x
+        Eigen::Vector3d params = X.colPivHouseholderQr().solve(Y);
 
         const float A = params(0);
         const float B = params(1);
+        const float K = params(2);
         const float magnitude = std::sqrt(A * A + B * B);
 
-        return {calibrationResultToMM(A), calibrationResultToMM(B), magnitude};
+        return {calibrationResultToMM(A), calibrationResultToMM(B), magnitude, K};
     };
 
 private:
-    const TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::TurretCalibrationConfig
-        &config;
+    const TurretAutoCommand::TurretCalibrationConfig &config;
+
+    const TurretSpringForceOffset &springForce;
     /**
      * @brief Helper function that turns the calibration result into
      * units of mm.

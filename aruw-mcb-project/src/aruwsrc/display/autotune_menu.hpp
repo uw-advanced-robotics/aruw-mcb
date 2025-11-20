@@ -40,7 +40,8 @@ class Drivers;
  * Weak function that you should define in `*_control.cpp` if an `gravityAutotuneCommand` exists,
  * returns a vector of autotune commands.
  */
-std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> getGravityAutotuneCommands();
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
+getGravityAutotuneCommands();
 namespace aruwsrc::display
 {
 class AutotuneMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>

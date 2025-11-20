@@ -35,12 +35,17 @@ TurretSpringForceOffset::TurretSpringForceOffset(
 
 float TurretSpringForceOffset::calculateCompensationEffort(const TurretCompensatorState state) const
 {
+    const float x = calculateEffectiveX(state.pitchChassisFrame);
+    return x * springConstant;
+}
+
+float TurretSpringForceOffset::calculateEffectiveX(const float pitch) const
+{
     // apply rotation to pitch
-    const Transform pitchTransform(0, 0, 0, 0, state.pitchChassisFrame, 0);
+    const Transform pitchTransform(0, 0, 0, 0, pitch, 0);
 
     const Position pitchPoint = pitchTransform.apply(pitchPointPosition);
 
     const float spring_dist = Position::distance(pitchPoint, yawPointPosition);
-    const float x = spring_dist - springFreeLength;
-    return x * springConstant;
+    return spring_dist - springFreeLength;
 }
