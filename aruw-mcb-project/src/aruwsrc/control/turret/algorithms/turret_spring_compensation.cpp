@@ -18,6 +18,8 @@
  */
 #include "turret_spring_compensation.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
+
 using namespace aruwsrc::control::turret::algorithms;
 using namespace tap::algorithms::transforms;
 
@@ -27,16 +29,38 @@ TurretSpringForceOffset::TurretSpringForceOffset(
     const float turretYawMountX,
     const float turretYawMountZ,
     const float springConstant,
-    const float springFreeLength)
+    const float springFreeLength,
+    const bool isMotorInverted)
     : pitchPointPosition(turretPitchMountX, 0, turretPitchMountZ),
       yawPointPosition(turretYawMountX, 0, turretYawMountZ),
       springConstant(springConstant),
-      springFreeLength(springFreeLength){};
+      springFreeLength(springFreeLength),
+      isMotorInverted(isMotorInverted){};
+
+static inline Vector normalize(const Vector vector)
+{
+    return vector * tap::algorithms::fastInvSqrt(Vector::dot(vector, vector));
+};
 
 float TurretSpringForceOffset::calculateCompensationEffort(const TurretCompensatorState state) const
 {
-    const float x = calculateEffectiveX(state.pitchChassisFrame);
-    return x * springConstant;
+    const Transform pitchTransform(0, 0, 0, 0, state.pitchChassisFrame, 0);
+
+    const Position pitchPoint = pitchTransform.apply(pitchPointPosition);
+
+    const float springLength = (yawPointPosition - pitchPoint).magnitude();
+
+    const float force = (springLength - springFreeLength) * springConstant;
+
+    const Vector springDirection = normalize(yawPointPosition - pitchPoint);
+
+    const Vector springForceVector = springDirection * force;
+
+    const Vector pitchPosVector(pitchPoint.coordinates());
+
+    const Vector torque = Vector::cross(pitchPosVector, springForceVector);
+
+    return isMotorInverted ? Vector::dot(torque, {0, 1.0, 0}) : -Vector::dot(torque, {0, 1.0, 0});
 }
 
 float TurretSpringForceOffset::calculateEffectiveX(const float pitch) const

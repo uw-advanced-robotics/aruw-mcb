@@ -332,7 +332,8 @@ algorithms::TurretSpringForceOffset turretSpringCompensation(
     TURRET_SPRING_YAW_MOUNT_X,
     TURRET_SPRING_YAW_MOUNT_Z,
     TURRET_SPRING_CONSTANT,
-    TURRET_SPRING_FREE_LENGTH);
+    TURRET_SPRING_FREE_LENGTH,
+    pitchMotor.isMotorInverted());
 
 // Turret controllers
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
@@ -363,7 +364,7 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         turret.pitchMotor,
         worldFramePitchTurretImuPosPid,
         worldFramePitchTurretImuVelPid,
-        {&turretGravityCompensation});
+        {&turretGravityCompensation, &turretSpringCompensation});
 
 algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
     worldFramePitchTurretImuControllerCv(
@@ -372,7 +373,7 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         turret.pitchMotor,
         worldFramePitchTurretImuPosPidCv,
         worldFramePitchTurretImuVelPid,
-        {&turretGravityCompensation});
+        {&turretGravityCompensation, &turretSpringCompensation});
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);

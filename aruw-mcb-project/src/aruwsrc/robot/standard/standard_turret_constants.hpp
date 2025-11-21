@@ -110,11 +110,11 @@ static constexpr float TURRET_CG_X = 20.0f;
 static constexpr float TURRET_CG_Z = 16.5f;
 static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'200;
 
-static constexpr float TURRET_SPRING_PITCH_MOUNT_X = 0.0f;
+static constexpr float TURRET_SPRING_PITCH_MOUNT_X = -20.0f;
 static constexpr float TURRET_SPRING_PITCH_MOUNT_Z = 0.0f;
-static constexpr float TURRET_SPRING_YAW_MOUNT_X = 0.0f;
+static constexpr float TURRET_SPRING_YAW_MOUNT_X = -20.0f;
 static constexpr float TURRET_SPRING_YAW_MOUNT_Z = 0.0f;
-static constexpr float TURRET_SPRING_CONSTANT = 0.0f;
+static constexpr float TURRET_SPRING_CONSTANT = 100.0f;
 static constexpr float TURRET_SPRING_FREE_LENGTH = 0.0f;
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
