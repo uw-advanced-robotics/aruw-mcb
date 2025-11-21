@@ -60,7 +60,8 @@ public:
         const float turretYawMountX,
         const float turretYawMountZ,
         const float springConstant,
-        const float springFreeLength);
+        const float springFreeLength,
+        const bool isMotorInverted);
 
     /**
      * @param[in] state The state of the turret, including the pitch in world and chassis frame.
@@ -78,6 +79,7 @@ private:
     tap::algorithms::transforms::Position yawPointPosition;
     const float springConstant;
     const float springFreeLength;
+    const bool isMotorInverted;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 
