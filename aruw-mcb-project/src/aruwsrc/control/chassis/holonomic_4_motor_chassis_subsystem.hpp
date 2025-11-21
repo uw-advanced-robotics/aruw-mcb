@@ -154,6 +154,16 @@ private:
     // ✨ the motors ✨
     tap::motor::MotorInterface* motors[4];
 
+    int32_t realVal[4];
+    float powerDrawWatts;
+
+    float mVolts;
+    float mAmps;
+    float sensorWatts;
+
+    tap::communication::sensors::current::CurrentSensorInterface* mcurrentSensor;
+    tap::communication::sensors::voltage::VoltageSensorInterface* mvoltageSensor;
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
 #endif

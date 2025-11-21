@@ -58,6 +58,16 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     motors[RF] = &rightFrontMotor;
     motors[LB] = &leftBackMotor;
     motors[RB] = &rightBackMotor;
+
+    memset(realVal, 0, 4 * sizeof(int32_t));
+    powerDrawWatts = 0;
+
+    mVolts = 0;
+    mAmps = 0;
+    sensorWatts = 0;
+    
+    mcurrentSensor = currentSensor;
+    mvoltageSensor = voltageSensor;
 }
 
 void Holonomic4MotorChassisSubsystem::initialize()
@@ -109,6 +119,8 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
 
     // compute modified power limiting fraction based on velocity PID error
     // motors with greater error should be allocated a larger fraction of the powerLimitFrac
+
+    float tryingToCalculate = 0;
     for (int i = 0; i < NUM_MOTORS; i++)
     {
         // Compared to the other wheels, fraction of how much velocity PID error there is for a
@@ -124,8 +136,26 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
         // velocityErrorFrac for each motor.
         float modifiedPowerLimitFrac =
             limitVal(NUM_MOTORS * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
-        motors[i]->setDesiredOutput(motors[i]->getOutputDesired() * modifiedPowerLimitFrac);
+
+        int32_t pppp = motors[i]->getOutputDesired() * modifiedPowerLimitFrac;
+        realVal[i] = pppp;
+
+        
+        const float VOLTAGE = 24;
+        const float MAX_AMPERAGE = 20;
+        const float MAX_DESIRED_OUTPUT = 16384;
+
+
+        tryingToCalculate += VOLTAGE * (MAX_AMPERAGE * abs(static_cast<float>(pppp) / MAX_DESIRED_OUTPUT));
+        motors[i]->setDesiredOutput(pppp);
     }
+
+    powerDrawWatts = tryingToCalculate;
+
+    mVolts = mvoltageSensor->getVoltageMv();
+    mAmps = mcurrentSensor->getCurrentMa();
+
+    sensorWatts = (mVolts / 1000.0f) * (mAmps / 1000.0f);
 }
 
 void Holonomic4MotorChassisSubsystem::calculateOutput(

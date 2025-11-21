@@ -47,6 +47,10 @@ public:
     float getVoltageMv() const override { return this->voltage; };
     float getCurrentMa() const override { return this->current; };
 
+    // super general tips for prepping:
+    // MCQ multiple choice question
+    // 
+
     void update() override{};
 
     bool isOnline() const { return !this->heartbeat.isExpired(); }
