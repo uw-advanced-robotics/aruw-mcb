@@ -86,6 +86,7 @@ void SentryTurretCVCommand::computeAimSetpoints(
 
 void SentryTurretCVCommand::execute()
 {
+    
     // setpoints are in chassis frame
     WrappedFloat majorSetpoint = yawControllerMajor.getSetpoint();
     WrappedFloat leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
@@ -156,32 +157,37 @@ void SentryTurretCVCommand::execute()
                 enterScanMode(majorSetpoint);
             }
 
-            // scan logic: start at some default, scan 180deg clockwise, change direction
-            // scan 180 ccw, change, etc.
-            float v = majorScanValue.getWrappedValue();
-            if (v >= CCW_TO_CW_WRAP_VALUE)
-                scanDir = SCAN_CLOCKWISE;  // decreases angle
-            else if (v <= CW_TO_CCW_WRAP_VALUE)
-                scanDir = SCAN_COUNTER_CLOCKWISE;  // increases angle
+            if (curHitState == HitState::NOT_HIT) {
+                // scan logic: start at some default, scan 180deg clockwise, change direction
+                // scan 180 ccw, change, etc.
+                float v = majorScanValue.getWrappedValue();
+                if (v >= CCW_TO_CW_WRAP_VALUE)
+                    scanDir = SCAN_CLOCKWISE;  // decreases angle
+                else if (v <= CW_TO_CCW_WRAP_VALUE)
+                    scanDir = SCAN_COUNTER_CLOCKWISE;  // increases angle
 
-            majorScanValue += YAW_SCAN_DELTA_ANGLE * scanDir;
-            majorSetpoint = majorSetpoint.minInterpolate(
-                majorScanValue,
-                SCAN_LOW_PASS_ALPHA);  // lowpass filter
+                majorScanValue += YAW_SCAN_DELTA_ANGLE * scanDir;
+                majorSetpoint = majorSetpoint.minInterpolate(
+                    majorScanValue,
+                    SCAN_LOW_PASS_ALPHA);  // lowpass filter
 
-            leftPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
-            rightPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
+                leftPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
+                rightPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
 
-            leftYawSetpoint = majorSetpoint + SCAN_TURRET_LEFT_YAW;
-            rightYawSetpoint = majorSetpoint + SCAN_TURRET_RIGHT_YAW;
+                leftYawSetpoint = majorSetpoint + SCAN_TURRET_LEFT_YAW;
+                rightYawSetpoint = majorSetpoint + SCAN_TURRET_RIGHT_YAW;
+            }
         }
     }
 
-    std::vector<PlateHitTracker::PlateHitBinData> hitData = plateHitTracker.getPeakAnglesRadians();
-    PlateHitTracker::PlateHitBinData maxHit = hitData.at(0);
+    PlateHitTracker::PlateHitBinData maxHit = plateHitTracker.getPeakAnglesRadians()[0];
+    lastPlateHitData = plateHitData;
+    plateHitData = maxHit;
     switch (curHitState) {
-        case HitState::HIT:
-            if (lastHitState != curHitState) {
+        case HitState::HIT: {
+            // set new setpoint if hit state transition or new hit is registered
+            hitLocDiffRads = abs(plateHitData.radians.minDifference(lastPlateHitData.radians));
+            if (lastHitState != curHitState || hitLocDiffRads > HIT_DIFF_OFFSET) {
                 majorSetpoint = maxHit.radians;
                 if (scanning) {
                     leftYawSetpoint = majorSetpoint + TURRET_OFFSET;
@@ -190,19 +196,20 @@ void SentryTurretCVCommand::execute()
             }
             lastHitState = curHitState;
             uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-            if (maxHit.magnitude < HIT_MAG_THRESH && curTime - lastHitTime > HIT_COUNT_DELAY_MILLISEC) {
+            if (maxHit.magnitude < HIT_MAG_THRESH && curTime - lastHitTime > HIT_COUNT_DELAY_MILLISEC) { 
                 curHitState = HitState::NOT_HIT;
             } else if (maxHit.magnitude >= HIT_MAG_THRESH) {
-                lastHitMag = maxHit.magnitude;
                 lastHitTime = curTime;
             }
             break;
-        case HitState::NOT_HIT:
+        }
+        case HitState::NOT_HIT: {
             lastHitState = curHitState;
             if (maxHit.magnitude >= HIT_MAG_THRESH) {
                 curHitState = HitState::HIT;
             }
             break;
+        }
         default:
             break;
     }

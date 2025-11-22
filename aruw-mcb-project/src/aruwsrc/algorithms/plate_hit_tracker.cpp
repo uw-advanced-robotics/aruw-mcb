@@ -39,6 +39,12 @@ void PlateHitTracker::update()
         return;
     }
     bins = bins * DECAY_FACTOR;
+    for (int i = 0; i < BIN_NUMBER; i++) {
+        if (bins[i] < HIT_THRESH) {
+            bins[i] = 0.0f;
+            calculatedPeakAngles = false;
+        }
+    }
     auto newHitData = this->drivers->refSerial.getRobotData();
     lastHitData.plateID = static_cast<int>(newHitData.damagedArmorId);
     if (newHitData.receivedDps > lastHitData.lastDps)

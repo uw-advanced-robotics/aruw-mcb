@@ -180,11 +180,14 @@ private:
     HitState curHitState = HitState::NOT_HIT;
     HitState lastHitState = HitState::NOT_HIT;
     uint32_t lastHitTime = 0;
-    float lastHitMag = 0.0f;
+    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData plateHitData {};
+    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData lastPlateHitData {};
+    float hitLocDiffRads = 0.0f;
 
     static constexpr uint32_t HIT_COUNT_DELAY_MILLISEC = 1000; 
-    static constexpr float HIT_MAG_THRESH = 0.01f; // TODO figure out what actually counts as a hit
-    static constexpr float TURRET_OFFSET = modm::toRadian(20.0f);
+    static constexpr float HIT_MAG_THRESH = 0.4f; 
+    static constexpr float TURRET_OFFSET = modm::toRadian(10.0f);
+    static constexpr float HIT_DIFF_OFFSET = modm::toRadian(20.0f);
 
     // scan direction
     static constexpr int SCAN_CLOCKWISE = -1;

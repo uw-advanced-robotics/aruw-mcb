@@ -109,7 +109,9 @@ public:
 
 private:
     static constexpr uint8_t BIN_NUMBER = 8;
+    CMSISMat<BIN_NUMBER, 1> binData {};
     static constexpr float BLUR_FACTOR = 0.5;
+    static constexpr float HIT_THRESH = 0.001;
 
     // clang-format off
     static constexpr float A = 0.5; 
