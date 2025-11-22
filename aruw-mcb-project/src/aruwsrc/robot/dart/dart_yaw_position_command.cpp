@@ -31,14 +31,14 @@ namespace aruwsrc::robot::dart
     DartYawPositionCommand::DartYawPositionCommand(
         tap::Drivers *drivers, 
         TriggerHomedJointSubsystem *subsystem,
-        float setpointDegrees
+        float setpointDegrees // setpoint should be measured as degrees to the right of
     ) : drivers(drivers), subsystem(subsystem), setpointDegrees(setpointDegrees){
         addSubsystemRequirement(subsystem);
     }
 
     void DartYawPositionCommand::initialize(){
-        float setpointRotations = (DART_LAUNCHER_YAW_RADIAL_LENGTH * tan(setpointDegrees*PI/180))/0.002;
-        subsystem->setSetpoint(setpointRotations);
+        float setpointMeters = -(DART_LAUNCHER_YAW_RADIAL_LENGTH * tan(setpointDegrees*PI/180)) + 0.13926685;
+        subsystem->setSetpoint(setpointMeters);
     }
 
     void DartYawPositionCommand::execute(){}
@@ -46,7 +46,7 @@ namespace aruwsrc::robot::dart
     void DartYawPositionCommand::end(bool interrupted){}
 
     bool DartYawPositionCommand::isFinished() const {
-        return true;
+        return subsystem->atSetpoint();
     }
 
 }
