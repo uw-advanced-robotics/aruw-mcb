@@ -49,8 +49,7 @@ public:
     GravityAutotuneMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
         tap::Drivers *drivers,
-        aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>
-            *gravityAutotuneCommand);
+        aruwsrc::control::autotune::TurretAutotuneInterface *gravityAutotuneCommand);
 
     void draw() override;
 
@@ -60,10 +59,10 @@ public:
 
     bool hasChanged() override;
 
-    static const char *getMenuName() { return "Gravity Calibrate Menu"; }
+    static const char *getMenuName() { return "Run Calibrate Menu"; }
 
 private:
-    static constexpr int GRAVITY_AUTOTUNE_MENU_ID = 1;
+    static constexpr int AUTOTUNE_MENU_ID = 1;
 
     static constexpr const char *CALI_STATE_TO_CHAR_STR[] = {
         "WAITING_FOR_SYSTEMS_ONLINE",
@@ -76,12 +75,11 @@ private:
 
     tap::Drivers *drivers;
 
-    aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>
-        *gravityAutotuneCommand;
+    aruwsrc::control::autotune::TurretAutotuneInterface *gravityAutotuneCommand;
 
-    aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>::CalibrationState
-        currCalibrationState = aruwsrc::control::autotune::TurretAutotuneInterface<
-            std::array<float, 3>>::CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
+    aruwsrc::control::autotune::TurretAutotuneInterface::CalibrationState currCalibrationState =
+        aruwsrc::control::autotune::TurretAutotuneInterface::CalibrationState::
+            WAITING_FOR_SYSTEMS_ONLINE;
 };
 }  // namespace aruwsrc::display
 

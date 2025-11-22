@@ -28,9 +28,8 @@ namespace aruwsrc::display
 GravityAutotuneMenu::GravityAutotuneMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
     tap::Drivers *drivers,
-    aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>
-        *GravityAutotuneCommand)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>(vs, GRAVITY_AUTOTUNE_MENU_ID),
+    aruwsrc::control::autotune::TurretAutotuneInterface *GravityAutotuneCommand)
+    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>(vs, AUTOTUNE_MENU_ID),
       drivers(drivers),
       gravityAutotuneCommand(GravityAutotuneCommand)
 {
@@ -51,20 +50,10 @@ void GravityAutotuneMenu::draw()
     {
         display << CALI_STATE_TO_CHAR_STR[static_cast<int>(currCalibrationState)] << modm::endl;
 
-        if (currCalibrationState ==
-            aruwsrc::control::autotune::TurretAutotuneInterface<
-                std::array<float, 3>>::CalibrationState::CALIBRATION_SUCCESS)
+        if (currCalibrationState == aruwsrc::control::autotune::TurretAutotuneInterface::
+                                        CalibrationState::CALIBRATION_SUCCESS)
         {
-            const auto result = gravityAutotuneCommand->getCalibrationResult();
-            const float X = result[0];
-            const float Z = result[1];
-            const float scalar = result[2];
-
-            display.printf(
-                "Center of mass position:\n\tcgX: %.2f mm\n\tcgZ: %.2f mm\n",
-                static_cast<double>(X),
-                static_cast<double>(Z));
-            display.printf("Gravity Compensation\n Scalar: %.1f\n", static_cast<double>(scalar));
+            gravityAutotuneCommand->drawCalibrationResult(display);
         }
     }
 }

@@ -24,19 +24,14 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret::algorithms
 {
-TurretGravitationalForceOffset::TurretGravitationalForceOffset(
-    const float cgX,
-    const float cgZ,
-    const float gravityCompensatorMax)
-    : cgX(cgX),
-      cgZ(cgZ),
-      gravityCompensatorMax(gravityCompensatorMax){};
+TurretGravitationalForceOffset::TurretGravitationalForceOffset(const TurretGravityParams& params)
+    : params(params){};
 
 float TurretGravitationalForceOffset::calculateCompensationEffort(
     TurretCompensatorState state) const
 {
-    bool cgXZero = compareFloatClose(cgX, 0.0f, 1E-5);
-    bool cgZZero = compareFloatClose(cgZ, 0.0f, 1E-5);
+    bool cgXZero = compareFloatClose(params.cgX, 0.0f, 1E-5);
+    bool cgZZero = compareFloatClose(params.cgZ, 0.0f, 1E-5);
 
     // If CG centered, no compensation necessary
     if (cgXZero && cgZZero)
@@ -49,14 +44,15 @@ float TurretGravitationalForceOffset::calculateCompensationEffort(
     float turretCGPolarTheta = 0.0f;
     if (!cgXZero)
     {
-        turretCGPolarTheta = (cgX > 0.0f) ? atanf(cgZ / cgX) : (atanf(cgZ / cgX) + M_PI);
+        turretCGPolarTheta = (params.cgX > 0.0f) ? atanf(params.cgZ / params.cgX)
+                                                 : (atanf(params.cgZ / params.cgX) + M_PI);
     }
     else
     {
-        turretCGPolarTheta = copysign(M_PI_2, cgZ);
+        turretCGPolarTheta = copysign(M_PI_2, params.cgZ);
     }
 
-    return gravityCompensatorMax * cosf(turretCGPolarTheta - state.pitchWorldFrame);
+    return params.gravityCompensatorMax * cosf(turretCGPolarTheta - state.pitchWorldFrame);
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

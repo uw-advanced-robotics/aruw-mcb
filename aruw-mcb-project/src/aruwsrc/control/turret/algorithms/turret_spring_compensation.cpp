@@ -24,18 +24,12 @@ using namespace aruwsrc::control::turret::algorithms;
 using namespace tap::algorithms::transforms;
 
 TurretSpringForceOffset::TurretSpringForceOffset(
-    const float turretPitchMountX,
-    const float turretPitchMountZ,
-    const float turretYawMountX,
-    const float turretYawMountZ,
-    const float springConstant,
-    const float springFreeLength,
+    const TurretSpringParams& params,
     const bool isMotorInverted)
-    : pitchPointPosition(turretPitchMountX, 0, turretPitchMountZ),
-      yawPointPosition(turretYawMountX, 0, turretYawMountZ),
-      springConstant(springConstant),
-      springFreeLength(springFreeLength),
-      isMotorInverted(isMotorInverted){};
+    : params(params),
+      isMotorInverted(isMotorInverted),
+      pitchPointPosition(params.turretPitchMountX, 0.0f, params.turretPitchMountZ),
+      yawPointPosition(params.turretYawMountX, 0.0f, params.turretYawMountZ){};
 
 static inline Vector normalize(const Vector vector)
 {
@@ -50,7 +44,7 @@ float TurretSpringForceOffset::calculateCompensationEffort(const TurretCompensat
 
     const float springLength = (yawPointPosition - pitchPoint).magnitude();
 
-    const float force = (springLength - springFreeLength) * springConstant;
+    const float force = (springLength - params.springFreeLength) * params.springConstant;
 
     const Vector springDirection = normalize(yawPointPosition - pitchPoint);
 
@@ -63,6 +57,7 @@ float TurretSpringForceOffset::calculateCompensationEffort(const TurretCompensat
     return isMotorInverted ? Vector::dot(torque, {0, 1.0, 0}) : -Vector::dot(torque, {0, 1.0, 0});
 }
 
+// Function currently used in the autotuning portion for the linear fit
 float TurretSpringForceOffset::calculateEffectiveX(const float pitch) const
 {
     // apply rotation to pitch
@@ -71,5 +66,5 @@ float TurretSpringForceOffset::calculateEffectiveX(const float pitch) const
     const Position pitchPoint = pitchTransform.apply(pitchPointPosition);
 
     const float spring_dist = Position::distance(pitchPoint, yawPointPosition);
-    return spring_dist - springFreeLength;
+    return spring_dist - params.springFreeLength;
 }

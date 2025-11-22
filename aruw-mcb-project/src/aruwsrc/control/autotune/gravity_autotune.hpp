@@ -30,6 +30,8 @@
 #ifndef GRAVITY_AUTOTUNE_HPP_
 #define GRAVITY_AUTOTUNE_HPP_
 
+#include "modm/ui/display.hpp"
+
 #include "autotune_command_interface.hpp"
 
 namespace aruwsrc::control::autotune
@@ -62,6 +64,7 @@ public:
           config(config)
     {
     }
+    const char *getName() const override { return "Gravity Autotune Command"; }
 
     /**
      * @brief Calculates the center of mass with least squares
@@ -91,6 +94,20 @@ public:
 
         return {calibrationResultToMM(A), calibrationResultToMM(B), magnitude};
     };
+
+    void drawCalibrationResult(modm::GraphicDisplay &display) const
+    {
+        const std::array<float, 3> result = this->getCalibrationResult();
+        const float X = result[0];
+        const float Z = result[1];
+        const float scalar = result[2];
+
+        display.printf(
+            "Center of mass position:\n\tcgX: %.2f mm\n\tcgZ: %.2f mm\n",
+            static_cast<double>(X),
+            static_cast<double>(Z));
+        display.printf("Gravity Compensation\n Scalar: %.1f\n", static_cast<double>(scalar));
+    }
 
 private:
     const TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::TurretCalibrationConfig

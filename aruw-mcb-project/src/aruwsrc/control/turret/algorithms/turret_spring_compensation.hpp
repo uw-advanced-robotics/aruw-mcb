@@ -35,33 +35,65 @@ class TurretSpringForceOffset : public TurretCompensatorInterface
 {
 public:
     /**
-     * @param[in] turretPitchMountX The mounting position of the fixed end of the spring on the X
-     * direction. The "X" direction lies along the plane that the turret is pointing. Units in
-     * millimeters. Positive is forward, negative is backwards.
-     * @param[in] turretPitchMountZ The mounting position of the fixed end of the spring on the Z
-     * (up/down) direction. The "Z" direction lies perpendicular to the plane that the turret is
-     * pointing. Units in millimeters. Positive is upwards, negative is downwards.
-     * @param[in] turretYawMountX The mounting position in the X direction of the fixed end of the
-     * spring on the non-pitching side of the turret. The "X" direction lies along the plane that
-     * the turret is pointing. Units in millimeters. Positive is forward, negative is backwards.
-     * @param[in] turretYawMountZ The mounting position in the Z direction of the fixed end of the
-     * spring on the non-pitching side of the turret. The "Z" direction lies perpendicular to the
-     * plane that the turret is pointing. Units in millimeters. Positive is upwards, negative is
-     * downwards.
-     * @param[in] springConstant spring constant in units of force per distance to be used when
-     * calculating the spring effort.
-     * @param[in] springFreeLength the length to subtract from the overall spring distance to get
-     * the portion of distance that is actively applying force. The length of a spring when
-     * un-stretched
+     * @brief Configuration parameters for TurretSpringForceOffset.
      */
-    TurretSpringForceOffset(
-        const float turretPitchMountX,
-        const float turretPitchMountZ,
-        const float turretYawMountX,
-        const float turretYawMountZ,
-        const float springConstant,
-        const float springFreeLength,
-        const bool isMotorInverted);
+    struct TurretSpringParams
+    {
+        /**
+         * @brief Mounting position of the fixed end of the spring in the X direction
+         *        on the pitching side of the turret.
+         *
+         * The "X" direction lies along the plane the turret is pointing.
+         * Units: millimeters. Positive is forward, negative is backward.
+         */
+        float turretPitchMountX;
+
+        /**
+         * @brief Mounting position of the fixed end of the spring in the Z direction
+         *        on the pitching side of the turret.
+         *
+         * The "Z" direction is perpendicular to the plane the turret is pointing.
+         * Units: millimeters. Positive is upward, negative is downward.
+         */
+        float turretPitchMountZ;
+
+        /**
+         * @brief Mounting position of the fixed end of the spring in the X direction
+         *        on the non-pitching (yaw) side of the turret.
+         *
+         * The "X" direction lies along the plane the turret is pointing.
+         * Units: millimeters. Positive is forward, negative is backward.
+         */
+        float turretYawMountX;
+
+        /**
+         * @brief Mounting position of the fixed end of the spring in the Z direction
+         *        on the non-pitching (yaw) side of the turret.
+         *
+         * The "Z" direction is perpendicular to the plane the turret is pointing.
+         * Units: millimeters. Positive is upward, negative is downward.
+         */
+        float turretYawMountZ;
+
+        /**
+         * @brief Spring constant used when calculating spring force.
+         *
+         * Units: force per unit distance.
+         */
+        float springConstant;
+
+        /**
+         * @brief Free (un-stretched) length of the spring.
+         *
+         * This value is subtracted from the current spring length to determine
+         * the stretch that produces force.
+         */
+        float springFreeLength;
+    };
+    /**
+     * @param[in] True if the motor direction should be inverted.
+     */
+    TurretSpringForceOffset(const TurretSpringParams& params, const bool isMotorInverted);
 
     /**
      * @param[in] state The state of the turret, including the pitch in world and chassis frame.
@@ -75,11 +107,10 @@ public:
     float calculateEffectiveX(const float pitch) const;
 
 private:
+    const TurretSpringParams params;
+    const bool isMotorInverted;
     tap::algorithms::transforms::Position pitchPointPosition;
     tap::algorithms::transforms::Position yawPointPosition;
-    const float springConstant;
-    const float springFreeLength;
-    const bool isMotorInverted;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

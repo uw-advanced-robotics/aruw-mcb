@@ -24,12 +24,10 @@
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 
 // weak function defined if not specifed by user
-modm_weak std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>*>
-getGravityAutotuneCommands()
+modm_weak std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
 {
-    return std::vector<
-        aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>>*>{};
-}
+    return std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*>{};
+};
 namespace aruwsrc::display
 {
 AutotuneMenu::AutotuneMenu(
@@ -62,8 +60,9 @@ void AutotuneMenu::draw()
 
     for (int8_t commandId = commandMinIndex; commandId <= commandMaxIndex; ++commandId)
     {
-        display << (verticalScroll.getCursorIndex() == commandId ? "> " : "  ");
-        display << "Gravity Autotune Command " << (commandId + 1) << modm::endl;
+        const int8_t idx = verticalScroll.getCursorIndex();
+        display << (idx == commandId ? "> " : "  ");
+        display << getAutotuneCommands()[idx]->getName() << (commandId + 1) << modm::endl;
     }
 }
 
@@ -86,14 +85,12 @@ void AutotuneMenu::shortButtonPress(modm::MenuButtons::Button button)
                 break;
             }
 
-            int8_t idx = verticalScroll.getCursorIndex();
+            const int8_t idx = verticalScroll.getCursorIndex();
             // Index is selecting a gravity autotune command, so push the corresponding menu.
-            if (idx < static_cast<int>(getGravityAutotuneCommands().size()))
+            if (idx < static_cast<int>(getAutotuneCommands().size()))
             {
-                this->getViewStack()->push(new GravityAutotuneMenu(
-                    getViewStack(),
-                    drivers,
-                    getGravityAutotuneCommands()[idx]));
+                this->getViewStack()->push(
+                    new GravityAutotuneMenu(getViewStack(), drivers, getAutotuneCommands()[idx]));
             }
             break;
         }

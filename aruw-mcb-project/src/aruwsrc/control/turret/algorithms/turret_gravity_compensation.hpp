@@ -33,21 +33,37 @@ class TurretGravitationalForceOffset : public TurretCompensatorInterface
 {
 public:
     /**
-     * @param[in] cgX The center of gravity relative to the center of the turret's pitch pivot point
-     *      in the X (forward/back) direction. The "X" direction lies along the plane that the
-     * turret is pointing. Units in millimeters. Positive is forward, negative is backwards.
-     * @param[in] cgZ The center of gravity relative to the center of the turret's pitch pivot
-     * point, in the Z (up/down) direction. The "Z" direction lies perpendicular to the plane that
-     * the turret is pointing. Units in millimeters. Positive is upwards, negative is downwards.
-     * @param[in] gravityCompensationMotorOutputMax The maximum output that will be returned by this
-     *      function. Should be equivalent to the output to offset gravity when the center of mass
-     * lies on the same xy-plane as the pivot (i.e.: when the turret's mass exerts the most torque
-     * about it's pivot).
+     * @brief Configuration parameters for TurretGravitationalForceOffset.
      */
-    TurretGravitationalForceOffset(
-        const float cgX,
-        const float cgZ,
-        const float gravityCompensatorMax);
+    struct TurretGravityParams
+    {
+        /**
+         * @brief Center of gravity relative to the turret's pitch pivot in the X direction.
+         *
+         * The "X" direction lies along the plane the turret is pointing.
+         * Units: millimeters. Positive is forward, negative is backward.
+         */
+        float cgX;
+
+        /**
+         * @brief Center of gravity relative to the turret's pitch pivot in the Z direction.
+         *
+         * The "Z" direction is perpendicular to the plane the turret is pointing.
+         * Units: millimeters. Positive is upward, negative is downward.
+         */
+        float cgZ;
+
+        /**
+         * @brief Maximum motor output value this compensator is allowed to return.
+         *
+         * This should correspond to the output required to fully cancel gravity when
+         * the CG lies on the same XY-plane as the pivot (i.e., when gravitational torque
+         * is greatest).
+         */
+        float gravityCompensatorMax;
+    };
+
+    TurretGravitationalForceOffset(const TurretGravityParams& params);
 
     /**
      * @param[in] state The state of the turret, including the pitch in world and chassis frame.
@@ -59,9 +75,7 @@ public:
     float calculateCompensationEffort(const TurretCompensatorState state) const override;
 
 private:
-    const float cgX = 0.0f;
-    const float cgZ = 0.0f;
-    const float gravityCompensatorMax = 0.0f;
+    const TurretGravityParams params;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

@@ -190,7 +190,7 @@ static inline float runWorldFrameTurretImuController(
 template <Axis AXIS>
 WorldFrameTurretImuCascadePidTurretController<AXIS>::WorldFrameTurretImuCascadePidTurretController(
     const transforms::Transform &worldToTurret,
-    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+    const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
     TurretMotor &turretMotor,
     SmoothPid &positionPid,
     SmoothPid &velocityPid,

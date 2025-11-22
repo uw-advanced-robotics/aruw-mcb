@@ -46,7 +46,6 @@ namespace aruwsrc::control::autotune
 /** @brief Non-template class to allow for getting the gravity autotune commands
  * in a weak function, as used in the gravity autotune menu.
  */
-template <typename T>
 class TurretAutotuneInterface : public tap::control::Command
 {
 public:
@@ -65,11 +64,13 @@ public:
 
     virtual CalibrationState getCalibrationState() const = 0;
 
-    virtual T getCalibrationResult() const = 0;
+    virtual const char *getName() const = 0;
+
+    virtual void drawCalibrationResult(modm::GraphicDisplay &display) const = 0;
 };
 
 template <typename T, uint32_t numTestPoints>
-class TurretAutotuneCommand : public TurretAutotuneInterface<T>
+class TurretAutotuneCommand : public TurretAutotuneInterface
 {
 public:
     /**  @brief Turret calibration config struct, all default members are not necessary required.
@@ -145,7 +146,7 @@ public:
      * @brief   Returns the current calibration state.
      * @return  The active CalibrationState.
      */
-    TurretAutotuneInterface<T>::CalibrationState getCalibrationState() const override
+    TurretAutotuneInterface::CalibrationState getCalibrationState() const override
     {
         return calibrationState;
     }
@@ -160,7 +161,7 @@ public:
             chassis->setDesiredOutput(0, 0, 0);
         }
 
-        calibrationState = TurretAutotuneInterface<T>::CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
+        calibrationState = TurretAutotuneInterface::CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
         calibrationFailTimeout.stop();
         calibrationTimer.stop();
         prevTime = tap::arch::clock::getTimeMilliseconds();
@@ -220,7 +221,7 @@ public:
     {
         switch (calibrationState)
         {
-            case TurretAutotuneInterface<T>::CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
+            case TurretAutotuneInterface::CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
             {
                 bool allOnline = true;
                 const bool turretsOnline = config.turret->isOnline();
@@ -237,11 +238,11 @@ public:
                 {
                     calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                     calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
-                    calibrationState = TurretAutotuneInterface<T>::CalibrationState::LOCKING_TURRET;
+                    calibrationState = TurretAutotuneInterface::CalibrationState::LOCKING_TURRET;
                 }
             }
             break;
-            case TurretAutotuneInterface<T>::CalibrationState::LOCKING_TURRET:
+            case TurretAutotuneInterface::CalibrationState::LOCKING_TURRET:
             {
                 const bool turretNotMoving = turretReachedPointAndNotMoving(
                     config.turret,
@@ -255,14 +256,13 @@ public:
                 // Exit Locking Turret
                 if (calibrationTimer.isExpired() && turretNotMoving)
                 {
-                    calibrationState =
-                        TurretAutotuneInterface<T>::CalibrationState::MEASURING_TORQUE;
+                    calibrationState = TurretAutotuneInterface::CalibrationState::MEASURING_TORQUE;
                     samplePointCount = 0;
                 }
             }
             break;
 
-            case TurretAutotuneInterface<T>::CalibrationState::MEASURING_TORQUE:
+            case TurretAutotuneInterface::CalibrationState::MEASURING_TORQUE:
             {
                 if (samplePointCount < NUM_SAMPLE_POINTS)
                 {
@@ -291,33 +291,32 @@ public:
                     samplePointCount = 0;
 
                     // Exit measuring when done taking samples
-                    calibrationState = TurretAutotuneInterface<T>::CalibrationState::NEXT_LOCATION;
+                    calibrationState = TurretAutotuneInterface::CalibrationState::NEXT_LOCATION;
 
                     // Finished going through all points
                     if (currentPointIndex == points.size())
                     {
-                        calibrationState = TurretAutotuneInterface<T>::CalibrationState::DONE;
+                        calibrationState = TurretAutotuneInterface::CalibrationState::DONE;
                     }
                 }
             }
             break;
 
-            case TurretAutotuneInterface<T>::CalibrationState::NEXT_LOCATION:
+            case TurretAutotuneInterface::CalibrationState::NEXT_LOCATION:
             {
                 config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[currentPointIndex]));
                 calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
-                calibrationState = TurretAutotuneInterface<T>::CalibrationState::LOCKING_TURRET;
+                calibrationState = TurretAutotuneInterface::CalibrationState::LOCKING_TURRET;
             }
             break;
 
-            case TurretAutotuneInterface<T>::CalibrationState::DONE:
+            case TurretAutotuneInterface::CalibrationState::DONE:
             {
                 // Turn off in case calculation takes awhile
                 config.turret->yawMotor.setMotorOutput(0);
                 config.turret->pitchMotor.setMotorOutput(0);
-                calibrationState =
-                    TurretAutotuneInterface<T>::CalibrationState::CALIBRATION_SUCCESS;
+                calibrationState = TurretAutotuneInterface::CalibrationState::CALIBRATION_SUCCESS;
             }
             break;
 
@@ -340,7 +339,7 @@ public:
     {
         switch (calibrationState)
         {
-            case TurretAutotuneInterface<T>::CalibrationState::CALIBRATION_SUCCESS:
+            case TurretAutotuneInterface::CalibrationState::CALIBRATION_SUCCESS:
             {
                 calibrationResult = calculate(measuredAngles, measuredTorques);
                 if (successChime) drivers->commandScheduler.addCommand(successChime);
@@ -354,12 +353,9 @@ public:
 
     bool isFinished() const override
     {
-        return calibrationState ==
-                   TurretAutotuneInterface<T>::CalibrationState::CALIBRATION_SUCCESS ||
-               calibrationState == TurretAutotuneInterface<T>::CalibrationState::CALIBRATION_FAIL;
+        return calibrationState == TurretAutotuneInterface::CalibrationState::CALIBRATION_SUCCESS ||
+               calibrationState == TurretAutotuneInterface::CalibrationState::CALIBRATION_FAIL;
     }
-
-    const char *getName() const override { return "Gravity Autotune Command"; }
 
     std::array<float, numTestPoints> getMeasuredAngles() const { return measuredAngles; }
     std::array<float, numTestPoints> getMeasuredTorques() const { return measuredTorques; }
@@ -368,7 +364,7 @@ public:
      * @brief   Retrieves the last computed center of mass calibration result.
      * @return  Array containing {cgX_mm, cgZ_mm, magnitude_desOut}.
      */
-    T getCalibrationResult() const override { return calibrationResult; }
+    T getCalibrationResult() const { return calibrationResult; }
 
 private:
     tap::Drivers *drivers;
@@ -382,12 +378,31 @@ private:
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
-    TurretAutotuneInterface<T>::CalibrationState calibrationState;
+    TurretAutotuneInterface::CalibrationState calibrationState;
 
-protected:
-    // Thresholds to determine if the turret is "not moving" and "at position"
-    static constexpr float DEFAULT_POSITION_THRESHOLD = modm::toRadian(3);
-    static constexpr float DEFAULT_VELOCITY_THRESHOLD = modm::toRadian(1e-4f);
+    inline bool turretReachedPointAndNotMoving(
+        control::turret::TurretSubsystem *turret,
+        const WrappedFloat setpoint) const
+    {
+        return compareFloatClose(
+                   0.0f,
+                   turret->pitchMotor.getChassisFrameVelocity(),
+                   velocityZeroThreshold) &&
+               (turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(setpoint) <
+                positionZeroThreshold);
+    }
+
+    /**
+     * @brief Helper function to check if the safety timer is expired
+     */
+    inline void checkSafetyTimeout()
+    {
+        if (calibrationFailTimeout.isExpired())
+        {
+            if (failChime) drivers->commandScheduler.addCommand(failChime);
+            calibrationState = TurretAutotuneInterface::CalibrationState::CALIBRATION_FAIL;
+        }
+    }
 
     // Current point in the sequence being measured
     size_t currentPointIndex = 0;
@@ -403,6 +418,22 @@ protected:
 
     // Value to store the averaging angle values
     float averagingAngles = 0;
+
+    /**
+     * Timeout that we set after initially starting the turret PID controller to allow any residual
+     * movement from starting the new PID controller to be resolved.
+     */
+    tap::arch::MilliTimeout calibrationTimer;
+
+    /**
+     * Timeout used to determine if we should give up on tuning.
+     */
+    tap::arch::MilliTimeout calibrationFailTimeout;
+
+protected:
+    // Thresholds to determine if the turret is "not moving" and "at position"
+    static constexpr float DEFAULT_POSITION_THRESHOLD = modm::toRadian(3);
+    static constexpr float DEFAULT_VELOCITY_THRESHOLD = modm::toRadian(1e-4f);
 
     // Array of torque measurements received post averaging
     std::array<float, numTestPoints> measuredTorques{};
@@ -427,44 +458,9 @@ protected:
     static constexpr uint32_t NUM_SAMPLE_POINTS = 2000;
 
     /**
-     * Timeout that we set after initially starting the turret PID controller to allow any residual
-     * movement from starting the new PID controller to be resolved.
-     */
-    tap::arch::MilliTimeout calibrationTimer;
-
-    /**
-     * Timeout used to determine if we should give up on tuning.
-     */
-    tap::arch::MilliTimeout calibrationFailTimeout;
-
-    /**
      * Place to store the last calibration result
      */
     T calibrationResult{};
-
-    inline bool turretReachedPointAndNotMoving(
-        control::turret::TurretSubsystem *turret,
-        const WrappedFloat setpoint) const
-    {
-        return compareFloatClose(
-                   0.0f,
-                   turret->pitchMotor.getChassisFrameVelocity(),
-                   velocityZeroThreshold) &&
-               (turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(setpoint) <
-                positionZeroThreshold);
-    }
-
-    /**
-     * @brief Helper function to check if the safety timer is expired
-     */
-    inline void checkSafetyTimeout()
-    {
-        if (calibrationFailTimeout.isExpired())
-        {
-            if (failChime) drivers->commandScheduler.addCommand(failChime);
-            calibrationState = TurretAutotuneInterface<T>::CalibrationState::CALIBRATION_FAIL;
-        }
-    }
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 

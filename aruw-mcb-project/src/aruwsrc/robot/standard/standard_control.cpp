@@ -324,34 +324,10 @@ aruwsrc::control::chassis::BeybladeCommand beybladeCommand(
 
 // Turret compensators
 
-algorithms::TurretGravitationalForceOffset turretGravityCompensation(
-    TURRET_CG_X,
-    TURRET_CG_Z,
-    GRAVITY_COMPENSATION_SCALAR);
+algorithms::TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
 
 algorithms::TurretSpringForceOffset turretSpringCompensation(
-    TURRET_SPRING_PITCH_MOUNT_X,
-    TURRET_SPRING_PITCH_MOUNT_Z,
-    TURRET_SPRING_YAW_MOUNT_X,
-    TURRET_SPRING_YAW_MOUNT_Z,
-    TURRET_SPRING_CONSTANT,
-    TURRET_SPRING_FREE_LENGTH,
-    pitchMotor.isMotorInverted());
-
-// Turret compensators
-
-algorithms::TurretGravitationalForceOffset turretGravityCompensation(
-    TURRET_CG_X,
-    TURRET_CG_Z,
-    GRAVITY_COMPENSATION_SCALAR);
-
-algorithms::TurretSpringForceOffset turretSpringCompensation(
-    TURRET_SPRING_PITCH_MOUNT_X,
-    TURRET_SPRING_PITCH_MOUNT_Z,
-    TURRET_SPRING_YAW_MOUNT_X,
-    TURRET_SPRING_YAW_MOUNT_Z,
-    TURRET_SPRING_CONSTANT,
-    TURRET_SPRING_FREE_LENGTH,
+    TURRET_SPRING_CONFIG,
     pitchMotor.isMotorInverted());
 
 // Turret controllers
@@ -843,19 +819,11 @@ imu::ImuCalibrateCommand *getImuCalibrateCommand()
     return &standard_control::imuCalibrateCommand;
 }
 
-std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
-getGravityAutotuneCommands()
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
 {
-    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
-        commands = {&standard_control::gravityAutotuneCommand};
-    return commands;
-}
-
-std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 4>> *>
-getSpringGravityAutotuneCommands()
-{
-    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 4>> *>
-        commands = {};
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
+        &standard_control::gravityAutotuneCommand,
+        &standard_control::springAutotuneCommand};
     return commands;
 }
 #endif

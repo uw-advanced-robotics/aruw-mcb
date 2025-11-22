@@ -63,6 +63,7 @@ public:
           springForce(springForce)
     {
     }
+    const char *getName() const override { return "Spring Gravity Autotune Command"; }
 
     /**
      * @brief Calculates the center of mass with least squares
@@ -93,6 +94,21 @@ public:
 
         return {calibrationResultToMM(A), calibrationResultToMM(B), magnitude, K};
     };
+
+    void drawCalibrationResult(modm::GraphicDisplay &display) const
+    {
+        const std::array<float, 4> result = this->getCalibrationResult();
+        const float X = result[0];
+        const float Z = result[1];
+        const float scalar = result[2];
+        const float K = result[3];
+        display.printf(
+            "Center of mass position:\n\tcgX: %.2f mm\n\tcgZ: %.2f mm\n",
+            static_cast<double>(X),
+            static_cast<double>(Z));
+        display.printf("Gravity Compensation\n Scalar: %.1f\n", static_cast<double>(scalar));
+        display.printf("Spring Constant K: %.2f", static_cast<double>(K));
+    }
 
 private:
     const TurretAutoCommand::TurretCalibrationConfig &config;

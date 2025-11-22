@@ -1020,13 +1020,11 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 }  // namespace aruwsrc::sentry
 
 #ifndef PLATFORM_HOSTED
-std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
-getGravityAutotuneCommands()
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
 {
-    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface<std::array<float, 3>> *>
-        commands = {
-            &sentry_control::gravityAutotuneCommandLeft,
-            &sentry_control::gravityAutotuneCommandRight};
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
+        &sentry_control::gravityAutotuneCommandLeft,
+        &sentry_control::gravityAutotuneCommandRight};
     return commands;
 }
 // imu::ImuCalibrateCommand *getImuCalibrateCommand() { return
