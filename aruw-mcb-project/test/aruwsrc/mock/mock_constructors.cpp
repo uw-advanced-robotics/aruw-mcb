@@ -179,7 +179,12 @@ SwerveModuleMock::~SwerveModuleMock() {}
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
     tap::Drivers *drivers,
     std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels)
-    : FrictionWheelSubsystem<2>(drivers, wheels, aruwsrc::control::launcher::wheelConfigsConstant, tap::can::CanBus::CAN_BUS1, nullptr)
+    : FrictionWheelSubsystem<2>(
+          drivers,
+          wheels,
+          aruwsrc::control::launcher::wheelConfigsConstant,
+          tap::can::CanBus::CAN_BUS1,
+          nullptr)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}

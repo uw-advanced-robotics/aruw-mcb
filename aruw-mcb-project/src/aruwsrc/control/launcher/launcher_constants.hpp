@@ -93,9 +93,7 @@ static tap::algorithms::SmoothPidConfig velocityPIDConfigRight(
 static FlywheelConfig wheelConfigLeft = {velocityPIDConfigLeft, 0.0f};
 static FlywheelConfig wheelConfigRight = {velocityPIDConfigRight, 0.0f};
 
-static std::array<FlywheelConfig, 2> wheelConfigsConstant = {
-    wheelConfigLeft,
-    wheelConfigRight};
+static std::array<FlywheelConfig, 2> wheelConfigsConstant = {wheelConfigLeft, wheelConfigRight};
 
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KP = 0.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KI = 5.0f;

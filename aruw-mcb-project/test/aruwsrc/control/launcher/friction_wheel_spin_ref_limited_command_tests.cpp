@@ -31,7 +31,6 @@ using namespace tap::communication::serial;
 
 class FrictionWheelSpinRefLimitedCommandTest : public Test
 {
-
 protected:
     FrictionWheelSpinRefLimitedCommandTest()
         : leftFlywheel(
