@@ -338,6 +338,22 @@ algorithms::TurretSpringForceOffset turretSpringCompensation(
     TURRET_SPRING_FREE_LENGTH,
     pitchMotor.isMotorInverted());
 
+// Turret compensators
+
+algorithms::TurretGravitationalForceOffset turretGravityCompensation(
+    TURRET_CG_X,
+    TURRET_CG_Z,
+    GRAVITY_COMPENSATION_SCALAR);
+
+algorithms::TurretSpringForceOffset turretSpringCompensation(
+    TURRET_SPRING_PITCH_MOUNT_X,
+    TURRET_SPRING_PITCH_MOUNT_Z,
+    TURRET_SPRING_YAW_MOUNT_X,
+    TURRET_SPRING_YAW_MOUNT_Z,
+    TURRET_SPRING_CONSTANT,
+    TURRET_SPRING_FREE_LENGTH,
+    pitchMotor.isMotorInverted());
+
 // Turret controllers
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
     turret.pitchMotor,
