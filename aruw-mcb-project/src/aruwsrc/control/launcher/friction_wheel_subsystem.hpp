@@ -20,6 +20,7 @@
 #ifndef FRICTION_WHEEL_SUBSYSTEM_HPP_
 #define FRICTION_WHEEL_SUBSYSTEM_HPP_
 
+#include <utility>
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/ramp.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
@@ -64,6 +65,16 @@ template <std::size_t NUM_WHEELS>
 class FrictionWheelSubsystem : public FrictionWheelInterface
 {
     friend class FrictionWheelTestCommand;
+private: 
+template <size_t... Is>
+static std::array<tap::algorithms::SmoothPid, NUM_WHEELS> createVelocityPidArray(std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs, std::index_sequence<Is...>) {
+    // std::array<tap::algorithms::SmoothPid, NUM_WHEELS> pids;
+    // for (uint8_t i = 0; i < NUM_WHEELS; i++)
+    //     {
+    //         pids[i] = tap::algorithms::SmoothPid(wheelConfigs[i].velocityPidConfig);
+    //     }
+    return {{ ((void)Is, tap::algorithms::SmoothPid(wheelConfigs[0].velocityPidConfig))... }};
+}
 
 public:
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -86,6 +97,7 @@ public:
               LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
               MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
           flywheelConfigs(wheelConfigs),
+          velocityPids(createVelocityPidArray(wheelConfigs, std::make_index_sequence<NUM_WHEELS>{})),
           speedCorrectionPid(
               LAUNCHER_SPEED_CORRECTION_PID_KP,
               LAUNCHER_SPEED_CORRECTION_PID_KI,
@@ -97,10 +109,6 @@ public:
           turretMCB(turretMCB),
           frictionTestCommand(this)
     {
-        for (uint8_t i = 0; i < NUM_WHEELS; i++)
-        {
-            velocityPids[i] = new tap::algorithms::SmoothPid(wheelConfigs[i].velocityPidConfig);
-        }
         this->setTestCommand(&frictionTestCommand);
     }
 
@@ -197,18 +205,18 @@ public:
         {
             if (isWheelVelocityOverridden[i])
             {
-                velocityPids[i]->runControllerDerivateError(
+                velocityPids[i].runControllerDerivateError(
                     individualWheelVelocities[i] - getCurrentIndividualFrictionWheelSpeed(i),
                     currTime - prevTime);
             }
             else
             {
-                velocityPids[i]->runControllerDerivateError(
+                velocityPids[i].runControllerDerivateError(
                     desiredRpmRamp.getValue() - getCurrentIndividualFrictionWheelSpeed(i) -
                         speedCorrection,
                     currTime - prevTime);
             }
-            wheels[i]->setDesiredOutput(static_cast<int32_t>(velocityPids[i]->getOutput()));
+            wheels[i]->setDesiredOutput(static_cast<int32_t>(velocityPids[i].getOutput()));
         }
         prevTime = currTime;
     }
@@ -242,7 +250,7 @@ private:
     modm::interpolation::Linear<modm::Pair<float, float>> launchSpeedLinearInterpolator;
 
     std::array<FlywheelConfig, NUM_WHEELS> flywheelConfigs;
-    tap::algorithms::SmoothPid *velocityPids[NUM_WHEELS];
+    std::array<tap::algorithms::SmoothPid, NUM_WHEELS> velocityPids;
 
     modm::Pid<float> speedCorrectionPid;
 

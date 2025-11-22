@@ -69,7 +69,9 @@ protected:
               std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}}),
           visionCoprocessor(&drivers),
           turretSubsystem(&drivers),
-          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};
+          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){
+            std::cout << "constructor" << std::endl;
+          };
 
     void SetUp() override {}
 
