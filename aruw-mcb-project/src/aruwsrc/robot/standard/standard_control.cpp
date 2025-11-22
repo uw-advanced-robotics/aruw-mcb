@@ -267,7 +267,7 @@ tap::motor::DjiMotor rightWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::DjiMotor *, 2> wheels = {&leftWheel, &rightWheel};
+std::array<tap::motor::MotorInterface *, 2> wheels = {&leftWheel, &rightWheel};
 std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {
     aruwsrc::control::launcher::wheelConfigLeft,
     aruwsrc::control::launcher::wheelConfigRight};

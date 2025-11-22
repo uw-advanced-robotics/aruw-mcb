@@ -458,7 +458,7 @@ tap::motor::DjiMotor leftTurretRightWheel(
     turretLeft::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::DjiMotor *, 2> leftTurretWheels = {
+std::array<tap::motor::MotorInterface *, 2> leftTurretWheels = {
     &leftTurretLeftWheel,
     &leftTurretRightWheel};
 tap::algorithms::SmoothPidConfig leftTurretVelocityPIDLeft(
@@ -504,7 +504,7 @@ tap::motor::DjiMotor rightTurretRightWheel(
     turretRight::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::DjiMotor *, 2> rightTurretWheels = {
+std::array<tap::motor::MotorInterface *, 2> rightTurretWheels = {
     &rightTurretLeftWheel,
     &rightTurretRightWheel};
 tap::algorithms::SmoothPidConfig rightTurretVelocityPIDLeft(

@@ -196,7 +196,7 @@ tap::motor::DjiMotor rightWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::DjiMotor *, 2> wheels = {&leftWheel, &rightWheel};
+std::array<tap::motor::MotorInterface *, 2> wheels = {&leftWheel, &rightWheel};
 modm::Pid<float> velocityPIDLeft(
     aruwsrc::control::launcher::LAUNCHER_PID_KP,
     aruwsrc::control::launcher::LAUNCHER_PID_KI,
