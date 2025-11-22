@@ -24,7 +24,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
@@ -34,7 +34,7 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Draws a bar on the HUD that represents the current charge of the cap bank.
@@ -51,7 +51,7 @@ public:
      */
     CapBankIndicator(
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const can::capbank::CapacitorBank *capBank);
+        const communication::can::cap_bank::CapacitorBank *capBank);
 
     modm::ResumableResult<void> sendInitialGraphics() override final;
 
@@ -80,9 +80,9 @@ private:
     static constexpr uint16_t VOLTAGE_SQUARED_ORANGE = pow(15, 2);
     // minimum displayed voltage of the supercapacitors (minimum usable voltage)
     static constexpr uint16_t VOLTAGE_SQUARED_MIN =
-        pow(can::capbank::CAPACITOR_BANK_MIN_VOLTAGE, 2);
+        pow(communication::can::cap_bank::CAPACITOR_BANK_MIN_VOLTAGE, 2);
 
-    const can::capbank::CapacitorBank *capBank;
+    const communication::can::cap_bank::CapacitorBank *capBank;
 
     /**
      * Background line for the status that highlights a few states.
@@ -102,8 +102,8 @@ private:
      */
     Tx::GraphicCharacterMessage capBankTextGraphic;
 
-    can::capbank::State previousState;
+    communication::can::cap_bank::State previousState;
 };
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  //  CAP_BANK_INDICATOR_HPP_

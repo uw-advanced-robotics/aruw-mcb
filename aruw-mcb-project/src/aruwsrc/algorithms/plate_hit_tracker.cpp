@@ -52,7 +52,8 @@ void PlateHitTracker::update()
 
         // Update bins
         int binIndex = static_cast<int>(
-            lastHitData.hitAngle_worldRelative_radians.getWrappedValue() / (2 * M_PI / BIN_NUMBER));
+            (lastHitData.hitAngle_worldRelative_radians + M_PI / BIN_NUMBER).getWrappedValue() /
+            (2 * M_PI / BIN_NUMBER));
         // Add the hit to the bin
         // Magnitude is based on damage
         float damage = newHitData.receivedDps - lastHitData.lastDps;

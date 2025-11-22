@@ -34,7 +34,7 @@ FrictionWheelSubsystem::FrictionWheelSubsystem(
     tap::motor::MotorId leftMotorId,
     tap::motor::MotorId rightMotorId,
     tap::can::CanBus canBus,
-    aruwsrc::can::TurretMCBCanComm *turretMCB)
+    aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
     : tap::control::Subsystem(drivers),
       drivers(drivers),
       launchSpeedLinearInterpolator(
@@ -74,10 +74,17 @@ void FrictionWheelSubsystem::initialize()
     prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
-void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed)
+void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed, bool directRpm)
 {
     desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
-    desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
+    if (directRpm)
+    {
+        desiredRpmRamp.setTarget(speed);
+    }
+    else
+    {
+        desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
+    }
     if (turretMCB != nullptr)
     {
         turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
@@ -99,18 +106,17 @@ void FrictionWheelSubsystem::refresh()
         return;
     }
     desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (currTime - prevTime));
-#if defined(ALL_STANDARDS)
+#if defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
     if (prevShotTime != drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp)
     {
         prevShotTime = drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp;
-        speedCorrectionPid.update(
-            drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED);
+        speedCorrectionPid.update(launchSpeedToFrictionWheelRpm(
+            drivers->refSerial.getRobotData().turret.bulletSpeed - LAUNCHER_SPEED));
     }
     speedCorrection = speedCorrectionPid.getValue();
 #endif
 
     prevTime = currTime;
-
     velocityPidLeftWheel.update(
         desiredRpmRamp.getValue() - leftWheel.getEncoder()->getVelocity() * 60.f / M_TWOPI -
         speedCorrection);

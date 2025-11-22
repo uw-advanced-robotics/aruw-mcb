@@ -26,7 +26,7 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
-using namespace aruwsrc::control::sentry;
+using namespace aruwsrc::sentry;
 using namespace tap::algorithms;
 
 namespace aruwsrc

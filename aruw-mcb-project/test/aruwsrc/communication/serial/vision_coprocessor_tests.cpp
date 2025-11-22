@@ -30,7 +30,7 @@
 #include "aruwsrc/mock/turret_orientation_interface_mock.hpp"
 #include "gtest/gtest.h"
 
-using aruwsrc::serial::VisionCoprocessor;
+using aruwsrc::communication::serial::VisionCoprocessor;
 using tap::communication::serial::DJISerial;
 using tap::communication::serial::RefSerialData;
 using namespace tap::arch;

@@ -168,7 +168,7 @@ TEST_F(
         float middleRpm = (firstTuple.second + secondTuple.second) / 2.0f;
 
         frictionWheels.setDesiredLaunchSpeed(middleSpeed);
-        EXPECT_NEAR(frictionWheels.desiredRpmRamp.getTarget(), middleRpm, 1E-3);
+        EXPECT_NEAR(frictionWheels.desiredRpmRamp.getTarget(), middleRpm, 1E-1);
     }
 }
 

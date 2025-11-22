@@ -39,7 +39,7 @@
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 class TurretMCBCanComm;
 }
@@ -75,7 +75,7 @@ public:
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,
         const TurretMotorConfig& yawMotorConfig,
-        const aruwsrc::can::TurretMCBCanComm* turretMCB);
+        const aruwsrc::communication::can::TurretMCBCanComm* turretMCB);
 
     void initialize() override;
 
@@ -91,7 +91,10 @@ public:
 
     mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
 
-    const inline aruwsrc::can::TurretMCBCanComm* getTurretMCB() const { return turretMCB; }
+    const inline aruwsrc::communication::can::TurretMCBCanComm* getTurretMCB() const
+    {
+        return turretMCB;
+    }
 
 #ifdef ENV_UNIT_TESTS
     testing::NiceMock<mock::TurretMotorMock> pitchMotor;
@@ -104,7 +107,7 @@ public:
 #endif
 
 protected:
-    const aruwsrc::can::TurretMCBCanComm* turretMCB;
+    const aruwsrc::communication::can::TurretMCBCanComm* turretMCB;
 };  // class TurretSubsystem
 
 }  // namespace aruwsrc::control::turret

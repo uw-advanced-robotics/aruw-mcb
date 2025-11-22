@@ -40,6 +40,7 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
@@ -88,24 +89,25 @@ using namespace tap::communication::serial;
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 
-using namespace aruwsrc::agitator;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::governor;
-using namespace aruwsrc::control::sentry;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::sentry;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace aruwsrc::sentry::chassis;
 using namespace aruwsrc::sentry::algorithms;
 using namespace aruwsrc::sentry::algorithms::odometry;
 using namespace aruwsrc::sentry::turret;
 using namespace aruwsrc::sentry::turret::cv;
-using namespace aruwsrc::virtualMCB;
+using namespace aruwsrc::communication::mcb_lite;
+using namespace aruwsrc::communication::mcb_lite::motor;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -119,7 +121,7 @@ namespace sentry_control
 {
 MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
-aruwsrc::virtualMCB::VirtualCanEncoder turretMajorYawEncoder(
+aruwsrc::communication::mcb_lite::VirtualCanEncoder turretMajorYawEncoder(
     drivers(),
     tap::encoder::CanEncoderId::ID0,
     &drivers()->chassisMcbLite,
@@ -128,7 +130,7 @@ aruwsrc::virtualMCB::VirtualCanEncoder turretMajorYawEncoder(
     1.0f,
     turretMajor::YAW_MOTOR_CONFIG.startEncoderValue);
 
-aruwsrc::virtualMCB::VirtualDjiMotor turretMajorYawMotor(
+aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor turretMajorYawMotor(
     drivers(),
     tap::motor::MOTOR5,
     turretMajor::CAN_BUS_MOTOR,
@@ -200,11 +202,11 @@ TurretMinorMotors turretRightMotors{
 
 };
 
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm1()
+inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm1()
 {
     return drivers()->turretMCBCanCommBus1;
 }
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm2()
+inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm2()
 {
     return drivers()->turretMCBCanCommBus2;
 }
@@ -299,9 +301,10 @@ VirtualDjiMotor rightBackMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::virtualMCB::VirtualVoltageCurrentSensor voltageCurrentSensor(&drivers()->chassisMcbLite);
+aruwsrc::communication::mcb_lite::VirtualVoltageCurrentSensor voltageCurrentSensor(
+    &drivers()->chassisMcbLite);
 
-aruwsrc::chassis::XDriveChassisSubsystem chassis(
+aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     drivers(),
     &voltageCurrentSensor,
     &voltageCurrentSensor,
@@ -311,14 +314,14 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     rightBackMotor,
     {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
 
-aruwsrc::virtualMCB::VirtualCanEncoder parallelOmni(
+aruwsrc::communication::mcb_lite::VirtualCanEncoder parallelOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
     &drivers()->chassisMcbLite,
     tap::can::CanBus::CAN_BUS2,
     true);
 
-aruwsrc::virtualMCB::VirtualCanEncoder perpendicularOmni(
+aruwsrc::communication::mcb_lite::VirtualCanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID4,
     &drivers()->chassisMcbLite,
@@ -368,11 +371,11 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-aruwsrc::chassis::ChassisAutoNavController autoNavController(
+aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
     transformer.getWorldToChassis(),
-    aruwsrc::chassis::BEYBLADE_CONFIG);
+    aruwsrc::control::chassis::BEYBLADE_CONFIG);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -386,11 +389,11 @@ struct TurretMinorWorldControllers
 // // @todo surely there's a better way to construct this
 SmoothPid turretLeftWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretLeftWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::LEFT_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretLeftWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 SmoothPid turretRightWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretRightWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretRightWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretRightWorldYawVelPid(minorPidConfigs::RIGHT_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 
 TurretMinorWorldControllers turretRightWorldControllers{
@@ -508,11 +511,11 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
     &turretLeftSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
+aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand(
     *drivers(),
     chassis,
     autoNavController,
-    false);
+    true);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -546,7 +549,7 @@ SentryBeybladeCommand beybladeCommand(
     &turretMajor.getReadOnlyMotor(),
     drivers()->controlOperatorInterface,
     transformer.getWorldToChassis(),
-    aruwsrc::chassis::BEYBLADE_CONFIG);
+    aruwsrc::control::chassis::BEYBLADE_CONFIG);
 
 SentryManualDriveCommand chassisDriveCommand(
     drivers(),
@@ -591,6 +594,24 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     transformer,
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
+
+autotune::GravityAutotuneCommand<9> gravityAutotuneCommandLeft(
+    drivers(),
+    {&turretLeft,
+     &turretLeftChassisControllers.pitchController,
+     turretLeftMotors.pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &chassis);
+
+autotune::GravityAutotuneCommand<9> gravityAutotuneCommandRight(
+    drivers(),
+    {&turretRight,
+     &turretRightChassisControllers.pitchController,
+     turretRightMotors.pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &chassis);
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
@@ -790,10 +811,11 @@ HoldCommandMapping rightUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // auto nav + auto aim + cv gated fire
-HoldCommandMapping leftUpRightUp(
+HoldRepeatCommandMapping leftUpRightUp(
     drivers(),
     {&autoNavBeybladeCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    true);
 
 HoldRepeatCommandMapping leftUpRightUpAg(
     drivers(),
@@ -985,8 +1007,17 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::registerSentryIoMappings(drivers);
 }
 }  // namespace aruwsrc::sentry
-// #ifndef PLATFORM_HOSTED
+
+#ifndef PLATFORM_HOSTED
+std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> getGravityAutotuneCommands()
+{
+    static std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> commands = {
+        &sentry_control::gravityAutotuneCommandLeft,
+        &sentry_control::gravityAutotuneCommandRight};
+    return commands;
+}
 // imu::ImuCalibrateCommand *getImuCalibrateCommand() { return
 // &sentry_control::imuCalibrateCommand; } #endif
+#endif
 
 #endif

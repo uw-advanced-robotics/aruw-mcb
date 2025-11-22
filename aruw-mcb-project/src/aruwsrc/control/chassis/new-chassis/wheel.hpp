@@ -31,7 +31,7 @@ using SmoothPidConfig = tap::algorithms::SmoothPidConfig;
 using namespace tap::algorithms;
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 // create a struct with wheel pose/radius/orientation
 struct WheelConfig
@@ -122,7 +122,7 @@ protected:
     tap::algorithms::CMSISMat<2, 3> distanceMat = CMSISMat<2, 3>(
         {1, 0, -config.wheelPositionChassisRelativeY, 0, 1, config.wheelPositionChassisRelativeX});
 };  // class Wheel
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 }  // namespace aruwsrc
 
 #endif  // WHEEL_HPP_

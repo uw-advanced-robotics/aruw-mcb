@@ -33,7 +33,7 @@
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
 #endif
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -154,12 +154,12 @@ static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
-    .beybladeRotationalSpeedFractionOfMax = 0.8f,
+    .beybladeRotationalSpeedFractionOfMax = 1.0f,
     .beybladeTranslationalSpeedMultiplier = 0.7f,
     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.75f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.7f,
     .beybladeRampRate = 50,
 };
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // HERO_CHASSIS_CONSTANTS_HPP_

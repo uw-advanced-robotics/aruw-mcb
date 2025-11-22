@@ -71,6 +71,15 @@ def check_header_guards():
     HEADER_PREFIX = None
     print("Checking header guards...")
     run(["python", "./taproot-scripts/check_header_guard.py", *HEADER_GUARD_CHECK_DIRS, *(["-p", HEADER_PREFIX] if HEADER_PREFIX else []), "-i", *IGNORE_HEADER])
+    
+def check_namespace():
+    # Specifying robot in namespace is redundant
+    # Constants sharing namespace is useful
+    # Old-indicators is legacy enough to not matter
+    IGNORE_NAMESPACE = ["robot"]
+    IGNORE_FOLDERS = ["*_constants.hpp", "old-indicators"]
+    print("Checking namespace rules")
+    run(["python", "./check_namespace_rule.py","-i", *IGNORE_FOLDERS,"-rn", *IGNORE_NAMESPACE])
 
 
 # def check_taproot_submodule():
@@ -170,6 +179,7 @@ action_to_method : Dict[str, Callable] = {
     "singleton_drivers" : check_singleton_drivers,
     "license" : check_license_headers,
     "header_guards" : check_header_guards,
+    "namespace" : check_namespace,
     # "taproot" : check_taproot_submodule,
     "lbuild" : run_lbuild,
     "build" : build_mcb,

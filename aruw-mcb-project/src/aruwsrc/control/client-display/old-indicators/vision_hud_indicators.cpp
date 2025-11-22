@@ -25,10 +25,10 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 VisionHudIndicators::VisionHudIndicators(
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor)
@@ -131,4 +131,4 @@ void VisionHudIndicators::initializeVisionHudIndicator(
         graphicData);
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

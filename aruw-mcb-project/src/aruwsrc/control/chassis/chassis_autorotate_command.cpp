@@ -31,7 +31,7 @@
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     tap::Drivers* drivers,
@@ -170,4 +170,4 @@ void ChassisAutorotateCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisAutorotateCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

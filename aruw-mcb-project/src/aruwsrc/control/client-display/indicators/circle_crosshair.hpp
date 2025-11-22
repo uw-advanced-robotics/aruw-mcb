@@ -27,7 +27,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 class CircleCrosshair : public HudIndicator, protected modm::Resumable<2>
 {
@@ -65,12 +65,16 @@ private:
     static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2 + OFFSET_Y;
     // SIZE of the circle
     static constexpr uint16_t CRICLE_SIZE = 2;
-    // Thickness of the line
+// Thickness of the line
+#if defined(TARGET_HERO_ZERO)
+    static constexpr uint16_t LINE_THICKNESS = 10;
+#else
     static constexpr uint16_t LINE_THICKNESS = 5;
+#endif
 
     Tx::Graphic1Message crosshairGraphics;
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // CIRCLE_CROSSHAIR_HPP_

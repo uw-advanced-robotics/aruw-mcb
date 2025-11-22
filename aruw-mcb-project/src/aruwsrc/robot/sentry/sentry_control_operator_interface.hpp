@@ -25,12 +25,12 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
 
-namespace aruwsrc::control::sentry
+namespace aruwsrc::sentry
 {
-class SentryControlOperatorInterface : public ControlOperatorInterface
+class SentryControlOperatorInterface : public control::ControlOperatorInterface
 {
 public:
     float DEFAULT_CHASSIS_X_VELOCITY = 0.f;
@@ -160,6 +160,6 @@ private:
     uint32_t prevTurretMinor2PitchInputCalledTime = 0;
 };
 
-}  // namespace aruwsrc::control::sentry
+}  // namespace aruwsrc::sentry
 
 #endif  // SENTRY_CONTROL_OPERATOR_INTERFACE_HPP__

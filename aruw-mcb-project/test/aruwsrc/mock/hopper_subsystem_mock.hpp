@@ -26,7 +26,7 @@
 
 namespace aruwsrc::mock
 {
-class HopperSubsystemMock : public control::HopperSubsystem
+class HopperSubsystemMock : public control::hopper_cover::HopperSubsystem
 {
     HopperSubsystemMock(
         tap::Drivers *drivers,

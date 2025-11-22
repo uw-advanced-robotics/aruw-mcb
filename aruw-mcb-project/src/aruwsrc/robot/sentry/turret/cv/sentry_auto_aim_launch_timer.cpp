@@ -25,7 +25,7 @@ namespace aruwsrc::sentry::turret::cv
 {
 SentryAutoAimLaunchTimer::SentryAutoAimLaunchTimer(
     uint32_t agitatorTypicalDelayMicroseconds,
-    aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
+    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
     aruwsrc::sentry::algorithms::SentryBallisticsSolver *ballistics)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),

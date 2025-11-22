@@ -54,7 +54,7 @@ public:
      */
     TurretMinorSentryControlCommand(
         tap::Drivers *drivers,
-        aruwsrc::control::sentry::SentryControlOperatorInterface &controlOperatorInterface,
+        aruwsrc::sentry::SentryControlOperatorInterface &controlOperatorInterface,
         SentryTurretMinorSubsystem &turretMinorSubsystem,
         aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController,
         aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController,
@@ -75,7 +75,7 @@ public:
 
 private:
     tap::Drivers *drivers;
-    aruwsrc::control::sentry::SentryControlOperatorInterface &controlOperatorInterface;
+    aruwsrc::sentry::SentryControlOperatorInterface &controlOperatorInterface;
 
     SentryTurretMinorSubsystem &turretMinorSubsystem;
 

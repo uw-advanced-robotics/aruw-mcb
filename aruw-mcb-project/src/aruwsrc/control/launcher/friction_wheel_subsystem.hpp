@@ -40,7 +40,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 class TurretMCBCanComm;
 }
@@ -64,7 +64,7 @@ public:
         tap::motor::MotorId leftMotorId,
         tap::motor::MotorId rightMotorId,
         tap::can::CanBus canBus,
-        aruwsrc::can::TurretMCBCanComm *turretMCB);
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCB);
 
     void initialize() override;
 
@@ -75,8 +75,9 @@ public:
      * this subsystem.
      *
      * @param[in] speed The launch speed in m/s.
+     * @param[in] directRpm Whether to directly set rpm or set bullet speed.
      */
-    mockable void setDesiredLaunchSpeed(float speed);
+    mockable void setDesiredLaunchSpeed(float speed, bool directRpm = false);
 
     mockable float getDesiredLaunchSpeed() const { return desiredLaunchSpeed; }
 
@@ -132,6 +133,8 @@ private:
 
     float speedCorrection = 0.0f;
 
+    float currentRPM = 0.0f;
+
     uint32_t prevTime = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -149,7 +152,7 @@ private:
     tap::motor::DjiMotor rightWheel;
 #endif
 
-    aruwsrc::can::TurretMCBCanComm *turretMCB;
+    aruwsrc::communication::can::TurretMCBCanComm *turretMCB;
 
     float prevShotTime = 0.0f;
 

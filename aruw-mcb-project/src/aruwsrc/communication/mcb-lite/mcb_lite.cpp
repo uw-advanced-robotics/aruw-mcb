@@ -26,12 +26,12 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
     : DJISerial(drivers, port),
-      canRxHandler(VirtualCanRxHandler(drivers)),
-      motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
+      canRxHandler(motor::VirtualCanRxHandler(drivers)),
+      motorTxHandler(motor::VirtualDJIMotorTxHandler(drivers)),
       imu(),
       analog(),
       digital(),
@@ -239,4 +239,4 @@ void MCBLite::processVoltageCurrentMessage(const ReceivedSerialMessage& complete
     }
 }
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
