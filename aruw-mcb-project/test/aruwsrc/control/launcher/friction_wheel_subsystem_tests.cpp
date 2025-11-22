@@ -33,10 +33,6 @@ tap::communication::serial::RefSerial::Rx::RobotData ROBOT_DATA{};
 class FrictionWheelSubsystemTest : public Test
 {
 protected:
-    NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
-    NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
-    std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
-
     FrictionWheelSubsystemTest()
         : leftFlywheel(
               &drivers,
@@ -69,6 +65,9 @@ protected:
 
     ClockStub clock;
     tap::Drivers drivers;
+    NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
+    NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
+    std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
     FrictionWheelSubsystem<2> frictionWheels;
 };
 

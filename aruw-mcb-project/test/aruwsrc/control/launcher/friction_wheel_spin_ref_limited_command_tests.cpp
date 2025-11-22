@@ -31,8 +31,6 @@ using namespace tap::communication::serial;
 
 class FrictionWheelSpinRefLimitedCommandTest : public Test
 {
-    NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
-    NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
 
 protected:
     FrictionWheelSpinRefLimitedCommandTest()
@@ -70,6 +68,8 @@ protected:
     }
 
     tap::Drivers drivers;
+    NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
+    NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
     aruwsrc::mock::FrictionWheelSubsystemMock frictionWheels;
     RefSerialData::Rx::RobotData robotData{};
     bool refSerialOnline = false;

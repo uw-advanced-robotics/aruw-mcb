@@ -50,20 +50,14 @@ protected:
               tap::can::CanBus::CAN_BUS1,
               true,
               "Left flywheel",
-              false,
-              1.0f,
-              0u,
-              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+              false),
           rightFlywheel(
               &drivers,
               tap::motor::MOTOR2,
               tap::can::CanBus::CAN_BUS1,
               false,
               "Right flywheel",
-              false,
-              1.0f,
-              0u,
-              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+              false),
           frictionWheels(
               &drivers,
               std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}}),
@@ -76,9 +70,9 @@ protected:
     void SetUp() override {}
 
     // Contrived deps due to unfortunate mock structure
+    tap::Drivers drivers;
     NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
     NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
-    tap::Drivers drivers;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;

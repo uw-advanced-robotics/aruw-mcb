@@ -31,8 +31,6 @@ using namespace testing;
 class RefereeFeedbackFrictionWheelSubsystemTest : public Test
 {
 protected:
-    NiceMock<tap::mock::DjiMotorMock> leftFlywheel, rightFlywheel;
-    std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
     RefereeFeedbackFrictionWheelSubsystemTest()
         : leftFlywheel(
               &drivers,
@@ -40,20 +38,14 @@ protected:
               tap::can::CanBus::CAN_BUS1,
               true,
               "Left flywheel",
-              false,
-              1.0f,
-              0u,
-              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+              false),
           rightFlywheel(
               &drivers,
               tap::motor::MOTOR2,
               tap::can::CanBus::CAN_BUS1,
               false,
               "Right flywheel",
-              false,
-              1.0f,
-              0u,
-              static_cast<tap::encoder::EncoderInterface*>(nullptr)),
+              false),
           frictionWheels(
               &drivers,
               std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
@@ -62,17 +54,17 @@ protected:
               nullptr,
               tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
     {
-         std::cout << "made to test" << std::endl;
     }
 
     void SetUp() override
     {
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
-        std::cout << "made to setup" << std::endl;
     }
 
     tap::arch::clock::ClockStub clock;
     tap::Drivers drivers;
+    NiceMock<tap::mock::DjiMotorMock> leftFlywheel, rightFlywheel;
+    std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
     RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheels;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
@@ -81,29 +73,19 @@ TEST_F(
     RefereeFeedbackFrictionWheelSubsystemTest,
     getPredictedLaunchSpeed_same_as_desired_launch_speed_when_ref_system_offline)
 {
-    std::cout << "first test" << std::endl;
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
-    std::cout << "line 1" << std::endl;
     frictionWheels.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first);
-    std::cout << "line 2" << std::endl;
     frictionWheels.refresh();
-    std::cout << "line 3" << std::endl;
     EXPECT_EQ(frictionWheels.getDesiredLaunchSpeed(), frictionWheels.getPredictedLaunchSpeed());
-    std::cout << "line 4" << std::endl;
     frictionWheels.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].first);
-    std::cout << "line 5" << std::endl;
     frictionWheels.refresh();
-    std::cout << "line 6" << std::endl;
     EXPECT_EQ(frictionWheels.getDesiredLaunchSpeed(), frictionWheels.getPredictedLaunchSpeed());
-    EXPECT_TRUE(false);
-    std::cout << "line 7" << std::endl;
 }
 
 TEST_F(
     RefereeFeedbackFrictionWheelSubsystemTest,
     getPredictedLaunchSpeed_launch_speed_based_on_ref_system_measured_bullet_speed)
 {
-    std::cout << "test 2" << std::endl;
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
 
     frictionWheels.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first);
@@ -150,7 +132,6 @@ TEST_F(
 
 TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rolling_average)
 {
-    std::cout << "test 2" << std::endl;
     RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheelAveraged(
         &drivers,
         std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},

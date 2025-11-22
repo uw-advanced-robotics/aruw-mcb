@@ -33,7 +33,8 @@
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
 #else
-#include "tap/motor/dji_motor.hpp"
+// #include "tap/motor/dji_motor.hpp"
+#include "tap/motor/motor_interface.hpp"
 #endif
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
@@ -80,7 +81,7 @@ public:
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
 #else
-    using Motor = tap::motor::DjiMotor;
+    using Motor = tap::motor::MotorInterface;
 #endif
     /**
      * Creates a new friction wheel subsystem
