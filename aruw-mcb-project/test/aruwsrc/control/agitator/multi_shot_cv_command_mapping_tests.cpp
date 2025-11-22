@@ -154,7 +154,6 @@ TEST_F(MultiShotCvCommandMappingTest, setShooterState_10hz_full_repeatedly_adds_
 
     EXPECT_CALL(drivers.commandScheduler, addCommand).Times(12);
 
-    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::LIMITED_10HZ);
 
     multiShotCommandMapping.executeCommandMapping(defaultRms);
     multiShotCommandMapping.executeCommandMapping(defaultRms);
@@ -183,8 +182,6 @@ TEST_F(
     ON_CALL(cvOnTargetGovernor, inShotTimingMode).WillByDefault(Return(true));
 
     EXPECT_CALL(drivers.commandScheduler, addCommand).Times(4);
-
-    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::SINGLE);
 
     multiShotCommandMapping.executeCommandMapping(defaultRms);
     multiShotCommandMapping.executeCommandMapping(defaultRms);

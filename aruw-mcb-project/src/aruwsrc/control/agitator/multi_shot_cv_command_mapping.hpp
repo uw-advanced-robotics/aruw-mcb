@@ -57,9 +57,7 @@ public:
      */
     enum LaunchMode : uint8_t
     {
-        SINGLE = 0,
         NO_HEATING,
-        LIMITED_10HZ,
         LIMITED_20HZ,
         FULL_AUTO,
         NUM_SHOOTER_STATES,
