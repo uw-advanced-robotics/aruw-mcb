@@ -25,7 +25,6 @@
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/util_macros.hpp"
 
-
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_turret_constants.hpp"
 #elif defined(TARGET_HERO_ZERO)
