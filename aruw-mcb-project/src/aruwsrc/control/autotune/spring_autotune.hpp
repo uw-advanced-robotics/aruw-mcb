@@ -78,8 +78,8 @@ public:
 
         for (uint32_t i = 0; i < numTestPoints; ++i)
         {
-            X(i, 0) = std::cos(Angles[i]);                          // corresponds to A (m·g·x)
-            X(i, 1) = std::sin(Angles[i]);                          // corresponds to B (−m·g·z)
+            X(i, 0) = std::cos(Angles[i]);  // corresponds to A (m·g·x)
+            X(i, 1) = std::sin(Angles[i]);  // corresponds to B (−m·g·z)
             X(i, 2) = springForce->calculateEffectiveMoment(Angles[i]);  // corresponds to K
             Y(i) = Torques[i];
         }
