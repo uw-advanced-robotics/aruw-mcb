@@ -461,6 +461,8 @@ protected:
      * Place to store the last calibration result
      */
     T calibrationResult{};
+
+    TurretCalibrationConfig getCalibrationConfig() const { return config; }
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 

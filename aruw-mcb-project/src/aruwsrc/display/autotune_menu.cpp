@@ -62,7 +62,7 @@ void AutotuneMenu::draw()
     {
         const int8_t idx = verticalScroll.getCursorIndex();
         display << (idx == commandId ? "> " : "  ");
-        display << getAutotuneCommands()[idx]->getName() << (commandId + 1) << modm::endl;
+        display << getAutotuneCommands()[commandId]->getName() << (commandId + 1) << modm::endl;
     }
 }
 

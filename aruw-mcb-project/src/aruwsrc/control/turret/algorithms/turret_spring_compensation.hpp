@@ -104,7 +104,7 @@ public:
      */
     float calculateCompensationEffort(const TurretCompensatorState state) const override;
 
-    float calculateEffectiveX(const float pitch) const;
+    float calculateEffectiveMoment(float pitch) const;
 
 private:
     const TurretSpringParams params;

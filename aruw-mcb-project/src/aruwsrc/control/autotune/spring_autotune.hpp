@@ -59,7 +59,6 @@ public:
               positionZeroThreshold,
               successChime,
               failChime),
-          config(config),
           springForce(springForce)
     {
     }
@@ -81,7 +80,7 @@ public:
         {
             X(i, 0) = std::cos(Angles[i]);                          // corresponds to A (m·g·x)
             X(i, 1) = std::sin(Angles[i]);                          // corresponds to B (−m·g·z)
-            X(i, 2) = springForce->calculateEffectiveX(Angles[i]);  // corresponds to K
+            X(i, 2) = springForce->calculateEffectiveMoment(Angles[i]);  // corresponds to K
             Y(i) = Torques[i];
         }
         // Solve least squares: torque = A·cos(theta) + B·sin(theta) + K·x
@@ -111,8 +110,6 @@ public:
     }
 
 private:
-    const TurretAutoCommand::TurretCalibrationConfig &config;
-
     const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce;
     /**
      * @brief Helper function that turns the calibration result into
@@ -124,8 +121,8 @@ private:
     inline float calibrationResultToMM(float calibrationNum) const
     {
         // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm
-        return calibrationNum * 1000 * this->config.torqueToDesiredOut / this->config.gravity /
-               this->config.turretMass;
+        return calibrationNum * 1000 * this->getCalibrationConfig().torqueToDesiredOut /
+               this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
     }
 
 };  // class autotune

@@ -28,7 +28,6 @@
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
-
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
 #error "Do not include this file directly! Use turret_controller_constants.hpp instead."
@@ -119,12 +118,12 @@ static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{.cgX = 20.0f, .cgZ = 16.5f, .gravityCompensatorMax = -5200.0f};
 
 static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
-    .turretPitchMountX = -20.0f,
-    .turretPitchMountZ = 0.0f,
-    .turretYawMountX = -20.0f,
-    .turretYawMountZ = 0.0f,
-    .springConstant = 100.0f,
-    .springFreeLength = 0.0f};
+    .turretPitchMountX = -80.0f,
+    .turretPitchMountZ = 6.0f,
+    .turretYawMountX = -53.0f,
+    .turretYawMountZ = -30.0f,
+    .springConstant = -10.78f,
+    .springFreeLength = 10.0f};
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif

@@ -31,39 +31,36 @@ TurretSpringForceOffset::TurretSpringForceOffset(
       pitchPointPosition(params.turretPitchMountX, 0.0f, params.turretPitchMountZ),
       yawPointPosition(params.turretYawMountX, 0.0f, params.turretYawMountZ){};
 
-static inline Vector normalize(const Vector vector)
-{
-    return vector * tap::algorithms::fastInvSqrt(Vector::dot(vector, vector));
-};
-
 float TurretSpringForceOffset::calculateCompensationEffort(const TurretCompensatorState state) const
 {
-    const Transform pitchTransform(0, 0, 0, 0, state.pitchChassisFrame, 0);
+    // Transform is negative as .apply() tells us what the pitchPointPosition in the applied (base)
+    // frame, thus we take the inverse to give us base frame to turret frame
+    const float torqueY = calculateEffectiveMoment(state.pitchChassisFrame) * params.springConstant;
 
-    const Position pitchPoint = pitchTransform.apply(pitchPointPosition);
+    return isMotorInverted ? torqueY : -torqueY;
+}
 
-    const float springLength = (yawPointPosition - pitchPoint).magnitude();
+// Function currently used in the autotuning portion for the linear fit and kinda as a helper
+float TurretSpringForceOffset::calculateEffectiveMoment(float pitch) const
+{
+    const Transform pitchTransformInv(0, 0, 0, 0, -pitch, 0);
 
-    const float force = (springLength - params.springFreeLength) * params.springConstant;
+    const Position pitchPoint = pitchTransformInv.apply(pitchPointPosition);
 
-    const Vector springDirection = normalize(yawPointPosition - pitchPoint);
+    const Vector springVector = yawPointPosition - pitchPoint;
 
-    const Vector springForceVector = springDirection * force;
+    const float currentLength = springVector.magnitude();
+
+    // Div-by-zero safety
+    if (currentLength < 1e-6) return 0.0f;
 
     const Vector pitchPosVector(pitchPoint.coordinates());
 
+    const float scaleFactor = (currentLength - params.springFreeLength) / currentLength;
+
+    const Vector springForceVector = springVector * scaleFactor;
+
     const Vector torque = Vector::cross(pitchPosVector, springForceVector);
 
-    return isMotorInverted ? Vector::dot(torque, {0, 1.0, 0}) : -Vector::dot(torque, {0, 1.0, 0});
-}
-
-// Function currently used in the autotuning portion for the linear fit
-float TurretSpringForceOffset::calculateEffectiveX(const float pitch) const
-{
-    const Transform pitchTransform(0, 0, 0, 0, pitch, 0);
-
-    const Position pitchPoint = pitchTransform.apply(pitchPointPosition);
-
-    const float springLength = (yawPointPosition - pitchPoint).magnitude();
-    return springLength - params.springFreeLength;
+    return torque.y();
 }

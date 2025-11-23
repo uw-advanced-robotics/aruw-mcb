@@ -24,8 +24,8 @@
 #ifndef TAPROOT_VECTOR_HPP_
 #define TAPROOT_VECTOR_HPP_
 
-#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/cmsis_mat.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 
 namespace tap::algorithms::transforms
 {
@@ -60,7 +60,10 @@ public:
         return *this;
     }
 
-    inline Vector operator+(const Position& other) const;
+    inline Vector operator+(const Position& other) const
+    {
+        return Vector(this->coordinates_ + other.coordinates());
+    }
 
     inline Vector operator+(const Vector& other) const
     {
@@ -93,6 +96,10 @@ public:
     const inline CMSISMat<3, 1>& coordinates() const { return coordinates_; }
 
     inline float magnitude() const { return sqrt(dot(*this, *this)); }
+
+    inline Vector normalize() const { return (*this) * 1.0f / this->magnitude(); };
+
+    inline static Vector normalize(const Vector& a) { return a * 1.0f / a.magnitude(); };
 
     friend class Transform;
     friend class DynamicPosition;

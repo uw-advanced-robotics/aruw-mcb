@@ -60,8 +60,7 @@ public:
               velocityZeroThreshold,
               positionZeroThreshold,
               successChime,
-              failChime),
-          config(config)
+              failChime)
     {
     }
     const char *getName() const override { return "Gravity Autotune Command"; }
@@ -110,8 +109,6 @@ public:
     }
 
 private:
-    const TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::TurretCalibrationConfig
-        &config;
     /**
      * @brief Helper function that turns the calibration result into
      * units of mm.
@@ -122,8 +119,8 @@ private:
     inline float calibrationResultToMM(float calibrationNum) const
     {
         // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm
-        return calibrationNum * 1000 * this->config.torqueToDesiredOut / this->config.gravity /
-               this->config.turretMass;
+        return calibrationNum * 1000 * this->getCalibrationConfig().torqueToDesiredOut /
+               this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
     }
 
 };  // class autotune
