@@ -23,6 +23,7 @@
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -61,10 +62,10 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 };
 
 // Turret is perfectly balanced
-static constexpr float TURRET_CG_X = 0.0f;
-static constexpr float TURRET_CG_Z = 0.0f;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
-
+algorithms::TurretGravitationalForceOffset::TurretGravityParams TURRET_GRAVITY_CONFIG{
+    .cgX = 0.0f,
+    .cgZ = 0.0f,
+    .gravityCompensatorMax = 0.0f};
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {

@@ -300,10 +300,7 @@ TEST_F(
 
 static int16_t computeCGOffset(float pitchAngleFromCenter)
 {
-    TurretGravitationalForceOffset gravityCompensation(
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
     return gravityCompensation.calculateCompensationEffort(
         {.pitchWorldFrame = pitchAngleFromCenter, .yaw = 0.0f});
 }
@@ -357,10 +354,7 @@ TEST_F(
 {
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
-    TurretGravitationalForceOffset gravityCompensation(
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
 
     WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
@@ -384,10 +378,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    TurretGravitationalForceOffset gravityCompensation(
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
 
     WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
@@ -416,10 +407,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    TurretGravitationalForceOffset gravityCompensation(
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
     WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
         turretMCBCanCommBus1,
@@ -445,10 +433,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    TurretGravitationalForceOffset gravityCompensation(
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
 
     WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
@@ -474,10 +459,7 @@ TEST_F(
 {
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
-    TurretGravitationalForceOffset gravityCompensation(
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
 
     WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
@@ -503,10 +485,7 @@ TEST_F(
 {
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
-    TurretGravitationalForceOffset gravityCompensation(
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
 
     WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,
@@ -532,10 +511,7 @@ TEST_F(
     TurretMotor turretMotor(&djiMotor, motorConfig);
     turretMotor.updateMotorAngle();
 
-    TurretGravitationalForceOffset gravityCompensation(
-        TURRET_CG_X,
-        TURRET_CG_Z,
-        GRAVITY_COMPENSATION_SCALAR);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
 
     WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> turretController(
         worldToTurret,

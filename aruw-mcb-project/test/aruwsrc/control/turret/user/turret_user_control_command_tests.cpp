@@ -39,20 +39,13 @@ using namespace testing;
 
 namespace
 {
-float computeGravitationalForceOffset(
-    const float cgX,
-    const float cgZ,
-    const float pitchAngleRad,
-    const float gravityCompensationScalar)
+float computeGravitationalForceOffset(const float pitchAngleRad)
 {
-    TurretGravitationalForceOffset gravityCompensation(cgX, cgZ, gravityCompensationScalar);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
     return gravityCompensation.calculateCompensationEffort(
         {.pitchWorldFrame = pitchAngleRad, .yaw = 0.0f});
 };
-TurretGravitationalForceOffset gravityCompensation(
-    TURRET_CG_X,
-    TURRET_CG_Z,
-    GRAVITY_COMPENSATION_SCALAR);
+TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
 }  // namespace
 
 class TurretUserControlCommandTest : public Test
@@ -144,13 +137,8 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
 
     EXPECT_CALL(
         turret.pitchMotor,
-        setMotorOutput(FloatNear(
-            computeGravitationalForceOffset(
-                TURRET_CG_X,
-                TURRET_CG_Z,
-                pitchActual.getWrappedValue(),
-                GRAVITY_COMPENSATION_SCALAR),
-            1E-2)));
+        setMotorOutput(
+            FloatNear(computeGravitationalForceOffset(pitchActual.getWrappedValue()), 1E-2)));
     EXPECT_CALL(turret.yawMotor, setMotorOutput(0));
     EXPECT_CALL(
         turret.pitchMotor,
@@ -181,11 +169,7 @@ TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
 
     EXPECT_CALL(
         turret.pitchMotor,
-        setMotorOutput(Gt(computeGravitationalForceOffset(
-            TURRET_CG_X,
-            TURRET_CG_Z,
-            pitchActual.getWrappedValue(),
-            GRAVITY_COMPENSATION_SCALAR))));
+        setMotorOutput(Gt(computeGravitationalForceOffset(pitchActual.getWrappedValue()))));
     EXPECT_CALL(turret.yawMotor, setMotorOutput(Lt(0)));
     EXPECT_CALL(
         turret.pitchMotor,

@@ -60,11 +60,10 @@ float TurretSpringForceOffset::calculateCompensationEffort(const TurretCompensat
 // Function currently used in the autotuning portion for the linear fit
 float TurretSpringForceOffset::calculateEffectiveX(const float pitch) const
 {
-    // apply rotation to pitch
     const Transform pitchTransform(0, 0, 0, 0, pitch, 0);
 
     const Position pitchPoint = pitchTransform.apply(pitchPointPosition);
 
-    const float spring_dist = Position::distance(pitchPoint, yawPointPosition);
-    return spring_dist - params.springFreeLength;
+    const float springLength = (yawPointPosition - pitchPoint).magnitude();
+    return springLength - params.springFreeLength;
 }

@@ -35,20 +35,13 @@ using namespace testing;
 
 namespace
 {
-float computeGravitationalForceOffset(
-    const float cgX,
-    const float cgZ,
-    const float pitchAngleRad,
-    const float gravityCompensationMax)
+float computeGravitationalForceOffset(const float pitchAngleRad)
 {
-    TurretGravitationalForceOffset gravityCompensation(cgX, cgZ, gravityCompensationMax);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
     return gravityCompensation.calculateCompensationEffort(
         {.pitchWorldFrame = pitchAngleRad, .yaw = 0.0f});
 };
-TurretGravitationalForceOffset gravityCompensation(
-    TURRET_CG_X,
-    TURRET_CG_Z,
-    GRAVITY_COMPENSATION_SCALAR);
+TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
 }  // namespace
 
 class ChassisFrameTurretControllerTest : public Test
@@ -124,31 +117,13 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_0_when_setpoints_match
 
         EXPECT_CALL(
             turretSubsystem.pitchMotor,
-            setMotorOutput(FloatNear(
-                computeGravitationalForceOffset(
-                    TURRET_CG_X,
-                    TURRET_CG_Z,
-                    0,
-                    GRAVITY_COMPENSATION_SCALAR),
-                1e-2)));
+            setMotorOutput(FloatNear(computeGravitationalForceOffset(0), 1e-2)));
         EXPECT_CALL(
             turretSubsystem.pitchMotor,
-            setMotorOutput(FloatNear(
-                computeGravitationalForceOffset(
-                    TURRET_CG_X,
-                    TURRET_CG_Z,
-                    M_PI_2,
-                    GRAVITY_COMPENSATION_SCALAR),
-                1e-2)));
+            setMotorOutput(FloatNear(computeGravitationalForceOffset(M_PI_2), 1e-2)));
         EXPECT_CALL(
             turretSubsystem.pitchMotor,
-            setMotorOutput(FloatNear(
-                computeGravitationalForceOffset(
-                    TURRET_CG_X,
-                    TURRET_CG_Z,
-                    modm::toRadian(150),
-                    GRAVITY_COMPENSATION_SCALAR),
-                1e-2)));
+            setMotorOutput(FloatNear(computeGravitationalForceOffset(modm::toRadian(150)), 1e-2)));
     }
 
     setpoint = Angle(0);
@@ -172,11 +147,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_positive_when_setpoint
     EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(setpoint));
     EXPECT_CALL(
         turretSubsystem.pitchMotor,
-        setMotorOutput(Gt(computeGravitationalForceOffset(
-            TURRET_CG_X,
-            TURRET_CG_Z,
-            currentAngle.getWrappedValue(),
-            GRAVITY_COMPENSATION_SCALAR))));
+        setMotorOutput(Gt(computeGravitationalForceOffset(currentAngle.getWrappedValue()))));
 
     turretController.runController(1, setpoint);
 }
@@ -189,11 +160,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_negative_when_setpoint
     EXPECT_CALL(turretSubsystem.pitchMotor, setChassisFrameSetpoint(setpoint));
     EXPECT_CALL(
         turretSubsystem.pitchMotor,
-        setMotorOutput(Lt(computeGravitationalForceOffset(
-            TURRET_CG_X,
-            TURRET_CG_Z,
-            currentAngle.getWrappedValue(),
-            GRAVITY_COMPENSATION_SCALAR))));
+        setMotorOutput(Lt(computeGravitationalForceOffset(currentAngle.getWrappedValue()))));
 
     turretController.runController(1, setpoint);
 }
