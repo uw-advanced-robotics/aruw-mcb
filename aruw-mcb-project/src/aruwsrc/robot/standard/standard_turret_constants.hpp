@@ -106,7 +106,6 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .turretYawMountZ = 0.0f,
     .springConstant = 0.0f,
     .springFreeLength = 0.0f,
-    .isMotorInverted = false,
 };
 
 #elif defined(TARGET_STANDARD_VOID)

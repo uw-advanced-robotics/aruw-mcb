@@ -22,7 +22,9 @@
 
 #include <stdint.h>
 
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/util_macros.hpp"
+
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_turret_constants.hpp"
@@ -39,10 +41,8 @@
 namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
-static constexpr float TURRET_CG_X = 0.0f;
-static constexpr float TURRET_CG_Z = 0.0f;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 1.0f;
-
+static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
+    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
 }  // namespace aruwsrc::control::turret
 #endif
 
