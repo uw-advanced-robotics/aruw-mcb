@@ -188,7 +188,7 @@ static inline float runWorldFrameTurretImuController(
 
 WorldFrameYawTurretImuCascadePidTurretController::WorldFrameYawTurretImuCascadePidTurretController(
     const transforms::Transform &worldToTurret,
-    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+    const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
     TurretMotor &yawMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid)
@@ -287,7 +287,7 @@ WrappedFloat WorldFrameYawTurretImuCascadePidTurretController::convertChassisAng
 WorldFramePitchTurretImuCascadePidTurretController::
     WorldFramePitchTurretImuCascadePidTurretController(
         const transforms::Transform &worldToTurret,
-        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &turretMotor,
         tap::algorithms::SmoothPid &positionPid,
         tap::algorithms::SmoothPid &velocityPid)

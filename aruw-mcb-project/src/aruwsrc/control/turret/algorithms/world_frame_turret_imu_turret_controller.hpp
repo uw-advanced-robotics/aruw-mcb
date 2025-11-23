@@ -62,7 +62,7 @@ public:
      */
     WorldFrameYawTurretImuCascadePidTurretController(
         const transforms::Transform &worldToTurret,
-        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &yawMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid);
@@ -95,7 +95,7 @@ public:
 
 private:
     const transforms::Transform &worldToTurret;
-    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
+    const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm;
 
     SmoothPid &positionPid;
     SmoothPid &velocityPid;
@@ -127,7 +127,7 @@ public:
      */
     WorldFramePitchTurretImuCascadePidTurretController(
         const transforms::Transform &worldToTurret,
-        const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm,
+        const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &pitchMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid);
@@ -159,7 +159,7 @@ public:
 
 private:
     const transforms::Transform &worldToTurret;
-    const aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
+    const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm;
 
     SmoothPid &positionPid;
     SmoothPid &velocityPid;

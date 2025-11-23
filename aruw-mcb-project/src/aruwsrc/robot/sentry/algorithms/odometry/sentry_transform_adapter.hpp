@@ -20,13 +20,14 @@
 #ifndef SENTRY_TRANSFORM_ADAPTER_HPP_
 #define SENTRY_TRANSFORM_ADAPTER_HPP_
 
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 
 #include "sentry_transforms.hpp"
 
 namespace aruwsrc::sentry::algorithms::odometry
 {
-class SentryTransformAdapter : public aruwsrc::algorithms::transforms::TransformerInterface
+class SentryTransformAdapter
+    : public aruwsrc::algorithms::odometry::transforms::TransformerInterface
 {
 public:
     SentryTransformAdapter(const SentryTransforms& transforms);

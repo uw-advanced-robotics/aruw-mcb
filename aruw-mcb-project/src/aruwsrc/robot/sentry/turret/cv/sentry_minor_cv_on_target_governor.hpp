@@ -45,7 +45,7 @@ class SentryMinorCvOnTargetGovernor : public tap::control::governor::CommandGove
 public:
     SentryMinorCvOnTargetGovernor(
         tap::Drivers *drivers,
-        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         SentryTurretCVCommand &turretCVCommand,
         SentryAutoAimLaunchTimer &launchTimer,
         SentryCvOnTargetGovernorMode mode,
@@ -137,7 +137,7 @@ public:
 
 private:
     tap::Drivers *drivers;
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     SentryTurretCVCommand &turretCVCommand;
     SentryAutoAimLaunchTimer &launchTimer;
     const SentryCvOnTargetGovernorMode mode;

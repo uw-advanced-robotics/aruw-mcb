@@ -29,12 +29,12 @@ namespace display
 SplashScreen::SplashScreen(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
     tap::Drivers* drivers,
-    serial::VisionCoprocessor* visionCoprocessor,
-    can::TurretMCBCanComm* turretMCBCanCommBus1,
-    can::TurretMCBCanComm* turretMCBCanCommBus2,
-    aruwsrc::virtualMCB::MCBLite* mcbLite1,
-    aruwsrc::virtualMCB::MCBLite* mcbLite2,
-    can::capbank::CapacitorBank* capacitorBank)
+    communication::serial::VisionCoprocessor* visionCoprocessor,
+    communication::can::TurretMCBCanComm* turretMCBCanCommBus1,
+    communication::can::TurretMCBCanComm* turretMCBCanCommBus2,
+    aruwsrc::communication::mcb_lite::MCBLite* mcbLite1,
+    aruwsrc::communication::mcb_lite::MCBLite* mcbLite2,
+    communication::can::cap_bank::CapacitorBank* capacitorBank)
     : modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(
           vs,
           SPLASH_SCREEN_MENU_ID),

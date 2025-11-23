@@ -34,7 +34,7 @@ using namespace aruwsrc::algorithms;
 namespace aruwsrc::control::turret::cv
 {
 TurretCVCommand::TurretCVCommand(
-    serial::VisionCoprocessor *visionCoprocessor,
+    communication::serial::VisionCoprocessor *visionCoprocessor,
     control::ControlOperatorInterface *controlOperatorInterface,
     RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretYawControllerInterface *yawController,

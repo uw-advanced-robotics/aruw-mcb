@@ -29,13 +29,14 @@
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 
 using namespace aruwsrc::testbed;
-using namespace aruwsrc::virtualMCB;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::communication::mcb_lite;
+using namespace aruwsrc::control::chassis;
 using namespace tap::control;
 
 /*
@@ -60,12 +61,14 @@ VirtualCanEncoder strafeEncoder(
     &drivers()->lite,
     tap::can::CanBus::CAN_BUS2);
 
-aruwsrc::can::AruwVoltageCurrentSensor voltageCurrentSensor(drivers(), tap::can::CanBus::CAN_BUS2);
+aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
-    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Left Front Chassis Motor",
     false,
@@ -73,8 +76,8 @@ tap::motor::DjiMotor leftFrontChassisMotor(
 
 tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
-    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Left Back Chassis Motor",
     false,
@@ -82,8 +85,8 @@ tap::motor::DjiMotor leftBackChassisMotor(
 
 tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
-    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Right Front Chassis Motor",
     false,
@@ -91,8 +94,8 @@ tap::motor::DjiMotor rightFrontChassisMotor(
 
 tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
-    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Right Back Chassis Motor",
     false,
@@ -108,24 +111,24 @@ XDriveChassisSubsystem chassis(
     rightBackChassisMotor,
     WHEEL_VELOCITY_PID_CONFIG);
 
-// aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
+// aruwsrc::control::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
 //     drivers(),
 //     &drivers()->controlOperatorInterface,
 //     &chassis,
 //     &turret.yawMotor);
 
-aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &chassis);
 
-// aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
+// aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
 //     drivers(),
 //     &drivers()->controlOperatorInterface,
 //     &chassis,
 //     &turret.yawMotor,
-//     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
-// aruwsrc::chassis::BeybladeCommand beybladeCommand(
+//     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+// aruwsrc::control::chassis::BeybladeCommand beybladeCommand(
 //     drivers(),
 //     &chassis,
 //     &turret.yawMotor,
@@ -142,15 +145,24 @@ aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
 
 // ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
     chassis.registerAndInitialize();
 }
 
-void setDefaultCommands(Drivers *) { chassis.setDefaultCommand(&chassisDriveCommand); }
+void registerSubsystems(Drivers* drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &testbed_control::remoteSafeDisconnectFunction);
+}
 
-void registerIoMappings(Drivers *)
+void setDefaultCommands(Drivers*) { chassis.setDefaultCommand(&chassisDriveCommand); }
+
+void registerIoMappings(Drivers*)
 {
     // drivers->commandMapper.addMap(&leftSwitchDown);
     // drivers->commandMapper.addMap(&leftSwitchUp);
@@ -161,7 +173,7 @@ void registerIoMappings(Drivers *)
 
 namespace aruwsrc::testbed
 {
-void initSubsystemCommands(aruwsrc::testbed::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::testbed::Drivers* drivers)
 {
     testbed_control::initializeSubsystems();
     testbed_control::setDefaultCommands(drivers);

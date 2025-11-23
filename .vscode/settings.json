@@ -1,6 +1,7 @@
 {
     "editor.tabSize": 4,
     "files.associations": {
+        "*.h": "c",
         "array": "cpp",
         "string": "cpp",
         "string_view": "cpp",
@@ -77,8 +78,17 @@
         "stop_token": "cpp",
         "numbers": "cpp",
         "span": "cpp",
+<<<<<<< HEAD
         "hash_map": "cpp",
         "semaphore": "cpp",
+=======
+        "dense": "cpp",
+        "hash_map": "cpp",
+        "sparseqr": "cpp",
+        "mprealsupport": "cpp",
+        "matrixfunctions": "cpp",
+        "polynomials": "cpp",
+>>>>>>> 593c184fd87c18607311c0449151b1b9874e7578
         "future": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled",
@@ -117,5 +127,5 @@
             "pattern": "**/*_subsystem.hpp",
             "snippet": "declare-subsystem"
         },
-    ]
+    ],
 }

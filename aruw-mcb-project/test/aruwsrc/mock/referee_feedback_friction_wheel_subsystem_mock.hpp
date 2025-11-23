@@ -38,7 +38,7 @@ public:
     virtual ~RefereeFeedbackFrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, setDesiredLaunchSpeed, (float), (override));
+    MOCK_METHOD(void, setDesiredLaunchSpeed, (float, bool), (override));
     MOCK_METHOD(float, getDesiredLaunchSpeed, (), (const override));
     MOCK_METHOD(float, getPredictedLaunchSpeed, (), (const override));
 };

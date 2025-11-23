@@ -36,7 +36,7 @@
 #include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
-#include "aruwsrc/communication/sensors/imu/ism330.hpp"
+#include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
@@ -81,13 +81,13 @@ public:
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
-    control::sentry::SentryControlOperatorInterface controlOperatorInterface;
-    serial::VisionCoprocessor visionCoprocessor;
+    SentryControlOperatorInterface controlOperatorInterface;
+    communication::serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
-    can::TurretMCBCanComm turretMCBCanCommBus1;
-    can::TurretMCBCanComm turretMCBCanCommBus2;
+    communication::can::TurretMCBCanComm turretMCBCanCommBus1;
+    communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
-    aruwsrc::virtualMCB::MCBLite chassisMcbLite;
+    aruwsrc::communication::mcb_lite::MCBLite chassisMcbLite;
     aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;

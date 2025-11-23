@@ -21,7 +21,7 @@
 
 #include "tap/drivers.hpp"
 
-using namespace aruwsrc::control::sentry;
+using namespace aruwsrc::sentry;
 
 namespace aruwsrc::sentry::turret
 {

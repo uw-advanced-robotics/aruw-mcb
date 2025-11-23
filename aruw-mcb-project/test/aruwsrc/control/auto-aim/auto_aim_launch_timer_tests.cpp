@@ -32,7 +32,7 @@
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
-using namespace aruwsrc::serial;
+using namespace aruwsrc::communication::serial;
 using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::algorithms;
 using namespace tap::arch::clock;

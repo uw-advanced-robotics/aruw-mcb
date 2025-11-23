@@ -25,11 +25,11 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 CapBankIndicator::CapBankIndicator(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const can::capbank::CapacitorBank *capBank)
+    const communication::can::cap_bank::CapacitorBank *capBank)
     : HudIndicator(refSerialTransmitter),
       capBank(capBank)
 {
@@ -37,7 +37,7 @@ CapBankIndicator::CapBankIndicator(
 
 modm::ResumableResult<void> CapBankIndicator::sendInitialGraphics()
 {
-    this->previousState = can::capbank::State::UNKNOWN;
+    this->previousState = communication::can::cap_bank::State::UNKNOWN;
     this->previousColor = Tx::GraphicColor::BLACK;
     voltageUpdateTimer.restart(500);
 
@@ -55,7 +55,7 @@ modm::ResumableResult<void> CapBankIndicator::update()
 {
     const int BOTTOM = CAP_CENTER_Y - BOX_HEIGHT / 2;
     float voltage_squared = 0;
-    can::capbank::State state = can::capbank::UNKNOWN;
+    communication::can::cap_bank::State state = communication::can::cap_bank::UNKNOWN;
 
     RF_BEGIN(1);
 
@@ -107,37 +107,37 @@ modm::ResumableResult<void> CapBankIndicator::update()
             state = capBank->getState();
             switch (state)
             {
-                case can::capbank::State::RESET:
+                case communication::can::cap_bank::State::RESET:
                     strncpy(capBankTextGraphic.msg, "RST ", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
-                case can::capbank::State::SAFE:
+                case communication::can::cap_bank::State::SAFE:
                     strncpy(capBankTextGraphic.msg, "SAFE", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
                     break;
-                case can::capbank::State::CHARGE:
+                case communication::can::cap_bank::State::CHARGE:
                     strncpy(capBankTextGraphic.msg, "CHRG", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
-                case can::capbank::State::CHARGE_DISCHARGE:
+                case communication::can::cap_bank::State::CHARGE_DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "CHDS", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
-                case can::capbank::State::DISCHARGE:
+                case communication::can::cap_bank::State::DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "DSCH", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
-                case can::capbank::State::BATTERY_OFF:
+                case communication::can::cap_bank::State::BATTERY_OFF:
                     strncpy(capBankTextGraphic.msg, "BOFF", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::CYAN);
                     break;
-                case can::capbank::State::DISABLED:
+                case communication::can::cap_bank::State::DISABLED:
                     strncpy(capBankTextGraphic.msg, "OFF ", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
@@ -229,4 +229,4 @@ void CapBankIndicator::initialize()
             &capBankTextGraphic);
     }
 }
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

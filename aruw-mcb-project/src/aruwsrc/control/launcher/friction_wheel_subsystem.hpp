@@ -49,7 +49,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 class TurretMCBCanComm;
 }
@@ -93,6 +93,7 @@ public:
      */
     FrictionWheelSubsystem(
         tap::Drivers *drivers,
+<<<<<<< HEAD
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus,
@@ -118,6 +119,12 @@ public:
     {
         this->setTestCommand(&frictionTestCommand);
     }
+=======
+        tap::motor::MotorId leftMotorId,
+        tap::motor::MotorId rightMotorId,
+        tap::can::CanBus canBus,
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCB);
+>>>>>>> 593c184fd87c18607311c0449151b1b9874e7578
 
     void initialize() override
     {
@@ -135,7 +142,9 @@ public:
      * this subsystem.
      *
      * @param[in] speed The launch speed in m/s.
+     * @param[in] directRpm Whether to directly set rpm or set bullet speed.
      */
+<<<<<<< HEAD
     void setDesiredLaunchSpeed(float speed) override
     {
         desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
@@ -145,6 +154,9 @@ public:
             turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
         }
     };
+=======
+    mockable void setDesiredLaunchSpeed(float speed, bool directRpm = false);
+>>>>>>> 593c184fd87c18607311c0449151b1b9874e7578
 
     // also need to changeWheelVelocityState to index, true for this to be used
     void setIndividualVelocity(int index, float velocity) override
@@ -265,6 +277,8 @@ private:
 
     float speedCorrection = 0.0f;
 
+    float currentRPM = 0.0f;
+
     uint32_t prevTime = 0;
 
     bool isWheelVelocityOverridden[NUM_WHEELS] = {0};
@@ -284,7 +298,7 @@ private:
     std::array<Motor *, NUM_WHEELS> wheels;
 #endif
 
-    aruwsrc::can::TurretMCBCanComm *turretMCB;
+    aruwsrc::communication::can::TurretMCBCanComm *turretMCB;
 
     float prevShotTime = 0.0f;
 

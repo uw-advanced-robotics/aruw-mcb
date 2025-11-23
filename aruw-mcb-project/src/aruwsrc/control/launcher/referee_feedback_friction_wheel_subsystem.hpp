@@ -63,7 +63,7 @@ public:
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus canBus,
-        aruwsrc::can::TurretMCBCanComm *turretMCB,
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
         : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfigs, canBus, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)

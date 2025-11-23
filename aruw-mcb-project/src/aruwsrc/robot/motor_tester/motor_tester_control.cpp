@@ -29,6 +29,7 @@
 
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/motor_tester/constant_rpm_command.hpp"
 #include "aruwsrc/robot/motor_tester/motor_subsystem.hpp"
@@ -37,11 +38,11 @@
 #include "aruwsrc/robot/motor_tester/stick_rpm_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
+using namespace tap::control::setpoint;
+
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;
-using namespace aruwsrc::agitator;
-using namespace aruwsrc::control::agitator;
-using namespace tap::control::setpoint;
 // using namespace tap::control;
 
 /*
@@ -137,6 +138,9 @@ tap::control::HoldRepeatCommandMapping leftSwitchUp(
         tap::communication::serial::Remote::SwitchState::UP),
     true);
 
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 // inits
 
 void initializeSubsystems()
@@ -149,6 +153,8 @@ void initializeSubsystems()
 
 void registerSubsystems(Drivers* drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &motor_tester_control::remoteSafeDisconnectFunction);
     drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);

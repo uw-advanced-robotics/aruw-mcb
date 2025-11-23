@@ -35,7 +35,7 @@ using namespace modm;
 namespace aruwsrc::algorithms
 {
 OttoBallisticsSolver::OttoBallisticsSolver(
-    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,

@@ -26,7 +26,7 @@
 using namespace tap::communication::serial;
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 TurretAnglesIndicator::TurretAnglesIndicator(
     tap::Drivers &drivers,
@@ -160,4 +160,4 @@ void TurretAnglesIndicator::updateTurretAnglesGraphicMsg()
     turretAnglesGraphic.graphicData.endAngle = bytesWritten;
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

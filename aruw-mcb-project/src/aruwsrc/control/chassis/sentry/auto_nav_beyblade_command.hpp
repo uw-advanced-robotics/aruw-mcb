@@ -30,7 +30,7 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
@@ -38,7 +38,7 @@
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis::sentry
 {
 class HolonomicChassisSubsystem;
 
@@ -50,8 +50,8 @@ class AutoNavBeybladeCommand : public tap::control::Command
 public:
     AutoNavBeybladeCommand(
         const tap::Drivers& drivers,
-        HolonomicChassisSubsystem& chassis,
-        aruwsrc::chassis::ChassisAutoNavController& autoNavController,
+        chassis::HolonomicChassisSubsystem& chassis,
+        aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -70,8 +70,8 @@ public:
 
 private:
     const tap::Drivers& drivers;
-    HolonomicChassisSubsystem& chassis;
-    aruwsrc::chassis::ChassisAutoNavController& autoNavController;
+    chassis::HolonomicChassisSubsystem& chassis;
+    aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
 
     bool autoNavOnlyInGame;
 
@@ -80,6 +80,6 @@ private:
 
 };  // class AutoNavBeybladeCommand
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis::sentry
 
 #endif  // AUTO_NAV_BEYBLADE_COMMAND_HPP_

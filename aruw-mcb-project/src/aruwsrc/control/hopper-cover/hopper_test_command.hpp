@@ -22,9 +22,7 @@
 
 #include "tap/control/command.hpp"
 
-namespace aruwsrc
-{
-namespace control
+namespace aruwsrc::control::hopper_cover
 {
 class HopperSubsystem;
 
@@ -51,8 +49,6 @@ private:
 
 };  // class HopperTestCommand
 
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::hopper_cover
 
 #endif  // HOPPER_TEST_COMMAND_HPP_

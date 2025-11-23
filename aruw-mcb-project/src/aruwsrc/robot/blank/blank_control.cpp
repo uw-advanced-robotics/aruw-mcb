@@ -19,6 +19,7 @@
 
 #if defined(TARGET_BLANK)
 
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/blank/blank_drivers.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
@@ -35,13 +36,21 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace blank_control
 {
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 void initializeSubsystems() {}
 
 }  // namespace blank_control
 
 namespace aruwsrc::blank
 {
-void initSubsystemCommands(aruwsrc::blank::Drivers *) { blank_control::initializeSubsystems(); }
+void initSubsystemCommands(aruwsrc::blank::Drivers* drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &blank_control::remoteSafeDisconnectFunction);
+    blank_control::initializeSubsystems();
+}
 
 }  // namespace aruwsrc::blank
 

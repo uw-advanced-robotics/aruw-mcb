@@ -29,7 +29,7 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc
 {
-namespace control::sentry
+namespace sentry
 {
 bool SentryControlOperatorInterface::isTurretControlMode()
 {
@@ -94,9 +94,9 @@ float SentryControlOperatorInterface::getChassisXVelocity()
         prevUpdateCounterChassisXInput = updateCounter;
     }
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalX =
         maxChassisSpeed * limitVal(chassisXInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
@@ -129,9 +129,9 @@ float SentryControlOperatorInterface::getChassisYVelocity()
         prevUpdateCounterChassisYInput = updateCounter;
     }
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalY =
         maxChassisSpeed * limitVal(chassisYInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
@@ -214,5 +214,5 @@ float SentryControlOperatorInterface::getTurretMinor2PitchVelocity()
     return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
 }
 
-}  // namespace control::sentry
+}  // namespace sentry
 }  // namespace aruwsrc

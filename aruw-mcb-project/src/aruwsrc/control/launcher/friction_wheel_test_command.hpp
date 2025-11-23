@@ -27,7 +27,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 class TurretMCBCanComm;
 }
