@@ -41,13 +41,30 @@ void ErrorMenu::update() {}
 
 void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
 {
-    if (button == modm::MenuButtons::LEFT)
+    switch (button)
     {
-        this->remove();
-    }
-    else
-    {
-        vertScrollHandler.onShortButtonPress(button);
+        case modm::MenuButtons::LEFT:
+            this->remove();
+            break;
+        case modm::MenuButtons::UP:
+        case modm::MenuButtons::DOWN:
+            vertScrollHandler.onShortButtonPress(button);
+            break;
+        case modm::MenuButtons::RIGHT:
+            // force you to hold right for .5 seconds to delete an error
+            // to prevent accidental deletions
+            rightHoldTimer++;
+            if (rightHoldTimer < 250)
+            {
+                break;
+            }
+            drivers->errorController.removeSystemErrorAtIndex(vertScrollHandler.getCursorIndex());
+            rightHoldTimer = 0;
+            break;
+        case modm::MenuButtons::OK:
+            break;
+        default:
+            break;
     }
 }
 
@@ -55,7 +72,7 @@ bool ErrorMenu::hasChanged()
 {
     bool cursorChanged = vertScrollHandler.acknowledgeCursorChanged();
 
-    size_t currentErrorCount = drivers->errorController.getErrorListSize();
+    size_t currentErrorCount = drivers->errorController.getErrorList().getSize();
     bool errorCountChanged = (currentErrorCount != prevErrorCount);
 
     if (errorCountChanged)
@@ -73,8 +90,9 @@ void ErrorMenu::draw()
     display.clear();
     display.setCursor(0, 2);
     display << ErrorMenu::getMenuName() << modm::endl;
+    display << "Hold RIGHT to remove error" << modm::endl;
 
-    int numErrors = drivers->errorController.getErrorListSize();
+    int numErrors = drivers->errorController.getErrorList().getSize();
     if (numErrors == 0)
     {
         display << "No Errors" << modm::endl;
@@ -89,7 +107,7 @@ void ErrorMenu::draw()
     int8_t index = 0;
 
     // Iterate over the errors
-    for (const auto &error : drivers->errorController)
+    for (const auto &error : drivers->errorController.getErrorList())
     {
         if (index >= vertScrollHandler.getSmallestIndexDisplayed() &&
             index <= vertScrollHandler.getLargestIndexDisplayed())

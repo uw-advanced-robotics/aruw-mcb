@@ -50,10 +50,10 @@ public:
 
 private:
     static constexpr int ERROR_MENU_ID = 3;
-
     tap::Drivers *drivers;
     tap::display::VerticalScrollLogicHandler vertScrollHandler;
-
+    
+    uint32_t rightHoldTimer = 0;
     std::size_t prevErrorCount = 0;
 };  // class ErrorMenu
 }  // namespace display
