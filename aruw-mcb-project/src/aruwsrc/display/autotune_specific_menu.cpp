@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "gravity_autotune_menu.hpp"
+#include "autotune_specific_menu.hpp"
 
 #include "tap/drivers.hpp"
 
@@ -25,24 +25,24 @@
 
 namespace aruwsrc::display
 {
-GravityAutotuneMenu::GravityAutotuneMenu(
+AutotuneSpecificMenu::AutotuneSpecificMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
     tap::Drivers *drivers,
-    aruwsrc::control::autotune::TurretAutotuneInterface *GravityAutotuneCommand)
+    aruwsrc::control::autotune::TurretAutotuneInterface *autotuneCommand)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>(vs, AUTOTUNE_MENU_ID),
       drivers(drivers),
-      gravityAutotuneCommand(GravityAutotuneCommand)
+      autotuneCommand(autotuneCommand)
 {
 }
 
-void GravityAutotuneMenu::draw()
+void AutotuneSpecificMenu::draw()
 {
     modm::GraphicDisplay &display = getViewStack()->getDisplay();
     display.clear();
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
-    if (gravityAutotuneCommand == nullptr)
+    if (autotuneCommand == nullptr)
     {
         display << "No gravity calibrate command";
     }
@@ -53,28 +53,29 @@ void GravityAutotuneMenu::draw()
         if (currCalibrationState == aruwsrc::control::autotune::TurretAutotuneInterface::
                                         CalibrationState::CALIBRATION_SUCCESS)
         {
-            gravityAutotuneCommand->drawCalibrationResult(display);
+            autotuneCommand->drawCalibrationResult(display);
         }
     }
 }
 
-void GravityAutotuneMenu::update() {}
+void AutotuneSpecificMenu::update() {}
 
-void GravityAutotuneMenu::shortButtonPress(modm::MenuButtons::Button button)
+void AutotuneSpecificMenu::shortButtonPress(modm::MenuButtons::Button button)
 {
     switch (button)
     {
         case modm::MenuButtons::LEFT:
             this->remove();
-            if (gravityAutotuneCommand != nullptr)
+            if (autotuneCommand != nullptr &&
+                drivers->commandScheduler.isCommandScheduled(autotuneCommand))
             {
-                drivers->commandScheduler.removeCommand(gravityAutotuneCommand, true);
+                drivers->commandScheduler.removeCommand(autotuneCommand, true);
             }
             break;
         case modm::MenuButtons::OK:
-            if (gravityAutotuneCommand != nullptr)
+            if (autotuneCommand != nullptr)
             {
-                drivers->commandScheduler.addCommand(gravityAutotuneCommand);
+                drivers->commandScheduler.addCommand(autotuneCommand);
             }
             break;
         case modm::MenuButtons::RIGHT:
@@ -85,16 +86,16 @@ void GravityAutotuneMenu::shortButtonPress(modm::MenuButtons::Button button)
     }
 }
 
-bool GravityAutotuneMenu::hasChanged()
+bool AutotuneSpecificMenu::hasChanged()
 {
     using namespace aruwsrc::control::autotune;
 
-    if (gravityAutotuneCommand == nullptr)
+    if (autotuneCommand == nullptr)
     {
         return false;
     }
 
-    auto newCalibrationState = gravityAutotuneCommand->getCalibrationState();
+    auto newCalibrationState = autotuneCommand->getCalibrationState();
     if (newCalibrationState != currCalibrationState)
     {
         currCalibrationState = newCalibrationState;

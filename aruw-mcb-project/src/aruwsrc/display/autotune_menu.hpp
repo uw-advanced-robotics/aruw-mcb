@@ -29,7 +29,7 @@
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
 
-#include "gravity_autotune_menu.hpp"
+#include "autotune_specific_menu.hpp"
 
 namespace aruwsrc
 {
@@ -76,6 +76,8 @@ private:
     tap::Drivers *drivers;
 
     tap::display::VerticalScrollLogicHandler verticalScroll;
+
+    aruwsrc::display::AutotuneSpecificMenu autotuneSpecificMenu;
 
     uint8_t getCommandNumber() const { return getAutotuneCommands().size(); }
 };

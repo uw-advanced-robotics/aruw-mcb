@@ -35,10 +35,10 @@ class Drivers;
 namespace aruwsrc::display
 {
 /**
- * Menu that allows the user to schedule an `gravityAutotuneCommand` in the `CommandScheduler`. Also
- * displays the current calibration state of the `gravityAutotuneCommand`.
+ * Menu that allows the user to schedule an `autotuneCommand` in the `CommandScheduler`. Also
+ * displays the current calibration state of the `autotuneCommand`.
  */
-class GravityAutotuneMenu
+class AutotuneSpecificMenu
     : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>
 {
 public:
@@ -46,10 +46,10 @@ public:
      * @param[in] vs `ViewStack` that this menu is sitting on top of.
      * @param[in] drivers A pointer to the global drivers object.
      */
-    GravityAutotuneMenu(
+    AutotuneSpecificMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
         tap::Drivers *drivers,
-        aruwsrc::control::autotune::TurretAutotuneInterface *gravityAutotuneCommand);
+        aruwsrc::control::autotune::TurretAutotuneInterface *autotuneCommand);
 
     void draw() override;
 
@@ -75,7 +75,7 @@ private:
 
     tap::Drivers *drivers;
 
-    aruwsrc::control::autotune::TurretAutotuneInterface *gravityAutotuneCommand;
+    aruwsrc::control::autotune::TurretAutotuneInterface *autotuneCommand;
 
     aruwsrc::control::autotune::TurretAutotuneInterface::CalibrationState currCalibrationState =
         aruwsrc::control::autotune::TurretAutotuneInterface::CalibrationState::

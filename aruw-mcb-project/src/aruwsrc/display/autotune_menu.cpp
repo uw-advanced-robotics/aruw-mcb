@@ -36,7 +36,8 @@ AutotuneMenu::AutotuneMenu(
     int entriesToDisplay)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>(vs, 1),
       drivers(drivers),
-      verticalScroll(drivers, 0, entriesToDisplay)
+      verticalScroll(drivers, 0, entriesToDisplay),
+      autotuneSpecificMenu(vs, drivers, nullptr)
 {
     verticalScroll.setSize(getCommandNumber());
 }
@@ -90,7 +91,8 @@ void AutotuneMenu::shortButtonPress(modm::MenuButtons::Button button)
             if (idx < static_cast<int>(getAutotuneCommands().size()))
             {
                 this->getViewStack()->push(
-                    new GravityAutotuneMenu(getViewStack(), drivers, getAutotuneCommands()[idx]));
+                    new (&autotuneSpecificMenu)
+                        AutotuneSpecificMenu(getViewStack(), drivers, getAutotuneCommands()[idx]));
             }
             break;
         }
