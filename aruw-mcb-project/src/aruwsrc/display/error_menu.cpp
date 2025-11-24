@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -19,22 +19,25 @@
 
 #include "error_menu.hpp"
 
+#include "tap/drivers.hpp"
+#include "tap/errors/error_controller.hpp"
+#include "tap/errors/system_error.hpp"
+
 namespace aruwsrc
 {
 namespace display
 {
-ErrorMenu::ErrorMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, ERROR_MENU_ID)
+ErrorMenu::ErrorMenu(
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+    tap::Drivers *drivers,
+    int entriesToDisplay)
+    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, ERROR_MENU_ID),
+      drivers(drivers),
+      vertScrollHandler(drivers, 0, entriesToDisplay)
 {
 }
 
-void ErrorMenu::update()
-{
-    if (this->hasChanged())
-    {
-        this->draw();
-    }
-}
+void ErrorMenu::update() {}
 
 void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
 {
@@ -42,14 +45,26 @@ void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
     {
         this->remove();
     }
+    else
+    {
+        vertScrollHandler.onShortButtonPress(button);
+    }
 }
 
 bool ErrorMenu::hasChanged()
 {
-    // TODO implement, see issue #222
-    // This should return true only when the state of the ErrorMenu has changed
-    // (the stuff on the display has changed) to minimize I/O usage.
-    return true;
+    bool cursorChanged = vertScrollHandler.acknowledgeCursorChanged();
+
+    size_t currentErrorCount = drivers->errorController.getErrorListSize();
+    bool errorCountChanged = (currentErrorCount != prevErrorCount);
+
+    if (errorCountChanged)
+    {
+        prevErrorCount = currentErrorCount;
+        vertScrollHandler.setSize(currentErrorCount);
+    }
+
+    return cursorChanged || errorCountChanged;
 }
 
 void ErrorMenu::draw()
@@ -57,8 +72,35 @@ void ErrorMenu::draw()
     modm::GraphicDisplay &display = getViewStack()->getDisplay();
     display.clear();
     display.setCursor(0, 2);
-    display << ErrorMenu::getMenuName();
-    // TODO implement, see issue #222
+    display << ErrorMenu::getMenuName() << modm::endl;
+
+    int numErrors = drivers->errorController.getErrorListSize();
+    if (numErrors == 0)
+    {
+        display << "No Errors" << modm::endl;
+        return;
+    }
+    // return as vertScrollHandler doesn't want a size of 0
+    if (numErrors != vertScrollHandler.getSize())
+    {
+        vertScrollHandler.setSize(numErrors);
+    }
+
+    int8_t index = 0;
+
+    // Iterate over the errors
+    for (const auto &error : drivers->errorController)
+    {
+        if (index >= vertScrollHandler.getSmallestIndexDisplayed() &&
+            index <= vertScrollHandler.getLargestIndexDisplayed())
+        {
+            display << (index == vertScrollHandler.getCursorIndex() ? "> " : "  ");
+
+            display << error.getDescription() << modm::endl;
+        }
+        index++;
+    }
 }
+
 }  // namespace display
 }  // namespace aruwsrc

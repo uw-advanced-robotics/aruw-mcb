@@ -47,7 +47,7 @@ MainMenu::MainMenu(
       imuCalibrateMenu(stack, drivers),
       autotuneMenu(stack, drivers, ENTRIES),
       cvMenu(stack, drivers, visionCoprocessor),
-      errorMenu(stack),
+      errorMenu(stack, drivers, ENTRIES),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers, ENTRIES),
       commandSchedulerMenu(stack, drivers, ENTRIES),
@@ -81,11 +81,11 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addAutotuneMenuCallback));
-    // addEntry(
-    //     ErrorMenu::getMenuName(),
-    //     modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
-    //         this,
-    //         &MainMenu::addErrorMenuCallback));
+    addEntry(
+        ErrorMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addErrorMenuCallback));
     if (this->visionCoprocessor != nullptr)
         addEntry(
             CVMenu::getMenuName(),
@@ -184,7 +184,7 @@ void MainMenu::addCVMenuCallback()
 void MainMenu::addErrorMenuCallback()
 {
     // em actually points to errorMenu
-    ErrorMenu* em = new (&errorMenu) ErrorMenu(getViewStack());
+    ErrorMenu* em = new (&errorMenu) ErrorMenu(getViewStack(), drivers, ENTRIES);
     getViewStack()->push(em);
 }
 
@@ -198,11 +198,6 @@ void MainMenu::addMotorMenuCallback()
 {
     MotorMenu* mm = new (&motorMenu) MotorMenu(getViewStack(), drivers, ENTRIES);
     getViewStack()->push(mm);
-}
-
-void MainMenu::addPropertyTableCallback()
-{
-    // TODO, see issue #221
 }
 
 void MainMenu::addCommandSchedulerCallback()

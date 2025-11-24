@@ -71,7 +71,6 @@ public:
 
 private:
     static constexpr int AUTOTUNE_MENU_ID = 15;
-    static constexpr int DISPLAY_MAX_ENTRIES = 7;
 
     tap::Drivers *drivers;
 
