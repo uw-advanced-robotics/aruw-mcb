@@ -620,7 +620,8 @@ autotune::GravityAutotuneCommand<9> gravityAutotuneCommandRight(
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &turretSpringCompensation,
-    &turretGravityCompensation, &chassis);
+    &turretGravityCompensation,
+    &chassis);
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
