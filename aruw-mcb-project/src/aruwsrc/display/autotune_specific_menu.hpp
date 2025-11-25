@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAVITY_AUTOTUNE_MENU_HPP_
-#define GRAVITY_AUTOTUNE_MENU_HPP_
+#ifndef AUTOTUNE_SPECIFIC_MENU_HPP_
+#define AUTOTUNE_SPECIFIC_MENU_HPP_
 
 #include <modm/io/iostream.hpp>
 
