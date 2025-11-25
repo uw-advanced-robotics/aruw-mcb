@@ -33,8 +33,6 @@ TurretSpringForceOffset::TurretSpringForceOffset(
 
 float TurretSpringForceOffset::calculateCompensationEffort(const TurretCompensatorState state) const
 {
-    // Transform is negative as .apply() tells us what the pitchPointPosition in the applied (base)
-    // frame, thus we take the inverse to give us base frame to turret frame
     const float torqueY = calculateEffectiveMoment(state.pitchChassisFrame) * params.springConstant;
 
     return isMotorInverted ? torqueY : -torqueY;
@@ -43,6 +41,8 @@ float TurretSpringForceOffset::calculateCompensationEffort(const TurretCompensat
 // Function currently used in the autotuning portion for the linear fit and kinda as a helper
 float TurretSpringForceOffset::calculateEffectiveMoment(float pitch) const
 {
+    // Transform is negative as .apply() tells us what the pitchPointPosition in the applied (base)
+    // frame, thus we take the inverse to give us base frame to turret frame
     const Transform pitchTransformInv(0, 0, 0, 0, -pitch, 0);
 
     const Position pitchPoint = pitchTransformInv.apply(pitchPointPosition);
