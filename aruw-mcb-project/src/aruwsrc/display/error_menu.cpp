@@ -54,7 +54,7 @@ void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
             // force you to hold right for .5 seconds to delete an error
             // to prevent accidental deletions
             rightHoldTimer++;
-            if (rightHoldTimer < 250)
+            if (rightHoldTimer < 2)
             {
                 break;
             }
@@ -106,15 +106,61 @@ void ErrorMenu::draw()
 
     int8_t index = 0;
 
-    // Iterate over the errors
+    constexpr size_t MAX_CHARS_PER_LINE = 40;
+
     for (const auto &error : drivers->errorController.getErrorList())
     {
+        // Check if the item is within the scroll window
         if (index >= vertScrollHandler.getSmallestIndexDisplayed() &&
             index <= vertScrollHandler.getLargestIndexDisplayed())
         {
-            display << (index == vertScrollHandler.getCursorIndex() ? "> " : "  ");
+            // 1. Print the Cursor
+            bool isSelected = (index == vertScrollHandler.getCursorIndex());
+            display << (isSelected ? "> " : "  ");
 
-            display << error.getDescription() << modm::endl;
+            // 2. Get description and prepare for wrapping
+            // Assuming getDescription() returns std::string or const char*
+            std::string text = error.getDescription();
+
+            size_t currentLineLen = 2;  // Start at 2 because of "> " or "  "
+            size_t pos = 0;
+
+            while (pos < text.length())
+            {
+                // Find the length of the next word
+                size_t nextSpace = text.find(' ', pos);
+                if (nextSpace == std::string::npos) nextSpace = text.length();
+
+                size_t wordLen = nextSpace - pos;
+
+                // Check if word fits on current line
+                // +1 accounts for the space we might need to add before the word
+                bool needsSpace = (currentLineLen > 2);
+                if (currentLineLen + wordLen + (needsSpace ? 1 : 0) > MAX_CHARS_PER_LINE)
+                {
+                    // WRAP: New line + Indent (2 spaces) to align with text
+                    display << modm::endl << "  ";
+                    currentLineLen = 2;
+                    needsSpace = false;  // New line, no leading space needed
+                }
+
+                // Print space before word if needed
+                if (needsSpace)
+                {
+                    display << " ";
+                    currentLineLen++;
+                }
+
+                // Print the word
+                display << text.substr(pos, wordLen).c_str();
+                currentLineLen += wordLen;
+
+                // Move position to next word (skip the space)
+                pos = nextSpace + 1;
+            }
+
+            // End the error item
+            display << modm::endl;
         }
         index++;
     }
