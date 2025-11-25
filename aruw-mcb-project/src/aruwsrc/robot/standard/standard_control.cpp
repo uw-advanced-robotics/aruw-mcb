@@ -462,7 +462,11 @@ autotune::SpringAutotuneCommand<9> springAutotuneCommand(
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &turretSpringCompensation,
-    &chassis);
+    &turretGravityCompensation,
+    &chassis,
+    {},
+    &imuCalibrateSuccessBuzzCommand,
+    &imuCalibrateFailBuzzCommand);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 

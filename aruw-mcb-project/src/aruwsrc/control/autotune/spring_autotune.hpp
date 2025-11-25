@@ -27,6 +27,7 @@
 #ifndef SPRING_AUTOTUNE_HPP_
 #define SPRING_AUTOTUNE_HPP_
 
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 
 #include "autotune_command_interface.hpp"
@@ -40,16 +41,36 @@ private:
     using TurretAutoCommand = TurretAutotuneCommand<std::array<float, 4>, numTestPoints>;
 
 public:
+    /**
+     * @brief Construct a new Spring Autotune Command object. If gravityForce is nullptr,
+     * the system will attempt to calculate both center of mass and spring constant. If
+     * gravityForce is provided, it will only calculate the spring constant by subtracting the
+     * gravity force values from the torque readings.
+     *
+     * @param drivers Pointer to global drivers object.
+     * @param config Configuration for the turret autotune.
+     * @param springForce Pointer to the turret spring force compensator.
+     * @param gravityForce Pointer to the turret gravity force compensator. If nullptr,
+     * will try to calculate comp values gravity and spring.
+     * @param chassis Pointer to chassis subsystem to stop movement during autotune.
+     * @param points Array of test points in radians.
+     * @param velocityZeroThreshold Velocity threshold to consider the turret "stopped".
+     * @param positionZeroThreshold Position threshold to consider the turret "at position".
+     * @param successChime Chime to play on successful autotune.
+     * @param failChime Chime to play on failed autotune.
+     */
     SpringAutotuneCommand(
         tap::Drivers *drivers,
         const TurretAutoCommand::TurretCalibrationConfig &config,
         const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce,
+        const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce =
+            nullptr,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
         const std::array<float, numTestPoints> points = {},
-        const float velocityZeroThreshold = TurretAutoCommand::DEFAULT_VELOCITY_THRESHOLD,
-        const float positionZeroThreshold = TurretAutoCommand::DEFAULT_POSITION_THRESHOLD,
+        aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
-        aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
+        const float velocityZeroThreshold = TurretAutoCommand::DEFAULT_VELOCITY_THRESHOLD,
+        const float positionZeroThreshold = TurretAutoCommand::DEFAULT_POSITION_THRESHOLD)
         : TurretAutoCommand(
               drivers,
               config,
@@ -59,19 +80,86 @@ public:
               positionZeroThreshold,
               successChime,
               failChime),
-          springForce(springForce)
+          springForce(springForce),
+          gravityForce(gravityForce)
     {
     }
     const char *getName() const override { return "Spring Gravity Autotune Command"; }
 
-    /**
-     * @brief Calculates the center of mass with least squares
-     *
-     * @return std::array<float,4> cgX, cgZ, magnitude, and K.
-     */
     std::array<float, 4> calculate(
         std::array<float, numTestPoints> Angles,
         std::array<float, numTestPoints> Torques) const override
+    {
+        if (gravityForce)
+        {
+            return calculateJustSpring(Angles, Torques);
+        }
+        else
+        {
+            return calculateCOMandSpring(Angles, Torques);
+        }
+    }
+
+    void drawCalibrationResult(modm::GraphicDisplay &display) const override
+    {
+        if (gravityForce)
+        {
+            drawCalibrationResultJustSpring(display);
+        }
+        else
+        {
+            drawCalibrationResultSpringGrav(display);
+        }
+    }
+
+private:
+    const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce;
+    const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce;
+
+    /**
+     * @brief Helper function that turns the calibration result into
+     * units of mm.
+     *
+     * @param calibrationNum Value from the COM calculation
+     * @return float `COMLocation` in mm
+     */
+    inline float calibrationResultToMM(float calibrationNum) const
+    {
+        // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm
+        return calibrationNum * 1000 * this->getCalibrationConfig().torqueToDesiredOut /
+               this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
+    }
+
+    void drawCalibrationResultSpringGrav(modm::GraphicDisplay &display) const
+    {
+        const std::array<float, 4> result = this->getCalibrationResult();
+        const float X = result[0];
+        const float Z = result[1];
+        const float scalar = result[2];
+        const float K = result[3];
+        display.printf(
+            "Center of mass position:\n\tcgX: %.2f mm\n\tcgZ: %.2f mm\n",
+            static_cast<double>(X),
+            static_cast<double>(Z));
+        display.printf("Gravity Compensation\n Scalar: %.1f\n", static_cast<double>(scalar));
+        display.printf("Spring Constant K: %.2f", static_cast<double>(K));
+    }
+
+    void drawCalibrationResultJustSpring(modm::GraphicDisplay &display) const
+    {
+        const std::array<float, 4> result = this->getCalibrationResult();
+        const float K = result[3];
+        display.printf("Spring Constant K: %.2f", static_cast<double>(K));
+    }
+
+    /**
+     * @brief Calculates the center of mass and spring constant with least squares as one go
+     *
+     * @return std::array<float,4> cgX, cgZ, magnitude, and K.
+     */
+    std::array<float, 4> calculateCOMandSpring(
+        std::array<float, numTestPoints> Angles,
+        std::array<float, numTestPoints> Torques) const
     {
         Eigen::MatrixXd X(numTestPoints, 3);
         Eigen::VectorXd Y(numTestPoints);
@@ -94,36 +182,34 @@ public:
         return {calibrationResultToMM(A), calibrationResultToMM(B), magnitude, K};
     };
 
-    void drawCalibrationResult(modm::GraphicDisplay &display) const
-    {
-        const std::array<float, 4> result = this->getCalibrationResult();
-        const float X = result[0];
-        const float Z = result[1];
-        const float scalar = result[2];
-        const float K = result[3];
-        display.printf(
-            "Center of mass position:\n\tcgX: %.2f mm\n\tcgZ: %.2f mm\n",
-            static_cast<double>(X),
-            static_cast<double>(Z));
-        display.printf("Gravity Compensation\n Scalar: %.1f\n", static_cast<double>(scalar));
-        display.printf("Spring Constant K: %.2f", static_cast<double>(K));
-    }
-
-private:
-    const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce;
     /**
-     * @brief Helper function that turns the calibration result into
-     * units of mm.
+     * @brief Calculates the center of spring constant with least squares subtracting gravity if it
+     * is able too
      *
-     * @param calibrationNum Value from the COM calculation
-     * @return float `COMLocation` in mm
+     * @return std::array<float,4> K, 0, 0, 0
      */
-    inline float calibrationResultToMM(float calibrationNum) const
+    std::array<float, 4> calculateJustSpring(
+        std::array<float, numTestPoints> Angles,
+        std::array<float, numTestPoints> Torques) const
     {
-        // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm
-        return calibrationNum * 1000 * this->getCalibrationConfig().torqueToDesiredOut /
-               this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
-    }
+        Eigen::MatrixXd X(numTestPoints, 1);
+        Eigen::VectorXd Y(numTestPoints);
+
+        for (uint32_t i = 0; i < numTestPoints; ++i)
+        {
+            // remove the gravity component from the torque readings
+            const float Torque = Torques[i] - gravityForce->calculateCompensationEffort(
+                                                  {.pitchWorldFrame = Angles[i]});
+            X(i, 0) = springForce->calculateEffectiveMoment(Angles[i]);  // corresponds to K
+            Y(i) = Torque;
+        }
+        // Solve least squares: torque =  K·x
+        Eigen::VectorXd params = X.colPivHouseholderQr().solve(Y);
+
+        const float K = params(0);
+
+        return {0, 0, 0, K};
+    };
 
 };  // class autotune
 }  // namespace aruwsrc::control::autotune

@@ -619,7 +619,8 @@ autotune::GravityAutotuneCommand<9> gravityAutotuneCommandRight(
      turretRightMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
-    &chassis);
+    &turretSpringCompensation,
+    &turretGravityCompensation, &chassis);
 
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,

@@ -121,7 +121,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .turretPitchMountZ = 6.0f,
     .turretYawMountX = -53.0f,
     .turretYawMountZ = -30.0f,
-    .springConstant = -10.78f,
+    .springConstant = -2.6f,
     .springFreeLength = 10.0f};
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
