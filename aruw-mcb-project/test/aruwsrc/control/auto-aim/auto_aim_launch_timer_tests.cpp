@@ -65,7 +65,6 @@ protected:
           turretSubsystem(&drivers),
           ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0)
     {
-        std::cout << "constructor" << std::endl;
     };
 
     void SetUp() override {}
