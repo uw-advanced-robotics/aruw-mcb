@@ -87,7 +87,7 @@
         "polynomials": "cpp",
         "future": "cpp"
     },
-    "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.default.includePath": [
         "aruw-mcb-project/taproot/src",
         "aruw-mcb-project/src",
