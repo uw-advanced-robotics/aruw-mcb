@@ -93,7 +93,6 @@ public:
      */
     FrictionWheelSubsystem(
         tap::Drivers *drivers,
-<<<<<<< HEAD
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus,
@@ -119,12 +118,6 @@ public:
     {
         this->setTestCommand(&frictionTestCommand);
     }
-=======
-        tap::motor::MotorId leftMotorId,
-        tap::motor::MotorId rightMotorId,
-        tap::can::CanBus canBus,
-        aruwsrc::communication::can::TurretMCBCanComm *turretMCB);
->>>>>>> 593c184fd87c18607311c0449151b1b9874e7578
 
     void initialize() override
     {
@@ -144,19 +137,22 @@ public:
      * @param[in] speed The launch speed in m/s.
      * @param[in] directRpm Whether to directly set rpm or set bullet speed.
      */
-<<<<<<< HEAD
-    void setDesiredLaunchSpeed(float speed) override
+    void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed, bool directRpm = false)
+{
+    desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
+    if (directRpm)
     {
-        desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
+        desiredRpmRamp.setTarget(speed);
+    }
+    else
+    {
         desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
-        if (turretMCB != nullptr)
-        {
-            turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
-        }
-    };
-=======
-    mockable void setDesiredLaunchSpeed(float speed, bool directRpm = false);
->>>>>>> 593c184fd87c18607311c0449151b1b9874e7578
+    }
+    if (turretMCB != nullptr)
+    {
+        turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
+    }
+}
 
     // also need to changeWheelVelocityState to index, true for this to be used
     void setIndividualVelocity(int index, float velocity) override
