@@ -34,7 +34,7 @@ public:
 
     float getPredictedLaunchSpeed() const;
 
-    virtual void setDesiredLaunchSpeed(float speed) = 0;
+    virtual void setDesiredLaunchSpeed(float speed, bool directRpm = true) = 0;
 
     virtual void setIndividualVelocity(int index, float velocity) = 0;
 

@@ -96,7 +96,7 @@ public:
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         tap::can::CanBus,
-        aruwsrc::can::TurretMCBCanComm *turretMCB)
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
         : FrictionWheelInterface(drivers),
           drivers(drivers),
           launchSpeedLinearInterpolator(
@@ -137,7 +137,7 @@ public:
      * @param[in] speed The launch speed in m/s.
      * @param[in] directRpm Whether to directly set rpm or set bullet speed.
      */
-    void FrictionWheelSubsystem::setDesiredLaunchSpeed(float speed, bool directRpm = false)
+    void setDesiredLaunchSpeed(float speed, bool directRpm = false) override
 {
     desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
     if (directRpm)
