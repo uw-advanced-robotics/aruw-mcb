@@ -78,20 +78,16 @@
         "stop_token": "cpp",
         "numbers": "cpp",
         "span": "cpp",
-<<<<<<< HEAD
-        "hash_map": "cpp",
         "semaphore": "cpp",
-=======
         "dense": "cpp",
         "hash_map": "cpp",
         "sparseqr": "cpp",
         "mprealsupport": "cpp",
         "matrixfunctions": "cpp",
         "polynomials": "cpp",
->>>>>>> 593c184fd87c18607311c0449151b1b9874e7578
         "future": "cpp"
     },
-    "C_Cpp.errorSquiggles": "Enabled",
+    "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.default.includePath": [
         "aruw-mcb-project/taproot/src",
         "aruw-mcb-project/src",
