@@ -39,8 +39,10 @@ void PlateHitTracker::update()
         return;
     }
     bins = bins * DECAY_FACTOR;
-    for (int i = 0; i < BIN_NUMBER; i++) {
-        if (bins[i] < HIT_THRESH) {
+    for (int i = 0; i < BIN_NUMBER; i++)
+    {
+        if (bins[i] < HIT_THRESH)
+        {
             bins[i] = 0.0f;
             calculatedPeakAngles = false;
         }

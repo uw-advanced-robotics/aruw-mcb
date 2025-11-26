@@ -20,6 +20,8 @@
 
 #include <cassert>
 
+#include <aruwsrc/algorithms/plate_hit_tracker.hpp>
+
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
@@ -30,7 +32,6 @@
 #include "aruwsrc/control/turret/cv/setpoint_scanner.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
-#include <aruwsrc/algorithms/plate_hit_tracker.hpp>
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
@@ -86,7 +87,6 @@ void SentryTurretCVCommand::computeAimSetpoints(
 
 void SentryTurretCVCommand::execute()
 {
-    
     // setpoints are in chassis frame
     WrappedFloat majorSetpoint = yawControllerMajor.getSetpoint();
     WrappedFloat leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
@@ -157,7 +157,8 @@ void SentryTurretCVCommand::execute()
                 enterScanMode(majorSetpoint);
             }
 
-            if (curHitState == HitState::NOT_HIT) {
+            if (curHitState == HitState::NOT_HIT)
+            {
                 // scan logic: start at some default, scan 180deg clockwise, change direction
                 // scan 180 ccw, change, etc.
                 float v = majorScanValue.getWrappedValue();
@@ -183,29 +184,41 @@ void SentryTurretCVCommand::execute()
     PlateHitTracker::PlateHitBinData maxHit = plateHitTracker.getPeakAnglesRadians()[0];
     lastPlateHitData = plateHitData;
     plateHitData = maxHit;
-    switch (curHitState) {
-        case HitState::HIT: {
+    switch (curHitState)
+    {
+        case HitState::HIT:
+        {
             // set new setpoint if hit state transition or new hit is registered
-            hitLocDiffRads = abs(plateHitData.radians.minDifference(lastPlateHitData.radians));
-            if (lastHitState != curHitState || hitLocDiffRads > HIT_DIFF_OFFSET) {
+            hitLocDiffRads =
+                abs(plateHitData.radians.getUnwrappedValue() -
+                    lastPlateHitData.radians.getUnwrappedValue());
+            if (lastHitState != curHitState || hitLocDiffRads > HIT_DIFF_OFFSET)
+            {
                 majorSetpoint = maxHit.radians;
-                if (scanning) {
+                if (scanning)
+                {
                     leftYawSetpoint = majorSetpoint + TURRET_OFFSET;
                     rightYawSetpoint = majorSetpoint - TURRET_OFFSET;
                 }
             }
             lastHitState = curHitState;
             uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-            if (maxHit.magnitude < HIT_MAG_THRESH && curTime - lastHitTime > HIT_COUNT_DELAY_MILLISEC) { 
+            if (maxHit.magnitude < HIT_MAG_THRESH &&
+                curTime - lastHitTime > HIT_COUNT_DELAY_MILLISEC)
+            {
                 curHitState = HitState::NOT_HIT;
-            } else if (maxHit.magnitude >= HIT_MAG_THRESH) {
+            }
+            else if (maxHit.magnitude >= HIT_MAG_THRESH)
+            {
                 lastHitTime = curTime;
             }
             break;
         }
-        case HitState::NOT_HIT: {
+        case HitState::NOT_HIT:
+        {
             lastHitState = curHitState;
-            if (maxHit.magnitude >= HIT_MAG_THRESH) {
+            if (maxHit.magnitude >= HIT_MAG_THRESH)
+            {
                 curHitState = HitState::HIT;
             }
             break;

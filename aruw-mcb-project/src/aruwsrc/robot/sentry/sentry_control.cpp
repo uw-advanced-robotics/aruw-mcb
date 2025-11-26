@@ -938,8 +938,8 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
 
-    //drivers->commandScheduler.registerSubsystem(&turretLeftFrictionWheels);
-    //drivers->commandScheduler.registerSubsystem(&turretRightFrictionWheels);
+    // drivers->commandScheduler.registerSubsystem(&turretLeftFrictionWheels);
+    // drivers->commandScheduler.registerSubsystem(&turretRightFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretLeftAgitator);
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 

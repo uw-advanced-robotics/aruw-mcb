@@ -20,6 +20,8 @@
 #ifndef SENTRY_TURRET_CV_COMMAND_HPP_
 #define SENTRY_TURRET_CV_COMMAND_HPP_
 
+#include <aruwsrc/algorithms/plate_hit_tracker.hpp>
+
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
@@ -34,7 +36,6 @@
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 #include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
-#include <aruwsrc/algorithms/plate_hit_tracker.hpp>
 
 namespace tap::control::odometry
 {
@@ -76,7 +77,8 @@ public:
         aruwsrc::sentry::algorithms::SentryBallisticsSolver &ballisticsSolver;
     };
 
-    enum HitState {
+    enum HitState
+    {
         HIT,
         NOT_HIT,
     };
@@ -180,12 +182,12 @@ private:
     HitState curHitState = HitState::NOT_HIT;
     HitState lastHitState = HitState::NOT_HIT;
     uint32_t lastHitTime = 0;
-    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData plateHitData {};
-    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData lastPlateHitData {};
+    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData plateHitData{};
+    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData lastPlateHitData{};
     float hitLocDiffRads = 0.0f;
 
-    static constexpr uint32_t HIT_COUNT_DELAY_MILLISEC = 1000; 
-    static constexpr float HIT_MAG_THRESH = 0.4f; 
+    static constexpr uint32_t HIT_COUNT_DELAY_MILLISEC = 500;
+    static constexpr float HIT_MAG_THRESH = 0.4f;
     static constexpr float TURRET_OFFSET = modm::toRadian(10.0f);
     static constexpr float HIT_DIFF_OFFSET = modm::toRadian(20.0f);
 
