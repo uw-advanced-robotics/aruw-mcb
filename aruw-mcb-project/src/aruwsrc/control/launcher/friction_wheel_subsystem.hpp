@@ -138,21 +138,21 @@ public:
      * @param[in] directRpm Whether to directly set rpm or set bullet speed.
      */
     void setDesiredLaunchSpeed(float speed, bool directRpm = false) override
-{
-    desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
-    if (directRpm)
     {
-        desiredRpmRamp.setTarget(speed);
+        desiredLaunchSpeed = limitVal(speed, 0.0f, MAX_DESIRED_LAUNCH_SPEED);
+        if (directRpm)
+        {
+            desiredRpmRamp.setTarget(speed);
+        }
+        else
+        {
+            desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
+        }
+        if (turretMCB != nullptr)
+        {
+            turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
+        }
     }
-    else
-    {
-        desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
-    }
-    if (turretMCB != nullptr)
-    {
-        turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
-    }
-}
 
     // also need to changeWheelVelocityState to index, true for this to be used
     void setIndividualVelocity(int index, float velocity) override
