@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
-#define FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
+#ifndef TRIPLE_FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
+#define TRIPLE_FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
@@ -42,8 +42,8 @@ public:
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, setDesiredLaunchSpeed, (float, bool), (override));
     MOCK_METHOD(float, getDesiredLaunchSpeed, (), (const override));
-};  // class FrictionWheelSubsystemMock
+};  // class TripleFrictionWheelSubsystemMock
 }  // namespace mock
 }  // namespace aruwsrc
 
-#endif  // FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
+#endif  // TRIPLE_FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_

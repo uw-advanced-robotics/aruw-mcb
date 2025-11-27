@@ -186,18 +186,17 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
-// TripleFrictionWheelSubsystemMock::TripleFrictionWheelSubsystemMock(
-//     tap::Drivers *drivers,
-//     std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 3> wheels)
-//     : FrictionWheelSubsystem<3>(
-//           drivers,
-//           wheels,
-//           aruwsrc::control::launcher::wheelConfigsConstant,
-//           tap::can::CanBus::CAN_BUS1,
-//           nullptr)
-// {
-// }
-// TripleFrictionWheelSubsystemMock::~TripleFrictionWheelSubsystemMock() {}
+TripleFrictionWheelSubsystemMock::TripleFrictionWheelSubsystemMock(
+    tap::Drivers *drivers,
+    std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 3> wheels)
+    : FrictionWheelSubsystem<3>(
+          drivers,
+          wheels,
+          aruwsrc::control::launcher::WHEEL_CONFIG,
+          nullptr)
+{
+}
+TripleFrictionWheelSubsystemMock::~TripleFrictionWheelSubsystemMock() {}
 
 RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystemMock(
     tap::Drivers *drivers,
