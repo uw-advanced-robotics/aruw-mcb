@@ -201,26 +201,13 @@ tap::motor::DjiMotor rightWheel(
     false,
     "Right flywheel");
 std::array<tap::motor::MotorInterface *, 2> wheels = {&leftWheel, &rightWheel};
-modm::Pid<float> velocityPIDLeft(
-    aruwsrc::control::launcher::LAUNCHER_PID_KP,
-    aruwsrc::control::launcher::LAUNCHER_PID_KI,
-    aruwsrc::control::launcher::LAUNCHER_PID_KD,
-    aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
-    aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-modm::Pid<float> velocityPIDRight(
-    aruwsrc::control::launcher::LAUNCHER_PID_KP,
-    aruwsrc::control::launcher::LAUNCHER_PID_KI,
-    aruwsrc::control::launcher::LAUNCHER_PID_KD,
-    aruwsrc::control::launcher::LAUNCHER_PID_MAX_ERROR_SUM,
-    aruwsrc::control::launcher::LAUNCHER_PID_MAX_OUTPUT);
-std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
 RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
     2>
     frictionWheelsSubsystem(
         drivers(),
         wheels,
-        wheelConfigs,
+        aruwsrc::control::launcher::WHEEL_CONFIG,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
