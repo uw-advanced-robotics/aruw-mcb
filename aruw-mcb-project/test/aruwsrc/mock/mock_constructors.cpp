@@ -180,7 +180,7 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
     : FrictionWheelSubsystem<2>(
           drivers,
           wheels,
-          aruwsrc::control::launcher::wheelConfigsConstant,
+          aruwsrc::control::launcher::WHEEL_CONFIGS_ARRAY,
           tap::can::CanBus::CAN_BUS1,
           nullptr)
 {
@@ -206,7 +206,7 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
     : RefereeFeedbackFrictionWheelSubsystem<10, 2>(
           drivers,
           wheels,
-          aruwsrc::control::launcher::wheelConfigsConstant,
+          aruwsrc::control::launcher::WHEEL_CONFIGS_ARRAY,
           tap::can::CanBus::CAN_BUS1,
           nullptr,
           tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)

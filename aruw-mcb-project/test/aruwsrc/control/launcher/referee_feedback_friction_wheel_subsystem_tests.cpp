@@ -49,7 +49,7 @@ protected:
           frictionWheels(
               &drivers,
               std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
-              wheelConfigs,
+              WHEEL_CONFIGS_ARRAY,
               tap::can::CanBus::CAN_BUS1,
               nullptr,
               tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
@@ -64,7 +64,7 @@ protected:
     tap::arch::clock::ClockStub clock;
     tap::Drivers drivers;
     NiceMock<tap::mock::DjiMotorMock> leftFlywheel, rightFlywheel;
-    std::array<FlywheelConfig, 2> wheelConfigs = {wheelConfigLeft, wheelConfigRight};
+    std::array<FlywheelConfig, 2> wheelConfigs = {WHEEL_CONFIG, WHEEL_CONFIG};
     RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheels;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
