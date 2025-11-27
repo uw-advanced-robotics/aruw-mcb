@@ -272,7 +272,7 @@ tap::motor::DjiMotor rightWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::MotorInterface*, 2> wheels = {&leftWheel, &rightWheel};
+std::array<tap::motor::MotorInterface *, 2> wheels = {&leftWheel, &rightWheel};
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,

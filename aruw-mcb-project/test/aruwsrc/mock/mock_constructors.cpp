@@ -189,11 +189,7 @@ FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 TripleFrictionWheelSubsystemMock::TripleFrictionWheelSubsystemMock(
     tap::Drivers *drivers,
     std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 3> wheels)
-    : FrictionWheelSubsystem<3>(
-          drivers,
-          wheels,
-          aruwsrc::control::launcher::WHEEL_CONFIG,
-          nullptr)
+    : FrictionWheelSubsystem<3>(drivers, wheels, aruwsrc::control::launcher::WHEEL_CONFIG, nullptr)
 {
 }
 TripleFrictionWheelSubsystemMock::~TripleFrictionWheelSubsystemMock() {}

@@ -127,7 +127,11 @@ public:
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
         aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
-        : FrictionWheelSubsystem(drivers, wheels, createWheelConfigArray(wheelConfig, std::make_index_sequence<NUM_WHEELS>{}), turretMCB)
+        : FrictionWheelSubsystem(
+              drivers,
+              wheels,
+              createWheelConfigArray(wheelConfig, std::make_index_sequence<NUM_WHEELS>{}),
+              turretMCB)
     {
     }
 
