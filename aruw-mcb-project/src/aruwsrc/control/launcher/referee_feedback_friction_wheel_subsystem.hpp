@@ -70,6 +70,19 @@ public:
     {
     }
 
+    // constructor for using a single wheelconfig for all wheels
+    RefereeFeedbackFrictionWheelSubsystem(
+        tap::Drivers *drivers,
+        std::array<Motor *, NUM_WHEELS> wheels,
+        FlywheelConfig wheelConfig,
+        tap::can::CanBus canBus,
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
+        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfig, canBus, turretMCB),
+          firingSystemMechanismID(firingSystemMechanismID)
+    {
+    }
+
     /**
      * @return The predicted launch speed of the next projectile in m/s, using measured feedback
      * from the referee system barrel system to dynamically predict the barrel speed based on

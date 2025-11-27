@@ -272,10 +272,7 @@ tap::motor::DjiMotor rightWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::MotorInterface *, 2> wheels = {&leftWheel, &rightWheel};
-std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {
-    aruwsrc::control::launcher::wheelConfigLeft,
-    aruwsrc::control::launcher::wheelConfigRight};
+std::array<tap::motor::MotorInterface*, 2> wheels = {&leftWheel, &rightWheel};
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
@@ -283,7 +280,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     frictionWheelsSubsystem(
         drivers(),
         wheels,
-        wheelConfigs,
+        aruwsrc::control::launcher::WHEEL_CONFIG,
         aruwsrc::control::launcher::CAN_BUS_MOTORS,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);

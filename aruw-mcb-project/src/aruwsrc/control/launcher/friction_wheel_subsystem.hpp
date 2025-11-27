@@ -74,12 +74,15 @@ private:
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         std::index_sequence<Is...>)
     {
-        // std::array<tap::algorithms::SmoothPid, NUM_WHEELS> pids;
-        // for (uint8_t i = 0; i < NUM_WHEELS; i++)
-        //     {
-        //         pids[i] = tap::algorithms::SmoothPid(wheelConfigs[i].velocityPidConfig);
-        //     }
         return {{((void)Is, tap::algorithms::SmoothPid(wheelConfigs[0].velocityPidConfig))...}};
+    }
+
+    template <size_t... Is>
+    static std::array<FlywheelConfig, NUM_WHEELS> createWheelConfigArray(
+        FlywheelConfig wheelConfig,
+        std::index_sequence<Is...>)
+    {
+        return {{((void)Is, wheelConfig)...}};
     }
 
 public:
@@ -117,6 +120,17 @@ public:
           frictionTestCommand(this)
     {
         this->setTestCommand(&frictionTestCommand);
+    }
+
+    // constructor for using a single wheelconfig for all wheels
+    FrictionWheelSubsystem(
+        tap::Drivers *drivers,
+        std::array<Motor *, NUM_WHEELS> wheels,
+        FlywheelConfig wheelConfig,
+        tap::can::CanBus deleteThisLaterLOL,
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
+        : FrictionWheelSubsystem(drivers, wheels, createWheelConfigArray(wheelConfig, std::make_index_sequence<NUM_WHEELS>{}), deleteThisLaterLOL, turretMCB)
+    {
     }
 
     void initialize() override

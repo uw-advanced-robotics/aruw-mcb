@@ -78,22 +78,15 @@ static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 #endif
 
-static tap::algorithms::SmoothPidConfig velocityPIDConfigLeft(
+static constexpr tap::algorithms::SmoothPidConfig VELOCITY_PID_CONFIG(
     LAUNCHER_PID_KP,
     LAUNCHER_PID_KI,
     LAUNCHER_PID_KD,
     LAUNCHER_PID_MAX_ERROR_SUM,
     LAUNCHER_PID_MAX_OUTPUT);
-static tap::algorithms::SmoothPidConfig velocityPIDConfigRight(
-    LAUNCHER_PID_KP,
-    LAUNCHER_PID_KI,
-    LAUNCHER_PID_KD,
-    LAUNCHER_PID_MAX_ERROR_SUM,
-    LAUNCHER_PID_MAX_OUTPUT);
-static FlywheelConfig wheelConfigLeft = {velocityPIDConfigLeft, 0.0f};
-static FlywheelConfig wheelConfigRight = {velocityPIDConfigRight, 0.0f};
+static constexpr FlywheelConfig WHEEL_CONFIG = {VELOCITY_PID_CONFIG, 0.0f};
 
-static std::array<FlywheelConfig, 2> wheelConfigsConstant = {wheelConfigLeft, wheelConfigRight};
+static constexpr std::array<FlywheelConfig, 2> WHEEL_CONFIGS_ARRAY = {WHEEL_CONFIG, WHEEL_CONFIG};
 
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KP = 0.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KI = 0.749f;

@@ -32,6 +32,7 @@
 #include "sentry_request_subsystem_mock.hpp"
 #include "swerve_chassis_subsystem_mock.hpp"
 #include "swerve_module_mock.hpp"
+#include "triple_friction_wheel_subsystem_mock.hpp"
 #include "turret_controller_interface_mock.hpp"
 #include "turret_cv_command_mock.hpp"
 #include "turret_mcb_can_comm_mock.hpp"
@@ -173,9 +174,6 @@ SwerveModuleMock::SwerveModuleMock(
 }
 SwerveModuleMock::~SwerveModuleMock() {}
 
-// std::array<aruwsrc::control::launcher::FlywheelConfig, 2> wheelConfigs = {
-//     aruwsrc::control::launcher::wheelConfigLeft,
-//     aruwsrc::control::launcher::wheelConfigRight};
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
     tap::Drivers *drivers,
     std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels)
@@ -188,6 +186,19 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
+
+// TripleFrictionWheelSubsystemMock::TripleFrictionWheelSubsystemMock(
+//     tap::Drivers *drivers,
+//     std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 3> wheels)
+//     : FrictionWheelSubsystem<3>(
+//           drivers,
+//           wheels,
+//           aruwsrc::control::launcher::wheelConfigsConstant,
+//           tap::can::CanBus::CAN_BUS1,
+//           nullptr)
+// {
+// }
+// TripleFrictionWheelSubsystemMock::~TripleFrictionWheelSubsystemMock() {}
 
 RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystemMock(
     tap::Drivers *drivers,
