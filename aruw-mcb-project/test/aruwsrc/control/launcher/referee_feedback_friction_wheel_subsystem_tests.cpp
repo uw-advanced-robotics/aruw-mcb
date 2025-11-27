@@ -50,7 +50,6 @@ protected:
               &drivers,
               std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
               WHEEL_CONFIGS_ARRAY,
-              tap::can::CanBus::CAN_BUS1,
               nullptr,
               tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
     {
@@ -136,7 +135,6 @@ TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rollin
         &drivers,
         std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
         wheelConfigs,
-        tap::can::CanBus::CAN_BUS1,
         nullptr,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 

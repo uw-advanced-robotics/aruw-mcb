@@ -62,10 +62,9 @@ public:
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
-        tap::can::CanBus canBus,
         aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfigs, canBus, turretMCB),
+        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfigs, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }
@@ -75,10 +74,9 @@ public:
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
-        tap::can::CanBus canBus,
         aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfig, canBus, turretMCB),
+        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfig, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }

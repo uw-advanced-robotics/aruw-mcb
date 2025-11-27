@@ -98,7 +98,6 @@ public:
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
-        tap::can::CanBus,
         aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
         : FrictionWheelInterface(drivers),
           drivers(drivers),
@@ -127,9 +126,8 @@ public:
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
-        tap::can::CanBus deleteThisLaterLOL,
         aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
-        : FrictionWheelSubsystem(drivers, wheels, createWheelConfigArray(wheelConfig, std::make_index_sequence<NUM_WHEELS>{}), deleteThisLaterLOL, turretMCB)
+        : FrictionWheelSubsystem(drivers, wheels, createWheelConfigArray(wheelConfig, std::make_index_sequence<NUM_WHEELS>{}), turretMCB)
     {
     }
 

@@ -59,12 +59,10 @@ protected:
               &drivers,
               std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
               WHEEL_CONFIGS_ARRAY,
-              tap::can::CanBus::CAN_BUS1,
               nullptr),
             tripleFrictionWheels(&drivers,
               std::array<NiceMock<tap::mock::DjiMotorMock>*, 3>{{&leftFlywheel, &rightFlywheel, &thirdFlywheel}},
               WHEEL_CONFIG, // added benefit of testing both constructors for us
-              tap::can::CanBus::CAN_BUS1,
               nullptr)
     {
     }

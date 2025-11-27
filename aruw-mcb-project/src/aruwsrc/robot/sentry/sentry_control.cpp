@@ -471,7 +471,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         leftTurretWheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
-        turretLeft::CAN_BUS_MOTORS,
         &getTurretMCBCanComm2(),
         turretLeft::barrelID);
 tap::motor::DjiMotor rightTurretLeftWheel(
@@ -496,7 +495,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         rightTurretWheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
-        turretRight::CAN_BUS_MOTORS,
         &getTurretMCBCanComm1(),
         turretRight::barrelID);  // @todo idk what they actually are
 

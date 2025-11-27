@@ -181,7 +181,6 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
           drivers,
           wheels,
           aruwsrc::control::launcher::WHEEL_CONFIGS_ARRAY,
-          tap::can::CanBus::CAN_BUS1,
           nullptr)
 {
 }
@@ -207,7 +206,6 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
           drivers,
           wheels,
           aruwsrc::control::launcher::WHEEL_CONFIGS_ARRAY,
-          tap::can::CanBus::CAN_BUS1,
           nullptr,
           tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
 {
