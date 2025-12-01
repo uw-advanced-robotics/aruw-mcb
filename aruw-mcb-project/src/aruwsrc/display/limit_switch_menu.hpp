@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIMITSWITCH_MENU_HPP_
-#define LIMITSWTICH_MENU_HPP_
+#ifndef LIMIT_SWITCH_MENU_HPP_
+#define LIMIT_SWTICH_MENU_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/drivers.hpp"
@@ -27,6 +27,8 @@
 
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/display/vertical_scroll_logic_handler.hpp"
+
+
 
 namespace aruwsrc
 {
@@ -50,13 +52,16 @@ public:
 
     void shortButtonPress(modm::MenuButtons::Button button) override;
 
-    static const char *getMenuName() { return "LimitSwitch Menu"; }
+    static const char *getMenuName() { return "Limit Switch Menu"; }
 
 private:
-    static constexpr int LIMITSWITCH_MENU_ID = 16; // idk if theres a system for this, i j picked one that wasn't used
-    tap::Drivers *drivers;
-
+    static constexpr int LIMIT_SWITCH_MENU_ID = 16; // idk if theres a system for this, i j picked one that wasn't used
     
+    tap::Drivers *drivers;
+    
+    static constexpr std::array<std::string_view, 5> InputPinNames{
+        "B", "C", "D", "T", "Button"
+    };
 
     void drawLimitSwitch(tap::gpio::Digital::InputPin pin);
     
@@ -67,9 +72,18 @@ private:
         {tap::gpio::Digital::InputPin::T, -1},
         {tap::gpio::Digital::InputPin::Button, -1}
     };
+
+    // is this right
+    // static constexpr std::array<std::pair<int, const char*>, 5> pins = {{
+        // {tap::gpio::Digital::InputPin::B, -1},
+        // {tap::gpio::Digital::InputPin::C, -1},
+        // {tap::gpio::Digital::InputPin::D, -1}, 
+        // {tap::gpio::Digital::InputPin::T, -1},
+        // {tap::gpio::Digital::InputPin::Button, -1}
+    // }};
     
 };
 }  // namespace display
   
 
-#endif  // LIMITSWITCH_MENU_HPP_
+#endif  // LIMIT_SWITCH_MENU_HPP_

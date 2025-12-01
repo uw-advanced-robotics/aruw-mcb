@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "limitswitch_menu.hpp"
+#include "limit_switch_menu.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include <algorithm>
 #include <cmath>
@@ -33,32 +33,25 @@ namespace aruwsrc::display
 LimitSwitchMenu::LimitSwitchMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* stack,
     tap::Drivers *drivers)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, LIMITSWITCH_MENU_ID),
+    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, LIMIT_SWITCH_MENU_ID),
       drivers(drivers)
 {
-} 
+}
+ 
 
 void LimitSwitchMenu::drawLimitSwitch(tap::gpio::Digital::InputPin pin)
 {
     DigitalBeamBreak beamBreak(&drivers->digital, pin, false);
     const char* pinName = "";
-    switch(pin) {
-        case tap::gpio::Digital::InputPin::B: 
-            pinName = "B"; 
-            break;
-        case tap::gpio::Digital::InputPin::C: 
-            pinName = "C"; 
-            break;
-        case tap::gpio::Digital::InputPin::T: 
-            pinName = "T"; 
-            break;
-        case tap::gpio::Digital::InputPin::D: 
-            pinName = "D"; 
-            break;
-        case tap::gpio::Digital::InputPin::Button: 
-            pinName = "Button"; 
-            break; 
+
+    try {
+        std::size_t idx = static_cast<std::size_t>(pin);
+        pinName = InputPinNames.at(idx).data(); 
     }
+    catch (const std::out_of_range&) {
+        pinName = "UNKNOWN PIN";
+    }
+
 
     getViewStack()->getDisplay() << "Pin " << pinName << ": ";
     
@@ -112,7 +105,7 @@ bool LimitSwitchMenu::hasChanged()
         }
     }
     
-    return true;
+    return false;
 }
 
 void LimitSwitchMenu::shortButtonPress(modm::MenuButtons::Button button)

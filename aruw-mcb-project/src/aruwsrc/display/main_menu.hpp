@@ -33,7 +33,7 @@
 
 #include "about_menu.hpp"
 #include "autotune_menu.hpp"
-#include "limitswitch_menu.hpp"
+#include "limit_switch_menu.hpp"
 #include "capacitor_bank_menu.hpp"
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
