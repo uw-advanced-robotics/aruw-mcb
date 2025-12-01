@@ -48,7 +48,14 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr),
+          oledDisplay(this, 
+                nullptr, 
+                &turretMCBCanCommBus1,
+                &turretMCBCanCommBus2, 
+                nullptr, 
+                nullptr),
+          turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
+          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           engineerCVCommunication(this)
     {
     }
@@ -57,11 +64,17 @@ public:
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     serial::EngineerCVCommunication engineerCVCommunication;
+
+    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
+    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
 #else
 public:
     engineer::EngineerControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
     communication::serial::EngineerCVCommunication engineerCVCommunication;
+
+    communication::can::TurretMCBCanComm turretMCBCanCommBus1;
+    communication::can::TurretMCBCanComm turretMCBCanCommBus2;
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer

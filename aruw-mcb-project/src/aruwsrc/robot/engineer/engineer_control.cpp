@@ -60,6 +60,27 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
+#include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+
+// check which of these r important
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+
+#include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
+#include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
+
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+
+
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::joint;
@@ -73,6 +94,10 @@ using namespace tap::gpio;
 using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
 
+using namespace aruwsrc::control::turret;
+using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::control::buzzer;
+
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -85,6 +110,42 @@ namespace aruwsrc
 {
 namespace control
 {
+
+inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
+
+tap::motor::DjiMotor pitchTurretMotor(
+    drivers(),
+    PITCH_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    true,
+    "Pitch Turret",
+    true,
+    1,
+    PITCH_MOTOR_CONFIG.startEncoderValue);
+
+tap::motor::DjiMotor yawTurretMotor(
+    drivers(),
+    YAW_MOTOR_ID,
+    CAN_BUS_MOTORS,
+    false,
+    "Yaw Turret",
+    true,
+    1,
+    YAW_MOTOR_CONFIG.startEncoderValue);
+
+EngineerTurretSubsystem turret(
+    drivers(),
+    &pitchTurretMotor,
+    &yawTurretMotor,
+    PITCH_MOTOR_CONFIG,
+    YAW_MOTOR_CONFIG,
+    &getTurretMCBCanComm());
+
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
+
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
 tap::motor::DjiMotor leftFrontChassisMotor(
@@ -231,15 +292,76 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryExtensionLim
 LimitSwitchTrigger gantryExtensionTrigger(&gantryExtensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
-chassis::MecanumChassisSubsystem mechanumChassis(
+// chassis::MecanumChassisSubsystem mechanumChassis( 
+//     drivers(),
+//     &currentSensor,
+//     &voltageSensor,
+//     leftFrontChassisMotor,
+//     leftBackChassisMotor,
+//     rightFrontChassisMotor,
+//     rightBackChassisMotor,
+//     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
+
+// x drive chassis now i think?
+aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     drivers(),
-    &currentSensor,
-    &voltageSensor,
+    &voltageCurrentSensor,
+    &voltageCurrentSensor,
     leftFrontChassisMotor,
     leftBackChassisMotor,
     rightFrontChassisMotor,
     rightBackChassisMotor,
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
+
+
+// this could be useful i think
+
+aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
+    drivers(),
+    &drivers()->controlOperatorInterface,
+    &chassis,
+    &turret.yawMotor,
+    aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+
+aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+    turret.pitchMotor,
+    chassis_rel::PITCH_PID_CONFIG);
+
+aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+    turret.yawMotor,
+    chassis_rel::YAW_PID_CONFIG);
+
+BuzzerSubsystem buzzer(drivers());
+
+NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_SUCCESS_NOTES,
+    IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
+
+NoteSequenceCommand imuCalibrateFailBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_FAIL_NOTES,
+    IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
+
+imu::ImuCalibrateCommand imuCalibrateCommand(
+    drivers(),
+    {{
+        &getTurretMCBCanComm(),
+        &turret,
+        &chassisFrameYawTurretController,
+        &chassisFramePitchTurretController,
+        true,
+    }},
+    &chassis,
+    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    &imuCalibrateSuccessBuzzCommand,
+    &imuCalibrateFailBuzzCommand,
+    &odometrySubsystem,
+    // {&drivers()->ism330});
+    {&drivers()->mpu6500});
+
+IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
 TriggerHomedJointSubsystem cubeLift(drivers(), cubeLiftMotor, cubeLiftTrigger, CUBE_LIFT_CONFIG);
 
