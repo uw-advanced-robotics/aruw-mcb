@@ -23,7 +23,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/servo.hpp"
-
+#include "tap/algorithms/smooth_pid.hpp"
 namespace aruwsrc::robot::dart
 {
 static constexpr tap::motor::MotorId UPPER_PULL_MOTOR_ID = tap::motor::MOTOR2;
@@ -33,7 +33,14 @@ static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
+static constexpr tap::algorithms::SmoothPidConfig DART_RELOADER_PID_CONFIG = {
+    //TODO tune PID values
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .errDeadzone = 0.0f,
 
+};
 //  * @param[in] pwmPin The pin to attach the Servo class with.
 //  * @param[in] maximumPwm The maximum allowable PWM output. This is limited between 0 and 1.
 //  * @param[in] minimumPwm The minimum allowable PWM output. This is limited between 0 and 1.

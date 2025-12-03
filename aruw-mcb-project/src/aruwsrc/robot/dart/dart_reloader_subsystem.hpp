@@ -21,6 +21,7 @@
 
 #include "tap/control/subsystem.hpp"
 #include <tap/motor/dji_motor.hpp>
+#include "tap/algorithms/smooth_pid.hpp"
 
 namespace aruwsrc::robot::dart
 {
@@ -29,21 +30,25 @@ class DartReloaderSubsystem : public tap::control::Subsystem
 {
 public: 
     DartReloaderSubsystem(
-        tap::Drivers* drivers);
+        tap::Drivers* drivers,
+        tap::motor::MotorInterface& motor
+    );
 
     void initialize() override;
 
-    void setMotorOutput() override;
-
+    void setSetpoint(float32_t setpoint) ;
+    bool atSetpoint() ;
     void refresh() override;
-
+    float32_t getSetpoint() const { return setpoint; }
     void refreshSafeDisconnect() override;
 
     const char* getName() const override { return "Dart Reloader Subsystem"; }
 
 private:
-    tap::motor::MotorInterface motor;
-};  // class CLASS_NAME
+    tap::motor::MotorInterface &motor;
+    tap::algorithms::SmoothPid pidController;
+    float32_t setpoint = 0;
+};  // class DartReloaderSubsystem
 
-}  // NAMESPACE
+}  // namespace aruwsrc::robot::dart
 #endif  // DART_RELOADER_SUBSYSTEM_HPP_
