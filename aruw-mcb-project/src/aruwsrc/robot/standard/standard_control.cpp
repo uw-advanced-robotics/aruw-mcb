@@ -109,6 +109,7 @@
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
 #endif
+#include <aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp>
 
 using namespace tap::communication::serial;
 using namespace tap::control;
@@ -290,7 +291,20 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
+aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    transformer.getWorldToChassis(),
+    aruwsrc::control::chassis::BEYBLADE_CONFIG);
+
 /* define commands ----------------------------------------------------------*/
+aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand(
+    *drivers(),
+    chassis,
+    autoNavController,
+    odometrySubsystem,
+    false);
+
 aruwsrc::control::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
@@ -604,9 +618,10 @@ HoldRepeatCommandMapping leftSwitchDown(
     {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
-HoldCommandMapping leftSwitchUp(
+
+PressCommandMapping leftSwitchUp(
     drivers(),
-    {&turretCVCommand, &chassisDriveCommand},
+    {&autoNavBeybladeCommand},//{&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
@@ -697,6 +712,7 @@ HoldCommandMapping ctrlPressed(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+AutoNavPath path {};
 /* register subsystems here -------------------------------------------------*/
 void registerStandardSubsystems(Drivers *drivers)
 {
@@ -706,10 +722,17 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    odometrySubsystem.reset();
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
+
+    path.clearPathChanged();
+    path.pushPoint(Position(1,0,0));
+    path.pushPoint(Position(0,0,0));
+    autoNavController.setDesiredSpeed(0.05);
+    autoNavController.attachPath(&path);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -733,7 +756,7 @@ void initializeSubsystems()
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
+    //chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);

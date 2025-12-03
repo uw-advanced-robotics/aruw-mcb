@@ -37,6 +37,7 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include <aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp>
 
 namespace aruwsrc::control::chassis::sentry
 {
@@ -52,6 +53,7 @@ public:
         const tap::Drivers& drivers,
         chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
+        aruwsrc::algorithms::odometry::ChassisCFOdometry& odometry,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -62,7 +64,7 @@ public:
 
     bool isFinished() const override { return false; }
 
-    inline void toggleBeyblade() { beybladeEnabled = !beybladeEnabled; };
+    inline void toggleBeyblade() { beybladeEnabled = false; };
 
     inline void toggleMovement() { movementEnabled = !movementEnabled; };
 
@@ -72,10 +74,11 @@ private:
     const tap::Drivers& drivers;
     chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
+    aruwsrc::algorithms::odometry::ChassisCFOdometry& odometry;
 
     bool autoNavOnlyInGame;
 
-    bool beybladeEnabled = true;
+    bool beybladeEnabled = false;
     bool movementEnabled = true;
 
 };  // class AutoNavBeybladeCommand

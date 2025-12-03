@@ -18,6 +18,7 @@
  */
 
 #include "auto_nav_beyblade_command.hpp"
+#include <aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp>
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -35,10 +36,12 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     const tap::Drivers& drivers,
     chassis::HolonomicChassisSubsystem& chassis,
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
+    aruwsrc::algorithms::odometry::ChassisCFOdometry& odometry,
     bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
       autoNavController(autoNavController),
+      odometry(odometry),
       autoNavOnlyInGame(autoNavOnlyInGame)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
@@ -46,7 +49,10 @@ AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     addSubsystemRequirement(&chassis);
 }
 
-void AutoNavBeybladeCommand::initialize() { autoNavController.initialize(); }
+void AutoNavBeybladeCommand::initialize() { 
+    //odometry.reset();
+    autoNavController.initialize();
+}
 
 void AutoNavBeybladeCommand::execute()
 {
