@@ -128,9 +128,8 @@ private:
         POINT_3,
         POINT_3 - Vector(3, 0.1, 0)};  // BIT BEHIND RIGHT SIDE_WALL
 
-    const std::array<const Position, 2> TEST_PATH = {Position(0,0,0), Position(0.1,0,0)};
-    const std::array<const Position, 2> ATTACKING_PATH = TEST_PATH; //{RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3};
-    const std::array<const Position, 2> HEALING_PATH = TEST_PATH;//{POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
+    const std::array<const Position, 4> ATTACKING_PATH = {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3};
+    const std::array<const Position, 4> HEALING_PATH = {POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
 
     static constexpr uint16_t PATH_LENGTH_MILLIS = 11000;
     static constexpr uint16_t PATROL_SEGMENT_LENGTH_MILLIS = 5000;

@@ -302,7 +302,6 @@ aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand
     *drivers(),
     chassis,
     autoNavController,
-    odometrySubsystem,
     false);
 
 aruwsrc::control::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
@@ -728,10 +727,11 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 
+    // TODO check odometry values while driving
     path.clearPathChanged();
-    path.pushPoint(Position(1,0,0));
-    path.pushPoint(Position(0,0,0));
-    autoNavController.setDesiredSpeed(0.05);
+    path.pushPoint(Position(0.5,0,0));
+    //path.pushPoint(Position(0,0.5,0));
+    autoNavController.setDesiredSpeed(5);
     autoNavController.attachPath(&path);
 }
 
@@ -752,6 +752,8 @@ void initializeSubsystems()
     perpendicularOmni.initialize();
     parallelOmni.initialize();
 }
+
+//x=0.61 - , y= 6.21
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)

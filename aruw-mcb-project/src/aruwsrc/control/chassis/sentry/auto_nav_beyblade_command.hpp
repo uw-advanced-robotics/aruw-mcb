@@ -53,7 +53,6 @@ public:
         const tap::Drivers& drivers,
         chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-        aruwsrc::algorithms::odometry::ChassisCFOdometry& odometry,
         bool autoNavOnlyInGame = false);
 
     void initialize() override;
@@ -64,7 +63,7 @@ public:
 
     bool isFinished() const override { return false; }
 
-    inline void toggleBeyblade() { beybladeEnabled = false; };
+    inline void toggleBeyblade() { beybladeEnabled = !beybladeEnabled; };
 
     inline void toggleMovement() { movementEnabled = !movementEnabled; };
 
@@ -74,7 +73,7 @@ private:
     const tap::Drivers& drivers;
     chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
-    aruwsrc::algorithms::odometry::ChassisCFOdometry& odometry;
+    float speed = 0.0f;
 
     bool autoNavOnlyInGame;
 
