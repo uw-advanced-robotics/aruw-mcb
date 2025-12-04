@@ -111,12 +111,12 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {28.19f, 7800.0f}, {29.40f, 7900.0f}};
 #elif defined(TARGET_SENTRY_ECLIPSE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},
-    {15.0f, 4900.0f},
-    {18.0f, 6050.0f},
-    {27.5f, 7000.0f},
-    {30.0f, 7700.0f},
-    {32.0f, 8400.0f},
+    {0.0f, 0.0f},      {11.33f, 4500.0f}, {11.34f, 4600.0f}, {12.3f, 4700.0f},  {13.39f, 4900.0f},
+    {14.32f, 5000.0f}, {14.78f, 5100.0f}, {15.91f, 5350.0f}, {16.4f, 5500.0f},  {18.28f, 5600.0f},
+    {19.18f, 5700.0f}, {19.58f, 5900.0f}, {20.21f, 6100.0f}, {20.76f, 6200.0f}, {20.88f, 6600.0f},
+    {21.52f, 6700.0f}, {22.45f, 6900.0f}, {22.91f, 7000.0f}, {24.14f, 7100.0f}, {24.16f, 7200.0f},
+    {24.61f, 7300.0f},
+
 };
 #else  // TARGET_DRONE, TARGET_ENGINEER
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {

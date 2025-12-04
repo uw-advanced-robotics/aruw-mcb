@@ -49,7 +49,7 @@ private:
     uint32_t prevTime = 0;
     uint16_t curRPM = 0;
 
-    static constexpr uint16_t TIME_INC_MILLI = 500;
+    static constexpr uint16_t TIME_INC_MILLI = 50;
     static constexpr uint16_t RPM_MAX = 8000;
     static constexpr uint8_t RPM_INCREMENT = 100;
 
