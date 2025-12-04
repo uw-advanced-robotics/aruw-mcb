@@ -467,19 +467,20 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     rotateAgitator,
     unjamAgitator);
 
-RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
-    drivers()->refSerial,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+// Unused, causes incosnistent fire rates due to suspected ref delay.
+// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
+//     drivers()->refSerial,
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
 ManualFireRateReselectionManager manualFireRateReselectionManager;
 FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
 
-GovernorLimitedCommand<3> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&refSystemProjectileLaunchedGovernor, &frictionWheelsOnGovernor, &fireRateLimitGovernor});
+    {&frictionWheelsOnGovernor, &fireRateLimitGovernor});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
