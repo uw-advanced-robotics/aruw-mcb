@@ -28,6 +28,8 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
 
+#include "main_menu.hpp"
+
 namespace aruwsrc
 {
 class Drivers;
@@ -71,6 +73,7 @@ private:
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite1;
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite2;
     communication::can::cap_bank::CapacitorBank *capacitorBank;
+    aruwsrc::display::MainMenu mainMenu;
 };
 }  // namespace display
 }  // namespace aruwsrc
