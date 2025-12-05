@@ -17,6 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "aruwsrc/util_macros.hpp"
+
 #if defined(TARGET_ENGINEER)
 
 #include "tap/communication/gpio/digital.hpp"
@@ -61,6 +63,7 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 #include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
+// #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
@@ -79,7 +82,8 @@
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-
+#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
+#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
 
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::client_display::indicators;
@@ -303,7 +307,7 @@ LimitSwitchTrigger gantryExtensionTrigger(&gantryExtensionLimit);
 //     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
 // x drive chassis now i think?
-aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
+XDriveChassisSubsystem chassis(
     drivers(),
     &voltageCurrentSensor,
     &voltageCurrentSensor,
@@ -323,11 +327,11 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &turret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
     turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
-aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
     turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
