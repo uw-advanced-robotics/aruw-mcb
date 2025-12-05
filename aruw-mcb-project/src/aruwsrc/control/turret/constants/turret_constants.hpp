@@ -27,6 +27,7 @@
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
+#include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"
 // necessary to satiate vision_coprocessor and world turret pid controller which relies on this
 // header for number of turrets and gravity compensation values
 // @todo use template parameter, normal parameter, or other workaround in the future
