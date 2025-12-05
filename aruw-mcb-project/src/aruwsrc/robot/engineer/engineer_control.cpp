@@ -101,6 +101,7 @@ using tap::control::CommandMapper;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::buzzer;
+using namespace aruwsrc::control::chassis;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -140,7 +141,7 @@ tap::motor::DjiMotor yawTurretMotor(
     1,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
-EngineerTurretSubsystem turret(
+EngineerTurretSubsystem engTurret(
     drivers(),
     &pitchTurretMotor,
     &yawTurretMotor,
@@ -148,7 +149,7 @@ EngineerTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
@@ -306,11 +307,10 @@ LimitSwitchTrigger gantryExtensionTrigger(&gantryExtensionLimit);
 //     rightBackChassisMotor,
 //     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
-// x drive chassis now i think?
-XDriveChassisSubsystem chassis(
+aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
     drivers(),
-    &voltageCurrentSensor,
-    &voltageCurrentSensor,
+    &currentSensor,
+    &voltageSensor,
     leftFrontChassisMotor,
     leftBackChassisMotor,
     rightFrontChassisMotor,
@@ -323,27 +323,27 @@ XDriveChassisSubsystem chassis(
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
-    &chassis,
-    &turret.yawMotor,
+    &xDriveChassis,
+    &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    turret.pitchMotor,
+aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+    engTurret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
-algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    turret.yawMotor,
+aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+    engTurret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
-BuzzerSubsystem buzzer(drivers());
+BuzzerSubsystem engineerBuzzer(drivers());
 
 NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
-    buzzer,
+    engineerBuzzer,
     IMU_CALIBRATE_SUCCESS_NOTES,
     IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
 
 NoteSequenceCommand imuCalibrateFailBuzzCommand(
-    buzzer,
+    engineerBuzzer,
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
@@ -351,21 +351,21 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
         &getTurretMCBCanComm(),
-        &turret,
+        &engTurret,
         &chassisFrameYawTurretController,
         &chassisFramePitchTurretController,
         true,
     }},
-    &chassis,
+    &xDriveChassis,
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand,
-    &odometrySubsystem,
+    nullptr,
     // {&drivers()->ism330});
     {&drivers()->mpu6500});
 
-IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
+aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
 TriggerHomedJointSubsystem cubeLift(drivers(), cubeLiftMotor, cubeLiftTrigger, CUBE_LIFT_CONFIG);
 
@@ -454,7 +454,7 @@ SetpointMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
 aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
-    &chassis);
+    &xDriveChassis);
 
 WristControllerCommand wristControllerCommand(
     wristRollSubsystem,
@@ -596,7 +596,7 @@ CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    chassis.initialize();
+    xDriveChassis.initialize();
     gantryLiftSubsystem.initialize();
     gantryExtensionSubsystem.initialize();
     wristRollSubsystem.initialize();
@@ -610,7 +610,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&xDriveChassis);
     drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
     drivers->commandScheduler.registerSubsystem(&gantryExtensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
@@ -624,7 +624,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
-    chassis.setDefaultCommand(&chassisDriveCommand);
+    xDriveChassis.setDefaultCommand(&chassisDriveCommand);
     gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
     gantryExtensionSubsystem.setDefaultCommand(&gantryExtensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);

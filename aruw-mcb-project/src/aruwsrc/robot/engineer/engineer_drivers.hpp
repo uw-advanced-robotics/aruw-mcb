@@ -31,6 +31,7 @@
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 
 #endif
