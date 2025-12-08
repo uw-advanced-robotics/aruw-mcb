@@ -20,6 +20,7 @@
 
 #include "tap/communication/serial/ref_serial_data.hpp"
 
+
 namespace aruwsrc::chassis
 {
 void ChassisAutoNavController::initialize()
@@ -48,7 +49,7 @@ void ChassisAutoNavController::runController(
 
     // make if can sprint (above 25%)
     // add a boolean for sprinting check posError over a threshold (make a constant in chassis constants)
-    if (posError.magnitude() > TRANSLATIONAL_MOTION_THRESHOLD && capBankSubsystem.getAvailableEnergy() > CAPBANK_ENERGY_THRESHOLD) { // is it translating
+    if (posError.magnitude() > translationalMotionThreshhold && capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold) { // is it translating
         capBankSubsystem.changeSprintMode(can::capbank::SprintMode::SPRINT);
         
     } else {

@@ -116,7 +116,7 @@ private:
     const Position POINT_3 = Position(5, 4.0, 0);     // MIDDLE
     const Position POINT_4 = Position(5.25, 7.5, 0);  // SIDE_WALL
     const Position POINT_5 = Position(0,0,0);
-    const Position POINT_6 = Position(0.01,0,0);
+    const Position POINT_6 = Position(0.5,0,0);
 
     // const std::array<Position, 5> ATTACKING_PATH =
     //     {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3, POINT_4};

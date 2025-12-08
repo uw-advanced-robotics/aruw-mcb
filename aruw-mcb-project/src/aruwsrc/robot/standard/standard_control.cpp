@@ -299,7 +299,9 @@ aruwsrc::chassis::ChassisAutoNavController autoNavController(
     chassis,
     transformer.getWorldToChassis(),
     aruwsrc::chassis::BEYBLADE_CONFIG,
-    capBankSubsystem);
+    capBankSubsystem,
+    0.25f,
+    500.0f);
 
 
 /* define commands ----------------------------------------------------------*/

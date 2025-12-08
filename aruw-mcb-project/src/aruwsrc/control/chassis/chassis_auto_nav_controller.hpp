@@ -50,13 +50,18 @@ public:
         aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
         const Transform& worldToChassis,
         const aruwsrc::chassis::BeybladeConfig beybladeConfig,
-        aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem)
+        aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem, 
+        float translationalMotionThreshhold,
+        float capbankEnergyThreshold)
         : chassis(chassis),
           lastSetPoint(Position(-1, -1, 0)),
           drivers(drivers),
           worldToChassis(worldToChassis),
           beybladeConfig(beybladeConfig),
-           capBankSubsystem(capBankSubsystem)
+          capBankSubsystem(capBankSubsystem),
+          translationalMotionThreshhold(translationalMotionThreshhold),
+          capbankEnergyThreshold(capbankEnergyThreshold)
+
     {}
 
     void initialize();
@@ -93,6 +98,9 @@ private:
     aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem;
 
     float desiredSpeed = 0;
+
+    float translationalMotionThreshhold;
+    float capbankEnergyThreshold;
 };
 }  // namespace aruwsrc::chassis
 
