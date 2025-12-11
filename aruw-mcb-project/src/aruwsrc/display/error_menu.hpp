@@ -53,7 +53,7 @@ private:
     tap::Drivers *drivers;
     tap::display::VerticalScrollLogicHandler vertScrollHandler;
 
-    uint32_t rightHoldTimer = 0;
+    uint32_t rightTapNum = 0;
     std::size_t prevErrorCount = 0;
 };  // class ErrorMenu
 }  // namespace display

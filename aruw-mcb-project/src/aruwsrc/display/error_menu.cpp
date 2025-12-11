@@ -49,17 +49,16 @@ void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
         case modm::MenuButtons::UP:
         case modm::MenuButtons::DOWN:
             vertScrollHandler.onShortButtonPress(button);
+            rightTapNum = 0;
             break;
         case modm::MenuButtons::RIGHT:
-            // force you to hold right for .5 seconds to delete an error
-            // to prevent accidental deletions
-            rightHoldTimer++;
-            if (rightHoldTimer < 2)
+            rightTapNum++;
+            if (rightTapNum < 2)
             {
                 break;
             }
             drivers->errorController.removeSystemErrorAtIndex(vertScrollHandler.getCursorIndex());
-            rightHoldTimer = 0;
+            rightTapNum = 0;
             break;
         case modm::MenuButtons::OK:
             break;
@@ -90,7 +89,7 @@ void ErrorMenu::draw()
     display.clear();
     display.setCursor(0, 2);
     display << ErrorMenu::getMenuName() << modm::endl;
-    display << "Hold RIGHT to remove error" << modm::endl;
+    display << "Tap RIGHT twice to remove error" << modm::endl;
 
     int numErrors = drivers->errorController.getErrorList().getSize();
     if (numErrors == 0)
@@ -98,7 +97,7 @@ void ErrorMenu::draw()
         display << "No Errors" << modm::endl;
         return;
     }
-    // return as vertScrollHandler doesn't want a size of 0
+
     if (numErrors != vertScrollHandler.getSize())
     {
         vertScrollHandler.setSize(numErrors);
@@ -106,62 +105,59 @@ void ErrorMenu::draw()
 
     int8_t index = 0;
 
-    constexpr size_t MAX_CHARS_PER_LINE = 40;
+    // There is no way to get the font width directly, but you can give it a character and get its
+    // width. There is also no getFont(), so we cannot see the font, only works with monospaced
+    // fonts.
+    size_t MAX_CHARS_PER_LINE = display.getWidth() / display.getStringWidth("a");
 
     for (const auto &error : drivers->errorController.getErrorList())
     {
-        // Check if the item is within the scroll window
         if (index >= vertScrollHandler.getSmallestIndexDisplayed() &&
             index <= vertScrollHandler.getLargestIndexDisplayed())
         {
-            // 1. Print the Cursor
+            // Draw selector
             bool isSelected = (index == vertScrollHandler.getCursorIndex());
             display << (isSelected ? "> " : "  ");
 
-            // 2. Get description and prepare for wrapping
-            // Assuming getDescription() returns std::string or const char*
-            std::string text = error.getDescription();
+            const std::string_view text = error.getDescription();
 
             size_t currentLineLen = 2;  // Start at 2 because of "> " or "  "
             size_t pos = 0;
-
-            while (pos < text.length())
+            // Print error with wrapping
+            while (pos < text.size())
             {
-                // Find the length of the next word
-                size_t nextSpace = text.find(' ', pos);
-                if (nextSpace == std::string::npos) nextSpace = text.length();
+                // manual scan for next space
+                size_t nextSpace = pos;
+                while (nextSpace < text.size() && text[nextSpace] != ' ') nextSpace++;
 
                 size_t wordLen = nextSpace - pos;
-
-                // Check if word fits on current line
-                // +1 accounts for the space we might need to add before the word
                 bool needsSpace = (currentLineLen > 2);
+
+                // wrap check
                 if (currentLineLen + wordLen + (needsSpace ? 1 : 0) > MAX_CHARS_PER_LINE)
                 {
-                    // WRAP: New line + Indent (2 spaces) to align with text
                     display << modm::endl << "  ";
                     currentLineLen = 2;
-                    needsSpace = false;  // New line, no leading space needed
+                    needsSpace = false;
                 }
 
-                // Print space before word if needed
                 if (needsSpace)
                 {
-                    display << " ";
+                    display << ' ';
                     currentLineLen++;
                 }
 
-                // Print the word
-                display << text.substr(pos, wordLen).c_str();
-                currentLineLen += wordLen;
+                // print characters
+                for (size_t i = pos; i < pos + wordLen; ++i) display << text[i];
 
-                // Move position to next word (skip the space)
-                pos = nextSpace + 1;
+                currentLineLen += wordLen;
+                pos = (nextSpace < text.size()) ? nextSpace + 1 : nextSpace;
             }
 
             // End the error item
             display << modm::endl;
         }
+        // move to next error
         index++;
     }
 }
