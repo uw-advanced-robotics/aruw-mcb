@@ -119,7 +119,9 @@ void ErrorMenu::draw()
             bool isSelected = (index == vertScrollHandler.getCursorIndex());
             display << (isSelected ? "> " : "  ");
 
-            const std::string_view text = error.getDescription();
+            const std::string text = std::string(error.getDescription()) + " [" +
+                                     std::string(error.getFilename()) + ':' +
+                                     std::to_string(error.getLineNumber()) + ']';
 
             size_t currentLineLen = 2;  // Start at 2 because of "> " or "  "
             size_t pos = 0;
