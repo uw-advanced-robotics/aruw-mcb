@@ -20,6 +20,10 @@
 #ifndef UTIL_MACROS_HPP_
 #define UTIL_MACROS_HPP_
 
+#if defined(TARGET_MOTOR_TESTER)
+#define SSH1106_OLED
+#endif
+
 /**
  * Define a helper macro that makes it easier to specify at compile time something that should be
  * true for all standards.
