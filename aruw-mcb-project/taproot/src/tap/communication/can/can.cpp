@@ -29,7 +29,6 @@
 #ifdef PLATFORM_HOSTED
 #include "tap/motor/motorsim/dji_motor_sim_handler.hpp"
 #endif
-
 #include "tap/board/board.hpp"
 #include "tap/util_macros.hpp"
 

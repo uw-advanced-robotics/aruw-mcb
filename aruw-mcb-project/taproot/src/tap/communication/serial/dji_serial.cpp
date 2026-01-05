@@ -20,9 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cstring>
 
-#include "tap/architecture/clock.hpp"
-#include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
