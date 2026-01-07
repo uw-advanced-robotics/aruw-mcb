@@ -19,11 +19,11 @@
 
 #include "friction_wheel_lut_finder_command.hpp"
 
-#include "friction_wheel_subsystem.hpp"
+#include "friction_wheel_interface.hpp"
 
 namespace aruwsrc::control::launcher
 {
-FrictionWheelLUTFinderCommand::FrictionWheelLUTFinderCommand(FrictionWheelSubsystem *subsystem)
+FrictionWheelLUTFinderCommand::FrictionWheelLUTFinderCommand(FrictionWheelInterface *subsystem)
     : subsystem(subsystem)
 {
     this->addSubsystemRequirement(subsystem);

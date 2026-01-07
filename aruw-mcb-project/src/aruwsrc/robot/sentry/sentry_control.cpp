@@ -60,6 +60,7 @@
 #include "aruwsrc/control/governor/match_running_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -448,23 +449,52 @@ ChassisFrameYawTurretController turretMajorChassisYawController(
     turretMajor::chassisFrameController::YAW_PID_CONFIG);
 
 // Friction Wheels
+tap::motor::DjiMotor turretLeftFrictionWheelLeft(
+    drivers(),
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    turretLeft::CAN_BUS_MOTORS,
+    true,
+    "Left flywheel");
+tap::motor::DjiMotor turretLeftFrictionWheelRight(
+    drivers(),
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    turretLeft::CAN_BUS_MOTORS,
+    false,
+    "Right flywheel");
+std::array<tap::motor::MotorInterface *, 2> turretLeftWheels = {
+    &turretLeftFrictionWheelLeft,
+    &turretLeftFrictionWheelRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
+    2>
     turretLeftFrictionWheels(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-        turretLeft::CAN_BUS_MOTORS,
+        turretLeftWheels,
+        aruwsrc::control::launcher::WHEEL_CONFIG,
         &getTurretMCBCanComm2(),
         turretLeft::barrelID);
-
+tap::motor::DjiMotor turretRightFrictionWheelLeft(
+    drivers(),
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    turretRight::CAN_BUS_MOTORS,
+    true,
+    "Left flywheel");
+tap::motor::DjiMotor turretRightFrictionWheelRight(
+    drivers(),
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    turretRight::CAN_BUS_MOTORS,
+    false,
+    "Right flywheel");
+std::array<tap::motor::MotorInterface *, 2> turretRightWheels = {
+    &turretRightFrictionWheelLeft,
+    &turretRightFrictionWheelRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
+    2>
     turretRightFrictionWheels(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-        turretRight::CAN_BUS_MOTORS,
+        turretRightWheels,
+        aruwsrc::control::launcher::WHEEL_CONFIG,
         &getTurretMCBCanComm1(),
         turretRight::barrelID);  // @todo idk what they actually are
 
