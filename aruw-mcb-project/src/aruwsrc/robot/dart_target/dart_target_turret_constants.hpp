@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOTOR_TESTER_TURRET_CONSTANTS_HPP_
-#define MOTOR_TESTER_TURRET_CONSTANTS_HPP_
+#ifndef DART_TARGET_TURRET_CONSTANTS_HPP_
+#define DART_TARGET_TURRET_CONSTANTS_HPP_
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
