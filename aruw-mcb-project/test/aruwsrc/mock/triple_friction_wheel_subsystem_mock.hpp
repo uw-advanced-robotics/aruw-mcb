@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,31 +17,33 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef REFEREE_FEEDBACK_FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
-#define REFEREE_FEEDBACK_FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
+#ifndef TRIPLE_FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
+#define TRIPLE_FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 
-namespace aruwsrc::mock
+namespace aruwsrc
 {
-class RefereeFeedbackFrictionWheelSubsystemMock
-    : public aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<10, 2>
+namespace mock
+{
+class TripleFrictionWheelSubsystemMock
+    : public aruwsrc::control::launcher::FrictionWheelSubsystem<3>
 {
 public:
-    RefereeFeedbackFrictionWheelSubsystemMock(
+    TripleFrictionWheelSubsystemMock(
         tap::Drivers *drivers,
-        std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels);
-    virtual ~RefereeFeedbackFrictionWheelSubsystemMock();
+        std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 3> wheels);
+    virtual ~TripleFrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, setDesiredLaunchSpeed, (float, bool), (override));
     MOCK_METHOD(float, getDesiredLaunchSpeed, (), (const override));
-    MOCK_METHOD(float, getPredictedLaunchSpeed, (), (const override));
-};
-}  // namespace aruwsrc::mock
+};  // class TripleFrictionWheelSubsystemMock
+}  // namespace mock
+}  // namespace aruwsrc
 
-#endif  // FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_
+#endif  // TRIPLE_FRICTION_WHEEL_SUBSYSTEM_MOCK_HPP_

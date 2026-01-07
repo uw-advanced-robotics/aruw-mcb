@@ -24,13 +24,13 @@
 
 namespace aruwsrc::control::launcher
 {
-class FrictionWheelSubsystem;
+class FrictionWheelInterface;
 
 /** Command to generate a lookup table between friction wheel RPM and projectile launch speed. */
 class FrictionWheelLUTFinderCommand : public tap::control::Command
 {
 public:
-    FrictionWheelLUTFinderCommand(FrictionWheelSubsystem *subsystem);
+    FrictionWheelLUTFinderCommand(FrictionWheelInterface *subsystem);
 
     bool isReady() override { return true; };
 
@@ -45,7 +45,7 @@ public:
     const char *getName() const override { return "friction wheel LUT finder command"; }
 
 private:
-    FrictionWheelSubsystem *subsystem;
+    FrictionWheelInterface *subsystem;
     uint32_t prevTime = 0;
     uint16_t curRPM = 0;
 
