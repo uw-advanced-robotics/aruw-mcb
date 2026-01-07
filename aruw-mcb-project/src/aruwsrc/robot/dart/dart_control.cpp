@@ -31,11 +31,13 @@
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 #include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
+#include "aruwsrc/robot/dart/dart_reloader_subsystem.hpp"
 
 #include "dart_close_command.hpp"
 #include "dart_open_command.hpp"
 #include "dart_pullback_command.hpp"
 #include "dart_release_command.hpp"
+#include "rotate_magazine_command.hpp"
 
 using namespace tap::control;
 using namespace aruwsrc::control;
@@ -64,15 +66,29 @@ tap::motor::DoubleDjiMotor pullMotors(
     "Upper Motor",
     "Lower Motor");
 
+tap::motor::DjiMotor reloaderMotor(
+    drivers(),
+    RELOADER_MOTOR_ID,
+    LAUNCHER_CAN_BUS,
+    true,
+    "Reloader Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006
+);
+
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 DartLauncherSubsystem dartLauncher(drivers(), pullMotors);
+
+DartReloaderSubsystem dartReloader(drivers(), reloaderMotor);
 
 DartReleaseCommand dartRelease(dartLauncher, MANUAL_RELEASE_DESIRED_OUTPUT);
 DartPullbackCommand dartPullback(dartLauncher, MANUAL_PULLBACK_DESIRED_OUTPUT);
 
 DartOpenCommand servoOpen(dartLauncher);
 DartCloseCommand servoClose(dartLauncher);
+
+RotateMagazineCommand rotateMagazine(dartReloader);
 
 HoldCommandMapping rightSwitchUp(
     drivers(),
@@ -91,14 +107,18 @@ HoldCommandMapping leftSwitchUp(
 
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&servoClose},
+    {&rotateMagazine},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-void initializeSubsystems() { dartLauncher.initialize(); }
+void initializeSubsystems() { 
+    dartLauncher.initialize(); 
+    dartReloader.initialize();
+}
 
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&dartLauncher);
+    drivers->commandScheduler.registerSubsystem(&dartReloader);
     drivers->digital.configureInputPullMode(
         tap::gpio::Digital::B,
         tap::gpio::Digital::InputPullMode::PullUp);

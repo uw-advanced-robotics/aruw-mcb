@@ -33,7 +33,7 @@ void DartReloaderSubsystem::refresh()
     int output = pidController.runController(
         error,
         errorDerivative,
-        0.02f);  // assuming refresh called every 20ms
+        0.002f);  // assuming refresh called every 20ms
     motor.setDesiredOutput(output);
 }
 
