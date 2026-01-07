@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MOTOR_TESTER_CONSTANTS_HPP_
-#define MOTOR_TESTER_CONSTANTS_HPP_
+#ifndef DART_TARGET_CONSTANTS_HPP_
+#define DART_TARGET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
@@ -40,7 +40,7 @@ tap::algorithms::SmoothPidConfig m2006VelocityPidConfig = {
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610};
 
-    tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
+tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
     {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
 }  // namespace aruwsrc::dart_target::constants

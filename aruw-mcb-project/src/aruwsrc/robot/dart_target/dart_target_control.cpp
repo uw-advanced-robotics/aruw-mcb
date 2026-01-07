@@ -31,9 +31,9 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/dart_target/motor_subsystem.hpp"
 #include "aruwsrc/robot/dart_target/dart_target_constants.hpp"
 #include "aruwsrc/robot/dart_target/dart_target_drivers.hpp"
+#include "aruwsrc/robot/dart_target/motor_subsystem.hpp"
 #include "aruwsrc/robot/dart_target/stick_rpm_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
@@ -85,10 +85,7 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 
 // inits
 
-void initializeSubsystems()
-{
-    motorSubsystem2006.initialize();
-}
+void initializeSubsystems() { motorSubsystem2006.initialize(); }
 
 void registerSubsystems(Drivers* drivers)
 {
@@ -97,10 +94,7 @@ void registerSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&motorSubsystem2006);
 }
 
-void registerIoMappings(Drivers*)
-{
-    motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
-}
+void registerIoMappings(Drivers*) { motorSubsystem2006.setDefaultCommand(&leftVerticalManual); }
 
 }  // namespace dart_target_control
 
