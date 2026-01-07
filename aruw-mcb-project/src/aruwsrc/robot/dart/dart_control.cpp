@@ -20,6 +20,7 @@
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
@@ -69,12 +70,11 @@ tap::motor::DoubleDjiMotor pullMotors(
 tap::motor::DjiMotor reloaderMotor(
     drivers(),
     RELOADER_MOTOR_ID,
-    LAUNCHER_CAN_BUS,
+    RELOADER_CAN_BUS,
     true,
     "Reloader Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006
-);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006);
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -105,13 +105,14 @@ HoldCommandMapping leftSwitchUp(
     {&servoOpen},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-HoldCommandMapping leftSwitchDown(
+PressCommandMapping leftSwitchDown(
     drivers(),
     {&rotateMagazine},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
-void initializeSubsystems() { 
-    dartLauncher.initialize(); 
+void initializeSubsystems()
+{
+    dartLauncher.initialize();
     dartReloader.initialize();
 }
 

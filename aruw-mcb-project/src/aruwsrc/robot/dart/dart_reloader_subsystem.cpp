@@ -35,6 +35,7 @@ void DartReloaderSubsystem::refresh()
         errorDerivative,
         0.002f);  // assuming refresh called every 20ms
     motor.setDesiredOutput(output);
+    DartReloaderSubsystem::currentPosition = currentPosition;
 }
 
 void DartReloaderSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
