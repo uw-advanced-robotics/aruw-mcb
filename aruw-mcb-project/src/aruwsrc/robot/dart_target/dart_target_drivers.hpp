@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,27 +17,31 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UTIL_MACROS_HPP_
-#define UTIL_MACROS_HPP_
+#ifndef DART_TARGET_DRIVERS_HPP_
+#define DART_TARGET_DRIVERS_HPP_
 
-#if defined(TARGET_MOTOR_TESTER) || defined(TARGET_DART_TARGET)
-#define SSH1106_OLED
+#include "tap/drivers.hpp"
+
+#include "aruwsrc/display/oled_display.hpp"
+
+namespace aruwsrc::dart_target
+{
+class Drivers : public tap::Drivers
+{
+    friend class DriversSingleton;
+
+#ifdef ENV_UNIT_TESTS
+public:
 #endif
+    Drivers()
+        : tap::Drivers(),
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
+    {
+    }
 
-/**
- * Define a helper macro that makes it easier to specify at compile time something that should be
- * true for all standards.
- */
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
-#define ALL_STANDARDS
-#endif
+public:
+    display::OledDisplay oledDisplay;
+};  // class aruwsrc::DartTargetDrivers
+}  // namespace aruwsrc::dart_target
 
-/**
- * A helper macro that makes it easier to specify at compile time something that should be true for
- * all sentries.
- */
-#if defined(TARGET_SENTRY_ECLIPSE)
-#define ALL_SENTRIES
-#endif
-
-#endif  // UTIL_MACROS_HPP_
+#endif  // DART_TARGET_DRIVERS_HPP_

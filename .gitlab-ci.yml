@@ -74,6 +74,7 @@ before_script:
             aruwsrc/robot/testbed/testbed_control.cpp
             aruwsrc/robot/blank/blank_control.cpp
             aruwsrc/robot/motor_tester/motor_tester_control.cpp
+            aruwsrc/robot/dart_target/dart_target_control.cpp
             aruwsrc/robot/characterizer/characterizer_control.cpp
             main.cpp
 
@@ -338,6 +339,14 @@ before_script:
     - .mcb_build
   variables:
     ROBOT: MOTOR_TESTER
+
+# Dart Target Build
+
+"Dart Target: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: DART_TARGET
 
 # Pages deploy
 

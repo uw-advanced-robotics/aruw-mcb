@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,27 +17,25 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UTIL_MACROS_HPP_
-#define UTIL_MACROS_HPP_
+#include "stick_rpm_command.hpp"
 
-#if defined(TARGET_MOTOR_TESTER) || defined(TARGET_DART_TARGET)
-#define SSH1106_OLED
-#endif
+StickRpmCommand::StickRpmCommand(
+    MotorSubsystem* subsystem,
+    tap::communication::serial::Remote* remote,
+    tap::communication::serial::Remote::Channel channel,
+    float maxRpm)
+    : motorSubsystem(subsystem),
+      remote(remote),
+      channel(channel),
+      maxRpm(maxRpm)
+{
+    this->addSubsystemRequirement(subsystem);
+}
 
-/**
- * Define a helper macro that makes it easier to specify at compile time something that should be
- * true for all standards.
- */
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
-#define ALL_STANDARDS
-#endif
+void StickRpmCommand::execute()
+{
+    float stick = remote->getChannel(this->channel);
+    motorSubsystem->setDesiredRPM(maxRpm * stick);
+}
 
-/**
- * A helper macro that makes it easier to specify at compile time something that should be true for
- * all sentries.
- */
-#if defined(TARGET_SENTRY_ECLIPSE)
-#define ALL_SENTRIES
-#endif
-
-#endif  // UTIL_MACROS_HPP_
+void StickRpmCommand::end(bool) { motorSubsystem->stop(); }

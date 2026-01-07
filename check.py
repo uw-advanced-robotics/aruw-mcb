@@ -151,6 +151,7 @@ class BuildTarget(Enum):
     TESTBED = "TESTBED"
     BLANK = "BLANK"
     MOTOR_TESTER = "MOTOR_TESTER"
+    DART_TARGET = "DART_TARGET"
     all = "all"
 
 
