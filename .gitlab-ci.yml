@@ -340,13 +340,13 @@ before_script:
   variables:
     ROBOT: MOTOR_TESTER
 
-# Dart Target Build
+# Launcher Target Build
 
-"Dart Target: MCB Build":
+"Launcher Target: MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: DART_TARGET
+    ROBOT: LAUNCHER_TARGET
 
 # Pages deploy
 

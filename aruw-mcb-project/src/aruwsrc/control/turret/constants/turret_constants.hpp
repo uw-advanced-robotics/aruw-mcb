@@ -51,7 +51,7 @@ static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 #include "aruwsrc/robot/blank/blank_turret_constants.hpp"
 #elif defined(TARGET_MOTOR_TESTER)
 #include "aruwsrc/robot/motor_tester/motor_tester_turret_constants.hpp"
-#elif defined(TARGET_DART_TARGET)
+#elif defined(TARGET_LAUNCHER_TARGET)
 #include "aruwsrc/robot/dart_target/dart_target_turret_constants.hpp"
 #elif defined(TARGET_CHARACTERIZER)
 #include "aruwsrc/robot/characterizer/characterizer_turret_constants.hpp"

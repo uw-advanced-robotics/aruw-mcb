@@ -20,7 +20,7 @@
 #ifndef UTIL_MACROS_HPP_
 #define UTIL_MACROS_HPP_
 
-#if defined(TARGET_MOTOR_TESTER) || defined(TARGET_DART_TARGET)
+#if defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
 #define SSH1106_OLED
 #endif
 

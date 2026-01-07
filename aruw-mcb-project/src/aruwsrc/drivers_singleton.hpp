@@ -51,7 +51,7 @@ namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 namespace aruwsrc::motor_tester
-#elif defined(TARGET_DART_TARGET)
+#elif defined(TARGET_LAUNCHER_TARGET)
 #include "aruwsrc/robot/dart_target/dart_target_drivers.hpp"
 namespace aruwsrc::dart_target
 #elif defined(TARGET_CHARACTERIZER)
