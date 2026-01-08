@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAVITY_AUTOTUNE_MENU_HPP_
-#define GRAVITY_AUTOTUNE_MENU_HPP_
+#ifndef AUTOTUNE_SPECIFIC_MENU_HPP_
+#define AUTOTUNE_SPECIFIC_MENU_HPP_
 
 #include <modm/io/iostream.hpp>
 
@@ -35,21 +35,21 @@ class Drivers;
 namespace aruwsrc::display
 {
 /**
- * Menu that allows the user to schedule an `gravityAutotuneCommand` in the `CommandScheduler`. Also
- * displays the current calibration state of the `gravityAutotuneCommand`.
+ * Menu that allows the user to schedule an `autotuneCommand` in the `CommandScheduler`. Also
+ * displays the current calibration state of the `autotuneCommand`.
  */
-class GravityAutotuneMenu
-    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class AutotuneSpecificMenu
+    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>
 {
 public:
     /**
      * @param[in] vs `ViewStack` that this menu is sitting on top of.
      * @param[in] drivers A pointer to the global drivers object.
      */
-    GravityAutotuneMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
+    AutotuneSpecificMenu(
+        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
         tap::Drivers *drivers,
-        aruwsrc::control::autotune::GravityAutotuneInterface *gravityAutotuneCommand);
+        aruwsrc::control::autotune::TurretAutotuneInterface *autotuneCommand);
 
     void draw() override;
 
@@ -59,10 +59,10 @@ public:
 
     bool hasChanged() override;
 
-    static const char *getMenuName() { return "Gravity Calibrate Menu"; }
+    static const char *getMenuName() { return "Run Calibrate Menu"; }
 
 private:
-    static constexpr int GRAVITY_AUTOTUNE_MENU_ID = 1;
+    static constexpr int AUTOTUNE_MENU_ID = 1;
 
     static constexpr const char *CALI_STATE_TO_CHAR_STR[] = {
         "WAITING_FOR_SYSTEMS_ONLINE",
@@ -75,10 +75,10 @@ private:
 
     tap::Drivers *drivers;
 
-    aruwsrc::control::autotune::GravityAutotuneInterface *gravityAutotuneCommand;
+    aruwsrc::control::autotune::TurretAutotuneInterface *autotuneCommand;
 
-    aruwsrc::control::autotune::GravityAutotuneInterface::CalibrationState currCalibrationState =
-        aruwsrc::control::autotune::GravityAutotuneInterface::CalibrationState::
+    aruwsrc::control::autotune::TurretAutotuneInterface::CalibrationState currCalibrationState =
+        aruwsrc::control::autotune::TurretAutotuneInterface::CalibrationState::
             WAITING_FOR_SYSTEMS_ONLINE;
 };
 }  // namespace aruwsrc::display
