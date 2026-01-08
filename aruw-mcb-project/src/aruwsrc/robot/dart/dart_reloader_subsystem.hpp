@@ -38,13 +38,13 @@ public:
 
     void setSetpoint(float32_t setpoint) ;
     bool atSetpoint() ;
-    float32_t getPostion() const { return motor.getEncoder()->getPosition().getUnwrappedValue(); }
+    float32_t getPosition() const { return motor.getEncoder()->getPosition().getUnwrappedValue(); }
     void refresh() override;
     float32_t getSetpoint() const { return setpoint; }
     void refreshSafeDisconnect() override;
 
     const char* getName() const override { return "Dart Reloader Subsystem"; }
-    float currentPosition = 0.0f;
+    float position = 0.0f;
 private:
     tap::motor::MotorInterface &motor;
     tap::algorithms::SmoothPid pidController;

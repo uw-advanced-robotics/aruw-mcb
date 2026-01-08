@@ -71,10 +71,10 @@ tap::motor::DjiMotor reloaderMotor(
     drivers(),
     RELOADER_MOTOR_ID,
     RELOADER_CAN_BUS,
-    true,
+    false,
     "Reloader Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006 / 6.25);
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -112,7 +112,7 @@ PressCommandMapping leftSwitchDown(
 
 void initializeSubsystems()
 {
-    dartLauncher.initialize();
+    // dartLauncher.initialize();
     dartReloader.initialize();
 }
 
@@ -131,9 +131,9 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
+    // drivers->commandMapper.addMap(&rightSwitchUp);
+    // drivers->commandMapper.addMap(&rightSwitchDown);
+    // drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
 }
 
