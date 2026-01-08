@@ -290,8 +290,10 @@ TurretCVCommandMock::TurretCVCommandMock(
     communication::serial::VisionCoprocessor *visionCoprocessor,
     control::ControlOperatorInterface *controlOperatorInterface,
     aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::YAW> *yawController,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::PITCH> *pitchController,
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
