@@ -244,11 +244,7 @@ void CommandScheduler::run()
         // to complete all this stuff, if it does something
         // is seriously wrong (i.e. you are adding subsystems unchecked or the scheduler
         // itself is broken).
-        RAISE_ERROR(
-            drivers,
-            ("scheduler took longer than MAX_ALLOWABLE_SCHEDULER_RUNTIME, Time: " +
-             std::to_string(arch::clock::getTimeMicroseconds() - runStart))
-                .c_str());
+        RAISE_ERROR(drivers, "scheduler took longer than MAX_ALLOWABLE_SCHEDULER_RUNTIME");
     }
 #endif
 }
