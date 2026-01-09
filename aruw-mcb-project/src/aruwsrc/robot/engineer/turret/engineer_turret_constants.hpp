@@ -24,6 +24,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
@@ -63,9 +64,8 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 // do we need this balancing stuff?
 
 // Turret is perfectly balanced
-static constexpr float TURRET_CG_X = 0.0f;
-static constexpr float TURRET_CG_Z = 0.0f;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
+static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
+    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
 
 // everything needs tuning
 namespace world_rel_turret_imu
