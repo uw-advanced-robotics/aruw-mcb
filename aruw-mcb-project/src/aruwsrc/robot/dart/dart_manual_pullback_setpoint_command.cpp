@@ -45,5 +45,4 @@ void DartManualPullbackSetpointCommand::execute()
 
 bool DartManualPullbackSetpointCommand::isFinished() const { return false; }
 
-void DartManualPullbackSetpointCommand::end(bool interrupted) {}
 }  // namespace aruwsrc::robot::dart
