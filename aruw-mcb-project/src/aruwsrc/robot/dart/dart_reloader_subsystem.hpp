@@ -50,5 +50,5 @@ private:
     float32_t setpoint = 0;
 };  // class DartReloaderSubsystem
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif  // DART_RELOADER_SUBSYSTEM_HPP_

@@ -39,5 +39,5 @@ public:
 private:
     DartReloaderSubsystem &subsystem;
 };
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif  // ROTATE_MAGAZINE_COMMAND_HPP_

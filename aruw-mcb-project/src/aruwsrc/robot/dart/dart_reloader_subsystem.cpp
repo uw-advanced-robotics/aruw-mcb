@@ -56,4 +56,4 @@ void DartReloaderSubsystem::refresh()
 
 void DartReloaderSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart

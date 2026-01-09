@@ -34,4 +34,4 @@ void RotateMagazineCommand::initialize()
 void RotateMagazineCommand::execute() {}
 void RotateMagazineCommand::end(bool) {}
 bool RotateMagazineCommand::isFinished() const { return subsystem.atSetpoint(); }
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
