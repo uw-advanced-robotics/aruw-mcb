@@ -314,15 +314,13 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-aruwsrc::control::turret::algorithms::
-    ChassisFramePitchTurretController chassisFramePitchTurretController(
-        engTurret.pitchMotor,
-        chassis_rel::PITCH_PID_CONFIG);
+aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+    aruwsrc::control::turret::algorithms::Axis::PITCH>
+    chassisFramePitchTurretController(engTurret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
 
-aruwsrc::control::turret::algorithms::
-    ChassisFrameYawTurretController chassisFrameYawTurretController(
-        engTurret.yawMotor,
-        chassis_rel::YAW_PID_CONFIG);
+aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+    aruwsrc::control::turret::algorithms::Axis::YAW>
+    chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
 
 BuzzerSubsystem engineerBuzzer(drivers());
 
