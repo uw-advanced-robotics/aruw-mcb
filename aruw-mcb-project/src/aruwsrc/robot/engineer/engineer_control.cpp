@@ -1,4 +1,3 @@
-#if defined(TARGET_ENGINEER)
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -17,6 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+// Guys please dont make fun of me
+#if defined(TARGET_ENGINEER)
 
 #include "aruwsrc/util_macros.hpp"
 
