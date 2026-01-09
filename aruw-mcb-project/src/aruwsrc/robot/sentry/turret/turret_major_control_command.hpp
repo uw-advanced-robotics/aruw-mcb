@@ -26,7 +26,7 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
-using namespace aruwsrc::control::sentry;
+using namespace aruwsrc::sentry;
 using namespace tap::algorithms;
 
 namespace aruwsrc
@@ -60,7 +60,8 @@ public:
         tap::Drivers *drivers,
         SentryControlOperatorInterface &controlOperatorInterface,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController,
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            aruwsrc::control::turret::algorithms::Axis::YAW> &yawController,
         float userYawInputScalar);
 
     bool isReady() override;
@@ -83,7 +84,8 @@ private:
     WrappedFloat lastYawSetPoint;
     uint32_t prevTime = 0;
 
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::YAW> &yawController;
 
     const float userYawInputScalar;
 };

@@ -26,7 +26,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/servo.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 class DartLauncherSubsystem : public tap::control::Subsystem
 {
@@ -66,5 +66,5 @@ protected:
 
 };  // class DartLauncherSubsystem
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif  // DART_LAUNCHER_SUBSYSTEM_HPP_

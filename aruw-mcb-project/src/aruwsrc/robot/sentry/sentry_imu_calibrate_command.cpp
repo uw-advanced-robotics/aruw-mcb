@@ -37,12 +37,13 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
     aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &turretMajorController,
-    chassis::HolonomicChassisSubsystem &chassis,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        control::turret::algorithms::Axis::YAW> &turretMajorController,
+    control::chassis::HolonomicChassisSubsystem &chassis,
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-    aruwsrc::virtualMCB::MCBLite &chassisMCBLite,
+    aruwsrc::communication::mcb_lite::MCBLite &chassisMCBLite,
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime)

@@ -43,7 +43,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::agitator
 {
 /**
  * Subsystem whose primary purpose is to encapsulate an agitator motor that operates using a
@@ -191,6 +191,6 @@ private:
 #endif
 };
 
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::agitator
 
 #endif  // VELOCITY_AGITATOR_SUBSYSTEM_HPP_

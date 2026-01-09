@@ -20,7 +20,7 @@
 
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 MecanumWheel::MecanumWheel(Motor& driveMotor, WheelConfig& config) : Wheel(driveMotor, config) {}
 
@@ -41,5 +41,5 @@ void MecanumWheel::initialize()
     }
 }
 
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 }  // namespace aruwsrc

@@ -25,7 +25,7 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/servo.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 static constexpr tap::motor::MotorId UPPER_PULL_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId LOWER_PULL_MOTOR_ID = tap::motor::MOTOR1;
@@ -57,5 +57,5 @@ static constexpr tap::gpio::Digital::InputPin BEAMBREAK_PORT = tap::gpio::Digita
 static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;  // TODO: update value when limit switch is installed on dart
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif

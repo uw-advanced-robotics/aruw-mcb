@@ -19,10 +19,10 @@
 
 #include "vision_assistance_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 VisionAssistanceIndicator::VisionAssistanceIndicator(
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     tap::communication::serial::RefSerial &refSerial,
     const Transform &worldToCameraTransform,
@@ -80,7 +80,8 @@ modm::ResumableResult<void> VisionAssistanceIndicator::update()
 
     robotOrbits = interRobotTransmitter.getStateEstimate();
 
-    for (int i = 0; i < aruwsrc::serial::VisionCoprocessor::MAX_NUM_ROBOT_ORBITS; i++)
+    for (int i = 0; i < aruwsrc::communication::serial::VisionCoprocessor::MAX_NUM_ROBOT_ORBITS;
+         i++)
     {
         bool valid = (tap::arch::clock::getTimeMilliseconds() - robotOrbits.robot[i].timestamp) <
                      TIME_CUTOFF_MS;
@@ -263,4 +264,4 @@ void VisionAssistanceIndicator::deleteGraphic(GraphicIndex index)
     graphic.graphicData[idx].operation = Tx::GRAPHIC_DELETE;
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

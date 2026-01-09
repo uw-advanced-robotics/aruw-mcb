@@ -35,7 +35,7 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Draws a little chassis graphic on the HUD that represents the actual rotation of the chassis
@@ -112,6 +112,6 @@ private:
      */
     Tx::Graphic2Message chassisOrientationGraphics;
 };
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  //  CHASSIS_ORIENTATION_INDICATOR_HPP_

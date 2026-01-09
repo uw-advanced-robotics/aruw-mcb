@@ -29,7 +29,7 @@
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class ChassisAutoNavController
 {
@@ -45,9 +45,9 @@ public:
 
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+        HolonomicChassisSubsystem& chassis,
         const Transform& worldToChassis,
-        const aruwsrc::chassis::BeybladeConfig beybladeConfig)
+        const aruwsrc::control::chassis::BeybladeConfig beybladeConfig)
         : chassis(chassis),
           lastSetPoint(Position(-1, -1, 0)),
           drivers(drivers),
@@ -74,14 +74,14 @@ public:
     inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
 
 private:
-    aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
+    aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
     Position lastSetPoint;
     tap::Drivers& drivers;
 
     const Transform& worldToChassis;
 
-    aruwsrc::chassis::BeybladeConfig beybladeConfig;
+    aruwsrc::control::chassis::BeybladeConfig beybladeConfig;
 
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;
@@ -89,6 +89,6 @@ private:
 
     float desiredSpeed = 0;
 };
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // CHASSIS_AUTO_NAV_CONTROLLER_HPP_

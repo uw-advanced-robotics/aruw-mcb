@@ -30,10 +30,12 @@ namespace aruwsrc
 {
 namespace mock
 {
-class FrictionWheelSubsystemMock : public aruwsrc::control::launcher::FrictionWheelSubsystem
+class FrictionWheelSubsystemMock : public aruwsrc::control::launcher::FrictionWheelSubsystem<2>
 {
 public:
-    FrictionWheelSubsystemMock(tap::Drivers *drivers);
+    FrictionWheelSubsystemMock(
+        tap::Drivers *drivers,
+        std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels);
     virtual ~FrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

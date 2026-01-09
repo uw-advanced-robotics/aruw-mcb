@@ -43,9 +43,7 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Abstract subsystem for a holonomic chassis
@@ -62,7 +60,7 @@ public:
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
         tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
-        can::capbank::CapacitorBank* capacitorBank = nullptr);
+        communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -99,7 +97,7 @@ public:
         if (capacitorBank != nullptr && capacitorBank->isSprinting())
         {
             return capacitorBank->getMaximumOutputCurrent() *
-                   can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
+                   communication::can::cap_bank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
         }
 
         return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
@@ -162,7 +160,7 @@ public:
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
-    static can::capbank::CapacitorBank* capacitorBank;
+    static communication::can::cap_bank::CapacitorBank* capacitorBank;
 
     float desiredRotation = 0;
 
@@ -185,8 +183,6 @@ public:
 
 };  // class HolonomicChassisSubsystem
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
 
 #endif  // HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_

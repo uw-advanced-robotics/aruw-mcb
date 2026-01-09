@@ -28,7 +28,7 @@
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 
-namespace aruwsrc::algorithms::transforms
+namespace aruwsrc::algorithms::odometry::transforms
 {
 /**
  * @brief transform provider for both the standard and hero
@@ -81,6 +81,6 @@ private:
     Transform chassisToArducam;
 };
 
-}  // namespace aruwsrc::algorithms::transforms
+}  // namespace aruwsrc::algorithms::odometry::transforms
 
 #endif  // STANDARD_AND_HERO_TRANSFORMER_HPP_

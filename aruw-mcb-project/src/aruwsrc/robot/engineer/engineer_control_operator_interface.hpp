@@ -25,11 +25,11 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
-namespace aruwsrc::control::engineer
+namespace aruwsrc::engineer
 {
-class EngineerControlOperatorInterface : public ControlOperatorInterface
+class EngineerControlOperatorInterface : public control::ControlOperatorInterface
 {
 public:
     EngineerControlOperatorInterface(tap::Drivers *drivers)
@@ -104,6 +104,6 @@ private:
     float divideGantryLift = 375.0f;
     float divideGantryExtension = 375.0f;
 };
-}  // namespace aruwsrc::control::engineer
+}  // namespace aruwsrc::engineer
 
 #endif  // ENGINEER_CONTROL_OPERATOR_INTERFACE_HPP__

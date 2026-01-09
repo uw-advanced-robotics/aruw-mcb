@@ -30,18 +30,19 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::engineer
 {
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::engineer::wrist;
-class SlidersIndicator : public HudIndicator, protected modm::Resumable<2>
+class SlidersIndicator : public control::client_display::indicators::HudIndicator,
+                         protected modm::Resumable<2>
 {
 public:
     SlidersIndicator(
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        joint::JointSubsystem &gantryLift,
-        joint::JointSubsystem &gantryExtension,
-        joint::JointSubsystem &cubeLift,
+        control::joint::JointSubsystem &gantryLift,
+        control::joint::JointSubsystem &gantryExtension,
+        control::joint::JointSubsystem &cubeLift,
         WristSubsystem &wristSubsystem,
         wrist::WristConfig wristConfig);
 
@@ -52,9 +53,9 @@ public:
     modm::ResumableResult<void> update() override final;
 
 private:
-    joint::JointSubsystem &gantryLift;
-    joint::JointSubsystem &gantryExtension;
-    joint::JointSubsystem &cubeLift;
+    control::joint::JointSubsystem &gantryLift;
+    control::joint::JointSubsystem &gantryExtension;
+    control::joint::JointSubsystem &cubeLift;
     WristSubsystem &wristSubsystem;
     wrist::WristConfig wristConfig;
 
@@ -96,6 +97,6 @@ private:
     }
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::engineer
 
 #endif  // SLIDERS_INDICATOR_HPP_

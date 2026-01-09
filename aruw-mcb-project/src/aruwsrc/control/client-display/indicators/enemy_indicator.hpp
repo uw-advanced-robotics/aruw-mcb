@@ -29,7 +29,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Adds text to show "ENEMY" in bright yellow under the enemy team's side.
@@ -68,6 +68,6 @@ private:
     const tap::communication::serial::RefSerial &refSerial;
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // ENEMY_INDICATOR_HPP_

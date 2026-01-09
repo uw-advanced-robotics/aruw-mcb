@@ -55,7 +55,7 @@ public:
     CVMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
         tap::Drivers *drivers,
-        serial::VisionCoprocessor *visionCoprocessor);
+        communication::serial::VisionCoprocessor *visionCoprocessor);
 
     void draw() override;
 
@@ -75,7 +75,7 @@ private:
 
     tap::Drivers *drivers;
     tap::display::VerticalScrollLogicHandler verticalScroll;
-    serial::VisionCoprocessor *visionCoprocessor;
+    communication::serial::VisionCoprocessor *visionCoprocessor;
 
     tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 

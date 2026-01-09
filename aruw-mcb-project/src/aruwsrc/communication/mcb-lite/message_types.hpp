@@ -24,7 +24,7 @@
 
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 enum MessageTypes : uint8_t
 {
@@ -170,6 +170,6 @@ struct VoltageCurrentMessage
     uint16_t current;
 } modm_packed;
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif  // MESSAGE_TYPES_HPP_

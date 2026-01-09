@@ -25,7 +25,7 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
-using namespace aruwsrc::can;
+using namespace aruwsrc::communication::can;
 using namespace testing;
 using namespace tap::arch::clock;
 using namespace tap::communication::sensors::imu::mpu6500;

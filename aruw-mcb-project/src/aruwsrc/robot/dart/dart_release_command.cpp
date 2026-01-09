@@ -21,7 +21,7 @@
 
 #include "dart_launcher_subsystem.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 DartReleaseCommand::DartReleaseCommand(DartLauncherSubsystem &dartLauncher, int32_t desiredOutput)
     : dartLauncher(dartLauncher),
@@ -41,4 +41,4 @@ bool DartReleaseCommand::isFinished() const
     return false;
 }
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart

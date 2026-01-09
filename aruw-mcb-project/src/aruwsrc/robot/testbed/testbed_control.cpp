@@ -35,8 +35,8 @@
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 
 using namespace aruwsrc::testbed;
-using namespace aruwsrc::virtualMCB;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::communication::mcb_lite;
+using namespace aruwsrc::control::chassis;
 using namespace tap::control;
 
 /*
@@ -61,12 +61,14 @@ VirtualCanEncoder strafeEncoder(
     &drivers()->lite,
     tap::can::CanBus::CAN_BUS2);
 
-aruwsrc::can::AruwVoltageCurrentSensor voltageCurrentSensor(drivers(), tap::can::CanBus::CAN_BUS2);
+aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
-    aruwsrc::chassis::LEFT_FRONT_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Left Front Chassis Motor",
     false,
@@ -74,8 +76,8 @@ tap::motor::DjiMotor leftFrontChassisMotor(
 
 tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
-    aruwsrc::chassis::LEFT_BACK_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Left Back Chassis Motor",
     false,
@@ -83,8 +85,8 @@ tap::motor::DjiMotor leftBackChassisMotor(
 
 tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
-    aruwsrc::chassis::RIGHT_FRONT_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Right Front Chassis Motor",
     false,
@@ -92,8 +94,8 @@ tap::motor::DjiMotor rightFrontChassisMotor(
 
 tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
-    aruwsrc::chassis::RIGHT_BACK_MOTOR_ID,
-    aruwsrc::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     "Right Back Chassis Motor",
     false,
@@ -109,24 +111,24 @@ XDriveChassisSubsystem chassis(
     rightBackChassisMotor,
     WHEEL_VELOCITY_PID_CONFIG);
 
-// aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
+// aruwsrc::control::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
 //     drivers(),
 //     &drivers()->controlOperatorInterface,
 //     &chassis,
 //     &turret.yawMotor);
 
-aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &chassis);
 
-// aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
+// aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
 //     drivers(),
 //     &drivers()->controlOperatorInterface,
 //     &chassis,
 //     &turret.yawMotor,
-//     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
-// aruwsrc::chassis::BeybladeCommand beybladeCommand(
+//     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+// aruwsrc::control::chassis::BeybladeCommand beybladeCommand(
 //     drivers(),
 //     &chassis,
 //     &turret.yawMotor,

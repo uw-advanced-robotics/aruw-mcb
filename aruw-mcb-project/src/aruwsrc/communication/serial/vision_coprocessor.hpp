@@ -31,7 +31,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -42,9 +42,7 @@ namespace aruwsrc::control::turret
 class TurretOrientationInterface;
 }
 
-namespace aruwsrc
-{
-namespace serial
+namespace aruwsrc::communication::serial
 {
 /**
  * A class used to communicate with our vision coprocessors. Targets the "Project Otto" vision
@@ -315,7 +313,7 @@ public:
     }
 
     mockable inline void attachTransformer(
-        aruwsrc::algorithms::transforms::TransformerInterface* transformer)
+        aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer)
     {
         this->transformer = transformer;
     }
@@ -352,7 +350,7 @@ public:
     inline void invalidateArducamArucoResetData() { this->lastArducamArucoData.updated = false; }
 
     mockable inline void attachAutoNavController(
-        aruwsrc::chassis::ChassisAutoNavController* autoNavController)
+        aruwsrc::control::chassis::ChassisAutoNavController* autoNavController)
     {
         this->autoNavController = autoNavController;
     }
@@ -460,9 +458,9 @@ private:
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
 
-    aruwsrc::algorithms::transforms::TransformerInterface* transformer;
+    aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer;
 
-    aruwsrc::chassis::ChassisAutoNavController* autoNavController = nullptr;
+    aruwsrc::control::chassis::ChassisAutoNavController* autoNavController = nullptr;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
@@ -514,7 +512,6 @@ public:
     void sendHealthMessage();
     void sendBulletsRemaining();
 };
-}  // namespace serial
-}  // namespace aruwsrc
+}  // namespace aruwsrc::communication::serial
 
 #endif  // VISION_COPROCESSOR_HPP_

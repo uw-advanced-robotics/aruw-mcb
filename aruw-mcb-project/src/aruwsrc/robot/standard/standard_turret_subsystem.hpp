@@ -22,14 +22,14 @@
 
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::standard
 {
 /**
  * Turret subsystem for the Standard.
  */
-class StandardTurretSubsystem final : public RobotTurretSubsystem
+class StandardTurretSubsystem final : public control::turret::RobotTurretSubsystem
 {
-    using RobotTurretSubsystem::RobotTurretSubsystem;
+    using control::turret::RobotTurretSubsystem::RobotTurretSubsystem;
     float getWorldYaw() const override;
     float getWorldPitch() const override;
     uint32_t getLastMeasurementTimeMicros() const override;
@@ -37,6 +37,6 @@ class StandardTurretSubsystem final : public RobotTurretSubsystem
     float getPitchOffset() const override { return 0; };
 };  // class StandardTurretSubsystem
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::standard
 
 #endif  // STANDARD_TURRET_SUBSYSTEM_HPP_

@@ -28,7 +28,7 @@ namespace aruwsrc
 {
 namespace mock
 {
-class MecanumChassisSubsystemMock : public aruwsrc::chassis::MecanumChassisSubsystem
+class MecanumChassisSubsystemMock : public aruwsrc::control::chassis::MecanumChassisSubsystem
 {
 public:
     MecanumChassisSubsystemMock(

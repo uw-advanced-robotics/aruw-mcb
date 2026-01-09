@@ -23,10 +23,9 @@
 
 #include "dart_constants.hpp"
 #include "dart_drivers.hpp"
-#include "dart_turret_constants.hpp"
 using namespace aruwsrc::control::turret;
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 DartLauncherSubsystem::DartLauncherSubsystem(
     tap::Drivers* drivers,
@@ -62,4 +61,4 @@ float DartLauncherSubsystem::getOpenPWM() { return servo.getMaxPWM(); }
 
 float DartLauncherSubsystem::getClosePWM() { return servo.getMinPWM(); }
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart

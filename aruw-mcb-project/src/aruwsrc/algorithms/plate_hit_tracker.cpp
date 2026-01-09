@@ -39,6 +39,14 @@ void PlateHitTracker::update()
         return;
     }
     bins = bins * DECAY_FACTOR;
+    for (int i = 0; i < BIN_NUMBER; i++)
+    {
+        if (bins[i] < HIT_THRESH)
+        {
+            bins[i] = 0.0f;
+            calculatedPeakAngles = false;
+        }
+    }
     auto newHitData = this->drivers->refSerial.getRobotData();
     lastHitData.plateID = static_cast<int>(newHitData.damagedArmorId);
     if (newHitData.receivedDps > lastHitData.lastDps)
@@ -96,7 +104,7 @@ CMSISMat<8, 1> PlateHitTracker::normaliseBins(CMSISMat<8, 1> mat)
 }
 CMSISMat<8, 1> PlateHitTracker::blurBins(CMSISMat<8, 1> mat) { return BLUR_CONVOLVE_MATRIX * mat; }
 
-std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadians()
+const std::vector<PlateHitTracker::PlateHitBinData>& PlateHitTracker::getPeakAnglesRadians()
 {
     // If we have already calculated the peak angles, return the cached previous data
     if (calculatedPeakAngles) return prevPeakBinData;
@@ -135,8 +143,6 @@ std::vector<PlateHitTracker::PlateHitBinData> PlateHitTracker::getPeakAnglesRadi
 
 PlateHitTracker::PlateHitBinData* PlateHitTracker::getBinData()
 {
-    static PlateHitBinData peakData[BIN_NUMBER];
-
     CMSISMat<BIN_NUMBER, 1> temp = normaliseBins(bins);
     temp = blurBins(temp);
     for (int i = 0; i < BIN_NUMBER; i++)

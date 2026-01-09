@@ -25,7 +25,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 EnemyIndicator::EnemyIndicator(
     RefSerialTransmitter &refSerialTransmitter,
@@ -72,4 +72,4 @@ void EnemyIndicator::initialize()
     RefSerialTransmitter::configCharacterMsg(SIZE, WIDTH, textX, TEXT_Y, "ENEMY", &enemyGraphic);
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

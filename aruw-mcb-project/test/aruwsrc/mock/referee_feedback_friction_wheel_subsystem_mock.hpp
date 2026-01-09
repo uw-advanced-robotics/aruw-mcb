@@ -29,10 +29,12 @@
 namespace aruwsrc::mock
 {
 class RefereeFeedbackFrictionWheelSubsystemMock
-    : public aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<10>
+    : public aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<10, 2>
 {
 public:
-    RefereeFeedbackFrictionWheelSubsystemMock(tap::Drivers *drivers);
+    RefereeFeedbackFrictionWheelSubsystemMock(
+        tap::Drivers *drivers,
+        std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels);
     virtual ~RefereeFeedbackFrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

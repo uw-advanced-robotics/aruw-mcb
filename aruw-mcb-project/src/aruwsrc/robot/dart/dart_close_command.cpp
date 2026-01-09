@@ -19,7 +19,7 @@
 
 #include "dart_close_command.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 DartCloseCommand::DartCloseCommand(DartLauncherSubsystem &dartLauncher) : dartLauncher(dartLauncher)
 {
@@ -34,4 +34,4 @@ void DartCloseCommand::end(bool) {}
 
 bool DartCloseCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
