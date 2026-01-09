@@ -28,17 +28,18 @@ namespace aruwsrc::robot::dart
 {
 static constexpr tap::motor::MotorId UPPER_PULL_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId LOWER_PULL_MOTOR_ID = tap::motor::MOTOR1;
-static constexpr tap::motor::MotorId RELOADER_MOTOR_ID = tap::motor::MOTOR6; //TODO: actually put the value 
+static constexpr tap::motor::MotorId RELOADER_MOTOR_ID = tap::motor::MOTOR8;
 static constexpr tap::motor::MotorId DEAD_MOTOR1 = tap::motor::MOTOR5;
 static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
+static constexpr tap::can::CanBus RELOADER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
 static constexpr tap::algorithms::SmoothPidConfig DART_RELOADER_PID_CONFIG = {
-    //TODO tune PID values
-    .kp = 0.0f,
+    .kp = 4000.0f, 
     .ki = 0.0f,
     .kd = 0.0f,
+    .maxOutput = 2400.0f,
     .errDeadzone = 0.0f,
 
 };

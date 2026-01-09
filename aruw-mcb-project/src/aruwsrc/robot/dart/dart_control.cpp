@@ -20,6 +20,7 @@
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
@@ -69,12 +70,11 @@ tap::motor::DoubleDjiMotor pullMotors(
 tap::motor::DjiMotor reloaderMotor(
     drivers(),
     RELOADER_MOTOR_ID,
-    LAUNCHER_CAN_BUS,
-    true,
+    RELOADER_CAN_BUS,
+    false,
     "Reloader Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006
-);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006 / 6.25);
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -90,28 +90,34 @@ DartCloseCommand servoClose(dartLauncher);
 
 RotateMagazineCommand rotateMagazine(dartReloader);
 
-HoldCommandMapping rightSwitchUp(
+HoldCommandMapping rightUpLeftUp(
     drivers(),
     {&dartPullback},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
-HoldCommandMapping rightSwitchDown(
+HoldCommandMapping rightUpLeftDown(
     drivers(),
     {&dartRelease},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
-HoldCommandMapping leftSwitchUp(
+HoldCommandMapping rightDownLeftUp(
     drivers(),
     {&servoOpen},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
-HoldCommandMapping leftSwitchDown(
+HoldCommandMapping rightDownLeftDown(
+    drivers(),
+    {&servoClose},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+
+PressCommandMapping rightMidLeftDown(
     drivers(),
     {&rotateMagazine},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
 
-void initializeSubsystems() { 
-    dartLauncher.initialize(); 
+void initializeSubsystems()
+{
+    // dartLauncher.initialize();
     dartReloader.initialize();
 }
 
@@ -130,10 +136,11 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rightSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&rightUpLeftUp);
+    drivers->commandMapper.addMap(&rightUpLeftDown);
+    drivers->commandMapper.addMap(&rightDownLeftUp);
+    drivers->commandMapper.addMap(&rightDownLeftDown);
+    drivers->commandMapper.addMap(&rightMidLeftDown);
 }
 
 }  // namespace dart_control
