@@ -30,7 +30,7 @@ namespace aruwsrc::robot::dart
 class DartPullbackCommand : public tap::control::Command
 {
 public:
-    DartPullbackCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem, int32_t desiredOutput);
+    DartPullbackCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem);
     void initialize() override;
     void execute() override {}
 
@@ -42,7 +42,6 @@ public:
 
 private:
     aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem;
-    int32_t desiredOutput;
 };  // class DartPullbackCommand
 
 }  // namespace aruwsrc::robot::dart

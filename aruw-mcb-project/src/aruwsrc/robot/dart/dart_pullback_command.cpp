@@ -27,10 +27,8 @@
 namespace aruwsrc::robot::dart
 {
 DartPullbackCommand::DartPullbackCommand(
-    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem,
-    int32_t desiredOutput)
-    : pullMotorSubsystem(pullMotorSubsystem),
-      desiredOutput(desiredOutput)
+    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem)
+    : pullMotorSubsystem(pullMotorSubsystem)
 {
     addSubsystemRequirement(&pullMotorSubsystem);
 }
