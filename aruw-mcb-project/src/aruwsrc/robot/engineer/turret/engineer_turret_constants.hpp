@@ -23,8 +23,8 @@
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
