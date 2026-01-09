@@ -19,26 +19,22 @@
 
 #include "dart_release_command.hpp"
 
-#include "dart_launcher_subsystem.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
+
 #include "dart_constants.hpp"
+#include "dart_launcher_subsystem.hpp"
 
 namespace aruwsrc::robot::dart
 {
-DartReleaseCommand::DartReleaseCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher)
+DartReleaseCommand::DartReleaseCommand(
+    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher)
     : dartLauncher(dartLauncher)
 {
     addSubsystemRequirement(&dartLauncher);
 }
 
-void DartReleaseCommand::initialize() { 
-    dartLauncher.setSetpoint(RELEASE_POSITION);
-}
+void DartReleaseCommand::initialize() { dartLauncher.setSetpoint(RELEASE_POSITION); }
 
-
-bool DartReleaseCommand::isFinished() const
-{
-    return dartLauncher.atSetpoint();
-}
+bool DartReleaseCommand::isFinished() const { return dartLauncher.atSetpoint(); }
 
 }  // namespace aruwsrc::robot::dart

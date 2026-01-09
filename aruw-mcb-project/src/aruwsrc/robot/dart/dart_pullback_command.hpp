@@ -21,16 +21,18 @@
 
 #include "tap/control/command.hpp"
 
-#include "dart_launcher_subsystem.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
+
 #include "dart_constants.hpp"
+#include "dart_launcher_subsystem.hpp"
 using namespace aruwsrc::robot::dart;
 namespace aruwsrc::robot::dart
 {
 class DartPullbackCommand : public tap::control::Command
 {
 public:
-    DartPullbackCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem);
+    DartPullbackCommand(
+        aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem);
     void initialize() override;
     void execute() override {}
 

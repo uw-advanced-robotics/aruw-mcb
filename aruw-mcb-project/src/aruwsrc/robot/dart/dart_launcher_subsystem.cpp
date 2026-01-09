@@ -28,8 +28,7 @@ using namespace aruwsrc::control::turret;
 
 namespace aruwsrc::robot::dart
 {
-DartLauncherSubsystem::DartLauncherSubsystem(
-    tap::Drivers* drivers)
+DartLauncherSubsystem::DartLauncherSubsystem(tap::Drivers* drivers)
     : Subsystem(drivers),
       servo(drivers, SERVO_PORT, SERVO_MAX, SERVO_MIN, SERVO_SPEED)
 {

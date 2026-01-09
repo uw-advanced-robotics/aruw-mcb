@@ -36,7 +36,7 @@ static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
 static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 3.0f;
 static constexpr int32_t PULLBACK_PULL_POSITION = 0;  // TODO: FIND
-static constexpr int32_t RELEASE_POSITION = 0;  // TODO: FIND
+static constexpr int32_t RELEASE_POSITION = 0;        // TODO: FIND
 //  * @param[in] pwmRampSpeed The speed in PWM percent per millisecond.
 
 static constexpr float SERVO_MIN = 0.5f;
@@ -48,25 +48,24 @@ static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;  // TODO: update value when limit switch is installed on dart
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
-    PULL_MOTOR_CONFIG{
-        // TODO: TUNE VALUES
-        .super =
-            {
-                .lowerBound = 0.0f,
-                .upperBound = 500.0f,
-                .epsilon = 1.0,
-                .posPidConfig{
-                    .kp = 10.0f,  // TODO: TUNE THIS
-                    .ki = 0.0f,
-                    .kd = 3.0f,
-                    .maxICumulative = 0.0f,
-                    .maxOutput = 5000.0f},  // these max outs seem safe for now
-                .maxOutput = 3000.0f,
+    PULL_MOTOR_CONFIG{// TODO: TUNE VALUES
+                      .super =
+                          {
+                              .lowerBound = 0.0f,
+                              .upperBound = 500.0f,
+                              .epsilon = 1.0,
+                              .posPidConfig{
+                                  .kp = 10.0f,  // TODO: TUNE THIS
+                                  .ki = 0.0f,
+                                  .kd = 3.0f,
+                                  .maxICumulative = 0.0f,
+                                  .maxOutput = 5000.0f},  // these max outs seem safe for now
+                              .maxOutput = 3000.0f,
 
-            },
-        .home = 0.0f,
-        .homingSpeed = 50.0f,
-        .homingReversed = true};
+                          },
+                      .home = 0.0f,
+                      .homingSpeed = 50.0f,
+                      .homingReversed = true};
 
 }  // namespace aruwsrc::robot::dart
 #endif

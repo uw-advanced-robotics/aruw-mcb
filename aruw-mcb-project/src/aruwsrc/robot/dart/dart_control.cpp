@@ -73,8 +73,6 @@ tap::motor::DoubleDjiMotor pullMotors(
     "Upper Motor",
     "Lower Motor");
 
-
-
 // aruwsrc::communication::sensors::beam_break::DigitalBeamBreak limitSwitch(
 //     &(drivers()->digital),
 //     LIMIT_SWITCH_PORT,
@@ -100,9 +98,6 @@ aruwsrc::control::joint::homing::TriggerHomedJointSubsystem pullMotorSubsystem(
     limit,
     PULL_MOTOR_CONFIG);
 
-
-
-
 HomingCommand pullMotorHomeCommand(pullMotorSubsystem);
 DartManualPullbackSetpointCommand manualPullbackCommand(
     pullMotorSubsystem,
@@ -111,7 +106,6 @@ DartManualPullbackSetpointCommand manualPullbackCommand(
 
 // TODO: ADD YAW MANUAL:
 // https://gitlab.com/aruw/controls/aruw-mcb/-/blob/a26bc3fb1845640e12b0afe32d720ec90c0bb709/aruw-mcb-project/src/aruwsrc/robot/dart/dart_control.cpp#L107
-
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -124,7 +118,6 @@ DartOpenCommand servoOpen(dartLauncher);
 DartCloseCommand servoClose(dartLauncher);
 
 HomingCommand pullMotorHome(pullMotorSubsystem);
-
 
 // Left Up + Right Up -> Servo Open
 HoldCommandMapping openServoMapping(
@@ -156,14 +149,11 @@ HoldCommandMapping homeYawMapping(
     {&pullMotorHome},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
-void initializeSubsystems() { 
-    dartLauncher.initialize(); 
+void initializeSubsystems()
+{
+    dartLauncher.initialize();
     pullMotorSubsystem.initialize();
-
-
 }
-
-
 
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
 {
@@ -174,7 +164,8 @@ void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
         tap::gpio::Digital::InputPullMode::PullUp);
 }
 
-void setDefaultDartCommands(aruwsrc::dart::Drivers*) {
+void setDefaultDartCommands(aruwsrc::dart::Drivers*)
+{
     pullMotorSubsystem.setDefaultCommand(&manualPullbackCommand);
 }
 
