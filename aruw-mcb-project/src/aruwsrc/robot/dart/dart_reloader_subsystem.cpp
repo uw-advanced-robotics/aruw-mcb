@@ -30,10 +30,7 @@ void DartReloaderSubsystem::refresh()
     float currentPosition = motor.getEncoder()->getPosition().getUnwrappedValue();
     float error = setpoint - currentPosition;
     float errorDerivative = -motor.getEncoder()->getVelocity();
-    float output = pidController.runController(
-        error,
-        errorDerivative,
-        0.002f);
+    float output = pidController.runController(error, errorDerivative, 0.002f);
     motor.setDesiredOutput(output);
     position = currentPosition;
 }
