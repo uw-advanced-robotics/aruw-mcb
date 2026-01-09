@@ -117,7 +117,7 @@ PressCommandMapping rightMidLeftDown(
 
 void initializeSubsystems()
 {
-    // dartLauncher.initialize();
+    dartLauncher.initialize();
     dartReloader.initialize();
 }
 
