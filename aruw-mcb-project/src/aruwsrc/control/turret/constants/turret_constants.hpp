@@ -33,18 +33,6 @@
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"
 #elif defined(TARGET_SENTRY_ECLIPSE)
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
-#elif defined(TARGET_DART)
-#include "aruwsrc/robot/dart/dart_turret_constants.hpp"
-#elif defined(TARGET_TESTBED)
-#include "aruwsrc/robot/testbed/testbed_turret_constants.hpp"
-#elif defined(TARGET_BLANK)
-#include "aruwsrc/robot/blank/blank_turret_constants.hpp"
-#elif defined(TARGET_MOTOR_TESTER)
-#include "aruwsrc/robot/motor_tester/motor_tester_turret_constants.hpp"
-#elif defined(TARGET_LAUNCHER_TARGET)
-#include "aruwsrc/robot/dart_target/dart_target_turret_constants.hpp"
-#elif defined(TARGET_CHARACTERIZER)
-#include "aruwsrc/robot/characterizer/characterizer_turret_constants.hpp"
 #else
 // necessary to satiate vision_coprocessor and tests which relies on this
 // header for number of turrets and gravity compensation values
