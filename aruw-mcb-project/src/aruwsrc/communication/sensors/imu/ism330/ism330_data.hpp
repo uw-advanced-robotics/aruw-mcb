@@ -88,6 +88,9 @@ enum OutputDataRate : uint8_t
 static constexpr float TEMPERATURE_OFFSET = 25.0f;
 static constexpr float TEMPERATURE_SENSITIVITY = 256.0f;
 
+static constexpr uint8_t ISM330_WRITE_BIT = 0x79;
+static constexpr uint8_t ISM330_READ_BIT = 0x80;
+
 }  // namespace aruwsrc::communication::sensors::imu::ism330
 
 #endif  // ISM330_DATA_HPP_
