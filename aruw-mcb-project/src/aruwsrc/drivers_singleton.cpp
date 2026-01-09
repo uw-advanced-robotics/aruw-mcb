@@ -31,7 +31,7 @@ namespace aruwsrc::hero
 namespace aruwsrc::drone
 #elif defined(TARGET_ENGINEER)
 namespace aruwsrc::engineer
-#elif defined(TARGET_2025_ENGINEER)
+#elif defined(TARGET_2025_ENGI)
 namespace aruwsrc::engineer
 #elif defined(TARGET_DART)
 namespace aruwsrc::dart
