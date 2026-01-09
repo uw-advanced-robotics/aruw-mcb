@@ -26,6 +26,7 @@
 #include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
 
 #else
 
@@ -44,6 +45,7 @@ public:
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 
+    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
 #else
 public:
     control::dart::DartControlOperatorInterface controlOperatorInterface;
