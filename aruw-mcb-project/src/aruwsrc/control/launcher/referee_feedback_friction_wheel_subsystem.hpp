@@ -29,6 +29,7 @@
 
 #include "friction_wheel_subsystem.hpp"
 #include "launch_speed_predictor_interface.hpp"
+#include "launcher_constants.hpp"
 
 namespace aruwsrc::control::launcher
 {
@@ -38,12 +39,19 @@ namespace aruwsrc::control::launcher
  *
  * @tparam PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE Number of balls to average when estimating the
  * next projectile velocity.
+ * @tparam NUM_WHEELS Number of friction wheels controlled by this subsystem
  */
-template <size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE>
-class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem,
+template <size_t PROJECTILE_LAUNCH_AVERAGING_DEQUE_SIZE, std::size_t NUM_WHEELS>
+class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem<NUM_WHEELS>,
                                               public LaunchSpeedPredictorInterface
 {
 public:
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+#else
+    using Motor = tap::motor::MotorInterface;
+#endif
+
     /**
      * For all params but `firingSystemMechanismId` see the `FrictionWheelSubsystem`.
      * @param[in] firingSystemMechanismId The barrel ID associated with this friction wheel
@@ -53,12 +61,23 @@ public:
      */
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
-        tap::motor::MotorId leftMotorId,
-        tap::motor::MotorId rightMotorId,
-        tap::can::CanBus canBus,
+        std::array<Motor *, NUM_WHEELS> wheels,
+        std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem(drivers, leftMotorId, rightMotorId, canBus, turretMCB),
+        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfigs, turretMCB),
+          firingSystemMechanismID(firingSystemMechanismID)
+    {
+    }
+
+    // constructor for using a single wheelconfig for all wheels
+    RefereeFeedbackFrictionWheelSubsystem(
+        tap::Drivers *drivers,
+        std::array<Motor *, NUM_WHEELS> wheels,
+        FlywheelConfig wheelConfig,
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
+        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfig, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }
@@ -70,14 +89,14 @@ public:
      */
     inline float getPredictedLaunchSpeed() const override final_mockable
     {
-        return ballSpeedAveragingTracker.getSize() == 0
-                   ? getDesiredLaunchSpeed()
+        return this->ballSpeedAveragingTracker.getSize() == 0
+                   ? this->getDesiredLaunchSpeed()
                    : (pastProjectileVelocitySpeedSummed / ballSpeedAveragingTracker.getSize());
     }
 
     void refresh() override
     {
-        FrictionWheelSubsystem::refresh();
+        FrictionWheelSubsystem<NUM_WHEELS>::refresh();
         updatePredictedLaunchSpeed();
     }
 
@@ -94,7 +113,7 @@ private:
 
     void updatePredictedLaunchSpeed()
     {
-        const float desiredLaunchSpeed = getDesiredLaunchSpeed();
+        const float desiredLaunchSpeed = this->getDesiredLaunchSpeed();
 
         // reset averaging if desired launch speed has changed...if we change desired launch speed
         // from 15 to 30, we should predict the launch speed to be around 30, not 15.
@@ -102,12 +121,12 @@ private:
         {
             lastDesiredLaunchSpeed = desiredLaunchSpeed;
             pastProjectileVelocitySpeedSummed = 0;
-            ballSpeedAveragingTracker.clear();
+            this->ballSpeedAveragingTracker.clear();
         }
 
-        if (drivers->refSerial.getRefSerialReceivingData())
+        if (this->drivers->refSerial.getRefSerialReceivingData())
         {
-            const auto &turretData = drivers->refSerial.getRobotData().turret;
+            const auto &turretData = this->drivers->refSerial.getRobotData().turret;
 
             // compute average bullet speed if new firing data received from correct mech ID
             if (prevLaunchingDataReceiveTimestamp !=
@@ -124,7 +143,7 @@ private:
                 const float limitedProjectileSpeed = tap::algorithms::limitVal(
                     turretData.bulletSpeed,
                     0.0f,
-                    MAX_MEASURED_LAUNCH_SPEED);
+                    this->MAX_MEASURED_LAUNCH_SPEED);
 
                 // insert new element
                 pastProjectileVelocitySpeedSummed += limitedProjectileSpeed;

@@ -20,6 +20,7 @@
 #ifndef LAUNCHER_CONSTANTS_HPP_
 #define LAUNCHER_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
 
@@ -34,6 +35,13 @@ static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 3;
 #else
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 #endif
+
+struct FlywheelConfig
+{
+    tap::algorithms::SmoothPidConfig velocityPidConfig;
+    float orientation;
+    uint8_t stage = 0;
+};
 
 #if defined(ALL_SENTRIES)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
@@ -52,28 +60,43 @@ static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
 #if defined(TARGET_STANDARD_VOID)
 static constexpr float LAUNCHER_PID_KP = 30.0f;
-static constexpr float LAUNCHER_PID_KI = 0.3f;
+static constexpr float LAUNCHER_PID_KI = 150.0f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
 #elif defined(TARGET_SENTRY_ECLIPSE)
 static constexpr float LAUNCHER_PID_KP = 30.0f;
-static constexpr float LAUNCHER_PID_KI = 0.4f;
+static constexpr float LAUNCHER_PID_KI = 200.0f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;
 #else
 static constexpr float LAUNCHER_PID_KP = 20.0f;
-static constexpr float LAUNCHER_PID_KI = 0.2f;
+static constexpr float LAUNCHER_PID_KI = 100.0f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
 #endif
+
+static constexpr tap::algorithms::SmoothPidConfig VELOCITY_PID_CONFIG(
+    LAUNCHER_PID_KP,
+    LAUNCHER_PID_KI,
+    LAUNCHER_PID_KD,
+    LAUNCHER_PID_MAX_ERROR_SUM,
+    LAUNCHER_PID_MAX_OUTPUT);
+static constexpr FlywheelConfig WHEEL_CONFIG = {VELOCITY_PID_CONFIG, 90.0f};
+
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KP = 0.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KI = 0.749f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_KD = 0.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM = 500.0f;
 static constexpr float LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT = 750.0f;
+static constexpr tap::algorithms::SmoothPidConfig LAUNCHER_SPEED_CORRECTION_PID_CONFIG = {
+    LAUNCHER_SPEED_CORRECTION_PID_KP,
+    LAUNCHER_SPEED_CORRECTION_PID_KI,
+    LAUNCHER_SPEED_CORRECTION_PID_KD,
+    LAUNCHER_SPEED_CORRECTION_PID_MAX_ERROR_SUM,
+    LAUNCHER_SPEED_CORRECTION_PID_MAX_OUTPUT};
 /**
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.

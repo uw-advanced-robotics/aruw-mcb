@@ -56,7 +56,8 @@ namespace aruwsrc::sentry::turret
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
 class TurretMajorWorldFrameController final
-    : public aruwsrc::control::turret::algorithms::TurretYawControllerInterface
+    : public aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+          control::turret::algorithms::Axis::YAW>
 {
 public:
     /**

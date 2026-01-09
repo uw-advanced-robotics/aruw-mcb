@@ -112,8 +112,9 @@ static inline void updateYawWorldFrameSetpoint(
 WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController(
     tap::Drivers &drivers,
     TurretMotor &yawMotor,
-    const tap::algorithms::SmoothPidConfig &pidConfig)
-    : TurretYawControllerInterface(yawMotor),
+    const tap::algorithms::SmoothPidConfig &pidConfig,
+    const std::vector<TurretCompensatorInterface *> compensators)
+    : TurretAxisControllerInterface<Axis::YAW>(yawMotor, compensators),
       drivers(drivers),
       pid(pidConfig),
       worldFrameSetpoint(Angle(0)),
