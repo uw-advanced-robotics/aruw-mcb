@@ -94,9 +94,15 @@ tap::algorithms::SmoothPidConfig rm3508VelocityPidConfig = {
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620};
 
-// untuned!!
+tap::algorithms::SmoothPidConfig rm3510VelocityPidConfig = {
+    .kp = 12.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_820R};
+
 tap::algorithms::SmoothPidConfig gm6020VelocityPidConfig = {
-    .kp = 0.0f,
+    .kp = 10.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,

@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 #if defined(ALL_STANDARDS)
@@ -42,20 +43,20 @@
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"
 #elif defined(TARGET_SENTRY_ECLIPSE)
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
-#elif defined(TARGET_DART)
-#include "aruwsrc/robot/dart/dart_turret_constants.hpp"
-#elif defined(TARGET_TESTBED)
-#include "aruwsrc/robot/testbed/testbed_turret_constants.hpp"
-#elif defined(TARGET_BLANK)
-#include "aruwsrc/robot/blank/blank_turret_constants.hpp"
-#elif defined(TARGET_MOTOR_TESTER)
-#include "aruwsrc/robot/motor_tester/motor_tester_turret_constants.hpp"
-#elif defined(TARGET_CHARACTERIZER)
-#include "aruwsrc/robot/characterizer/characterizer_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
 #include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"
 #elif defined(TARGET_ENGI_2025)
 #include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"
+#else
+// necessary to satiate vision_coprocessor and tests which relies on this
+// header for number of turrets and gravity compensation values
+// @todo use template parameter, normal parameter, or other workaround in the future
+namespace aruwsrc::control::turret
+{
+static constexpr uint8_t NUM_TURRETS = 1;
+static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
+    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
+}  // namespace aruwsrc::control::turret
 #endif
 
 #endif  // TURRET_CONSTANTS_HPP_
