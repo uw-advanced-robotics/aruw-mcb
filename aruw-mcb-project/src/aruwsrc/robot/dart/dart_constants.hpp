@@ -36,11 +36,10 @@ static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
 static constexpr tap::algorithms::SmoothPidConfig DART_RELOADER_PID_CONFIG = {
-    //TODO tune PID values
-    .kp = 0.0f, //current estimate: 3000
+    .kp = 4000.0f, 
     .ki = 0.0f,
     .kd = 0.0f,
-    .maxOutput = 0.0f, //current estimate: 1800, might have to increase though
+    .maxOutput = 2400.0f,
     .errDeadzone = 0.0f,
 
 };

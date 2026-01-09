@@ -90,25 +90,30 @@ DartCloseCommand servoClose(dartLauncher);
 
 RotateMagazineCommand rotateMagazine(dartReloader);
 
-HoldCommandMapping rightSwitchUp(
+HoldCommandMapping rightUpLeftUp(
     drivers(),
     {&dartPullback},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
-HoldCommandMapping rightSwitchDown(
+HoldCommandMapping rightUpLeftDown(
     drivers(),
     {&dartRelease},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
-HoldCommandMapping leftSwitchUp(
+HoldCommandMapping rightDownLeftUp(
     drivers(),
     {&servoOpen},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
-PressCommandMapping leftSwitchDown(
+HoldCommandMapping rightDownLeftDown(
+    drivers(),
+    {&servoClose},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+
+PressCommandMapping rightMidLeftDown(
     drivers(),
     {&rotateMagazine},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
 
 void initializeSubsystems()
 {
@@ -131,10 +136,11 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    // drivers->commandMapper.addMap(&rightSwitchUp);
-    // drivers->commandMapper.addMap(&rightSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&rightUpLeftUp);
+    drivers->commandMapper.addMap(&rightUpLeftDown);
+    drivers->commandMapper.addMap(&rightDownLeftUp);
+    drivers->commandMapper.addMap(&rightDownLeftDown);
+    drivers->commandMapper.addMap(&rightMidLeftDown);
 }
 
 }  // namespace dart_control

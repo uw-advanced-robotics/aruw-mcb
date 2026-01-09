@@ -29,7 +29,7 @@ RotateMagazineCommand::RotateMagazineCommand(DartReloaderSubsystem& subsystem)
 
 void RotateMagazineCommand::initialize()
 {
-    subsystem.setSetpoint(subsystem.getSetpoint() + 1.0f);  // Rotate one position forward
+    subsystem.setSetpoint(subsystem.getSetpoint() + 1.0f);  // moves setpoint 1 rotation forward
 }
 void RotateMagazineCommand::execute() {}
 void RotateMagazineCommand::end(bool) {}
