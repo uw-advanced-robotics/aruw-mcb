@@ -24,7 +24,7 @@
 
 #include "dart_reloader_subsystem.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 class RotateMagazineCommand : public tap::control::Command
 {

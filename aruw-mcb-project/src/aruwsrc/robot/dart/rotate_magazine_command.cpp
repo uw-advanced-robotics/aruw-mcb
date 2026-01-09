@@ -19,7 +19,7 @@
 #include "rotate_magazine_command.hpp"
 
 #include "tap/control/command.hpp"
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 RotateMagazineCommand::RotateMagazineCommand(DartReloaderSubsystem& subsystem)
     : subsystem(subsystem)

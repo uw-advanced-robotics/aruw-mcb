@@ -25,7 +25,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/subsystem.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 class DartReloaderSubsystem : public tap::control::Subsystem
 {

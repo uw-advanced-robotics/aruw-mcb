@@ -22,7 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "dart_constants.hpp"
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 DartReloaderSubsystem::DartReloaderSubsystem(
     tap::Drivers* drivers,
