@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_ENGINEER) && defined(TARGET_2025_ENGINEER) && defined(PLATFORM_HOSTED)
+#if defined(TARGET_ENGINEER) && defined(TARGET_2025_ENGI) && defined(PLATFORM_HOSTED)
 
 #include "robot_sim.hpp"
 
