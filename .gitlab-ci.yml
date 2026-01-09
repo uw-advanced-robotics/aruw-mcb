@@ -261,6 +261,20 @@ before_script:
   variables:
     ROBOT: ENGINEER
 
+# 2025 Engi build
+
+"2025 Engi: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: ENGINEER
+
+"2025 Engi: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: ENGI_2025
+
 # Hero build
 
 "Hero: MCB Build":

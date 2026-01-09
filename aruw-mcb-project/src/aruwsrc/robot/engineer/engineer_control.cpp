@@ -56,33 +56,29 @@
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/sliders_indicator.hpp"
+#include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
-
-#include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
 // #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 // check which of these r important
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
+#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
-
-#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
-#include "aruwsrc/control/buzzer/note_sequences.hpp"
-#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
-#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
 
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::client_display::indicators;
@@ -114,7 +110,6 @@ namespace aruwsrc
 {
 namespace control
 {
-
 inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
@@ -307,7 +302,6 @@ aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
     rightBackChassisMotor,
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
-
 // this could be useful i think
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
@@ -317,13 +311,15 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    engTurret.pitchMotor,
-    chassis_rel::PITCH_PID_CONFIG);
+aruwsrc::control::turret::algorithms::
+    ChassisFramePitchTurretController chassisFramePitchTurretController(
+        engTurret.pitchMotor,
+        chassis_rel::PITCH_PID_CONFIG);
 
-aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
-    engTurret.yawMotor,
-    chassis_rel::YAW_PID_CONFIG);
+aruwsrc::control::turret::algorithms::
+    ChassisFrameYawTurretController chassisFrameYawTurretController(
+        engTurret.yawMotor,
+        chassis_rel::YAW_PID_CONFIG);
 
 BuzzerSubsystem engineerBuzzer(drivers());
 
@@ -355,7 +351,9 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     // {&drivers()->ism330});
     {&drivers()->mpu6500});
 
-aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
+aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
+    drivers(),
+    imuCalibrateCommand);
 
 TriggerHomedJointSubsystem cubeLift(drivers(), cubeLiftMotor, cubeLiftTrigger, CUBE_LIFT_CONFIG);
 

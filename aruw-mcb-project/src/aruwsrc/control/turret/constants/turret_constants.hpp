@@ -54,7 +54,7 @@
 #include "aruwsrc/robot/characterizer/characterizer_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
 #include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"
-#elif defined(TARGET_2025_ENGI)
+#elif defined(TARGET_ENGI_2025)
 #include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"
 #endif
 

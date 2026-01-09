@@ -28,10 +28,10 @@
 #include "aruwsrc/mock/oled_display_mock.hpp"
 
 #else
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 
 #endif
@@ -49,15 +49,16 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-          oledDisplay(this, 
-                nullptr, 
-                &turretMCBCanCommBus1,
-                &turretMCBCanCommBus2, 
-                nullptr, 
-                nullptr),
+          oledDisplay(
+              this,
+              nullptr,
+              &turretMCBCanCommBus1,
+              &turretMCBCanCommBus2,
+              nullptr,
+              nullptr),
+          engineerCVCommunication(this),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
-          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          engineerCVCommunication(this)
+          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)
     {
     }
 

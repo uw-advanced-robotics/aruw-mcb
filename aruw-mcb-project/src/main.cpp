@@ -61,7 +61,7 @@ using namespace aruwsrc::hero;
 using namespace aruwsrc::drone;
 #elif defined(TARGET_ENGINEER)
 using namespace aruwsrc::engineer;
-#elif defined(TARGET_2025_ENGI)
+#elif defined(TARGET_ENGI_2025)
 using namespace aruwsrc::engineer;
 #elif defined(TARGET_DART)
 using namespace aruwsrc::dart;
@@ -86,7 +86,7 @@ static void updateIo(Drivers *drivers);
 
 static void initializeI2C(Drivers *drivers);
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || defined(TARGET_2025_ENGI)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
@@ -124,11 +124,12 @@ int main()
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+    defined(TARGET_ENGINEER)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_ENGINEER) || defined(TARGET_2025_ENGI)
+#if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
@@ -183,7 +184,7 @@ static void initializeIo(Drivers *drivers)
 #endif
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_2025_ENGI) 
+    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
@@ -205,7 +206,7 @@ static void initializeIo(Drivers *drivers)
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
 #endif
-    #if defined(TARGET_ENGINEER) || defined(TARGET_2025_ENGI) 
+#if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
     drivers->engineerCVCommunication.initializeCV();
     drivers->digital.configureInputPullMode(
         tap::gpio::Digital::B,
@@ -232,7 +233,7 @@ static void updateIo(Drivers *drivers)
     drivers->mpu6500.read();
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_2025_ENGI)
+    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
@@ -240,7 +241,7 @@ static void updateIo(Drivers *drivers)
     drivers->visionCoprocessor.updateSerial();
 #endif
 
-#if defined(TARGET_ENGINEER) || defined(TARGET_2025_ENGI)
+#if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
     drivers->engineerCVCommunication.updateSerial();
 #endif
 
