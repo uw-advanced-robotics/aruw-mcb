@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef DART_RELOADER_SUBSYSTEM_HPP_
 #define DART_RELOADER_SUBSYSTEM_HPP_
 
@@ -23,7 +24,6 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/subsystem.hpp"
-
 
 namespace aruwsrc::robot::dart
 {
