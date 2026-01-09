@@ -28,11 +28,8 @@ public:
      */
     bool read();
 
-    void periodicIMUUpdate() override;
-
     virtual inline float getAccelerationSensitivity() const override { return GRAVITY_MPS2; }
     virtual inline const char *getName() const { return "ISM330DHCX"; }
-    virtual void periodicIMUUpdate();
 
     void setAccelRange(AccelerometerRangeConfig xl_config);
     void setGyroRange(GyroscopeRangeConfig g_config);
