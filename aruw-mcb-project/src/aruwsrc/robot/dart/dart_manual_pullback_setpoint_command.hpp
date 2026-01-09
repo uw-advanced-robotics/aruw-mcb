@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef DART_MANUAL_PULLBACK_SETPOINT_COMMAND
-#define DART_MANUAL_PULLBACK_SETPOINT_COMMAND
+#ifndef DART_MANUAL_PULLBACK_SETPOINT_COMMAND_HPP_
+#define DART_MANUAL_PULLBACK_SETPOINT_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -36,7 +36,7 @@ public:
         aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface);
     void initialize() override;
     void execute() override;
-    void end(bool ) override{}
+    void end(bool) override {}
 
     bool isFinished() const override;
 
