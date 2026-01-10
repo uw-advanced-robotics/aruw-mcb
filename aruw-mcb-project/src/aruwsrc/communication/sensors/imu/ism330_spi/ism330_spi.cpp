@@ -18,7 +18,7 @@ void Ism330Spi::initialize(float sampleFrequency, float mahonyKp, float mahonyKi
 #ifndef PLATFORM_HOSTED
     Board::ImuNss::GpioOutput();
     Board::ImuSpiMaster::connect<Board::ImuMiso::Miso, Board::ImuMosi::Mosi, Board::ImuSck::Sck>();
-    Board::ImuSpiMaster::initialize<Board::SystemClock, 10_MHz>();
+    Board::ImuSpiMaster::initialize<Board::SystemClock, 5625000_Hz>();
 
     assert (spiReadRegister(Register::WHO_AM_I) == 0x6B);
     setODR(ODR_833HZ);
@@ -119,7 +119,7 @@ void Ism330Spi::setODR(OutputDataRate odr) {
 
     spiWriteRegister(CTRL1_XL, (current_reg_XL & ODR_BITMASK) | odr);
     spiWriteRegister(CTRL2_G, (current_reg_G & ODR_BITMASK) | odr);
-    uint32_t timeout;
+    uint32_t timeout{1200};
     switch (odr)
     {
         case ODR_416HZ:
