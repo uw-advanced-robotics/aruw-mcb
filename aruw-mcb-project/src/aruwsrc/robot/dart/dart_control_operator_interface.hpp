@@ -19,7 +19,7 @@
 #ifndef DART_CONTROL_OPERATOR_INTERFACE_HPP_
 #define DART_CONTROL_OPERATOR_INTERFACE_HPP_
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 namespace aruwsrc::control::dart
 {

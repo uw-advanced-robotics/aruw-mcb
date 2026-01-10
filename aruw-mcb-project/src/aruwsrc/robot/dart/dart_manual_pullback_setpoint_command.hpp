@@ -24,7 +24,7 @@
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 
 {
 class DartManualPullbackSetpointCommand : public tap::control::Command
@@ -47,6 +47,6 @@ private:
     float moveSpeed;
     aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface;  // NOLINT
 };
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 
 #endif  // DART_MANUAL_PULLBACK_SETPOINT_COMMAND

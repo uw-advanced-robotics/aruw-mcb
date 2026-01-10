@@ -18,7 +18,7 @@
  */
 #include "dart_manual_pullback_setpoint_command.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 
 {
 DartManualPullbackSetpointCommand::DartManualPullbackSetpointCommand(
@@ -45,4 +45,4 @@ void DartManualPullbackSetpointCommand::execute()
 
 bool DartManualPullbackSetpointCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart

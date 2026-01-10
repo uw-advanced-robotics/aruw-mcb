@@ -67,5 +67,5 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
                       .homingSpeed = 50.0f,
                       .homingReversed = true};
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif

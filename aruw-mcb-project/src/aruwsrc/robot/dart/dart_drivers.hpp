@@ -22,7 +22,6 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)

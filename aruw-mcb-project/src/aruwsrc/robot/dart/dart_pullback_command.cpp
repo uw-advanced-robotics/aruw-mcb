@@ -23,7 +23,7 @@
 #include "dart_constants.hpp"
 #include "dart_launcher_subsystem.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 DartPullbackCommand::DartPullbackCommand(
     aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem)
