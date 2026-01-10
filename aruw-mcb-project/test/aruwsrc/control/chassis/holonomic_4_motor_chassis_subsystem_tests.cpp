@@ -31,7 +31,7 @@
 using modm::Matrix;
 using modm::Vector3f;
 using tap::algorithms::getSign;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace testing;
 
 // See this paper for equations: https://www.hindawi.com/journals/js/2015/347379/.
@@ -60,7 +60,7 @@ protected:
     Holonomic4MotorChassisSubsystemTest()
         : currentSensor(
               {&drivers.analog,
-               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),

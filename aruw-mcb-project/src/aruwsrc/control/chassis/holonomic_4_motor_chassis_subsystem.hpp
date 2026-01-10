@@ -32,9 +32,7 @@
 #include "tap/mock/motor_interface_mock.hpp"
 #endif
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Encapsulates a chassis with mecanum wheels in standard layout
@@ -57,7 +55,7 @@ public:
         Motor& rightFrontMotor,
         Motor& rightBackMotor,
         tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
-        can::capbank::CapacitorBank* capacitorBank = nullptr);
+        communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 
     inline bool allMotorsOnline() const override
     {
@@ -163,7 +161,6 @@ public:
     Motor& rightBackMotor;
 };
 
-}  // namespace chassis
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
 
 #endif

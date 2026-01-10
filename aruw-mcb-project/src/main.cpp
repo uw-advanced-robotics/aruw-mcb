@@ -69,6 +69,8 @@ using namespace aruwsrc::testbed;
 using namespace aruwsrc::blank;
 #elif defined(TARGET_MOTOR_TESTER)
 using namespace aruwsrc::motor_tester;
+#elif defined(TARGET_LAUNCHER_TARGET)
+using namespace aruwsrc::dart_target;
 #elif defined(TARGET_CHARACTERIZER)
 using namespace aruwsrc::characterizer;
 #endif
@@ -118,7 +120,6 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
@@ -126,7 +127,8 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_ENGINEER)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
@@ -176,7 +178,7 @@ static void initializeIo(Drivers *drivers)
     drivers->turretMCBCanCommBus1.init();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
+    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
@@ -225,7 +227,7 @@ static void updateIo(Drivers *drivers)
     drivers->mpu6500.read();
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
+    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 

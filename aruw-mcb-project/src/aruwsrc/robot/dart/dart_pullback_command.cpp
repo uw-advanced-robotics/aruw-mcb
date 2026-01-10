@@ -18,7 +18,6 @@
  */
 
 #include "dart_pullback_command.hpp"
-
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
 #include "dart_constants.hpp"
@@ -37,4 +36,4 @@ void DartPullbackCommand::initialize() { pullMotorSubsystem.setSetpoint(PULLBACK
 
 bool DartPullbackCommand::isFinished() const { return pullMotorSubsystem.atSetpoint(); }
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart

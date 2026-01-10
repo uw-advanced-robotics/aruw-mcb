@@ -19,7 +19,7 @@
 #include "sentry_turret_major_world_relative_yaw_controller.hpp"
 
 using namespace tap::algorithms;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 
 namespace aruwsrc::sentry::turret
 {
@@ -35,7 +35,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     float maxVelErrorInput,
     float minorMajorTorqueRatio,
     float feedforwardGain)
-    : TurretYawControllerInterface(yawMotor),
+    : TurretAxisControllerInterface<control::turret::algorithms::Axis::YAW>(yawMotor),
       worldToMajor(worldToMajor),
       chassis(chassis),
       yawMotor(yawMotor),

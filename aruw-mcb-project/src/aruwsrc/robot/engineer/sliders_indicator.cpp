@@ -21,13 +21,13 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::engineer
 {
 SlidersIndicator::SlidersIndicator(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    joint::JointSubsystem &gantryLift,
-    joint::JointSubsystem &gantryExtension,
-    joint::JointSubsystem &cubeLift,
+    control::joint::JointSubsystem &gantryLift,
+    control::joint::JointSubsystem &gantryExtension,
+    control::joint::JointSubsystem &cubeLift,
     WristSubsystem &wristSubsystem,
     WristConfig wristConfig)
     : HudIndicator(refSerialTransmitter),
@@ -185,4 +185,4 @@ modm::ResumableResult<void> SlidersIndicator::update()
     RF_END();
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::engineer

@@ -25,7 +25,7 @@ namespace aruwsrc::display
 {
 CapacitorBankMenu::CapacitorBankMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    can::capbank::CapacitorBank *capacitorBank)
+    communication::can::cap_bank::CapacitorBank *capacitorBank)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
       capacitorBank(capacitorBank)
 {
@@ -46,25 +46,25 @@ void CapacitorBankMenu::draw()
 
     switch (this->state)
     {
-        case can::capbank::State::RESET:
+        case communication::can::cap_bank::State::RESET:
             display << "RESET";
             break;
-        case can::capbank::State::SAFE:
+        case communication::can::cap_bank::State::SAFE:
             display << "SAFE";
             break;
-        case can::capbank::State::CHARGE:
+        case communication::can::cap_bank::State::CHARGE:
             display << "CHARGE";
             break;
-        case can::capbank::State::CHARGE_DISCHARGE:
+        case communication::can::cap_bank::State::CHARGE_DISCHARGE:
             display << "CHARGE_DISCHARGE";
             break;
-        case can::capbank::State::DISCHARGE:
+        case communication::can::cap_bank::State::DISCHARGE:
             display << "DISCHARGE";
             break;
-        case can::capbank::State::BATTERY_OFF:
+        case communication::can::cap_bank::State::BATTERY_OFF:
             display << "BATTERY_OFF";
             break;
-        case can::capbank::State::DISABLED:
+        case communication::can::cap_bank::State::DISABLED:
             display << "DISABLED";
             break;
         default:

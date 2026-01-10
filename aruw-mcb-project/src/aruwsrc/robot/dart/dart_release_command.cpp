@@ -24,7 +24,7 @@
 #include "dart_constants.hpp"
 #include "dart_launcher_subsystem.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 DartReleaseCommand::DartReleaseCommand(
     aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher)
@@ -37,4 +37,4 @@ void DartReleaseCommand::initialize() { dartLauncher.setSetpoint(RELEASE_POSITIO
 
 bool DartReleaseCommand::isFinished() const { return dartLauncher.atSetpoint(); }
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart

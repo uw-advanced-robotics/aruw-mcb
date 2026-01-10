@@ -25,7 +25,7 @@
 #include "tap/motor/servo.hpp"
 
 #include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 static constexpr tap::motor::MotorId UPPER_PULL_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId LOWER_PULL_MOTOR_ID = tap::motor::MOTOR1;

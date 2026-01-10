@@ -40,7 +40,7 @@ class SentryStrategyMenu
 public:
     SentryStrategyMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
-        aruwsrc::serial::VisionCoprocessor *visionCoprocessor);
+        aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor);
 
     void openNextScreen() override;
 
@@ -49,7 +49,7 @@ public:
 private:
     static constexpr int SENTRY_STRATEGY_MENU_ID = 13;
 
-    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
 };
 }  // namespace aruwsrc::display
 

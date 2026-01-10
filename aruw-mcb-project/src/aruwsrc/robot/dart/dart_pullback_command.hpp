@@ -25,8 +25,8 @@
 
 #include "dart_constants.hpp"
 #include "dart_launcher_subsystem.hpp"
-using namespace aruwsrc::robot::dart;
-namespace aruwsrc::robot::dart
+using namespace aruwsrc::dart;
+namespace aruwsrc::dart
 {
 class DartPullbackCommand : public tap::control::Command
 {
@@ -46,5 +46,5 @@ private:
     aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem;
 };  // class DartPullbackCommand
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif  // DART_PULLBACK_COMMAND_HPP_

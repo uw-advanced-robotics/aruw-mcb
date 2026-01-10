@@ -29,9 +29,10 @@
 
 #else
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+
 #endif
 
 namespace aruwsrc::engineer
@@ -58,9 +59,9 @@ public:
     serial::EngineerCVCommunication engineerCVCommunication;
 #else
 public:
-    control::engineer::EngineerControlOperatorInterface controlOperatorInterface;
+    engineer::EngineerControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
-    serial::EngineerCVCommunication engineerCVCommunication;
+    communication::serial::EngineerCVCommunication engineerCVCommunication;
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer

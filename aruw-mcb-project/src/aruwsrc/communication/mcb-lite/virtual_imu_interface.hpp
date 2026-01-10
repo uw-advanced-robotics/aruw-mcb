@@ -29,7 +29,7 @@
 using namespace tap::communication::sensors::imu::mpu6500;
 using namespace tap::communication::serial;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
 {
@@ -88,6 +88,6 @@ private:
     bool sendIMUCalibrationMessage = false;
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif

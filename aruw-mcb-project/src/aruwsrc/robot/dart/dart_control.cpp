@@ -47,7 +47,6 @@ using namespace tap::control;
 using namespace aruwsrc::control;
 using namespace tap::communication::serial;
 using namespace aruwsrc::dart;
-using namespace aruwsrc::robot::dart;
 using namespace aruwsrc::control::joint;
 using namespace aruwsrc::control::joint::homing;
 using namespace aruwsrc::control::joint::homing::trigger;

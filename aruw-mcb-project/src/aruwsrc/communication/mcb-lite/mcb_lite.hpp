@@ -46,7 +46,7 @@ namespace aruwsrc::display
 class MCBLiteMenu;
 }
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 /**
  * This class is used to communicate with the the virtual MCB using the UART port.
@@ -72,8 +72,8 @@ public:
 
     constexpr static int UART_BAUDRATE = 1'000'000;
 
-    VirtualCanRxHandler canRxHandler;
-    VirtualDJIMotorTxHandler motorTxHandler;
+    motor::VirtualCanRxHandler canRxHandler;
+    motor::VirtualDJIMotorTxHandler motorTxHandler;
     VirtualIMUInterface imu;
     VirtualAnalog analog;
     VirtualDigital digital;
@@ -106,6 +106,6 @@ private:
 
     bool initialized = false;
 };
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif  // MCB_LITE_HPP_

@@ -37,7 +37,7 @@ class SetpointMoveManualCommand : public tap::control::Command
 public:
     SetpointMoveManualCommand(
         aruwsrc::control::joint::JointSubsystem &subsystem,
-        aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface,
+        aruwsrc::engineer::EngineerControlOperatorInterface *operatorInterface,
         float moveSpeed,
         SetpointType setpointType = CUBE_LIFT);
 
@@ -53,7 +53,7 @@ public:
 
 private:
     aruwsrc::control::joint::JointSubsystem &subsystem;
-    aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface;
+    aruwsrc::engineer::EngineerControlOperatorInterface *operatorInterface;
     float moveSpeed;
     SetpointType setpointType;
 

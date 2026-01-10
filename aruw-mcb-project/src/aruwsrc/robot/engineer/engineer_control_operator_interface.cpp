@@ -25,9 +25,9 @@
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 
 using namespace tap::algorithms;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 
-namespace aruwsrc::control::engineer
+namespace aruwsrc::engineer
 {
 bool EngineerControlOperatorInterface::isDriveMode()
 {
@@ -196,9 +196,10 @@ float EngineerControlOperatorInterface::getChassisXInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+    const float maxChassisSpeed =
+        aruwsrc::control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            aruwsrc::control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalX = maxChassisSpeed *
                    limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
@@ -251,9 +252,10 @@ float EngineerControlOperatorInterface::getChassisYInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::A) - drivers->remote.keyPressed(Remote::Key::D);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+    const float maxChassisSpeed =
+        aruwsrc::control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            aruwsrc::control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalY = maxChassisSpeed *
                    limitVal(chassisYInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
@@ -302,9 +304,10 @@ float EngineerControlOperatorInterface::getChassisRInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+    const float maxChassisSpeed =
+        aruwsrc::control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            aruwsrc::control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalR = maxChassisSpeed *
                    limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
@@ -328,4 +331,4 @@ float EngineerControlOperatorInterface::getChassisRInput()
     }
 }
 
-}  // namespace aruwsrc::control::engineer
+}  // namespace aruwsrc::engineer

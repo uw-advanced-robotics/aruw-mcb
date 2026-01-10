@@ -26,9 +26,7 @@
 #include "chassis_rel_drive.hpp"
 #include "holonomic_chassis_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 ChassisDriveCommand::ChassisDriveCommand(
     tap::Drivers* drivers,
@@ -52,6 +50,4 @@ void ChassisDriveCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisDriveCommand::isFinished() const { return false; }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

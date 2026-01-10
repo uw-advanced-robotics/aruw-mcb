@@ -28,9 +28,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     tap::Drivers* drivers,
@@ -41,7 +39,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     Motor& rightFrontMotor,
     Motor& rightBackMotor,
     tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
-    can::capbank::CapacitorBank* capacitorBank)
+    communication::can::cap_bank::CapacitorBank* capacitorBank)
     : HolonomicChassisSubsystem(drivers, currentSensor, voltageSensor, capacitorBank),
       velocityPid{
           tap::algorithms::SmoothPid(wheelVelocityPidConfig),
@@ -201,6 +199,4 @@ modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getDesiredVelocityCha
     return wheelVelToChassisVelMat * convertRawRPM(desiredWheelRPM);
 }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

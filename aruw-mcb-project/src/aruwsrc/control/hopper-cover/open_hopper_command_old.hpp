@@ -24,9 +24,7 @@
 
 #include "hopper_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace control
+namespace aruwsrc::control::hopper_cover
 {
 class OpenHopperCommand;
 
@@ -49,8 +47,6 @@ private:
     HopperSubsystem* subsystemHopper;
 };
 
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::hopper_cover
 
 #endif  // OPEN_HOPPER_COMMAND_OLD_HPP_

@@ -26,7 +26,7 @@
 
 #include "dart_launcher_subsystem.hpp"
 
-namespace aruwsrc::robot::dart
+namespace aruwsrc::dart
 {
 class DartReleaseCommand : public tap::control::Command
 {
@@ -47,5 +47,5 @@ private:
     aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher;
 };  // class DartReleaseCommand
 
-}  // namespace aruwsrc::robot::dart
+}  // namespace aruwsrc::dart
 #endif  // DART_RELEASE_COMMAND_HPP_

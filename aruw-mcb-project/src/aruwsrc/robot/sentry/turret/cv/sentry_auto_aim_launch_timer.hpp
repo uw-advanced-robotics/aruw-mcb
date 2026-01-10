@@ -54,7 +54,7 @@ public:
 
     SentryAutoAimLaunchTimer(
         uint32_t agitatorTypicalDelayMicroseconds,
-        aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
+        aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
         aruwsrc::sentry::algorithms::SentryBallisticsSolver *ballistics);
 
     /**
@@ -72,7 +72,7 @@ public:
 
 private:
     uint32_t agitatorTypicalDelayMicroseconds;
-    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
     aruwsrc::sentry::algorithms::SentryBallisticsSolver *ballistics;
 };  // class SentryAutoAimLaunchTimer
 
