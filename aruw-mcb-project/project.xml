@@ -44,5 +44,6 @@
     <module>taproot:display</module>
     <module>taproot:ext:littlefs</module>
     <module>taproot:ext:eigen</module>
+    <module>modm::platform::random</module>
   </modules>
 </library>

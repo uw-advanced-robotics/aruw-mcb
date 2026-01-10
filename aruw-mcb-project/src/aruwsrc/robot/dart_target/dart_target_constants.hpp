@@ -43,6 +43,9 @@ tap::algorithms::SmoothPidConfig m2006VelocityPidConfig = {
 tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
     {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
+static constexpr uint32_t TERMINAL_MOVING_TARGET_DELAY = 1200;
+static constexpr uint32_t TARGET_TIMEOUT = 600;
+static constexpr uint32_t TARGET_TRAVEL_DISTANCE = 560;
 }  // namespace aruwsrc::dart_target::constants
 
 #endif  // DART_TARGET_CONSTANTS_HPP_

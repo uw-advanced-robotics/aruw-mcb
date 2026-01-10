@@ -85,7 +85,7 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 
 // inits
 
-void initializeSubsystems() { motorSubsystem2006.initialize(); }
+void initializeSubsystems() { motorSubsystem2006.initialize(); modm::platform::RandomNumberGenerator::enable();}
 
 void registerSubsystems(Drivers* drivers)
 {
