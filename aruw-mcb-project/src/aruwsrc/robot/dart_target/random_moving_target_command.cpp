@@ -41,7 +41,7 @@ void RandomMovingTargetCommand::execute()
     }
 
     if (targetSet) {
-        // subsystem move to target
+        motorSubsystem->setDesiredRPM(aruwsrc::dart_target::constants::TARGET_MOVEMENT_SPEED);
     }
 }
 

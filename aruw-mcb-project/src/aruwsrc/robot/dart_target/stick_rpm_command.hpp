@@ -44,7 +44,7 @@ public:
 
     bool isFinished() const override { return false; }
 
-    const char* getName() const override { return "stick rpm"; }
+    const char* getName() const override { return "Stick Rpm Command"; }
 
 private:
     MotorSubsystem* motorSubsystem;

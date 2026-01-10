@@ -71,6 +71,10 @@ public:
         return motor.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
     }
 
+    inline float getCurrentPosition() {
+        return motor.getEncoder()->getPosition().getUnwrappedValue() * 30 * M_PI;
+    }
+
     inline void refreshSafeDisconnect() override { stop(); };
 
     inline void stop()

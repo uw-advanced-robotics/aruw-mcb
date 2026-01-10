@@ -21,6 +21,7 @@
 
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -35,6 +36,8 @@
 #include "aruwsrc/robot/dart_target/dart_target_drivers.hpp"
 #include "aruwsrc/robot/dart_target/motor_subsystem.hpp"
 #include "aruwsrc/robot/dart_target/stick_rpm_command.hpp"
+#include "aruwsrc/robot/dart_target/random_moving_target_command.hpp"
+#include "aruwsrc/robot/dart_target/terminal_moving_target_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
 using namespace tap::control::setpoint;
@@ -76,9 +79,20 @@ StickRpmCommand leftVerticalManual(
     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
     500.0f);
 
+RandomMovingTargetCommand randomMovingTargetCommand(&motorSubsystem2006);
+TerminalMovingTargetCommand terminalMovingTargetCommand(&motorSubsystem2006);
 // ------------------
 // command mappings
 // ------------------
+tap::control::PressCommandMapping leftUp(
+    drivers(),
+    {&randomMovingTargetCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+tap::control::PressCommandMapping leftDown(
+    drivers(),
+    {&terminalMovingTargetCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -94,8 +108,10 @@ void registerSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&motorSubsystem2006);
 }
 
-void registerIoMappings(Drivers*) { motorSubsystem2006.setDefaultCommand(&leftVerticalManual); }
-
+void registerIoMappings(Drivers* drivers) { motorSubsystem2006.setDefaultCommand(&leftVerticalManual); 
+    drivers->commandMapper.addMap(&leftUp);
+    drivers->commandMapper.addMap(&leftDown);
+}
 }  // namespace dart_target_control
 
 namespace aruwsrc::dart_target

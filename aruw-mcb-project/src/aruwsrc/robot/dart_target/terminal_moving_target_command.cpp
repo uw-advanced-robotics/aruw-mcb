@@ -42,7 +42,7 @@ void TerminalMovingTargetCommand::execute()
 
     uint32_t timeDiff = tap::arch::clock::getTimeMilliseconds() - startTime;
     if (targetSet && timeDiff > aruwsrc::dart_target::constants::TERMINAL_MOVING_TARGET_DELAY) {
-        // subsystem move to target
+        motorSubsystem->setDesiredRPM(aruwsrc::dart_target::constants::TARGET_MOVEMENT_SPEED);
     }
 }
 
