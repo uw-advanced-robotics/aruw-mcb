@@ -18,6 +18,7 @@
  */
 
 #include "dart_pullback_command.hpp"
+
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
 #include "dart_constants.hpp"
