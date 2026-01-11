@@ -87,12 +87,12 @@ TerminalMovingTargetCommand terminalMovingTargetCommand(&motorSubsystem2006);
 tap::control::PressCommandMapping leftUp(
     drivers(),
     {&randomMovingTargetCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 tap::control::PressCommandMapping leftDown(
     drivers(),
     {&terminalMovingTargetCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());

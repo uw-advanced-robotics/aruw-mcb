@@ -32,14 +32,14 @@
 namespace aruwsrc::dart_target::constants
 {
 // velocity pid terms
-tap::algorithms::SmoothPidConfig m2006VelocityPidConfig = {
+static constexpr tap::algorithms::SmoothPidConfig m2006VelocityPidConfig = {
     .kp = 50.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610};
 
-tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
+static constexpr tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
     {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
 static constexpr float TARGET_MOVEMENT_SPEED = 1.0f / 0.03f / M_PI * 60.0f; // 1 m/s / 0.03pi pulley circumference * 60sec/min

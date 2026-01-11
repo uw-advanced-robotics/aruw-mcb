@@ -32,7 +32,7 @@ public:
     explicit RandomMovingTargetCommand(
         MotorSubsystem* subsystem);
 
-    void initialize() override {}
+    void initialize() override;
 
     void execute() override;
 
