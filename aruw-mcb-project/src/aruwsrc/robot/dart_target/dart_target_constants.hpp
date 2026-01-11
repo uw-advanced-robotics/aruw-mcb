@@ -42,7 +42,8 @@ static constexpr tap::algorithms::SmoothPidConfig m2006VelocityPidConfig = {
 static constexpr tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
     {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
-static constexpr float TARGET_MOVEMENT_SPEED = 1.0f / 0.03f / M_PI * 60.0f; // 1 m/s / 0.03pi pulley circumference * 60sec/min
+static constexpr float TARGET_MOVEMENT_SPEED =
+    1.0f / 0.03f / M_PI * 60.0f;  // 1 m/s / 0.03pi pulley circumference * 60sec/min
 static constexpr uint32_t TERMINAL_MOVING_TARGET_DELAY = 1200;
 static constexpr uint32_t TARGET_TIMEOUT = 600;
 static constexpr uint32_t TARGET_TRAVEL_DISTANCE = 280;

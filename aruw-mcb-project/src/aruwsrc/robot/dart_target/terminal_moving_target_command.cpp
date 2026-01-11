@@ -18,11 +18,12 @@
  */
 
 #include "terminal_moving_target_command.hpp"
-#include "dart_target_constants.hpp"
+
 #include "modm/platform/random/random_number_generator.hpp"
 
-TerminalMovingTargetCommand::TerminalMovingTargetCommand(
-    MotorSubsystem* subsystem)
+#include "dart_target_constants.hpp"
+
+TerminalMovingTargetCommand::TerminalMovingTargetCommand(MotorSubsystem* subsystem)
     : motorSubsystem(subsystem)
 {
     this->addSubsystemRequirement(subsystem);
@@ -36,18 +37,25 @@ void TerminalMovingTargetCommand::initialize()
 
 void TerminalMovingTargetCommand::execute()
 {
-    if (!targetSet && modm::platform::RandomNumberGenerator::isReady()) {
-        targetPos = modm::platform::RandomNumberGenerator::getValue() % aruwsrc::dart_target::constants::TARGET_TRAVEL_DISTANCE;
+    if (!targetSet && modm::platform::RandomNumberGenerator::isReady())
+    {
+        targetPos = modm::platform::RandomNumberGenerator::getValue() %
+                    aruwsrc::dart_target::constants::TARGET_TRAVEL_DISTANCE;
     }
 
     uint32_t timeDiff = tap::arch::clock::getTimeMilliseconds() - startTime;
-    if (targetSet && timeDiff > aruwsrc::dart_target::constants::TERMINAL_MOVING_TARGET_DELAY) {
+    if (targetSet && timeDiff > aruwsrc::dart_target::constants::TERMINAL_MOVING_TARGET_DELAY)
+    {
         motorSubsystem->setDesiredRPM(aruwsrc::dart_target::constants::TARGET_MOVEMENT_SPEED);
     }
 }
 
 void TerminalMovingTargetCommand::end(bool) { motorSubsystem->stop(); }
 
-bool TerminalMovingTargetCommand::isFinished() const {
-    return (tap::arch::clock::getTimeMilliseconds() - startTime) >= (aruwsrc::dart_target::constants::TERMINAL_MOVING_TARGET_DELAY + aruwsrc::dart_target::constants::TARGET_TIMEOUT); // if it times out, just time out and stop moving
+bool TerminalMovingTargetCommand::isFinished() const
+{
+    return (tap::arch::clock::getTimeMilliseconds() - startTime) >=
+           (aruwsrc::dart_target::constants::TERMINAL_MOVING_TARGET_DELAY +
+            aruwsrc::dart_target::constants::TARGET_TIMEOUT);  // if it times out, just time out and
+                                                               // stop moving
 }

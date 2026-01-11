@@ -29,8 +29,7 @@ using namespace aruwsrc::dart_target;
 class TerminalMovingTargetCommand : public tap::control::Command
 {
 public:
-    explicit TerminalMovingTargetCommand(
-        MotorSubsystem* subsystem);
+    explicit TerminalMovingTargetCommand(MotorSubsystem* subsystem);
 
     void initialize() override;
 

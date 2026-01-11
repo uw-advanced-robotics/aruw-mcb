@@ -35,8 +35,8 @@
 #include "aruwsrc/robot/dart_target/dart_target_constants.hpp"
 #include "aruwsrc/robot/dart_target/dart_target_drivers.hpp"
 #include "aruwsrc/robot/dart_target/motor_subsystem.hpp"
-#include "aruwsrc/robot/dart_target/stick_rpm_command.hpp"
 #include "aruwsrc/robot/dart_target/random_moving_target_command.hpp"
+#include "aruwsrc/robot/dart_target/stick_rpm_command.hpp"
 #include "aruwsrc/robot/dart_target/terminal_moving_target_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
@@ -99,7 +99,11 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 
 // inits
 
-void initializeSubsystems() { motorSubsystem2006.initialize(); modm::platform::RandomNumberGenerator::enable();}
+void initializeSubsystems()
+{
+    motorSubsystem2006.initialize();
+    modm::platform::RandomNumberGenerator::enable();
+}
 
 void registerSubsystems(Drivers* drivers)
 {
@@ -108,7 +112,9 @@ void registerSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&motorSubsystem2006);
 }
 
-void registerIoMappings(Drivers* drivers) { motorSubsystem2006.setDefaultCommand(&leftVerticalManual); 
+void registerIoMappings(Drivers* drivers)
+{
+    motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
     drivers->commandMapper.addMap(&leftUp);
     drivers->commandMapper.addMap(&leftDown);
 }

@@ -18,11 +18,12 @@
  */
 
 #include "random_moving_target_command.hpp"
-#include "dart_target_constants.hpp"
+
 #include "modm/platform/random/random_number_generator.hpp"
 
-RandomMovingTargetCommand::RandomMovingTargetCommand(
-    MotorSubsystem* subsystem)
+#include "dart_target_constants.hpp"
+
+RandomMovingTargetCommand::RandomMovingTargetCommand(MotorSubsystem* subsystem)
     : motorSubsystem(subsystem)
 {
     this->addSubsystemRequirement(subsystem);
@@ -36,17 +37,23 @@ void RandomMovingTargetCommand::initialize()
 
 void RandomMovingTargetCommand::execute()
 {
-    if (!targetSet && modm::platform::RandomNumberGenerator::isReady()) {
-        targetPos = modm::platform::RandomNumberGenerator::getValue() % aruwsrc::dart_target::constants::TARGET_TRAVEL_DISTANCE;
+    if (!targetSet && modm::platform::RandomNumberGenerator::isReady())
+    {
+        targetPos = modm::platform::RandomNumberGenerator::getValue() %
+                    aruwsrc::dart_target::constants::TARGET_TRAVEL_DISTANCE;
     }
 
-    if (targetSet) {
+    if (targetSet)
+    {
         motorSubsystem->setDesiredRPM(aruwsrc::dart_target::constants::TARGET_MOVEMENT_SPEED);
     }
 }
 
 void RandomMovingTargetCommand::end(bool) { motorSubsystem->stop(); }
 
-bool RandomMovingTargetCommand::isFinished() const {
-    return (tap::arch::clock::getTimeMilliseconds() - startTime) >= aruwsrc::dart_target::constants::TARGET_TIMEOUT; // if it times out, just time out and stop moving
+bool RandomMovingTargetCommand::isFinished() const
+{
+    return (tap::arch::clock::getTimeMilliseconds() - startTime) >=
+           aruwsrc::dart_target::constants::TARGET_TIMEOUT;  // if it times out, just time out and
+                                                             // stop moving
 }

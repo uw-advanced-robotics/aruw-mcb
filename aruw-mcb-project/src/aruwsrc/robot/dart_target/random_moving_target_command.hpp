@@ -29,8 +29,7 @@ using namespace aruwsrc::dart_target;
 class RandomMovingTargetCommand : public tap::control::Command
 {
 public:
-    explicit RandomMovingTargetCommand(
-        MotorSubsystem* subsystem);
+    explicit RandomMovingTargetCommand(MotorSubsystem* subsystem);
 
     void initialize() override;
 
