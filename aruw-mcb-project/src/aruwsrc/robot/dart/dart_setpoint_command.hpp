@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef DART_PULLBACK_COMMAND_HPP_
-#define DART_PULLBACK_COMMAND_HPP_
+#ifndef DART_SETPOINT_COMMAND_HPP_
+#define DART_SETPOINT_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -27,7 +27,6 @@
 using namespace aruwsrc::dart;
 namespace aruwsrc::dart
 {
-
 // pulls dart to pullback position using PID control
 
 class DartSetpointCommand : public tap::control::Command
@@ -51,4 +50,4 @@ private:
 };  // class DartPullbackCommand
 
 }  // namespace aruwsrc::dart
-#endif  // DART_PULLBACK_COMMAND_HPP_
+#endif  // DART_SETPOINT_COMMAND_HPP_
