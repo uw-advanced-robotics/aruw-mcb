@@ -23,16 +23,19 @@
 
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
-#include "dart_constants.hpp"
 #include "dart_launcher_subsystem.hpp"
 using namespace aruwsrc::dart;
 namespace aruwsrc::dart
 {
-class DartPullbackCommand : public tap::control::Command
+
+// pulls dart to pullback position using PID control
+
+class DartSetpointCommand : public tap::control::Command
 {
 public:
-    DartPullbackCommand(
-        aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem);
+    DartSetpointCommand(
+        aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem,
+        float setpoint);
     void initialize() override;
     void execute() override {}
 
@@ -44,6 +47,7 @@ public:
 
 private:
     aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem;
+    float setpoint;
 };  // class DartPullbackCommand
 
 }  // namespace aruwsrc::dart

@@ -20,10 +20,10 @@
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/sequential_command.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
-
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -40,8 +40,9 @@
 
 #include "dart_close_command.hpp"
 #include "dart_open_command.hpp"
-#include "dart_pullback_command.hpp"
 #include "dart_release_command.hpp"
+#include "dart_setpoint_command.hpp"
+#include "dart_constants.hpp"
 
 using namespace tap::control;
 using namespace aruwsrc::control;
@@ -110,13 +111,21 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 DartLauncherSubsystem dartLauncher(drivers());
 
-DartReleaseCommand dartRelease(pullMotorSubsystem);
-DartPullbackCommand dartPullback(pullMotorSubsystem);
-
+DartSetpointCommand dartPullback(pullMotorSubsystem, PULLBACK_PULL_POSITION);
+DartSetpointCommand dartGrab(pullMotorSubsystem, GRAB_POSITION);
 DartOpenCommand servoOpen(dartLauncher);
 DartCloseCommand servoClose(dartLauncher);
 
 HomingCommand pullMotorHome(pullMotorSubsystem);
+
+// grab the string and pullback to setpoint
+SequentialCommand<2> pullBackCommand(
+    std::array<Command*, 2>{{&servoClose, &dartPullback}});
+
+// release the string to let the dart go, then go to reload position
+// TODO: need to add in the command to rotate magazine
+SequentialCommand<2> releaseDartAndReload(
+    std::array<Command*, 2>{{&servoOpen, &dartGrab}});
 
 // Left Up + Right Up -> Servo Open
 HoldCommandMapping openServoMapping(

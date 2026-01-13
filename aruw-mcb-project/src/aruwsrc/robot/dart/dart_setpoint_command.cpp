@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dart_pullback_command.hpp"
+#include "dart_setpoint_command.hpp"
 
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
@@ -26,15 +26,15 @@
 
 namespace aruwsrc::dart
 {
-DartPullbackCommand::DartPullbackCommand(
-    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem)
+DartSetpointCommand::DartSetpointCommand(
+    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem, float setpoint)
     : pullMotorSubsystem(pullMotorSubsystem)
 {
     addSubsystemRequirement(&pullMotorSubsystem);
 }
 
-void DartPullbackCommand::initialize() { pullMotorSubsystem.setSetpoint(PULLBACK_PULL_POSITION); }
+void DartSetpointCommand::initialize() { pullMotorSubsystem.setSetpoint(setpoint); }
 
-bool DartPullbackCommand::isFinished() const { return pullMotorSubsystem.atSetpoint(); }
+bool DartSetpointCommand::isFinished() const { return pullMotorSubsystem.atSetpoint(); }
 
 }  // namespace aruwsrc::dart
