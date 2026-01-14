@@ -27,8 +27,10 @@
 namespace aruwsrc::dart
 {
 DartSetpointCommand::DartSetpointCommand(
-    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem, float setpoint)
-    : pullMotorSubsystem(pullMotorSubsystem)
+    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem,
+    float setpoint)
+    : pullMotorSubsystem(pullMotorSubsystem),
+      setpoint(setpoint)
 {
     addSubsystemRequirement(&pullMotorSubsystem);
 }

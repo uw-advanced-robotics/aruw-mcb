@@ -37,8 +37,8 @@ static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
 static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 3.0f;
 static constexpr int32_t PULLBACK_PULL_POSITION = 0;  // TODO: FIND
 static constexpr int32_t RELEASE_POSITION = 0;        // TODO: FIND
-static constexpr int32_t GRAB_POSITION = 0;        // TODO: FIND
-static constexpr int32_t RELOAD_POSITION = 0;        // TODO: FIND
+static constexpr int32_t GRAB_POSITION = 0;           // TODO: FIND
+static constexpr int32_t RELOAD_POSITION = 0;         // TODO: FIND
 //  * @param[in] pwmRampSpeed The speed in PWM percent per millisecond.
 
 static constexpr float SERVO_MIN = 0.5f;
