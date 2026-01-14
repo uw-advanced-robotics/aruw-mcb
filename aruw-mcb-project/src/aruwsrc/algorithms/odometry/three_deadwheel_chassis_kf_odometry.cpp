@@ -32,6 +32,7 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
     const modm::Vector2f initPos,
     const float parallelOneCenterToWheelDistance,
     const float parallelTwoCenterToWheelDistance,
+    const float perpendicularCenterToWheelDistance,
     const float parallelWheelOneChassisForwardRelativeAngleRadians,
     const float parallelWheelTwoChassisForwardRelativeAngleRadians,
     const float perpendicularWheelChassisForwardRelativeAngleRadians)
@@ -42,6 +43,7 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
       initPos(initPos),
       parallelOneCenterToWheelDistance(parallelOneCenterToWheelDistance),
       parallelTwoCenterToWheelDistance(parallelTwoCenterToWheelDistance),
+      perpendicularCenterToWheelDistance(perpendicularCenterToWheelDistance),
       parallelWheelOneChassisForwardRelativeAngleRadians(
           parallelWheelOneChassisForwardRelativeAngleRadians),
       parallelWheelTwoChassisForwardRelativeAngleRadians(
@@ -54,7 +56,8 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
 
 void ThreeDeadwheelChassisKFOdometry::reset()
 {
-    float initialX[int(OdomState::NUM_STATES)] = {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f, 0.0f, 0.0f};
+    float initialX[int(OdomState::NUM_STATES)] =
+        {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f, 0.0f, 0.0f};
     kf.init(initialX);
 }
 
@@ -84,58 +87,76 @@ float ThreeDeadwheelChassisKFOdometry::applyIirFilter(
 
 void ThreeDeadwheelChassisKFOdometry::update()
 {
-    if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
+    float chassisYaw = location.getOrientation();
+    /* Process dead wheels */
+
+    float yawIMU;
+    if (!chassisYawObserver.getChassisWorldYaw(&yawIMU))
     {
-        chassisYaw = 0;
+        yawIMU = 0;
         return;
     }
+
+    // Get acceleration from IMU
+    float Ax = imu.getAx();
+    float Ay = imu.getAy();
+
+    float Wimu = imu.getGz();
+
+    // Rotate acceleration to the world frame
+    tap::algorithms::rotateVector(&Ax, &Ay, chassisYaw);
+
+    /* Process dead wheels */
 
     perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
     parallelOneRaw = deadwheelOdometry.getParallelMotorOneVelocity();
     parallelTwoRaw = deadwheelOdometry.getParallelMotorTwoVelocity();
 
-    float angularVeloODOM = (parallelTwoRaw - parallelOneRaw) /
-                       (parallelOneCenterToWheelDistance + parallelTwoCenterToWheelDistance);
+    // Compute odometry angular velocity
+    float Wodo = (parallelTwoRaw - parallelOneRaw) /
+                 (parallelOneCenterToWheelDistance + parallelTwoCenterToWheelDistance);
 
-    filteredParallelOne = parallelOneRaw + (angularVeloODOM * parallelOneCenterToWheelDistance);
-    filteredParallelTwo = parallelTwoRaw - (angularVeloODOM * parallelTwoCenterToWheelDistance);
-    combinedParallel = (filteredParallelOne + filteredParallelTwo) / 2.0f;
+    // Correct deadwheel velocities for rotational component
+    float correctedParallelOne = parallelOneRaw + (Wodo * parallelOneCenterToWheelDistance);
+    float correctedParallelTwo = parallelTwoRaw - (Wodo * parallelTwoCenterToWheelDistance);
+    float correctedPerpendicular = perpendicularRaw - (Wodo * perpendicularCenterToWheelDistance);
 
-    combinedParallel =
-        applyIirFilter(combinedParallel, parallelFilterState, IIR_A, IIR_B, FILTER_ORDER);
-    filteredPerpendicular =
-        applyIirFilter(perpendicularRaw, perpendicularFilterState, IIR_A, IIR_B, FILTER_ORDER);
+    filteredParallelOne =
+        applyIirFilter(correctedParallelOne, parallelOneFilterState, IIR_A, IIR_B, FILTER_ORDER);
 
+    filteredParallelTwo =
+        applyIirFilter(correctedParallelTwo, parallelTwoFilterState, IIR_A, IIR_B, FILTER_ORDER);
+
+    filteredPerpendicular = applyIirFilter(
+        correctedPerpendicular,
+        perpendicularFilterState,
+        IIR_A,
+        IIR_B,
+        FILTER_ORDER);
+
+    // Correct for deadwheel orientation and average the two parallel wheels
     float Vx =
-        (combinedParallel * std::sin((parallelWheelOneChassisForwardRelativeAngleRadians + parallelWheelTwoChassisForwardRelativeAngleRadians) / 2.0f) +
+        ((filteredParallelOne * std::sin(parallelWheelOneChassisForwardRelativeAngleRadians) +
+          (filteredParallelTwo * std::sin(parallelWheelTwoChassisForwardRelativeAngleRadians))) /
+             2 +
          filteredPerpendicular * std::cos(perpendicularWheelChassisForwardRelativeAngleRadians));
     float Vy =
-        (combinedParallel * std::sin((parallelWheelOneChassisForwardRelativeAngleRadians + parallelWheelTwoChassisForwardRelativeAngleRadians) / 2.0f) -
+        ((filteredParallelOne * std::cos(parallelWheelOneChassisForwardRelativeAngleRadians) +
+          (filteredParallelTwo * std::cos(parallelWheelTwoChassisForwardRelativeAngleRadians))) /
+             2 +
          filteredPerpendicular * std::sin(perpendicularWheelChassisForwardRelativeAngleRadians));
 
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
 
-    // Get acceleration from IMU
-    float ax = imu.getAx();
-    float ay = imu.getAy();
-
-    float angularVeloIMU = imu.getGz();
-
-    // Rotate acceleration to the world frame
-    float accelXWorld, accelYWorld;
-    tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
-    accelXWorld = ax;
-    accelYWorld = ay;
-
     // Create the measurement vector
-    float y[int(OdomInput::NUM_INPUTS)] = {Vx, accelXWorld, Vy, accelYWorld, chassisYaw, angularVeloODOM, angularVeloIMU};
+    float y[int(OdomInput::NUM_INPUTS)] = {Vx, Ax, Vy, Ay, chassisYaw, Wodo, Wimu};
 
     // Perform the Kalman filter update
     kf.performUpdate(y);
-    updateChassisStateFromKF(chassisYaw);
+    updateChassisStateFromKF();
 }
 
-void ThreeDeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
+void ThreeDeadwheelChassisKFOdometry::updateChassisStateFromKF()
 {
     const auto& x = kf.getStateVectorAsMatrix();
 

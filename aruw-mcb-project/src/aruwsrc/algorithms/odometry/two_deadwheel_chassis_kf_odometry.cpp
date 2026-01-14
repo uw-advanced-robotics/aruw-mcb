@@ -17,11 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "deadwheel_chassis_kf_odometry.hpp"
+#include "two_deadwheel_chassis_kf_odometry.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
-DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
+TwoDeadwheelChassisKFOdometry::TwoDeadwheelChassisKFOdometry(
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
 #if defined(TARGET_SENTRY_ECLIPSE)
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
@@ -47,14 +47,14 @@ DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     reset();
 }
 
-void DeadwheelChassisKFOdometry::reset()
+void TwoDeadwheelChassisKFOdometry::reset()
 {
     float initialX[int(OdomState::NUM_STATES)] = {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f};
     kf.init(initialX);
 }
 
 // may or may not work
-float DeadwheelChassisKFOdometry::applyIirFilter(
+float TwoDeadwheelChassisKFOdometry::applyIirFilter(
     float input,
     float* state,
     const float* a,
@@ -77,7 +77,7 @@ float DeadwheelChassisKFOdometry::applyIirFilter(
     return output;
 }
 
-void DeadwheelChassisKFOdometry::update()
+void TwoDeadwheelChassisKFOdometry::update()
 {
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
     {
@@ -124,7 +124,7 @@ void DeadwheelChassisKFOdometry::update()
     updateChassisStateFromKF(chassisYaw);
 }
 
-void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
+void TwoDeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
 {
     const auto& x = kf.getStateVectorAsMatrix();
 
@@ -137,7 +137,7 @@ void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
     prevTime = tap::arch::clock::getTimeMicroseconds();
 }
 
-void DeadwheelChassisKFOdometry::overrideOdometryPosition(
+void TwoDeadwheelChassisKFOdometry::overrideOdometryPosition(
     const float positionX,
     const float positionY)
 {

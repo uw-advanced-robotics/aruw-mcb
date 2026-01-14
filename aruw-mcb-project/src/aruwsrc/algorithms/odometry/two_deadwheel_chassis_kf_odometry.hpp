@@ -42,7 +42,7 @@ namespace aruwsrc::algorithms::odometry
  * robots). For those robots that measure chassis position directly (sentry, for example), a
  * tweaked version of the kalman filter used in this implementation should be used.
  */
-class DeadwheelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
+class TwoDeadwheelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
     /**
@@ -63,7 +63,7 @@ public:
      * chassis. When moving in the direction of the parallel deadwheel, the perpendicular deadwheel
      * should not move, and vice versa
      */
-    DeadwheelChassisKFOdometry(
+    TwoDeadwheelChassisKFOdometry(
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
 #if defined(TARGET_SENTRY_ECLIPSE)
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,

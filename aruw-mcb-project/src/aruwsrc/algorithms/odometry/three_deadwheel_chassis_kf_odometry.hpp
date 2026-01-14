@@ -74,6 +74,7 @@ public:
         const modm::Vector2f initPos,
         const float parallelOneCenterToWheelDistance,
         const float parallelTwoCenterToWheelDistance,
+        const float perpendicularCenterToWheelDistance,
         const float parallelWheelOneChassisForwardRelativeAngleRadians,
         const float parallelWheelTwoChassisForwardRelativeAngleRadians,
         const float perpendicularWheelChassisForwardRelativeAngleRadians);
@@ -84,12 +85,12 @@ public:
 
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
-    inline float getYaw() const override { return chassisYaw; }
-
     /**
      * @brief Resets the KF back to the robot's boot position.
      */
     void reset();
+
+    void getOdometry();
 
     void update();
 
@@ -194,18 +195,17 @@ private:
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
-    // Chassis yaw orientation in world frame (radians)
-    float chassisYaw = 0;
 
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
 
     const float parallelOneCenterToWheelDistance;
     const float parallelTwoCenterToWheelDistance;
+    const float perpendicularCenterToWheelDistance;
     const float parallelWheelOneChassisForwardRelativeAngleRadians;
     const float parallelWheelTwoChassisForwardRelativeAngleRadians;
     const float perpendicularWheelChassisForwardRelativeAngleRadians;
-    void updateChassisStateFromKF(float chassisYaw);
+    void updateChassisStateFromKF();
     float perpendicularRaw;
     float parallelOneRaw;
     float parallelTwoRaw;
@@ -215,7 +215,8 @@ private:
     float combinedParallel;
 
     static constexpr int FILTER_ORDER = 3;
-    float parallelFilterState[FILTER_ORDER] = {0.0f};
+    float parallelOneFilterState[FILTER_ORDER] = {0.0f};
+    float parallelTwoFilterState[FILTER_ORDER] = {0.0f};
     float perpendicularFilterState[FILTER_ORDER] = {0.0f};
     float parallelNotchFilterState[3] = {0.0f};
     float perpendicularNotchFilterState[3] = {0.0f};
