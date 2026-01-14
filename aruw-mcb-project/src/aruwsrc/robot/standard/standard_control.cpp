@@ -301,7 +301,7 @@ aruwsrc::chassis::ChassisAutoNavController autoNavController(
     aruwsrc::chassis::BEYBLADE_CONFIG,
     capBankSubsystem,
     0.15f,
-    500.0f);
+    1000.0f);
 
 
 /* define commands ----------------------------------------------------------*/
@@ -677,14 +677,8 @@ HoldCommandMapping leftMidRightMid(
 
 HoldCommandMapping leftMidRightUp(
     drivers(),
-    {&autoNavBeybladeCommand}, // added imucalibrate to this
+    {&autoNavBeybladeCommand, &capBankSentryCommand}, // added imucalibrate to this
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
-
-
-HoldCommandMapping leftMidRightDown(
-    drivers(),
-    {&capBankSentryCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
 // // manual aim
 // HoldCommandMapping leftMidRightDown(
@@ -889,7 +883,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
     //drivers->commandMapper.addMap(&leftMidRightUpAg);
     drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
-    drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
+    //drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
     // drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
     // drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
