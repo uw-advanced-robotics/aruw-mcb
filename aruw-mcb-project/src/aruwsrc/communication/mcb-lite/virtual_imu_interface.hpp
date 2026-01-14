@@ -62,7 +62,7 @@ private:
         IMUMessage* imuMessage = (IMUMessage*)completeMessage.data;
         pitch = imuMessage->pitch;
         roll = imuMessage->roll;
-#ifdef TARGET_SENTRY_ECLIPSE
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
         // IMUs initalize yaw at 180 degrees for some reason, must be resolved as tech debt
         yaw = fmodf(imuMessage->yaw + 180, 360);
 #else

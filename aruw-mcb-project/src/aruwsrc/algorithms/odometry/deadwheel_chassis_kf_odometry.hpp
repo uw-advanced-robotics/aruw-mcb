@@ -65,7 +65,7 @@ public:
      */
     DeadwheelChassisKFOdometry(
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
 #else
         aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver& chassisYawObserver,

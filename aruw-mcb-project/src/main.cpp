@@ -121,22 +121,22 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
+    defined(TARGET_ENGINEER) || defined(TARGET_SENTINEL_2026)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
-    defined(TARGET_LAUNCHER_TARGET)
+    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTINEL_2026)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
             PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
@@ -146,7 +146,7 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
@@ -188,7 +188,7 @@ static void initializeIo(Drivers *drivers)
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
-    defined(TARGET_LAUNCHER_TARGET)
+    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTINEL_2026)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
@@ -197,7 +197,7 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
     drivers->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
     // dictates command length
@@ -238,11 +238,11 @@ static void updateIo(Drivers *drivers)
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
-    defined(TARGET_LAUNCHER_TARGET)
+    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTINEL_2026)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
     drivers->visionCoprocessor.updateSerial();
 #endif
 
@@ -250,7 +250,7 @@ static void updateIo(Drivers *drivers)
     drivers->engineerCVCommunication.updateSerial();
 #endif
 
-#ifdef TARGET_SENTRY_ECLIPSE
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorImu.read();
 #endif
@@ -268,7 +268,7 @@ static void updateIo(Drivers *drivers)
     // drivers->ism330.read();
 #endif
 
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
     drivers->stateMachine.updateState();
 #endif
 }

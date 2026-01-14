@@ -22,7 +22,7 @@
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
-#elif defined(TARGET_SENTRY_ECLIPSE)
+#elif defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
 #include "aruwsrc/robot/sentry/sentry_agitator_constants.hpp"
 #elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
