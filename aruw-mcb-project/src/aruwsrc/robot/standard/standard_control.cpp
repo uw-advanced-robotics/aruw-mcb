@@ -297,10 +297,10 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
 aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    transformer.getWorldToChassis(),
+    &transformer,
     aruwsrc::chassis::BEYBLADE_CONFIG,
     capBankSubsystem,
-    0.25f,
+    0.15f,
     500.0f);
 
 
@@ -680,6 +680,12 @@ HoldCommandMapping leftMidRightUp(
     {&autoNavBeybladeCommand}, // added imucalibrate to this
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
+
+HoldCommandMapping leftMidRightDown(
+    drivers(),
+    {&capBankSentryCommand},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
+
 // // manual aim
 // HoldCommandMapping leftMidRightDown(
 //     drivers(),
@@ -812,7 +818,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&frictionWheels);
+    //drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
@@ -850,7 +856,7 @@ void setDefaultStandardCommands(Drivers *)
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 
-    capBankSubsystem.setDefaultCommand(&capBankSentryCommand);
+    //capBankSubsystem.setDefaultCommand(&capBankSentryCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -883,7 +889,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
     //drivers->commandMapper.addMap(&leftMidRightUpAg);
     drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
-    //drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
+    drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
     // drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
     // drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire

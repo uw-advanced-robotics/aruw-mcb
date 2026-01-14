@@ -30,6 +30,7 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 #include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
+#include <aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp>
 
 namespace aruwsrc::chassis
 {
@@ -48,7 +49,7 @@ public:
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
         aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
-        const Transform& worldToChassis,
+        aruwsrc::algorithms::transforms::StandardAndHeroTransformer* transformer,
         const aruwsrc::chassis::BeybladeConfig beybladeConfig,
         aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem, 
         float translationalMotionThreshhold,
@@ -56,7 +57,7 @@ public:
         : chassis(chassis),
           lastSetPoint(Position(-1, -1, 0)),
           drivers(drivers),
-          worldToChassis(worldToChassis),
+          transformer(transformer),
           beybladeConfig(beybladeConfig),
           capBankSubsystem(capBankSubsystem),
           translationalMotionThreshhold(translationalMotionThreshhold),
@@ -82,12 +83,13 @@ public:
     inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
 
 private:
+    float curPosError;
     aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
     Position lastSetPoint;
     tap::Drivers& drivers;
 
-    const Transform& worldToChassis;
+    const aruwsrc::algorithms::transforms::StandardAndHeroTransformer* transformer;
 
     aruwsrc::chassis::BeybladeConfig beybladeConfig;
 
