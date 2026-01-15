@@ -32,7 +32,7 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 #endif
 
 namespace aruwsrc::drone
@@ -59,8 +59,8 @@ public:
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
-    can::TurretMCBCanComm turretMCBCanCommBus1;
-    can::TurretMCBCanComm turretMCBCanCommBus2;
+    aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus1;
+    aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus2;
 #endif
 };
 
