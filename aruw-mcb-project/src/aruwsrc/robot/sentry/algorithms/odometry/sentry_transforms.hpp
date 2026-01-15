@@ -49,31 +49,64 @@ public:
     SentryTransforms(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
+#ifdef TARGET_SENTINEL_2026
+        const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretWidow,
+        const tap::communication::sensors::imu::ImuInterface& turretWidowImu,
+#else
         const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretLeft,
         const tap::communication::sensors::imu::ImuInterface& turretLeftImu,
         const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretRight,
         const tap::communication::sensors::imu::ImuInterface& turretRightImu,
+#endif
         const SentryTransformConfig& config);
 
     void updateTransforms();
 
     inline void initialize()
     {
+#ifdef TARGET_SENTINEL_2026
+        turretWidowYawSyncPid.reset();
+        turretWidowYawCorrection = 0;
+#else
         turretLeftYawSyncPid.reset();
         turretLeftYawCorrection = 0;
         turretRightYawSyncPid.reset();
         turretRightYawCorrection = 0;
+#endif
     }
 
     inline const Transform& getWorldToChassis() const { return worldToChassis; };
     inline const Transform& getWorldToTurretMajor() const { return worldToTurretMajor; };
+#ifdef TARGET_SENTINEL_2026
+    inline const Transform& getWorldToTurretWidow() const { return worldToTurretWidow; };
+    inline const Transform& getWorldToTurretLeft() const { return worldToTurretWidow; };  // Alias for compatibility
+    inline const Transform& getWorldToTurretRight() const { return worldToTurretWidow; };  // Alias for compatibility
+#else
     inline const Transform& getWorldToTurretLeft() const { return worldToTurretLeft; };
     inline const Transform& getWorldToTurretRight() const { return worldToTurretRight; };
+#endif
 
     inline const Transform& getChassisToMajor() const { return chassisToTurretMajor; };
 
     inline const Transform& getWorldToVTM() const { return worldToVTM; }
 
+#ifdef TARGET_SENTINEL_2026
+    inline const Transform& getWorldToTurret(int turretID) const
+    {
+        (void)turretID;
+        return worldToTurretWidow;
+    }
+
+    inline const Transform& getMajorToTurretWidow() const { return turretMajorToTurretWidow; };
+    inline const Transform& getMajorToTurretLeft() const { return turretMajorToTurretWidow; };  // Alias for compatibility
+    inline const Transform& getMajorToTurretRight() const { return turretMajorToTurretWidow; };  // Alias for compatibility
+
+    inline const Transform& getMajorToMinor(uint8_t turretId) const
+    {
+        (void)turretId;
+        return turretMajorToTurretWidow;
+    };
+#else
     // If you pass a wrong turretID, the right turret will automatically be returned.
     inline const Transform& getWorldToTurret(int turretID) const
     {
@@ -102,6 +135,7 @@ public:
             return turretMajorToTurretRight;
         }
     };
+#endif
 
     inline uint32_t getLastComputedOdometryTime() const
     {
@@ -142,27 +176,42 @@ private:
 
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
+#ifdef TARGET_SENTINEL_2026
+    const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretWidow;
+    const tap::communication::sensors::imu::ImuInterface& turretWidowImu;
+#else
     const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretLeft;
     const tap::communication::sensors::imu::ImuInterface& turretLeftImu;
     const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretRight;
     const tap::communication::sensors::imu::ImuInterface& turretRightImu;
+#endif
 
     // Transforms
     Transform worldToChassis;
     Transform worldToTurretMajor;
+#ifdef TARGET_SENTINEL_2026
+    Transform worldToTurretWidow;
+    tap::algorithms::SmoothPid turretWidowYawSyncPid;
+    float turretWidowYawCorrection;
+#else
     Transform worldToTurretLeft;
     tap::algorithms::SmoothPid turretLeftYawSyncPid;
     float turretLeftYawCorrection;
     Transform worldToTurretRight;
     tap::algorithms::SmoothPid turretRightYawSyncPid;
     float turretRightYawCorrection;
+#endif
     Transform worldToVTM;
     Transform chassisToArducam0, chassisToArducam1, chassisToArducam2, chassisToArducam3;
 
     // Intermediary transforms
     Transform chassisToTurretMajor;
+#ifdef TARGET_SENTINEL_2026
+    Transform turretMajorToTurretWidow;
+#else
     Transform turretMajorToTurretLeft;
     Transform turretMajorToTurretRight;
+#endif
 
     // Arducam offsets
     const Transform MAJOR_TO_ARDUCAM1 =

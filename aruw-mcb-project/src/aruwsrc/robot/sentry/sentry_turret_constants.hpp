@@ -39,7 +39,11 @@
 
 namespace aruwsrc::control::turret
 {
+#ifdef TARGET_SENTINEL_2026
+static constexpr uint8_t NUM_TURRETS = 1;
+#else
 static constexpr uint8_t NUM_TURRETS = 2;
+#endif
 
 static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 
@@ -146,6 +150,43 @@ static constexpr float FEEDFORWARD_GAIN = 0.0f;
 static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(255.7f);
 static constexpr float PADDING = modm::toRadian(5);
 
+#ifdef TARGET_SENTINEL_2026
+// Single turret minor for SENTINEL 2026 - named "widow"
+namespace turretWidow
+{
+static constexpr uint8_t turretID = 0;
+
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR6;
+static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
+
+static constexpr float CENTER_OF_FREEDOM = modm::toRadian(90);
+
+static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+    .startAngle = 0,
+    .startEncoderValue = 3142,
+    .minAngle = CENTER_OF_FREEDOM - ANGLES_OF_FREEDOM / 2.f + PADDING,
+    .maxAngle = CENTER_OF_FREEDOM + ANGLES_OF_FREEDOM / 2.f - PADDING,
+    .limitMotorAngles = true,
+};
+
+static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+    .startAngle = 0,
+    .startEncoderValue = 1364,
+    .minAngle = modm::toRadian(-18),  // actual CAD limit -20
+    .maxAngle = modm::toRadian(33),   // actual CAD limit is 35
+    .limitMotorAngles = true,
+};
+
+static constexpr float majorToTurretR = 0.145;
+static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
+static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
+}  // namespace turretWidow
+
+#else  // TARGET_SENTRY_ECLIPSE
+
 namespace turretLeft
 {
 static constexpr uint8_t turretID = 0;
@@ -211,6 +252,8 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 
 }  // namespace turretRight
+
+#endif  // TARGET_SENTINEL_2026 vs TARGET_SENTRY_ECLIPSE
 
 namespace minorPidConfigs
 {

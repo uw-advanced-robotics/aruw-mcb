@@ -31,34 +31,54 @@ namespace aruwsrc::sentry::algorithms::odometry
 SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
     const YawTurretSubsystem& turretMajor,
+#ifdef TARGET_SENTINEL_2026
+    const SentryTurretMinorSubsystem& turretWidow,
+    const ImuInterface& turretWidowImu,
+#else
     const SentryTurretMinorSubsystem& turretLeft,
     const ImuInterface& turretLeftImu,
     const SentryTurretMinorSubsystem& turretRight,
     const ImuInterface& turretRightImu,
+#endif
     const SentryTransforms::SentryTransformConfig& config)
     : config(config),
       chassisOdometry(chassisOdometry),
       turretMajor(turretMajor),
+#ifdef TARGET_SENTINEL_2026
+      turretWidow(turretWidow),
+      turretWidowImu(turretWidowImu),
+#else
       turretLeft(turretLeft),
       turretLeftImu(turretLeftImu),
       turretRight(turretRight),
       turretRightImu(turretRightImu),
+#endif
       worldToChassis(Transform::identity()),
       worldToTurretMajor(Transform::identity()),
+#ifdef TARGET_SENTINEL_2026
+      worldToTurretWidow(Transform::identity()),
+      turretWidowYawSyncPid(config.imuSyncConfig),
+      turretWidowYawCorrection(0),
+#else
       worldToTurretLeft(Transform::identity()),
       turretLeftYawSyncPid(config.imuSyncConfig),
       turretLeftYawCorrection(0),
       worldToTurretRight(Transform::identity()),
       turretRightYawSyncPid(config.imuSyncConfig),
       turretRightYawCorrection(0),
+#endif
       worldToVTM(Transform::identity()),
       chassisToArducam0(Transform::identity()),
       chassisToArducam1(Transform::identity()),
       chassisToArducam2(Transform::identity()),
       chassisToArducam3(Transform::identity()),
       chassisToTurretMajor(Transform::identity()),
+#ifdef TARGET_SENTINEL_2026
+      turretMajorToTurretWidow(0., config.turretMinorOffset, 0., 0., 0., 0.)
+#else
       turretMajorToTurretLeft(0., config.turretMinorOffset, 0., 0., 0., 0.),
       turretMajorToTurretRight(0., -config.turretMinorOffset, 0., 0., 0., 0.)
+#endif
 {
 }
 
@@ -72,6 +92,27 @@ void SentryTransforms::updateTransforms()
     // Chassis to Turret Major
     chassisToTurretMajor.updateRotation(0., 0., turretMajor.getChassisYaw());
 
+#ifdef TARGET_SENTINEL_2026
+    turretMajorToTurretWidow.updateRotation(
+        0.,
+        turretWidow.pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
+        turretWidow.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
+
+    // World transforms
+    worldToTurretMajor = worldToChassis.composeStatic(chassisToTurretMajor);
+    worldToVTM = worldToTurretMajor;
+
+    worldToTurretWidow = worldToTurretMajor.composeStatic(turretMajorToTurretWidow);
+    turretWidowYawCorrection += turretWidowYawSyncPid.runControllerDerivateError(
+        Angle(turretWidowImu.getYaw() + turretWidowYawCorrection)
+            .minDifference(worldToTurretWidow.getYaw()),
+        0.002f);
+    worldToTurretWidow.updateRotation(
+        0,
+        turretWidowImu.getPitch(),
+        turretWidowImu.getYaw() + turretWidowYawCorrection);
+    worldToTurretWidow.updateAngularVelocity(0, turretWidowImu.getGy(), turretWidowImu.getGz());
+#else
     // Turret Major to Minors
     turretMajorToTurretLeft.updateRotation(
         0.,
@@ -107,6 +148,7 @@ void SentryTransforms::updateTransforms()
         turretRightImu.getPitch(),
         turretRightImu.getYaw() + turretRightYawCorrection);
     worldToTurretRight.updateAngularVelocity(0, turretRightImu.getGy(), turretRightImu.getGz());
+#endif
 
     // Chassis to Arducam
     chassisToArducam0 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM1);

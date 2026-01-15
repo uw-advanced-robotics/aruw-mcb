@@ -28,8 +28,12 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const HolonomicChassisSubsystem& chassis,
     aruwsrc::control::turret::TurretMotor& yawMotor,
     tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
+#ifdef TARGET_SENTINEL_2026
+    const SentryTurretMinorSubsystem& turretWidow,
+#else
     const SentryTurretMinorSubsystem& turretLeft,
     const SentryTurretMinorSubsystem& turretRight,
+#endif
     SmoothPid& positionPid,
     SmoothPid& velocityPid,
     float maxVelErrorInput,
@@ -40,8 +44,12 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
       chassis(chassis),
       yawMotor(yawMotor),
       turretMajorIMU(turretMajorIMU),
+#ifdef TARGET_SENTINEL_2026
+      turretWidow(turretWidow),
+#else
       turretLeft(turretLeft),
       turretRight(turretRight),
+#endif
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(0, 0.0, M_TWOPI),
@@ -89,7 +97,11 @@ void TurretMajorWorldFrameController::runController(
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
     torqueCompensation =
+#ifdef TARGET_SENTINEL_2026
+        turretWidow.yawMotor.getMotorOutput();
+#else
         turretLeft.yawMotor.getMotorOutput() + turretRight.yawMotor.getMotorOutput();
+#endif
     if (abs(torqueCompensation) < 3000)  // @todo make a config
     {
         torqueCompensation = 0;

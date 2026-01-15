@@ -68,6 +68,7 @@ public:
      * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] turretLeft The left turret minor.
      * @param[in] turretRight The right turret minor.
+     * @param[in] turretWidow The turret minor 2026.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      * @param[in] maxVelErrorInput Cap on the max error passed into velocity controller.
@@ -79,8 +80,12 @@ public:
         const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
         tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
+#ifdef TARGET_SENTINEL_2026
+        const SentryTurretMinorSubsystem& turretWidow,
+#else
         const SentryTurretMinorSubsystem& turretLeft,
         const SentryTurretMinorSubsystem& turretRight,
+#endif
         tap::algorithms::SmoothPid& positionPid,
         tap::algorithms::SmoothPid& velocityPid,
         float maxVelErrorInput,
@@ -129,8 +134,12 @@ private:
 
     tap::communication::sensors::imu::ImuInterface& turretMajorIMU;
 
+#ifdef TARGET_SENTINEL_2026
+    const SentryTurretMinorSubsystem& turretWidow;
+#else
     const SentryTurretMinorSubsystem& turretLeft;
     const SentryTurretMinorSubsystem& turretRight;
+#endif
 
     tap::algorithms::SmoothPid& positionPid;
     tap::algorithms::SmoothPid& velocityPid;
