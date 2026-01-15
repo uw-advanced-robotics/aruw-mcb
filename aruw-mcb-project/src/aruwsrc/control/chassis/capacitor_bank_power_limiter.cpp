@@ -22,19 +22,17 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
-CapacitorSelectingCurrentSensor::CapacitorSelectingCurrentSensor(
+CapacitorSelectingSensor::CapacitorSelectingSensor(
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    can::capbank::CapacitorBank *capacitorBank)
-    :
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
+    communication::can::cap_bank::CapacitorBank *capacitorBank)
+    : currentSensor(currentSensor),
+      voltageSensor(voltageSensor),
+      capacitorBank(capacitorBank){};
 
-      currentSensor(currentSensor),
-      capacitorBank(capacitorBank){
-
-      };
-
-float CapacitorSelectingCurrentSensor::getCurrentMa() const
+float CapacitorSelectingSensor::getCurrentMa() const
 {
     if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline())
     {
@@ -44,18 +42,30 @@ float CapacitorSelectingCurrentSensor::getCurrentMa() const
     return this->capacitorBank->getCurrent() * 1000;
 }
 
+float CapacitorSelectingSensor::getVoltageMv() const
+{
+    if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline())
+    {
+        return this->voltageSensor->getVoltageMv();
+    }
+
+    return aruwsrc::communication::can::cap_bank::CAPACITOR_BANK_OUTPUT_VOLTAGE * 1000;
+}
+
 CapBankPowerLimiter::CapBankPowerLimiter(
     const tap::Drivers *drivers,
     tap::communication::sensors::current::CurrentSensorInterface *currentSensor,
-    aruwsrc::can::capbank::CapacitorBank *capacitorBank,
+    tap::communication::sensors::voltage::VoltageSensorInterface *voltageSensor,
+    aruwsrc::communication::can::cap_bank::CapacitorBank *capacitorBank,
     float startingEnergyBuffer,
     float energyBufferLimitThreshold,
     float energyBufferCritThreshold)
     : drivers(drivers),
       capacitorBank(capacitorBank),
-      sensor(currentSensor, capacitorBank),
+      sensor(currentSensor, voltageSensor, capacitorBank),
       fallback(
           drivers,
+          &sensor,
           &sensor,
           startingEnergyBuffer,
           energyBufferLimitThreshold,
@@ -75,14 +85,14 @@ float CapBankPowerLimiter::getPowerLimitRatio()
     float fallback = this->fallback.getPowerLimitRatio();
     if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline() ||
         this->capacitorBank->isDisabled() ||
-        this->capacitorBank->getState() == can::capbank::State::SAFE)
+        this->capacitorBank->getState() == communication::can::cap_bank::State::SAFE)
     {
         return fallback;
     }
 
-    float setpoint = can::capbank::CAPACITOR_BANK_EFFICIENCY *
+    float setpoint = communication::can::cap_bank::CAPACITOR_BANK_EFFICIENCY *
                      drivers->refSerial.getRobotData().chassis.powerConsumptionLimit /
-                     can::capbank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
+                     communication::can::cap_bank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
 
     if (this->capacitorBank->isSprinting())
     {
@@ -96,7 +106,8 @@ float CapBankPowerLimiter::getPowerLimitRatio()
     this->currentIntegrator += K_I * error;
 
     float lowVoltageRamp = std::clamp(
-        (this->capacitorBank->getVoltage() - can::capbank::CAPACITOR_BANK_MIN_VOLTAGE) /
+        (this->capacitorBank->getVoltage() -
+         communication::can::cap_bank::CAPACITOR_BANK_MIN_VOLTAGE) /
             VOLTAGE_RAMPDOWN_RANGE,
         0.0f,
         1.0f);
@@ -108,4 +119,4 @@ float CapBankPowerLimiter::getPowerLimitRatio()
     return controlFractionOutput * lowVoltageRamp;
 }
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

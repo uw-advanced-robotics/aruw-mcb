@@ -17,8 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HERO_ZERO)
 
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
@@ -33,13 +34,14 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/standard_and_hero_transform_adapter.hpp"
-#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp"
-#include "aruwsrc/algorithms/odometry/standard_and_hero_transformer_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
-#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -47,25 +49,30 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-#include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
-#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
-#include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_sprint_command.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
+#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/client-display/indicators/ammo_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/enemy_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/control/client-display/indicators/vision_target_indicator.hpp"
+
+//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+#include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
@@ -77,7 +84,9 @@
 #include "aruwsrc/control/governor/plate_hit_governor.hpp"
 #include "aruwsrc/control/governor/yellow_carded_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -90,24 +99,26 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
-using namespace tap::control::setpoint;
-using namespace tap::control::governor;
-using namespace aruwsrc::chassis;
-using namespace aruwsrc::control;
-using namespace aruwsrc::control::turret;
-using namespace tap::control;
-using namespace aruwsrc::algorithms::odometry;
-using namespace aruwsrc::algorithms;
-using namespace aruwsrc::control::client_display;
-using namespace aruwsrc::control::governor;
-using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::agitator;
-using namespace aruwsrc::control::launcher;
 using namespace tap::communication::serial;
+using namespace tap::control;
+using namespace tap::control::governor;
+using namespace tap::control::setpoint;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::algorithms::odometry::transforms;
+using namespace aruwsrc::control::chassis;
+using namespace aruwsrc::control;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control::buzzer;
+using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::client_display::indicators;
+using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::launcher;
+using namespace aruwsrc::control::turret;
+using namespace aruwsrc::hero;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
-using namespace aruwsrc::algorithms::transforms;
-using namespace aruwsrc::hero;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -119,29 +130,89 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace hero_control
 {
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
 
 /* define subsystems --------------------------------------------------------*/
-tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
-    {&drivers()->analog,
-     aruwsrc::chassis::CURRENT_SENSOR_PIN,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+BuzzerSubsystem buzzer(drivers());
 
-MecanumChassisSubsystem chassis(drivers(), &currentSensor, &drivers()->capacitorBank);
+aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2);
 
-RefereeFeedbackFrictionWheelSubsystem<aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
-    frictionWheels(
+tap::motor::DjiMotor leftFrontChassisMotor(
+    drivers(),
+    aruwsrc::control::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Front Chassis Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor leftBackChassisMotor(
+    drivers(),
+    aruwsrc::control::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Back Chassis Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightFrontChassisMotor(
+    drivers(),
+    aruwsrc::control::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Front Chassis Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightBackChassisMotor(
+    drivers(),
+    aruwsrc::control::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Back Chassis Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+XDriveChassisSubsystem chassis(
+    drivers(),
+    &voltageCurrentSensor,
+    &voltageCurrentSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
+    &drivers()->capacitorBank);
+tap::motor::DjiMotor leftFrictionWheel(
+    drivers(),
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    true,
+    "Left flywheel");
+tap::motor::DjiMotor rightFrictionWheel(
+    drivers(),
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    false,
+    "Right flywheel");
+std::array<tap::motor::MotorInterface *, 2> wheels = {&leftFrictionWheel, &rightFrictionWheel};
+RefereeFeedbackFrictionWheelSubsystem<
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
+    2>
+    frictionWheelsSubsystem(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-        aruwsrc::control::launcher::CAN_BUS_MOTORS,
+        wheels,
+        aruwsrc::control::launcher::WHEEL_CONFIG,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
+
+FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
+LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor = frictionWheelsSubsystem;
 
 VelocityAgitatorSubsystem kickerAgitator(
     drivers(),
@@ -158,8 +229,27 @@ tap::motor::DjiMotor pitchMotor(
     PITCH_MOTOR_ID,
     CAN_BUS_PITCH_MOTOR,
     true,
-    "Pitch Turret");
-tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, CAN_BUS_YAW_MOTOR, true, "Yaw Turret");
+    "Pitch Turret",
+    true,
+    1,
+    PITCH_MOTOR_CONFIG.startEncoderValue);
+tap::encoder::CanEncoder yawEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID3,
+    tap::can::CanBus::CAN_BUS2,
+    false,
+    1.0,
+    YAW_MOTOR_CONFIG.startEncoderValue);
+tap::motor::DjiMotor yawMotor(
+    drivers(),
+    YAW_MOTOR_ID,
+    CAN_BUS_YAW_MOTOR,
+    false,
+    "Yaw Turret",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508,
+    0,
+    &yawEncoder);
 HeroTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -168,7 +258,16 @@ HeroTurretSubsystem turret(
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm());
 
-OttoKFOdometry2DSubsystem odometrySubsystem(*drivers(), turret, chassis, modm::Vector2f(0, 0));
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
+aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+    drivers(),
+    chassis,
+    yawObserver,
+    // drivers()->ism330,
+    drivers()->mpu6500,
+    modm::Vector2f(
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -180,16 +279,16 @@ OttoBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     odometrySubsystem,
     turret,
-    frictionWheels,
-    9.0f,  // defaultLaunchSpeed
-    0      // turretID
+    frictionWheelSpeedPredictor,
+    15.0f,  // defaultLaunchSpeed
+    0       // turretID
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
 /* define commands ----------------------------------------------------------*/
 
@@ -206,25 +305,19 @@ ChassisAutorotateCommand chassisAutorotateCommand(
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
 
 BeybladeCommand beybladeCommand(
     drivers(),
     &chassis,
     &turret.yawMotor,
-    (drivers()->controlOperatorInterface));
-
-BeybladeCommand slowBeybladeCommand(
-    drivers(),
-    &chassis,
-    &turret.yawMotor,
     (drivers()->controlOperatorInterface),
-    0.5f);
+    aruwsrc::control::chassis::BEYBLADE_CONFIG);
 
 FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
-    10.0f,
+    14.0f,
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
@@ -235,12 +328,16 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
-// Turret controllers
-algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
-    turret.pitchMotor,
-    chassis_rel::PITCH_PID_CONFIG);
+// Turret Compensators
+algorithms::TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
 
-algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+// Turret controllers
+algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
+    turret.pitchMotor,
+    chassis_rel::PITCH_PID_CONFIG,
+    {&turretGravityCompensation});
+
+algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
     turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
@@ -248,11 +345,13 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YA
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController(
-    getTurretMCBCanComm(),
-    turret.yawMotor,
-    worldFrameYawTurretImuPosPid,
-    worldFrameYawTurretImuVelPid);
+algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
+    worldFrameYawTurretImuController(
+        transformer.getWorldToTurret(),
+        getTurretMCBCanComm(),
+        turret.yawMotor,
+        worldFrameYawTurretImuPosPid,
+        worldFrameYawTurretImuVelPid);
 
 algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
     *drivers(),
@@ -264,11 +363,14 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController(
-    getTurretMCBCanComm(),
-    turret.pitchMotor,
-    worldFramePitchTurretImuPosPid,
-    worldFramePitchTurretImuVelPid);
+algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
+    worldFramePitchTurretImuController(
+        transformer.getWorldToTurret(),
+        getTurretMCBCanComm(),
+        turret.pitchMotor,
+        worldFramePitchTurretImuPosPid,
+        worldFramePitchTurretImuVelPid,
+        {&turretGravityCompensation});
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
@@ -279,17 +381,22 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidCv(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuControllerCv(
-    getTurretMCBCanComm(),
-    turret.yawMotor,
-    worldFrameYawTurretImuPosPidCv,
-    worldFrameYawTurretImuVelPidCv);
+algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
+    worldFrameYawTurretImuControllerCv(
+        transformer.getWorldToTurret(),
+        getTurretMCBCanComm(),
+        turret.yawMotor,
+        worldFrameYawTurretImuPosPidCv,
+        worldFrameYawTurretImuVelPidCv);
 
-algorithms::WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuControllerCv(
-    getTurretMCBCanComm(),
-    turret.pitchMotor,
-    worldFramePitchTurretImuPosPidCv,
-    worldFramePitchTurretImuVelPidCv);
+algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
+    worldFramePitchTurretImuControllerCv(
+        transformer.getWorldToTurret(),
+        getTurretMCBCanComm(),
+        turret.pitchMotor,
+        worldFramePitchTurretImuPosPidCv,
+        worldFramePitchTurretImuVelPidCv,
+        {&turretGravityCompensation});
 
 // turret commands
 // @todo: chassis MCB is mounted vertically so world frame chassis IMU controller cannot be used for
@@ -315,6 +422,16 @@ cv::TurretCVCommand turretCVCommand(
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
+NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_SUCCESS_NOTES,
+    IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
+
+NoteSequenceCommand imuCalibrateFailBuzzCommand(
+    buzzer,
+    IMU_CALIBRATE_FAIL_NOTES,
+    IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
+
 imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
@@ -324,7 +441,14 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         &chassisFramePitchTurretController,
         true,
     }},
-    &chassis);
+    &chassis,
+    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    &imuCalibrateSuccessBuzzCommand,
+    &imuCalibrateFailBuzzCommand,
+    &odometrySubsystem,
+    // {&drivers()->ism330});
+    {&drivers()->mpu6500});
 
 // beyblade governors
 
@@ -337,12 +461,6 @@ MovedFastRecentlyGovernor movedRecentlyGovernor(
     5000.0f,
     5000);
 
-GovernorWithFallbackCommand<3> beybladeSlowWhenOutOfCombatCommand(
-    {&chassis},
-    slowBeybladeCommand,
-    beybladeCommand,
-    {&firedRecentlyGovernor, &plateHitGovernor, &movedRecentlyGovernor},
-    true);
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
@@ -420,18 +538,16 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
 // @todo remove
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
-aruwsrc::control::buzzer::BuzzerSubsystem buzzer(drivers());
-
 // Cap Bank
-aruwsrc::control::capbank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
-aruwsrc::control::capbank::CapBankSprintCommand capBankSprintCommand(
+aruwsrc::control::cap_bank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
+aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
     drivers(),
     capBankSubsystem,
-    aruwsrc::can::capbank::SprintMode::SPRINT);
-aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
+    aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
+aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(
     drivers(),
     capBankSubsystem,
-    aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
+    aruwsrc::communication::can::cap_bank::SprintMode::HALF_SPRINT);
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -450,7 +566,7 @@ MatrixHudIndicators positionHudIndicators(
     &kicker::cvOnTargetGovernor);
 
 AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
-
+EnemyIndicator enemyIndicator(refSerialTransmitter, drivers()->refSerial);
 CircleCrosshair circleCrosshair(refSerialTransmitter);
 
 DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTransmitter);
@@ -459,23 +575,30 @@ TextHudIndicators textHudIndicators(
     *drivers(),
     waterwheelAgitator,
     imuCalibrateCommand,
-    {&beybladeSlowWhenOutOfCombatCommand},
+    {&beybladeCommand},
     refSerialTransmitter);
+
+// VisionAssistanceIndicator visionAssistanceIndicator(
+//     drivers()->visionCoprocessor,
+//     refSerialTransmitter,
+//     drivers()->refSerial,
+//     transformAdapter.getWorldToVTM(),
+//     drivers()->interRobotTransmitter);
 
 VisionTargetIndicator visionTargetIndicator(
     drivers()->visionCoprocessor,
     refSerialTransmitter,
-    transformer.getWorldToVTM());
+    transformAdapter.getWorldToVTM());
 
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
     &ammoIndicator,
+    &enemyIndicator,
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &visionTargetIndicator,
-};
+    &visionTargetIndicator};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
@@ -491,7 +614,7 @@ HoldRepeatCommandMapping rightSwitchUp(
     false);
 HoldCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeSlowWhenOutOfCombatCommand},
+    {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping leftSwitchUp(
     drivers(),
@@ -519,10 +642,7 @@ HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
     RemoteMapState(RemoteMapState::MouseButton::RIGHT));
-ToggleCommandMapping fToggled(
-    drivers(),
-    {&beybladeSlowWhenOutOfCombatCommand},
-    RemoteMapState({Remote::Key::F}));
+ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 PressCommandMapping zPressed(
     drivers(),
     {&turretUTurnCommandLimited},
@@ -575,6 +695,7 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 void initializeSubsystems()
 {
     chassis.initialize();
+    voltageCurrentSensor.initialize();
     frictionWheels.initialize();
     odometrySubsystem.initialize();
     clientDisplay.initialize();
@@ -616,6 +737,9 @@ void setDefaultHeroCommands()
 void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
+    drivers->mpu6500.setMountingTransform(
+        aruwsrc::control::chassis::MPU6500_MCB_MOUNTING_TRANSFORM);
+    // drivers->ism330.setMountingTransform(aruwsrc::control::chassis::ISM330_MCB_MOUNTING_TRANSFORM);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);

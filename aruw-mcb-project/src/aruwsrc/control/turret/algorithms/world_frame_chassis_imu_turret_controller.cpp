@@ -112,8 +112,9 @@ static inline void updateYawWorldFrameSetpoint(
 WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController(
     tap::Drivers &drivers,
     TurretMotor &yawMotor,
-    const tap::algorithms::SmoothPidConfig &pidConfig)
-    : TurretYawControllerInterface(yawMotor),
+    const tap::algorithms::SmoothPidConfig &pidConfig,
+    const std::vector<TurretCompensatorInterface *> compensators)
+    : TurretAxisControllerInterface<Axis::YAW>(yawMotor, compensators),
       drivers(drivers),
       pid(pidConfig),
       worldFrameSetpoint(Angle(0)),
@@ -157,7 +158,7 @@ void WorldFrameYawChassisImuTurretController::runController(
         turretMotor.getValidMinError(worldFrameSetpoint, worldFrameYawAngle);
     const float pidOutput = pid.runController(
         positionControllerError,
-        turretMotor.getChassisFrameVelocity() + modm::toRadian(drivers.mpu6500.getGz()),
+        turretMotor.getChassisFrameVelocity() + drivers.mpu6500.getGz(),
         dt);
 
     turretMotor.setMotorOutput(pidOutput);

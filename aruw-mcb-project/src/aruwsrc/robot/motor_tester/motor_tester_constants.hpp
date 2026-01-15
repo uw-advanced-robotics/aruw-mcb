@@ -46,8 +46,8 @@ static constexpr int AGITATOR_NUM_POCKETS = 8;          // number of balls in on
 static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
 
-static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 36.0f,
+static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
+    .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR2,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -80,15 +80,36 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         .targetCycleCount = 3,
 };
 
-tap::algorithms::SmoothPidConfig m2006VelocityPidConfig =
+tap::algorithms::SmoothPidConfig m2006VelocityPidConfig = {
+    .kp = 50.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610};
+
+tap::algorithms::SmoothPidConfig rm3508VelocityPidConfig = {
+    .kp = 12.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620};
+
+tap::algorithms::SmoothPidConfig rm3510VelocityPidConfig = {
+    .kp = 12.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_820R};
+
+tap::algorithms::SmoothPidConfig gm6020VelocityPidConfig = {
+    .kp = 10.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA};
+
+tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
     {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
-
-tap::algorithms::SmoothPidConfig rm3508VelocityPidConfig =
-    {.kp = 12.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
-
-// untuned!!
-tap::algorithms::SmoothPidConfig gm6020VelocityPidConfig =
-    {.kp = 0.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
 }  // namespace aruwsrc::motor_tester::constants
 

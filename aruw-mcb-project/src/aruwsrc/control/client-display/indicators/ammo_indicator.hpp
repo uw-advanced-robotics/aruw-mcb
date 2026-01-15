@@ -29,7 +29,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Adds text to show in bright yellow the number of bullets currently the robot has.
@@ -54,22 +54,30 @@ public:
     modm::ResumableResult<void> update() override final;
 
 private:
-    // X position of the text
+// X position of the text
+#if defined(TARGET_HERO_ZERO)
+    static constexpr uint16_t TEXT_X = 611;
+    static constexpr uint16_t NUMBER_X = 1018;
+#else
     static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 150;
+    static constexpr uint16_t NUMBER_X = TEXT_X + 175;
+#endif
     // Y position of the text
     static constexpr uint16_t TEXT_Y = 200;
     // WIDTH of the text
     static constexpr uint16_t WIDTH = 4;
-    // SIZE of the text
+// SIZE of the text
+#if defined(TARGET_HERO_ZERO)
+    static constexpr uint16_t SIZE = 80;
+#else
     static constexpr uint16_t SIZE = 40;
+#endif
 
     Tx::GraphicCharacterMessage textGraphic;
     const char *bulletsRemainingText = "AMMO: ";
 
     Tx::Graphic1Message numberGraphic;
     tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
-
-    static constexpr uint16_t NUMBER_X = TEXT_X + 175;
 
     int bulletCount = 0;
 
@@ -87,6 +95,6 @@ private:
     }
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // AMMO_INDICATOR_HPP_

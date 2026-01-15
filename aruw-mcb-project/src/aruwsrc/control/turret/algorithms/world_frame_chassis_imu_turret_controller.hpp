@@ -50,7 +50,8 @@ namespace aruwsrc::control::turret::algorithms
  * @note Upon initialization of the controller, the world frame zero point is set to the current IMU
  * yaw angle.
  */
-class WorldFrameYawChassisImuTurretController final : public TurretYawControllerInterface
+class WorldFrameYawChassisImuTurretController final
+    : public TurretAxisControllerInterface<Axis::YAW>
 {
 public:
     /**
@@ -61,7 +62,8 @@ public:
     WorldFrameYawChassisImuTurretController(
         tap::Drivers &drivers,
         TurretMotor &yawMotor,
-        const tap::algorithms::SmoothPidConfig &pidConfig);
+        const tap::algorithms::SmoothPidConfig &pidConfig,
+        const std::vector<TurretCompensatorInterface *> compensators = {});
 
     void initialize() final;
 
@@ -99,10 +101,7 @@ private:
 
     WrappedFloat chassisFrameInitImuYawAngle;
 
-    inline WrappedFloat getMpu6500Yaw() const
-    {
-        return Angle::fromDegrees(drivers.mpu6500.getYaw());
-    }
+    inline WrappedFloat getMpu6500Yaw() const { return Angle(drivers.mpu6500.getYaw()); }
 };
 
 }  // namespace aruwsrc::control::turret::algorithms

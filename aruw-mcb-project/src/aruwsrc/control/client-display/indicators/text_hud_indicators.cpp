@@ -21,7 +21,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 TextHudIndicators::TextHudIndicators(
     tap::Drivers &drivers,
@@ -62,6 +62,7 @@ modm::ResumableResult<void> TextHudIndicators::update()
 
     // Check if we are actually in a match
     states[NOT_SPINNING] &= drivers.refSerial.getGameData().gameStage == Rx::GameStage::IN_GAME;
+    states[SENTRY_LOW] = checkIfSentryLow();
 
     for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {
@@ -103,4 +104,12 @@ void TextHudIndicators::initialize()
     }
 }
 
-}  // namespace aruwsrc::control::client_display
+bool TextHudIndicators::checkIfSentryLow()
+{
+    RefSerialData::RobotId ourRobot = drivers.refSerial.getRobotData().robotId;
+    bool isBlue = RefSerialData::isBlueTeam(ourRobot);
+    auto allRobotHp = drivers.refSerial.getRobotData().allRobotHp;
+    return (isBlue ? allRobotHp.blue.sentry7 : allRobotHp.red.sentry7) < SENTRY_LOW_LIMIT;
+}
+
+}  // namespace aruwsrc::control::client_display::indicators

@@ -106,7 +106,7 @@ TEST_F(
     runYawPidController_chassis_frame_rotated_setpoint_actual_equal_0_output)
 {
     chassisFrameMeasured = Angle(0);
-    mpu6500Yaw = 90;
+    mpu6500Yaw = M_PI_2;
 
     EXPECT_CALL(turretMotor, setMotorOutput(FloatNear(0, 1E-3)));
 

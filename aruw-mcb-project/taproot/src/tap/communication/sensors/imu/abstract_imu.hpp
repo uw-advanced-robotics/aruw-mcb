@@ -30,6 +30,7 @@
 #include "tap/algorithms/transforms/vector.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "tap/util_macros.hpp"
 
 namespace tap::communication::sensors::imu
 {
@@ -37,11 +38,14 @@ using tap::algorithms::transforms::Orientation;
 using tap::algorithms::transforms::Transform;
 
 constexpr float GRAVITY_MPS2 = 9.81f;
+/**
+ * A class that represents any directly connected IMU.
+ */
 class AbstractIMU : public ImuInterface
 {
 public:
-    AbstractIMU(const Transform& mountingTransform = Transform(Transform::identity()))
-        : mountingTransform(mountingTransform)
+    AbstractIMU(const Transform& mountingTransform = Transform::identity())
+        : mountingTransform(mountingTransform.getInverse())
     {
     }
 
@@ -57,7 +61,7 @@ public:
      * calibrating, angle, accelerometer, and gyroscope values will return 0. When calibrating
      * the BMI088 should be level, otherwise the IMU will be calibrated incorrectly.
      */
-    virtual void requestCalibration();
+    virtual void requestCalibration() override;
 
     /**
      * Call this function at same rate as intialized sample frequency.
@@ -77,20 +81,20 @@ public:
      */
     virtual ImuState getImuState() const { return imuState; }
 
-    inline float getAx() override { return imuData.accG.x(); }
-    inline float getAy() override { return imuData.accG.y(); }
-    inline float getAz() override { return imuData.accG.z(); }
-    inline float getAzMinusG() { return imuData.accG.z() - GRAVITY_MPS2; }
+    mockable inline float getAx() const override { return imuData.accG.x(); }
+    mockable inline float getAy() const override { return imuData.accG.y(); }
+    mockable inline float getAz() const override { return imuData.accG.z(); }
+    mockable inline float getAzMinusG() const { return imuData.accG.z() - GRAVITY_MPS2; }
 
-    inline float getGx() override { return imuData.gyroDegPerSec.x(); }
-    inline float getGy() override { return imuData.gyroDegPerSec.y(); }
-    inline float getGz() override { return imuData.gyroDegPerSec.z(); }
+    mockable inline float getGx() const override { return imuData.gyroRadPerSec.x(); }
+    mockable inline float getGy() const override { return imuData.gyroRadPerSec.y(); }
+    mockable inline float getGz() const override { return imuData.gyroRadPerSec.z(); }
 
-    inline float getTemp() override { return imuData.temperature; }
+    mockable inline float getTemp() const { return imuData.temperature; }
 
-    virtual float getYaw() override { return mahonyAlgorithm.getYaw(); }
-    virtual float getPitch() override { return mahonyAlgorithm.getPitch(); }
-    virtual float getRoll() override { return mahonyAlgorithm.getRoll(); }
+    virtual inline float getYaw() const override { return mahonyAlgorithm.getYaw(); }
+    virtual inline float getPitch() const override { return mahonyAlgorithm.getPitch(); }
+    virtual inline float getRoll() const override { return mahonyAlgorithm.getRoll(); }
 
     struct ImuData
     {
@@ -99,20 +103,27 @@ public:
         tap::algorithms::transforms::Vector accOffsetRaw = {0, 0, 0};
         tap::algorithms::transforms::Vector gyroOffsetRaw = {0, 0, 0};
         tap::algorithms::transforms::Vector accG = {0, 0, 0};
-        tap::algorithms::transforms::Vector gyroDegPerSec = {0, 0, 0};
+        tap::algorithms::transforms::Vector gyroRadPerSec = {0, 0, 0};
 
         float temperature = 0;
     };
 
     void setCalibrationSamples(int sampleCount) { offsetSampleCount = sampleCount; }
 
-protected:
-    void resetOffsets();
-    void computeOffsets();
     void setAccelOffset(float x, float y, float z);
     void setGyroOffset(float x, float y, float z);
 
-    virtual inline float getAccelerationSensitivity() = 0;
+protected:
+    void resetOffsets();
+    void computeOffsets();
+
+    inline void applyMountingTransformToRaw(ImuData& data)
+    {
+        data.accRaw = mountingTransform.apply(data.accRaw);
+        data.gyroRaw = mountingTransform.apply(data.gyroRaw);
+    }
+
+    virtual inline float getAccelerationSensitivity() const = 0;
 
     tap::algorithms::transforms::Transform mountingTransform;
 

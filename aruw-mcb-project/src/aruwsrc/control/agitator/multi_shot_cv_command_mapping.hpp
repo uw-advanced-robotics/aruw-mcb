@@ -100,7 +100,12 @@ private:
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager;
     governor::CvOnTargetGovernor &cvOnTargetGovernor;
 
+#if defined(ALL_STANDARDS)
+    LaunchMode launchMode = LIMITED_20HZ;
+#else
     LaunchMode launchMode = SINGLE;
+#endif
+
     std::optional<ConstantVelocityAgitatorCommand *> command;
 
     int getCurrentBarrelCoolingRate() const

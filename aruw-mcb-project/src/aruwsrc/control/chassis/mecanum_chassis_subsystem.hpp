@@ -28,9 +28,7 @@
 
 #include "holonomic_4_motor_chassis_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Encapsulates a chassis with mecanum wheels in standard layout
@@ -41,14 +39,15 @@ public:
     MecanumChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        can::capbank::CapacitorBank* capacitorBank = nullptr,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
+        Motor& leftFrontMotor,
+        Motor& leftBackMotor,
+        Motor& rightFrontMotor,
+        Motor& rightBackMotor,
+        tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+        communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 };
 
-}  // namespace chassis
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
 
 #endif

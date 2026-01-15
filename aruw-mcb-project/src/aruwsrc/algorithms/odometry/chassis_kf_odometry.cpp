@@ -80,7 +80,7 @@ void ChassisKFOdometry::update()
     tap::algorithms::rotateVector(
         &y[int(OdomInput::ACC_X)],
         &y[int(OdomInput::ACC_Y)],
-        serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+        communication::serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
 #endif
 
     // perform the update, after this update a new state matrix is now available
@@ -142,6 +142,21 @@ void ChassisKFOdometry::updateMeasurementCovariance(
     kf.getMeasurementCovariance()[0] = velocityCovariance;
     kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
         velocityCovariance;
+}
+
+void ChassisKFOdometry::overrideOdometryPosition(const float positionX, const float positionY)
+{
+    auto currKFState = kf.getStateVectorAsMatrix();
+
+    float newState[int(OdomState::NUM_STATES)] = {
+        positionX,
+        currKFState[int(OdomState::VEL_X)],
+        currKFState[int(OdomState::ACC_X)],
+        positionY,
+        currKFState[int(OdomState::VEL_Y)],
+        currKFState[int(OdomState::ACC_Y)]};
+
+    kf.init(newState);
 }
 
 }  // namespace aruwsrc::algorithms::odometry

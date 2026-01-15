@@ -30,7 +30,7 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 struct SwerveModuleConfig
 {
@@ -91,5 +91,5 @@ struct SwerveModuleConfig
     const float gearboxRatio = (1.0f / 19.0f);
 };
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 #endif  // SWERVE_MODULE_CONFIG_HPP_

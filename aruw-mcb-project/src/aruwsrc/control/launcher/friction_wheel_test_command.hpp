@@ -27,19 +27,19 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 class TurretMCBCanComm;
 }
 
 namespace aruwsrc::control::launcher
 {
-class FrictionWheelSubsystem;
+class FrictionWheelInterface;
 
 class FrictionWheelTestCommand : public tap::control::Command
 {
 public:
-    FrictionWheelTestCommand(FrictionWheelSubsystem *subsystem);
+    FrictionWheelTestCommand(FrictionWheelInterface *subsystem);
 
     bool isReady() override { return true; };
 
@@ -54,7 +54,7 @@ public:
     const char *getName() const override { return "friction wheel test command"; }
 
 private:
-    FrictionWheelSubsystem *subsystem;
+    FrictionWheelInterface *subsystem;
 };  // class FrictionWheelTestCommand
 
 }  // namespace aruwsrc::control::launcher

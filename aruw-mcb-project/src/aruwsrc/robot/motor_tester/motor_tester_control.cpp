@@ -29,6 +29,7 @@
 
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/motor_tester/constant_rpm_command.hpp"
 #include "aruwsrc/robot/motor_tester/motor_subsystem.hpp"
@@ -37,11 +38,11 @@
 #include "aruwsrc/robot/motor_tester/stick_rpm_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
+using namespace tap::control::setpoint;
+
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;
-using namespace aruwsrc::agitator;
-using namespace aruwsrc::control::agitator;
-using namespace tap::control::setpoint;
 // using namespace tap::control;
 
 /*
@@ -55,67 +56,79 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace motor_tester_control
 {
 // m2006
-tap::motor::DjiMotor leftChannelMotor(
+tap::motor::DjiMotor motor2006(
     drivers(),
     tap::motor::MOTOR3,          // id 3
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
-    "LMotor");
+    "2006 Motor",
+    true,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006);
 
 VelocityAgitatorSubsystem agitator(drivers(), AGITATOR_PID_CONFIG, AGITATOR_CONFIG);
 
 // 3508
-tap::motor::DjiMotor rightChannelMotor(
+tap::motor::DjiMotor motor3508(
     drivers(),
     tap::motor::MOTOR1,          // id 1
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
-    "RMotor");
+    "3508 Motor",
+    true,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+// 3510
+tap::motor::DjiMotor motor3510(
+    drivers(),
+    tap::motor::MOTOR4,          // id 4
+    tap::can::CanBus::CAN_BUS1,  // bus 1
+    false,
+    "3510 Motor",
+    true,
+    (1.0f));
 
 // 6020
-tap::motor::DjiMotor wheelChannelMotor(
+tap::motor::DjiMotor motor6020(
     drivers(),
     tap::motor::MOTOR7,          // id 3+4
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
-    "WMotor");
+    "6020 Motor",
+    true,
+    (1.0f));
 
-MotorSubsystem leftMotorSubsystem(
-    drivers(),
-    leftChannelMotor,
-    m2006VelocityPidConfig,
-    (1.0f / 36.0f));
+MotorSubsystem motorSubsystem2006(drivers(), motor2006, m2006VelocityPidConfig);
 
-MotorSubsystem rightMotorSubsystem(
-    drivers(),
-    rightChannelMotor,
-    rm3508VelocityPidConfig,
-    (187.0f / 3591.0f));  // internal gearbox ratio
+MotorSubsystem motorSubsystem3505(drivers(), motor3508, rm3508VelocityPidConfig);
 
-MotorSubsystem wheelMotorSubsystem(
-    drivers(),
-    wheelChannelMotor,
-    gm6020VelocityPidConfig,
-    (1.0f));  // internal gearbox ratio
+MotorSubsystem motorSubsystem6020(drivers(), motor6020, gm6020VelocityPidConfig);
+
+MotorSubsystem motorSubsystem3510(drivers(), motor3510, rm3510VelocityPidConfig);
 
 // ----------
 // Commands
 // ----------
 
-StickRpmCommand leftManual(
-    &leftMotorSubsystem,
+StickRpmCommand leftVerticalManual(
+    &motorSubsystem2006,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
     500.0f);
 
-StickRpmCommand rightManual(
-    &rightMotorSubsystem,
+StickRpmCommand leftHorizontalManual(
+    &motorSubsystem3510,
+    &drivers()->remote,
+    tap::communication::serial::Remote::Channel::LEFT_HORIZONTAL,
+    500.0f);
+
+StickRpmCommand rightVerticalManual(
+    &motorSubsystem3505,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::RIGHT_VERTICAL,
     482.0f);
 
 StickRpmCommand wheelManual(
-    &wheelMotorSubsystem,
+    &motorSubsystem6020,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::WHEEL,
     320.0f);
@@ -143,31 +156,39 @@ tap::control::HoldRepeatCommandMapping leftSwitchUp(
         tap::communication::serial::Remote::SwitchState::UP),
     true);
 
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 // inits
 
 void initializeSubsystems()
 {
     agitator.initialize();
-    leftMotorSubsystem.initialize();
-    rightMotorSubsystem.initialize();
-    wheelMotorSubsystem.initialize();
+    motorSubsystem2006.initialize();
+    motorSubsystem3505.initialize();
+    motorSubsystem6020.initialize();
+    motorSubsystem3510.initialize();
 }
 
 void registerSubsystems(Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&leftMotorSubsystem);
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &motor_tester_control::remoteSafeDisconnectFunction);
+    drivers->commandScheduler.registerSubsystem(&motorSubsystem2006);
     drivers->commandScheduler.registerSubsystem(&agitator);
-    drivers->commandScheduler.registerSubsystem(&rightMotorSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wheelMotorSubsystem);
+    drivers->commandScheduler.registerSubsystem(&motorSubsystem3505);
+    drivers->commandScheduler.registerSubsystem(&motorSubsystem6020);
+    drivers->commandScheduler.registerSubsystem(&motorSubsystem3510);
 }
 
 void registerIoMappings(Drivers* drivers)
 {
     drivers->commandMapper.addMap(&leftSwitchUp);
 
-    wheelMotorSubsystem.setDefaultCommand(&wheelManual);
-    leftMotorSubsystem.setDefaultCommand(&leftManual);
-    rightMotorSubsystem.setDefaultCommand(&rightManual);
+    motorSubsystem6020.setDefaultCommand(&wheelManual);
+    motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
+    motorSubsystem3505.setDefaultCommand(&rightVerticalManual);
+    motorSubsystem3510.setDefaultCommand(&leftHorizontalManual);
 }
 
 }  // namespace motor_tester_control

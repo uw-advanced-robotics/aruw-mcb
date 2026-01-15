@@ -23,7 +23,7 @@
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 VirtualDoubleDjiMotor::VirtualDoubleDjiMotor(
     tap::Drivers* drivers,
@@ -36,8 +36,10 @@ VirtualDoubleDjiMotor::VirtualDoubleDjiMotor(
     bool isInvertedTwo,
     const char* nameOne,
     const char* nameTwo,
-    uint16_t encWrapped,
-    int64_t encRevolutions)
+    bool currentControl,
+    float gearRatio,
+    uint32_t encoderHomePositionOne,
+    tap::encoder::EncoderInterface* externalEncoder)
     : DoubleDjiMotor(
           drivers,
           desMotorIdentifierOne,
@@ -48,8 +50,10 @@ VirtualDoubleDjiMotor::VirtualDoubleDjiMotor(
           isInvertedTwo,
           nameOne,
           nameTwo,
-          encWrapped,
-          encRevolutions),
+          currentControl,
+          gearRatio,
+          encoderHomePositionOne,
+          externalEncoder),
       mcbLite(mcbLite)
 {
 }
@@ -67,4 +71,4 @@ void VirtualDoubleDjiMotor::attachSelfToRxHandler()
     mcbLite->canRxHandler.attachReceiveHandler(&motorTwo);
 }
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor

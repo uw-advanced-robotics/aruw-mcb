@@ -24,26 +24,35 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using modm::Matrix;
 using modm::Vector3f;
 using tap::algorithms::getSign;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace testing;
 
 // See this paper for equations: https://www.hindawi.com/journals/js/2015/347379/.
-static constexpr float WHEEL_VEL_RPM_TO_MPS = (2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f);
 
-static constexpr float WHEEL_VEL = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 3.0f;
+static constexpr float WHEEL_VEL =
+    CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 3.0f * M_TWOPI / 60.0f;
 // translational chassis velocity in m/s, if WHEEL_VEL velocity commanded in X or Y direction
-static constexpr float CHASSIS_VEL = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS;
+static constexpr float CHASSIS_VEL = WHEEL_VEL * WHEEL_RADIUS;
 // rotational chassis velocity in rad/s, if WHEEL_VEL velocity commanded in R direction
 static constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
                                ? 1
                                : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
-static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS / ::A;
+static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_RADIUS / ::A;
+
+static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 1,
+    .ki = 0,
+    .kd = 0,
+};
+
+static constexpr float GEAR_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
 
 class HolonomicChassisSubsystemTest : public Test
 {
@@ -51,11 +60,24 @@ protected:
     HolonomicChassisSubsystemTest()
         : currentSensor(
               {&drivers.analog,
-               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-          chassis(&drivers, &currentSensor)
+          voltageSensor(),
+          leftFrontMotor(),
+          leftBackMotor(),
+          rightFrontMotor(),
+          rightBackMotor(),
+          chassis(
+              &drivers,
+              &currentSensor,
+              &voltageSensor,
+              leftFrontMotor,
+              leftBackMotor,
+              rightFrontMotor,
+              rightBackMotor,
+              MOCK_WHEEL_VELOCITY_PID_CONFIG)
     {
     }
 
@@ -67,6 +89,9 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+    NiceMock<tap::mock::MotorInterfaceMock> leftFrontMotor, leftBackMotor, rightFrontMotor,
+        rightBackMotor;
     MecanumChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
@@ -153,13 +178,16 @@ TEST_P(VelocityGetterTest, getDesiredVelocity)
     modm::Vector3f desiredOutput = GetParam().desiredOutput;
     modm::Vector3f expectedVelocity = GetParam().expectedVelocity;
 
-    chassis.setDesiredOutput(desiredOutput.x, desiredOutput.y, desiredOutput.z);
+    chassis.setDesiredOutput(
+        desiredOutput.x * 60.0f / M_TWOPI,
+        desiredOutput.y * 60.0f / M_TWOPI,
+        desiredOutput.z * 60.0f / M_TWOPI);
 
     Matrix<float, 3, 1> chassisVelocity = chassis.getDesiredVelocityChassisRelative();
 
-    EXPECT_NEAR(expectedVelocity.x, chassisVelocity[0][0], 1E-3);
-    EXPECT_NEAR(expectedVelocity.y, chassisVelocity[1][0], 1E-3);
-    EXPECT_NEAR(expectedVelocity.z, chassisVelocity[2][0], 1E-3);
+    EXPECT_NEAR(expectedVelocity.x, chassisVelocity[0][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
+    EXPECT_NEAR(expectedVelocity.y, chassisVelocity[1][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
+    EXPECT_NEAR(expectedVelocity.z, chassisVelocity[2][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
 }
 
 TEST_P(VelocityGetterTest, getVelocityWorldRelative)
@@ -254,7 +282,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 struct ActualVelocityParam
 {
-    int16_t lfRPM, lbRPM, rfRPM, rbRPM;
+    float lfVel, lbVel, rfVel, rbVel;
     float expectedX, expectedY, expectedR;
 };
 
@@ -266,10 +294,14 @@ public:
     {
         HolonomicChassisSubsystemTest::SetUp();
 
-        ON_CALL(chassis.leftFrontMotor, getShaftRPM).WillByDefault(Return(GetParam().lfRPM));
-        ON_CALL(chassis.leftBackMotor, getShaftRPM).WillByDefault(Return(GetParam().lbRPM));
-        ON_CALL(chassis.rightFrontMotor, getShaftRPM).WillByDefault(Return(GetParam().rfRPM));
-        ON_CALL(chassis.rightBackMotor, getShaftRPM).WillByDefault(Return(GetParam().rbRPM));
+        ON_CALL(*chassis.leftFrontMotor.getEncoder(), getVelocity)
+            .WillByDefault(Return(GetParam().lfVel));
+        ON_CALL(*chassis.leftBackMotor.getEncoder(), getVelocity)
+            .WillByDefault(Return(GetParam().lbVel));
+        ON_CALL(*chassis.rightFrontMotor.getEncoder(), getVelocity)
+            .WillByDefault(Return(GetParam().rfVel));
+        ON_CALL(*chassis.rightBackMotor.getEncoder(), getVelocity)
+            .WillByDefault(Return(GetParam().rbVel));
     }
 };
 
@@ -284,46 +316,46 @@ TEST_P(ActualVelocityTest, getActualVelocityChassisRelative)
 
 ActualVelocityParam actualVelocityValuesToTest[] = {
     {
-        .lfRPM = 0,
-        .lbRPM = 0,
-        .rfRPM = 0,
-        .rbRPM = 0,
+        .lfVel = 0,
+        .lbVel = 0,
+        .rfVel = 0,
+        .rbVel = 0,
         .expectedX = 0,
         .expectedY = 0,
         .expectedR = 0,
     },
     {
-        .lfRPM = static_cast<int16_t>(WHEEL_VEL),
-        .lbRPM = static_cast<int16_t>(WHEEL_VEL),
-        .rfRPM = static_cast<int16_t>(WHEEL_VEL),
-        .rbRPM = static_cast<int16_t>(WHEEL_VEL),
+        .lfVel = WHEEL_VEL,
+        .lbVel = WHEEL_VEL,
+        .rfVel = WHEEL_VEL,
+        .rbVel = WHEEL_VEL,
         .expectedX = 0,
         .expectedY = 0,
         .expectedR = -CHASSIS_VEL_R,
     },
     {
-        .lfRPM = static_cast<int16_t>(-WHEEL_VEL),
-        .lbRPM = static_cast<int16_t>(-WHEEL_VEL),
-        .rfRPM = static_cast<int16_t>(-WHEEL_VEL),
-        .rbRPM = static_cast<int16_t>(-WHEEL_VEL),
+        .lfVel = -WHEEL_VEL,
+        .lbVel = -WHEEL_VEL,
+        .rfVel = -WHEEL_VEL,
+        .rbVel = -WHEEL_VEL,
         .expectedX = 0,
         .expectedY = 0,
         .expectedR = CHASSIS_VEL_R,
     },
     {
-        .lfRPM = static_cast<int16_t>(WHEEL_VEL),
-        .lbRPM = static_cast<int16_t>(WHEEL_VEL),
-        .rfRPM = static_cast<int16_t>(-WHEEL_VEL),
-        .rbRPM = static_cast<int16_t>(-WHEEL_VEL),
+        .lfVel = WHEEL_VEL,
+        .lbVel = WHEEL_VEL,
+        .rfVel = -WHEEL_VEL,
+        .rbVel = -WHEEL_VEL,
         .expectedX = CHASSIS_VEL,
         .expectedY = 0,
         .expectedR = 0,
     },
     {
-        .lfRPM = static_cast<int16_t>(-WHEEL_VEL),
-        .lbRPM = static_cast<int16_t>(-WHEEL_VEL),
-        .rfRPM = static_cast<int16_t>(WHEEL_VEL),
-        .rbRPM = static_cast<int16_t>(WHEEL_VEL),
+        .lfVel = -WHEEL_VEL,
+        .lbVel = -WHEEL_VEL,
+        .rfVel = WHEEL_VEL,
+        .rbVel = WHEEL_VEL,
         .expectedX = -CHASSIS_VEL,
         .expectedY = 0,
         .expectedR = 0,

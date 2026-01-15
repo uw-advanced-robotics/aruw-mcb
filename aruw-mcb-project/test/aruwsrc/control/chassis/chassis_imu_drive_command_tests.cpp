@@ -25,6 +25,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
@@ -32,11 +33,19 @@
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace aruwsrc;
 using namespace testing;
 
 static constexpr float MAX_SPEED = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
+
+static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 1,
+    .ki = 0,
+    .kd = 0,
+};
+
+static constexpr float GEAR_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
 
 class ChassisImuDriveCommandTest : public Test
 {
@@ -45,11 +54,24 @@ protected:
         : drivers(),
           currentSensor(
               {&drivers.analog,
-               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-          chassis(&drivers, &currentSensor),
+          voltageSensor(),
+          lfm(),
+          lbm(),
+          rfm(),
+          rbm(),
+          chassis(
+              &drivers,
+              &currentSensor,
+              &voltageSensor,
+              lfm,
+              lbm,
+              rfm,
+              rbm,
+              MOCK_WHEEL_VELOCITY_PID_CONFIG),
           controlOperatorInterface(&drivers),
           robotData{}
     {
@@ -79,6 +101,8 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+    NiceMock<tap::mock::MotorInterfaceMock> lfm, lbm, rfm, rbm;
     NiceMock<aruwsrc::mock::MecanumChassisSubsystemMock> chassis;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
@@ -189,7 +213,7 @@ TEST_P(
 
     chassisImuDriveCommand.initialize();
 
-    imuYaw += 10;
+    imuYaw += modm::toRadian(10);
 
     chassisImuDriveCommand.execute();
 }
@@ -204,10 +228,10 @@ TEST_P(
     imuYaw = 0;
     chassisImuDriveCommand.initialize();
 
-    imuYaw += 90;
+    imuYaw += modm::toRadian(90);
     chassisImuDriveCommand.execute();
 
-    imuYaw = 90 - modm::toDegree(ChassisImuDriveCommand::MAX_ROTATION_ERR);
+    imuYaw = modm::toRadian(90) - ChassisImuDriveCommand::MAX_ROTATION_ERR;
     float rotation = INFINITY;
     ON_CALL(chassis, setDesiredOutput).WillByDefault([&](float, float, float r) { rotation = r; });
 
@@ -226,7 +250,7 @@ TEST_P(
 {
     chassisImuDriveCommand.initialize();
 
-    imuYaw += 10;
+    imuYaw += modm::toRadian(10);
 
     float xExpected = std::get<0>(GetParam());
     float yExpected = std::get<1>(GetParam());
@@ -244,10 +268,10 @@ INSTANTIATE_TEST_SUITE_P(
     ChassisImuDriveCommandNoTurretParameterizedTest,
     Values(
         ParameterizedTuple(0, 0, 0, 0),
-        ParameterizedTuple(0.5 * MAX_SPEED, 0.5 * MAX_SPEED, 0.5 * MAX_SPEED, 45),
-        ParameterizedTuple(-0.2 * MAX_SPEED, 0.4 * MAX_SPEED, 0.7 * MAX_SPEED, -45),
-        ParameterizedTuple(MAX_SPEED, MAX_SPEED, MAX_SPEED, 90),
-        ParameterizedTuple(-MAX_SPEED, -MAX_SPEED, -MAX_SPEED, 135)));
+        ParameterizedTuple(0.5 * MAX_SPEED, 0.5 * MAX_SPEED, 0.5 * MAX_SPEED, modm::toRadian(45)),
+        ParameterizedTuple(-0.2 * MAX_SPEED, 0.4 * MAX_SPEED, 0.7 * MAX_SPEED, modm::toRadian(-45)),
+        ParameterizedTuple(MAX_SPEED, MAX_SPEED, MAX_SPEED, modm::toRadian(90)),
+        ParameterizedTuple(-MAX_SPEED, -MAX_SPEED, -MAX_SPEED, modm::toRadian(135))));
 
 TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_nullptr)
 {

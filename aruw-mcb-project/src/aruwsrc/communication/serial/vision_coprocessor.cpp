@@ -29,7 +29,7 @@
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
-using namespace aruwsrc::serial;
+using namespace aruwsrc::communication::serial;
 using tap::arch::clock::getTimeMicroseconds;
 
 VisionCoprocessor* VisionCoprocessor::visionCoprocessorInstance = nullptr;
@@ -99,9 +99,14 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToAutoNavSetpointData(completeMessage);
             return;
         }
-        case CV_MESSAGE_TYPE_ARUCO_RESET:
+        case CV_MESSAGE_TYPE_REALSENSE_ARUCO:
         {
-            decodeToArucoResetData(completeMessage);
+            decodeToRealsenseArucoData(completeMessage);
+            return;
+        }
+        case CV_MESSAGE_TYPE_ARDUCAM_ARUCO:
+        {
+            decodeToArducamArucoData(completeMessage);
             return;
         }
         case CV_MESSAGE_TYPE_ROBOT_ORBIT:
@@ -137,14 +142,29 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
             Position(setpointData.setpoints[i].x, setpointData.setpoints[i].y, 0));
     }
     lastSetpointData = setpointData;
+
+    if (this->autoNavController != nullptr)
+    {
+        this->autoNavController->attachPath(&autoNavPath);
+        this->autoNavController->setDesiredSpeed(setpointData.speed);
+    }
+
     return true;
 }
 
-bool VisionCoprocessor::decodeToArucoResetData(const ReceivedSerialMessage& message)
+bool VisionCoprocessor::decodeToRealsenseArucoData(const ReceivedSerialMessage& message)
 {
     // copy packet into data field
-    memcpy(&(lastArucoData.data), &message.data, sizeof(ArucoResetPacket));
-    lastArucoData.updated = true;
+    memcpy(&(lastRealsenseArucoData.data), &message.data, sizeof(ArucoResetPacket));
+    lastRealsenseArucoData.updated = true;
+    return true;
+}
+
+bool VisionCoprocessor::decodeToArducamArucoData(const ReceivedSerialMessage& message)
+{
+    // copy packet into data field
+    memcpy(&(lastArducamArucoData.data), &message.data, sizeof(ArucoResetPacket));
+    lastArducamArucoData.updated = true;
     return true;
 }
 
@@ -441,7 +461,7 @@ void VisionCoprocessor::sendBulletsRemaining()
             bulletsRemainMessage;
         bulletsRemainMessage.messageType = CV_MESSAGE_TYPES_BULLETS_REMAINING;
 
-#if defined(TARGET_HERO_PERSEUS)
+#if defined(TARGET_HERO_ZERO)
         const uint16_t* bulletsRemaining =
             &drivers->refSerial.getRobotData().turret.bulletsRemaining42;
 #else

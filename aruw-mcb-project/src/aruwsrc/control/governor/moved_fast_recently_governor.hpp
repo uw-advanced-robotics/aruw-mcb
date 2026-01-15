@@ -27,9 +27,9 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/chassis_rel_drive.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/ref_system_constants.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
 
 namespace aruwsrc::control::governor
 {

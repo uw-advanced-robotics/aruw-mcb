@@ -27,7 +27,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 class CircleCrosshair : public HudIndicator, protected modm::Resumable<2>
 {
@@ -44,18 +44,37 @@ public:
     modm::ResumableResult<void> sendInitialGraphics() override final;
 
 private:
+    // Offset from the center of the screen for the crosshair
+#ifdef TARGET_STANDARD_NULL
+    static constexpr int16_t OFFSET_X = 25;
+    static constexpr int16_t OFFSET_Y = -75;
+#elif defined(TARGET_STANDARD_VOID)
+    static constexpr int16_t OFFSET_X = -5;
+    static constexpr int16_t OFFSET_Y = -50;
+#elif defined(TARGET_HERO_ZERO)
+    static constexpr int16_t OFFSET_X = 2;
+    static constexpr int16_t OFFSET_Y = -42;
+#else
+    static constexpr int16_t OFFSET_X = 0;
+    static constexpr int16_t OFFSET_Y = 0;
+#endif
+
     // X position of the circle
-    static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2;
+    static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2 + OFFSET_X;
     // Y position of the circle
-    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2;
+    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2 + OFFSET_Y;
     // SIZE of the circle
     static constexpr uint16_t CRICLE_SIZE = 2;
-    // Thickness of the line
+// Thickness of the line
+#if defined(TARGET_HERO_ZERO)
+    static constexpr uint16_t LINE_THICKNESS = 10;
+#else
     static constexpr uint16_t LINE_THICKNESS = 5;
+#endif
 
     Tx::Graphic1Message crosshairGraphics;
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // CIRCLE_CROSSHAIR_HPP_

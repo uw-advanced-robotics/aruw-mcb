@@ -25,7 +25,7 @@
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 ChassisDiagonalDriveCommand::ChassisDiagonalDriveCommand(
     tap::Drivers* drivers,
@@ -61,4 +61,4 @@ float ChassisDiagonalDriveCommand::computeAngleFromCenterForAutorotation(
     return angleFromCenterForChassisAutorotate;
 }
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

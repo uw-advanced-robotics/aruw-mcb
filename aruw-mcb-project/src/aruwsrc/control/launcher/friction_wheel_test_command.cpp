@@ -22,7 +22,7 @@
 
 namespace aruwsrc::control::launcher
 {
-FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelSubsystem *subsystem)
+FrictionWheelTestCommand::FrictionWheelTestCommand(FrictionWheelInterface *subsystem)
     : subsystem(subsystem)
 {
     this->addSubsystemRequirement(subsystem);
@@ -34,7 +34,7 @@ void FrictionWheelTestCommand::end(bool) { this->subsystem->setDesiredLaunchSpee
 
 bool FrictionWheelTestCommand::isFinished() const
 {
-    return abs(this->subsystem->rightWheel.getShaftRPM()) > 4000.0f;
+    return abs(this->subsystem->getCurrentAverageFrictionWheelSpeed()) > 4000.0f;
 }
 
 }  // namespace aruwsrc::control::launcher

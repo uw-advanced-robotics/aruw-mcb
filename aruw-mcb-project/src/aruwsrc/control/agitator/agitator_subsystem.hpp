@@ -38,9 +38,7 @@
 
 #include "agitator_test_command.hpp"
 
-namespace aruwsrc
-{
-namespace agitator
+namespace aruwsrc::control::agitator
 {
 /**
  * Subsystem whose primary purpose is to encapsulate an agitator motor
@@ -162,7 +160,7 @@ public:
      */
     mockable inline float getVelocity() override
     {
-        return 6.0f * static_cast<float>(agitatorMotor.getShaftRPM()) / gearRatio;
+        return agitatorMotor.getEncoder()->getVelocity() * 360 / M_TWOPI;
     }
 
     mockable const char* getName() const override { return "Agitator"; }
@@ -194,16 +192,6 @@ private:
     float desiredAgitatorAngle = 0.0f;
 
     /**
-     * You can calibrate the agitator, which will set the current agitator angle to zero radians.
-     */
-    float agitatorCalibratedZeroAngle = 0.0f;
-
-    /**
-     * Motor gear ratio, so we use shaft angle rather than encoder angle.
-     */
-    float gearRatio;
-
-    /**
      * Stores the jam state of the subsystem
      */
     bool subsystemJamStatus = false;
@@ -214,11 +202,6 @@ private:
      * Detailed effect: When `false`, isJammed() always return false.
      */
     bool jamLogicEnabled;
-
-    /**
-     * Get the raw angle of the shaft from the motor
-     */
-    float getUncalibratedAgitatorAngle() const;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
@@ -232,8 +215,6 @@ private:
     AgitatorTestCommand agitatorTestCommand;
 };  // class AgitatorSubsystem
 
-}  // namespace agitator
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::agitator
 
 #endif  // AGITATOR_SUBSYSTEM_HPP_

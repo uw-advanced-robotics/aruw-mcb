@@ -45,7 +45,7 @@
 
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 /**
  * Abstract subsystem for a holonomic chassis
@@ -61,7 +61,8 @@ public:
     ChassisSubsystem(
         tap::Drivers* drivers,
         std::vector<Wheel>* wheels,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -178,6 +179,8 @@ public:
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor;
+
     tap::algorithms::SmoothPid chasisSpeedRotationPID;
 
     tap::control::chassis::PowerLimiter chassisPowerLimiter;
@@ -190,7 +193,7 @@ private:
     float tempMax = 0;
 };  // class ChassisSubsystem
 
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 
 }  // namespace aruwsrc
 

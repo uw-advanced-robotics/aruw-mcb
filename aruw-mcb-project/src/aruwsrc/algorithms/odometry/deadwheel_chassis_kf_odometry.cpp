@@ -23,23 +23,26 @@ namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
+#if defined(TARGET_SENTRY_ECLIPSE)
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
+#else
+    aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver& chassisYawObserver,
+#endif
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
     const float parallelCenterToWheelDistance,
-    const float parallelWheelChassisRelativeAngleRadians,
-    const float perpendicularWheelChassisRelativeAngleRadians)
+    const float parallelWheelChassisForwardRelativeAngleRadians,
+    const float perpendicularWheelChassisForwardRelativeAngleRadians)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
-      chassisAccelerationToMeasurementCovarianceInterpolator(
-          CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT,
-          MODM_ARRAY_SIZE(CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT)),
       parallelCenterToWheelDistance(parallelCenterToWheelDistance),
-      parallelWheelChassisRelativeAngleRadians(parallelWheelChassisRelativeAngleRadians),
-      perpendicularWheelChassisRelativeAngleRadians(perpendicularWheelChassisRelativeAngleRadians)
+      parallelWheelChassisForwardRelativeAngleRadians(
+          parallelWheelChassisForwardRelativeAngleRadians),
+      perpendicularWheelChassisForwardRelativeAngleRadians(
+          perpendicularWheelChassisForwardRelativeAngleRadians)
 {
     reset();
 }
@@ -50,6 +53,30 @@ void DeadwheelChassisKFOdometry::reset()
     kf.init(initialX);
 }
 
+// may or may not work
+float DeadwheelChassisKFOdometry::applyIirFilter(
+    float input,
+    float* state,
+    const float* a,
+    const float* b,
+    int order)
+{
+    for (int i = order - 1; i > 0; i--)
+    {
+        state[i] = state[i - 1];
+    }
+
+    float output = b[0] * input;
+    for (int i = 1; i < order; i++)
+    {
+        output += b[i] * state[i];
+        output -= a[i] * state[i - 1];
+    }
+
+    state[0] = input;
+    return output;
+}
+
 void DeadwheelChassisKFOdometry::update()
 {
     if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
@@ -58,19 +85,24 @@ void DeadwheelChassisKFOdometry::update()
         return;
     }
 
-    // Assuming getPerpendicularWheelVelocity() and getParallelWheelVelocity() return the velocities
-    // of the two omni wheels
-    float rawV1 = deadwheelOdometry.getPerpendicularRPM();
-    float rawV2 = deadwheelOdometry.getParallelMotorRPM();
-    float V1 = deadwheelOdometry.rpmToMetersPerSecond(rawV1);
-    float V2 = deadwheelOdometry.rpmToMetersPerSecond(rawV2);
+    float angularVelo = imu.getGz();
 
-    // Calculate velocities in the robot's frame of reference
-    // Correct for roation of the robot
-    V2 -= modm::toRadian(imu.getGz()) * parallelCenterToWheelDistance;
-    // Rotate the velocities based on the wheel rotations
-    float Vx = (((V1 - V2)) * parallelWheelChassisRelativeAngleRadians);
-    float Vy = (((V1 + V2)) * perpendicularWheelChassisRelativeAngleRadians);
+    perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
+    parallelRaw = deadwheelOdometry.getParallelMotorVelocity();
+
+    filteredParallel = parallelRaw + (angularVelo * parallelCenterToWheelDistance);
+
+    filteredParallel =
+        applyIirFilter(filteredParallel, parallelFilterState, IIR_A, IIR_B, FILTER_ORDER);
+    filteredPerpendicular =
+        applyIirFilter(perpendicularRaw, perpendicularFilterState, IIR_A, IIR_B, FILTER_ORDER);
+
+    float Vx =
+        (filteredParallel * std::sin(parallelWheelChassisForwardRelativeAngleRadians) +
+         filteredPerpendicular * std::cos(perpendicularWheelChassisForwardRelativeAngleRadians));
+    float Vy =
+        (filteredParallel * std::cos(parallelWheelChassisForwardRelativeAngleRadians) -
+         filteredPerpendicular * std::sin(perpendicularWheelChassisForwardRelativeAngleRadians));
 
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
 
@@ -83,9 +115,6 @@ void DeadwheelChassisKFOdometry::update()
     tap::algorithms::rotateVector(&ax, &ay, chassisYaw);
     accelXWorld = ax;
     accelYWorld = ay;
-
-    // The measurement covariance is dynamically updated based on chassis-measured acceleration
-    updateMeasurementCovariance(Vx, Vy);
 
     // Create the measurement vector
     float y[int(OdomInput::NUM_INPUTS)] = {Vx, accelXWorld, Vy, accelYWorld};
@@ -105,46 +134,24 @@ void DeadwheelChassisKFOdometry::updateChassisStateFromKF(float chassisYaw)
 
     location.setOrientation(chassisYaw);
     location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
+    prevTime = tap::arch::clock::getTimeMicroseconds();
 }
 
-void DeadwheelChassisKFOdometry::updateMeasurementCovariance(float Vx, float Vy)
+void DeadwheelChassisKFOdometry::overrideOdometryPosition(
+    const float positionX,
+    const float positionY)
 {
-    const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
-    const uint32_t dt = curTime - prevTime;
-    prevTime = curTime;
+    auto currKFState = kf.getStateVectorAsMatrix();
 
-    // Return to avoid weird acceleration spike on startup
-    if (prevTime == 0)
-    {
-        return;
-    }
+    float newState[int(OdomState::NUM_STATES)] = {
+        positionX,
+        currKFState[int(OdomState::VEL_X)],
+        currKFState[int(OdomState::ACC_X)],
+        positionY,
+        currKFState[int(OdomState::VEL_Y)],
+        currKFState[int(OdomState::ACC_Y)]};
 
-    // Compute acceleration
-    chassisMeasuredDeltaVelocity.x = tap::algorithms::lowPassFilter(
-        chassisMeasuredDeltaVelocity.x,
-        Vx - prevChassisVelocity[0][0],
-        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
-
-    chassisMeasuredDeltaVelocity.y = tap::algorithms::lowPassFilter(
-        chassisMeasuredDeltaVelocity.y,
-        Vy - prevChassisVelocity[1][0],
-        CHASSIS_WHEEL_ACCELERATION_LOW_PASS_ALPHA);
-
-    prevChassisVelocity[0][0] = Vx;
-    prevChassisVelocity[1][0] = Vy;
-
-    // dt is in microseconds, acceleration is dv / dt, so to get an acceleration with units m/s^2,
-    // convert dt in microseconds to seconds
-    const float accelMagnitude =
-        chassisMeasuredDeltaVelocity.getLength() * 1E6 / static_cast<float>(dt);
-
-    const float velocityCovariance =
-        chassisAccelerationToMeasurementCovarianceInterpolator.interpolate(accelMagnitude);
-
-    // Set measurement covariance of chassis velocity as measured by the wheels
-    kf.getMeasurementCovariance()[0] = velocityCovariance;
-    kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
-        velocityCovariance;
+    kf.init(newState);
 }
 
 }  // namespace aruwsrc::algorithms::odometry

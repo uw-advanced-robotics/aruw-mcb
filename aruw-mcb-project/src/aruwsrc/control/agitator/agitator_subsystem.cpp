@@ -36,9 +36,7 @@
 
 using namespace tap::motor;
 
-namespace aruwsrc
-{
-namespace agitator
+namespace aruwsrc::control::agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
     tap::Drivers* drivers,
@@ -53,14 +51,15 @@ AgitatorSubsystem::AgitatorSubsystem(
     : tap::control::Subsystem(drivers),
       agitatorPositionPid(pidParams),
       jamChecker(this, jammingDistance, jammingTime),
-      gearRatio(agitatorGearRatio),
       jamLogicEnabled(jamLogicEnabled),
       agitatorMotor(
           drivers,
           agitatorMotorId,
           agitatorCanBusId,
           isAgitatorInverted,
-          "agitator motor"),
+          "agitator motor",
+          false,
+          agitatorGearRatio),
       agitatorTestCommand(this)
 {
     assert(jammingDistance >= 0);
@@ -112,7 +111,7 @@ bool AgitatorSubsystem::calibrateHere()
     {
         return false;
     }
-    agitatorCalibratedZeroAngle = getUncalibratedAgitatorAngle();
+    agitatorMotor.getEncoder()->resetEncoderValue();
     agitatorIsCalibrated = true;
     desiredAgitatorAngle = 0.0f;
     clearJam();
@@ -125,7 +124,7 @@ float AgitatorSubsystem::getCurrentValue() const
     {
         return 0.0f;
     }
-    return getUncalibratedAgitatorAngle() - agitatorCalibratedZeroAngle;
+    return agitatorMotor.getEncoder()->getPosition().getUnwrappedValue();
 }
 
 float AgitatorSubsystem::getJamSetpointTolerance() const
@@ -133,14 +132,4 @@ float AgitatorSubsystem::getJamSetpointTolerance() const
     return jamChecker.getJamSetpointTolerance();
 }
 
-float AgitatorSubsystem::getUncalibratedAgitatorAngle() const
-{
-    // position is equal to the following equation:
-    // position = 2 * PI / encoder resolution * unwrapped encoder value / gear ratio
-    return (2.0f * M_PI / static_cast<float>(DjiMotor::ENC_RESOLUTION)) *
-           agitatorMotor.getEncoderUnwrapped() / gearRatio;
-}
-
-}  // namespace agitator
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::agitator

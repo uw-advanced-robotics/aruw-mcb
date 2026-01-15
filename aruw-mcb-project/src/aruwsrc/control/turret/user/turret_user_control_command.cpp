@@ -23,7 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 using tap::algorithms::WrappedFloat;
 
@@ -33,8 +33,8 @@ TurretUserControlCommand::TurretUserControlCommand(
     tap::Drivers *drivers,
     ControlOperatorInterface &controlOperatorInterface,
     TurretSubsystem *turretSubsystem,
-    algorithms::TurretYawControllerInterface *yawController,
-    algorithms::TurretPitchControllerInterface *pitchController,
+    algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController,
+    algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)

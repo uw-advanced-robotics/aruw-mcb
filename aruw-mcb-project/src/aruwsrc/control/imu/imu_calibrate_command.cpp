@@ -25,6 +25,7 @@
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
+using namespace tap::algorithms::odometry;
 
 namespace aruwsrc::control::imu
 {
@@ -33,13 +34,21 @@ ImuCalibrateCommand::ImuCalibrateCommand(
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
     chassis::HolonomicChassisSubsystem *chassis,
     float velocityZeroThreshold,
-    float positionZeroThreshold)
+    float positionZeroThreshold,
+    aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
+    aruwsrc::control::buzzer::NoteSequenceCommand *failChime,
+    Odometry2DInterface *odometry2DInterface,
+    const std::vector<tap::communication::sensors::imu::ImuInterface *> &externalIMUs)
     : tap::control::Command(),
       velocityZeroThreshold(velocityZeroThreshold),
       positionZeroThreshold(positionZeroThreshold),
       drivers(drivers),
       turretsAndControllers(turretsAndControllers),
-      chassis(chassis)
+      externalIMUs(externalIMUs),
+      chassis(chassis),
+      odometry2DInterface(odometry2DInterface),
+      successChime(successChime),
+      failChime(failChime)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -74,6 +83,10 @@ void ImuCalibrateCommand::initialize()
         config.pitchController->initialize();
         config.yawController->initialize();
     }
+    if (odometry2DInterface != nullptr)
+    {
+        odometry2DInterface->reset();
+    }
 
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
@@ -86,6 +99,11 @@ void ImuCalibrateCommand::execute()
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
         {
+            if (calibrationLongTimeout.isExpired())
+            {
+                if (failChime) drivers->commandScheduler.addCommand(failChime);
+                calibrationState = CalibrationState::CALIBRATION_FAIL;
+            }
             // Only start calibrating if the turret is online and if there is an IMU online to be
             // calibrated. The onboard Mpu6500 will never be in the `IMU_NOT_CONNECTED` state unless
             // the Mpu6500 is shorted (which has never happened). The turret MCB will only be
@@ -111,6 +129,12 @@ void ImuCalibrateCommand::execute()
         }
         case CalibrationState::LOCKING_TURRET:
         {
+            if (calibrationLongTimeout.isExpired())
+            {
+                if (failChime) drivers->commandScheduler.addCommand(failChime);
+                calibrationState = CalibrationState::CALIBRATION_FAIL;
+            }
+
             bool turretsNotMoving = true;
             for (auto &config : turretsAndControllers)
             {
@@ -125,16 +149,27 @@ void ImuCalibrateCommand::execute()
 
                 for (auto &config : turretsAndControllers)
                 {
-                    config.turretMCBCanComm->sendImuCalibrationRequest();
+                    config.turretMCBCanComm->requestCalibration();
                 }
 
                 drivers->mpu6500.requestCalibration();
                 calibrationState = CalibrationState::CALIBRATING_IMU;
+
+                for (auto *imu : externalIMUs)
+                {
+                    if (imu) imu->requestCalibration();
+                }
             }
 
             break;
         }
         case CalibrationState::CALIBRATING_IMU:
+            if (calibrationLongTimeout.isExpired())
+            {
+                if (failChime) drivers->commandScheduler.addCommand(failChime);
+                calibrationState = CalibrationState::CALIBRATION_FAIL;
+            }
+
             if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED)
             {
                 // assume turret MCB takes approximately as long as the onboard IMU to calibrate,
@@ -142,19 +177,21 @@ void ImuCalibrateCommand::execute()
                 // TODO to handle the case where the turret MCB doesn't receive information,
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
-                calibrationState = CalibrationState::BUZZING;
-            }
-            buzzerTimer.restart(1000);
-            break;
-        case CalibrationState::BUZZING:
-            if (buzzerTimer.isExpired())
-            {
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
+                if (odometry2DInterface != nullptr)
+                {
+                    odometry2DInterface->reset();
+                }
             }
-            tap::buzzer::playNote(&drivers->pwm, 1000);
             break;
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
-            tap::buzzer::silenceBuzzer(&drivers->pwm);
+            if (calibrationTimer.isExpired())
+            {
+                calibrationState = CalibrationState::CALIBRATION_SUCCESS;
+                if (successChime) drivers->commandScheduler.addCommand(successChime);
+            }
+            break;
+        default:
             break;
     }
 
@@ -186,9 +223,8 @@ void ImuCalibrateCommand::end(bool)
 
 bool ImuCalibrateCommand::isFinished() const
 {
-    return (calibrationState == CalibrationState::WAITING_CALIBRATION_COMPLETE &&
-            calibrationTimer.isExpired()) ||
-           calibrationLongTimeout.isExpired();
+    return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
+           calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
 
 }  // namespace aruwsrc::control::imu

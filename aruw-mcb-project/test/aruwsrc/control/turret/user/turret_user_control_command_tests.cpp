@@ -37,13 +37,27 @@ using namespace testing;
 
 #define SETUP_TEST()
 
+namespace
+{
+float computeGravitationalForceOffset(const float pitchAngleRad)
+{
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
+    return gravityCompensation.calculateCompensationEffort(
+        {.pitchWorldFrame = pitchAngleRad, .yaw = 0.0f});
+};
+TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
+}  // namespace
+
 class TurretUserControlCommandTest : public Test
 {
 protected:
     TurretUserControlCommandTest()
         : turret(&drivers),
           controlOperatorInterface(&drivers),
-          pitchController(turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          pitchController(
+              turret.pitchMotor,
+              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
+              {&gravityCompensation}),
           yawController(turret.yawMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           turretCmd(
               &drivers,
@@ -59,8 +73,8 @@ protected:
     tap::Drivers drivers;
     NiceMock<TurretSubsystemMock> turret;
     NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
-    ChassisFramePitchTurretController pitchController;
-    ChassisFrameYawTurretController yawController;
+    ChassisFrameTurretController<Axis::PITCH> pitchController;
+    ChassisFrameTurretController<Axis::YAW> yawController;
     TurretUserControlCommand turretCmd;
 };
 
@@ -123,13 +137,8 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
 
     EXPECT_CALL(
         turret.pitchMotor,
-        setMotorOutput(FloatNear(
-            computeGravitationalForceOffset(
-                TURRET_CG_X,
-                TURRET_CG_Z,
-                -pitchActual.getWrappedValue(),
-                GRAVITY_COMPENSATION_SCALAR),
-            1E-2)));
+        setMotorOutput(
+            FloatNear(computeGravitationalForceOffset(pitchActual.getWrappedValue()), 1E-2)));
     EXPECT_CALL(turret.yawMotor, setMotorOutput(0));
     EXPECT_CALL(
         turret.pitchMotor,
@@ -160,11 +169,7 @@ TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
 
     EXPECT_CALL(
         turret.pitchMotor,
-        setMotorOutput(Gt(computeGravitationalForceOffset(
-            TURRET_CG_X,
-            TURRET_CG_Z,
-            -pitchActual.getWrappedValue(),
-            GRAVITY_COMPENSATION_SCALAR))));
+        setMotorOutput(Gt(computeGravitationalForceOffset(pitchActual.getWrappedValue()))));
     EXPECT_CALL(turret.yawMotor, setMotorOutput(Lt(0)));
     EXPECT_CALL(
         turret.pitchMotor,

@@ -21,7 +21,7 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::standard
 {
 float StandardTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
 
@@ -32,4 +32,4 @@ uint32_t StandardTurretSubsystem::getLastMeasurementTimeMicros() const
     return getTurretMCB()->getIMUDataTimestamp();
 }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::standard

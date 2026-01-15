@@ -20,40 +20,50 @@
 #include "image_indicator.hpp"
 
 #include "aruwsrc/control/client-display/images/marcus.hpp"
+#include "aruwsrc/control/client-display/images/nathaniel_sussy.hpp"
 
 using namespace tap::communication::serial;
 using namespace aruwsrc::control::client_display::images;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
-      image({NUM_LINES_MARCUS, MARCUS_LINES})
+      images({nathaniel_sussy, marcus})
 {
 }
 
-void ImageIndicator::initialize() { index = 0; }
+void ImageIndicator::initialize()
+{
+    image_index = 0;
+    line_index = 0;
+}
 
 modm::ResumableResult<void> ImageIndicator::update()
 {
-    auto currentTuple = image.lines[0];
-    int startX = 0;
-    int startY = 0;
-    int endX = 0;
-    int endY = 0;
+    auto currentImage = images[image_index];
+    auto currentTuple = currentImage.lines[0];  // 0 here as placeholder until we access later
+    int startX, startY, endX, endY;
 
     RF_BEGIN(1);
 
-    if (index > image.size - 1)
+    if (image_index > images.size() - 1)
     {
         RF_RETURN();
     }
 
-    currentTuple = image.lines[index];
-    startX = std::get<0>(currentTuple) + IMAGE_X_OFFSET;
-    startY = std::get<1>(currentTuple) + IMAGE_Y_OFFSET;
-    endX = std::get<2>(currentTuple) + IMAGE_X_OFFSET;
-    endY = std::get<3>(currentTuple) + IMAGE_Y_OFFSET;
+    if (line_index > currentImage.size - 1)
+    {
+        image_index++;
+        line_index = 0;
+        RF_RETURN();
+    }
+
+    currentTuple = currentImage.lines[line_index];
+    startX = std::get<0>(currentTuple) * currentImage.IMAGE_SCALE + currentImage.IMAGE_X_OFFSET;
+    startY = std::get<1>(currentTuple) * currentImage.IMAGE_SCALE + currentImage.IMAGE_Y_OFFSET;
+    endX = std::get<2>(currentTuple) * currentImage.IMAGE_SCALE + currentImage.IMAGE_X_OFFSET;
+    endY = std::get<3>(currentTuple) * currentImage.IMAGE_SCALE + currentImage.IMAGE_Y_OFFSET;
 
     uint8_t graphicName[3];
     getUnusedGraphicName(graphicName);
@@ -61,7 +71,7 @@ modm::ResumableResult<void> ImageIndicator::update()
         &imageGraphic.graphicData,
         graphicName,
         Tx::GRAPHIC_ADD,
-        DEFAULT_GRAPHIC_LAYER,
+        image_index,
         Tx::GraphicColor::GREEN);
 
     RefSerialTransmitter::configLine(
@@ -74,8 +84,8 @@ modm::ResumableResult<void> ImageIndicator::update()
 
     RF_CALL(refSerialTransmitter.sendGraphic(&imageGraphic));
 
-    index++;
+    line_index++;
     RF_END();
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

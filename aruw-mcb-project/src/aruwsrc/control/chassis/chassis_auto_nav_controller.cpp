@@ -20,7 +20,7 @@
 
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 void ChassisAutoNavController::initialize()
 {
@@ -43,8 +43,6 @@ void ChassisAutoNavController::runController(
     Vector moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
 
     Vector posError = setpoint - currentPos;
-
-    float desiredSpeed = visionCoprocessor.getAutonavSpeed();
 
     if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
     {
@@ -86,20 +84,20 @@ Position ChassisAutoNavController::calculateSetPoint(
     float lookaheadDistance,
     bool movementEnabled)
 {
-    if (!visionCoprocessor.isCvOnline() || !movementEnabled || path.empty())
+    if (path == nullptr || !movementEnabled || path->empty())
     {
         return lastSetPoint;
     }
 
-    if (path.hasChanged())
+    if (path->hasChanged())
     {
-        path.clearPathChanged();
+        path->clearPathChanged();
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
     }
 
-    float distOfClosest = path.positionToClosestParameter(current);
+    float distOfClosest = path->positionToClosestParameter(current);
 
-    Position lookaheadPos = path.parametertoPosition(distOfClosest + lookaheadDistance);
+    Position lookaheadPos = path->parametertoPosition(distOfClosest + lookaheadDistance);
 
     if (!pathTransitionTimeout.isExpired())
         return aruwsrc::algorithms::quadraticBezierInterpolation(
@@ -112,4 +110,4 @@ Position ChassisAutoNavController::calculateSetPoint(
     return lookaheadPos;
 }
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

@@ -20,10 +20,11 @@
 #ifndef TESTBED_CHASSIS_CONSTANTS_HPP_
 #define TESTBED_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "modm/math/filter/pid.hpp"
+#include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
@@ -33,7 +34,7 @@
 
 using tap::motor::DjiMotor;
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -78,6 +79,14 @@ static constexpr float VELOCITY_PID_KS = 0.0f;
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = DjiMotor::MAX_OUTPUT_C620;
 
+static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = VELOCITY_PID_KP,
+    .ki = VELOCITY_PID_KI,
+    .kd = VELOCITY_PID_KD,
+    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
+    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+};
+
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
@@ -117,32 +126,13 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
-/**
- * Fraction of max chassis speed that will be applied to rotation when beyblading
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
-
-/**
- * Fraction between [0, 1], what we multiply user translational input by when beyblading.
- */
-static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
-
-/**
- * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
- * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
- */
-static constexpr float
-    BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.5f;
-
-/**
- * The fraction to cut rotation speed while moving and beyblading
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0.7f;
-/**
- * Rotational speed to update the beyblade ramp target by each iteration until final rotation
- * setpoint reached, in RPM.
- */
-static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
-}  // namespace aruwsrc::chassis
+static constexpr BeybladeConfig BEYBLADE_CONFIG{
+    .beybladeRotationalSpeedFractionOfMax = 0.75f,
+    .beybladeTranslationalSpeedMultiplier = 0.6f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
+    .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
+    .beybladeRampRate = 50,
+};
+}  // namespace aruwsrc::control::chassis
 
 #endif  // TESTBED_CHASSIS_CONSTANTS_HPP_

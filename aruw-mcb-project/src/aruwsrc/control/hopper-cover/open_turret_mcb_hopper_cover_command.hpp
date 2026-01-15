@@ -24,7 +24,7 @@
 
 #include "turret_mcb_hopper_cover_subsystem.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::hopper_cover
 {
 class OpenTurretMCBHopperCoverCommand : public tap::control::Command
 {
@@ -48,6 +48,6 @@ private:
     TurretMCBHopperSubsystem* hopper;
 };
 
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::hopper_cover
 
 #endif  // OPEN_TURRET_MCB_HOPPER_COVER_COMMAND_HPP_

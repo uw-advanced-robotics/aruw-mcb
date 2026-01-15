@@ -25,6 +25,7 @@
 #define TAPROOT_VECTOR_HPP_
 
 #include "tap/algorithms/cmsis_mat.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 
 namespace tap::algorithms::transforms
 {
@@ -40,7 +41,10 @@ public:
 
     Vector(const Vector& other) : coordinates_(CMSISMat(other.coordinates_)) {}
 
-    Vector(CMSISMat<3, 1>& coordinates) : coordinates_(CMSISMat(coordinates)) {}
+    /**
+     * Costly copy constructor
+     */
+    Vector(const CMSISMat<3, 1>& coordinates) : coordinates_(CMSISMat(coordinates)) {}
 
     Vector(CMSISMat<3, 1>&& coordinates) : coordinates_(std::move(coordinates)) {}
 
@@ -56,7 +60,10 @@ public:
         return *this;
     }
 
-    inline Vector operator+(const Position& other) const;
+    inline Vector operator+(const Position& other) const
+    {
+        return Vector(this->coordinates_ + other.coordinates());
+    }
 
     inline Vector operator+(const Vector& other) const
     {
@@ -77,11 +84,25 @@ public:
 
     inline float dot(const Vector& other) const { return dot(*this, other); }
 
+    inline static Vector cross(const Vector& a, const Vector& b)
+    {
+        return Vector(tap::algorithms::cross(a.coordinates(), b.coordinates()));
+    }
+
+    inline Vector cross(const Vector& other) const { return cross(*this, other); }
+
     inline Vector operator/(const float scale) const { return Vector(this->coordinates_ / scale); }
 
     const inline CMSISMat<3, 1>& coordinates() const { return coordinates_; }
 
     inline float magnitude() const { return sqrt(dot(*this, *this)); }
+
+    inline Vector normalize() const { return (*this) * 1.0f / this->magnitude(); };
+
+    inline static Vector normalize(const Vector& a) { return a * 1.0f / a.magnitude(); };
+
+    friend class Transform;
+    friend class DynamicPosition;
 
 private:
     CMSISMat<3, 1> coordinates_;

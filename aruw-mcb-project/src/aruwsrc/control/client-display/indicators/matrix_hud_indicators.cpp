@@ -31,7 +31,7 @@ using namespace tap::communication::referee;
 using namespace tap::communication::serial;
 using namespace tap::algorithms;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Updates the `graphic`'s `startY` to the specified `location`. Updates `endY` such that the
@@ -56,9 +56,9 @@ static inline void updateGraphicYLocation(
 
 MatrixHudIndicators::MatrixHudIndicators(
     tap::Drivers &drivers,
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+    const aruwsrc::control::launcher::FrictionWheelInterface &frictionWheelSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor)
@@ -273,4 +273,4 @@ void MatrixHudIndicators::initialize()
         positionHudGraphicTitles,
         &matrixHudLabelAndTitleGraphics[NUM_MATRIX_HUD_INDICATORS]);
 }
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

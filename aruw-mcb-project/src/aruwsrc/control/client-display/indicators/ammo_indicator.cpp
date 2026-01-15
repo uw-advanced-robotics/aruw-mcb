@@ -23,7 +23,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 AmmoIndicator::AmmoIndicator(RefSerialTransmitter &refSerialTransmitter, const RefSerial &refSerial)
     : HudIndicator(refSerialTransmitter),
@@ -38,17 +38,16 @@ modm::ResumableResult<void> AmmoIndicator::update()
     if (refSerial.getRobotData().robotId == RefSerialData::RobotId::BLUE_HERO ||
         refSerial.getRobotData().robotId == RefSerialData::RobotId::RED_HERO)
     {
-        bulletCount = refSerial.getRobotData().turret.bulletsRemaining42;
+        bulletCount = static_cast<int16_t>(refSerial.getRobotData().turret.bulletsRemaining42);
     }
     else
     {
-        bulletCount = refSerial.getRobotData().turret.bulletsRemaining17;
+        bulletCount = static_cast<int16_t>(refSerial.getRobotData().turret.bulletsRemaining17);
     }
-
-    numberIndicator.setIndicatorState(bulletCount);
 
     RF_BEGIN(1);
 
+    numberIndicator.setIndicatorState(bulletCount);
     RF_CALL(numberIndicator.draw());
 
     RF_END();
@@ -75,7 +74,7 @@ void AmmoIndicator::initialize()
         graphicName,
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::ORANGE);
+        Tx::GraphicColor::YELLOW);
 
     RefSerialTransmitter::configCharacterMsg(SIZE, WIDTH, TEXT_X, TEXT_Y, "AMMO: ", &textGraphic);
 
@@ -85,9 +84,9 @@ void AmmoIndicator::initialize()
         graphicName,
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::ORANGE);
+        Tx::GraphicColor::YELLOW);
 
     updateAmmoCount(0, &numberGraphic);
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

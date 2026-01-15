@@ -19,7 +19,16 @@ import subprocess
 
 from SCons.Script import *
 
-def run_ozone(env, source):
+ROBOT_IPS = {
+    "TARGET_STANDARD_NULL": "192.168.1.103",
+    "TARGET_STANDARD_VOID": "192.168.1.166",
+    "TARGET_SENTRY_ECLIPSE": "192.168.1.231",
+    "TARGET_HERO_ZERO": "192.168.1.169",
+    "TARGET_ENGINEER": "192.168.0.232",
+    "TARGET_ENGI_2025": "192.168.0.232"
+}
+
+def run_ozone(env, source, robot=""):
     def call_run_ozone(target, source, env):
         jdebug = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"
         import sys
@@ -31,9 +40,9 @@ def run_ozone(env, source):
             subprocess.call(['xdg-open', jdebug])
 
     action = Action(call_run_ozone, cmdstr="Launching Ozone...")
-    return env.AlwaysBuild(env.Alias("ozone_run", [generate_ozone(env), source], action))
+    return env.AlwaysBuild(env.Alias("ozone_run", [generate_ozone(env, robot), source], action))
 
-def generate_ozone(env):
+def generate_ozone(env, robot=""):
     def call_generate_ozone(target, source, env):
         project_content = ""
         with open("./build_tools/example_ozone_project/example.jdebug") as r:
@@ -42,9 +51,14 @@ def generate_ozone(env):
         project_file_path = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"
 
         ip = ARGUMENTS.get("ip", "")
+        if ip == "" and robot in ROBOT_IPS.keys():
+            ip = ROBOT_IPS[robot]
+
         if ip != "":
+            print(f"Using IP({ip}) connection...")
             project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"IP\", \"{ip}\");")
         else:
+            print(f"Using USB connection...")
             project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"USB\", \"\");")
 
         project_content = project_content.replace("${BUILD_DIR}", env['BUILDPATH'])

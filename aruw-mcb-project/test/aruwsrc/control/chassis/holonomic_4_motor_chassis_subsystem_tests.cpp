@@ -24,13 +24,14 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using modm::Matrix;
 using modm::Vector3f;
 using tap::algorithms::getSign;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace testing;
 
 // See this paper for equations: https://www.hindawi.com/journals/js/2015/347379/.
@@ -45,17 +46,38 @@ static constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0
                                : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS / ::A;
 
+static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 1,
+    .ki = 0,
+    .kd = 0,
+};
+
+static constexpr float GEAR_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+
 class Holonomic4MotorChassisSubsystemTest : public Test
 {
 protected:
     Holonomic4MotorChassisSubsystemTest()
         : currentSensor(
               {&drivers.analog,
-               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-          chassis(&drivers, &currentSensor)
+          voltageSensor(),
+          leftFrontMotor(),
+          leftBackMotor(),
+          rightFrontMotor(),
+          rightBackMotor(),
+          chassis(
+              &drivers,
+              &currentSensor,
+              &voltageSensor,
+              leftFrontMotor,
+              leftBackMotor,
+              rightFrontMotor,
+              rightBackMotor,
+              MOCK_WHEEL_VELOCITY_PID_CONFIG)
     {
     }
 
@@ -67,6 +89,9 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+    NiceMock<tap::mock::MotorInterfaceMock> leftFrontMotor, leftBackMotor, rightFrontMotor,
+        rightBackMotor;
     MecanumChassisSubsystem chassis;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
@@ -110,30 +135,6 @@ TEST_F(Holonomic4MotorChassisSubsystemTest, allMotorsOnline)
     rbOnline = true;
 
     EXPECT_TRUE(chassis.allMotorsOnline());
-}
-
-TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftFrontRpmActual)
-{
-    ON_CALL(chassis.leftFrontMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getLeftFrontRpmActual(), 1E-3);
-}
-
-TEST_F(Holonomic4MotorChassisSubsystemTest, getLeftBackRpmActual)
-{
-    ON_CALL(chassis.leftBackMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getLeftBackRpmActual(), 1E-3);
-}
-
-TEST_F(Holonomic4MotorChassisSubsystemTest, getRightFrontRpmActual)
-{
-    ON_CALL(chassis.rightFrontMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getRightFrontRpmActual(), 1E-3);
-}
-
-TEST_F(Holonomic4MotorChassisSubsystemTest, getRightBackRpmActual)
-{
-    ON_CALL(chassis.rightBackMotor, getShaftRPM).WillByDefault(Return(1000));
-    EXPECT_NEAR(1000, chassis.getRightBackRpmActual(), 1E-3);
 }
 
 TEST_F(Holonomic4MotorChassisSubsystemTest, initialize)

@@ -22,18 +22,21 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
-#include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/robot/testbed/testbed_drivers.hpp"
 
 using namespace aruwsrc::testbed;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::communication::mcb_lite;
+using namespace aruwsrc::control::chassis;
 using namespace tap::control;
 
 /*
@@ -46,33 +49,86 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace testbed_control
 {
-tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
-    {&drivers()->analog,
-     aruwsrc::chassis::CURRENT_SENSOR_PIN,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
-     aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
+VirtualCanEncoder forwardEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    &drivers()->lite,
+    tap::can::CanBus::CAN_BUS2);
 
-XDriveChassisSubsystem chassis(drivers(), &currentSensor);
+VirtualCanEncoder strafeEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    &drivers()->lite,
+    tap::can::CanBus::CAN_BUS2);
 
-// aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
+aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2);
+
+tap::motor::DjiMotor leftFrontChassisMotor(
+    drivers(),
+    aruwsrc::control::chassis::LEFT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Front Chassis Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor leftBackChassisMotor(
+    drivers(),
+    aruwsrc::control::chassis::LEFT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    "Left Back Chassis Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightFrontChassisMotor(
+    drivers(),
+    aruwsrc::control::chassis::RIGHT_FRONT_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Front Chassis Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+tap::motor::DjiMotor rightBackChassisMotor(
+    drivers(),
+    aruwsrc::control::chassis::RIGHT_BACK_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    "Right Back Chassis Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+XDriveChassisSubsystem chassis(
+    drivers(),
+    &voltageCurrentSensor,
+    &voltageCurrentSensor,
+    leftFrontChassisMotor,
+    leftBackChassisMotor,
+    rightFrontChassisMotor,
+    rightBackChassisMotor,
+    WHEEL_VELOCITY_PID_CONFIG);
+
+// aruwsrc::control::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
 //     drivers(),
 //     &drivers()->controlOperatorInterface,
 //     &chassis,
 //     &turret.yawMotor);
 
-aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
+aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &chassis);
 
-// aruwsrc::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
+// aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
 //     drivers(),
 //     &drivers()->controlOperatorInterface,
 //     &chassis,
 //     &turret.yawMotor,
-//     aruwsrc::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
-// aruwsrc::chassis::BeybladeCommand beybladeCommand(
+//     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+// aruwsrc::control::chassis::BeybladeCommand beybladeCommand(
 //     drivers(),
 //     &chassis,
 //     &turret.yawMotor,
@@ -89,11 +145,24 @@ aruwsrc::chassis::ChassisDriveCommand chassisDriveCommand(
 
 // ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
-void initializeSubsystems() { chassis.registerAndInitialize(); }
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void setDefaultCommands(Drivers *) { chassis.setDefaultCommand(&chassisDriveCommand); }
+void initializeSubsystems()
+{
+    voltageCurrentSensor.initialize();
+    chassis.registerAndInitialize();
+}
 
-void registerIoMappings(Drivers *)
+void registerSubsystems(Drivers* drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &testbed_control::remoteSafeDisconnectFunction);
+}
+
+void setDefaultCommands(Drivers*) { chassis.setDefaultCommand(&chassisDriveCommand); }
+
+void registerIoMappings(Drivers*)
 {
     // drivers->commandMapper.addMap(&leftSwitchDown);
     // drivers->commandMapper.addMap(&leftSwitchUp);
@@ -104,7 +173,7 @@ void registerIoMappings(Drivers *)
 
 namespace aruwsrc::testbed
 {
-void initSubsystemCommands(aruwsrc::testbed::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::testbed::Drivers* drivers)
 {
     testbed_control::initializeSubsystems();
     testbed_control::setDefaultCommands(drivers);

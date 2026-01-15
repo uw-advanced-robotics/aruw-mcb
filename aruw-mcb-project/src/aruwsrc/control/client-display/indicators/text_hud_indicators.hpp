@@ -29,7 +29,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * A list of text indicators that are displayed if a condition is met
@@ -58,6 +58,7 @@ public:
     modm::ResumableResult<void> update() override final;
 
     void initialize() override final;
+    bool checkIfSentryLow();
 
 private:
     struct TextIndicatorData
@@ -75,6 +76,7 @@ private:
         AGITATOR_JAMMED,
         IMU_CALIBRATING,
         NOT_SPINNING,
+        SENTRY_LOW,
         NUM_TEXT_HUD_INDICATORS
     };
 
@@ -84,16 +86,19 @@ private:
         {"Calibrating", Tx::GraphicColor::ORANGE, 730, 840, 20, 3};
     static constexpr TextIndicatorData notSpinning =
         {"SPIN!", Tx::GraphicColor::PURPLISH_RED, 730, 800, 100, 10};
+    static constexpr TextIndicatorData sentryLow =
+        {"SENTRY", Tx::GraphicColor::YELLOW, 680, 840, 60, 10};
 
     static constexpr TextIndicatorData INDICATOR_LIST[NUM_TEXT_HUD_INDICATORS] = {
         agitatorJammed,
         imuCalibrating,
-        notSpinning};
+        notSpinning,
+        sentryLow};
 
     Tx::GraphicCharacterMessage textHudIndicatorGraphics[NUM_TEXT_HUD_INDICATORS];
 
-    bool states[NUM_TEXT_HUD_INDICATORS];
-    bool prevStates[NUM_TEXT_HUD_INDICATORS];
+    bool states[NUM_TEXT_HUD_INDICATORS] = {false};
+    bool prevStates[NUM_TEXT_HUD_INDICATORS] = {false};
 
     tap::Drivers &drivers;
     tap::control::setpoint::SetpointSubsystem &agitatorSubsystem;
@@ -101,12 +106,13 @@ private:
     const std::vector<tap::control::Command *> validChassisCommands;
 
     static constexpr uint16_t JAM_TIMEOUT_MS = 1000;
+    static constexpr uint16_t SENTRY_LOW_LIMIT = 200;
     tap::arch::MilliTimeout jamTimeout;
 
     // Resumeable function thing
     int index = 0;
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // TEXT_HUD_INDICATORS_HPP_

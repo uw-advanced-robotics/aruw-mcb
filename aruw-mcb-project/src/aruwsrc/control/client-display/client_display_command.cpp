@@ -34,10 +34,11 @@ namespace aruwsrc::control::client_display
 ClientDisplayCommand::ClientDisplayCommand(
     tap::Drivers &drivers,
     ClientDisplaySubsystem &clientDisplay,
-    std::vector<HudIndicator *> &hudIndicators)
+    std::vector<indicators::HudIndicator *> &hudIndicators)
     : Command(),
       drivers(drivers),
-      hudIndicators(hudIndicators)
+      hudIndicators(hudIndicators),
+      refSerialTransmitter(&drivers)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
@@ -53,7 +54,7 @@ void ClientDisplayCommand::initialize()
 
 void ClientDisplayCommand::restartHud()
 {
-    HudIndicator::resetGraphicNameGenerator();
+    indicators::HudIndicator::resetGraphicNameGenerator();
 
     // Initialize all the HUD indicators
     for (auto &indicator : hudIndicators)
@@ -81,6 +82,8 @@ bool ClientDisplayCommand::run()
     PT_BEGIN();
 
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
+
+    PT_CALL(refSerialTransmitter.deleteGraphicLayer(RefSerialTransmitter::Tx::DELETE_ALL, 0));
 
     for (index = 0; index < numIndicators; index++)
     {
