@@ -135,7 +135,6 @@ algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawT
     turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
-
 TurretUserControlCommand turrettUserControlCommand(
     drivers(),
     drivers()->controlOperatorInterface,
