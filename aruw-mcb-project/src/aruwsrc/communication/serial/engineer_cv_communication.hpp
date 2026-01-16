@@ -26,7 +26,7 @@
 
 namespace aruwsrc
 {
-namespace serial
+namespace communication::serial
 {
 class EngineerCVCommunication : public tap::communication::serial::DJISerial
 {
@@ -71,7 +71,7 @@ private:
     TargetPositionMessage targetPositionMessage;
     tap::algorithms::transforms::Transform receptableToCam;
 };
-}  // namespace serial
+}  // namespace communication::serial
 }  // namespace aruwsrc
 
 #endif  // VISION_COPROCESSOR_HPP_

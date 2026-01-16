@@ -40,6 +40,7 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
@@ -59,9 +60,11 @@
 #include "aruwsrc/control/governor/match_running_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -88,24 +91,25 @@ using namespace tap::communication::serial;
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 
-using namespace aruwsrc::agitator;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::client_display;
+using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::governor;
-using namespace aruwsrc::control::sentry;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::sentry;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace aruwsrc::sentry::chassis;
 using namespace aruwsrc::sentry::algorithms;
 using namespace aruwsrc::sentry::algorithms::odometry;
 using namespace aruwsrc::sentry::turret;
 using namespace aruwsrc::sentry::turret::cv;
-using namespace aruwsrc::virtualMCB;
+using namespace aruwsrc::communication::mcb_lite;
+using namespace aruwsrc::communication::mcb_lite::motor;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -119,7 +123,7 @@ namespace sentry_control
 {
 MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
-aruwsrc::virtualMCB::VirtualCanEncoder turretMajorYawEncoder(
+aruwsrc::communication::mcb_lite::VirtualCanEncoder turretMajorYawEncoder(
     drivers(),
     tap::encoder::CanEncoderId::ID0,
     &drivers()->chassisMcbLite,
@@ -128,7 +132,7 @@ aruwsrc::virtualMCB::VirtualCanEncoder turretMajorYawEncoder(
     1.0f,
     turretMajor::YAW_MOTOR_CONFIG.startEncoderValue);
 
-aruwsrc::virtualMCB::VirtualDjiMotor turretMajorYawMotor(
+aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor turretMajorYawMotor(
     drivers(),
     tap::motor::MOTOR5,
     turretMajor::CAN_BUS_MOTOR,
@@ -200,11 +204,11 @@ TurretMinorMotors turretRightMotors{
 
 };
 
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm1()
+inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm1()
 {
     return drivers()->turretMCBCanCommBus1;
 }
-inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm2()
+inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm2()
 {
     return drivers()->turretMCBCanCommBus2;
 }
@@ -234,27 +238,32 @@ SentryTurretMinorSubsystem turretRight(
 
 SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
 
+// Turret Compensators
+TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
+
 struct TurretMinorChassisControllers
 {
-    ChassisFramePitchTurretController pitchController;
-    ChassisFrameYawTurretController yawController;
+    ChassisFrameTurretController<Axis::PITCH> pitchController;
+    ChassisFrameTurretController<Axis::YAW> yawController;
 };
 
 // @todo make controllers part of subsystem
 TurretMinorChassisControllers turretLeftChassisControllers{
-    .pitchController = ChassisFramePitchTurretController(
+    .pitchController = ChassisFrameTurretController<Axis::PITCH>(
         turretLeft.pitchMotor,
-        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME),
-    .yawController = ChassisFrameYawTurretController(
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
+        {&turretGravityCompensation}),
+    .yawController = ChassisFrameTurretController<Axis::YAW>(
         turretLeft.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
 TurretMinorChassisControllers turretRightChassisControllers{
-    .pitchController = ChassisFramePitchTurretController(
+    .pitchController = ChassisFrameTurretController<Axis::PITCH>(
         turretRight.pitchMotor,
-        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME),
-    .yawController = ChassisFrameYawTurretController(
+        minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
+        {&turretGravityCompensation}),
+    .yawController = ChassisFrameTurretController<Axis::YAW>(
         turretRight.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
@@ -299,9 +308,10 @@ VirtualDjiMotor rightBackMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::virtualMCB::VirtualVoltageCurrentSensor voltageCurrentSensor(&drivers()->chassisMcbLite);
+aruwsrc::communication::mcb_lite::VirtualVoltageCurrentSensor voltageCurrentSensor(
+    &drivers()->chassisMcbLite);
 
-aruwsrc::chassis::XDriveChassisSubsystem chassis(
+aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     drivers(),
     &voltageCurrentSensor,
     &voltageCurrentSensor,
@@ -311,14 +321,14 @@ aruwsrc::chassis::XDriveChassisSubsystem chassis(
     rightBackMotor,
     {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
 
-aruwsrc::virtualMCB::VirtualCanEncoder parallelOmni(
+aruwsrc::communication::mcb_lite::VirtualCanEncoder parallelOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
     &drivers()->chassisMcbLite,
     tap::can::CanBus::CAN_BUS2,
     true);
 
-aruwsrc::virtualMCB::VirtualCanEncoder perpendicularOmni(
+aruwsrc::communication::mcb_lite::VirtualCanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID4,
     &drivers()->chassisMcbLite,
@@ -368,40 +378,41 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-aruwsrc::chassis::ChassisAutoNavController autoNavController(
+aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
     transformer.getWorldToChassis(),
-    aruwsrc::chassis::BEYBLADE_CONFIG);
+    aruwsrc::control::chassis::BEYBLADE_CONFIG);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
 struct TurretMinorWorldControllers
 {
-    WorldFramePitchTurretImuCascadePidTurretController pitchController;
-    WorldFrameYawTurretImuCascadePidTurretController yawController;
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> pitchController;
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> yawController;
 };
 
 // // @todo surely there's a better way to construct this
 SmoothPid turretLeftWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretLeftWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretLeftWorldYawVelPid(minorPidConfigs::LEFT_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretLeftWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 SmoothPid turretRightWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretRightWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretRightWorldYawVelPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretRightWorldYawVelPid(minorPidConfigs::RIGHT_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretRightWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 
 TurretMinorWorldControllers turretRightWorldControllers{
-    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
+    .pitchController = WorldFrameTurretImuCascadePidTurretController<Axis::PITCH>(
         transformer.getWorldToTurretRight(),
         drivers()->turretMCBCanCommBus1,
         turretRight.pitchMotor,
         turretRightWorldPitchPosPid,
-        turretRightWorldPitchVelPid),
+        turretRightWorldPitchVelPid,
+        {&turretGravityCompensation}),
 
-    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
+    .yawController = WorldFrameTurretImuCascadePidTurretController<Axis::YAW>(
         transformer.getWorldToTurretRight(),
         drivers()->turretMCBCanCommBus1,
         turretRight.yawMotor,
@@ -411,14 +422,15 @@ TurretMinorWorldControllers turretRightWorldControllers{
 };
 
 TurretMinorWorldControllers turretLeftWorldControllers{
-    .pitchController = WorldFramePitchTurretImuCascadePidTurretController(
+    .pitchController = WorldFrameTurretImuCascadePidTurretController<Axis::PITCH>(
         transformer.getWorldToTurretLeft(),
         drivers()->turretMCBCanCommBus2,
         turretLeft.pitchMotor,
         turretLeftWorldPitchPosPid,
-        turretLeftWorldPitchVelPid),
+        turretLeftWorldPitchVelPid,
+        {&turretGravityCompensation}),
 
-    .yawController = WorldFrameYawTurretImuCascadePidTurretController(
+    .yawController = WorldFrameTurretImuCascadePidTurretController<Axis::YAW>(
         transformer.getWorldToTurretLeft(),
         drivers()->turretMCBCanCommBus2,
         turretLeft.yawMotor,
@@ -440,28 +452,57 @@ TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     turretMajor::TURRET_MINOR_TORQUE_RATIO,
     turretMajor::FEEDFORWARD_GAIN);
 
-ChassisFrameYawTurretController turretMajorChassisYawController(
+ChassisFrameTurretController<Axis::YAW> turretMajorChassisYawController(
     turretMajor.getMutableMotor(),
     turretMajor::chassisFrameController::YAW_PID_CONFIG);
 
 // Friction Wheels
+tap::motor::DjiMotor turretLeftFrictionWheelLeft(
+    drivers(),
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    turretLeft::CAN_BUS_MOTORS,
+    true,
+    "Left flywheel");
+tap::motor::DjiMotor turretLeftFrictionWheelRight(
+    drivers(),
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    turretLeft::CAN_BUS_MOTORS,
+    false,
+    "Right flywheel");
+std::array<tap::motor::MotorInterface *, 2> turretLeftWheels = {
+    &turretLeftFrictionWheelLeft,
+    &turretLeftFrictionWheelRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
+    2>
     turretLeftFrictionWheels(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-        turretLeft::CAN_BUS_MOTORS,
+        turretLeftWheels,
+        aruwsrc::control::launcher::WHEEL_CONFIG,
         &getTurretMCBCanComm2(),
         turretLeft::barrelID);
-
+tap::motor::DjiMotor turretRightFrictionWheelLeft(
+    drivers(),
+    aruwsrc::control::launcher::LEFT_MOTOR_ID,
+    turretRight::CAN_BUS_MOTORS,
+    true,
+    "Left flywheel");
+tap::motor::DjiMotor turretRightFrictionWheelRight(
+    drivers(),
+    aruwsrc::control::launcher::RIGHT_MOTOR_ID,
+    turretRight::CAN_BUS_MOTORS,
+    false,
+    "Right flywheel");
+std::array<tap::motor::MotorInterface *, 2> turretRightWheels = {
+    &turretRightFrictionWheelLeft,
+    &turretRightFrictionWheelRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
-    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE>
+    aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
+    2>
     turretRightFrictionWheels(
         drivers(),
-        aruwsrc::control::launcher::LEFT_MOTOR_ID,
-        aruwsrc::control::launcher::RIGHT_MOTOR_ID,
-        turretRight::CAN_BUS_MOTORS,
+        turretRightWheels,
+        aruwsrc::control::launcher::WHEEL_CONFIG,
         &getTurretMCBCanComm1(),
         turretRight::barrelID);  // @todo idk what they actually are
 
@@ -508,11 +549,11 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
     &turretLeftSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
+aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand(
     *drivers(),
     chassis,
     autoNavController,
-    false);
+    true);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -546,7 +587,7 @@ SentryBeybladeCommand beybladeCommand(
     &turretMajor.getReadOnlyMotor(),
     drivers()->controlOperatorInterface,
     transformer.getWorldToChassis(),
-    aruwsrc::chassis::BEYBLADE_CONFIG);
+    aruwsrc::control::chassis::BEYBLADE_CONFIG);
 
 SentryManualDriveCommand chassisDriveCommand(
     drivers(),
@@ -592,6 +633,24 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
+autotune::GravityAutotuneCommand<9> gravityAutotuneCommandLeft(
+    drivers(),
+    {&turretLeft,
+     &turretLeftChassisControllers.pitchController,
+     turretLeftMotors.pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &chassis);
+
+autotune::GravityAutotuneCommand<9> gravityAutotuneCommandRight(
+    drivers(),
+    {&turretRight,
+     &turretRightChassisControllers.pitchController,
+     turretRightMotors.pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &chassis);
+
 SentryTurretCVCommand::TurretConfig turretLeftCVConfig(
     turretLeft,
     turretLeftWorldControllers.yawController,
@@ -606,6 +665,7 @@ SentryTurretCVCommand::TurretConfig turretRightCVConfig(
 
 SentryTurretCVCommand turretCVCommand(
     drivers()->visionCoprocessor,
+    drivers()->plateHitTracker,
     turretMajor,
     turretMajorWorldYawController,
     turretLeftCVConfig,
@@ -667,29 +727,26 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretLeft(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     turretLeft::turretID);
 
-// TODO:: see if this actually does stuff, test later.
-RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLeft(
-    drivers()->refSerial,
-    turretLeft::barrelID);
+// Unused, causes incosnistent fire rates due to suspected ref delay.
+// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretLeft(
+//     drivers()->refSerial,
+//     turretLeft::barrelID);
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretLeft(turretLeftFrictionWheels);
 
-GovernorLimitedCommand<6> turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<5> turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
     {&fireRateLimitGovernorTurretLeft,
      &heatLimitGovernorTurretLeft,
-     &refSystemProjectileLaunchedGovernorTurretLeft,
      &frictionWheelsOnGovernorTurretLeft,
      &cvOnTargetGovernorTurretLeft,
      &matchRunningGovernor});
 
-GovernorLimitedCommand<3> turretLeftAgitatorManualSpin(
+GovernorLimitedCommand<2> turretLeftAgitatorManualSpin(
     {&turretLeftAgitator},
     turretLeftRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretLeft,
-     &refSystemProjectileLaunchedGovernorTurretLeft,
-     &frictionWheelsOnGovernorTurretLeft});
+    {&heatLimitGovernorTurretLeft, &frictionWheelsOnGovernorTurretLeft});
 
 // RIGHT shooting ======================
 
@@ -746,28 +803,26 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretRight(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     turretRight::turretID);
 
-RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRight(
-    drivers()->refSerial,
-    turretRight::barrelID);
+// Unused, causes incosnistent fire rates due to suspected ref delay.
+// RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretRight(
+//     drivers()->refSerial,
+//     turretRight::barrelID);
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernorTurretRight(turretRightFrictionWheels);
 
-GovernorLimitedCommand<6> turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<5> turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&turretRightAgitator},
     turretRightRotateAndUnjamAgitator,
     {&fireRateLimitGovernorTurretRight,
      &heatLimitGovernorTurretRight,
-     &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight,
      &cvOnTargetGovernorTurretRight,
      &matchRunningGovernor});
 
-GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
+GovernorLimitedCommand<2> turretRightAgitatorManualSpin(
     {&turretRightAgitator},
     turretRightRotateAndUnjamAgitator,
-    {&heatLimitGovernorTurretRight,
-     &refSystemProjectileLaunchedGovernorTurretRight,
-     &frictionWheelsOnGovernorTurretRight});
+    {&heatLimitGovernorTurretRight, &frictionWheelsOnGovernorTurretRight});
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -790,10 +845,11 @@ HoldCommandMapping rightUp(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
 
 // auto nav + auto aim + cv gated fire
-HoldCommandMapping leftUpRightUp(
+HoldRepeatCommandMapping leftUpRightUp(
     drivers(),
     {&autoNavBeybladeCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    true);
 
 HoldRepeatCommandMapping leftUpRightUpAg(
     drivers(),
@@ -921,6 +977,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretRightAgitator);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
+    drivers->plateHitTracker.attachTransformer(&transformAdapter);
     // drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
     drivers->stateMachine.attachAutoNavController(&autoNavController);
 }
@@ -943,7 +1000,6 @@ void setDefaultSentryCommands(Drivers *)
 void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->plateHitTracker.attachTransformer(&transformAdapter);
     drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
 }
 
@@ -985,8 +1041,17 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
     sentry_control::registerSentryIoMappings(drivers);
 }
 }  // namespace aruwsrc::sentry
-// #ifndef PLATFORM_HOSTED
+
+#ifndef PLATFORM_HOSTED
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
+{
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
+        &sentry_control::gravityAutotuneCommandLeft,
+        &sentry_control::gravityAutotuneCommandRight};
+    return commands;
+}
 // imu::ImuCalibrateCommand *getImuCalibrateCommand() { return
 // &sentry_control::imuCalibrateCommand; } #endif
+#endif
 
 #endif

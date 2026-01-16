@@ -21,11 +21,11 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 
 using namespace testing;
 
-using namespace aruwsrc::can::capbank;
+using namespace aruwsrc::communication::can::cap_bank;
 
 class CapBankTests : public Test
 {

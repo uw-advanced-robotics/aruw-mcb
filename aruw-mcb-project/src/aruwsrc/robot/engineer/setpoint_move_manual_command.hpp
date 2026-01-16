@@ -21,8 +21,8 @@
 
 #include "tap/control/command.hpp"
 
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
-#include "aruwsrc/robot/engineer/limit_switch_setpoint_interface.hpp"
 
 namespace aruwsrc::engineer
 {
@@ -36,8 +36,8 @@ class SetpointMoveManualCommand : public tap::control::Command
 {
 public:
     SetpointMoveManualCommand(
-        LimitSwitchSetpointInterface &cubeLift,
-        aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface,
+        aruwsrc::control::joint::JointSubsystem &subsystem,
+        aruwsrc::engineer::EngineerControlOperatorInterface *operatorInterface,
         float moveSpeed,
         SetpointType setpointType = CUBE_LIFT);
 
@@ -49,11 +49,11 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Cube Move Manual Command"; }
+    const char *getName() const override { return "Setpoint Move Manual Command"; }
 
 private:
-    LimitSwitchSetpointInterface &cubeLift;
-    aruwsrc::control::engineer::EngineerControlOperatorInterface *operatorInterface;
+    aruwsrc::control::joint::JointSubsystem &subsystem;
+    aruwsrc::engineer::EngineerControlOperatorInterface *operatorInterface;
     float moveSpeed;
     SetpointType setpointType;
 

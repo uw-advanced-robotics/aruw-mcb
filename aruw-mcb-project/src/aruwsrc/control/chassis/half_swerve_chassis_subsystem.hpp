@@ -30,10 +30,9 @@
 using Module = testing::NiceMock<aruwsrc::mock::SwerveModuleMock>;
 #else
 #include "aruwsrc/control/chassis/swerve_module.hpp"
-using Module = aruwsrc::chassis::SwerveModule;
+using Module = aruwsrc::control::chassis::SwerveModule;
 #endif
-
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class HalfSwerveChassisSubsystem : public HolonomicChassisSubsystem
 {
@@ -46,7 +45,7 @@ public:
         Module* moduleTwo,
         const float wheelbaseRadius,
         const float forwardMatrixArray[12],
-        can::capbank::CapacitorBank* capacitorBank = nullptr);
+        communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 
     void initialize() override;
 
@@ -113,5 +112,5 @@ private:
 
 };  // class HalfSwerveChassisSubsystem
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 #endif  // HALF_SWERVE_CHASSIS_SUBSYSTEM_HPP_

@@ -22,7 +22,7 @@
 namespace aruwsrc::engineer::wrist
 {
 WristControllerCommand::WristControllerCommand(
-    JointSubsystem &roll,
+    aruwsrc::control::joint::JointSubsystem &roll,
     WristSubsystem &wrist,
     EngineerControlOperatorInterface *operatorInterface,
     float rollScalingFactor,
@@ -45,11 +45,12 @@ void WristControllerCommand::initialize() {}
 void WristControllerCommand::execute()
 {
     // Get the desired velocities from the operator interface
+    // to add/subtract from position setpoint
     float rollVelocity = operatorInterface->getWristRollVelocity() * rollScalingFactor;
     float pitchVelocity = operatorInterface->getWristPitchVelocity() * pitchScalingFactor;
     float yawVelocity = operatorInterface->getWristYawVelocity() * yawScalingFactor;
 
-    // Set the desired velocities
+    // Set the desired positions
     roll.setSetpoint(roll.getSetpoint() + rollVelocity);
     wrist.setSetpointPitch(wrist.getSetpointPitch() + pitchVelocity);
     wrist.setSetpointYaw(wrist.getSetpointYaw() + yawVelocity);

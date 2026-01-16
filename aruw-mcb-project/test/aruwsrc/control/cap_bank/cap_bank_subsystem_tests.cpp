@@ -21,17 +21,17 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
-#include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
-#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
-#include "aruwsrc/control/cap_bank/cap_bank_toggle_command.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_sprint_command.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/mock/capacitor_bank_mock.hpp"
 
 using namespace testing;
 
 using namespace aruwsrc::mock;
-using namespace aruwsrc::can::capbank;
-using namespace aruwsrc::control::capbank;
+using namespace aruwsrc::communication::can::cap_bank;
+using namespace aruwsrc::control::cap_bank;
 
 class CapBankSubsystemTests : public Test
 {

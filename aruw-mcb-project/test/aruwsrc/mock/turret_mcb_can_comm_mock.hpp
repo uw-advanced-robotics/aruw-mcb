@@ -26,7 +26,7 @@
 
 namespace aruwsrc::mock
 {
-class TurretMCBCanCommMock : public can::TurretMCBCanComm
+class TurretMCBCanCommMock : public communication::can::TurretMCBCanComm
 {
 public:
     TurretMCBCanCommMock(tap::Drivers *drivers, tap::can::CanBus canBus);

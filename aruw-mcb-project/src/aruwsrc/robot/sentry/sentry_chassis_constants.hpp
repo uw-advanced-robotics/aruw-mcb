@@ -23,11 +23,11 @@
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.34f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 6.34f;
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -124,12 +124,12 @@ static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
-    .beybladeRotationalSpeedFractionOfMax = 0.75f,
+    .beybladeRotationalSpeedFractionOfMax = 0.4f,
     .beybladeTranslationalSpeedMultiplier = 0.5f,
-    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.8f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.25f,
     .beybladeRampRate = 100,
 };
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_
