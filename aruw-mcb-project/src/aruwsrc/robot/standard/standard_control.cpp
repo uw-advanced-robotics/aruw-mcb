@@ -106,7 +106,6 @@
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/wheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
