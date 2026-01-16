@@ -42,6 +42,10 @@ namespace aruwsrc::control::turret
 {
 class TurretSubsystem;
 }
+namespace aruwsrc::chassis
+{
+class Holonomic4MotorChassisSubsystem;
+}
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -61,12 +65,14 @@ public:
      * @param[in] chassisMotors array of 4 chassis motor pointers
      * @param[in] turret pointer to a TurretMotor object, @see OttoChassisWorldYawObserver for how
      * it is used
+     * @param[in] chassisSubsystem optional chassis subsystem providing desired wheel outputs
      * @param[in] initPos initial position of chassis on boot
      */
     WheelEKFOdometry2DSubsystem(
         tap::Drivers& drivers,
         const tap::motor::DjiMotor* chassisMotors[4],
         const aruwsrc::control::turret::TurretSubsystem& turret,
+        const aruwsrc::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
         const modm::Vector2f initPos);
 
     void refresh() override;

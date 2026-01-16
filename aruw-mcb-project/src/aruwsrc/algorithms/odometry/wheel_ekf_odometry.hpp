@@ -20,17 +20,20 @@
 #ifndef WHEEL_EKF_ODOMETRY_HPP_
 #define WHEEL_EKF_ODOMETRY_HPP_
 
-#include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
-#include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "modm/math/geometry/location_2d.hpp"
-#include "modm/math/interpolation/linear.hpp"
+#include "modm/math/geometry/vector.hpp"
 
 #include "aruwsrc/algorithms/extended_kalman_filter.hpp"
+
+namespace aruwsrc::chassis
+{
+class Holonomic4MotorChassisSubsystem;
+}
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -47,11 +50,10 @@ class FourWheelEKFOdometry : public tap::algorithms::odometry::Odometry2DInterfa
 public:
     struct ChassisWheelConfig {
         float wheelRadius;                          // Wheel radius in meters
-        float wheelbaseDistance;                    // Distance from chassis center to wheel
-        float wheelOrientationToForwardRadians;     // Wheel orientation relative to forward direction
-        float slipCoefficient;                      // Per-wheel slip coefficient (multiplier for slip factor)
-        float frictionCoefficient;                  // Per-wheel friction coefficient
-        float gearRatio;                            // Motor-to-wheel gear ratio (motor_rotations / wheel_rotations)
+        float wheelPositionX;                       // Wheel position relative to chassis center (m)
+        float wheelPositionY;                       // Wheel position relative to chassis center (m)
+        float wheelOrientationToForwardRadians;     // Wheel rolling direction relative to forward (rad)
+        float motorToWheelGearRatio;                // Output/input gear ratio used for desired wheel speeds
     };
 
     /**
@@ -60,12 +62,14 @@ public:
      * @param chassisMotors The motors of the robot for odometry measurements
      * @param chassisYawObserver Interface that computes the yaw of the chassis externally
      * @param imu IMU mounted on the chassis to measure chassis acceleration
+     * @param chassisSubsystem Optional chassis subsystem providing desired wheel outputs
      * @param initPos Initial position of chassis when robot boots
      */
     FourWheelEKFOdometry(
         const tap::motor::DjiMotor *chassisMotors[4],
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
+        const aruwsrc::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
         const modm::Vector2f initPos);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
@@ -88,29 +92,31 @@ public:
 protected:
     enum class OdomState
     {
-        POS_X = 0,      // X position
-        VEL_X,          // X velocity
-        ACC_X,          // X acceleration
-        POS_Y,          // Y position
-        VEL_Y,          // Y velocity
-        ACC_Y,          // Y acceleration
-        BIAS_ACC_X,     // IMU acceleration bias X
-        BIAS_ACC_Y,     // IMU acceleration bias Y
+        POS_X = 0,      // World X position
+        POS_Y,          // World Y position
+        VEL_X,          // World X velocity
+        VEL_Y,          // World Y velocity
+        YAW,            // World yaw
+        YAW_RATE,       // World yaw rate
+        ACC_X,          // World X acceleration
+        ACC_Y,          // World Y acceleration
         NUM_STATES,
     };
 
     enum class OdomInput
     {
-        VEL_X_1 = 0,    // Wheel 1 X velocity component
-        VEL_Y_1,        // Wheel 1 Y velocity component
-        VEL_X_2,        // Wheel 2 X velocity component
-        VEL_Y_2,        // Wheel 2 Y velocity component
-        VEL_X_3,        // Wheel 3 X velocity component
-        VEL_Y_3,        // Wheel 3 Y velocity component
-        VEL_X_4,        // Wheel 4 X velocity component
-        VEL_Y_4,        // Wheel 4 Y velocity component
-        ACC_X,          // IMU acceleration X
-        ACC_Y,          // IMU acceleration Y
+        WHEEL_0 = 0,    // Wheel 0 linear speed (m/s)
+        WHEEL_1,        // Wheel 1 linear speed (m/s)
+        WHEEL_2,        // Wheel 2 linear speed (m/s)
+        WHEEL_3,        // Wheel 3 linear speed (m/s)
+        ACC_X,          // IMU acceleration X (world)
+        ACC_Y,          // IMU acceleration Y (world)
+        GYRO_Z,         // IMU yaw rate (rad/s)
+        YAW,            // External yaw observation (rad)
+        DESIRED_WHEEL_0,// Desired wheel 0 linear speed (m/s)
+        DESIRED_WHEEL_1,// Desired wheel 1 linear speed (m/s)
+        DESIRED_WHEEL_2,// Desired wheel 2 linear speed (m/s)
+        DESIRED_WHEEL_3,// Desired wheel 3 linear speed (m/s)
         NUM_INPUTS,
     };
 
@@ -121,159 +127,67 @@ private:
         static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
     static constexpr int INPUTS_SQUARED =
         static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
-    static constexpr int INPUTS_MULT_STATES =
-        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
 
-    /// Assumed time difference between calls to `update`, in seconds
-    static constexpr float DT = 0.002f;
+    /// Assumed time difference between calls to `update`, in seconds.
+    static constexpr float DT = 0.002f;  // Nominal EKF update period
+    static constexpr float MIN_DT = 0.0005f;  // Lower bound on dt for stability
 
-    /// Max chassis acceleration magnitude measured on the standard when at 120W power mode, in m/s²
-    static constexpr float MAX_ACCELERATION = 8.0f;
-    
-    /// Velocity correction factor coefficient for nonlinear position integration
-    /// Accounts for tire deformation and kinematic model errors at high speeds
-    /// Increase if odometry underestimates distance at high speed, decrease if overestimates.
-    static constexpr float VELOCITY_CORRECTION_COEFFICIENT = 0.01f;
+    static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE = 1.0f;  // Base wheel speed variance
+    static constexpr float DESIRED_WHEEL_MEASUREMENT_VARIANCE = 1.0e3f;  // Low trust in commands
+    static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 1.2f;  // Accel noise variance
+    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.05f;  // Gyro noise variance
+    static constexpr float YAW_MEASUREMENT_VARIANCE = 0.02f;  // Yaw observer variance
 
-    /// Maximum acceleration change rate (m/s² per second) - jerk limit
-    /// Record acceleration during aggressive maneuvers, measure max derivative.
-    /// If too high: allows unrealistic acceleration spikes. Too low: filters out real dynamics.
-    static constexpr float MAX_ACCELERATION_CHANGE_RATE = 15.0f;
 
-    /// Drag coefficient for velocity-dependent acceleration decay
-    /// Tuning: Accelerate to max speed, let robot coast, measure deceleration.
-    /// Fit exponential decay to find drag coefficient that matches deceleration curve.
-    static constexpr float DRAG_COEFFICIENT = 0.02f;
-
-    /// Minimum and maximum drag factor bounds
-    /// TMIN should be >0.8 to avoid negative drag. MAX=1.0 means no drag at zero velocity.
-    /// Adjust based on coast-down tests at different speeds.
-    static constexpr float MIN_DRAG_FACTOR = 0.85f;
-    static constexpr float MAX_DRAG_FACTOR = 1.0f;
-
-    /// IMU bias aging factor (per update cycle)
-    /// 0.999 = 0.1% drift per update. Adjust based on IMU.
-    static constexpr float IMU_BIAS_AGING_FACTOR = 0.999f;
-    
-    /// Velocity threshold below which low-speed slip model is used (m/s)
-    /// Speed below which tire deformation dominates over kinematic rolling
-    /// Drive at very low speeds, compare wheel encoder vs actual movement.
-    /// Find speed where slip behavior changes from static to kinematic friction.
-    static constexpr float SLIP_VELOCITY_THRESHOLD = 0.1f;     // m/s
-    
-    /// Velocity offset for tanh slip model (m/s)
-    /// Characteristic speed where slip saturates to maximum level
-    /// Drive at high speeds on different surfaces, measure slip vs velocity.
-    /// Fit tanh curve to data, this parameter shifts the transition point.
-    static constexpr float SLIP_TANH_OFFSET = 2.0f;            // m/s
-    
-    /// Slip scaling factor (dimensionless)
-    ///  Maximum additional slip factor at high speeds
-    /// Increase if high-speed odometry overestimates distance, decrease if underestimates.
-    static constexpr float SLIP_SCALING_FACTOR = 0.05f;        // dimensionless
-    
-    /// Low velocity slip factor (dimensionless)
-    /// Slip factor for low-speed motion (static friction effects)
-    /// Slow, precise movements comparing odometry to precise positioning system.
-    /// <1.0 indicates wheels slip even at low speeds due to deformation/compliance.
-    static constexpr float LOW_VELOCITY_SLIP_FACTOR = 0.95f;   // dimensionless
-
-    /// IMU bias scaling parameters
-    /// How IMU bias changes with acceleration magnitude (sensor nonlinearity)
-    /// Compare measured vs expected acceleration, fit bias as function of acceleration magnitude.
-    static constexpr float BIAS_ACCELERATION_SCALING = 0.1f;   // scaling per m/s²
-
-    // Static wheel configurations for standard X-drive (accessible by static functions)
-    static constexpr ChassisWheelConfig WHEEL_CONFIGS[4] = {
-        // Left Front (LF): +45°
-        {
-            .wheelRadius = 0.1016f,  
-            .wheelbaseDistance = 141 / 1000.0f, // 141mm -> m  
-            .wheelOrientationToForwardRadians = M_PI_4,  
-            .slipCoefficient = 1.0f,
-            .frictionCoefficient = 1.0f,
-            .gearRatio = 1.0f
-        },
-        // Left Back (LB): -45°
-        {
-            .wheelRadius = 0.1016f,  
-            .wheelbaseDistance = 141 / 1000.0f, // 141mm -> m  
-            .wheelOrientationToForwardRadians = -M_PI_4, 
-            .slipCoefficient = 1.0f,
-            .frictionCoefficient = 1.0f,
-            .gearRatio = 1.0f
-        },
-        // Right Front (RF): +135°
-        {
-            .wheelRadius = 0.1016f,
-            .wheelbaseDistance = 141 / 1000.0f, // 141mm -> m
-            .wheelOrientationToForwardRadians = 3*M_PI_4,
-            .slipCoefficient = 1.0f,
-            .frictionCoefficient = 1.0f,
-            .gearRatio = 1.0f
-        },
-        // Right Back (RB): -135°
-        {
-            .wheelRadius = 0.1016f,
-            .wheelbaseDistance = 141 / 1000.0f, // 141mm -> m
-            .wheelOrientationToForwardRadians = -3*M_PI_4,
-            .slipCoefficient = 1.0f,
-            .frictionCoefficient = 1.0f,
-            .gearRatio = 1.0f
-        }
-    };
-
-    /// Lookup table for measurement covariance vs chassis acceleration
-    /// Higher acceleration correlates with more measurement noise/uncertainty
-    static constexpr modm::Pair<float, float> CHASSIS_ACCELERATION_TO_MEASUREMENT_COVARIANCE_LUT[] =
-        {
-            {0, 1E0},           // Low acceleration: baseline noise level
-            {MAX_ACCELERATION, 1E2},  // High acceleration: 100x more noise/uncertainty
-        };
-
-    // Process noise covariance matrix (Q) - how much we trust the motion model
+    // Process noise covariance matrix (Q) - how much we trust the motion model.
+    // State order: POS_X, POS_Y, VEL_X, VEL_Y, YAW, YAW_RATE, ACC_X, ACC_Y.
     // Larger values = less trust in model, more responsive to measurements
     static constexpr float EKF_Q[STATES_SQUARED] = {
-        1E2, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,    // POS_X: 100 (m²) - position model uncertainty
-        0  , 1E1, 0  , 0  , 0  , 0  , 0  , 0  ,    // VEL_X: 10 (m²/s²) - velocity model uncertainty  
-        0  , 0  , 5E0, 0  , 0  , 0  , 0  , 0  ,    // ACC_X: 5 (m²/s⁴) - acceleration model uncertainty
-        0  , 0  , 0  , 1E2, 0  , 0  , 0  , 0  ,    // POS_Y: 100 (m²) - same as X direction
-        0  , 0  , 0  , 0  , 1E1, 0  , 0  , 0  ,    // VEL_Y: 10 (m²/s²) - same as X direction
-        0  , 0  , 0  , 0  , 0  , 5E0, 0  , 0  ,    // ACC_Y: 5 (m²/s⁴) - same as X direction
-        0  , 0  , 0  , 0  , 0  , 0  , 1E-3, 0  ,   // BIAS_ACC_X: 0.001 - IMU bias drift variance
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E-3,   // BIAS_ACC_Y: 0.001 - IMU bias drift variance
+        1E2, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E2, 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 1E1, 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E1, 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E-2,0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 1E-1,0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 5E0, 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 5E0,
     };
 
-    // Measurement noise covariance matrix (R)
+    // Measurement noise covariance matrix (R).
+    // Measurement order: WHEEL_0..WHEEL_3, ACC_X, ACC_Y, GYRO_Z, YAW, DESIRED_WHEEL_0..3.
+    // Higher value means less trust
     static constexpr float EKF_R[INPUTS_SQUARED] = {
-        1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  // VEL_X_1
-        0  , 1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  // VEL_Y_1
-        0  , 0  , 1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  // VEL_X_2
-        0  , 0  , 0  , 1.0, 0  , 0  , 0  , 0  , 0  , 0  ,  // VEL_Y_2
-        0  , 0  , 0  , 0  , 1.0, 0  , 0  , 0  , 0  , 0  ,  // VEL_X_3
-        0  , 0  , 0  , 0  , 0  , 1.0, 0  , 0  , 0  , 0  ,  // VEL_Y_3
-        0  , 0  , 0  , 0  , 0  , 0  , 1.0, 0  , 0  , 0  ,  // VEL_X_4
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.0, 0  , 0  ,  // VEL_Y_4
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.2, 0  ,  // ACC_X: IMU X acceleration noise (higher noise than wheels)
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.2,  // ACC_Y: IMU Y acceleration noise
+        1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 1.0, 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 1.2, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 1.2, 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0.05,0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0.02,0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.0e3,0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.0e3,0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.0e3,0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1.0e3,
     };
 
     // Initial covariance matrix (P0) - uncertainty in initial state estimates
     // Should be larger than steady-state uncertainties to allow filter to learn quickly
     static constexpr float EKF_P0[STATES_SQUARED] = {
-        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,  // POS_X
-        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,  // VEL_X
-        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,  // ACC_X
-        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,  // POS_Y
-        0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,  // VEL_Y
-        0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,  // ACC_Y
-        0  , 0  , 0  , 0  , 0  , 0  , 1E0, 0  ,  // BIAS_ACC_X
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E0,  // BIAS_ACC_Y
+        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E2, 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 1E2, 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
     };
 
     const tap::motor::DjiMotor *chassisMotors[4];
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
+    const aruwsrc::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem;
 
     const modm::Vector2f initPos;
 
@@ -284,23 +198,22 @@ private:
     // Chassis yaw orientation in world frame (radians)
     float chassisYaw = 0;
 
-    /// Chassis measured change in velocity since the last time `update` was called, in the chassis
-    /// frame
-    modm::Vector2f chassisMeasuredDeltaVelocity;
-
-    modm::interpolation::Linear<modm::Pair<float, float>>
-        chassisAccelerationToMeasurementCovarianceInterpolator;
-
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
-    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector prevChassisVelocity;
+    float prevWheelSpeeds[4]{0, 0, 0, 0};
+    bool prevWheelSpeedsValid = false;
 
     /// Measurement vector for the EKF
     float z[int(OdomInput::NUM_INPUTS)];
 
-    void updateChassisStateFromEKF(float chassisYaw);
+    void updateChassisStateFromEKF();
 
-    void updateMeasurementCovariance(const modm::Vector2f& chassisVelocity);
+    void updateMeasurementCovariance(
+        const float wheelSpeeds[4],
+        const float desiredWheelSpeeds[4],
+        const modm::Vector2f& imuAccelWorld,
+        bool yawMeasurementValid,
+        float dt);
 
     // EKF function definitions
     static void stateTransitionFunction(
@@ -321,9 +234,7 @@ private:
         const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x,
         ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::ObservationMatrix& H);
 
-    // Temporary variables for calculations
-    float motorVel = 0;
-    float wheelLinearVel = 0;
+    static const ChassisWheelConfig WHEEL_CONFIGS[4];
 };
 
 }  // namespace aruwsrc::algorithms::odometry
