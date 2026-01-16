@@ -88,6 +88,7 @@ float ThreeDeadwheelChassisKFOdometry::applyIirFilter(
 void ThreeDeadwheelChassisKFOdometry::update()
 {
     float chassisYaw = location.getOrientation();
+    
     /* Process dead wheels */
 
     float yawIMU;
