@@ -35,7 +35,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     float maxVelErrorInput,
     float minorMajorTorqueRatio,
     float feedforwardGain)
-    : TurretYawControllerInterface(yawMotor),
+    : TurretAxisControllerInterface<control::turret::algorithms::Axis::YAW>(yawMotor),
       worldToMajor(worldToMajor),
       chassis(chassis),
       yawMotor(yawMotor),

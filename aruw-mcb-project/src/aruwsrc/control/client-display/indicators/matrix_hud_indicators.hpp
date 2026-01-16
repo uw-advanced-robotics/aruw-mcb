@@ -25,7 +25,7 @@
 
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
-#include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 #include "hud_indicator.hpp"
@@ -75,7 +75,7 @@ public:
         tap::Drivers &drivers,
         aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+        const aruwsrc::control::launcher::FrictionWheelInterface &frictionWheelSubsystem,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
         const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor);
@@ -181,7 +181,7 @@ private:
 
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
 
-    const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem;
+    const aruwsrc::control::launcher::FrictionWheelInterface &frictionWheelSubsystem;
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
 

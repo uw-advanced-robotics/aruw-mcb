@@ -44,7 +44,16 @@ SplashScreen::SplashScreen(
       turretMCBCanCommBus2(turretMCBCanCommBus2),
       mcbLite1(mcbLite1),
       mcbLite2(mcbLite2),
-      capacitorBank(capacitorBank)
+      capacitorBank(capacitorBank),
+      mainMenu(
+          vs,
+          drivers,
+          visionCoprocessor,
+          turretMCBCanCommBus1,
+          turretMCBCanCommBus2,
+          mcbLite1,
+          mcbLite2,
+          capacitorBank)
 {
 }
 
@@ -74,7 +83,7 @@ void SplashScreen::shortButtonPress(modm::MenuButtons::Button button)
             break;
         case modm::MenuButtons::RIGHT:
         {
-            MainMenu* mm = new MainMenu(
+            MainMenu* mm = new (&mainMenu) MainMenu(
                 getViewStack(),
                 drivers,
                 visionCoprocessor,

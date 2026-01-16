@@ -30,406 +30,40 @@
 #ifndef GRAVITY_AUTOTUNE_HPP_
 #define GRAVITY_AUTOTUNE_HPP_
 
-#include <Eigen/Dense>
+#include "modm/ui/display.hpp"
 
-#include "tap/algorithms/math_user_utils.hpp"
-#include "tap/control/command.hpp"
-#include "tap/drivers.hpp"
-
-#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
-#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+#include "autotune_command_interface.hpp"
 
 namespace aruwsrc::control::autotune
 {
-/** @brief Non-template class to allow for getting the gravity autotune commands
- * in a weak function, as used in the gravity autotune menu.
- */
-class GravityAutotuneInterface : public tap::control::Command
-{
-public:
-    enum class CalibrationState
-    {
-        WAITING_FOR_SYSTEMS_ONLINE,
-        LOCKING_TURRET,
-        MEASURING_TORQUE,
-        NEXT_LOCATION,
-        CALIBRATION_SUCCESS,
-        CALIBRATION_FAIL,
-        DONE
-    };
-
-    virtual ~GravityAutotuneInterface() = default;
-
-    virtual CalibrationState getCalibrationState() const = 0;
-
-    virtual std::array<float, 3> getCalibrationResult() const = 0;
-};
-
 template <uint32_t numTestPoints>
-class GravityAutotuneCommand : public GravityAutotuneInterface
+class GravityAutotuneCommand : public TurretAutotuneCommand<std::array<float, 3>, numTestPoints>
 {
 public:
-    /**  @brief Turret calibration config struct, all default members are not necessary required.
-     *  They are only important for giving a result with accurate units, as the gravity compensation
-     *  converts the cx and cz into a unit vector multiplied by the compensation scalar it doesn't
-     * require real units.
-     */
-    struct TurretCalibrationConfig
-    {
-        /// A `TurretSubsystem` that this command will control (will lock the turret).
-        turret::TurretSubsystem *turret;
-        /// A chassis relative pitch controller used to lock the turret.
-        turret::algorithms::ChassisFramePitchTurretController *pitchController;
-        /// If the pitch motor is inverted
-        bool isMotorInverted;
-        /// Mass of the pitching part of the turret in units of Kg
-        float turretMass = 1.0f;
-        /// A constant that relates the motor units to Nm of torque, would only work with current
-        /// controlled motors. In units of Nm / desOut
-        float torqueToDesiredOut = 1.0f;
-        /// Force of gravity. Unlikely to change. m / s^2
-        const float gravity = ACCELERATION_GRAVITY;
-    };
-
     GravityAutotuneCommand(
         tap::Drivers *drivers,
-        const TurretCalibrationConfig &config,
+        const TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::TurretCalibrationConfig
+            &config,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
         const std::array<float, numTestPoints> points = {},
-        const float velocityZeroThreshold = DEFAULT_VELOCITY_THRESHOLD,
-        const float positionZeroThreshold = DEFAULT_POSITION_THRESHOLD,
+        const float velocityZeroThreshold =
+            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_VELOCITY_THRESHOLD,
+        const float positionZeroThreshold =
+            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_POSITION_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
-        : drivers(drivers),
-          config(config),
-          chassis(chassis),
-          points(points),
-          velocityZeroThreshold(velocityZeroThreshold),
-          positionZeroThreshold(positionZeroThreshold),
-          successChime(successChime),
-          failChime(failChime)
+        : TurretAutotuneCommand<std::array<float, 3>, numTestPoints>(
+              drivers,
+              config,
+              chassis,
+              points,
+              velocityZeroThreshold,
+              positionZeroThreshold,
+              successChime,
+              failChime)
     {
-        addSubsystemRequirement(config.turret);
-
-        if (chassis != nullptr)
-        {
-            addSubsystemRequirement(chassis);
-        }
-
-        // Fill the points array with evenly spaced points if the array is all zeros
-        bool allZero = std::all_of(this->points.begin(), this->points.end(), [](float v) {
-            return v == 0.0f;
-        });
-
-        if (allZero)
-        {
-            const float minAngle = config.turret->pitchMotor.getConfig().minAngle;
-            const float maxAngle = config.turret->pitchMotor.getConfig().maxAngle;
-
-            for (size_t i = 0; i < numTestPoints; ++i)
-            {
-                this->points[i] = minAngle + i * (maxAngle - minAngle) / (numTestPoints - 1);
-            }
-        }
     }
-
-    /**
-     * @brief   Returns the current calibration state.
-     * @return  The active CalibrationState.
-     */
-    GravityAutotuneInterface::CalibrationState getCalibrationState() const override
-    {
-        return calibrationState;
-    }
-
-    /**
-     * @brief   Retrieves the last computed center of mass calibration result.
-     * @return  Array containing {cgX_mm, cgZ_mm, magnitude_desOut}.
-     */
-    std::array<float, 3> getCalibrationResult() const override { return calibrationResult; }
-
-    /**
-     * @brief Initializes the autotune command, resetting state and timers.
-     */
-    void initialize() override
-    {
-        if (chassis != nullptr)
-        {
-            chassis->setDesiredOutput(0, 0, 0);
-        }
-
-        calibrationState = CalibrationState::WAITING_FOR_SYSTEMS_ONLINE;
-        calibrationFailTimeout.stop();
-        calibrationTimer.stop();
-        prevTime = tap::arch::clock::getTimeMilliseconds();
-
-        samplePointCount = 0;
-        currentPointIndex = 0;
-
-        config.pitchController->initialize();
-        config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[currentPointIndex]));
-
-        calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
-        calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
-    };
-
-    /**
-     * @brief Executes one cycle of the gravity calibration state machine.
-     *
-     * This method drives the calibration process by moving the turret to
-     * predetermined angles, measuring motor torque at each point, and determining
-     * when calibration is complete.
-     *
-     * @details
-     * The calibration process is implemented as a state machine with the following states:
-     *
-     * - **WAITING_FOR_SYSTEMS_ONLINE**
-     *   Waits until the turret is online and a short wait timer expires.
-     *   Once ready, restarts a long calibration timeout and transitions to
-     *   `LOCKING_TURRET`.
-     *
-     * - **LOCKING_TURRET**
-     *   Waits until the turret has reached its target angle and is no longer moving.
-     *   If movement is detected, restarts the short wait timer.
-     *   When stable and the timer expires, transitions to `MEASURING_TORQUE`.
-     *
-     * - **MEASURING_TORQUE**
-     *   Collects a fixed number of torque and location samples from the turret's pitch motor,
-     *   averaging.
-     *   After samples are collected:
-     *     - If more points remain, transitions to `NEXT_LOCATION`.
-     *     - If all points are measured, transitions to `DONE`.
-     *
-     * - **NEXT_LOCATION**
-     *   Moves the turret to the next target angle for measurement,
-     *   restarts the long calibration timeout, and returns to `LOCKING_TURRET`.
-     *
-     * - **DONE**
-     *   Turns off the motors as to be sure that in the case of the robot hanging during
-     *   the calculation it won't become uncontrolled (should never happen) and transitions
-     *   into `CALIBRATION_SUCCESS`
-     *
-     * - **CALIBRATION_FAIL**
-     *   Calibration fail is called if the turret is unable to lock at a single position
-     *   over the period of the `calibrationFailTimeout` to ensure the user can regain
-     *   control.
-     */
-    void execute() override
-    {
-        switch (calibrationState)
-        {
-            case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
-            {
-                bool allOnline = true;
-                const bool turretsOnline = config.turret->isOnline();
-
-                if (chassis != nullptr)
-                {
-                    allOnline &= chassis->allMotorsOnline();
-                }
-
-                allOnline &= turretsOnline;
-
-                // Calibration timer to give people a chance to move out of the way
-                if (allOnline && calibrationTimer.execute())
-                {
-                    calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
-                    calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
-                    calibrationState = CalibrationState::LOCKING_TURRET;
-                }
-            }
-            break;
-            case CalibrationState::LOCKING_TURRET:
-            {
-                const bool turretNotMoving = turretReachedPointAndNotMoving(
-                    config.turret,
-                    config.turret->pitchMotor.getChassisFrameSetpoint());
-
-                if (!turretNotMoving)
-                {
-                    calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
-                }
-
-                // Exit Locking Turret
-                if (calibrationTimer.isExpired() && turretNotMoving)
-                {
-                    calibrationState = CalibrationState::MEASURING_TORQUE;
-                    samplePointCount = 0;
-                }
-            }
-            break;
-
-            case CalibrationState::MEASURING_TORQUE:
-            {
-                if (samplePointCount < NUM_SAMPLE_POINTS)
-                {
-                    // Increment sample point first so it's not 0 when first average
-                    samplePointCount++;
-
-                    // Add to the running average of the motors value and angle measurements
-                    const float motorValue =
-                        static_cast<float>(config.turret->pitchMotor.getMotorOutput());
-                    averagingTorques += (motorValue - averagingTorques) / (samplePointCount);
-
-                    const float angleValue =
-                        config.turret->pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue();
-                    averagingAngles += (angleValue - averagingAngles) / samplePointCount;
-                }
-                else
-                {
-                    // Store averaged values
-                    measuredTorques[currentPointIndex] = averagingTorques;
-                    measuredAngles[currentPointIndex] = averagingAngles;
-
-                    // Switch to next point and reset averaging
-                    currentPointIndex++;
-                    averagingTorques = 0;
-                    averagingAngles = 0;
-                    samplePointCount = 0;
-
-                    // Exit measuring when done taking samples
-                    calibrationState = CalibrationState::NEXT_LOCATION;
-
-                    // Finished going through all points
-                    if (currentPointIndex == points.size())
-                    {
-                        calibrationState = CalibrationState::DONE;
-                    }
-                }
-            }
-            break;
-
-            case CalibrationState::NEXT_LOCATION:
-            {
-                config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[currentPointIndex]));
-                calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
-                calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
-                calibrationState = CalibrationState::LOCKING_TURRET;
-            }
-            break;
-
-            case CalibrationState::DONE:
-            {
-                // Turn off in case calculation takes awhile
-                config.turret->yawMotor.setMotorOutput(0);
-                config.turret->pitchMotor.setMotorOutput(0);
-                calibrationState = CalibrationState::CALIBRATION_SUCCESS;
-            }
-            break;
-
-            default:
-                break;
-        }
-
-        checkSafetyTimeout();
-        uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-        // Have to use ms to share turret controller
-        float dt = (currTime - prevTime);
-        prevTime = currTime;
-
-        config.pitchController->runController(
-            dt,
-            config.turret->pitchMotor.getChassisFrameSetpoint());
-    };
-
-    void end(bool) override
-    {
-        switch (calibrationState)
-        {
-            case CalibrationState::CALIBRATION_SUCCESS:
-            {
-                calibrationResult = calculateCOM(measuredAngles, measuredTorques);
-                // Adjust magnitude sign based on motor inversion
-                calibrationResult[2] *= config.isMotorInverted ? -1.0f : 1.0f;
-                if (successChime) drivers->commandScheduler.addCommand(successChime);
-            }
-            break;
-            default:
-                if (failChime) drivers->commandScheduler.addCommand(failChime);
-                break;
-        }
-    };
-
-    bool isFinished() const override
-    {
-        return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
-               calibrationState == CalibrationState::CALIBRATION_FAIL;
-    }
-
     const char *getName() const override { return "Gravity Autotune Command"; }
-
-private:
-    tap::Drivers *drivers;
-    TurretCalibrationConfig config;
-    chassis::HolonomicChassisSubsystem *chassis;
-    std::array<float, numTestPoints> points;
-
-    const float velocityZeroThreshold;
-    const float positionZeroThreshold;
-
-    aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
-    aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
-
-    GravityAutotuneInterface::CalibrationState calibrationState;
-
-    // Thresholds to determine if the turret is "not moving" and "at position"
-    static constexpr float DEFAULT_POSITION_THRESHOLD = modm::toRadian(3);
-    static constexpr float DEFAULT_VELOCITY_THRESHOLD = modm::toRadian(1e-4f);
-
-    // Current point in the sequence being measured
-    size_t currentPointIndex = 0;
-
-    // Previous time, used for the controller's dt
-    uint32_t prevTime = 0;
-
-    // Value to store what sample number we're currently at
-    uint32_t samplePointCount = 0;
-
-    // Value to store the averaging torque values
-    float averagingTorques = 0;
-
-    // Value to store the averaging angle values
-    float averagingAngles = 0;
-
-    // Array of torque measurements received post averaging
-    std::array<float, numTestPoints> measuredTorques{};
-
-    // Array of angle measurements received post averaging
-    std::array<float, numTestPoints> measuredAngles{};
-
-    /**
-     * Amount of time the turret has to have passed `turretReachedPointAndNotMoving()`
-     */
-    static constexpr uint32_t WAIT_TIME_TURRET_RESPONSE_MS = 1000;
-
-    /**
-     * Wait timeout for the command to wait until it gives up.
-     * Is a safety precaution to avoid getting stuck in calibration forever.
-     */
-    static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 1000 * 20;
-
-    /**
-     * Number of sample points per test point to average the torque measurement.
-     */
-    static constexpr uint32_t NUM_SAMPLE_POINTS = 2000;
-
-    /**
-     * Timeout that we set after initially starting the turret PID controller to allow any residual
-     * movement from starting the new PID controller to be resolved.
-     */
-    tap::arch::MilliTimeout calibrationTimer;
-
-    /**
-     * Timeout used to determine if we should give up on tuning.
-     */
-    tap::arch::MilliTimeout calibrationFailTimeout;
-
-    /**
-     * Place to store the last calibration result
-     */
-    std::array<float, 3> calibrationResult{};
 
     /**
      * @brief Calculates the center of mass with least squares
@@ -437,9 +71,9 @@ private:
      * @return std::array<float,3> cgX, cgZ, and magnitude of the center of mass
      * with cgX, and cgZ in units of mm and magnitude in units of desOut.
      */
-    std::array<float, 3> calculateCOM(
+    std::array<float, 3> calculate(
         std::array<float, numTestPoints> Angles,
-        std::array<float, numTestPoints> Torques)
+        std::array<float, numTestPoints> Torques) const override
     {
         Eigen::MatrixXd X(numTestPoints, 2);
         Eigen::VectorXd Y(numTestPoints);
@@ -458,32 +92,23 @@ private:
         const float magnitude = std::sqrt(A * A + B * B);
 
         return {calibrationResultToMM(A), calibrationResultToMM(B), magnitude};
-    }
+    };
 
-    inline bool turretReachedPointAndNotMoving(
-        control::turret::TurretSubsystem *turret,
-        const WrappedFloat setpoint) const
+    void drawCalibrationResult(modm::GraphicDisplay &display) const
     {
-        return compareFloatClose(
-                   0.0f,
-                   turret->pitchMotor.getChassisFrameVelocity(),
-                   velocityZeroThreshold) &&
-               (turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(setpoint) <
-                positionZeroThreshold);
+        const std::array<float, 3> result = this->getCalibrationResult();
+        const float X = result[0];
+        const float Z = result[1];
+        const float scalar = result[2];
+
+        display.printf(
+            "Center of mass position:\n\tcgX: %.2f mm\n\tcgZ: %.2f mm\n",
+            static_cast<double>(X),
+            static_cast<double>(Z));
+        display.printf("Gravity Compensation\n Scalar: %.1f\n", static_cast<double>(scalar));
     }
 
-    /**
-     * @brief Helper function to check if the safety timer is expired
-     */
-    inline void checkSafetyTimeout()
-    {
-        if (calibrationFailTimeout.isExpired())
-        {
-            if (failChime) drivers->commandScheduler.addCommand(failChime);
-            calibrationState = CalibrationState::CALIBRATION_FAIL;
-        }
-    }
-
+private:
     /**
      * @brief Helper function that turns the calibration result into
      * units of mm.
@@ -491,11 +116,11 @@ private:
      * @param calibrationNum Value from the COM calculation
      * @return float `COMLocation` in mm
      */
-    inline float calibrationResultToMM(float calibrationNum)
+    inline float calibrationResultToMM(float calibrationNum) const
     {
         // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm
-        return calibrationNum * 1000 * config.torqueToDesiredOut / config.gravity /
-               config.turretMass;
+        return calibrationNum * 1000 * this->getCalibrationConfig().torqueToDesiredOut /
+               this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
     }
 
 };  // class autotune

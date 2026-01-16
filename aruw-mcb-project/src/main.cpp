@@ -61,6 +61,8 @@ using namespace aruwsrc::hero;
 using namespace aruwsrc::drone;
 #elif defined(TARGET_ENGINEER)
 using namespace aruwsrc::engineer;
+#elif defined(TARGET_ENGI_2025)
+using namespace aruwsrc::engineer;
 #elif defined(TARGET_DART)
 using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
@@ -69,6 +71,8 @@ using namespace aruwsrc::testbed;
 using namespace aruwsrc::blank;
 #elif defined(TARGET_MOTOR_TESTER)
 using namespace aruwsrc::motor_tester;
+#elif defined(TARGET_LAUNCHER_TARGET)
+using namespace aruwsrc::dart_target;
 #elif defined(TARGET_CHARACTERIZER)
 using namespace aruwsrc::characterizer;
 #endif
@@ -84,7 +88,7 @@ static void updateIo(Drivers *drivers);
 
 static void initializeI2C(Drivers *drivers);
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers *drivers);
 #endif
@@ -118,15 +122,17 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+    defined(TARGET_ENGINEER)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_ENGINEER)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
+    defined(TARGET_LAUNCHER_TARGET)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
@@ -144,7 +150,7 @@ int main()
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
             checkTurretMcbDisconnection(drivers);
 #endif
 
@@ -175,8 +181,14 @@ static void initializeIo(Drivers *drivers)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
+
+#if defined(TARGET_ENGINEER)
+    drivers->turretMCBCanCommBus1.init();
+#endif
+
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
+    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
+    defined(TARGET_LAUNCHER_TARGET)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
@@ -198,7 +210,7 @@ static void initializeIo(Drivers *drivers)
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
 #endif
-#if defined(TARGET_ENGINEER)
+#if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
     drivers->engineerCVCommunication.initializeCV();
     drivers->digital.configureInputPullMode(
         tap::gpio::Digital::B,
@@ -225,7 +237,8 @@ static void updateIo(Drivers *drivers)
     drivers->mpu6500.read();
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
+    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
+    defined(TARGET_LAUNCHER_TARGET)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
@@ -233,7 +246,7 @@ static void updateIo(Drivers *drivers)
     drivers->visionCoprocessor.updateSerial();
 #endif
 
-#ifdef TARGET_ENGINEER
+#if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
     drivers->engineerCVCommunication.updateSerial();
 #endif
 
@@ -260,7 +273,7 @@ static void updateIo(Drivers *drivers)
 #endif
 }
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
 static void checkTurretMcbDisconnection(Drivers *drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();

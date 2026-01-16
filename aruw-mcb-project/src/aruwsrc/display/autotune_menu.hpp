@@ -29,7 +29,7 @@
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
 
-#include "gravity_autotune_menu.hpp"
+#include "autotune_specific_menu.hpp"
 
 namespace aruwsrc
 {
@@ -40,7 +40,7 @@ class Drivers;
  * Weak function that you should define in `*_control.cpp` if an `gravityAutotuneCommand` exists,
  * returns a vector of autotune commands.
  */
-std::vector<aruwsrc::control::autotune::GravityAutotuneInterface *> getGravityAutotuneCommands();
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands();
 namespace aruwsrc::display
 {
 class AutotuneMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>
@@ -77,7 +77,9 @@ private:
 
     tap::display::VerticalScrollLogicHandler verticalScroll;
 
-    uint8_t getCommandNumber() const { return getGravityAutotuneCommands().size(); }
+    aruwsrc::display::AutotuneSpecificMenu autotuneSpecificMenu;
+
+    uint8_t getCommandNumber() const { return getAutotuneCommands().size(); }
 };
 }  // namespace aruwsrc::display
 

@@ -74,6 +74,7 @@ before_script:
             aruwsrc/robot/testbed/testbed_control.cpp
             aruwsrc/robot/blank/blank_control.cpp
             aruwsrc/robot/motor_tester/motor_tester_control.cpp
+            aruwsrc/robot/dart_target/dart_target_control.cpp
             aruwsrc/robot/characterizer/characterizer_control.cpp
             main.cpp
 
@@ -261,6 +262,20 @@ before_script:
   variables:
     ROBOT: ENGINEER
 
+# 2025 Engi build
+
+"2025 Engi: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: ENGINEER
+
+"2025 Engi: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: ENGI_2025
+
 # Hero build
 
 "Hero: MCB Build":
@@ -338,6 +353,14 @@ before_script:
     - .mcb_build
   variables:
     ROBOT: MOTOR_TESTER
+
+# Launcher Target Build
+
+"Launcher Target: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: LAUNCHER_TARGET
 
 # Pages deploy
 

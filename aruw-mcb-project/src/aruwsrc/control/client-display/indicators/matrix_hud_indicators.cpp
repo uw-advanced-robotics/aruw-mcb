@@ -58,7 +58,7 @@ MatrixHudIndicators::MatrixHudIndicators(
     tap::Drivers &drivers,
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+    const aruwsrc::control::launcher::FrictionWheelInterface &frictionWheelSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor)

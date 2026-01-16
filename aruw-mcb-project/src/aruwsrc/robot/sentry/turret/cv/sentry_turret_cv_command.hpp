@@ -20,6 +20,8 @@
 #ifndef SENTRY_TURRET_CV_COMMAND_HPP_
 #define SENTRY_TURRET_CV_COMMAND_HPP_
 
+#include <aruwsrc/algorithms/plate_hit_tracker.hpp>
+
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
@@ -70,9 +72,17 @@ public:
     struct TurretConfig
     {
         SentryTurretMinorSubsystem &turretSubsystem;
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController;
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController;
+        control::turret::algorithms::TurretAxisControllerInterface<
+            control::turret::algorithms::Axis::YAW> &yawController;
+        control::turret::algorithms::TurretAxisControllerInterface<
+            control::turret::algorithms::Axis::PITCH> &pitchController;
         aruwsrc::sentry::algorithms::SentryBallisticsSolver &ballisticsSolver;
+    };
+
+    enum HitState
+    {
+        HIT,
+        NOT_HIT,
     };
 
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
@@ -107,8 +117,10 @@ public:
      */
     SentryTurretCVCommand(
         communication::serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
         TurretConfig &turretLeftConfig,
         TurretConfig &turretRightConfig,
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms);
@@ -153,9 +165,11 @@ private:
         bool *withinAimingTolerance);
 
     communication::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
 
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor;
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor;
 
     TurretConfig &turretLeftConfig;
     TurretConfig &turretRightConfig;
@@ -168,6 +182,18 @@ private:
      */
     bool scanning = false;
     bool targetFound = false;
+
+    HitState curHitState = HitState::NOT_HIT;
+    HitState lastHitState = HitState::NOT_HIT;
+    uint32_t lastHitTime = 0;
+    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData plateHitData{};
+    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData lastPlateHitData{};
+    float hitLocDiffRads = 0.0f;
+
+    static constexpr uint32_t HIT_COUNT_DELAY_MILLISEC = 500;
+    static constexpr float HIT_MAG_THRESH = 0.4f;
+    static constexpr float TURRET_OFFSET = modm::toRadian(10.0f);
+    static constexpr float HIT_DIFF_OFFSET = modm::toRadian(20.0f);
 
     // scan direction
     static constexpr int SCAN_CLOCKWISE = -1;
