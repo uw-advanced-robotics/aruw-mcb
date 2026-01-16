@@ -36,7 +36,7 @@ namespace motor
 {
 class DjiMotor;
 }
-}
+}  // namespace tap
 namespace aruwsrc::control::chassis
 {
 class Holonomic4MotorChassisSubsystem;
@@ -52,7 +52,8 @@ namespace aruwsrc::algorithms::odometry
  *
  * @see FourWheelKFOdometry
  */
-class WheelEKFOdometry2DSubsystem final : public tap::control::Subsystem, public FourWheelEKFOdometry
+class WheelEKFOdometry2DSubsystem final : public tap::control::Subsystem,
+                                          public FourWheelEKFOdometry
 {
 public:
     /**
@@ -70,7 +71,6 @@ public:
         const modm::Vector2f initPos);
 
     void refresh() override;
-
 };
 
 }  // namespace aruwsrc::algorithms::odometry

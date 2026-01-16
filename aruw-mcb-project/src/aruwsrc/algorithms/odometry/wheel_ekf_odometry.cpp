@@ -19,18 +19,17 @@
 
 #include "wheel_ekf_odometry.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/holonomic_4_motor_chassis_subsystem.hpp"
 
-#include <algorithm>
-#include <cmath>
-
 namespace aruwsrc::algorithms::odometry
 {
-
 const FourWheelEKFOdometry::ChassisWheelConfig FourWheelEKFOdometry::WHEEL_CONFIGS[4] = {
     {
         aruwsrc::control::chassis::WHEEL_RADIUS,
@@ -63,7 +62,7 @@ const FourWheelEKFOdometry::ChassisWheelConfig FourWheelEKFOdometry::WHEEL_CONFI
 };
 
 FourWheelEKFOdometry::FourWheelEKFOdometry(
-    const tap::motor::DjiMotor *chassisMotors[4],
+    const tap::motor::DjiMotor* chassisMotors[4],
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
     const aruwsrc::control::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
@@ -81,7 +80,8 @@ FourWheelEKFOdometry::FourWheelEKFOdometry(
       initPos(initPos)
 {
     // Copy motor pointers to member array
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++)
+    {
         this->chassisMotors[i] = chassisMotors[i];
     }
     reset();
@@ -89,16 +89,8 @@ FourWheelEKFOdometry::FourWheelEKFOdometry(
 
 void FourWheelEKFOdometry::reset()
 {
-    float initialX[int(OdomState::NUM_STATES)] = {
-        initPos.x,
-        initPos.y,
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f
-    };
+    float initialX[int(OdomState::NUM_STATES)] =
+        {initPos.x, initPos.y, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ekf.init(initialX);
     prevTime = 0;
     prevWheelSpeedsValid = false;
@@ -122,8 +114,8 @@ void FourWheelEKFOdometry::update()
     float wheelSpeeds[4] = {0, 0, 0, 0};
     for (int i = 0; i < 4; i++)
     {
-        float motorVel = chassisMotors[i]->getEncoder()->getVelocity(); // rad/s (after gear ratio)
-        wheelSpeeds[i] = motorVel * WHEEL_CONFIGS[i].wheelRadius;       // m/s
+        float motorVel = chassisMotors[i]->getEncoder()->getVelocity();  // rad/s (after gear ratio)
+        wheelSpeeds[i] = motorVel * WHEEL_CONFIGS[i].wheelRadius;        // m/s
         z[int(OdomInput::WHEEL_0) + i] = wheelSpeeds[i];
     }
 
@@ -149,8 +141,8 @@ void FourWheelEKFOdometry::update()
         {
             float desiredWheelRpm = chassisSubsystem->desiredWheelRPM[i][0];
             float wheelRpmOutput = desiredWheelRpm * WHEEL_CONFIGS[i].motorToWheelGearRatio;
-            desiredWheelSpeeds[i] = wheelRpmOutput * static_cast<float>(M_TWOPI) / 60.0f *
-                                    WHEEL_CONFIGS[i].wheelRadius;
+            desiredWheelSpeeds[i] =
+                wheelRpmOutput * static_cast<float>(M_TWOPI) / 60.0f * WHEEL_CONFIGS[i].wheelRadius;
         }
     }
     for (int i = 0; i < 4; i++)
@@ -158,10 +150,16 @@ void FourWheelEKFOdometry::update()
         z[int(OdomInput::DESIRED_WHEEL_0) + i] = desiredWheelSpeeds[i];
     }
 
-    updateMeasurementCovariance(wheelSpeeds, desiredWheelSpeeds, imuAccelWorld, yawMeasurementValid, dt);
+    updateMeasurementCovariance(
+        wheelSpeeds,
+        desiredWheelSpeeds,
+        imuAccelWorld,
+        yawMeasurementValid,
+        dt);
 
     // Create measurement vector
-    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector measurement;
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector
+        measurement;
     for (int i = 0; i < int(OdomInput::NUM_INPUTS); i++)
     {
         measurement.data[i] = z[i];
@@ -245,24 +243,26 @@ void FourWheelEKFOdometry::overrideOdometryPosition(const float positionX, const
 {
     float initialX[int(OdomState::NUM_STATES)];
     const auto& currentState = ekf.getStateVectorAsMatrix();
-    
+
     // Copy current state and update position
     for (int i = 0; i < int(OdomState::NUM_STATES); i++)
     {
         initialX[i] = currentState[i];
     }
-    
+
     initialX[int(OdomState::POS_X)] = positionX;
     initialX[int(OdomState::POS_Y)] = positionY;
-    
+
     ekf.init(initialX);
 }
 
 // Static function implementations for EKF
 
 void FourWheelEKFOdometry::stateTransitionFunction(
-    const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x_prev,
-    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x_pred,
+    const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector&
+        x_prev,
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector&
+        x_pred,
     float dt)
 {
     float pos_x = x_prev.data[int(OdomState::POS_X)];
@@ -285,7 +285,8 @@ void FourWheelEKFOdometry::stateTransitionFunction(
 }
 
 void FourWheelEKFOdometry::observationFunction(
-    const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x,
+    const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector&
+        x,
     ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector& h_x)
 {
     float vel_x_world = x.data[int(OdomState::VEL_X)];
@@ -322,7 +323,8 @@ void FourWheelEKFOdometry::observationFunction(
 }
 
 void FourWheelEKFOdometry::stateJacobianFunction(
-    const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x,
+    const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector&
+        x,
     ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateMatrix& F,
     float dt)
 {
@@ -335,11 +337,13 @@ void FourWheelEKFOdometry::stateJacobianFunction(
 
     F.data[int(OdomState::POS_X) * int(OdomState::NUM_STATES) + int(OdomState::POS_X)] = 1.0f;
     F.data[int(OdomState::POS_X) * int(OdomState::NUM_STATES) + int(OdomState::VEL_X)] = dt;
-    F.data[int(OdomState::POS_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] = 0.5f * dt * dt;
+    F.data[int(OdomState::POS_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] =
+        0.5f * dt * dt;
 
     F.data[int(OdomState::POS_Y) * int(OdomState::NUM_STATES) + int(OdomState::POS_Y)] = 1.0f;
     F.data[int(OdomState::POS_Y) * int(OdomState::NUM_STATES) + int(OdomState::VEL_Y)] = dt;
-    F.data[int(OdomState::POS_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] = 0.5f * dt * dt;
+    F.data[int(OdomState::POS_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] =
+        0.5f * dt * dt;
 
     F.data[int(OdomState::VEL_X) * int(OdomState::NUM_STATES) + int(OdomState::VEL_X)] = 1.0f;
     F.data[int(OdomState::VEL_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] = dt;
@@ -354,12 +358,13 @@ void FourWheelEKFOdometry::stateJacobianFunction(
 
     F.data[int(OdomState::ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] = 1.0f;
     F.data[int(OdomState::ACC_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] = 1.0f;
-
 }
 
 void FourWheelEKFOdometry::observationJacobianFunction(
-    const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector& x,
-    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::ObservationMatrix& H)
+    const ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector&
+        x,
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::ObservationMatrix&
+        H)
 {
     // Initialize to zero
     for (int i = 0; i < int(OdomInput::NUM_INPUTS) * int(OdomState::NUM_STATES); i++)

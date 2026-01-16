@@ -23,10 +23,10 @@
 #include <cinttypes>
 #include <functional>
 
+#include "tap/algorithms/cmsis_mat.hpp"
+
 #include "modm/architecture/interface/assert.h"
 #include "modm/math/matrix.hpp"
-
-#include "tap/algorithms/cmsis_mat.hpp"
 
 namespace aruwsrc::algorithms
 {
@@ -50,12 +50,13 @@ public:
     using InputMatrix = tap::algorithms::CMSISMat<INPUTS, INPUTS>;
     using ObservationMatrix = tap::algorithms::CMSISMat<INPUTS, STATES>;
     using KalmanGainMatrix = tap::algorithms::CMSISMat<STATES, INPUTS>;
-    
+
     // Function type definitions for nonlinear functions
-    using StateTransitionFunction = std::function<void(const StateVector&, StateVector&, float)>;
-    using ObservationFunction = std::function<void(const StateVector&, InputVector&)>;
-    using StateJacobianFunction = std::function<void(const StateVector&, StateMatrix&, float)>;
-    using ObservationJacobianFunction = std::function<void(const StateVector&, ObservationMatrix&)>;
+    using StateTransitionFunction = std::function<void(const StateVector &, StateVector &, float)>;
+    using ObservationFunction = std::function<void(const StateVector &, InputVector &)>;
+    using StateJacobianFunction = std::function<void(const StateVector &, StateMatrix &, float)>;
+    using ObservationJacobianFunction =
+        std::function<void(const StateVector &, ObservationMatrix &)>;
 
     /**
      * @param[in] f State transition function f(x, dt) -> x'

@@ -73,6 +73,7 @@
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 
 //#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+#include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
@@ -106,7 +107,6 @@
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -239,13 +239,11 @@ tap::encoder::CanEncoder perpendicularOmni(
     tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2);
 
-const tap::motor::DjiMotor* chassisMotors[4] = {
+const tap::motor::DjiMotor *chassisMotors[4] = {
     &leftFrontChassisMotor,
     &leftBackChassisMotor,
     &rightFrontChassisMotor,
-    &rightBackChassisMotor
-};
-
+    &rightBackChassisMotor};
 
 // FourWheelEKFOdometry::ChassisWheelConfig LEFT_FRONT_WHEEL_CONFIG = {
 //     .wheelRadius = aruwsrc::chassis::WHEEL_RADIUS,

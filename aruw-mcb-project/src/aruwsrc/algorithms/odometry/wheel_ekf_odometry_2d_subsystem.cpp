@@ -24,18 +24,13 @@
 namespace aruwsrc::algorithms::odometry
 {
 WheelEKFOdometry2DSubsystem::WheelEKFOdometry2DSubsystem(
-    tap::Drivers &drivers,
+    tap::Drivers& drivers,
     const tap::motor::DjiMotor* chassisMotors[4],
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& yawObserver,
     const aruwsrc::control::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
     const modm::Vector2f initPos)
     : Subsystem(&drivers),
-      FourWheelEKFOdometry(
-          chassisMotors,
-          yawObserver,
-          drivers.mpu6500,
-          chassisSubsystem,
-          initPos)
+      FourWheelEKFOdometry(chassisMotors, yawObserver, drivers.mpu6500, chassisSubsystem, initPos)
 {
 }
 
