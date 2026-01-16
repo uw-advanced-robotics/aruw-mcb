@@ -30,8 +30,14 @@
 using namespace tap::communication::serial;
 namespace aruwsrc
 {
+namespace communication::rtt
+{
+class RttTelemetry;
+}
+
 namespace control
 {
+
 /**
  * A class for interfacing with the remote IO inside of Commands. While the
  * CommandMapper handles the scheduling of Commands, this class is used
@@ -88,6 +94,11 @@ public:
     ControlOperatorInterface(tap::Drivers* drivers) : drivers(drivers) {}
     DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)
     mockable ~ControlOperatorInterface() = default;
+
+    void setTelemetry(aruwsrc::communication::rtt::RttTelemetry* telemetry)
+    {
+        this->telemetry = telemetry;
+    }
 
     /**
      * @return The value used for chassis movement forward and backward, between
@@ -149,6 +160,7 @@ protected:
     uint32_t prevUpdateCounterX = 0;
     uint32_t prevUpdateCounterY = 0;
     uint32_t prevUpdateCounterR = 0;
+    uint32_t prevLoggedRemoteUpdateCounter = 0;
 
     tap::algorithms::LinearInterpolationPredictor chassisXInput;
     tap::algorithms::LinearInterpolationPredictor chassisYInput;
@@ -161,6 +173,8 @@ protected:
     uint32_t prevChassisXInputCalledTime = 0;
     uint32_t prevChassisYInputCalledTime = 0;
     uint32_t prevChassisRInputCalledTime = 0;
+
+    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
 
     /**
      * Scales `value` when ctrl/shift are pressed and returns the scaled value.

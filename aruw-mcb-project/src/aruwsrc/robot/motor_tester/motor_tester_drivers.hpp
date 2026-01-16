@@ -22,7 +22,7 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/serial/rtt_telemetry.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 
 namespace aruwsrc::motor_tester
@@ -42,7 +42,7 @@ public:
     }
 
 public:
-    communication::serial::RttTelemetry rttTelemetry;
+    communication::rtt::RttTelemetry rttTelemetry;
     display::OledDisplay oledDisplay;
 };  // class aruwsrc::MotortesterDrivers
 }  // namespace aruwsrc::motor_tester

@@ -22,11 +22,11 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/communication/serial/rtt_telemetry.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 
 namespace aruwsrc::mock
 {
-class RttTelemetryMock : public communication::serial::RttTelemetry
+class RttTelemetryMock : public communication::rtt::RttTelemetry
 {
 public:
     RttTelemetryMock(tap::Drivers* drivers);

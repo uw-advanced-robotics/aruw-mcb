@@ -27,28 +27,19 @@
 #include <string>
 #include <type_traits>
 
-#include "tap/architecture/periodic_timer.hpp"
 #include "tap/util_macros.hpp"
 
 #include "modm/container/deque.hpp"
 #include "modm/processing/protothread.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_led_animator.hpp"
 // Forward declarations
 namespace tap
 {
 class Drivers;
-namespace communication::serial
-{
-class RefSerial;
-}
 }  // namespace tap
 
-namespace aruwsrc::communication::serial
-{
-class VisionCoprocessor;
-}
-
-namespace aruwsrc::communication::serial
+namespace aruwsrc::communication::rtt
 {
 /**
  * RTT (Real Time Transfer) telemetry handler for sending debug and diagnostic
@@ -68,16 +59,6 @@ public:
      * @param drivers Pointer to the global drivers instance
      */
     RttTelemetry(tap::Drivers* drivers);
-
-    /**
-     * Set optional logging dependencies (can be called after construction)
-     * @param controlInterface Control operator interface for input logging
-     * @param refSerial Referee serial interface for game data logging
-     * @param visionProcessor Vision coprocessor for CV data logging
-     */
-    void setLoggingDependencies(
-        tap::communication::serial::RefSerial* refSerial = nullptr,
-        aruwsrc::communication::serial::VisionCoprocessor* visionProcessor = nullptr);
 
     /**
      * Asynchronous telemetry update using modm protothreads.
@@ -124,6 +105,8 @@ public:
         queuePrintMessage(msg.c_str());
     }
 
+    int printf(const char* format, ...);
+
     /**
      * Blocking function that's already called by protothread, so no need to call manually. Only
      * public for use by `modm_abort()`.
@@ -135,27 +118,11 @@ private:
 #endif
     tap::Drivers* drivers;
 
-    // Optional logging dependencies (set via setLoggingDependencies)
-    tap::communication::serial::RefSerial* refSerial;
-    aruwsrc::communication::serial::VisionCoprocessor* visionProcessor;
-
-    // Timer for LED blinking
-    tap::arch::PeriodicMilliTimer ledBlinkTimer;
-
     // Deadline (ms) until which the message indicator keeps the row animation active
     uint32_t messageIndicatorDeadlineMillis;
     static constexpr uint32_t MESSAGE_INDICATOR_MS = 1000;  // milliseconds (1s)
 
-    // Animation state for the A-H LED row
-    tap::arch::PeriodicMilliTimer animationTimer;  // drives the moving 'bounce' animation
-    uint8_t animationIndex;                        // current lit LED index 0..7
-    bool animationDirectionUp;                     // true = moving A->H, false = H->A
-    uint32_t animationStepMs;                      // ms between animation steps
-    // Group flash state used when no recent message has been received
-    bool groupFlashOn;
-    // Unidirectional pause state used when no messages are being received
-    bool unidirectionalPaused;
-    uint32_t unidirectionalPauseDeadlineMillis;
+    RttLedAnimator ledAnimator;
 
     // Total messages sent
     uint32_t messageCounter;
@@ -194,21 +161,6 @@ private:
      * Queue timestamp, robot type, and counter
      */
     void logHeartbeatInfo();
-
-    /**
-     * Queue remote channel and switch state data
-     */
-    void logRemoteData();
-
-    /**
-     * Queue ref system data
-     */
-    void logRefereeData();
-
-    /**
-     * Queue vision coprocessor data
-     */
-    void logVisionData();
 
     template <class T>
     void append_json_value(std::string& out, const T& v)
@@ -287,6 +239,6 @@ private:
     }
 };
 
-}  // namespace aruwsrc::communication::serial
+}  // namespace aruwsrc::communication::rtt
 
 #endif  // RTT_TELEMETRY_HPP_

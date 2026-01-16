@@ -22,7 +22,7 @@
 
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/communication/serial/rtt_telemetry.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 
 #include "standard_and_hero_transformer.hpp"
 
@@ -37,7 +37,7 @@ public:
     StandardAnderHeroTransformerSubsystem(
         tap::Drivers& drivers,
         StandardAndHeroTransformer& transformer,
-        aruwsrc::communication::serial::RttTelemetry* telemetry = nullptr)
+        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr)
         : tap::control::Subsystem(&drivers),
           transformer(transformer),
           telemetry(telemetry)
@@ -64,7 +64,7 @@ public:
 
 private:
     StandardAndHeroTransformer& transformer;
-    aruwsrc::communication::serial::RttTelemetry* telemetry;
+    aruwsrc::communication::rtt::RttTelemetry* telemetry;
 };
 
 }  // namespace aruwsrc::algorithms::odometry::transforms

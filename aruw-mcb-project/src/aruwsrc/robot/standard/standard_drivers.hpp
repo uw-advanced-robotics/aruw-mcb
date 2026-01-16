@@ -38,7 +38,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/inter_robot_comm/inter_robot_transmitter.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
-#include "aruwsrc/communication/serial/rtt_telemetry.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
@@ -75,7 +75,8 @@ public:
           refSerialTransmitter(this),
           interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
     {
-        rttTelemetry.setLoggingDependencies(&this->refSerial, &visionCoprocessor);
+        controlOperatorInterface.setTelemetry(&rttTelemetry);
+        visionCoprocessor.setTelemetry(&rttTelemetry);
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -90,7 +91,7 @@ public:
 public:
     control::ControlOperatorInterface controlOperatorInterface;
     communication::serial::VisionCoprocessor visionCoprocessor;
-    communication::serial::RttTelemetry rttTelemetry;
+    communication::rtt::RttTelemetry rttTelemetry;
     display::OledDisplay oledDisplay;
     communication::can::TurretMCBCanComm turretMCBCanCommBus1;
     communication::can::TurretMCBCanComm turretMCBCanCommBus2;
