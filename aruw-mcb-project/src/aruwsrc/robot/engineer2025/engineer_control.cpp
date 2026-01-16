@@ -46,26 +46,26 @@
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/engineer/cubelift_switch_command.hpp"
-#include "aruwsrc/robot/engineer/digital_out_command.hpp"
-#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
-#include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
-#include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
-#include "aruwsrc/robot/engineer/score_position_command.hpp"
-#include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
-#include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/sliders_indicator.hpp"
-#include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
-// #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
+#include "aruwsrc/robot/engineer2025/cubelift_switch_command.hpp"
+#include "aruwsrc/robot/engineer2025/digital_out_command.hpp"
+#include "aruwsrc/robot/engineer2025/digital_out_subsystem.hpp"
+#include "aruwsrc/robot/engineer2025/digital_out_toggle_command.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_cube_lift_constants.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_drivers.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_gantry_constants.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_setpoint_constants.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_wrist_constants.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_extension_constants.hpp"
+#include "aruwsrc/robot/engineer2025/score_position_command.hpp"
+#include "aruwsrc/robot/engineer2025/setpoint_move_manual_command.hpp"
+#include "aruwsrc/robot/engineer2025/setpoint_move_position_command.hpp"
+#include "aruwsrc/robot/engineer2025/sliders_indicator.hpp"
+#include "aruwsrc/robot/engineer2025/turret/engineer_turret_subsystem.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_controller_command.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_move_position_command.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_setpoints_command.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_subsystem.hpp"
+// #include "aruwsrc/robot/engineer2025/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
@@ -342,6 +342,8 @@ WristSubsystem wristSubsystem(
     wristYawEncoder,
     WRIST_CONFIG);
 
+
+
 TriggerHomedJointSubsystem extensionSubsystem(
     drivers(),
     extensionMotor,
@@ -391,8 +393,14 @@ SetpointMoveManualCommand cubeManualControl(
     CUBE_LIFT_MOVE_SPEED,
     SetpointType::CUBE_LIFT);
 
-SetpointMoveManualCommand extensionManualControl(
-    extensionSubsystem,
+SetpointMoveManualCommand gantryLiftManualControl(
+    gantryLiftSubsystem,
+    &drivers()->controlOperatorInterface,
+    GANTRY_LIFT_MOVE_SPEED,
+    SetpointType::GANTRY_LIFT);
+
+SetpointMoveManualCommand gantryExtensionManualControl(
+    gantryExtensionSubsystem,
     &drivers()->controlOperatorInterface,
     EXTENSION_MOVE_SPEED,
     SetpointType::GANTRY_EXTENSION);
@@ -575,7 +583,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
     xDriveChassis.setDefaultCommand(&chassisDriveCommand);
-    extensionSubsystem.setDefaultCommand(&extensionManualControl);
+    gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
+    gantryExtensionSubsystem.setDefaultCommand(&gantryExtensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeLift.setDefaultCommand(&cubeManualControl);
@@ -666,23 +675,23 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/engineer/cubelift_switch_command.hpp"
-#include "aruwsrc/robot/engineer/digital_out_command.hpp"
-#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
-#include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
-#include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
-#include "aruwsrc/robot/engineer/score_position_command.hpp"
-#include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
-#include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/sliders_indicator.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/robot/engineer2025/cubelift_switch_command.hpp"
+#include "aruwsrc/robot/engineer2025/digital_out_command.hpp"
+#include "aruwsrc/robot/engineer2025/digital_out_subsystem.hpp"
+#include "aruwsrc/robot/engineer2025/digital_out_toggle_command.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_cube_lift_constants.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_drivers.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_gantry_constants.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_setpoint_constants.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_wrist_constants.hpp"
+#include "aruwsrc/robot/engineer2025/score_position_command.hpp"
+#include "aruwsrc/robot/engineer2025/setpoint_move_manual_command.hpp"
+#include "aruwsrc/robot/engineer2025/setpoint_move_position_command.hpp"
+#include "aruwsrc/robot/engineer2025/sliders_indicator.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_controller_command.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_move_position_command.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_setpoints_command.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_subsystem.hpp"
 
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::client_display::indicators;
