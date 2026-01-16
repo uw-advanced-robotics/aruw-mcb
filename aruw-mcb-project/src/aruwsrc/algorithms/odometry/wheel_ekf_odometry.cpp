@@ -165,8 +165,25 @@ void FourWheelEKFOdometry::update()
         measurement.data[i] = z[i];
     }
 
-    // Perform the EKF update - prediction and correction
-    ekf.performUpdate(measurement, dt);
+    // Perform prediction step.
+    ekf.predict(dt);
+
+    // Wrap yaw residual to avoid discontinuities at +/-pi.
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector z_pred;
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector x_current;
+    const auto& stateArray = ekf.getStateVectorAsMatrix();
+    for (int i = 0; i < int(OdomState::NUM_STATES); i++)
+    {
+        x_current.data[i] = stateArray[i];
+    }
+    observationFunction(x_current, z_pred);
+    float yaw_residual = std::atan2(
+        std::sin(measurement.data[int(OdomInput::YAW)] - z_pred.data[int(OdomInput::YAW)]),
+        std::cos(measurement.data[int(OdomInput::YAW)] - z_pred.data[int(OdomInput::YAW)]));
+    measurement.data[int(OdomInput::YAW)] = z_pred.data[int(OdomInput::YAW)] + yaw_residual;
+
+    // Perform correction step.
+    ekf.update(measurement);
 
     // Update the location and velocity accessor objects with values from the state vector
     updateChassisStateFromEKF();
