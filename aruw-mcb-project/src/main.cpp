@@ -121,7 +121,8 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+    defined(TARGET_SENTINEL_2026)
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
@@ -146,7 +147,8 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+    defined(TARGET_SENTINEL_2026)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
@@ -242,7 +244,8 @@ static void updateIo(Drivers *drivers)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+    defined(TARGET_SENTINEL_2026)
     drivers->visionCoprocessor.updateSerial();
 #endif
 

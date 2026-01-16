@@ -79,8 +79,14 @@ public:
     inline const Transform& getWorldToTurretMajor() const { return worldToTurretMajor; };
 #ifdef TARGET_SENTINEL_2026
     inline const Transform& getWorldToTurretWidow() const { return worldToTurretWidow; };
-    inline const Transform& getWorldToTurretLeft() const { return worldToTurretWidow; };  // Alias for compatibility
-    inline const Transform& getWorldToTurretRight() const { return worldToTurretWidow; };  // Alias for compatibility
+    inline const Transform& getWorldToTurretLeft() const
+    {
+        return worldToTurretWidow;
+    };  // Alias for compatibility
+    inline const Transform& getWorldToTurretRight() const
+    {
+        return worldToTurretWidow;
+    };  // Alias for compatibility
 #else
     inline const Transform& getWorldToTurretLeft() const { return worldToTurretLeft; };
     inline const Transform& getWorldToTurretRight() const { return worldToTurretRight; };
@@ -98,8 +104,14 @@ public:
     }
 
     inline const Transform& getMajorToTurretWidow() const { return turretMajorToTurretWidow; };
-    inline const Transform& getMajorToTurretLeft() const { return turretMajorToTurretWidow; };  // Alias for compatibility
-    inline const Transform& getMajorToTurretRight() const { return turretMajorToTurretWidow; };  // Alias for compatibility
+    inline const Transform& getMajorToTurretLeft() const
+    {
+        return turretMajorToTurretWidow;
+    };  // Alias for compatibility
+    inline const Transform& getMajorToTurretRight() const
+    {
+        return turretMajorToTurretWidow;
+    };  // Alias for compatibility
 
     inline const Transform& getMajorToMinor(uint8_t turretId) const
     {

@@ -658,9 +658,7 @@ HoldRepeatCommandMapping leftMidRightUpAg(
 // auto drive & auto aim
 HoldCommandMapping leftMidRightMid(
     drivers(),
-    {&majorManualCommand,
-     &turretWidowManualCommand,
-     &autoNavBeybladeCommand},
+    {&majorManualCommand, &turretWidowManualCommand, &autoNavBeybladeCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // manual aim
