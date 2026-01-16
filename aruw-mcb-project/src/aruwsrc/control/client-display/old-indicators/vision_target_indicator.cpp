@@ -21,10 +21,10 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 VisionTargetIndicator::VisionTargetIndicator(
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     RefSerialTransmitter &refSerialTransmitter,
     const Transform &worldToCameraTransform)
     : HudIndicator(refSerialTransmitter),
@@ -117,4 +117,4 @@ VisionTargetIndicator::ProjectedPlateResult VisionTargetIndicator::getEnemyPlate
     return output;
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

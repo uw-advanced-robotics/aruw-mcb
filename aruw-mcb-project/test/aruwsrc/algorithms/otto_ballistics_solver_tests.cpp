@@ -134,7 +134,7 @@ protected:
 
     std::optional<OttoBallisticsSolver::BallisticsSolution> solution;
 
-    aruwsrc::serial::VisionCoprocessor::TurretAimData aimData = {};
+    aruwsrc::communication::serial::VisionCoprocessor::TurretAimData aimData = {};
     uint32_t lastComputedOdomTime = 0;
     float launchSpeed = 15;
     bool cvOnline = true;

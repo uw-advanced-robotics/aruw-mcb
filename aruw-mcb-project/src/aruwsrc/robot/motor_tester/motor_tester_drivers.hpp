@@ -23,6 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/serial/rtt_telemetry.hpp"
+#include "aruwsrc/display/oled_display.hpp"
 
 namespace aruwsrc::motor_tester
 {
@@ -33,10 +34,16 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), rttTelemetry(this) {}
+    Drivers()
+        : tap::Drivers(),
+          rttTelemetry(this),
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
+    {
+    }
 
 public:
     communication::serial::RttTelemetry rttTelemetry;
+    display::OledDisplay oledDisplay;
 };  // class aruwsrc::MotortesterDrivers
 }  // namespace aruwsrc::motor_tester
 

@@ -29,9 +29,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 XDriveChassisSubsystem::XDriveChassisSubsystem(
     tap::Drivers* drivers,
@@ -42,7 +40,7 @@ XDriveChassisSubsystem::XDriveChassisSubsystem(
     Motor& rightFrontMotor,
     Motor& rightBackMotor,
     tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
-    can::capbank::CapacitorBank* capacitorBank)
+    communication::can::cap_bank::CapacitorBank* capacitorBank)
     : Holonomic4MotorChassisSubsystem(
           drivers,
           currentSensor,
@@ -69,6 +67,4 @@ XDriveChassisSubsystem::XDriveChassisSubsystem(
     wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
 }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

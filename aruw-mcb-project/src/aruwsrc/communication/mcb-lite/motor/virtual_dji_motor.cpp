@@ -23,7 +23,7 @@
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 VirtualDjiMotor::VirtualDjiMotor(
     tap::Drivers* drivers,
@@ -58,4 +58,4 @@ void VirtualDjiMotor::initialize()
 
 void VirtualDjiMotor::attachSelfToRxHandler() { mcbLite->canRxHandler.attachReceiveHandler(this); }
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor

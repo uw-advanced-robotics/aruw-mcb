@@ -20,6 +20,7 @@
 #ifndef RTT_TELEMETRY_HPP_
 #define RTT_TELEMETRY_HPP_
 
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -30,7 +31,6 @@
 #include "tap/util_macros.hpp"
 
 #include "modm/processing/protothread.hpp"
-#include <cstdint>
 
 // Forward declarations
 namespace tap
@@ -122,8 +122,7 @@ public:
         std::string msg;
         msg.reserve(64);
 
-        auto append = [&](const char* s)
-        {
+        auto append = [&](const char* s) {
             if (s) msg += s;
         };
 
@@ -154,13 +153,13 @@ private:
 
     // Deadline (ms) until which the message indicator keeps the row animation active
     uint32_t messageIndicatorDeadlineMillis;
-    static constexpr uint32_t MESSAGE_INDICATOR_MS = 1000; // milliseconds (1s)
+    static constexpr uint32_t MESSAGE_INDICATOR_MS = 1000;  // milliseconds (1s)
 
     // Animation state for the A-H LED row
-    tap::arch::PeriodicMilliTimer animationTimer; // drives the moving 'bounce' animation
-    uint8_t animationIndex;   // current lit LED index 0..7
-    bool animationDirectionUp; // true = moving A->H, false = H->A
-    uint32_t animationStepMs; // ms between animation steps
+    tap::arch::PeriodicMilliTimer animationTimer;  // drives the moving 'bounce' animation
+    uint8_t animationIndex;                        // current lit LED index 0..7
+    bool animationDirectionUp;                     // true = moving A->H, false = H->A
+    uint32_t animationStepMs;                      // ms between animation steps
     // Group flash state used when no recent message has been received
     bool groupFlashOn;
     // Unidirectional pause state used when no messages are being received
@@ -223,7 +222,12 @@ private:
             int vq = static_cast<int32_t>(v * 1000);
             if (vq < 0)
             {
-                std::snprintf(buf, sizeof(buf), "-%d.%03d", std::abs(vq) / 1000, std::abs(vq) % 1000);
+                std::snprintf(
+                    buf,
+                    sizeof(buf),
+                    "-%d.%03d",
+                    std::abs(vq) / 1000,
+                    std::abs(vq) % 1000);
             }
             else
             {

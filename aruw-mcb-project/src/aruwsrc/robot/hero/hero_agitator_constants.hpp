@@ -54,20 +54,21 @@ static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM
 static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 5.0f;
 static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.1f;
 
-static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig WATERWHEEL_AGITATOR_CONFIG = {
-    .gearRatio = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *
-                 (24.0f / 152.0f),  // M3508 * (Pulley Teeth / Agitator Teeth)
-    .agitatorMotorId = tap::motor::MOTOR4,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
-    .isAgitatorInverted = false,
-    /**
-     * The jamming constants. Agitator is considered jammed if difference between the velocity
-     * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
-     */
-    .jammingVelocityDifference = 0.75f * (WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S),
-    .jammingTime = 500,
-    .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 0.0f,
+static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
+    WATERWHEEL_AGITATOR_CONFIG = {
+        .gearRatio = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *
+                     (24.0f / 152.0f),  // M3508 * (Pulley Teeth / Agitator Teeth)
+        .agitatorMotorId = tap::motor::MOTOR4,
+        .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+        .isAgitatorInverted = false,
+        /**
+         * The jamming constants. Agitator is considered jammed if difference between the velocity
+         * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
+         */
+        .jammingVelocityDifference = 0.75f * (WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S),
+        .jammingTime = 500,
+        .jamLogicEnabled = true,
+        .velocityPIDFeedForwardGain = 0.0f,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config
@@ -101,15 +102,16 @@ static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr aruwsrc::agitator::VelocityAgitatorSubsystemConfig KICKER_AGITATOR_CONFIG = {
-    .gearRatio = 1.0f / 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR3,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
-    .isAgitatorInverted = false,
-    .jammingVelocityDifference = 0,
-    .jammingTime = 0,
-    .jamLogicEnabled = false,
-    .velocityPIDFeedForwardGain = 0,
+static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
+    KICKER_AGITATOR_CONFIG = {
+        .gearRatio = 1.0f / 36.0f,
+        .agitatorMotorId = tap::motor::MOTOR3,
+        .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+        .isAgitatorInverted = false,
+        .jammingVelocityDifference = 0,
+        .jammingTime = 0,
+        .jamLogicEnabled = false,
+        .velocityPIDFeedForwardGain = 0,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config

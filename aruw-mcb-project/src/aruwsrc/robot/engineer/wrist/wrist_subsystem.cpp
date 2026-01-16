@@ -46,10 +46,7 @@ WristSubsystem::WristSubsystem(
 
 void WristSubsystem::setSetpointPitch(float setpoint)
 {
-    if (config.minPitch == config.maxPitch)
-        setpointPitch = setpoint;
-    else
-        setpointPitch = std::clamp(setpoint, config.minPitch, config.maxPitch);
+    setpointPitch = std::clamp(setpoint, config.minPitch, config.maxPitch);
 }
 
 void WristSubsystem::setSetpointYaw(float setpoint)

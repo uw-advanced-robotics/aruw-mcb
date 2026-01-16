@@ -24,7 +24,7 @@
 
 #include "modm/math/geometry/vector3.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 class TurretMCBCanComm;
 }

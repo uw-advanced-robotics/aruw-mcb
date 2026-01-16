@@ -110,20 +110,20 @@ RttTelemetry::RttTelemetry(tap::Drivers* drivers)
       drivers(drivers),
       refSerial(nullptr),
       visionProcessor(nullptr),
-            ledBlinkTimer(800),  // for slow group flash
-            messageIndicatorDeadlineMillis(0),
-            animationTimer(120), // 120ms per step
-            animationIndex(0),
-            animationDirectionUp(true),
-            animationStepMs(120),
-            groupFlashOn(false),
-            unidirectionalPaused(false),
-            unidirectionalPauseDeadlineMillis(0),
-            messageCounter(0),
-            firstInputReceived(false),
-            queueHead(0),
-            queueTail(0),
-            queueCount(0)
+      ledBlinkTimer(800),  // for slow group flash
+      messageIndicatorDeadlineMillis(0),
+      animationTimer(120),  // 120ms per step
+      animationIndex(0),
+      animationDirectionUp(true),
+      animationStepMs(120),
+      groupFlashOn(false),
+      unidirectionalPaused(false),
+      unidirectionalPauseDeadlineMillis(0),
+      messageCounter(0),
+      firstInputReceived(false),
+      queueHead(0),
+      queueTail(0),
+      queueCount(0)
 {
     // Initialize message queue
     for (size_t i = 0; i < MAX_QUEUED_MESSAGES; i++)
@@ -164,7 +164,8 @@ bool RttTelemetry::updateTelemetryAsync()
             }
 
             // Turn off red LED for a short indicator period to show message receipt
-            messageIndicatorDeadlineMillis = tap::arch::clock::getTimeMilliseconds() + MESSAGE_INDICATOR_MS;
+            messageIndicatorDeadlineMillis =
+                tap::arch::clock::getTimeMilliseconds() + MESSAGE_INDICATOR_MS;
 
             // Echo back the received character
             char echoMsg[32];
@@ -184,7 +185,7 @@ bool RttTelemetry::updateTelemetryAsync()
         if (drivers)
         {
             uint32_t now = tap::arch::clock::getTimeMilliseconds();
-            
+
             // Determine if we're actively sending telemetry
             bool activelySendingTelemetry = (queueCount > 0) || firstInputReceived;
 
@@ -225,8 +226,8 @@ bool RttTelemetry::updateTelemetryAsync()
                     drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), true);
                 }
 
-                // Lighting rule: at ends (0 or 7) light only one LED; otherwise light pair (index-1, index)
-                // Makes fun bouncy effect
+                // Lighting rule: at ends (0 or 7) light only one LED; otherwise light pair
+                // (index-1, index) Makes fun bouncy effect
                 if (animationIndex == 0)
                 {
                     drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), false);
@@ -237,14 +238,16 @@ bool RttTelemetry::updateTelemetryAsync()
                 }
                 else
                 {
-                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
+                    drivers->leds.set(
+                        static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1),
+                        false);
                     drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
                 }
             }
             else if (activelySendingTelemetry)
             {
                 // State 2: Sending telemetry but no recent RTT input - unidirectional sweep A->H
-                const uint32_t sweepSteps = 7; // steps from 0 to 7
+                const uint32_t sweepSteps = 7;  // steps from 0 to 7
                 const uint32_t pauseMs = sweepSteps * animationStepMs;
 
                 if (unidirectionalPaused)
@@ -252,7 +255,7 @@ bool RttTelemetry::updateTelemetryAsync()
                     if (now >= unidirectionalPauseDeadlineMillis)
                     {
                         unidirectionalPaused = false;
-                        animationIndex = 0; // restart at bottom
+                        animationIndex = 0;  // restart at bottom
                     }
                 }
 
@@ -288,7 +291,9 @@ bool RttTelemetry::updateTelemetryAsync()
                 }
                 else
                 {
-                    drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
+                    drivers->leds.set(
+                        static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1),
+                        false);
                     drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
                 }
             }

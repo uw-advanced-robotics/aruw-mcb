@@ -107,12 +107,12 @@ protected:
     NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
     Transform worldToTurret;
     NiceMock<aruwsrc::mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
-    ChassisFramePitchTurretController chassisFramePitchTurretController;
+    ChassisFrameTurretController<Axis::PITCH> chassisFramePitchTurretController;
     WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController;
     tap::algorithms::SmoothPid posPid;
     tap::algorithms::SmoothPid velPid;
-    WorldFramePitchTurretImuCascadePidTurretController worldFramePitchTurretImuController;
-    WorldFrameYawTurretImuCascadePidTurretController worldFrameYawTurretImuController;
+    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> worldFramePitchTurretImuController;
+    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> worldFrameYawTurretImuController;
     TurretUserWorldRelativeCommand turretCmd;
     WrappedFloat currentYawValue;
     WrappedFloat currentPitchValue;

@@ -36,7 +36,7 @@
 
 using namespace tap::motor;
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::agitator
 {
 VelocityAgitatorSubsystem::VelocityAgitatorSubsystem(
     tap::Drivers* drivers,
@@ -126,4 +126,4 @@ void VelocityAgitatorSubsystem::setSetpoint(float velocity)
         velocitySetpoint = velocity;
     }
 }
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::agitator
