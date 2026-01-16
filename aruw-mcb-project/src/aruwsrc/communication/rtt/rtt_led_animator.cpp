@@ -94,9 +94,7 @@ void RttLedAnimator::update(
         }
         else
         {
-            drivers->leds.set(
-                static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1),
-                false);
+            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
             drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
         }
         return;
@@ -149,9 +147,7 @@ void RttLedAnimator::update(
         }
         else
         {
-            drivers->leds.set(
-                static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1),
-                false);
+            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
             drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
         }
         return;

@@ -22,7 +22,8 @@
 #include <algorithm>
 #include <cstdarg>
 
-extern "C" {
+extern "C"
+{
 #include "aruwsrc/communication/rtt/imported/SEGGER_RTT.h"
 }
 
@@ -87,10 +88,7 @@ void ensureInitialized()
 
 namespace aruwsrc::communication::rtt
 {
-void seggerRttInit()
-{
-    ensureInitialized();
-}
+void seggerRttInit() { ensureInitialized(); }
 
 void seggerRttSetUpMode(RttWriteMode mode)
 {
@@ -133,10 +131,8 @@ std::size_t seggerRttWriteWithMode(const uint8_t* data, std::size_t length, RttW
             {
                 SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, SEGGER_RTT_MODE_NO_BLOCK_SKIP);
             }
-            const std::size_t written = SEGGER_RTT_WriteNoLock(
-                kTelemetryBufferIndex,
-                data,
-                static_cast<unsigned>(length));
+            const std::size_t written =
+                SEGGER_RTT_WriteNoLock(kTelemetryBufferIndex, data, static_cast<unsigned>(length));
             if (prevFlags != SEGGER_RTT_MODE_NO_BLOCK_SKIP)
             {
                 SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, prevFlags);
@@ -161,12 +157,12 @@ std::size_t seggerRttWriteWithMode(const uint8_t* data, std::size_t length, RttW
             const unsigned prevFlags = seggerMode(g_upMode);
             if (prevFlags != SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL)
             {
-                SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL);
+                SEGGER_RTT_SetFlagsUpBuffer(
+                    kTelemetryBufferIndex,
+                    SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL);
             }
-            const std::size_t written = SEGGER_RTT_WriteNoLock(
-                kTelemetryBufferIndex,
-                data,
-                static_cast<unsigned>(length));
+            const std::size_t written =
+                SEGGER_RTT_WriteNoLock(kTelemetryBufferIndex, data, static_cast<unsigned>(length));
             if (prevFlags != SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL)
             {
                 SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, prevFlags);

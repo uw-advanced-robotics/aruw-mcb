@@ -19,9 +19,9 @@
 #ifndef CLEMENTINE_SEGGER_RTT_HPP_
 #define CLEMENTINE_SEGGER_RTT_HPP_
 
+#include <cstdarg>
 #include <cstddef>
 #include <cstdint>
-#include <cstdarg>
 
 namespace aruwsrc::communication::rtt
 {
@@ -124,10 +124,7 @@ inline bool read(uint8_t& data)
 
 inline void seggerRttInit() {}
 inline void seggerRttSetUpMode(RttWriteMode) {}
-inline std::size_t seggerRttGetAvailWriteSpace()
-{
-    return clementine_rtt::getAvailWriteSpace();
-}
+inline std::size_t seggerRttGetAvailWriteSpace() { return clementine_rtt::getAvailWriteSpace(); }
 inline std::size_t seggerRttWrite(const uint8_t* data, std::size_t length)
 {
     return clementine_rtt::write(data, length);
@@ -136,18 +133,9 @@ inline std::size_t seggerRttWriteWithMode(const uint8_t* data, std::size_t lengt
 {
     return clementine_rtt::write(data, length);
 }
-inline bool seggerRttRead(uint8_t& data)
-{
-    return clementine_rtt::read(data);
-}
-inline int seggerRttPrintf(const char*, ...)
-{
-    return -1;
-}
-inline int seggerRttVprintf(const char*, va_list*)
-{
-    return -1;
-}
+inline bool seggerRttRead(uint8_t& data) { return clementine_rtt::read(data); }
+inline int seggerRttPrintf(const char*, ...) { return -1; }
+inline int seggerRttVprintf(const char*, va_list*) { return -1; }
 
 }  // namespace aruwsrc::communication::rtt
 

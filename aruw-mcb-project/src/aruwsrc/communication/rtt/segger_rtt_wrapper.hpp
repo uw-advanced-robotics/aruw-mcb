@@ -19,9 +19,9 @@
 #ifndef SEGGER_RTT_HPP_
 #define SEGGER_RTT_HPP_
 
+#include <cstdarg>
 #include <cstddef>
 #include <cstdint>
-#include <cstdarg>
 
 namespace aruwsrc::communication::rtt
 {

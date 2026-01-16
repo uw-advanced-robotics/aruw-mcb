@@ -29,10 +29,9 @@
 
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_led_animator.hpp"
 #include "modm/container/deque.hpp"
 #include "modm/processing/protothread.hpp"
-
-#include "aruwsrc/communication/rtt/rtt_led_animator.hpp"
 // Forward declarations
 namespace tap
 {

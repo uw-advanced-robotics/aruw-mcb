@@ -37,7 +37,6 @@ class RttTelemetry;
 
 namespace control
 {
-
 /**
  * A class for interfacing with the remote IO inside of Commands. While the
  * CommandMapper handles the scheduling of Commands, this class is used
