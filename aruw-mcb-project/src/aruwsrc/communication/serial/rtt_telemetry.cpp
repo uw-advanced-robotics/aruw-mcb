@@ -22,7 +22,7 @@
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 using Channel = tap::communication::serial::Remote::Channel;
 
@@ -121,21 +121,14 @@ RttTelemetry::RttTelemetry(tap::Drivers* drivers)
       unidirectionalPauseDeadlineMillis(0),
       messageCounter(0),
       firstInputReceived(false),
-      queueHead(0),
-      queueTail(0),
-      queueCount(0)
+      messageQueue(),
+      printQueue()
 {
-    // Initialize message queue
-    for (size_t i = 0; i < MAX_QUEUED_MESSAGES; i++)
-    {
-        messageQueue[i].valid = false;
-        messageQueue[i].length = 0;
-    }
 }
 
 void RttTelemetry::setLoggingDependencies(
     tap::communication::serial::RefSerial* refSerial,
-    aruwsrc::serial::VisionCoprocessor* visionProcessor)
+    aruwsrc::communication::serial::VisionCoprocessor* visionProcessor)
 {
 #ifndef TARGET_MOTOR_TESTER
     this->refSerial = refSerial;
@@ -187,7 +180,7 @@ bool RttTelemetry::updateTelemetryAsync()
             uint32_t now = tap::arch::clock::getTimeMilliseconds();
 
             // Determine if we're actively sending telemetry
-            bool activelySendingTelemetry = (queueCount > 0) || firstInputReceived;
+            bool activelySendingTelemetry = (!messageQueue.isEmpty() || !printQueue.isEmpty()) || firstInputReceived;
 
             if (activelySendingTelemetry && now <= messageIndicatorDeadlineMillis)
             {
@@ -379,15 +372,15 @@ void RttTelemetry::logVisionData()
 void RttTelemetry::queueMessage(const char* message)
 {
     // Check if queue is full
-    if (queueCount >= MAX_QUEUED_MESSAGES)
+    if (messageQueue.isFull())
     {
         // Drop oldest message to make room
-        queueHead = (queueHead + 1) % MAX_QUEUED_MESSAGES;
-        queueCount--;
+        messageQueue.removeFront();
     }
 
-    // Add new message to tail - use std::snprintf for safe copying
-    size_t len = std::snprintf(messageQueue[queueTail].data, MAX_MESSAGE_SIZE, "%s", message);
+    // Create new message
+    QueuedMessage msg;
+    size_t len = std::snprintf(msg.data, MAX_MESSAGE_SIZE, "%s", message);
 
     // std::snprintf returns the number of characters that would have been written
     // Clamp to actual buffer size
@@ -396,28 +389,85 @@ void RttTelemetry::queueMessage(const char* message)
         len = MAX_MESSAGE_SIZE - 1;  // Null terminator is already handled by std::snprintf
     }
 
-    messageQueue[queueTail].length = len;
-    messageQueue[queueTail].valid = true;
+    msg.length = len;
 
-    queueTail = (queueTail + 1) % MAX_QUEUED_MESSAGES;
-    queueCount++;
+    // Add message to queue
+    messageQueue.append(msg);
+}
+
+void RttTelemetry::queuePrintMessage(const char* message)
+{
+    // Check if queue is full
+    if (printQueue.isFull())
+    {
+        // Drop oldest message to make room
+        printQueue.removeFront();
+    }
+
+    // Create new message
+    QueuedMessage msg;
+    size_t len = std::snprintf(msg.data, MAX_MESSAGE_SIZE, "%s", message);
+
+    // std::snprintf returns the number of characters that would have been written
+    // Clamp to actual buffer size
+    if (len >= MAX_MESSAGE_SIZE)
+    {
+        len = MAX_MESSAGE_SIZE - 1;  // Null terminator is already handled by std::snprintf
+    }
+
+    msg.length = len;
+
+    // Add message to queue
+    printQueue.append(msg);
 }
 
 void RttTelemetry::sendQueuedMessages()
 {
-    writeToSeggerRTT("{");
-    while (queueCount > 0)
+    // Send print messages first 
+    while (!printQueue.isEmpty())
     {
-        if (messageQueue[queueHead].valid)
+        const auto& msg = printQueue.getFront();
+        writeToSeggerRTT("{\"print\":\"");
+        
+        // Escape special JSON characters in the message
+        for (size_t i = 0; i < msg.length; i++)
         {
-            writeToSeggerRTT(messageQueue[queueHead].data);
-            messageQueue[queueHead].valid = false;
-            if (queueCount > 1) writeToSeggerRTT(",");
+            char c = msg.data[i];
+            if (c == '"' || c == '\\')
+            {
+                writeToSeggerRTT("\\");
+            }
+            char buf[2] = {c, '\0'};
+            writeToSeggerRTT(buf);
         }
-
-        queueHead = (queueHead + 1) % MAX_QUEUED_MESSAGES;
-        queueCount--;
+        
+        writeToSeggerRTT("\"}\n");
+        printQueue.removeFront();
     }
+
+    // Send JSON telemetry messages
+    if (messageQueue.isEmpty())
+    {
+        return;
+    }
+
+    writeToSeggerRTT("{");
+
+    bool first = true;
+    while (!messageQueue.isEmpty())
+    {
+        const auto& msg = messageQueue.getFront();
+
+        if (!first)
+        {
+            writeToSeggerRTT(",");
+        }
+        first = false;
+
+        writeToSeggerRTT(msg.data);
+        messageQueue.removeFront();
+    }
+
     writeToSeggerRTT("}\n");
 }
 

@@ -30,6 +30,7 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/util_macros.hpp"
 
+#include "modm/container/deque.hpp"
 #include "modm/processing/protothread.hpp"
 
 // Forward declarations
@@ -42,17 +43,9 @@ class RefSerial;
 }
 }  // namespace tap
 
-namespace aruwsrc
-{
-namespace serial
+namespace aruwsrc::communication::serial
 {
 class VisionCoprocessor;
-}
-}  // namespace aruwsrc
-
-namespace tap
-{
-class Drivers;
 }
 
 namespace aruwsrc::communication::serial
@@ -84,7 +77,7 @@ public:
      */
     void setLoggingDependencies(
         tap::communication::serial::RefSerial* refSerial = nullptr,
-        aruwsrc::serial::VisionCoprocessor* visionProcessor = nullptr);
+        aruwsrc::communication::serial::VisionCoprocessor* visionProcessor = nullptr);
 
     /**
      * Asynchronous telemetry update using modm protothreads.
@@ -120,7 +113,7 @@ public:
     void println(const char* first, Args... rest)
     {
         std::string msg;
-        msg.reserve(64);
+        msg.reserve(MAX_MESSAGE_SIZE);
 
         auto append = [&](const char* s) {
             if (s) msg += s;
@@ -128,9 +121,7 @@ public:
 
         (append(first), ..., append(rest));
 
-        // msg += '\n';
-
-        // queueMessage(msg.c_str());  // TODO: this can't use the same buffer
+        queuePrintMessage(msg.c_str());
     }
 
     /**
@@ -146,7 +137,7 @@ private:
 
     // Optional logging dependencies (set via setLoggingDependencies)
     tap::communication::serial::RefSerial* refSerial;
-    aruwsrc::serial::VisionCoprocessor* visionProcessor;
+    aruwsrc::communication::serial::VisionCoprocessor* visionProcessor;
 
     // Timer for LED blinking
     tap::arch::PeriodicMilliTimer ledBlinkTimer;
@@ -180,18 +171,24 @@ private:
     {
         char data[MAX_MESSAGE_SIZE];
         size_t length;
-        bool valid;
+
+        QueuedMessage() : data{0}, length(0) {}
     };
 
-    QueuedMessage messageQueue[MAX_QUEUED_MESSAGES];
-    size_t queueHead;
-    size_t queueTail;
-    size_t queueCount;
+    modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES> messageQueue;
+
+    // Separate queue for println() messages to avoid interference with JSON telemetry
+    modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES> printQueue;
 
     /**
-     * Queue a message for asynchronous transmission
+     * Queue a message for asynchronous transmission (JSON telemetry)
      */
     void queueMessage(const char* message);
+
+    /**
+     * Queue a print message for asynchronous transmission (separate from JSON telemetry)
+     */
+    void queuePrintMessage(const char* message);
 
     /**
      * Queue timestamp, robot type, and counter
