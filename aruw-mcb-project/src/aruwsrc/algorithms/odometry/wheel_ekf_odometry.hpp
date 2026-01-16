@@ -29,8 +29,8 @@
 #include "modm/math/geometry/vector.hpp"
 
 #include "aruwsrc/algorithms/extended_kalman_filter.hpp"
-
-namespace aruwsrc::chassis
+#include "aruwsrc/control/chassis/holonomic_4_motor_chassis_subsystem.hpp"
+namespace aruwsrc::control::chassis
 {
 class Holonomic4MotorChassisSubsystem;
 }
@@ -69,7 +69,7 @@ public:
         const tap::motor::DjiMotor *chassisMotors[4],
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
-        const aruwsrc::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
+        const aruwsrc::control::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
         const modm::Vector2f initPos);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
@@ -187,7 +187,7 @@ private:
     const tap::motor::DjiMotor *chassisMotors[4];
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
-    const aruwsrc::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem;
+    const aruwsrc::control::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem;
 
     const modm::Vector2f initPos;
 

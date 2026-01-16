@@ -33,32 +33,32 @@ namespace aruwsrc::algorithms::odometry
 
 const FourWheelEKFOdometry::ChassisWheelConfig FourWheelEKFOdometry::WHEEL_CONFIGS[4] = {
     {
-        aruwsrc::chassis::WHEEL_RADIUS,
-        aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
-        aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
+        aruwsrc::control::chassis::WHEEL_RADIUS,
+        aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
+        aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         M_PI_4,
-        aruwsrc::chassis::CHASSIS_GEARBOX_RATIO,
+        aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO,
     },
     {
-        aruwsrc::chassis::WHEEL_RADIUS,
-        -aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
-        aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
+        aruwsrc::control::chassis::WHEEL_RADIUS,
+        -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
+        aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         -M_PI_4,
-        aruwsrc::chassis::CHASSIS_GEARBOX_RATIO,
+        aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO,
     },
     {
-        aruwsrc::chassis::WHEEL_RADIUS,
-        aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
-        -aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
+        aruwsrc::control::chassis::WHEEL_RADIUS,
+        aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
+        -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         3.0f * M_PI_4,
-        aruwsrc::chassis::CHASSIS_GEARBOX_RATIO,
+        aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO,
     },
     {
-        aruwsrc::chassis::WHEEL_RADIUS,
-        -aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
-        -aruwsrc::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
+        aruwsrc::control::chassis::WHEEL_RADIUS,
+        -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
+        -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         -3.0f * M_PI_4,
-        aruwsrc::chassis::CHASSIS_GEARBOX_RATIO,
+        aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO,
     },
 };
 
@@ -66,7 +66,7 @@ FourWheelEKFOdometry::FourWheelEKFOdometry(
     const tap::motor::DjiMotor *chassisMotors[4],
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
-    const aruwsrc::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
+    const aruwsrc::control::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
     const modm::Vector2f initPos)
     : ekf(stateTransitionFunction,
           observationFunction,
@@ -135,7 +135,7 @@ void FourWheelEKFOdometry::update()
     tap::algorithms::rotateVector(
         &imuAccelWorld.x,
         &imuAccelWorld.y,
-        aruwsrc::serial::VisionCoprocessor::MCB_ROTATION_OFFSET + yawForRotation);
+        aruwsrc::communication::serial::VisionCoprocessor::MCB_ROTATION_OFFSET + yawForRotation);
 
     z[int(OdomInput::ACC_X)] = imuAccelWorld.x;
     z[int(OdomInput::ACC_Y)] = imuAccelWorld.y;
@@ -326,6 +326,7 @@ void FourWheelEKFOdometry::stateJacobianFunction(
     ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateMatrix& F,
     float dt)
 {
+    (void)x;
     // Initialize to zero
     for (int i = 0; i < int(OdomState::NUM_STATES) * int(OdomState::NUM_STATES); i++)
     {

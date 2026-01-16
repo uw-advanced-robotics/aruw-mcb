@@ -117,7 +117,7 @@ void FourWheelKFOdometry::update()
     tap::algorithms::rotateVector(
         &y[int(OdomInput::ACC_X)],
         &y[int(OdomInput::ACC_Y)],
-        serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+        aruwsrc::communication::serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
 
     // Calculate average chassis velocity for measurement covariance update
     modm::Matrix<float, 3, 1> chassisVelocity;
