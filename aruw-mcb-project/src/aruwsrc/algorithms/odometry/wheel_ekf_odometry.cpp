@@ -97,6 +97,10 @@ void FourWheelEKFOdometry::update()
 {
     float measuredYaw = 0.0f;
     bool yawMeasurementValid = chassisYawObserver.getChassisWorldYaw(&measuredYaw);
+    if (yawMeasurementValid)
+    {
+        measuredYaw = modm::Angle::normalize(measuredYaw);
+    }
 
     uint32_t currentTime = tap::arch::clock::getTimeMicroseconds();
     float dt = prevTime == 0 ? DT : (currentTime - prevTime) / 1e6f;
@@ -125,7 +129,7 @@ void FourWheelEKFOdometry::update()
     z[int(OdomInput::ACC_X)] = imuAccelWorld.x;
     z[int(OdomInput::ACC_Y)] = imuAccelWorld.y;
     z[int(OdomInput::GYRO_Z)] = imu.getGz();
-    z[int(OdomInput::YAW)] = yawMeasurementValid ? measuredYaw : chassisYaw;
+    z[int(OdomInput::YAW)] = yawForRotation;
 
     updateMeasurementCovariance(wheelSpeeds, imuAccelWorld, yawMeasurementValid, dt);
 
@@ -168,7 +172,7 @@ void FourWheelEKFOdometry::updateChassisStateFromEKF()
     // update odometry velocity and orientation
     velocity.x = x[int(OdomState::VEL_X)];
     velocity.y = x[int(OdomState::VEL_Y)];
-    chassisYaw = x[int(OdomState::YAW)];
+    chassisYaw = modm::Angle::normalize(x[int(OdomState::YAW)]);
 
     // Set location
     location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
