@@ -16,9 +16,9 @@ void Ism330Spi::initialize(float sampleFrequency, float mahonyKp, float mahonyKi
 {
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
 #ifndef PLATFORM_HOSTED
-    Board::ImuNss::GpioOutput();
-    Board::ImuSpiMaster::connect<Board::ImuMiso::Miso, Board::ImuMosi::Mosi, Board::ImuSck::Sck>();
-    Board::ImuSpiMaster::initialize<Board::SystemClock, 5625000_Hz>();
+    Board::SpiNss::GpioOutput();
+    Board::GenSpiMaster::connect<Board::SpiMiso::Miso, Board::SpiMosi::Mosi, Board::SpiSck::Sck>();
+    Board::GenSpiMaster::initialize<Board::SystemClock, 5625000_Hz>();
 
     assert (spiReadRegister(Register::WHO_AM_I) == 0x6B);
     setODR(ODR_833HZ);
@@ -38,8 +38,8 @@ bool Ism330Spi::read()
         ismNssLow();
         tx = OUT_TEMP_L | ISM330_READ_BIT;
         
-        PT_CALL(Board::ImuSpiMaster::transfer(&tx, &rx, 1));
-        PT_CALL(Board::ImuSpiMaster::transfer(txBuff, rxBuff, READ_LENGTH));
+        PT_CALL(Board::GenSpiMaster::transfer(&tx, &rx, 1));
+        PT_CALL(Board::GenSpiMaster::transfer(txBuff, rxBuff, READ_LENGTH));
         ismNssHigh();
 
         imuData.temperature = tempValueToCelsius(rxBuff);
@@ -78,9 +78,9 @@ void Ism330Spi::spiWriteRegister(uint8_t reg, uint8_t data)
     ismNssLow();
     uint8_t tx = reg & ~ISM330_WRITE_BIT;
     uint8_t rx = 0;
-    Board::ImuSpiMaster::transferBlocking(&tx, &rx, 1);
+    Board::GenSpiMaster::transferBlocking(&tx, &rx, 1);
     tx = data;
-    Board::ImuSpiMaster::transferBlocking(&tx, &rx, 1);
+    Board::GenSpiMaster::transferBlocking(&tx, &rx, 1);
     ismNssHigh();
 #endif
 }
@@ -94,8 +94,8 @@ uint8_t Ism330Spi::spiReadRegister(uint8_t reg)
     ismNssLow();
     uint8_t tx = reg | ISM330_READ_BIT;
     uint8_t rx = 0;
-    Board::ImuSpiMaster::transferBlocking(&tx, &rx, 1);
-    Board::ImuSpiMaster::transferBlocking(&tx, &rx, 1);
+    Board::GenSpiMaster::transferBlocking(&tx, &rx, 1);
+    Board::GenSpiMaster::transferBlocking(&tx, &rx, 1);
     ismNssHigh();
     return rx;
 #endif
@@ -103,13 +103,13 @@ uint8_t Ism330Spi::spiReadRegister(uint8_t reg)
 
 void Ism330Spi::ismNssLow() {
 #ifndef PLATFORM_HOSTED
-    Board::ImuNss::setOutput(modm::GpioOutput::Low);
+    Board::SpiNss::setOutput(modm::GpioOutput::Low);
 #endif
 }
 
 void Ism330Spi::ismNssHigh() {
 #ifndef PLATFORM_HOSTED
-    Board::ImuNss::setOutput(modm::GpioOutput::High);
+    Board::SpiNss::setOutput(modm::GpioOutput::High);
 #endif
 }
 
