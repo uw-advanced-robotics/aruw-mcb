@@ -87,6 +87,7 @@ void FourWheelEKFOdometry::reset()
     ekf.init(initialX);
     prevTime = 0;
     prevWheelSpeedsValid = false;
+    yawOffsetInitialized = false;
     for (int i = 0; i < 4; i++)
     {
         prevWheelSpeeds[i] = 0.0f;
@@ -100,6 +101,11 @@ void FourWheelEKFOdometry::update()
     if (yawMeasurementValid)
     {
         measuredYaw = modm::Angle::normalize(measuredYaw);
+    }
+    if (!yawOffsetInitialized && yawMeasurementValid)
+    {
+        yawOffset = measuredYaw;
+        yawOffsetInitialized = true;
     }
 
     uint32_t currentTime = tap::arch::clock::getTimeMicroseconds();
@@ -119,6 +125,10 @@ void FourWheelEKFOdometry::update()
     // Get IMU acceleration data in chassis frame
     modm::Vector2f imuAccelWorld(imu.getAx(), imu.getAy());
     float yawForRotation = yawMeasurementValid ? measuredYaw : chassisYaw;
+    if (yawOffsetInitialized)
+    {
+        yawForRotation = modm::Angle::normalize(yawForRotation - yawOffset);
+    }
 
     // Rotate acceleration from MCB frame to the world frame
     tap::algorithms::rotateVector(
@@ -284,19 +294,11 @@ void FourWheelEKFOdometry::observationFunction(
     float sin_yaw = std::sin(yaw);
     float vel_x_chassis = cos_yaw * vel_x_world + sin_yaw * vel_y_world;
     float vel_y_chassis = -sin_yaw * vel_x_world + cos_yaw * vel_y_world;
-
-    for (int i = 0; i < 4; i++)
-    {
-        float wheel_angle = WHEEL_CONFIGS[i].wheelOrientationToForwardRadians;
-        float roll_x = std::cos(wheel_angle);
-        float roll_y = std::sin(wheel_angle);
-        float omega_contrib =
-            roll_x * (-WHEEL_CONFIGS[i].wheelPositionY) + roll_y * WHEEL_CONFIGS[i].wheelPositionX;
-        float wheel_speed =
-            roll_x * vel_x_chassis + roll_y * vel_y_chassis + omega_contrib * yaw_rate;
-
-        h_x.data[int(OdomInput::WHEEL_0) + i] = wheel_speed;
-    }
+    const float rotationRadius = 1.0f / aruwsrc::control::chassis::WHEELBASE_HYPOTENUSE;
+    h_x.data[int(OdomInput::WHEEL_0)] = vel_x_chassis - vel_y_chassis - rotationRadius * yaw_rate;
+    h_x.data[int(OdomInput::WHEEL_1)] = -vel_x_chassis - vel_y_chassis - rotationRadius * yaw_rate;
+    h_x.data[int(OdomInput::WHEEL_2)] = vel_x_chassis + vel_y_chassis - rotationRadius * yaw_rate;
+    h_x.data[int(OdomInput::WHEEL_3)] = -vel_x_chassis + vel_y_chassis - rotationRadius * yaw_rate;
 
     float acc_x = x.data[int(OdomState::ACC_X)];
     float acc_y = x.data[int(OdomState::ACC_Y)];
@@ -371,29 +373,47 @@ void FourWheelEKFOdometry::observationJacobianFunction(
     float d_vx_chassis_d_yaw = -sin_yaw * vel_x_world + cos_yaw * vel_y_world;
     float d_vy_chassis_d_yaw = -cos_yaw * vel_x_world - sin_yaw * vel_y_world;
 
-    for (int i = 0; i < 4; i++)
-    {
-        float wheel_angle = WHEEL_CONFIGS[i].wheelOrientationToForwardRadians;
-        float roll_x = std::cos(wheel_angle);
-        float roll_y = std::sin(wheel_angle);
+    const float rotationRadius = 1.0f / aruwsrc::control::chassis::WHEELBASE_HYPOTENUSE;
+    const float d_wheel0_d_vx = d_vx_chassis_d_vx - d_vy_chassis_d_vx;
+    const float d_wheel0_d_vy = d_vx_chassis_d_vy - d_vy_chassis_d_vy;
+    const float d_wheel0_d_yaw = d_vx_chassis_d_yaw - d_vy_chassis_d_yaw;
 
-        float d_wheel_d_vx = roll_x * d_vx_chassis_d_vx + roll_y * d_vy_chassis_d_vx;
-        float d_wheel_d_vy = roll_x * d_vx_chassis_d_vy + roll_y * d_vy_chassis_d_vy;
-        float d_wheel_d_yaw = roll_x * d_vx_chassis_d_yaw + roll_y * d_vy_chassis_d_yaw;
-        float d_wheel_d_yaw_rate =
-            roll_x * (-WHEEL_CONFIGS[i].wheelPositionY) + roll_y * WHEEL_CONFIGS[i].wheelPositionX;
+    const float d_wheel1_d_vx = -d_vx_chassis_d_vx - d_vy_chassis_d_vx;
+    const float d_wheel1_d_vy = -d_vx_chassis_d_vy - d_vy_chassis_d_vy;
+    const float d_wheel1_d_yaw = -d_vx_chassis_d_yaw - d_vy_chassis_d_yaw;
 
-        int wheelRow = int(OdomInput::WHEEL_0) + i;
-        int vxIndex = int(OdomState::VEL_X);
-        int vyIndex = int(OdomState::VEL_Y);
-        int yawIndex = int(OdomState::YAW);
-        int yawRateIndex = int(OdomState::YAW_RATE);
+    const float d_wheel2_d_vx = d_vx_chassis_d_vx + d_vy_chassis_d_vx;
+    const float d_wheel2_d_vy = d_vx_chassis_d_vy + d_vy_chassis_d_vy;
+    const float d_wheel2_d_yaw = d_vx_chassis_d_yaw + d_vy_chassis_d_yaw;
 
-        H.data[wheelRow * int(OdomState::NUM_STATES) + vxIndex] = d_wheel_d_vx;
-        H.data[wheelRow * int(OdomState::NUM_STATES) + vyIndex] = d_wheel_d_vy;
-        H.data[wheelRow * int(OdomState::NUM_STATES) + yawIndex] = d_wheel_d_yaw;
-        H.data[wheelRow * int(OdomState::NUM_STATES) + yawRateIndex] = d_wheel_d_yaw_rate;
-    }
+    const float d_wheel3_d_vx = -d_vx_chassis_d_vx + d_vy_chassis_d_vx;
+    const float d_wheel3_d_vy = -d_vx_chassis_d_vy + d_vy_chassis_d_vy;
+    const float d_wheel3_d_yaw = -d_vx_chassis_d_yaw + d_vy_chassis_d_yaw;
+
+    const int vxIndex = int(OdomState::VEL_X);
+    const int vyIndex = int(OdomState::VEL_Y);
+    const int yawIndex = int(OdomState::YAW);
+    const int yawRateIndex = int(OdomState::YAW_RATE);
+
+    H.data[int(OdomInput::WHEEL_0) * int(OdomState::NUM_STATES) + vxIndex] = d_wheel0_d_vx;
+    H.data[int(OdomInput::WHEEL_0) * int(OdomState::NUM_STATES) + vyIndex] = d_wheel0_d_vy;
+    H.data[int(OdomInput::WHEEL_0) * int(OdomState::NUM_STATES) + yawIndex] = d_wheel0_d_yaw;
+    H.data[int(OdomInput::WHEEL_0) * int(OdomState::NUM_STATES) + yawRateIndex] = -rotationRadius;
+
+    H.data[int(OdomInput::WHEEL_1) * int(OdomState::NUM_STATES) + vxIndex] = d_wheel1_d_vx;
+    H.data[int(OdomInput::WHEEL_1) * int(OdomState::NUM_STATES) + vyIndex] = d_wheel1_d_vy;
+    H.data[int(OdomInput::WHEEL_1) * int(OdomState::NUM_STATES) + yawIndex] = d_wheel1_d_yaw;
+    H.data[int(OdomInput::WHEEL_1) * int(OdomState::NUM_STATES) + yawRateIndex] = -rotationRadius;
+
+    H.data[int(OdomInput::WHEEL_2) * int(OdomState::NUM_STATES) + vxIndex] = d_wheel2_d_vx;
+    H.data[int(OdomInput::WHEEL_2) * int(OdomState::NUM_STATES) + vyIndex] = d_wheel2_d_vy;
+    H.data[int(OdomInput::WHEEL_2) * int(OdomState::NUM_STATES) + yawIndex] = d_wheel2_d_yaw;
+    H.data[int(OdomInput::WHEEL_2) * int(OdomState::NUM_STATES) + yawRateIndex] = -rotationRadius;
+
+    H.data[int(OdomInput::WHEEL_3) * int(OdomState::NUM_STATES) + vxIndex] = d_wheel3_d_vx;
+    H.data[int(OdomInput::WHEEL_3) * int(OdomState::NUM_STATES) + vyIndex] = d_wheel3_d_vy;
+    H.data[int(OdomInput::WHEEL_3) * int(OdomState::NUM_STATES) + yawIndex] = d_wheel3_d_yaw;
+    H.data[int(OdomInput::WHEEL_3) * int(OdomState::NUM_STATES) + yawRateIndex] = -rotationRadius;
 
     H.data[int(OdomInput::ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] = 1.0f;
     H.data[int(OdomInput::ACC_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] = 1.0f;

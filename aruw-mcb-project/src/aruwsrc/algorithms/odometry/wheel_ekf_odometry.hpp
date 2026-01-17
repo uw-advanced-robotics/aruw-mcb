@@ -132,31 +132,41 @@ private:
     // State order: POS_X, POS_Y, VEL_X, VEL_Y, YAW, YAW_RATE, ACC_X, ACC_Y.
     // Larger values = less trust in model, more responsive to measurements
     static constexpr float EKF_Q[STATES_SQUARED] = {
-        1E2, 0,    0, 0, 0, 0,   0, 0, 0, 1E2, 0,   0, 0, 0, 0,    0, 0, 0, 1E1, 0,   0, 0,
-        0,   0,    0, 0, 0, 1E1, 0, 0, 0, 0,   0,   0, 0, 0, 1E-2, 0, 0, 0, 0,   0,   0, 0,
-        0,   1E-1, 0, 0, 0, 0,   0, 0, 0, 0,   5E0, 0, 0, 0, 0,    0, 0, 0, 0,   5E0,
+        1.15818e-08f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         1.15818e-08f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         3.29795e-05f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         3.29795e-05f, 0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         7.26128e-04f, 0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         2.67848e-05f, 0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.53807e-03f, 0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.53807e-03f,
     };
 
     // Measurement noise covariance matrix (R).
     // Measurement order: WHEEL_0..WHEEL_3, ACC_X, ACC_Y, GYRO_Z, YAW.
     // Higher value means less trust
     static constexpr float EKF_R[INPUTS_SQUARED] = {
-        1.0, 0,   0,   0,   0,    0,    0,    0,
-        0,   1.0, 0,   0,   0,    0,    0,    0,
-        0,   0,   1.0, 0,   0,    0,    0,    0,
-        0,   0,   0,   1.0, 0,    0,    0,    0,
-        0,   0,   0,   0,   1.2,  0,    0,    0,
-        0,   0,   0,   0,   0,    1.2,  0,    0,
-        0,   0,   0,   0,   0,    0,    0.05, 0,
-        0,   0,   0,   0,   0,    0,    0,    0.02,
+        3.10309e-04f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         3.10309e-04f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         3.10309e-04f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         3.10309e-04f, 0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         9.62164e-02f, 0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         9.62164e-02f, 0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         3.9285e-04f,  0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         7.30955e-04f,
     };
 
     // Initial covariance matrix (P0) - uncertainty in initial state estimates
     // Should be larger than steady-state uncertainties to allow filter to learn quickly
     static constexpr float EKF_P0[STATES_SQUARED] = {
-        1E3, 0,   0, 0, 0, 0,   0, 0, 0, 1E3, 0,   0, 0, 0, 0,   0, 0, 0, 1E3, 0,   0, 0,
-        0,   0,   0, 0, 0, 1E3, 0, 0, 0, 0,   0,   0, 0, 0, 1E2, 0, 0, 0, 0,   0,   0, 0,
-        0,   1E2, 0, 0, 0, 0,   0, 0, 0, 0,   1E3, 0, 0, 0, 0,   0, 0, 0, 0,   1E3,
+        0.25f, 0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f, 0.0f,
+        0.0f,  0.25f, 0.0f,  0.0f,  0.0f,   0.0f, 0.0f, 0.0f,
+        0.0f,  0.0f,  0.25f, 0.0f,  0.0f,   0.0f, 0.0f, 0.0f,
+        0.0f,  0.0f,  0.0f,  0.25f, 0.0f,   0.0f, 0.0f, 0.0f,
+        0.0f,  0.0f,  0.0f,  0.0f,  0.0305f, 0.0f, 0.0f, 0.0f,
+        0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   1.0f, 0.0f, 0.0f,
+        0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 1.0f, 0.0f,
+        0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f, 1.0f,
     };
 
     const tap::motor::DjiMotor* chassisMotors[4];
@@ -171,6 +181,8 @@ private:
     modm::Vector2f velocity;
     // Chassis yaw orientation in world frame (radians)
     float chassisYaw = 0;
+    float yawOffset = 0.0f;
+    bool yawOffsetInitialized = false;
 
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
