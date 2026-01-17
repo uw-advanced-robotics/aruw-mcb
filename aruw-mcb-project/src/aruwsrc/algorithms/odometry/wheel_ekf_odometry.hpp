@@ -26,13 +26,8 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/algorithms/extended_kalman_filter.hpp"
-#include "aruwsrc/control/chassis/holonomic_4_motor_chassis_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector.hpp"
-namespace aruwsrc::control::chassis
-{
-class Holonomic4MotorChassisSubsystem;
-}
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -54,7 +49,6 @@ public:
         float wheelPositionY;  // Wheel position relative to chassis center (m)
         float
             wheelOrientationToForwardRadians;  // Wheel rolling direction relative to forward (rad)
-        float motorToWheelGearRatio;  // Output/input gear ratio used for desired wheel speeds
     };
 
     /**
@@ -63,14 +57,12 @@ public:
      * @param chassisMotors The motors of the robot for odometry measurements
      * @param chassisYawObserver Interface that computes the yaw of the chassis externally
      * @param imu IMU mounted on the chassis to measure chassis acceleration
-     * @param chassisSubsystem Optional chassis subsystem providing desired wheel outputs
      * @param initPos Initial position of chassis when robot boots
      */
     FourWheelEKFOdometry(
         const tap::motor::DjiMotor* chassisMotors[4],
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
-        const aruwsrc::control::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
         const modm::Vector2f initPos);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
@@ -114,10 +106,6 @@ protected:
         ACC_Y,            // IMU acceleration Y (world)
         GYRO_Z,           // IMU yaw rate (rad/s)
         YAW,              // External yaw observation (rad)
-        DESIRED_WHEEL_0,  // Desired wheel 0 linear speed (m/s)
-        DESIRED_WHEEL_1,  // Desired wheel 1 linear speed (m/s)
-        DESIRED_WHEEL_2,  // Desired wheel 2 linear speed (m/s)
-        DESIRED_WHEEL_3,  // Desired wheel 3 linear speed (m/s)
         NUM_INPUTS,
     };
 
@@ -134,7 +122,6 @@ private:
     static constexpr float MIN_DT = 0.0005f;  // Lower bound on dt for stability
 
     static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE = 1.0f;  // Base wheel speed variance
-    static constexpr float DESIRED_WHEEL_MEASUREMENT_VARIANCE = 1.0e3f;  // Low trust in commands
     static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 1.2f;        // Accel noise variance
     static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.05f;        // Gyro noise variance
     static constexpr float YAW_MEASUREMENT_VARIANCE = 0.02f;             // Yaw observer variance
@@ -149,15 +136,17 @@ private:
     };
 
     // Measurement noise covariance matrix (R).
-    // Measurement order: WHEEL_0..WHEEL_3, ACC_X, ACC_Y, GYRO_Z, YAW, DESIRED_WHEEL_0..3.
+    // Measurement order: WHEEL_0..WHEEL_3, ACC_X, ACC_Y, GYRO_Z, YAW.
     // Higher value means less trust
     static constexpr float EKF_R[INPUTS_SQUARED] = {
-        1.0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        1.0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        1.2,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.2,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0.05,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.02,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        1.0e3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        1.0e3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0e3,
+        1.0, 0,   0,   0,   0,    0,    0,    0,
+        0,   1.0, 0,   0,   0,    0,    0,    0,
+        0,   0,   1.0, 0,   0,    0,    0,    0,
+        0,   0,   0,   1.0, 0,    0,    0,    0,
+        0,   0,   0,   0,   1.2,  0,    0,    0,
+        0,   0,   0,   0,   0,    1.2,  0,    0,
+        0,   0,   0,   0,   0,    0,    0.05, 0,
+        0,   0,   0,   0,   0,    0,    0,    0.02,
     };
 
     // Initial covariance matrix (P0) - uncertainty in initial state estimates
@@ -171,7 +160,6 @@ private:
     const tap::motor::DjiMotor* chassisMotors[4];
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
-    const aruwsrc::control::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem;
 
     const modm::Vector2f initPos;
 
@@ -194,7 +182,6 @@ private:
 
     void updateMeasurementCovariance(
         const float wheelSpeeds[4],
-        const float desiredWheelSpeeds[4],
         const modm::Vector2f& imuAccelWorld,
         bool yawMeasurementValid,
         float dt);

@@ -282,7 +282,6 @@ aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
     chassisMotors,
     // chassisWheelConfigs,
     yawObserver,
-    &chassis,
     modm::Vector2f(
         aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
         aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));

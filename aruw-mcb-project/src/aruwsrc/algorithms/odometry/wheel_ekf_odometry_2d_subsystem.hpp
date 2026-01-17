@@ -37,11 +37,6 @@ namespace motor
 class DjiMotor;
 }
 }  // namespace tap
-namespace aruwsrc::control::chassis
-{
-class Holonomic4MotorChassisSubsystem;
-}
-
 namespace aruwsrc::algorithms::odometry
 {
 /**
@@ -60,14 +55,12 @@ public:
      * @param[in] drivers pointer to aruwsrc drivers
      * @param[in] chassisMotors array of 4 chassis motor pointers
      * @param[in] yawObserver yaw observer used to provide world-frame yaw measurements
-     * @param[in] chassisSubsystem optional chassis subsystem providing desired wheel outputs
      * @param[in] initPos initial position of chassis on boot
      */
     WheelEKFOdometry2DSubsystem(
         tap::Drivers& drivers,
         const tap::motor::DjiMotor* chassisMotors[4],
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& yawObserver,
-        const aruwsrc::control::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
         const modm::Vector2f initPos);
 
     void refresh() override;

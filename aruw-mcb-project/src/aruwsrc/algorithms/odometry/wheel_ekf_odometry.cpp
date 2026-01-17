@@ -26,7 +26,6 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/holonomic_4_motor_chassis_subsystem.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -36,28 +35,24 @@ const FourWheelEKFOdometry::ChassisWheelConfig FourWheelEKFOdometry::WHEEL_CONFI
         aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
         aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         M_PI_4,
-        aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO,
     },
     {
         aruwsrc::control::chassis::WHEEL_RADIUS,
         -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
         aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         -M_PI_4,
-        aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO,
     },
     {
         aruwsrc::control::chassis::WHEEL_RADIUS,
         aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
         -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         3.0f * M_PI_4,
-        aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO,
     },
     {
         aruwsrc::control::chassis::WHEEL_RADIUS,
         -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
         -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         -3.0f * M_PI_4,
-        aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO,
     },
 };
 
@@ -65,7 +60,6 @@ FourWheelEKFOdometry::FourWheelEKFOdometry(
     const tap::motor::DjiMotor* chassisMotors[4],
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
-    const aruwsrc::control::chassis::Holonomic4MotorChassisSubsystem* chassisSubsystem,
     const modm::Vector2f initPos)
     : ekf(stateTransitionFunction,
           observationFunction,
@@ -76,7 +70,6 @@ FourWheelEKFOdometry::FourWheelEKFOdometry(
           EKF_P0),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
-      chassisSubsystem(chassisSubsystem),
       initPos(initPos)
 {
     // Copy motor pointers to member array
@@ -134,28 +127,7 @@ void FourWheelEKFOdometry::update()
     z[int(OdomInput::GYRO_Z)] = imu.getGz();
     z[int(OdomInput::YAW)] = yawMeasurementValid ? measuredYaw : chassisYaw;
 
-    float desiredWheelSpeeds[4] = {wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3]};
-    if (chassisSubsystem != nullptr)
-    {
-        for (int i = 0; i < 4; i++)
-        {
-            float desiredWheelRpm = chassisSubsystem->desiredWheelRPM[i][0];
-            float wheelRpmOutput = desiredWheelRpm * WHEEL_CONFIGS[i].motorToWheelGearRatio;
-            desiredWheelSpeeds[i] =
-                wheelRpmOutput * static_cast<float>(M_TWOPI) / 60.0f * WHEEL_CONFIGS[i].wheelRadius;
-        }
-    }
-    for (int i = 0; i < 4; i++)
-    {
-        z[int(OdomInput::DESIRED_WHEEL_0) + i] = desiredWheelSpeeds[i];
-    }
-
-    updateMeasurementCovariance(
-        wheelSpeeds,
-        desiredWheelSpeeds,
-        imuAccelWorld,
-        yawMeasurementValid,
-        dt);
+    updateMeasurementCovariance(wheelSpeeds, imuAccelWorld, yawMeasurementValid, dt);
 
     // Create measurement vector
     ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector
@@ -205,7 +177,6 @@ void FourWheelEKFOdometry::updateChassisStateFromEKF()
 
 void FourWheelEKFOdometry::updateMeasurementCovariance(
     const float wheelSpeeds[4],
-    const float desiredWheelSpeeds[4],
     const modm::Vector2f& imuAccelWorld,
     bool yawMeasurementValid,
     float dt)
@@ -228,15 +199,9 @@ void FourWheelEKFOdometry::updateMeasurementCovariance(
 
     for (int i = 0; i < 4; i++)
     {
-        float commandMismatch = std::abs(desiredWheelSpeeds[i] - wheelSpeeds[i]);
-        float commandScale = 1.0f + commandMismatch;
-        float wheelVariance = BASE_WHEEL_MEASUREMENT_VARIANCE * slipScale * commandScale;
+        float wheelVariance = BASE_WHEEL_MEASUREMENT_VARIANCE * slipScale;
         int wheelIndex = int(OdomInput::WHEEL_0) + i;
         R[wheelIndex * int(OdomInput::NUM_INPUTS) + wheelIndex] = wheelVariance;
-
-        int desiredIndex = int(OdomInput::DESIRED_WHEEL_0) + i;
-        R[desiredIndex * int(OdomInput::NUM_INPUTS) + desiredIndex] =
-            DESIRED_WHEEL_MEASUREMENT_VARIANCE;
     }
 
     int accXIndex = int(OdomInput::ACC_X);
@@ -327,7 +292,6 @@ void FourWheelEKFOdometry::observationFunction(
             roll_x * vel_x_chassis + roll_y * vel_y_chassis + omega_contrib * yaw_rate;
 
         h_x.data[int(OdomInput::WHEEL_0) + i] = wheel_speed;
-        h_x.data[int(OdomInput::DESIRED_WHEEL_0) + i] = wheel_speed;
     }
 
     float acc_x = x.data[int(OdomState::ACC_X)];
@@ -416,7 +380,6 @@ void FourWheelEKFOdometry::observationJacobianFunction(
             roll_x * (-WHEEL_CONFIGS[i].wheelPositionY) + roll_y * WHEEL_CONFIGS[i].wheelPositionX;
 
         int wheelRow = int(OdomInput::WHEEL_0) + i;
-        int desiredRow = int(OdomInput::DESIRED_WHEEL_0) + i;
         int vxIndex = int(OdomState::VEL_X);
         int vyIndex = int(OdomState::VEL_Y);
         int yawIndex = int(OdomState::YAW);
@@ -426,11 +389,6 @@ void FourWheelEKFOdometry::observationJacobianFunction(
         H.data[wheelRow * int(OdomState::NUM_STATES) + vyIndex] = d_wheel_d_vy;
         H.data[wheelRow * int(OdomState::NUM_STATES) + yawIndex] = d_wheel_d_yaw;
         H.data[wheelRow * int(OdomState::NUM_STATES) + yawRateIndex] = d_wheel_d_yaw_rate;
-
-        H.data[desiredRow * int(OdomState::NUM_STATES) + vxIndex] = d_wheel_d_vx;
-        H.data[desiredRow * int(OdomState::NUM_STATES) + vyIndex] = d_wheel_d_vy;
-        H.data[desiredRow * int(OdomState::NUM_STATES) + yawIndex] = d_wheel_d_yaw;
-        H.data[desiredRow * int(OdomState::NUM_STATES) + yawRateIndex] = d_wheel_d_yaw_rate;
     }
 
     H.data[int(OdomInput::ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] = 1.0f;
