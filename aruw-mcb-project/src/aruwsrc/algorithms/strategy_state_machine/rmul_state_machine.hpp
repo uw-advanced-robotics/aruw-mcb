@@ -115,8 +115,8 @@ private:
     const Position POINT_2 = Position(3.5, 1.5, 0);   // MIDDLE_RIGHT
     const Position POINT_3 = Position(5, 4.0, 0);     // MIDDLE
     const Position POINT_4 = Position(5.25, 7.5, 0);  // SIDE_WALL
-    const Position POINT_5 = Position(0,0,0);
-    const Position POINT_6 = Position(1.5,0,0);
+    const Position POINT_5 = Position(0, 0, 0);
+    const Position POINT_6 = Position(1.5, 0, 0);
 
     // const std::array<Position, 5> ATTACKING_PATH =
     //     {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3, POINT_4};
@@ -124,11 +124,8 @@ private:
     // const std::array<Position, 5> HEALING_PATH =
     //     {POINT_4, POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
 
-    const std::array<Position, 2> ATTACKING_PATH =
-         {POINT_5, POINT_6};
-    const std::array<Position, 2> HEALING_PATH =
-         {POINT_5, POINT_6};
-
+    const std::array<Position, 2> ATTACKING_PATH = {POINT_5, POINT_6};
+    const std::array<Position, 2> HEALING_PATH = {POINT_5, POINT_6};
 };
 }  // namespace aruwsrc::algorithms::strategy_state_machine
 

@@ -47,14 +47,14 @@ enum MessageType
 
 enum State
 {
-    UNKNOWN = -1, // not connected?
-    RESET = 0, // software error
-    SAFE = 1, // getting data is on
-    CHARGE = 2, // only getting input
-    CHARGE_DISCHARGE = 3, // can do both
-    DISCHARGE = 4, // only motor output
-    BATTERY_OFF = 5, // who knows
-    DISABLED = 6, // driver has turned it off
+    UNKNOWN = -1,          // not connected?
+    RESET = 0,             // software error
+    SAFE = 1,              // getting data is on
+    CHARGE = 2,            // only getting input
+    CHARGE_DISCHARGE = 3,  // can do both
+    DISCHARGE = 4,         // only motor output
+    BATTERY_OFF = 5,       // who knows
+    DISABLED = 6,          // driver has turned it off
 };
 
 enum SprintMode

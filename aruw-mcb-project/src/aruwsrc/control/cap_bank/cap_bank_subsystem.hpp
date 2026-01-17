@@ -61,8 +61,8 @@ public:
     void enableCapacitors() { this->capacitorsEnabled = true; }
     void disableCapacitors() { this->capacitorsEnabled = false; }
     void toggleCapacitors() { this->capacitorsEnabled = !this->capacitorsEnabled; }
-    
-    int getAvailableEnergy() { return this->capacitorBank.getAvailableEnergy();}
+
+    int getAvailableEnergy() { return this->capacitorBank.getAvailableEnergy(); }
 
     bool enabled() const { return this->capacitorsEnabled; }
 

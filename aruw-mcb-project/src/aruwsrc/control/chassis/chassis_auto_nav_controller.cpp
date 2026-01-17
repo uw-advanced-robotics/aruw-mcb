@@ -20,7 +20,6 @@
 
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-
 namespace aruwsrc::chassis
 {
 void ChassisAutoNavController::initialize()
@@ -38,7 +37,8 @@ void ChassisAutoNavController::runController(
     const bool movementEnabled,
     const bool beybladeEnabled)
 {
-    Position currentPos = transformer->getWorldToChassis().getTranslation();  // works bc transformer always makes z 0
+    Position currentPos =
+        transformer->getWorldToChassis().getTranslation();  // works bc transformer always makes z 0
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
                                                // this constant with a function in the future
     Position setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
@@ -48,12 +48,16 @@ void ChassisAutoNavController::runController(
     Vector posError = setpoint - currentPos;
 
     // make if can sprint (above 25%)
-    // add a boolean for sprinting check posError over a threshold (make a constant in chassis constants)
+    // add a boolean for sprinting check posError over a threshold (make a constant in chassis
+    // constants)
     curPosError = posError.magnitude();
-    if (posError.magnitude() > translationalMotionThreshhold && capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold) { // is it translating
+    if (posError.magnitude() > translationalMotionThreshhold &&
+        capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold)
+    {  // is it translating
         capBankSubsystem.changeSprintMode(can::capbank::SprintMode::SPRINT);
-        
-    } else {
+    }
+    else
+    {
         capBankSubsystem.changeSprintMode(can::capbank::SprintMode::NO_SPRINT);
     }
 

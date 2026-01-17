@@ -25,9 +25,9 @@
 
 namespace aruwsrc::chassis
 {
-// Initial position of the chassis in the field (meters) 
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f; // should be 0.5f 
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f; // should be 7.0f
+// Initial position of the chassis in the field (meters)
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;  // should be 0.5f
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;  // should be 7.0f
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -131,7 +131,7 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 100,
 };
 
-static constexpr float TRANSLATIONAL_MOTION_THRESHOLD = 0.25f; 
+static constexpr float TRANSLATIONAL_MOTION_THRESHOLD = 0.25f;
 
 static constexpr float CAPBANK_ENERGY_THRESHOLD = 500.0f;
 

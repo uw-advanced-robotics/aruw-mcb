@@ -74,7 +74,7 @@ public:
           plateHitTracker(this),
           refSerialTransmitter(this),
           interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor),
-          // for fake sentry 
+          // for fake sentry
           stateMachine(refSerial, visionCoprocessor)
     {
     }
@@ -99,7 +99,7 @@ public:
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
-    
+
     // for fake sentry
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 

@@ -103,7 +103,6 @@
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
-
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
 #endif
@@ -127,7 +126,7 @@ using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::standard;
 
-//for fake sentry 
+// for fake sentry
 // using namespace aruwsrc::sentry::chassis;
 
 /*
@@ -288,7 +287,6 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers()->visionCoprocessor,
     odometrySubsystem,
     transformAdapter);
-
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
@@ -743,30 +741,10 @@ void startStandardCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerStandardIoMappings(Drivers *drivers)
 {
-    // drivers->commandMapper.addMap(&rightSwitchMiddle);
-    // drivers->commandMapper.addMap(&rightSwitchUp);
-    // drivers->commandMapper.addMap(&leftSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchUp);
-
-    // ------------------ FOR FAKE SENTRY ---------------------------------------------
-    //drivers->commandMapper.addMap(&rightUp);
-
-    drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive & auto aim
-    drivers->commandMapper.addMap(&leftDownRightUp);   // manual drive, auto aim, gated-fire
-    //drivers->commandMapper.addMap(&leftDownRightUpAg);
-    //drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
-
-    drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
-    //drivers->commandMapper.addMap(&leftMidRightUpAg);
-    drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
-    //drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
-
-    // drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
-    // drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
-    // drivers->commandMapper.addMap(&leftUpRightUpAg);
-
-    // --------------------- END FAKE SENTRY MAPPINGS ------------------
-
+    drivers->commandMapper.addMap(&rightSwitchMiddle);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
@@ -778,9 +756,9 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&qPressed);
     drivers->commandMapper.addMap(&xPressed);
     drivers->commandMapper.addMap(&vPressed);
-    // drivers->commandMapper.addMap(&cShiftPressed);
-    // drivers->commandMapper.addMap(&shiftPressed);
-    // drivers->commandMapper.addMap(&ctrlPressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&shiftPressed);
+    drivers->commandMapper.addMap(&ctrlPressed);
 }
 }  // namespace standard_control
 

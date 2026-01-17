@@ -43,6 +43,8 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap_bank/sentry_capbank_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
@@ -51,6 +53,7 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/image_indicator.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -81,12 +84,6 @@
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret/turret_minor_control_command.hpp"
-
-#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
-
-#include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
-
-#include "aruwsrc/control/cap_bank/sentry_capbank_command.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -388,7 +385,6 @@ aruwsrc::chassis::ChassisAutoNavController autoNavController(
     0.15f,
     1000.0f);
 
-
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
@@ -522,7 +518,6 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
     &drivers()->visionCoprocessor,
     &turretLeftSolver);
 
-
 /* define commands ----------------------------------------------------------*/
 aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     *drivers(),
@@ -530,10 +525,7 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     autoNavController,
     false);
 
-aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(
-    drivers(),
-    capBankSubsystem
-);
+aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(drivers(), capBankSubsystem);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -790,7 +782,6 @@ GovernorLimitedCommand<3> turretRightAgitatorManualSpin(
      &refSystemProjectileLaunchedGovernorTurretRight,
      &frictionWheelsOnGovernorTurretRight});
 
-
 /* define client display / HUD related items --------------------------------*/
 
 // This shit is currently banned by DJI, but left for a hopeful future
@@ -800,9 +791,7 @@ tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers())
 CircleCrosshair circleCrosshair(refSerialTransmitter);
 ImageIndicator imageIndicator(refSerialTransmitter);
 
-std::vector<HudIndicator *> indicators = {
-    &imageIndicator, 
-    &circleCrosshair};
+std::vector<HudIndicator *> indicators = {&imageIndicator, &circleCrosshair};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, indicators);
 
@@ -900,7 +889,6 @@ PressCommandMapping bCtrlPressed(
     drivers(),
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
-
 
 // safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
