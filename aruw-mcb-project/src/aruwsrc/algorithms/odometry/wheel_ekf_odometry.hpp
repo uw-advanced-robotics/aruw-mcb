@@ -82,6 +82,8 @@ public:
 
     void overrideOdometryPosition(const float positionX, const float positionY);
 
+    int a = -2;
+
 protected:
     enum class OdomState
     {

@@ -155,7 +155,7 @@ void FourWheelEKFOdometry::update()
     measurement.data[int(OdomInput::YAW)] = z_pred.data[int(OdomInput::YAW)] + yaw_residual;
 
     // Perform correction step.
-    ekf.update(measurement);
+    a = ekf.update(measurement);
 
     // Update the location and velocity accessor objects with values from the state vector
     updateChassisStateFromEKF();

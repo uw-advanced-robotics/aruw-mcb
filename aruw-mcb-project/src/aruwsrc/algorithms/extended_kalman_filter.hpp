@@ -120,35 +120,87 @@ public:
         P = F * P * Ft + Q;
     }
 
-    void update(const InputVector &z)
+    int update(const InputVector &z)
     {
         if (!initialized)
         {
-            return;
+            return -1;
         }
 
         // Compute Jacobian of observation function at predicted state
         H_jacobian(xHat, H);
-        arm_mat_trans_f32(&H.matrix, &Ht.matrix);
+        if (arm_mat_trans_f32(&H.matrix, &Ht.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 0;
+        }
 
         // Predict measurement using nonlinear observation function
-        InputVector z_pred;
         h(xHat, z_pred);
 
         // Innovation (measurement residual)
-        InputVector y = z - z_pred;
+        if (arm_mat_sub_f32(&z.matrix, &z_pred.matrix, &y.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 1;
+        }
 
         // Innovation covariance
-        InputMatrix S = H * P * Ht + R;
+        if (arm_mat_mult_f32(&H.matrix, &P.matrix, &HP.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 2;
+        }
+        if (arm_mat_mult_f32(&HP.matrix, &Ht.matrix, &S.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 3;
+        }
+        if (arm_mat_add_f32(&S.matrix, &R.matrix, &S.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 4;
+        }
+        for (uint16_t i = 0; i < INPUTS; i++)
+        {
+            S.data[i * INPUTS + i] += 1.0e-6f;
+        }
 
-        // Kalman gain
-        K = P * Ht * S.inverse();
+        // Kalman gain (guard against singular S)
+        if (arm_mat_inverse_f32(&S.matrix, &S_inv.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 5;
+        }
+        if (arm_mat_mult_f32(&P.matrix, &Ht.matrix, &K.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 6;
+        }
+        if (arm_mat_mult_f32(&K.matrix, &S_inv.matrix, &K_tmp.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 7;
+        }
+        K = K_tmp;
 
         // Update state estimate
-        xHat = xHat + K * y;
+        if (arm_mat_mult_f32(&K.matrix, &y.matrix, &K_y.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 8;
+        }
+        if (arm_mat_add_f32(&xHat.matrix, &K_y.matrix, &xHat.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 9;
+        }
 
         // Update covariance estimate
-        P = (I - K * H) * P;
+        if (arm_mat_mult_f32(&K.matrix, &H.matrix, &KH.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 10;
+        }
+        if (arm_mat_sub_f32(&I.matrix, &KH.matrix, &IKH.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 11;
+        }
+        if (arm_mat_mult_f32(&IKH.matrix, &P.matrix, &P_new.matrix) != ARM_MATH_SUCCESS)
+        {
+            return 12;
+        }
+        P = P_new;
+        return 13;
     }
 
     void performUpdate(const InputVector &z, float dt)
@@ -214,12 +266,22 @@ private:
      * Kalman filter gain matrix.
      */
     KalmanGainMatrix K;
+    KalmanGainMatrix K_tmp;
 
     /**
      * Identity matrix created upon construction and stored to avoid
      * having to compute it each update step.
      */
     StateMatrix I;
+    StateMatrix KH;
+    StateMatrix IKH;
+    StateMatrix P_new;
+    InputMatrix HP;
+    InputMatrix S;
+    InputMatrix S_inv;
+    InputVector z_pred;
+    InputVector y;
+    StateVector K_y;
 
     bool initialized = false;
 };
