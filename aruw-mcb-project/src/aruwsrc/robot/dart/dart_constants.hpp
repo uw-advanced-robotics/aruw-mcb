@@ -23,6 +23,8 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/servo.hpp"
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
 #include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
 namespace aruwsrc::dart
@@ -34,6 +36,41 @@ static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
 static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
+
+static constexpr float YAW_INPUT_SENSITIVITY = 0.05;
+static constexpr tap::gpio::Digital::InputPin YAW_LIMITSWITCH_PORT = tap::gpio::Digital::InputPin::D; 
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5; 
+static constexpr float YAW_MOTOR_GEAR_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+static constexpr float YAW_LEADSCREW_THREAD_PITCH = 0.002; // 2 mm
+static constexpr float DART_LAUNCHER_YAW_RADIAL_LENGTH = 0.763; // 76.3 cm
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+    .kp = 0.0f, //should be in realm of 10000s
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 0.002f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config YAW_HOME_CONFIG = {
+    .super = {
+        .lowerBound = 0.0f, 
+        .upperBound = 0.2785337f,
+        .epsilon = 0.002f,
+        .maxSetpointIncrement = 0.05f, //TODO: adjust
+        .initSetpoint = 0.0f,
+
+        .encoderRatio = YAW_MOTOR_GEAR_RATIO * YAW_LEADSCREW_THREAD_PITCH,
+        .posPidConfig = YAW_PID_CONFIG,
+        .maxOutput = YAW_PID_CONFIG.maxOutput,
+        .staticFeedforward = 0,
+    },
+    .home = 0.0f,
+    .homingSpeed = 0.03, // MAYBE CHANGE
+    .homingReversed = false // TODO: CHANGE IF HOMES THE WRONG WAY
+};
 static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 3.0f;
 static constexpr int32_t PULLBACK_PULL_POSITION = 0;  // TODO: FIND
 static constexpr int32_t RELEASE_POSITION = 0;        // TODO: FIND
