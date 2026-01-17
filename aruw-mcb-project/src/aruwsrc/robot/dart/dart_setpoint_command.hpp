@@ -23,7 +23,7 @@
 
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
-#include "dart_launcher_subsystem.hpp"
+#include "dart_servo.hpp"
 using namespace aruwsrc::dart;
 namespace aruwsrc::dart
 {

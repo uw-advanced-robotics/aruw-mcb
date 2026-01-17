@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dart_launcher_subsystem.hpp"
+#include "dart_servo.hpp"
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
@@ -27,28 +27,28 @@ using namespace aruwsrc::control::turret;
 
 namespace aruwsrc::dart
 {
-DartLauncherSubsystem::DartLauncherSubsystem(tap::Drivers* drivers)
+DartServo::DartServo(tap::Drivers* drivers)
     : Subsystem(drivers),
       servo(drivers, SERVO_PORT, SERVO_MAX, SERVO_MIN, SERVO_SPEED)
 {
     servo.setTargetPwm(SERVO_MAX);
 };
 
-void DartLauncherSubsystem::initialize()
+void DartServo::initialize()
 {
     drivers->pwm.setTimerFrequency(tap::gpio::Pwm::TIMER8, 500);
 }
 
-void DartLauncherSubsystem::refresh() { servo.updateSendPwmRamp(); }
+void DartServo::refresh() { servo.updateSendPwmRamp(); }
 
-void DartLauncherSubsystem::refreshSafeDisconnect() { servo.setTargetPwm(0.0f); }
+void DartServo::refreshSafeDisconnect() { servo.setTargetPwm(0.0f); }
 
-void DartLauncherSubsystem::setOpen() { servo.setTargetPwm(servo.getMaxPWM()); }
+void DartServo::setOpen() { servo.setTargetPwm(servo.getMaxPWM()); }
 
-void DartLauncherSubsystem::setClose() { servo.setTargetPwm(servo.getMinPWM()); }
+void DartServo::setClose() { servo.setTargetPwm(servo.getMinPWM()); }
 
-float DartLauncherSubsystem::getOpenPWM() { return servo.getMaxPWM(); }
+float DartServo::getOpenPWM() { return servo.getMaxPWM(); }
 
-float DartLauncherSubsystem::getClosePWM() { return servo.getMinPWM(); }
+float DartServo::getClosePWM() { return servo.getMinPWM(); }
 
 }  // namespace aruwsrc::dart

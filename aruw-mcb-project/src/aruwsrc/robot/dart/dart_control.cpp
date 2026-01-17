@@ -36,7 +36,7 @@
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
-#include "aruwsrc/robot/dart/dart_launcher_subsystem.hpp"
+#include "aruwsrc/robot/dart/dart_servo.hpp"
 #include "aruwsrc/robot/dart/dart_manual_pullback_setpoint_command.hpp"
 
 #include "dart_close_command.hpp"
@@ -74,24 +74,12 @@ tap::motor::DoubleDjiMotor pullMotors(
     "Upper Motor",
     "Lower Motor");
 
-// aruwsrc::communication::sensors::beam_break::DigitalBeamBreak limitSwitch(
-//     &(drivers()->digital),
-//     LIMIT_SWITCH_PORT,
-//     true);
-
-// aruwsrc::control::joint::homing::trigger::LimitSwitchTrigger limit(&limitSwitch);
-
-/*
- TODO: we will need to change to limit switch once it is added.
-    For now, we are using a beam break as a placeholder.
-*/
-
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak beamBreak(
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak limitSwitch(
     &(drivers()->digital),
-    BEAMBREAK_PORT,
+    LIMITSWITCH_PORT,
     true);
 
-aruwsrc::control::joint::homing::trigger::LimitSwitchTrigger limit(&beamBreak);
+aruwsrc::control::joint::homing::trigger::LimitSwitchTrigger limit(&limitSwitch);
 
 aruwsrc::control::joint::homing::TriggerHomedJointSubsystem pullMotorSubsystem(
     drivers(),
@@ -110,13 +98,11 @@ DartManualPullbackSetpointCommand manualPullbackCommand(
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-DartLauncherSubsystem dartLauncher(drivers());
-
+DartServo dartServo (drivers());
 DartSetpointCommand dartPullback(pullMotorSubsystem, PULLBACK_PULL_POSITION);
 DartSetpointCommand dartGrab(pullMotorSubsystem, GRAB_POSITION);
-DartOpenCommand servoOpen(dartLauncher);
-DartCloseCommand servoClose(dartLauncher);
-
+DartOpenCommand servoOpen(dartServo);
+DartCloseCommand servoClose(dartServo);
 HomingCommand pullMotorHome(pullMotorSubsystem);
 
 // grab the string and pullback to setpoint
@@ -158,13 +144,13 @@ HoldCommandMapping homeYawMapping(
 
 void initializeSubsystems()
 {
-    dartLauncher.initialize();
+    dartServo.initialize();
     pullMotorSubsystem.initialize();
 }
 
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&dartLauncher);
+    drivers->commandScheduler.registerSubsystem(&dartServo);
     drivers->commandScheduler.registerSubsystem(&pullMotorSubsystem);
     drivers->digital.configureInputPullMode(
         tap::gpio::Digital::B,

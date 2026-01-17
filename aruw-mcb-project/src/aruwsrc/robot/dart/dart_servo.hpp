@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_LAUNCHER_SUBSYSTEM_HPP_
-#define DART_LAUNCHER_SUBSYSTEM_HPP_
+#ifndef DART_SERVO_HPP_
+#define DART_SERVO_HPP_
 
 #include <tap/motor/dji_motor.hpp>
 
@@ -28,10 +28,10 @@
 
 namespace aruwsrc::dart
 {
-class DartLauncherSubsystem : public tap::control::Subsystem
+class DartServo : public tap::control::Subsystem
 {
 public:
-    DartLauncherSubsystem(tap::Drivers* drivers);
+    DartServo(tap::Drivers* drivers);
 
     void initialize() override;
     void refresh() override;
@@ -52,12 +52,12 @@ public:
 
     tap::motor::Servo& getServo() { return servo; }
 
-    const char* getName() const override { return "Dart Launcher Subsystem"; }
+    const char* getName() const override { return "Dart Servo"; }
 
 protected:
     tap::motor::Servo servo;
 
-};  // class DartLauncherSubsystem
+};  // class DartServo
 
 }  // namespace aruwsrc::dart
-#endif  // DART_LAUNCHER_SUBSYSTEM_HPP_
+#endif  // DART_SERVO_HPP_
