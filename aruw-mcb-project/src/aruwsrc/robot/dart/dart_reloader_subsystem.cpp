@@ -42,7 +42,7 @@ void DartReloaderSubsystem::setSetpoint(float32_t setpoint) { this->setpoint = s
 bool DartReloaderSubsystem::atSetpoint()
 {
     float error = motor.getEncoder()->getPosition().getUnwrappedValue() - setpoint;
-    return tap::algorithms::compareFloatClose(error, 0.0f, DART_RELOADER_PID_CONFIG.errDeadzone);
+    return tap::algorithms::compareFloatClose(error, 0.0f, DART_MAGAZINE_TOLERANCE);
 }
 void DartReloaderSubsystem::refresh()
 {

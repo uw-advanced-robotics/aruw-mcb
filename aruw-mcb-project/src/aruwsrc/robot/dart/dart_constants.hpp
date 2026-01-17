@@ -41,8 +41,9 @@ static constexpr tap::algorithms::SmoothPidConfig DART_RELOADER_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxOutput = 2400.0f,
-    .errDeadzone = 0.0125f,
+    .errDeadzone = 0.0f,
 };
+static constexpr float DART_MAGAZINE_TOLERANCE = 0.0125f;
 //  * @param[in] pwmPin The pin to attach the Servo class with.
 //  * @param[in] maximumPwm The maximum allowable PWM output. This is limited between 0 and 1.
 //  * @param[in] minimumPwm The minimum allowable PWM output. This is limited between 0 and 1.
