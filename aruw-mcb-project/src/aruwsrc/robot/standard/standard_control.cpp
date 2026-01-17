@@ -103,10 +103,6 @@
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 
-// for fake sentry
-#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
-#include "aruwsrc/control/cap_bank/sentry_capbank_command.hpp"
-
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -293,25 +289,8 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-// for fake sentry
-aruwsrc::chassis::ChassisAutoNavController autoNavController(
-    *drivers(),
-    chassis,
-    &transformer,
-    aruwsrc::chassis::BEYBLADE_CONFIG,
-    capBankSubsystem,
-    0.15f,
-    1000.0f);
-
 
 /* define commands ----------------------------------------------------------*/
-// for fake sentry
-aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
-    *drivers(),
-    chassis,
-    autoNavController,
-    false);
-
 aruwsrc::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
@@ -531,21 +510,15 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // Cap Bank
-// aruwsrc::control::capbank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
-// aruwsrc::control::capbank::CapBankSprintCommand capBankSprintCommand(
-//     drivers(),
-//     capBankSubsystem,
-//     aruwsrc::can::capbank::SprintMode::SPRINT);
-// aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
-//     drivers(),
-//     capBankSubsystem,
-//     aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
-
-// ---------------fake sentry-----------------
-aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(
+aruwsrc::control::capbank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
+aruwsrc::control::capbank::CapBankSprintCommand capBankSprintCommand(
     drivers(),
-    capBankSubsystem
-);
+    capBankSubsystem,
+    aruwsrc::can::capbank::SprintMode::SPRINT);
+aruwsrc::control::capbank::CapBankSprintCommand capBankHalfSprintCommand(
+    drivers(),
+    capBankSubsystem,
+    aruwsrc::can::capbank::SprintMode::HALF_SPRINT);
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -603,120 +576,28 @@ ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicato
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
-// HoldRepeatCommandMapping rightSwitchMiddle(
-//     drivers(),
-//     {&spinFrictionWheels},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
-//     true);
-// HoldRepeatCommandMapping rightSwitchUp(
-//     drivers(),
-//     {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-//     true);
+HoldRepeatCommandMapping rightSwitchMiddle(
+    drivers(),
+    {&spinFrictionWheels},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
+    true);
 
-// HoldRepeatCommandMapping leftSwitchDown(
-//     drivers(),
-//     {&beybladeCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-//     true);
+HoldRepeatCommandMapping rightSwitchUp(
+    drivers(),
+    {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+    true);
+
+HoldRepeatCommandMapping leftSwitchDown(
+    drivers(),
+    {&beybladeCommand},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+    true);
+
 HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
-// --------------------------------- FOR FAKE SENTRY -------------------------------------
-
-// HoldCommandMapping rightUp(
-//     drivers(),
-//     {&turretLeftFrictionWheelSpinCommand, &turretRightFrictionWheelSpinCommand},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-
-// auto nav + auto aim + cv gated fire
-// HoldCommandMapping leftUpRightUp(
-//     drivers(),
-//     {&autoNavBeybladeCommand, &turretCVCommand},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
-
-// HoldRepeatCommandMapping leftUpRightUpAg(
-//     drivers(),
-//     {&turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting,
-//      &turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
-//     false);
-
-// auto nav + auto aim
-// HoldCommandMapping leftUpRightMid(
-//     drivers(),
-//     {&autoNavBeybladeCommand, &turretCVCommand},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
-
-// // imu calibrate
-// HoldCommandMapping leftUpRightDown(
-//     drivers(),
-//     {&imuCalibrateCommand},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
-
-// manual aim and shoot
-// HoldCommandMapping leftMidRightUp(
-//     drivers(),
-//     {&turretLeftManualCommand, &turretRightManualCommand},
-//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
-
-// manual aim and shoot
-// HoldRepeatCommandMapping leftMidRightUpAg(
-//     drivers(),
-//     {&turretLeftAgitatorManualSpin, &turretRightAgitatorManualSpin},
-//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP),
-//     false);
-
-// auto drive & auto aim
-HoldCommandMapping leftMidRightMid(
-    drivers(),
-    {&imuCalibrateCommand}, // added imucalibrate to this
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
-
-HoldCommandMapping leftMidRightUp(
-    drivers(),
-    {&autoNavBeybladeCommand, &capBankSentryCommand}, // added imucalibrate to this
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
-
-// // manual aim
-// HoldCommandMapping leftMidRightDown(
-//     drivers(),
-//     {
-//         &majorManualCommand,
-//         &turretLeftManualCommand,
-//         &turretRightManualCommand,
-//     },
-//     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
-
-// manual drive, auto aim, cv-gated fire
-HoldCommandMapping leftDownRightUp(
-    drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
-
-// HoldRepeatCommandMapping leftDownRightUpAg(
-//     drivers(),
-//     {&turretLeftRotateAndUnjamAgitatorWithHeatAndCVLimiting,
-//      &turretRightRotateAndUnjamAgitatorWithHeatAndCVLimiting},
-//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP),
-//     false);
-
-// manual drive & auto aim
-HoldCommandMapping leftDownRightMid(
-    drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
-
-// manual drive
-HoldCommandMapping leftDownRightDown(
-    drivers(),
-    {&chassisDriveCommand},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
-
-
-// ------------------------ END FAKE SENTRY MAPPINGS ---------------------------------------
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
@@ -790,18 +671,18 @@ CycleStateCommandMapping<
         RemoteMapState({Remote::Key::E}));
 
 // cap bank
-// PressCommandMapping cShiftPressed(
-//     drivers(),
-//     {&capBankToggleCommand},
-//     RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
-// HoldCommandMapping shiftPressed(
-//     drivers(),
-//     {&capBankSprintCommand},
-//     RemoteMapState({Remote::Key::SHIFT}));
-// HoldCommandMapping ctrlPressed(
-//     drivers(),
-//     {&capBankHalfSprintCommand},
-//     RemoteMapState({Remote::Key::CTRL}));
+PressCommandMapping cShiftPressed(
+    drivers(),
+    {&capBankToggleCommand},
+    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
+HoldCommandMapping shiftPressed(
+    drivers(),
+    {&capBankSprintCommand},
+    RemoteMapState({Remote::Key::SHIFT}));
+HoldCommandMapping ctrlPressed(
+    drivers(),
+    {&capBankHalfSprintCommand},
+    RemoteMapState({Remote::Key::CTRL}));
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -812,16 +693,13 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
-    //drivers->commandScheduler.registerSubsystem(&frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
-
-    // for fake sentry
-    drivers->stateMachine.attachAutoNavController(&autoNavController);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -849,8 +727,6 @@ void setDefaultStandardCommands(Drivers *)
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
-
-    //capBankSubsystem.setDefaultCommand(&capBankSentryCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

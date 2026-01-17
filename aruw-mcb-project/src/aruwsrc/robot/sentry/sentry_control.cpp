@@ -82,9 +82,11 @@
 #include "aruwsrc/robot/sentry/turret/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret/turret_minor_control_command.hpp"
 
-#include "aruwsrc/control/cap_bank/cap_bank_sprint_command.hpp"
+#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
 
 #include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
+
+#include "aruwsrc/control/cap_bank/sentry_capbank_command.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -110,6 +112,7 @@ using namespace aruwsrc::sentry::algorithms::odometry;
 using namespace aruwsrc::sentry::turret;
 using namespace aruwsrc::sentry::turret::cv;
 using namespace aruwsrc::virtualMCB;
+using namespace aruwsrc::control::capbank;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -373,12 +376,16 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
+// for fake sentry
 aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    transformer.getWorldToChassis(),
+    &transformerAdapter,
     aruwsrc::chassis::BEYBLADE_CONFIG,
-    drivers()->capacitorBank);
+    capBankSubsystem,
+    0.15f,
+    1000.0f);
+
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -520,6 +527,11 @@ aruwsrc::chassis::AutoNavBeybladeCommand autoNavBeybladeCommand(
     chassis,
     autoNavController,
     false);
+
+aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(
+    drivers(),
+    capBankSubsystem
+);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
