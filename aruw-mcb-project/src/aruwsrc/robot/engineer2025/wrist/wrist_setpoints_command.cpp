@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wrist_setpoints_command.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_setpoints_command.hpp"
 namespace aruwsrc::engineer::wrist
 {
 WristSetpointsCommand::WristSetpointsCommand(WristSubsystem &wrist, std::vector<Setpoint> setpoints)

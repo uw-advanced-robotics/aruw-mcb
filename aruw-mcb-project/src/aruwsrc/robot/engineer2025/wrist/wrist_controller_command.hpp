@@ -23,8 +23,8 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
-#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_control_operator_interface.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer::wrist
 {

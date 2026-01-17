@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/robot/engineer2025/wrist/wrist_subsystem.hpp"
 
 using namespace tap::algorithms::transforms;
 using tap::algorithms::CMSISMat;

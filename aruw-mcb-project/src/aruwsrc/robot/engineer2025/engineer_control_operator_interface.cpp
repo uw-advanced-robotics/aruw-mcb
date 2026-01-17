@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+#include "aruwsrc/robot/engineer2025/engineer_control_operator_interface.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 

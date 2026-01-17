@@ -47,7 +47,7 @@
             .lowerBound = 5.0f,
             .upperBound = 300.0f,
             .epsilon = 1.0f,
-            .encoderRatio = 5 * 14 / M_TWOPI,  // 5mm per tooth, 14 teeth
+            .encoderRatio = 5 * 14 / M_TWOPI,  // 5mm per tooth, 14 teeth was old constants, probably change this
             .posPidConfig = EXTENSION_PID_CONFIG,
             .maxOutput = EXTENSION_PID_CONFIG.maxOutput,
             .staticFeedforward = 0.0f,

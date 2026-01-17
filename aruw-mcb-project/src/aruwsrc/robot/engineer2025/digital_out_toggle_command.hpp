@@ -23,7 +23,7 @@
 
 #include "tap/control/command.hpp"
 
-#include "digital_out_subsystem.hpp"
+#include "aruwsrc/robot/engineer2025/digital_out_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {

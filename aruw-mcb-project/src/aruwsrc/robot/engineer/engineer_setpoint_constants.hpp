@@ -34,27 +34,26 @@ enum ScorePositions
 // pickup position
 static constexpr float WRIST_PITCH_PICKUP = 1.605495333f;
 static constexpr float WRIST_YAW_PICKUP = 0.0f;
-static constexpr float GANTRY_EXTENSION_PICKUP = 20.0f;
-static constexpr float GANTRY_LIFT_PICKUP = 60.0f;
+static constexpr float EXTENSION_PICKUP = 0.0f; // TODO: get position
+
 // score position (almost reaching 1st setpoint), what we used in competition
 static constexpr float WRIST_PITCH_SCORE = 0.0f;
 static constexpr float WRIST_YAW_SCORE = 0.0f;
-static constexpr float GANTRY_EXTENSION_SCORE = 240.0f;
-static constexpr float GANTRY_LIFT_SCORE = 320.0f;
+static constexpr float EXTENSION_SCORE = 240.0f; //TODO: get position
 
 // score positions
 // while the code for this exists, none of it been tested lol
-static constexpr float gantryLiftScoreOneSetpoint = 1;  // TODO: find positions
+static constexpr float extensionScoreOneSetpoint = 1;  // TODO: find positions
 static constexpr float wristYawScoreOneSetpoint = 1;
 static constexpr float wristPitchScoreOneSetpoint = 1;
 static constexpr float wristRollScoreOneSetpoint = 1;
 
-static constexpr float gantryLiftScoreTwoSetpoint = 1;  // TODO: find positions
+static constexpr float extensionScoreTwoSetpoint = 1;  // TODO: find positions
 static constexpr float wristYawScoreTwoSetpoint = 1;
 static constexpr float wristPitchScoreTwoSetpoint = 1;
 static constexpr float wristRollScoreTwoSetpoint = 1;
 
-static constexpr float gantryLiftScoreThreeSetpoint = 1;  // TODO: find positions
+static constexpr float extensionScoreThreeSetpoint = 1;  // TODO: find positions
 static constexpr float wristYawScoreThreeSetpoint = 1;
 static constexpr float wristPitchScoreThreeSetpoint = 1;
 static constexpr float wristRollScoreThreeSetpoint = 1;
