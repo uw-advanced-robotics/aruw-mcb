@@ -30,7 +30,7 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 
 #include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
-#include <aruwsrc/algorithms/odometry/standard_and_hero_transformer.hpp>
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"
 
 namespace aruwsrc::chassis
 {

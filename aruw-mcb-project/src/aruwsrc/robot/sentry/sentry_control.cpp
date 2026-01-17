@@ -217,6 +217,8 @@ inline aruwsrc::can::TurretMCBCanComm &getTurretMCBCanComm2()
 }
 
 // /* define subsystems --------------------------------------------------------*/
+aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+
 BuzzerSubsystem buzzer(drivers());
 
 YawTurretSubsystem turretMajor(*drivers(), turretMajorYawMotor, turretMajor::YAW_MOTOR_CONFIG);
@@ -380,7 +382,7 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
 aruwsrc::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    &transformerAdapter,
+    &transformAdapter,
     aruwsrc::chassis::BEYBLADE_CONFIG,
     capBankSubsystem,
     0.15f,

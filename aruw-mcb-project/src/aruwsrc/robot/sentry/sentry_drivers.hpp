@@ -91,12 +91,13 @@ public:
     can::TurretMCBCanComm turretMCBCanCommBus1;
     can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
+    can::capbank::CapacitorBank capacitorBank;
     aruwsrc::virtualMCB::MCBLite chassisMcbLite;
     aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 
-    can::capbank::CapacitorBank capacitorBank;
+    
 #endif
 };  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc::sentry
