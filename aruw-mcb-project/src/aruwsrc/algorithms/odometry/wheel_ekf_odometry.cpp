@@ -31,25 +31,25 @@ namespace aruwsrc::algorithms::odometry
 {
 const FourWheelEKFOdometry::ChassisWheelConfig FourWheelEKFOdometry::WHEEL_CONFIGS[4] = {
     {
-        aruwsrc::control::chassis::WHEEL_RADIUS,
+        aruwsrc::control::chassis::WHEEL_RADIUS * WHEEL_RADIUS_SCALE,
         aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
         aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         M_PI_4,
     },
     {
-        aruwsrc::control::chassis::WHEEL_RADIUS,
+        aruwsrc::control::chassis::WHEEL_RADIUS * WHEEL_RADIUS_SCALE,
         -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
         aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         -M_PI_4,
     },
     {
-        aruwsrc::control::chassis::WHEEL_RADIUS,
+        aruwsrc::control::chassis::WHEEL_RADIUS * WHEEL_RADIUS_SCALE,
         aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
         -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         3.0f * M_PI_4,
     },
     {
-        aruwsrc::control::chassis::WHEEL_RADIUS,
+        aruwsrc::control::chassis::WHEEL_RADIUS * WHEEL_RADIUS_SCALE,
         -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_X * 0.5f,
         -aruwsrc::control::chassis::WIDTH_BETWEEN_WHEELS_Y * 0.5f,
         -3.0f * M_PI_4,

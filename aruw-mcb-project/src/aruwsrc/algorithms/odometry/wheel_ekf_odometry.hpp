@@ -122,6 +122,7 @@ private:
     /// Assumed time difference between calls to `update`, in seconds.
     static constexpr float DT = 0.002f;       // Nominal EKF update period
     static constexpr float MIN_DT = 0.0005f;  // Lower bound on dt for stability
+    static constexpr float WHEEL_RADIUS_SCALE = 1.3326f;  // Wheel radius calibration scale
 
     static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE = 1.0f;  // Base wheel speed variance
     static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 1.2f;        // Accel noise variance
@@ -132,28 +133,28 @@ private:
     // State order: POS_X, POS_Y, VEL_X, VEL_Y, YAW, YAW_RATE, ACC_X, ACC_Y.
     // Larger values = less trust in model, more responsive to measurements
     static constexpr float EKF_Q[STATES_SQUARED] = {
-        1.15818e-08f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         1.15818e-08f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         3.29795e-05f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         3.29795e-05f, 0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         7.26128e-04f, 0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         2.67848e-05f, 0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.53807e-03f, 0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.53807e-03f,
+        5.44086e-09f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         5.44086e-09f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         2.47185e-05f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         2.47185e-05f, 0.0f,         0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         3.91168e-08f, 0.0f,         0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         2.93711e-05f, 0.0f,         0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.2437e-03f,  0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.2437e-03f,
     };
 
     // Measurement noise covariance matrix (R).
     // Measurement order: WHEEL_0..WHEEL_3, ACC_X, ACC_Y, GYRO_Z, YAW.
     // Higher value means less trust
     static constexpr float EKF_R[INPUTS_SQUARED] = {
-        3.10309e-04f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         3.10309e-04f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         3.10309e-04f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         3.10309e-04f, 0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         9.62164e-02f, 0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         9.62164e-02f, 0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         3.9285e-04f,  0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         7.30955e-04f,
+        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,
+        0.0f,        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,
+        0.0f,        0.0f,        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,        0.0f,
+        0.0f,        0.0f,        0.0f,        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,
+        0.0f,        0.0f,        0.0f,        0.0f,        9.66825e-02f, 0.0f,        0.0f,        0.0f,
+        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        9.66825e-02f, 0.0f,        0.0f,
+        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        3.69454e-04f, 0.0f,
+        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        2.04033e-07f,
     };
 
     // Initial covariance matrix (P0) - uncertainty in initial state estimates

@@ -241,8 +241,8 @@ tap::encoder::CanEncoder perpendicularOmni(
 
 const tap::motor::DjiMotor *chassisMotors[4] = {
     &leftFrontChassisMotor,
-    &leftBackChassisMotor,
     &rightFrontChassisMotor,
+    &leftBackChassisMotor,
     &rightBackChassisMotor};
 
 // FourWheelEKFOdometry::ChassisWheelConfig LEFT_FRONT_WHEEL_CONFIG = {
