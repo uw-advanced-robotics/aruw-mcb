@@ -36,7 +36,8 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
-#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
+#
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
@@ -227,27 +228,51 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
-tap::encoder::CanEncoder parallelOmni(
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+tap::encoder::CanEncoder parallelOmniOne(
     drivers(),
-    tap::encoder::CanEncoderId::ID1,
-    tap::can::CanBus::CAN_BUS2,
-    true);
+    tap::encoder::CanEncoderId::ID1,  //EG@TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
+    true); //EG@TODO: find correct inversion
+
+tap::encoder::CanEncoder parallelOmniTwo(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
+    true); //EG@TODO: find correct inversion
 
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
-    tap::encoder::CanEncoderId::ID0,
-    tap::can::CanBus::CAN_BUS2);
+    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
+    true); //EG@TODO: find correct inversion
 
-aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
-aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
-    drivers(),
-    chassis,
-    yawObserver,
-    // drivers()->ism330,
+float DEADWHEEL_RADIUS = 0.0f; //EG@TODO: find correct radius
+aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
+    &parallelOmniOne,
+    &parallelOmniTwo,
+    &perpendicularOmni,
+    DEADWHEEL_RADIUS
+);
+
+aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    deadwheels,
+    engTurret,
     drivers()->mpu6500,
-    modm::Vector2f(
-        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
-        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));
+    INITIAL_CHASSIS_POSITION_X,
+    INITIAL_CHASSIS_POSITION_Y,
+    parallelOneCenterToWheelDistance,
+    parallelTwoCenterToWheelDistance,
+    perpendicularCenterToWheelDistance,
+    parallelWheelOneChassisForwardRelativeAngleRadians,
+    parallelWheelTwoChassisForwardRelativeAngleRadians,
+    perpendicularWheelChassisForwardRelativeAngleRadians
+);
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
@@ -776,7 +801,8 @@ void initializeSubsystems()
     capBankSubsystem.initialize();
     arucoResetSubsystem.initialize();
     perpendicularOmni.initialize();
-    parallelOmni.initialize();
+    parallelOmniOne.initialize(); //@@@@@@@@@@@@@@@@
+    parallelOmniTwo.initialize(); //@@@@@@@@@@@@@@@@
 }
 
 /* set any default commands to subsystems here ------------------------------*/
