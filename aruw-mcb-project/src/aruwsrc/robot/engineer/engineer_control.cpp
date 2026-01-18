@@ -70,6 +70,10 @@
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
 
 // check which of these r important
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -305,6 +309,52 @@ aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
     rightBackChassisMotor,
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
 
+tap::encoder::CanEncoder parallelOmniOne(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,  //EG@TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
+    true); //EG@TODO: find correct inversion
+
+tap::encoder::CanEncoder parallelOmniTwo(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
+    true); //EG@TODO: find correct inversion
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
+    true); //EG@TODO: find correct inversion
+
+aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
+    &parallelOmniOne,
+    &parallelOmniTwo,
+    &perpendicularOmni,
+    DEADWHEEL_RADIUS
+);
+
+aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    deadwheels,
+    engTurret,
+    drivers()->mpu6500,
+    INITIAL_CHASSIS_POSITION_X,
+    INITIAL_CHASSIS_POSITION_Y,
+    parallelOneCenterToWheelDistance,
+    parallelTwoCenterToWheelDistance,
+    perpendicularCenterToWheelDistance,
+    parallelWheelOneChassisForwardRelativeAngleRadians,
+    parallelWheelTwoChassisForwardRelativeAngleRadians,
+    perpendicularWheelChassisForwardRelativeAngleRadians
+);
+
+// transforms
+aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformer transformer(odometrySubsystem, engTurret);
+aruwsrc::algorithms::odometry::transforms::StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+
+aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformAdapter transformAdapter(transformer);
+
 // this could be useful i think
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
@@ -348,7 +398,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand,
-    nullptr,
+    &odometrySubsystem,
     // {&drivers()->ism330});
     {&drivers()->mpu6500});
 
@@ -593,6 +643,11 @@ void initializeSubsystems()
     cubeLift.initialize();
     suckSubsystem.initialize();
     releaseSubsystem.initialize();
+    transformSubsystem.initialize();
+    odometrySubsystem.initialize();
+    perpendicularOmni.initialize();
+    parallelOmniOne.initialize(); 
+    parallelOmniTwo.initialize();
     // clientDicsplay.initialize();
 }
 
@@ -607,6 +662,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
     drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
@@ -624,7 +681,7 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers *) {} //EG@TODO: attach transformer to vision?
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)

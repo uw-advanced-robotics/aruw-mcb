@@ -85,6 +85,8 @@ public:
 
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
+    inline float getYaw() const override { return chassisYaw; }
+
     /**
      * @brief Resets the KF back to the robot's boot position.
      */
@@ -163,7 +165,7 @@ private:
         0, 0, 0, 5.69132363e-04, 0, 0,
         0, 0, 0, 0, 0 /*VARIANCE*/, 0, 
         0, 0, 0, 0, 0, 0 /*VARIANCE*/, 
-    };
+    }; //EG@TODO:
 
     static constexpr float KF_Q[STATES_SQUARED] = {
         4e-12f, 4e-9f, 2e-6f, 0     , 0    , 0    , 0     , 0    ,
@@ -174,7 +176,7 @@ private:
         0     , 0    , 0    , 2e-6f , 2e-3f, 1    , 0     , 0    ,
         0     , 0    , 0    , 0     , 0    , 0    , 4e-12f, 4e-9f,
         0     , 0    , 0    , 0     , 0    , 0    , 4e-9f , 4e-6f,
-    }; //TODO: Multiply by variance.
+    }; //EG@TODO: Multiply by variance.
     
     static constexpr float KF_P0[STATES_SQUARED] = {
         1E-2, 0   , 0   , 0   , 0   , 0   ,
@@ -183,7 +185,7 @@ private:
         0   , 0   , 0   , 1E-2, 0   , 0   ,
         0   , 0   , 0   , 0   , 0/*TUNE*/, 0   ,
         0   , 0   , 0   , 0   , 0   , 0/*TUNE*/,
-    };
+    }; //EG@TODO:
     // clang-format on
 
     const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry;
@@ -195,6 +197,8 @@ private:
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
+    // Chassis yaw orientation in world frame (radians)
+    float chassisYaw = 0;
 
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
