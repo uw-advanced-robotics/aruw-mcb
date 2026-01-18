@@ -183,7 +183,7 @@ int main()
             checkTurretMcbDisconnection(drivers);
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_MOTOR_TESTER)
+#if defined(ALL_STANDARDS) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_TESTBED)
 #if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
             PROFILE(drivers->profiler, ((Drivers*)drivers)->rttTelemetry.updateTelemetryAsync, ());
 #endif

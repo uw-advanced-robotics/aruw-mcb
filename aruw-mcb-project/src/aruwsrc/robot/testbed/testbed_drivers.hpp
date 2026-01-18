@@ -30,6 +30,8 @@
 #include "aruwsrc/control/control_operator_interface.hpp"
 #endif
 
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+
 namespace aruwsrc::testbed
 {
 class Drivers : public tap::Drivers
@@ -41,18 +43,20 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
+            rttTelemetry(this),
           controlOperatorInterface(this),
           lite(this, tap::communication::serial::Uart::UartPort::Uart7)
     {
     }
 
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
 #else
 public:
+    communication::rtt::RttTelemetry rttTelemetry;
     control::ControlOperatorInterface controlOperatorInterface;
 #endif
-
     aruwsrc::communication::mcb_lite::MCBLite lite;
 
 public:
