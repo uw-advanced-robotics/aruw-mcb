@@ -67,23 +67,12 @@ RttTelemetry::RttTelemetry(tap::Drivers* drivers)
       messageCounter(0),
       firstInputReceived(false),
       messageQueue(),
-      printQueue()
+      printQueue(),
+      errorQueue()
 {
 }
 
-int RttTelemetry::printf(const char* format, ...)
-{
-    if (!format)
-    {
-        return 0;
-    }
 
-    va_list args;
-    va_start(args, format);
-    int result = aruwsrc::communication::rtt::seggerRttVprintf(format, &args);
-    va_end(args);
-    return result;
-}
 
 bool RttTelemetry::updateTelemetryAsync()
 {
@@ -190,8 +179,65 @@ void RttTelemetry::queuePrintMessage(const char* message)
     printQueue.append(msg);
 }
 
+void RttTelemetry::logError(const char* message)
+{
+    if (!message)
+    {
+        return;
+    }
+
+    if (errorQueue.isFull())
+    {
+        errorQueue.removeFront();
+    }
+
+    QueuedMessage msg;
+    size_t len = std::snprintf(msg.data, MAX_MESSAGE_SIZE, "%s", message);
+    if (len >= MAX_MESSAGE_SIZE)
+    {
+        len = MAX_MESSAGE_SIZE - 1;
+    }
+    msg.length = len;
+    errorQueue.append(msg);
+}
+
 void RttTelemetry::sendQueuedMessages()
 {
+    // Send error messages first
+    while (!errorQueue.isEmpty())
+    {
+        const auto& msg = errorQueue.getFront();
+        const std::size_t available = aruwsrc::communication::rtt::seggerRttGetAvailWriteSpace();
+        const std::size_t needed =
+            sizeof("{\"ERROR:\",\"message\":\"") - 1 +
+            escapedLength(msg.data, msg.length) + 3;
+        if (available < needed)
+        {
+            break;
+        }
+
+        std::string out;
+        out.reserve(needed);
+        out += "{\"ERROR:\",\"message\":\"";
+        for (size_t i = 0; i < msg.length; i++)
+        {
+            char c = msg.data[i];
+            if (c == '"' || c == '\\')
+            {
+                out += '\\';
+            }
+            out += c;
+        }
+        out += "\"}\n";
+
+        if (!writeRttLine(out))
+        {
+            break;
+        }
+
+        errorQueue.removeFront();
+    }
+
     // Send print messages first
     while (!printQueue.isEmpty())
     {
@@ -283,27 +329,50 @@ void RttTelemetry::sendQueuedMessages()
 void RttTelemetry::logHeartbeatInfo()
 {
     const char* robotName;
-#if defined(TARGET_DRONE)
+// this is stupid
+#if defined(TARGET_STANDARD_NULL)
+    robotName = "TARGET_STANDARD_NULL";
+#elif defined(TARGET_STANDARD_VOID)
+    robotName = "TARGET_STANDARD_VOID";
+#elif defined(TARGET_DRONE)
     robotName = "TARGET_DRONE";
 #elif defined(TARGET_ENGINEER)
     robotName = "TARGET_ENGINEER";
+#elif defined(TARGET_ENGI_2025)
+    robotName = "TARGET_ENGI_2025";
 #elif defined(TARGET_SENTRY_ECLIPSE)
     robotName = "TARGET_SENTRY_ECLIPSE";
 #elif defined(TARGET_HERO_ZERO)
     robotName = "TARGET_HERO_ZERO";
-#elif defined(TARGET_STANDARD_NULL)
-    robotName = "TARGET_STANDARD_NULL";
-#elif defined(TARGET_STANDARD_VOID)
-    robotName = "TARGET_STANDARD_VOID";
+#elif defined(TARGET_DART)
+    robotName = "TARGET_DART";
+#elif defined(TARGET_TESTBED)
+    robotName = "TARGET_TESTBED";
+#elif defined(TARGET_BLANK)
+    robotName = "TARGET_BLANK";
 #elif defined(TARGET_MOTOR_TESTER)
     robotName = "TARGET_MOTOR_TESTER";
+#elif defined(TARGET_LAUNCHER_TARGET)
+    robotName = "TARGET_LAUNCHER_TARGET";
+#elif defined(TARGET_CHARACTERIZER)
+    robotName = "TARGET_CHARACTERIZER";
 #else
     robotName = "TARGET_UNKNOWN";
 #endif
 
-    logSignal("time", tap::arch::clock::getTimeMilliseconds());
-    logSignal("robot", robotName);
-    logSignal("messageCount", messageCounter++);
+static uint32_t lastLoopTime = 0;
+uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
+uint32_t dt = currentTime - lastLoopTime;
+lastLoopTime = currentTime;
+
+// Convert currentTime to seconds
+float uptime = currentTime / 1000.0f;
+logSignal("uptime", uptime);
+logSignal("dt_ms", dt);
+logSignal("robot", robotName);
+logError("test");
+println("test");
+
 }
 
 }  // namespace aruwsrc::communication::rtt

@@ -81,7 +81,6 @@ void ensureInitialized()
 
     SEGGER_RTT_Init();
     SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, seggerMode(g_upMode));
-    ensurePrintfBufferConfigured();
     g_initialized = true;
 }
 }  // namespace
@@ -209,5 +208,29 @@ int seggerRttVprintf(const char* format, va_list* args)
 
     return SEGGER_RTT_vprintf(bufferIndex, format, args);
 }
+
+// The printf funciton is unused in this current implementation.
+// It is provided in the envent that future telemetry requirements
+// need formatted output over RTT, but currently all telemetry
+// is sent as JSON lines via the updateTelemetryAsync function, for parsing 
+// by Control Tower.
+
+// Future work could re-enable this function if needed.
+/*
+// Paste into RttTelemetry class in rtt_telemetry.*:
+int RttTelemetry::printf(const char* format, ...)
+{
+    if (!format)
+    {
+        return 0;
+    }
+
+    va_list args;
+    va_start(args, format);
+    int result = aruwsrc::communication::rtt::seggerRttVprintf(format, &args);
+    va_end(args);
+    return result;
+}
+*/
 
 }  // namespace aruwsrc::communication::rtt

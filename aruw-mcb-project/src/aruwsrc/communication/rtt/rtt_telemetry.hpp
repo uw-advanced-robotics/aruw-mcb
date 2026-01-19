@@ -104,6 +104,14 @@ public:
         queuePrintMessage(msg.c_str());
     }
 
+    /**
+     * Queue a structured error message for telemetry.
+     */
+    void logError(const char* message);
+
+    /**
+     * Legacy printf-style telemetry hook. Intentionally unused; println() is queued and framed.
+     */
     int printf(const char* format, ...);
 
     /**
@@ -145,6 +153,9 @@ private:
 
     // Separate queue for println() messages to avoid interference with JSON telemetry
     modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES> printQueue;
+
+    // Separate queue for error messages to prioritize delivery
+    modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES> errorQueue;
 
     /**
      * Queue a message for asynchronous transmission (JSON telemetry)
