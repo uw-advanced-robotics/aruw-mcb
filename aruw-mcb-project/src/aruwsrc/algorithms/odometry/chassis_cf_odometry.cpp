@@ -65,8 +65,8 @@ void ChassisCFOdometry::update()
         chassisVelocity,
         chassisYaw);
 
-    chassis_x_vel = chassisVelocity[0][0];
-    chassis_y_vel = chassisVelocity[1][0];
+    chassis_x_vel = chassisVelocity[0][0] * WHEEL_RADIUS_SCALE;
+    chassis_y_vel = chassisVelocity[1][0] * WHEEL_RADIUS_SCALE;
 
     // Get IMU acceleration data
     float acc_x_vel, acc_y_vel;

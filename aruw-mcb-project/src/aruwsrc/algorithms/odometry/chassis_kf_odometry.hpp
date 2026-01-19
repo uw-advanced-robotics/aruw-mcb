@@ -106,6 +106,7 @@ private:
 
     /// Assumed time difference between calls to `update`, in seconds
     static constexpr float DT = 0.002f;
+    static constexpr float WHEEL_RADIUS_SCALE = 1.3326f;  // Wheel radius calibration scale
 
     // clang-format off
     static constexpr float KF_A[STATES_SQUARED] = {

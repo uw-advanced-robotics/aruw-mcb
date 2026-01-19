@@ -139,8 +139,8 @@ private:
         0.0f,         0.0f,         0.0f,         2.47185e-05f, 0.0f,         0.0f,         0.0f,         0.0f,
         0.0f,         0.0f,         0.0f,         0.0f,         3.91168e-08f, 0.0f,         0.0f,         0.0f,
         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         2.93711e-05f, 0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.2437e-03f,  0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.2437e-03f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.2437e-05f,  0.0f,
+        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.2437e-05f,
     };
 
     // Measurement noise covariance matrix (R).
@@ -151,24 +151,25 @@ private:
         0.0f,        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,
         0.0f,        0.0f,        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,        0.0f,
         0.0f,        0.0f,        0.0f,        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,
-        0.0f,        0.0f,        0.0f,        0.0f,        9.66825e-02f, 0.0f,        0.0f,        0.0f,
-        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        9.66825e-02f, 0.0f,        0.0f,
+        0.0f,        0.0f,        0.0f,        0.0f,        9.66825e-03f, 0.0f,        0.0f,        0.0f,
+        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        9.66825e-03f, 0.0f,        0.0f,
         0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        3.69454e-04f, 0.0f,
         0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        2.04033e-07f,
     };
 
-    // Initial covariance matrix (P0) - uncertainty in initial state estimates
-    // Should be larger than steady-state uncertainties to allow filter to learn quickly
+    // Initial state covariance matrix P0
     static constexpr float EKF_P0[STATES_SQUARED] = {
-        0.25f, 0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f, 0.0f,
-        0.0f,  0.25f, 0.0f,  0.0f,  0.0f,   0.0f, 0.0f, 0.0f,
-        0.0f,  0.0f,  0.25f, 0.0f,  0.0f,   0.0f, 0.0f, 0.0f,
-        0.0f,  0.0f,  0.0f,  0.25f, 0.0f,   0.0f, 0.0f, 0.0f,
-        0.0f,  0.0f,  0.0f,  0.0f,  0.0305f, 0.0f, 0.0f, 0.0f,
-        0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   1.0f, 0.0f, 0.0f,
-        0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 1.0f, 0.0f,
-        0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f, 1.0f,
+        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
+        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
     };
+    // clang-format on
+        // clang-format on
 
     const tap::motor::DjiMotor* chassisMotors[4];
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;

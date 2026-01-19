@@ -92,6 +92,7 @@ private:
     uint32_t prevTime = 0;
 
     float chassisTrust = 1.0f;  // Trust in deadwheel odometry vs IMU
+    static constexpr float WHEEL_RADIUS_SCALE = 1.3326f;  // Wheel radius calibration scale
 
     void computeAccVelocities(float* acc_x_vel, float* acc_y_vel, float dt);
 };

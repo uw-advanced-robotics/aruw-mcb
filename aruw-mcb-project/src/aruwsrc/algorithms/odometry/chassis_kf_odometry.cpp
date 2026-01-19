@@ -59,6 +59,8 @@ void ChassisKFOdometry::update()
     tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
         chassisVelocity,
         chassisYaw);
+    chassisVelocity[0][0] *= WHEEL_RADIUS_SCALE;
+    chassisVelocity[1][0] *= WHEEL_RADIUS_SCALE;
 
     // the measurement covariance is dynamically updated based on chassis-measured acceleration
     updateMeasurementCovariance(chassisVelocity);

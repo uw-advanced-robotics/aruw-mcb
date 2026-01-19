@@ -42,6 +42,7 @@
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
@@ -58,9 +59,11 @@
 #include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/cap-bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
+#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
@@ -145,6 +148,55 @@ inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
+
+inline aruwsrc::algorithms::AutoNavPath buildAutoNavPath()
+{
+    aruwsrc::algorithms::AutoNavPath path;
+    path.resetPath();
+    path.pushPoint(tap::algorithms::transforms::Position(0.0f, 0.0f, 0.0f));
+    path.pushPoint(tap::algorithms::transforms::Position(2.0f, 0.0f, 0.0f));
+    return path;
+}
+
+class AutoNavBeybladeResetCommand : public tap::control::Command
+{
+public:
+    AutoNavBeybladeResetCommand(
+        aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand& inner,
+        aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem& ekf,
+        aruwsrc::algorithms::odometry::ChassisCFOdometry& cf,
+        aruwsrc::algorithms::odometry::OttoKFOdometry2DSubsystem& kf,
+        aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis)
+        : inner(inner),
+          ekf(ekf),
+          cf(cf),
+          kf(kf)
+    {
+        addSubsystemRequirement(&chassis);
+    }
+
+    void initialize() override
+    {
+        ekf.reset();
+        cf.reset();
+        kf.reset();
+        inner.initialize();
+    }
+
+    void execute() override { inner.execute(); }
+
+    void end(bool interrupted) override { inner.end(interrupted); }
+
+    bool isFinished() const override { return false; }
+
+    const char* getName() const override { return "autonav beyblade reset"; }
+
+private:
+    aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand& inner;
+    aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem& ekf;
+    aruwsrc::algorithms::odometry::ChassisCFOdometry& cf;
+    aruwsrc::algorithms::odometry::OttoKFOdometry2DSubsystem& kf;
+};
 
 /* define subsystems --------------------------------------------------------*/
 BuzzerSubsystem buzzer(drivers());
@@ -286,11 +338,58 @@ aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
         aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
         aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));
 
+aruwsrc::algorithms::odometry::ChassisCFOdometry chassisCFOdometrySubsystem(
+    drivers(),
+    chassis,
+    yawObserver,
+    drivers()->mpu6500,
+    modm::Vector2f(
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));
+
+aruwsrc::algorithms::odometry::OttoKFOdometry2DSubsystem chassisKFOdometrySubsystem(
+    *drivers(),
+    turret,
+    chassis,
+    modm::Vector2f(
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));
+
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
+StandardAndHeroTransformer kfTransformer(chassisKFOdometrySubsystem, turret);
+StandardAndHeroTransformer cfTransformer(chassisCFOdometrySubsystem, turret);
+
 StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+StandardAnderHeroTransformerSubsystem kfTransformSubsystem(*drivers(), kfTransformer);
+StandardAnderHeroTransformerSubsystem cfTransformSubsystem(*drivers(), cfTransformer);
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
+
+aruwsrc::algorithms::AutoNavPath autoNavPath = buildAutoNavPath();
+aruwsrc::algorithms::AutoNavPath autoNavPathKf = buildAutoNavPath();
+aruwsrc::control::chassis::ChassisAutoNavController autoNavControllerEkf(
+    *drivers(),
+    chassis,
+    transformer.getWorldToChassis(),
+    aruwsrc::control::chassis::BEYBLADE_CONFIG);
+aruwsrc::control::chassis::ChassisAutoNavController autoNavControllerKf(
+    *drivers(),
+    chassis,
+    kfTransformer.getWorldToChassis(),
+    aruwsrc::control::chassis::BEYBLADE_CONFIG);
+
+struct AutoNavPathInit
+{
+    AutoNavPathInit()
+    {
+        autoNavControllerEkf.attachPath(&autoNavPath);
+        autoNavControllerEkf.setDesiredSpeed(1.0f);
+        autoNavControllerKf.attachPath(&autoNavPathKf);
+        autoNavControllerKf.setDesiredSpeed(1.0f);
+    }
+};
+AutoNavPathInit autoNavPathInit;
 
 VelocityAgitatorSubsystem agitator(
     drivers(),
@@ -377,6 +476,29 @@ aruwsrc::control::chassis::BeybladeCommand beybladeCommand(
     &turret.yawMotor,
     (drivers()->controlOperatorInterface),
     aruwsrc::control::chassis::BEYBLADE_CONFIG);
+aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand(
+    *drivers(),
+    chassis,
+    autoNavControllerEkf,
+    false);
+aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeKfCommand(
+    *drivers(),
+    chassis,
+    autoNavControllerKf,
+    false);
+
+AutoNavBeybladeResetCommand autoNavBeybladeResetCommand(
+    autoNavBeybladeCommand,
+    odometrySubsystem,
+    chassisCFOdometrySubsystem,
+    chassisKFOdometrySubsystem,
+    chassis);
+AutoNavBeybladeResetCommand autoNavBeybladeKfResetCommand(
+    autoNavBeybladeKfCommand,
+    odometrySubsystem,
+    chassisCFOdometrySubsystem,
+    chassisKFOdometrySubsystem,
+    chassis);
 
 // Turret compensators
 
@@ -687,12 +809,12 @@ HoldRepeatCommandMapping rightSwitchUp(
 
 HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
-    {&beybladeCommand},
+    {&autoNavBeybladeResetCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&turretCVCommand, &chassisDriveCommand},
+    {&autoNavBeybladeKfResetCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
@@ -792,8 +914,12 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&chassisCFOdometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&chassisKFOdometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
+    drivers->commandScheduler.registerSubsystem(&kfTransformSubsystem);
+    drivers->commandScheduler.registerSubsystem(&cfTransformSubsystem);
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
 }
@@ -805,11 +931,15 @@ void initializeSubsystems()
     voltageCurrentSensor.initialize();
     chassis.initialize();
     odometrySubsystem.initialize();
+    chassisCFOdometrySubsystem.reset();
+    chassisKFOdometrySubsystem.reset();
     agitator.initialize();
     frictionWheels.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
+    kfTransformSubsystem.initialize();
+    cfTransformSubsystem.initialize();
     capBankSubsystem.initialize();
     arucoResetSubsystem.initialize();
     perpendicularOmni.initialize();
