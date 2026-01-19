@@ -29,11 +29,6 @@
         modm:platform:uart:7:buffer.rx 512
         modm:platform:uart:8:buffer.tx 256
         modm:platform:uart:8:buffer.rx 256
-        modm:platform:rtt:buffer.tx 1024
-        modm:platform:rtt:buffer.rx 256
-    </option>
-    <option name="taproot:modm-project.xml:modm_hal_modules">
-      modm:platform:rtt
     </option>
   </options>
   <modules>

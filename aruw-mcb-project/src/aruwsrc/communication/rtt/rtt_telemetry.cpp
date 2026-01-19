@@ -23,13 +23,7 @@
 
 #include "tap/architecture/clock.hpp"
 
-// #define ARUWSRC_RTT_USE_CLEMENTINE
-
-#if defined(ARUWSRC_RTT_USE_CLEMENTINE)
-#include "aruwsrc/communication/rtt/clementine_segger_rtt.hpp"
-#else
 #include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
-#endif
 
 namespace
 {
@@ -177,6 +171,7 @@ void RttTelemetry::queuePrintMessage(const char* message)
 
     // Add message to queue
     printQueue.append(msg);
+    ledAnimator.notifyPrintLogged(tap::arch::clock::getTimeMilliseconds());
 }
 
 void RttTelemetry::logError(const char* message)
@@ -199,6 +194,7 @@ void RttTelemetry::logError(const char* message)
     }
     msg.length = len;
     errorQueue.append(msg);
+    ledAnimator.notifyErrorLogged(tap::arch::clock::getTimeMilliseconds());
 }
 
 void RttTelemetry::sendQueuedMessages()
@@ -370,8 +366,6 @@ float uptime = currentTime / 1000.0f;
 logSignal("uptime", uptime);
 logSignal("dt_ms", dt);
 logSignal("robot", robotName);
-logError("test");
-println("test");
 
 }
 

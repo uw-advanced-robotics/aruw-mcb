@@ -28,6 +28,9 @@ namespace tap
 class Drivers;
 }  // namespace tap
 
+#define ARUWSRC_RTT_USE_OZONE_PATTERN
+
+
 namespace aruwsrc::communication::rtt
 {
 class RttLedAnimator
@@ -41,6 +44,9 @@ public:
         bool recentRttInput,
         uint32_t now);
 
+    void notifyPrintLogged(uint32_t now);
+    void notifyErrorLogged(uint32_t now);
+
 private:
     // Timer for LED blinking
     tap::arch::PeriodicMilliTimer ledBlinkTimer;
@@ -50,11 +56,24 @@ private:
     uint8_t animationIndex;                        // current lit LED index 0..7
     bool animationDirectionUp;                     // true = moving A->H, false = H->A
     uint32_t animationStepMs;                      // ms between animation steps
+#if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
+    tap::arch::PeriodicMilliTimer ozoneTimer;      // drives OZONE binary animation
+    uint8_t ozoneFrameIndex;
+    bool ozoneSequenceActive;
+    uint8_t ozoneFramesRemaining;
+#endif
     // Group flash state used when no recent message has been received
     bool groupFlashOn;
     // Unidirectional pause state used when no messages are being received
     bool unidirectionalPaused;
     uint32_t unidirectionalPauseDeadlineMillis;
+
+    tap::arch::PeriodicMilliTimer greenBlinkTimer;
+    tap::arch::PeriodicMilliTimer redBlinkTimer;
+    bool greenBlinkOn;
+    bool redBlinkOn;
+    uint32_t greenBlinkDeadlineMillis;
+    uint32_t redBlinkDeadlineMillis;
 };
 }  // namespace aruwsrc::communication::rtt
 

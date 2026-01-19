@@ -23,15 +23,54 @@
 
 namespace aruwsrc::communication::rtt
 {
+namespace
+{
+constexpr uint32_t kBlinkIntervalMs = 120;
+constexpr uint32_t kBlinkDurationMs = 600;
+#if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
+constexpr uint32_t kOzoneFrameMs = 200;
+constexpr uint8_t kOzoneFrames[] = {
+    0x00,
+    static_cast<uint8_t>('O'),
+    static_cast<uint8_t>('O'),
+    0x00,
+    static_cast<uint8_t>('Z'),
+    static_cast<uint8_t>('Z'),
+    0x00,
+    static_cast<uint8_t>('O'),
+    static_cast<uint8_t>('O'),
+    0x00,
+    static_cast<uint8_t>('N'),
+    static_cast<uint8_t>('N'),
+    0x00,
+    static_cast<uint8_t>('E'),
+    static_cast<uint8_t>('E'),
+    0x00,
+};
+#endif
+}  // namespace
+
 RttLedAnimator::RttLedAnimator()
     : ledBlinkTimer(800),
       animationTimer(120),
       animationIndex(0),
       animationDirectionUp(true),
-      animationStepMs(120),
-      groupFlashOn(false),
+      animationStepMs(120)
+#if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
+    , ozoneTimer(kOzoneFrameMs),
+      ozoneFrameIndex(0),
+      ozoneSequenceActive(false),
+      ozoneFramesRemaining(0)
+#endif
+    , groupFlashOn(false),
       unidirectionalPaused(false),
-      unidirectionalPauseDeadlineMillis(0)
+      unidirectionalPauseDeadlineMillis(0),
+      greenBlinkTimer(kBlinkIntervalMs),
+      redBlinkTimer(kBlinkIntervalMs),
+      greenBlinkOn(false),
+      redBlinkOn(false),
+      greenBlinkDeadlineMillis(0),
+      redBlinkDeadlineMillis(0)
 {
 }
 
@@ -46,7 +85,46 @@ void RttLedAnimator::update(
         return;
     }
 
-    if (recentRttInput)
+    bool handled = false;
+
+#if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
+    const bool idle = !recentRttInput && !activelySendingTelemetry;
+    if (ozoneSequenceActive || idle)
+    {
+        if (!ozoneSequenceActive)
+        {
+            ozoneSequenceActive = true;
+            ozoneFrameIndex = 0;
+            ozoneFramesRemaining = static_cast<uint8_t>(sizeof(kOzoneFrames) - 1);
+            ozoneTimer.restart();
+        }
+
+        if (ozoneTimer.execute())
+        {
+            ozoneFrameIndex =
+                static_cast<uint8_t>((ozoneFrameIndex + 1) % (sizeof(kOzoneFrames)));
+            if (ozoneFramesRemaining > 0)
+            {
+                ozoneFramesRemaining--;
+            }
+            if (ozoneFramesRemaining == 0)
+            {
+                ozoneSequenceActive = false;
+            }
+        }
+
+        const uint8_t mask = kOzoneFrames[ozoneFrameIndex];
+        for (int i = 0; i < 8; ++i)
+        {
+            const uint8_t bit = static_cast<uint8_t>(1u << (7 - i));
+            const bool on = (mask & bit) != 0;
+            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), !on);
+        }
+        handled = true;
+    }
+#endif
+
+    if (!handled && recentRttInput)
     {
         // State 1: Recent RTT input received - bidirectional bounce animation
         if (animationTimer.execute())
@@ -97,10 +175,10 @@ void RttLedAnimator::update(
             drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
             drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
         }
-        return;
+        handled = true;
     }
 
-    if (activelySendingTelemetry)
+    if (!handled && activelySendingTelemetry)
     {
         // State 2: Sending telemetry but no recent RTT input - unidirectional sweep A->H
         const uint32_t sweepSteps = 7;  // steps from 0 to 7
@@ -150,19 +228,72 @@ void RttLedAnimator::update(
             drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
             drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
         }
-        return;
+        handled = true;
     }
 
-    // State 3: Not sending telemetry - slow group flash
-    if (ledBlinkTimer.execute())
+#if !defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
+    if (!handled)
     {
-        groupFlashOn = !groupFlashOn;
+        // State 3: Not sending telemetry - slow group flash.
+        if (ledBlinkTimer.execute())
+        {
+            groupFlashOn = !groupFlashOn;
+        }
+
+        for (int i = 0; i < 8; ++i)
+        {
+            auto pin = static_cast<tap::gpio::Leds::LedPin>(i);
+            drivers->leds.set(pin, !groupFlashOn);
+        }
+    }
+#endif
+
+    if (now <= greenBlinkDeadlineMillis)
+    {
+        if (greenBlinkTimer.execute())
+        {
+            greenBlinkOn = !greenBlinkOn;
+        }
+        drivers->leds.set(tap::gpio::Leds::Green, !greenBlinkOn);
+    }
+    else
+    {
+        greenBlinkOn = false;
+        drivers->leds.set(tap::gpio::Leds::Green, false);
     }
 
-    for (int i = 0; i < 8; ++i)
+    if (now <= redBlinkDeadlineMillis)
     {
-        auto pin = static_cast<tap::gpio::Leds::LedPin>(i);
-        drivers->leds.set(pin, !groupFlashOn);
+        if (redBlinkTimer.execute())
+        {
+            redBlinkOn = !redBlinkOn;
+        }
+        drivers->leds.set(tap::gpio::Leds::Red, !redBlinkOn);
     }
+    else
+    {
+        redBlinkOn = false;
+        drivers->leds.set(tap::gpio::Leds::Red, false);
+    }
+}
+
+void RttLedAnimator::notifyPrintLogged(uint32_t now)
+{
+    if (now > greenBlinkDeadlineMillis)
+    {
+        greenBlinkOn = true;
+        greenBlinkTimer.restart();
+    }
+    greenBlinkDeadlineMillis = now + kBlinkDurationMs;
+}
+
+void RttLedAnimator::notifyErrorLogged(uint32_t now)
+{
+    if (now > redBlinkDeadlineMillis)
+    {
+        redBlinkOn = true;
+        redBlinkTimer.restart();
+    }
+    redBlinkDeadlineMillis = now + kBlinkDurationMs;
 }
 }  // namespace aruwsrc::communication::rtt

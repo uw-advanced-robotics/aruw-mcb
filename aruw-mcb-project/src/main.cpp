@@ -25,7 +25,6 @@
 #include "tap/board/board.hpp"
 
 #include "modm/architecture/interface/delay.hpp"
-#include "modm/platform/rtt/rtt.hpp"
 
 /* arch includes ------------------------------------------------------------*/
 #include "tap/architecture/periodic_timer.hpp"
@@ -36,6 +35,17 @@
 
 /* error handling includes --------------------------------------------------*/
 #include "tap/errors/create_errors.hpp"
+
+#if defined(ALL_STANDARDS) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_TESTBED)
+#undef RAISE_ERROR
+#define RAISE_ERROR(drivers, desc)                                      \
+    do                                                                  \
+    {                                                                   \
+        tap::errors::SystemError stringError(desc, __LINE__, __FILE__); \
+        (drivers)->errorController.addToErrorList(stringError);         \
+        (drivers)->rttTelemetry.logError(desc);                         \
+    } while (0)
+#endif
 
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
@@ -94,33 +104,6 @@ static void initializeI2C(Drivers* drivers);
 static void checkTurretMcbDisconnection(Drivers* drivers);
 #endif
 
-namespace
-{
-Drivers* driversForAssert = nullptr;
-}
-
-/*
-#ifdef ALL_STANDARDS  // temp, bc logging only added for standard atm
-static modm::Abandonment log_assertion(const modm::AssertionInfo& info)
-{
-    if (driversForAssert) driversForAssert->rttTelemetry.println("Assertion raised: ", info.name);
-    return modm::Abandonment::DontCare;
-}
-MODM_ASSERTION_HANDLER(log_assertion);
-
-modm_extern_c modm_noreturn void modm_abandon(const modm::AssertionInfo& info)
-{
-    if (driversForAssert)
-    {
-        driversForAssert->rttTelemetry.println("ABORTING - Assertion raised: ", info.name);
-
-        driversForAssert->rttTelemetry.sendQueuedMessages();
-        modm::delay_ms(1);  // maybe unnecessary / too long
-    }
-}
-#endif
-*/
-
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -133,7 +116,6 @@ int main()
      *      IO states and run the scheduler.
      */
     Drivers* drivers = DoNotUse_getDrivers();
-    driversForAssert = drivers;
 
     Board::initialize();
     initializeIo(drivers);
