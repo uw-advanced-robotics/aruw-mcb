@@ -1,3 +1,4 @@
+// clang-format off
 /*********************************************************************
 *                    SEGGER Microcontroller GmbH                     *
 *                        The Embedded Experts                        *
@@ -518,3 +519,4 @@ int SEGGER_RTT_vprintf(unsigned BufferIndex, const char * sFormat, va_list * pPa
 #endif
 
 /*************************** End of file ****************************/
+// clang-format on

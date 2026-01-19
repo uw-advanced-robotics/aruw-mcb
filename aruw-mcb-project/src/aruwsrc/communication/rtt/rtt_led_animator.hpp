@@ -30,7 +30,6 @@ class Drivers;
 
 #define ARUWSRC_RTT_USE_OZONE_PATTERN
 
-
 namespace aruwsrc::communication::rtt
 {
 class RttLedAnimator
@@ -57,7 +56,7 @@ private:
     bool animationDirectionUp;                     // true = moving A->H, false = H->A
     uint32_t animationStepMs;                      // ms between animation steps
 #if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
-    tap::arch::PeriodicMilliTimer ozoneTimer;      // drives OZONE binary animation
+    tap::arch::PeriodicMilliTimer ozoneTimer;  // drives OZONE binary animation
     uint8_t ozoneFrameIndex;
     bool ozoneSequenceActive;
     uint8_t ozoneFramesRemaining;

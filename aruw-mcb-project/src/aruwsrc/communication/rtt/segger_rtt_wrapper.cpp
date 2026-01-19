@@ -212,7 +212,7 @@ int seggerRttVprintf(const char* format, va_list* args)
 // The printf funciton is unused in this current implementation.
 // It is provided in the envent that future telemetry requirements
 // need formatted output over RTT, but currently all telemetry
-// is sent as JSON lines via the updateTelemetryAsync function, for parsing 
+// is sent as JSON lines via the updateTelemetryAsync function, for parsing
 // by Control Tower.
 
 // Future work could re-enable this function if needed.

@@ -1,3 +1,4 @@
+// clang-format off
 /*********************************************************************
 *                    SEGGER Microcontroller GmbH                     *
 *                        The Embedded Experts                        *
@@ -438,3 +439,4 @@ void OS_SIM_LeaveCriticalSection(void);
 
 #endif
 /*************************** End of file ****************************/
+// clang-format on

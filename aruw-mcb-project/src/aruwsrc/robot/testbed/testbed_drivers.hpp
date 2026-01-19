@@ -43,12 +43,11 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
-            rttTelemetry(this),
+          rttTelemetry(this),
           controlOperatorInterface(this),
           lite(this, tap::communication::serial::Uart::UartPort::Uart7)
     {
     }
-
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;

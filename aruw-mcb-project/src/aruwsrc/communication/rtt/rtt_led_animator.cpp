@@ -57,12 +57,14 @@ RttLedAnimator::RttLedAnimator()
       animationDirectionUp(true),
       animationStepMs(120)
 #if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
-    , ozoneTimer(kOzoneFrameMs),
+      ,
+      ozoneTimer(kOzoneFrameMs),
       ozoneFrameIndex(0),
       ozoneSequenceActive(false),
       ozoneFramesRemaining(0)
 #endif
-    , groupFlashOn(false),
+      ,
+      groupFlashOn(false),
       unidirectionalPaused(false),
       unidirectionalPauseDeadlineMillis(0),
       greenBlinkTimer(kBlinkIntervalMs),
@@ -101,8 +103,7 @@ void RttLedAnimator::update(
 
         if (ozoneTimer.execute())
         {
-            ozoneFrameIndex =
-                static_cast<uint8_t>((ozoneFrameIndex + 1) % (sizeof(kOzoneFrames)));
+            ozoneFrameIndex = static_cast<uint8_t>((ozoneFrameIndex + 1) % (sizeof(kOzoneFrames)));
             if (ozoneFramesRemaining > 0)
             {
                 ozoneFramesRemaining--;

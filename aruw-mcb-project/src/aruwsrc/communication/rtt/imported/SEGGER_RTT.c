@@ -1,3 +1,4 @@
+// clang-format off
 /*********************************************************************
 *                    SEGGER Microcontroller GmbH                     *
 *                        The Embedded Experts                        *
@@ -2091,3 +2092,4 @@ unsigned SEGGER_RTT_GetBytesInBuffer(unsigned BufferIndex) {
 }
 
 /*************************** End of file ****************************/
+// clang-format on

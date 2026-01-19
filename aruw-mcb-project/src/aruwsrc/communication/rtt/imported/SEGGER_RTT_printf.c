@@ -1,3 +1,4 @@
+// clang-format off
 /*********************************************************************
 *                    SEGGER Microcontroller GmbH                     *
 *                        The Embedded Experts                        *
@@ -520,3 +521,4 @@ int SEGGER_RTT_printf(unsigned BufferIndex, const char * sFormat, ...) {
   return r;
 }
 /*************************** End of file ****************************/
+// clang-format on

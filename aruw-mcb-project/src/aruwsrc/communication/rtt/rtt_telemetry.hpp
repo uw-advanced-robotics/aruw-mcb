@@ -107,12 +107,27 @@ public:
     /**
      * Queue a structured error message for telemetry.
      */
-    void logError(const char* message);
+    template <typename... Args>
+    void logError(const char* first, Args... rest)
+    {
+        std::string msg;
+
+        msg.reserve(MAX_MESSAGE_SIZE);
+
+        auto append = [&](const char* s) {
+            if (s) msg += s;
+        };
+
+        (append(first), ..., append(rest));
+
+        queueErrorMessage(msg.c_str());
+    }
 
     /**
-     * Legacy printf-style telemetry hook. Intentionally unused; println() is queued and framed.
+     * Segger's printf-style telemetry hook. Intentionally unused; println() is queued and framed.
+     * See segger_rtt_wrapper.cpp for more details.
      */
-    int printf(const char* format, ...);
+    // int printf(const char* format, ...);
 
     /**
      * Blocking function that's already called by protothread, so no need to call manually. Only
@@ -127,7 +142,7 @@ private:
 
     // Deadline (ms) until which the message indicator keeps the row animation active
     uint32_t messageIndicatorDeadlineMillis;
-    static constexpr uint32_t MESSAGE_INDICATOR_MS = 1000;  // milliseconds (1s)
+    static constexpr uint32_t MESSAGE_INDICATOR_MS = 1000;
 
     RttLedAnimator ledAnimator;
 
@@ -166,6 +181,11 @@ private:
      * Queue a print message for asynchronous transmission (separate from JSON telemetry)
      */
     void queuePrintMessage(const char* message);
+
+    /**
+     * Queue an error message for asynchronous transmission (separate from JSON telemetry)
+     */
+    void queueErrorMessage(const char* message);
 
     /**
      * Queue timestamp, robot type, and counter

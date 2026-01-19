@@ -66,8 +66,6 @@ RttTelemetry::RttTelemetry(tap::Drivers* drivers)
 {
 }
 
-
-
 bool RttTelemetry::updateTelemetryAsync()
 {
     PT_BEGIN();
@@ -78,13 +76,10 @@ bool RttTelemetry::updateTelemetryAsync()
         uint8_t receivedByte;
         if (aruwsrc::communication::rtt::seggerRttRead(receivedByte))
         {
-            // First input received - change LED pattern to red blinking
             if (!firstInputReceived)
             {
                 firstInputReceived = true;
             }
-
-            // Turn off red LED for a short indicator period to show message receipt
             messageIndicatorDeadlineMillis =
                 tap::arch::clock::getTimeMilliseconds() + MESSAGE_INDICATOR_MS;
 
@@ -93,16 +88,18 @@ bool RttTelemetry::updateTelemetryAsync()
             std::snprintf(
                 echoMsg,
                 sizeof(echoMsg),
-                "ECHO: %c (0x%02X)\n",
+                "ECHO: %c (0x%02X)",
                 (receivedByte >= 32 && receivedByte <= 126) ? receivedByte : '?',
                 receivedByte);
-            queueMessage(echoMsg);
+            println(echoMsg);
         }
 
         // Handle LED patterns for A-H row
         // 1. If RTT message received within last 1s -> bidirectional bounce (two-way)
         // 2. Else if actively sending telemetry -> unidirectional sweep (one-way, no heartbeat)
-        // 3. Else -> slow group flash (idle, not sending/receiving)
+        // 3. Else -> slow group flash (idle, not sending/receiving) ((this also happens when
+        // connected to ozone,
+        //    since it never sends the initial RTT input))
         {
             uint32_t now = tap::arch::clock::getTimeMilliseconds();
             bool activelySendingTelemetry =
@@ -123,7 +120,6 @@ bool RttTelemetry::updateTelemetryAsync()
 
 void RttTelemetry::queueMessage(const char* message)
 {
-    // Check if queue is full
     if (messageQueue.isFull())
     {
         // Drop oldest message to make room
@@ -149,7 +145,6 @@ void RttTelemetry::queueMessage(const char* message)
 
 void RttTelemetry::queuePrintMessage(const char* message)
 {
-    // Check if queue is full
     if (printQueue.isFull())
     {
         // Drop oldest message to make room
@@ -174,25 +169,28 @@ void RttTelemetry::queuePrintMessage(const char* message)
     ledAnimator.notifyPrintLogged(tap::arch::clock::getTimeMilliseconds());
 }
 
-void RttTelemetry::logError(const char* message)
+void RttTelemetry::queueErrorMessage(const char* message)
 {
-    if (!message)
-    {
-        return;
-    }
-
     if (errorQueue.isFull())
     {
+        // Drop oldest message to make room
         errorQueue.removeFront();
     }
 
+    // Create new message
     QueuedMessage msg;
     size_t len = std::snprintf(msg.data, MAX_MESSAGE_SIZE, "%s", message);
+
+    // std::snprintf returns the number of characters that would have been written
+    // Clamp to actual buffer size
     if (len >= MAX_MESSAGE_SIZE)
     {
-        len = MAX_MESSAGE_SIZE - 1;
+        len = MAX_MESSAGE_SIZE - 1;  // Null terminator is already handled by std::snprintf
     }
+
     msg.length = len;
+
+    // Add message to queue
     errorQueue.append(msg);
     ledAnimator.notifyErrorLogged(tap::arch::clock::getTimeMilliseconds());
 }
@@ -205,8 +203,7 @@ void RttTelemetry::sendQueuedMessages()
         const auto& msg = errorQueue.getFront();
         const std::size_t available = aruwsrc::communication::rtt::seggerRttGetAvailWriteSpace();
         const std::size_t needed =
-            sizeof("{\"ERROR:\",\"message\":\"") - 1 +
-            escapedLength(msg.data, msg.length) + 3;
+            sizeof("{\"ERROR:\",\"message\":\"") - 1 + escapedLength(msg.data, msg.length) + 3;
         if (available < needed)
         {
             break;
@@ -234,7 +231,7 @@ void RttTelemetry::sendQueuedMessages()
         errorQueue.removeFront();
     }
 
-    // Send print messages first
+    // Send print messages next
     while (!printQueue.isEmpty())
     {
         const auto& msg = printQueue.getFront();
@@ -356,17 +353,16 @@ void RttTelemetry::logHeartbeatInfo()
     robotName = "TARGET_UNKNOWN";
 #endif
 
-static uint32_t lastLoopTime = 0;
-uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
-uint32_t dt = currentTime - lastLoopTime;
-lastLoopTime = currentTime;
+    static uint32_t lastLoopTime = 0;
+    uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currentTime - lastLoopTime;
+    lastLoopTime = currentTime;
 
-// Convert currentTime to seconds
-float uptime = currentTime / 1000.0f;
-logSignal("uptime", uptime);
-logSignal("dt_ms", dt);
-logSignal("robot", robotName);
-
+    // Convert currentTime to seconds
+    float uptime = currentTime / 1000.0f;
+    logSignal("uptime", uptime);
+    logSignal("dt_ms", dt);
+    logSignal("robot", robotName);
 }
 
 }  // namespace aruwsrc::communication::rtt
