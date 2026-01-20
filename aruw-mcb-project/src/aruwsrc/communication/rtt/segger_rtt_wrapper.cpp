@@ -24,7 +24,7 @@
 
 extern "C"
 {
-#include "aruwsrc/communication/rtt/imported/SEGGER_RTT.h"
+#include "SEGGER_RTT.h"
 }
 
 namespace

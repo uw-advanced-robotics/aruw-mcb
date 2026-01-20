@@ -99,4 +99,11 @@ for source in rawSrcs:
     else:
         sources.append(env_cpy.Object(source))
 
+if args["COMPILE_SRC"]:
+    rtt_sources = [
+        abspath(join("..", "..", "segger-rtt", "RTT", "SEGGER_RTT.c")),
+        abspath(join("..", "..", "segger-rtt", "RTT", "SEGGER_RTT_printf.c")),
+    ]
+    sources.extend(env_cpy.Object(source) for source in rtt_sources)
+
 Return('sources')
