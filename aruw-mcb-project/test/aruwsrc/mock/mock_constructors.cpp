@@ -29,7 +29,6 @@
 #include "otto_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "robot_turret_subsystem_mock.hpp"
-#include "rtt_telemetry_mock.hpp"
 #include "sentry_request_subsystem_mock.hpp"
 #include "swerve_chassis_subsystem_mock.hpp"
 #include "swerve_module_mock.hpp"
@@ -264,9 +263,6 @@ RobotTurretSubsystemMock::RobotTurretSubsystemMock(tap::Drivers *drivers)
 {
 }
 RobotTurretSubsystemMock::~RobotTurretSubsystemMock() {}
-
-RttTelemetryMock::RttTelemetryMock(tap::Drivers *drivers) : RttTelemetry(drivers) {}
-RttTelemetryMock::~RttTelemetryMock() {}
 
 VisionCoprocessorMock::VisionCoprocessorMock(tap::Drivers *drivers)
     : communication::serial::VisionCoprocessor(drivers)
