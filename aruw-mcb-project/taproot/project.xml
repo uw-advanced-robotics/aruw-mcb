@@ -24,8 +24,6 @@
     <option name="modm:platform:uart:7:buffer.rx">512</option>
     <option name="modm:platform:uart:8:buffer.tx">256</option>
     <option name="modm:platform:uart:8:buffer.rx">256</option>
-    <option name="modm:platform:rtt:buffer.tx">1024</option>
-    <option name="modm:platform:rtt:buffer.rx">256</option>
 
   </options>
   <modules>
@@ -71,7 +69,6 @@
     <module>modm:platform:uart:8</module>
     <module>modm:ui:display</module>
     <module>modm:ui:menu</module>
-    <module>modm:platform:rtt</module>
 
   </modules>
 </library>
