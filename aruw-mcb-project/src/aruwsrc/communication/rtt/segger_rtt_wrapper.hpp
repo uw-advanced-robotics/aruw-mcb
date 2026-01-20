@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SEGGER_RTT_HPP_
-#define SEGGER_RTT_HPP_
+#ifndef SEGGER_RTT_WRAPPER_HPP_
+#define SEGGER_RTT_WRAPPER_HPP_
 
 #include <cstdarg>
 #include <cstddef>
