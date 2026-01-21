@@ -100,7 +100,6 @@ DartManualPullbackSetpointCommand manualPullbackCommand(
 // TODO: ADD YAW MANUAL:
 // https://gitlab.com/aruw/controls/aruw-mcb/-/blob/a26bc3fb1845640e12b0afe32d720ec90c0bb709/aruw-mcb-project/src/aruwsrc/robot/dart/dart_control.cpp#L107
 
-
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, LAUNCHER_CAN_BUS, true, "Yaw Motor", false);
