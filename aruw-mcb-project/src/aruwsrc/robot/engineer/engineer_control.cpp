@@ -351,7 +351,7 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
 
 // transforms
 aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformer transformer(odometrySubsystem, engTurret);
-aruwsrc::algorithms::odometry::transforms::StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
 aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformAdapter transformAdapter(transformer);
 

@@ -30,9 +30,9 @@ class ThreeDeadwheelOdometryObserver
 {
 public:
     ThreeDeadwheelOdometryObserver(
-        tap::encoder::EncoderInterface* parallelWheelOne,
-        tap::encoder::EncoderInterface* parallelWheelTwo,
-        tap::encoder::EncoderInterface* perpendicularWheel,
+        const tap::encoder::EncoderInterface& parallelWheelOne, //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        const tap::encoder::EncoderInterface& parallelWheelTwo, //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        const tap::encoder::EncoderInterface& perpendicularWheel, //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         const float wheelRadius);
 
     const float wheelRadius;
@@ -46,12 +46,12 @@ public:
 
 private:
     /// Parallel wheel is oriented such that it rolls on the tangent line to the chassis
-    tap::encoder::EncoderInterface* parallelWheelOne;
-    tap::encoder::EncoderInterface* parallelWheelTwo;
+    const tap::encoder::EncoderInterface& parallelWheelOne; //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    const tap::encoder::EncoderInterface& parallelWheelTwo; //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     /// Perpendicular wheel is oriented such that it rolls on the line perpendicular to the chassis
-    tap::encoder::EncoderInterface* perpendicularWheel;
+    const tap::encoder::EncoderInterface& perpendicularWheel; //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 };
 
 }  // namespace aruwsrc::algorithms::odometry
 
-#endif  // TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
+#endif  // THREE_DEADWHEEL_ODOMETRY_OBSERVER_HPP_

@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
-#define DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
+#ifndef THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
+#define THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
@@ -232,4 +232,4 @@ private:
 };
 }  // namespace aruwsrc::algorithms::odometry
 
-#endif  // CHASSIS_KF_ODOMETRY_HPP_
+#endif  // THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_

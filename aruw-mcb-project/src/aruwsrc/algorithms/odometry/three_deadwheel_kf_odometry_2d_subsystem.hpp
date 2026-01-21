@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
-#define DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#ifndef THREE_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#define THREE_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
@@ -103,4 +103,4 @@ private:
 
 }  // namespace aruwsrc::algorithms::odometry
 
-#endif  // DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#endif  // THREE_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_

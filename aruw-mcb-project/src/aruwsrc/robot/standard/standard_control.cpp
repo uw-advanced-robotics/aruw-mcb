@@ -37,7 +37,7 @@
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
-#
+
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
@@ -230,39 +230,34 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-tap::encoder::CanEncoder parallelOmniOne(
-    drivers(),
-    tap::encoder::CanEncoderId::ID1,  //EG@TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
-    true); //EG@TODO: find correct inversion
+const tap::motor::DjiMotorEncoder& parallelOmniOne = leftFrontChassisMotor.getInternalEncoder();
 
-tap::encoder::CanEncoder parallelOmniTwo(
-    drivers(),
-    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
-    true); //EG@TODO: find correct inversion
+const tap::motor::DjiMotorEncoder& parallelOmniTwo = rightBackChassisMotor.getInternalEncoder();
 
-tap::encoder::CanEncoder perpendicularOmni(
-    drivers(),
-    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
-    true); //EG@TODO: find correct inversion
+const tap::motor::DjiMotorEncoder& perpendicularOmni = rightFrontChassisMotor.getInternalEncoder();
 
 float DEADWHEEL_RADIUS = 0.0f; //EG@TODO: find correct radius
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
-    &parallelOmniOne,
-    &parallelOmniTwo,
-    &perpendicularOmni,
+    parallelOmniOne,
+    parallelOmniTwo,
+    perpendicularOmni,
     DEADWHEEL_RADIUS
 );
+
+constexpr float parallelOneCenterToWheelDistance = 0.0f; //EG@TODO: find correct distance
+constexpr float parallelTwoCenterToWheelDistance = 0.0f; //EG@TODO: find correct distance
+constexpr float perpendicularCenterToWheelDistance = 0.0f; //EG@TODO: find correct distance
+constexpr float parallelWheelOneChassisForwardRelativeAngleRadians = 0.0f; //EG@TODO: find correct angle
+constexpr float parallelWheelTwoChassisForwardRelativeAngleRadians = 0.0f; //EG@TODO: find correct angle
+constexpr float perpendicularWheelChassisForwardRelativeAngleRadians = 0.0f; //EG@TODO: find correct angle
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     deadwheels,
-    engTurret,
+    turret,
     drivers()->mpu6500,
-    INITIAL_CHASSIS_POSITION_X,
-    INITIAL_CHASSIS_POSITION_Y,
+    aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
+    aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y,
     parallelOneCenterToWheelDistance,
     parallelTwoCenterToWheelDistance,
     perpendicularCenterToWheelDistance,
@@ -276,7 +271,7 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+StandardAndHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
@@ -800,9 +795,6 @@ void initializeSubsystems()
     transformSubsystem.initialize();
     capBankSubsystem.initialize();
     arucoResetSubsystem.initialize();
-    perpendicularOmni.initialize();
-    parallelOmniOne.initialize(); //@@@@@@@@@@@@@@@@
-    parallelOmniTwo.initialize(); //@@@@@@@@@@@@@@@@
 }
 
 /* set any default commands to subsystems here ------------------------------*/
