@@ -34,10 +34,7 @@ DartServo::DartServo(tap::Drivers* drivers)
     servo.setTargetPwm(SERVO_MAX);
 };
 
-void DartServo::initialize()
-{
-    drivers->pwm.setTimerFrequency(tap::gpio::Pwm::TIMER8, 500);
-}
+void DartServo::initialize() { drivers->pwm.setTimerFrequency(tap::gpio::Pwm::TIMER8, 500); }
 
 void DartServo::refresh() { servo.updateSendPwmRamp(); }
 

@@ -20,33 +20,39 @@
 #include "dart_yaw_position_command.hpp"
 
 #include "tap/control/command.hpp"
-#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 
 using namespace aruwsrc::control::joint::homing;
 using tap::communication::serial::Remote;
 namespace aruwsrc::robot::dart
 {
-    DartYawPositionCommand::DartYawPositionCommand(
-        tap::Drivers *drivers, 
-        TriggerHomedJointSubsystem *subsystem,
-        float setpointDegrees // setpoint should be measured as degrees to the right of
-    ) : drivers(drivers), subsystem(subsystem), setpointDegrees(setpointDegrees){
-        addSubsystemRequirement(subsystem);
-    }
-
-    void DartYawPositionCommand::initialize(){
-        float setpointMeters = -(aruwsrc::dart::DART_LAUNCHER_YAW_RADIAL_LENGTH * tan(setpointDegrees*PI/180)) + 0.13926685;
-        subsystem->setSetpoint(setpointMeters);
-    }
-
-    void DartYawPositionCommand::execute(){}
-
-    void DartYawPositionCommand::end(bool){}
-
-    bool DartYawPositionCommand::isFinished() const {
-        return subsystem->atSetpoint();
-    }
-
+DartYawPositionCommand::DartYawPositionCommand(
+    tap::Drivers *drivers,
+    TriggerHomedJointSubsystem *subsystem,
+    float setpointDegrees  // setpoint should be measured as degrees to the right of
+    )
+    : drivers(drivers),
+      subsystem(subsystem),
+      setpointDegrees(setpointDegrees)
+{
+    addSubsystemRequirement(subsystem);
 }
+
+void DartYawPositionCommand::initialize()
+{
+    float setpointMeters =
+        -(aruwsrc::dart::DART_LAUNCHER_YAW_RADIAL_LENGTH * tan(setpointDegrees * PI / 180)) +
+        0.13926685;
+    subsystem->setSetpoint(setpointMeters);
+}
+
+void DartYawPositionCommand::execute() {}
+
+void DartYawPositionCommand::end(bool) {}
+
+bool DartYawPositionCommand::isFinished() const { return subsystem->atSetpoint(); }
+
+}  // namespace aruwsrc::robot::dart

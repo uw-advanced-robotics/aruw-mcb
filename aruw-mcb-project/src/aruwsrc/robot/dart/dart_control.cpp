@@ -18,17 +18,14 @@
  */
 #if defined(TARGET_DART)
 
+#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/sequential_command.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
-#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
-#include "aruwsrc/robot/dart/dart_yaw_position_command.hpp"
-#include "aruwsrc/robot/dart/dart_yaw_velocity_command.hpp"
-#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -40,12 +37,10 @@
 #include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
-#include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
-#include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
-#include "aruwsrc/control/joint/homing/homing_command.hpp"
-#include "aruwsrc/robot/dart/dart_yaw_velocity_command.hpp"
-#include "aruwsrc/robot/dart/dart_servo.hpp"
 #include "aruwsrc/robot/dart/dart_manual_pullback_setpoint_command.hpp"
+#include "aruwsrc/robot/dart/dart_servo.hpp"
+#include "aruwsrc/robot/dart/dart_yaw_position_command.hpp"
+#include "aruwsrc/robot/dart/dart_yaw_velocity_command.hpp"
 
 #include "dart_close_command.hpp"
 #include "dart_constants.hpp"
@@ -105,39 +100,23 @@ DartManualPullbackSetpointCommand manualPullbackCommand(
 // TODO: ADD YAW MANUAL:
 // https://gitlab.com/aruw/controls/aruw-mcb/-/blob/a26bc3fb1845640e12b0afe32d720ec90c0bb709/aruw-mcb-project/src/aruwsrc/robot/dart/dart_control.cpp#L107
 
-aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
-    drivers(),
-    &yawSubsystem,
-    Remote::Channel::LEFT_HORIZONTAL
-);
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-tap::motor::DjiMotor yawMotor(
-    drivers(),
-    YAW_MOTOR_ID,
-    LAUNCHER_CAN_BUS,
-    true,
-    "Yaw Motor",
-    false
-);
+tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, LAUNCHER_CAN_BUS, true, "Yaw Motor", false);
 
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak yawLimitSwitch(
     &drivers()->digital,
     YAW_LIMITSWITCH_PORT,
-    false
-);
+    false);
 
-LimitSwitchTrigger yawTrigger(
-    &yawLimitSwitch
-);
+LimitSwitchTrigger yawTrigger(&yawLimitSwitch);
 
 aruwsrc::control::joint::homing::TriggerHomedJointSubsystem yawSubsystem(
     drivers(),
     yawMotor,
     yawTrigger,
-    YAW_HOME_CONFIG
-);
+    YAW_HOME_CONFIG);
 
 DartServo dartServo(drivers());
 DartSetpointCommand dartPullback(pullMotorSubsystem, PULLBACK_PULL_POSITION);
@@ -147,13 +126,12 @@ DartCloseCommand servoClose(dartServo);
 HomingCommand pullMotorHome(pullMotorSubsystem);
 HomingCommand yawHomeCommand(yawSubsystem);
 
+aruwsrc::robot::dart::DartYawPositionCommand dartYawPositionCommand(drivers(), &yawSubsystem, 0.0f);
 
-aruwsrc::robot::dart::DartYawPositionCommand dartYawPositionCommand(
+aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
     drivers(),
     &yawSubsystem,
-    0.0f
-);
-
+    Remote::Channel::LEFT_HORIZONTAL);
 // grab the string and pullback to setpoint
 SequentialCommand<2> pullBackCommand(std::array<Command*, 2>{{&servoClose, &dartPullback}});
 

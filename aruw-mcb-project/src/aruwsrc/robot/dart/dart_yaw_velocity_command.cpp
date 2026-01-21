@@ -19,31 +19,38 @@
 
 #include "dart_yaw_velocity_command.hpp"
 
-#include "aruwsrc/robot/dart/dart_constants.hpp"
 #include "tap/control/command.hpp"
-#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::robot::dart{
-    DartYawVelocityCommand::DartYawVelocityCommand(
-        tap::Drivers *drivers,
-        TriggerHomedJointSubsystem *subsystem,
-        Remote::Channel channel
-    ) : drivers(drivers), subsystem(subsystem), channel(channel){
-        addSubsystemRequirement(subsystem);
-    }
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
+#include "aruwsrc/robot/dart/dart_constants.hpp"
 
-    void DartYawVelocityCommand::initialize(){}
-
-    void DartYawVelocityCommand::execute(){
-        subsystem->setSetpoint(
-            subsystem->getPosition() + drivers->remote.getChannel(channel) * aruwsrc::dart::YAW_INPUT_SENSITIVITY
-        );
-    }
-
-    bool DartYawVelocityCommand::isFinished() const {
-        return abs(drivers->remote.getChannel(channel)) < 0.05;
-    }
-
-    void DartYawVelocityCommand::end(bool interrupted){}
+namespace aruwsrc::robot::dart
+{
+DartYawVelocityCommand::DartYawVelocityCommand(
+    tap::Drivers* drivers,
+    TriggerHomedJointSubsystem* subsystem,
+    Remote::Channel channel)
+    : drivers(drivers),
+      subsystem(subsystem),
+      channel(channel)
+{
+    addSubsystemRequirement(subsystem);
 }
+
+void DartYawVelocityCommand::initialize() {}
+
+void DartYawVelocityCommand::execute()
+{
+    subsystem->setSetpoint(
+        subsystem->getPosition() +
+        drivers->remote.getChannel(channel) * aruwsrc::dart::YAW_INPUT_SENSITIVITY);
+}
+
+bool DartYawVelocityCommand::isFinished() const
+{
+    return abs(drivers->remote.getChannel(channel)) < 0.05;
+}
+
+void DartYawVelocityCommand::end(bool) {}
+}  // namespace aruwsrc::robot::dart
