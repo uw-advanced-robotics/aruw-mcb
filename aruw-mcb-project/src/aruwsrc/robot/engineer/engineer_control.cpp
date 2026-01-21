@@ -58,7 +58,6 @@
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/sliders_indicator.hpp"
 #include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
@@ -365,21 +364,6 @@ DigitalOutSubsystem releaseSubsystem(
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
-SlidersIndicator slidersIndicator(
-    refSerialTransmitter,
-    gantryLiftSubsystem,
-    gantryExtensionSubsystem,
-    cubeLift,
-    wristSubsystem,
-    WRIST_CONFIG);
-
-std::vector<HudIndicator *> hudIndicators = {&slidersIndicator};
-
-aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
-    clientDisplay,
-    hudIndicators);
-
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
 HomingCommand extensionHome(extensionSubsystem);
@@ -394,7 +378,7 @@ SetpointMoveManualCommand extensionManualControl(
     extensionSubsystem,
     &drivers()->controlOperatorInterface,
     EXTENSION_MOVE_SPEED,
-    SetpointType::GANTRY_EXTENSION);
+    SetpointType::EXTENSION);
 
 SetpointMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 SetpointMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
@@ -429,43 +413,35 @@ DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
 
 // commands here for sequences, but setpoints never tuned
-SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
-SetpointMovePositionCommand liftDownCommand(gantryLiftSubsystem, 2);
-SetpointMovePositionCommand gantryRetractCommand(gantryExtensionSubsystem, 2);
-SetpointMovePositionCommand gantryExtendCommand(gantryExtensionSubsystem, 2);
+SetpointMovePositionCommand extensionInCommand(extensionSubsystem, 2);
+SetpointMovePositionCommand extensionOutCommand(extensionSubsystem, 2);
+
 // never tested
 CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
 SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
-    {&liftUpCommand,
-     &gantryRetractCommand,
+    {&extensionInCommand,
      &wristFoldInCommand,
-     &liftDownCommand,
      &suckOffCommand,
      &releaseOnCommand,
-     &gantryExtendCommand,
-     &liftUpCommand,
-     &gantryRetractCommand,
+     &extensionOutCommand,
+     &extensionInCommand,
      &cubeLiftSwitchDownCommand}});
 SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
-    {&liftDownCommand,
-     &gantryExtendCommand,
+    {&extensionOutCommand,
      &wristFoldInCommand,
-     &gantryRetractCommand,
+     &extensionInCommand,
      &suckOnCommand,
      &releaseOffCommand,
-     &liftUpCommand,
      &wristFoldOutCommand,
-     &liftDownCommand,
      &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
-SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
-SetpointMovePositionCommand gantryIn(gantryExtensionSubsystem, GANTRY_EXTENSION_PICKUP);
-SetpointMovePositionCommand liftScore(gantryLiftSubsystem, GANTRY_LIFT_SCORE);
-SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, GANTRY_LIFT_PICKUP);
+SetpointMovePositionCommand extensionOut(extensionSubsystem, EXTENSION_SCORE);
+SetpointMovePositionCommand extensionIn(extensionSubsystem, EXTENSION_PICKUP);
+
 WristMovePositionCommand wristDown(
     wristSubsystem,
     WRIST_PITCH_PICKUP,
@@ -473,7 +449,7 @@ WristMovePositionCommand wristDown(
 WristMovePositionCommand wristOut(wristSubsystem, WRIST_PITCH_SCORE, WRIST_YAW_SCORE);
 
 ScorePositionCommand scorePositionCommand(
-    gantryLiftSubsystem,
+    extensionSubsystem,
     wristSubsystem,
     wristRollSubsystem);  // TODO: test that this works
 
@@ -482,7 +458,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 tap::control::PressCommandMapping leftUp(
     drivers(),
-    {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
+    {&cubeLiftHome, &extensionHome},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 tap::control::HoldCommandMapping rightMid(
@@ -502,12 +478,12 @@ tap::control::PressCommandMapping suctionToggle(
 
 tap::control::PressCommandMapping vPressed(
     drivers(),
-    {&gantryOut, &liftPickup, &wristDown},
+    {&extensionOut, &wristDown},
     RemoteMapState({Remote::Key::V}));
 
 tap::control::PressCommandMapping bPressed(
     drivers(),
-    {&gantryIn, &liftScore, &wristOut},
+    {&extensionIn, &wristOut},
     RemoteMapState({Remote::Key::B}));
 
 // following commands never tested, and still need to get working
@@ -546,8 +522,7 @@ CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
 void initializeSubsystems()
 {
     xDriveChassis.initialize();
-    gantryLiftSubsystem.initialize();
-    gantryExtensionSubsystem.initialize();
+    extensionSubsystem.initialize();
     wristRollSubsystem.initialize();
     wristSubsystem.initialize();
     cubeLift.initialize();
@@ -560,8 +535,7 @@ void initializeSubsystems()
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&xDriveChassis);
-    drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
-    drivers->commandScheduler.registerSubsystem(&gantryExtensionSubsystem);
+    drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);

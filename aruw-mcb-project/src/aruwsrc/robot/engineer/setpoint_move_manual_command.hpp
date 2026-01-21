@@ -29,8 +29,7 @@ namespace aruwsrc::engineer
 enum SetpointType
 {
     CUBE_LIFT,
-    GANTRY_LIFT,
-    GANTRY_EXTENSION
+    EXTENSION
 };
 class SetpointMoveManualCommand : public tap::control::Command
 {
