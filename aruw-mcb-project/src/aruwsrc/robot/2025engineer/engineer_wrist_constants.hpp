@@ -25,8 +25,8 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
-#include "aruwsrc/robot/engineer2025/wrist/wrist_setpoints_command.hpp"
-#include "aruwsrc/robot/engineer2025/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/robot/2025engineer/wrist/wrist_setpoints_command.hpp"
+#include "aruwsrc/robot/2025engineer/wrist/wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {

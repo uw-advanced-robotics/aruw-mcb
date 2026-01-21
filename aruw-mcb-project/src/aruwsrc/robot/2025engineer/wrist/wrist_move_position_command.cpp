@@ -17,35 +17,29 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer2025/wrist/wrist_setpoints_command.hpp"
+#include "aruwsrc/robot/2025engineer/wrist/wrist_move_position_command.hpp"
 namespace aruwsrc::engineer::wrist
 {
-WristSetpointsCommand::WristSetpointsCommand(WristSubsystem &wrist, std::vector<Setpoint> setpoints)
+WristMovePositionCommand::WristMovePositionCommand(
+    WristSubsystem &wrist,
+    float pitchSetpoint,
+    float yawSetpoint)
     : wrist(wrist),
-      setpoints(std::move(setpoints)),
-      currentSetpointIndex(0)
+      pitchSetpoint(pitchSetpoint),
+      yawSetpoint(yawSetpoint)
 {
     addSubsystemRequirement(&wrist);
 }
 
-void WristSetpointsCommand::initialize() {}
-
-void WristSetpointsCommand::execute()
+void WristMovePositionCommand::initialize()
 {
-    if (currentSetpointIndex < setpoints.size())
-    {
-        const auto &setpoint = setpoints[currentSetpointIndex];
-        wrist.setSetpointPitch(setpoint.pitch);
-        wrist.setSetpointYaw(setpoint.yaw);
-        if (wrist.atSetpointPitch(setpoint.epsilonPitch) &&
-            wrist.atSetpointYaw(setpoint.epsilonYaw))
-        {
-            currentSetpointIndex++;
-        }
-    }
+    wrist.setSetpointPitch(pitchSetpoint);
+    wrist.setSetpointYaw(yawSetpoint);
 }
 
-void WristSetpointsCommand::end(bool) {}
+void WristMovePositionCommand::execute() {}
 
-bool WristSetpointsCommand::isFinished() const { return currentSetpointIndex >= setpoints.size(); }
+void WristMovePositionCommand::end(bool) {}
+
+bool WristMovePositionCommand::isFinished() const { return wrist.atSetpoint(); }
 }  // namespace aruwsrc::engineer::wrist

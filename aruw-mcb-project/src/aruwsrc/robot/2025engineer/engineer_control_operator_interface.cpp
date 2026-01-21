@@ -17,12 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer2025/engineer_control_operator_interface.hpp"
+#include "aruwsrc/robot/2025engineer/engineer_control_operator_interface.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/robot/engineer2025/engineer_wrist_constants.hpp"
+#include "aruwsrc/robot/2025engineer/engineer_wrist_constants.hpp"
 
 using namespace tap::algorithms;
 using namespace aruwsrc::control::chassis;

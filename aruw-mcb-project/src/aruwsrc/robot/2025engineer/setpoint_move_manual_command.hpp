@@ -22,7 +22,7 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
-#include "aruwsrc/robot/engineer2025/engineer_control_operator_interface.hpp"
+#include "aruwsrc/robot/2025engineer/engineer_control_operator_interface.hpp"
 
 namespace aruwsrc::engineer
 {

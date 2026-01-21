@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer2025/score_position_command.hpp"
+#include "aruwsrc/robot/2025engineer/score_position_command.hpp"
 
 namespace aruwsrc::engineer
 {

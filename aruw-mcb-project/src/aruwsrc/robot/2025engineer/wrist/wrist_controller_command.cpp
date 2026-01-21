@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer2025/wrist/wrist_controller_command.hpp"
+#include "aruwsrc/robot/2025engineer/wrist/wrist_controller_command.hpp"
 
 namespace aruwsrc::engineer::wrist
 {

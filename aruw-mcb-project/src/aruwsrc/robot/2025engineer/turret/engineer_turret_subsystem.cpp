@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer2025/turret/engineer_turret_subsystem.hpp"
+#include "aruwsrc/robot/2025engineer/turret/engineer_turret_subsystem.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 

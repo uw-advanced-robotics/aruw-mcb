@@ -16,26 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SCORE_POSITION_COMMAND_HPP_
-#define SCORE_POSITION_COMMAND_HPP_
+#ifndef WRIST_MOVE_POSITION_COMMAND_HPP_
+#define WRIST_MOVE_POSITION_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/control/joint/joint_subsystem.hpp"
-#include "aruwsrc/robot/engineer2025/engineer_setpoint_constants.hpp"
-#include "aruwsrc/robot/engineer2025/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/robot/2025engineer/wrist/wrist_subsystem.hpp"
 
-using namespace aruwsrc::engineer::wrist;
+namespace aruwsrc::engineer::wrist
 
-namespace aruwsrc::engineer
 {
-class ScorePositionCommand : public tap::control::Command
+class WristMovePositionCommand : public tap::control::Command
 {
 public:
-    ScorePositionCommand(
-        aruwsrc::control::joint::JointSubsystem &gantryLift,
-        WristSubsystem &wrist,
-        aruwsrc::control::joint::JointSubsystem &roll);
+    WristMovePositionCommand(WristSubsystem &wrist, float pitchSetpoint, float yawSetpoint);
 
     void initialize() override;
 
@@ -45,17 +39,13 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Score Position Command"; }
-
-    void cyclePositions(ScorePositions scorePos);
+    const char *getName() const override { return "Wrist Move Position Command"; }
 
 private:
-    aruwsrc::control::joint::JointSubsystem &gantryLift;
     WristSubsystem &wrist;
-    aruwsrc::control::joint::JointSubsystem &roll;
-    ScorePositions scoringPosition;
+    float pitchSetpoint, yawSetpoint;
 
-};  // class ScorePositionCommand
+};  // class WristMovePositionCommand
 
-}  // namespace aruwsrc::engineer
-#endif  // SCORE_POSITION_COMMAND_HPP_
+}  // namespace aruwsrc::engineer::wrist
+#endif  // WRIST_MOVE_POSITION_COMMAND_HPP_
