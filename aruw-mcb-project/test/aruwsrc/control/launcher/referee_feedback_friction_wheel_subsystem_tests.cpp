@@ -32,11 +32,24 @@ class RefereeFeedbackFrictionWheelSubsystemTest : public Test
 {
 protected:
     RefereeFeedbackFrictionWheelSubsystemTest()
-        : frictionWheels(
+        : leftFlywheel(
               &drivers,
               tap::motor::MOTOR1,
+              tap::can::CanBus::CAN_BUS1,
+              true,
+              "Left flywheel",
+              false),
+          rightFlywheel(
+              &drivers,
               tap::motor::MOTOR2,
               tap::can::CanBus::CAN_BUS1,
+              false,
+              "Right flywheel",
+              false),
+          frictionWheels(
+              &drivers,
+              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
+              WHEEL_CONFIGS_ARRAY,
               nullptr,
               tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
     {
@@ -49,7 +62,9 @@ protected:
 
     tap::arch::clock::ClockStub clock;
     tap::Drivers drivers;
-    RefereeFeedbackFrictionWheelSubsystem<10> frictionWheels;
+    NiceMock<tap::mock::DjiMotorMock> leftFlywheel, rightFlywheel;
+    std::array<FlywheelConfig, 2> WHEEL_CONFIGS_ARRAY = {WHEEL_CONFIG, WHEEL_CONFIG};
+    RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheels;
     tap::communication::serial::RefSerialData::Rx::RobotData robotData;
 };
 
@@ -58,17 +73,11 @@ TEST_F(
     getPredictedLaunchSpeed_same_as_desired_launch_speed_when_ref_system_offline)
 {
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
-
     frictionWheels.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first);
-
     frictionWheels.refresh();
-
     EXPECT_EQ(frictionWheels.getDesiredLaunchSpeed(), frictionWheels.getPredictedLaunchSpeed());
-
     frictionWheels.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].first);
-
     frictionWheels.refresh();
-
     EXPECT_EQ(frictionWheels.getDesiredLaunchSpeed(), frictionWheels.getPredictedLaunchSpeed());
 }
 
@@ -105,6 +114,7 @@ TEST_F(
     RefereeFeedbackFrictionWheelSubsystemTest,
     getPredictedLaunchSpeed_does_not_update_when_lastReceivedLaunchingInfoTimestamp_does_not_change)
 {
+    std::cout << "test 2" << std::endl;
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;
@@ -121,11 +131,10 @@ TEST_F(
 
 TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rolling_average)
 {
-    RefereeFeedbackFrictionWheelSubsystem<10> frictionWheelAveraged(
+    RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheelAveraged(
         &drivers,
-        tap::motor::MOTOR1,
-        tap::motor::MOTOR2,
-        tap::can::CanBus::CAN_BUS1,
+        std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
+        WHEEL_CONFIGS_ARRAY,
         nullptr,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 

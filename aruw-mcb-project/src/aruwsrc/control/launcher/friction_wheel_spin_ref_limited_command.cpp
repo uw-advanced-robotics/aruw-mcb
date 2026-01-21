@@ -23,11 +23,13 @@
 
 #include "modm/architecture/interface/assert.hpp"
 
+#include "launcher_constants.hpp"
+
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     tap::Drivers *drivers,
-    FrictionWheelSubsystem *frictionWheels,
+    FrictionWheelInterface *frictionWheels,
     float defaultLaunchSpeed,
     bool alwaysUseDefaultLaunchSpeed,
     tap::communication::serial::RefSerialData::Rx::MechanismID barrel)

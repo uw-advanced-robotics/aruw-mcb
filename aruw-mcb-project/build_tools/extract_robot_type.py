@@ -24,12 +24,14 @@ VALID_ROBOT_TYPES   = [ "STANDARD_NULL",
                         "STANDARD_VOID",
                         "DRONE",
                         "ENGINEER",
+                        "ENGI_2025",
                         "SENTRY_ECLIPSE",
                         "HERO_ZERO",
                         "DART",
                         "TESTBED",
                         "BLANK",
                         "MOTOR_TESTER",
+                        "LAUNCHER_TARGET",
                         "CHARACTERIZER", ]
 
 ROBOT_CLASS = {
@@ -37,12 +39,14 @@ ROBOT_CLASS = {
     "STANDARD_VOID": "standard",
     "DRONE": "drone",
     "ENGINEER": "engineer",
+    "ENGI_2025": "engineer",
     "SENTRY_ECLIPSE": "sentry",
     "HERO_ZERO": "hero",
     "DART": "dart",
     "TESTBED": "testbed",
     "BLANK": "blank",
     "MOTOR_TESTER": "motor_tester",
+    "LAUNCHER_TARGET" : "dart_target",
     "CHARACTERIZER": "characterizer",
 }
 

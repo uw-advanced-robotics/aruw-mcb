@@ -20,6 +20,8 @@
 
 #include <cassert>
 
+#include <aruwsrc/algorithms/plate_hit_tracker.hpp>
+
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
@@ -38,13 +40,16 @@ using namespace aruwsrc::algorithms;
 namespace aruwsrc::sentry::turret::cv
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
-    serial::VisionCoprocessor &visionCoprocessor,
+    communication::serial::VisionCoprocessor &visionCoprocessor,
+    aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawControllerMajor,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
     TurretConfig &turretLeftConfig,
     TurretConfig &turretRightConfig,
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
+      plateHitTracker(plateHitTracker),
       turretMajorSubsystem(turretMajorSubsystem),
       yawControllerMajor(yawControllerMajor),
       turretLeftConfig(turretLeftConfig),
@@ -124,7 +129,13 @@ void SentryTurretCVCommand::execute()
         }
 
         // major averaging
-        majorSetpoint = leftYawSetpoint.minInterpolate(rightYawSetpoint, 0.5);
+        WrappedFloat majorDirection = leftYawSetpoint.minInterpolate(rightYawSetpoint, 0.5);
+
+        // utilize major's 180˚ symmetry
+        // majorSetpoint = fabs(majorSetpoint.minDifference(majorDirection)) < M_PI_2
+        //                     ? majorDirection
+        //                     : majorDirection + M_PI;
+        majorSetpoint = majorDirection;
     }
     else
     {
@@ -147,25 +158,87 @@ void SentryTurretCVCommand::execute()
                 enterScanMode(majorSetpoint);
             }
 
-            // scan logic: start at some default, scan 180deg clockwise, change direction
-            // scan 180 ccw, change, etc.
-            float v = majorScanValue.getWrappedValue();
-            if (v >= CCW_TO_CW_WRAP_VALUE)
-                scanDir = SCAN_CLOCKWISE;  // decreases angle
-            else if (v <= CW_TO_CCW_WRAP_VALUE)
-                scanDir = SCAN_COUNTER_CLOCKWISE;  // increases angle
+            if (curHitState == HitState::NOT_HIT)
+            {
+                // scan logic: start at some default, scan 180deg clockwise, change direction
+                // scan 180 ccw, change, etc.
+                float v = majorScanValue.getWrappedValue();
+                if (v >= CCW_TO_CW_WRAP_VALUE)
+                    scanDir = SCAN_CLOCKWISE;  // decreases angle
+                else if (v <= CW_TO_CCW_WRAP_VALUE)
+                    scanDir = SCAN_COUNTER_CLOCKWISE;  // increases angle
 
-            majorScanValue += YAW_SCAN_DELTA_ANGLE * scanDir;
-            majorSetpoint = majorSetpoint.minInterpolate(
-                majorScanValue,
-                SCAN_LOW_PASS_ALPHA);  // lowpass filter
+                majorScanValue += YAW_SCAN_DELTA_ANGLE * scanDir;
+                majorSetpoint = majorSetpoint.minInterpolate(
+                    majorScanValue,
+                    SCAN_LOW_PASS_ALPHA);  // lowpass filter
 
-            leftPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
-            rightPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
+                leftPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
+                rightPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
 
-            leftYawSetpoint = majorSetpoint + SCAN_TURRET_LEFT_YAW;
-            rightYawSetpoint = majorSetpoint + SCAN_TURRET_RIGHT_YAW;
+                leftYawSetpoint = majorSetpoint + SCAN_TURRET_LEFT_YAW;
+                rightYawSetpoint = majorSetpoint + SCAN_TURRET_RIGHT_YAW;
+            }
         }
+    }
+
+    const std::vector<PlateHitTracker::PlateHitBinData> &hitData =
+        plateHitTracker.getPeakAnglesRadians();
+    PlateHitTracker::PlateHitBinData maxHit;
+    if (!hitData.empty())
+    {
+        maxHit = hitData[0];
+    }
+    else
+    {
+        maxHit.magnitude = 0.0f;
+        maxHit.radians = Angle(0);
+        maxHit.projectileType = PlateHitTracker::ProjectileType::NONE;
+    }
+
+    lastPlateHitData = plateHitData;
+    plateHitData = maxHit;
+    switch (curHitState)
+    {
+        case HitState::HIT:
+        {
+            // set new setpoint if hit state transition or new hit is registered
+            hitLocDiffRads =
+                abs(plateHitData.radians.getUnwrappedValue() -
+                    lastPlateHitData.radians.getUnwrappedValue());
+            if (lastHitState != curHitState || hitLocDiffRads > HIT_DIFF_OFFSET)
+            {
+                majorSetpoint = maxHit.radians;
+                if (scanning)
+                {
+                    leftYawSetpoint = majorSetpoint + TURRET_OFFSET;
+                    rightYawSetpoint = majorSetpoint - TURRET_OFFSET;
+                }
+            }
+            lastHitState = curHitState;
+            uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
+            if (maxHit.magnitude < HIT_MAG_THRESH &&
+                curTime - lastHitTime > HIT_COUNT_DELAY_MILLISEC)
+            {
+                curHitState = HitState::NOT_HIT;
+            }
+            else if (maxHit.magnitude >= HIT_MAG_THRESH)
+            {
+                lastHitTime = curTime;
+            }
+            break;
+        }
+        case HitState::NOT_HIT:
+        {
+            lastHitState = curHitState;
+            if (maxHit.magnitude >= HIT_MAG_THRESH)
+            {
+                curHitState = HitState::HIT;
+            }
+            break;
+        }
+        default:
+            break;
     }
 
     uint32_t currTime = getTimeMilliseconds();

@@ -23,6 +23,8 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -85,15 +87,42 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #endif
 
 #if defined(TARGET_STANDARD_NULL)
+static constexpr float TORQUE_TO_DESIRED_OUT =
+    1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
+static constexpr float TURRET_WEIGHT_KG = 1.646f;       // 1.646kg from CAD
+
 // Actual CAD value is 55.76, decreased for balls in hopper
-static constexpr float TURRET_CG_X = 33.83;
-static constexpr float TURRET_CG_Z = 26.68;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
+static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
+    TURRET_GRAVITY_CONFIG{
+        .cgX = 33.83f,
+        .cgZ = 26.68f,
+        .gravityCompensatorMax = -5000.0f,
+    };
+
+static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
+    .turretPitchMountX = 0.0f,
+    .turretPitchMountZ = 0.0f,
+    .turretYawMountX = 0.0f,
+    .turretYawMountZ = 0.0f,
+    .springConstant = 0.0f,
+    .springFreeLength = 0.0f,
+};
 
 #elif defined(TARGET_STANDARD_VOID)
-static constexpr float TURRET_CG_X = 33.83;
-static constexpr float TURRET_CG_Z = 26.68;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = -5'000;
+static constexpr float TORQUE_TO_DESIRED_OUT =
+    1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
+static constexpr float TURRET_WEIGHT_KG = 1.646f;       // 1.646kg from CAD
+
+static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
+    TURRET_GRAVITY_CONFIG{.cgX = 20.0f, .cgZ = 16.5f, .gravityCompensatorMax = -5200.0f};
+
+static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
+    .turretPitchMountX = -80.0f,
+    .turretPitchMountZ = 6.0f,
+    .turretYawMountX = -53.0f,
+    .turretYawMountZ = -30.0f,
+    .springConstant = -2.6f,
+    .springFreeLength = 10.0f};
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif
@@ -340,7 +369,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 80'000.0f,
     .ki = 200.0f,
-    .kd = 7'000.0f,
+    .kd = 5'000.0f,
     .maxICumulative = 7000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,

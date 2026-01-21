@@ -56,7 +56,8 @@ namespace aruwsrc::sentry::turret
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
 class TurretMajorWorldFrameController final
-    : public aruwsrc::control::turret::algorithms::TurretYawControllerInterface
+    : public aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+          control::turret::algorithms::Axis::YAW>
 {
 public:
     /**
@@ -75,7 +76,7 @@ public:
      */
     TurretMajorWorldFrameController(
         const tap::algorithms::transforms::Transform& worldToMajor,
-        const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+        const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
         tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
         const SentryTurretMinorSubsystem& turretLeft,
@@ -122,7 +123,7 @@ public:
 private:
     const tap::algorithms::transforms::Transform& worldToMajor;
 
-    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
+    const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
 
     aruwsrc::control::turret::TurretMotor& yawMotor;
 

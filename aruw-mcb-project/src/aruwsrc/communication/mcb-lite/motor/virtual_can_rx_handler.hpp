@@ -28,7 +28,7 @@
 #include "modm/architecture/interface/assert.h"
 #include "modm/architecture/interface/can_message.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 /**
  * This class is used to pass CAN messages from the virtual MCB to listeners (motors)
@@ -41,6 +41,6 @@ public:
     void refresh(tap::can::CanBus canbus, modm::can::Message message);
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor
 
 #endif

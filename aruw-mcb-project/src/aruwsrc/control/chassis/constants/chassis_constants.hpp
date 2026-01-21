@@ -36,7 +36,7 @@
 #include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"
 #endif
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 // hardware constants, not specific to any particular chassis
 static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
@@ -48,6 +48,6 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #else
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 #endif
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // CHASSIS_CONSTANTS_HPP_

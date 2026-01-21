@@ -24,7 +24,7 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class HolonomicChassisSubsystem;
 }
@@ -34,7 +34,7 @@ namespace aruwsrc::control::turret
 class RobotTurretSubsystem;
 }
 
-namespace aruwsrc::serial
+namespace aruwsrc::communication::serial
 {
 class VisionCoprocessor;
 }
@@ -116,7 +116,7 @@ public:
      * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
-        const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
@@ -136,7 +136,7 @@ public:
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
-    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;

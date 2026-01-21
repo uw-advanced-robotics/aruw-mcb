@@ -24,14 +24,14 @@
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "../projection_utils.hpp"
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "modm/processing/resumable.hpp"
 
-using namespace aruwsrc::algorithms::transforms;
+using namespace aruwsrc::algorithms::odometry::transforms;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Draws a square where the enemy robot is.
@@ -40,7 +40,7 @@ class VisionTargetIndicator : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     VisionTargetIndicator(
-        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const Transform &worldToTurretTransform);
 
@@ -69,7 +69,7 @@ public:
     };
 
 private:
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     const Transform &worldToCameraTransform;
 
     Tx::Graphic1Message visionTargetGraphic;
@@ -88,6 +88,6 @@ private:
     ProjectedPlateResult getEnemyPlatePosition(Position &enemyPosition);
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // VISION_TARGET_INDICATOR_HPP_

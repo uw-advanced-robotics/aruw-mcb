@@ -31,6 +31,8 @@ namespace aruwsrc::hero
 namespace aruwsrc::drone
 #elif defined(TARGET_ENGINEER)
 namespace aruwsrc::engineer
+#elif defined(TARGET_ENGI_2025)
+namespace aruwsrc::engineer
 #elif defined(TARGET_DART)
 namespace aruwsrc::dart
 #elif defined(TARGET_TESTBED)
@@ -39,6 +41,8 @@ namespace aruwsrc::testbed
 namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 namespace aruwsrc::motor_tester
+#elif defined(TARGET_LAUNCHER_TARGET)
+namespace aruwsrc::dart_target
 #elif defined(TARGET_CHARACTERIZER)
 namespace aruwsrc::characterizer
 #endif

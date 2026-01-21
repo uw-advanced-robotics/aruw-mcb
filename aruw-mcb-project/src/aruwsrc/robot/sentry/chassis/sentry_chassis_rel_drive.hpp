@@ -36,17 +36,17 @@ class SentryChassisRelDrive
 {
 public:
     static void computeDesiredUserTranslation(
-        aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
+        aruwsrc::sentry::SentryControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem *chassis,
+        aruwsrc::control::chassis::HolonomicChassisSubsystem *chassis,
         float chassisRotation,
         float *chassisXDesiredWheelspeed,
         float *chassisYDesiredWheelspeed);
 
     static void onExecute(
-        aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
+        aruwsrc::sentry::SentryControlOperatorInterface *operatorInterface,
         tap::Drivers *drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem *chassis);
+        aruwsrc::control::chassis::HolonomicChassisSubsystem *chassis);
 };
 }  // namespace aruwsrc::sentry::chassis
 

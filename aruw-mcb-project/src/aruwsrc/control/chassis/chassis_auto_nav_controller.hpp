@@ -31,7 +31,7 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class ChassisAutoNavController
 {
@@ -47,10 +47,10 @@ public:
 
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+        HolonomicChassisSubsystem& chassis,
         aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer,
-        const aruwsrc::chassis::BeybladeConfig beybladeConfig,
-        aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem,
+        const aruwsrc::control::chassis::BeybladeConfig beybladeConfig,
+        aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
         float translationalMotionThreshhold,
         float capbankEnergyThreshold)
         : chassis(chassis),
@@ -84,26 +84,26 @@ public:
 
 private:
     float curPosError;
-    aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
+    aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
     Position lastSetPoint;
     tap::Drivers& drivers;
 
     const aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer;
 
-    aruwsrc::chassis::BeybladeConfig beybladeConfig;
+    aruwsrc::control::chassis::BeybladeConfig beybladeConfig;
 
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;
 
-    aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem;
+    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
 
     float desiredSpeed = 0;
 
     float translationalMotionThreshhold;
     float capbankEnergyThreshold;
 };
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // CHASSIS_AUTO_NAV_CONTROLLER_HPP_

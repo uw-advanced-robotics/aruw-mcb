@@ -32,7 +32,7 @@
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
 #endif
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -167,6 +167,6 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // STANDARD_CHASSIS_CONSTANTS_HPP_

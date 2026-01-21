@@ -24,19 +24,19 @@
 
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class HolonomicChassisSubsystem;
 }
 
-namespace aruwsrc::serial
+namespace aruwsrc::communication::serial
 {
 class VisionCoprocessor;
 }
@@ -124,7 +124,7 @@ public:
      * for, see the VisionCoprocessor for more information about this id.
      */
     SentryBallisticsSolver(
-        const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         const odometry::SentryTransforms &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
@@ -147,7 +147,7 @@ public:
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
-    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     const odometry::SentryTransforms &transformer;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const aruwsrc::control::turret::YawTurretSubsystem &turretMajor;

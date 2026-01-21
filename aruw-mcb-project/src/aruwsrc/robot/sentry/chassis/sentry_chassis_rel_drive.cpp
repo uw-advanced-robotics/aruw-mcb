@@ -22,17 +22,17 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 using namespace tap::algorithms;
-using aruwsrc::chassis::HolonomicChassisSubsystem;
+using aruwsrc::control::chassis::HolonomicChassisSubsystem;
 
 namespace aruwsrc::sentry::chassis
 {
 void SentryChassisRelDrive::computeDesiredUserTranslation(
-    aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
+    aruwsrc::sentry::SentryControlOperatorInterface *operatorInterface,
     tap::Drivers *drivers,
-    aruwsrc::chassis::HolonomicChassisSubsystem *chassis,
+    aruwsrc::control::chassis::HolonomicChassisSubsystem *chassis,
     float chassisRotation,
     float *chassisXDesiredWheelspeed,
     float *chassisYDesiredWheelspeed)
@@ -63,7 +63,7 @@ void SentryChassisRelDrive::computeDesiredUserTranslation(
 }
 
 void SentryChassisRelDrive::onExecute(
-    aruwsrc::control::sentry::SentryControlOperatorInterface *operatorInterface,
+    aruwsrc::sentry::SentryControlOperatorInterface *operatorInterface,
     tap::Drivers *drivers,
     HolonomicChassisSubsystem *chassis)
 {
