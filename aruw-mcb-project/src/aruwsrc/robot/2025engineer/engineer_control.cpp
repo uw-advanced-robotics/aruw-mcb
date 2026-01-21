@@ -19,7 +19,6 @@
 
 #if defined(TARGET_ENGI_2025)
 
-
 #if defined(TARGET_ENGI_2025)
 
 #include "tap/communication/gpio/digital.hpp"

@@ -34,12 +34,12 @@ enum ScorePositions
 // pickup position
 static constexpr float WRIST_PITCH_PICKUP = 1.605495333f;
 static constexpr float WRIST_YAW_PICKUP = 0.0f;
-static constexpr float EXTENSION_PICKUP = 0.0f; // TODO: get position
+static constexpr float EXTENSION_PICKUP = 0.0f;  // TODO: get position
 
 // score position (almost reaching 1st setpoint), what we used in competition
 static constexpr float WRIST_PITCH_SCORE = 0.0f;
 static constexpr float WRIST_YAW_SCORE = 0.0f;
-static constexpr float EXTENSION_SCORE = 240.0f; //TODO: get position
+static constexpr float EXTENSION_SCORE = 240.0f;  // TODO: get position
 
 // score positions
 // while the code for this exists, none of it been tested lol

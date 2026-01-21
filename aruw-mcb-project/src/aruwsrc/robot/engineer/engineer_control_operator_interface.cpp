@@ -45,8 +45,6 @@ float EngineerControlOperatorInterface::getCubeLiftVelocity()
     return 0.0f;
 }
 
-
-
 float EngineerControlOperatorInterface::getGantryExtensionVelocity()
 {
     if (getShiftKey())

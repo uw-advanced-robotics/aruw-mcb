@@ -52,9 +52,9 @@
 #include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
+#include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
@@ -63,6 +63,7 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+
 // #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
@@ -255,7 +256,7 @@ tap::motor::DjiMotor extensionMotor(
     drivers(),
     aruwsrc::engineer::EXTENSION_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_EXTENSION,
-    true, // inverted? test
+    true,  // inverted? test
     "Extension Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
