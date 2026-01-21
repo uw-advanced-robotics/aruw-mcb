@@ -26,7 +26,7 @@
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/interpolate.hpp"
-#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"

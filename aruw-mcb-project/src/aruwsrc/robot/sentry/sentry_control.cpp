@@ -44,8 +44,8 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
-#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
-#include "aruwsrc/control/cap_bank/sentry_capbank_command.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap-bank/sentry_capbank_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
@@ -111,7 +111,8 @@ using namespace aruwsrc::sentry::algorithms;
 using namespace aruwsrc::sentry::algorithms::odometry;
 using namespace aruwsrc::sentry::turret;
 using namespace aruwsrc::sentry::turret::cv;
-using namespace aruwsrc::virtualMCB;
+using namespace aruwsrc::communication::mcb_lite;
+using namespace aruwsrc::communication::mcb_lite::motor;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -216,7 +217,7 @@ inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm2()
 }
 
 // /* define subsystems --------------------------------------------------------*/
-aruwsrc::control::capbank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
 BuzzerSubsystem buzzer(drivers());
 
@@ -383,11 +384,11 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-aruwsrc::chassis::ChassisAutoNavController autoNavController(
+aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
     &transformAdapter,
-    aruwsrc::chassis::BEYBLADE_CONFIG,
+    aruwsrc::control::chassis::BEYBLADE_CONFIG,
     capBankSubsystem,
     0.15f,
     1000.0f);
@@ -562,8 +563,6 @@ aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand
     chassis,
     autoNavController,
     true);
-
-aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(drivers(), capBankSubsystem);
 
 aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(drivers(), capBankSubsystem);
 

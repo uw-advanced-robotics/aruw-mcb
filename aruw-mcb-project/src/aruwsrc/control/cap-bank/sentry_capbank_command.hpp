@@ -23,7 +23,7 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/cap_bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 
 namespace aruwsrc::control::capbank
 {
@@ -32,7 +32,7 @@ class SentryCapBankCommand : public tap::control::Command
 public:
     SentryCapBankCommand(
         tap::Drivers* drivers,
-        aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem);
+        aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem);
 
     void initialize() override;
 
@@ -46,7 +46,7 @@ public:
 
 private:
     tap::Drivers* drivers;
-    aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem;
+    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
 };  // class SentryCapBankCommand
 
 }  // namespace aruwsrc::control::capbank

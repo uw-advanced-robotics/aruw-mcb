@@ -135,9 +135,6 @@ static constexpr float TRANSLATIONAL_MOTION_THRESHOLD = 0.25f;
 
 static constexpr float CAPBANK_ENERGY_THRESHOLD = 500.0f;
 
-static constexpr float TRANSLATIONAL_MOTION_THRESHOLD = 0.25f;
-
-static constexpr float CAPBANK_ENERGY_THRESHOLD = 500.0f;
 
 }  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_

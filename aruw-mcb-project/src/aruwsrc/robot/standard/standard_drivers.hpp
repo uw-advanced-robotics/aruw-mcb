@@ -70,9 +70,7 @@ public:
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
           plateHitTracker(this),
           refSerialTransmitter(this),
-          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor),
-          // for fake sentry
-          stateMachine(refSerial, visionCoprocessor)
+          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
     {
     }
 
@@ -96,10 +94,6 @@ public:
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
-
-    // for fake sentry
-    aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
-
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard

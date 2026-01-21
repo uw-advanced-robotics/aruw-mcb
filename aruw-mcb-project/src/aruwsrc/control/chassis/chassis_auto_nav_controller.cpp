@@ -54,11 +54,12 @@ void ChassisAutoNavController::runController(
     if (posError.magnitude() > translationalMotionThreshhold &&
         capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold)
     {  // is it translating
-        capBankSubsystem.changeSprintMode(can::capbank::SprintMode::SPRINT);
+        
+        capBankSubsystem.changeSprintMode(aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
     }
     else
     {
-        capBankSubsystem.changeSprintMode(can::capbank::SprintMode::NO_SPRINT);
+        capBankSubsystem.changeSprintMode(aruwsrc::communication::can::cap_bank::SprintMode::NO_SPRINT);
     }
 
     if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())

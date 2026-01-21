@@ -22,13 +22,13 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/serial/remote.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 
 namespace aruwsrc::control::capbank
 {
 SentryCapBankCommand::SentryCapBankCommand(
     tap::Drivers* drivers,
-    aruwsrc::control::capbank::CapBankSubsystem& capBankSubsystem)
+    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem)
     : drivers(drivers),
       capBankSubsystem(capBankSubsystem)
 
