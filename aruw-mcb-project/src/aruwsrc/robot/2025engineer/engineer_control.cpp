@@ -1,4 +1,3 @@
-#if defined(TARGET_ENGI_2025)
 /*
  * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -17,6 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#if defined(TARGET_ENGI_2025)
+
 
 #if defined(TARGET_ENGI_2025)
 
