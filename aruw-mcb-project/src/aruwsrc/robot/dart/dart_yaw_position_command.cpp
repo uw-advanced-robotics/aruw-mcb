@@ -37,13 +37,13 @@ namespace aruwsrc::robot::dart
     }
 
     void DartYawPositionCommand::initialize(){
-        float setpointMeters = -(DART_LAUNCHER_YAW_RADIAL_LENGTH * tan(setpointDegrees*PI/180)) + 0.13926685;
+        float setpointMeters = -(aruwsrc::dart::DART_LAUNCHER_YAW_RADIAL_LENGTH * tan(setpointDegrees*PI/180)) + 0.13926685;
         subsystem->setSetpoint(setpointMeters);
     }
 
     void DartYawPositionCommand::execute(){}
 
-    void DartYawPositionCommand::end(bool interrupted){}
+    void DartYawPositionCommand::end(bool){}
 
     bool DartYawPositionCommand::isFinished() const {
         return subsystem->atSetpoint();

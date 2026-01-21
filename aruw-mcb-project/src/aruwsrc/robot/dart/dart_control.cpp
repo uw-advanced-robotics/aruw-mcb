@@ -105,6 +105,12 @@ DartManualPullbackSetpointCommand manualPullbackCommand(
 // TODO: ADD YAW MANUAL:
 // https://gitlab.com/aruw/controls/aruw-mcb/-/blob/a26bc3fb1845640e12b0afe32d720ec90c0bb709/aruw-mcb-project/src/aruwsrc/robot/dart/dart_control.cpp#L107
 
+aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
+    drivers(),
+    &yawSubsystem,
+    Remote::Channel::LEFT_HORIZONTAL
+);
+
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 tap::motor::DjiMotor yawMotor(
@@ -139,12 +145,8 @@ DartSetpointCommand dartGrab(pullMotorSubsystem, GRAB_POSITION);
 DartOpenCommand servoOpen(dartServo);
 DartCloseCommand servoClose(dartServo);
 HomingCommand pullMotorHome(pullMotorSubsystem);
+HomingCommand yawHomeCommand(yawSubsystem);
 
-aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
-    drivers(),
-    &yawSubsystem,
-    Remote::Channel::LEFT_HORIZONTAL
-);
 
 aruwsrc::robot::dart::DartYawPositionCommand dartYawPositionCommand(
     drivers(),
@@ -158,6 +160,8 @@ SequentialCommand<2> pullBackCommand(std::array<Command*, 2>{{&servoClose, &dart
 // release the string to let the dart go, then go to reload position
 // TODO: need to add in the command to rotate magazine
 SequentialCommand<2> releaseDartAndReload(std::array<Command*, 2>{{&servoOpen, &dartGrab}});
+
+SequentialCommand<2> homeAll(std::array<Command*, 2>{{&pullMotorHome, &yawHomeCommand}});
 
 // Left Up + Right Up -> Servo Open
 HoldCommandMapping openServoMapping(

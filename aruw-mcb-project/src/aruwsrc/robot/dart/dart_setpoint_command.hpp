@@ -42,12 +42,12 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "DART PULLBACK"; }
+    const char* getName() const override { return "DART SETPOINT"; }
 
 private:
     aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem;
     float setpoint;
-};  // class DartPullbackCommand
+};  // class DartSetpointCommand
 
 }  // namespace aruwsrc::dart
 #endif  // DART_SETPOINT_COMMAND_HPP_

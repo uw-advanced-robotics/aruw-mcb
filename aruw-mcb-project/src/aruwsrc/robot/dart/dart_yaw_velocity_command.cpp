@@ -37,7 +37,7 @@ namespace aruwsrc::robot::dart{
 
     void DartYawVelocityCommand::execute(){
         subsystem->setSetpoint(
-            subsystem->getPosition() + drivers->remote.getChannel(channel) * YAW_INPUT_SENSITIVITY
+            subsystem->getPosition() + drivers->remote.getChannel(channel) * aruwsrc::dart::YAW_INPUT_SENSITIVITY
         );
     }
 
