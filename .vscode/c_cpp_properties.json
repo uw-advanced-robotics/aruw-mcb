@@ -209,7 +209,7 @@
             ]
         },
         {
-            "name": "MCB Launcher Target",
+            "name": "MCB Flywheel Testing",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",

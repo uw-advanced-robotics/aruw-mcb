@@ -26,52 +26,25 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
-#include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
-#include "aruwsrc/control/cycle_state_command_mapping.hpp"
-#include "aruwsrc/control/governor/cv_on_target_governor.hpp"
-#include "aruwsrc/control/governor/fired_recently_governor.hpp"
-#include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
-#include "aruwsrc/control/governor/heat_limit_governor.hpp"
-#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
-#include "aruwsrc/control/governor/limit_switch_depressed_governor.hpp"
-#include "aruwsrc/control/governor/moved_fast_recently_governor.hpp"
-#include "aruwsrc/control/governor/plate_hit_governor.hpp"
-#include "aruwsrc/control/governor/yellow_carded_governor.hpp"
-#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
-#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
-#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
-#include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
-#include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
+#include "aruwsrc/robot/robot_control.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::control;
 using namespace tap::control::governor;
-using namespace tap::control::setpoint;
-using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::algorithms;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms::odometry::transforms;
 using namespace aruwsrc::control::chassis;
 using namespace aruwsrc::control;
-using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::control::buzzer;
-using namespace aruwsrc::control::client_display;
-using namespace aruwsrc::control::client_display::indicators;
-using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::control::turret;
-using namespace aruwsrc::hero;
+using namespace aruwsrc::flywheel_testing;
 using tap::control::CommandMapper;
 using tap::control::RemoteMapState;
 
@@ -103,7 +76,25 @@ tap::motor::DjiMotor rightFrictionWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::MotorInterface *, 5> wheels = {&leftFrictionWheel, &rightFrictionWheel};
+tap::motor::DjiMotor upperFrictionWheel(
+    drivers(),
+    aruwsrc::control::launcher::UPPER_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    true,
+    "Upper flywheel");
+tap::motor::DjiMotor lowerFrictionWheel(
+    drivers(),
+    aruwsrc::control::launcher::LOWER_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    false,
+    "Lower flywheel");
+tap::motor::DjiMotor upperSmallFrictionWheel(
+    drivers(),
+    aruwsrc::control::launcher::UPPER_SMALL_MOTOR_ID,
+    aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    false,
+    "Upper small flywheel");
+std::array<tap::motor::MotorInterface *, 5> wheels = {&leftFrictionWheel, &rightFrictionWheel, &lowerFrictionWheel, &upperFrictionWheel, &upperSmallFrictionWheel};
 RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
     5>
@@ -146,7 +137,6 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 void initializeSubsystems()
 {
     frictionWheels.initialize();
-    odometrySubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -162,7 +152,7 @@ void setDefaultHeroCommands()
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(Drivers *drivers)
+void startHeroCommands(Drivers *)
 {
 }
 
@@ -175,15 +165,15 @@ void registerHeroIoMappings(Drivers *drivers)
 
 namespace aruwsrc::flywheel_testing
 {
-void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::flywheel_testing::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
-        &hero_control::remoteSafeDisconnectFunction);
-    hero_control::initializeSubsystems();
-    hero_control::registerHeroSubsystems(drivers);
-    hero_control::setDefaultHeroCommands();
-    hero_control::startHeroCommands(drivers);
-    hero_control::registerHeroIoMappings(drivers);
+        &flywheel_testing_control::remoteSafeDisconnectFunction);
+    flywheel_testing_control::initializeSubsystems();
+    flywheel_testing_control::registerHeroSubsystems(drivers);
+    flywheel_testing_control::setDefaultHeroCommands();
+    flywheel_testing_control::startHeroCommands(drivers);
+    flywheel_testing_control::registerHeroIoMappings(drivers);
 }
 }  // namespace aruwsrc::flywheel_testing
 
