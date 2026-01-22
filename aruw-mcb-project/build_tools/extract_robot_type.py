@@ -48,7 +48,7 @@ ROBOT_CLASS = {
     "BLANK": "blank",
     "MOTOR_TESTER": "motor_tester",
     "LAUNCHER_TARGET" : "dart_target",
-    "FLYWHEEL_TESTING" : "flywheel_testing"
+    "FLYWHEEL_TESTING" : "flywheel_testing",
     "CHARACTERIZER": "characterizer",
 }
 
