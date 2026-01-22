@@ -46,7 +46,7 @@ struct FlywheelConfig
 #if defined(ALL_SENTRIES)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
-#if defined(TARGET_HERO) 
+#if defined(TARGET_FLYWHEEL_TESTING) 
 static constexpr tap::motor::MotorId FLYWHEEL_UPPER_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId FLYWHEEL_UPPER_SMALL_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId FLYWHEEL_LOWER_MOTOR_ID = tap::motor::MOTOR3;

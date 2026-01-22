@@ -43,6 +43,8 @@ namespace aruwsrc::blank
 namespace aruwsrc::motor_tester
 #elif defined(TARGET_LAUNCHER_TARGET)
 namespace aruwsrc::dart_target
+#elif defined(TARGET_FLYWHEEL_TESTING)
+namespace aruwsrc::flywheel_testing
 #elif defined(TARGET_CHARACTERIZER)
 namespace aruwsrc::characterizer
 #endif

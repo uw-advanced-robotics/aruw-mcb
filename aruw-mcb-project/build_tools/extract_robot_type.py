@@ -32,6 +32,7 @@ VALID_ROBOT_TYPES   = [ "STANDARD_NULL",
                         "BLANK",
                         "MOTOR_TESTER",
                         "LAUNCHER_TARGET",
+                        "FLYWHEEL_TESTING",
                         "CHARACTERIZER", ]
 
 ROBOT_CLASS = {
@@ -47,6 +48,7 @@ ROBOT_CLASS = {
     "BLANK": "blank",
     "MOTOR_TESTER": "motor_tester",
     "LAUNCHER_TARGET" : "dart_target",
+    "FLYWHEEL_TESTING" : "flywheel_testing"
     "CHARACTERIZER": "characterizer",
 }
 
