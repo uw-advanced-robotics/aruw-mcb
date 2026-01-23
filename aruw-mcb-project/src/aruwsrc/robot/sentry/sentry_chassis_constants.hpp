@@ -101,7 +101,8 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 /**
  * Radius of the wheels (m)
  */
-static constexpr float WHEEL_RADIUS = 0.1016 * 1.413;  // This is being fudged
+static constexpr float FUDGE_FACTOR = 1.413f / M_SQRT2;
+static constexpr float WHEEL_RADIUS = 0.1016f * FUDGE_FACTOR;
 /**
  * Distance from center of the two front wheels (m)
  */
@@ -111,7 +112,7 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.55f;
  */
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.55f;
 
-static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+static constexpr float WHEELBASE_RADIUS = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y) / 2;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.

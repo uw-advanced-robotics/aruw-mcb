@@ -52,18 +52,18 @@ XDriveChassisSubsystem::XDriveChassisSubsystem(
           wheelVelocityPidConfig,
           capacitorBank)
 {
-    wheelVelToChassisVelMat[X][LF] = 1;
-    wheelVelToChassisVelMat[X][RF] = -1;
-    wheelVelToChassisVelMat[X][LB] = 1;
-    wheelVelToChassisVelMat[X][RB] = -1;
-    wheelVelToChassisVelMat[Y][LF] = -1;
-    wheelVelToChassisVelMat[Y][RF] = -1;
-    wheelVelToChassisVelMat[Y][LB] = 1;
-    wheelVelToChassisVelMat[Y][RB] = 1;
-    wheelVelToChassisVelMat[R][LF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][LB] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RB] = -1.0 / WHEELBASE_HYPOTENUSE;
+    wheelVelToChassisVelMat[X][LF] = M_SQRT2;
+    wheelVelToChassisVelMat[X][RF] = -M_SQRT2;
+    wheelVelToChassisVelMat[X][LB] = M_SQRT2;
+    wheelVelToChassisVelMat[X][RB] = -M_SQRT2;
+    wheelVelToChassisVelMat[Y][LF] = -M_SQRT2;
+    wheelVelToChassisVelMat[Y][RF] = -M_SQRT2;
+    wheelVelToChassisVelMat[Y][LB] = M_SQRT2;
+    wheelVelToChassisVelMat[Y][RB] = M_SQRT2;
+    wheelVelToChassisVelMat[R][LF] = -1.0 / WHEELBASE_RADIUS;
+    wheelVelToChassisVelMat[R][RF] = -1.0 / WHEELBASE_RADIUS;
+    wheelVelToChassisVelMat[R][LB] = -1.0 / WHEELBASE_RADIUS;
+    wheelVelToChassisVelMat[R][RB] = -1.0 / WHEELBASE_RADIUS;
     wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
 }
 
