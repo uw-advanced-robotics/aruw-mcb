@@ -36,15 +36,6 @@ struct WristConfig
     tap::algorithms::SmoothPidConfig theta1PidConfig;
     tap::algorithms::SmoothPidConfig theta2PidConfig;
 
-    tap::algorithms::SmoothPidConfig pitchPidConfig;
-    tap::algorithms::SmoothPidConfig yawPidConfig;
-
-    // Minimum and maximum setpoints for pitch and yaw
-    float minPitch = 0.0f;
-    float maxPitch = 0.0f;
-    float minYaw = 0.0f;
-    float maxYaw = 0.0f;
-
     float theta1Min = 0.0f;
     float theta1Max = 0.0f;
     float theta2Min = 0.0f;
@@ -63,8 +54,8 @@ public:
         tap::Drivers* drivers,
         tap::motor::MotorInterface& motorLeft,
         tap::motor::MotorInterface& motorRight,
-        tap::encoder::EncoderInterface& encoderPitch,
-        tap::encoder::EncoderInterface& encoderYaw,
+        tap::encoder::EncoderInterface& encoderTheta1,
+        tap::encoder::EncoderInterface& encoderTheta2,
         const WristConfig config);
 
     float getTheta1();
@@ -74,7 +65,6 @@ public:
     float getSetpointTheta1() { return setpointTheta1; }
     float getSetpointTheta2() { return setpointTheta2; }
 
-
     float calculateLeftMotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
     float calculateRightMotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
 
@@ -82,19 +72,11 @@ public:
 
     float getYaw();
 
-    float getSetpointPitch() { return setpointPitch; }
-
-    float getSetpointYaw() { return setpointYaw; }
-
-    void setSetpointPitch(float setpoint);
-
-    void setSetpointYaw(float setpoint);
-
     virtual void initialize() override;
 
-    bool atSetpointPitch(float epsilon = 1e-4);
+    bool atSetpointTheta1(float epsilon = 1e-4);
 
-    bool atSetpointYaw(float epsilon = 1e-4);
+    bool atSetpointTheta2(float epsilon = 1e-4);
 
     bool atSetpoint();
 
@@ -104,11 +86,10 @@ public:
 
 private:
     tap::motor::MotorInterface &motorLeft, &motorRight;
-    tap::encoder::EncoderInterface &encoderPitch, &encoderYaw;
-    tap::algorithms::SmoothPid pidPitch, pidYaw;
+    tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2;
+    tap::algorithms::SmoothPid pidTheta1, pidTheta2;
     const WristConfig config;
 
-    float setpointPitch, setpointYaw;
     float setpointTheta1, setpointTheta2;
 
     const tap::algorithms::transforms::Position COM_POS =
