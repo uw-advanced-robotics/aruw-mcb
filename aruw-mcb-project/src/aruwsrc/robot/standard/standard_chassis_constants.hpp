@@ -116,7 +116,7 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
 
 static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;         // 41.275mm -> m
-static constexpr float CENTER_TO_WHEELBASE_RADIUS = 141 / 1000.0f;  // 141mm -> m
+static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;  // 141mm -> m
 static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
 static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
 
@@ -125,7 +125,7 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
 
 static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;         // 41.275mm -> m
-static constexpr float CENTER_TO_WHEELBASE_RADIUS = 141 / 1000.0f;  // 141mm -> m
+static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;  // 141mm -> m
 static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
 static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
 
@@ -134,12 +134,6 @@ static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIAN
 #error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
 
 #endif
-
-static constexpr float WHEELBASE_RADIUS =
-    (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-        ? 1
-        : (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y) / 2;
-
 /*
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y (m).
  */

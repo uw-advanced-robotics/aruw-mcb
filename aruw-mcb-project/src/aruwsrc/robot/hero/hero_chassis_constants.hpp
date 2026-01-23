@@ -138,7 +138,7 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.54f;
  */
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.54f;
 
-static constexpr float WHEELBASE_RADIUS = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y) / 2;
+static constexpr float WHEELBASE_RADIUS = 0.54f;
 
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
