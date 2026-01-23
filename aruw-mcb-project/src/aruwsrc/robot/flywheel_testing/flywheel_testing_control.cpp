@@ -94,7 +94,12 @@ tap::motor::DjiMotor upperSmallFrictionWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Upper small flywheel");
-std::array<tap::motor::MotorInterface *, 5> wheels = {&leftFrictionWheel, &rightFrictionWheel, &lowerFrictionWheel, &upperFrictionWheel, &upperSmallFrictionWheel};
+std::array<tap::motor::MotorInterface *, 5> wheels = {
+    &leftFrictionWheel,
+    &rightFrictionWheel,
+    &lowerFrictionWheel,
+    &upperFrictionWheel,
+    &upperSmallFrictionWheel};
 RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
     5>
@@ -134,10 +139,7 @@ HoldCommandMapping rightSwitchUp(
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems()
-{
-    frictionWheels.initialize();
-}
+void initializeSubsystems() { frictionWheels.initialize(); }
 
 /* register subsystems here -------------------------------------------------*/
 void registerHeroSubsystems(Drivers *drivers)
@@ -146,21 +148,13 @@ void registerHeroSubsystems(Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultHeroCommands()
-{
-    frictionWheels.setDefaultCommand(&stopFrictionWheels);
-}
+void setDefaultHeroCommands() { frictionWheels.setDefaultCommand(&stopFrictionWheels); }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(Drivers *)
-{
-}
+void startHeroCommands(Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(Drivers *drivers)
-{
-    drivers->commandMapper.addMap(&rightSwitchUp);
-}
+void registerHeroIoMappings(Drivers *drivers) { drivers->commandMapper.addMap(&rightSwitchUp); }
 }  // namespace flywheel_testing_control
 
 namespace aruwsrc::flywheel_testing

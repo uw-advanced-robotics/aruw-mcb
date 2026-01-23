@@ -54,6 +54,25 @@ void FrictionWheelSpinRefLimitedCommand::execute()
     {
         frictionWheels->setDesiredLaunchSpeed(LAUNCHER_SPEED);
     }
+
+#if defined(TARGET_FLYWHEEL_TESTING)
+    frictionWheels->changeWheelVelocityState(0, true);
+    frictionWheels->changeWheelVelocityState(1, true);
+    frictionWheels->changeWheelVelocityState(2, true);
+    frictionWheels->changeWheelVelocityState(3, true);
+    frictionWheels->changeWheelVelocityState(4, true);
+
+    // left
+    frictionWheels->setIndividualVelocity(0, 0);
+    // right
+    frictionWheels->setIndividualVelocity(1, 0);
+    // lower
+    frictionWheels->setIndividualVelocity(2, 0);
+    // upper
+    frictionWheels->setIndividualVelocity(3, 0);
+    // small upper
+    frictionWheels->setIndividualVelocity(4, 0);
+#endif
 }
 
 }  // namespace aruwsrc::control::launcher
