@@ -24,6 +24,8 @@
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
+#include <array>
+
 #include "holonomic_chassis_subsystem.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -154,12 +156,19 @@ private:
     // ✨ the motors ✨
     tap::motor::MotorInterface* motors[4];
 
-    int32_t realVal[4];
-    float powerDrawWatts;
-
     float mVolts;
     float mAmps;
     float sensorWatts;
+
+    static constexpr std::size_t kWindow = 500;
+
+    std::array<double, kWindow> window{}; // ring buffer storage (value-initialized to 0.0)
+    std::size_t writeIndex = 0;           // next position to overwrite
+    std::size_t count = 0;                // number of samples seen so far (caps at kWindow)
+    double sum = 0.0;                     // sum of the current window (valid once count==kWindow)
+    double average = 0.0;                 // REQUIRED: updated field; 0 until count==kWindow
+
+    int powerLimit = 0;
 
     tap::communication::sensors::current::CurrentSensorInterface* mcurrentSensor;
     tap::communication::sensors::voltage::VoltageSensorInterface* mvoltageSensor;

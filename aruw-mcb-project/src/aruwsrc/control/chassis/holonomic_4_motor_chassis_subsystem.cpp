@@ -59,15 +59,14 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
     motors[LB] = &leftBackMotor;
     motors[RB] = &rightBackMotor;
 
-    memset(realVal, 0, 4 * sizeof(int32_t));
-    powerDrawWatts = 0;
-
     mVolts = 0;
     mAmps = 0;
     sensorWatts = 0;
     
     mcurrentSensor = currentSensor;
     mvoltageSensor = voltageSensor;
+
+    powerLimit = 0;
 }
 
 void Holonomic4MotorChassisSubsystem::initialize()
@@ -106,7 +105,10 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
     // use power limiting object to compute initial power limiting fraction
     currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
-    powerLimitFrac = 1.0f;
+
+    // this is uncommented when you want the power limiting to be using the LUTs properly
+    // setting it to one enables ?
+    // powerLimitFrac = 1.0f;
 
     // total velocity error for all wheels
     float totalError = 0.0f;
@@ -120,7 +122,6 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
     // compute modified power limiting fraction based on velocity PID error
     // motors with greater error should be allocated a larger fraction of the powerLimitFrac
 
-    float tryingToCalculate = 0;
     for (int i = 0; i < NUM_MOTORS; i++)
     {
         // Compared to the other wheels, fraction of how much velocity PID error there is for a
@@ -136,26 +137,70 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
         // velocityErrorFrac for each motor.
         float modifiedPowerLimitFrac =
             limitVal(NUM_MOTORS * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
-
-        int32_t pppp = motors[i]->getOutputDesired() * modifiedPowerLimitFrac;
-        realVal[i] = pppp;
-
-        
-        const float VOLTAGE = 24;
-        const float MAX_AMPERAGE = 20;
-        const float MAX_DESIRED_OUTPUT = 16384;
-
-
-        tryingToCalculate += VOLTAGE * (MAX_AMPERAGE * abs(static_cast<float>(pppp) / MAX_DESIRED_OUTPUT));
-        motors[i]->setDesiredOutput(pppp);
+    
+        motors[i]->setDesiredOutput(motors[i]->getOutputDesired() * modifiedPowerLimitFrac);
     }
-
-    powerDrawWatts = tryingToCalculate;
 
     mVolts = mvoltageSensor->getVoltageMv();
     mAmps = mcurrentSensor->getCurrentMa();
 
+    // can view this on ozone
     sensorWatts = (mVolts / 1000.0f) * (mAmps / 1000.0f);
+
+    if (count < kWindow)
+    {
+        // Window not full yet: just add the new sample into the next slot.
+        window[writeIndex] = sensorWatts;
+        sum += sensorWatts;
+
+        ++count;
+        writeIndex = (writeIndex + 1) % kWindow;
+
+        // Average must stay 0 until we have *at least* 500 samples.
+        if (count == kWindow)
+            average = sum / static_cast<double>(kWindow);
+        else
+            average = 0.0;
+    }
+    else
+    {
+        // Window full: evict the oldest sample at writeIndex, replace with x.
+        const double old = window[writeIndex];
+        sum -= old;
+        window[writeIndex] = sensorWatts;
+        sum += sensorWatts;
+
+        writeIndex = (writeIndex + 1) % kWindow;
+
+        average = sum / static_cast<double>(kWindow);
+    }
+
+    // now need to calculate acceleariton values
+
+    // motors[0]->getOutputDesired
+
+    // Over bumps, max power = 50, RPM achieved: 3125
+    // Over field, max power = 50, RPM achieved: 3875
+
+    // Over bumps, max power = 60, RPM achieved: 3550
+    // Over field, max power = 60, RPM achieved: 4600
+
+    // Over bumps, max power = 70, RPM achieved: 3700
+    // Over field, max power = 70, RPM achieved: 5325
+    
+    // Over bumps, max power = 80, RPM achieved: 4200
+    // Over field, max power = 80, RPM achieved: 5850
+
+    // Over bumps, max power = 100, RPM achieved: 5400
+    // Over field, max power = 100, RPM achieved: 6775
+
+    // Over bumps, max power = 120, RPM achieved: 5875 (did not get to 120 watts, capped at ~110 watts)
+    // Over field, max power = 120, RPM achieved: 7325 (did not get to 120 watts, capped at ~111 watts)
+
+
+    if (capacitorBank) {
+        powerLimit = capacitorBank->getPowerLimit();
+    }
 }
 
 void Holonomic4MotorChassisSubsystem::calculateOutput(
