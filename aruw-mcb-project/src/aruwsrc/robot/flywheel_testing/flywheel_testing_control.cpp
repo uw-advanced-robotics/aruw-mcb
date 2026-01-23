@@ -92,8 +92,10 @@ tap::motor::DjiMotor upperSmallFrictionWheel(
     drivers(),
     aruwsrc::control::launcher::UPPER_SMALL_MOTOR_ID,
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
+    true,
+    "Upper small flywheel",
     false,
-    "Upper small flywheel");
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006);
 std::array<tap::motor::MotorInterface *, 5> wheels = {
     &leftFrictionWheel,
     &rightFrictionWheel,
@@ -111,7 +113,6 @@ RefereeFeedbackFrictionWheelSubsystem<
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
-LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor = frictionWheelsSubsystem;
 
 /* define commands ----------------------------------------------------------*/
 

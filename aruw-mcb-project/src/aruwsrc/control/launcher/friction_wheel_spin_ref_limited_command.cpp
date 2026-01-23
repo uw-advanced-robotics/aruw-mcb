@@ -62,16 +62,32 @@ void FrictionWheelSpinRefLimitedCommand::execute()
     frictionWheels->changeWheelVelocityState(3, true);
     frictionWheels->changeWheelVelocityState(4, true);
 
-    // left
-    frictionWheels->setIndividualVelocity(0, 0);
-    // right
-    frictionWheels->setIndividualVelocity(1, 0);
-    // lower
-    frictionWheels->setIndividualVelocity(2, 0);
-    // upper
-    frictionWheels->setIndividualVelocity(3, 0);
-    // small upper
-    frictionWheels->setIndividualVelocity(4, 0);
+    if (defaultLaunchSpeed == 0)
+    {
+        // left
+        frictionWheels->setIndividualVelocity(0, 0);
+        // right
+        frictionWheels->setIndividualVelocity(1, 0);
+        // lower
+        frictionWheels->setIndividualVelocity(2, 0);
+        // upper
+        frictionWheels->setIndividualVelocity(3, 0);
+        // small upper
+        frictionWheels->setIndividualVelocity(4, 0);
+    }
+    else
+    {
+        // left
+        frictionWheels->setIndividualVelocity(0, flywheelTestingRpms.leftRpm);
+        // right
+        frictionWheels->setIndividualVelocity(1, flywheelTestingRpms.rightRpm);
+        // lower
+        frictionWheels->setIndividualVelocity(2, flywheelTestingRpms.lowerRpm);
+        // upper
+        frictionWheels->setIndividualVelocity(3, flywheelTestingRpms.upperRpm);
+        // small upper
+        frictionWheels->setIndividualVelocity(4, flywheelTestingRpms.smallUpperRpm);
+    }
 #endif
 }
 
