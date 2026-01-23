@@ -143,10 +143,14 @@ SequentialCommand<2> homeAll(std::array<Command*, 2>{{&pullMotorHome, &yawHomeCo
 // Left Up + Right Up -> Servo Open
 HoldCommandMapping openServoMapping(
     drivers(),
-    {&dartYawPositionCommand},
+    {&servoOpen},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
 
 // Left Up + Right Down -> Servo Close
+HoldCommandMapping closeServoMapping(
+    drivers(),
+    {&servoClose},
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 // HoldCommandMapping rightSwitchUp(
 //     drivers(),
 //     {&dartPullback},
@@ -162,10 +166,6 @@ HoldCommandMapping openServoMapping(
 //     {&servoOpen},
 //     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
-// HoldCommandMapping closeServoMapping(
-//     drivers(),
-//     {&servoClose},
-//     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
 // Left Mid + Right Up -> Home Pullback
 HoldCommandMapping homePullbackMapping(
@@ -180,10 +180,10 @@ HoldCommandMapping pullbackMapping(
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
 // Left Down + Right Up -> Home Yaw (placeholder) TODO: CHANGE
-HoldCommandMapping homeYawMapping(
-    drivers(),
-    {&pullMotorHome},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+// HoldCommandMapping homeYawMapping(
+//     drivers(),
+//     {&pullMotorHome},
+//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
 void initializeSubsystems()
 {
@@ -212,11 +212,11 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    // drivers->commandMapper.addMap(&openServoMapping);
-    // drivers->commandMapper.addMap(&closeServoMapping);
+    drivers->commandMapper.addMap(&openServoMapping);
+    drivers->commandMapper.addMap(&closeServoMapping);
     drivers->commandMapper.addMap(&homePullbackMapping);
     drivers->commandMapper.addMap(&pullbackMapping);
-    drivers->commandMapper.addMap(&homeYawMapping);
+    // drivers->commandMapper.addMap(&homeYawMapping);
 }
 
 }  // namespace dart_control
