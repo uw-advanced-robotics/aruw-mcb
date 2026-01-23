@@ -31,6 +31,11 @@ namespace aruwsrc::engineer::wrist
 {
 struct WristConfig
 {
+    // Joints ordered based on distance from base of wrist
+    // theta 1 is "azimuth/roll", theta 2 is "pitch"
+    tap::algorithms::SmoothPidConfig theta1PidConfig;
+    tap::algorithms::SmoothPidConfig theta2PidConfig;
+
     tap::algorithms::SmoothPidConfig pitchPidConfig;
     tap::algorithms::SmoothPidConfig yawPidConfig;
 
@@ -39,6 +44,11 @@ struct WristConfig
     float maxPitch = 0.0f;
     float minYaw = 0.0f;
     float maxYaw = 0.0f;
+
+    float theta1Min = 0.0f;
+    float theta1Max = 0.0f;
+    float theta2Min = 0.0f;
+    float theta2Max = 0.0f;
 
     float ratio = 1.0f;     // differential pitch gear teeth / yaw gear teeth
     float epsilon = 1e-4f;  // angular tolerance used to determine if we reached the setpoint
@@ -50,12 +60,23 @@ class WristSubsystem : public tap::control::Subsystem
 {
 public:
     WristSubsystem(
-        tap::Drivers *drivers,
-        tap::motor::MotorInterface &motorLeft,
-        tap::motor::MotorInterface &motorRight,
-        tap::encoder::EncoderInterface &encoderPitch,
-        tap::encoder::EncoderInterface &encoderYaw,
+        tap::Drivers* drivers,
+        tap::motor::MotorInterface& motorLeft,
+        tap::motor::MotorInterface& motorRight,
+        tap::encoder::EncoderInterface& encoderPitch,
+        tap::encoder::EncoderInterface& encoderYaw,
         const WristConfig config);
+
+    float getTheta1();
+    float getTheta2();
+    float setSetpointTheta1(float setpoint);
+    float setSetpointTheta2(float setpoint);
+    float getSetpointTheta1() { return setpointTheta1; }
+    float getSetpointTheta2() { return setpointTheta2; }
+
+
+    float calculateLeftMotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
+    float calculateRightMotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
 
     float getPitch();
 
@@ -88,6 +109,7 @@ private:
     const WristConfig config;
 
     float setpointPitch, setpointYaw;
+    float setpointTheta1, setpointTheta2;
 
     const tap::algorithms::transforms::Position COM_POS =
         tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static
