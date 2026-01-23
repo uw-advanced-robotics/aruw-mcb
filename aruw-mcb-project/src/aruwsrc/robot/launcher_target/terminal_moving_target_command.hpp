@@ -17,31 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_TARGET_DRIVERS_HPP_
-#define DART_TARGET_DRIVERS_HPP_
+#ifndef TERMINAL_MOVING_TARGET_COMMAND_HPP_
+#define TERMINAL_MOVING_TARGET_COMMAND_HPP_
 
-#include "tap/drivers.hpp"
+#include "tap/control/command.hpp"
 
-#include "aruwsrc/display/oled_display.hpp"
+#include "motor_subsystem.hpp"
 
-namespace aruwsrc::dart_target
+using namespace aruwsrc::launcher_target;
+
+class TerminalMovingTargetCommand : public tap::control::Command
 {
-class Drivers : public tap::Drivers
-{
-    friend class DriversSingleton;
-
-#ifdef ENV_UNIT_TESTS
 public:
-#endif
-    Drivers()
-        : tap::Drivers(),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
-    {
-    }
+    explicit TerminalMovingTargetCommand(MotorSubsystem* subsystem);
 
-public:
-    display::OledDisplay oledDisplay;
-};  // class aruwsrc::DartTargetDrivers
-}  // namespace aruwsrc::dart_target
+    void initialize() override;
 
-#endif  // DART_TARGET_DRIVERS_HPP_
+    void execute() override;
+
+    void end(bool) override;
+
+    bool isFinished() const override;
+
+    const char* getName() const override { return "Terminal Moving Target Command"; }
+
+private:
+    MotorSubsystem* motorSubsystem;
+    uint32_t startTime;
+    float targetPos;
+    bool targetSet;
+    bool targetAhead;
+};  // class TerminalMovingTargetCommand
+
+#endif  // TERMINAL_MOVING_TARGET_COMMAND_HPP_
