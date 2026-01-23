@@ -23,6 +23,7 @@
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/drivers.hpp"
+#include <tuple>
 
 namespace aruwsrc
 {
@@ -70,6 +71,9 @@ private:
     static EngineerCVCommunication* engineerCVCommunicationInstance;
     TargetPositionMessage targetPositionMessage;
     tap::algorithms::transforms::Transform receptableToCam;
+
+    TargetPositionMessage history[50];
+    int index;
 };
 }  // namespace communication::serial
 }  // namespace aruwsrc

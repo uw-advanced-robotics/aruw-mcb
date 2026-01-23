@@ -23,6 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 
 namespace aruwsrc::motor_tester
 {
@@ -35,12 +36,14 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
+          engineerCVCommunication(this)
     {
     }
 
 public:
     display::OledDisplay oledDisplay;
+    communication::serial::EngineerCVCommunication engineerCVCommunication;
 };  // class aruwsrc::MotortesterDrivers
 }  // namespace aruwsrc::motor_tester
 

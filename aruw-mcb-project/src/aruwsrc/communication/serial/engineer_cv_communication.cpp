@@ -20,6 +20,7 @@
 #include "engineer_cv_communication.hpp"
 
 #include "tap/drivers.hpp"
+#include <sstream>
 
 using namespace tap::communication::serial;
 using namespace aruwsrc::communication::serial;
@@ -29,7 +30,8 @@ EngineerCVCommunication* EngineerCVCommunication::engineerCVCommunicationInstanc
 
 EngineerCVCommunication::EngineerCVCommunication(tap::Drivers* drivers)
     : DJISerial(drivers, ENGINEER_CV_RX_UART_PORT),
-      receptableToCam(Transform::identity())
+      receptableToCam(Transform::identity()),
+      index(0)
 {
 #ifndef ENV_UNIT_TESTS
     // when testing it is OK to have multiple vision coprocessor instances, so this assertion
@@ -52,6 +54,13 @@ void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage
         targetPositionMessage.roll,
         targetPositionMessage.pitch,
         targetPositionMessage.yaw);
+    
+    if (index >= 50) {
+        return;
+    }
+
+    history[index] = targetPositionMessage;
+    ++index;
 }
 
 void EngineerCVCommunication::initializeCV()

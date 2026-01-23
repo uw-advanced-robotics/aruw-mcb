@@ -211,6 +211,10 @@ static void initializeIo(Drivers *drivers)
         tap::gpio::Digital::InputPullMode::PullUp);
 #endif
 
+#if defined(TARGET_MOTOR_TESTER)
+    drivers->engineerCVCommunication.initializeCV();
+#endif
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
     // modm::delay_ms(2000);
     // drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
@@ -234,6 +238,10 @@ static void updateIo(Drivers *drivers)
 #endif
 
 #ifdef TARGET_ENGINEER
+    drivers->engineerCVCommunication.updateSerial();
+#endif
+
+#ifdef TARGET_MOTOR_TESTER
     drivers->engineerCVCommunication.updateSerial();
 #endif
 
