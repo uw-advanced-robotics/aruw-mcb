@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "auto_nav_beyblade_command.hpp"
+#include "auto_nav_command.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -29,26 +29,27 @@ using GameData = RefSerialData::Rx::GameData;
 
 namespace aruwsrc
 {
-namespace control::chassis::sentry
+namespace control::chassis
 {
-AutoNavBeybladeCommand::AutoNavBeybladeCommand(
+AutoNavCommand::AutoNavCommand(
     const tap::Drivers& drivers,
     chassis::HolonomicChassisSubsystem& chassis,
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-    bool autoNavOnlyInGame)
+    bool autoNavOnlyInGame, bool beybladeEnabled)
     : drivers(drivers),
       chassis(chassis),
       autoNavController(autoNavController),
-      autoNavOnlyInGame(autoNavOnlyInGame)
+      autoNavOnlyInGame(autoNavOnlyInGame),
+      beybladeEnabled(beybladeEnabled)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
     // pointers
     addSubsystemRequirement(&chassis);
 }
 
-void AutoNavBeybladeCommand::initialize() { autoNavController.initialize(); }
+void AutoNavCommand::initialize() { autoNavController.initialize(); }
 
-void AutoNavBeybladeCommand::execute()
+void AutoNavCommand::execute()
 {
     const float maxWheelSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers.refSerial.getRefSerialReceivingData(),
@@ -67,7 +68,7 @@ void AutoNavBeybladeCommand::execute()
     }
 }
 
-void AutoNavBeybladeCommand::end(bool) { chassis.setZeroRPM(); }
+void AutoNavCommand::end(bool) { chassis.setZeroRPM(); }
 }  // namespace control::chassis::sentry
 
 }  // namespace aruwsrc
