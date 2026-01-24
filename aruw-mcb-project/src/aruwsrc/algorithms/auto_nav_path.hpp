@@ -76,6 +76,8 @@ public:
      */
     bool hasChanged() const;
 
+    Position getFinalPosition();
+
     inline void clearPathChanged() { pathChanged = false; }
 
     inline float distTo(const Position& position, const float parameter) const

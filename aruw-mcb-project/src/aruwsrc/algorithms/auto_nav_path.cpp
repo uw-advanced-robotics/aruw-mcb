@@ -107,3 +107,7 @@ float AutoNavPath::getClosestParameterOnSegment(Position current, Position p1, P
     float ratio = dotprod / (distance1.dot(distance1));
     return tap::algorithms::limitVal(ratio, 0.0f, 1.0f) * Position::distance(p1, p2);
 }
+
+Position AutoNavPath::getFinalPosition(){
+    return setpointData.back();
+}

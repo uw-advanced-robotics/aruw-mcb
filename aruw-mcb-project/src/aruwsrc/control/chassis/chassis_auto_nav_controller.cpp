@@ -128,7 +128,9 @@ Position ChassisAutoNavController::calculateSetPoint(
 }
 
 bool ChassisAutoNavController::atSetpoint(){
-    
+    Position curr = worldToChassis.getTranslation();
+    Position goal = path->getFinalPosition();
+    return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0);
 }
 
 }  // namespace aruwsrc::control::chassis
