@@ -77,6 +77,7 @@ public:
         float interpolationParameter,
         bool movementEnabled);
 
+    bool atSetpoint();
     // Sets the maximum speed the chassis moves at, in units of Meters per Second
     inline void setDesiredSpeed(float speed) { this->desiredSpeed = speed; }
 

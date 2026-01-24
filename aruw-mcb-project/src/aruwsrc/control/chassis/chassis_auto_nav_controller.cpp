@@ -127,4 +127,8 @@ Position ChassisAutoNavController::calculateSetPoint(
     return lookaheadPos;
 }
 
+bool ChassisAutoNavController::atSetpoint(){
+    
+}
+
 }  // namespace aruwsrc::control::chassis
