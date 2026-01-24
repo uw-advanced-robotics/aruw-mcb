@@ -52,7 +52,7 @@ public:
         const tap::Drivers& drivers,
         chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-        bool autoNavOnlyInGame = false, bool beybladeEnabled);
+        bool autoNavOnlyInGame = false, bool beybladeEnabled, bool ends);
 
     void initialize() override;
 
@@ -60,7 +60,7 @@ public:
 
     void end(bool) override;
 
-    bool isFinished() const override { return false; }
+    bool isFinished() const override;
 
     inline void toggleBeyblade() { beybladeEnabled = !beybladeEnabled; };
 
@@ -74,7 +74,7 @@ private:
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
 
     bool autoNavOnlyInGame;
-
+    bool ends;
     bool beybladeEnabled;
     bool movementEnabled = true;
 

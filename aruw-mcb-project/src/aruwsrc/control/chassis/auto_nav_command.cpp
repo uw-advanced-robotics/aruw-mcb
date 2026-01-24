@@ -35,12 +35,13 @@ AutoNavCommand::AutoNavCommand(
     const tap::Drivers& drivers,
     chassis::HolonomicChassisSubsystem& chassis,
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-    bool autoNavOnlyInGame, bool beybladeEnabled)
+    bool autoNavOnlyInGame, bool beybladeEnabled, bool ends)
     : drivers(drivers),
       chassis(chassis),
       autoNavController(autoNavController),
       autoNavOnlyInGame(autoNavOnlyInGame),
-      beybladeEnabled(beybladeEnabled)
+      beybladeEnabled(beybladeEnabled),
+      ends(ends)
 {
     // TODO: sucks that we have to pull the address out of the reference bc everything else uses
     // pointers
@@ -69,6 +70,11 @@ void AutoNavCommand::execute()
 }
 
 void AutoNavCommand::end(bool) { chassis.setZeroRPM(); }
-}  // namespace control::chassis::sentry
+bool AutoNavCommand::isFinished() const {
+    return ends ? autoNavController.atSetpoint() : false; 
+}
+}
+
+  // namespace control::chassis::sentry
 
 }  // namespace aruwsrc
