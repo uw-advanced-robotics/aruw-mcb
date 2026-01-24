@@ -21,6 +21,7 @@
 
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -31,17 +32,19 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/dart_target/dart_target_constants.hpp"
-#include "aruwsrc/robot/dart_target/dart_target_drivers.hpp"
-#include "aruwsrc/robot/dart_target/motor_subsystem.hpp"
-#include "aruwsrc/robot/dart_target/stick_rpm_command.hpp"
+#include "aruwsrc/robot/launcher_target/launcher_target_constants.hpp"
+#include "aruwsrc/robot/launcher_target/launcher_target_drivers.hpp"
+#include "aruwsrc/robot/launcher_target/motor_subsystem.hpp"
+#include "aruwsrc/robot/launcher_target/random_moving_target_command.hpp"
+#include "aruwsrc/robot/launcher_target/stick_rpm_command.hpp"
+#include "aruwsrc/robot/launcher_target/terminal_moving_target_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::dart_target;
-using namespace aruwsrc::dart_target::constants;
+using namespace aruwsrc::launcher_target;
+using namespace aruwsrc::launcher_target::constants;
 // using namespace tap::control;
 
 /*
@@ -52,7 +55,7 @@ using namespace aruwsrc::dart_target::constants;
  */
 driversFunc drivers = DoNotUse_getDrivers;
 
-namespace dart_target_control
+namespace launcher_target_control
 {
 // m2006
 tap::motor::DjiMotor motor2006(
@@ -76,37 +79,56 @@ StickRpmCommand leftVerticalManual(
     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
     500.0f);
 
+RandomMovingTargetCommand randomMovingTargetCommand(&motorSubsystem2006);
+TerminalMovingTargetCommand terminalMovingTargetCommand(&motorSubsystem2006);
 // ------------------
 // command mappings
 // ------------------
+tap::control::PressCommandMapping leftUp(
+    drivers(),
+    {&randomMovingTargetCommand},
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+tap::control::PressCommandMapping leftDown(
+    drivers(),
+    {&terminalMovingTargetCommand},
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 // inits
 
-void initializeSubsystems() { motorSubsystem2006.initialize(); }
+void initializeSubsystems()
+{
+    motorSubsystem2006.initialize();
+    modm::platform::RandomNumberGenerator::enable();
+}
 
 void registerSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
-        &dart_target_control::remoteSafeDisconnectFunction);
+        &launcher_target_control::remoteSafeDisconnectFunction);
     drivers->commandScheduler.registerSubsystem(&motorSubsystem2006);
 }
 
-void registerIoMappings(Drivers*) { motorSubsystem2006.setDefaultCommand(&leftVerticalManual); }
-
-}  // namespace dart_target_control
-
-namespace aruwsrc::dart_target
+void registerIoMappings(Drivers* drivers)
 {
-void initSubsystemCommands(aruwsrc::dart_target::Drivers* drivers)
+    motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
+    drivers->commandMapper.addMap(&leftUp);
+    drivers->commandMapper.addMap(&leftDown);
+}
+}  // namespace launcher_target_control
+
+namespace aruwsrc::launcher_target
 {
-    dart_target_control::registerSubsystems(drivers);
-    dart_target_control::initializeSubsystems();
-    dart_target_control::registerIoMappings(drivers);
+void initSubsystemCommands(aruwsrc::launcher_target::Drivers* drivers)
+{
+    launcher_target_control::registerSubsystems(drivers);
+    launcher_target_control::initializeSubsystems();
+    launcher_target_control::registerIoMappings(drivers);
 }
 
-}  // namespace aruwsrc::dart_target
+}  // namespace aruwsrc::launcher_target
 
 #endif

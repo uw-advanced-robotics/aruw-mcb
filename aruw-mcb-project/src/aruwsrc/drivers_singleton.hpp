@@ -55,8 +55,8 @@ namespace aruwsrc::blank
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 namespace aruwsrc::motor_tester
 #elif defined(TARGET_LAUNCHER_TARGET)
-#include "aruwsrc/robot/dart_target/dart_target_drivers.hpp"
-namespace aruwsrc::dart_target
+#include "aruwsrc/robot/launcher_target/launcher_target_drivers.hpp"
+namespace aruwsrc::launcher_target
 #elif defined(TARGET_FLYWHEEL_TESTING)
 #include "aruwsrc/robot/flywheel_testing/flywheel_testing_drivers.hpp"
 namespace aruwsrc::flywheel_testing
