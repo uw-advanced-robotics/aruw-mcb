@@ -61,12 +61,12 @@ void StandardAndHeroTransformer::updateTransforms()
     worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
 
     float roll = 0.0f;
-    const aruwsrc::communication::can::TurretMCBCanComm* turretMCB = turret.getTurretMCB();
+    const tap::communication::sensors::imu::AbstractIMU* imu = turret.getIMU();
 
-    if (turretMCB != nullptr) roll = turretMCB->getRoll();
+    if (imu) roll = imu->getRoll();
 
     worldToTurret.updateRotation(roll, turret.getWorldPitch(), turret.getWorldYaw());
-    worldToTurret.updateAngularVelocity(0, turretMCB->getGy(), turretMCB->getGz());
+    worldToTurret.updateAngularVelocity(0, imu->getGy(), imu->getGz());
 
     worldToTurret.updateTranslation(worldToChassis.getTranslation());
     chassisToTurret = worldToChassis.getInverse().composeStatic(worldToTurret);
