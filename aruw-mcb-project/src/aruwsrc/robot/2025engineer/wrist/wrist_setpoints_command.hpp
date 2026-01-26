@@ -17,29 +17,47 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
+#ifndef WRIST_SETPOINTS_COMMAND_HPP_
+#define WRIST_SETPOINTS_COMMAND_HPP_
+
+#include <vector>
+
+#include "tap/control/command.hpp"
+
+#include "aruwsrc/robot/2025engineer/wrist/wrist_subsystem.hpp"
+
 namespace aruwsrc::engineer::wrist
 {
-WristMovePositionCommand::WristMovePositionCommand(
-    WristSubsystem &wrist,
-    float pitchSetpoint,
-    float yawSetpoint)
-    : wrist(wrist),
-      pitchSetpoint(pitchSetpoint),
-      yawSetpoint(yawSetpoint)
+struct Setpoint
 {
-    addSubsystemRequirement(&wrist);
-}
+    float pitch;
+    float yaw;
+    float epsilonPitch;
+    float epsilonYaw;
+};
 
-void WristMovePositionCommand::initialize()
+class WristSetpointsCommand : public tap::control::Command
 {
-    wrist.setSetpointPitch(pitchSetpoint);
-    wrist.setSetpointYaw(yawSetpoint);
-}
+public:
+    WristSetpointsCommand(WristSubsystem &wrist, std::vector<Setpoint> setpoints);
 
-void WristMovePositionCommand::execute() {}
+    void initialize() override;
 
-void WristMovePositionCommand::end(bool) {}
+    void execute() override;
 
-bool WristMovePositionCommand::isFinished() const { return wrist.atSetpoint(); }
+    void end(bool interrupted) override;
+
+    bool isFinished() const override;
+
+    const char *getName() const override { return "Wrist Setpoints Command"; }
+
+private:
+    WristSubsystem &wrist;
+    std::vector<Setpoint> setpoints;
+    unsigned int currentSetpointIndex;
+
+};  // class WristSetpointsCommand
+
 }  // namespace aruwsrc::engineer::wrist
+
+#endif  // WRIST_SETPOINTS_COMMAND_HPP_

@@ -16,30 +16,36 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef WRIST_MOVE_POSITION_COMMAND_HPP_
+#define WRIST_MOVE_POSITION_COMMAND_HPP_
 
-#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
+#include "tap/control/command.hpp"
+
+#include "aruwsrc/robot/2025engineer/wrist/wrist_subsystem.hpp"
+
 namespace aruwsrc::engineer::wrist
+
 {
-WristMovePositionCommand::WristMovePositionCommand(
-    WristSubsystem &wrist,
-    float pitchSetpoint,
-    float yawSetpoint)
-    : wrist(wrist),
-      pitchSetpoint(pitchSetpoint),
-      yawSetpoint(yawSetpoint)
+class WristMovePositionCommand : public tap::control::Command
 {
-    addSubsystemRequirement(&wrist);
-}
+public:
+    WristMovePositionCommand(WristSubsystem &wrist, float pitchSetpoint, float yawSetpoint);
 
-void WristMovePositionCommand::initialize()
-{
-    wrist.setSetpointPitch(pitchSetpoint);
-    wrist.setSetpointYaw(yawSetpoint);
-}
+    void initialize() override;
 
-void WristMovePositionCommand::execute() {}
+    void execute() override;
 
-void WristMovePositionCommand::end(bool) {}
+    void end(bool interrupted) override;
 
-bool WristMovePositionCommand::isFinished() const { return wrist.atSetpoint(); }
+    bool isFinished() const override;
+
+    const char *getName() const override { return "Wrist Move Position Command"; }
+
+private:
+    WristSubsystem &wrist;
+    float pitchSetpoint, yawSetpoint;
+
+};  // class WristMovePositionCommand
+
 }  // namespace aruwsrc::engineer::wrist
+#endif  // WRIST_MOVE_POSITION_COMMAND_HPP_

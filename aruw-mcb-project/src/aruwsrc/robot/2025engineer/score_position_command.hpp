@@ -16,30 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef WRIST_SETPOINTS_COMMAND_HPP_
-#define WRIST_SETPOINTS_COMMAND_HPP_
-
-#include <vector>
+#ifndef SCORE_POSITION_COMMAND_HPP_
+#define SCORE_POSITION_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
+#include "aruwsrc/robot/2025engineer/engineer_setpoint_constants.hpp"
+#include "aruwsrc/robot/2025engineer/wrist/wrist_subsystem.hpp"
 
-namespace aruwsrc::engineer::wrist
-{
-struct Setpoint
-{
-    float pitch;
-    float yaw;
-    float epsilonPitch;
-    float epsilonYaw;
-};
+using namespace aruwsrc::engineer::wrist;
 
-class WristSetpointsCommand : public tap::control::Command
+namespace aruwsrc::engineer
+{
+class ScorePositionCommand : public tap::control::Command
 {
 public:
-    WristSetpointsCommand(WristSubsystem &wrist, std::vector<Setpoint> setpoints);
+    ScorePositionCommand(
+        aruwsrc::control::joint::JointSubsystem &gantryLift,
+        WristSubsystem &wrist,
+        aruwsrc::control::joint::JointSubsystem &roll);
 
     void initialize() override;
 
@@ -49,15 +45,17 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Wrist Setpoints Command"; }
+    const char *getName() const override { return "Score Position Command"; }
+
+    void cyclePositions(ScorePositions scorePos);
 
 private:
+    aruwsrc::control::joint::JointSubsystem &gantryLift;
     WristSubsystem &wrist;
-    std::vector<Setpoint> setpoints;
-    unsigned int currentSetpointIndex;
+    aruwsrc::control::joint::JointSubsystem &roll;
+    ScorePositions scoringPosition;
 
-};  // class WristSetpointsCommand
+};  // class ScorePositionCommand
 
-}  // namespace aruwsrc::engineer::wrist
-
-#endif  // WRIST_SETPOINTS_COMMAND_HPP_
+}  // namespace aruwsrc::engineer
+#endif  // SCORE_POSITION_COMMAND_HPP_

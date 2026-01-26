@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,19 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
-
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/robot/2025engineer/setpoint_move_position_command.hpp"
 
 namespace aruwsrc::engineer
 {
-float EngineerTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
-
-float EngineerTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
-
-uint32_t EngineerTurretSubsystem::getLastMeasurementTimeMicros() const
+SetpointMovePositionCommand::SetpointMovePositionCommand(
+    aruwsrc::control::joint::JointSubsystem &subsystem,
+    float setpoint)
+    : subsystem(subsystem),
+      setpoint(setpoint)
 {
-    return getTurretMCB()->getIMUDataTimestamp();
+    addSubsystemRequirement(&subsystem);
 }
 
+void SetpointMovePositionCommand::initialize() { subsystem.setSetpoint(setpoint); }
+
+void SetpointMovePositionCommand::execute() {}
+
+void SetpointMovePositionCommand::end(bool) {}
+
+bool SetpointMovePositionCommand::isFinished() const { return subsystem.atSetpoint(); }
 }  // namespace aruwsrc::engineer

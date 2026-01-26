@@ -39,7 +39,7 @@ ROBOT_CLASS = {
     "STANDARD_VOID": "standard",
     "DRONE": "drone",
     "ENGINEER": "engineer",
-    "ENGI_2025": "engineer",
+    "ENGI_2025": "2025engineer",
     "SENTRY_ECLIPSE": "sentry",
     "HERO_ZERO": "hero",
     "DART": "dart",

@@ -17,12 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+#include "aruwsrc/robot/2025engineer/engineer_control_operator_interface.hpp"
 
 #include "tap/algorithms/math_user_utils.hpp"
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
+#include "aruwsrc/robot/2025engineer/engineer_wrist_constants.hpp"
 
 using namespace tap::algorithms;
 using namespace aruwsrc::control::chassis;
@@ -43,6 +43,27 @@ float EngineerControlOperatorInterface::getCubeLiftVelocity()
 {
     // Note: CubeLiftSwitchCommand will break if cubelift is manually moved to the wrong place
     return 0.0f;
+}
+
+float EngineerControlOperatorInterface::getGantryLiftVelocity()
+{
+    if (getShiftKey())
+    {
+        if (isGantryWristControlMode())
+        {
+            return -(drivers->remote.getMouseY() / divideGantryLift) +
+                   drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+        }
+        return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+    }
+    else
+    {
+        if (isGantryWristControlMode())
+        {
+            return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+        }
+        return 0.0f;
+    }
 }
 
 float EngineerControlOperatorInterface::getGantryExtensionVelocity()
@@ -67,6 +88,16 @@ float EngineerControlOperatorInterface::getGantryExtensionVelocity()
         }
         return 0.0f;
     }
+}
+
+bool EngineerControlOperatorInterface::getGantryKeyUp()
+{
+    return drivers->remote.keyPressed(Remote::Key::X);
+}
+
+bool EngineerControlOperatorInterface::getGantryKeyDown()
+{
+    return drivers->remote.keyPressed(Remote::Key::V);
 }
 
 bool EngineerControlOperatorInterface::getGantryKeyIn()

@@ -16,30 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef CUBELIFT_SWITCH_COMMAND_HPP_
+#define CUBELIFT_SWITCH_COMMAND_HPP_
 
-#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
-namespace aruwsrc::engineer::wrist
+#include "tap/control/command.hpp"
+
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
+
+namespace aruwsrc::engineer
 {
-WristMovePositionCommand::WristMovePositionCommand(
-    WristSubsystem &wrist,
-    float pitchSetpoint,
-    float yawSetpoint)
-    : wrist(wrist),
-      pitchSetpoint(pitchSetpoint),
-      yawSetpoint(yawSetpoint)
+class CubeliftSwitchCommand : public tap::control::Command
 {
-    addSubsystemRequirement(&wrist);
-}
+public:
+    CubeliftSwitchCommand(aruwsrc::control::joint::JointSubsystem &cubeLift, bool isDirectionUp);
 
-void WristMovePositionCommand::initialize()
-{
-    wrist.setSetpointPitch(pitchSetpoint);
-    wrist.setSetpointYaw(yawSetpoint);
-}
+    void initialize() override;
 
-void WristMovePositionCommand::execute() {}
+    void execute() override;
 
-void WristMovePositionCommand::end(bool) {}
+    void end(bool interrupted) override;
 
-bool WristMovePositionCommand::isFinished() const { return wrist.atSetpoint(); }
-}  // namespace aruwsrc::engineer::wrist
+    bool isFinished() const override;
+
+    const char *getName() const override { return "Cube Lift Switch Command"; }
+
+private:
+    aruwsrc::control::joint::JointSubsystem &cubeLift;
+    bool isDirectionUp;
+
+};  // class CubeliftSwitchCommand
+
+}  // namespace aruwsrc::engineer
+#endif  // CUBELIFT_SWITCH_COMMAND_HPP_

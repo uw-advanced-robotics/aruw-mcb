@@ -17,9 +17,9 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/cubelift_switch_command.hpp"
+#include "aruwsrc/robot/2025engineer/cubelift_switch_command.hpp"
 
-#include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
+#include "aruwsrc/robot/2025engineer/engineer_cube_lift_constants.hpp"
 
 namespace aruwsrc::engineer
 {
