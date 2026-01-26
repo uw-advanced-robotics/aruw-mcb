@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
+#include "aruwsrc/robot/2025engineer/setpoint_move_manual_command.hpp"
 
 namespace aruwsrc::engineer
 {
@@ -46,7 +46,18 @@ void SetpointMoveManualCommand::execute()
         case SetpointType::CUBE_LIFT:
             setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;
             break;
-        case SetpointType::EXTENSION:
+        case SetpointType::GANTRY_LIFT:
+            setpoint += operatorInterface->getGantryLiftVelocity() * moveSpeed;
+            if (operatorInterface->getGantryKeyUp())
+            {
+                setpoint += moveSpeed;
+            }
+            else if (operatorInterface->getGantryKeyDown())
+            {
+                setpoint -= moveSpeed;
+            }
+            break;
+        case SetpointType::GANTRY_EXTENSION:
             setpoint += operatorInterface->getGantryExtensionVelocity() * moveSpeed;
             if (operatorInterface->getGantryKeyOut())
             {

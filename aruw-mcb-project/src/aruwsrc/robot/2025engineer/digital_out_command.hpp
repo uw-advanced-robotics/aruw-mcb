@@ -21,7 +21,7 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
+#include "aruwsrc/robot/2025engineer/digital_out_subsystem.hpp"
 
 namespace aruwsrc::engineer
 {

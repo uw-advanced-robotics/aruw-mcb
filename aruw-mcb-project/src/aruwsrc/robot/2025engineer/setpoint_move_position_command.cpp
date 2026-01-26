@@ -17,29 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
-namespace aruwsrc::engineer::wrist
+#include "aruwsrc/robot/2025engineer/setpoint_move_position_command.hpp"
+
+namespace aruwsrc::engineer
 {
-WristMovePositionCommand::WristMovePositionCommand(
-    WristSubsystem &wrist,
-    float pitchSetpoint,
-    float yawSetpoint)
-    : wrist(wrist),
-      pitchSetpoint(pitchSetpoint),
-      yawSetpoint(yawSetpoint)
+SetpointMovePositionCommand::SetpointMovePositionCommand(
+    aruwsrc::control::joint::JointSubsystem &subsystem,
+    float setpoint)
+    : subsystem(subsystem),
+      setpoint(setpoint)
 {
-    addSubsystemRequirement(&wrist);
+    addSubsystemRequirement(&subsystem);
 }
 
-void WristMovePositionCommand::initialize()
-{
-    wrist.setSetpointPitch(pitchSetpoint);
-    wrist.setSetpointYaw(yawSetpoint);
-}
+void SetpointMovePositionCommand::initialize() { subsystem.setSetpoint(setpoint); }
 
-void WristMovePositionCommand::execute() {}
+void SetpointMovePositionCommand::execute() {}
 
-void WristMovePositionCommand::end(bool) {}
+void SetpointMovePositionCommand::end(bool) {}
 
-bool WristMovePositionCommand::isFinished() const { return wrist.atSetpoint(); }
-}  // namespace aruwsrc::engineer::wrist
+bool SetpointMovePositionCommand::isFinished() const { return subsystem.atSetpoint(); }
+}  // namespace aruwsrc::engineer

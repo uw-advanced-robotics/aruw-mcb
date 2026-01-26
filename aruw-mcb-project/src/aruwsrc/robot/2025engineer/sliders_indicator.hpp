@@ -26,8 +26,8 @@
 
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
-#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
-#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/robot/2025engineer/engineer_wrist_constants.hpp"
+#include "aruwsrc/robot/2025engineer/wrist/wrist_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
 
 namespace aruwsrc::engineer
