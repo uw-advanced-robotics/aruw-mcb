@@ -145,7 +145,6 @@ static constexpr float WHEELBASE_HYPOTENUSE =
         ? 1
         : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 
-
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
 
