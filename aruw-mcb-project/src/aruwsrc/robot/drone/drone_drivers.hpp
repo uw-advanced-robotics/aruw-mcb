@@ -26,11 +26,9 @@
 #include "tap/mock/imu_terminal_serial_handler_mock.hpp"
 
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
-#include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #else
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
@@ -47,21 +45,15 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
-          controlOperatorInterface(this),
-          turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
-          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)
+          controlOperatorInterface(this)
     {
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
-    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
-    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
-    aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus1;
-    aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> turretImu;
 #endif
 };

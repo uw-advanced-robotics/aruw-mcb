@@ -70,11 +70,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace drone_control
 {
-inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
-{
-    return drivers()->turretMCBCanCommBus1;
-}
-
 /* define subsystems --------------------------------------------------------*/
 tap::motor::DjiMotor pitchMotor(
     drivers(),
@@ -91,7 +86,7 @@ aruwsrc::drone::DroneTurretSubsystem turret(
     &yawMotor,
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
+    &drivers()->turretImu);
 
 // transforms
 VelocityAgitatorSubsystem agitator(
@@ -120,7 +115,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
-        &getTurretMCBCanComm(),
+        nullptr,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 algorithms::TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
