@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "setpoint_move_position_command.hpp"
+#include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 
 namespace aruwsrc::engineer
 {
