@@ -209,7 +209,7 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::initialize()
 {
     initializeWorldFrameTurretImuController(
         this,
-        Angle(worldToTurret.getYaw()),
+        Angle(AXIS == Axis::PITCH ? worldToTurret.getPitch() : worldToTurret.getYaw()),
         this->turretMotor,
         positionPid,
         velocityPid,
