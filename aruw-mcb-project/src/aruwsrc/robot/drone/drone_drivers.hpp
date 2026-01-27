@@ -31,6 +31,7 @@
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #endif
@@ -61,6 +62,7 @@ public:
     control::ControlOperatorInterface controlOperatorInterface;
     aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus1;
     aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus2;
+    aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> turretImu;
 #endif
 };
 

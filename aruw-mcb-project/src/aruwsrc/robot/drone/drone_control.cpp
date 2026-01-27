@@ -235,6 +235,7 @@ void setDefaultDroneCommands(Drivers *)
 void startDroneCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&turrettUserControlCommand);
+    drivers->turretImu.setMountingTransform(TURRET_IMU_MOUNTING_TRANSFORM);
 }
 
 /* register io mappings here ------------------------------------------------*/

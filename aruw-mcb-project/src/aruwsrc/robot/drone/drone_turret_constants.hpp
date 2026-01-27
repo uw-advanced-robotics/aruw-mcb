@@ -64,6 +64,14 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 1.0f};
 
+static const tap::algorithms::transforms::Transform TURRET_IMU_MOUNTING_TRANSFORM(
+    0,
+    0,
+    0,
+    M_PI,
+    0,
+    0);
+
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
