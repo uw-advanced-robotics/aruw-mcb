@@ -235,6 +235,9 @@ private:
     static constexpr float IIR_A[FILTER_ORDER] = {1.000000f, -1.583541f, 0.656414f};
     static constexpr float IIR_B[FILTER_ORDER] = {0.018218f, 0.036436f, 0.018218f};
 
+    float y[int(OdomInput::NUM_INPUTS)];
+    float x[int(OdomState::NUM_STATES)];
+
     float applyIirFilter(float input, float* state, const float* a, const float* b, int order);
 };
 }  // namespace aruwsrc::algorithms::odometry

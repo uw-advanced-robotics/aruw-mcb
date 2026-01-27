@@ -152,7 +152,13 @@ void ThreeDeadwheelChassisKFOdometry::update()
     tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
 
     // Create the measurement vector
-    float y[int(OdomInput::NUM_INPUTS)] = {Vx, Ax, Vy, Ay, chassisYaw, Wodo, Wimu};
+    y[int(OdomInput::VEL_X)] = Vx;
+    y[int(OdomInput::ACC_X)] = Ax;
+    y[int(OdomInput::VEL_Y)] = Vy;
+    y[int(OdomInput::ACC_Y)] = Ay;
+    y[int(OdomInput::POS_ANG)] = chassisYaw;
+    y[int(OdomInput::VEL_ANG_ODOM)] = Wodo;
+    y[int(OdomInput::VEL_ANG_IMU)] = Wimu;
 
     // Perform the Kalman filter update
     kf.performUpdate(y);
@@ -161,7 +167,11 @@ void ThreeDeadwheelChassisKFOdometry::update()
 
 void ThreeDeadwheelChassisKFOdometry::updateChassisStateFromKF()
 {
-    const auto& x = kf.getStateVectorAsMatrix();
+    auto stateVector = kf.getStateVectorAsMatrix();
+    for (int i = 0; i < int(OdomState::NUM_STATES); i++)
+    {
+        x[i] = stateVector[i];
+    }
 
     // update odometry velocity and orientation
     velocity.x = x[int(OdomState::VEL_X)];
