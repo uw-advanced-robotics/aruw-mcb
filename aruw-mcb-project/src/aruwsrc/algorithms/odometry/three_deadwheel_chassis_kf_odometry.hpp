@@ -72,6 +72,7 @@ public:
 #endif
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
+        const float initYaw,
         const float parallelOneCenterToWheelDistance,
         const float parallelTwoCenterToWheelDistance,
         const float perpendicularCenterToWheelDistance,
@@ -159,32 +160,35 @@ private:
     };
 
     static constexpr float KF_R[INPUTS_SQUARED] = {
-        7.49565672e-05, 0, 0, 0, 0, 0,
-        0, 7.35872941e-04, 0, 0, 0, 0,
-        0, 0, 7.81982345e-05, 0, 0, 0,
-        0, 0, 0, 5.69132363e-04, 0, 0,
-        0, 0, 0, 0, 0 /*VARIANCE*/, 0, 
-        0, 0, 0, 0, 0, 0 /*VARIANCE*/, 
+        7.49565672e-05, 0, 0, 0, 0, 0, 0,
+        0, 7.35872941e-04, 0, 0, 0, 0, 0,
+        0, 0, 7.81982345e-05, 0, 0, 0, 0,
+        0, 0, 0, 5.69132363e-04, 0, 0, 0,
+        0, 0, 0, 0, 5.69132363e-04, 0, 0,
+        0, 0, 0, 0, 0, 5.69132363e-04, 0,
+        0, 0, 0, 0, 0, 0, 5.69132363e-04,
     }; //EG@TODO:
 
     static constexpr float KF_Q[STATES_SQUARED] = {
-        4e-12f, 4e-9f, 2e-6f, 0     , 0    , 0    , 0     , 0    ,
-        4e-9f , 4e-6f, 2e-3f, 0     , 0    , 0    , 0     , 0    ,
-        2e-6f , 2e-3f, 1    , 0     , 0    , 0    , 0     , 0    ,
-        0     , 0    , 0    , 4e-12f, 4e-9f, 2e-6f, 0     , 0    ,
-        0     , 0    , 0    , 4e-9f , 4e-6f, 2e-3f, 0     , 0    ,
-        0     , 0    , 0    , 2e-6f , 2e-3f, 1    , 0     , 0    ,
-        0     , 0    , 0    , 0     , 0    , 0    , 4e-12f, 4e-9f,
-        0     , 0    , 0    , 0     , 0    , 0    , 4e-9f , 4e-6f,
+        2.276528e-15f, 2.276528e-12f, 1.138264e-09f, 0            , 0            , 0            , 0            , 0            ,
+        2.276528e-12f, 2.276528e-09f, 1.138264e-06f, 0            , 0            , 0            , 0            , 0            ,
+        1.138264e-09f, 1.138264e-06f, 5.69132e-04f , 0            , 0            , 0            , 0            , 0            ,
+        0            , 0            , 0            , 2.276528e-15f, 2.276528e-12f, 1.138264e-09f, 0            , 0            ,
+        0            , 0            , 0            , 2.276528e-12f, 2.276528e-09f, 1.138264e-06f, 0            , 0            ,
+        0            , 0            , 0            , 1.138264e-09f, 1.138264e-06f, 5.69132e-04f , 0            , 0            ,
+        0            , 0            , 0            , 0            , 0            , 0            , 2.276528e-15f, 2.276528e-12f,
+        0            , 0            , 0            , 0            , 0            , 0            , 2.276528e-12f, 2.276528e-09f,
     }; //EG@TODO: Multiply by variance.
     
     static constexpr float KF_P0[STATES_SQUARED] = {
-        1E-2, 0   , 0   , 0   , 0   , 0   ,
-        0   , 1E-6, 0   , 0   , 0   , 0   ,
-        0   , 0   , 1E+3, 0   , 0   , 0   ,
-        0   , 0   , 0   , 1E-2, 0   , 0   ,
-        0   , 0   , 0   , 0   , 0/*TUNE*/, 0   ,
-        0   , 0   , 0   , 0   , 0   , 0/*TUNE*/,
+        1E-2, 0   , 0   , 0   , 0   , 0   , 0   , 0   ,
+        0   , 1E-6, 0   , 0   , 0   , 0   , 0   , 0   ,
+        0   , 0   , 1E+3, 0   , 0   , 0   , 0   , 0   ,
+        0   , 0   , 0   , 1E-2, 0   , 0   , 0   , 0   ,
+        0   , 0   , 0   , 0   , 1E-2, 0   , 0   , 0   ,
+        0   , 0   , 0   , 0   , 0   , 1E-2, 0   , 0   ,
+        0   , 0   , 0   , 0   , 0   , 0   , 1E-2, 0   ,
+        0   , 0   , 0   , 0   , 0   , 0   , 0   , 1E-2,
     }; //EG@TODO:
     // clang-format on
 
@@ -192,13 +196,16 @@ private:
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
     const modm::Vector2f initPos;
+    const float initYaw;
 
     /// Chassis location in the world frame
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
     // Chassis yaw orientation in world frame (radians)
-    float chassisYaw = 0;
+    float chassisYaw;
+
+    float angularVelocity = 0;
 
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;

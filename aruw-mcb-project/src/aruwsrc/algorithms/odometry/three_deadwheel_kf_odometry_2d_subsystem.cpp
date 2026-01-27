@@ -34,6 +34,7 @@ ThreeDeadwheelKFOdometry2DSubsystem::ThreeDeadwheelKFOdometry2DSubsystem(
     tap::communication::sensors::imu::ImuInterface &imu,
     float initialXPos,
     float initialYPos,
+    float initialYaw,
     const float parallelOneCenterToWheelDistance,
     const float parallelTwoCenterToWheelDistance,
     const float perpendicularCenterToWheelDistance,
@@ -50,6 +51,7 @@ ThreeDeadwheelKFOdometry2DSubsystem::ThreeDeadwheelKFOdometry2DSubsystem(
 #endif
           imu,
           modm::Vector2f(initialXPos, initialYPos),
+          initialYaw,
           parallelOneCenterToWheelDistance,
           parallelTwoCenterToWheelDistance,
           perpendicularCenterToWheelDistance,

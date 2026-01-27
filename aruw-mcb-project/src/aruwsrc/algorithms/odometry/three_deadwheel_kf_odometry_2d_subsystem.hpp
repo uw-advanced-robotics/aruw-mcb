@@ -80,6 +80,7 @@ public:
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,
         float initialYPos,
+        float initialYaw,
         const float parallelOneCenterToWheelDistance,
         const float parallelTwoCenterToWheelDistance,
         const float perpendicularCenterToWheelDistance,

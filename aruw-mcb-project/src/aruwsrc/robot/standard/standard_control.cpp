@@ -228,6 +228,29 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
+/*tap::encoder::CanEncoder parallelOmniOne(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    tap::can::CanBus::CAN_BUS2,
+    true);
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    tap::can::CanBus::CAN_BUS2);*/
+
+/*aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
+aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+    drivers(),
+    chassis,
+    yawObserver,
+    // drivers()->ism330,
+    drivers()->mpu6500,
+    modm::Vector2f(
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));*/
+
+
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 const tap::motor::DjiMotorEncoder& parallelOmniOne = leftFrontChassisMotor.getInternalEncoder();
@@ -236,20 +259,20 @@ const tap::motor::DjiMotorEncoder& parallelOmniTwo = rightBackChassisMotor.getIn
 
 const tap::motor::DjiMotorEncoder& perpendicularOmni = rightFrontChassisMotor.getInternalEncoder();
 
-float DEADWHEEL_RADIUS = 0.0f; //EG@TODO: find correct radius
+float DEADWHEEL_RADIUS = 0.1016f;
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
     parallelOmniOne,
-    parallelOmniTwo,
+    parallelOmniOne,
     perpendicularOmni,
     DEADWHEEL_RADIUS
 );
 
-constexpr float parallelOneCenterToWheelDistance = 0.0f; //EG@TODO: find correct distance
-constexpr float parallelTwoCenterToWheelDistance = 0.0f; //EG@TODO: find correct distance
-constexpr float perpendicularCenterToWheelDistance = 0.0f; //EG@TODO: find correct distance
-constexpr float parallelWheelOneChassisForwardRelativeAngleRadians = 0.0f; //EG@TODO: find correct angle
-constexpr float parallelWheelTwoChassisForwardRelativeAngleRadians = 0.0f; //EG@TODO: find correct angle
-constexpr float perpendicularWheelChassisForwardRelativeAngleRadians = 0.0f; //EG@TODO: find correct angle
+constexpr float parallelOneCenterToWheelDistance = 0.33f / 2.0f; 
+constexpr float parallelTwoCenterToWheelDistance = 0.33f / 2.0f; 
+constexpr float perpendicularCenterToWheelDistance = 0.33f / 2.0f; 
+constexpr float parallelWheelOneChassisForwardRelativeAngleRadians = 0.0f; 
+constexpr float parallelWheelTwoChassisForwardRelativeAngleRadians = 0.0f; 
+constexpr float perpendicularWheelChassisForwardRelativeAngleRadians = PI / 2.0f; 
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
@@ -258,6 +281,7 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
     drivers()->mpu6500,
     aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
     aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y,
+    0.0f, 
     parallelOneCenterToWheelDistance,
     parallelTwoCenterToWheelDistance,
     perpendicularCenterToWheelDistance,

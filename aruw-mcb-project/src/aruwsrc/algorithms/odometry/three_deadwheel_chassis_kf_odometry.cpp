@@ -30,6 +30,7 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
 #endif
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
+    const float initYaw,
     const float parallelOneCenterToWheelDistance,
     const float parallelTwoCenterToWheelDistance,
     const float perpendicularCenterToWheelDistance,
@@ -41,6 +42,7 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
+      initYaw(initYaw),
       parallelOneCenterToWheelDistance(parallelOneCenterToWheelDistance),
       parallelTwoCenterToWheelDistance(parallelTwoCenterToWheelDistance),
       perpendicularCenterToWheelDistance(perpendicularCenterToWheelDistance),
@@ -56,8 +58,10 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
 
 void ThreeDeadwheelChassisKFOdometry::reset()
 {
+    chassisYaw = initYaw;
+
     float initialX[int(OdomState::NUM_STATES)] =
-        {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f, 0.0f, 0.0f};
+        {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f, initYaw, 0.0f};
     kf.init(initialX);
 }
 
@@ -86,12 +90,10 @@ float ThreeDeadwheelChassisKFOdometry::applyIirFilter(
 }
 
 void ThreeDeadwheelChassisKFOdometry::update()
-{
-    chassisYaw = location.getOrientation();
-    
+{   
     /* Process dead wheels */
 
-    float yawIMU;
+    float yawIMU = 0;
     if (!chassisYawObserver.getChassisWorldYaw(&yawIMU))
     {
         yawIMU = 0;
@@ -164,6 +166,7 @@ void ThreeDeadwheelChassisKFOdometry::updateChassisStateFromKF()
     // update odometry velocity and orientation
     velocity.x = x[int(OdomState::VEL_X)];
     velocity.y = x[int(OdomState::VEL_Y)];
+    angularVelocity = x[int(OdomState::VEL_ANG)];
 
     location.setOrientation(x[int(OdomState::POS_ANG)]);
     location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
