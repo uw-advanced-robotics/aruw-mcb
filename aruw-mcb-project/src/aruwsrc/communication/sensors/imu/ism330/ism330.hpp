@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,80 +20,70 @@
 #ifndef ISM330_HPP_
 #define ISM330_HPP_
 
-#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
+#include "tap/util_macros.hpp"
 
-#include "modm/architecture/interface/i2c_device.hpp"
-#include "modm/architecture/interface/register.hpp"
-#include "modm/math/utils.hpp"
+#include "aruwsrc/communication/sensors/imu/ism330/ism330_data.hpp"
 #include "modm/processing/protothread.hpp"
 #include "modm/processing/resumable.hpp"
-
-#include "ism330_data.hpp"
 
 namespace aruwsrc::communication::sensors::imu::ism330
 {
 using namespace tap::communication::sensors::imu;
 
-/**
- * I2C driver for the ISM330DHCX IMU
- *
- * For registers and datasheet, go to:
- * https://www.st.com/en/mems-and-sensors/ism330dhcx.html
- */
-template <class I2cMaster>
-class ISM330 : public modm::I2cDevice<I2cMaster>, public AbstractIMU, public modm::pt::Protothread
+class ISM330 : public AbstractIMU, public modm::pt::Protothread
 {
 public:
     ISM330();
-
+    DISALLOW_COPY_AND_ASSIGN(ISM330);
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
 
+    /**
+     * Read data from the imu. This is a protothread that reads the SPI bus using
+     * nonblocking I/O.
+     *
+     * @return `true` if the function is not done, `false` otherwise
+     */
     bool read();
+
+    virtual inline float getAccelerationSensitivity() const override { return GRAVITY_MPS2; }
+    virtual inline const char* getName() const { return "ISM330DHCX"; }
 
     void setAccelRange(AccelerometerRangeConfig xl_config);
     void setGyroRange(GyroscopeRangeConfig g_config);
     void setODR(OutputDataRate odr);
 
-    virtual inline const char *getName() const { return "ISM330DHCX"; }
-    virtual inline float getAccelerationSensitivity() const override { return GRAVITY_MPS2; }
-
 private:
-    modm::ResumableResult<bool> readRegister(uint8_t reg, int length, uint8_t *rxBuffer)
-    {
-        txBuff[0] = reg;
-
-        RF_BEGIN();
-
-        RF_WAIT_WHILE(!this->transaction.configureWriteRead(txBuff, 1, rxBuffer, length));
-
-        RF_END_RETURN_CALL(this->runTransaction());
-    };
-
-    modm::ResumableResult<bool> writeRegister(uint8_t reg, uint8_t data)
-    {
-        txBuff[0] = reg;
-        txBuff[1] = data;
-
-        RF_BEGIN();
-
-        RF_WAIT_WHILE(!this->transaction.configureWrite(txBuff, 2));
-
-        RF_END_RETURN_CALL(this->runTransaction());
-    };
-
-    bool pinged;
-
-    uint8_t rxBuff[15];
-    uint8_t txBuff[2];
-
-    int timeout = 1200;
-
-    uint8_t current_reg_G;
-    uint8_t current_reg_XL;
-
     float gyroScale;
     float accelScale;
+    ImuState prevImuState = ImuState::IMU_NOT_CONNECTED;
+    uint8_t tx;
+    uint8_t rx;
+
+    uint8_t counter;
+
+    uint8_t rxBuff[15];
+    uint8_t txBuff[15];
+
+    static constexpr OutputDataRate DEFAULT_ODR = ODR_833HZ;
+    static constexpr GyroscopeRangeConfig DEFAULT_GYRO_RANGE = DPS1000_CONFIG;
+    static constexpr AccelerometerRangeConfig DEFAULT_ACCEL_RANGE = G4_CONFIG;
+
+    // Pre-computed register values for non-blocking writes (protothread use)
+    static constexpr uint8_t DEFAULT_CTRL1_XL_VALUE = DEFAULT_ODR | DEFAULT_ACCEL_RANGE;
+    static constexpr uint8_t DEFAULT_CTRL2_G_VALUE = DEFAULT_ODR | DEFAULT_GYRO_RANGE;
+
+    // Pull CS low to read / write.
+    void ismNssLow();
+
+    // Pull CS high to end
+    void ismNssHigh();
+
+    // Read from a register
+    uint8_t spiReadRegister(uint8_t reg);
+
+    // Write to register
+    void spiWriteRegister(uint8_t reg, uint8_t data);
 
     /**
      * Convert int16_t stored in big endian format in buff to a floating point value.
@@ -101,31 +91,29 @@ private:
      * @param[in] buff Buffer containing two bytes representing an int16_t in big endian format.
      * @return A float, the converted int16_t in floating point form.
      */
-    inline float bigEndianInt16ToFloat(const uint8_t *buff)
+    inline float bigEndianInt16ToFloat(const uint8_t* buff)
     {
         return static_cast<float>(static_cast<int16_t>((*(buff)) | (*(buff + 1) << 8)));
     }
 
-    float accelValueToMeterPerSec(const uint8_t *buff)
+    float accelValueToMeterPerSec(const uint8_t* buff)
     {
         float raw = bigEndianInt16ToFloat(buff);
         return raw * accelScale / 1000.0f * getAccelerationSensitivity();
     }
 
-    float gyroValueToRadPerSec(const uint8_t *buff)
+    float gyroValueToRadPerSec(const uint8_t* buff)
     {
         float raw = bigEndianInt16ToFloat(buff);
         return raw * gyroScale / 1000.0f;
     }
 
-    float tempValueToCelsius(const uint8_t *buff)
+    float tempValueToCelsius(const uint8_t* buff)
     {
         float raw = bigEndianInt16ToFloat(buff);
         return (raw / TEMPERATURE_SENSITIVITY) + TEMPERATURE_OFFSET;
     }
 };
 }  // namespace aruwsrc::communication::sensors::imu::ism330
-
-#include "ism330_impl.hpp"
 
 #endif  // ISM330_HPP_

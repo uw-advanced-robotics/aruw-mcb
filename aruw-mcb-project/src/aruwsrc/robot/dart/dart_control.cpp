@@ -22,6 +22,7 @@
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/sequential_command.hpp"
+#include "tap/control/press_command_mapping.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
@@ -41,12 +42,14 @@
 #include "aruwsrc/robot/dart/dart_servo.hpp"
 #include "aruwsrc/robot/dart/dart_yaw_position_command.hpp"
 #include "aruwsrc/robot/dart/dart_yaw_velocity_command.hpp"
+#include "aruwsrc/robot/dart/dart_reloader_subsystem.hpp"
 
 #include "dart_close_command.hpp"
 #include "dart_constants.hpp"
 #include "dart_open_command.hpp"
 #include "dart_release_command.hpp"
 #include "dart_setpoint_command.hpp"
+#include "rotate_magazine_command.hpp"
 
 using namespace tap::control;
 using namespace aruwsrc::control;
@@ -100,7 +103,18 @@ DartManualPullbackSetpointCommand manualPullbackCommand(
 // TODO: ADD YAW MANUAL:
 // https://gitlab.com/aruw/controls/aruw-mcb/-/blob/a26bc3fb1845640e12b0afe32d720ec90c0bb709/aruw-mcb-project/src/aruwsrc/robot/dart/dart_control.cpp#L107
 
+tap::motor::DjiMotor reloaderMotor(
+    drivers(),
+    RELOADER_MOTOR_ID,
+    RELOADER_CAN_BUS,
+    false,
+    "Reloader Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006 / 6.25);
+
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
+DartReloaderSubsystem dartReloader(drivers(), reloaderMotor);
 
 tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, LAUNCHER_CAN_BUS, true, "Yaw Motor", false);
 
@@ -110,6 +124,8 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak yawLimitSwitch(
     false);
 
 LimitSwitchTrigger yawTrigger(&yawLimitSwitch);
+
+RotateMagazineCommand rotateMagazine(dartReloader);
 
 aruwsrc::control::joint::homing::TriggerHomedJointSubsystem yawSubsystem(
     drivers(),
@@ -164,7 +180,7 @@ HoldCommandMapping closeServoMapping(
 // HoldCommandMapping leftSwitchUp(
 //     drivers(),
 //     {&servoOpen},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
 
 // Left Mid + Right Up -> Home Pullback
@@ -179,6 +195,11 @@ HoldCommandMapping pullbackMapping(
     {&dartPullback},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
+PressCommandMapping rightMidLeftDown(
+    drivers(),
+    {&rotateMagazine},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
+
 // Left Down + Right Up -> Home Yaw (placeholder) TODO: CHANGE
 // HoldCommandMapping homeYawMapping(
 //     drivers(),
@@ -189,6 +210,7 @@ void initializeSubsystems()
 {
     dartServo.initialize();
     pullMotorSubsystem.initialize();
+    dartReloader.initialize();
 }
 
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
@@ -196,6 +218,7 @@ void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&yawSubsystem);
     drivers->commandScheduler.registerSubsystem(&dartServo);
     drivers->commandScheduler.registerSubsystem(&pullMotorSubsystem);
+    drivers->commandScheduler.registerSubsystem(&dartReloader);
     drivers->digital.configureInputPullMode(
         tap::gpio::Digital::B,
         tap::gpio::Digital::InputPullMode::PullUp);

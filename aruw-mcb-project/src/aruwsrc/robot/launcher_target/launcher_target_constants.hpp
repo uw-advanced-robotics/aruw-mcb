@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_TARGET_CONSTANTS_HPP_
-#define DART_TARGET_CONSTANTS_HPP_
+#ifndef LAUNCHER_TARGET_CONSTANTS_HPP_
+#define LAUNCHER_TARGET_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
@@ -29,20 +29,25 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
-namespace aruwsrc::dart_target::constants
+namespace aruwsrc::launcher_target::constants
 {
-// position PID terms
-// PID terms for standard
-tap::algorithms::SmoothPidConfig m2006VelocityPidConfig = {
+// velocity pid terms
+static constexpr tap::algorithms::SmoothPidConfig m2006VelocityPidConfig = {
     .kp = 50.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610};
 
-tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
+static constexpr tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
     {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
-}  // namespace aruwsrc::dart_target::constants
+static constexpr float WHEEL_DIAMETER = 0.030f;
+static constexpr float TARGET_MOVEMENT_SPEED =
+    1.0f / WHEEL_DIAMETER / M_PI * 60.0f;  // 1 m/s / 0.03pi pulley circumference * 60sec/min
+static constexpr uint32_t TERMINAL_MOVING_TARGET_DELAY = 1200;
+static constexpr uint32_t TARGET_TIMEOUT = 600;
+static constexpr float TARGET_TRAVEL_DISTANCE = .360f;
+}  // namespace aruwsrc::launcher_target::constants
 
-#endif  // DART_TARGET_CONSTANTS_HPP_
+#endif  // LAUNCHER_TARGET_CONSTANTS_HPP_
