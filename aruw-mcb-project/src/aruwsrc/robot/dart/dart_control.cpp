@@ -21,8 +21,8 @@
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/sequential_command.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/sequential_command.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
@@ -39,10 +39,10 @@
 #include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 #include "aruwsrc/robot/dart/dart_manual_pullback_setpoint_command.hpp"
+#include "aruwsrc/robot/dart/dart_reloader_subsystem.hpp"
 #include "aruwsrc/robot/dart/dart_servo.hpp"
 #include "aruwsrc/robot/dart/dart_yaw_position_command.hpp"
 #include "aruwsrc/robot/dart/dart_yaw_velocity_command.hpp"
-#include "aruwsrc/robot/dart/dart_reloader_subsystem.hpp"
 
 #include "dart_close_command.hpp"
 #include "dart_constants.hpp"
@@ -181,7 +181,6 @@ HoldCommandMapping closeServoMapping(
 //     drivers(),
 //     {&servoOpen},
 //     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
-
 
 // Left Mid + Right Up -> Home Pullback
 HoldCommandMapping homePullbackMapping(
