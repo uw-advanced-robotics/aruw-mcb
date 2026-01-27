@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -16,32 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "rotate_magazine_command.hpp"
 
-#ifndef DART_TARGET_DRIVERS_HPP_
-#define DART_TARGET_DRIVERS_HPP_
-
-#include "tap/drivers.hpp"
-
-#include "aruwsrc/display/oled_display.hpp"
-
-namespace aruwsrc::dart_target
+#include "tap/control/command.hpp"
+namespace aruwsrc::dart
 {
-class Drivers : public tap::Drivers
+RotateMagazineCommand::RotateMagazineCommand(DartReloaderSubsystem& subsystem)
+    : subsystem(subsystem)
 {
-    friend class DriversSingleton;
+    addSubsystemRequirement(&subsystem);
+}
 
-#ifdef ENV_UNIT_TESTS
-public:
-#endif
-    Drivers()
-        : tap::Drivers(),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
-    {
-    }
-
-public:
-    display::OledDisplay oledDisplay;
-};  // class aruwsrc::DartTargetDrivers
-}  // namespace aruwsrc::dart_target
-
-#endif  // DART_TARGET_DRIVERS_HPP_
+void RotateMagazineCommand::initialize()
+{
+    subsystem.setSetpoint(subsystem.getSetpoint() + 1.0f);  // moves setpoint 1 rotation forward
+}
+void RotateMagazineCommand::execute() {}
+void RotateMagazineCommand::end(bool) {}
+bool RotateMagazineCommand::isFinished() const { return subsystem.atSetpoint(); }
+}  // namespace aruwsrc::dart

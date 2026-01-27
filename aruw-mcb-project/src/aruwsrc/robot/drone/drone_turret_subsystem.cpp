@@ -22,13 +22,8 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 namespace aruwsrc::drone
 {
-float DroneTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
+float DroneTurretSubsystem::getWorldYaw() const { return turretImu->getYaw(); }
 
-float DroneTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
-
-uint32_t DroneTurretSubsystem::getLastMeasurementTimeMicros() const
-{
-    return getTurretMCB()->getIMUDataTimestamp();
-}
+float DroneTurretSubsystem::getWorldPitch() const { return turretImu->getPitch(); }
 
 }  // namespace aruwsrc::drone

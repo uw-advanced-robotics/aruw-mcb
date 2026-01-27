@@ -65,6 +65,7 @@ before_script:
         -p ./aruw-mcb-project/src/
         -w aruwsrc/drivers_singleton.cpp
             aruwsrc/drivers_singleton.hpp
+            aruwsrc/robot/2025engineer/engineer_control.cpp
             aruwsrc/robot/engineer/engineer_control.cpp
             aruwsrc/robot/sentry/sentry_control.cpp
             aruwsrc/robot/standard/standard_control.cpp
@@ -74,7 +75,7 @@ before_script:
             aruwsrc/robot/testbed/testbed_control.cpp
             aruwsrc/robot/blank/blank_control.cpp
             aruwsrc/robot/motor_tester/motor_tester_control.cpp
-            aruwsrc/robot/dart_target/dart_target_control.cpp
+            aruwsrc/robot/launcher_target/launcher_target_control.cpp
             aruwsrc/robot/characterizer/characterizer_control.cpp
             main.cpp
 
