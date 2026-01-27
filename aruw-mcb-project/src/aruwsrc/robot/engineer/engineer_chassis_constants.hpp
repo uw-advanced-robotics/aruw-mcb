@@ -135,6 +135,11 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 100,
 };
 
+static constexpr float WHEELBASE_HYPOTENUSE =
+    (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
+        ? 1
+        : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+
 static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
 static constexpr float CHASSIS_SPEED_DIVSOR_SPRINT = 8;
 }  // namespace aruwsrc::control::chassis

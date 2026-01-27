@@ -178,13 +178,16 @@ TEST_P(VelocityGetterTest, getDesiredVelocity)
     modm::Vector3f desiredOutput = GetParam().desiredOutput;
     modm::Vector3f expectedVelocity = GetParam().expectedVelocity;
 
-    chassis.setDesiredOutput(desiredOutput.x, desiredOutput.y, desiredOutput.z);
+    chassis.setDesiredOutput(
+        desiredOutput.x * 60.0f / M_TWOPI,
+        desiredOutput.y * 60.0f / M_TWOPI,
+        desiredOutput.z * 60.0f / M_TWOPI);
 
     Matrix<float, 3, 1> chassisVelocity = chassis.getDesiredVelocityChassisRelative();
 
-    EXPECT_NEAR(expectedVelocity.x, chassisVelocity[0][0], 1E-3);
-    EXPECT_NEAR(expectedVelocity.y, chassisVelocity[1][0], 1E-3);
-    EXPECT_NEAR(expectedVelocity.z, chassisVelocity[2][0], 1E-3);
+    EXPECT_NEAR(expectedVelocity.x, chassisVelocity[0][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
+    EXPECT_NEAR(expectedVelocity.y, chassisVelocity[1][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
+    EXPECT_NEAR(expectedVelocity.z, chassisVelocity[2][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
 }
 
 TEST_P(VelocityGetterTest, getVelocityWorldRelative)
