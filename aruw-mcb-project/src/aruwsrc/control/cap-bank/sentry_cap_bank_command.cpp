@@ -17,10 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sentry_capbank_command.hpp"
-
-#include "tap/algorithms/math_user_utils.hpp"
-#include "tap/communication/serial/remote.hpp"
+#include "sentry_cap_bank_command.hpp"
 
 #include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 

@@ -42,7 +42,7 @@ public:
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "sentry capbank"; }
+    const char* getName() const override { return "Sentry Cap Bank"; }
 
 private:
     tap::Drivers* drivers;

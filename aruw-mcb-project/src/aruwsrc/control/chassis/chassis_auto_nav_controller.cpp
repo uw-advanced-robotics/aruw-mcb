@@ -24,8 +24,6 @@ namespace aruwsrc::control::chassis
 {
 void ChassisAutoNavController::initialize()
 {
-    // it starts maybe
-    // capBankSubsystem.enableCapacitors();
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 
     lastSetPoint = transformer->getWorldToChassis().getTranslation();
@@ -50,8 +48,7 @@ void ChassisAutoNavController::runController(
     // make if can sprint (above 25%)
     // add a boolean for sprinting check posError over a threshold (make a constant in chassis
     // constants)
-    curPosError = posError.magnitude();
-    if (posError.magnitude() > translationalMotionThreshhold &&
+    if (posError.magnitude() > translationalMotionThreshold &&
         capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold)
     {  // is it translating
 

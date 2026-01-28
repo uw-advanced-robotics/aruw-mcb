@@ -38,11 +38,6 @@ namespace aruwsrc::control::chassis
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 
-// ------------------ for fake sentry----------------
-static constexpr float TRANSLATIONAL_MOTION_THRESHOLD = 0.25f;
-static constexpr float CAPBANK_ENERGY_THRESHOLD = 500.0f;
-// ----------------------no more fake sentry---------------
-
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {50, 4'500},
     {60, 5'700},

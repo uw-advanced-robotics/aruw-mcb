@@ -45,7 +45,7 @@
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
-#include "aruwsrc/control/cap-bank/sentry_capbank_command.hpp"
+#include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"

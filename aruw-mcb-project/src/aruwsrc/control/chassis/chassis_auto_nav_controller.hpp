@@ -51,7 +51,7 @@ public:
         aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer,
         const aruwsrc::control::chassis::BeybladeConfig beybladeConfig,
         aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
-        float translationalMotionThreshhold,
+        float translationalMotionThreshold,
         float capbankEnergyThreshold)
         : chassis(chassis),
           lastSetPoint(Position(-1, -1, 0)),
@@ -59,7 +59,7 @@ public:
           transformer(transformer),
           beybladeConfig(beybladeConfig),
           capBankSubsystem(capBankSubsystem),
-          translationalMotionThreshhold(translationalMotionThreshhold),
+          translationalMotionThreshold(translationalMotionThreshold),
           capbankEnergyThreshold(capbankEnergyThreshold)
 
     {
@@ -83,7 +83,6 @@ public:
     inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
 
 private:
-    float curPosError;
     aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
     Position lastSetPoint;
@@ -101,8 +100,8 @@ private:
 
     float desiredSpeed = 0;
 
-    float translationalMotionThreshhold;
-    float capbankEnergyThreshold;
+    const float translationalMotionThreshold;
+    const float capbankEnergyThreshold;
 };
 }  // namespace aruwsrc::control::chassis
 

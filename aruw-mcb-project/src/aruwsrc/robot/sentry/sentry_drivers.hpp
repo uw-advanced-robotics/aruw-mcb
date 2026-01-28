@@ -67,10 +67,7 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          capacitorBank(
-              this,
-              tap::can::CanBus::CAN_BUS1,
-              4.358),  // what canbus & capacitance should this be
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, CAP_BANK_CAPACITANCE),
           chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
           turretMajorImu(),
           plateHitTracker(this),
@@ -98,6 +95,7 @@ public:
     aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
+    static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
 
 #endif
 };  // class aruwsrc::SentryDrivers
