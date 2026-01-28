@@ -25,8 +25,8 @@
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
-#include "aruwsrc/mock/rtt_telemetry_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
+#include "aruwsrc/mock/rtt_telemetry_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 
 #else
