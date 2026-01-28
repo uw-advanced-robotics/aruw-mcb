@@ -111,7 +111,7 @@ static constexpr float WHEEL_RADIUS = 0.076;
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.395f;
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.395f;
 
-static constexpr float WHEELBASE_RADIUS = 0.395; //wrong
+static constexpr float WHEELBASE_RADIUS = 0.395;  // wrong
 
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
