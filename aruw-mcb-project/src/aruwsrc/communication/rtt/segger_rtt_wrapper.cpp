@@ -27,6 +27,9 @@ extern "C"
 #include "SEGGER_RTT.h"
 }
 
+#undef BUFFER_SIZE_UP
+#define BUFFER_SIZE_UP (4096)
+
 namespace
 {
 constexpr unsigned kTelemetryBufferIndex = 0;
