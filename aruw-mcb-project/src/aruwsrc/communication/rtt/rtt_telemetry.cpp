@@ -24,20 +24,10 @@
 #include "tap/architecture/clock.hpp"
 
 #include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
+#include "aruwsrc/communication/rtt/create_rtt_error.hpp"
 
 namespace
 {
-constexpr std::size_t kRttLineOverhead = 3;  // "{", "}\n"
-
-std::size_t escapedLength(const char* data, std::size_t length)
-{
-    std::size_t extra = 0;
-    for (std::size_t i = 0; i < length; ++i)
-    {
-        if (data[i] == '"' || data[i] == '\\') extra++;
-    }
-    return length + extra;
-}
 
 bool writeRttLine(const std::string& line)
 {
@@ -195,10 +185,37 @@ void RttTelemetry::queueErrorMessage(const char* message)
     ledAnimator.notifyErrorLogged(tap::arch::clock::getTimeMilliseconds());
 }
 
+bool RttTelemetry::ensureSpaceOrClearQueue(
+    modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
+    std::size_t requiredSpace,
+    std::size_t available,
+    std::size_t currentSize,
+    const char* queueName)
+{
+    if (currentSize + requiredSpace > available)
+    {
+        std::size_t destroyed = 0;
+        while (!queue.isEmpty())
+        {
+            queue.removeBack();
+            ++destroyed;
+        }
+        std::string err = std::string("Out of memory.")
+                  + "Av: " + std::to_string(available)
+                  + ", req: " + std::to_string(requiredSpace)
+                  + ", buf use: " + std::to_string(currentSize) + ". Del: "
+                  + std::to_string(destroyed) + ". Cleared " + queueName;
+        RAISE_ERROR(drivers, this, err.c_str());
+        return false;
+    }
+    return true;
+}
+
 void RttTelemetry::appendEvents(
     std::string& out,
     modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
-    const char* label) const
+    const char* label,
+    std::size_t available)
 {
     out += '{';
     out += label;
@@ -206,6 +223,23 @@ void RttTelemetry::appendEvents(
     while (!queue.isEmpty())
     {
         const auto& msg = queue.getFront();
+        
+        // Calculate space needed: quotes + escaped content + potential comma
+        std::size_t extra = 2;  // Opening and closing quotes
+        for (size_t i = 0; i < msg.length; i++)
+        {
+            extra++;
+            if (msg.data[i] == '"' || msg.data[i] == '\\')
+            {
+                extra++;  // Extra char for escape
+            }
+        }
+        
+        if (!ensureSpaceOrClearQueue(queue, extra + 2, available, out.size(), label))
+        {
+            break;
+        }
+        
         queue.removeFront();
 
         out += '"';
@@ -219,7 +253,9 @@ void RttTelemetry::appendEvents(
             out += c;
         }
         out += '"';
+        out += ',';
     }
+    out += "]}";
 }
 
 void RttTelemetry::sendQueuedMessages()
@@ -231,9 +267,12 @@ void RttTelemetry::sendQueuedMessages()
 
     const std::size_t available = aruwsrc::communication::rtt::seggerRttGetAvailWriteSpace();
     // Require space for at least "{}\\n" plus one payload char before building a line.
-    if (available <= kRttLineOverhead)
+    if (available <= rttLineOverhead)
     {
-        logError("not enough avail");
+        std::string err = std::string("Insufficient RTT space available (")
+                          + std::to_string(available)
+                          + " bytes). Cannot send queued messages.";
+        RAISE_ERROR(drivers, this, err.c_str());
         return;
     }
 
@@ -243,13 +282,16 @@ void RttTelemetry::sendQueuedMessages()
     bool first = true;
     while (!messageQueue.isEmpty())
     {
-        const auto& msg = messageQueue.getFront();
-        messageQueue.removeFront();
+        // Get from back to ensure we send the heartbeat
+        const auto& msg = messageQueue.getBack();
         const std::size_t extra = (first ? 0 : 1) + msg.length;
-        if (out.size() + extra + 2 > available)
+        
+        if (!ensureSpaceOrClearQueue(messageQueue, extra + 2, available, out.size(), "message"))
         {
             break;
         }
+        
+        messageQueue.removeBack();
         if (!first)
         {
             out += ',';
@@ -258,14 +300,14 @@ void RttTelemetry::sendQueuedMessages()
         out.append(msg.data, msg.length);
     }
 
-    appendEvents(out, errorQueue, "_ERROR_");
-    appendEvents(out, printQueue, "_PRINT_");
+    appendEvents(out, errorQueue, "_ERROR_", available);
+    appendEvents(out, printQueue, "_PRINT_", available);
 
     out += "}\n";
 
     if (!writeRttLine(out))
     {
-        logError("wth");
+        RAISE_ERROR(drivers, this, "Failed to write RTT telemetry line.");
     }
 }
 
@@ -310,9 +352,9 @@ void RttTelemetry::logHeartbeatInfo()
 
     // Convert currentTime to seconds
     float time = currentTime / 1000.0f;
-    logSignal("time", time);
     logSignal("dt_us", dt);
     logSignal("robot", robotName);
+    logSignal("time", time);
 }
 
 }  // namespace aruwsrc::communication::rtt

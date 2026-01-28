@@ -32,6 +32,7 @@
 #include "aruwsrc/communication/rtt/rtt_led_animator.hpp"
 #include "modm/container/deque.hpp"
 #include "modm/processing/protothread.hpp"
+
 // Forward declarations
 namespace tap
 {
@@ -40,6 +41,8 @@ class Drivers;
 
 namespace aruwsrc::communication::rtt
 {
+struct RttErrorHelper;  // Forward declaration for friend access
+
 /**
  * RTT (Real Time Transfer) telemetry handler for sending debug and diagnostic
  * information to the host through J-Link RTT protocol without halting the target.
@@ -106,26 +109,6 @@ public:
     }
 
     /**
-     * Queue a structured error message for telemetry.
-     */
-    template <typename... Args>
-    void logError(const char* first, Args... rest)
-    {
-        std::string msg;
-
-        msg.reserve(MAX_MESSAGE_SIZE);
-
-        auto append = [&](const char* s)
-        {
-            if (s) msg += s;
-        };
-
-        (append(first), ..., append(rest));
-
-        queueErrorMessage(msg.c_str());
-    }
-
-    /**
      * Segger's printf-style telemetry hook. Intentionally unused; println() is queued and framed.
      * See segger_rtt_wrapper.cpp for more details.
      */
@@ -140,11 +123,41 @@ public:
 #if !defined(ENV_UNIT_TESTS) || !defined(PLATFORM_HOSTED)
 private:
 #endif
+    // Friend declaration to allow RAISE_ERROR macro access to protected logError
+    friend struct aruwsrc::communication::rtt::RttErrorHelper;
+
+protected:
+    /**
+     * Queue a structured error message for telemetry.
+     * 
+     * This method is protected and should only be called via the RAISE_ERROR macro.
+     */
+    template <typename... Args>
+    void logError(const char* first, Args... rest)
+    {
+        std::string msg;
+        msg.reserve(MAX_MESSAGE_SIZE);
+
+        auto append = [&](const char* s)
+        {
+            if (s) msg += s;
+        };
+
+        (append(first), ..., append(rest));
+
+        queueErrorMessage(msg.c_str());
+    }
+
+#if !defined(ENV_UNIT_TESTS) || !defined(PLATFORM_HOSTED)
+private:
+#endif
     tap::Drivers* drivers;
 
     // Deadline (ms) until which the message indicator keeps the row animation active
     uint32_t messageIndicatorDeadlineMillis;
     static constexpr uint32_t MESSAGE_INDICATOR_MS = 1000;
+
+    static constexpr std::size_t rttLineOverhead = 3;  // "{", "}\n"
 
     RttLedAnimator ledAnimator;
 
@@ -155,8 +168,8 @@ private:
     bool firstInputReceived;
 
     // Message queue for asynchronous transmission
-    static constexpr size_t MAX_QUEUED_MESSAGES = 64;
-    static constexpr size_t MAX_MESSAGE_SIZE = 64;
+    static constexpr size_t MAX_QUEUED_MESSAGES = 100;
+    static constexpr size_t MAX_MESSAGE_SIZE = 100;
 
     struct QueuedMessage
     {
@@ -270,10 +283,24 @@ private:
         queueMessage(msg.c_str());
     }
 
+    /**
+     * Ensures there is enough RTT space for the next message.
+     * If not, clears the queue and raises an error.
+     * 
+     * @return true if there is enough space, false if queue was cleared
+     */
+    bool ensureSpaceOrClearQueue(
+        modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
+        std::size_t requiredSpace,
+        std::size_t available,
+        std::size_t currentSize,
+        const char* queueName);
+
     void appendEvents(
         std::string& out,
         modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
-        const char* label) const;
+        const char* label,
+        std::size_t available);
 };
 
 }  // namespace aruwsrc::communication::rtt

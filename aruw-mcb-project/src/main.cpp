@@ -34,18 +34,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
-#include "tap/errors/create_errors.hpp"
-
-#if defined(ALL_STANDARDS) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_TESTBED)
-#undef RAISE_ERROR
-#define RAISE_ERROR(drivers, desc)                                      \
-    do                                                                  \
-    {                                                                   \
-        tap::errors::SystemError stringError(desc, __LINE__, __FILE__); \
-        (drivers)->errorController.addToErrorList(stringError);         \
-        (drivers)->rttTelemetry.logError(desc);                         \
-    } while (0)
-#endif
+#include "aruwsrc/communication/rtt/create_rtt_error.hpp"
 
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
@@ -125,7 +114,7 @@ int main()
     {
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
-
+        
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
