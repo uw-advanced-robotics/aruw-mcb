@@ -54,8 +54,8 @@ struct FlywheelRpms
 };
 
 static constexpr FlywheelRpms flywheelTestingRpms{
-    .leftRpm = 60.0f,
-    .rightRpm = 60.0f,
+    .leftRpm = 0.0f,
+    .rightRpm = 0.0f,
     .lowerRpm = 60.0f,
     .upperRpm = 60.0f,
     .smallUpperRpm = 60.0f};

@@ -43,6 +43,8 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     addSubsystemRequirement(frictionWheels);
 }
 
+FlywheelRpms testingRpms = flywheelTestingRpms;
+
 void FrictionWheelSpinRefLimitedCommand::execute()
 {
     // @todo dubious
@@ -78,15 +80,15 @@ void FrictionWheelSpinRefLimitedCommand::execute()
     else
     {
         // left
-        frictionWheels->setIndividualVelocity(0, flywheelTestingRpms.leftRpm);
+        frictionWheels->setIndividualVelocity(0, testingRpms.leftRpm);
         // right
-        frictionWheels->setIndividualVelocity(1, flywheelTestingRpms.rightRpm);
+        frictionWheels->setIndividualVelocity(1, testingRpms.rightRpm);
         // lower
-        frictionWheels->setIndividualVelocity(2, flywheelTestingRpms.lowerRpm);
+        frictionWheels->setIndividualVelocity(2, testingRpms.lowerRpm);
         // upper
-        frictionWheels->setIndividualVelocity(3, flywheelTestingRpms.upperRpm);
+        frictionWheels->setIndividualVelocity(3, testingRpms.upperRpm);
         // small upper
-        frictionWheels->setIndividualVelocity(4, flywheelTestingRpms.smallUpperRpm);
+        frictionWheels->setIndividualVelocity(4, testingRpms.smallUpperRpm);
     }
 #endif
 }
