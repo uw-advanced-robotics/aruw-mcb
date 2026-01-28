@@ -267,9 +267,9 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
     DEADWHEEL_RADIUS
 );
 
-constexpr float parallelOneCenterToWheelDistance = 0.33f / 2.0f; 
-constexpr float parallelTwoCenterToWheelDistance = 0.33f / 2.0f; 
-constexpr float perpendicularCenterToWheelDistance = 0.33f / 2.0f; 
+constexpr float parallelOneCenterToWheelDistance = 0.45f / 2.0f; 
+constexpr float parallelTwoCenterToWheelDistance = 0.45f / 2.0f; 
+constexpr float perpendicularCenterToWheelDistance = 0.45f / 2.0f; 
 constexpr float parallelWheelOneChassisForwardRelativeAngleRadians = 0.0f; 
 constexpr float parallelWheelTwoChassisForwardRelativeAngleRadians = 0.0f; 
 constexpr float perpendicularWheelChassisForwardRelativeAngleRadians = PI / 2.0f; 
