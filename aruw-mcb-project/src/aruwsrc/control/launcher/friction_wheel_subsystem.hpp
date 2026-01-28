@@ -89,7 +89,8 @@ public:
           velocityPids(
               createVelocityPidArray(wheelConfigs, std::make_index_sequence<NUM_WHEELS>{})),
           speedCorrectionPid(LAUNCHER_SPEED_CORRECTION_PID_CONFIG),
-          individualVelocityRamping(createWheelRampingArray(std::make_index_sequence<NUM_WHEELS>{})),
+          individualVelocityRamping(
+              createWheelRampingArray(std::make_index_sequence<NUM_WHEELS>{})),
           desiredRpmRamp(0),
           wheels(wheels),
           turretMCB(turretMCB),
@@ -211,11 +212,12 @@ public:
         for (uint8_t i = 0; i < NUM_WHEELS; i++)
         {
             if (isWheelVelocityOverridden[i])
-            {   
+            {
                 individualVelocityRamping[i].setTarget(individualWheelVelocities[i]);
                 individualVelocityRamping[i].update(FRICTION_WHEEL_RAMP_SPEED * (2.0));
                 velocityPids[i].runControllerDerivateError(
-                    individualVelocityRamping[i].getValue() - getCurrentIndividualFrictionWheelSpeed(i),
+                    individualVelocityRamping[i].getValue() -
+                        getCurrentIndividualFrictionWheelSpeed(i),
                     0.002f);
             }
             else
@@ -320,7 +322,8 @@ private:
     }
 
     template <size_t... Is>
-    static std::array<tap::algorithms::Ramp, NUM_WHEELS> createWheelRampingArray(std::index_sequence<Is...>)
+    static std::array<tap::algorithms::Ramp, NUM_WHEELS> createWheelRampingArray(
+        std::index_sequence<Is...>)
     {
         return {{((void)Is, tap::algorithms::Ramp(0))...}};
     }
