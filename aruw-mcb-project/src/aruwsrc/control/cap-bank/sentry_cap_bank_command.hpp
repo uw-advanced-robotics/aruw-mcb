@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_CAPBANK_COMMAND_HPP_
-#define SENTRY_CAPBANK_COMMAND_HPP_
+#ifndef SENTRY_CAP_BANK_COMMAND_HPP_
+#define SENTRY_CAP_BANK_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
