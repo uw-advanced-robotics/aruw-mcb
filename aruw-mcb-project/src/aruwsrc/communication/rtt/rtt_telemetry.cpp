@@ -195,77 +195,35 @@ void RttTelemetry::queueErrorMessage(const char* message)
     ledAnimator.notifyErrorLogged(tap::arch::clock::getTimeMilliseconds());
 }
 
+void RttTelemetry::appendEvents(
+    std::string& out,
+    modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
+    const char* label) const
+{
+    out += '{';
+    out += label;
+    out += ":[";
+    while (!queue.isEmpty())
+    {
+        const auto& msg = queue.getFront();
+        queue.removeFront();
+
+        out += '"';
+        for (size_t i = 0; i < msg.length; i++)
+        {
+            char c = msg.data[i];
+            if (c == '"' || c == '\\')
+            {
+                out += '\\';
+            }
+            out += c;
+        }
+        out += '"';
+    }
+}
+
 void RttTelemetry::sendQueuedMessages()
 {
-    // Send error messages first
-    while (!errorQueue.isEmpty())
-    {
-        const auto& msg = errorQueue.getFront();
-        const std::size_t available = aruwsrc::communication::rtt::seggerRttGetAvailWriteSpace();
-        const std::size_t needed =
-            sizeof("{\"ERROR:\",\"message\":\"") - 1 + escapedLength(msg.data, msg.length) + 3;
-        if (available < needed)
-        {
-            break;
-        }
-
-        std::string out;
-        out.reserve(needed);
-        out += "{\"ERROR:\",\"message\":\"";
-        for (size_t i = 0; i < msg.length; i++)
-        {
-            char c = msg.data[i];
-            if (c == '"' || c == '\\')
-            {
-                out += '\\';
-            }
-            out += c;
-        }
-        out += "\"}\n";
-
-        if (!writeRttLine(out))
-        {
-            break;
-        }
-
-        errorQueue.removeFront();
-    }
-
-    // Send print messages next
-    while (!printQueue.isEmpty())
-    {
-        const auto& msg = printQueue.getFront();
-        const std::size_t available = aruwsrc::communication::rtt::seggerRttGetAvailWriteSpace();
-        const std::size_t needed =
-            sizeof("{\"print\":\"") - 1 + escapedLength(msg.data, msg.length) + 3;
-        // Only emit full JSON lines; partial lines break the host parser.
-        if (available < needed)
-        {
-            break;
-        }
-
-        std::string out;
-        out.reserve(needed);
-        out += "{\"print\":\"";
-        for (size_t i = 0; i < msg.length; i++)
-        {
-            char c = msg.data[i];
-            if (c == '"' || c == '\\')
-            {
-                out += '\\';
-            }
-            out += c;
-        }
-        out += "\"}\n";
-
-        if (!writeRttLine(out))
-        {
-            break;
-        }
-
-        printQueue.removeFront();
-    }
-
     if (messageQueue.isEmpty())
     {
         return;
@@ -273,8 +231,9 @@ void RttTelemetry::sendQueuedMessages()
 
     const std::size_t available = aruwsrc::communication::rtt::seggerRttGetAvailWriteSpace();
     // Require space for at least "{}\\n" plus one payload char before building a line.
-    if (available < kRttLineOverhead + 1)
+    if (available <= kRttLineOverhead)
     {
+        logError("not enough avail");
         return;
     }
 
@@ -282,11 +241,10 @@ void RttTelemetry::sendQueuedMessages()
     out.reserve(available);
     out += '{';
     bool first = true;
-    std::size_t sendCount = 0;
-    const auto queueSize = messageQueue.getSize();
-    for (size_t i = 0; i < queueSize; ++i)
+    while (!messageQueue.isEmpty())
     {
-        const auto& msg = messageQueue.get(static_cast<decltype(messageQueue)::Index>(i));
+        const auto& msg = messageQueue.getFront();
+        messageQueue.removeFront();
         const std::size_t extra = (first ? 0 : 1) + msg.length;
         if (out.size() + extra + 2 > available)
         {
@@ -298,24 +256,16 @@ void RttTelemetry::sendQueuedMessages()
         }
         first = false;
         out.append(msg.data, msg.length);
-        ++sendCount;
     }
 
-    if (sendCount == 0)
-    {
-        return;
-    }
+    appendEvents(out, errorQueue, "_ERROR_");
+    appendEvents(out, printQueue, "_PRINT_");
 
     out += "}\n";
 
     if (!writeRttLine(out))
     {
-        return;
-    }
-
-    for (std::size_t i = 0; i < sendCount; ++i)
-    {
-        messageQueue.removeFront();
+        logError("wth");
     }
 }
 
@@ -354,14 +304,14 @@ void RttTelemetry::logHeartbeatInfo()
 #endif
 
     static uint32_t lastLoopTime = 0;
-    uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t currentTime = tap::arch::clock::getTimeMicroseconds();
     uint32_t dt = currentTime - lastLoopTime;
     lastLoopTime = currentTime;
 
     // Convert currentTime to seconds
-    float uptime = currentTime / 1000.0f;
-    logSignal("uptime", uptime);
-    logSignal("dt_ms", dt);
+    float time = currentTime / 1000.0f;
+    logSignal("time", time);
+    logSignal("dt_us", dt);
     logSignal("robot", robotName);
 }
 

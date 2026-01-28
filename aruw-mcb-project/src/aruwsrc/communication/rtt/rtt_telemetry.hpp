@@ -95,7 +95,8 @@ public:
         std::string msg;
         msg.reserve(MAX_MESSAGE_SIZE);
 
-        auto append = [&](const char* s) {
+        auto append = [&](const char* s)
+        {
             if (s) msg += s;
         };
 
@@ -114,7 +115,8 @@ public:
 
         msg.reserve(MAX_MESSAGE_SIZE);
 
-        auto append = [&](const char* s) {
+        auto append = [&](const char* s)
+        {
             if (s) msg += s;
         };
 
@@ -267,6 +269,11 @@ private:
         msg += "]";
         queueMessage(msg.c_str());
     }
+
+    void appendEvents(
+        std::string& out,
+        modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
+        const char* label) const;
 };
 
 }  // namespace aruwsrc::communication::rtt
