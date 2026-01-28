@@ -43,7 +43,9 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     addSubsystemRequirement(frictionWheels);
 }
 
+#if defined(TARGET_FLYWHEEL_TESTING)
 FlywheelRpms testingRpms = flywheelTestingRpms;
+#endif
 
 void FrictionWheelSpinRefLimitedCommand::execute()
 {
