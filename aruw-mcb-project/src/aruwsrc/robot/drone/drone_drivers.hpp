@@ -37,7 +37,6 @@ public:
 
 public:
     communication::rtt::RttTelemetry rttTelemetry;
-#endif
 };  // class aruwsrc::DroneDrivers
 }  // namespace aruwsrc::drone
 

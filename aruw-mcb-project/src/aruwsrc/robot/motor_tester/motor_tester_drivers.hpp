@@ -43,7 +43,6 @@ public:
 
 public:
     communication::rtt::RttTelemetry rttTelemetry;
-#endif
     display::OledDisplay oledDisplay;
 };  // class aruwsrc::MotortesterDrivers
 }  // namespace aruwsrc::motor_tester

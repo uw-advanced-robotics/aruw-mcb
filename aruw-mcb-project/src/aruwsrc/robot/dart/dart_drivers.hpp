@@ -37,7 +37,6 @@ public:
 
 public:
     communication::rtt::RttTelemetry rttTelemetry;
-#endif
 };  // class aruwsrc::DartDrivers
 }  // namespace aruwsrc::dart
 
