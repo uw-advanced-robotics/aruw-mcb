@@ -47,10 +47,7 @@ struct RttErrorHelper;  // Forward declaration for friend access
  * RTT (Real Time Transfer) telemetry handler for sending debug and diagnostic
  * information to the host through J-Link RTT protocol without halting the target.
  *
- * Uses modm protothreads for asynchronous, non-blocking operation to prevent
- * telemetry transmission from interfering with real-time robot control.
- *
- * Provides heartbeat functionality, input detection, and comprehensive logging
+ * Provides heartbeat functionality and comprehensive logging
  * of robot subsystem data.
  */
 class RttTelemetry : public modm::pt::Protothread

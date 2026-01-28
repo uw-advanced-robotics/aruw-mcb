@@ -25,11 +25,11 @@ namespace aruwsrc::communication::rtt
 {
 namespace
 {
-constexpr uint32_t kBlinkIntervalMs = 120;
-constexpr uint32_t kBlinkDurationMs = 600;
+constexpr uint32_t blinkIntervalMs = 120;
+constexpr uint32_t blinkDurationMs = 600;
 #if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
-constexpr uint32_t kOzoneFrameMs = 200;
-constexpr uint8_t kOzoneFrames[] = {
+constexpr uint32_t ozoneFrameMs = 200;
+constexpr uint8_t ozoneFrames[] = {
     0x00,
     static_cast<uint8_t>('O'),
     static_cast<uint8_t>('O'),
@@ -58,7 +58,7 @@ RttLedAnimator::RttLedAnimator()
       animationStepMs(120)
 #if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
       ,
-      ozoneTimer(kOzoneFrameMs),
+      ozoneTimer(ozoneFrameMs),
       ozoneFrameIndex(0),
       ozoneSequenceActive(false),
       ozoneFramesRemaining(0)
@@ -67,8 +67,8 @@ RttLedAnimator::RttLedAnimator()
       groupFlashOn(false),
       unidirectionalPaused(false),
       unidirectionalPauseDeadlineMillis(0),
-      greenBlinkTimer(kBlinkIntervalMs),
-      redBlinkTimer(kBlinkIntervalMs),
+      greenBlinkTimer(blinkIntervalMs),
+      redBlinkTimer(blinkIntervalMs),
       greenBlinkOn(false),
       redBlinkOn(false),
       greenBlinkDeadlineMillis(0),
@@ -97,13 +97,13 @@ void RttLedAnimator::update(
         {
             ozoneSequenceActive = true;
             ozoneFrameIndex = 0;
-            ozoneFramesRemaining = static_cast<uint8_t>(sizeof(kOzoneFrames) - 1);
+            ozoneFramesRemaining = static_cast<uint8_t>(sizeof(ozoneFrames) - 1);
             ozoneTimer.restart();
         }
 
         if (ozoneTimer.execute())
         {
-            ozoneFrameIndex = static_cast<uint8_t>((ozoneFrameIndex + 1) % (sizeof(kOzoneFrames)));
+            ozoneFrameIndex = static_cast<uint8_t>((ozoneFrameIndex + 1) % (sizeof(ozoneFrames)));
             if (ozoneFramesRemaining > 0)
             {
                 ozoneFramesRemaining--;
@@ -114,7 +114,7 @@ void RttLedAnimator::update(
             }
         }
 
-        const uint8_t mask = kOzoneFrames[ozoneFrameIndex];
+        const uint8_t mask = ozoneFrames[ozoneFrameIndex];
         for (int i = 0; i < 8; ++i)
         {
             const uint8_t bit = static_cast<uint8_t>(1u << (7 - i));
@@ -285,7 +285,7 @@ void RttLedAnimator::notifyPrintLogged(uint32_t now)
         greenBlinkOn = true;
         greenBlinkTimer.restart();
     }
-    greenBlinkDeadlineMillis = now + kBlinkDurationMs;
+    greenBlinkDeadlineMillis = now + blinkDurationMs;
 }
 
 void RttLedAnimator::notifyErrorLogged(uint32_t now)
@@ -295,6 +295,6 @@ void RttLedAnimator::notifyErrorLogged(uint32_t now)
         redBlinkOn = true;
         redBlinkTimer.restart();
     }
-    redBlinkDeadlineMillis = now + kBlinkDurationMs;
+    redBlinkDeadlineMillis = now + blinkDurationMs;
 }
 }  // namespace aruwsrc::communication::rtt
