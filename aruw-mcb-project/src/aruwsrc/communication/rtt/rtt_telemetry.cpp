@@ -23,12 +23,11 @@
 
 #include "tap/architecture/clock.hpp"
 
-#include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
 #include "aruwsrc/communication/rtt/create_rtt_error.hpp"
+#include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
 
 namespace
 {
-
 bool writeRttLine(const std::string& line)
 {
     // RTT modes: Skip drops if full, Trim sends partial, Block waits for space.
@@ -200,11 +199,10 @@ bool RttTelemetry::ensureSpaceOrClearQueue(
             queue.removeBack();
             ++destroyed;
         }
-        std::string err = std::string("Out of memory.")
-                  + "Av: " + std::to_string(available)
-                  + ", req: " + std::to_string(requiredSpace)
-                  + ", buf use: " + std::to_string(currentSize) + ". Del: "
-                  + std::to_string(destroyed) + ". Cleared " + queueName;
+        std::string err = std::string("Out of memory.") + "Av: " + std::to_string(available) +
+                          ", req: " + std::to_string(requiredSpace) +
+                          ", buf use: " + std::to_string(currentSize) +
+                          ". Del: " + std::to_string(destroyed) + ". Cleared " + queueName;
         RAISE_ERROR(drivers, this, err.c_str());
         return false;
     }
@@ -223,7 +221,7 @@ void RttTelemetry::appendEvents(
     while (!queue.isEmpty())
     {
         const auto& msg = queue.getFront();
-        
+
         // Calculate space needed: quotes + escaped content + potential comma
         std::size_t extra = 2;  // Opening and closing quotes
         for (size_t i = 0; i < msg.length; i++)
@@ -234,12 +232,12 @@ void RttTelemetry::appendEvents(
                 extra++;  // Extra char for escape
             }
         }
-        
+
         if (!ensureSpaceOrClearQueue(queue, extra + 2, available, out.size(), label))
         {
             break;
         }
-        
+
         queue.removeFront();
 
         out += '"';
@@ -269,9 +267,8 @@ void RttTelemetry::sendQueuedMessages()
     // Require space for at least "{}\\n" plus one payload char before building a line.
     if (available <= rttLineOverhead)
     {
-        std::string err = std::string("Insufficient RTT space available (")
-                          + std::to_string(available)
-                          + " bytes). Cannot send queued messages.";
+        std::string err = std::string("Insufficient RTT space available (") +
+                          std::to_string(available) + " bytes). Cannot send queued messages.";
         RAISE_ERROR(drivers, this, err.c_str());
         return;
     }
@@ -285,12 +282,12 @@ void RttTelemetry::sendQueuedMessages()
         // Get from back to ensure we send the heartbeat
         const auto& msg = messageQueue.getBack();
         const std::size_t extra = (first ? 0 : 1) + msg.length;
-        
+
         if (!ensureSpaceOrClearQueue(messageQueue, extra + 2, available, out.size(), "message"))
         {
             break;
         }
-        
+
         messageQueue.removeBack();
         if (!first)
         {

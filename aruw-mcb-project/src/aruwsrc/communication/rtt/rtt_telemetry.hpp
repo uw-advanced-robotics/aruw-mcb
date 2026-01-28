@@ -98,8 +98,7 @@ public:
         std::string msg;
         msg.reserve(MAX_MESSAGE_SIZE);
 
-        auto append = [&](const char* s)
-        {
+        auto append = [&](const char* s) {
             if (s) msg += s;
         };
 
@@ -129,7 +128,7 @@ private:
 protected:
     /**
      * Queue a structured error message for telemetry.
-     * 
+     *
      * This method is protected and should only be called via the RAISE_ERROR macro.
      */
     template <typename... Args>
@@ -138,8 +137,7 @@ protected:
         std::string msg;
         msg.reserve(MAX_MESSAGE_SIZE);
 
-        auto append = [&](const char* s)
-        {
+        auto append = [&](const char* s) {
             if (s) msg += s;
         };
 
@@ -286,7 +284,7 @@ private:
     /**
      * Ensures there is enough RTT space for the next message.
      * If not, clears the queue and raises an error.
-     * 
+     *
      * @return true if there is enough space, false if queue was cleared
      */
     bool ensureSpaceOrClearQueue(

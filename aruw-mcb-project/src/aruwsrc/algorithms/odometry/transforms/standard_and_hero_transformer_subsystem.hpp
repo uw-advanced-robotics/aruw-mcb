@@ -44,7 +44,7 @@ public:
     {
     }
 
-    inline void initialize() override {};
+    inline void initialize() override{};
     inline void refresh() override
     {
         transformer.updateTransforms();

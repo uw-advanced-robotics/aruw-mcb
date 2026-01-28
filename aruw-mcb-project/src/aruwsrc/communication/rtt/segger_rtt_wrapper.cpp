@@ -32,15 +32,15 @@ extern "C"
 
 namespace
 {
-constexpr unsigned kTelemetryBufferIndex = 0;
-constexpr unsigned kPrintfBufferIndex = 1;
-constexpr unsigned kPrintfBufferSize = 256;
+const unsigned telemetryBufferIndex = 0;
+const unsigned printfBufferIndex = 1;
+const unsigned printfBufferSize = 256;
 
-static char g_printfBuffer[kPrintfBufferSize];
-static bool g_printfBufferConfigured = false;
-static aruwsrc::communication::rtt::RttWriteMode g_upMode =
+static char printfBuffer[printfBufferSize];
+static bool printfBufferConfigured = false;
+static aruwsrc::communication::rtt::RttWriteMode upMode =
     aruwsrc::communication::rtt::RttWriteMode::NoBlockSkip;
-static bool g_initialized = false;
+static bool initialized = false;
 
 unsigned seggerMode(aruwsrc::communication::rtt::RttWriteMode mode)
 {
@@ -58,33 +58,33 @@ unsigned seggerMode(aruwsrc::communication::rtt::RttWriteMode mode)
 
 void ensurePrintfBufferConfigured()
 {
-    if (g_printfBufferConfigured)
+    if (printfBufferConfigured)
     {
         return;
     }
 
     const int status = SEGGER_RTT_ConfigUpBuffer(
-        kPrintfBufferIndex,
+        printfBufferIndex,
         "Printf",
-        g_printfBuffer,
-        sizeof(g_printfBuffer),
+        printfBuffer,
+        sizeof(printfBuffer),
         SEGGER_RTT_MODE_NO_BLOCK_SKIP);
     if (status >= 0)
     {
-        g_printfBufferConfigured = true;
+        printfBufferConfigured = true;
     }
 }
 
 void ensureInitialized()
 {
-    if (g_initialized)
+    if (initialized)
     {
         return;
     }
 
     SEGGER_RTT_Init();
-    SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, seggerMode(g_upMode));
-    g_initialized = true;
+    SEGGER_RTT_SetFlagsUpBuffer(telemetryBufferIndex, seggerMode(upMode));
+    initialized = true;
 }
 }  // namespace
 
@@ -95,14 +95,14 @@ void seggerRttInit() { ensureInitialized(); }
 void seggerRttSetUpMode(RttWriteMode mode)
 {
     ensureInitialized();
-    g_upMode = mode;
-    SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, seggerMode(mode));
+    upMode = mode;
+    SEGGER_RTT_SetFlagsUpBuffer(telemetryBufferIndex, seggerMode(mode));
 }
 
 std::size_t seggerRttGetAvailWriteSpace()
 {
     ensureInitialized();
-    return SEGGER_RTT_GetAvailWriteSpace(kTelemetryBufferIndex);
+    return SEGGER_RTT_GetAvailWriteSpace(telemetryBufferIndex);
 }
 
 std::size_t seggerRttWrite(const uint8_t* data, std::size_t length)
@@ -113,7 +113,7 @@ std::size_t seggerRttWrite(const uint8_t* data, std::size_t length)
         return 0;
     }
 
-    return seggerRttWriteWithMode(data, length, g_upMode);
+    return seggerRttWriteWithMode(data, length, upMode);
 }
 
 std::size_t seggerRttWriteWithMode(const uint8_t* data, std::size_t length, RttWriteMode mode)
@@ -128,46 +128,46 @@ std::size_t seggerRttWriteWithMode(const uint8_t* data, std::size_t length, RttW
     {
         case RttWriteMode::NoBlockSkip:
         {
-            const unsigned prevFlags = seggerMode(g_upMode);
+            const unsigned prevFlags = seggerMode(upMode);
             if (prevFlags != SEGGER_RTT_MODE_NO_BLOCK_SKIP)
             {
-                SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, SEGGER_RTT_MODE_NO_BLOCK_SKIP);
+                SEGGER_RTT_SetFlagsUpBuffer(telemetryBufferIndex, SEGGER_RTT_MODE_NO_BLOCK_SKIP);
             }
             const std::size_t written =
-                SEGGER_RTT_WriteNoLock(kTelemetryBufferIndex, data, static_cast<unsigned>(length));
+                SEGGER_RTT_WriteNoLock(telemetryBufferIndex, data, static_cast<unsigned>(length));
             if (prevFlags != SEGGER_RTT_MODE_NO_BLOCK_SKIP)
             {
-                SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, prevFlags);
+                SEGGER_RTT_SetFlagsUpBuffer(telemetryBufferIndex, prevFlags);
             }
             return written;
         }
         case RttWriteMode::NoBlockTrim:
         {
-            const std::size_t avail = SEGGER_RTT_GetAvailWriteSpace(kTelemetryBufferIndex);
+            const std::size_t avail = SEGGER_RTT_GetAvailWriteSpace(telemetryBufferIndex);
             const std::size_t toWrite = std::min(avail, length);
             if (toWrite == 0)
             {
                 return 0;
             }
             return SEGGER_RTT_WriteNoLock(
-                kTelemetryBufferIndex,
+                telemetryBufferIndex,
                 data,
                 static_cast<unsigned>(toWrite));
         }
         case RttWriteMode::BlockIfFull:
         {
-            const unsigned prevFlags = seggerMode(g_upMode);
+            const unsigned prevFlags = seggerMode(upMode);
             if (prevFlags != SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL)
             {
                 SEGGER_RTT_SetFlagsUpBuffer(
-                    kTelemetryBufferIndex,
+                    telemetryBufferIndex,
                     SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL);
             }
             const std::size_t written =
-                SEGGER_RTT_WriteNoLock(kTelemetryBufferIndex, data, static_cast<unsigned>(length));
+                SEGGER_RTT_WriteNoLock(telemetryBufferIndex, data, static_cast<unsigned>(length));
             if (prevFlags != SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL)
             {
-                SEGGER_RTT_SetFlagsUpBuffer(kTelemetryBufferIndex, prevFlags);
+                SEGGER_RTT_SetFlagsUpBuffer(telemetryBufferIndex, prevFlags);
             }
             return written;
         }
@@ -179,18 +179,18 @@ std::size_t seggerRttWriteWithMode(const uint8_t* data, std::size_t length, RttW
 bool seggerRttRead(uint8_t& data)
 {
     ensureInitialized();
-    return SEGGER_RTT_Read(kTelemetryBufferIndex, &data, 1u) == 1u;
+    return SEGGER_RTT_Read(telemetryBufferIndex, &data, 1u) == 1u;
 }
 
 int seggerRttPrintf(const char* format, ...)
 {
     ensureInitialized();
     ensurePrintfBufferConfigured();
-    if (!g_printfBufferConfigured)
+    if (!printfBufferConfigured)
     {
         return -1;
     }
-    const unsigned bufferIndex = kPrintfBufferIndex;
+    const unsigned bufferIndex = printfBufferIndex;
 
     va_list args;
     va_start(args, format);
@@ -203,11 +203,11 @@ int seggerRttVprintf(const char* format, va_list* args)
 {
     ensureInitialized();
     ensurePrintfBufferConfigured();
-    if (!g_printfBufferConfigured)
+    if (!printfBufferConfigured)
     {
         return -1;
     }
-    const unsigned bufferIndex = kPrintfBufferIndex;
+    const unsigned bufferIndex = printfBufferIndex;
 
     return SEGGER_RTT_vprintf(bufferIndex, format, args);
 }

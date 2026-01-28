@@ -114,7 +114,7 @@ int main()
     {
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
-        
+
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());

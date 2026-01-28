@@ -17,11 +17,11 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_TAPROOT_CREATE_ERRORS_HPP_
-#define TAPROOT_TAPROOT_CREATE_ERRORS_HPP_
+#ifndef CREATE_RTT_ERROR_HPP_
+#define CREATE_RTT_ERROR_HPP_
 
-#include "tap/errors/system_error.hpp"
 #include "tap/drivers.hpp"
+#include "tap/errors/system_error.hpp"
 
 // Forward declaration
 namespace aruwsrc::communication::rtt
@@ -31,7 +31,6 @@ class RttTelemetry;
 
 namespace aruwsrc::communication::rtt
 {
-
 // Helper struct to access protected logError method
 struct RttErrorHelper
 {
@@ -46,16 +45,15 @@ struct RttErrorHelper
 
 namespace tap::errors
 {
-
 #undef RAISE_ERROR
-#define RAISE_ERROR(drivers, telemetry, desc)                                      \
-    do                                                                  \
-    {                                                                   \
-        tap::errors::SystemError stringError(desc, __LINE__, __FILE__); \
-        (drivers)->errorController.addToErrorList(stringError);         \
+#define RAISE_ERROR(drivers, telemetry, desc)                                     \
+    do                                                                            \
+    {                                                                             \
+        tap::errors::SystemError stringError(desc, __LINE__, __FILE__);           \
+        (drivers)->errorController.addToErrorList(stringError);                   \
         aruwsrc::communication::rtt::RttErrorHelper::logError((telemetry), desc); \
     } while (0)
 
 }  // namespace tap::errors
 
-#endif  
+#endif  // CREATE_RTT_ERROR_HPP_
