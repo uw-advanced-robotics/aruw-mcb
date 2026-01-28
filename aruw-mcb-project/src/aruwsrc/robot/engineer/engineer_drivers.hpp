@@ -26,7 +26,6 @@
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
-#include "aruwsrc/mock/rtt_telemetry_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 
 #else
@@ -68,7 +67,6 @@ public:
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<mock::RttTelemetryMock> rttTelemetry;
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     serial::EngineerCVCommunication engineerCVCommunication;

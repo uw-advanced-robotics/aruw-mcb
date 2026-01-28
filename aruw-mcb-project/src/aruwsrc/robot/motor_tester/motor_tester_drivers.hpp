@@ -22,11 +22,8 @@
 
 #include "tap/drivers.hpp"
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "aruwsrc/mock/rtt_telemetry_mock.hpp"
-#else
+
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
-#endif
 #include "aruwsrc/display/oled_display.hpp"
 
 namespace aruwsrc::motor_tester
@@ -45,9 +42,6 @@ public:
     {
     }
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    testing::NiceMock<mock::RttTelemetryMock> rttTelemetry;
-#else
 public:
     communication::rtt::RttTelemetry rttTelemetry;
 #endif
