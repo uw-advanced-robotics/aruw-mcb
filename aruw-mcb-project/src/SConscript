@@ -116,6 +116,9 @@ if args["COMPILE_SRC"]:
         abspath(join("..", "..", "segger-rtt", "RTT", "SEGGER_RTT.c")),
         abspath(join("..", "..", "segger-rtt", "RTT", "SEGGER_RTT_printf.c")),
     ]
+    # Add segger-rtt C sources directly; centralized sconsign is configured
+    # in the top-level SConstruct so that SCons will not write per-directory
+    # .sconsign files into the segger-rtt submodule.
     sources.extend(env_cpy.Object(source) for source in rtt_sources)
 
 Return("sources")
