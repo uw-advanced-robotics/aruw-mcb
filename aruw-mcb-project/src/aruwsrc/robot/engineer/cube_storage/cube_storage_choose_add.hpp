@@ -16,19 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef CUBELIFT_SWITCH_COMMAND_HPP_
-#define CUBELIFT_SWITCH_COMMAND_HPP_
+#ifndef CUBE_STORAGE_CHOOSE_ADD_COMMAND_HPP_
+#define CUBE_STORAGE_CHOOSE_ADD_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/control/joint/joint_subsystem.hpp"
+#include "cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::cube_storage
+
 {
-class CubeliftSwitchCommand : public tap::control::Command
+class CubeStorageChooseAddCommand : public tap::control::Command
 {
 public:
-    CubeliftSwitchCommand(aruwsrc::control::joint::JointSubsystem &cubeLift, bool isDirectionUp);
+    CubeStorageChooseAddCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem);
 
     void initialize() override;
 
@@ -38,13 +40,13 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Cube Lift Switch Command"; }
+    const char *getName() const override { return "Cube Storage Choose Add Command"; }
 
 private:
-    aruwsrc::control::joint::JointSubsystem &cubeLift;
-    bool isDirectionUp;
+    CubeStorageSubsystem &cubeStorage;
+    aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem;
 
-};  // class CubeliftSwitchCommand
+};  // class CubeStorageChooseAddCommand
 
-}  // namespace aruwsrc::engineer
-#endif  // CUBELIFT_SWITCH_COMMAND_HPP_
+}  // namespace aruwsrc::engineer::cube_storage
+#endif  // CUBE_STORAGE_CHOOSE_ADD_COMMAND_HPP_

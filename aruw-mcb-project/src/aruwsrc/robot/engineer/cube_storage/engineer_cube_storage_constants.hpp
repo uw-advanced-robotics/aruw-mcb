@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ENGINEER_CUBE_LIFT_CONSTANTS_HPP_
-#define ENGINEER_CUBE_LIFT_CONSTANTS_HPP_
+#ifndef ENGINEER_CUBE_STORAGE_CONSTANTS_HPP_
+#define ENGINEER_CUBE_STORAGE_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/digital.hpp"
@@ -26,18 +26,18 @@
 
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::engineer::cube_storage
 {
-static constexpr tap::motor::MotorId CUBE_LIFT_MOTOR_ID = tap::motor::MOTOR7;
+static constexpr tap::motor::MotorId CUBE_STORAGE_MOTOR_ID = tap::motor::MOTOR7;
 
-static constexpr tap::can::CanBus CUBE_LIFT_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::can::CanBus CUBE_STORAGE_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 
-static constexpr tap::gpio::Digital::InputPin CUBELIFT_LIMITSWITCH_PORT =
+static constexpr tap::gpio::Digital::InputPin CUBE_STORAGE_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::B;
 
 static constexpr float MM_PER_REVOLUTION = 74.63f / M_TWOPI;
 
-static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
+static constexpr tap::algorithms::SmoothPidConfig CUBE_STORAGE_MOTOR_PID_CONFIG = {
     .kp = 300.0f,
     .ki = 50.0f,
     .kd = 25.0f,
@@ -45,30 +45,28 @@ static constexpr tap::algorithms::SmoothPidConfig LIFT_MOTOR_PID_CONFIG = {
     .maxOutput = 6000.0f,
 };
 
-static constexpr float CUBE_LIFT_MOVE_SPEED = -2.0f;
+static constexpr float CUBE_STORAGE_MOVE_SPEED = -2.0f;
 
-static constexpr float ONE_CUBE_SETPOINT = -40.0f;
-static constexpr float TWO_CUBE_SETPOINT = -220.0f;
-static constexpr float THREE_CUBE_SETPOINT = -310.0f;
-
-static constexpr float LIFT_UPPER_BOUND = THREE_CUBE_SETPOINT;
+static constexpr float CUBE_STORAGE_LEFT_SETPOINT = -40.0f;
+static constexpr float CUBE_STORAGE_CENTER_SETPOINT = -220.0f;
+static constexpr float CUBE_STORAGE_RIGHT_SETPOINT = -310.0f;
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
-    CUBE_LIFT_CONFIG{
+    CUBE_STORAGE_CONFIG{
         .super =  // JointSubsystem::Config
         {
             .lowerBound = -320.0f,
             .upperBound = -40.0f,
             .epsilon = 0.5f,
             .encoderRatio = MM_PER_REVOLUTION,
-            .posPidConfig = LIFT_MOTOR_PID_CONFIG,
-            .maxOutput = LIFT_MOTOR_PID_CONFIG.maxOutput,
+            .posPidConfig = CUBE_STORAGE_MOTOR_PID_CONFIG,
+            .maxOutput = CUBE_STORAGE_MOTOR_PID_CONFIG.maxOutput,
             .staticFeedforward = 0.0f,
         },
-        .home = ONE_CUBE_SETPOINT,
+        .home = CUBE_STORAGE_CENTER_SETPOINT,
         .homingSpeed = 20.0f,
         .homingReversed = true,
     };
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::cube_storage
 #endif
