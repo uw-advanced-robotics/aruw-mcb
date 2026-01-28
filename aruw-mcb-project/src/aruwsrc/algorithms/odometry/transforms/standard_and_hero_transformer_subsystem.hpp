@@ -44,7 +44,7 @@ public:
     {
     }
 
-    inline void initialize() override{};
+    inline void initialize() override {};
     inline void refresh() override
     {
         transformer.updateTransforms();
@@ -58,6 +58,10 @@ public:
                 worldToChassis.getXVel(),
                 worldToChassis.getYVel());
             telemetry->logSignal("state:chassis:yaw", worldToChassis.getYaw());
+
+            const Transform& worldToTurret = transformer.getWorldToTurret();
+            telemetry->logSignal("state:turret:yaw", worldToTurret.getYaw());
+            telemetry->logSignal("state:turret:pitch", worldToTurret.getPitch());
         }
     };
     const char* getName() const { return "Standard and hero transformer subsystem"; }
