@@ -108,10 +108,10 @@ float CubeStorageSubsystem::getWristPos(CubeOptions cubeToRemove) {
         if (hasCube[cubeToRemove]) {
             return wristPos[cubeToRemove];
         } else {
-            return 0.0f;
+            return std::numeric_limits<float>::quiet_NaN();
         }
     }
-    return 0.0f;
+    return std::numeric_limits<float>::quiet_NaN();
 }
 
 void CubeStorageSubsystem::checkForCubes() {
@@ -124,7 +124,7 @@ float CubeStorageSubsystem::getPressure(CubeOptions cube) {
     if (cube != CubeOptions::NONE) {
         return 1.0f; //TODO: update to read the pressure
     }
-    return 0.0f;
+    return std::numeric_limits<float>::quiet_NaN();
 }
 
 }  // namespace aruwsrc::engineer::cube_storage
