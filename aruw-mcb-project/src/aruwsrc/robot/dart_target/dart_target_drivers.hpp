@@ -22,8 +22,8 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "aruwsrc/display/oled_display.hpp"
 
 namespace aruwsrc::dart_target
 {
