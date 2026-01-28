@@ -43,8 +43,32 @@ struct FlywheelConfig
     uint8_t stage = 0;
 };
 
+#if defined(TARGET_FLYWHEEL_TESTING)
+struct FlywheelRpms
+{
+    float leftRpm;
+    float rightRpm;
+    float lowerRpm;
+    float upperRpm;
+    float smallUpperRpm;
+};
+
+static constexpr FlywheelRpms flywheelTestingRpms{
+    .leftRpm = 0.0f,
+    .rightRpm = 0.0f,
+    .lowerRpm = 60.0f,
+    .upperRpm = 60.0f,
+    .smallUpperRpm = 60.0f};
+#endif
+
 #if defined(ALL_SENTRIES)
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
+#elif defined(TARGET_FLYWHEEL_TESTING)
+static constexpr tap::motor::MotorId UPPER_MOTOR_ID = tap::motor::MOTOR6;
+static constexpr tap::motor::MotorId UPPER_SMALL_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LOWER_MOTOR_ID = tap::motor::MOTOR4;
+static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR3;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
 #else
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
