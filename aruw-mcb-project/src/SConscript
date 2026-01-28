@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
+import datetime as dt
 import subprocess
 from os.path import abspath, dirname, join
-import datetime as dt
 
 from build_tools import extract_robot_type
 
@@ -27,19 +27,29 @@ Import("sources")
 
 
 # Don't compile this stuff when testing
-IGNORED_FILES_WHILE_TESTING = ["main.cpp", "aruwsrc/robot/**/*_control.cpp", "aruwsrc/sim-initialization/*_sim.cpp"]
+IGNORED_FILES_WHILE_TESTING = [
+    "main.cpp",
+    "aruwsrc/robot/**/*_control.cpp",
+    "aruwsrc/sim-initialization/*_sim.cpp",
+]
 
 ignored_files = []
 ignored_dirs = []
+
+
 def get_output(command):
-    return (subprocess.check_output(command).decode('UTF-8')).strip()
+    return (subprocess.check_output(command).decode("UTF-8")).strip()
+
+
 try:
     get_user_name = get_output(["git", "config", "user.name"])
 except subprocess.CalledProcessError as error:
     get_user_name = "Unknown"
     print(error.output)
 try:
-    get_sha = get_output(["git", "describe", "--match=''", "--always", "--abbrev=7", "--dirty"])
+    get_sha = get_output(
+        ["git", "describe", "--match=''", "--always", "--abbrev=7", "--dirty"]
+    )
 except subprocess.CalledProcessError as error:
     get_sha = "Unknown"
     print(error.output)
@@ -74,12 +84,14 @@ env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_BRANCH_NAME=" + get_branch_na
 
 if args["COMPILE_SRC"]:
     ignored_files.append("main_src_not_compiled.cpp")
-    rawSrcs = env_cpy.FindSourceFiles(".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files)
+    rawSrcs = env_cpy.FindSourceFiles(
+        ".", ignorePaths=ignored_dirs, ignoreFiles=ignored_files
+    )
 else:
     rawSrcs = []
 
 robot_directory = join("aruwsrc", "robot")
-robot_class = extract_robot_type.ROBOT_CLASS[args["ROBOT_TYPE"][len("TARGET_"):]]
+robot_class = extract_robot_type.ROBOT_CLASS[args["ROBOT_TYPE"][len("TARGET_") :]]
 class_directory = join(robot_directory, robot_class)
 
 sim_directory = join("aruwsrc", "sim-initialization")
@@ -88,7 +100,7 @@ for source in rawSrcs:
     # Only compile robot-specific sources
     if source.startswith(robot_directory):
         directory = dirname(source)
-        if not(directory == robot_directory or directory.startswith(class_directory)):
+        if not (directory == robot_directory or directory.startswith(class_directory)):
             continue
     if source.startswith(sim_directory):
         if not source.endswith(f"{robot_class}_sim.cpp"):
@@ -106,4 +118,4 @@ if args["COMPILE_SRC"]:
     ]
     sources.extend(env_cpy.Object(source) for source in rtt_sources)
 
-Return('sources')
+Return("sources")

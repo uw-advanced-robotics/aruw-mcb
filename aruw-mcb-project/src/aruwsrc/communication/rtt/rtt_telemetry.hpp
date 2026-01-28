@@ -114,7 +114,7 @@ public:
      * Blocking function that's already called by protothread, so no need to call manually. Only
      * public for use by `modm_abort()`.
      */
-    mockable void sendQueuedMessages();
+    mockable void sendQueuedMessages(bool ozone);
 
 #if !defined(ENV_UNIT_TESTS) || !defined(PLATFORM_HOSTED)
 private:
@@ -165,6 +165,7 @@ private:
     // Message queue for asynchronous transmission
     static constexpr size_t MAX_QUEUED_MESSAGES = 100;
     static constexpr size_t MAX_MESSAGE_SIZE = 100;
+    bool ozoneMode;
 
     struct QueuedMessage
     {

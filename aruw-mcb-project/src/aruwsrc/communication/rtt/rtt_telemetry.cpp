@@ -95,10 +95,14 @@ bool RttTelemetry::updateTelemetryAsync()
                 (!messageQueue.isEmpty() || !printQueue.isEmpty()) || firstInputReceived;
             bool recentRttInput = activelySendingTelemetry && now <= messageIndicatorDeadlineMillis;
             ledAnimator.update(drivers, activelySendingTelemetry, recentRttInput, now);
-        }
 
-        logHeartbeatInfo();
-        sendQueuedMessages();
+            // In Ozone mode (idle, no messages received yet), don't send telemetry
+            // heartbeat info, only prints and errors are allowed
+            ozoneMode = !firstInputReceived;
+
+            logHeartbeatInfo();
+            sendQueuedMessages(ozoneMode);
+        }
 
         // Yield to allow other protothreads to run
         PT_YIELD();
@@ -215,8 +219,9 @@ void RttTelemetry::appendEvents(
     const char* label,
     std::size_t available)
 {
-    out += '{';
-    out += label;
+    out += '"';
+    out.append(label);
+    out += '"';
     out += ":[";
     while (!queue.isEmpty())
     {
@@ -251,14 +256,18 @@ void RttTelemetry::appendEvents(
             out += c;
         }
         out += '"';
-        out += ',';
+        if (!queue.isEmpty())
+        {
+            out += ',';
+        }
     }
-    out += "]}";
+    out += ']';
 }
 
-void RttTelemetry::sendQueuedMessages()
+void RttTelemetry::sendQueuedMessages(bool ozone)
 {
-    if (messageQueue.isEmpty())
+    // Send only if there are any messages, errors, or prints to send
+    if (messageQueue.isEmpty() && errorQueue.isEmpty() && printQueue.isEmpty())
     {
         return;
     }
@@ -295,9 +304,15 @@ void RttTelemetry::sendQueuedMessages()
         }
         first = false;
         out.append(msg.data, msg.length);
+        if (ozone)
+        {
+            // After sending timestamp, break to avoid flooding in ozone mode
+            break;
+        }
     }
-
+    out += ',';
     appendEvents(out, errorQueue, "_ERROR_", available);
+    out += ',';
     appendEvents(out, printQueue, "_PRINT_", available);
 
     out += "}\n";
@@ -353,5 +368,4 @@ void RttTelemetry::logHeartbeatInfo()
     logSignal("robot", robotName);
     logSignal("time", time);
 }
-
 }  // namespace aruwsrc::communication::rtt

@@ -32,6 +32,10 @@ SRC_PATH             = "src"
 TEST_PATH            = "test"
 TAPROOT_SCRIPTS_TOOLPATH = abspath("../taproot-scripts/scons-tools")
 
+# Keep signature database in build/ to avoid touching third-party submodules.
+os.makedirs(BUILD_PATH, exist_ok=True)
+SConsignFile(abspath(join(BUILD_PATH, ".sconsign.dblite")))
+
 
 # Parse and validate arguments
 args = parse_args.parse_args()
@@ -58,10 +62,6 @@ sources = []
 # Ensure that modm is first, since Taproot depends on modm
 # Append include path to environment so both src/test environments have access to them
 env.SConscript(dirs=[TAPROOT_PATH], exports=["env", "args", "sources"])
-
-# Setup SCons to use directory based caching, not global
-from  SCons.SConsign import File
-File(None)
 
 # We include the tests as library to improve build times for CI.
 if args["TARGET_ENV"] == "tests":
