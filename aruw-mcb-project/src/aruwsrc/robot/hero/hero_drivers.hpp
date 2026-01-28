@@ -26,6 +26,7 @@
 #include "tap/mock/imu_terminal_serial_handler_mock.hpp"
 
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/rtt_telemetry_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
@@ -35,6 +36,7 @@
 #include "aruwsrc/algorithms/plate_hit_tracker.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/inter_robot_comm/inter_robot_transmitter.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
@@ -53,6 +55,7 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
+          rttTelemetry(this),
           controlOperatorInterface(this),
           visionCoprocessor(this),
           oledDisplay(
@@ -71,9 +74,12 @@ public:
           refSerialTransmitter(this),
           interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
     {
+        controlOperatorInterface.setTelemetry(&rttTelemetry);
+        visionCoprocessor.setTelemetry(&rttTelemetry);
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    testing::NiceMock<mock::RttTelemetryMock> rttTelemetry;
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
@@ -82,6 +88,7 @@ public:
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
+    communication::rtt::RttTelemetry rttTelemetry;
     control::ControlOperatorInterface controlOperatorInterface;
     communication::serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;

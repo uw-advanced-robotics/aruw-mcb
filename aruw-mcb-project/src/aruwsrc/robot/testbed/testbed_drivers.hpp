@@ -26,11 +26,11 @@
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/rtt_telemetry_mock.hpp"
 #else
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #endif
-
-#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 
 namespace aruwsrc::testbed
 {
@@ -47,9 +47,11 @@ public:
           controlOperatorInterface(this),
           lite(this, tap::communication::serial::Uart::UartPort::Uart7)
     {
+        controlOperatorInterface.setTelemetry(&rttTelemetry);
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    testing::NiceMock<mock::RttTelemetryMock> rttTelemetry;
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
 #else
 public:
