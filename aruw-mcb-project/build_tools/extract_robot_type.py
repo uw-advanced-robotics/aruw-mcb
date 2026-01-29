@@ -15,25 +15,26 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
+from build_tools.parse_args import USAGE
 from SCons.Script import *
 
-from build_tools.parse_args import USAGE
-
 # TODO: Make this sync up with check.py and c_cpp_properties.json if possible
-VALID_ROBOT_TYPES   = [ "STANDARD_NULL",
-                        "STANDARD_VOID",
-                        "DRONE",
-                        "ENGINEER",
-                        "ENGI_2025",
-                        "SENTRY_ECLIPSE",
-                        "SENTINEL_2026",
-                        "HERO_ZERO",
-                        "DART",
-                        "TESTBED",
-                        "BLANK",
-                        "MOTOR_TESTER",
-                        "LAUNCHER_TARGET",
-                        "CHARACTERIZER", ]
+VALID_ROBOT_TYPES = [
+    "STANDARD_NULL",
+    "STANDARD_VOID",
+    "DRONE",
+    "ENGINEER",
+    "ENGI_2025",
+    "SENTRY_ECLIPSE",
+    "SENTRY_NAME",
+    "HERO_ZERO",
+    "DART",
+    "TESTBED",
+    "BLANK",
+    "MOTOR_TESTER",
+    "LAUNCHER_TARGET",
+    "CHARACTERIZER",
+]
 
 ROBOT_CLASS = {
     "STANDARD_NULL": "standard",
@@ -42,21 +43,27 @@ ROBOT_CLASS = {
     "ENGINEER": "engineer",
     "ENGI_2025": "engineer",
     "SENTRY_ECLIPSE": "sentry",
-    "SENTINEL_2026": "sentry",
+    "SENTRY_NAME": "sentry",
     "HERO_ZERO": "hero",
     "DART": "dart",
     "TESTBED": "testbed",
     "BLANK": "blank",
     "MOTOR_TESTER": "motor_tester",
-    "LAUNCHER_TARGET" : "dart_target",
+    "LAUNCHER_TARGET": "dart_target",
     "CHARACTERIZER": "characterizer",
 }
 
 # Make sure that all robots have a class
 assert all([robot in ROBOT_CLASS.keys() for robot in VALID_ROBOT_TYPES])
 
+
 def search_for_robot_type(query):
-    return [robot for robot in VALID_ROBOT_TYPES if query.lower() in robot.lower()] if query else []
+    return (
+        [robot for robot in VALID_ROBOT_TYPES if query.lower() in robot.lower()]
+        if query
+        else []
+    )
+
 
 def get_robot_type():
     robot_query = ARGUMENTS.get("robot")
@@ -73,7 +80,7 @@ def get_robot_type():
         prompt += "--> "
         robot_query = input(prompt)
         robot_type_matches = search_for_robot_type(robot_query)
-    
+
     # Check against valid robot type
     if len(robot_type_matches) != 1:
         raise Exception(USAGE)

@@ -39,7 +39,7 @@
 
 namespace aruwsrc::control::turret
 {
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
 static constexpr uint8_t NUM_TURRETS = 1;
 #else
 static constexpr uint8_t NUM_TURRETS = 2;
@@ -150,7 +150,7 @@ static constexpr float FEEDFORWARD_GAIN = 0.0f;
 static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(255.7f);
 static constexpr float PADDING = modm::toRadian(5);
 
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
 // Single turret minor for SENTINEL 2026 - named "widow"
 namespace turretWidow
 {
@@ -253,7 +253,7 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
 
 }  // namespace turretRight
 
-#endif  // TARGET_SENTINEL_2026 vs TARGET_SENTRY_ECLIPSE
+#endif  // TARGET_SENTRY_NAME vs TARGET_SENTRY_ECLIPSE
 
 namespace minorPidConfigs
 {

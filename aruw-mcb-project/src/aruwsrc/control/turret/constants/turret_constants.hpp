@@ -41,7 +41,7 @@
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"
-#elif defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#elif defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
 #include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"

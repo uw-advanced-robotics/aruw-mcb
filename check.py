@@ -16,15 +16,18 @@
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from enum import Enum
-import subprocess, os
-from typing import Callable, List, Optional, Dict
 import argparse
+import os
 import pathlib
 import platform
+import subprocess
+from enum import Enum
+from typing import Callable, Dict, List, Optional
 
 
-def run(cmd: List[str], cwd: Optional[str] = None, add_env: Optional[Dict[str, str]] = None):
+def run(
+    cmd: List[str], cwd: Optional[str] = None, add_env: Optional[Dict[str, str]] = None
+):
     env = os.environ.copy() | add_env if add_env else None
     subprocess.run(cmd, check=True, cwd=cwd, env=env)
 
@@ -46,20 +49,39 @@ def clang_format():
 
 def check_singleton_drivers():
     print("Checking singleton drivers...")
-    run(["python", "taproot-scripts/check_singleton_drivers.py", "DoNotUse_getDrivers", "-p", "src"])
+    run(
+        [
+            "python",
+            "taproot-scripts/check_singleton_drivers.py",
+            "DoNotUse_getDrivers",
+            "-p",
+            "src",
+        ]
+    )
 
 
 def check_license_headers():
     IGNORE_LICENSE = [
-        './**/__init__.py',
-        'taproot/**/*',
-        'taproot-scripts/**/*',
-        'aruw-mcb-project/taproot/**/*',
-        'docs/**/*',
-        'aruw-mcb-project/robot-type/robot_type.hpp',
+        "./**/__init__.py",
+        "taproot/**/*",
+        "taproot-scripts/**/*",
+        "aruw-mcb-project/taproot/**/*",
+        "docs/**/*",
+        "aruw-mcb-project/robot-type/robot_type.hpp",
     ]
     print("Checking license headers...")
-    run(["python", "taproot-scripts/check_license_headers.py", "-p", PROJECT_NAME, "-o", ORGANIZATION_NAME, "-i", *IGNORE_LICENSE])
+    run(
+        [
+            "python",
+            "taproot-scripts/check_license_headers.py",
+            "-p",
+            PROJECT_NAME,
+            "-o",
+            ORGANIZATION_NAME,
+            "-i",
+            *IGNORE_LICENSE,
+        ]
+    )
 
 
 def check_header_guards():
@@ -70,8 +92,18 @@ def check_header_guards():
     IGNORE_HEADER = []
     HEADER_PREFIX = None
     print("Checking header guards...")
-    run(["python", "./taproot-scripts/check_header_guard.py", *HEADER_GUARD_CHECK_DIRS, *(["-p", HEADER_PREFIX] if HEADER_PREFIX else []), "-i", *IGNORE_HEADER])
-    
+    run(
+        [
+            "python",
+            "./taproot-scripts/check_header_guard.py",
+            *HEADER_GUARD_CHECK_DIRS,
+            *(["-p", HEADER_PREFIX] if HEADER_PREFIX else []),
+            "-i",
+            *IGNORE_HEADER,
+        ]
+    )
+
+
 def check_namespace():
     # Specifying robot in namespace is redundant
     # Constants sharing namespace is useful
@@ -79,15 +111,24 @@ def check_namespace():
     IGNORE_NAMESPACE = ["robot"]
     IGNORE_FOLDERS = ["*_constants.hpp", "old-indicators"]
     print("Checking namespace rules")
-    run(["python", "./check_namespace_rule.py","-i", *IGNORE_FOLDERS,"-rn", *IGNORE_NAMESPACE])
+    run(
+        [
+            "python",
+            "./check_namespace_rule.py",
+            "-i",
+            *IGNORE_FOLDERS,
+            "-rn",
+            *IGNORE_NAMESPACE,
+        ]
+    )
 
 
 # def check_taproot_submodule():
 #     VALID_BRANCHES = ["release", "develop"]
 #     print("Checking taproot submodule...")
-    # FIXME: Newly written powershell script relies on lbuild build command which is broken for windows
-    # Need to replace with below wrapper for lbuild build
-    # run(["bash" "./taproot-scripts/check_taproot_submodule.sh", PROJECT_DIR, "taproot", " ".join(VALID_BRANCHES)])
+# FIXME: Newly written powershell script relies on lbuild build command which is broken for windows
+# Need to replace with below wrapper for lbuild build
+# run(["bash" "./taproot-scripts/check_taproot_submodule.sh", PROJECT_DIR, "taproot", " ".join(VALID_BRANCHES)])
 
 
 def run_lbuild():
@@ -97,13 +138,17 @@ def run_lbuild():
     def override_windows():
         # Note: The LF/CRLF change should be undone by git automatically when the change is staged but we do it manually to reduce confusion
         LF_TO_CRLF = ["aruw-mcb-project/taproot/modm/ext/gcc/cabi.c"]
-        DOUBLE_BACKSLASHES_TO_FORWARD_SLASHES = ["aruw-mcb-project/taproot/modm/openocd.cfg"]
+        DOUBLE_BACKSLASHES_TO_FORWARD_SLASHES = [
+            "aruw-mcb-project/taproot/modm/openocd.cfg"
+        ]
         BACKSLASHES_TO_FORWARD_SLASHES = [
-            os.path.join(PROJECT_DIR, "taproot", dir, file) for file in [
+            os.path.join(PROJECT_DIR, "taproot", dir, file)
+            for file in [
                 pathlib.Path("project.xml"),
                 pathlib.Path("modm/SConscript"),
                 pathlib.Path("modm/ext/printf/printf.h"),
-            ] for dir in [
+            ]
+            for dir in [
                 pathlib.Path("."),
                 pathlib.Path("sim-modm/hosted-darwin"),
                 pathlib.Path("sim-modm/hosted-linux"),
@@ -118,7 +163,7 @@ def run_lbuild():
                 f.seek(0)
                 f.write(content)
                 f.truncate()
-        
+
         for file_path in DOUBLE_BACKSLASHES_TO_FORWARD_SLASHES:
             with open(file_path, "r+", encoding="utf8") as f:
                 content = f.read()
@@ -134,7 +179,7 @@ def run_lbuild():
                 f.seek(0)
                 f.write(content)
                 f.truncate()
-    
+
     if platform.system() == "Windows":
         print("Replacing lbuild windows jankness...")
         override_windows()
@@ -145,7 +190,7 @@ class BuildTarget(Enum):
     STANDARD_VOID = "STANDARD_VOID"
     HERO_CYCLONE = "HERO_PERSEUS"
     SENTRY_ECLIPSE = "SENTRY_ECLIPSE"
-    SENTINEL_2026 = "SENTINEL_2026"
+    SENTRY_NAME = "SENTRY_NAME"
     DART = "DART"
     ENGINEER = "ENGINEER"
     ENGI_2025 = "ENGI_2025"
@@ -157,36 +202,49 @@ class BuildTarget(Enum):
     all = "all"
 
 
-def build_mcb(target : Optional[BuildTarget] = None):
+def build_mcb(target: Optional[BuildTarget] = None):
     print(f"Checking MCB build for {target.value if target else 'all'}...")
     if not target or target == BuildTarget.all:
         for t in BuildTarget:
             if t != BuildTarget.all:
                 build_mcb(t)
     else:
-        run(["pipenv", "run", "scons", "build", f"robot={target.value}", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
+        run(
+            [
+                "pipenv",
+                "run",
+                "scons",
+                "build",
+                f"robot={target.value}",
+                "additional-ccflags=-Werror",
+            ],
+            cwd=PROJECT_DIR,
+        )
 
 
-def build_and_run_tests(target : Optional[BuildTarget] = None):
+def build_and_run_tests(target: Optional[BuildTarget] = None):
     print(f"Checking tests for {target.value if target else 'all'}...")
     if not target or target == BuildTarget.all:
         for t in BuildTarget:
             if t != BuildTarget.all:
                 build_and_run_tests(t)
     else:
-        run(["pipenv", "run", "scons", "run-tests", f"robot={target.value}"], cwd=PROJECT_DIR)
+        run(
+            ["pipenv", "run", "scons", "run-tests", f"robot={target.value}"],
+            cwd=PROJECT_DIR,
+        )
 
 
-action_to_method : Dict[str, Callable] = {
-    "format" : clang_format,
-    "singleton_drivers" : check_singleton_drivers,
-    "license" : check_license_headers,
-    "header_guards" : check_header_guards,
-    "namespace" : check_namespace,
+action_to_method: Dict[str, Callable] = {
+    "format": clang_format,
+    "singleton_drivers": check_singleton_drivers,
+    "license": check_license_headers,
+    "header_guards": check_header_guards,
+    "namespace": check_namespace,
     # "taproot" : check_taproot_submodule,
-    "lbuild" : run_lbuild,
-    "build" : build_mcb,
-    "test" : build_and_run_tests
+    "lbuild": run_lbuild,
+    "build": build_mcb,
+    "test": build_and_run_tests,
 }
 
 
@@ -208,7 +266,7 @@ def main():
     else:
         # Format
         clang_format()
-        
+
         # Policy checks
         check_singleton_drivers()
         check_license_headers()
@@ -224,10 +282,18 @@ def main():
 
 
 def parse_args():
-    arg = argparse.ArgumentParser(
-        description="Runs all checks.")
-    arg.add_argument("action", default=None, help=f"Action to take. If not specified, runs all checks. Must be one of {action_to_method.keys()} or all.")
-    arg.add_argument("-r", "--robot", default=None, help="If action is either build, test, or sim, a robot target must be specified.")
+    arg = argparse.ArgumentParser(description="Runs all checks.")
+    arg.add_argument(
+        "action",
+        default=None,
+        help=f"Action to take. If not specified, runs all checks. Must be one of {action_to_method.keys()} or all.",
+    )
+    arg.add_argument(
+        "-r",
+        "--robot",
+        default=None,
+        help="If action is either build, test, or sim, a robot target must be specified.",
+    )
     return arg.parse_args()
 
 

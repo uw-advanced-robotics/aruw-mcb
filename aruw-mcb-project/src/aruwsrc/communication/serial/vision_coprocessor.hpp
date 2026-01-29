@@ -59,7 +59,7 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
 #else
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;

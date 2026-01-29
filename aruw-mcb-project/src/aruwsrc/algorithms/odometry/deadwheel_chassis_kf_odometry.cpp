@@ -23,7 +23,7 @@ namespace aruwsrc::algorithms::odometry
 {
 DeadwheelChassisKFOdometry::DeadwheelChassisKFOdometry(
     const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
 #else
     aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver& chassisYawObserver,

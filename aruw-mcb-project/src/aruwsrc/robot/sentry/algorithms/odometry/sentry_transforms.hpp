@@ -49,7 +49,7 @@ public:
     SentryTransforms(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
         const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretWidow,
         const tap::communication::sensors::imu::ImuInterface& turretWidowImu,
 #else
@@ -64,7 +64,7 @@ public:
 
     inline void initialize()
     {
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
         turretWidowYawSyncPid.reset();
         turretWidowYawCorrection = 0;
 #else
@@ -77,7 +77,7 @@ public:
 
     inline const Transform& getWorldToChassis() const { return worldToChassis; };
     inline const Transform& getWorldToTurretMajor() const { return worldToTurretMajor; };
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     inline const Transform& getWorldToTurretWidow() const { return worldToTurretWidow; };
     inline const Transform& getWorldToTurretLeft() const
     {
@@ -96,7 +96,7 @@ public:
 
     inline const Transform& getWorldToVTM() const { return worldToVTM; }
 
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     inline const Transform& getWorldToTurret(int turretID) const
     {
         (void)turretID;
@@ -188,7 +188,7 @@ private:
 
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretWidow;
     const tap::communication::sensors::imu::ImuInterface& turretWidowImu;
 #else
@@ -201,7 +201,7 @@ private:
     // Transforms
     Transform worldToChassis;
     Transform worldToTurretMajor;
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     Transform worldToTurretWidow;
     tap::algorithms::SmoothPid turretWidowYawSyncPid;
     float turretWidowYawCorrection;
@@ -218,7 +218,7 @@ private:
 
     // Intermediary transforms
     Transform chassisToTurretMajor;
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     Transform turretMajorToTurretWidow;
 #else
     Transform turretMajorToTurretLeft;

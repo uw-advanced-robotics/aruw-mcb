@@ -121,7 +121,7 @@ public:
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
         TurretConfig &turretWidowConfig,
 #else
         TurretConfig &turretLeftConfig,
@@ -151,7 +151,7 @@ public:
      */
     bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
     {
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
         if (turretID != turretWidowConfig.turretSubsystem.getTurretID())
         {
             return false;
@@ -183,7 +183,7 @@ private:
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor;
 
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     TurretConfig &turretWidowConfig;
 #else
     TurretConfig &turretLeftConfig;
@@ -222,7 +222,7 @@ private:
 
     tap::algorithms::WrappedFloat majorScanValue = Angle(0);
 
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     bool withinAimingToleranceWidow = false;
 #else
     bool withinAimingToleranceLeft = false;

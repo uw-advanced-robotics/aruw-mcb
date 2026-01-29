@@ -80,7 +80,7 @@ public:
         const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
         tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
         const SentryTurretMinorSubsystem& turretWidow,
 #else
         const SentryTurretMinorSubsystem& turretLeft,
@@ -134,7 +134,7 @@ private:
 
     tap::communication::sensors::imu::ImuInterface& turretMajorIMU;
 
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     const SentryTurretMinorSubsystem& turretWidow;
 #else
     const SentryTurretMinorSubsystem& turretLeft;

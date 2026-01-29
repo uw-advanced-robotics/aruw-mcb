@@ -31,7 +31,7 @@ namespace aruwsrc::sentry::algorithms::odometry
 SentryTransforms::SentryTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
     const YawTurretSubsystem& turretMajor,
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     const SentryTurretMinorSubsystem& turretWidow,
     const ImuInterface& turretWidowImu,
 #else
@@ -44,7 +44,7 @@ SentryTransforms::SentryTransforms(
     : config(config),
       chassisOdometry(chassisOdometry),
       turretMajor(turretMajor),
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
       turretWidow(turretWidow),
       turretWidowImu(turretWidowImu),
 #else
@@ -55,7 +55,7 @@ SentryTransforms::SentryTransforms(
 #endif
       worldToChassis(Transform::identity()),
       worldToTurretMajor(Transform::identity()),
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
       worldToTurretWidow(Transform::identity()),
       turretWidowYawSyncPid(config.imuSyncConfig),
       turretWidowYawCorrection(0),
@@ -73,7 +73,7 @@ SentryTransforms::SentryTransforms(
       chassisToArducam2(Transform::identity()),
       chassisToArducam3(Transform::identity()),
       chassisToTurretMajor(Transform::identity()),
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
       turretMajorToTurretWidow(0., config.turretMinorOffset, 0., 0., 0., 0.)
 #else
       turretMajorToTurretLeft(0., config.turretMinorOffset, 0., 0., 0., 0.),
@@ -92,7 +92,7 @@ void SentryTransforms::updateTransforms()
     // Chassis to Turret Major
     chassisToTurretMajor.updateRotation(0., 0., turretMajor.getChassisYaw());
 
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     turretMajorToTurretWidow.updateRotation(
         0.,
         turretWidow.pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue(),

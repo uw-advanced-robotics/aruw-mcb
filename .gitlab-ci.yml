@@ -308,13 +308,13 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: SENTINEL_2026
+    ROBOT: SENTRY_NAME
 
 "Sentry: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SENTINEL_2026
+    ROBOT: SENTRY_NAME
 
 # Dart Build
 

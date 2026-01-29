@@ -61,7 +61,7 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_SENTINEL_2026"
+                "TARGET_SENTRY_NAME"
             ]
         },
         {

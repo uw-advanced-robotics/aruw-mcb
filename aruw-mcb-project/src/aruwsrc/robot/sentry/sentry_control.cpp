@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#if defined(TARGET_SENTINEL_2026)
+#if defined(TARGET_SENTRY_NAME)
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"

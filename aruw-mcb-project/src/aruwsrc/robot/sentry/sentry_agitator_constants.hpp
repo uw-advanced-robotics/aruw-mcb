@@ -48,7 +48,7 @@ static constexpr int AGITATOR_NUM_POCKETS = 8;          // number of balls in on
 static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
 
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
 // Single turret minor agitator for sentry 2026
 namespace turretWidow
 {
@@ -106,7 +106,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
 };
 }  // namespace turretRight
 
-#endif  // TARGET_SENTINEL_2026 vs TARGET_SENTRY_ECLIPSE
+#endif  // TARGET_SENTRY_NAME vs TARGET_SENTRY_ECLIPSE
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
     // magic numbers are fudge factors

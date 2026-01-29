@@ -85,7 +85,7 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
     static constexpr float IMU_SCALING_FACTOR =
         1 / tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
 #else

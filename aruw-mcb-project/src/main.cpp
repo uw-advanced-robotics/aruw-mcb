@@ -122,22 +122,22 @@ int main()
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_SENTINEL_2026)
+    defined(TARGET_SENTRY_NAME)
             ((Drivers *)drivers)->plateHitTracker.update();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_SENTINEL_2026)
+    defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
-    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTINEL_2026)
+    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
             PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
@@ -148,7 +148,7 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_SENTINEL_2026)
+    defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
@@ -190,7 +190,7 @@ static void initializeIo(Drivers *drivers)
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
-    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTINEL_2026)
+    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
     ((Drivers *)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
@@ -199,7 +199,7 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
     drivers->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
     // dictates command length
@@ -240,12 +240,12 @@ static void updateIo(Drivers *drivers)
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
-    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTINEL_2026)
+    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
     ((Drivers *)drivers)->oledDisplay.updateDisplay();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_SENTINEL_2026)
+    defined(TARGET_SENTRY_NAME)
     drivers->visionCoprocessor.updateSerial();
 #endif
 
@@ -253,7 +253,7 @@ static void updateIo(Drivers *drivers)
     drivers->engineerCVCommunication.updateSerial();
 #endif
 
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorImu.read();
 #endif
@@ -271,7 +271,7 @@ static void updateIo(Drivers *drivers)
     // drivers->ism330.read();
 #endif
 
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTINEL_2026)
+#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
     drivers->stateMachine.updateState();
 #endif
 }

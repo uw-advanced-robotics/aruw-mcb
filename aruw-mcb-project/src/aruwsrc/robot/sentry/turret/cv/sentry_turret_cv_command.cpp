@@ -45,7 +45,7 @@ SentryTurretCVCommand::SentryTurretCVCommand(
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     TurretConfig &turretWidowConfig,
 #else
     TurretConfig &turretLeftConfig,
@@ -56,7 +56,7 @@ SentryTurretCVCommand::SentryTurretCVCommand(
       plateHitTracker(plateHitTracker),
       turretMajorSubsystem(turretMajorSubsystem),
       yawControllerMajor(yawControllerMajor),
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
       turretWidowConfig(turretWidowConfig),
 #else
       turretLeftConfig(turretLeftConfig),
@@ -65,7 +65,7 @@ SentryTurretCVCommand::SentryTurretCVCommand(
       sentryTransforms(sentryTransforms)
 {
     this->addSubsystemRequirement(&turretMajorSubsystem);
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     this->addSubsystemRequirement(&turretWidowConfig.turretSubsystem);
 #else
     this->addSubsystemRequirement(&turretLeftConfig.turretSubsystem);
@@ -102,7 +102,7 @@ void SentryTurretCVCommand::execute()
 {
     // setpoints are in chassis frame
     WrappedFloat majorSetpoint = yawControllerMajor.getSetpoint();
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     WrappedFloat widowYawSetpoint = turretWidowConfig.yawController.getSetpoint();
     WrappedFloat widowPitchSetpoint = turretWidowConfig.pitchController.getSetpoint();
 
@@ -291,7 +291,7 @@ void SentryTurretCVCommand::execute()
                 majorSetpoint = maxHit.radians;
                 if (scanning)
                 {
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
                     widowYawSetpoint = majorSetpoint + TURRET_OFFSET;
 #else
                     leftYawSetpoint = majorSetpoint + TURRET_OFFSET;
@@ -331,7 +331,7 @@ void SentryTurretCVCommand::execute()
 
     yawControllerMajor.runController(dt, majorSetpoint);
 
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     turretWidowConfig.pitchController.runController(dt, widowPitchSetpoint);
     turretWidowConfig.yawController.runController(dt, widowYawSetpoint);
 #else
@@ -345,7 +345,7 @@ void SentryTurretCVCommand::execute()
 
 bool SentryTurretCVCommand::isFinished() const
 {
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     return !turretWidowConfig.pitchController.isOnline() ||
            !turretWidowConfig.yawController.isOnline();
 #else
@@ -360,7 +360,7 @@ void SentryTurretCVCommand::end(bool)
 {
     turretMajorSubsystem.getMutableMotor().setMotorOutput(0);
 
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     turretWidowConfig.turretSubsystem.pitchMotor.setMotorOutput(0);
     turretWidowConfig.turretSubsystem.yawMotor.setMotorOutput(0);
     withinAimingToleranceWidow = false;

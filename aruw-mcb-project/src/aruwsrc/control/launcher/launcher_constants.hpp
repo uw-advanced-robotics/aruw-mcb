@@ -70,7 +70,7 @@ static constexpr float LAUNCHER_PID_KI = 200.0f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;
-#elif defined(TARGET_SENTINEL_2026)
+#elif defined(TARGET_SENTRY_NAME)
 static constexpr float LAUNCHER_PID_KP = 30.0f;
 static constexpr float LAUNCHER_PID_KI = 200.0f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
@@ -147,7 +147,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {24.61f, 7300.0f},
 
 };
-#elif defined(TARGET_SENTINEL_2026)
+#elif defined(TARGET_SENTRY_NAME)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},      {11.33f, 4500.0f}, {11.34f, 4600.0f}, {12.3f, 4700.0f},  {13.39f, 4900.0f},
     {14.32f, 5000.0f}, {14.78f, 5100.0f}, {15.91f, 5350.0f}, {16.4f, 5500.0f},  {18.28f, 5600.0f},
@@ -172,7 +172,7 @@ static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
 #elif defined(TARGET_SENTRY_ECLIPSE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
-#elif defined(TARGET_SENTINEL_2026)
+#elif defined(TARGET_SENTRY_NAME)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #endif
 

@@ -28,7 +28,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const HolonomicChassisSubsystem& chassis,
     aruwsrc::control::turret::TurretMotor& yawMotor,
     tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
     const SentryTurretMinorSubsystem& turretWidow,
 #else
     const SentryTurretMinorSubsystem& turretLeft,
@@ -44,7 +44,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
       chassis(chassis),
       yawMotor(yawMotor),
       turretMajorIMU(turretMajorIMU),
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
       turretWidow(turretWidow),
 #else
       turretLeft(turretLeft),
@@ -97,7 +97,7 @@ void TurretMajorWorldFrameController::runController(
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
     torqueCompensation =
-#ifdef TARGET_SENTINEL_2026
+#ifdef TARGET_SENTRY_NAME
         turretWidow.yawMotor.getMotorOutput();
 #else
         turretLeft.yawMotor.getMotorOutput() + turretRight.yawMotor.getMotorOutput();
