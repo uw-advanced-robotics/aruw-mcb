@@ -106,15 +106,21 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  * Radius of the wheels (m)
  */
 static constexpr float WHEEL_RADIUS = 0.076f;
+
 /**
  * Distance from center of the two front wheels (m)
+ * Unused for circular robots
  */
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
 /**
  * Distance from center of the front and rear wheels (m).
+ * Unused for circular robots
  */
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
-
+/**
+ * Hypotenuse of the triangle formed by the x and y distances between wheels.
+ * Unused for circular robots
+ */
 static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 
 /**

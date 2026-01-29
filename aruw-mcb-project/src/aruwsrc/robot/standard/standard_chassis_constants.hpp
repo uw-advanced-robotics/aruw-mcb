@@ -111,8 +111,15 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 static constexpr float WHEEL_RADIUS = 0.1016;
 
 #if defined(TARGET_STANDARD_NULL)
-
+/**
+ * Distance from center of the two front wheels (m)
+ * Unused for circular robots
+ */
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
+/**
+ * Distance from center of the front and rear wheels (m).
+ * Unused for circular robots
+ */
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
 
 static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
@@ -121,7 +128,15 @@ static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M
 static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
 
 #elif defined(TARGET_STANDARD_VOID)
+/**
+ * Distance from center of the two front wheels (m)
+ * Unused for circular robots
+ */
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
+/**
+ * Distance from center of the front and rear wheels (m).
+ * Unused for circular robots
+ */
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
 
 static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
@@ -135,6 +150,10 @@ static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIAN
 
 #endif
 
+/**
+ * Hypotenuse of the triangle formed by the x and y distances between wheels.
+ * Unused for circular robots
+ */
 static constexpr float WHEELBASE_HYPOTENUSE =
     (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
         ? 1
