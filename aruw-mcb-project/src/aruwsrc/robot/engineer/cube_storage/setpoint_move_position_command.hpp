@@ -16,26 +16,38 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef SETPOINT_MOVE_POSITION_COMMAND_HPP_
+#define SETPOINT_MOVE_POSITION_COMMAND_HPP_
 
-#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_add_command.hpp"
+#include "tap/control/command.hpp"
 
-namespace aruwsrc::engineer::cube_storage
+#include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
+
+using namespace aruwsrc::engineer::cube_storage;
+
+namespace aruwsrc::engineer
+
 {
-CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem) : cubeStorage(cubeStorage), wristSubsystem(wristSubsystem)
+class SetpointMovePositionCommand : public tap::control::Command
 {
-    // mostly computation, so no requirements
-}
+public:
+    SetpointMovePositionCommand(CubeStorageSubsystem &subsystem, float setpoint);
 
-void CubeStorageChooseAddCommand::initialize() {
-    cubeStorage.storeWristPos(CubeStorageSubsystem::CubeOptions::LEFT, 1.0f); //TODO: update
-    cubeStorage.getCubeToAdd();
-}
+    void initialize() override;
 
+    void execute() override;
 
+    void end(bool interrupted) override;
 
-void CubeStorageChooseAddCommand::execute() {}
+    bool isFinished() const override;
 
-void CubeStorageChooseAddCommand::end(bool) {}
+    const char *getName() const override { return "Setpoint Move Position Command"; }
 
-bool CubeStorageChooseAddCommand::isFinished() const { return true; }
+private:
+    CubeStorageSubsystem &subsystem;
+    float setpoint;
+
+};  // class SetpointMovePositionCommand
+
 }  // namespace aruwsrc::engineer
+#endif  // SETPOINT_MOVE_POSITION_COMMAND_HPP_

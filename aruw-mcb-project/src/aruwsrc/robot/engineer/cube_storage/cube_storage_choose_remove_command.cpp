@@ -17,25 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_add_command.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_remove_command.hpp"
 
 namespace aruwsrc::engineer::cube_storage
 {
-CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem) : cubeStorage(cubeStorage), wristSubsystem(wristSubsystem)
+CubeStorageChooseRemoveCommand::CubeStorageChooseRemoveCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem) : cubeStorage(cubeStorage), wristSubsystem(wristSubsystem)
 {
     // mostly computation, so no requirements
 }
 
-void CubeStorageChooseAddCommand::initialize() {
+void CubeStorageChooseRemoveCommand::initialize() {
     cubeStorage.storeWristPos(CubeStorageSubsystem::CubeOptions::LEFT, 1.0f); //TODO: update
-    cubeStorage.getCubeToAdd();
+    cubeStorage.getCubeToRemove();
+
 }
 
 
 
-void CubeStorageChooseAddCommand::execute() {}
+void CubeStorageChooseRemoveCommand::execute() {}
 
-void CubeStorageChooseAddCommand::end(bool) {}
+void CubeStorageChooseRemoveCommand::end(bool) {}
 
-bool CubeStorageChooseAddCommand::isFinished() const { return true; }
+bool CubeStorageChooseRemoveCommand::isFinished() const { return true; }
 }  // namespace aruwsrc::engineer

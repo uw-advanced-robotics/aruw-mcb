@@ -56,7 +56,7 @@ CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToAdd() {
     }
 }
 
-CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToAdd() {
+CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove() {
     checkForCubes();
     if (hasCube[CubeOptions::LEFT]) {
         return CubeOptions::LEFT;

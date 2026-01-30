@@ -17,25 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_add_command.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/setpoint_move_position_command.hpp"
 
-namespace aruwsrc::engineer::cube_storage
+using namespace aruwsrc::engineer::cube_storage;
+
+namespace aruwsrc::engineer
 {
-CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem) : cubeStorage(cubeStorage), wristSubsystem(wristSubsystem)
+SetpointMovePositionCommand::SetpointMovePositionCommand(
+    CubeStorageSubsystem &subsystem,
+    float setpoint)
+    : subsystem(subsystem),
+      setpoint(setpoint)
 {
-    // mostly computation, so no requirements
+    addSubsystemRequirement(&subsystem);
 }
 
-void CubeStorageChooseAddCommand::initialize() {
-    cubeStorage.storeWristPos(CubeStorageSubsystem::CubeOptions::LEFT, 1.0f); //TODO: update
-    cubeStorage.getCubeToAdd();
-}
+void SetpointMovePositionCommand::initialize() { subsystem.setSetpoint(setpoint); }
 
+void SetpointMovePositionCommand::execute() {}
 
+void SetpointMovePositionCommand::end(bool) {}
 
-void CubeStorageChooseAddCommand::execute() {}
-
-void CubeStorageChooseAddCommand::end(bool) {}
-
-bool CubeStorageChooseAddCommand::isFinished() const { return true; }
+bool SetpointMovePositionCommand::isFinished() const { return subsystem.atSetpoint(); }
 }  // namespace aruwsrc::engineer
