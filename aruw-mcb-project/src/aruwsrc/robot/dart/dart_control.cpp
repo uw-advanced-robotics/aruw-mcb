@@ -81,7 +81,7 @@ tap::motor::DoubleDjiMotor pullMotors(
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak limitSwitch(
     &(drivers()->digital),
     LIMITSWITCH_PORT,
-    true);
+    false);
 
 aruwsrc::control::joint::homing::trigger::LimitSwitchTrigger limit(&limitSwitch);
 
@@ -96,9 +96,6 @@ DartManualPullbackSetpointCommand manualPullbackCommand(
     pullMotorSubsystem,
     MANUAL_PULLBACK_SPEED_MULTIPLIER,
     &drivers()->controlOperatorInterface);
-
-// TODO: ADD YAW MANUAL:
-// https://gitlab.com/aruw/controls/aruw-mcb/-/blob/a26bc3fb1845640e12b0afe32d720ec90c0bb709/aruw-mcb-project/src/aruwsrc/robot/dart/dart_control.cpp#L107
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -127,6 +124,7 @@ HomingCommand yawHomeCommand(yawSubsystem);
 
 aruwsrc::robot::dart::DartYawPositionCommand dartYawPositionCommand(drivers(), &yawSubsystem, 0.0f);
 
+// yaw manual velocity control, LEFT_X
 aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
     drivers(),
     &yawSubsystem,
@@ -151,21 +149,6 @@ HoldCommandMapping closeServoMapping(
     drivers(),
     {&servoClose},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
-// HoldCommandMapping rightSwitchUp(
-//     drivers(),
-//     {&dartPullback},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-
-// HoldCommandMapping rightSwitchDown(
-//     drivers(),
-//     {&dartRelease},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&servoOpen},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
 
 // Left Mid + Right Up -> Home Pullback
 HoldCommandMapping homePullbackMapping(
@@ -180,10 +163,10 @@ HoldCommandMapping pullbackMapping(
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
 // Left Down + Right Up -> Home Yaw (placeholder) TODO: CHANGE
-// HoldCommandMapping homeYawMapping(
-//     drivers(),
-//     {&pullMotorHome},
-//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+HoldCommandMapping homeYawMapping(
+    drivers(),
+    {&yawHomeCommand},
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
 void initializeSubsystems()
 {

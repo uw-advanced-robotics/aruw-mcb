@@ -75,6 +75,7 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
         .homingReversed = false  // TODO: CHANGE IF HOMES THE WRONG WAY
 };
 static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 3.0f;
+
 static constexpr int32_t PULLBACK_PULL_POSITION = 0;  // TODO: FIND
 static constexpr int32_t RELEASE_POSITION = 0;        // TODO: FIND
 static constexpr int32_t GRAB_POSITION = 0;           // TODO: FIND
@@ -97,9 +98,9 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
                               .upperBound = 500.0f,
                               .epsilon = 1.0,
                               .posPidConfig{
-                                  .kp = 10.0f,  // TODO: TUNE THIS
+                                  .kp = 80.0f,  // TODO: TUNE THIS
                                   .ki = 0.0f,
-                                  .kd = 3.0f,
+                                  .kd = 20.0f,
                                   .maxICumulative = 0.0f,
                                   .maxOutput = 5000.0f},  // these max outs seem safe for now
                               .maxOutput = 3000.0f,
