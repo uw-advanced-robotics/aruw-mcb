@@ -130,7 +130,7 @@ Position ChassisAutoNavController::calculateSetPoint(
 bool ChassisAutoNavController::atSetpoint(){
     Position curr = worldToChassis.getTranslation();
     Position goal = path->getFinalPosition();
-    return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0);
+    return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0.01); //tolerance = 1 cm
 }
 
 }  // namespace aruwsrc::control::chassis
