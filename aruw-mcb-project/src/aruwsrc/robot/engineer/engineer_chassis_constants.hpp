@@ -106,16 +106,6 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  * Radius of the wheels (m)
  */
 static constexpr float WHEEL_RADIUS = 0.076f;
-/**
- * Distance from center of the two front wheels (m)
- * Unused for circular robots
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
-/**
- * Distance from center of the front and rear wheels (m).
- * Unused for circular robots
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
 
 static constexpr float WHEELBASE_RADIUS = 0.46f;
 
@@ -136,15 +126,6 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
     .beybladeRampRate = 100,
 };
-
-/**
- * Hypotenuse of the triangle formed by the x and y distances between wheels.
- * Unused for circular robots
- */
-static constexpr float WHEELBASE_HYPOTENUSE =
-    (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-        ? 1
-        : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 
 static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
 static constexpr float CHASSIS_SPEED_DIVSOR_SPRINT = 8;

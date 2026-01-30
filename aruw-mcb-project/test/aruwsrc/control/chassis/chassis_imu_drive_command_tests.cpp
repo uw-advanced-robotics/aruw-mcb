@@ -71,7 +71,9 @@ protected:
               lbm,
               rfm,
               rbm,
-              MOCK_WHEEL_VELOCITY_PID_CONFIG),
+              MOCK_WHEEL_VELOCITY_PID_CONFIG,
+              WHEEL_RADIUS,
+              WHEELBASE_RADIUS),
           controlOperatorInterface(&drivers),
           robotData{}
     {
@@ -81,12 +83,16 @@ protected:
     {
         ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
         ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
-        ON_CALL(chassis, calculateRotationTranslationalGain).WillByDefault([&](float r) {
-            return chassis.HolonomicChassisSubsystem::calculateRotationTranslationalGain(r);
-        });
-        ON_CALL(chassis, chassisSpeedRotationPID).WillByDefault([&](float r, float d) {
-            return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(r, d);
-        });
+        ON_CALL(chassis, calculateRotationTranslationalGain)
+            .WillByDefault(
+                [&](float r)
+                {
+                    return chassis.HolonomicChassisSubsystem::calculateRotationTranslationalGain(r);
+                });
+        ON_CALL(chassis, chassisSpeedRotationPID)
+            .WillByDefault(
+                [&](float r, float d)
+                { return chassis.HolonomicChassisSubsystem::chassisSpeedRotationPID(r, d); });
 
         ON_CALL(drivers.mpu6500, getYaw).WillByDefault(ReturnPointee(&imuYaw));
         ON_CALL(drivers.mpu6500, getImuState).WillByDefault(ReturnPointee(&imuState));

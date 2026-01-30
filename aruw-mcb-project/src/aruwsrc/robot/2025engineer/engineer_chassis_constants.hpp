@@ -111,17 +111,21 @@ static constexpr float WHEEL_RADIUS = 0.076f;
  * Distance from center of the two front wheels (m)
  * Unused for circular robots
  */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
+static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.32f;
 /**
  * Distance from center of the front and rear wheels (m).
  * Unused for circular robots
  */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
+static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.27f;
 /**
- * Hypotenuse of the triangle formed by the x and y distances between wheels.
- * Unused for circular robots
+ * Average side length of the wheelbase
  */
-static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+static constexpr float EFFECTIVE_WHEELBASE = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y) / 2;
+
+// should only be used in holonomic_4_motor_chassis_subsystem.cpp::137
+// this name is inaccurate, but the value is correct for its only usage: converting between chassis
+// and wheel angular velocities
+static constexpr float WHEELBASE_RADIUS = EFFECTIVE_WHEELBASE / 2;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
