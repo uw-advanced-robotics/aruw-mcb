@@ -84,9 +84,7 @@ public:
         const float parallelOneCenterToWheelDistance,
         const float parallelTwoCenterToWheelDistance,
         const float perpendicularCenterToWheelDistance,
-        const float parallelWheelOneChassisForwardRelativeAngleRadians,
-        const float parallelWheelTwoChassisForwardRelativeAngleRadians,
-        const float perpendicularWheelChassisForwardRelativeAngleRadians);
+        const float odomFrameToRobotFrame);
 
     void refresh() override;
 

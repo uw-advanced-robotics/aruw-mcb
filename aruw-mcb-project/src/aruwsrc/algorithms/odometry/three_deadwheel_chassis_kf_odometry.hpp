@@ -76,9 +76,7 @@ public:
         const float parallelOneCenterToWheelDistance,
         const float parallelTwoCenterToWheelDistance,
         const float perpendicularCenterToWheelDistance,
-        const float parallelWheelOneChassisForwardRelativeAngleRadians,
-        const float parallelWheelTwoChassisForwardRelativeAngleRadians,
-        const float perpendicularWheelChassisForwardRelativeAngleRadians);
+        const float odomFrameToRobotFrame);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
@@ -86,7 +84,7 @@ public:
 
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
-    inline float getYaw() const override { return chassisYaw; }
+    inline float getYaw() const override { return chassisYaw.getWrappedValue(); }
 
     /**
      * @brief Resets the KF back to the robot's boot position.
@@ -203,7 +201,7 @@ private:
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
     // Chassis yaw orientation in world frame (radians)
-    float chassisYaw;
+    tap::algorithms::Angle chassisYaw;
 
     float angularVelocity = 0;
 
@@ -213,9 +211,7 @@ private:
     const float parallelOneCenterToWheelDistance;
     const float parallelTwoCenterToWheelDistance;
     const float perpendicularCenterToWheelDistance;
-    const float parallelWheelOneChassisForwardRelativeAngleRadians;
-    const float parallelWheelTwoChassisForwardRelativeAngleRadians;
-    const float perpendicularWheelChassisForwardRelativeAngleRadians;
+    const float odomFrameToRobotFrame;
     void updateChassisStateFromKF();
 
     float perpendicularRaw;
@@ -230,6 +226,8 @@ private:
     float correctedParallelTwo;
     float correctedPerpendicular;
 
+    float mahonyTheta;
+    float lastMahonyTheta;
     float imuTheta;
 
     float imuOmega;
@@ -250,7 +248,7 @@ private:
 
     static constexpr float IIR_A[FILTER_ORDER] = {1.000000f, -1.583541f, 0.656414f};
     static constexpr float IIR_B[FILTER_ORDER] = {0.018218f, 0.036436f, 0.018218f};
-
+    
     float y[int(OdomInput::NUM_INPUTS)];
     float x[int(OdomState::NUM_STATES)];
 

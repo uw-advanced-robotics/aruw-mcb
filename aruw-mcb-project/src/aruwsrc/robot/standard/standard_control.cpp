@@ -262,7 +262,7 @@ const tap::motor::DjiMotorEncoder& perpendicularOmni = rightFrontChassisMotor.ge
 float DEADWHEEL_RADIUS = 0.1016f;
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
     parallelOmniOne,
-    parallelOmniOne,
+    parallelOmniTwo,
     perpendicularOmni,
     DEADWHEEL_RADIUS
 );
@@ -270,9 +270,7 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
 constexpr float parallelOneCenterToWheelDistance = 0.45f / 2.0f; 
 constexpr float parallelTwoCenterToWheelDistance = 0.45f / 2.0f; 
 constexpr float perpendicularCenterToWheelDistance = 0.45f / 2.0f; 
-constexpr float parallelWheelOneChassisForwardRelativeAngleRadians = 0.0f; 
-constexpr float parallelWheelTwoChassisForwardRelativeAngleRadians = 0.0f; 
-constexpr float perpendicularWheelChassisForwardRelativeAngleRadians = PI / 2.0f; 
+constexpr float odomFrameToRobotFrame = -PI / 4.0f; 
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
@@ -285,9 +283,7 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
     parallelOneCenterToWheelDistance,
     parallelTwoCenterToWheelDistance,
     perpendicularCenterToWheelDistance,
-    parallelWheelOneChassisForwardRelativeAngleRadians,
-    parallelWheelTwoChassisForwardRelativeAngleRadians,
-    perpendicularWheelChassisForwardRelativeAngleRadians
+    odomFrameToRobotFrame
 );
 
 

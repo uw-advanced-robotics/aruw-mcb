@@ -38,9 +38,7 @@ ThreeDeadwheelKFOdometry2DSubsystem::ThreeDeadwheelKFOdometry2DSubsystem(
     const float parallelOneCenterToWheelDistance,
     const float parallelTwoCenterToWheelDistance,
     const float perpendicularCenterToWheelDistance,
-    const float parallelWheelOneChassisForwardRelativeAngleRadians,
-    const float parallelWheelTwoChassisForwardRelativeAngleRadians,
-    const float perpendicularWheelChassisForwardRelativeAngleRadians)
+    const float odomFrameToRobotFrame)
     : Subsystem(&drivers),
       ThreeDeadwheelChassisKFOdometry(
           deadwheels,
@@ -55,9 +53,7 @@ ThreeDeadwheelKFOdometry2DSubsystem::ThreeDeadwheelKFOdometry2DSubsystem(
           parallelOneCenterToWheelDistance,
           parallelTwoCenterToWheelDistance,
           perpendicularCenterToWheelDistance,
-          parallelWheelOneChassisForwardRelativeAngleRadians,
-          parallelWheelTwoChassisForwardRelativeAngleRadians,
-          perpendicularWheelChassisForwardRelativeAngleRadians),
+          odomFrameToRobotFrame),
       chassisYawObserver(yawObserver)
 {
 }

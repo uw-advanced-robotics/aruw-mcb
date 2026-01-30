@@ -34,24 +34,18 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
     const float parallelOneCenterToWheelDistance,
     const float parallelTwoCenterToWheelDistance,
     const float perpendicularCenterToWheelDistance,
-    const float parallelWheelOneChassisForwardRelativeAngleRadians,
-    const float parallelWheelTwoChassisForwardRelativeAngleRadians,
-    const float perpendicularWheelChassisForwardRelativeAngleRadians)
+    const float odomFrameToRobotFrame)
     : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
       deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
       initPos(initPos),
       initYaw(initYaw),
+      chassisYaw(initYaw),
       parallelOneCenterToWheelDistance(parallelOneCenterToWheelDistance),
       parallelTwoCenterToWheelDistance(parallelTwoCenterToWheelDistance),
       perpendicularCenterToWheelDistance(perpendicularCenterToWheelDistance),
-      parallelWheelOneChassisForwardRelativeAngleRadians(
-          parallelWheelOneChassisForwardRelativeAngleRadians),
-      parallelWheelTwoChassisForwardRelativeAngleRadians(
-          parallelWheelTwoChassisForwardRelativeAngleRadians),
-      perpendicularWheelChassisForwardRelativeAngleRadians(
-          perpendicularWheelChassisForwardRelativeAngleRadians)
+      odomFrameToRobotFrame(odomFrameToRobotFrame)
 {
     reset();
 }
@@ -59,6 +53,7 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
 void ThreeDeadwheelChassisKFOdometry::reset()
 {
     chassisYaw = initYaw;
+    lastMahonyTheta = 0.0f;
 
     float initialX[int(OdomState::NUM_STATES)] =
         {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f, initYaw, 0.0f};
@@ -95,11 +90,24 @@ void ThreeDeadwheelChassisKFOdometry::update()
 
     /* Process dead wheels */
 
-    if (!chassisYawObserver.getChassisWorldYaw(&imuTheta))
+    if (!chassisYawObserver.getChassisWorldYaw(&mahonyTheta))
     {
-        imuTheta = 0;
+        mahonyTheta = 0.0f;
         return;
     }
+
+    float deltaTheta = mahonyTheta - lastMahonyTheta;
+    lastMahonyTheta = mahonyTheta;
+
+    if (deltaTheta > M_PI)
+    {
+        deltaTheta -= M_TWOPI;
+    }
+    else if (deltaTheta < -M_PI)
+    {
+        deltaTheta += M_TWOPI;
+    }
+    imuTheta += deltaTheta;
 
     // Get acceleration from IMU
     Ax = imu.getAx();
@@ -108,13 +116,13 @@ void ThreeDeadwheelChassisKFOdometry::update()
     imuOmega = imu.getGz();
 
     // Rotate acceleration to the world frame
-    tap::algorithms::rotateVector(&Ax, &Ay, chassisYaw);
+    tap::algorithms::rotateVector(&Ax, &Ay, chassisYaw.getWrappedValue());
 
     /* Process dead wheels */
 
-    perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
+    perpendicularRaw = -deadwheelOdometry.getPerpendicularVelocity();
     parallelOneRaw = deadwheelOdometry.getParallelMotorOneVelocity();
-    parallelTwoRaw = deadwheelOdometry.getParallelMotorTwoVelocity();
+    parallelTwoRaw = -deadwheelOdometry.getParallelMotorTwoVelocity(); //EG@TODO: remove debug code
 
     // Compute odometry angular velocity
     odoOmega = (parallelTwoRaw - parallelOneRaw) /
@@ -139,23 +147,19 @@ void ThreeDeadwheelChassisKFOdometry::update()
         FILTER_ORDER);
 
     // Correct for deadwheel orientation and average the two parallel wheels
-    Vx =
-        ((filteredParallelOne * std::cos(parallelWheelOneChassisForwardRelativeAngleRadians) +
-         (filteredParallelTwo * std::cos(parallelWheelTwoChassisForwardRelativeAngleRadians))) / 2 +
-          filteredPerpendicular * std::cos(perpendicularWheelChassisForwardRelativeAngleRadians));
-    Vy =
-        ((filteredParallelOne * std::sin(parallelWheelOneChassisForwardRelativeAngleRadians) +
-         (filteredParallelTwo * std::sin(parallelWheelTwoChassisForwardRelativeAngleRadians))) / 2 +
-          filteredPerpendicular * std::sin(perpendicularWheelChassisForwardRelativeAngleRadians));
+    Vx = (filteredParallelOne + filteredParallelTwo) / 2;
+    Vy = filteredPerpendicular;
 
-    tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw);
+    tap::algorithms::rotateVector(&Vx, &Vy, odomFrameToRobotFrame);
+
+    tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw.getWrappedValue());
 
     // Create the measurement vector
     y[int(OdomInput::VEL_X)] = Vx;
     y[int(OdomInput::ACC_X)] = Ax;
     y[int(OdomInput::VEL_Y)] = Vy;
     y[int(OdomInput::ACC_Y)] = Ay;
-    y[int(OdomInput::POS_ANG)] = chassisYaw;
+    y[int(OdomInput::POS_ANG)] = imuTheta;
     y[int(OdomInput::VEL_ANG_ODOM)] = odoOmega;
     y[int(OdomInput::VEL_ANG_IMU)] = imuOmega;
 
