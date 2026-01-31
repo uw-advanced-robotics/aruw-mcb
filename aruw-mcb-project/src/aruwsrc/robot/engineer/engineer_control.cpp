@@ -421,6 +421,24 @@ SetpointMovePositionCommand extensionOutCommand(extensionSubsystem, 2);
 SetpointMovePositionCommand extensionOut(extensionSubsystem, EXTENSION_SCORE);
 SetpointMovePositionCommand extensionIn(extensionSubsystem, EXTENSION_PICKUP);
 
+// rotating cube storage
+SetpointMovePositionCommand leftCubePosition(cubeLift, CUBE_STORAGE_LEFT_SETPOINT);
+SetpointMovePositionCommand rightCubePosition(cubeLift, CUBE_STORAGE_RIGHT_SETPOINT);
+SetpointMovePositionCommand centerCubePosition(cubeLift, CUBE_STORAGE_CENTER_SETPOINT);
+
+// sequential stuff for cube storage (check if right)
+// SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
+//     {&liftUpCommand,
+//      &gantryRetractCommand,
+//      &wristFoldInCommand,
+//      &liftDownCommand,
+//      &suckOffCommand,
+//      &releaseOnCommand,
+//      &gantryExtendCommand,
+//      &liftUpCommand,
+//      &gantryRetractCommand,
+//      &cubeLiftSwitchDownCommand}});
+
 WristMovePositionCommand wristDown(
     wristSubsystem,
     WRIST_PITCH_PICKUP,
