@@ -23,12 +23,12 @@
 #include <cassert>
 #include <deque>
 
+#include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
-#include "tap/algorithms/ballistics.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
@@ -118,7 +118,6 @@ public:
         messageWidths::TARGET_DATA_BYTES,
         messageWidths::SHOT_TIMING_BYTES};  // indices correspond to Tags
 
-
     // Must be declared here due to circlular dependency
     struct RobotOrbitKinematicState : ballistics::SecondOrderKinematicState
     {
@@ -129,16 +128,13 @@ public:
             float radius,
             float theta,
             float omega)
-            : 
-            ballistics::SecondOrderKinematicState(
-                position, velocity, acceleration
-            ),
-            position(position),
-            velocity(velocity),
-            acceleration(acceleration),
-            radius(radius),
-            theta(theta),
-            omega(omega)
+            : ballistics::SecondOrderKinematicState(position, velocity, acceleration),
+              position(position),
+              velocity(velocity),
+              acceleration(acceleration),
+              radius(radius),
+              theta(theta),
+              omega(omega)
         {
         }
         modm::Vector3f position;      // m
@@ -167,7 +163,8 @@ public:
          * @param[in] dt: The amount of time to project the state forward.
          *
          * @return The future 3D position of this object using a quadratic (constant acceleration)
-         * model for the center and linear (constant angular velocity) model for angle about the center
+         * model for the center and linear (constant angular velocity) model for angle about the
+         * center
          */
         inline modm::Vector3f projectForward(float dt) const override
         {
@@ -181,7 +178,6 @@ public:
                 quadraticKinematicProjection(dt, position.z, velocity.z, acceleration.z));
         }
     };
-
 
     /**
      * AutoAim data to receive from Jetson. Describes a rectangular robot with separate z offsets
@@ -220,21 +216,12 @@ public:
         inline PositionData projectForward(float dt) const
         {
             PositionData projected = *this;
-            projected.xPos = RobotOrbitKinematicState::quadraticKinematicProjection(
-                dt,
-                xPos,
-                xVel,
-                xAcc);
-            projected.yPos = RobotOrbitKinematicState::quadraticKinematicProjection(
-                dt,
-                yPos,
-                yVel,
-                yAcc);
-            projected.zPos = RobotOrbitKinematicState::quadraticKinematicProjection(
-                dt,
-                zPos,
-                zVel,
-                zAcc);
+            projected.xPos =
+                RobotOrbitKinematicState::quadraticKinematicProjection(dt, xPos, xVel, xAcc);
+            projected.yPos =
+                RobotOrbitKinematicState::quadraticKinematicProjection(dt, yPos, yVel, yAcc);
+            projected.zPos =
+                RobotOrbitKinematicState::quadraticKinematicProjection(dt, zPos, zVel, zAcc);
             projected.theta += omega * dt;
             return projected;
         }

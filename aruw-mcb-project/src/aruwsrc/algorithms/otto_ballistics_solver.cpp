@@ -120,17 +120,16 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
             float currTheta = projectedAimPosData.theta + M_PI_2 * i;
             // target state, frame whose axis is at the turret center and z is up
             // assume acceleration of the chassis is 0 since we don't measure it
-            aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState targetState (
+            aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState targetState(
                 {projectedAimPosData.xPos + currRadius * cos(currTheta) - turretPosition.x,
-                     projectedAimPosData.yPos + currRadius * sin(currTheta) - turretPosition.y,
-                     projectedAimPosData.zPos + projectedAimPosData.plateHeights[i] -
-                         turretPosition.z},
-               {projectedAimPosData.xVel - chassisVel.x,
-                     projectedAimPosData.yVel - chassisVel.y,
-                     projectedAimPosData.zVel},
+                 projectedAimPosData.yPos + currRadius * sin(currTheta) - turretPosition.y,
+                 projectedAimPosData.zPos + projectedAimPosData.plateHeights[i] - turretPosition.z},
+                {projectedAimPosData.xVel - chassisVel.x,
+                 projectedAimPosData.yVel - chassisVel.y,
+                 projectedAimPosData.zVel},
                 {projectedAimPosData.xAcc,
-                     projectedAimPosData.yAcc,
-                     projectedAimPosData.zAcc}, // TODO consider using chassis acceleration from IMU
+                 projectedAimPosData.yAcc,
+                 projectedAimPosData.zAcc},  // TODO consider using chassis acceleration from IMU
                 currRadius,
                 currTheta,
                 projectedAimPosData.omega);
