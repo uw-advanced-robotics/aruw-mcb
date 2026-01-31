@@ -319,7 +319,9 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     leftBackMotor,
     rightFrontMotor,
     rightBackMotor,
-    {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
+    {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f},
+    WHEEL_RADIUS,
+    WHEELBASE_RADIUS);
 
 aruwsrc::communication::mcb_lite::VirtualCanEncoder parallelOmni(
     drivers(),

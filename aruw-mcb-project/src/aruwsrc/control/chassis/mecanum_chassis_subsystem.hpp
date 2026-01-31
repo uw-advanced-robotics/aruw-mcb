@@ -45,6 +45,8 @@ public:
         Motor& rightFrontMotor,
         Motor& rightBackMotor,
         tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+        float wheelRadius,
+        float effectiveWheelbase,  // Assuming a rectangular chassis, this is (width + height)/2.
         communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 };
 
