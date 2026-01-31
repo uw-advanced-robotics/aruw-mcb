@@ -120,6 +120,9 @@ int main()
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
+#if defined(TARGET_MOTOR_TESTER)
+            PROFILE(drivers->profiler, ((Drivers *)drivers)->fusedImu.periodicIMUUpdate, ());
+#endif
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
@@ -192,6 +195,9 @@ static void initializeIo(Drivers *drivers)
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
     defined(TARGET_LAUNCHER_TARGET)
     ((Drivers *)drivers)->oledDisplay.initialize();
+#endif
+#if defined(TARGET_MOTOR_TESTER)
+    ((Drivers *)drivers)->fusedImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
