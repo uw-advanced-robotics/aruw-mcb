@@ -86,10 +86,10 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
 };
 static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 1.0f;
 
-static constexpr int32_t PULLBACK_PULL_POSITION = 0;  // TODO: FIND
-static constexpr int32_t RELEASE_POSITION = 0;        // TODO: FIND
-static constexpr int32_t GRAB_POSITION = -10089;           // TODO: FIND
-static constexpr int32_t RELOAD_POSITION = -2745;         // TODO: FIND
+static constexpr float PULLBACK_PULL_POSITION = 0;  // TODO: FIND
+static constexpr float RELEASE_POSITION = 0;        // TODO: FIND
+static constexpr float GRAB_POSITION = -10089.0f;
+static constexpr float RELOAD_POSITION = -2745.0f;
 //  * @param[in] pwmRampSpeed The speed in PWM percent per millisecond.
 
 static constexpr float SERVO_MIN = 0.5f;
@@ -101,14 +101,14 @@ static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;  // TODO: update value when limit switch is installed on dart
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
-    PULL_MOTOR_CONFIG{// TODO: TUNE VALUES
+    PULL_MOTOR_CONFIG{
                       .super =
                           {
                               .lowerBound = 0.0f,
                               .upperBound = 500.0f,
                               .epsilon = 1.0,
                               .posPidConfig{
-                                  .kp = 80.0f,  // TODO: TUNE THIS
+                                  .kp = 80.0f,  
                                   .ki = 0.0f,
                                   .kd = 20.0f,
                                   .maxICumulative = 0.0f,
@@ -117,7 +117,7 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
 
                           },
                       .home = 0.0f,
-                      .homingSpeed = 50.0f,
+                      .homingSpeed = 50.0f, //TODO CHANGE
                       .homingReversed = true};
 
 }  // namespace aruwsrc::dart

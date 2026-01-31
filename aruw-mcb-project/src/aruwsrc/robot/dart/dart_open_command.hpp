@@ -38,11 +38,11 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "DART CLOSE"; }
+    const char *getName() const override { return "DART OPEN"; }
 
 private:
     DartServo &dartLauncher;
-};  // class DartCloseCommand
+};  // class DartOpenCommand
 
 }  // namespace aruwsrc::dart
 #endif  // DART_OPEN_COMMAND_HPP_

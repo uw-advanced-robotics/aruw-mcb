@@ -94,16 +94,11 @@ aruwsrc::control::joint::homing::TriggerHomedJointSubsystem pullMotorSubsystem(
     limit,
     PULL_MOTOR_CONFIG);
 
-
-
 HomingCommand pullMotorHomeCommand(pullMotorSubsystem);
 DartManualPullbackSetpointCommand manualPullbackCommand(
     pullMotorSubsystem,
     MANUAL_PULLBACK_SPEED_MULTIPLIER,
     &drivers()->controlOperatorInterface);
-
-// TODO: ADD YAW MANUAL:
-// https://gitlab.com/aruw/controls/aruw-mcb/-/blob/a26bc3fb1845640e12b0afe32d720ec90c0bb709/aruw-mcb-project/src/aruwsrc/robot/dart/dart_control.cpp#L107
 
 tap::motor::DjiMotor reloaderMotor(
     drivers(),
@@ -154,8 +149,7 @@ aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
 SequentialCommand<2> pullBackCommand(std::array<Command*, 2>{{&servoClose, &dartPullback}});
 
 // release the string to let the dart go, then go to reload position
-// TODO: need to add in the command to rotate magazine
-SequentialCommand<2> releaseDartAndReload(std::array<Command*, 2>{{&servoOpen, &dartGrab}});
+SequentialCommand<3> releaseDartAndReload(std::array<Command*, 3>{{&servoOpen, &dartGrab, &rotateMagazine}});
 
 SequentialCommand<2> homeAll(std::array<Command*, 2>{{&pullMotorHome, &yawHomeCommand}});
 
@@ -202,7 +196,7 @@ PressCommandMapping rightMidLeftDown(
     {&rotateMagazine},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
 
-// Left Down + Right Up -> Home Yaw (placeholder) TODO: CHANGE
+// Left Down + Right Up -> Home Yaw 
 HoldCommandMapping homeYawMapping(
     drivers(),
     {&yawHomeCommand},
