@@ -33,7 +33,7 @@ class ScorePositionCommand : public tap::control::Command
 {
 public:
     ScorePositionCommand(
-        aruwsrc::control::joint::JointSubsystem &gantryLift,
+        aruwsrc::control::joint::JointSubsystem &extension,
         WristSubsystem &wrist,
         aruwsrc::control::joint::JointSubsystem &roll);
 
@@ -50,7 +50,7 @@ public:
     void cyclePositions(ScorePositions scorePos);
 
 private:
-    aruwsrc::control::joint::JointSubsystem &gantryLift;
+    aruwsrc::control::joint::JointSubsystem &extension;
     WristSubsystem &wrist;
     aruwsrc::control::joint::JointSubsystem &roll;
     ScorePositions scoringPosition;

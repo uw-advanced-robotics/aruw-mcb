@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,31 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_TARGET_DRIVERS_HPP_
-#define DART_TARGET_DRIVERS_HPP_
+#include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
 
-#include "tap/drivers.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
-#include "aruwsrc/display/oled_display.hpp"
-
-namespace aruwsrc::dart_target
+namespace aruwsrc::engineer
 {
-class Drivers : public tap::Drivers
-{
-    friend class DriversSingleton;
+float EngineerTurretSubsystem::getWorldYaw() const { return getIMU()->getYaw(); }
 
-#ifdef ENV_UNIT_TESTS
-public:
-#endif
-    Drivers()
-        : tap::Drivers(),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
-    {
-    }
+float EngineerTurretSubsystem::getWorldPitch() const { return getIMU()->getPitch(); }
 
-public:
-    display::OledDisplay oledDisplay;
-};  // class aruwsrc::DartTargetDrivers
-}  // namespace aruwsrc::dart_target
-
-#endif  // DART_TARGET_DRIVERS_HPP_
+}  // namespace aruwsrc::engineer
