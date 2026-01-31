@@ -38,6 +38,7 @@ void DartManualPullbackSetpointCommand::execute()
 {
     float setpoint = dartSystem.getSetpoint();
 
+    position = dartSystem.getPosition();
     setpoint += controlOperatorInterface->getPullbackVelocity() * moveSpeed;
 
     dartSystem.setSetpoint(setpoint);

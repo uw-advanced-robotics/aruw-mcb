@@ -45,6 +45,7 @@ public:
 private:
     aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartSystem;
     float moveSpeed;
+    float position;
     aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface;  
 };
 }  // namespace aruwsrc::dart
