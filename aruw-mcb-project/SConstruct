@@ -29,11 +29,6 @@ SRC_PATH = "src"
 TEST_PATH = "test"
 TAPROOT_SCRIPTS_TOOLPATH = abspath("../taproot-scripts/scons-tools")
 
-# Keep signature database in build/ to avoid touching third-party submodules.
-os.makedirs(BUILD_PATH, exist_ok=True)
-SConsignFile(abspath(join(BUILD_PATH, ".sconsign.dblite")))
-
-
 # Parse and validate arguments
 args = parse_args.parse_args()
 
