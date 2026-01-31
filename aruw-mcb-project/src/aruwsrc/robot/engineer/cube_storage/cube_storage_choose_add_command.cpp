@@ -23,9 +23,9 @@ namespace aruwsrc::engineer::cube_storage
 {
 CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(
     CubeStorageSubsystem &cubeStorage,
-    aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem)
+    aruwsrc::control::joint::JointSubsystem &jointSubsystem)
     : cubeStorage(cubeStorage),
-      wristSubsystem(wristSubsystem)
+      jointSubsystem(jointSubsystem)
 {
     // mostly computation, so no requirements
 }

@@ -17,13 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_remove.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_remove_command.hpp"
 
 namespace aruwsrc::engineer::cube_storage
 {
-CubeStorageChooseRemoveCommand::CubeStorageChooseRemoveCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem) : cubeStorage(cubeStorage), wristSubsystem(wristSubsystem)
+CubeStorageChooseRemoveCommand::CubeStorageChooseRemoveCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::control::joint::JointSubsystem &jointSubsystem) : cubeStorage(cubeStorage), wristSubsystem(wristSubsystem)
 {
-    addSubsystemRequirement(&wristSubsystem);
+    addSubsystemRequirement(&jointSubsystem);
 }
 
 void CubeStorageChooseRemoveCommand::initialize() {

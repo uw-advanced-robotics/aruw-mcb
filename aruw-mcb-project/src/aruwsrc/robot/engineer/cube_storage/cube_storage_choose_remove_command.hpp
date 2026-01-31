@@ -30,7 +30,7 @@ namespace aruwsrc::engineer::cube_storage
 class CubeStorageChooseRemoveCommand : public tap::control::Command
 {
 public:
-    CubeStorageChooseRemoveCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem);
+    CubeStorageChooseRemoveCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::control::joint::JointSubsystem &jointSubsystem);
 
     void initialize() override;
 
@@ -44,7 +44,7 @@ public:
 
 private:
     CubeStorageSubsystem &cubeStorage;
-    aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem;
+    aruwsrc::control::joint::JointSubsystem &jointSubsystem;
 
 };  // class CubeStorageChooseRemoveCommand
 
