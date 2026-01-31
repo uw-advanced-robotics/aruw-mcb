@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_add.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_add_command.hpp"
 
 namespace aruwsrc::engineer::cube_storage
 {
