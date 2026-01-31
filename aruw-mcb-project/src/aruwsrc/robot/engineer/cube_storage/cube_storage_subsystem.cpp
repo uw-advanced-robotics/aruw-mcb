@@ -29,8 +29,8 @@ CubeStorageSubsystem::CubeStorageSubsystem(
     tap::motor::MotorInterface &motor,
     TriggerInterface &trigger,
     Config config)
-    : TriggerHomedJointSubsystem(drivers, motor, trigger, config),
-      Subsystem(drivers)
+    : Subsystem(drivers),
+    TriggerHomedJointSubsystem(drivers, motor, trigger, config)
 {
 }
 
