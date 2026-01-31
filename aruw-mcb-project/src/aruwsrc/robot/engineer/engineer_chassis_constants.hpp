@@ -20,9 +20,10 @@
 #ifndef ENGINEER_CHASSIS_CONSTANTS_HPP_
 #define ENGINEER_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
 
-#include "modm/math/filter/pid.hpp"
+#include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
@@ -30,7 +31,7 @@
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
 #endif
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -60,10 +61,13 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
+static constexpr float VELOCITY_PID_KP = 10.0f;
 static constexpr float VELOCITY_PID_KI = 0.0f;
 static constexpr float VELOCITY_PID_KD = 0.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float VELOCITY_PID_KV = 0.0f;
+static constexpr float VELOCITY_PID_KS = 0.0;
+
 /**
  * This max output is measured in the c620 robomaster translated current.
  * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
@@ -71,6 +75,14 @@ static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
  * -20 ~ 0 ~ 20 A.
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
+
+static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = VELOCITY_PID_KP,
+    .ki = VELOCITY_PID_KI,
+    .kd = VELOCITY_PID_KD,
+    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
+    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+};
 
 /**
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
@@ -94,16 +106,8 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  * Radius of the wheels (m)
  */
 static constexpr float WHEEL_RADIUS = 0.076f;
-/**
- * Distance from center of the two front wheels (m)
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
-/**
- * Distance from center of the front and rear wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
 
-static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+static constexpr float WHEELBASE_RADIUS = 0.46f;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
@@ -115,32 +119,16 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
-/**
- * Fraction of max chassis speed that will be applied to rotation when beyblading
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
+static constexpr BeybladeConfig BEYBLADE_CONFIG{
+    .beybladeRotationalSpeedFractionOfMax = 0.75f,
+    .beybladeTranslationalSpeedMultiplier = 0.5f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.5f,
+    .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
+    .beybladeRampRate = 100,
+};
 
-/**
- * Fraction between [0, 1], what we multiply user translational input by when beyblading.
- */
-static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.5f;
-
-/**
- * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
- * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
- */
-static constexpr float
-    BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.5f;
-
-/**
- * The fraction to cut rotation speed while moving and beyblading.
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0.5f;
-/**
- * Rotational speed to update the beyblade ramp target by each iteration until final rotation
- * setpoint reached, in RPM.
- */
-static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 100;
-}  // namespace aruwsrc::chassis
+static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
+static constexpr float CHASSIS_SPEED_DIVSOR_SPRINT = 8;
+}  // namespace aruwsrc::control::chassis
 
 #endif  // ENGINEER_CHASSIS_CONSTANTS_HPP_

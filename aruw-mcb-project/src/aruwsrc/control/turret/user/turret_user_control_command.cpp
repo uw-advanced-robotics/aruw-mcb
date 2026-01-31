@@ -19,10 +19,13 @@
 
 #include "turret_user_control_command.hpp"
 
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/drivers.hpp"
 
 #include "../turret_subsystem.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
+
+using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::control::turret::user
 {
@@ -30,8 +33,8 @@ TurretUserControlCommand::TurretUserControlCommand(
     tap::Drivers *drivers,
     ControlOperatorInterface &controlOperatorInterface,
     TurretSubsystem *turretSubsystem,
-    algorithms::TurretYawControllerInterface *yawController,
-    algorithms::TurretPitchControllerInterface *pitchController,
+    algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController,
+    algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)
@@ -62,12 +65,12 @@ void TurretUserControlCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
-    const float pitchSetpoint =
+    const WrappedFloat pitchSetpoint =
         pitchController->getSetpoint() +
         userPitchInputScalar * controlOperatorInterface.getTurretPitchInput(turretID);
     pitchController->runController(dt, pitchSetpoint);
 
-    const float yawSetpoint =
+    const WrappedFloat yawSetpoint =
         yawController->getSetpoint() +
         userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID);
     yawController->runController(dt, yawSetpoint);

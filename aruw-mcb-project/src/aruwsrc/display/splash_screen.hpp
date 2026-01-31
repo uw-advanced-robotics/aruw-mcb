@@ -23,8 +23,12 @@
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/abstract_menu.hpp"
+
+#include "main_menu.hpp"
 
 namespace aruwsrc
 {
@@ -41,9 +45,12 @@ public:
     SplashScreen(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
         tap::Drivers *drivers,
-        serial::VisionCoprocessor *visionCoprocessor,
-        can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2);
+        communication::serial::VisionCoprocessor *visionCoprocessor,
+        communication::can::TurretMCBCanComm *turretMCBCanCommBus1,
+        communication::can::TurretMCBCanComm *turretMCBCanCommBus2,
+        aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
+        aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
+        communication::can::cap_bank::CapacitorBank *capacitorBank);
 
     void draw() override;
 
@@ -60,9 +67,13 @@ private:
 
     bool drawn = false;
     tap::Drivers *drivers;
-    serial::VisionCoprocessor *visionCoprocessor;
-    can::TurretMCBCanComm *turretMCBCanCommBus1;
-    can::TurretMCBCanComm *turretMCBCanCommBus2;
+    communication::serial::VisionCoprocessor *visionCoprocessor;
+    communication::can::TurretMCBCanComm *turretMCBCanCommBus1;
+    communication::can::TurretMCBCanComm *turretMCBCanCommBus2;
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite1;
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite2;
+    communication::can::cap_bank::CapacitorBank *capacitorBank;
+    aruwsrc::display::MainMenu mainMenu;
 };
 }  // namespace display
 }  // namespace aruwsrc

@@ -23,6 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -31,10 +32,18 @@
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace aruwsrc::mock;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace testing;
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
+
+static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 1,
+    .ki = 0,
+    .kd = 0,
+};
+
+static constexpr float GEAR_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
 
 class ChassisAutorotateCommandTest : public Test
 {
@@ -43,11 +52,26 @@ protected:
         : drivers(),
           currentSensor(
               {&drivers.analog,
-               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
-          chassis(&drivers, &currentSensor),
+          voltageSensor(),
+          lfm(),
+          lbm(),
+          rfm(),
+          rbm(),
+          chassis(
+              &drivers,
+              &currentSensor,
+              &voltageSensor,
+              lfm,
+              lbm,
+              rfm,
+              rbm,
+              MOCK_WHEEL_VELOCITY_PID_CONFIG,
+              WHEEL_RADIUS,
+              WHEELBASE_RADIUS),
           turret(&drivers),
           controlOperatorInterface(&drivers),
           turretConfig{0, 0, 0, M_PI, false}
@@ -64,6 +88,8 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+    NiceMock<tap::mock::MotorInterfaceMock> lfm, lbm, rfm, rbm;
     NiceMock<MecanumChassisSubsystemMock> chassis;
     NiceMock<TurretSubsystemMock> turret;
     NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
@@ -137,7 +163,7 @@ struct TurretOnlineTestStruct
     float y = 0;
     float r = 0;
     float yawAngle = 0;
-    float yawSetpoint = 0;
+    WrappedFloat yawSetpoint = Angle(0);
     bool yawLimited = false;
     ChassisAutorotateCommand::ChassisSymmetry chassisSymmetry =
         ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE;
@@ -176,7 +202,6 @@ public:
         turretConfig.limitMotorAngles = GetParam().yawLimited;
 
         ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(true));
-        ON_CALL(turret.yawMotor, getAngleFromCenter).WillByDefault(Return(yawAngleFromCenter));
         ON_CALL(turret.yawMotor, getChassisFrameVelocity).WillByDefault(Return(0));
         ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
             .WillByDefault(ReturnRef(turretAngleActual));
@@ -264,7 +289,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = 0,
             .r = 0,
             .yawAngle = M_PI_4,
-            .yawSetpoint = 0,
+            .yawSetpoint = Angle(0),
             .yawLimited = true,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
         },
@@ -273,7 +298,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = 10,
             .r = 10,
             .yawAngle = M_PI_2,
-            .yawSetpoint = 0,
+            .yawSetpoint = Angle(0),
             .yawLimited = true,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
         },
@@ -282,7 +307,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = -10,
             .r = -10,
             .yawAngle = -M_PI_4,
-            .yawSetpoint = 0,
+            .yawSetpoint = Angle(0),
             .yawLimited = true,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
         },
@@ -291,7 +316,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = 0,
             .r = 10,
             .yawAngle = modm::toRadian(-135),
-            .yawSetpoint = 0,
+            .yawSetpoint = Angle(0),
             .yawLimited = true,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
         },
@@ -300,7 +325,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = 0,
             .r = 0,
             .yawAngle = -M_PI,
-            .yawSetpoint = 0,
+            .yawSetpoint = Angle(0),
             .yawLimited = true,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_NONE,
         },
@@ -309,7 +334,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = 0,
             .r = 0,
             .yawAngle = 0,
-            .yawSetpoint = M_PI,
+            .yawSetpoint = Angle(M_PI),
             .yawLimited = true,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
         },
@@ -318,7 +343,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = 0,
             .r = 0,
             .yawAngle = M_PI,
-            .yawSetpoint = M_PI,
+            .yawSetpoint = Angle(M_PI),
             .yawLimited = false,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180,
         },
@@ -327,7 +352,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = 0,
             .r = 0,
             .yawAngle = -M_PI,
-            .yawSetpoint = 0,
+            .yawSetpoint = Angle(0),
             .yawLimited = false,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
         },
@@ -336,7 +361,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = 0,
             .r = 0,
             .yawAngle = M_PI_4,
-            .yawSetpoint = -M_PI_4,
+            .yawSetpoint = Angle(-M_PI_4),
             .yawLimited = true,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
         },
@@ -345,7 +370,7 @@ INSTANTIATE_TEST_SUITE_P(
             .y = 0,
             .r = 0,
             .yawAngle = 0,
-            .yawSetpoint = M_PI_2,
+            .yawSetpoint = Angle(M_PI_2),
             .yawLimited = false,
             .chassisSymmetry = ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
         }),
@@ -355,7 +380,8 @@ INSTANTIATE_TEST_SUITE_P(
            << PrintToString(info.param.r) << "_yawAngle_"
            << PrintToString(static_cast<int>(modm::toDegree(info.param.yawAngle)))
            << "_yawSetpoint_"
-           << PrintToString(static_cast<int>(modm::toDegree(info.param.yawSetpoint)))
+           << PrintToString(
+                  static_cast<int>(modm::toDegree(info.param.yawSetpoint.getUnwrappedValue())))
            << "_yawLimited_" << PrintToString(info.param.yawLimited) << "_chassisSymmetry_"
            << PrintToString(static_cast<int>(info.param.chassisSymmetry));
         std::string s = ss.str();

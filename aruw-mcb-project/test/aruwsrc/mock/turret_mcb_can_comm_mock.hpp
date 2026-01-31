@@ -26,7 +26,7 @@
 
 namespace aruwsrc::mock
 {
-class TurretMCBCanCommMock : public can::TurretMCBCanComm
+class TurretMCBCanCommMock : public communication::can::TurretMCBCanComm
 {
 public:
     TurretMCBCanCommMock(tap::Drivers *drivers, tap::can::CanBus canBus);
@@ -34,16 +34,16 @@ public:
 
     MOCK_METHOD(void, init, (), (override));
     MOCK_METHOD(float, getPitch, (), (const override));
-    MOCK_METHOD(float, getPitchVelocity, (), (const override));
+    MOCK_METHOD(float, getGy, (), (const override));
     MOCK_METHOD(float, getPitchUnwrapped, (), (const override));
     MOCK_METHOD(float, getYaw, (), (const override));
-    MOCK_METHOD(float, getYawVelocity, (), (const override));
+    MOCK_METHOD(float, getGz, (), (const override));
     MOCK_METHOD(float, getYawUnwrapped, (), (const override));
     MOCK_METHOD(bool, getLimitSwitchDepressed, (), (const override));
     MOCK_METHOD(bool, isConnected, (), (const override));
     MOCK_METHOD(void, setOpenHopperCover, (bool), (override));
     MOCK_METHOD(void, setLaserStatus, (bool), (override));
-    MOCK_METHOD(void, sendImuCalibrationRequest, (), (override));
+    MOCK_METHOD(void, requestCalibration, (), (override));
     MOCK_METHOD(void, sendData, (), (override));
     MOCK_METHOD(uint32_t, getIMUDataTimestamp, (), (const override));
 };

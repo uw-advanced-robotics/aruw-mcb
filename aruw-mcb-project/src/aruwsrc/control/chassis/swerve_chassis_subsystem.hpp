@@ -45,7 +45,7 @@
 using Module = testing::NiceMock<aruwsrc::mock::SwerveModuleMock>;
 #else
 #include "aruwsrc/control/chassis/swerve_module.hpp"
-using Module = aruwsrc::chassis::SwerveModule;
+using Module = aruwsrc::control::chassis::SwerveModule;
 #endif
 
 namespace aruwsrc
@@ -53,9 +53,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 class SwerveChassisSubsystem : public chassis::HolonomicChassisSubsystem
 {
@@ -63,11 +61,13 @@ public:
     SwerveChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
         Module* moduleLeftFront,
         Module* moduleRightFront,
         Module* moduleLeftBack,
         Module* moduleRightBack,
-        const float forwardMatrixArray[24]);
+        const float forwardMatrixArray[24],
+        communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 
     void initialize() override;
 
@@ -86,6 +86,8 @@ public:
     void refreshSafeDisconnect() override { setZeroRPM(); }
 
     Module* getModule(unsigned int i);
+
+    inline float mpsToRpm(float mps) const override { return modules[0]->wheel.mpsToRpm(mps); }
 
     /**
      * Used to index into the modules array and desiredModuleSpeeds matrix.
@@ -128,8 +130,6 @@ private:
 
 };  // class SwerveChassisSubsystem
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
 
 #endif  // SWERVE_CHASSIS_SUBSYSTEM_HPP_

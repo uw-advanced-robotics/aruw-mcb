@@ -22,8 +22,6 @@ variables:
   ARTIFACT_PATH: isolated-deploy
   GIT_SUBMODULE_STRATEGY: normal
   BUILD_PATH: aruw-mcb-project/build
-  DEFAULT_BUILD_ELF_FILE: build/hardware/scons-release/aruw-mcb.elf
-  DEFAULT_TESTS_BUILD_ELF_FILE: build/tests/scons-fast/aruw-mcb-tests.elf
   NUM_JOBS: 4
   ADDITIONAL_CI_BUILD_ARGS: -j${NUM_JOBS} additional-ccflags=-Werror
 
@@ -31,10 +29,6 @@ variables:
   - merge_requests
   - develop
   - schedules
-
-.default_except: &default_except
-  variables:
-    - $UPDATE_SUBMODULE
 
 .verification_only: &verification_only
   - merge_requests
@@ -71,6 +65,7 @@ before_script:
         -p ./aruw-mcb-project/src/
         -w aruwsrc/drivers_singleton.cpp
             aruwsrc/drivers_singleton.hpp
+            aruwsrc/robot/2025engineer/engineer_control.cpp
             aruwsrc/robot/engineer/engineer_control.cpp
             aruwsrc/robot/sentry/sentry_control.cpp
             aruwsrc/robot/standard/standard_control.cpp
@@ -78,6 +73,11 @@ before_script:
             aruwsrc/robot/dart/dart_control.cpp
             aruwsrc/robot/hero/hero_control.cpp
             aruwsrc/robot/testbed/testbed_control.cpp
+            aruwsrc/robot/blank/blank_control.cpp
+            aruwsrc/robot/motor_tester/motor_tester_control.cpp
+            aruwsrc/robot/flywheel_testing/flywheel_testing_control.cpp
+            aruwsrc/robot/launcher_target/launcher_target_control.cpp
+            aruwsrc/robot/characterizer/characterizer_control.cpp
             main.cpp
 
     - python3 ./taproot-scripts/check_license_headers.py
@@ -96,14 +96,13 @@ before_script:
 .mcb_build:
   stage: Build
   only: *default_only
-  except: *default_except
   needs: ["MCB Lib Build"]
   script:
     - cd aruw-mcb-project
     - scons build robot=$ROBOT $ADDITIONAL_CI_BUILD_ARGS
     - scons size robot=$ROBOT $ADDITIONAL_CI_BUILD_ARGS > size.txt
     - python3 ../taproot-scripts/parse_metrics.py -i size.txt -o metrics.txt --identifier $ROBOT
-    - cp $DEFAULT_BUILD_ELF_FILE ../$ARTIFACT_PATH/aruw-mcb-$ROBOT.elf
+    - cp build/hardware/scons-release/TARGET_$ROBOT/aruw-mcb.elf ../$ARTIFACT_PATH/aruw-mcb-$ROBOT.elf
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$ROBOT-mcb"
     paths:
@@ -112,100 +111,112 @@ before_script:
     reports:
       metrics: metrics.txt
   cache:
-    key: mcb-binaries
-    untracked: true
-
-.sim_build:
-  stage: Build
-  only: *default_only
-  except: *default_except
-  needs: ["Sim Lib Build"]
-  script:
-    - cd aruw-mcb-project
-    - scons build-sim profile=fast robot=$ROBOT -j${NUM_JOBS}
-  cache:
-    key: sim-binaries
-    untracked: true
+    - key: mcb-libs-$CI_COMMIT_REF_SLUG
+      paths:
+        - aruw-mcb-project/build/hardware/scons-release/modm/
+        - aruw-mcb-project/build/hardware/scons-release/src/tap/
+        - aruw-mcb-project/build/hardware/scons-release/.sconsign
+      policy: pull
+    - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG
+      paths:
+        - aruw-mcb-project/build/hardware/scons-release/TARGET_$ROBOT/
+      fallback_keys:
+        - robot-$ROBOT-develop
+      when: 'always'
 
 .test_build:
   stage: Tests
   only: *default_only
-  except: *default_except
   needs: ["Test Lib Build"]
   script:
     - cd aruw-mcb-project
     - scons build-tests profile=fast robot=$ROBOT -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_$ROBOT/aruw-mcb-tests.elf
   cache:
-    key: test-binaries
-    untracked: true
+    - key: mcb-test-libs-$CI_COMMIT_REF_SLUG
+      paths:
+        - aruw-mcb-project/build/tests/scons-fast/modm/
+        - aruw-mcb-project/build/tests/scons-fast/src/tap/
+        - aruw-mcb-project/build/tests/scons-fast/test/tap/
+        - aruw-mcb-project/build/tests/scons-fast/.sconsign
+      policy: pull
+    - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG-test
+      paths:
+        - aruw-mcb-project/build/tests/scons-fast/TARGET_$ROBOT/
+      fallback_keys:
+        - robot-$ROBOT-develop-test
+      when: 'always'
 
 # Generic build, done before other builds which then use shared cache to build faster
 
 "MCB Lib Build":
   stage: Build Libraries
   only: *default_only
-  except: *default_except
   needs: []
   variables:
     GIT_SUBMODULE_STRATEGY: none
   script:
     - cd aruw-mcb-project
-    - scons build robot=STANDARD_SPIDER compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
+    - scons build robot=STANDARD_VOID compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
   cache:
-    untracked: true
-    key: mcb-binaries
+    key: mcb-libs-$CI_COMMIT_REF_SLUG
     paths:
-      - $BUILD_PATH
-
-"Sim Lib Build":
-  stage: Build Libraries
-  only: *default_only
-  except: *default_except
-  needs: []
-  script:
-    - cd aruw-mcb-project
-    - scons build robot=STANDARD_SPIDER compile_lib_only=sim profile=fast -j${NUM_JOBS}
-  cache:
-    paths:
-      - $BUILD_PATH
+      - aruw-mcb-project/build/hardware/scons-release/modm/
+      - aruw-mcb-project/build/hardware/scons-release/src/tap/
+      - aruw-mcb-project/build/hardware/scons-release/.sconsign
+    fallback_keys:
+      - mcb-libs-develop
+    when: 'always'
 
 "Test Lib Build":
   stage: Build Libraries
   only: *default_only
-  except: *default_except
   needs: []
   script:
     - cd aruw-mcb-project
-    - scons build robot=STANDARD_SPIDER compile_lib_only=test profile=fast -j${NUM_JOBS}
+    - scons build robot=STANDARD_VOID compile_lib_only=test profile=fast -j${NUM_JOBS}
   cache:
+    key: mcb-test-libs-$CI_COMMIT_REF_SLUG
     paths:
-      - $BUILD_PATH
+      - aruw-mcb-project/build/tests/scons-fast/modm/
+      - aruw-mcb-project/build/tests/scons-fast/src/tap/
+      - aruw-mcb-project/build/tests/scons-fast/test/tap/
+      - aruw-mcb-project/build/tests/scons-fast/.sconsign
+    fallback_keys:
+      - mcb-test-libs-develop
+    when: 'always'
 
-# Standard (Spider) build
+# Standard (Null) build
 
-"Standard (Spider): MCB Build":
+"Standard (Null): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: STANDARD_SPIDER
+    ROBOT: STANDARD_NULL
 
-"Standard (Spider): Sim Build":
+"Standard (Null): Test Build":
   extends:
-    - .sim_build
+    - .test_build
   variables:
-    ROBOT: STANDARD_SPIDER
+    ROBOT: STANDARD_NULL
+
+# Standard (Void) build
+
+"Standard (Void): MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: STANDARD_VOID
 
 # Test build script is different from the others since we use this one to track test coverage for the repo
-"Standard (Spider): Test Build":
+"Standard (Void): Test Build":
   stage: Tests
   needs: []
   only: *default_only
-  except: *default_except
   script:
     - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=STANDARD_SPIDER -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all $DEFAULT_TESTS_BUILD_ELF_FILE
+    - scons run-tests-gcov profile=fast robot=STANDARD_VOID -j${NUM_JOBS}
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_VOID/aruw-mcb-tests.elf
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
@@ -217,58 +228,19 @@ before_script:
         coverage_format: cobertura
         path: cobertura.xml
     expire_in: 2 weeks
-
-# Standard (Elsa) build
-
-"Standard (Elsa): MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: STANDARD_ELSA
-
-"Standard (Elsa): Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: STANDARD_ELSA
-
-"Standard (Elsa): Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: STANDARD_ELSA
-
-# Standard (Woody) Build
-
-"Standard (Woody): MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: STANDARD_WOODY
-
-"Standard (Woody): Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: STANDARD_WOODY
-
-"Standard (Woody): Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: STANDARD_WOODY
+  cache:
+    key: robot-STANDARD_VOID-$CI_COMMIT_REF_SLUG-tests
+    paths:
+      - aruw-mcb-project/build/tests/scons-fast/
+    fallback_keys:
+      - robot-STANDARD_VOID-develop-tests
+    when: 'always'
 
 # Drone build
 
 "Drone: MCB Build":
   extends:
     - .mcb_build
-  variables:
-    ROBOT: DRONE
-
-"Drone: Sim Build":
-  extends:
-    - .sim_build
   variables:
     ROBOT: DRONE
 
@@ -286,17 +258,25 @@ before_script:
   variables:
     ROBOT: ENGINEER
 
-"Engineer: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: ENGINEER
-
 "Engineer: Test Build":
   extends:
     - .test_build
   variables:
     ROBOT: ENGINEER
+
+# 2025 Engi build
+
+"2025 Engi: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: ENGI_2025
+
+"2025 Engi: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: ENGI_2025
 
 # Hero build
 
@@ -304,19 +284,13 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: HERO_CYCLONE
-
-"Hero: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: HERO_CYCLONE
+    ROBOT: HERO_ZERO
 
 "Hero: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: HERO_CYCLONE
+    ROBOT: HERO_ZERO
 
 # Sentry (Beehive) build
 
@@ -324,19 +298,13 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: SENTRY_BEEHIVE
-
-"Sentry: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: SENTRY_BEEHIVE
+    ROBOT: SENTRY_ECLIPSE
 
 "Sentry: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SENTRY_BEEHIVE
+    ROBOT: SENTRY_ECLIPSE
 
 # Dart Build
 
@@ -346,17 +314,63 @@ before_script:
   variables:
     ROBOT: DART
 
-"Dart: Sim Build":
-  extends:
-    - .sim_build
-  variables:
-    ROBOT: DART
-
 "Dart: Test Build":
   extends:
     - .test_build
   variables:
     ROBOT: DART
+
+# Testbed Build
+
+"Testbed: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: TESTBED
+  
+"Testbed: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: TESTBED
+
+# Blank Build
+
+"Blank: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: BLANK
+  
+"Blank: Test Build":
+  extends:
+    - .test_build
+  variables:
+    ROBOT: BLANK
+
+# Motor Tester Build
+
+"Motor Tester: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: MOTOR_TESTER
+
+# Launcher Target Build
+
+"Launcher Target: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: LAUNCHER_TARGET
+
+# Flywheel Testing Target Build
+
+"Flywheel Testing Target: MCB Build":
+  extends:
+    - .mcb_build
+  variables:
+    ROBOT: FLYWHEEL_TESTING
 
 # Pages deploy
 
@@ -385,7 +399,6 @@ before_script:
       - public
   only:
     - develop
-    - merge_requests
   except:
     - schedules
   environment:
@@ -409,31 +422,3 @@ pages:
     - develop
   except:
     - schedules
-
-"Update Submodule":
-  stage: Quality
-  needs: []
-  variables:
-    GIT_SUBMODULE_STRATEGY: recursive
-  before_script:
-    - apt-get update -y && apt-get install -yqqf curl openssh-client git unzip sshpass rsync --fix-missing
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY_TOOLKIT" | base64 -d | ssh-add - > /dev/null
-
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-
-    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-
-    - git config --global user.email "robomstr@uw.edu"
-    - git config --global user.name "Gitlab Runner"
-
-    - git remote rm origin
-    - git remote add origin git@gitlab.com:aruw/controls/aruw-mcb.git
-  script:
-    - ./taproot-scripts/update_taproot_submodule.sh ./aruw-mcb-project 20675733 develop
-  only:
-    variables:
-      - $UPDATE_SUBMODULE

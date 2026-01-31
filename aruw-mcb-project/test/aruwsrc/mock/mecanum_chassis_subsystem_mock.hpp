@@ -28,12 +28,20 @@ namespace aruwsrc
 {
 namespace mock
 {
-class MecanumChassisSubsystemMock : public aruwsrc::chassis::MecanumChassisSubsystem
+class MecanumChassisSubsystemMock : public aruwsrc::control::chassis::MecanumChassisSubsystem
 {
 public:
     MecanumChassisSubsystemMock(
         tap::Drivers* drivers,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
+        testing::NiceMock<tap::mock::MotorInterfaceMock>& leftFrontMotor,
+        testing::NiceMock<tap::mock::MotorInterfaceMock>& leftBackMotor,
+        testing::NiceMock<tap::mock::MotorInterfaceMock>& rightFrontMotor,
+        testing::NiceMock<tap::mock::MotorInterfaceMock>& rightBackMotor,
+        tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+        float wheelRadius,
+        float effectiveWheelbase);
     virtual ~MecanumChassisSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
@@ -42,10 +50,6 @@ public:
     MOCK_METHOD(float, chassisSpeedRotationPID, (float, float));
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(float, calculateRotationTranslationalGain, (float), ());
-    MOCK_METHOD(int16_t, getLeftFrontRpmActual, (), (const override));
-    MOCK_METHOD(int16_t, getLeftBackRpmActual, (), (const override));
-    MOCK_METHOD(int16_t, getRightFrontRpmActual, (), (const override));
-    MOCK_METHOD(int16_t, getRightBackRpmActual, (), (const override));
     MOCK_METHOD(float, getDesiredRotation, (), (const override));
 };  // class MecanumChassisSubsystemMock
 }  // namespace mock

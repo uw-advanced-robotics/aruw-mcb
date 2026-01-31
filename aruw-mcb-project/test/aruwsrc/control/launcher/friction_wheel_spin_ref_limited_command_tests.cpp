@@ -32,7 +32,26 @@ using namespace tap::communication::serial;
 class FrictionWheelSpinRefLimitedCommandTest : public Test
 {
 protected:
-    FrictionWheelSpinRefLimitedCommandTest() : frictionWheels(&drivers) {}
+    FrictionWheelSpinRefLimitedCommandTest()
+        : leftFlywheel(
+              &drivers,
+              tap::motor::MOTOR1,
+              tap::can::CanBus::CAN_BUS1,
+              true,
+              "Left flywheel",
+              false),
+          rightFlywheel(
+              &drivers,
+              tap::motor::MOTOR2,
+              tap::can::CanBus::CAN_BUS1,
+              false,
+              "Right flywheel",
+              false),
+          frictionWheels(
+              &drivers,
+              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}})
+    {
+    }
 
     void SetUp() override
     {
@@ -42,6 +61,8 @@ protected:
     }
 
     tap::Drivers drivers;
+    NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
+    NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
     aruwsrc::mock::FrictionWheelSubsystemMock frictionWheels;
     RefSerialData::Rx::RobotData robotData{};
     bool refSerialOnline = false;
@@ -59,55 +80,7 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_ref_serial_offline)
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = false;
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(5));
-
-    frictionWheelSpinRefLimitedCommand.execute();
-}
-
-TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_1_specified)
-{
-    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
-        &drivers,
-        &frictionWheels,
-        5,
-        false,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-    refSerialOnline = true;
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
-    robotData.turret.barrelSpeedLimit17ID1 = 10;
-
-    frictionWheelSpinRefLimitedCommand.execute();
-}
-
-TEST_EXECUTE(barrelSpeedLimit17ID1_used_when_ref_serial_online_barrel_2_specified)
-{
-    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
-        &drivers,
-        &frictionWheels,
-        5,
-        false,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2);
-
-    refSerialOnline = true;
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
-    robotData.turret.barrelSpeedLimit17ID2 = 10;
-
-    frictionWheelSpinRefLimitedCommand.execute();
-}
-
-TEST_EXECUTE(barrelSpeedLimit17ID2_used_when_ref_serial_online_barrel_42mm_specified)
-{
-    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
-        &drivers,
-        &frictionWheels,
-        5,
-        false,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
-
-    refSerialOnline = true;
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
-    robotData.turret.barrelSpeedLimit42 = 10;
+    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(5, false));
 
     frictionWheelSpinRefLimitedCommand.execute();
 }
@@ -122,8 +95,7 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_s
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = true;
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
-    robotData.turret.barrelSpeedLimit17ID1 = 10;
+    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0, false));
 
     frictionWheelSpinRefLimitedCommand.execute();
 }
@@ -138,37 +110,8 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_s
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = false;
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
-    robotData.turret.barrelSpeedLimit17ID1 = 10;
+    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0, false));
 
-    frictionWheelSpinRefLimitedCommand.execute();
-}
-
-TEST_EXECUTE(launch_speed_changes_when_ref_serial_online_and_barrel_speed_changes)
-{
-    FrictionWheelSpinRefLimitedCommand frictionWheelSpinRefLimitedCommand(
-        &drivers,
-        &frictionWheels,
-        0,
-        false,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
-
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0));
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(10));
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(15));
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(30));
-
-    frictionWheelSpinRefLimitedCommand.execute();
-
-    refSerialOnline = true;
-
-    robotData.turret.barrelSpeedLimit17ID1 = 10;
-    frictionWheelSpinRefLimitedCommand.execute();
-
-    robotData.turret.barrelSpeedLimit17ID1 = 15;
-    frictionWheelSpinRefLimitedCommand.execute();
-
-    robotData.turret.barrelSpeedLimit17ID1 = 30;
     frictionWheelSpinRefLimitedCommand.execute();
 }
 
@@ -193,7 +136,7 @@ TEST_F(FrictionWheelSpinRefLimitedCommandTest, end__sets_launch_speed_to_0)
         true,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0)).Times(2);
+    EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0, false)).Times(2);
 
     frictionWheelSpinRefLimitedCommand.end(true);
     frictionWheelSpinRefLimitedCommand.end(false);

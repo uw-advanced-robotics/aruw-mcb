@@ -35,15 +35,15 @@
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
 
+#include "capacitor_bank_power_limiter.hpp"
+
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "tap/mock/dji_motor_mock.hpp"
 #else
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Abstract subsystem for a holonomic chassis
@@ -58,7 +58,9 @@ class HolonomicChassisSubsystem : public tap::control::chassis::ChassisSubsystem
 public:
     HolonomicChassisSubsystem(
         tap::Drivers* drivers,
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor);
+        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
+        communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 
     /**
      * Used to index into matrices returned by functions of the form get*Velocity*().
@@ -70,23 +72,35 @@ public:
         R = 2,
     };
 
-    static inline float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
+    static inline float getMaxWheelSpeed(bool refSerialOnline, float chassisPowerLimit)
     {
         if (!refSerialOnline)
         {
-            chassisPower = 0;
+            chassisPowerLimit = 0;
         }
 
         // only re-interpolate when needed (since this function is called a lot and the chassis
-        // power rarely changes, this helps cut down on unnecessary array searching/interpolation)
-        if (lastComputedMaxWheelSpeed.first != chassisPower)
+        // power limit rarely changes, this helps cut down on unnecessary array
+        // searching/interpolation)
+        if (lastComputedMaxWheelSpeed.first != (int)chassisPowerLimit)
         {
-            lastComputedMaxWheelSpeed.first = chassisPower;
+            lastComputedMaxWheelSpeed.first = (int)chassisPowerLimit;
             lastComputedMaxWheelSpeed.second =
-                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
+                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPowerLimit);
         }
 
         return lastComputedMaxWheelSpeed.second;
+    }
+
+    static inline float getChassisPowerLimit(tap::Drivers* drivers)
+    {
+        if (capacitorBank != nullptr && capacitorBank->isSprinting())
+        {
+            return capacitorBank->getMaximumOutputCurrent() *
+                   communication::can::cap_bank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
+        }
+
+        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
     }
 
     /**
@@ -143,17 +157,16 @@ public:
 
     const char* getName() const override { return "Chassis"; }
 
-    mockable inline void onHardwareTestStart() override { setDesiredOutput(0, 0, 0); }
-
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
+    static communication::can::cap_bank::CapacitorBank* capacitorBank;
 
     float desiredRotation = 0;
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 
-    tap::control::chassis::PowerLimiter chassisPowerLimiter;
+    CapBankPowerLimiter chassisPowerLimiter;
 
     virtual void limitChassisPower() = 0;
 
@@ -166,10 +179,10 @@ public:
         return mat * ratio;
     }
 
+    virtual float mpsToRpm(float mps) const = 0;
+
 };  // class HolonomicChassisSubsystem
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
 
 #endif  // HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_

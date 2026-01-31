@@ -23,14 +23,14 @@
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 #include "chassis_rel_drive.hpp"
 #include "holonomic_chassis_subsystem.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 ChassisImuDriveCommand::ChassisImuDriveCommand(
     tap::Drivers* drivers,
@@ -55,7 +55,7 @@ void ChassisImuDriveCommand::initialize()
 
     if (imuSetpointInitialized)
     {
-        const float yaw = modm::toRadian(drivers->mpu6500.getYaw());
+        const float yaw = drivers->mpu6500.getYaw();
         rotationSetpoint.setWrappedValue(yaw);
     }
 
@@ -76,7 +76,7 @@ void ChassisImuDriveCommand::execute()
         }
         else
         {
-            const float yaw = modm::toRadian(drivers->mpu6500.getYaw());
+            const float yaw = drivers->mpu6500.getYaw();
             angleFromDesiredRotation = -rotationSetpoint.minDifference(yaw);
 
             // Update desired yaw angle, bound the setpoint to within some angle of the current mpu
@@ -115,7 +115,7 @@ void ChassisImuDriveCommand::execute()
             // run PID controller to attempt to attain the setpoint
             chassisRotationDesiredWheelspeed = chassis->chassisSpeedRotationPID(
                 angleFromDesiredRotation,
-                targetVelocity - modm::toRadian(drivers->mpu6500.getGz()));
+                targetVelocity - drivers->mpu6500.getGz());
         }
     }
     else
@@ -142,7 +142,7 @@ void ChassisImuDriveCommand::execute()
         tap::algorithms::rotateVector(
             &chassisXDesiredWheelspeed,
             &chassisYDesiredWheelspeed,
-            yawMotor->getAngleFromCenter());
+            yawMotor->getChassisFrameMeasuredAngle().getWrappedValue());
     }
     else
     {
@@ -164,4 +164,4 @@ void ChassisImuDriveCommand::execute()
 void ChassisImuDriveCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisImuDriveCommand::isFinished() const { return false; }
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

@@ -24,6 +24,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/swerve_chassis_subsystem.hpp"
 #include "aruwsrc/mock/swerve_module_mock.hpp"
 #include "aruwsrc/util_macros.hpp"
@@ -31,7 +32,7 @@
 using modm::Matrix;
 using modm::Vector3f;
 using tap::algorithms::getSign;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace testing;
 
 // See this paper for equations: https://www.hindawi.com/journals/js/2015/347379/.
@@ -41,10 +42,8 @@ static constexpr float WHEEL_VEL = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 3.
 // translational chassis velocity in m/s, if WHEEL_VEL velocity commanded in X or Y direction
 static constexpr float CHASSIS_VEL = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS;
 // rotational chassis velocity in rad/s, if WHEEL_VEL velocity commanded in R direction
-static constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-                               ? 1
-                               : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
-static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS / ::A;
+static constexpr float CHASSIS_VEL_R =
+    WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS / WHEELBASE_RADIUS;
 
 constexpr float SWERVE_FORWARD_MATRIX[24]{
     0.25,      0.0,       0.25,      0.0,      0.25,     0.,        0.25,     0.0,
@@ -59,10 +58,11 @@ protected:
     SwerveChassisSubsystemTest()
         : currentSensor(
               {&drivers.analog,
-               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
+          voltageSensor(),
           LFDr(&drivers, tap::motor::MOTOR1, CAN_BUS_MOTORS, false, "lf drive mock"),
           LFAz(&drivers, tap::motor::MOTOR2, CAN_BUS_MOTORS, false, "lf azimuth mock"),
           RFDr(&drivers, tap::motor::MOTOR3, CAN_BUS_MOTORS, false, "rf drive mock"),
@@ -78,6 +78,7 @@ protected:
           chassis(
               &drivers,
               &currentSensor,
+              &voltageSensor,
               &moduleLF,
               &moduleRF,
               &moduleLB,
@@ -94,6 +95,7 @@ protected:
 
     tap::Drivers drivers;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
+    aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
     NiceMock<tap::mock::DjiMotorMock> LFDr;
     NiceMock<tap::mock::DjiMotorMock> LFAz;
     NiceMock<tap::mock::DjiMotorMock> RFDr;
@@ -160,18 +162,6 @@ TEST_F(SwerveChassisSubsystemTest, allMotorsOnline)
     online4 = true;
 
     EXPECT_TRUE(chassis.allMotorsOnline());
-}
-
-TEST_F(SwerveChassisSubsystemTest, onHardwareTestStart_sets_desired_out_0)
-{
-    chassis.setDesiredOutput(1000, 1000, 1000);
-    chassis.onHardwareTestStart();
-
-    Matrix<float, 3, 1> chassiSVelocity = chassis.getDesiredVelocityChassisRelative();
-
-    EXPECT_NEAR(0, chassiSVelocity[0][0], 1E-3);
-    EXPECT_NEAR(0, chassiSVelocity[1][0], 1E-3);
-    EXPECT_NEAR(0, chassiSVelocity[2][0], 1E-3);
 }
 
 TEST_F(SwerveChassisSubsystemTest, initialize)

@@ -71,6 +71,15 @@ def check_header_guards():
     HEADER_PREFIX = None
     print("Checking header guards...")
     run(["python", "./taproot-scripts/check_header_guard.py", *HEADER_GUARD_CHECK_DIRS, *(["-p", HEADER_PREFIX] if HEADER_PREFIX else []), "-i", *IGNORE_HEADER])
+    
+def check_namespace():
+    # Specifying robot in namespace is redundant
+    # Constants sharing namespace is useful
+    # Old-indicators is legacy enough to not matter
+    IGNORE_NAMESPACE = ["robot"]
+    IGNORE_FOLDERS = ["*_constants.hpp", "old-indicators"]
+    print("Checking namespace rules")
+    run(["python", "./check_namespace_rule.py","-i", *IGNORE_FOLDERS,"-rn", *IGNORE_NAMESPACE])
 
 
 # def check_taproot_submodule():
@@ -132,42 +141,40 @@ def run_lbuild():
 
 
 class BuildTarget(Enum):
-    STANDARD_SPIDER = "STANDARD_SPIDER"
-    STANDARD_ELSA = "STANDARD_ELSA"
-    STANDARD_WOODY = "STANDARD_WOODY"
-    HERO_CYCLONE = "HERO_CYCLONE"
-    SENTRY_BEEHIVE = "SENTRY_BEEHIVE"
+    STANDARD_NULL = "STANDARD_NULL"
+    STANDARD_VOID = "STANDARD_VOID"
+    HERO_CYCLONE = "HERO_PERSEUS"
+    SENTRY_ECLIPSE = "SENTRY_ECLIPSE"
     DART = "DART"
     ENGINEER = "ENGINEER"
+    ENGI_2025 = "ENGI_2025"
     DRONE = "DRONE"
     TESTBED = "TESTBED"
+    BLANK = "BLANK"
+    MOTOR_TESTER = "MOTOR_TESTER"
+    LAUNCHER_TARGET = "LAUNCHER_TARGET"
+    FLYWHEEL_TESTING = "FLYWHEEL_TESTING"
+    all = "all"
 
 
 def build_mcb(target : Optional[BuildTarget] = None):
     print(f"Checking MCB build for {target.value if target else 'all'}...")
-    if not target:
+    if not target or target == BuildTarget.all:
         for t in BuildTarget:
-            build_mcb(t)
+            if t != BuildTarget.all:
+                build_mcb(t)
     else:
         run(["pipenv", "run", "scons", "build", f"robot={target.value}", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
 
 
 def build_and_run_tests(target : Optional[BuildTarget] = None):
     print(f"Checking tests for {target.value if target else 'all'}...")
-    if not target:
+    if not target or target == BuildTarget.all:
         for t in BuildTarget:
-            build_mcb(t)
+            if t != BuildTarget.all:
+                build_and_run_tests(t)
     else:
-        run(["pipenv", "run", "scons", "run-tests", f"robot={target.value}", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
-
-
-def build_sim(target : Optional[BuildTarget] = None):
-    print(f"Checking sim build for {target.value if target else 'all'}...")
-    if not target:
-        for t in BuildTarget:
-            build_mcb(t)
-    else:
-        run(["pipenv", "run", "scons", "build-sim", "profile=fast", "additional-ccflags=-Werror"], cwd=PROJECT_DIR)
+        run(["pipenv", "run", "scons", "run-tests", f"robot={target.value}"], cwd=PROJECT_DIR)
 
 
 action_to_method : Dict[str, Callable] = {
@@ -175,11 +182,11 @@ action_to_method : Dict[str, Callable] = {
     "singleton_drivers" : check_singleton_drivers,
     "license" : check_license_headers,
     "header_guards" : check_header_guards,
+    "namespace" : check_namespace,
     # "taproot" : check_taproot_submodule,
     "lbuild" : run_lbuild,
     "build" : build_mcb,
-    "test" : build_and_run_tests,
-    "sim" : build_sim,
+    "test" : build_and_run_tests
 }
 
 
@@ -212,7 +219,6 @@ def main():
         run_lbuild()
         build_mcb()
         build_and_run_tests()
-        build_sim()
 
     # TODO: idk how docs work
 

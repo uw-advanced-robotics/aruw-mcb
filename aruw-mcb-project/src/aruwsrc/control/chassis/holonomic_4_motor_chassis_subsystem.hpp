@@ -20,17 +20,19 @@
 #ifndef HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 #define HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 
-#include "tap/communication/gpio/analog.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
-#include "constants/chassis_constants.hpp"
-
 #include "holonomic_chassis_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace chassis
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include <gmock/gmock.h>
+
+#include "tap/mock/motor_interface_mock.hpp"
+#endif
+
+namespace aruwsrc::control::chassis
 {
 /**
  * Encapsulates a chassis with mecanum wheels in standard layout
@@ -38,24 +40,28 @@ namespace chassis
 class Holonomic4MotorChassisSubsystem : public HolonomicChassisSubsystem
 {
 public:
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    using Motor = testing::NiceMock<tap::mock::MotorInterfaceMock>;
+#else
+    using Motor = tap::motor::MotorInterface;
+#endif
+
     Holonomic4MotorChassisSubsystem(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        tap::motor::MotorId leftFrontMotorId = LEFT_FRONT_MOTOR_ID,
-        tap::motor::MotorId leftBackMotorId = LEFT_BACK_MOTOR_ID,
-        tap::motor::MotorId rightFrontMotorId = RIGHT_FRONT_MOTOR_ID,
-        tap::motor::MotorId rightBackMotorId = RIGHT_BACK_MOTOR_ID);
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
+        Motor& leftFrontMotor,
+        Motor& leftBackMotor,
+        Motor& rightFrontMotor,
+        Motor& rightBackMotor,
+        tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+        communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 
     inline bool allMotorsOnline() const override
     {
         return leftFrontMotor.isMotorOnline() && rightFrontMotor.isMotorOnline() &&
                leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
-
-    virtual inline int16_t getLeftFrontRpmActual() const { return leftFrontMotor.getShaftRPM(); }
-    virtual inline int16_t getLeftBackRpmActual() const { return leftBackMotor.getShaftRPM(); }
-    virtual inline int16_t getRightFrontRpmActual() const { return rightFrontMotor.getShaftRPM(); }
-    virtual inline int16_t getRightBackRpmActual() const { return rightBackMotor.getShaftRPM(); }
 
     inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 
@@ -104,6 +110,11 @@ public:
      */
     mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
+    float mpsToRpm(float mps) const override
+    {
+        return mps / (M_TWOPI * WHEEL_RADIUS) * 60.0f / CHASSIS_GEARBOX_RATIO;
+    }
+
 protected:
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
@@ -114,35 +125,25 @@ private:
      */
     void calculateOutput(float x, float y, float r, float maxWheelSpeed);
 
-    void updateMotorRpmPid(
-        modm::Pid<float>* pid,
-        tap::motor::DjiMotor* const motor,
-        float desiredRpm);
+    void updateMotorRpmPid(int i);
 
     // wheel velocity PID variables
-    modm::Pid<float> velocityPid[4];
+    tap::algorithms::SmoothPid velocityPid[4];
+
+    float velocityPidErrors[4];
 
     // ✨ the motors ✨
-    tap::motor::DjiMotor* motors[4];
+    tap::motor::MotorInterface* motors[4];
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
-    testing::NiceMock<tap::mock::DjiMotorMock> leftFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> leftBackMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightFrontMotor;
-    testing::NiceMock<tap::mock::DjiMotorMock> rightBackMotor;
-
-private:
-#else
-    // motors
-    tap::motor::DjiMotor leftFrontMotor;
-    tap::motor::DjiMotor leftBackMotor;
-    tap::motor::DjiMotor rightFrontMotor;
-    tap::motor::DjiMotor rightBackMotor;
 #endif
+    Motor& leftFrontMotor;
+    Motor& leftBackMotor;
+    Motor& rightFrontMotor;
+    Motor& rightBackMotor;
 };
 
-}  // namespace chassis
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
 
 #endif

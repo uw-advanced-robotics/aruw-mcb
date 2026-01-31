@@ -21,20 +21,19 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
     Module* moduleLeftFront,
     Module* moduleRightFront,
     Module* moduleLeftBack,
     Module* moduleRightBack,
-    const float forwardMatrixArray[24])
-    : HolonomicChassisSubsystem(drivers, currentSensor),
-      NUM_MODULES(4),
+    const float forwardMatrixArray[24],
+    communication::can::cap_bank::CapacitorBank* capacitorBank)
+    : HolonomicChassisSubsystem(drivers, currentSensor, voltageSensor, capacitorBank),
       modules{moduleLeftFront, moduleRightFront, moduleLeftBack, moduleRightBack},
       forwardMatrix(forwardMatrixArray)
 {
@@ -79,7 +78,7 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
         r,
         getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit));
+            HolonomicChassisSubsystem::getChassisPowerLimit(drivers)));
 }
 
 void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
@@ -114,12 +113,6 @@ void SwerveChassisSubsystem::limitChassisPower()
     currentSensor->update();
     float powerLimitFrac = chassisPowerLimiter.getPowerLimitRatio();
 
-    // short circuit if power limiting doesn't need to be applied
-    if (compareFloatClose(1.0f, powerLimitFrac, 1E-3))
-    {
-        return;
-    }
-
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {
         modules[i]->limitPower(powerLimitFrac);
@@ -150,6 +143,4 @@ modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelat
     return forwardMatrix * desiredModuleVectors;
 }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

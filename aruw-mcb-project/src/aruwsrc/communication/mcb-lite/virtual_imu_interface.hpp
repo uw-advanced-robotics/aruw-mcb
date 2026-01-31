@@ -29,7 +29,7 @@
 using namespace tap::communication::sensors::imu::mpu6500;
 using namespace tap::communication::serial;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
 {
@@ -42,16 +42,16 @@ public:
         calibrateIMUMessage.setCRC16();
     }
 
-    float getPitch() override { return pitch; }
-    float getRoll() override { return roll; }
-    float getYaw() override { return yaw; }
-    float getGx() override { return Gx; }
-    float getGy() override { return Gy; }
-    float getGz() override { return Gz; }
-    float getAx() override { return Ax; }
-    float getAy() override { return Ay; }
-    float getAz() override { return Az; }
-    float getTemp() override { return temperature; }
+    float getPitch() const override { return pitch; }
+    float getRoll() const override { return roll; }
+    float getYaw() const override { return yaw; }
+    float getGx() const override { return Gx; }
+    float getGy() const override { return Gy; }
+    float getGz() const override { return Gz; }
+    float getAx() const override { return Ax; }
+    float getAy() const override { return Ay; }
+    float getAz() const override { return Az; }
+    float getTemp() const { return temperature; }
     Mpu6500::ImuState getImuState() { return imuState; }
     virtual inline const char* getName() const { return "Virtual MPU6500"; }
     void requestCalibration() { sendIMUCalibrationMessage = true; }
@@ -62,7 +62,12 @@ private:
         IMUMessage* imuMessage = (IMUMessage*)completeMessage.data;
         pitch = imuMessage->pitch;
         roll = imuMessage->roll;
+#ifdef TARGET_SENTRY_ECLIPSE
+        // IMUs initalize yaw at 180 degrees for some reason, must be resolved as tech debt
+        yaw = fmodf(imuMessage->yaw + 180, 360);
+#else
         yaw = imuMessage->yaw;
+#endif
         Gx = imuMessage->Gx;
         Gy = imuMessage->Gy;
         Gz = imuMessage->Gz;
@@ -83,6 +88,6 @@ private:
     bool sendIMUCalibrationMessage = false;
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif

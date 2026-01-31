@@ -17,13 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(TARGET_HERO_CYCLONE) && defined(PLATFORM_HOSTED)
+#if defined(TARGET_HERO_PERSEUS) && defined(PLATFORM_HOSTED)
 
 #include "robot_sim.hpp"
 
-namespace aruwsrc::sim
+namespace aruwsrc::sim_initialization
 {
 void initialize_robot_sim() {}
-}  // namespace aruwsrc::sim
+}  // namespace aruwsrc::sim_initialization
 
 #endif

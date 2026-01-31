@@ -21,9 +21,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& config)
     : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, config.gearboxRatio),
@@ -48,7 +46,12 @@ void SwerveModule::initialize()
     azimuthMotor.initialize();
 }
 
-void SwerveModule::setZeroRPM() { speedSetpointRPM = 0; }
+void SwerveModule::setZeroRPM()
+{
+    speedSetpointRPM = 0;
+    driveMotor.setDesiredOutput(0);
+    azimuthMotor.setDesiredOutput(0);
+}
 
 bool SwerveModule::allMotorsOnline() const
 {
@@ -82,11 +85,11 @@ float SwerveModule::calculate(float x, float y, float r)
         // TODO: mechanical problem with the tension wheels in swerve module make this not work
         //       re-enable once fixed
         // reverse module if it's a smaller azimuth rotation to do so
-        // if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
-        // {
-        //     rotationOffset -=
-        //         getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
-        // }
+        if (abs(newRotationSetpointRadians - preScaledRotationSetpoint) > M_PI_2)
+        {
+            rotationOffset -=
+                getSign(newRotationSetpointRadians - preScaledRotationSetpoint) * M_PI;
+        }
         preScaledRotationSetpoint = newRawRotationSetpointRadians + rotationOffset;
 
         preScaledSpeedSetpoint =
@@ -112,41 +115,48 @@ void SwerveModule::setDesiredState(float driveRpm, float radianTarget)
     rotationSetpoint = radianTarget;
 }
 
+float rpm = 0;
+
 void SwerveModule::refresh()
 {
+    rpm = getDriveRPM();
     drivePid.runControllerDerivateError(speedSetpointRPM - getDriveRPM(), 2.0f);
-    driveMotor.setDesiredOutput(drivePid.getOutput());
+    driveMotor.setDesiredOutput(drivePid.getOutput() * powerLimitFrac);
 
-    azimuthPid.runController(rotationSetpoint - getAngle(), getAngularVelocity(), 2.0f);
-    azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
+    azimuthPid.runController(
+        getAngle().minDifference(tap::algorithms::Angle(rotationSetpoint)),
+        getAngularVelocity(),
+        2.0f);
+    azimuthMotor.setDesiredOutput(azimuthPid.getOutput() * powerLimitFrac);
 }
 
-float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(driveMotor.getShaftRPM()); }
+float SwerveModule::getDriveVelocity() const { return wheel.rpmToMps(getDriveRPM()); }
 
-float SwerveModule::getDriveRPM() const { return driveMotor.getShaftRPM(); }
-
-float SwerveModule::getAngle() const
+float SwerveModule::getDriveRPM() const
 {
-    return modm::toRadian(
-        azimuthMotor.encoderToDegrees(
-            azimuthMotor.getEncoderUnwrapped() - config.azimuthZeroOffset) *
-        config.azimuthMotorGearing);
+    return driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI /
+           (config.driveMotorGearing * config.gearboxRatio);
+}
+
+tap::algorithms::WrappedFloat SwerveModule::getAngle() const
+{
+    return azimuthMotor.getEncoder()->getPosition();
 }
 
 float SwerveModule::getAngularVelocity() const
 {
-    return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) * config.azimuthMotorGearing;
+    return 6.0f * azimuthMotor.getEncoder()->getVelocity() * 60.f / M_TWOPI /
+           config.azimuthMotorGearing;
 }
 
 void SwerveModule::limitPower(float frac)
 {
-    driveMotor.setDesiredOutput(
-        driveMotor.getOutputDesired() * frac *
-        angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle()));
-    azimuthMotor.setDesiredOutput(
-        azimuthMotor.getOutputDesired() * frac *
-        (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
+    powerLimitFrac = frac;
+    // TODO: We were scared so we commented out the code to prioritize azimuth motor power
+    // driveMotor.setDesiredOutput(driveMotor.getOutputDesired() * frac);  // *
+    // angularBiasLUTInterpolator.interpolate(fabs(rotationSetpoint - getAngle())));
+    // azimuthMotor.setDesiredOutput(azimuthMotor.getOutputDesired() * frac);  // *
+    // (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
 }
 
-}  // namespace chassis
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

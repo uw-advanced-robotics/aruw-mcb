@@ -26,7 +26,7 @@
 
 namespace aruwsrc::mock
 {
-class HopperSubsystemMock : public control::HopperSubsystem
+class HopperSubsystemMock : public control::hopper_cover::HopperSubsystem
 {
     HopperSubsystemMock(
         tap::Drivers *drivers,
@@ -39,7 +39,6 @@ class HopperSubsystemMock : public control::HopperSubsystem
     MOCK_METHOD(void, setOpen, (), (override));
     MOCK_METHOD(void, setClose, (), (override));
     MOCK_METHOD(void, refresh, (), (override));
-    MOCK_METHOD(void, runHardwareTests, (), (override));
     MOCK_METHOD(const char *, getName, (), (const override));
 };
 }  // namespace aruwsrc::mock

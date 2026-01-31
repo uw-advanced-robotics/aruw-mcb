@@ -59,7 +59,8 @@ public:
     {
         SINGLE = 0,
         NO_HEATING,
-        FULL_AUTO_10HZ,
+        LIMITED_10HZ,
+        LIMITED_20HZ,
         FULL_AUTO,
         NUM_SHOOTER_STATES,
     };
@@ -99,27 +100,22 @@ private:
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager;
     governor::CvOnTargetGovernor &cvOnTargetGovernor;
 
+#if defined(ALL_STANDARDS)
+    LaunchMode launchMode = LIMITED_20HZ;
+#else
     LaunchMode launchMode = SINGLE;
+#endif
+
     std::optional<ConstantVelocityAgitatorCommand *> command;
 
     int getCurrentBarrelCoolingRate() const
     {
-        if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 != 0)
-        {
-            return drivers->refSerial.getRobotData().turret.heatCoolingRate17ID1 / 10.0f;
-        }
-        else if (drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 != 0)
-        {
-            return drivers->refSerial.getRobotData().turret.heatCoolingRate17ID2 / 10.0f;
-        }
-        else if (drivers->refSerial.getRobotData().turret.heatCoolingRate42 != 0)
-        {
-            return drivers->refSerial.getRobotData().turret.heatCoolingRate42 / 100.0f;
-        }
-        else
-        {
-            return ManualFireRateReselectionManager::MAX_FIRERATE_RPS;
-        }
+        int coolingRate = drivers->refSerial.getRobotData().turret.coolingRate;
+#if defined(TARGET_HERO_PERSEUS)
+        return coolingRate / 100.0f;
+#else
+        return coolingRate / 10.0f;
+#endif
     }
 };
 

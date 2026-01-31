@@ -32,23 +32,14 @@ namespace tap::algorithms::ballistics
 {
 /**
  * Stores the 3D position, velocity, and acceleration of an object as `modm::Vector3f`s.
- * Assumes it is rotating around a point with radius, theta, and omega
  * - Position Units: m
  * - Velocity Units: m/s
  * - Acceleration Units: m/s^2
- * - Angle Units: rad
- * - Angular Velocity units: rad/s
  */
-struct MeasuredKinematicState
-{
-    modm::Vector3f position;      // m
-    modm::Vector3f velocity;      // m/s
-    modm::Vector3f acceleration;  // m/s^2
 
-    // rotation about center
-    float radius{0};  // m
-    float theta{0};   // rad
-    float omega{0};   // rad/s
+struct AbstractKinematicState
+{
+    virtual modm::Vector3f projectForward(float dt) const = 0;
 
     /**
      * @param[in] dt: The amount of time to project forward.
@@ -60,24 +51,37 @@ struct MeasuredKinematicState
      */
     inline static float quadraticKinematicProjection(float dt, float s, float v, float a)
     {
-        return s + v * dt + 0.5f * a * dt * dt;
+        return s + v * dt + 0.5f * a * powf(dt, 2.0f);
     }
+};
+
+struct SecondOrderKinematicState : public AbstractKinematicState
+{
+    inline SecondOrderKinematicState(
+        modm::Vector3f position,
+        modm::Vector3f velocity,
+        modm::Vector3f acceleration)
+        : position(position),
+          velocity(velocity),
+          acceleration(acceleration)
+    {
+    }
+
+    modm::Vector3f position;      // m
+    modm::Vector3f velocity;      // m/s
+    modm::Vector3f acceleration;  // m/s^2
 
     /**
      * @param[in] dt: The amount of time to project the state forward.
      *
      * @return The future 3D position of this object using a quadratic (constant acceleration)
-     * model for the center and linear (constant angular velocity) model for angle about the center
+     * model.
      */
-    inline modm::Vector3f projectForward(float dt)
+    inline modm::Vector3f projectForward(float dt) const override
     {
-        float rx = radius * cos(theta);
-        float ry = radius * sin(theta);
-        float rxf = radius * cos(theta + omega * dt);
-        float ryf = radius * sin(theta + omega * dt);
         return modm::Vector3f(
-            quadraticKinematicProjection(dt, position.x - rx, velocity.x, acceleration.x) + rxf,
-            quadraticKinematicProjection(dt, position.y - ry, velocity.y, acceleration.y) + ryf,
+            quadraticKinematicProjection(dt, position.x, velocity.x, acceleration.x),
+            quadraticKinematicProjection(dt, position.y, velocity.y, acceleration.y),
             quadraticKinematicProjection(dt, position.z, velocity.z, acceleration.z));
     }
 };
@@ -129,7 +133,7 @@ bool computeTravelTime(
  * @return Whether or not a valid aiming solution was found. Out parameters only valid if true.
  */
 bool findTargetProjectileIntersection(
-    MeasuredKinematicState targetInitialState,
+    const AbstractKinematicState &targetInitialState,
     float bulletVelocity,
     uint8_t numIterations,
     float *turretPitch,

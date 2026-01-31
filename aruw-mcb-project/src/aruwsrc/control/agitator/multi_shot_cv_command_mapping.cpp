@@ -53,9 +53,13 @@ void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::Remote
             timesToReschedule = -1;
             fireRate = getCurrentBarrelCoolingRate();
             break;
-        case FULL_AUTO_10HZ:
+        case LIMITED_10HZ:
             timesToReschedule = -1;
             fireRate = 10;
+            break;
+        case LIMITED_20HZ:
+            timesToReschedule = -1;
+            fireRate = 20;
             break;
         case FULL_AUTO:
             timesToReschedule = -1;

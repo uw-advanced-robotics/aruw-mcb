@@ -32,8 +32,11 @@
 #else
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
+#include "aruwsrc/algorithms/plate_hit_tracker.hpp"
+#include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+#include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
@@ -52,11 +55,20 @@ public:
         : tap::Drivers(),
           controlOperatorInterface(this),
           visionCoprocessor(this),
-          oledDisplay(this, &visionCoprocessor, &turretMCBCanCommBus1, &turretMCBCanCommBus2),
+          oledDisplay(
+              this,
+              &visionCoprocessor,
+              &turretMCBCanCommBus1,
+              &turretMCBCanCommBus2,
+              &chassisMcbLite,
+              nullptr),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          mcbLite(this, tap::communication::serial::Uart::Uart8)
+          chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
+          turretMajorImu(),
+          plateHitTracker(this),
+          stateMachine(refSerial, visionCoprocessor)
     {
     }
 
@@ -69,13 +81,16 @@ public:
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
-    control::sentry::SentryControlOperatorInterface controlOperatorInterface;
-    serial::VisionCoprocessor visionCoprocessor;
+    SentryControlOperatorInterface controlOperatorInterface;
+    communication::serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
-    can::TurretMCBCanComm turretMCBCanCommBus1;
-    can::TurretMCBCanComm turretMCBCanCommBus2;
+    communication::can::TurretMCBCanComm turretMCBCanCommBus1;
+    communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
-    aruwsrc::virtualMCB::MCBLite mcbLite;
+    aruwsrc::communication::mcb_lite::MCBLite chassisMcbLite;
+    aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImu;
+    aruwsrc::algorithms::PlateHitTracker plateHitTracker;
+    aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 #endif
 };  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc::sentry

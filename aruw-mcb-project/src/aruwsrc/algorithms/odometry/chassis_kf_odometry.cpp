@@ -67,6 +67,12 @@ void ChassisKFOdometry::update()
     float y[int(OdomInput::NUM_INPUTS)] = {};
     y[int(OdomInput::VEL_X)] = chassisVelocity[0][0];
     y[int(OdomInput::VEL_Y)] = chassisVelocity[1][0];
+#ifdef TARGET_HERO_PERSEUS
+    // @todo this is a dumb ifdef to avoid support for vertically mounted chassis MCB
+    y[int(OdomInput::ACC_X)] = imu.getAz();
+    y[int(OdomInput::ACC_Y)] = -imu.getAy();
+    tap::algorithms::rotateVector(&y[int(OdomInput::ACC_X)], &y[int(OdomInput::ACC_Y)], chassisYaw);
+#else
     y[int(OdomInput::ACC_X)] = imu.getAx();
     y[int(OdomInput::ACC_Y)] = imu.getAy();
 
@@ -74,7 +80,8 @@ void ChassisKFOdometry::update()
     tap::algorithms::rotateVector(
         &y[int(OdomInput::ACC_X)],
         &y[int(OdomInput::ACC_Y)],
-        serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+        communication::serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+#endif
 
     // perform the update, after this update a new state matrix is now available
     kf.performUpdate(y);
@@ -135,6 +142,21 @@ void ChassisKFOdometry::updateMeasurementCovariance(
     kf.getMeasurementCovariance()[0] = velocityCovariance;
     kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
         velocityCovariance;
+}
+
+void ChassisKFOdometry::overrideOdometryPosition(const float positionX, const float positionY)
+{
+    auto currKFState = kf.getStateVectorAsMatrix();
+
+    float newState[int(OdomState::NUM_STATES)] = {
+        positionX,
+        currKFState[int(OdomState::VEL_X)],
+        currKFState[int(OdomState::ACC_X)],
+        positionY,
+        currKFState[int(OdomState::VEL_Y)],
+        currKFState[int(OdomState::ACC_Y)]};
+
+    kf.init(newState);
 }
 
 }  // namespace aruwsrc::algorithms::odometry

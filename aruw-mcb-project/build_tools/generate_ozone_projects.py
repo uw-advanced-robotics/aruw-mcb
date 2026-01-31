@@ -1,0 +1,87 @@
+# Copyright (c) 2024-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+#
+# This file is part of aruw-mcb.
+#
+# aruw-mcb is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# aruw-mcb is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+import os
+import subprocess
+
+from SCons.Script import *
+
+ROBOT_IPS = {
+    "TARGET_STANDARD_NULL": "192.168.1.103",
+    "TARGET_STANDARD_VOID": "192.168.1.166",
+    "TARGET_SENTRY_ECLIPSE": "192.168.1.231",
+    "TARGET_HERO_ZERO": "192.168.1.169",
+    "TARGET_ENGINEER": "192.168.0.232",
+    "TARGET_ENGI_2025": "192.168.0.232"
+}
+
+def run_ozone(env, source, robot=""):
+    def call_run_ozone(target, source, env):
+        jdebug = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"
+        import sys
+        if sys.platform == "win32":
+            os.startfile(jdebug)
+        elif sys.platform == "darwin":
+            subprocess.call(['open', '-n', '-a', 'Ozone.app', '--args', jdebug])
+        else:
+            subprocess.call(['xdg-open', jdebug])
+
+    action = Action(call_run_ozone, cmdstr="Launching Ozone...")
+    return env.AlwaysBuild(env.Alias("ozone_run", [generate_ozone(env, robot), source], action))
+
+def generate_ozone(env, robot=""):
+    def call_generate_ozone(target, source, env):
+        project_content = ""
+        with open("./build_tools/example_ozone_project/example.jdebug") as r:
+            project_content = r.read()
+
+        project_file_path = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"
+
+        ip = ARGUMENTS.get("ip", "")
+        if ip == "" and robot in ROBOT_IPS.keys():
+            ip = ROBOT_IPS[robot]
+
+        if ip != "":
+            print(f"Using IP({ip}) connection...")
+            project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"IP\", \"{ip}\");")
+        else:
+            print(f"Using USB connection...")
+            project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"USB\", \"\");")
+
+        project_content = project_content.replace("${BUILD_DIR}", env['BUILDPATH'])
+        project_content = project_content.replace("${BUILD_DIR_LOWER}", env['BUILDPATH'].lower())
+
+        target.append(env.File(project_file_path))
+        target.append(env.File(f"{project_file_path}.user"))
+
+        with open(f"{project_file_path}", "w+") as w:
+            w.write(project_content)
+
+        with open("./build_tools/example_ozone_project/example.jdebug.user") as w:
+            project_user_content = w.read()
+
+        with open(f"{project_file_path}.user", "w+") as w:
+            w.write(project_user_content)
+
+    action = Action(call_generate_ozone, cmdstr="Generating Ozone config...")
+    return env.AlwaysBuild(env.Alias("ozone_generate", '', action))
+
+def generate(env, **kw):
+    env.AddMethod(run_ozone, "RunOzoneConfig")
+    env.AddMethod(generate_ozone, "GenerateOzoneConfig")
+
+def exists(env):
+    return True

@@ -34,105 +34,53 @@ class TurretMotor;
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * Controller that runs a single position PID controller in the chassis frame to control the turret
- * yaw.
+ * Controller that runs a single position PID controller in the chassis frame to control the turret.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-class ChassisFrameYawTurretController final : public TurretYawControllerInterface
+template <Axis AXIS>
+class ChassisFrameTurretController : public TurretAxisControllerInterface<AXIS>
 {
 public:
     /**
-     * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
+     * @param[in] Motor A `yawMotor` object accessible for children objects to use.
      * @param[in] pidConfig PID configuration struct for the controller.
      */
-    ChassisFrameYawTurretController(
-        TurretMotor &yawMotor,
-        const tap::algorithms::SmoothPidConfig &pidConfig);
+    ChassisFrameTurretController(
+        TurretMotor &Motor,
+        const tap::algorithms::SmoothPidConfig &pidConfig,
+        const std::vector<TurretCompensatorInterface *> compensators = {});
 
-    void initialize() final;
+    void initialize();
 
     /**
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the chassis frame.
      */
-    void runController(const uint32_t dt, const float desiredSetpoint) final;
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint);
 
-    void setSetpoint(float desiredSetpoint) final;
+    void setSetpoint(WrappedFloat desiredSetpoint);
 
     /// @return The chassis frame yaw turret measurement, refer to top level documentation for more
     /// details.
-    float getMeasurement() const final;
+    WrappedFloat getMeasurement() const;
 
     /**
      * @return The yaw setpoint, in the chassis frame.
      */
-    float getSetpoint() const final;
+    WrappedFloat getSetpoint() const;
 
-    bool isOnline() const final;
+    bool isOnline() const;
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
+    inline WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat controllerFrameAngle) const
     {
         return controllerFrameAngle;
     }
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
-    {
-        return chassisFrameAngle;
-    }
-
-private:
-    tap::algorithms::SmoothPid pid;
-};
-
-/**
- * Controller that runs a single position PID controller in the chassis frame to control the turret
- * pitch.
- *
- * Implements TurretControllerInterface interface, see parent class comment for details.
- */
-class ChassisFramePitchTurretController final : public TurretPitchControllerInterface
-{
-public:
-    /**
-     * @param[in] pitchMotor A `TurretMotor` object accessible for children objects to use.
-     * @param[in] pidConfig PID configuration struct for the controller.
-     */
-    ChassisFramePitchTurretController(
-        TurretMotor &pitchMotor,
-        const tap::algorithms::SmoothPidConfig &pidConfig);
-
-    void initialize() final;
-
-    /**
-     * @see TurretControllerInterface for more details.
-     * @param[in] desiredSetpoint The pitch desired setpoint in the chassis frame.
-     */
-    void runController(const uint32_t dt, const float desiredSetpoint) final;
-
-    void setSetpoint(float desiredSetpoint) final;
-
-    /**
-     * @return The pitch setpoint, in the chassis frame.
-     */
-    float getSetpoint() const final;
-
-    /// @return The chassis frame pitch turret measurement, refer to top level documentation for
-    /// more details.
-    float getMeasurement() const final;
-
-    bool isOnline() const final;
-
-    /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline float convertControllerAngleToChassisFrame(float controllerFrameAngle) const final
-    {
-        return controllerFrameAngle;
-    }
-
-    /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline float convertChassisAngleToControllerFrame(float chassisFrameAngle) const final
+    inline WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const
     {
         return chassisFrameAngle;
     }
@@ -144,3 +92,4 @@ private:
 }  // namespace aruwsrc::control::turret::algorithms
 
 #endif  // CHASSIS_FRAME_TURRET_CONTROLLER_HPP_
+#include "chassis_frame_turret_controller_impl.hpp"

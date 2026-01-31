@@ -65,8 +65,8 @@ public:
      * @param[in] drivers Pointer to a global drivers object.
      * @param[in] turretSubsystem Pointer to the turret to control.
      * @param[in] chassisImuYawController World frame turret controller that uses the chassis IMU.
-     * @param[in] chassisImuPitchController Turret controller that is used when the turret IMU is in
-     * use.
+     * @param[in] chassisImuPitchController Turret controller that is used when the chassis IMU is
+     * in use.
      * @param[in] turretImuYawController World frame turret controller that uses the turret IMU.
      * @param[in] turretImuPitchController Turret controller that is used when the turret IMU is in
      * use. Doesn't strictly have to be world relative.
@@ -75,10 +75,12 @@ public:
         tap::Drivers *drivers,
         ControlOperatorInterface &controlOperatorInterface,
         TurretSubsystem *turretSubsystem,
-        algorithms::TurretYawControllerInterface *chassisImuYawController,
-        algorithms::TurretPitchControllerInterface *chassisImuPitchController,
-        algorithms::TurretYawControllerInterface *turretImuYawController,
-        algorithms::TurretPitchControllerInterface *turretImuPitchController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *chassisImuYawController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH>
+            *chassisImuPitchController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *turretImuYawController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH>
+            *turretImuPitchController,
         float userYawInputScalar,
         float userPitchInputScalar,
         uint8_t turretID = 0);

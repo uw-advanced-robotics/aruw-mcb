@@ -19,7 +19,6 @@
 
 #include "otto_ballistics_solver.hpp"
 
-#include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 
@@ -35,7 +34,7 @@ using namespace modm;
 namespace aruwsrc::algorithms
 {
 OttoBallisticsSolver::OttoBallisticsSolver(
-    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
@@ -100,8 +99,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
 
-        // time in microseconds to project the target position ahead by to account for message
-        // lag
+        // time in microseconds to project the target position ahead by
         int64_t projectForwardTimeDt =
             static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
             static_cast<int64_t>(aimData.timestamp);
@@ -120,24 +118,22 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
             float currRadius = (i % 2 == 0) ? projectedAimPosData.rad0 : projectedAimPosData.rad1;
             float currTheta = projectedAimPosData.theta + M_PI_2 * i;
-            ballistics::MeasuredKinematicState targetState = {
-                .position =
-                    {projectedAimPosData.xPos + currRadius * cos(currTheta) - turretPosition.x,
+            // target state, frame whose axis is at the turret center and z is up
+            // assume acceleration of the chassis is 0 since we don't measure it
+            aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState targetState (
+                {projectedAimPosData.xPos + currRadius * cos(currTheta) - turretPosition.x,
                      projectedAimPosData.yPos + currRadius * sin(currTheta) - turretPosition.y,
                      projectedAimPosData.zPos + projectedAimPosData.plateHeights[i] -
                          turretPosition.z},
-                .velocity =
-                    {projectedAimPosData.xVel - chassisVel.x,
+               {projectedAimPosData.xVel - chassisVel.x,
                      projectedAimPosData.yVel - chassisVel.y,
                      projectedAimPosData.zVel},
-                .acceleration =
-                    {projectedAimPosData.xAcc,
+                {projectedAimPosData.xAcc,
                      projectedAimPosData.yAcc,
-                     projectedAimPosData
-                         .zAcc},  // TODO consider using chassis acceleration from IMU
-                .radius = currRadius,
-                .theta = currTheta,
-                .omega = projectedAimPosData.omega};
+                     projectedAimPosData.zAcc}, // TODO consider using chassis acceleration from IMU
+                currRadius,
+                currTheta,
+                projectedAimPosData.omega);
 
             BallisticsSolution currentSolution = BallisticsSolution();
             currentSolution.distance = targetState.position.getLength();
@@ -145,7 +141,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
             if (ballistics::findTargetProjectileIntersection(
                     targetState,
                     launchSpeed,
-                    3,
+                    NUM_FORWARD_KINEMATIC_PROJECTIONS,
                     &currentSolution.pitchAngle,
                     &currentSolution.yawAngle,
                     &currentSolution.timeOfFlight,

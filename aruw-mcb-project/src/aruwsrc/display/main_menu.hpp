@@ -27,13 +27,17 @@
 #include "tap/display/motor_menu.hpp"
 #include "tap/display/ref_serial_menu.hpp"
 
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/ui/menu/standard_menu.hpp"
 
 #include "about_menu.hpp"
+#include "autotune_menu.hpp"
+#include "capacitor_bank_menu.hpp"
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
+#include "mcb_lite_menu.hpp"
 #include "sentry_strategy_menu.hpp"
 #include "turret_mcb_menu.hpp"
 
@@ -52,9 +56,12 @@ public:
     MainMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *stack,
         tap::Drivers *drivers,
-        serial::VisionCoprocessor *visionCoprocessor,
-        can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2);
+        communication::serial::VisionCoprocessor *visionCoprocessor,
+        communication::can::TurretMCBCanComm *turretMCBCanCommBus1,
+        communication::can::TurretMCBCanComm *turretMCBCanCommBus2,
+        aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
+        aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
+        communication::can::cap_bank::CapacitorBank *capacitorBank);
 
     virtual ~MainMenu() = default;
 
@@ -69,6 +76,7 @@ private:
     tap::Drivers *drivers;
 
     ImuCalibrateMenu imuCalibrateMenu;
+    AutotuneMenu autotuneMenu;
     CVMenu cvMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
@@ -78,13 +86,20 @@ private:
     tap::communication::sensors::imu::ImuMenu imuMenu;
     TurretMCBMenu turretStatusMenuBus1;
     TurretMCBMenu turretStatusMenuBus2;
+    MCBLiteMenu mcbLiteMenu1;
+    MCBLiteMenu mcbLiteMenu2;
     AboutMenu aboutMenu;
     SentryStrategyMenu sentryStrategyMenu;
-    serial::VisionCoprocessor *visionCoprocessor;
-    can::TurretMCBCanComm *turretMCBCanCommBus1;
-    can::TurretMCBCanComm *turretMCBCanCommBus2;
+    CapacitorBankMenu capBankMenu;
+    communication::serial::VisionCoprocessor *visionCoprocessor;
+    communication::can::TurretMCBCanComm *turretMCBCanCommBus1;
+    communication::can::TurretMCBCanComm *turretMCBCanCommBus2;
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite1;
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite2;
+    communication::can::cap_bank::CapacitorBank *capacitorBank;
 
     void addImuCalibrateMenuCallback();
+    void addAutotuneMenuCallback();
     void addCVMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();
@@ -97,6 +112,9 @@ private:
     void addTurretMCBMenuBus2Callback();
     void addAboutMenuCallback();
     void addSentryStrategyMenuCallback();
+    void addMCBLiteMenu1Callback();
+    void addMCBLiteMenu2Callback();
+    void addCapacitorBankMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

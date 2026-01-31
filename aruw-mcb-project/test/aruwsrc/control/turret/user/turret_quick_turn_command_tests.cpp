@@ -61,12 +61,16 @@ TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_
 
     EXPECT_CALL(turret.yawMotor, attachTurretController(nullptr));
     ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turretYawValue));
-    EXPECT_CALL(turret.yawMotor, setChassisFrameSetpoint(M_PI));
+    EXPECT_CALL(
+        turret.yawMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, M_PI)));
 
     EXPECT_CALL(turret2.yawMotor, attachTurretController(nullptr));
     ON_CALL(turret2.yawMotor, getChassisFrameMeasuredAngle)
         .WillByDefault(ReturnRef(turret2YawValue));
-    EXPECT_CALL(turret2.yawMotor, setChassisFrameSetpoint(M_PI_4 + M_PI_2));
+    EXPECT_CALL(
+        turret2.yawMotor,
+        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, M_PI_4 + M_PI_2)));
 
     turretUturnCommand180Deg.initialize();
     turretUturnCommand90Deg.initialize();

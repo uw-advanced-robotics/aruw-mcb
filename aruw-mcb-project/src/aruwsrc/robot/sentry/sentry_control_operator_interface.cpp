@@ -29,24 +29,26 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc
 {
-namespace control::sentry
+namespace sentry
 {
 bool SentryControlOperatorInterface::isTurretControlMode()
 {
-    return (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID) ||
-           (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN) ||
-           (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN);
+    Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
+    Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
+
+    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::MID) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN);
 }
 
 bool SentryControlOperatorInterface::isDriveMode()
 {
-    return (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN) ||
-           (drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
-            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID);
+    Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
+    Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
+
+    return (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::MID) ||
+           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
 }
 
 /**
@@ -92,9 +94,9 @@ float SentryControlOperatorInterface::getChassisXVelocity()
         prevUpdateCounterChassisXInput = updateCounter;
     }
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power);
+        control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalX =
         maxChassisSpeed * limitVal(chassisXInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
@@ -127,9 +129,9 @@ float SentryControlOperatorInterface::getChassisYVelocity()
         prevUpdateCounterChassisYInput = updateCounter;
     }
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power);
+        control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalY =
         maxChassisSpeed * limitVal(chassisYInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
@@ -156,7 +158,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity()
     if (prevUpdateCounterChassisYawInput != updateCounter)
     {
         chassisYawInput.update(
-            drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
+            -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
             currTime);
         prevUpdateCounterChassisYawInput = updateCounter;
     }
@@ -212,5 +214,5 @@ float SentryControlOperatorInterface::getTurretMinor2PitchVelocity()
     return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
 }
 
-}  // namespace control::sentry
+}  // namespace sentry
 }  // namespace aruwsrc

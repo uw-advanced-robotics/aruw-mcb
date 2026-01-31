@@ -20,9 +20,11 @@
 #ifndef STANDARD_CHASSIS_CONSTANTS_HPP_
 #define STANDARD_CHASSIS_CONSTANTS_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/motor/dji_motor.hpp"
 
-#include "modm/math/filter/pid.hpp"
+#include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
@@ -30,7 +32,7 @@
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
 #endif
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -64,25 +66,36 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 20.0f;
-static constexpr float VELOCITY_PID_KI = 0.2f;
+static constexpr float VELOCITY_PID_KP = 19.0f;
+static constexpr float VELOCITY_PID_KI = 0.0f;
 static constexpr float VELOCITY_PID_KD = 0.0f;
-static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 5'000.0f;
+static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
+static constexpr float VELOCITY_PID_KV = 0.07f;
+static constexpr float VELOCITY_PID_KS = 400.0f;
+
 /**
  * This max output is measured in the c620 robomaster translated current.
  * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
  * The corresponding speed controller output torque current range is
  * -20 ~ 0 ~ 20 A.
  */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
+static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C620;
+
+static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = VELOCITY_PID_KP,
+    .ki = VELOCITY_PID_KI,
+    .kd = VELOCITY_PID_KD,
+    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
+    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+};
 
 /**
  * Rotation PID: A PD controller for chassis autorotation.
  */
-static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
-static constexpr float AUTOROTATION_PID_KD = 57.3f;
+static constexpr float AUTOROTATION_PID_KP = 3'000.0f;
+static constexpr float AUTOROTATION_PID_KD = 0.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 5'000.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 0.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
@@ -95,34 +108,25 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 /**
  * Radius of the wheels (m).
  */
-static constexpr float WHEEL_RADIUS = 0.076;
+static constexpr float WHEEL_RADIUS = 0.1016;
 
-#ifdef TARGET_STANDARD_WOODY
-/**
- * Distance from center of the two front wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.366f;
-/**
- * Distance from center of the front and rear wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+#if defined(TARGET_STANDARD_NULL)
+static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
+static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;     // 141mm -> m
+static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
+static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
 
-#elif defined(TARGET_STANDARD_ELSA)
+#elif defined(TARGET_STANDARD_VOID)
+static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
+static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;     // 141mm -> m
+static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
+static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
 
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.340f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.374f;
+#else
 
-#elif defined(TARGET_STANDARD_SPIDER)
-
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.385f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.366f;
+#error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
 
 #endif
-
-static constexpr float WHEELBASE_HYPOTENUSE =
-    (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-        ? 1
-        : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 
 /*
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y (m).
@@ -134,32 +138,17 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
-/**
- * Fraction of max chassis speed that will be applied to rotation when beyblading
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX = 0.75f;
+static constexpr BeybladeConfig BEYBLADE_CONFIG{
+    .beybladeRotationalSpeedFractionOfMax = 0.9f,
+    .beybladeTranslationalSpeedMultiplier = 0.6f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.8f,
+    .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.05f,
+    .beybladeRampRate = 50,
+};
 
-/**
- * Fraction between [0, 1], what we multiply user translational input by when beyblading.
- */
-static constexpr float BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER = 0.6f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
 
-/**
- * Threshold, a fraction of the maximum translational speed that is used to determine if beyblade
- * speed should be reduced (when translating at an appreciable speed beyblade speed is reduced).
- */
-static constexpr float
-    BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE = 0.5f;
-
-/**
- * The fraction to cut rotation speed while moving and beyblading
- */
-static constexpr float BEYBLADE_ROTATIONAL_SPEED_MULTIPLIER_WHEN_TRANSLATING = 0.7f;
-/**
- * Rotational speed to update the beyblade ramp target by each iteration until final rotation
- * setpoint reached, in RPM.
- */
-static constexpr float BEYBLADE_RAMP_UPDATE_RAMP = 50;
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // STANDARD_CHASSIS_CONSTANTS_HPP_

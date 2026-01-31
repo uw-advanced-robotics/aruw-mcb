@@ -21,13 +21,12 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 #include "holonomic_chassis_subsystem.hpp"
 
 using namespace tap::algorithms;
-
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 void ChassisRelDrive::computeDesiredUserTranslation(
     aruwsrc::control::ControlOperatorInterface *operatorInterface,
@@ -45,7 +44,7 @@ void ChassisRelDrive::computeDesiredUserTranslation(
 
     const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+        HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     // what we will multiply x and y speed by to take into account rotation
     float rotationLimitedMaxTranslationalSpeed =
@@ -85,4 +84,4 @@ void ChassisRelDrive::onExecute(
         chassisYDesiredWheelspeed,
         chassisRotationDesiredWheelspeed);
 }
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

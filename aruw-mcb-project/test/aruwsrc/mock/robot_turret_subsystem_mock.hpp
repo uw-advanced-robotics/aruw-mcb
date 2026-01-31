@@ -39,13 +39,11 @@ public:
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, refresh, (), (override));
     MOCK_METHOD(const char *, getName, (), (const override));
-    MOCK_METHOD(void, onHardwareTestStart, (), (override));
     MOCK_METHOD(bool, isOnline, (), (const override));
     MOCK_METHOD(modm::Vector3f, getTurretOffset, (), (const override));
     MOCK_METHOD(float, getPitchOffset, (), (const override));
     MOCK_METHOD(float, getWorldYaw, (), (const override));
     MOCK_METHOD(float, getWorldPitch, (), (const override));
-    MOCK_METHOD(uint32_t, getLastMeasurementTimeMicros, (), (const override));
 
 private:
     static constexpr aruwsrc::control::turret::TurretMotorConfig MOTOR_CONFIG = {

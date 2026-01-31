@@ -84,27 +84,21 @@ public:
      * The setpoint is limited between the min and max config angles as specified in the
      * constructor.
      */
-    mockable void setChassisFrameSetpoint(float setpoint);
+    mockable void setChassisFrameSetpoint(WrappedFloat setpoint);
 
     /// @return `true` if the hardware motor is connected and powered on
     mockable inline bool isOnline() const { return motor->isMotorOnline(); }
 
     /**
-     * @return turret motor angle setpoint relative to the chassis, in radians, not normalized
+     * @return turret motor angle setpoint relative to the chassis, in radians
      */
-    mockable inline float getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
+    mockable inline WrappedFloat getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
 
     /// @return turret motor angle measurement relative to the chassis, in radians, wrapped between
     /// [0, 2 PI)
-    mockable inline const tap::algorithms::WrappedFloat &getChassisFrameMeasuredAngle() const
+    mockable inline const WrappedFloat &getChassisFrameMeasuredAngle() const
     {
         return chassisFrameMeasuredAngle;
-    }
-
-    /// @return turret motor angle measurement in chassis frame, unwrapped (not normalized).
-    mockable inline float getChassisFrameUnwrappedMeasuredAngle() const
-    {
-        return chassisFrameUnwrappedMeasurement;
     }
 
     /**
@@ -113,21 +107,7 @@ public:
      */
     mockable inline float getChassisFrameVelocity() const
     {
-        return (M_TWOPI / 60) * motor->getShaftRPM();
-    }
-
-    /**
-     * @return A normalized angle between [-PI, PI] that is the angle difference between the turret
-     * and the turret motors' specified "start angle" (specified upon construction in the
-     * TurretMotorConfig struct).
-     */
-    mockable inline float getAngleFromCenter() const
-    {
-        return tap::algorithms::WrappedFloat(
-                   chassisFrameMeasuredAngle.getWrappedValue() - config.startAngle,
-                   -M_PI,
-                   M_PI)
-            .getWrappedValue();
+        return motor->getEncoder()->getVelocity();
     }
 
     /// @return turret controller controlling this motor (as specified by `attachTurretController`)
@@ -152,15 +132,6 @@ public:
     mockable float getValidChassisMeasurementError() const;
 
     /**
-     * Same as getValidChassisMeasurementError, but operates on "wrapped" angles regardless of
-     * turret limit status.
-     * This function should be used for checking tolerances, while
-     * getValidChassisMeasurementErrorWrapped should be used for PID controllers and other
-     * applications that require directionality.
-     */
-    float getValidChassisMeasurementErrorWrapped() const;
-
-    /**
      * @param[in] measurement A turret measurement in the chassis frame, an angle in radians. This
      * can be encoder based (via getChassisFrameMeasuredAngle) or can be measured by some other
      * means (for example, an IMU on the turret that is than transformed to the chassis frame).
@@ -179,74 +150,10 @@ public:
      * @note Before calling this function, you **must** first set the chassis frame setpoint before
      * calling this function (i.e. call `setChassisFrameSetpoint`).
      */
-    mockable float getValidMinError(const float setpoint, const float measurement) const;
-
-    /**
-     * "Unwraps" a normalized (between [0, 2PI)) angle. Does so in such a way that setpoint returned
-     * is an equivalent angle to the specified setpoint, but the setpoint returned is the closest
-     * possible angle to the passed in measurement.
-     *
-     * @param[in] measurement Some non-normalized measurement in radians. The returned setpoint will
-     * be the closest possible angle within the limits of this turret motor to this measurement.
-     * @param[in] setpoint A setpoint in radians that is not necessarily normalized.
-     *
-     * @return A setpoint angle in radians that is unwrapped and is the closest value between the
-     * min/max angle values that is closest to the measurement.
-     */
-    static float getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint);
-
-    /**
-     * Translates the setpoint that may or may not be within the range of the turret to an angle
-     * that is within the min/max bounds of the turret motor if possible. If there is no valid
-     * setpoint within the min/max bounds, this function will return the original setpoint.
-     *
-     * For example, if the minimum angle is -PI and the max angle is PI, if the setpoint is -2*PI
-     * then the value returned is -2*PI + 2*PI = 0. This angle is within the acceptable bounds and
-     * rotationally equivalent to the specified setpoint.
-     *
-     * @param[in] setpoint Some non-normalized turret setpoint, in radians.
-     *
-     * @return The translated value.
-     */
-    float getSetpointWithinTurretRange(float setpoint) const;
+    mockable float getValidMinError(const WrappedFloat setpoint, const WrappedFloat measurement)
+        const;
 
     int16_t getMotorOutput() const { return motor->getOutputDesired(); }
-
-    /**
-     * Takes in a normalized setpoint and "unnormalizes" it. Finds an equivalent unwrapped setpoint
-     * that is closest to the TurretMotor's measured angle that is also within bounds of the min/max
-     * angles.
-     *
-     * @note This function assumes that if the TurretMotor's angle is not limited, this function
-     * does not need to perform any updates of setpointToUnwrap since the turret controller will
-     * normalize both the setpoint and measurement before performing computation.
-     *
-     * @note A TurretController must be attached to the TurretMotor in order for this function to do
-     * anything. If a TurretController is not associated, we don't know how to convert the
-     * setpointToUnwrap into the chassis reference frame.
-     *
-     * @param[in] setpointToUnwrap Setpoint to update, a setpoint angle measurement in radians in
-     * the same reference frame as the attached turretController's reference frame.
-     * @return The updated setpointToUnwrap, or the same setpointToUnwrap if no updating necessary
-     * or if the notes above apply.
-     */
-    inline float unwrapTargetAngle(float setpointToUnwrap) const
-    {
-        if (turretController == nullptr || !config.limitMotorAngles)
-        {
-            return setpointToUnwrap;
-        }
-
-        setpointToUnwrap = getClosestNonNormalizedSetpointToMeasurement(
-            turretController->getMeasurement(),
-            setpointToUnwrap);
-
-        setpointToUnwrap =
-            turretController->convertChassisAngleToControllerFrame(getSetpointWithinTurretRange(
-                turretController->convertControllerAngleToChassisFrame(setpointToUnwrap)));
-
-        return setpointToUnwrap;
-    }
 
 private:
     const TurretMotorConfig config;
@@ -257,27 +164,12 @@ private:
     /// Associated turret controller interface that is being used by a command to control this motor
     const algorithms::TurretControllerInterface *turretController = nullptr;
 
-    /**
-     * Offset applied when the motor is turned on. When the turret is turned on, the distance
-     * between the start encoder value and the current encoder value is measured. If the magnitude
-     * of this difference is greater than DjiMotor::ENC_RESOLUTION / 2, an offset of
-     * DjiMotor::ENC_RESOLUTION is applied to measured encoder values to avoid bad angle wrapping.
-     *
-     * If equal to UINT16_MAX, needs to be re-computed
-     */
-    int16_t startEncoderOffset = INT16_MIN;
-
     /// Unwrapped chassis frame setpoint specified by the user and limited to `[config.minAngle,
     /// config.maxAngle]`. Units radians.
-    float chassisFrameSetpoint;
+    WrappedFloat chassisFrameSetpoint;
 
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
-    tap::algorithms::WrappedFloat chassisFrameMeasuredAngle;
-
-    /// Unwrapped chassis frame measured angle. Units radians.
-    float chassisFrameUnwrappedMeasurement;
-
-    int64_t lastUpdatedEncoderValue;
+    WrappedFloat chassisFrameMeasuredAngle;
 };
 }  // namespace aruwsrc::control::turret
 

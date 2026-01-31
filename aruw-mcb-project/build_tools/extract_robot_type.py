@@ -17,30 +17,65 @@
 
 from SCons.Script import *
 
-from .parse_args import USAGE
+from build_tools.parse_args import USAGE
 
-VALID_ROBOT_TYPES   = [ "STANDARD_WOODY",
-                        "STANDARD_ELSA",
-                        "STANDARD_SPIDER",
+# TODO: Make this sync up with check.py and c_cpp_properties.json if possible
+VALID_ROBOT_TYPES   = [ "STANDARD_NULL",
+                        "STANDARD_VOID",
                         "DRONE",
                         "ENGINEER",
-                        "SENTRY_BEEHIVE",
-                        "HERO_CYCLONE",
+                        "ENGI_2025",
+                        "SENTRY_ECLIPSE",
+                        "HERO_ZERO",
                         "DART",
-                        "TESTBED" ]
+                        "TESTBED",
+                        "BLANK",
+                        "MOTOR_TESTER",
+                        "LAUNCHER_TARGET",
+                        "FLYWHEEL_TESTING",
+                        "CHARACTERIZER", ]
+
+ROBOT_CLASS = {
+    "STANDARD_NULL": "standard",
+    "STANDARD_VOID": "standard",
+    "DRONE": "drone",
+    "ENGINEER": "engineer",
+    "ENGI_2025": "2025engineer",
+    "SENTRY_ECLIPSE": "sentry",
+    "HERO_ZERO": "hero",
+    "DART": "dart",
+    "TESTBED": "testbed",
+    "BLANK": "blank",
+    "MOTOR_TESTER": "motor_tester",
+    "FLYWHEEL_TESTING" : "flywheel_testing",
+    "LAUNCHER_TARGET" : "launcher_target",
+    "CHARACTERIZER": "characterizer",
+}
+
+# Make sure that all robots have a class
+assert all([robot in ROBOT_CLASS.keys() for robot in VALID_ROBOT_TYPES])
+
+def search_for_robot_type(query):
+    return [robot for robot in VALID_ROBOT_TYPES if query.lower() in robot.lower()] if query else []
 
 def get_robot_type():
-    robot_type = ARGUMENTS.get("robot")
+    robot_query = ARGUMENTS.get("robot")
+    robot_type_matches = search_for_robot_type(robot_query)
 
-    if robot_type not in VALID_ROBOT_TYPES:
-        prompt = "Please enter a valid robot type out of the following:\n"
+    if len(robot_type_matches) != 1:
+        if not robot_query or not robot_type_matches:
+            prompt = "Please enter a valid robot type out of the following:\n"
+        else:
+            prompt = "Robot type is ambiguous, please enter a valid robot type or unique substring out of the following:\n"
+
         for type in VALID_ROBOT_TYPES:
             prompt += type + "\n"
         prompt += "--> "
-        robot_type = input(prompt)
+        robot_query = input(prompt)
+        robot_type_matches = search_for_robot_type(robot_query)
     
     # Check against valid robot type
-    if robot_type not in VALID_ROBOT_TYPES:
+    if len(robot_type_matches) != 1:
         raise Exception(USAGE)
 
-    return "TARGET_" + robot_type
+    return "TARGET_" + robot_type_matches[0]

@@ -29,14 +29,15 @@ namespace aruwsrc
 {
 namespace mock
 {
-class BeybladeCommandMock : public aruwsrc::chassis::BeybladeCommand
+class BeybladeCommandMock : public aruwsrc::control::chassis::BeybladeCommand
 {
 public:
     BeybladeCommandMock(
         tap::Drivers *drivers,
-        chassis::MecanumChassisSubsystem *chassis,
+        control::chassis::MecanumChassisSubsystem *chassis,
         aruwsrc::control::turret::TurretMotor *yawMotor,
-        aruwsrc::control::ControlOperatorInterface &operatorInterface);
+        aruwsrc::control::ControlOperatorInterface &operatorInterface,
+        aruwsrc::control::chassis::BeybladeConfig config);
 
     virtual ~BeybladeCommandMock();
 

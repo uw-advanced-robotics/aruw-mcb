@@ -31,7 +31,7 @@
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     tap::Drivers* drivers,
@@ -90,7 +90,7 @@ void ChassisAutorotateCommand::execute()
     {
         updateAutorotateState();
 
-        float turretAngleFromCenter = yawMotor->getAngleFromCenter();
+        float turretAngleFromCenter = yawMotor->getChassisFrameMeasuredAngle().getWrappedValue();
 
         if (chassisAutorotating)
         {
@@ -116,7 +116,7 @@ void ChassisAutorotateCommand::execute()
             // PD controller to find desired rotational component of the chassis control
             float desiredRotation = chassis->chassisSpeedRotationPID(
                 angleFromCenterForChassisAutorotate,
-                yawMotor->getChassisFrameVelocity() - modm::toRadian(drivers->mpu6500.getGz()));
+                yawMotor->getChassisFrameVelocity() - drivers->mpu6500.getGz());
 
             // find an alpha value to be used for the low pass filter, some value >
             // AUTOROTATION_MIN_SMOOTHING_ALPHA, inversely proportional to
@@ -135,7 +135,7 @@ void ChassisAutorotateCommand::execute()
 
         const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
             drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+            HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
         // the x/y translational speed is limited to this value, this means when rotation is
         // large, the translational speed will be clamped to a smaller value to compensate
@@ -170,4 +170,4 @@ void ChassisAutorotateCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisAutorotateCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

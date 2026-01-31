@@ -28,7 +28,7 @@
 namespace aruwsrc::control::governor
 {
 /**
- * Governor that halts a Comamnd's execution when the ref serial reports that a projectile has been
+ * Governor that halts a Command's execution when the ref serial reports that a projectile has been
  * fired by one of the barrel mechanism IDs. This allows one to have a more consistent firing
  * frequency.
  *

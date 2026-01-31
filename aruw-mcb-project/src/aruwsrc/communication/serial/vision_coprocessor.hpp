@@ -21,16 +21,20 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include <cassert>
+#include <deque>
 
-#include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/algorithms/ballistics.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/auto_nav_path.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
+#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
@@ -41,9 +45,7 @@ namespace aruwsrc::control::turret
 class TurretOrientationInterface;
 }
 
-namespace aruwsrc
-{
-namespace serial
+namespace aruwsrc::communication::serial
 {
 /**
  * A class used to communicate with our vision coprocessors. Targets the "Project Otto" vision
@@ -60,22 +62,29 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
+#if defined(TARGET_SENTRY_ECLIPSE)
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
+#else
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
+#endif
+
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart2;
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
 
-#if defined(TARGET_HERO_CYCLONE) || defined(TARGET_STANDARD_SPIDER)
+#if defined(TARGET_HERO_PERSEUS)
     /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
      *  The IMU Faces to the left of the 'R' on the Type A MCB
      *  0 Rotation corresponds with a 0 rotation of the chassis
      */
     // MCB has power inlet facing forward
     static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
-#elif defined(TARGET_SENTRY_BEEHIVE)
+#elif defined(TARGET_SENTRY_ECLIPSE)
     // MCB is on a diagonal
-    static constexpr float MCB_ROTATION_OFFSET = -3.0f * M_PI_4;
+    // @todo: ensure this is correct
+    static constexpr float MCB_ROTATION_OFFSET = 0;
 #else
     // MCB has power inlet facing backwards
     static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
@@ -108,6 +117,71 @@ public:
     static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {
         messageWidths::TARGET_DATA_BYTES,
         messageWidths::SHOT_TIMING_BYTES};  // indices correspond to Tags
+
+
+    // Must be declared here due to circlular dependency
+    struct RobotOrbitKinematicState : ballistics::SecondOrderKinematicState
+    {
+        inline RobotOrbitKinematicState(
+            modm::Vector3f position,
+            modm::Vector3f velocity,
+            modm::Vector3f acceleration,
+            float radius,
+            float theta,
+            float omega)
+            : 
+            ballistics::SecondOrderKinematicState(
+                position, velocity, acceleration
+            ),
+            position(position),
+            velocity(velocity),
+            acceleration(acceleration),
+            radius(radius),
+            theta(theta),
+            omega(omega)
+        {
+        }
+        modm::Vector3f position;      // m
+        modm::Vector3f velocity;      // m/s
+        modm::Vector3f acceleration;  // m/s^2
+
+        // rotation about center
+        float radius{0};  // m
+        float theta{0};   // rad
+        float omega{0};   // rad/s
+
+        /**
+         * @param[in] dt: The amount of time to project forward.
+         * @param[in] s: The position of the object.
+         * @param[in] v: The velocity of the object.
+         * @param[in] a: The acceleration of the object.
+         *
+         * @return The future position of an object using a quadratic (constant acceleration) model.
+         */
+        inline static float quadraticKinematicProjection(float dt, float s, float v, float a)
+        {
+            return s + v * dt + 0.5f * a * dt * dt;
+        }
+
+        /**
+         * @param[in] dt: The amount of time to project the state forward.
+         *
+         * @return The future 3D position of this object using a quadratic (constant acceleration)
+         * model for the center and linear (constant angular velocity) model for angle about the center
+         */
+        inline modm::Vector3f projectForward(float dt) const override
+        {
+            float rx = radius * cos(theta);
+            float ry = radius * sin(theta);
+            float rxf = radius * cos(theta + omega * dt);
+            float ryf = radius * sin(theta + omega * dt);
+            return modm::Vector3f(
+                quadraticKinematicProjection(dt, position.x - rx, velocity.x, acceleration.x) + rxf,
+                quadraticKinematicProjection(dt, position.y - ry, velocity.y, acceleration.y) + ryf,
+                quadraticKinematicProjection(dt, position.z, velocity.z, acceleration.z));
+        }
+    };
+
 
     /**
      * AutoAim data to receive from Jetson. Describes a rectangular robot with separate z offsets
@@ -146,17 +220,17 @@ public:
         inline PositionData projectForward(float dt) const
         {
             PositionData projected = *this;
-            projected.xPos = ballistics::MeasuredKinematicState::quadraticKinematicProjection(
+            projected.xPos = RobotOrbitKinematicState::quadraticKinematicProjection(
                 dt,
                 xPos,
                 xVel,
                 xAcc);
-            projected.yPos = ballistics::MeasuredKinematicState::quadraticKinematicProjection(
+            projected.yPos = RobotOrbitKinematicState::quadraticKinematicProjection(
                 dt,
                 yPos,
                 yVel,
                 yAcc);
-            projected.zPos = ballistics::MeasuredKinematicState::quadraticKinematicProjection(
+            projected.zPos = RobotOrbitKinematicState::quadraticKinematicProjection(
                 dt,
                 zPos,
                 zVel,
@@ -188,13 +262,12 @@ public:
      */
     struct ChassisOdometryData
     {
-        uint32_t timestamp;  ///< timestamp associated with chassis odometry (in us).
-        float xPos;          ///< x position of the chassis (in m).
-        float yPos;          ///< y position of the chassis (in m).
-        float zPos;          ///< z position of the chassis (in m).
-        float pitch;         ///< world frame pitch of the chassis (in rad).
-        float yaw;           ///< world frame yaw of the chassis (in rad).
-        float roll;          ///< world frame roll of the chassis (in rad).
+        float xPos;   ///< x position of the chassis in the world frame (in m).
+        float yPos;   ///< y position of the chassis in the world frame (in m).
+        float zPos;   ///< z position of the chassis in the world frame (in m).
+        float roll;   ///< world frame roll of the chassis (in rad).
+        float pitch;  ///< world frame pitch of the chassis (in rad).
+        float yaw;    ///< world frame yaw of the chassis (in rad).
     } modm_packed;
 
     /**
@@ -202,10 +275,13 @@ public:
      */
     struct TurretOdometryData
     {
-        uint32_t timestamp;  ///< Timestamp in microseconds, when turret data was computed (in us).
-        float pitch;         ///< Pitch angle of turret relative to plane parallel to the ground (in
-                             ///< rad).
-        float yaw;           ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
+        float xPos;   ///< x position of the turret in the world frame (in m).
+        float yPos;   ///< y position of the turret in the world frame (in m).
+        float zPos;   ///< z position of the turret in the world frame (in m).
+        float roll;   ///< roll of turret
+        float pitch;  ///< Pitch angle of turret relative to plane parallel to the ground (in
+                      ///< rad).
+        float yaw;    ///< Clockwise turret rotation angle between 0 and M_TWOPI (in rad).
     } modm_packed;
 
     struct AutoNavSetpointData
@@ -237,9 +313,27 @@ public:
 
     struct OdometryData
     {
+        uint32_t timestamp;
         ChassisOdometryData chassisOdometry;
         uint8_t numTurrets;
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
+    } modm_packed;
+
+    static constexpr uint8_t MAX_NUM_ROBOT_ORBITS = 3;
+
+    struct RobotOrbitData
+    {
+        struct RobotOrbit
+        {
+            float x;
+            float y;
+            float z;
+            float radius;
+            uint16_t robotType;
+        } modm_packed;
+
+        RobotOrbit data[MAX_NUM_ROBOT_ORBITS];  // Use the nested struct
+
     } modm_packed;
 
     VisionCoprocessor(tap::Drivers* drivers);
@@ -282,12 +376,17 @@ public:
         return lastAimData[turretID];
     }
 
-    mockable inline const AutoNavSetpointData& getLastSetpointData() const
+    mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
+
+    mockable inline const ArucoResetData& getLastRealsenseArucoData() const
     {
-        return lastSetpointData;
+        return lastRealsenseArucoData;
     }
 
-    mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
+    mockable inline const ArucoResetData& getLastArducamArucoData() const
+    {
+        return lastArducamArucoData;
+    }
 
     mockable inline bool getSomeTurretHasTarget() const
     {
@@ -309,26 +408,15 @@ public:
         return hasTarget;
     }
 
-    mockable inline void attachOdometryInterface(
-        tap::algorithms::odometry::Odometry2DInterface* odometryInterface)
+    mockable inline const RobotOrbitData& getLastRobotOrbitData() const
     {
-        this->odometryInterface = odometryInterface;
+        return lastRobotOrbitData;
     }
 
-    /**
-     * Specify the turret orientation for auto-aim to reference based on the target robot.
-     *
-     * @param[in] turretOrientationInterface The interface that provides turret information to the
-     * vision coprocessor
-     * @param[in] turretID The turret ID of the orientation interface that will be used to identify
-     * the turret.
-     */
-    mockable inline void attachTurretOrientationInterface(
-        aruwsrc::control::turret::TurretOrientationInterface* turretOrientationInterface,
-        uint8_t turretID)
+    mockable inline void attachTransformer(
+        aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer)
     {
-        assert(turretID < control::turret::NUM_TURRETS);
-        turretOrientationInterfaces[turretID] = turretOrientationInterface;
+        this->transformer = transformer;
     }
 
     mockable void sendShutdownMessage();
@@ -346,11 +434,29 @@ public:
 
     // This is for compatibility with the OLED menu
     bool* getMutableMotionStrategyPtr(
-        aruwsrc::communication::serial::SentryVisionMessageType messageType)
+        aruwsrc::communication::serial::SentryMotionStrategyType messageType)
     {
         return &sentryMotionStrategy[static_cast<uint8_t>(messageType)];
     }
 
+    /**
+     * Sets the most recent aruco reset message's to updated field to false.
+     * This signals that the message has been consumed and should not be used
+     * for future resets.
+     */
+    inline void invalidateRealsenseArucoResetData()
+    {
+        this->lastRealsenseArucoData.updated = false;
+    }
+    inline void invalidateArducamArucoResetData() { this->lastArducamArucoData.updated = false; }
+
+    mockable inline void attachAutoNavController(
+        aruwsrc::control::chassis::ChassisAutoNavController* autoNavController)
+    {
+        this->autoNavController = autoNavController;
+    }
+
+    // @todo private should not be here
 private:
     enum TxMessageTypes
     {
@@ -362,26 +468,28 @@ private:
         CV_MESSAGE_TYPE_SELECT_NEW_TARGET = 7,
         CV_MESSAGE_TYPE_REBOOT = 8,
         CV_MESSAGE_TYPE_SHUTDOWN = 9,
-        CV_MESSAGE_TYPE_TIME_SYNC_RESP = 11,
         CV_MESSAGE_TYPES_HEALTH_DATA = 12,
-        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 13
+        CV_MESSAGE_TYPES_SENTRY_MOTION_STRATEGY = 11
     };
 
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
-        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 12,
+        CV_MESSAGE_TYPE_REALSENSE_ARUCO = 10,
+        CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
+        CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
+        CV_MESSAGE_TYPE_ROBOT_ORBIT = 15,
+        CV_MESSAGE_TYPE_ARDUCAM_ARUCO = 17,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
-    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1000;
+    static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1'000;
 
     /** Time in ms between sending the robot ID message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
+    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 2'000;
 
     /** Time in ms between sending the robot health message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 500;
+    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 350;
 
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
@@ -391,6 +499,12 @@ private:
 
     /// Time in ms between sending competition result status (as reported by the ref system).
     static constexpr uint32_t TIME_BTWN_SENDING_COMP_RESULT = 10'000;
+
+    /// Time in ms between sending sentry motion strategy message.
+    static constexpr uint32_t TIME_BTWN_SENDING_MOTION_STRAT = 5'000;
+
+    /** Time in ms between sending the bullets remaining message. */
+    static constexpr uint32_t TIME_BTWN_SENDING_BULLETS_REMAINING_MSG = 100;
 
     static VisionCoprocessor* visionCoprocessorInstance;
 
@@ -403,31 +517,64 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    AutoNavSetpointData lastSetpointData{false, 0.0f, 0.0f, 0};
+    static constexpr uint8_t MAXSETPOINTS = 100;
+    struct AutoNavCoordinate
+    {
+        float x;
+        float y;
+    };
 
-    ArucoResetData lastArucoData{
+    struct AutoNavSetpointMessage
+    {
+        // Header
+        uint32_t sequenceNum;
+        float speed;
+        uint32_t numSetpoints;
+        // Setpoints
+        AutoNavCoordinate setpoints[MAXSETPOINTS];
+    };
+
+    static constexpr size_t AUTO_NAV_SETPOINT_HEADER_SIZE = sizeof(uint32_t) * 2 + sizeof(float);
+
+    aruwsrc::algorithms::AutoNavPath autoNavPath;
+    AutoNavSetpointMessage lastSetpointData{
+        .sequenceNum = 0,
+        .speed = 0.5f,
+        .numSetpoints = 0,
+        .setpoints = {}};
+
+    ArucoResetData lastRealsenseArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
     };
+
+    ArucoResetData lastArducamArucoData{
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .updated = false,
+    };
+
+    RobotOrbitData lastRobotOrbitData;
 
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
 
-    tap::algorithms::odometry::Odometry2DInterface* odometryInterface;
+    aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer;
 
-    aruwsrc::control::turret::TurretOrientationInterface*
-        turretOrientationInterfaces[control::turret::NUM_TURRETS];
+    aruwsrc::control::chassis::ChassisAutoNavController* autoNavController = nullptr;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
     tap::arch::PeriodicMilliTimer sendHealthTimeout{TIME_BTWN_SENDING_HEALTH_MSG};
 
-    tap::arch::PeriodicMilliTimer sendTimeSyncTimeout{TIME_BTWN_SENDING_TIME_SYNC_DATA};
-
     tap::arch::PeriodicMilliTimer sendRefRealTimeDataTimeout{TIME_BTWN_SENDING_REF_REAL_TIME_DATA};
 
     tap::arch::PeriodicMilliTimer sendCompetitionResultTimeout{TIME_BTWN_SENDING_COMP_RESULT};
+
+    tap::arch::PeriodicMilliTimer sendMotionStrategyTimeout{TIME_BTWN_SENDING_MOTION_STRAT};
+
+    tap::arch::PeriodicMilliTimer sendBulletsRemainingTimeout{
+        TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
 
     uint32_t lastSentRefereeWarningTime = 0;
 
@@ -444,18 +591,15 @@ private:
 
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
 
-    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+    bool decodeToRealsenseArucoData(const ReceivedSerialMessage& message);
 
-    /**
-     * Sets the most recent aruco reset message's to updated field to false.
-     * This signals that the message has been consumed and should not be used
-     * for future resets.
-     */
-    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+    bool decodeToArducamArucoData(const ReceivedSerialMessage& message);
+
+    bool decodeToRobotOrbitData(const ReceivedSerialMessage& message);
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
-        aruwsrc::communication::serial::SentryVisionMessageType::NUM_MESSAGE_TYPES)] = {};
+        aruwsrc::communication::serial::SentryMotionStrategyType::NUM_MESSAGE_TYPES)] = {0, 1, 0};
 
 #ifdef ENV_UNIT_TESTS
 public:
@@ -467,9 +611,8 @@ public:
     void sendRefereeWarning();
     void sendRobotTypeData();
     void sendHealthMessage();
-    void sendTimeSyncMessage();
+    void sendBulletsRemaining();
 };
-}  // namespace serial
-}  // namespace aruwsrc
+}  // namespace aruwsrc::communication::serial
 
 #endif  // VISION_COPROCESSOR_HPP_

@@ -30,7 +30,7 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 struct SwerveModuleConfig
 {
@@ -63,22 +63,22 @@ struct SwerveModuleConfig
     const float azimuthMotorGearing = 1;
 
     tap::algorithms::SmoothPidConfig drivePidConfig = {
-        .kp = 7.0f,
-        .ki = 0.0f,
-        .kd = -80.0f,
-        .maxICumulative = 0.0f,
-        .maxOutput = 16'000.0f,
+        .kp = 10.0f,
+        .ki = 0.8f,
+        .kd = 0.0f,
+        .maxICumulative = 100.0f,
+        .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
         .tRDerivativeKalman = 100.0f,
-        .tRProportionalKalman = 100.0f,
-        .errDeadzone = 0.0f,
+        .tRProportionalKalman = 500.0f,
+        .errDeadzone = 500.0f,  // for motor backlash
         .errorDerivativeFloor = 0.0f};
 
     tap::algorithms::SmoothPidConfig azimuthPidConfig = {
-        .kp = 15000.0f,  // 10000.0f
-        .ki = 0.0f,
-        .kd = 0.0f,  // 12.0f
-        .maxICumulative = 0.0f,
-        .maxOutput = 16'000.0f,
+        .kp = 62'000.0f,
+        .ki = 1'400.0f,
+        .kd = 10.0f,
+        .maxICumulative = 4'500.0f,
+        .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020,
         .errDeadzone = 0.0f,
         .errorDerivativeFloor = 0.0f,
     };
@@ -91,5 +91,5 @@ struct SwerveModuleConfig
     const float gearboxRatio = (1.0f / 19.0f);
 };
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 #endif  // SWERVE_MODULE_CONFIG_HPP_

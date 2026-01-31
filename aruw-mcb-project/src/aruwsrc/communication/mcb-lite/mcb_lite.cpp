@@ -26,12 +26,12 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
     : DJISerial(drivers, port),
-      canRxHandler(VirtualCanRxHandler(drivers)),
-      motorTxHandler(VirtualDJIMotorTxHandler(drivers)),
+      canRxHandler(motor::VirtualCanRxHandler(drivers)),
+      motorTxHandler(motor::VirtualDJIMotorTxHandler(drivers)),
       imu(),
       analog(),
       digital(),
@@ -170,6 +170,15 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 memcpy(&digitalData, completeMessage.data, sizeof(digitalData));
                 digital.processDigitalMessage(completeMessage);
                 break;
+            case MessageTypes::CAN1_ENCODER_MESSAGE:
+                processCanEncoderMessage(completeMessage, can1Encoders);
+                break;
+            case MessageTypes::CAN2_ENCODER_MESSAGE:
+                processCanEncoderMessage(completeMessage, can2Encoders);
+                break;
+            case MessageTypes::VOLTAGE_CURRENT_MESSAGE:
+                processVoltageCurrentMessage(completeMessage);
+                break;
             default:
                 break;
         }
@@ -184,17 +193,50 @@ void MCBLite::processCanMessage(
         &(canbus == tap::can::CanBus::CAN_BUS1 ? can1Data : can2Data),
         completeMessage.data,
         sizeof(can1Data));
-    for (int i = 0; i < 8; i++)
+    uint8_t bitmap = completeMessage.data[sizeof(can1Data)];
+
+    modm::can::Message msg;
+    for (uint8_t i = 0; i < 8; i++)
     {
-        modm::can::Message msg;
-        for (uint8_t i = 0; i < 8; i++)
+        if ((bitmap & (1 << i)) == 0)
         {
-            // Get back the motor num
-            msg.identifier = i + tap::motor::MotorId::MOTOR1;
-            memcpy(&msg.data, &completeMessage.data[i * sizeof(msg.data)], sizeof(msg.data));
-            canRxHandler.refresh(canbus, msg);
+            continue;
+        }
+
+        // Get back the motor num
+        msg.identifier = i + tap::motor::MotorId::MOTOR1;
+        memcpy(&msg.data, &completeMessage.data[i * sizeof(msg.data)], sizeof(msg.data));
+        canRxHandler.refresh(canbus, msg);
+    }
+}
+
+void MCBLite::processCanEncoderMessage(
+    const ReceivedSerialMessage& completeMessage,
+    VirtualCanEncoder** encoders)
+{
+    modm::can::Message message{};
+
+    uint8_t online = completeMessage.data[0];
+    for (uint8_t i = 0; i < 8; i++)
+    {
+        if ((online & (1 << i)) != 0 && encoders[i] != nullptr)
+        {
+            memcpy(message.data, completeMessage.data + 1 + i * 4, 4);
+            encoders[i]->processMessage(message);
         }
     }
 }
 
-}  // namespace aruwsrc::virtualMCB
+void MCBLite::processVoltageCurrentMessage(const ReceivedSerialMessage& completeMessage)
+{
+    const VoltageCurrentMessage* message =
+        reinterpret_cast<const VoltageCurrentMessage*>(completeMessage.data);
+
+    if (this->voltageCurrentSensor != nullptr)
+    {
+        this->voltageCurrentSensor->voltage = message->voltage;
+        this->voltageCurrentSensor->current = message->current;
+    }
+}
+
+}  // namespace aruwsrc::communication::mcb_lite

@@ -21,41 +21,41 @@
 
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/can/can_bus.hpp"
-#include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 VirtualDjiMotor::VirtualDjiMotor(
     tap::Drivers* drivers,
     MotorId desMotorIdentifier,
     tap::can::CanBus motorCanBus,
-    MCBLite* motorHandler,
+    MCBLite* mcbLite,
     bool isInverted,
     const char* name,
-    uint16_t encoderWrapped,
-    int64_t encoderRevolutions)
+    bool currentControl,
+    float gearRatio,
+    uint32_t encoderHomePosition,
+    tap::encoder::EncoderInterface* externalEncoder)
     : DjiMotor(
           drivers,
           desMotorIdentifier,
           motorCanBus,
           isInverted,
           name,
-          encoderWrapped,
-          encoderRevolutions),
-      motorHandler(motorHandler)
+          currentControl,
+          gearRatio,
+          encoderHomePosition,
+          externalEncoder),
+      mcbLite(mcbLite)
 {
 }
 
 void VirtualDjiMotor::initialize()
 {
-    motorHandler->motorTxHandler.addMotorToManager(this);
+    mcbLite->motorTxHandler.addMotorToManager(this);
     attachSelfToRxHandler();
 }
 
-void VirtualDjiMotor::attachSelfToRxHandler()
-{
-    motorHandler->canRxHandler.attachReceiveHandler(this);
-}
+void VirtualDjiMotor::attachSelfToRxHandler() { mcbLite->canRxHandler.attachReceiveHandler(this); }
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor

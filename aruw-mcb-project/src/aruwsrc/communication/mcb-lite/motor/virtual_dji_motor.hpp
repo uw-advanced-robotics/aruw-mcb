@@ -27,7 +27,7 @@
 
 using namespace tap::motor;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 /**
  * This class builds off of DjiMotor, but changes motor communication to talk to a virtual MCB
@@ -39,20 +39,22 @@ public:
         tap::Drivers* drivers,
         MotorId desMotorIdentifier,
         tap::can::CanBus motorCanBus,
-        MCBLite* motorHandler,
+        MCBLite* mcbLite,
         bool isInverted,
         const char* name,
-        uint16_t encoderWrapped = DjiMotor::ENC_RESOLUTION / 2,
-        int64_t encoderRevolutions = 0);
+        bool currentControl = false,
+        float gearRatio = 1,
+        uint32_t encoderHomePosition = 0,
+        tap::encoder::EncoderInterface* externalEncoder = nullptr);
 
     void initialize() override;
 
     void attachSelfToRxHandler();
 
 private:
-    MCBLite* motorHandler;
+    MCBLite* mcbLite;
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor
 
 #endif

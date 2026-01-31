@@ -89,8 +89,12 @@ private:
     NiceMock<tap::mock::MotorInterfaceMock> pitM;
     aruwsrc::mock::TurretMotorMock yawMotor;
     aruwsrc::mock::TurretMotorMock pitchMotor;
-    aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController yawController;
-    aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController pitchController;
+    aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+        aruwsrc::control::turret::algorithms::Axis::YAW>
+        yawController;
+    aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+        aruwsrc::control::turret::algorithms::Axis::PITCH>
+        pitchController;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
@@ -145,15 +149,23 @@ TEST_F(MultiShotCvCommandMappingTest, setShooterState_10hz_full_repeatedly_adds_
     {
         InSequence seq;
         EXPECT_CALL(fireRateManager, setFireRate(10)).Times(4);
+        EXPECT_CALL(fireRateManager, setFireRate(20)).Times(4);
         EXPECT_CALL(
             fireRateManager,
             setFireRate(ManualFireRateReselectionManager::MAX_FIRERATE_RPS))
             .Times(4);
     }
 
-    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(8);
+    EXPECT_CALL(drivers.commandScheduler, addCommand).Times(12);
 
-    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::FULL_AUTO_10HZ);
+    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::LIMITED_10HZ);
+
+    multiShotCommandMapping.executeCommandMapping(defaultRms);
+    multiShotCommandMapping.executeCommandMapping(defaultRms);
+    multiShotCommandMapping.executeCommandMapping(defaultRms);
+    multiShotCommandMapping.executeCommandMapping(defaultRms);
+
+    multiShotCommandMapping.setShooterState(MultiShotCvCommandMapping::LIMITED_20HZ);
 
     multiShotCommandMapping.executeCommandMapping(defaultRms);
     multiShotCommandMapping.executeCommandMapping(defaultRms);

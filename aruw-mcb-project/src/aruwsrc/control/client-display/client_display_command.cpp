@@ -23,10 +23,9 @@
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "indicators/hud_indicator.hpp"
 
 #include "client_display_subsystem.hpp"
-#include "hud_indicator.hpp"
 
 using namespace tap::control;
 
@@ -34,51 +33,16 @@ namespace aruwsrc::control::client_display
 {
 ClientDisplayCommand::ClientDisplayCommand(
     tap::Drivers &drivers,
-    tap::control::CommandScheduler &commandScheduler,
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
     ClientDisplaySubsystem &clientDisplay,
-    const TurretMCBHopperSubsystem *hopperSubsystem,
-    const launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
-    tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
-    const control::turret::RobotTurretSubsystem &robotTurretSubsystem,
-    const control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
-    const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetManager,
-    const chassis::BeybladeCommand *chassisBeybladeCmd,
-    const chassis::ChassisAutorotateCommand *chassisAutorotateCmd,
-    const chassis::ChassisImuDriveCommand *chassisImuDriveCommand,
-    const aruwsrc::communication::serial::SentryResponseHandler &sentryResponseHandler)
+    std::vector<indicators::HudIndicator *> &hudIndicators)
     : Command(),
       drivers(drivers),
-      visionCoprocessor(visionCoprocessor),
-      commandScheduler(commandScheduler),
-      refSerialTransmitter(&drivers),
-      booleanHudIndicators(
-          commandScheduler,
-          refSerialTransmitter,
-          hopperSubsystem,
-          frictionWheelSubsystem,
-          agitatorSubsystem,
-          imuCalibrateCommand,
-          sentryResponseHandler),
-      chassisOrientationIndicator(drivers, refSerialTransmitter, robotTurretSubsystem),
-      positionHudIndicators(
-          drivers,
-          visionCoprocessor,
-          refSerialTransmitter,
-          hopperSubsystem,
-          frictionWheelSubsystem,
-          robotTurretSubsystem,
-          multiShotHandler,
-          cvOnTargetManager,
-          chassisBeybladeCmd,
-          chassisAutorotateCmd,
-          chassisImuDriveCommand),
-      reticleIndicator(drivers, refSerialTransmitter),
-      visionHudIndicators(visionCoprocessor, refSerialTransmitter)
+      hudIndicators(hudIndicators),
+      refSerialTransmitter(&drivers)
 {
     addSubsystemRequirement(&clientDisplay);
     this->restartHud();
+    numIndicators = hudIndicators.size();
 }
 
 void ClientDisplayCommand::initialize()
@@ -90,12 +54,13 @@ void ClientDisplayCommand::initialize()
 
 void ClientDisplayCommand::restartHud()
 {
-    HudIndicator::resetGraphicNameGenerator();
-    booleanHudIndicators.initialize();
-    chassisOrientationIndicator.initialize();
-    positionHudIndicators.initialize();
-    reticleIndicator.initialize();
-    visionHudIndicators.initialize();
+    indicators::HudIndicator::resetGraphicNameGenerator();
+
+    // Initialize all the HUD indicators
+    for (auto &indicator : hudIndicators)
+    {
+        indicator->initialize();
+    }
 
     // We can successfully restart the thread
     this->restarting = false;
@@ -118,20 +83,25 @@ bool ClientDisplayCommand::run()
 
     PT_WAIT_UNTIL(drivers.refSerial.getRefSerialReceivingData());
 
-    PT_CALL(booleanHudIndicators.sendInitialGraphics());
-    PT_CALL(chassisOrientationIndicator.sendInitialGraphics());
-    PT_CALL(positionHudIndicators.sendInitialGraphics());
-    PT_CALL(reticleIndicator.sendInitialGraphics());
-    PT_CALL(visionHudIndicators.sendInitialGraphics());
+    PT_CALL(refSerialTransmitter.deleteGraphicLayer(RefSerialTransmitter::Tx::DELETE_ALL, 0));
+
+    for (index = 0; index < numIndicators; index++)
+    {
+        PT_CALL(hudIndicators[index]->sendInitialGraphics());
+    }
 
     // If we try to restart the hud, break out of the loop
     while (!this->restarting)
     {
-        PT_CALL(booleanHudIndicators.update());
-        PT_CALL(chassisOrientationIndicator.update());
-        PT_CALL(positionHudIndicators.update());
-        PT_CALL(reticleIndicator.update());
-        PT_CALL(visionHudIndicators.update());
+        startTime = tap::arch::clock::getTimeMicroseconds();
+        for (index = 0; index < numIndicators; index++)
+        {
+            PT_CALL(hudIndicators[index]->update());
+        }
+
+        // Calculate the time it took to update the HUD
+        this->fps = 1e6 / (tap::arch::clock::getTimeMicroseconds() - startTime);
+
         PT_YIELD();
     }
     // Breaking out of the loop successfully calls this method,
