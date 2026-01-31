@@ -45,7 +45,6 @@ public:
 private:
     CubeStorageSubsystem &cubeStorage;
     aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem;
-    CubeStorageSubsystem::CubeOptions cubeToAdd;
 
 };  // class CubeStorageChooseAddCommand
 

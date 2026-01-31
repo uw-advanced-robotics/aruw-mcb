@@ -46,10 +46,10 @@
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
-#include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
@@ -89,6 +89,7 @@ using namespace aruwsrc::control::joint::homing;
 using namespace aruwsrc::control::joint::homing::trigger;
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::engineer::wrist;
+using namespace aruwsrc::engineer::cube_storage;
 using namespace tap::control;
 using namespace tap::gpio;
 
@@ -203,7 +204,7 @@ tap::motor::DjiMotor cubeStorageMotor(
 
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeStorageLimit(
     &(drivers()->digital),
-    CUBESTORAGE_LIMITSWITCH_PORT,
+    CUBE_STORAGE_LIMITSWITCH_PORT,
     true);
 
 LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
@@ -330,7 +331,11 @@ aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
     drivers(),
     imuCalibrateCommand);
 
-TriggerHomedJointSubsystem cubeStorage(drivers(), cubeStorageMotor, cubeStorageTrigger, CUBE_STORAGE_CONFIG);
+TriggerHomedJointSubsystem cubeStorage(
+    drivers(),
+    cubeStorageMotor,
+    cubeStorageTrigger,
+    CUBE_STORAGE_CONFIG);
 
 WristSubsystem wristSubsystem(
     drivers(),
@@ -459,29 +464,6 @@ tap::control::PressCommandMapping bPressed(
     drivers(),
     {&extensionIn, &wristOut},
     RemoteMapState({Remote::Key::B}));
-
-// following commands never tested, and still need to get working
-tap::control::PressCommandMapping storeCube(
-    drivers(),
-    {&storeCubeCommand},
-    RemoteMapState({Remote::Key::Z}, {Remote::Key::SHIFT}));
-tap::control::PressCommandMapping retrieveCube(
-    drivers(),
-    {&retrieveCubeCommand},
-    RemoteMapState({Remote::Key::X}, {Remote::Key::SHIFT}));
-
-tap::control::PressCommandMapping cyclePositions(
-    drivers(),
-    {&scorePositionCommand},
-    RemoteMapState({Remote::Key::C}));
-
-CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
-    drivers(),
-    RemoteMapState({Remote::Key::C}, {Remote::Key::SHIFT}),
-    ScorePositions::three,
-    &scorePositionCommand,
-    &ScorePositionCommand::cyclePositions,
-    RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()

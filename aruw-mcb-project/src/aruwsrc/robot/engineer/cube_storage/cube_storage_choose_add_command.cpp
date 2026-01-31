@@ -21,14 +21,19 @@
 
 namespace aruwsrc::engineer::cube_storage
 {
-CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem) : cubeStorage(cubeStorage), wristSubsystem(wristSubsystem)
+CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(
+    CubeStorageSubsystem &cubeStorage,
+    aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem)
+    : cubeStorage(cubeStorage),
+      wristSubsystem(wristSubsystem)
 {
     // mostly computation, so no requirements
 }
 
-void CubeStorageChooseAddCommand::initialize() {
-    cubeStorage.storeWristPos(CubeStorageSubsystem::CubeOptions::LEFT, 1.0f); //TODO: update
+void CubeStorageChooseAddCommand::initialize()
+{
     cubeStorage.getCubeToAdd();
+    cubeStorage.storeWristPos(1.0f);  // TODO: update
 }
 
 
@@ -38,4 +43,4 @@ void CubeStorageChooseAddCommand::execute() {}
 void CubeStorageChooseAddCommand::end(bool) {}
 
 bool CubeStorageChooseAddCommand::isFinished() const { return true; }
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::cube_storage
