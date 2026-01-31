@@ -21,8 +21,9 @@
 
 #include "tap/control/command.hpp"
 
-#include "cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+
+#include "cube_storage_subsystem.hpp"
 
 namespace aruwsrc::engineer::cube_storage
 
@@ -30,7 +31,9 @@ namespace aruwsrc::engineer::cube_storage
 class CubeStorageChooseRemoveCommand : public tap::control::Command
 {
 public:
-    CubeStorageChooseRemoveCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem);
+    CubeStorageChooseRemoveCommand(
+        CubeStorageSubsystem &cubeStorage,
+        aruwsrc::engineer::wrist::WristSubsystem &wristSubsystem);
 
     void initialize() override;
 

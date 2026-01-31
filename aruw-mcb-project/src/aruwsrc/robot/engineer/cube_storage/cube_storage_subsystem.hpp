@@ -31,8 +31,8 @@ namespace aruwsrc::engineer::cube_storage
 class CubeStorageSubsystem : public aruwsrc::control::joint::homing::TriggerHomedJointSubsystem
 {
 public:
-
-    CubeStorageSubsystem(tap::Drivers *drivers,
+    CubeStorageSubsystem(
+        tap::Drivers *drivers,
         tap::motor::MotorInterface &motor,
         aruwsrc::control::joint::homing::trigger::TriggerInterface &trigger,
         aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config config);
@@ -42,20 +42,22 @@ public:
     void refresh() override;
 
     // can also be used as indices in arrary
-    enum CubeOptions {
+    enum CubeOptions
+    {
         LEFT = 0,
         RIGHT = 1,
         NONE = 2,
-    }; 
+    };
 
     CubeOptions getCubeToRemove();
     CubeOptions getCubeToAdd();
+    CubeOptions getCurrentCube();
 
-    bool addCube(CubeOptions cubeToAdd);
-    bool removeCube(CubeOptions cubeToRemove);
+    bool addCube();
+    bool removeCube();
 
-    bool storeWristPos(CubeOptions cubeToAdd, float wristPos);
-    float getWristPos(CubeOptions cubeToRemove);
+    bool storeWristPos(float wristPos);
+    float getWristPos();
 
     void checkForCubes();
 
@@ -65,7 +67,7 @@ protected:
     CubeOptions currentCube = CubeOptions::LEFT;
     bool hasCube[2] = {false, false};
     float wristPos[2] = {0.0f, 0.0f};
-    //TODO: add vars for left and right pressure sensor
+    // TODO: add vars for left and right pressure sensor
 };
 }  // namespace aruwsrc::engineer::cube_storage
 

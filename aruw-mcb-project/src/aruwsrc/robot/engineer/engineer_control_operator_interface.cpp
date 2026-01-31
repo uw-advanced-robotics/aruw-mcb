@@ -46,7 +46,9 @@ bool EngineerControlOperatorInterface::isCubeStorageControlMode()
 }
 
 float EngineerControlOperatorInterface::getCubeStorageVelocity()
-{   if (isCubeStorageControlMode) {
+{
+    if (isCubeStorageControlMode())
+    {
         return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
     }
     return 0.0f;

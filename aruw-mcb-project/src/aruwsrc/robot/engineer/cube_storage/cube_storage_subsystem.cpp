@@ -25,104 +25,134 @@ using namespace aruwsrc::control::joint::homing::trigger;
 namespace aruwsrc::engineer::cube_storage
 {
 CubeStorageSubsystem::CubeStorageSubsystem(
-        tap::Drivers *drivers,
-        tap::motor::MotorInterface &motor,
-        TriggerInterface &trigger,
-        Config config)
-    : TriggerHomedJointSubsystem(drivers, motor, trigger, config), Subsystem(drivers)
+    tap::Drivers *drivers,
+    tap::motor::MotorInterface &motor,
+    TriggerInterface &trigger,
+    Config config)
+    : TriggerHomedJointSubsystem(drivers, motor, trigger, config),
+      Subsystem(drivers)
 {
 }
 
-void CubeStorageSubsystem::initialize() {
+void CubeStorageSubsystem::initialize()
+{
     TriggerHomedJointSubsystem::initialize();
     currentCube = CubeOptions::LEFT;
     hasCube[CubeOptions::LEFT] = false;
     hasCube[CubeOptions::RIGHT] = false;
 }
 
-void CubeStorageSubsystem::refresh()
-{   
-    TriggerHomedJointSubsystem::refresh();
-}
+void CubeStorageSubsystem::refresh() { TriggerHomedJointSubsystem::refresh(); }
 
-CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToAdd() {
+CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToAdd()
+{
     checkForCubes();
-    if (!hasCube[CubeOptions::LEFT]) {
-        return CubeOptions::LEFT;
-    } else if (!hasCube[CubeOptions::RIGHT]) {
-        return CubeOptions::RIGHT;
-    } else {
-        return CubeOptions::NONE;
+    if (!hasCube[CubeOptions::LEFT])
+    {
+        currentCube = CubeOptions::LEFT;
     }
+    else if (!hasCube[CubeOptions::RIGHT])
+    {
+        currentCube = CubeOptions::RIGHT;
+    }
+    else
+    {
+        currentCube = CubeOptions::NONE;
+    }
+    return currentCube;
 }
 
-CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToAdd() {
+CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCurrentCube() { return currentCube; }
+
+CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove()
+{
     checkForCubes();
-    if (hasCube[CubeOptions::LEFT]) {
+    if (hasCube[CubeOptions::LEFT])
+    {
         return CubeOptions::LEFT;
-    } else if (hasCube[CubeOptions::RIGHT]) {
+    }
+    else if (hasCube[CubeOptions::RIGHT])
+    {
         return CubeOptions::RIGHT;
-    } else {
+    }
+    else
+    {
         return CubeOptions::NONE;
     }
 }
 
 /* tell subsystem that you have added a cube
-* @param CubeOptions which cube you are adding
-* @return true for success, false for failure
-*/
-bool CubeStorageSubsystem::addCube(CubeOptions cubeToAdd) {
-    if (cubeToAdd != CubeOptions::NONE) {
-        hasCube[cubeToAdd] = 1;
+ * @param CubeOptions which cube you are adding
+ * @return true for success, false for failure
+ */
+bool CubeStorageSubsystem::addCube()
+{
+    if (currentCube != CubeOptions::NONE)
+    {
+        hasCube[currentCube] = 1;
         return true;
     }
     return false;
 }
 
 /* tell subsystem that you have added a cube
-* @param CubeOptions which cube you are adding
-* @return true for success, false for failure
-*/
-bool CubeStorageSubsystem::removeCube(CubeOptions cubeToRemove) {
-    if (cubeToRemove != CubeOptions::NONE) {
-        hasCube[cubeToRemove] = 0;
+ * @param CubeOptions which cube you are adding
+ * @return true for success, false for failure
+ */
+bool CubeStorageSubsystem::removeCube()
+{
+    if (currentCube != CubeOptions::NONE)
+    {
+        hasCube[currentCube] = 0;
         return true;
     }
     return false;
 }
 
-bool CubeStorageSubsystem::storeWristPos(CubeOptions cubeToAdd, float newWristPosition) {
-    if (cubeToAdd != CubeOptions::NONE) {
-        if (!hasCube[cubeToAdd]) {
-            wristPos[cubeToAdd] = newWristPosition;
+bool CubeStorageSubsystem::storeWristPos(float newWristPosition)
+{
+    if (currentCube != CubeOptions::NONE)
+    {
+        if (!hasCube[currentCube])
+        {
+            wristPos[currentCube] = newWristPosition;
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
     return false;
 }
 
-float CubeStorageSubsystem::getWristPos(CubeOptions cubeToRemove) {
-    if (cubeToRemove != CubeOptions::NONE) {
-        if (hasCube[cubeToRemove]) {
-            return wristPos[cubeToRemove];
-        } else {
+float CubeStorageSubsystem::getWristPos()
+{
+    if (currentCube != CubeOptions::NONE)
+    {
+        if (hasCube[currentCube])
+        {
+            return wristPos[currentCube];
+        }
+        else
+        {
             return std::numeric_limits<float>::quiet_NaN();
         }
     }
     return std::numeric_limits<float>::quiet_NaN();
 }
 
-void CubeStorageSubsystem::checkForCubes() {
-    hasCube[CubeOptions::LEFT] = getPressure(CubeOptions::LEFT) > 1.0f; //TODO: update this
+void CubeStorageSubsystem::checkForCubes()
+{
+    hasCube[CubeOptions::LEFT] = getPressure(CubeOptions::LEFT) > 1.0f;  // TODO: update this
     hasCube[CubeOptions::RIGHT] = getPressure(CubeOptions::RIGHT) > 1.0f;
-
 }
 
-float CubeStorageSubsystem::getPressure(CubeOptions cube) {
-    if (cube != CubeOptions::NONE) {
-        return 1.0f; //TODO: update to read the pressure
+float CubeStorageSubsystem::getPressure(CubeOptions cube)
+{
+    if (cube != CubeOptions::NONE)
+    {
+        return 1.0f;  // TODO: update to read the pressure
     }
     return std::numeric_limits<float>::quiet_NaN();
 }

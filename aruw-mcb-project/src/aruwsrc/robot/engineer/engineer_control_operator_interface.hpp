@@ -97,7 +97,7 @@ public:
      */
     bool isGantryWristControlMode();
 
-     /**
+    /**
      * @return whether or not the control switch is set to cube storage control mode.
      */
     bool isCubeStorageControlMode();
