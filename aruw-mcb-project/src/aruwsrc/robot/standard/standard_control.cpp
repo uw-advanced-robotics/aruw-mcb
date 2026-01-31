@@ -225,6 +225,8 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     rightFrontChassisMotor,
     rightBackChassisMotor,
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
+    aruwsrc::control::chassis::WHEEL_RADIUS,
+    aruwsrc::control::chassis::WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
 
 tap::encoder::CanEncoder parallelOmni(

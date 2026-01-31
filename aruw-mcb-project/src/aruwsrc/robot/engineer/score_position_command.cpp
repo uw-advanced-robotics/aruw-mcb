@@ -17,19 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "score_position_command.hpp"
+#include "aruwsrc/robot/engineer/score_position_command.hpp"
 
 namespace aruwsrc::engineer
 {
 ScorePositionCommand::ScorePositionCommand(
-    aruwsrc::control::joint::JointSubsystem& gantryLift,
+    aruwsrc::control::joint::JointSubsystem& extension,
     WristSubsystem& wrist,
     aruwsrc::control::joint::JointSubsystem& roll)
-    : gantryLift(gantryLift),
+    : extension(extension),
       wrist(wrist),
       roll(roll)
 {
-    addSubsystemRequirement(&gantryLift);
+    addSubsystemRequirement(&extension);
     addSubsystemRequirement(&wrist);
     addSubsystemRequirement(&roll);
 };
@@ -38,34 +38,34 @@ void ScorePositionCommand::cyclePositions(ScorePositions scorePos) { scoringPosi
 
 void ScorePositionCommand::initialize()
 {
-    float gantryLiftSetpoint;
+    float extensionSetpoint;
     float wristYawSetpoint;
     float wristPitchSetpoint;
     float wristRollSetpoint;
 
     if (scoringPosition == ScorePositions::one)
     {
-        gantryLiftSetpoint = gantryLiftScoreOneSetpoint;
+        extensionSetpoint = extensionScoreOneSetpoint;
         wristYawSetpoint = wristYawScoreOneSetpoint;
         wristPitchSetpoint = wristPitchScoreOneSetpoint;
         wristRollSetpoint = wristRollScoreOneSetpoint;
     }
     else if (scoringPosition == ScorePositions::two)
     {
-        gantryLiftSetpoint = gantryLiftScoreTwoSetpoint;
+        extensionSetpoint = extensionScoreTwoSetpoint;
         wristYawSetpoint = wristYawScoreTwoSetpoint;
         wristPitchSetpoint = wristPitchScoreTwoSetpoint;
         wristRollSetpoint = wristRollScoreTwoSetpoint;
     }
     else
     {
-        gantryLiftSetpoint = gantryLiftScoreThreeSetpoint;
+        extensionSetpoint = extensionScoreThreeSetpoint;
         wristYawSetpoint = wristYawScoreThreeSetpoint;
         wristPitchSetpoint = wristPitchScoreThreeSetpoint;
         wristRollSetpoint = wristRollScoreThreeSetpoint;
     }
 
-    gantryLift.setSetpoint(gantryLiftSetpoint);
+    extension.setSetpoint(extensionSetpoint);
     wrist.setSetpointYaw(wristYawSetpoint);
     wrist.setSetpointPitch(wristPitchSetpoint);
     roll.setSetpoint(wristRollSetpoint);
@@ -77,6 +77,6 @@ void ScorePositionCommand::end(bool) {}
 
 bool ScorePositionCommand::isFinished() const
 {
-    return gantryLift.atSetpoint() && wrist.atSetpoint() && roll.atSetpoint();
+    return extension.atSetpoint() && wrist.atSetpoint() && roll.atSetpoint();
 }
 }  // namespace aruwsrc::engineer

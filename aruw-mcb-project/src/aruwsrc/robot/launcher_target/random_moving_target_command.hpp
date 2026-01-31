@@ -17,42 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef STICK_RPM_COMMAND_HPP_
-#define STICK_RPM_COMMAND_HPP_
+#ifndef RANDOM_MOVING_TARGET_COMMAND_HPP_
+#define RANDOM_MOVING_TARGET_COMMAND_HPP_
 
-#include "tap/communication/serial/remote.hpp"
 #include "tap/control/command.hpp"
 
 #include "motor_subsystem.hpp"
 
-using namespace aruwsrc::dart_target;
+using namespace aruwsrc::launcher_target;
 
-class StickRpmCommand : public tap::control::Command
+class RandomMovingTargetCommand : public tap::control::Command
 {
 public:
-    explicit StickRpmCommand(
-        MotorSubsystem* subsystem,
-        tap::communication::serial::Remote* remote,
-        tap::communication::serial::Remote::Channel channel,
-        float maxRpm);
+    explicit RandomMovingTargetCommand(MotorSubsystem* subsystem);
 
-    void initialize() override {}
+    void initialize() override;
 
     void execute() override;
 
     void end(bool) override;
 
-    bool isFinished() const override { return false; }
+    bool isFinished() const override;
 
-    const char* getName() const override { return "stick rpm"; }
+    const char* getName() const override { return "Random Moving Target Command"; }
 
 private:
     MotorSubsystem* motorSubsystem;
-    tap::communication::serial::Remote* remote;
-    tap::communication::serial::Remote::Channel channel;
-    float maxRpm;
+    uint32_t startTime;
+    float targetPos;
+    bool targetSet;
+    bool targetAhead;
+};  // class RandomMovingTargetCommand
 
-    const float STICK_DEADZONE = 0.05;
-};  // class StickRpmCommand
-
-#endif  // STICK_RPM_COMMAND_HPP_
+#endif  // RANDOM_MOVING_TARGET_COMMAND_HPP_

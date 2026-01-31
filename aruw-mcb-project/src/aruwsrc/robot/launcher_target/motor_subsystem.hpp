@@ -28,7 +28,9 @@
 
 #include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
 
-namespace aruwsrc::dart_target
+#include "launcher_target_constants.hpp"
+
+namespace aruwsrc::launcher_target
 {
 class MotorSubsystem : public tap::control::Subsystem
 {
@@ -43,7 +45,11 @@ public:
     {
     }
 
-    inline void initialize() override { this->motor.initialize(); };
+    inline void initialize() override
+    {
+        this->motor.initialize();
+        this->motor.getEncoder()->resetEncoderValue();
+    };
 
     inline void setDesiredRPM(float rpm) { desiredRPM = rpm; }
 
@@ -52,12 +58,25 @@ public:
         const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
         const uint32_t dt = curTime - prevTime;
         prevTime = curTime;
+        position = getCurrentPosition();
 
         const float velocityError = desiredRPM - getCurrentRPM();
 
         velocityPid.runControllerDerivateError(velocityError, dt);
 
-        motor.setDesiredOutput(velocityPid.getOutput());
+        // safety to make sure we don't go past the bounds
+        if ((position < 0 && desiredRPM < 0) ||
+            (position > aruwsrc::launcher_target::constants::TARGET_TRAVEL_DISTANCE &&
+             desiredRPM > 0))
+        {
+            stop();
+        }
+        else
+        {
+            motor.setDesiredOutput(velocityPid.getOutput());
+        }
+
+        // motor.setDesiredOutput(velocityPid.getOutput());
 
         if (akMotor)
         {
@@ -69,6 +88,12 @@ public:
     inline float getCurrentRPM() const
     {
         return motor.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+    }
+
+    inline float getCurrentPosition()
+    {
+        return motor.getEncoder()->getPosition().getUnwrappedValue() *
+               aruwsrc::launcher_target::constants::WHEEL_DIAMETER / 2.0;
     }
 
     inline void refreshSafeDisconnect() override { stop(); };
@@ -90,10 +115,11 @@ private:
     tap::algorithms::SmoothPid velocityPid;
 
     float desiredRPM{0};
+    float position = 0;
     uint32_t prevTime = 0;
     bool akMotor = false;
 };
 
-}  // namespace aruwsrc::dart_target
+}  // namespace aruwsrc::launcher_target
 
 #endif

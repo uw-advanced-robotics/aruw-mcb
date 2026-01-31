@@ -23,13 +23,8 @@
 
 namespace aruwsrc::hero
 {
-float HeroTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
+float HeroTurretSubsystem::getWorldYaw() const { return getIMU()->getYaw(); }
 
-float HeroTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
-
-uint32_t HeroTurretSubsystem::getLastMeasurementTimeMicros() const
-{
-    return getTurretMCB()->getIMUDataTimestamp();
-}
+float HeroTurretSubsystem::getWorldPitch() const { return getIMU()->getPitch(); }
 
 }  // namespace aruwsrc::hero

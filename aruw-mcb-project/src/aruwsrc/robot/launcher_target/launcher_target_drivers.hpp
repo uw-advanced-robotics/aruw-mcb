@@ -17,15 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_TARGET_DRIVERS_HPP_
-#define DART_TARGET_DRIVERS_HPP_
+#ifndef LAUNCHER_TARGET_DRIVERS_HPP_
+#define LAUNCHER_TARGET_DRIVERS_HPP_
 
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 
-namespace aruwsrc::dart_target
+namespace aruwsrc::launcher_target
 {
 class Drivers : public tap::Drivers
 {
@@ -44,7 +44,7 @@ public:
 public:
     communication::rtt::RttTelemetry rttTelemetry;
     display::OledDisplay oledDisplay;
-};  // class aruwsrc::DartTargetDrivers
-}  // namespace aruwsrc::dart_target
+};  // class aruwsrc::LauncherTargetDrivers
+}  // namespace aruwsrc::launcher_target
 
-#endif  // DART_TARGET_DRIVERS_HPP_
+#endif  // LAUNCHER_TARGET_DRIVERS_HPP_
