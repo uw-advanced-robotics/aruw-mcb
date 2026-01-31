@@ -37,6 +37,7 @@ namespace aruwsrc::control::chassis
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
+
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {50, 4'500},
     {60, 5'700},
@@ -146,8 +147,8 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 50,
 };
 
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
 
 }  // namespace aruwsrc::control::chassis
 

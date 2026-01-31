@@ -44,6 +44,8 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
@@ -52,6 +54,7 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/image_indicator.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -214,6 +217,8 @@ inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm2()
 }
 
 // /* define subsystems --------------------------------------------------------*/
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+
 BuzzerSubsystem buzzer(drivers());
 
 YawTurretSubsystem turretMajor(*drivers(), turretMajorYawMotor, turretMajor::YAW_MOTOR_CONFIG);
@@ -321,7 +326,8 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     rightBackMotor,
     {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f},
     WHEEL_RADIUS,
-    WHEELBASE_RADIUS);
+    WHEELBASE_RADIUS,
+    &drivers()->capacitorBank);
 
 aruwsrc::communication::mcb_lite::VirtualCanEncoder parallelOmni(
     drivers(),
@@ -383,8 +389,11 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
 aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    transformer.getWorldToChassis(),
-    aruwsrc::control::chassis::BEYBLADE_CONFIG);
+    &transformAdapter,
+    aruwsrc::control::chassis::BEYBLADE_CONFIG,
+    capBankSubsystem,
+    0.15f,
+    1000.0f);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -556,6 +565,8 @@ aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand
     chassis,
     autoNavController,
     true);
+
+aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(drivers(), capBankSubsystem);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -935,6 +946,7 @@ PressCommandMapping bCtrlPressed(
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
+// safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
