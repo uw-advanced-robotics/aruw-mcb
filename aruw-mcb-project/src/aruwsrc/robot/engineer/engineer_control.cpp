@@ -47,6 +47,10 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_add_command.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_remove_command.hpp"
+
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
@@ -331,7 +335,7 @@ aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
     drivers(),
     imuCalibrateCommand);
 
-TriggerHomedJointSubsystem cubeStorage(
+CubeStorageSubsystem cubeStorage(
     drivers(),
     cubeStorageMotor,
     cubeStorageTrigger,
@@ -353,13 +357,23 @@ TriggerHomedJointSubsystem extensionSubsystem(
 
 JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_CONFIG);
 
-DigitalOutSubsystem suckSubsystem(
+// update vals
+DigitalOutSubsystem leftSuckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
     true);
-
-DigitalOutSubsystem releaseSubsystem(
+DigitalOutSubsystem rightSuckSubsystem(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::Y,
+    true);
+DigitalOutSubsystem leftReleaseSubsystem(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::Z,
+    false);
+DigitalOutSubsystem rightReleaseSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Z,
@@ -407,11 +421,18 @@ WristSetpointsCommand wristFoldOutCommand(
     wristSubsystem,
     {WRIST_TOP_SETPOINT, WRIST_BOTTOM_SETPOINT, WRIST_OUT_SETPOINT});
 
-DigitalOutCommand suckOffCommand(suckSubsystem, false);
-DigitalOutCommand suckOnCommand(suckSubsystem, true);
-DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
-DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
-DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
+DigitalOutCommand suckOffLeftCommand(leftSuckSubsystem, false);
+DigitalOutCommand suckOnLeftCommand(leftSuckSubsystem, true);
+DigitalOutCommand suckOffRightCommand(rightSuckSubsystem, false);
+DigitalOutCommand suckOnRightCommand(rightSuckSubsystem, true);
+
+DigitalOutCommand releaseOffLeftCommand(leftReleaseSubsystem, false);
+DigitalOutCommand releaseOnLeftCommand(leftReleaseSubsystem, true);
+DigitalOutCommand releaseOffRightCommand(rightReleaseSubsystem, false);
+DigitalOutCommand releaseOnRightCommand(rightReleaseSubsystem, true);
+
+DigitalOutToggleCommand suctionToggleLeftCommand(leftSuckSubsystem, leftReleaseSubsystem);
+DigitalOutToggleCommand suctionToggleRightCommand(rightSuckSubsystem, rightReleaseSubsystem);
 
 // commands here for sequences, but setpoints never tuned
 SetpointMovePositionCommand extensionInCommand(extensionSubsystem, 2);
@@ -422,22 +443,24 @@ SetpointMovePositionCommand extensionOut(extensionSubsystem, EXTENSION_SCORE);
 SetpointMovePositionCommand extensionIn(extensionSubsystem, EXTENSION_PICKUP);
 
 // rotating cube storage
-SetpointMovePositionCommand leftCubePosition(cubeLift, CUBE_STORAGE_LEFT_SETPOINT);
-SetpointMovePositionCommand rightCubePosition(cubeLift, CUBE_STORAGE_RIGHT_SETPOINT);
-SetpointMovePositionCommand centerCubePosition(cubeLift, CUBE_STORAGE_CENTER_SETPOINT);
+SetpointMovePositionCommand leftCubePosition(cubeStorage, CUBE_STORAGE_LEFT_SETPOINT);
+SetpointMovePositionCommand rightCubePosition(cubeStorage, CUBE_STORAGE_RIGHT_SETPOINT);
+SetpointMovePositionCommand centerCubePosition(cubeStorage, CUBE_STORAGE_CENTER_SETPOINT);
 
-// sequential stuff for cube storage (check if right)
-// SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
-//     {&liftUpCommand,
-//      &gantryRetractCommand,
-//      &wristFoldInCommand,
-//      &liftDownCommand,
-//      &suckOffCommand,
-//      &releaseOnCommand,
-//      &gantryExtendCommand,
-//      &liftUpCommand,
-//      &gantryRetractCommand,
-//      &cubeLiftSwitchDownCommand}});
+CubeStorageChooseAddCommand chooseCubeDirectionCommand(cubeStorage, wristRollSubsystem);
+
+// todo - update for correct sequence
+SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
+    {&chooseCubeDirectionCommand,
+     &gantryRetractCommand,
+     &wristFoldInCommand,
+     &liftDownCommand,
+     &suckOffCommand,
+     &releaseOnCommand,
+     &gantryExtendCommand,
+     &liftUpCommand,
+     &gantryRetractCommand,
+     &cubeLiftSwitchDownCommand}});
 
 WristMovePositionCommand wristDown(
     wristSubsystem,
@@ -491,8 +514,10 @@ void initializeSubsystems()
     wristRollSubsystem.initialize();
     wristSubsystem.initialize();
     cubeStorage.initialize();
-    suckSubsystem.initialize();
-    releaseSubsystem.initialize();
+    leftSuckSubsystem.initialize();
+    leftReleaseSubsystem.initialize();
+    rightSuckSubsystem.initialize();
+    rightReleaseSubsystem.initialize();
     // clientDicsplay.initialize();
 }
 
@@ -504,8 +529,10 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
-    drivers->commandScheduler.registerSubsystem(&suckSubsystem);
-    drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
+    drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&leftReleaseSubsystem);
+    drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&rightReleaseSubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 

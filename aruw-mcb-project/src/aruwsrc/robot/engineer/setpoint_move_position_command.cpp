@@ -19,6 +19,7 @@
 
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 
+
 namespace aruwsrc::engineer
 {
 SetpointMovePositionCommand::SetpointMovePositionCommand(
