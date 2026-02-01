@@ -66,14 +66,15 @@
 
 // #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
-#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
-#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+
 
 // check which of these r important
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -286,28 +287,27 @@ aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
 
 tap::encoder::CanEncoder parallelOmniOne(
     drivers(),
-    tap::encoder::CanEncoderId::ID1,  //EG@TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
-    true); //EG@TODO: find correct inversion
+    tap::encoder::CanEncoderId::ID1,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
 
 tap::encoder::CanEncoder parallelOmniTwo(
     drivers(),
-    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
-    true); //EG@TODO: find correct inversion
+    tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
 
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
-    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
-    true); //EG@TODO: find correct inversion
+    tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
     &parallelOmniOne,
     &parallelOmniTwo,
     &perpendicularOmni,
-    DEADWHEEL_RADIUS
-);
+    DEADWHEEL_RADIUS);
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
@@ -316,21 +316,22 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
     drivers()->mpu6500,
     INITIAL_CHASSIS_POSITION_X,
     INITIAL_CHASSIS_POSITION_Y,
+    INITIAL_CHASSIS_ORIENTATION,
     parallelOneCenterToWheelDistance,
     parallelTwoCenterToWheelDistance,
     perpendicularCenterToWheelDistance,
-    parallelWheelOneChassisForwardRelativeAngleRadians,
-    parallelWheelTwoChassisForwardRelativeAngleRadians,
-    perpendicularWheelChassisForwardRelativeAngleRadians
-);
+    odomFrameToRobotFrame);
 
 // transforms
-aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformer transformer(odometrySubsystem, engTurret);
-aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformer transformer(
+    odometrySubsystem,
+    engTurret);
+aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformerSubsystem transformSubsystem(
+    *drivers(),
+    transformer);
 
-aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformAdapter transformAdapter(transformer);
-
-// this could be useful i think
+aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformAdapter transformAdapter(
+    transformer);
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
@@ -582,7 +583,7 @@ void initializeSubsystems()
     transformSubsystem.initialize();
     odometrySubsystem.initialize();
     perpendicularOmni.initialize();
-    parallelOmniOne.initialize(); 
+    parallelOmniOne.initialize();
     parallelOmniTwo.initialize();
     // clientDicsplay.initialize();
 }

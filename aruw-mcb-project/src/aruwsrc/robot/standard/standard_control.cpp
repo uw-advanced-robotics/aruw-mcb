@@ -228,7 +228,7 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
     &drivers()->capacitorBank);
 
-/*tap::encoder::CanEncoder parallelOmniOne(
+tap::encoder::CanEncoder parallelOmniOne(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
     tap::can::CanBus::CAN_BUS2,
@@ -239,7 +239,7 @@ tap::encoder::CanEncoder perpendicularOmni(
     tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2);*/
 
-/*aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers(),
     chassis,
@@ -248,46 +248,7 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers()->mpu6500,
     modm::Vector2f(
         aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
-        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));*/
-
-
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-const tap::motor::DjiMotorEncoder& parallelOmniOne = leftFrontChassisMotor.getInternalEncoder();
-
-const tap::motor::DjiMotorEncoder& parallelOmniTwo = rightBackChassisMotor.getInternalEncoder();
-
-const tap::motor::DjiMotorEncoder& perpendicularOmni = rightFrontChassisMotor.getInternalEncoder();
-
-float DEADWHEEL_RADIUS = 0.1016f;
-aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
-    parallelOmniOne,
-    parallelOmniTwo,
-    perpendicularOmni,
-    DEADWHEEL_RADIUS
-);
-
-constexpr float parallelOneCenterToWheelDistance = 0.45f / 2.0f; 
-constexpr float parallelTwoCenterToWheelDistance = 0.45f / 2.0f; 
-constexpr float perpendicularCenterToWheelDistance = 0.45f / 2.0f; 
-constexpr float odomFrameToRobotFrame = -PI / 4.0f; 
-
-aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
-    *drivers(),
-    deadwheels,
-    turret,
-    drivers()->mpu6500,
-    aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
-    aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y,
-    0.0f, 
-    parallelOneCenterToWheelDistance,
-    parallelTwoCenterToWheelDistance,
-    perpendicularCenterToWheelDistance,
-    odomFrameToRobotFrame
-);
-
-
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);

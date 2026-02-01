@@ -208,36 +208,14 @@ private:
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
 
+    tap::algorithms::Angle lastWrappedTheta;
+    tap::algorithms::Angle imuTheta;
+
     const float parallelOneCenterToWheelDistance;
     const float parallelTwoCenterToWheelDistance;
     const float perpendicularCenterToWheelDistance;
     const float odomFrameToRobotFrame;
     void updateChassisStateFromKF();
-
-    float perpendicularRaw;
-    float parallelOneRaw;
-    float parallelTwoRaw;
-
-    float filteredPerpendicular;
-    float filteredParallelOne;
-    float filteredParallelTwo;
-
-    float correctedParallelOne;
-    float correctedParallelTwo;
-    float correctedPerpendicular;
-
-    float mahonyTheta;
-    float lastMahonyTheta;
-    float imuTheta;
-
-    float imuOmega;
-    float odoOmega; 
-
-    float Vx;
-    float Vy;
-
-    float Ax;
-    float Ay;
 
     static constexpr int FILTER_ORDER = 3;
     float parallelOneFilterState[FILTER_ORDER] = {0.0f};
@@ -248,8 +226,7 @@ private:
 
     static constexpr float IIR_A[FILTER_ORDER] = {1.000000f, -1.583541f, 0.656414f};
     static constexpr float IIR_B[FILTER_ORDER] = {0.018218f, 0.036436f, 0.018218f};
-    
-    float y[int(OdomInput::NUM_INPUTS)];
+
     float x[int(OdomState::NUM_STATES)];
 
     float applyIirFilter(float input, float* state, const float* a, const float* b, int order);
