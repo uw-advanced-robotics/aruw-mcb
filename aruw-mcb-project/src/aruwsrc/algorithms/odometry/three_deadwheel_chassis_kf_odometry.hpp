@@ -208,8 +208,8 @@ private:
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
 
-    tap::algorithms::Angle lastWrappedTheta;
-    tap::algorithms::Angle imuTheta;
+    tap::algorithms::Angle lastWrappedTheta = tap::algorithms::Angle(0.0f);
+    tap::algorithms::Angle imuTheta = tap::algorithms::Angle(0.0f);
 
     const float parallelOneCenterToWheelDistance;
     const float parallelTwoCenterToWheelDistance;
