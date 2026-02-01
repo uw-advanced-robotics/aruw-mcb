@@ -90,13 +90,13 @@ public:
 
         // Predict state
         // TODO add control vector if necessary in the future
-        xHat = A * xHat; //State Extrapolation
-        P = A * P * At + Q; //Covariance Extrapolation
+        xHat = A * xHat;     // State Extrapolation
+        P = A * P * At + Q;  // Covariance Extrapolation
 
         // Update step
-        K = P * Ct * (C * P * Ct + R).inverse(); // Kalman Gain
-        xHat = xHat + K * (y - C * xHat); //State Update
-        P = (I - K * C) * P; //Covariance Update
+        K = P * Ct * (C * P * Ct + R).inverse();  // Kalman Gain
+        xHat = xHat + K * (y - C * xHat);         // State Update
+        P = (I - K * C) * P;                      // Covariance Update
     }
 
     const std::array<float, STATES> &getStateVectorAsMatrix() const { return xHat.data; }
