@@ -31,7 +31,6 @@
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
 
-
 // Forward declarations
 namespace tap
 {
