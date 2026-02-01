@@ -73,6 +73,8 @@ using namespace aruwsrc::blank;
 using namespace aruwsrc::motor_tester;
 #elif defined(TARGET_LAUNCHER_TARGET)
 using namespace aruwsrc::launcher_target;
+#elif defined(TARGET_FLYWHEEL_TESTING)
+using namespace aruwsrc::flywheel_testing;
 #elif defined(TARGET_CHARACTERIZER)
 using namespace aruwsrc::characterizer;
 #endif
@@ -194,7 +196,7 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
     ((Drivers *)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_ECLIPSE)

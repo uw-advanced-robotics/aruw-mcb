@@ -283,7 +283,9 @@ aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
     leftBackChassisMotor,
     rightFrontChassisMotor,
     rightBackChassisMotor,
-    aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
+    aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
+    WHEEL_RADIUS,
+    WHEELBASE_RADIUS);
 
 tap::encoder::CanEncoder parallelOmniOne(
     drivers(),

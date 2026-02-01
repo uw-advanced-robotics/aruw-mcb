@@ -233,7 +233,7 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryExtensionLim
 LimitSwitchTrigger gantryExtensionTrigger(&gantryExtensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
-chassis::MecanumChassisSubsystem mechanumChassis(
+chassis::MecanumChassisSubsystem mecanumChassis(
     drivers(),
     &currentSensor,
     &voltageSensor,
@@ -241,7 +241,9 @@ chassis::MecanumChassisSubsystem mechanumChassis(
     leftBackChassisMotor,
     rightFrontChassisMotor,
     rightBackChassisMotor,
-    aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
+    aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
+    aruwsrc::control::chassis::WHEEL_RADIUS,
+    aruwsrc::control::chassis::EFFECTIVE_WHEELBASE);
 
 TriggerHomedJointSubsystem cubeLift(drivers(), cubeLiftMotor, cubeLiftTrigger, CUBE_LIFT_CONFIG);
 
@@ -330,7 +332,7 @@ SetpointMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
 aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
-    &mechanumChassis);
+    &mecanumChassis);
 
 WristControllerCommand wristControllerCommand(
     wristRollSubsystem,
@@ -472,11 +474,11 @@ CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    mechanumChassis.initialize();
+    mecanumChassis.initialize();
     gantryLiftSubsystem.initialize();
     gantryExtensionSubsystem.initialize();
-    wristRollSubsystem.initialize();
-    wristSubsystem.initialize();
+    // wristRollSubsystem.initialize();
+    // wristSubsystem.initialize();
     cubeLift.initialize();
     suckSubsystem.initialize();
     releaseSubsystem.initialize();
@@ -486,11 +488,11 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&mechanumChassis);
+    drivers->commandScheduler.registerSubsystem(&mecanumChassis);
     drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
     drivers->commandScheduler.registerSubsystem(&gantryExtensionSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wristSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
     drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
@@ -500,7 +502,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
-    mechanumChassis.setDefaultCommand(&chassisDriveCommand);
+    mecanumChassis.setDefaultCommand(&chassisDriveCommand);
     gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
     gantryExtensionSubsystem.setDefaultCommand(&gantryExtensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);

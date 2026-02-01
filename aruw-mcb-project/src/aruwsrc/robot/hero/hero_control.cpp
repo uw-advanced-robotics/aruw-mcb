@@ -187,7 +187,10 @@ XDriveChassisSubsystem chassis(
     rightFrontChassisMotor,
     rightBackChassisMotor,
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
+    aruwsrc::control::chassis::WHEEL_RADIUS,
+    aruwsrc::control::chassis::WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
+
 tap::motor::DjiMotor leftFrictionWheel(
     drivers(),
     aruwsrc::control::launcher::LEFT_MOTOR_ID,

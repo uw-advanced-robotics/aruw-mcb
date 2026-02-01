@@ -34,6 +34,7 @@
 
 #include "aruwsrc/algorithms/plate_hit_tracker.hpp"
 #include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
@@ -61,10 +62,12 @@ public:
               &turretMCBCanCommBus1,
               &turretMCBCanCommBus2,
               &chassisMcbLite,
-              nullptr),
+              nullptr,
+              &capacitorBank),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, CAP_BANK_CAPACITANCE),
           chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
           turretMajorImu(),
           plateHitTracker(this),
@@ -81,16 +84,19 @@ public:
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
-    SentryControlOperatorInterface controlOperatorInterface;
-    communication::serial::VisionCoprocessor visionCoprocessor;
+    aruwsrc::sentry::SentryControlOperatorInterface controlOperatorInterface;
+    aruwsrc::communication::serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
-    communication::can::TurretMCBCanComm turretMCBCanCommBus1;
-    communication::can::TurretMCBCanComm turretMCBCanCommBus2;
+    aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus1;
+    aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
+    aruwsrc::communication::can::cap_bank::CapacitorBank capacitorBank;
     aruwsrc::communication::mcb_lite::MCBLite chassisMcbLite;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
+    static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
+
 #endif
 };  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc::sentry

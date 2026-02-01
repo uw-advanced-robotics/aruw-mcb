@@ -109,7 +109,9 @@ XDriveChassisSubsystem chassis(
     leftBackChassisMotor,
     rightFrontChassisMotor,
     rightBackChassisMotor,
-    WHEEL_VELOCITY_PID_CONFIG);
+    WHEEL_VELOCITY_PID_CONFIG,
+    WHEEL_RADIUS,
+    WHEELBASE_RADIUS);
 
 // aruwsrc::control::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
 //     drivers(),
