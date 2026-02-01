@@ -73,7 +73,6 @@ public:
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
         const float initYaw,
-        const float initYaw,
         const float parallelOneCenterToWheelDistance,
         const float parallelTwoCenterToWheelDistance,
         const float perpendicularCenterToWheelDistance,
@@ -166,25 +165,18 @@ private:
         0, 0, 0, 0, 5.69132363e-04, 0, 0,
         0, 0, 0, 0, 0, 5.69132363e-04, 0,
         0, 0, 0, 0, 0, 0, 5.69132363e-04,
-        7.49565672e-05, 0, 0, 0, 0, 0, 0,
-        0, 7.35872941e-04, 0, 0, 0, 0, 0,
-        0, 0, 7.81982345e-05, 0, 0, 0, 0,
-        0, 0, 0, 5.69132363e-04, 0, 0, 0,
-        0, 0, 0, 0, 5.69132363e-04, 0, 0,
-        0, 0, 0, 0, 0, 5.69132363e-04, 0,
-        0, 0, 0, 0, 0, 0, 5.69132363e-04,
-    }; //EG@TODO:
+    }; //TODO: TUNE
 
     static constexpr float KF_Q[STATES_SQUARED] = {
-        2.276528e-15f, 2.276528e-12f, 1.138264e-09f, 0            , 0            , 0            , 0            , 0            ,
-        2.276528e-12f, 2.276528e-09f, 1.138264e-06f, 0            , 0            , 0            , 0            , 0            ,
-        1.138264e-09f, 1.138264e-06f, 5.69132e-04f , 0            , 0            , 0            , 0            , 0            ,
-        0            , 0            , 0            , 2.276528e-15f, 2.276528e-12f, 1.138264e-09f, 0            , 0            ,
-        0            , 0            , 0            , 2.276528e-12f, 2.276528e-09f, 1.138264e-06f, 0            , 0            ,
-        0            , 0            , 0            , 1.138264e-09f, 1.138264e-06f, 5.69132e-04f , 0            , 0            ,
-        0            , 0            , 0            , 0            , 0            , 0            , 2.276528e-15f, 2.276528e-12f,
-        0            , 0            , 0            , 0            , 0            , 0            , 2.276528e-12f, 2.276528e-09f,
-    }; //EG@TODO: Multiply by variance.
+         9.0120570108e-06f,  5.4281168875e-04f,  5.6797949319e-02f,  4.3864560552e-07f, -7.6362940038e-05f, -7.9139054404e-03f, 0            , 0            ,
+         5.4281168875e-04f,  1.9396555203e-01f,  1.8282498819e+01f, -8.3483362129e-05f, -1.8580184164e-02f, -1.7427705884e+00f, 0            , 0            ,
+         5.6797949319e-02f,  1.8282498819e+01f,  1.7345126240e+03f, -7.4990656881e-03f, -1.7895295666e+00f, -1.6939745776e+02f, 0            , 0            ,
+         4.3864560552e-07f, -8.3483362129e-05f, -7.4990656881e-03f,  4.7600903828e-06f,  4.9474361167e-04f,  4.6590765854e-02f, 0            , 0            ,
+        -7.6362940038e-05f, -1.8580184164e-02f, -1.7895295666e+00f,  4.9474361167e-04f,  1.5265492535e-01f,  1.4482580576e+01f, 0            , 0            ,
+        -7.9139054404e-03f, -1.7427705884e+00f, -1.6939745776e+02f,  4.6590765854e-02f,  1.4482580576e+01f,  1.3770822857e+03f, 0            , 0            ,
+         0                ,  0                ,  0                ,  0                ,  0                ,  0                , 2.276528e-15f, 2.276528e-12f,
+         0                ,  0                ,  0                ,  0                ,  0                ,  0                , 2.276528e-12f, 2.276528e-09f,
+    }; //TODO: TUNE
     
     static constexpr float KF_P0[STATES_SQUARED] = {
         1E-2, 0   , 0   , 0   , 0   , 0   , 0   , 0   ,
@@ -195,15 +187,7 @@ private:
         0   , 0   , 0   , 0   , 0   , 1E-2, 0   , 0   ,
         0   , 0   , 0   , 0   , 0   , 0   , 1E-2, 0   ,
         0   , 0   , 0   , 0   , 0   , 0   , 0   , 1E-2,
-        1E-2, 0   , 0   , 0   , 0   , 0   , 0   , 0   ,
-        0   , 1E-6, 0   , 0   , 0   , 0   , 0   , 0   ,
-        0   , 0   , 1E+3, 0   , 0   , 0   , 0   , 0   ,
-        0   , 0   , 0   , 1E-2, 0   , 0   , 0   , 0   ,
-        0   , 0   , 0   , 0   , 1E-2, 0   , 0   , 0   ,
-        0   , 0   , 0   , 0   , 0   , 1E-2, 0   , 0   ,
-        0   , 0   , 0   , 0   , 0   , 0   , 1E-2, 0   ,
-        0   , 0   , 0   , 0   , 0   , 0   , 0   , 1E-2,
-    }; //EG@TODO:
+    }; //TODO: TUNE
     // clang-format on
 
     const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry;
@@ -211,16 +195,13 @@ private:
     tap::communication::sensors::imu::ImuInterface& imu;
     const modm::Vector2f initPos;
     const float initYaw;
-    const float initYaw;
 
     /// Chassis location in the world frame
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
     // Chassis yaw orientation in world frame (radians)
-    float chassisYaw;
-
-    float angularVelocity = 0;
+    tap::algorithms::Angle chassisYaw;
 
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;

@@ -41,25 +41,22 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
       imu(imu),
       initPos(initPos),
       initYaw(initYaw),
+      chassisYaw(initYaw),
       parallelOneCenterToWheelDistance(parallelOneCenterToWheelDistance),
       parallelTwoCenterToWheelDistance(parallelTwoCenterToWheelDistance),
       perpendicularCenterToWheelDistance(perpendicularCenterToWheelDistance),
-      odomFrameToRobotFrame(odomFrameToRobotFrame),
-      lastWrappedTheta(0.0f),
-      imuTheta(0.0f)
+      odomFrameToRobotFrame(odomFrameToRobotFrame)
 {
     reset();
 }
 
 void ThreeDeadwheelChassisKFOdometry::reset()
 {
-    chassisYaw = initYaw;
+    chassisYaw = tap::algorithms::Angle(initYaw);
+    imuTheta = 0.0f;
     lastWrappedTheta = 0.0f;
 
-    chassisYaw = initYaw;
-
     float initialX[int(OdomState::NUM_STATES)] =
-        {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f, initYaw, 0.0f};
         {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f, initYaw, 0.0f};
     kf.init(initialX);
 }
@@ -92,13 +89,9 @@ void ThreeDeadwheelChassisKFOdometry::update()
 {
     assert(parallelOneCenterToWheelDistance + parallelTwoCenterToWheelDistance > 0);
 
-{   
     /* Process dead wheels */
     float mahonyOutput = 0.0f;
     if (!chassisYawObserver.getChassisWorldYaw(&mahonyOutput))
-
-    float yawIMU = 0;
-    if (!chassisYawObserver.getChassisWorldYaw(&yawIMU))
     {
         mahonyOutput = 0.0f;
         return;
@@ -178,12 +171,10 @@ void ThreeDeadwheelChassisKFOdometry::updateChassisStateFromKF()
     velocity.x = x[int(OdomState::VEL_X)];
     velocity.y = x[int(OdomState::VEL_Y)];
 
-    angularVelocity = x[int(OdomState::VEL_ANG)];
     chassisYaw = x[int(OdomState::POS_ANG)];
-    angularVelocity = x[int(OdomState::VEL_ANG)];
-
     location.setOrientation(x[int(OdomState::POS_ANG)]);
     location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
+
     prevTime = tap::arch::clock::getTimeMicroseconds();
 }
 

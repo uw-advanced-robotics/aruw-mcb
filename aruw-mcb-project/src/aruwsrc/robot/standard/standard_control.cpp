@@ -234,7 +234,7 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::control::chassis::WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
 
-tap::encoder::CanEncoder parallelOmniOne(
+tap::encoder::CanEncoder parallelOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
     tap::can::CanBus::CAN_BUS2,
@@ -243,7 +243,7 @@ tap::encoder::CanEncoder parallelOmniOne(
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID0,
-    tap::can::CanBus::CAN_BUS2);*/
+    tap::can::CanBus::CAN_BUS2);
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
@@ -785,8 +785,7 @@ void initializeSubsystems()
     capBankSubsystem.initialize();
     arucoResetSubsystem.initialize();
     perpendicularOmni.initialize();
-    parallelOmniOne.initialize(); //@@@@@@@@@@@@@@@@
-    parallelOmniTwo.initialize(); //@@@@@@@@@@@@@@@@
+    parallelOmni.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
