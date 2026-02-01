@@ -55,6 +55,8 @@ private:
 
     uint32_t rightTapNum = 0;
     std::size_t prevErrorCount = 0;
+
+    std::string wrapText(std::string_view text, size_t maxCharsPerLine);
 };  // class ErrorMenu
 }  // namespace display
 }  // namespace aruwsrc

@@ -164,5 +164,61 @@ void ErrorMenu::draw()
     }
 }
 
+std::string ErrorMenu::wrapText(std::string_view text, size_t maxCharsPerLine)
+{
+    std::string buffer;
+    // Pre-allocate once to avoid "re-alloc and move" cycles
+    buffer.reserve(text.size() + (text.size() / maxCharsPerLine) * 2);
+
+    int lineLen = 0;
+    size_t pos = 0;
+
+    while (pos < text.length())
+    {
+        size_t nextSpace = text.find(' ', pos);
+        if (nextSpace == std::string::npos) nextSpace = text.length();
+        size_t wordLen = nextSpace - pos;
+
+        bool needsSpace = (lineLen > 0);
+        int spaceCost = needsSpace ? 1 : 0;
+
+        if (lineLen + spaceCost + wordLen <= maxCharsPerLine)
+        {
+            if (needsSpace)
+            {
+                buffer += ' ';
+                lineLen++;
+            }
+            buffer.append(text.data() + pos, wordLen);
+            lineLen += wordLen;
+        }
+        else if (wordLen <= maxCharsPerLine)
+        {
+            buffer += "\n";
+            buffer.append(text.data() + pos, wordLen);
+            lineLen = wordLen;
+        }
+        else
+        {
+            if (needsSpace)
+            {
+                buffer += ' ';
+                lineLen++;
+            }
+            for (size_t i = 0; i < wordLen; i++)
+            {
+                if (lineLen >= maxCharsPerLine - 1)
+                {
+                    buffer += "-\n";
+                    lineLen = 0;
+                }
+                buffer += text[pos + i];
+                lineLen++;
+            }
+        }
+        pos = nextSpace + 1;
+    }
+    return buffer;
+};
 }  // namespace display
 }  // namespace aruwsrc
