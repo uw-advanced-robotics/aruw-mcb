@@ -44,7 +44,9 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
       parallelOneCenterToWheelDistance(parallelOneCenterToWheelDistance),
       parallelTwoCenterToWheelDistance(parallelTwoCenterToWheelDistance),
       perpendicularCenterToWheelDistance(perpendicularCenterToWheelDistance),
-      odomFrameToRobotFrame(odomFrameToRobotFrame)
+      odomFrameToRobotFrame(odomFrameToRobotFrame),
+      lastWrappedTheta(0.0f),
+      imuTheta(0.0f)
 {
     reset();
 }

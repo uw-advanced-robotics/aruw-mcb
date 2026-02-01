@@ -78,6 +78,11 @@
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+
 
 // check which of these r important
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"

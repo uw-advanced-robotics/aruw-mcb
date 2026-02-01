@@ -234,7 +234,7 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     aruwsrc::control::chassis::WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
 
-/*tap::encoder::CanEncoder parallelOmniOne(
+tap::encoder::CanEncoder parallelOmniOne(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
     tap::can::CanBus::CAN_BUS2,
@@ -245,7 +245,7 @@ tap::encoder::CanEncoder perpendicularOmni(
     tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2);*/
 
-/*aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers(),
     chassis,
@@ -254,54 +254,7 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers()->mpu6500,
     modm::Vector2f(
         aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_X,
-        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));*/
-
-
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-tap::encoder::CanEncoder parallelOmniOne(
-    drivers(),
-    tap::encoder::CanEncoderId::ID1,  //EG@TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
-    true); //EG@TODO: find correct inversion
-
-tap::encoder::CanEncoder parallelOmniTwo(
-    drivers(),
-    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
-    true); //EG@TODO: find correct inversion
-
-tap::encoder::CanEncoder perpendicularOmni(
-    drivers(),
-    tap::encoder::CanEncoderId::ID2,  //EG@TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2, //EG@TODO: find correct CAN bus
-    true); //EG@TODO: find correct inversion
-
-float DEADWHEEL_RADIUS = 0.0f; //EG@TODO: find correct radius
-aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
-    &parallelOmniOne,
-    &parallelOmniTwo,
-    &perpendicularOmni,
-    DEADWHEEL_RADIUS
-);
-
-aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
-    *drivers(),
-    deadwheels,
-    engTurret,
-    drivers()->mpu6500,
-    INITIAL_CHASSIS_POSITION_X,
-    INITIAL_CHASSIS_POSITION_Y,
-    parallelOneCenterToWheelDistance,
-    parallelTwoCenterToWheelDistance,
-    perpendicularCenterToWheelDistance,
-    parallelWheelOneChassisForwardRelativeAngleRadians,
-    parallelWheelTwoChassisForwardRelativeAngleRadians,
-    perpendicularWheelChassisForwardRelativeAngleRadians
-);
-
-
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        aruwsrc::control::chassis::INITIAL_CHASSIS_POSITION_Y));
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
