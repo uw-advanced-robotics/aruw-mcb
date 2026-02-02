@@ -33,10 +33,8 @@ CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(
 void CubeStorageChooseAddCommand::initialize()
 {
     cubeStorage.getCubeToAdd();
-    cubeStorage.storeWristPos(1.0f);  // TODO: update
+    cubeStorage.storeWristPos(jointSubsystem.getPosition());
 }
-
-
 
 void CubeStorageChooseAddCommand::execute() {}
 

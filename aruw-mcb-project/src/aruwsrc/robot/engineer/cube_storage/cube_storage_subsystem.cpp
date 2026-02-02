@@ -30,7 +30,7 @@ CubeStorageSubsystem::CubeStorageSubsystem(
     TriggerInterface &trigger,
     Config config)
     : Subsystem(drivers),
-    TriggerHomedJointSubsystem(drivers, motor, trigger, config)
+      TriggerHomedJointSubsystem(drivers, motor, trigger, config)
 {
 }
 
@@ -64,7 +64,8 @@ CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToAdd()
 
 CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCurrentCube() { return currentCube; }
 
-CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove() {
+CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove()
+{
     checkForCubes();
     if (hasCube[CubeOptions::LEFT])
     {

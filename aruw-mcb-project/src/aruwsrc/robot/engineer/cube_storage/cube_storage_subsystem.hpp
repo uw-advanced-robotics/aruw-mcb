@@ -42,7 +42,8 @@ public:
     void refresh() override;
 
     // can also be used as indices in array
-    enum CubeOptions {
+    enum CubeOptions
+    {
         LEFT = 0,
         RIGHT = 1,
         NONE = 2,

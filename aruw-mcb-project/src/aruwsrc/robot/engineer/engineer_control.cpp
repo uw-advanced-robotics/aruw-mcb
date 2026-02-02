@@ -46,11 +46,10 @@
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
-#include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_add_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_remove_command.hpp"
-
+#include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"

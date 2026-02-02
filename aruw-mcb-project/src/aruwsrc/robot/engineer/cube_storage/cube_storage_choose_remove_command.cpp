@@ -21,14 +21,19 @@
 
 namespace aruwsrc::engineer::cube_storage
 {
-CubeStorageChooseRemoveCommand::CubeStorageChooseRemoveCommand(CubeStorageSubsystem &cubeStorage, aruwsrc::control::joint::JointSubsystem &jointSubsystem) : cubeStorage(cubeStorage), wristSubsystem(wristSubsystem)
+CubeStorageChooseRemoveCommand::CubeStorageChooseRemoveCommand(
+    CubeStorageSubsystem &cubeStorage,
+    aruwsrc::control::joint::JointSubsystem &jointSubsystem)
+    : cubeStorage(cubeStorage),
+      jointSubsystem(jointSubsystem)
 {
     addSubsystemRequirement(&jointSubsystem);
 }
 
-void CubeStorageChooseRemoveCommand::initialize() {
-    cubeStorage.getWristPos(CubeStorageSubsystem::CubeOptions::LEFT); //TODO: update to make wrist go to position
+void CubeStorageChooseRemoveCommand::initialize()
+{
     cubeStorage.getCubeToRemove();
+    jointSubsystem.setSetpoint(cubeStorage.getWristPos());
 }
 
 void CubeStorageChooseRemoveCommand::execute() {}
@@ -36,4 +41,4 @@ void CubeStorageChooseRemoveCommand::execute() {}
 void CubeStorageChooseRemoveCommand::end(bool) {}
 
 bool CubeStorageChooseRemoveCommand::isFinished() const { return true; }
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::cube_storage
