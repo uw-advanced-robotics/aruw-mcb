@@ -448,19 +448,6 @@ SetpointMovePositionCommand centerCubePosition(cubeStorage, CUBE_STORAGE_CENTER_
 
 CubeStorageChooseAddCommand chooseCubeDirectionCommand(cubeStorage, wristRollSubsystem);
 
-// todo - update for correct sequence
-SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
-    {&chooseCubeDirectionCommand,
-     &gantryRetractCommand,
-     &wristFoldInCommand,
-     &liftDownCommand,
-     &suckOffCommand,
-     &releaseOnCommand,
-     &gantryExtendCommand,
-     &liftUpCommand,
-     &gantryRetractCommand,
-     &cubeLiftSwitchDownCommand}});
-
 WristMovePositionCommand wristDown(
     wristSubsystem,
     WRIST_PITCH_PICKUP,
@@ -479,21 +466,6 @@ tap::control::PressCommandMapping leftUp(
     drivers(),
     {&cubeStorageHome, &extensionHome},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
-tap::control::HoldCommandMapping rightMid(
-    drivers(),
-    {&suckOffCommand, &releaseOffCommand},
-    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
-
-tap::control::HoldCommandMapping rightDown(
-    drivers(),
-    {&suckOnCommand, &releaseOnCommand},
-    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
-tap::control::PressCommandMapping suctionToggle(
-    drivers(),
-    {&suctionToggleCommand},
-    RemoteMapState({Remote::Key::F}));
 
 tap::control::PressCommandMapping vPressed(
     drivers(),
@@ -553,14 +525,11 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&suctionToggle);
     // drivers->commandMapper.addMap(&storeCube);
     // drivers->commandMapper.addMap(&retrieveCube);
     // drivers->commandMapper.addMap(&cyclePositions);
     // drivers->commandMapper.addMap(&cPressed);
     drivers->commandMapper.addMap(&leftUp);
-    drivers->commandMapper.addMap(&rightMid);
-    drivers->commandMapper.addMap(&rightDown);
     drivers->commandMapper.addMap(&vPressed);
     drivers->commandMapper.addMap(&bPressed);
     // drivers->commandMapper.addMap(&wristFoldIn);
