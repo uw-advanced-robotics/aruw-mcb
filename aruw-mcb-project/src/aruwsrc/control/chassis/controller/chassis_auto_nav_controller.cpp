@@ -20,59 +20,48 @@
 
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-namespace aruwsrc::control::chassis
-{
-void ChassisAutoNavController::initialize()
-{
-    rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
+using namespace tap::algorithms::transforms;
 
-    lastSetPoint = transformer->getWorldToChassis().getTranslation();
-    rotateSpeedRamp.reset(chassis.getDesiredRotation());
-}
-
-Vector ChassisAutoNavController::runFrameRelativeController(
-    const float maxWheelSpeed,
-    const bool movementEnabled)
+namespace aruwsrc::control::chassis::controller
 {
-    Position currentPos =
-        transformer->getWorldToChassis().getTranslation();  // works bc transformer always makes z 0
+void ChassisAutoNavController::initialize() { lastSetPoint = worldToChassis.getTranslation(); }
+
+Vector ChassisAutoNavController::runFrameRelativeController(const float maxSpeed)
+{
+    Position currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
                                                // this constant with a function in the future
-    Position setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
-
-    Vector moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
+    Position setpoint = calculateSetPoint(currentPos, lookaheadDist, true);
 
     Vector posError = setpoint - currentPos;
 
-    // make if can sprint (above 25%)
-    // add a boolean for sprinting check posError over a threshold (make a constant in chassis
-    // constants)
-    if (posError.magnitude() > translationalMotionThreshold &&
-        capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold)
-    {  // is it translating
-
-        capBankSubsystem.changeSprintMode(
-            aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
-    }
-    else
+    if (capBankSubsystem)
     {
-        capBankSubsystem.changeSprintMode(
-            aruwsrc::communication::can::cap_bank::SprintMode::NO_SPRINT);
+        if (posError.magnitude() > translationalMotionThreshold &&
+            capBankSubsystem->getAvailableEnergy() > capbankEnergyThreshold)
+        {  // is it translating
+            capBankSubsystem->changeSprintMode(
+                aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
+        }
+        else
+        {
+            capBankSubsystem->changeSprintMode(
+                aruwsrc::communication::can::cap_bank::SprintMode::NO_SPRINT);
+        }
     }
 
-    if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
+    if (posError.magnitude() < POS_ERROR_THRESHOLD)
     {
-        moveVector = posError / lookaheadDist * chassis.mpsToRpm(desiredSpeed);
+        return Vector(0, 0, 0);
     }
 
-    // convert world frame translation to chassis frame
-    Vector chassisFrameMoveVector = transformer->getWorldToChassis().apply(moveVector);
+    return posError / lookaheadDist * desiredSpeed;
 }
 
 Position ChassisAutoNavController::calculateSetPoint(
     Position current,
     float lookaheadDistance,
-    bool movementEnabled)
+    bool movementEnabled)  // todo: remove this?
 {
     if (path == nullptr || !movementEnabled || path->empty())
     {
@@ -100,4 +89,4 @@ Position ChassisAutoNavController::calculateSetPoint(
     return lookaheadPos;
 }
 
-}  // namespace aruwsrc::control::chassis
+}  // namespace aruwsrc::control::chassis::controller

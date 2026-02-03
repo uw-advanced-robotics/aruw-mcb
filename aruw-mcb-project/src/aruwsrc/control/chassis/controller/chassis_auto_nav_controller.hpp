@@ -32,7 +32,7 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"
 
-namespace aruwsrc::control::chassis
+namespace aruwsrc::control::chassis::controller
 {
 class ChassisAutoNavController : public controller::FrameRelativeChassisTranslationController
 {
@@ -47,31 +47,22 @@ public:
     const float POS_ERROR_THRESHOLD = 0.01;
 
     inline ChassisAutoNavController(
-        tap::Drivers& drivers,
-        HolonomicChassisSubsystem& chassis,
-        aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer,
-        const aruwsrc::control::chassis::BeybladeConfig beybladeConfig,
-        aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
-        float translationalMotionThreshold,
-        float capbankEnergyThreshold)
-        : FrameRelativeChassisTranslationController(
-              transformer->getWorldToChassis()),  // THIS IS WRONG IT SHOULD BE INVERTED
-          chassis(chassis),
-          lastSetPoint(tap::algorithms::transforms::Position(-1, -1, 0)),
-          drivers(drivers),
-          transformer(transformer),
-          beybladeConfig(beybladeConfig),
+        const tap::algorithms::transforms::Transform& worldToChassis,
+        aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem = nullptr,
+        float translationalMotionThreshold = 0,
+        float capbankEnergyThreshold = 0)
+        : FrameRelativeChassisTranslationController(worldToChassis),
+          lastSetPoint(tap::algorithms::transforms::Position(0, 0, 0)),
+          worldToChassis(worldToChassis),
           capBankSubsystem(capBankSubsystem),
           translationalMotionThreshold(translationalMotionThreshold),
           capbankEnergyThreshold(capbankEnergyThreshold)
     {
     }
 
-    void initialize();
+    void initialize() override;
 
-    tap::algorithms::transforms::Vector runFrameRelativeController(
-        float maxWheelSpeed,
-        bool movementEnabled) override;
+    tap::algorithms::transforms::Vector runFrameRelativeController(const float maxSpeed) override;
 
     tap::algorithms::transforms::Position calculateSetPoint(
         tap::algorithms::transforms::Position current,
@@ -84,26 +75,19 @@ public:
     inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
 
 private:
-    aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
     tap::algorithms::transforms::Position lastSetPoint;
-    tap::Drivers& drivers;
-
-    const aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer;
-
-    aruwsrc::control::chassis::BeybladeConfig beybladeConfig;
+    const tap::algorithms::transforms::Transform& worldToChassis;
 
     tap::arch::MilliTimeout pathTransitionTimeout;
-    float rotationDirection;
-    tap::algorithms::Ramp rotateSpeedRamp;
 
-    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
+    aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem;
 
     float desiredSpeed = 0;
 
     const float translationalMotionThreshold;
     const float capbankEnergyThreshold;
 };
-}  // namespace aruwsrc::control::chassis
+}  // namespace aruwsrc::control::chassis::controller
 
 #endif  // CHASSIS_AUTO_NAV_CONTROLLER_HPP_

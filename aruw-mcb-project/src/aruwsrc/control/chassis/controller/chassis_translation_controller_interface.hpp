@@ -27,10 +27,15 @@ namespace aruwsrc::control::chassis::controller
 class ChassisTranslationControllerInterface
 {
 public:
+    virtual void initialize() {}
+
     /**
+     * @param maxVel Maximum translation speed as determined by the power limiting system
+     * TODO: is power consumption vs translation speed actually constant wrt to direction?
+     *
      * @return desired translational velocity
      */
-    virtual tap::algorithms::transforms::Vector runTranslationController() = 0;
+    virtual tap::algorithms::transforms::Vector runTranslationController(const float maxSpeed) = 0;
 };  // class ChassisTranslationControllerInterface
 
 }  // namespace aruwsrc::control::chassis::controller

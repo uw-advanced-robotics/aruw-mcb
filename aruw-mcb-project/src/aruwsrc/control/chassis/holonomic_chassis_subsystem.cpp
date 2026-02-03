@@ -53,19 +53,27 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
 
 void HolonomicChassisSubsystem::refresh()
 {
+    const float maxWheelSpeed = getMaxWheelSpeed(
+        drivers->refSerial.getRefSerialReceivingData(),
+        getChassisPowerLimit(drivers));
+
+    const float maxTransSpeed = maxWheelSpeed;  // TODO: ACTUAL CONVERSION
+    const float maxAngSpeed = maxWheelSpeed;    // TODO: ACTUAL CONVERSION
+
     tap::algorithms::transforms::Vector transVel =
-        translationController ? translationController->runTranslationController()
+        translationController ? translationController->runTranslationController(maxTransSpeed)
                               : tap::algorithms::transforms::Vector(0, 0, 0);
-    float yawVel = yawController ? yawController->runYawController() : 0;
+    float yawVel = yawController ? yawController->runYawController(maxAngSpeed) : 0;
 
     // todo: gain/balancing logic
 
     // reduce the beyblade rotation when translating to allow for better translational speed
     // (otherwise it is likely that you will barely move unless
     // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
+    // todo: smoother function? not really necessary but might feel nicer to drive
     if (transVel.magnitude() > translationalSpeedThreshold)
     {
-        yawVel *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
+        yawVel *= beybladeRotationalSpeedMultiplierWhenTranslating;
     }
 
     yawVelRamp.setTarget(yawVel);

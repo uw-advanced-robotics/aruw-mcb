@@ -45,7 +45,7 @@ public:
     {
     }
 
-    float runYawController() override
+    float runYawController(const float maxSpeed) override
     {
         return pid.runController(
             chassisToTurret.getYaw() - chassisYawTarget,

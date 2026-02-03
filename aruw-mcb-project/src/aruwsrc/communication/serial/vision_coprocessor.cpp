@@ -139,7 +139,10 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
     for (uint32_t i = 0; i < setpointData.numSetpoints; i++)
     {
         autoNavPath.pushPoint(
-            Position(setpointData.setpoints[i].x, setpointData.setpoints[i].y, 0));
+            tap::algorithms::transforms::Position(
+                setpointData.setpoints[i].x,
+                setpointData.setpoints[i].y,
+                0));
     }
     lastSetpointData = setpointData;
 

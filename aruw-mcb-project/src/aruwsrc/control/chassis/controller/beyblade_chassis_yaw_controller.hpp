@@ -30,7 +30,7 @@ namespace aruwsrc::control::chassis::controller
 class BeybladeChassisYawController : public ChassisYawControllerInterface
 {
 public:
-    BeybladeChassisYawController() : beybladeSpeedRamp(0) {}
+    BeybladeChassisYawController() {}
 
     void initialize() override
     {
@@ -41,7 +41,7 @@ public:
 #endif
     }
 
-    float runYawController() override
+    float runYawController(const float maxSpeed) override
     {
         return rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed *
                rotationMultiplier;

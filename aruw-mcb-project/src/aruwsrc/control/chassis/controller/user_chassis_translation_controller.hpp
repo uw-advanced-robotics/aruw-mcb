@@ -45,7 +45,8 @@ public:
     {
     }
 
-    tap::algorithms::transforms::Vector runFrameRelativeTranslationController() final override
+    tap::algorithms::transforms::Vector runFrameRelativeTranslationController(
+        const float maxSpeed) final override
     {
         return tap::algorithms::transforms::Vector(
             operatorInterface.getChassisXInput(),

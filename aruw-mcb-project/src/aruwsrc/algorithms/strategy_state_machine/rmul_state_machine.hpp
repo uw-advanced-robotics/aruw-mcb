@@ -30,7 +30,7 @@
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
+#include "aruwsrc/control/chassis/controller/chassis_auto_nav_controller.hpp"
 
 /**
  * Field:

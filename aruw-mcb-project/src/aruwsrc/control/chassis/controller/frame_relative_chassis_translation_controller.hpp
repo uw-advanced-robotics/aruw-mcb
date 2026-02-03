@@ -34,21 +34,23 @@ class FrameRelativeChassisTranslationController : public ChassisTranslationContr
 {
 public:
     FrameRelativeChassisTranslationController(
-        const tap::algorithms::transforms::Transform& chassisToFrame)
-        : chassisToFrame(chassisToFrame)
+        const tap::algorithms::transforms::Transform& frameToChassis)
+        : frameToChassis(frameToChassis)
     {
     }
 
-    tap::algorithms::transforms::Vector runTranslationController() final override
+    tap::algorithms::transforms::Vector runTranslationController(
+        const float maxSpeed) final override
     {
         // TODO: shouldn't have to invert the entire transform, just the orientation
-        return chassisToFrame.getInverse().apply(runFrameRelativeTranslationController());
+        return frameToChassis.apply(runFrameRelativeTranslationController(maxSpeed));
     }
 
-    virtual tap::algorithms::transforms::Vector runFrameRelativeTranslationController() = 0;
+    virtual tap::algorithms::transforms::Vector runFrameRelativeTranslationController(
+        const float maxSpeed) = 0;
 
 private:
-    const tap::algorithms::transforms::Transform& chassisToFrame;
+    const tap::algorithms::transforms::Transform& frameToChassis;
 };  // class ChassisYawControllerInterface
 
 }  // namespace aruwsrc::control::chassis::controller

@@ -28,9 +28,10 @@ public:
     virtual void initialize() {}
 
     /**
-     * @return desired yaw velocity
+     * @param maxVel Maximum yaw velocity as determined by the power limiting system
+     * @return Desired yaw velocity
      */
-    virtual float runYawController() = 0;
+    virtual float runYawController(const float maxSpeed) = 0;
 };  // class ChassisYawControllerInterface
 
 }  // namespace aruwsrc::control::chassis::controller
