@@ -30,10 +30,9 @@ void ChassisAutoNavController::initialize()
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
 }
 
-void ChassisAutoNavController::runController(
+Vector ChassisAutoNavController::runFrameRelativeController(
     const float maxWheelSpeed,
-    const bool movementEnabled,
-    const bool beybladeEnabled)
+    const bool movementEnabled)
 {
     Position currentPos =
         transformer->getWorldToChassis().getTranslation();  // works bc transformer always makes z 0
@@ -66,34 +65,8 @@ void ChassisAutoNavController::runController(
         moveVector = posError / lookaheadDist * chassis.mpsToRpm(desiredSpeed);
     }
 
-    // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
-    // up by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER *
-    // maxWheelSpeed)
-    const float translationalSpeedThreshold =
-        beybladeConfig.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
-        beybladeConfig.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
-
-    float beybladeRampTarget =
-        rotationDirection * beybladeConfig.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed;
-
-    // reduce the beyblade rotation when translating to allow for better translational speed
-    // (otherwise it is likely that you will barely move unless
-    // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
-    if (moveVector.magnitude() > translationalSpeedThreshold)
-    {
-        beybladeRampTarget *= beybladeConfig.beybladeRotationalSpeedMultiplierWhenTranslating;
-    }
-
-    rotateSpeedRamp.setTarget(beybladeEnabled ? beybladeRampTarget : 0);
-    // Update the r speed by BEYBLADE_RAMP_UPDATE_RAMP each iteration
-    rotateSpeedRamp.update(beybladeConfig.beybladeRampRate);
-    float r = rotateSpeedRamp.getValue();
-
     // convert world frame translation to chassis frame
     Vector chassisFrameMoveVector = transformer->getWorldToChassis().apply(moveVector);
-
-    // set outputs
-    chassis.setDesiredOutput(chassisFrameMoveVector.x(), chassisFrameMoveVector.y(), r);
 }
 
 Position ChassisAutoNavController::calculateSetPoint(

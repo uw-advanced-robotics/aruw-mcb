@@ -84,7 +84,7 @@ public:
         RB = 3,
     };
 
-    void refresh() override;
+    void runMotorControllers() override;
 
     void refreshSafeDisconnect() override
     {
@@ -116,7 +116,8 @@ public:
     }
 
 protected:
-    modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
+    modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;  // forward kinematics
+    modm::Matrix<float, 4, 3> chassisVelToWheelVelMat;  // inverse kinematics
 
 private:
     /**

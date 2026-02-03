@@ -22,14 +22,17 @@
 
 #include "tap/algorithms/transforms/vector.hpp"
 
-namespace aruwsrc::chassis::controller
+namespace aruwsrc::control::chassis::controller
 {
 class ChassisTranslationControllerInterface
 {
 public:
-    virtual tap::algorithms::transforms::Vector runController() = 0;
+    /**
+     * @return desired translational velocity
+     */
+    virtual tap::algorithms::transforms::Vector runTranslationController() = 0;
 };  // class ChassisTranslationControllerInterface
 
-}  // namespace aruwsrc::chassis::controller
+}  // namespace aruwsrc::control::chassis::controller
 
 #endif  // CHASSIS_TRANSLATION_CONTROLLER_INTERFACE_HPP_

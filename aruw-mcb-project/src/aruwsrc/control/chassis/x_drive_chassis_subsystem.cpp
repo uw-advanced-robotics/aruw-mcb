@@ -67,6 +67,21 @@ XDriveChassisSubsystem::XDriveChassisSubsystem(
     wheelVelToChassisVelMat[R][LB] = -1.0 / wheelbaseRadius;
     wheelVelToChassisVelMat[R][RB] = -1.0 / wheelbaseRadius;
     wheelVelToChassisVelMat *= (wheelRadius / 4);
+
+    float sqrt2_2 = M_SQRT2 / 2;
+    chassisVelToWheelVelMat[LF][X] = sqrt2_2;
+    chassisVelToWheelVelMat[RF][X] = -sqrt2_2;
+    chassisVelToWheelVelMat[LB][X] = sqrt2_2;
+    chassisVelToWheelVelMat[RB][X] = -sqrt2_2;
+    chassisVelToWheelVelMat[LF][Y] = -sqrt2_2;
+    chassisVelToWheelVelMat[RF][Y] = -sqrt2_2;
+    chassisVelToWheelVelMat[LB][Y] = sqrt2_2;
+    chassisVelToWheelVelMat[RB][Y] = sqrt2_2;
+    chassisVelToWheelVelMat[LF][R] = -(wheelbaseRadius - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+    chassisVelToWheelVelMat[RF][R] = -(wheelbaseRadius - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+    chassisVelToWheelVelMat[LB][R] = -(wheelbaseRadius + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+    chassisVelToWheelVelMat[RB][R] = -(wheelbaseRadius + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+    wheelVelToChassisVelMat /= wheelRadius;
 }
 
 }  // namespace aruwsrc::control::chassis

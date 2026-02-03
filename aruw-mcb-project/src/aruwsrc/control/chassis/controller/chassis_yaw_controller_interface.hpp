@@ -20,14 +20,19 @@
 #ifndef CHASSIS_YAW_CONTROLLER_INTERFACE_HPP_
 #define CHASSIS_YAW_CONTROLLER_INTERFACE_HPP_
 
-namespace aruwsrc::chassis::controller
+namespace aruwsrc::control::chassis::controller
 {
 class ChassisYawControllerInterface
 {
 public:
-    virtual float runController() = 0;
+    virtual void initialize() {}
+
+    /**
+     * @return desired yaw velocity
+     */
+    virtual float runYawController() = 0;
 };  // class ChassisYawControllerInterface
 
-}  // namespace aruwsrc::chassis::controller
+}  // namespace aruwsrc::control::chassis::controller
 
 #endif  // CHASSIS_YAW_CONTROLLER_INTERFACE_HPP_

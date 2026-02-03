@@ -20,19 +20,18 @@
 #ifndef HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
 #define HOLONOMIC_CHASSIS_SUBSYSTEM_HPP_
 
-#include "tap/algorithms/extended_kalman.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
-#include "tap/communication/gpio/analog.hpp"
+#include "tap/algorithms/ramp.hpp"
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/drivers.hpp"
-#include "tap/motor/m3508_constants.hpp"
-#include "tap/util_macros.hpp"
+// #include "tap/util_macros.hpp"
 
-#include "aruwsrc/util_macros.hpp"
+#include "aruwsrc/control/chassis/controller/chassis_translation_controller_interface.hpp"
+#include "aruwsrc/control/chassis/controller/chassis_yaw_controller_interface.hpp"
+// #include "aruwsrc/util_macros.hpp"
 #include "constants/chassis_constants.hpp"
-#include "modm/math/filter/pid.hpp"
 #include "modm/math/matrix.hpp"
 
 #include "capacitor_bank_power_limiter.hpp"
@@ -103,6 +102,10 @@ public:
         return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
     }
 
+    void refresh() override final;
+
+    virtual void runMotorControllers() = 0;
+
     /**
      * Updates the desired wheel RPM based on the passed in x, y, and r components of
      * movement. See the class comment for x and y terminology (should be in right hand coordinate
@@ -123,17 +126,6 @@ public:
      * chassis state information like desired rotation.
      */
     virtual void setZeroRPM() = 0;
-
-    /**
-     * Run chassis rotation PID on some actual turret angle offset.
-     *
-     * @param currentAngleError The error as an angle. For autorotation,
-     * error between gimbal and center of chassis.
-     * @param errD The derivative of currentAngleError.
-     *
-     * @retval a desired rotation speed (wheel speed)
-     */
-    mockable float chassisSpeedRotationPID(float currentAngleError, float errD);
 
     /**
      * When the desired rotational wheel speed is large, you can slow down your translational speed
@@ -157,16 +149,29 @@ public:
 
     const char* getName() const override { return "Chassis"; }
 
-    mockable inline float getDesiredRotation() const { return desiredRotation; }
+    inline void attachTranslationController(
+        controller::ChassisTranslationControllerInterface* controller)
+    {
+        translationController = controller;
+    }
 
+    inline void attachYawController(controller::ChassisYawControllerInterface* controller)
+    {
+        yawController = controller;
+    }
+
+protected:
     static modm::Pair<int, float> lastComputedMaxWheelSpeed;
     static communication::can::cap_bank::CapacitorBank* capacitorBank;
 
-    float desiredRotation = 0;
+    tap::algorithms::Ramp yawVelRamp;
 
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
 
     CapBankPowerLimiter chassisPowerLimiter;
+
+    controller::ChassisTranslationControllerInterface* translationController;
+    controller::ChassisYawControllerInterface* yawController;
 
     virtual void limitChassisPower() = 0;
 

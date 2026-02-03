@@ -75,7 +75,7 @@ public:
 
     void limitChassisPower() override;
 
-    void refresh() override;
+    void runMotorControllers() override;
 
     inline int getNumChassisMotors() const override { return NUM_MODULES * 2; }
 

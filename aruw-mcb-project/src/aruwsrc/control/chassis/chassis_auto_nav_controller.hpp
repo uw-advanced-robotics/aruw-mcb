@@ -28,12 +28,13 @@
 #include "aruwsrc/algorithms/interpolate.hpp"
 #include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
+#include "aruwsrc/control/chassis/controller/frame_relative_chassis_translation_controller.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"
 
 namespace aruwsrc::control::chassis
 {
-class ChassisAutoNavController
+class ChassisAutoNavController : public controller::FrameRelativeChassisTranslationController
 {
 public:
     // how much farther ahead along the path the robot movement aims for
@@ -53,27 +54,27 @@ public:
         aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
         float translationalMotionThreshold,
         float capbankEnergyThreshold)
-        : chassis(chassis),
-          lastSetPoint(Position(-1, -1, 0)),
+        : FrameRelativeChassisTranslationController(
+              transformer->getWorldToChassis()),  // THIS IS WRONG IT SHOULD BE INVERTED
+          chassis(chassis),
+          lastSetPoint(tap::algorithms::transforms::Position(-1, -1, 0)),
           drivers(drivers),
           transformer(transformer),
           beybladeConfig(beybladeConfig),
           capBankSubsystem(capBankSubsystem),
           translationalMotionThreshold(translationalMotionThreshold),
           capbankEnergyThreshold(capbankEnergyThreshold)
-
     {
     }
 
     void initialize();
 
-    void runController(
-        const float maxWheelSpeed,
-        const bool movementEnabled,
-        const bool beybladeEnabled);
+    tap::algorithms::transforms::Vector runFrameRelativeController(
+        float maxWheelSpeed,
+        bool movementEnabled) override;
 
-    Position calculateSetPoint(
-        Position current,
+    tap::algorithms::transforms::Position calculateSetPoint(
+        tap::algorithms::transforms::Position current,
         float interpolationParameter,
         bool movementEnabled);
 
@@ -85,7 +86,7 @@ public:
 private:
     aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
-    Position lastSetPoint;
+    tap::algorithms::transforms::Position lastSetPoint;
     tap::Drivers& drivers;
 
     const aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer;

@@ -51,26 +51,27 @@ HolonomicChassisSubsystem::HolonomicChassisSubsystem(
     HolonomicChassisSubsystem::capacitorBank = capacitorBank;
 }
 
-// HolonomicChassisSubsystem::~HolonomicChassisSubsystem() {}
-
-float HolonomicChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, float errD)
+void HolonomicChassisSubsystem::refresh()
 {
-    // P
-    float currRotationPidP = currentAngleError * AUTOROTATION_PID_KP;
-    currRotationPidP = limitVal(currRotationPidP, -AUTOROTATION_PID_MAX_P, AUTOROTATION_PID_MAX_P);
+    tap::algorithms::transforms::Vector transVel =
+        translationController ? translationController->runTranslationController()
+                              : tap::algorithms::transforms::Vector(0, 0, 0);
+    float yawVel = yawController ? yawController->runYawController() : 0;
 
-    // D
-    float currentRotationPidD = errD * AUTOROTATION_PID_KD;
+    // todo: gain/balancing logic
 
-    currentRotationPidD =
-        limitVal(currentRotationPidD, -AUTOROTATION_PID_MAX_D, AUTOROTATION_PID_MAX_D);
+    // reduce the beyblade rotation when translating to allow for better translational speed
+    // (otherwise it is likely that you will barely move unless
+    // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
+    if (transVel.magnitude() > translationalSpeedThreshold)
+    {
+        yawVel *= config.beybladeRotationalSpeedMultiplierWhenTranslating;
+    }
 
-    float wheelRotationSpeed = limitVal(
-        currRotationPidP + currentRotationPidD,
-        -AUTOROTATION_PID_MAX_OUTPUT,
-        AUTOROTATION_PID_MAX_OUTPUT);
-
-    return wheelRotationSpeed;
+    yawVelRamp.setTarget(yawVel);
+    yawVelRamp.update(yawVel);
+    setDesiredOutput(transVel.x(), transVel.y(), yawVel);
+    runMotorControllers();
 }
 
 float HolonomicChassisSubsystem::calculateRotationTranslationalGain(

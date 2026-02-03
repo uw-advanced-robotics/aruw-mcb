@@ -20,16 +20,37 @@
 #ifndef BEYBLADE_CHASSIS_YAW_CONTROLLER_HPP_
 #define BEYBLADE_CHASSIS_YAW_CONTROLLER_HPP_
 
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/ramp.hpp"
+
 #include "chassis_yaw_controller_interface.hpp"
 
-namespace aruwsrc::chassis::controller
+namespace aruwsrc::control::chassis::controller
 {
 class BeybladeChassisYawController : public ChassisYawControllerInterface
 {
 public:
-    float runController() override;
+    BeybladeChassisYawController() : beybladeSpeedRamp(0) {}
+
+    void initialize() override
+    {
+#ifdef ENV_UNIT_TESTS
+        rotationDirection = 1;
+#else
+        rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
+#endif
+    }
+
+    float runYawController() override
+    {
+        return rotationDirection * config.beybladeRotationalSpeedFractionOfMax * maxWheelSpeed *
+               rotationMultiplier;
+    }
+
+private:
+    int8_t rotationDirection;
 };  // class ChassisYawControllerInterface
 
-}  // namespace aruwsrc::chassis::controller
+}  // namespace aruwsrc::control::chassis::controller
 
 #endif  // BEYBLADE_CHASSIS_YAW_CONTROLLER_HPP_

@@ -99,7 +99,7 @@ void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, flo
     }
 }
 
-void SwerveChassisSubsystem::refresh()
+void SwerveChassisSubsystem::runMotorControllers()
 {
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {

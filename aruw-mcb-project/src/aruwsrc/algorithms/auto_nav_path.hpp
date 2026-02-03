@@ -26,8 +26,6 @@
 #include "tap/algorithms/transforms/position.hpp"
 #include "tap/algorithms/transforms/vector.hpp"
 
-using namespace tap::algorithms::transforms;
-
 namespace aruwsrc::algorithms
 {
 /**
@@ -43,7 +41,7 @@ public:
     /**
      * Appends the given point to the path.
      */
-    void pushPoint(Position point);
+    void pushPoint(tap::algorithms::transforms::Position point);
 
     /**
      * Removes the first point from the path.
@@ -64,12 +62,12 @@ public:
      * Finds the closest position along the path to the given position and returns that position's
      * arc length parameterized value (its distance along the path).
      */
-    float positionToClosestParameter(const Position pos) const;
+    float positionToClosestParameter(const tap::algorithms::transforms::Position pos) const;
 
     /**
      * Returns the point the given distance along the path.
      */
-    Position parametertoPosition(const float parameter) const;
+    tap::algorithms::transforms::Position parametertoPosition(const float parameter) const;
 
     /**
      * Returns whether the path was updated.
@@ -78,19 +76,26 @@ public:
 
     inline void clearPathChanged() { pathChanged = false; }
 
-    inline float distTo(const Position& position, const float parameter) const
+    inline float distTo(
+        const tap::algorithms::transforms::Position& position,
+        const float parameter) const
     {
-        return Position::distance(position, parametertoPosition(parameter));
+        return tap::algorithms::transforms::Position::distance(
+            position,
+            parametertoPosition(parameter));
     }
 
 private:
-    std::deque<Position> setpointData;
+    std::deque<tap::algorithms::transforms::Position> setpointData;
     bool pathChanged;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
 #endif
-    float getClosestParameterOnSegment(Position current, Position p1, Position p2) const;
+    float getClosestParameterOnSegment(
+        tap::algorithms::transforms::Position current,
+        tap::algorithms::transforms::Position p1,
+        tap::algorithms::transforms::Position p2) const;
 };
 
 }  // namespace aruwsrc::algorithms

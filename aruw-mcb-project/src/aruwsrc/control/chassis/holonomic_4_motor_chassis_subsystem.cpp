@@ -76,15 +76,12 @@ void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r
             drivers->refSerial.getRefSerialReceivingData(),
             HolonomicChassisSubsystem::getChassisPowerLimit(drivers)));
 }
-modm::Matrix<float, 3, 1> state;
-void Holonomic4MotorChassisSubsystem::refresh()
+void Holonomic4MotorChassisSubsystem::runMotorControllers()
 {
     for (int i = 0; i < getNumChassisMotors(); i++)
     {
         updateMotorRpmPid(i);
     }
-
-    state = getActualVelocityChassisRelative();
 
     limitChassisPower();
 }
@@ -167,6 +164,13 @@ void Holonomic4MotorChassisSubsystem::calculateOutput(
         maxWheelSpeed);
 
     desiredRotation = r;
+
+    // NEW
+    modm::Matrix<float, 3, 1> xyr;
+    xyr[0][0] = x;
+    xyr[1][0] = y;
+    xyr[2][0] = r;
+    desiredWheelRPM = chassisVelToWheelVelMat * xyr;
 }
 
 void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(int i)

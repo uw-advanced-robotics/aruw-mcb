@@ -63,6 +63,21 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
     wheelVelToChassisVelMat[R][LB] = -1.0 / effectiveWheelbase;
     wheelVelToChassisVelMat[R][RB] = -1.0 / effectiveWheelbase;
     wheelVelToChassisVelMat *= (wheelRadius / 4);
+
+    // HAVENT LOOKED AT THIS YET
+    chassisVelToWheelVelMat[LF][X] = 1;
+    chassisVelToWheelVelMat[RF][X] = 1;
+    chassisVelToWheelVelMat[LB][X] = 1;
+    chassisVelToWheelVelMat[RB][X] = 1;
+    chassisVelToWheelVelMat[LF][Y] = -1;
+    chassisVelToWheelVelMat[RF][Y] = 1;
+    chassisVelToWheelVelMat[LB][Y] = 1;
+    chassisVelToWheelVelMat[RB][Y] = -1;
+    chassisVelToWheelVelMat[LF][R] = -(effectiveWheelbase - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+    chassisVelToWheelVelMat[RF][R] = (effectiveWheelbase - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+    chassisVelToWheelVelMat[LB][R] = -(effectiveWheelbase + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+    chassisVelToWheelVelMat[RB][R] = (effectiveWheelbase + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+    wheelVelToChassisVelMat /= wheelRadius;
 }
 
 }  // namespace aruwsrc::control::chassis

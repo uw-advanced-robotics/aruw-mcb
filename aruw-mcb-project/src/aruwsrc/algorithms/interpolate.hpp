@@ -22,17 +22,18 @@
 
 #include "tap/algorithms/transforms/position.hpp"
 
-using namespace tap::algorithms::transforms;
-
 namespace aruwsrc::algorithms
 {
-inline Position quadraticBezierInterpolation(
-    const Position& a,
-    const Position& b,
-    const Position& c,
+inline tap::algorithms::transforms::Position quadraticBezierInterpolation(
+    const tap::algorithms::transforms::Position& a,
+    const tap::algorithms::transforms::Position& b,
+    const tap::algorithms::transforms::Position& c,
     float t)
 {
-    return Position::interpolate(Position::interpolate(a, b, t), Position::interpolate(b, c, t), t);
+    return tap::algorithms::transforms::Position::interpolate(
+        tap::algorithms::transforms::Position::interpolate(a, b, t),
+        tap::algorithms::transforms::Position::interpolate(b, c, t),
+        t);
 }
 
 }  // namespace aruwsrc::algorithms
