@@ -33,45 +33,15 @@ namespace aruwsrc::engineer
 static constexpr tap::can::CanBus CAN_BUS_WRIST = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId WRIST_LEFT_MOTOR_ID = tap::motor::MotorId::MOTOR4;
 static constexpr tap::motor::MotorId WRIST_RIGHT_MOTOR_ID = tap::motor::MotorId::MOTOR5;
-static constexpr tap::motor::MotorId WRIST_ROLL_MOTOR_ID = tap::motor::MotorId::MOTOR6;
-static constexpr tap::encoder::CanEncoderId WRIST_PITCH_ENCODER_ID =
+static constexpr tap::motor::MotorId WRIST_THETA3_MOTOR_ID = tap::motor::MotorId::MOTOR6;
+static constexpr tap::encoder::CanEncoderId WRIST_THETA1_ENCODER_ID =
     tap::encoder::CanEncoderId::ID0;
-static constexpr tap::encoder::CanEncoderId WRIST_YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID1;
+static constexpr tap::encoder::CanEncoderId WRIST_THETA2_ENCODER_ID =
+    tap::encoder::CanEncoderId::ID1;
+static constexpr tap::encoder::CanEncoderId WRIST_THETA3_ENCODER_ID =
+    tap::encoder::CanEncoderId::ID2;
 
 static constexpr wrist::WristConfig WRIST_CONFIG{
-    .pitchPidConfig =
-        {
-            .kp = 10000.0f,
-            .ki = 0.0f,  // 10.0f,
-            .kd = 700.0f,
-            .maxICumulative = 1000.0f,
-            .maxOutput = 5000.0f,
-            .tQDerivativeKalman = 1.0f,
-            .tRDerivativeKalman = 30.0f,
-            .tQProportionalKalman = 1.0f,
-            .tRProportionalKalman = 0.0f,
-            .errDeadzone = 0.0f,
-            .errorDerivativeFloor = 0.025f,
-        },
-    .yawPidConfig =
-        {
-            .kp = 16000.0f,
-            .ki = 0.0f,  // 500.0f,
-            .kd = 1000.0f,
-            .maxICumulative = 500.0f,
-            .maxOutput = 5500.0f,
-            .tQDerivativeKalman = 1.0f,
-            .tRDerivativeKalman = 30.0f,
-            .tQProportionalKalman = 1.0f,
-            .tRProportionalKalman = 0.0f,
-            .errDeadzone = 0.0f,
-            .errorDerivativeFloor = 0.0,
-        },
-    .minPitch = 0.0f - M_PI_4,
-    .maxPitch = M_PI_2 +
-                0.04f,  // allow wrist to pitch down a bit more to allow more adjustment for scoring
-    .minYaw = -M_PI_2,
-    .maxYaw = M_PI,
     .ratio = 30.0f / 40.0f,
     .maxMotorDesiredOutput = 5500,
 };

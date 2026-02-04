@@ -25,113 +25,145 @@ using tap::algorithms::CMSISMat;
 namespace aruwsrc::engineer::wrist
 {
 WristSubsystem::WristSubsystem(
-    tap::Drivers *drivers,
-    tap::motor::MotorInterface &motorLeft,
-    tap::motor::MotorInterface &motorRight,
-    tap::encoder::EncoderInterface &encoderPitch,
-    tap::encoder::EncoderInterface &encoderYaw,
+    tap::Drivers* drivers,
+    tap::motor::MotorInterface& motorLeft,
+    tap::motor::MotorInterface& motorRight,
+    tap::motor::MotorInterface& motorTheta3,
+    tap::encoder::EncoderInterface& encoderTheta1,
+    tap::encoder::EncoderInterface& encoderTheta2,
+    tap::encoder::EncoderInterface& encoderTheta3,
     const WristConfig config)
     : tap::control::Subsystem(drivers),
       motorLeft(motorLeft),
       motorRight(motorRight),
-      encoderPitch(encoderPitch),
-      encoderYaw(encoderYaw),
-      pidPitch(config.pitchPidConfig),
-      pidYaw(config.yawPidConfig),
+      motorTheta3(motorTheta3),
+      encoderTheta1(encoderTheta1),
+      encoderTheta2(encoderTheta2),
+      encoderTheta3(encoderTheta3),
       config(config),
-      setpointPitch(0),
-      setpointYaw(0)
+      setpointTheta1(0),
+      setpointTheta2(0),
+      setpointTheta3(0),
+      pidTheta1(config.theta1PidConfig),
+      pidTheta2(config.theta2PidConfig),
+      pidTheta3(config.theta3PidConfig)
 {
 }
 
-void WristSubsystem::setSetpointPitch(float setpoint)
+float WristSubsystem::getTheta1() { return encoderTheta1.getPosition().getUnwrappedValue(); }
+float WristSubsystem::getTheta2() { return encoderTheta2.getPosition().getUnwrappedValue(); }
+float WristSubsystem::getTheta3() { return encoderTheta3.getPosition().getUnwrappedValue(); }
+
+void WristSubsystem::setSetpointTheta1(float setpoint)
 {
-    setpointPitch = std::clamp(setpoint, config.minPitch, config.maxPitch);
+    setpointTheta1 = std::clamp(setpoint, config.theta1Min, config.theta1Max);
 }
-
-void WristSubsystem::setSetpointYaw(float setpoint)
+void WristSubsystem::setSetpointTheta2(float setpoint)
 {
-    if (config.minYaw == config.maxYaw)
-        setpointYaw = setpoint;
-    else
-        setpointYaw = std::clamp(setpoint, config.minYaw, config.maxYaw);
+    setpointTheta2 = std::clamp(setpoint, config.theta2Min, config.theta2Max);
 }
-
-float WristSubsystem::getPitch() { return encoderPitch.getPosition().getUnwrappedValue(); }
-
-float WristSubsystem::getYaw() { return encoderYaw.getPosition().getUnwrappedValue(); }
-
-bool WristSubsystem::atSetpointPitch(float epsilon)
+void WristSubsystem::setSetpointTheta3(float setpoint)
 {
-    return tap::algorithms::compareFloatClose(setpointPitch, getPitch(), epsilon);
-}
-
-bool WristSubsystem::atSetpointYaw(float epsilon)
-{
-    return tap::algorithms::compareFloatClose(setpointYaw, getYaw(), epsilon);
+    setpointTheta3 = std::clamp(setpoint, config.theta3Min, config.theta3Max);
 }
 
 bool WristSubsystem::atSetpoint()
 {
-    return atSetpointPitch(config.epsilon) && atSetpointYaw(config.epsilon);
+    return atSetpointTheta1(config.epsilon) && atSetpointTheta2(config.epsilon) &&
+           atSetpointTheta3(config.epsilon);
+}
+
+float WristSubsystem::calculateLeftMotorOutputForTheta1Theta2(
+    float theta1Setpoint,
+    float theta2Setpoint)
+{
+    // TODO: implement
+    return 0.0f;
+}
+float WristSubsystem::calculateRightMotorOutputForTheta1Theta2(
+    float theta1Setpoint,
+    float theta2Setpoint)
+{
+    // TODO: implement
+    return 0.0f;
 }
 
 void WristSubsystem::initialize()
 {
     motorLeft.initialize();
     motorRight.initialize();
-    encoderPitch.initialize();
-    encoderYaw.initialize();
+    motorTheta3.initialize();
+    encoderTheta1.initialize();
+    encoderTheta2.initialize();
+    encoderTheta3.initialize();
 }
 
 void WristSubsystem::refresh()
 {
-    if (!encoderPitch.isOnline() || !encoderYaw.isOnline())
+    if (!encoderTheta1.isOnline() || !encoderTheta2.isOnline() || !encoderTheta3.isOnline())
     {
         motorLeft.setDesiredOutput(0);
         motorRight.setDesiredOutput(0);
+        motorTheta3.setDesiredOutput(0);
         return;
     }
 
-    CMSISMat<3, 1> gantryToCOMTranslation =
-        computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
+    float outMotorLeft = calculateLeftMotorOutputForTheta1Theta2(setpointTheta1, setpointTheta2);
+    float outMotorRight = calculateRightMotorOutputForTheta1Theta2(setpointTheta1, setpointTheta2);
 
-    Vector gravityTorque(tap::algorithms::cross(
-        gantryToCOMTranslation,
-        CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
-
-    // we can compute the torque exerted on each joint by projecting the robot-space gravity torque
-    // into the joint axis subspace
-    Vector pitchAxis(0, 1, 0);
-    Vector yawAxis = Transform(0, 0, 0, 0, -getPitch(), 0).apply(Vector(0, 0, 1));
-
-    // torque applied on each joint by gravity
-    float gravityPitchTorque = gravityTorque.dot(pitchAxis);
-    float gravityYawTorque = gravityTorque.dot(yawAxis);
-
-    // gravity torque halved because we have two motors
-    float outPitch = pidPitch.runController(
-                         encoderPitch.getPosition().minDifference(setpointPitch),
-                         encoderPitch.getVelocity(),
-                         2.0f) -
-                     gravityPitchTorque / 2 * M3508_TORQUE_CONSTANT;
-
-    // gear ratio only applied to gravity compensation here because pid was tuned without it
-    // gravity torque halved because we have two motors
-    float outYaw = pidYaw.runController(
-                       encoderYaw.getPosition().minDifference(setpointYaw),
-                       encoderYaw.getVelocity(),
-                       2.0f) -
-                   gravityYawTorque / 2 * M3508_TORQUE_CONSTANT * config.ratio;
-
-    // differential
-    float outLeft = outYaw + outPitch;
-    float outRight = outYaw - outPitch;
+    float errorTheta3 = encoderTheta3.getPosition().minDifference(setpointTheta3);
+    float outMotorTheta3 = pidTheta3.runController(errorTheta3, encoderTheta3.getVelocity(), 2.0f);
 
     motorLeft.setDesiredOutput(
-        std::clamp<int32_t>(outLeft, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
+        std::clamp<int32_t>(
+            outMotorLeft, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
     motorRight.setDesiredOutput(
-        std::clamp<int32_t>(outRight, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
+        std::clamp<int32_t>(
+            outMotorRight, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
+    motorTheta3.setDesiredOutput(
+        std::clamp<int32_t>(
+            outMotorTheta3, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
+
+    // CMSISMat<3, 1> gantryToCOMTranslation =
+    //     computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
+
+    // Vector gravityTorque(
+    //     tap::algorithms::cross(
+    //         gantryToCOMTranslation,
+    //         CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
+
+    // // we can compute the torque exerted on each joint by projecting the robot-space gravity torque
+    // // into the joint axis subspace
+    // Vector pitchAxis(0, 1, 0);
+    // Vector yawAxis = Transform(0, 0, 0, 0, -getPitch(), 0).apply(Vector(0, 0, 1));
+
+    // // torque applied on each joint by gravity
+    // float gravityPitchTorque = gravityTorque.dot(pitchAxis);
+    // float gravityYawTorque = gravityTorque.dot(yawAxis);
+
+    // // gravity torque halved because we have two motors
+    // float outPitch = pidPitch.runController(
+    //                      encoderPitch.getPosition().minDifference(setpointPitch),
+    //                      encoderPitch.getVelocity(),
+    //                      2.0f) -
+    //                  gravityPitchTorque / 2 * M3508_TORQUE_CONSTANT;
+
+    // // gear ratio only applied to gravity compensation here because pid was tuned without it
+    // // gravity torque halved because we have two motors
+    // float outYaw = pidYaw.runController(
+    //                    encoderYaw.getPosition().minDifference(setpointYaw),
+    //                    encoderYaw.getVelocity(),
+    //                    2.0f) -
+    //                gravityYawTorque / 2 * M3508_TORQUE_CONSTANT * config.ratio;
+
+    // // differential
+    // float outLeft = outYaw + outPitch;
+    // float outRight = outYaw - outPitch;
+
+    // motorLeft.setDesiredOutput(
+    //     std::clamp<int32_t>(outLeft, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
+    // motorRight.setDesiredOutput(
+    //     std::clamp<int32_t>(outRight, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
 }
 
 void WristSubsystem::refreshSafeDisconnect()

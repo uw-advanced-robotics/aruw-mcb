@@ -113,7 +113,7 @@ namespace aruwsrc
 {
 namespace control
 {
-inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -209,15 +209,6 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeLiftLimit(
 
 LimitSwitchTrigger cubeLiftTrigger(&cubeLiftLimit);
 
-tap::motor::DjiMotor wristRollMotor(
-    drivers(),
-    aruwsrc::engineer::WRIST_ROLL_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_WRIST,
-    false,
-    "Wrist Roll Motor",
-    false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
 tap::motor::DjiMotor wristLeftMotor(
     drivers(),
     aruwsrc::engineer::WRIST_LEFT_MOTOR_ID,
@@ -233,6 +224,14 @@ tap::motor::DjiMotor wristRightMotor(
     aruwsrc::engineer::CAN_BUS_WRIST,
     false,
     "Wrist Right Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+tap::motor::DjiMotor wristMotorTheta3(
+    drivers(),
+    aruwsrc::engineer::WRIST_THETA3_MOTOR_ID,
+    aruwsrc::engineer::CAN_BUS_WRIST,
+    false,
+    "Wrist Theta3 Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
@@ -358,13 +357,7 @@ aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
 
 TriggerHomedJointSubsystem cubeLift(drivers(), cubeLiftMotor, cubeLiftTrigger, CUBE_LIFT_CONFIG);
 
-WristSubsystem wristSubsystem(
-    drivers(),
-    wristLeftMotor,
-    wristRightMotor,
-    wristPitchEncoder,
-    wristYawEncoder,
-    WRIST_CONFIG);
+WristSubsystem wristSubsystem(drivers(), );
 
 TriggerHomedDualJointSubsystem gantryLiftSubsystem(
     drivers(),
@@ -406,7 +399,7 @@ SlidersIndicator slidersIndicator(
     wristSubsystem,
     WRIST_CONFIG);
 
-std::vector<HudIndicator *> hudIndicators = {&slidersIndicator};
+std::vector<HudIndicator*> hudIndicators = {&slidersIndicator};
 
 aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -478,28 +471,30 @@ CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
-SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
-    {&liftUpCommand,
-     &gantryRetractCommand,
-     &wristFoldInCommand,
-     &liftDownCommand,
-     &suckOffCommand,
-     &releaseOnCommand,
-     &gantryExtendCommand,
-     &liftUpCommand,
-     &gantryRetractCommand,
-     &cubeLiftSwitchDownCommand}});
-SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
-    {&liftDownCommand,
-     &gantryExtendCommand,
-     &wristFoldInCommand,
-     &gantryRetractCommand,
-     &suckOnCommand,
-     &releaseOffCommand,
-     &liftUpCommand,
-     &wristFoldOutCommand,
-     &liftDownCommand,
-     &cubeLiftSwitchUpCommand}});
+SequentialCommand<10> storeCubeCommand(
+    std::array<Command*, 10>{
+        {&liftUpCommand,
+         &gantryRetractCommand,
+         &wristFoldInCommand,
+         &liftDownCommand,
+         &suckOffCommand,
+         &releaseOnCommand,
+         &gantryExtendCommand,
+         &liftUpCommand,
+         &gantryRetractCommand,
+         &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(
+    std::array<Command*, 10>{
+        {&liftDownCommand,
+         &gantryExtendCommand,
+         &wristFoldInCommand,
+         &gantryRetractCommand,
+         &suckOnCommand,
+         &releaseOffCommand,
+         &liftUpCommand,
+         &wristFoldOutCommand,
+         &liftDownCommand,
+         &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
@@ -597,7 +592,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
+void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&xDriveChassis);
     drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
@@ -611,7 +606,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
+void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
     xDriveChassis.setDefaultCommand(&chassisDriveCommand);
     gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
@@ -624,10 +619,10 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandMapper.addMap(&suctionToggle);
     // drivers->commandMapper.addMap(&cubeLiftUp);
@@ -649,7 +644,7 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 
 namespace aruwsrc::engineer
 {
-void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &aruwsrc::control::remoteSafeDisconnectFunction);
@@ -955,7 +950,7 @@ SlidersIndicator slidersIndicator(
     wristSubsystem,
     WRIST_CONFIG);
 
-std::vector<HudIndicator *> hudIndicators = {&slidersIndicator};
+std::vector<HudIndicator*> hudIndicators = {&slidersIndicator};
 
 aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -1027,28 +1022,30 @@ CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
-SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
-    {&liftUpCommand,
-     &gantryRetractCommand,
-     &wristFoldInCommand,
-     &liftDownCommand,
-     &suckOffCommand,
-     &releaseOnCommand,
-     &gantryExtendCommand,
-     &liftUpCommand,
-     &gantryRetractCommand,
-     &cubeLiftSwitchDownCommand}});
-SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
-    {&liftDownCommand,
-     &gantryExtendCommand,
-     &wristFoldInCommand,
-     &gantryRetractCommand,
-     &suckOnCommand,
-     &releaseOffCommand,
-     &liftUpCommand,
-     &wristFoldOutCommand,
-     &liftDownCommand,
-     &cubeLiftSwitchUpCommand}});
+SequentialCommand<10> storeCubeCommand(
+    std::array<Command*, 10>{
+        {&liftUpCommand,
+         &gantryRetractCommand,
+         &wristFoldInCommand,
+         &liftDownCommand,
+         &suckOffCommand,
+         &releaseOnCommand,
+         &gantryExtendCommand,
+         &liftUpCommand,
+         &gantryRetractCommand,
+         &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(
+    std::array<Command*, 10>{
+        {&liftDownCommand,
+         &gantryExtendCommand,
+         &wristFoldInCommand,
+         &gantryRetractCommand,
+         &suckOnCommand,
+         &releaseOffCommand,
+         &liftUpCommand,
+         &wristFoldOutCommand,
+         &liftDownCommand,
+         &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
@@ -1146,7 +1143,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
+void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&mechanumChassis);
     drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
@@ -1160,7 +1157,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
+void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
     mechanumChassis.setDefaultCommand(&chassisDriveCommand);
     gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
@@ -1173,10 +1170,10 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandMapper.addMap(&suctionToggle);
     // drivers->commandMapper.addMap(&cubeLiftUp);
@@ -1198,7 +1195,7 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 
 namespace aruwsrc::engineer
 {
-void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &aruwsrc::control::remoteSafeDisconnectFunction);
