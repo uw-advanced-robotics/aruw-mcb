@@ -52,7 +52,7 @@ public:
         const tap::Drivers& drivers,
         chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-        bool autoNavOnlyInGame = false, bool beybladeEnabled, bool ends);
+        bool autoNavOnlyInGame = false, bool beybladeEnabled = true, bool ends = false);
 
     void initialize() override;
 
