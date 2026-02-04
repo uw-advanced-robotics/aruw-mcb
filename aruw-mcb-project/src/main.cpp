@@ -207,7 +207,7 @@ static void initializeIo(Drivers* drivers)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
-    ((Drivers *)drivers)->capacitorBank.initialize();
+    ((Drivers*)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_ECLIPSE)
     drivers->turretMCBCanCommBus2.init();
