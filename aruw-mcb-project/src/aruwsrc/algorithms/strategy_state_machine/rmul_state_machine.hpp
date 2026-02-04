@@ -132,7 +132,7 @@ private:
 
     const std::array<const Position, 4> HEALING_PATH = {POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
 
-    const std::array<const Position, 2> ENGINEER_PATH = {};
+    const std::array<const Position, 2> ENGINEER_PATH = {POINT_1, POINT_2};
 
     static constexpr uint16_t PATH_LENGTH_MILLIS = 11000;
     static constexpr uint16_t PATROL_SEGMENT_LENGTH_MILLIS = 5000;
