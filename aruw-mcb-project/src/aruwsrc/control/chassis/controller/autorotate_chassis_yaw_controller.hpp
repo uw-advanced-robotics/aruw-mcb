@@ -21,7 +21,9 @@
 #define AUTOROTATE_CHASSIS_YAW_CONTROLLER_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
-#include "tap/algorithms/transforms/transform.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
+
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
 
 #include "chassis_yaw_controller_interface.hpp"
 
@@ -31,32 +33,41 @@ class AutorotateChassisYawController : public ChassisYawControllerInterface
 {
 public:
     /**
-     * @param rotationalSymmetry
+     * @param rotationalSymmetry Angle in radians of the chassis' rotational symmetry. Default is
+     * 2pi which means no symmetry.
+     * @param chassisYawTarget Chassis-turret angle that the controller is aiming for.
      */
     AutorotateChassisYawController(
-        const tap::algorithms::transforms::Transform& chassisToTurret,
+        const aruwsrc::control::turret::TurretMotor& yawMotor,
         tap::algorithms::SmoothPidConfig pidConfig,
+        float followLpAlpha,
         float rotationalSymmetry = M_TWOPI,
         float chassisYawTarget = 0)
-        : chassisToTurret(chassisToTurret),
+        : yawMotor(yawMotor),
           pid(pidConfig),
+          followLpAlpha(followLpAlpha),
           rotationalSymmetry(rotationalSymmetry),
-          chassisYawTarget(chassisYawTarget)
+          chassisYawTarget(chassisYawTarget),
+          setpoint(tap::algorithms::Angle(0))
     {
     }
 
     float runYawController(const float maxSpeed) override
     {
+        setpoint = setpoint.minInterpolate(yawMotor.getChassisFrameSetpoint(), followLpAlpha);
         return pid.runController(
-            chassisToTurret.getYaw() - chassisYawTarget,
-            chassisToTurret.getYawVelocity(),
+            tap::algorithms::WrappedFloat(setpoint.getWrappedValue(), 0, rotationalSymmetry)
+                .minDifference(chassisYawTarget),
+            yawMotor.getChassisFrameVelocity(),
             0.002f);
     }
 
 private:
-    const tap::algorithms::transforms::Transform& chassisToTurret;
+    const aruwsrc::control::turret::TurretMotor& yawMotor;
     tap::algorithms::SmoothPid pid;
-    float rotationalSymmetry, chassisYawTarget;
+    float rotationalSymmetry, chassisYawTarget, followLpAlpha;
+
+    tap::algorithms::WrappedFloat setpoint;
 };  // class ChassisYawControllerInterface
 
 }  // namespace aruwsrc::control::chassis::controller
