@@ -33,7 +33,10 @@ class CubeStorageChooseRemoveCommand : public tap::control::Command
 public:
     CubeStorageChooseRemoveCommand(
         CubeStorageSubsystem &cubeStorage,
-        aruwsrc::control::joint::JointSubsystem &jointSubsystem);
+        aruwsrc::control::joint::JointSubsystem &jointSubsystem)
+        // TurretToCubeTransform &turretToCubeTransformer,
+        // TurretToSuctionTransform &turretToSuctionTransformer
+    ;
 
     void initialize() override;
 
