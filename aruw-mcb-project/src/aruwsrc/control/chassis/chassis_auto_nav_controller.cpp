@@ -112,9 +112,11 @@ Position ChassisAutoNavController::calculateSetPoint(
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
     }
 
-    float distOfClosest = path->positionToClosestParameter(current);
+    float robotParam = path->estimateRobotProgress(current, lastParameter);
 
-    Position lookaheadPos = path->parametertoPosition(distOfClosest + lookaheadDistance);
+    lastParameter = robotParam;
+
+    Position lookaheadPos = path->parametertoPosition(robotParam + lookaheadDistance);
 
     if (!pathTransitionTimeout.isExpired())
         return aruwsrc::algorithms::quadraticBezierInterpolation(
@@ -128,7 +130,7 @@ Position ChassisAutoNavController::calculateSetPoint(
 }
 
 bool ChassisAutoNavController::atSetpoint(){
-    Position curr = worldToChassis.getTranslation();
+    Position curr = transformer->getWorldToChassis().getTranslation();
     Position goal = path->getFinalPosition();
     return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0.01); //tolerance = 1 cm
 }

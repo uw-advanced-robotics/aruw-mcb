@@ -66,6 +66,8 @@ public:
      */
     float positionToClosestParameter(const Position pos) const;
 
+    float estimateRobotProgress(const Position robotPos, const float lastRobotParam) const;
+
     /**
      * Returns the point the given distance along the path.
      */

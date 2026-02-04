@@ -54,6 +54,7 @@ public:
         float translationalMotionThreshold,
         float capbankEnergyThreshold)
         : chassis(chassis),
+          lastParameter(0),
           lastSetPoint(Position(-1, -1, 0)),
           drivers(drivers),
           transformer(transformer),
@@ -87,6 +88,7 @@ private:
     aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
     Position lastSetPoint;
+    float lastParameter;
     tap::Drivers& drivers;
 
     const aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer;

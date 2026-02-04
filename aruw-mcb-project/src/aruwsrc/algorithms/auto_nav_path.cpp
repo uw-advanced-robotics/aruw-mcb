@@ -73,6 +73,78 @@ float AutoNavPath::positionToClosestParameter(const Position pos) const
     return minClosest;
 }
 
+float AutoNavPath::estimateRobotProgress(const Position robotPos, const float lastRobotParam) const
+{
+    /*
+    Algorithm:
+    identify local minima in distance to segment vs parameter and select the one closest to
+    prevParam
+        might want to bias this forward (if select the further ahead one if you encounter 2
+        equidistant ones)
+
+    this breaks if you have several consecutive equidistant candidates around the robot
+    */
+
+    float currParameter = 0.0f;
+
+    // float minDistance = F32_MAX;
+    float minParam = 0.0f;
+
+    float prevDistance = F32_MAX;
+    float prevParam = 0.0f;
+    bool prevRising = false;  // whether the previous distance was greater than its previous
+
+    if (setpointData.size() < 2)
+    {
+        return 0.0f;
+    }
+
+    for (size_t i = 0; i < setpointData.size() - 1; i++)
+    {
+        Position p1 = setpointData[i];
+        Position p2 = setpointData[i + 1];
+        float segLength = Position::distance(p1, p2);  // segment length
+
+        float segLocalParam = getClosestParameterOnSegment(
+            robotPos,
+            p1,
+            p2);  // parameter along segment of closest point
+        float segParam =
+            currParameter + segLocalParam;  // total parameter of closest point on segment
+
+        Position segPoint = Position::interpolate(
+            p1,
+            p2,
+            segLocalParam / segLength);  // position of closest point on segment
+        float segDistance = Position::distance(robotPos, segPoint);
+
+        if (segDistance >= prevDistance && !prevRising)
+        {
+            // negative peak detection, last segment was a local minimum
+            if (fabs(prevParam - lastRobotParam) < fabs(minParam - lastRobotParam))
+            {
+                // minDistance = prevDistance;
+                minParam = prevParam;
+            }
+        }
+
+        prevRising = segDistance > prevDistance;
+        prevDistance = segDistance;
+        prevParam = segParam;
+        currParameter += segLength;
+    }
+    if (!prevRising)
+    {
+        if (fabs(prevParam - lastRobotParam) <= fabs(minParam - lastRobotParam))
+        {
+            // minDistance = prevDistance;
+            minParam = prevParam;
+        }
+    }
+
+    return minParam;
+}
+
 Position AutoNavPath::parametertoPosition(const float parameter) const
 {
     size_t pointIndex;
