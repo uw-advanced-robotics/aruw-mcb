@@ -31,9 +31,11 @@ namespace aruwsrc::engineer::cube_storage
 class CubeStorageChooseAddCommand : public tap::control::Command
 {
 public:
-    CubeStorageChooseAddCommand(
-        CubeStorageSubsystem &cubeStorage,
-        aruwsrc::control::joint::JointSubsystem &jointSubsystem);
+    CubeStorageChooseAddCommand(CubeStorageSubsystem &cubeStorage, 
+        aruwsrc::control::joint::JointSubsystem &jointSubsystem
+    // TurretToCubeTransform &turretToCubeTransformer,
+    // TurretToSuctionTransform &turretToSuctionTransformer
+    );
 
     void initialize() override;
 
@@ -48,6 +50,9 @@ public:
 private:
     CubeStorageSubsystem &cubeStorage;
     aruwsrc::control::joint::JointSubsystem &jointSubsystem;
+
+    // TurretToCubeTransform &turretToCubeTransformer;
+    // TurretToSuctionTransform &turretToSuctionTransformer;
 
 };  // class CubeStorageChooseAddCommand
 

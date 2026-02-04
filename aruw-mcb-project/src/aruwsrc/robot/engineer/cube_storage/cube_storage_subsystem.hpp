@@ -22,6 +22,9 @@
 
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
+
+using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::engineer::cube_storage
 {
@@ -39,8 +42,6 @@ public:
 
     void initialize() override;
 
-    void refresh() override;
-
     // can also be used as indices in array
     enum CubeOptions
     {
@@ -56,8 +57,8 @@ public:
     bool addCube();
     bool removeCube();
 
-    bool storeWristPos(float wristPos);
-    float getWristPos();
+    bool storeWristPos(Transform* wristPos);
+    Transform* getWristPos();
 
     void checkForCubes();
 
@@ -66,7 +67,7 @@ public:
 protected:
     CubeOptions currentCube = CubeOptions::LEFT;
     bool hasCube[2] = {false, false};
-    float wristPos[2] = {0.0f, 0.0f};
+    Transform* wristPos[2] = {nullptr, nullptr};
     // TODO: add vars for left and right pressure sensor
 };
 }  // namespace aruwsrc::engineer::cube_storage

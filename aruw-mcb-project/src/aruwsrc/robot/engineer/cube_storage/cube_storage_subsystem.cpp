@@ -42,8 +42,6 @@ void CubeStorageSubsystem::initialize()
     hasCube[CubeOptions::RIGHT] = false;
 }
 
-void CubeStorageSubsystem::refresh() { TriggerHomedJointSubsystem::refresh(); }
-
 CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToAdd()
 {
     checkForCubes();
@@ -109,7 +107,7 @@ bool CubeStorageSubsystem::removeCube()
     return false;
 }
 
-bool CubeStorageSubsystem::storeWristPos(float newWristPosition)
+bool CubeStorageSubsystem::storeWristPos(Transform* newWristPosition)
 {
     if (currentCube != CubeOptions::NONE)
     {
@@ -126,7 +124,7 @@ bool CubeStorageSubsystem::storeWristPos(float newWristPosition)
     return false;
 }
 
-float CubeStorageSubsystem::getWristPos()
+Transform* CubeStorageSubsystem::getWristPos()
 {
     if (currentCube != CubeOptions::NONE)
     {
@@ -136,10 +134,10 @@ float CubeStorageSubsystem::getWristPos()
         }
         else
         {
-            return std::numeric_limits<float>::quiet_NaN();
+            return nullptr;
         }
     }
-    return std::numeric_limits<float>::quiet_NaN();
+    return nullptr;
 }
 
 void CubeStorageSubsystem::checkForCubes()
