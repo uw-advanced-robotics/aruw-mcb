@@ -36,7 +36,7 @@ public:
         aruwsrc::control::joint::JointSubsystem &jointSubsystem)
         // TurretToCubeTransform &turretToCubeTransformer,
         // TurretToSuctionTransform &turretToSuctionTransformer
-    ;
+        ;
 
     void initialize() override;
 

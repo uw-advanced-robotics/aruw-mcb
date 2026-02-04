@@ -21,16 +21,16 @@
 
 namespace aruwsrc::engineer::cube_storage
 {
-CubeStorageChooseAddCommand::CubeStorageChooseAddCommand( //two const references
+CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(  // two const references
     CubeStorageSubsystem &cubeStorage,
     aruwsrc::control::joint::JointSubsystem &jointSubsystem
     // TurretToCubeTransform &turretToCubeTransformer,
     // TurretToSuctionTransform &turretToSuctionTransformer
-)
+    )
     : cubeStorage(cubeStorage),
       jointSubsystem(jointSubsystem)
-      // turretToCubeTransformer(turretToCubeTransformer),
-      // turretToSuctionTransformer(turretToSectionTransformer)
+// turretToCubeTransformer(turretToCubeTransformer),
+// turretToSuctionTransformer(turretToSectionTransformer)
 {
     // mostly computation, so no requirements
 }
@@ -39,7 +39,7 @@ void CubeStorageChooseAddCommand::initialize()
 {
     cubeStorage.getCubeToAdd();
     cubeStorage.storeWristPos(nullptr);  // TODO: update; 3 motors on wrist
-    // use transforms systems 
+    // use transforms systems
 
     // multiply transformers here & give position to wrist
 }

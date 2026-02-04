@@ -107,7 +107,7 @@ bool CubeStorageSubsystem::removeCube()
     return false;
 }
 
-bool CubeStorageSubsystem::storeWristPos(Transform* newWristPosition)
+bool CubeStorageSubsystem::storeWristPos(Transform *newWristPosition)
 {
     if (currentCube != CubeOptions::NONE)
     {
@@ -124,7 +124,7 @@ bool CubeStorageSubsystem::storeWristPos(Transform* newWristPosition)
     return false;
 }
 
-Transform* CubeStorageSubsystem::getWristPos()
+Transform *CubeStorageSubsystem::getWristPos()
 {
     if (currentCube != CubeOptions::NONE)
     {

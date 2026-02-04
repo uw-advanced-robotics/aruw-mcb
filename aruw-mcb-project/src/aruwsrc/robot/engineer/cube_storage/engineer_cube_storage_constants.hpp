@@ -35,7 +35,7 @@ static constexpr tap::can::CanBus CUBE_STORAGE_MOTOR_CAN_BUS = tap::can::CanBus:
 static constexpr tap::gpio::Digital::InputPin CUBE_STORAGE_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::B;
 
-static constexpr float MM_PER_REVOLUTION = 74.63f / M_TWOPI; // update
+static constexpr float MM_PER_REVOLUTION = 74.63f / M_TWOPI;  // update
 
 static constexpr tap::algorithms::SmoothPidConfig CUBE_STORAGE_MOTOR_PID_CONFIG = {
     .kp = 300.0f,

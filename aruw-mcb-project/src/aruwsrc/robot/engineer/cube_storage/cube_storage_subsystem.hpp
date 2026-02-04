@@ -20,9 +20,10 @@
 #ifndef CUBE_STORAGE_SUBSYSTEM_HPP_
 #define CUBE_STORAGE_SUBSYSTEM_HPP_
 
+#include "tap/algorithms/transforms/transform.hpp"
+
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
-#include "tap/algorithms/transforms/transform.hpp"
 
 using namespace tap::algorithms::transforms;
 
@@ -35,9 +36,9 @@ class CubeStorageSubsystem : public aruwsrc::control::joint::homing::TriggerHome
 {
 public:
     CubeStorageSubsystem(
-        tap::Drivers *drivers,
-        tap::motor::MotorInterface &motor,
-        aruwsrc::control::joint::homing::trigger::TriggerInterface &trigger,
+        tap::Drivers* drivers,
+        tap::motor::MotorInterface& motor,
+        aruwsrc::control::joint::homing::trigger::TriggerInterface& trigger,
         aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config config);
 
     void initialize() override;

@@ -24,13 +24,13 @@ namespace aruwsrc::engineer::cube_storage
 CubeStorageChooseRemoveCommand::CubeStorageChooseRemoveCommand(
     CubeStorageSubsystem &cubeStorage,
     aruwsrc::control::joint::JointSubsystem &jointSubsystem
-// TurretToCubeTransform &turretToCubeTransformer,
+    // TurretToCubeTransform &turretToCubeTransformer,
     // TurretToSuctionTransform &turretToSuctionTransformer
     )
     : cubeStorage(cubeStorage),
       jointSubsystem(jointSubsystem)
-      // turretToCubeTransformer(turretToCubeTransformer),
-    // turretToSuctionTransformeer(turretToSuctionTransformer)
+// turretToCubeTransformer(turretToCubeTransformer),
+// turretToSuctionTransformeer(turretToSuctionTransformer)
 {
     addSubsystemRequirement(&jointSubsystem);
 }
@@ -38,7 +38,7 @@ CubeStorageChooseRemoveCommand::CubeStorageChooseRemoveCommand(
 void CubeStorageChooseRemoveCommand::initialize()
 {
     cubeStorage.getCubeToRemove();
-    // jointSubsystem.setSetpoint(cubeStorage.getWristPos()); 
+    // jointSubsystem.setSetpoint(cubeStorage.getWristPos());
     // ^ make smth in jointsubsystem accept a transform, oliver problem i think?
 }
 
