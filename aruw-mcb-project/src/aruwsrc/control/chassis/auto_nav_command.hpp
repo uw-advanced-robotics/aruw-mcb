@@ -74,8 +74,8 @@ private:
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
 
     bool autoNavOnlyInGame;
-    bool ends;
     bool beybladeEnabled;
+    bool ends;
     bool movementEnabled = true;
 
 };  // class AutoNavBeybladeCommand

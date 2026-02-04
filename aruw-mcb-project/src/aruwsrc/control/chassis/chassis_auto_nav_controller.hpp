@@ -87,8 +87,8 @@ public:
 private:
     aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
-    Position lastSetPoint;
     float lastParameter;
+    Position lastSetPoint;
     tap::Drivers& drivers;
 
     const aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer;
