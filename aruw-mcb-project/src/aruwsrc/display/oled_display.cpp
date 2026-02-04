@@ -39,7 +39,8 @@ OledDisplay::OledDisplay(
     : display(),
       viewStack(&display),
       buttonHandler(
-          drivers
+          drivers,
+          tap::gpio::Analog::Pin::OledJoystick
 #ifndef SSH1106_OLED
           ,
           buttonConfig

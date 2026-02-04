@@ -68,7 +68,7 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          capacitorBank(this, tap::can::CanBus::CAN_BUS1, 4.358),
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, CAP_BANK_CAPACITANCE),
           plateHitTracker(this),
           refSerialTransmitter(this),
           interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
@@ -98,6 +98,7 @@ public:
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
+    static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
 #endif
 };  // class aruwsrc::HeroDrivers
 }  // namespace aruwsrc::hero
