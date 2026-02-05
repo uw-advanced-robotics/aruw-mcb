@@ -37,6 +37,7 @@
 #include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
@@ -54,6 +55,7 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
+          rttTelemetry(this),
           controlOperatorInterface(this),
           visionCoprocessor(this),
           oledDisplay(
@@ -73,6 +75,8 @@ public:
           plateHitTracker(this),
           stateMachine(refSerial, visionCoprocessor)
     {
+        controlOperatorInterface.setTelemetry(&rttTelemetry);
+        visionCoprocessor.setTelemetry(&rttTelemetry);
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -84,6 +88,7 @@ public:
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
+    communication::rtt::RttTelemetry rttTelemetry;
     aruwsrc::sentry::SentryControlOperatorInterface controlOperatorInterface;
     aruwsrc::communication::serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;

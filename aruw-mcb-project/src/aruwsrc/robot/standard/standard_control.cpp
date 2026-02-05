@@ -256,7 +256,10 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+StandardAnderHeroTransformerSubsystem transformSubsystem(
+    *drivers(),
+    transformer,
+    &drivers()->rttTelemetry);
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
