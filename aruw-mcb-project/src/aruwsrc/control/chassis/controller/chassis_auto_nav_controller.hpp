@@ -47,11 +47,13 @@ public:
     const float POS_ERROR_THRESHOLD = 0.01;
 
     inline ChassisAutoNavController(
+        const tap::Drivers& drivers,
         const tap::algorithms::transforms::Transform& worldToChassis,
         aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem = nullptr,
         float translationalMotionThreshold = 0,
         float capbankEnergyThreshold = 0)
         : FrameRelativeChassisTranslationController(worldToChassis),
+          drivers(drivers),
           lastSetPoint(tap::algorithms::transforms::Position(0, 0, 0)),
           worldToChassis(worldToChassis),
           capBankSubsystem(capBankSubsystem),
@@ -76,6 +78,7 @@ public:
     inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
 
 private:
+    const tap::Drivers& drivers;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
     tap::algorithms::transforms::Position lastSetPoint;
     const tap::algorithms::transforms::Transform& worldToChassis;

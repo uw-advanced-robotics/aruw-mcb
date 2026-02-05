@@ -21,6 +21,9 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 using namespace tap::algorithms::transforms;
+using GameType = tap::communication::serial::RefSerialData::Rx::GameType;
+using GameStage = tap::communication::serial::RefSerialData::Rx::GameStage;
+using GameData = tap::communication::serial::RefSerialData::Rx::GameData;
 
 namespace aruwsrc::control::chassis::controller
 {
@@ -28,6 +31,13 @@ void ChassisAutoNavController::initialize() { lastSetPoint = worldToChassis.getT
 
 Vector ChassisAutoNavController::runFrameRelativeTranslationController(const float maxSpeed)
 {
+    const GameData gameData = drivers.refSerial.getGameData();
+
+    if (!(gameData.gameType == GameType::UNKNOWN || (gameData.gameStage == GameStage::IN_GAME)))
+    {
+        return Vector(0, 0, 0);
+    }
+
     Position currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
                                                // this constant with a function in the future
