@@ -36,6 +36,8 @@ public:
      * @return desired translational velocity
      */
     virtual tap::algorithms::transforms::Vector runTranslationController(const float maxSpeed) = 0;
+
+    virtual bool isFinished() { return false; }
 };  // class ChassisTranslationControllerInterface
 
 }  // namespace aruwsrc::control::chassis::controller

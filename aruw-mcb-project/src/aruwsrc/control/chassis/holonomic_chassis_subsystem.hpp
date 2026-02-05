@@ -152,11 +152,15 @@ public:
     inline void attachTranslationController(
         controller::ChassisTranslationControllerInterface* controller)
     {
+        if (translationController == controller) return;
+        if (controller) controller->initialize();
         translationController = controller;
     }
 
     inline void attachYawController(controller::ChassisYawControllerInterface* controller)
     {
+        if (yawController == controller) return;
+        if (controller) controller->initialize();
         yawController = controller;
     }
 

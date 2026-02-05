@@ -32,6 +32,8 @@ public:
      * @return Desired yaw velocity
      */
     virtual float runYawController(const float maxSpeed) = 0;
+
+    virtual bool isFinished() { return false; }
 };  // class ChassisYawControllerInterface
 
 }  // namespace aruwsrc::control::chassis::controller
