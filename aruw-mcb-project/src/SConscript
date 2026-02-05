@@ -70,6 +70,7 @@ env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
 env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
 env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_DATE=" + get_date])
 env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_BRANCH_NAME=" + get_branch_name])
+env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_TARGET=" + args["ROBOT_TYPE"]])
 
 
 if args["COMPILE_SRC"]:
