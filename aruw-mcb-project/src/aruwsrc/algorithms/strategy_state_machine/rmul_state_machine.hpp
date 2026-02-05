@@ -69,7 +69,7 @@
 namespace aruwsrc::algorithms::strategy_state_machine
 {
 using namespace tap::communication::serial;
-using namespace aruwsrc::control::chassis;
+using namespace aruwsrc::control::chassis::controller;
 using namespace aruwsrc::algorithms;
 using namespace tap::algorithms::transforms;
 class RMULStateMachine

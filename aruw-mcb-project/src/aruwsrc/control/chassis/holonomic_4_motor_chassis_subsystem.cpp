@@ -163,8 +163,6 @@ void Holonomic4MotorChassisSubsystem::calculateOutput(
         -maxWheelSpeed,
         maxWheelSpeed);
 
-    desiredRotation = r;
-
     // NEW
     modm::Matrix<float, 3, 1> xyr;
     xyr[0][0] = x;

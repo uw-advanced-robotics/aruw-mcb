@@ -26,7 +26,7 @@ namespace aruwsrc::control::chassis::controller
 {
 void ChassisAutoNavController::initialize() { lastSetPoint = worldToChassis.getTranslation(); }
 
-Vector ChassisAutoNavController::runFrameRelativeController(const float maxSpeed)
+Vector ChassisAutoNavController::runFrameRelativeTranslationController(const float maxSpeed)
 {
     Position currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace

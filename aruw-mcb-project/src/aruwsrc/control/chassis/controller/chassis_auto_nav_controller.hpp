@@ -62,7 +62,8 @@ public:
 
     void initialize() override;
 
-    tap::algorithms::transforms::Vector runFrameRelativeController(const float maxSpeed) override;
+    tap::algorithms::transforms::Vector runFrameRelativeTranslationController(
+        const float maxSpeed) override;
 
     tap::algorithms::transforms::Position calculateSetPoint(
         tap::algorithms::transforms::Position current,

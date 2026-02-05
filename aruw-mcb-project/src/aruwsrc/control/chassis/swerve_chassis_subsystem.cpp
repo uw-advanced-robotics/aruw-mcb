@@ -83,7 +83,6 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
 
 void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)
 {
-    desiredRotation = modules[LF]->wheel.mpsToRpm(r) * 0.205f;
     float maxInitialSpeed = 0;
     for (unsigned int i = 0; i < NUM_MODULES; i++)
     {

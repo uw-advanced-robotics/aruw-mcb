@@ -22,6 +22,7 @@
 #include <deque>
 
 using tap::algorithms::transforms::Position;
+using tap::algorithms::transforms::Vector;
 using namespace aruwsrc::algorithms;
 
 void AutoNavPath::pushPoint(Position point) { setpointData.push_back(point); }

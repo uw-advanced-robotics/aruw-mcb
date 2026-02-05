@@ -42,7 +42,6 @@ public:
     tap::algorithms::transforms::Vector runTranslationController(
         const float maxSpeed) final override
     {
-        // TODO: shouldn't have to invert the entire transform, just the orientation
         return frameToChassis.apply(runFrameRelativeTranslationController(maxSpeed));
     }
 

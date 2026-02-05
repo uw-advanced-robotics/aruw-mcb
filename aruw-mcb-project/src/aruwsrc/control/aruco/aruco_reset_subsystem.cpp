@@ -22,6 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 
 using namespace tap::algorithms;
+using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::control::aruco
 {

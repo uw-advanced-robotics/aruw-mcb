@@ -350,7 +350,7 @@ public:
     inline void invalidateArducamArucoResetData() { this->lastArducamArucoData.updated = false; }
 
     mockable inline void attachAutoNavController(
-        aruwsrc::control::chassis::ChassisAutoNavController* autoNavController)
+        aruwsrc::control::chassis::controller::ChassisAutoNavController* autoNavController)
     {
         this->autoNavController = autoNavController;
     }
@@ -460,7 +460,7 @@ private:
 
     aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer;
 
-    aruwsrc::control::chassis::ChassisAutoNavController* autoNavController = nullptr;
+    aruwsrc::control::chassis::controller::ChassisAutoNavController* autoNavController = nullptr;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 

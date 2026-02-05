@@ -34,7 +34,7 @@ namespace control::chassis::sentry
 AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     const tap::Drivers& drivers,
     chassis::HolonomicChassisSubsystem& chassis,
-    aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
+    aruwsrc::control::chassis::controller::ChassisAutoNavController& autoNavController,
     bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
@@ -59,7 +59,7 @@ void AutoNavBeybladeCommand::execute()
     if (!autoNavOnlyInGame ||
         (gameData.gameType == GameType::UNKNOWN || (gameData.gameStage == GameStage::IN_GAME)))
     {
-        autoNavController.runController(maxWheelSpeed, movementEnabled, beybladeEnabled);
+        autoNavController.runTranslationController(maxWheelSpeed);
     }
     else
     {

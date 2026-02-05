@@ -71,10 +71,10 @@ void HolonomicChassisSubsystem::refresh()
     // (otherwise it is likely that you will barely move unless
     // BEYBLADE_ROTATIONAL_SPEED_FRACTION_OF_MAX is small)
     // todo: smoother function? not really necessary but might feel nicer to drive
-    if (transVel.magnitude() > translationalSpeedThreshold)
-    {
-        yawVel *= beybladeRotationalSpeedMultiplierWhenTranslating;
-    }
+    // if (transVel.magnitude() > translationalSpeedThreshold)
+    // {
+    //     yawVel *= beybladeRotationalSpeedMultiplierWhenTranslating;
+    // }
 
     yawVelRamp.setTarget(yawVel);
     yawVelRamp.update(yawVel);
