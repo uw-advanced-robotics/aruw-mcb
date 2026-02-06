@@ -34,7 +34,7 @@ public:
         const tap::gpio::Digital::OutputPin pinOne,
         const bool offStateOne = true,
         const tap::gpio::Digital::OutputPin* pinTwo = nullptr,
-        const bool offStateTwo = false, 
+        const bool offStateTwo = false,
         const bool initialState = false)
         : Subsystem(drivers),
           digital(digital),
@@ -42,7 +42,7 @@ public:
           pinTwo(pinTwo),
           offStateOne(offStateOne),
           offStateTwo(offStateTwo),
-          state(initialState), 
+          state(initialState),
     {
     }
 
