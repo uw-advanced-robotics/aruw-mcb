@@ -52,7 +52,7 @@ public:
         float staticFeedforward = 0.0f;
     };
 
-    JointSubsystem(tap::Drivers *drivers, tap::motor::MotorInterface &motor, Config config);
+    JointSubsystem(tap::Drivers* drivers, tap::motor::MotorInterface& motor, Config config);
 
     void initialize() override;
 
@@ -74,6 +74,8 @@ public:
 
     bool atSetpoint();
 
+    bool isOnline() const;
+
     float getLowerBound() const { return lowerBound; }
 
     float getUpperBound() const { return upperBound; }
@@ -83,9 +85,10 @@ public:
     void setUpperBound(float upperBound);
 
 protected:
+    float debug_position, error, motorDesiredOutput; 
     tap::algorithms::Ramp setpoint;
     float lowerBound, upperBound;
-    tap::motor::MotorInterface &motor;
+    tap::motor::MotorInterface& motor;
     const float epsilon, maxSetpointIncrement;
     tap::algorithms::SmoothPid posPid;
     float encoderRatio;

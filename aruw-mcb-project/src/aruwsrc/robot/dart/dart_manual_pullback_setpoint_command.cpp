@@ -36,6 +36,9 @@ void DartManualPullbackSetpointCommand::initialize() {}
 
 void DartManualPullbackSetpointCommand::execute()
 {
+    if(dartSystem.isOnline() == false) {
+        return;
+    }
     float setpoint = dartSystem.getSetpoint();
 
     position = dartSystem.getPosition();

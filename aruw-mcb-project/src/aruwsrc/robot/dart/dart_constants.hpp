@@ -47,7 +47,7 @@ static constexpr tap::algorithms::SmoothPidConfig DART_RELOADER_PID_CONFIG = {
     .errDeadzone = 0.0f,
 };
 static constexpr float DART_MAGAZINE_TOLERANCE = 0.0125f;
-static constexpr float YAW_INPUT_SENSITIVITY = 0.05;
+static constexpr float YAW_INPUT_SENSITIVITY = 1.0;
 static constexpr tap::gpio::Digital::InputPin YAW_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
@@ -88,11 +88,11 @@ static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 1.0f;
 
 static constexpr float PULLBACK_PULL_POSITION = 0;  // TODO: FIND
 static constexpr float RELEASE_POSITION = 0;        // TODO: FIND
-static constexpr float GRAB_POSITION = -10089.0f;
-static constexpr float RELOAD_POSITION = -2745.0f;
+static constexpr float GRAB_POSITION = -9790.0f;
+static constexpr float RELOAD_POSITION = 0.0f;
 //  * @param[in] pwmRampSpeed The speed in PWM percent per millisecond.
 
-static constexpr float SERVO_MIN = 0.5f;
+static constexpr float SERVO_MIN = 0.7f;
 static constexpr float SERVO_MAX = 0.99f;
 static constexpr float SERVO_SPEED = 1.0f;
 static constexpr tap::gpio::Pwm::Pin SERVO_PORT = tap::gpio::Pwm::Pin::X;

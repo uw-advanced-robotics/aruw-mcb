@@ -34,7 +34,7 @@ class DartYawVelocityCommand : public tap::control::Command
 public:
     DartYawVelocityCommand(
         tap::Drivers* drivers,
-        TriggerHomedJointSubsystem* subsystem,
+        TriggerHomedJointSubsystem& subsystem,
         Remote::Channel channel);
 
     void initialize() override;
@@ -49,7 +49,7 @@ public:
 
 private:
     tap::Drivers* drivers;
-    TriggerHomedJointSubsystem* subsystem;
+    TriggerHomedJointSubsystem& subsystem;
     Remote::Channel channel;
 };  // class CLASS_NAME
 

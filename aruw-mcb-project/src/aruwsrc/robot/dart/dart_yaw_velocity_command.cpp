@@ -29,27 +29,26 @@ namespace aruwsrc::robot::dart
 {
 DartYawVelocityCommand::DartYawVelocityCommand(
     tap::Drivers* drivers,
-    TriggerHomedJointSubsystem* subsystem,
+    TriggerHomedJointSubsystem& subsystem,
     Remote::Channel channel)
     : drivers(drivers),
       subsystem(subsystem),
       channel(channel)
 {
-    addSubsystemRequirement(subsystem);
+    addSubsystemRequirement(&subsystem);
 }
 
 void DartYawVelocityCommand::initialize() {}
 
 void DartYawVelocityCommand::execute()
 {
-    subsystem->setSetpoint(
-        subsystem->getPosition() +
-        drivers->remote.getChannel(channel) * aruwsrc::dart::YAW_INPUT_SENSITIVITY);
+    float setpoint = subsystem.getSetpoint() + drivers->remote.getChannel(channel) * aruwscrc::dart::YAW_INPUT_SENSITIVITY;
+    subsystem.setSetpoint(setpoint);
 }
 
 bool DartYawVelocityCommand::isFinished() const
 {
-    return abs(drivers->remote.getChannel(channel)) < 0.05;
+    return false;
 }
 
 void DartYawVelocityCommand::end(bool) {}
