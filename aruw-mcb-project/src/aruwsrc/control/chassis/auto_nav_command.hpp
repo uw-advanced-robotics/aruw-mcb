@@ -66,7 +66,7 @@ public:
 
     inline void toggleMovement() { movementEnabled = !movementEnabled; };
 
-    const char* getName() const override { return "autonav beyblade"; }
+    const char* getName() const override { return "autonav command"; }
 
 private:
     const tap::Drivers& drivers;

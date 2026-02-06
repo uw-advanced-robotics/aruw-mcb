@@ -48,7 +48,7 @@
 #include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
@@ -560,7 +560,7 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerTurretLeft(
     &turretLeftSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand(
+aruwsrc::control::chassis::AutoNavCommand autoNavCommand(
     *drivers(),
     chassis,
     autoNavController,
@@ -860,7 +860,7 @@ HoldCommandMapping rightUp(
 // auto nav + auto aim + cv gated fire
 HoldRepeatCommandMapping leftUpRightUp(
     drivers(),
-    {&autoNavBeybladeCommand, &turretCVCommand},
+    {&autoNavCommand, &turretCVCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
     true);
 
@@ -874,7 +874,7 @@ HoldRepeatCommandMapping leftUpRightUpAg(
 // auto nav + auto aim
 HoldCommandMapping leftUpRightMid(
     drivers(),
-    {&autoNavBeybladeCommand, &turretCVCommand},
+    {&autoNavCommand, &turretCVCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
 
 // imu calibrate
@@ -902,7 +902,7 @@ HoldCommandMapping leftMidRightMid(
     {&majorManualCommand,
      &turretLeftManualCommand,
      &turretRightManualCommand,
-     &autoNavBeybladeCommand},
+     &autoNavCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // manual aim
