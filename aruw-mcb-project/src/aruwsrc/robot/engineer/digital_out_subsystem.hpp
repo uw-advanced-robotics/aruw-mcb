@@ -27,40 +27,26 @@ namespace aruwsrc::engineer
 class DigitalOutSubsystem : public tap::control::Subsystem
 {
 public:
-    // initial state is based on offStateOne
     DigitalOutSubsystem(
         tap::Drivers* drivers,
         tap::gpio::Digital& digital,
-        const tap::gpio::Digital::OutputPin pinOne,
-        const bool offStateOne = true,
-        const tap::gpio::Digital::OutputPin* pinTwo = nullptr,
-        const bool offStateTwo = false,
-        const bool initialState = false)
+        const tap::gpio::Digital::OutputPin pin,
+        const bool offState = false)
         : Subsystem(drivers),
           digital(digital),
-          pinOne(pinOne),
-          pinTwo(pinTwo),
-          offStateOne(offStateOne),
-          offStateTwo(offStateTwo),
-          state(initialState),
+          pin(pin),
+          offState(offState),
+          state(offState)
     {
     }
 
     inline void initialize() override {}
 
-    inline void refresh() override
-    {
-        digital.set(pinOne, state ^ offStateOne);
-        digital.set(pinTwo, state ^ offStateTwo);
-    }
+    inline void refresh() override { digital.set(pin, state ^ offState); }
 
     inline bool getState() { return state; }
 
-    inline void refreshSafeDisconnect() override
-    {
-        digital.set(pinOne, offStateOne);
-        digital.set(pinTwo, offStateTwo);
-    }
+    inline void refreshSafeDisconnect() override { digital.set(pin, offState); }
 
     inline void set(bool s) { state = s; }
 
@@ -68,10 +54,8 @@ public:
 
 private:
     tap::gpio::Digital& digital;
-    const tap::gpio::Digital::OutputPin pinOne;
-    const tap::gpio::Digital::OutputPin* pinTwo;
-    const bool offStateOne;
-    const bool offStateTwo;
+    const tap::gpio::Digital::OutputPin pin;
+    const bool offState;
     bool state;
 };  // class DigitalOutSubsystem
 
