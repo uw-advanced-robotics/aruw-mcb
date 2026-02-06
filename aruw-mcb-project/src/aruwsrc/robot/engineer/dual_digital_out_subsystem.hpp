@@ -46,14 +46,16 @@ public:
     {
     }
 
-    inline void refresh() override { 
-        digital.set(pinOne, getState() ^ offStateOne); 
-        digital.set(pinTwo, getState() ^ offStateTwo); 
+    inline void refresh() override
+    {
+        digital.set(pinOne, getState() ^ offStateOne);
+        digital.set(pinTwo, getState() ^ offStateTwo);
     }
 
-    inline void refreshSafeDisconnect() override { 
-        digital.set(pinOne, offStateOne); 
-        digital.set(pinTwo, offStateTwo); 
+    inline void refreshSafeDisconnect() override
+    {
+        digital.set(pinOne, offStateOne);
+        digital.set(pinTwo, offStateTwo);
     }
 
     const char* getName() const override { return "Dual Digital Out Subsystem"; }
