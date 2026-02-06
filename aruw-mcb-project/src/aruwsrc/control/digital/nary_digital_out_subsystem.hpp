@@ -26,7 +26,7 @@
 
 namespace aruwsrc::control::digital
 {
-template<uint16_t NUM_PINS>
+template <uint16_t NUM_PINS>
 class NaryDigitalOutSubsystem : public DigitalOutSubsystem
 {
 public:
@@ -45,14 +45,16 @@ public:
 
     inline void refresh() override
     {
-        for (int i = 0; i < NUM_PINS; i++) {
+        for (int i = 0; i < NUM_PINS; i++)
+        {
             digital.set(pins[i], getState() ^ offStates[i]);
         }
     }
 
     inline void refreshSafeDisconnect() override
     {
-        for (int i = 0; i < NUM_PINS; i++) {
+        for (int i = 0; i < NUM_PINS; i++)
+        {
             digital.set(pins[i], offStates[i]);
         }
     }
@@ -61,8 +63,8 @@ public:
 
 private:
     tap::gpio::Digital& digital;
-    const tap::gpio::Digital::OutputPin pins [NUM_PINS];
-    const bool offStates [NUM_PINS];
+    const tap::gpio::Digital::OutputPin pins[NUM_PINS];
+    const bool offStates[NUM_PINS];
 };  // class NaryDigitalOutSubsystem
 
 }  // namespace aruwsrc::control::digital
