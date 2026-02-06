@@ -355,11 +355,7 @@ DigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true);
-
-DigitalOutSubsystem releaseSubsystem(
-    drivers(),
-    drivers()->digital,
+    true,
     tap::gpio::Digital::OutputPin::Z,
     false);
 
@@ -411,9 +407,7 @@ WristSetpointsCommand wristFoldOutCommand(
 
 DigitalOutCommand suckOffCommand(suckSubsystem, false);
 DigitalOutCommand suckOnCommand(suckSubsystem, true);
-DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
-DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
-DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
+DigitalOutToggleCommand suctionToggleCommand(suckSubsystem);
 
 // commands here for sequences, but setpoints never tuned
 SetpointMovePositionCommand extensionInCommand(extensionSubsystem, 2);
@@ -428,7 +422,6 @@ SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
     {&extensionInCommand,
      &wristFoldInCommand,
      &suckOffCommand,
-     &releaseOnCommand,
      &extensionOutCommand,
      &extensionInCommand,
      &cubeLiftSwitchDownCommand}});
@@ -437,7 +430,6 @@ SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
      &wristFoldInCommand,
      &extensionInCommand,
      &suckOnCommand,
-     &releaseOffCommand,
      &wristFoldOutCommand,
      &cubeLiftSwitchUpCommand}});
 
@@ -466,12 +458,12 @@ tap::control::PressCommandMapping leftUp(
 
 tap::control::HoldCommandMapping rightMid(
     drivers(),
-    {&suckOffCommand, &releaseOffCommand},
+    {&suckOffCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 
 tap::control::HoldCommandMapping rightDown(
     drivers(),
-    {&suckOnCommand, &releaseOnCommand},
+    {&suckOnCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 tap::control::PressCommandMapping suctionToggle(
@@ -530,7 +522,6 @@ void initializeSubsystems()
     wristSubsystem.initialize();
     cubeLift.initialize();
     suckSubsystem.initialize();
-    releaseSubsystem.initialize();
     // clientDicsplay.initialize();
 }
 
@@ -543,7 +534,6 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
-    drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 

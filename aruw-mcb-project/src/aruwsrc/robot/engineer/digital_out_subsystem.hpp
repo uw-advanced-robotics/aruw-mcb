@@ -30,8 +30,10 @@ public:
     DigitalOutSubsystem(
         tap::Drivers* drivers,
         tap::gpio::Digital& digital,
-        const tap::gpio::Digital::OutputPin pin,
-        const bool offState = false)
+        const tap::gpio::Digital::OutputPin pinOne,
+        const bool offStateOne = false,
+        const tap::gpio::Digital::OutputPin* pinTwo = nullptr,
+        const bool offStateTwo = false)
         : Subsystem(drivers),
           digital(digital),
           pin(pin),
@@ -42,11 +44,19 @@ public:
 
     inline void initialize() override {}
 
-    inline void refresh() override { digital.set(pin, state ^ offState); }
+    inline void refresh() override
+    {
+        digital.set(pinOne, state ^ offStateOne);
+        digital.set(pinTwo, state ^ offStateTwo);
+    }
 
     inline bool getState() { return state; }
 
-    inline void refreshSafeDisconnect() override { digital.set(pin, offState); }
+    inline void refreshSafeDisconnect() override
+    {
+        digital.set(pinOne, offStateOne);
+        digital.set(pinTwo, offStateTwo);
+    }
 
     inline void set(bool s) { state = s; }
 
@@ -54,8 +64,10 @@ public:
 
 private:
     tap::gpio::Digital& digital;
-    const tap::gpio::Digital::OutputPin pin;
-    const bool offState;
+    const tap::gpio::Digital::OutputPin pinOne;
+    const tap::gpio::Digital::OutputPin* pinTwo;
+    const bool offStateOne;
+    const bool offStateTwo;
     bool state;
 };  // class DigitalOutSubsystem
 
