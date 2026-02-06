@@ -27,18 +27,22 @@ namespace aruwsrc::engineer
 class DigitalOutSubsystem : public tap::control::Subsystem
 {
 public:
+    // initial state is based on offStateOne
     DigitalOutSubsystem(
         tap::Drivers* drivers,
         tap::gpio::Digital& digital,
         const tap::gpio::Digital::OutputPin pinOne,
-        const bool offStateOne = false,
+        const bool offStateOne = true,
         const tap::gpio::Digital::OutputPin* pinTwo = nullptr,
-        const bool offStateTwo = false)
+        const bool offStateTwo = false, 
+        const bool initialState = false)
         : Subsystem(drivers),
           digital(digital),
-          pin(pin),
-          offState(offState),
-          state(offState)
+          pinOne(pinOne),
+          pinTwo(pinTwo),
+          offStateOne(offStateOne),
+          offStateTwo(offStateTwo),
+          state(initialState), 
     {
     }
 
