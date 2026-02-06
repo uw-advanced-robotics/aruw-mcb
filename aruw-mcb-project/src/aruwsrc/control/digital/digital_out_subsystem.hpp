@@ -22,7 +22,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::control::digital
 {
 class DigitalOutSubsystem : public tap::control::Subsystem
 {
@@ -59,5 +59,5 @@ private:
     bool state;
 };  // class DigitalOutSubsystem
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::control::digital
 #endif  // DIGITAL_OUT_SUBSYSTEM_HPP_

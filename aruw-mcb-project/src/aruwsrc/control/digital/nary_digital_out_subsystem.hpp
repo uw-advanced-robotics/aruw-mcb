@@ -16,57 +16,54 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef DUAL_DIGITAL_OUT_SUBSYSTEM_HPP_
-#define DUAL_DIGITAL_OUT_SUBSYSTEM_HPP_
+#ifndef NARY_DIGITAL_OUT_SUBSYSTEM_HPP_
+#define NARY_DIGITAL_OUT_SUBSYSTEM_HPP_
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "digital_out_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::control::digital
 {
-class DualDigitalOutSubsystem : public DigitalOutSubsystem
+template<uint16_t NUM_PINS>
+class NaryDigitalOutSubsystem : public DigitalOutSubsystem
 {
 public:
-    // initial state is based on pinOne's offState
+    // initial state is based on offStates[0]
     DualDigitalOutSubsystem(
         tap::Drivers* drivers,
         tap::gpio::Digital& digital,
-        const tap::gpio::Digital::OutputPin pinOne,
-        const bool offStateOne,
-        const tap::gpio::Digital::OutputPin pinTwo,
-        const bool offStateTwo)
-        : DigitalOutSubsystem(drivers, digital, pinOne, offStateOne),
+        const tap::gpio::Digital::OutputPin pins[NUM_PINS],
+        const bool offStates[NUM_PINS])
+        : DigitalOutSubsystem(drivers, digital, pins[0], offStates[0]),
           digital(digital),
-          pinOne(pinOne),
-          offStateOne(offStateOne),
-          pinTwo(pinTwo),
-          offStateTwo(offStateTwo)
+          pins(pins),
+          offStates(offStates)
     {
     }
 
     inline void refresh() override
     {
-        digital.set(pinOne, getState() ^ offStateOne);
-        digital.set(pinTwo, getState() ^ offStateTwo);
+        for (int i = 0; i < NUM_PINS; i++) {
+            digital.set(pins[i], getState() ^ offStates[i]);
+        }
     }
 
     inline void refreshSafeDisconnect() override
     {
-        digital.set(pinOne, offStateOne);
-        digital.set(pinTwo, offStateTwo);
+        for (int i = 0; i < NUM_PINS; i++) {
+            digital.set(pins[i], offStates[i]);
+        }
     }
 
-    const char* getName() const override { return "Dual Digital Out Subsystem"; }
+    const char* getName() const override { return "Nary Digital Out Subsystem"; }
 
 private:
     tap::gpio::Digital& digital;
-    const tap::gpio::Digital::OutputPin pinOne;
-    const bool offStateOne;
-    const tap::gpio::Digital::OutputPin pinTwo;
-    const bool offStateTwo;
-};  // class DualDigitalOutSubsystem
+    const tap::gpio::Digital::OutputPin pins [NUM_PINS];
+    const bool offStates [NUM_PINS];
+};  // class NaryDigitalOutSubsystem
 
-}  // namespace aruwsrc::engineer
-#endif  // DUAL_DIGITAL_OUT_SUBSYSTEM_HPP_
+}  // namespace aruwsrc::control::digital
+#endif  // NARY_DIGITAL_OUT_SUBSYSTEM_HPP_

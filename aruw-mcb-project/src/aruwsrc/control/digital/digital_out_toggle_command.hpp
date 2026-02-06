@@ -23,9 +23,9 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
+#include "digital_out_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::control::digital
 {
 class DigitalOutToggleCommand : public tap::control::Command
 {
@@ -49,5 +49,5 @@ private:
     DigitalOutSubsystem& subsystem;
 };  // class DigitalOutToggleCommand
 
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::control::digital
 #endif  // DIGITAL_OUT_TOGGLE_COMMAND_HPP_

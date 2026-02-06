@@ -47,10 +47,10 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cubelift_switch_command.hpp"
-#include "aruwsrc/robot/engineer/digital_out_command.hpp"
-#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
-#include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
-#include "aruwsrc/robot/engineer/dual_digital_out_subsystem.hpp"
+#include "aruwsrc/control/digital/digital_out_command.hpp"
+#include "aruwsrc/control/digital/digital_out_subsystem.hpp"
+#include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
+#include "aruwsrc/control/digital/dual_digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
@@ -86,6 +86,7 @@
 
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::client_display::indicators;
+using namespace aruwsrc::control::digital;
 using namespace aruwsrc::control::joint;
 using namespace aruwsrc::control::joint::homing;
 using namespace aruwsrc::control::joint::homing::trigger;
