@@ -222,8 +222,8 @@ private:
     float parallelNotchFilterState[3] = {0.0f};
     float perpendicularNotchFilterState[3] = {0.0f};
 
-    static constexpr float IIR_A[FILTER_ORDER] = {1.000000f, -1.583541f, 0.656414f};
-    static constexpr float IIR_B[FILTER_ORDER] = {0.018218f, 0.036436f, 0.018218f};
+    static constexpr float IIR_A[FILTER_ORDER] = {1.000000f, -1.583541f, 0.656414f}; // TODO: Tune
+    static constexpr float IIR_B[FILTER_ORDER] = {0.018218f, 0.036436f, 0.018218f}; // TODO: Tune
 
     float x[int(OdomState::NUM_STATES)];
 

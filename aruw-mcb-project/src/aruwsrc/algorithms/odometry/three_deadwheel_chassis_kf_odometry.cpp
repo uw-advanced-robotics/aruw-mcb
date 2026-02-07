@@ -21,6 +21,9 @@
 
 namespace aruwsrc::algorithms::odometry
 {
+
+using namespace tap::algorithms;
+
 ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
     const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry,
 #if defined(TARGET_SENTRY_ECLIPSE)
@@ -61,7 +64,6 @@ void ThreeDeadwheelChassisKFOdometry::reset()
     kf.init(initialX);
 }
 
-// may or may not work
 float ThreeDeadwheelChassisKFOdometry::applyIirFilter(
     float input,
     float* state,
@@ -97,8 +99,8 @@ void ThreeDeadwheelChassisKFOdometry::update()
         return;
     }
 
-    tap::algorithms::Angle wrappedTheta = tap::algorithms::Angle(mahonyOutput);
-    tap::algorithms::WrappedFloat deltaTheta = wrappedTheta - lastWrappedTheta;
+    Angle wrappedTheta = Angle(mahonyOutput);
+    WrappedFloat deltaTheta = wrappedTheta - lastWrappedTheta;
     lastWrappedTheta = wrappedTheta;
 
     imuTheta += deltaTheta;
@@ -110,7 +112,7 @@ void ThreeDeadwheelChassisKFOdometry::update()
     float imuOmega = imu.getGz();
 
     // Rotate acceleration to the world frame
-    tap::algorithms::rotateVector(&Ax, &Ay, chassisYaw.getWrappedValue());
+    rotateVector(&Ax, &Ay, chassisYaw.getWrappedValue());
 
     /* Process dead wheels */
 
@@ -146,9 +148,9 @@ void ThreeDeadwheelChassisKFOdometry::update()
     float Vx = (filteredParallelOne + filteredParallelTwo) / 2;
     float Vy = filteredPerpendicular;
 
-    tap::algorithms::rotateVector(&Vx, &Vy, odomFrameToRobotFrame);
+    rotateVector(&Vx, &Vy, odomFrameToRobotFrame);
 
-    tap::algorithms::rotateVector(&Vx, &Vy, chassisYaw.getWrappedValue());
+    rotateVector(&Vx, &Vy, chassisYaw.getWrappedValue());
 
     // Create the measurement vector
     float y[int(OdomInput::NUM_INPUTS)] =

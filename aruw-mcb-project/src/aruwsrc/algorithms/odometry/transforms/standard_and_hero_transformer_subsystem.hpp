@@ -29,10 +29,10 @@ namespace aruwsrc::algorithms::odometry::transforms
 /**
  * @brief a convenience subsystem for updating a StandardAndHeroTransformer each control loop
  */
-class StandardAndHeroTransformerSubsystem : public tap::control::Subsystem
+class StandardAnderHeroTransformerSubsystem : public tap::control::Subsystem
 {
 public:
-    StandardAndHeroTransformerSubsystem(
+    StandardAnderHeroTransformerSubsystem(
         tap::Drivers& drivers,
         StandardAndHeroTransformer& transformer)
         : tap::control::Subsystem(&drivers),
