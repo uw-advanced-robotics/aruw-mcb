@@ -58,8 +58,8 @@ public:
     bool addCube();
     bool removeCube();
 
-    bool storeWristPos(Transform* wristPos);
-    Transform* getWristPos();
+    bool storeWristPos(Transform wristPos);
+    Transform getWristPos();
 
     void checkForCubes();
 
@@ -68,7 +68,7 @@ public:
 protected:
     CubeOptions currentCube = CubeOptions::ERROR;
     bool hasCube[2] = {false, false};
-    Transform* wristPos[2] = {nullptr, nullptr};
+    Transform wristPos[2] = {null, null};
     // TODO: add vars for left and right pressure sensor
 };
 }  // namespace aruwsrc::engineer::cube_storage
