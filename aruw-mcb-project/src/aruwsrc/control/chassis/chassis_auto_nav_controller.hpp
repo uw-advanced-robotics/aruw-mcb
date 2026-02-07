@@ -48,7 +48,7 @@ public:
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
-        aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer,
+        aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer,
         const aruwsrc::control::chassis::BeybladeConfig beybladeConfig,
         aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
         float translationalMotionThreshold,
@@ -91,7 +91,7 @@ private:
     Position lastSetPoint;
     tap::Drivers& drivers;
 
-    const aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer;
+    const aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer;
 
     aruwsrc::control::chassis::BeybladeConfig beybladeConfig;
 

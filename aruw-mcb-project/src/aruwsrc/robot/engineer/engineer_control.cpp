@@ -67,6 +67,7 @@
 // #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -284,6 +285,18 @@ aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
 
 // this could be useful i think
 
+EngineerTransformSubsystem transformerSubsystem(*drivers(), transformer);
+EngineerTransformAdapter transformAdapter(transformer);
+
+aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    xDriveChassis,
+    &transformAdapter,
+    aruwsrc::control::chassis::BEYBLADE_CONFIG,
+    capBankSubsystem, //TODO: dont have rn :/
+    0.15f,
+    1000.0f);
+
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
@@ -300,6 +313,8 @@ aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
     chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
 
 BuzzerSubsystem engineerBuzzer(drivers());
+
+c
 
 NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
     engineerBuzzer,
@@ -513,6 +528,11 @@ tap::control::PressCommandMapping cyclePositions(
     {&scorePositionCommand},
     RemoteMapState({Remote::Key::C}));
 
+tap::control::HoldCommandMapping testAuto(
+    drivers(),
+    {&autoNavCommand},
+    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN)); // probably delete before merge to develop
+
 CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
     drivers(),
     RemoteMapState({Remote::Key::C}, {Remote::Key::SHIFT}),
@@ -566,17 +586,20 @@ void startEngineerCommands(aruwsrc::engineer::Drivers *) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
 {
     drivers->commandMapper.addMap(&suctionToggle);
+
+    drivers->commandMapper.addMap(&leftUp);
+    drivers->commandMapper.addMap(&rightMid);  
+    drivers->commandMapper.addMap(&rightDown);
+    drivers->commandMapper.addMap(&vPressed);
+    drivers->commandMapper.addMap(&bPressed);
+
     // drivers->commandMapper.addMap(&cubeLiftUp);
     // drivers->commandMapper.addMap(&cubeLiftDown);
     // drivers->commandMapper.addMap(&storeCube);
     // drivers->commandMapper.addMap(&retrieveCube);
     // drivers->commandMapper.addMap(&cyclePositions);
     // drivers->commandMapper.addMap(&cPressed);
-    drivers->commandMapper.addMap(&leftUp);
-    drivers->commandMapper.addMap(&rightMid);
-    drivers->commandMapper.addMap(&rightDown);
-    drivers->commandMapper.addMap(&vPressed);
-    drivers->commandMapper.addMap(&bPressed);
+    
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }

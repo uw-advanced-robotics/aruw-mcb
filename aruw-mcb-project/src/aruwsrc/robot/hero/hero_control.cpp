@@ -55,11 +55,14 @@
 #include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/cap-bank/cap_bank_toggle_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
+
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
@@ -98,6 +101,7 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
+#include "aruwsrc/control/chassis/push_auto_nav_point_command.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::control;
@@ -294,6 +298,29 @@ AutoAimLaunchTimer autoAimLaunchTimer(
 aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
 /* define commands ----------------------------------------------------------*/
+
+aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    &transformAdapter,
+    aruwsrc::control::chassis::BEYBLADE_CONFIG,
+    capBankSubsystem, 
+    0.15f,
+    1000.0f);
+
+AutoNavCommand autoNavCommand(
+    *drivers(),
+    chassis,
+    autoNavController,
+    true,
+    false,
+    true);
+
+PushAutoNavPointCommand pushAutoNavPointX1Y1(
+    *drivers(),
+    autoNavController,
+    
+);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -606,6 +633,14 @@ std::vector<HudIndicator *> hudIndicators = {
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
 /* define command mappings --------------------------------------------------*/
+HoldCommandMapping testAuto(
+    drivers(),
+    {&autoNavCommand},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+HoldCommandMapping pushAutoPathPoint(
+    drivers(),
+    tap::control::Command
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping rightSwitchMiddle(
     drivers(),
     {&spinFrictionWheels},
@@ -728,12 +763,12 @@ void registerHeroSubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
-    frictionWheels.setDefaultCommand(&stopFrictionWheels);
-    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
-    kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    // chassis.setDefaultCommand(&chassisAutorotateCommand);
+    // frictionWheels.setDefaultCommand(&stopFrictionWheels); //TODO: uncomment before merging
+    // turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    // waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
+    // kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
+    // clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -751,22 +786,23 @@ void startHeroCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerHeroIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchMiddle);
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftMousePressedBNotPressedVNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedBPressed);
-    drivers->commandMapper.addMap(&leftMousePressedVPressed);
-    drivers->commandMapper.addMap(&rightMousePressed);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&zPressed);
-    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-    drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&rPressed);
-    drivers->commandMapper.addMap(&cShiftPressed);
-    drivers->commandMapper.addMap(&shiftPressed);
-    drivers->commandMapper.addMap(&ctrlPressed);
+    // drivers->commandMapper.addMap(&rightSwitchMiddle);
+    // drivers->commandMapper.addMap(&rightSwitchUp);
+    // drivers->commandMapper.addMap(&leftMousePressedBNotPressedVNotPressed);
+    // drivers->commandMapper.addMap(&leftMousePressedBPressed);
+    // drivers->commandMapper.addMap(&leftMousePressedVPressed);
+    // drivers->commandMapper.addMap(&rightMousePressed);
+    // drivers->commandMapper.addMap(&leftSwitchDown);
+    // drivers->commandMapper.addMap(&leftSwitchUp);
+    // drivers->commandMapper.addMap(&fToggled);
+    // drivers->commandMapper.addMap(&zPressed);
+    // drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+    // drivers->commandMapper.addMap(&bCtrlPressed);
+    // drivers->commandMapper.addMap(&rPressed);
+    // drivers->commandMapper.addMap(&cShiftPressed);
+    // drivers->commandMapper.addMap(&shiftPressed);
+    // drivers->commandMapper.addMap(&ctrlPressed);
+    drivers->commandMapper.addMap(&testAuto);
 }
 }  // namespace hero_control
 

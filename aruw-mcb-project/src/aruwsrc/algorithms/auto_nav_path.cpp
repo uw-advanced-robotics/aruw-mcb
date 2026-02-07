@@ -181,5 +181,5 @@ float AutoNavPath::getClosestParameterOnSegment(Position current, Position p1, P
 }
 
 Position AutoNavPath::getFinalPosition(){
-    return setpointData.back();
+    return setpointData.empty() ? Position(0, 0, 0) : setpointData.back();
 }

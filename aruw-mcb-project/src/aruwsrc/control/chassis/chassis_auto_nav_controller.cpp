@@ -28,6 +28,8 @@ void ChassisAutoNavController::initialize()
 
     lastSetPoint = transformer->getWorldToChassis().getTranslation();
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
+    aruwsrc::algorithms::AutoNavPath emptyPath;
+    path = &emptyPath;
 }
 
 void ChassisAutoNavController::runController(
@@ -134,5 +136,11 @@ bool ChassisAutoNavController::atSetpoint(){
     Position goal = path->getFinalPosition();
     return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0.01); //tolerance = 1 cm
 }
+
+void ChassisAutoNavController::pushPoint(Position newPoint){
+    path->pushPoint(newPoint);
+}
+
+bool ChassisAutoNavController
 
 }  // namespace aruwsrc::control::chassis

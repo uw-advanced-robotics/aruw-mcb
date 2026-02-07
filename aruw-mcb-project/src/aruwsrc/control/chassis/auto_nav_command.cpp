@@ -48,7 +48,10 @@ AutoNavCommand::AutoNavCommand(
     addSubsystemRequirement(&chassis);
 }
 
-void AutoNavCommand::initialize() { autoNavController.initialize(); }
+void AutoNavCommand::initialize() { 
+    autoNavController.initialize(); 
+    if(autoNavControll)
+}
 
 void AutoNavCommand::execute()
 {
