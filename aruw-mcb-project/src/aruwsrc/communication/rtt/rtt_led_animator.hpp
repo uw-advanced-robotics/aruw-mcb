@@ -22,6 +22,7 @@
 #include <cstdint>
 
 #include "tap/architecture/periodic_timer.hpp"
+#include "aruwsrc/communication/rtt/rtt_connection_state.hpp"
 
 namespace tap
 {
@@ -39,8 +40,9 @@ public:
 
     void update(
         tap::Drivers* drivers,
-        bool activelySendingTelemetry,
-        bool recentRttInput,
+       ConnectionState connectionState,
+        bool blinkingGreen,
+        bool blinkingRed,
         uint32_t now);
 
     void notifyPrintLogged(uint32_t now);

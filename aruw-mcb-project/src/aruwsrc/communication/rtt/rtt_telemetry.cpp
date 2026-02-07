@@ -91,10 +91,18 @@ bool RttTelemetry::updateTelemetryAsync()
         //    since it never sends the initial RTT input))
         {
             uint32_t now = tap::arch::clock::getTimeMilliseconds();
+
+            logMessageProcessing = now <= logMessageDeadlineMillis;
+            errorMessageProcessing = now <= errorMessageDeadlineMillis;
+
             bool activelySendingTelemetry =
                 (!messageQueue.isEmpty() || !printQueue.isEmpty()) || firstInputReceived;
             bool recentRttInput = activelySendingTelemetry && now <= messageIndicatorDeadlineMillis;
-            ledAnimator.update(drivers, activelySendingTelemetry, recentRttInput, now);
+
+            // 0 = none, 1 = one active, 2 = both active
+            connectionState = static_cast<ConnectionState>(activelySendingTelemetry + recentRttInput);
+
+            ledAnimator.update(drivers, connectionState, logMessageProcessing, errorMessageProcessing, now);
 
             // In Ozone mode (idle, no messages received yet), don't send telemetry
             // heartbeat info, only prints and errors are allowed
@@ -159,7 +167,9 @@ void RttTelemetry::queuePrintMessage(const char* message)
 
     // Add message to queue
     printQueue.append(msg);
-    ledAnimator.notifyPrintLogged(tap::arch::clock::getTimeMilliseconds());
+
+    uint32_t now = tap::arch::clock::getTimeMilliseconds();
+    logMessageDeadlineMillis = now + MESSAGE_DURATION;
 }
 
 void RttTelemetry::queueErrorMessage(const char* message)
@@ -185,7 +195,9 @@ void RttTelemetry::queueErrorMessage(const char* message)
 
     // Add message to queue
     errorQueue.append(msg);
-    ledAnimator.notifyErrorLogged(tap::arch::clock::getTimeMilliseconds());
+
+    uint32_t now = tap::arch::clock::getTimeMilliseconds();
+    errorMessageDeadlineMillis = now + MESSAGE_DURATION;
 }
 
 bool RttTelemetry::ensureSpaceOrClearQueue(
