@@ -29,7 +29,13 @@ namespace aruwsrc::control::digital
 class DualDigitalOutSubsystem : public DigitalOutSubsystem
 {
 public:
-    // initial state is based on pinOne's offState
+    /** Creates a new DualDigitalOutSubsystem to handle two digital out pins based on the same state 
+    * @param[in] drivers reference to robot's drivers object
+    * @param[in] pinOne first digital out pin
+    * @param[in] offStateOne state pin one should be in when off (also defines the initial state of the subsystem)
+    * @param[in] pinTwo second digital out pin
+    * @param[in] offStateTwo state pin two should be in when off
+    */
     DualDigitalOutSubsystem(
         tap::Drivers* drivers,
         tap::gpio::Digital& digital,
