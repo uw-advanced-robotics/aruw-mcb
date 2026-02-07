@@ -23,11 +23,11 @@
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.34f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 6.34f;
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -101,17 +101,10 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 /**
  * Radius of the wheels (m)
  */
-static constexpr float WHEEL_RADIUS = 0.1016 * 1.413;  // This is being fudged
-/**
- * Distance from center of the two front wheels (m)
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.55f;
-/**
- * Distance from center of the front and rear wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.55f;
+static constexpr float FUDGE_FACTOR = 0.999141881817f;
+static constexpr float WHEEL_RADIUS = 0.1016f * FUDGE_FACTOR;
 
-static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+static constexpr float WHEELBASE_RADIUS = 0.55f;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
@@ -124,12 +117,16 @@ static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
-    .beybladeRotationalSpeedFractionOfMax = 0.75f,
+    .beybladeRotationalSpeedFractionOfMax = 0.4f,
     .beybladeTranslationalSpeedMultiplier = 0.5f,
-    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.7f,
+    .beybladeRotationalSpeedMultiplierWhenTranslating = 0.8f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.25f,
     .beybladeRampRate = 100,
 };
 
-}  // namespace aruwsrc::chassis
+static constexpr float TRANSLATIONAL_MOTION_THRESHOLD = 0.25f;
+
+static constexpr float CAPBANK_ENERGY_THRESHOLD = 500.0f;
+
+}  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_

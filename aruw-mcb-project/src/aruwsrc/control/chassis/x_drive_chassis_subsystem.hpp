@@ -32,9 +32,7 @@
 
 #include "holonomic_4_motor_chassis_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Encapsulates a chassis with omni wheels in X layout
@@ -51,10 +49,10 @@ public:
         Motor& rightFrontMotor,
         Motor& rightBackMotor,
         tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
-        can::capbank::CapacitorBank* capacitorBank = nullptr);
+        float wheelRadius,
+        float wheelbaseRadius,
+        communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 };
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
 #endif

@@ -23,9 +23,7 @@
 
 #include "hopper_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace control
+namespace aruwsrc::control::hopper_cover
 {
 HopperTestCommand::HopperTestCommand(HopperSubsystem* subsystem) : subsystem(subsystem)
 {
@@ -44,6 +42,4 @@ bool HopperTestCommand::isFinished() const
 {
     return tap::arch::clock::getTimeMilliseconds() - this->startTime > 1000;
 }
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::hopper_cover

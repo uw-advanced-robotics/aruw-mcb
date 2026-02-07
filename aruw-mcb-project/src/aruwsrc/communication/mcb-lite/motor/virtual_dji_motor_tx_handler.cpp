@@ -25,7 +25,7 @@
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 VirtualDJIMotorTxHandler::VirtualDJIMotorTxHandler(tap::Drivers* drivers)
     : DjiMotorTxHandler(drivers),
@@ -141,4 +141,4 @@ void VirtualDJIMotorTxHandler::encodeAndSendCanData()
     }
 }
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor

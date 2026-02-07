@@ -1,0 +1,201 @@
+/*
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef CONTROL_OPERATOR_INTERFACE_HPP_
+#define CONTROL_OPERATOR_INTERFACE_HPP_
+
+// mm tasty imports
+#include "tap/algorithms/linear_interpolation_predictor.hpp"
+#include "tap/algorithms/ramp.hpp"
+#include "tap/communication/serial/remote.hpp"
+#include "tap/drivers.hpp"
+#include "tap/util_macros.hpp"
+
+using namespace tap::communication::serial;
+namespace aruwsrc
+{
+namespace communication::rtt
+{
+class RttTelemetry;
+}
+
+namespace control
+{
+/**
+ * A class for interfacing with the remote IO inside of Commands. While the
+ * CommandMapper handles the scheduling of Commands, this class is used
+ * inside of Commands to interact with the remote. Filtering and normalization
+ * is done in this class.
+ */
+class ControlOperatorInterface
+{
+public:
+    static constexpr Remote::Key LOW_DPI_MODE_KEY = Remote::Key::G;
+    static constexpr int16_t USER_MOUSE_YAW_MAX = 1000;
+    static constexpr int16_t USER_MOUSE_PITCH_MAX = 1000;
+    static constexpr float USER_MOUSE_YAW_SCALAR = (1.0f / USER_MOUSE_YAW_MAX);
+    static constexpr float USER_MOUSE_PITCH_SCALAR = (1.0f / USER_MOUSE_PITCH_MAX);
+    static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
+    static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
+
+#if defined(TARGET_HERO_ZERO) && not defined(PLATFORM_HOSTED) && not defined(ENV_UNIT_TESTS)
+    static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_NORMAL = 5.0f;
+    static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_LOW_DPI = 0.1f;
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the x direction
+     */
+    static constexpr float MAX_ACCELERATION_X = 100'000.0f;
+    static constexpr float MAX_DECELERATION_X = 100'000.0f;
+
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the y direction
+     */
+    static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
+    static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
+#else  // TARGET_STANDARD, TARGET_ENGINEER (and other targets that don't use a traditional chassis)
+    static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_NORMAL = 1.0f;
+    static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_LOW_DPI = 1.0f;
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the x direction
+     */
+    static constexpr float MAX_ACCELERATION_X = 200'000.0f;
+    static constexpr float MAX_DECELERATION_X = MAX_ACCELERATION_X;
+
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the y direction
+     */
+    static constexpr float MAX_ACCELERATION_Y = MAX_ACCELERATION_X;
+    static constexpr float MAX_DECELERATION_Y = MAX_DECELERATION_X;
+#endif
+
+    /**
+     * Max acceleration in rpm/s^2 of the chassis in the r direction
+     */
+    static constexpr float MAX_ACCELERATION_R = 40'000.0f;
+    static constexpr float MAX_DECELERATION_R = 50'000.0f;
+
+    ControlOperatorInterface(tap::Drivers* drivers) : drivers(drivers) {}
+    DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)
+    mockable ~ControlOperatorInterface() = default;
+
+    void setTelemetry(aruwsrc::communication::rtt::RttTelemetry* telemetry)
+    {
+        this->telemetry = telemetry;
+    }
+
+    /**
+     * @return The value used for chassis movement forward and backward, between
+     * `[-getMaxUserWheelSpeed, getMaxUserWheelSpeed]`. Acceleration is applied to this value
+     * controlled by `MAX_ACCELERATION_X` and `MAX_DECELERATION_X`. A linear combination of keyboard
+     * and remote joystick information.
+     */
+    virtual float getChassisXInput();
+
+    /**
+     * @return The value used for chassis movement side to side, between `[-getMaxUserWheelSpeed,
+     * getMaxUserWheelSpeed]`. Acceleration is applied to this value controlled by
+     * `MAX_ACCELERATION_Y` and `MAX_DECELERATION_Y`. A linear combination of keyboard and remote
+     * joystick information.
+     */
+    virtual float getChassisYInput();
+
+    /**
+     * @return The value used for chassis rotation, between `[-getMaxUserWheelSpeed,
+     * getMaxUserWheelSpeed]`. Acceleration is applied to this value controlled by
+     * `MAX_ACCELERATION_R` and `MAX_DECELERATION_R`. A linear combination of keyboard and remote
+     * joystick information.
+     */
+    virtual float getChassisRInput();
+
+    /**
+     * @return the value used for turret yaw rotation, between about -1 and 1
+     *      this value can be greater or less than (-1, 1) since the mouse input has no
+     *      clear lower and upper bound.
+     */
+    mockable float getTurretYawInput(uint8_t turretID);
+
+    /**
+     * @returns the value used for turret pitch rotation, between about -1 and 1
+     *      this value can be greater or less than (-1, 1) since the mouse input has no
+     *      clear lower and upper bound.
+     */
+    mockable float getTurretPitchInput(uint8_t turretID);
+
+    /**
+     * @returns the value used to scale turret yaw movement from horizontal movement.
+     */
+    mockable float getUserMouseYawScalar();
+
+    /**
+     * @returns the value used to scale turret pitch movement from vertical movement.
+     */
+    mockable float getUserMousePitchScalar();
+
+    /**
+     * @returns the value used for sentiel drive speed, between
+     *      [-USER_STICK_SENTRY_DRIVE_SCALAR, USER_STICK_SENTRY_DRIVE_SCALAR].
+     */
+    mockable float getSentrySpeedInput();
+
+protected:
+    tap::Drivers* drivers;
+
+    uint32_t prevUpdateCounterX = 0;
+    uint32_t prevUpdateCounterY = 0;
+    uint32_t prevUpdateCounterR = 0;
+    uint32_t prevLoggedRemoteUpdateCounter = 0;
+
+    tap::algorithms::LinearInterpolationPredictor chassisXInput;
+    tap::algorithms::LinearInterpolationPredictor chassisYInput;
+    tap::algorithms::LinearInterpolationPredictor chassisRInput;
+
+    tap::algorithms::Ramp chassisXInputRamp;
+    tap::algorithms::Ramp chassisYInputRamp;
+    tap::algorithms::Ramp chassisRInputRamp;
+
+    uint32_t prevChassisXInputCalledTime = 0;
+    uint32_t prevChassisYInputCalledTime = 0;
+    uint32_t prevChassisRInputCalledTime = 0;
+
+    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
+
+    /**
+     * Scales `value` when ctrl/shift are pressed and returns the scaled value.
+     */
+    float applyChassisSpeedScaling(float value);
+
+    /**
+     * @param[out] ramp Ramp that should have acceleration applied to. The ramp is updated some
+     * increment based on the passed in acceleration values. Ramp stores values in some units.
+     * @param[in] maxAcceleration Positive acceleration value to apply to the ramp in units/time^2.
+     * @param[in] maxDeceleration Negative acceleration value to apply to the ramp, in units/time^2.
+     * @param[in] dt Change in time since this function was last called, in units of some time.
+     */
+    void applyAccelerationToRamp(
+        tap::algorithms::Ramp& ramp,
+        float maxAcceleration,
+        float maxDeceleration,
+        float dt);
+};  // class ControlOperatorInterface
+
+}  // namespace control
+
+}  // namespace aruwsrc
+
+#endif  // CONTROL_OPERATOR_INTERFACE_HPP_

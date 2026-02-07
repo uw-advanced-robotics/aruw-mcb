@@ -17,48 +17,53 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "setpoint_move_manual_command.hpp"
+#include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 
 namespace aruwsrc::engineer
 {
 SetpointMoveManualCommand::SetpointMoveManualCommand(
-    LimitSwitchSetpointInterface& cubeLift,
-    aruwsrc::control::engineer::EngineerControlOperatorInterface* operatorInterface,
+    aruwsrc::control::joint::JointSubsystem& subsystem,
+    aruwsrc::engineer::EngineerControlOperatorInterface* operatorInterface,
     float moveSpeed,
     SetpointType setpointType)
-    : cubeLift(cubeLift),
+    : subsystem(subsystem),
       operatorInterface(operatorInterface),
       moveSpeed(moveSpeed),
       setpointType(setpointType)
 {
-    addSubsystemRequirement(&cubeLift);
+    addSubsystemRequirement(&subsystem);
 }
 
 void SetpointMoveManualCommand::initialize() {}
 
 void SetpointMoveManualCommand::execute()
 {
-    if (!operatorInterface->isGantryControlMode()) return;
+    if (!operatorInterface->isGantryWristControlMode()) return;
 
-    float setpoint = cubeLift.getSetpoint();
+    float setpoint = subsystem.getSetpoint();
     switch (setpointType)
     {
         case SetpointType::CUBE_LIFT:
             setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;
             break;
-        case SetpointType::GANTRY_LIFT:
-            setpoint += operatorInterface->getGantryLiftVelocity() * moveSpeed;
-            break;
-        case SetpointType::GANTRY_EXTENSION:
+        case SetpointType::EXTENSION:
             setpoint += operatorInterface->getGantryExtensionVelocity() * moveSpeed;
+            if (operatorInterface->getGantryKeyOut())
+            {
+                setpoint += moveSpeed;
+            }
+            else if (operatorInterface->getGantryKeyIn())
+            {
+                setpoint -= moveSpeed;
+            }
             break;
         default:
             break;  // Invalid setpoint type
     }
-    cubeLift.setSetpoint(setpoint);
+    subsystem.setSetpoint(setpoint);
 }
 
-void SetpointMoveManualCommand::end(bool) { cubeLift.setDesiredOutput(0); }
+void SetpointMoveManualCommand::end(bool) {}
 
 bool SetpointMoveManualCommand::isFinished() const { return false; }
 }  // namespace aruwsrc::engineer

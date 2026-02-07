@@ -22,7 +22,7 @@
 #include "tap/drivers.hpp"
 
 using namespace tap::communication::serial;
-using namespace aruwsrc::serial;
+using namespace aruwsrc::communication::serial;
 using namespace tap::algorithms::transforms;
 
 EngineerCVCommunication* EngineerCVCommunication::engineerCVCommunicationInstance = nullptr;

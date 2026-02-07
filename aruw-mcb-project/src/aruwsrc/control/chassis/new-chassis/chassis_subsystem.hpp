@@ -45,7 +45,7 @@
 
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 /**
  * Abstract subsystem for a holonomic chassis
@@ -193,7 +193,7 @@ private:
     float tempMax = 0;
 };  // class ChassisSubsystem
 
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 
 }  // namespace aruwsrc
 

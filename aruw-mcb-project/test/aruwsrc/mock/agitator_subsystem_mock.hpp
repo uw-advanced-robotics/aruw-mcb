@@ -28,7 +28,7 @@ namespace aruwsrc
 {
 namespace mock
 {
-class AgitatorSubsystemMock : public agitator::AgitatorSubsystem
+class AgitatorSubsystemMock : public control::agitator::AgitatorSubsystem
 {
 public:
     AgitatorSubsystemMock(

@@ -26,12 +26,16 @@
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
+#include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 
 #else
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+
 #endif
 
 namespace aruwsrc::engineer
@@ -46,21 +50,38 @@ public:
 
     Drivers()
         : tap::Drivers(),
+          rttTelemetry(this),
           controlOperatorInterface(this),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr),
-          engineerCVCommunication(this)
+          oledDisplay(
+              this,
+              nullptr,
+              &turretMCBCanCommBus1,
+              &turretMCBCanCommBus2,
+              nullptr,
+              nullptr),
+          engineerCVCommunication(this),
+          turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
+          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)
     {
+        controlOperatorInterface.setTelemetry(&rttTelemetry);
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     serial::EngineerCVCommunication engineerCVCommunication;
+
+    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
+    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
 #else
 public:
-    control::engineer::EngineerControlOperatorInterface controlOperatorInterface;
+    communication::rtt::RttTelemetry rttTelemetry;
+    engineer::EngineerControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
-    serial::EngineerCVCommunication engineerCVCommunication;
+    communication::serial::EngineerCVCommunication engineerCVCommunication;
+
+    communication::can::TurretMCBCanComm turretMCBCanCommBus1;
+    communication::can::TurretMCBCanComm turretMCBCanCommBus2;
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer

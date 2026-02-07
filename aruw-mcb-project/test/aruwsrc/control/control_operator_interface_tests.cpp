@@ -32,7 +32,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 using aruwsrc::control::ControlOperatorInterface;
 using namespace tap::communication::serial;
@@ -60,7 +60,7 @@ protected:
 };
 
 static constexpr float MAX_CHASSIS_SPEED =
-    aruwsrc::chassis::CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
+    aruwsrc::control::chassis::CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
 
 using COIChassisTuple = std::tuple<float, bool, bool, float>;
 

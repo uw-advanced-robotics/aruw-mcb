@@ -27,7 +27,7 @@ SentryTurretMinorSubsystem::SentryTurretMinorSubsystem(
     tap::motor::MotorInterface& yawMotor,
     const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
     const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
-    const aruwsrc::can::TurretMCBCanComm* turretMCB,
+    const tap::communication::sensors::imu::AbstractIMU* turretIMU,
     uint8_t turretID)
     : aruwsrc::control::turret::TurretSubsystem(
           &drivers,
@@ -35,7 +35,7 @@ SentryTurretMinorSubsystem::SentryTurretMinorSubsystem(
           &yawMotor,
           pitchMotorConfig,
           yawMotorConfig,
-          turretMCB),
+          turretIMU),
       turretID(turretID)
 {
 }

@@ -33,7 +33,7 @@
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace aruwsrc;
 using namespace testing;
 
@@ -54,7 +54,7 @@ protected:
         : drivers(),
           currentSensor(
               {&drivers.analog,
-               aruwsrc::chassis::CURRENT_SENSOR_PIN,
+               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
@@ -71,7 +71,9 @@ protected:
               lbm,
               rfm,
               rbm,
-              MOCK_WHEEL_VELOCITY_PID_CONFIG),
+              MOCK_WHEEL_VELOCITY_PID_CONFIG,
+              WHEEL_RADIUS,
+              WHEELBASE_RADIUS),
           controlOperatorInterface(&drivers),
           robotData{}
     {

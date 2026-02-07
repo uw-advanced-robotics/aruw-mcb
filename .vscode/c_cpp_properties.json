@@ -39,7 +39,10 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -54,7 +57,10 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -69,7 +75,10 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -84,12 +93,33 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
                 "TARGET_DART"
+            ]
+        },
+        {
+            "name": "MCB 2025 Engineer",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_ENGI_2025"
             ]
         },
         {
@@ -99,7 +129,10 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -114,7 +147,10 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -129,7 +165,10 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -144,7 +183,10 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -159,12 +201,49 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
                 "TARGET_MOTOR_TESTER"
+            ]
+        },
+        {
+            "name": "MCB Launcher Target",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_LAUNCHER_TARGET"
+            ]
+        },
+        {
+            "name": "MCB Flywheel Testing",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_FLYWHEEL_TESTING"
             ]
         },
         {
@@ -174,7 +253,10 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
@@ -189,7 +271,10 @@
                 "aruw-mcb-project/taproot/modm/src",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp"
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",

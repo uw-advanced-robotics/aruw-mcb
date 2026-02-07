@@ -31,7 +31,7 @@
 #error "Do not include this file directly! Use chassis_constants.hpp instead."
 #endif
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -106,16 +106,8 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  * Radius of the wheels (m)
  */
 static constexpr float WHEEL_RADIUS = 0.076f;
-/**
- * Distance from center of the two front wheels (m)
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
-/**
- * Distance from center of the front and rear wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
 
-static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+static constexpr float WHEELBASE_RADIUS = 0.46f;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
@@ -134,6 +126,9 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
     .beybladeRampRate = 100,
 };
-}  // namespace aruwsrc::chassis
+
+static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
+static constexpr float CHASSIS_SPEED_DIVSOR_SPRINT = 8;
+}  // namespace aruwsrc::control::chassis
 
 #endif  // ENGINEER_CHASSIS_CONSTANTS_HPP_

@@ -24,6 +24,7 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
@@ -41,7 +42,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
     .pitchPidConfig =
         {
             .kp = 10000.0f,
-            .ki = 10.0f,
+            .ki = 0.0f,  // 10.0f,
             .kd = 700.0f,
             .maxICumulative = 1000.0f,
             .maxOutput = 5000.0f,
@@ -55,7 +56,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
     .yawPidConfig =
         {
             .kp = 16000.0f,
-            .ki = 500.0f,
+            .ki = 0.0f,  // 500.0f,
             .kd = 1000.0f,
             .maxICumulative = 500.0f,
             .maxOutput = 5500.0f,
@@ -66,8 +67,9 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
             .errDeadzone = 0.0f,
             .errorDerivativeFloor = 0.0,
         },
-    .minPitch = 0.0f,
-    .maxPitch = M_PI_2,
+    .minPitch = 0.0f - M_PI_4,
+    .maxPitch = M_PI_2 +
+                0.04f,  // allow wrist to pitch down a bit more to allow more adjustment for scoring
     .minYaw = -M_PI_2,
     .maxYaw = M_PI,
     .ratio = 30.0f / 40.0f,
@@ -86,9 +88,17 @@ static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
     .maxOutput = 3000.0f,
 };
 
-static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.25f;
+static constexpr aruwsrc::control::joint::JointSubsystem::Config WRIST_ROLL_CONFIG{
+    .epsilon = 1e-2,
+    .posPidConfig = WRIST_ROLL_PID_CONFIG,
+    .maxOutput = WRIST_ROLL_PID_CONFIG.maxOutput,
+};
+
+static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
+
+static constexpr float WRIST_ROLL_CLICK_VELOCITY = 0.5f;
 
 static constexpr wrist::Setpoint WRIST_IN_SETPOINT{
     .pitch = 0,

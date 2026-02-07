@@ -19,7 +19,7 @@
 #include "sentry_turret_major_world_relative_yaw_controller.hpp"
 
 using namespace tap::algorithms;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 
 namespace aruwsrc::sentry::turret
 {
@@ -27,7 +27,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const transforms::Transform& worldToMajor,
     const HolonomicChassisSubsystem& chassis,
     aruwsrc::control::turret::TurretMotor& yawMotor,
-    tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
+    tap::communication::sensors::imu::AbstractIMU& turretMajorIMU,
     const SentryTurretMinorSubsystem& turretLeft,
     const SentryTurretMinorSubsystem& turretRight,
     SmoothPid& positionPid,
@@ -35,7 +35,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     float maxVelErrorInput,
     float minorMajorTorqueRatio,
     float feedforwardGain)
-    : TurretYawControllerInterface(yawMotor),
+    : TurretAxisControllerInterface<control::turret::algorithms::Axis::YAW>(yawMotor),
       worldToMajor(worldToMajor),
       chassis(chassis),
       yawMotor(yawMotor),
@@ -115,6 +115,11 @@ WrappedFloat TurretMajorWorldFrameController::getMeasurement() const
     return yawMotor.getChassisFrameMeasuredAngle() + worldToMajor.getYaw();
 }
 
-bool TurretMajorWorldFrameController::isOnline() const { return turretMotor.isOnline(); }
+bool TurretMajorWorldFrameController::isOnline() const
+{
+    return turretMotor.isOnline() &&
+           turretMajorIMU.getImuState() !=
+               tap::communication::sensors::imu::AbstractIMU::ImuState::IMU_NOT_CONNECTED;
+}
 
 }  // namespace aruwsrc::sentry::turret

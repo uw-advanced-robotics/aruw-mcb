@@ -25,10 +25,11 @@
 
 #include "modm/architecture/interface/can.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus)
-    : canBus(canBus),
+    : AbstractIMU(),
+      canBus(canBus),
       drivers(drivers),
       currProcessingImuData{},
       lastCompleteImuData{},
@@ -219,4 +220,4 @@ void TurretMCBCanComm::TurretMcbRxHandler::processMessage(const modm::can::Messa
     (msgHandler->*funcToCall)(message);
 }
 
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::communication::can

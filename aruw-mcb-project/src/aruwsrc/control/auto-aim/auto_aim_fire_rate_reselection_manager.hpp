@@ -41,9 +41,9 @@ class AutoAimFireRateReselectionManager
 {
 public:
     // @todo move this to passed-in config
-    static constexpr float LOW_RPS = 5;
-    static constexpr float MID_RPS = 10;
-    static constexpr float HIGH_RPS = 15;
+    static constexpr float LOW_RPS = 10;
+    static constexpr float MID_RPS = 20;
+    static constexpr float HIGH_RPS = 30;
 
     /**
      * @param[in] visionCoprocessor reference to the vision coprocessor
@@ -53,7 +53,7 @@ public:
      */
     AutoAimFireRateReselectionManager(
         tap::Drivers &drivers,
-        serial::VisionCoprocessor &visionCoprocessor,
+        communication::serial::VisionCoprocessor &visionCoprocessor,
         tap::control::CommandScheduler &commandScheduler,
         const tap::control::Command &turretCVCommand,
         const uint8_t turretID)
@@ -70,13 +70,13 @@ public:
         auto fireRate = visionCoprocessor.getLastAimData(turretID).pva.firerate;
         switch (fireRate)
         {
-            case aruwsrc::serial::VisionCoprocessor::FireRate::ZERO:
+            case aruwsrc::communication::serial::VisionCoprocessor::FireRate::ZERO:
                 return 0;
-            case aruwsrc::serial::VisionCoprocessor::FireRate::LOW:
+            case aruwsrc::communication::serial::VisionCoprocessor::FireRate::LOW:
                 return rpsToPeriodMS(LOW_RPS);
-            case aruwsrc::serial::VisionCoprocessor::FireRate::MEDIUM:
+            case aruwsrc::communication::serial::VisionCoprocessor::FireRate::MEDIUM:
                 return rpsToPeriodMS(MID_RPS);
-            case aruwsrc::serial::VisionCoprocessor::FireRate::HIGH:
+            case aruwsrc::communication::serial::VisionCoprocessor::FireRate::HIGH:
                 return rpsToPeriodMS(HIGH_RPS);
             default:
                 RAISE_ERROR((&drivers), "Illegal fire rate value encountered");
@@ -99,7 +99,7 @@ public:
         }
 
         if (visionCoprocessor.getLastAimData(turretID).pva.firerate ==
-            aruwsrc::serial::VisionCoprocessor::FireRate::ZERO)
+            aruwsrc::communication::serial::VisionCoprocessor::FireRate::ZERO)
         {
             return control::agitator::FireRateReadinessState::NOT_READY;
         }
@@ -109,7 +109,7 @@ public:
 
 private:
     tap::Drivers &drivers;
-    serial::VisionCoprocessor &visionCoprocessor;
+    communication::serial::VisionCoprocessor &visionCoprocessor;
     tap::control::CommandScheduler &commandScheduler;
     const tap::control::Command &turretCVCommand;
     const uint8_t turretID;

@@ -19,7 +19,7 @@
 
 #include "aruw_voltage_current_sensor.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 AruwVoltageCurrentSensor::AruwVoltageCurrentSensor(tap::Drivers* drivers, tap::can::CanBus canBus)
     : tap::can::CanRxListener(drivers, CHASSIS_SENSOR_CAN_ID, canBus)
@@ -38,4 +38,4 @@ void AruwVoltageCurrentSensor::initialize()
     this->attachSelfToRxHandler();
     this->heartbeat.restart(0);
 }
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::communication::can

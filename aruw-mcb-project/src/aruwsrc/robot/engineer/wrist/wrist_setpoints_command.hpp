@@ -24,7 +24,7 @@
 
 #include "tap/control/command.hpp"
 
-#include "wrist_subsystem.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer::wrist
 {

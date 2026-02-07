@@ -20,13 +20,13 @@
 
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 void ChassisAutoNavController::initialize()
 {
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 
-    lastSetPoint = worldToChassis.getTranslation();
+    lastSetPoint = transformer->getWorldToChassis().getTranslation();
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
 }
 
@@ -35,7 +35,8 @@ void ChassisAutoNavController::runController(
     const bool movementEnabled,
     const bool beybladeEnabled)
 {
-    Position currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
+    Position currentPos =
+        transformer->getWorldToChassis().getTranslation();  // works bc transformer always makes z 0
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
                                                // this constant with a function in the future
     Position setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
@@ -43,6 +44,22 @@ void ChassisAutoNavController::runController(
     Vector moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
 
     Vector posError = setpoint - currentPos;
+
+    // make if can sprint (above 25%)
+    // add a boolean for sprinting check posError over a threshold (make a constant in chassis
+    // constants)
+    if (posError.magnitude() > translationalMotionThreshold &&
+        capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold)
+    {  // is it translating
+
+        capBankSubsystem.changeSprintMode(
+            aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
+    }
+    else
+    {
+        capBankSubsystem.changeSprintMode(
+            aruwsrc::communication::can::cap_bank::SprintMode::NO_SPRINT);
+    }
 
     if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
     {
@@ -73,7 +90,7 @@ void ChassisAutoNavController::runController(
     float r = rotateSpeedRamp.getValue();
 
     // convert world frame translation to chassis frame
-    Vector chassisFrameMoveVector = worldToChassis.apply(moveVector);
+    Vector chassisFrameMoveVector = transformer->getWorldToChassis().apply(moveVector);
 
     // set outputs
     chassis.setDesiredOutput(chassisFrameMoveVector.x(), chassisFrameMoveVector.y(), r);
@@ -110,4 +127,4 @@ Position ChassisAutoNavController::calculateSetPoint(
     return lookaheadPos;
 }
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
