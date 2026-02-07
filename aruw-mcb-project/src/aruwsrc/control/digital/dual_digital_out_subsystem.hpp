@@ -53,7 +53,9 @@ public:
     {
     }
 
-    inline void refresh() override
+    inline void refresh() override {}
+
+    inline void updateStates()
     {
         digital.set(pinOne, getState() ^ offStateOne);
         digital.set(pinTwo, getState() ^ offStateTwo);

@@ -42,13 +42,19 @@ public:
 
     inline void initialize() override {}
 
-    inline void refresh() override { digital.set(pin, state ^ offState); }
+    inline void refresh() override {}
 
     inline bool getState() { return state; }
 
     inline void refreshSafeDisconnect() override { digital.set(pin, offState); }
 
-    inline void set(bool s) { state = s; }
+    inline void set(bool s)
+    {
+        state = s;
+        updateStates();
+    }
+
+    inline void updateStates() { digital.set(pin, state ^ offState); }
 
     const char* getName() const override { return "Digital Out Subsystem"; }
 

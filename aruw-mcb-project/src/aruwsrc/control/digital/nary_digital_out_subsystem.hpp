@@ -49,7 +49,9 @@ public:
     {
     }
 
-    inline void refresh() override
+    inline void refresh() override {}
+
+    inline void updateStates()
     {
         for (int i = 0; i < NUM_PINS; i++)
         {
