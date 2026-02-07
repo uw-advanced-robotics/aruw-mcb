@@ -37,7 +37,7 @@ CubeStorageSubsystem::CubeStorageSubsystem(
 void CubeStorageSubsystem::initialize()
 {
     TriggerHomedJointSubsystem::initialize();
-    currentCube = CubeOptions::LEFT;
+    currentCube = CubeOptions::ERROR;
     hasCube[CubeOptions::LEFT] = false;
     hasCube[CubeOptions::RIGHT] = false;
 }
@@ -55,7 +55,7 @@ CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToAdd()
     }
     else
     {
-        currentCube = CubeOptions::NONE;
+        currentCube = CubeOptions::ERROR;
     }
     return currentCube;
 }
@@ -75,7 +75,7 @@ CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove()
     }
     else
     {
-        return CubeOptions::NONE;
+        return CubeOptions::ERROR;
     }
 }
 
@@ -85,7 +85,7 @@ CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove()
  */
 bool CubeStorageSubsystem::addCube()
 {
-    if (currentCube != CubeOptions::NONE)
+    if (currentCube != CubeOptions::ERROR)
     {
         hasCube[currentCube] = 1;
         return true;
@@ -99,7 +99,7 @@ bool CubeStorageSubsystem::addCube()
  */
 bool CubeStorageSubsystem::removeCube()
 {
-    if (currentCube != CubeOptions::NONE)
+    if (currentCube != CubeOptions::ERROR)
     {
         hasCube[currentCube] = 0;
         return true;
@@ -109,7 +109,7 @@ bool CubeStorageSubsystem::removeCube()
 
 bool CubeStorageSubsystem::storeWristPos(Transform *newWristPosition)
 {
-    if (currentCube != CubeOptions::NONE)
+    if (currentCube != CubeOptions::ERROR)
     {
         if (!hasCube[currentCube])
         {
@@ -126,7 +126,7 @@ bool CubeStorageSubsystem::storeWristPos(Transform *newWristPosition)
 
 Transform *CubeStorageSubsystem::getWristPos()
 {
-    if (currentCube != CubeOptions::NONE)
+    if (currentCube != CubeOptions::ERROR)
     {
         if (hasCube[currentCube])
         {
@@ -148,7 +148,7 @@ void CubeStorageSubsystem::checkForCubes()
 
 float CubeStorageSubsystem::getPressure(CubeOptions cube)
 {
-    if (cube != CubeOptions::NONE)
+    if (cube != CubeOptions::ERROR)
     {
         return 1.0f;  // TODO: update to read the pressure
     }

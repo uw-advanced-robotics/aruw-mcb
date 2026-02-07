@@ -48,7 +48,7 @@ public:
     {
         LEFT = 0,
         RIGHT = 1,
-        NONE = 2,
+        ERROR = 2,
     };
 
     CubeOptions getCubeToRemove();
@@ -66,7 +66,7 @@ public:
     float getPressure(CubeOptions cube);
 
 protected:
-    CubeOptions currentCube = CubeOptions::LEFT;
+    CubeOptions currentCube = CubeOptions::ERROR;
     bool hasCube[2] = {false, false};
     Transform* wristPos[2] = {nullptr, nullptr};
     // TODO: add vars for left and right pressure sensor

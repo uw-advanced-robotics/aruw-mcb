@@ -32,7 +32,6 @@ CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(  // two const referenc
 // turretToCubeTransformer(turretToCubeTransformer),
 // turretToSuctionTransformer(turretToSectionTransformer)
 {
-    // mostly computation, so no requirements
 }
 
 void CubeStorageChooseAddCommand::initialize()
