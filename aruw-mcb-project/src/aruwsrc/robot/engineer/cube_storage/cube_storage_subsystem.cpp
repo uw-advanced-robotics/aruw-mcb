@@ -155,4 +155,8 @@ float CubeStorageSubsystem::getPressure(CubeOptions cube)
     return std::numeric_limits<float>::quiet_NaN();
 }
 
+bool CubeStorageSubsystem::isReady() {
+    return currentCube != CubeOptions::ERROR;
+}
+
 }  // namespace aruwsrc::engineer::cube_storage

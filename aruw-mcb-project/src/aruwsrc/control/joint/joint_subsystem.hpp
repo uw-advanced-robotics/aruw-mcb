@@ -82,6 +82,8 @@ public:
 
     void setUpperBound(float upperBound);
 
+    bool isReady() {return true;};
+
 protected:
     tap::algorithms::Ramp setpoint;
     float lowerBound, upperBound;

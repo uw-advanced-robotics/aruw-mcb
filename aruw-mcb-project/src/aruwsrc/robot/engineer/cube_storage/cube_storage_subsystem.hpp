@@ -64,6 +64,7 @@ public:
     void checkForCubes();
 
     float getPressure(CubeOptions cube);
+    bool isReady();
 
 protected:
     CubeOptions currentCube = CubeOptions::ERROR;
