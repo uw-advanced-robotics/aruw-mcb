@@ -29,10 +29,11 @@
 
 #include "tap/util_macros.hpp"
 
-#include "aruwsrc/communication/rtt/rtt_led_animator.hpp"
 #include "aruwsrc/communication/rtt/rtt_connection_state.hpp"
+#include "aruwsrc/communication/rtt/rtt_led_animator.hpp"
 #include "modm/container/deque.hpp"
 #include "modm/processing/protothread.hpp"
+
 
 // Forward declarations
 namespace tap
@@ -105,29 +106,17 @@ public:
         queuePrintMessage(msg.c_str());
     }
 
-    ConnectionState getConnectionState() const {
-        return connectionState;
-    }
+    ConnectionState getConnectionState() const { return connectionState; }
 
-    int getMessageQueueSize() const {
-        return messageQueue.getSize();
-    }
+    int getMessageQueueSize() const { return messageQueue.getSize(); }
 
-    int getPrintQueueSize() const {
-        return printQueue.getSize();
-    }
+    int getPrintQueueSize() const { return printQueue.getSize(); }
 
-    int getErrorQueueSize() const {
-        return errorQueue.getSize();
-    }
+    int getErrorQueueSize() const { return errorQueue.getSize(); }
 
-    bool getProcessingLogMessage() const {
-        return logMessageProcessing;
-    }
+    bool getProcessingLogMessage() const { return logMessageProcessing; }
 
-    bool getProcessingErrorMessage() const {
-        return errorMessageProcessing;
-    }
+    bool getProcessingErrorMessage() const { return errorMessageProcessing; }
 
     /**
      * Segger's printf-style telemetry hook. Intentionally unused; println() is queued and framed.

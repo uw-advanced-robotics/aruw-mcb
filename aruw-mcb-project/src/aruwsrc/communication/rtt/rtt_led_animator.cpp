@@ -89,13 +89,15 @@ void RttLedAnimator::update(
     }
 
     // If ozone hasn't finished playing its message, stay in ozone state until it's done
-    if (ozoneSequenceActive) {
+    if (ozoneSequenceActive)
+    {
         connectionState = ConnectionState::Ozone;
     }
 
-    switch (connectionState) 
+    switch (connectionState)
     {
-        case ConnectionState::Ozone: {
+        case ConnectionState::Ozone:
+        {
 #if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
             // State 0: Connected to ozone - animation I don't understand
             if (!ozoneSequenceActive)
@@ -108,7 +110,8 @@ void RttLedAnimator::update(
 
             if (ozoneTimer.execute())
             {
-                ozoneFrameIndex = static_cast<uint8_t>((ozoneFrameIndex + 1) % (sizeof(ozoneFrames)));
+                ozoneFrameIndex =
+                    static_cast<uint8_t>((ozoneFrameIndex + 1) % (sizeof(ozoneFrames)));
                 if (ozoneFramesRemaining > 0)
                 {
                     ozoneFramesRemaining--;
@@ -142,7 +145,8 @@ void RttLedAnimator::update(
 #endif
             break;
         }
-        case ConnectionState::Unidrictional: {
+        case ConnectionState::Unidrictional:
+        {
             // State 1: Recent RTT input received - bidirectional bounce animation
             if (animationTimer.execute())
             {
@@ -196,7 +200,8 @@ void RttLedAnimator::update(
             break;
         }
 
-        case ConnectionState::Bidirectional: {
+        case ConnectionState::Bidirectional:
+        {
             // State 2: Sending telemetry but no recent RTT input - unidirectional sweep A->H
             const uint32_t sweepSteps = 7;  // steps from 0 to 7
             const uint32_t pauseMs = sweepSteps * animationStepMs;

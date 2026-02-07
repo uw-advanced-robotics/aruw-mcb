@@ -100,9 +100,15 @@ bool RttTelemetry::updateTelemetryAsync()
             bool recentRttInput = activelySendingTelemetry && now <= messageIndicatorDeadlineMillis;
 
             // 0 = none, 1 = one active, 2 = both active
-            connectionState = static_cast<ConnectionState>(activelySendingTelemetry + recentRttInput);
+            connectionState =
+                static_cast<ConnectionState>(activelySendingTelemetry + recentRttInput);
 
-            ledAnimator.update(drivers, connectionState, logMessageProcessing, errorMessageProcessing, now);
+            ledAnimator.update(
+                drivers,
+                connectionState,
+                logMessageProcessing,
+                errorMessageProcessing,
+                now);
 
             // In Ozone mode (idle, no messages received yet), don't send telemetry
             // heartbeat info, only prints and errors are allowed

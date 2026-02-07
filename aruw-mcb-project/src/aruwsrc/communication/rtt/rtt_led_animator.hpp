@@ -22,7 +22,9 @@
 #include <cstdint>
 
 #include "tap/architecture/periodic_timer.hpp"
+
 #include "aruwsrc/communication/rtt/rtt_connection_state.hpp"
+
 
 namespace tap
 {
@@ -40,7 +42,7 @@ public:
 
     void update(
         tap::Drivers* drivers,
-       ConnectionState connectionState,
+        ConnectionState connectionState,
         bool blinkingGreen,
         bool blinkingRed,
         uint32_t now);

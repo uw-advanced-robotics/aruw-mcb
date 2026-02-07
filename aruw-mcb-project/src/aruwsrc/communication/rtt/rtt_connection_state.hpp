@@ -23,7 +23,8 @@
 namespace aruwsrc::communication::rtt
 {
 // Enum to track state of RTT connection
-enum class ConnectionState : int{
+enum class ConnectionState : int
+{
     Ozone = 0,
     Unidrictional = 1,
     Bidirectional = 2,
