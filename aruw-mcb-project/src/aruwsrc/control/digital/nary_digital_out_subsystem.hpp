@@ -30,12 +30,13 @@ template <uint16_t NUM_PINS>
 class NaryDigitalOutSubsystem : public DigitalOutSubsystem
 {
 public:
-    /** Creates a new NaryDigitalOutSubsystem to handle n-number digital out pins tied to the same state 
-    * @param[in] drivers reference to robot's drivers object
-    * @param[in] pins array of digital output pins to be controlled of size NUM_PINS
-    * @param[in] offStates state pins should be in when off, based on order of pins. Also of size NUM_PINS
-    * offStates[0] is the initial state of the subsystem so be intentional
-    */
+    /** Creates a new NaryDigitalOutSubsystem to handle n-number digital out pins tied to the same
+     * state
+     * @param[in] drivers reference to robot's drivers object
+     * @param[in] pins array of digital output pins to be controlled of size NUM_PINS
+     * @param[in] offStates state pins should be in when off, based on order of pins. Also of size
+     * NUM_PINS offStates[0] is the initial state of the subsystem so be intentional
+     */
     NaryDigitalOutSubsystem(
         tap::Drivers* drivers,
         tap::gpio::Digital& digital,
