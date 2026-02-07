@@ -42,8 +42,8 @@ void DartYawVelocityCommand::initialize() {}
 
 void DartYawVelocityCommand::execute()
 {
-    float setpoint = subsystem.getSetpoint() + drivers->remote.getChannel(channel) * aruwscrc::dart::YAW_INPUT_SENSITIVITY;
-    subsystem.setSetpoint(setpoint);
+    // float setpoint = subsystem.getSetpoint() + drivers->remote.getChannel(channel) * aruwscrc::dart::YAW_INPUT_SENSITIVITY;
+    // subsystem.setSetpoint(setpoint);
 }
 
 bool DartYawVelocityCommand::isFinished() const

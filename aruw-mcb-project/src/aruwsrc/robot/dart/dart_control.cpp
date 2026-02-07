@@ -141,10 +141,10 @@ HomingCommand yawHomeCommand(yawSubsystem);
 aruwsrc::robot::dart::DartYawPositionCommand dartYawPositionCommand(drivers(), &yawSubsystem, 0.0f);
 
 // yaw manual velocity control, LEFT_X
-aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
-    drivers(),
-    &yawSubsystem,
-    Remote::Channel::LEFT_HORIZONTAL);
+// aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
+//     drivers(),
+//     &yawSubsystem,
+//     Remote::Channel::LEFT_HORIZONTAL);
 // grab the string and pullback to setpoint
 SequentialCommand<2> pullBackCommand(std::array<Command*, 2>{{&servoClose, &dartPullback}});
 
@@ -224,7 +224,7 @@ void setDefaultDartCommands(aruwsrc::dart::Drivers*)
 {
     pullMotorSubsystem.setDefaultCommand(&manualPullbackCommand);
 
-    yawSubsystem.setDefaultCommand(&dartYawVelocityCommand);
+    // yawSubsystem.setDefaultCommand(&dartYawVelocityCommand);
 }
 
 void startDartCommands(aruwsrc::dart::Drivers*) {}
@@ -235,6 +235,7 @@ void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
     drivers->commandMapper.addMap(&closeServoMapping);
     drivers->commandMapper.addMap(&homePullbackMapping);
     drivers->commandMapper.addMap(&pullbackMapping);
+    drivers->commandMapper.addMap(&rightMidLeftDown);
     // drivers->commandMapper.addMap(&homeYawMapping);
 }
 
