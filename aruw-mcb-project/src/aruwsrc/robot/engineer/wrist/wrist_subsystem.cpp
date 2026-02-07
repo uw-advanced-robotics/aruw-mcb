@@ -18,6 +18,7 @@
  */
 
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#define ts this
 
 using namespace tap::algorithms::transforms;
 using tap::algorithms::CMSISMat;
@@ -48,6 +49,7 @@ WristSubsystem::WristSubsystem(
       pidTheta2(config.theta2PidConfig),
       pidTheta3(config.theta3PidConfig)
 {
+    ts->motorLeft = motorLeft;
 }
 
 float WristSubsystem::getTheta1() { return encoderTheta1.getPosition().getUnwrappedValue(); }
@@ -67,6 +69,21 @@ void WristSubsystem::setSetpointTheta3(float setpoint)
     setpointTheta3 = std::clamp(setpoint, config.theta3Min, config.theta3Max);
 }
 
+bool WristSubsystem::atSetpointTheta1(float epsilon)
+{
+    return std::abs(encoderTheta1.getPosition().minDifference(setpointTheta1)) < epsilon;
+}
+
+bool WristSubsystem::atSetpointTheta2(float epsilon)
+{
+    return std::abs(encoderTheta2.getPosition().minDifference(setpointTheta2)) < epsilon;
+}
+
+bool WristSubsystem::atSetpointTheta3(float epsilon)
+{
+    return std::abs(encoderTheta3.getPosition().minDifference(setpointTheta3)) < epsilon;
+}
+
 bool WristSubsystem::atSetpoint()
 {
     return atSetpointTheta1(config.epsilon) && atSetpointTheta2(config.epsilon) &&
@@ -78,14 +95,22 @@ float WristSubsystem::calculateLeftMotorOutputForTheta1Theta2(
     float theta2Setpoint)
 {
     // TODO: implement
-    return 0.0f;
+    float theta1Error = encoderTheta1.getPosition().minDifference(setpointTheta1);
+    float theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
+
+    float pidOutTheta1 = pidTheta1.runController(theta1Error, encoderTheta1.getVelocity(), 2.0f);
+    float pidOutTheta2 = pidTheta2.runController(theta2Error, encoderTheta2.getVelocity(), 2.0f);
+
+    return -pidOutTheta2 - pidOutTheta1;
 }
 float WristSubsystem::calculateRightMotorOutputForTheta1Theta2(
     float theta1Setpoint,
     float theta2Setpoint)
 {
     // TODO: implement
-    return 0.0f;
+    float theta1Error = encoderTheta1.getPosition().minDifference(setpointTheta1);
+    float pidOutTheta1 = pidTheta1.runController(theta1Error, encoderTheta1.getVelocity(), 2.0f);
+    return -pidOutTheta1;
 }
 
 void WristSubsystem::initialize()

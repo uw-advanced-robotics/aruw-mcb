@@ -91,12 +91,12 @@ public:
     virtual void refreshSafeDisconnect() override;
 
 private:
+    float setpointTheta1, setpointTheta2, setpointTheta3;
     tap::motor::MotorInterface &motorLeft, &motorRight, &motorTheta3;
     tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2, &encoderTheta3;
     tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
     const WristConfig config;
 
-    float setpointTheta1, setpointTheta2, setpointTheta3;
 
     const tap::algorithms::transforms::Position COM_POS =
         tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static

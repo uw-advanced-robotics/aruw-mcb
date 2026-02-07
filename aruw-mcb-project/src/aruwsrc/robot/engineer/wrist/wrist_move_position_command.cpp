@@ -33,8 +33,8 @@ WristMovePositionCommand::WristMovePositionCommand(
 
 void WristMovePositionCommand::initialize()
 {
-    wrist.setSetpointPitch(pitchSetpoint);
-    wrist.setSetpointYaw(yawSetpoint);
+    wrist.setSetpointTheta2(pitchSetpoint);  // theta2 is pitch
+    wrist.setSetpointTheta1(yawSetpoint);  // theta1 is yaw
 }
 
 void WristMovePositionCommand::execute() {}

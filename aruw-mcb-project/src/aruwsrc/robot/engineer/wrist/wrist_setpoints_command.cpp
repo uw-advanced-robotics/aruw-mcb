@@ -35,10 +35,10 @@ void WristSetpointsCommand::execute()
     if (currentSetpointIndex < setpoints.size())
     {
         const auto &setpoint = setpoints[currentSetpointIndex];
-        wrist.setSetpointPitch(setpoint.pitch);
-        wrist.setSetpointYaw(setpoint.yaw);
-        if (wrist.atSetpointPitch(setpoint.epsilonPitch) &&
-            wrist.atSetpointYaw(setpoint.epsilonYaw))
+        wrist.setSetpointTheta2(setpoint.pitch);  // theta2 is pitch
+        wrist.setSetpointTheta1(setpoint.yaw);  // theta1 is yaw
+        if (wrist.atSetpointTheta2(setpoint.epsilonPitch) &&
+            wrist.atSetpointTheta1(setpoint.epsilonYaw))
         {
             currentSetpointIndex++;
         }

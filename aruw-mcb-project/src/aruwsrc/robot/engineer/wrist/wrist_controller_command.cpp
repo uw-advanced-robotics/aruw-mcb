@@ -52,8 +52,8 @@ void WristControllerCommand::execute()
 
     // Set the desired positions
     roll.setSetpoint(roll.getSetpoint() + rollVelocity);
-    wrist.setSetpointPitch(wrist.getSetpointPitch() + pitchVelocity);
-    wrist.setSetpointYaw(wrist.getSetpointYaw() + yawVelocity);
+    wrist.setSetpointTheta2(wrist.getSetpointTheta2() + pitchVelocity);  // theta2 is pitch
+    wrist.setSetpointTheta1(wrist.getSetpointTheta1() + yawVelocity);  // theta1 is yaw
 }
 
 }  // namespace aruwsrc::engineer::wrist

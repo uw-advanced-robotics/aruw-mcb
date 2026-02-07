@@ -235,21 +235,29 @@ tap::motor::DjiMotor wristMotorTheta3(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-tap::encoder::CanEncoder wristPitchEncoder(
+tap::encoder::CanEncoder wristTheta1Encoder(
     drivers(),
-    aruwsrc::engineer::WRIST_PITCH_ENCODER_ID,
+    aruwsrc::engineer::WRIST_THETA1_ENCODER_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     1,
-    WRIST_HOME_PITCH);
+    WRIST_HOME_THETA1);
 
-tap::encoder::CanEncoder wristYawEncoder(
+tap::encoder::CanEncoder wristTheta2Encoder(
     drivers(),
-    aruwsrc::engineer::WRIST_YAW_ENCODER_ID,
+    aruwsrc::engineer::WRIST_THETA2_ENCODER_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     1,
-    WRIST_HOME_YAW);
+    WRIST_HOME_THETA2);
+
+tap::encoder::CanEncoder wristTheta3Encoder(
+    drivers(),
+    aruwsrc::engineer::WRIST_THETA3_ENCODER_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    1,
+    WRIST_HOME_THETA3);
 
 tap::motor::DjiMotor gantryLiftLeftMotor(
     drivers(),
@@ -357,7 +365,15 @@ aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
 
 TriggerHomedJointSubsystem cubeLift(drivers(), cubeLiftMotor, cubeLiftTrigger, CUBE_LIFT_CONFIG);
 
-WristSubsystem wristSubsystem(drivers(), );
+WristSubsystem wristSubsystem(
+    drivers(),
+    wristLeftMotor,
+    wristRightMotor,
+    wristMotorTheta3,
+    wristTheta1Encoder,
+    wristTheta2Encoder,
+    wristTheta3Encoder,
+    WRIST_CONFIG);
 
 TriggerHomedDualJointSubsystem gantryLiftSubsystem(
     drivers(),
@@ -373,7 +389,8 @@ TriggerHomedJointSubsystem gantryExtensionSubsystem(
     gantryExtensionTrigger,
     GANTRY_EXTENSION_CONFIG);
 
-JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_CONFIG);
+// NOTE: wristRollSubsystem is defined in the TARGET_ENGI_2025 block below
+// JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_CONFIG);
 
 DigitalOutSubsystem suckSubsystem(
     drivers(),
@@ -438,13 +455,14 @@ aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     &drivers()->controlOperatorInterface,
     &xDriveChassis);
 
-WristControllerCommand wristControllerCommand(
-    wristRollSubsystem,
-    wristSubsystem,
-    &drivers()->controlOperatorInterface,
-    WRIST_ROLL_SCALING_FACTOR,
-    WRIST_PITCH_SCALING_FACTOR,
-    WRIST_YAW_SCALING_FACTOR);
+// NOTE: WristControllerCommand is defined in the TARGET_ENGI_2025 block where wristRollSubsystem exists
+// WristControllerCommand wristControllerCommand(
+//     wristRollSubsystem,
+//     wristSubsystem,
+//     &drivers()->controlOperatorInterface,
+//     WRIST_ROLL_SCALING_FACTOR,
+//     WRIST_PITCH_SCALING_FACTOR,
+//     WRIST_YAW_SCALING_FACTOR);
 
 // wrist fold in commands are not fully tuned yet
 WristSetpointsCommand wristFoldInCommand(
@@ -507,10 +525,11 @@ WristMovePositionCommand wristDown(
     WRIST_YAW_PICKUP);  // tuned to align for better suction
 WristMovePositionCommand wristOut(wristSubsystem, WRIST_PITCH_SCORE, WRIST_YAW_SCORE);
 
-ScorePositionCommand scorePositionCommand(
-    gantryLiftSubsystem,
-    wristSubsystem,
-    wristRollSubsystem);  // TODO: test that this works
+// NOTE: ScorePositionCommand requires wristRollSubsystem which is only available in TARGET_ENGI_2025
+// ScorePositionCommand scorePositionCommand(
+//     gantryLiftSubsystem,
+//     wristSubsystem,
+//     wristRollSubsystem);  // TODO: test that this works
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -564,18 +583,19 @@ tap::control::PressCommandMapping cubeLiftDown(
     {&cubeLiftSwitchUpCommand},
     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
 
-tap::control::PressCommandMapping cyclePositions(
-    drivers(),
-    {&scorePositionCommand},
-    RemoteMapState({Remote::Key::C}));
-
-CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
-    drivers(),
-    RemoteMapState({Remote::Key::C}, {Remote::Key::SHIFT}),
-    ScorePositions::three,
-    &scorePositionCommand,
-    &ScorePositionCommand::cyclePositions,
-    RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
+// NOTE: cyclePositions and cPressed require scorePositionCommand
+// tap::control::PressCommandMapping cyclePositions(
+//     drivers(),
+//     {&scorePositionCommand},
+//     RemoteMapState({Remote::Key::C}));
+//
+// CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
+//     drivers(),
+//     RemoteMapState({Remote::Key::C}, {Remote::Key::SHIFT}),
+//     ScorePositions::three,
+//     &scorePositionCommand,
+//     &ScorePositionCommand::cyclePositions,
+//     RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -583,7 +603,7 @@ void initializeSubsystems()
     xDriveChassis.initialize();
     gantryLiftSubsystem.initialize();
     gantryExtensionSubsystem.initialize();
-    wristRollSubsystem.initialize();
+    // wristRollSubsystem.initialize();  // Only available in TARGET_ENGI_2025
     wristSubsystem.initialize();
     cubeLift.initialize();
     suckSubsystem.initialize();
@@ -597,7 +617,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&xDriveChassis);
     drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
     drivers->commandScheduler.registerSubsystem(&gantryExtensionSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);  // Only available in TARGET_ENGI_2025
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
@@ -611,8 +631,8 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
     xDriveChassis.setDefaultCommand(&chassisDriveCommand);
     gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
     gantryExtensionSubsystem.setDefaultCommand(&gantryExtensionManualControl);
-    wristSubsystem.setDefaultCommand(&wristControllerCommand);
-    wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
+    // wristSubsystem.setDefaultCommand(&wristControllerCommand);  // wristControllerCommand only available in TARGET_ENGI_2025
+    // wristRollSubsystem.setDefaultCommand(&wristControllerCommand);  // Only available in TARGET_ENGI_2025
     cubeLift.setDefaultCommand(&cubeManualControl);
 
     // clientDisplay.setDefaultCommand(&clientDisplayCommand);
@@ -1058,10 +1078,11 @@ WristMovePositionCommand wristDown(
     WRIST_YAW_PICKUP);  // tuned to align for better suction
 WristMovePositionCommand wristOut(wristSubsystem, WRIST_PITCH_SCORE, WRIST_YAW_SCORE);
 
-ScorePositionCommand scorePositionCommand(
-    gantryLiftSubsystem,
-    wristSubsystem,
-    wristRollSubsystem);  // TODO: test that this works
+// NOTE: ScorePositionCommand requires wristRollSubsystem which is only available in TARGET_ENGI_2025
+// ScorePositionCommand scorePositionCommand(
+//     gantryLiftSubsystem,
+//     wristSubsystem,
+//     wristRollSubsystem);  // TODO: test that this works
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -1115,18 +1136,19 @@ tap::control::PressCommandMapping cubeLiftDown(
     {&cubeLiftSwitchUpCommand},
     RemoteMapState({Remote::Key::X, Remote::Key::SHIFT}));
 
-tap::control::PressCommandMapping cyclePositions(
-    drivers(),
-    {&scorePositionCommand},
-    RemoteMapState({Remote::Key::C}));
-
-CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
-    drivers(),
-    RemoteMapState({Remote::Key::C}, {Remote::Key::SHIFT}),
-    ScorePositions::three,
-    &scorePositionCommand,
-    &ScorePositionCommand::cyclePositions,
-    RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
+// NOTE: cyclePositions and cPressed require scorePositionCommand
+// tap::control::PressCommandMapping cyclePositions(
+//     drivers(),
+//     {&scorePositionCommand},
+//     RemoteMapState({Remote::Key::C}));
+//
+// CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
+//     drivers(),
+//     RemoteMapState({Remote::Key::C}, {Remote::Key::SHIFT}),
+//     ScorePositions::three,
+//     &scorePositionCommand,
+//     &ScorePositionCommand::cyclePositions,
+//     RemoteMapState({Remote::Key::C, Remote::Key::SHIFT}));
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()

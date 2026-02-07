@@ -123,16 +123,16 @@ modm::ResumableResult<void> SlidersIndicator::update()
     }
     uint16_t cubeLiftCircleX = START_X + BOUNDING_BOX_WIDTH * cubeLiftPositionPercent;
 
-    // Update wrist pitch
-    float wristPitchPosition = wristSubsystem.getPitch();
+    // Update wrist pitch (theta2)
+    float wristPitchPosition = wristSubsystem.getTheta2();
     float wristPitchPositionPercent =
-        getPercentage(wristPitchPosition, wristConfig.minPitch, wristConfig.maxPitch);
+        getPercentage(wristPitchPosition, wristConfig.theta2Min, wristConfig.theta2Max);
     uint16_t wristPitchCircleX = START_X + BOUNDING_BOX_WIDTH * wristPitchPositionPercent;
 
-    // Update wrist yaw
-    float wristYawPosition = wristSubsystem.getYaw();
+    // Update wrist yaw (theta1)
+    float wristYawPosition = wristSubsystem.getTheta1();
     float wristYawPositionPercent =
-        getPercentage(wristYawPosition, wristConfig.minYaw, wristConfig.maxYaw);
+        getPercentage(wristYawPosition, wristConfig.theta1Min, wristConfig.theta1Max);
     uint16_t wristYawCircleX = START_X + BOUNDING_BOX_WIDTH * wristYawPositionPercent;
 
     RF_BEGIN(1);

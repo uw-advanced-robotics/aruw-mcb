@@ -41,15 +41,46 @@ static constexpr tap::encoder::CanEncoderId WRIST_THETA2_ENCODER_ID =
 static constexpr tap::encoder::CanEncoderId WRIST_THETA3_ENCODER_ID =
     tap::encoder::CanEncoderId::ID2;
 
+
+static constexpr uint32_t WRIST_HOME_THETA1 = 0;
+static constexpr uint32_t WRIST_HOME_THETA2 = 0;
+static constexpr uint32_t WRIST_HOME_THETA3 = 0;
+
+
+
+static constexpr float WRIST_ROLL_PID_KS = 0.0;
+static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA1_PID_CONFIG{
+    .kp = 0,
+    .ki = 0.0f,
+    .kd = 0,
+    .maxICumulative = 0.0f,
+    .maxOutput = 3000.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA2_PID_CONFIG{
+    .kp = 0,
+    .ki = 0.0f,
+    .kd = 0,
+    .maxICumulative = 0.0f,
+    .maxOutput = 3000.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA3_PID_CONFIG{
+    .kp = 0,
+    .ki = 0.0f,
+    .kd = 0,
+    .maxICumulative = 0.0f,
+    .maxOutput = 3000.0f,
+};
+
 static constexpr wrist::WristConfig WRIST_CONFIG{
+    .theta1PidConfig = WRIST_THETA1_PID_CONFIG,
+    .theta2PidConfig = WRIST_THETA2_PID_CONFIG,
+    .theta3PidConfig = WRIST_THETA3_PID_CONFIG,
     .ratio = 30.0f / 40.0f,
     .maxMotorDesiredOutput = 5500,
 };
 
-static constexpr uint32_t WRIST_HOME_PITCH = 2454;
-static constexpr uint32_t WRIST_HOME_YAW = 1961;
-
-static constexpr float WRIST_ROLL_PID_KS = 0.0;
 static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
     .kp = 200.0f,
     .ki = 0.0f,
@@ -77,20 +108,20 @@ static constexpr wrist::Setpoint WRIST_IN_SETPOINT{
     .epsilonYaw = 0.1f,
 };
 static constexpr wrist::Setpoint WRIST_TOP_SETPOINT{
-    .pitch = 1.5f,
+    .pitch = 0,
     .yaw = 0,
     .epsilonPitch = 0.1f,
     .epsilonYaw = 0.1f,
 };
 static constexpr wrist::Setpoint WRIST_BOTTOM_SETPOINT{
-    .pitch = 1.5f,
-    .yaw = M_PI,
+    .pitch = 0,
+    .yaw = 0,
     .epsilonPitch = 0.1f,
     .epsilonYaw = 0.1f,
 };
 static constexpr wrist::Setpoint WRIST_OUT_SETPOINT{
     .pitch = 0,
-    .yaw = M_PI,
+    .yaw = 0,
     .epsilonPitch = 0.1f,
     .epsilonYaw = 0.1f,
 };

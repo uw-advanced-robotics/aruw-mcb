@@ -66,8 +66,8 @@ void ScorePositionCommand::initialize()
     }
 
     gantryLift.setSetpoint(gantryLiftSetpoint);
-    wrist.setSetpointYaw(wristYawSetpoint);
-    wrist.setSetpointPitch(wristPitchSetpoint);
+    wrist.setSetpointTheta1(wristYawSetpoint);  // theta1 is azimuth/yaw
+    wrist.setSetpointTheta2(wristPitchSetpoint);  // theta2 is pitch
     roll.setSetpoint(wristRollSetpoint);
 }
 
