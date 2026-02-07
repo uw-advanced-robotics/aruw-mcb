@@ -30,6 +30,17 @@ enum class ConnectionState : int
     Bidirectional = 2,
 };
 
+constexpr const char* connectionStateNames[] = {
+    "Ozone",
+    "Unidirectional",
+    "Bidirectional",
+};
+
+inline const char* connectionStateToString (ConnectionState state)
+{
+    return connectionStateNames[static_cast<int>(state)];
+}
+
 }  // namespace aruwsrc::communication::rtt
 
 #endif  // RTT_CONNECTION_STATE_HPP_
