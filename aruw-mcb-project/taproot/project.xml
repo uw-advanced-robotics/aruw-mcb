@@ -87,5 +87,7 @@
     <module>modm:ui:display</module>
     <module>modm:ui:menu</module>
 
+    <module>modm:platform:random</module>
+
   </modules>
 </library>

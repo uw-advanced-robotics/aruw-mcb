@@ -22,6 +22,7 @@
         modm:platform:uart:7:buffer.tx 512
         modm:platform:uart:7:buffer.rx 512
     </option>
+    <option name="taproot:modm-project.xml:modm_hal_modules">modm:platform:random</option>
   </options>
   <modules>
     <module>taproot:algorithms:odometry</module>
