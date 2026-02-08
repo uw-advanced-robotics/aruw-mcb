@@ -39,13 +39,13 @@ bool Uart::read(UartPort port, uint8_t *data)
 #else
     switch (port)
     {
-        case UartPort::Uart1:
+        case UartPort::Remote:
             return Usart1::read(*data);
-        case UartPort::Uart2:
+        case UartPort::Usart2:
             return Usart2::read(*data);
-        case UartPort::Uart3:
+        case UartPort::Usart3:
             return Usart3::read(*data);
-        case UartPort::Uart6:
+        case UartPort::RefSerial:
             return Usart6::read(*data);
         case UartPort::Uart7:
             return Uart7::read(*data);
@@ -67,13 +67,13 @@ std::size_t Uart::read(UartPort port, uint8_t *data, std::size_t length)
 #else
     switch (port)
     {
-        case UartPort::Uart1:
+        case UartPort::Remote:
             return Usart1::read(data, length);
-        case UartPort::Uart2:
+        case UartPort::Usart2:
             return Usart2::read(data, length);
-        case UartPort::Uart3:
+        case UartPort::Usart3:
             return Usart3::read(data, length);
-        case UartPort::Uart6:
+        case UartPort::RefSerial:
             return Usart6::read(data, length);
         case UartPort::Uart7:
             return Uart7::read(data, length);
@@ -93,13 +93,13 @@ std::size_t Uart::discardReceiveBuffer(UartPort port)
 #else
     switch (port)
     {
-        case UartPort::Uart1:
+        case UartPort::Remote:
             return Usart1::discardReceiveBuffer();
-        case UartPort::Uart2:
+        case UartPort::Usart2:
             return Usart2::discardReceiveBuffer();
-        case UartPort::Uart3:
+        case UartPort::Usart3:
             return Usart3::discardReceiveBuffer();
-        case UartPort::Uart6:
+        case UartPort::RefSerial:
             return Usart6::discardReceiveBuffer();
         case UartPort::Uart7:
             return Uart7::discardReceiveBuffer();
@@ -120,13 +120,13 @@ bool Uart::write(UartPort port, uint8_t data)
 #else
     switch (port)
     {
-        case UartPort::Uart1:
+        case UartPort::Remote:
             return Usart1::write(data);
-        case UartPort::Uart2:
+        case UartPort::Usart2:
             return Usart2::write(data);
-        case UartPort::Uart3:
+        case UartPort::Usart3:
             return Usart3::write(data);
-        case UartPort::Uart6:
+        case UartPort::RefSerial:
             return Usart6::write(data);
         case UartPort::Uart7:
             return Uart7::write(data);
@@ -148,13 +148,13 @@ std::size_t Uart::write(UartPort port, const uint8_t *data, std::size_t length)
 #else
     switch (port)
     {
-        case UartPort::Uart1:
+        case UartPort::Remote:
             return Usart1::write(data, length);
-        case UartPort::Uart2:
+        case UartPort::Usart2:
             return Usart2::write(data, length);
-        case UartPort::Uart3:
+        case UartPort::Usart3:
             return Usart3::write(data, length);
-        case UartPort::Uart6:
+        case UartPort::RefSerial:
             return Usart6::write(data, length);
         case UartPort::Uart7:
             return Uart7::write(data, length);
@@ -174,13 +174,13 @@ bool Uart::isWriteFinished(UartPort port) const
 #else
     switch (port)
     {
-        case UartPort::Uart1:
+        case UartPort::Remote:
             return Usart1::isWriteFinished();
-        case UartPort::Uart2:
+        case UartPort::Usart2:
             return Usart2::isWriteFinished();
-        case UartPort::Uart3:
+        case UartPort::Usart3:
             return Usart3::isWriteFinished();
-        case UartPort::Uart6:
+        case UartPort::RefSerial:
             return Usart6::isWriteFinished();
         case UartPort::Uart7:
             return Uart7::isWriteFinished();
@@ -199,16 +199,16 @@ void Uart::flushWriteBuffer(UartPort port)
 #else
     switch (port)
     {
-        case UartPort::Uart1:
+        case UartPort::Remote:
             Usart1::flushWriteBuffer();
             break;
-        case UartPort::Uart2:
+        case UartPort::Usart2:
             Usart2::flushWriteBuffer();
             break;
-        case UartPort::Uart3:
+        case UartPort::Usart3:
             Usart3::flushWriteBuffer();
             break;
-        case UartPort::Uart6:
+        case UartPort::RefSerial:
             Usart6::flushWriteBuffer();
             break;
         case UartPort::Uart7:

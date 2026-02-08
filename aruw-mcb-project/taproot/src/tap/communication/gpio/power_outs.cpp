@@ -21,28 +21,48 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_DJI_MOTOR_TERMINAL_SERIAL_HANDLER_MOCK_HPP_
-#define TAPROOT_DJI_MOTOR_TERMINAL_SERIAL_HANDLER_MOCK_HPP_
+#include "power_outs.hpp"
 
-#include <gmock/gmock.h>
+#include "tap/board/board.hpp"
+#include "tap/util_macros.hpp"
 
-#include "tap/motor/dji_motor_terminal_serial_handler.hpp"
+using namespace Board;
 
 namespace tap
 {
-namespace mock
+namespace gpio
 {
-class DjiMotorTerminalSerialHandlerMock : public motor::DjiMotorTerminalSerialHandler
+void PowerOuts::init()
 {
-public:
-    DjiMotorTerminalSerialHandlerMock(Drivers *drivers);
-    virtual ~DjiMotorTerminalSerialHandlerMock();
+#ifndef PLATFORM_HOSTED
+    // init PowerOuts
+    PowerOutsPort::setOutput(modm::Gpio::High);
+#endif
+}
 
-    MOCK_METHOD(void, init, (), (override));
-    MOCK_METHOD(bool, terminalSerialCallback, (char *, modm::IOStream &, bool), (override));
-    MOCK_METHOD(void, terminalSerialStreamCallback, (modm::IOStream &), (override));
-};
-}  // namespace mock
+void PowerOuts::set(PowerOuts::PowerOutPin pin, bool set)
+{
+#ifdef PLATFORM_HOSTED
+    UNUSED(pin);
+    UNUSED(set);
+#else
+    switch (pin)
+    {
+        case PowerOuts::PowerOutPin::Port1:
+            PowerOutPort1::set(set);
+            break;
+        case PowerOuts::PowerOutPin::Port2:
+            PowerOutPort2::set(set);
+            break;
+        case PowerOuts::PowerOutPin::Port3:
+            PowerOutPort3::set(set);
+            break;
+        case PowerOuts::PowerOutPin::Port4:
+            PowerOutPort4::set(set);
+            break;
+    }
+#endif
+}
+}  // namespace gpio
+
 }  // namespace tap
-
-#endif  //  TAPROOT_DJI_MOTOR_TERMINAL_SERIAL_HANDLER_MOCK_HPP_

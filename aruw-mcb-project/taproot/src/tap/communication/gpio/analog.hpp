@@ -26,10 +26,6 @@
 
 #include <cstdint>
 
-#ifndef PLATFORM_HOSTED
-#include "modm/platform/adc/adc_1.hpp"
-#endif
-
 #include "tap/util_macros.hpp"
 
 namespace tap
@@ -37,8 +33,8 @@ namespace tap
 namespace gpio
 {
 /**
- * To read from a pin call Read and pass the function a pin from the
- * analog Pin enum.
+ * To read from a pin call read and pass the function a pin from the
+ * Pin enum.
  */
 class Analog
 {
@@ -50,10 +46,10 @@ public:
     // Analog pins
     enum Pin
     {
-        S,
-        U,
-        V,
-        OledJoystick,
+        S, // Adc1 In0
+        U, // Adc1 In2
+        V, // Adc1 In3
+        DisplayJoystick, // Adc1 In6
     };
 
     /**

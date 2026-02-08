@@ -181,8 +181,8 @@ static void initializeIo(Drivers* drivers)
     drivers->pwm.init();
     drivers->digital.init();
     drivers->leds.init();
+    drivers->powerOuts.init();
     drivers->can.initialize();
-    drivers->errorController.init();
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
@@ -307,8 +307,6 @@ static void initializeI2C(Drivers* drivers)
     drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
     modm::delay_ms(2000);  // Wait for the SDA and SCL lines to be pulled high
 
-    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-        Board::I2CMaster::PullUps::External);
-    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
-    Board::I2CMaster::reset();
+    Board::initializeI2c2<300'000>(Board::I2c2::PullUps::External);
+    Board::I2c2::reset();
 }

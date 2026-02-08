@@ -21,28 +21,49 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_SCHEDULER_TERMINAL_HANDLER_MOCK_HPP_
-#define TAPROOT_SCHEDULER_TERMINAL_HANDLER_MOCK_HPP_
+#ifndef TAPROOT_POWER_OUTS_HPP_
+#define TAPROOT_POWER_OUTS_HPP_
 
-#include <gmock/gmock.h>
+#include <cstdint>
 
-#include "tap/control/scheduler_terminal_handler.hpp"
+#include "tap/util_macros.hpp"
 
 namespace tap
 {
-namespace mock
+namespace gpio
 {
-class SchedulerTerminalHandlerMock : public control::SchedulerTerminalHandler
+class PowerOuts
 {
 public:
-    SchedulerTerminalHandlerMock(Drivers *drivers);
-    virtual ~SchedulerTerminalHandlerMock();
+    PowerOuts() = default;
+    DISALLOW_COPY_AND_ASSIGN(PowerOuts)
+    mockable ~PowerOuts() = default;
 
-    MOCK_METHOD(void, init, (), (override));
-    MOCK_METHOD(bool, terminalSerialCallback, (char *, modm::IOStream &, bool), (override));
-    MOCK_METHOD(void, terminalSerialStreamCallback, (modm::IOStream &), (override));
-};
-}  // namespace mock
+
+    enum PowerOutPin
+    {
+        Port1 = 0,
+        Port2,
+        Port3,
+        Port4
+    };
+
+    /**
+     * Initializes the pins in output mode and settting the pins to their default.
+     */
+    mockable void init();
+
+    /**
+     * Sets a given pin to either high or low.
+     *
+     * @param[in] pin the pin to set
+     * @param[in] set the state of the pin to set
+     */
+    mockable void set(PowerOutPin pin, bool set);
+};  // class PowerOuts
+
+}  // namespace gpio
+
 }  // namespace tap
 
-#endif  // TAPROOT_SCHEDULER_TERMINAL_HANDLER_MOCK_HPP_
+#endif  // TAPROOT_POWER_OUTS_HPP_

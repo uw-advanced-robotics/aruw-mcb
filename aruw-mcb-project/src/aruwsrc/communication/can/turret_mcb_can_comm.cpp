@@ -109,7 +109,7 @@ void TurretMCBCanComm::handleXAxisMessage(const modm::can::Message& message)
 {
     // Update light to indicate IMU message received and turret controller running.
     imuMessageReceivedLEDBlinkCounter = (imuMessageReceivedLEDBlinkCounter + 1) % 100;
-    drivers->leds.set(tap::gpio::Leds::Green, imuMessageReceivedLEDBlinkCounter > 50);
+    drivers->leds.set(tap::gpio::Leds::Green, imuMessageReceivedLEDBlinkCounter <= 50);
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
 
     const AxisMessageData* xAxisMessage = reinterpret_cast<const AxisMessageData*>(message.data);

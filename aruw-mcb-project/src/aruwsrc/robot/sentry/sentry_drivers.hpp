@@ -23,14 +23,11 @@
 #include "tap/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "tap/mock/imu_terminal_serial_handler_mock.hpp"
-
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 #else
-#include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
 #include "aruwsrc/algorithms/plate_hit_tracker.hpp"
 #include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
@@ -69,7 +66,6 @@ public:
               &rttTelemetry),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, CAP_BANK_CAPACITANCE),
           chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
           turretMajorImu(),
@@ -86,7 +82,6 @@ public:
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
-    testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
     communication::rtt::RttTelemetry rttTelemetry;
@@ -95,7 +90,6 @@ public:
     display::OledDisplay oledDisplay;
     aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus1;
     aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus2;
-    tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     aruwsrc::communication::can::cap_bank::CapacitorBank capacitorBank;
     aruwsrc::communication::mcb_lite::MCBLite chassisMcbLite;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImu;

@@ -127,7 +127,7 @@ void RttLedAnimator::update(
             {
                 const uint8_t bit = static_cast<uint8_t>(1u << (7 - i));
                 const bool on = (mask & bit) != 0;
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), !on);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), on);
             }
 #else
             // State 0: Not sending telemetry - slow group flash.
@@ -179,22 +179,22 @@ void RttLedAnimator::update(
             // Clear A..H (turn off)
             for (int i = 0; i < 8; ++i)
             {
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), true);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), false);
             }
 
             // Lighting rule: at ends (0 or 7) light only one LED; otherwise light pair.
             if (animationIndex == 0)
             {
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), false);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), true);
             }
             else if (animationIndex >= 7)
             {
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), false);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), true);
             }
             else
             {
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), true);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), true);
             }
 
             break;
@@ -234,21 +234,21 @@ void RttLedAnimator::update(
             // Clear A..H
             for (int i = 0; i < 8; ++i)
             {
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), true);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), false);
             }
 
             if (animationIndex == 0)
             {
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), false);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), true);
             }
             else if (animationIndex >= 7)
             {
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), false);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), true);
             }
             else
             {
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
-                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), true);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), true);
             }
 
             break;
@@ -261,12 +261,12 @@ void RttLedAnimator::update(
         {
             greenBlinkOn = !greenBlinkOn;
         }
-        drivers->leds.set(tap::gpio::Leds::Green, !greenBlinkOn);
+        drivers->leds.set(tap::gpio::Leds::Green, greenBlinkOn);
     }
     else
     {
         greenBlinkOn = false;
-        drivers->leds.set(tap::gpio::Leds::Green, false);
+        drivers->leds.set(tap::gpio::Leds::Green, true);
     }
 
     if (blinkingRed)
@@ -275,12 +275,12 @@ void RttLedAnimator::update(
         {
             redBlinkOn = !redBlinkOn;
         }
-        drivers->leds.set(tap::gpio::Leds::Red, !redBlinkOn);
+        drivers->leds.set(tap::gpio::Leds::Red, redBlinkOn);
     }
     else
     {
         redBlinkOn = false;
-        drivers->leds.set(tap::gpio::Leds::Red, false);
+        drivers->leds.set(tap::gpio::Leds::Red, true);
     }
 }
 }  // namespace aruwsrc::communication::rtt
