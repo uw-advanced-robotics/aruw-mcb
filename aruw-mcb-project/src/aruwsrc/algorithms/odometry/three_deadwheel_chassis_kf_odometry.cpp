@@ -21,7 +21,6 @@
 
 namespace aruwsrc::algorithms::odometry
 {
-
 using namespace tap::algorithms;
 
 ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
@@ -62,29 +61,6 @@ void ThreeDeadwheelChassisKFOdometry::reset()
     float initialX[int(OdomState::NUM_STATES)] =
         {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f, initYaw, 0.0f};
     kf.init(initialX);
-}
-
-float ThreeDeadwheelChassisKFOdometry::applyIirFilter(
-    float input,
-    float* state,
-    const float* a,
-    const float* b,
-    int order)
-{
-    for (int i = order - 1; i > 0; i--)
-    {
-        state[i] = state[i - 1];
-    }
-
-    float output = b[0] * input;
-    for (int i = 1; i < order; i++)
-    {
-        output += b[i] * state[i];
-        output -= a[i] * state[i - 1];
-    }
-
-    state[0] = input;
-    return output;
 }
 
 void ThreeDeadwheelChassisKFOdometry::update()
@@ -131,25 +107,14 @@ void ThreeDeadwheelChassisKFOdometry::update()
     float correctedPerpendicular =
         perpendicularRaw - (odoOmega * perpendicularCenterToWheelDistance);
 
-    float filteredParallelOne =
-        applyIirFilter(correctedParallelOne, parallelOneFilterState, IIR_A, IIR_B, FILTER_ORDER);
+    // Average two parallel wheels to get velocity in odometry frame
+    float Vx = (correctedParallelOne + correctedParallelTwo) / 2;
+    float Vy = correctedPerpendicular;
 
-    float filteredParallelTwo =
-        applyIirFilter(correctedParallelTwo, parallelTwoFilterState, IIR_A, IIR_B, FILTER_ORDER);
-
-    float filteredPerpendicular = applyIirFilter(
-        correctedPerpendicular,
-        perpendicularFilterState,
-        IIR_A,
-        IIR_B,
-        FILTER_ORDER);
-
-    // Correct for deadwheel orientation and average the two parallel wheels
-    float Vx = (filteredParallelOne + filteredParallelTwo) / 2;
-    float Vy = filteredPerpendicular;
-
+    // Rotate velocity from odometry frame to robot frame
     rotateVector(&Vx, &Vy, odomFrameToRobotFrame);
 
+    // Rotate velocity from robot frame to world frame
     rotateVector(&Vx, &Vy, chassisYaw.getWrappedValue());
 
     // Create the measurement vector

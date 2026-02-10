@@ -215,19 +215,7 @@ private:
     const float odomFrameToRobotFrame;
     void updateChassisStateFromKF();
 
-    static constexpr int FILTER_ORDER = 3;
-    float parallelOneFilterState[FILTER_ORDER] = {0.0f};
-    float parallelTwoFilterState[FILTER_ORDER] = {0.0f};
-    float perpendicularFilterState[FILTER_ORDER] = {0.0f};
-    float parallelNotchFilterState[3] = {0.0f};
-    float perpendicularNotchFilterState[3] = {0.0f};
-
-    static constexpr float IIR_A[FILTER_ORDER] = {1.000000f, -1.583541f, 0.656414f}; // TODO: Tune
-    static constexpr float IIR_B[FILTER_ORDER] = {0.018218f, 0.036436f, 0.018218f}; // TODO: Tune
-
     float x[int(OdomState::NUM_STATES)];
-
-    float applyIirFilter(float input, float* state, const float* a, const float* b, int order);
 };
 }  // namespace aruwsrc::algorithms::odometry
 
