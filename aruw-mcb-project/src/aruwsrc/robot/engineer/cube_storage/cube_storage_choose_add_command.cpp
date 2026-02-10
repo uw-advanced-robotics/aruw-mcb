@@ -37,7 +37,7 @@ CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(  // two const referenc
 void CubeStorageChooseAddCommand::initialize()
 {
     cubeStorage.getCubeToAdd();
-    cubeStorage.storeWristPos(nullptr);  // TODO: update; 3 motors on wrist
+    cubeStorage.storeWristPos(Transform(0,0,0,0,0,0));  // TODO: update; 3 motors on wrist
     // use transforms systems
 
     // multiply transformers here & give position to wrist

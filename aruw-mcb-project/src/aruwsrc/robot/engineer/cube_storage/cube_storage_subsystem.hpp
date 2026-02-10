@@ -69,7 +69,7 @@ public:
 protected:
     CubeOptions currentCube = CubeOptions::ERROR;
     bool hasCube[2] = {false, false};
-    Transform wristPos[2] = {null, null};
+    Transform wristPos[2] = {Transform(0,0,0,0,0,0), Transform(0,0,0,0,0,0)};
     // TODO: add vars for left and right pressure sensor
 };
 }  // namespace aruwsrc::engineer::cube_storage

@@ -124,6 +124,10 @@ bool CubeStorageSubsystem::storeWristPos(Transform newWristPosition)
     return false;
 }
 
+/**
+ * @return wrist position for current cube position as a transform
+ * if no current cube will return an empty transform
+*/
 Transform CubeStorageSubsystem::getWristPos()
 {
     if (currentCube != CubeOptions::ERROR)
@@ -134,10 +138,10 @@ Transform CubeStorageSubsystem::getWristPos()
         }
         else
         {
-            return null;
+            return Transform(0,0,0,0,0,0);
         }
     }
-    return null;
+    return Transform(0,0,0,0,0,0);
 }
 
 void CubeStorageSubsystem::checkForCubes()
