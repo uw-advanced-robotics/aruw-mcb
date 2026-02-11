@@ -25,6 +25,8 @@
 
 #include "cube_storage_subsystem.hpp"
 
+using namespace aruwsrc::control::digital;
+
 namespace aruwsrc::engineer::cube_storage
 {
 class CubePositionDigitalOutCommand : public tap::control::Command
