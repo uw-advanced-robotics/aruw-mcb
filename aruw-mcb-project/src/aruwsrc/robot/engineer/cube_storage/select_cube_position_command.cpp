@@ -31,7 +31,7 @@ SelectCubePositionCommand::SelectCubePositionCommand(  // two const references
     // TurretToSuctionTransform &turretToSuctionTransformer
     )
     : cubeStorage(cubeStorage),
-      jointSubsystem(jointSubsystem)
+      jointSubsystem(jointSubsystem), addCube(addCube)
 // turretToCubeTransformer(turretToCubeTransformer),
 // turretToSuctionTransformer(turretToSectionTransformer)
 {
