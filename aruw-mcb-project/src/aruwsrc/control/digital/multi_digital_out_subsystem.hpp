@@ -40,8 +40,8 @@ public:
     MultiDigitalOutSubsystem(
         tap::Drivers* drivers,
         tap::gpio::Digital& digital,
-        const tap::gpio::Digital::OutputPin pins[NUM_PINS],
-        const bool offStates[NUM_PINS])
+        const std::array<tap::gpio::Digital::OutputPin, NUM_PINS> pins,
+        const std::array<bool, NUM_PINS> offStates)
         : DigitalOutSubsystem(drivers, digital, pins[0], offStates[0]),
           digital(digital),
           pins(pins),
@@ -71,8 +71,8 @@ public:
 
 private:
     tap::gpio::Digital& digital;
-    const tap::gpio::Digital::OutputPin pins[NUM_PINS];
-    const bool offStates[NUM_PINS];
+    const std::array<tap::gpio::Digital::OutputPin, NUM_PINS> pins;
+    const std::array<bool, NUM_PINS> offStates;
 };  // class MultiDigitalOutSubsystem
 
 }  // namespace aruwsrc::control::digital

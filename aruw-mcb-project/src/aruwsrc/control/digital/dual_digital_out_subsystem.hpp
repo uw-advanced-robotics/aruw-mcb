@@ -22,11 +22,11 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "digital_out_subsystem.hpp"
+#include "multi_digital_out_subsystem.hpp"
 
 namespace aruwsrc::control::digital
 {
-class DualDigitalOutSubsystem : public DigitalOutSubsystem
+class DualDigitalOutSubsystem : public MultiDigitalOutSubsystem<2>
 {
 public:
     /** Creates a new DualDigitalOutSubsystem to handle two digital out pins based on the same state
@@ -44,37 +44,15 @@ public:
         const bool offStateOne,
         const tap::gpio::Digital::OutputPin pinTwo,
         const bool offStateTwo)
-        : DigitalOutSubsystem(drivers, digital, pinOne, offStateOne),
-          digital(digital),
-          pinOne(pinOne),
-          offStateOne(offStateOne),
-          pinTwo(pinTwo),
-          offStateTwo(offStateTwo)
+        : MultiDigitalOutSubsystem<2>(
+              drivers,
+              digital,
+              {{pinOne, pinTwo}},
+              {{offStateOne, offStateTwo}})
     {
-    }
-
-    inline void refresh() override {}
-
-    inline void updateStates()
-    {
-        digital.set(pinOne, getState() ^ offStateOne);
-        digital.set(pinTwo, getState() ^ offStateTwo);
-    }
-
-    inline void refreshSafeDisconnect() override
-    {
-        digital.set(pinOne, offStateOne);
-        digital.set(pinTwo, offStateTwo);
     }
 
     const char* getName() const override { return "Dual Digital Out Subsystem"; }
-
-private:
-    tap::gpio::Digital& digital;
-    const tap::gpio::Digital::OutputPin pinOne;
-    const bool offStateOne;
-    const tap::gpio::Digital::OutputPin pinTwo;
-    const bool offStateTwo;
 };  // class DualDigitalOutSubsystem
 
 }  // namespace aruwsrc::control::digital
