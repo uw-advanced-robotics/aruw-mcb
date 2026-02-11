@@ -50,13 +50,10 @@
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/select_cube_position_command.hpp"
-#include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
-#include "aruwsrc/control/digital/digital_out_command.hpp"
-#include "aruwsrc/control/digital/digital_out_subsystem.hpp"
-#include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
@@ -368,13 +365,15 @@ DualDigitalOutSubsystem leftSuckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true, tap::gpio::Digital::OutputPin::Z,
+    true,
+    tap::gpio::Digital::OutputPin::Z,
     false);
 DualDigitalOutSubsystem rightSuckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true, tap::gpio::Digital::OutputPin::Z,
+    true,
+    tap::gpio::Digital::OutputPin::Z,
     false);
 
 /* define client display / HUD related items --------------------------------*/
@@ -442,8 +441,16 @@ ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem, wr
 
 SelectCubePositionCommand selectCubeAddPositionCommand(cubeStorage, wristRollSubsystem, true);
 SelectCubePositionCommand selectCubeRemovePositionCommand(cubeStorage, wristRollSubsystem, false);
-CubePositionDigitalOutCommand cubeStorageSuckOnCommand(cubeStorage, leftSuckSubsystem, rightSuckSubsystem, true);
-CubePositionDigitalOutCommand cubeStorageSuckOffCommand(cubeStorage, leftSuckSubsystem, rightSuckSubsystem, false);
+CubePositionDigitalOutCommand cubeStorageSuckOnCommand(
+    cubeStorage,
+    leftSuckSubsystem,
+    rightSuckSubsystem,
+    true);
+CubePositionDigitalOutCommand cubeStorageSuckOffCommand(
+    cubeStorage,
+    leftSuckSubsystem,
+    rightSuckSubsystem,
+    false);
 
 SequentialCommand<4> storeCubeCommand(std::array<Command *, 4>{{
     &selectCubeAddPositionCommand,

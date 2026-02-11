@@ -22,6 +22,7 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
+
 #include "cube_storage_subsystem.hpp"
 
 namespace aruwsrc::engineer::cube_storage
@@ -29,10 +30,14 @@ namespace aruwsrc::engineer::cube_storage
 class CubePositionDigitalOutCommand : public tap::control::Command
 {
 public:
-    CubePositionDigitalOutCommand(CubeStorageSubsystem &cubeStorage, DigitalOutSubsystem& leftSubsystem, DigitalOutSubsystem& rightSubsystem, const bool state)
+    CubePositionDigitalOutCommand(
+        CubeStorageSubsystem& cubeStorage,
+        DigitalOutSubsystem& leftSubsystem,
+        DigitalOutSubsystem& rightSubsystem,
+        const bool state)
         : cubeStorage(cubeStorage),
-        leftSubsystem(leftSubsystem),
-        rightSubsystem(rightSubsystem),
+          leftSubsystem(leftSubsystem),
+          rightSubsystem(rightSubsystem),
           state(state),
           running(false)
     {
@@ -44,20 +49,25 @@ public:
 
     inline void execute() override
     {
-        if (cubeStorage.getCurrentCube() == CubeStorageSubsystem::CubeOptions::LEFT) {
+        if (cubeStorage.getCurrentCube() == CubeStorageSubsystem::CubeOptions::LEFT)
+        {
             leftSubsystem.set(state);
             running = true;
-        } else if (cubeStorage.getCurrentCube() == CubeStorageSubsystem::CubeOptions::RIGHT) {
+        }
+        else if (cubeStorage.getCurrentCube() == CubeStorageSubsystem::CubeOptions::RIGHT)
+        {
             rightSubsystem.set(state);
             running = true;
-        } else {
+        }
+        else
+        {
             running = false;
         }
     }
 
     inline void end(bool) override
     {
-        // would running still be true here? 
+        // would running still be true here?
         running = false;
     }
 
