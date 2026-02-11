@@ -20,7 +20,6 @@
 // Guys please dont make fun of me
 
 #if defined(TARGET_ENGINEER)
-#include "aruwsrc/util_macros.hpp"
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
@@ -60,6 +59,7 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/util_macros.hpp"
 
 // #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
@@ -353,7 +353,6 @@ TriggerHomedJointSubsystem extensionSubsystem(
     extensionMotor,
     extensionTrigger,
     EXTENSION_CONFIG);
-
 
 DigitalOutSubsystem suckSubsystem(
     drivers(),

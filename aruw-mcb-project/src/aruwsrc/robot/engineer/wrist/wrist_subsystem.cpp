@@ -102,8 +102,7 @@ float WristSubsystem::calculateLeftMotorOutputForTheta1Theta2(
 
     return -pidOutTheta2 - pidOutTheta1;
 }
-float WristSubsystem::calculateRightMotorOutputForTheta1(
-    float theta1Setpoint)
+float WristSubsystem::calculateRightMotorOutputForTheta1(float theta1Setpoint)
 {
     float theta1Error = encoderTheta1.getPosition().minDifference(theta1Setpoint);
     float pidOutTheta1 = pidTheta1.runController(theta1Error, encoderTheta1.getVelocity(), 2.0f);
