@@ -39,7 +39,7 @@ public:
 
     inline void execute() override {}
 
-    inline void end(bool) override { subsystem.refreshSafeDisconnect(); }
+    inline void end(bool) override {}
 
     inline bool isFinished() const override { return true; }
 
