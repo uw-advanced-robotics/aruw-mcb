@@ -18,7 +18,7 @@
  */
 
 #ifndef LIMIT_SWITCH_MENU_HPP_
-#define LIMIT_SWTICH_MENU_HPP_
+#define LIMIT_SWITCH_MENU_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/gpio/digital.hpp"
