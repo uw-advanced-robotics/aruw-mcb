@@ -88,7 +88,7 @@ public:
     communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     aruwsrc::communication::mcb_lite::MCBLite chassisMcbLite;
-    aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> turretMajorImu;
+    aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 #endif

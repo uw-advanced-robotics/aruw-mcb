@@ -52,18 +52,18 @@
 #include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-#include "aruwsrc/robot/engineer/engineer_gantry_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/sliders_indicator.hpp"
 #include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+
 // #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
@@ -249,56 +249,24 @@ tap::encoder::CanEncoder wristTheta2Encoder(
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
     false,
     1,
-    WRIST_HOME_THETA2);
+    WRIST_HOME_YAW);
 
-tap::encoder::CanEncoder wristTheta3Encoder(
+tap::motor::DjiMotor extensionMotor(
     drivers(),
-    aruwsrc::engineer::WRIST_THETA3_ENCODER_ID,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    aruwsrc::engineer::EXTENSION_MOTOR_ID,
+    aruwsrc::engineer::CAN_BUS_EXTENSION,
+    true,  // inverted? test
+    "Extension Motor",
     false,
     1,
     WRIST_HOME_THETA3);
 
-tap::motor::DjiMotor gantryLiftLeftMotor(
-    drivers(),
-    aruwsrc::engineer::GANTRY_LIFT_LEFT_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_GANTRY,
-    true,
-    "Gantry Lift Left Motor",
-    false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
-tap::motor::DjiMotor gantryLiftRightMotor(
-    drivers(),
-    aruwsrc::engineer::GANTRY_LIFT_RIGHT_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_GANTRY,
-    false,
-    "Gantry Lift Right Motor",
-    false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryLiftLimit(
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
     &drivers()->digital,
-    aruwsrc::engineer::GANTRY_LIFT_LIMIT_SWITCH_PIN,
+    aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
     true);
 
-LimitSwitchTrigger gantryLiftTrigger(&gantryLiftLimit);
-
-tap::motor::DjiMotor gantryExtensionMotor(
-    drivers(),
-    aruwsrc::engineer::GANTRY_EXTENSION_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_GANTRY,
-    true,
-    "Gantry Extension Motor",
-    false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryExtensionLimit(
-    &drivers()->digital,
-    aruwsrc::engineer::GANTRY_EXTENSION_LIMIT_SWITCH_PIN,
-    true);
-
-LimitSwitchTrigger gantryExtensionTrigger(&gantryExtensionLimit);
+LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
 
@@ -375,22 +343,13 @@ WristSubsystem wristSubsystem(
     wristTheta3Encoder,
     WRIST_CONFIG);
 
-TriggerHomedDualJointSubsystem gantryLiftSubsystem(
+TriggerHomedJointSubsystem extensionSubsystem(
     drivers(),
-    gantryLiftLeftMotor,
-    gantryLiftRightMotor,
-    gantryLiftTrigger,
-    GANTRY_LIFT_ALIGN_PID_CONFIG,
-    GANTRY_LIFT_CONFIG);
+    extensionMotor,
+    extensionTrigger,
+    EXTENSION_CONFIG);
 
-TriggerHomedJointSubsystem gantryExtensionSubsystem(
-    drivers(),
-    gantryExtensionMotor,
-    gantryExtensionTrigger,
-    GANTRY_EXTENSION_CONFIG);
-
-// NOTE: wristRollSubsystem is defined in the TARGET_ENGI_2025 block below
-// JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_CONFIG);
+JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_CONFIG);
 
 DigitalOutSubsystem suckSubsystem(
     drivers(),
@@ -408,25 +367,9 @@ DigitalOutSubsystem releaseSubsystem(
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
-SlidersIndicator slidersIndicator(
-    refSerialTransmitter,
-    gantryLiftSubsystem,
-    gantryExtensionSubsystem,
-    cubeLift,
-    wristSubsystem,
-    WRIST_CONFIG);
-
-std::vector<HudIndicator*> hudIndicators = {&slidersIndicator};
-
-aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
-    *drivers(),
-    clientDisplay,
-    hudIndicators);
-
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeLiftHome(cubeLift);
-HomingCommand gantryLiftHome(gantryLiftSubsystem);
-HomingCommand gantryExtensionHome(gantryExtensionSubsystem);
+HomingCommand extensionHome(extensionSubsystem);
 
 SetpointMoveManualCommand cubeManualControl(
     cubeLift,
@@ -434,17 +377,11 @@ SetpointMoveManualCommand cubeManualControl(
     CUBE_LIFT_MOVE_SPEED,
     SetpointType::CUBE_LIFT);
 
-SetpointMoveManualCommand gantryLiftManualControl(
-    gantryLiftSubsystem,
+SetpointMoveManualCommand extensionManualControl(
+    extensionSubsystem,
     &drivers()->controlOperatorInterface,
-    GANTRY_LIFT_MOVE_SPEED,
-    SetpointType::GANTRY_LIFT);
-
-SetpointMoveManualCommand gantryExtensionManualControl(
-    gantryExtensionSubsystem,
-    &drivers()->controlOperatorInterface,
-    GANTRY_EXTENSION_MOVE_SPEED,
-    SetpointType::GANTRY_EXTENSION);
+    EXTENSION_MOVE_SPEED,
+    SetpointType::EXTENSION);
 
 SetpointMovePositionCommand oneCubePosition(cubeLift, ONE_CUBE_SETPOINT);
 SetpointMovePositionCommand twoCubePosition(cubeLift, TWO_CUBE_SETPOINT);
@@ -480,43 +417,35 @@ DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
 DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
 
 // commands here for sequences, but setpoints never tuned
-SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
-SetpointMovePositionCommand liftDownCommand(gantryLiftSubsystem, 2);
-SetpointMovePositionCommand gantryRetractCommand(gantryExtensionSubsystem, 2);
-SetpointMovePositionCommand gantryExtendCommand(gantryExtensionSubsystem, 2);
+SetpointMovePositionCommand extensionInCommand(extensionSubsystem, 2);
+SetpointMovePositionCommand extensionOutCommand(extensionSubsystem, 2);
+
 // never tested
 CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
 SequentialCommand<10> storeCubeCommand(std::array<Command*, 10>{
-    {&liftUpCommand,
-     &gantryRetractCommand,
+    {&extensionInCommand,
      &wristFoldInCommand,
-     &liftDownCommand,
      &suckOffCommand,
      &releaseOnCommand,
-     &gantryExtendCommand,
-     &liftUpCommand,
-     &gantryRetractCommand,
+     &extensionOutCommand,
+     &extensionInCommand,
      &cubeLiftSwitchDownCommand}});
 SequentialCommand<10> retrieveCubeCommand(std::array<Command*, 10>{
-    {&liftDownCommand,
-     &gantryExtendCommand,
+    {&extensionOutCommand,
      &wristFoldInCommand,
-     &gantryRetractCommand,
+     &extensionInCommand,
      &suckOnCommand,
      &releaseOffCommand,
-     &liftUpCommand,
      &wristFoldOutCommand,
-     &liftDownCommand,
      &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
-SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
-SetpointMovePositionCommand gantryIn(gantryExtensionSubsystem, GANTRY_EXTENSION_PICKUP);
-SetpointMovePositionCommand liftScore(gantryLiftSubsystem, GANTRY_LIFT_SCORE);
-SetpointMovePositionCommand liftPickup(gantryLiftSubsystem, GANTRY_LIFT_PICKUP);
+SetpointMovePositionCommand extensionOut(extensionSubsystem, EXTENSION_SCORE);
+SetpointMovePositionCommand extensionIn(extensionSubsystem, EXTENSION_PICKUP);
+
 WristMovePositionCommand wristDown(
     wristSubsystem,
     WRIST_PITCH_PICKUP,
@@ -525,7 +454,7 @@ WristMovePositionCommand wristOut(wristSubsystem, WRIST_PITCH_SCORE, WRIST_YAW_S
 
 // NOTE: ScorePositionCommand requires wristRollSubsystem which is only available in
 // TARGET_ENGI_2025 ScorePositionCommand scorePositionCommand(
-//     gantryLiftSubsystem,
+//     extensionSubsystem,
 //     wristSubsystem,
 //     wristRollSubsystem);  // TODO: test that this works
 
@@ -534,7 +463,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 tap::control::PressCommandMapping leftUp(
     drivers(),
-    {&cubeLiftHome, &gantryLiftHome, &gantryExtensionHome},
+    {&cubeLiftHome, &extensionHome},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 tap::control::HoldCommandMapping rightMid(
@@ -554,12 +483,12 @@ tap::control::PressCommandMapping suctionToggle(
 
 tap::control::PressCommandMapping vPressed(
     drivers(),
-    {&gantryOut, &liftPickup, &wristDown},
+    {&extensionOut, &wristDown},
     RemoteMapState({Remote::Key::V}));
 
 tap::control::PressCommandMapping bPressed(
     drivers(),
-    {&gantryIn, &liftScore, &wristOut},
+    {&extensionIn, &wristOut},
     RemoteMapState({Remote::Key::B}));
 
 // following commands never tested, and still need to get working
@@ -599,8 +528,7 @@ tap::control::PressCommandMapping cubeLiftDown(
 void initializeSubsystems()
 {
     xDriveChassis.initialize();
-    gantryLiftSubsystem.initialize();
-    gantryExtensionSubsystem.initialize();
+    extensionSubsystem.initialize();
     // wristRollSubsystem.initialize();  // Only available in TARGET_ENGI_2025
     wristSubsystem.initialize();
     cubeLift.initialize();
@@ -613,8 +541,7 @@ void initializeSubsystems()
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&xDriveChassis);
-    drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
-    drivers->commandScheduler.registerSubsystem(&gantryExtensionSubsystem);
+    drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     // drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);  // Only available in
     // TARGET_ENGI_2025
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
@@ -628,6 +555,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
     xDriveChassis.setDefaultCommand(&chassisDriveCommand);
+    extensionSubsystem.setDefaultCommand(&extensionManualControl);
     gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
     gantryExtensionSubsystem.setDefaultCommand(&gantryExtensionManualControl);
     // wristSubsystem.setDefaultCommand(&wristControllerCommand);  // wristControllerCommand only

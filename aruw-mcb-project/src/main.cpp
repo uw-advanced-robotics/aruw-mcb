@@ -72,7 +72,9 @@ using namespace aruwsrc::blank;
 #elif defined(TARGET_MOTOR_TESTER)
 using namespace aruwsrc::motor_tester;
 #elif defined(TARGET_LAUNCHER_TARGET)
-using namespace aruwsrc::dart_target;
+using namespace aruwsrc::launcher_target;
+#elif defined(TARGET_FLYWHEEL_TESTING)
+using namespace aruwsrc::flywheel_testing;
 #elif defined(TARGET_CHARACTERIZER)
 using namespace aruwsrc::characterizer;
 #endif
