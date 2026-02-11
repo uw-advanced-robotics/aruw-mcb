@@ -50,6 +50,7 @@
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_remove_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/select_cube_position_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
@@ -457,7 +458,30 @@ WristMovePositionCommand wristOut(wristSubsystem, WRIST_PITCH_SCORE, WRIST_YAW_S
 ScorePositionCommand scorePositionCommand(
     extensionSubsystem,
     wristSubsystem,
-    wristRollSubsystem);  // TODO: test that this works
+    wristRollSubsystem); 
+
+SelectCubePositionCommand selectCubeAddPositionCommand(cubeStorage, wristRollSubsystem, true);
+SelectCubePositionCommand selectCubeRemovePositionCommand(cubeStorage, wristRollSubsystem, false);
+
+SequentialCommand<4> storeCubeCommand(std::array<Command *, 4>{
+    {&selectCubeAddPositionCommand, 
+    &suckOnCommand, 
+    &releaseOnCommand, 
+    // hand down
+    // hand release cube
+    // hand up
+    &centerCubePosition,
+    }});
+
+SequentialCommand<4> releaseCubeCommand(std::array<Command *, 4>{
+    {&selectCubeRemovePositionCommand, 
+    // hand suction on
+    // hand down
+    &suckOffCommand, 
+    &releaseOffCommand,
+    // hand up
+    &centerCubePosition,
+    }});
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
