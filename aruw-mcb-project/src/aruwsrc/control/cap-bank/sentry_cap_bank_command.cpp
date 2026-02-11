@@ -17,27 +17,28 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_DRIVERS_HPP_
-#define DART_DRIVERS_HPP_
+#include "sentry_cap_bank_command.hpp"
 
-#include "tap/drivers.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 
-#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
-
-namespace aruwsrc::dart
+namespace aruwsrc::control::capbank
 {
-class Drivers : public tap::Drivers
+SentryCapBankCommand::SentryCapBankCommand(
+    tap::Drivers* drivers,
+    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem)
+    : drivers(drivers),
+      capBankSubsystem(capBankSubsystem)
+
 {
-    friend class DriversSingleton;
+    addSubsystemRequirement(&capBankSubsystem);
+}
 
-#ifdef ENV_UNIT_TESTS
-public:
-#endif
-    Drivers() : tap::Drivers(), rttTelemetry(this) {}
+void SentryCapBankCommand::initialize() { capBankSubsystem.enableCapacitors(); }
 
-public:
-    communication::rtt::RttTelemetry rttTelemetry;
-};  // class aruwsrc::DartDrivers
-}  // namespace aruwsrc::dart
+void SentryCapBankCommand::execute() {}
 
-#endif  // DART_DRIVERS_HPP_
+void SentryCapBankCommand::end(bool) { capBankSubsystem.disableCapacitors(); }
+
+bool SentryCapBankCommand::isFinished() const { return false; }
+
+}  // namespace aruwsrc::control::capbank

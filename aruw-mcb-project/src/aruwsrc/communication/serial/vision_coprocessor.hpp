@@ -45,6 +45,11 @@ namespace aruwsrc::control::turret
 class TurretOrientationInterface;
 }
 
+namespace aruwsrc::communication::rtt
+{
+class RttTelemetry;
+}  // namespace aruwsrc::communication::rtt
+
 namespace aruwsrc::communication::serial
 {
 /**
@@ -461,6 +466,11 @@ public:
      */
     mockable bool isCvOnline() const;
 
+    void setTelemetry(aruwsrc::communication::rtt::RttTelemetry* telemetry)
+    {
+        this->telemetry = telemetry;
+    }
+
     /**
      * @param[in] turretID The zero-indexed turret ID that will be used to identify which aim data
      * the will be used. In particular, the turret ID should identify different turret hardware. The
@@ -557,6 +567,9 @@ public:
 
     // @todo private should not be here
 private:
+    void logVisionTelemetry();
+    void logRefereeTelemetry();
+
     enum TxMessageTypes
     {
         CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
@@ -659,6 +672,8 @@ private:
     tap::arch::MilliTimeout cvOfflineTimeout;
 
     aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer;
+
+    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
 
     aruwsrc::control::chassis::ChassisAutoNavController* autoNavController = nullptr;
 
