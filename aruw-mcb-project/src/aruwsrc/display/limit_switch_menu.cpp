@@ -18,55 +18,56 @@
  */
 
 #include "limit_switch_menu.hpp"
-#include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
+
 #include <algorithm>
 #include <cmath>
+
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/drivers.hpp"
+
+#include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 
 using namespace aruwsrc::communication::sensors::beam_break;
 
 namespace aruwsrc::display
 {
-
 LimitSwitchMenu::LimitSwitchMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* stack,
-    tap::Drivers *drivers)
+    tap::Drivers* drivers)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, LIMIT_SWITCH_MENU_ID),
       drivers(drivers)
 {
 }
- 
 
 void LimitSwitchMenu::drawLimitSwitch(tap::gpio::Digital::InputPin pin)
 {
     DigitalBeamBreak beamBreak(&drivers->digital, pin, false);
     const char* pinName = "";
 
-    try {
+    try
+    {
         std::size_t idx = static_cast<std::size_t>(pin);
-        pinName = InputPinNames.at(idx).data(); 
+        pinName = InputPinNames.at(idx).data();
     }
-    catch (const std::out_of_range&) {
+    catch (const std::out_of_range&)
+    {
         pinName = "UNKNOWN PIN";
     }
 
-
     getViewStack()->getDisplay() << "Pin " << pinName << ": ";
-    
+
     if (beamBreak.getLimitSwitchDepressed())
     {
         getViewStack()->getDisplay() << "1";
-        pins[pin] = 1;  
+        pins[pin] = 1;
     }
     else
     {
         getViewStack()->getDisplay() << "0";
-        pins[pin] = 0;  
+        pins[pin] = 0;
     }
 
-    
     getViewStack()->getDisplay() << modm::endl;
 }
 
@@ -77,34 +78,35 @@ void LimitSwitchMenu::draw()
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
-    
-
-    for (const auto& [pin,status] : pins) {
-    
+    for (const auto& [pin, status] : pins)
+    {
         drawLimitSwitch(pin);
     }
-
 }
 
 void LimitSwitchMenu::update() {}
 
 bool LimitSwitchMenu::hasChanged()
 {
-    for (auto& [pin, status] : pins) {
-        
+    for (auto& [pin, status] : pins)
+    {
         DigitalBeamBreak beamBreak(&(drivers->digital), pin, false);
         int currState = -1;
-        if (beamBreak.getLimitSwitchDepressed()) {
+        if (beamBreak.getLimitSwitchDepressed())
+        {
             currState = 1;
-        } else {
+        }
+        else
+        {
             currState = 0;
         }
-        
-        if (currState != status) {
+
+        if (currState != status)
+        {
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -115,5 +117,4 @@ void LimitSwitchMenu::shortButtonPress(modm::MenuButtons::Button button)
         this->remove();
     }
 }
-}  // namespace display
-
+}  // namespace aruwsrc::display

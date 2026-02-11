@@ -33,11 +33,11 @@
 
 #include "about_menu.hpp"
 #include "autotune_menu.hpp"
-#include "limit_switch_menu.hpp"
 #include "capacitor_bank_menu.hpp"
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
+#include "limit_switch_menu.hpp"
 #include "mcb_lite_menu.hpp"
 #include "sentry_strategy_menu.hpp"
 #include "turret_mcb_menu.hpp"
