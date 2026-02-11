@@ -99,7 +99,7 @@ static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 100.0f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
+static constexpr float LAUNCHER_PID_MAX_OUTPUT = 15'500.0f;
 #endif
 
 static constexpr tap::algorithms::SmoothPidConfig VELOCITY_PID_CONFIG(
