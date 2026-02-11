@@ -75,9 +75,11 @@ public:
         float distance;
         /// The expected time-of-flight until impact (in seconds).
         float timeOfFlight;
-        /// Start of the shot timing window (absolute timestamp in microseconds), valid when usePulseEstimation is true.
+        /// Start of the shot timing window (absolute timestamp in microseconds), valid when
+        /// usePulseEstimation is true.
         uint64_t shotWindowStart;
-        /// End of the shot timing window (absolute timestamp in microseconds), valid when usePulseEstimation is true.
+        /// End of the shot timing window (absolute timestamp in microseconds), valid when
+        /// usePulseEstimation is true.
         uint64_t shotWindowEnd;
         /// Whether pulse estimation is being used (omega above threshold).
         bool usePulseEstimation;
@@ -141,7 +143,7 @@ public:
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID,
-        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
+        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -167,7 +169,7 @@ public:
     const uint8_t turretID;
 
 private:
-    aruwsrc::communication::rtt::RttTelemetry* telemetry;
+    aruwsrc::communication::rtt::RttTelemetry *telemetry;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
@@ -178,9 +180,9 @@ private:
      * determine shot timing window based on robot rotation.
      */
     std::optional<BallisticsSolution> computePulseEstimation(
-        const communication::serial::VisionCoprocessor::PositionData& projectedAimPosData,
-        const modm::Vector3f& turretPosition,
-        const modm::Vector2f& chassisVel,
+        const communication::serial::VisionCoprocessor::PositionData &projectedAimPosData,
+        const modm::Vector3f &turretPosition,
+        const modm::Vector2f &chassisVel,
         float launchSpeed);
 };
 }  // namespace aruwsrc::algorithms

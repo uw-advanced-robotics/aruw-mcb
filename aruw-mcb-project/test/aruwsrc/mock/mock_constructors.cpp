@@ -21,12 +21,12 @@
 #include "beyblade_command_mock.hpp"
 #include "capacitor_bank_mock.hpp"
 #include "chassis_drive_command_mock.hpp"
+#include "cv_ballistics_solver_mock.hpp"
 #include "cv_on_target_governor_mock.hpp"
 #include "friction_wheel_subsystem_mock.hpp"
 #include "hopper_subsystem_mock.hpp"
 #include "mecanum_chassis_subsystem_mock.hpp"
 #include "oled_display_mock.hpp"
-#include "cv_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "robot_turret_subsystem_mock.hpp"
 #include "sentry_request_subsystem_mock.hpp"
@@ -327,7 +327,7 @@ CvBallisticsSolverMock::CvBallisticsSolverMock(
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID,
-    aruwsrc::communication::rtt::RttTelemetry* telemetry)
+    aruwsrc::communication::rtt::RttTelemetry *telemetry)
     : aruwsrc::algorithms::CvBallisticsSolver(
           visionCoprocessor,
           odometryInterface,

@@ -34,12 +34,12 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
-#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
@@ -283,8 +283,8 @@ CvBallisticsSolver ballisticsSolver(
     odometrySubsystem,
     turret,
     frictionWheelSpeedPredictor,
-    15.0f,                   // defaultLaunchSpeed
-    0,                       // turretID
+    15.0f,                    // defaultLaunchSpeed
+    0,                        // turretID
     &drivers()->rttTelemetry  // telemetry
 );
 AutoAimLaunchTimer autoAimLaunchTimer(

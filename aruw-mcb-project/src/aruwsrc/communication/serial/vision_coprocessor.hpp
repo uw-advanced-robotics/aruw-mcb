@@ -202,7 +202,7 @@ public:
             // Avoid division by zero
             if (rMagSquared < 1e-6f)
             {
-            return omega;
+                return omega;
             }
 
             float omegaFromTranslation = crossProductZ / rMagSquared;
@@ -228,7 +228,7 @@ public:
         {
             // Minimum fire window duration to be considered valid (100ms)
             constexpr float MIN_FIRE_WINDOW_S = 0.1f;
-            
+
             uint8_t bestPlate = 0;
             float bestTimeDifference = 1e9f;  // Large initial value
             bool foundValidPlate = false;
@@ -238,14 +238,14 @@ public:
             {
                 // Calculate actual angular position of plate i
                 float plateAngle = currentTheta + i * M_PI_2;
-                
+
                 // Angular distance from plate to aim line
                 float angularOffset = plateAngle - aimAngle;
-                
+
                 // Normalize to [-π, π]
                 while (angularOffset > M_PI) angularOffset -= 2.0f * M_PI;
                 while (angularOffset < -M_PI) angularOffset += 2.0f * M_PI;
-                
+
                 // Calculate time for plate center to reach aim line
                 float timeToCenterEdge;
                 if (omegaTotal > 0)
@@ -266,16 +266,17 @@ public:
                         // Plate is ahead, subtract full rotation
                         angularOffset -= 2.0f * M_PI;
                     }
-                    timeToCenterEdge = angularOffset / omegaTotal;  // angularOffset negative, omega negative
+                    timeToCenterEdge =
+                        angularOffset / omegaTotal;  // angularOffset negative, omega negative
                 }
-                
+
                 // Calculate when we'd need to fire to hit this plate
                 // We need the far edge time to determine if the fire window is still open
                 float plateAngularWidth = plateWidth / radius;
                 float halfWidthTime = (plateAngularWidth / 2.0f) / fabsf(omegaTotal);
                 float timeToFarEdge = timeToCenterEdge + halfWidthTime;
                 float fireWindowEnd = timeToFarEdge - timeOfFlight;
-                
+
                 // Only consider plates whose fire window hasn't closed yet
                 // (with minimum window requirement)
                 if (fireWindowEnd >= MIN_FIRE_WINDOW_S)

@@ -41,7 +41,7 @@ CvBallisticsSolver::CvBallisticsSolver(
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID,
-    aruwsrc::communication::rtt::RttTelemetry* telemetry)
+    aruwsrc::communication::rtt::RttTelemetry *telemetry)
     : visionCoprocessor(visionCoprocessor),
       odometryInterface(odometryInterface),
       turretSubsystem(turretSubsystem),
@@ -52,8 +52,7 @@ CvBallisticsSolver::CvBallisticsSolver(
 {
 }
 
-std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
-    computeTurretAimAngles()
+std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computeTurretAimAngles()
 {
     const auto &aimData = visionCoprocessor.getLastAimData(turretID);
 
@@ -62,7 +61,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
         telemetry->logSignal("ballistics:cv_online", visionCoprocessor.isCvOnline());
         telemetry->logSignal("ballistics:aim_updated", aimData.pva.updated);
     }
-    
+
     // Verify that CV is actually online and that the aimData had a target
     if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
     {
@@ -83,7 +82,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
         {
             launchSpeed = defaultLaunchSpeed;
         }
-        
+
         if (telemetry)
         {
             telemetry->logSignal("ballistics:launch_speed", launchSpeed);
@@ -122,11 +121,19 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
         // project the target position forward in time s.t. we are computing a ballistics
         // solution for a target "now" rather than whenever the camera saw the target
         auto projectedAimPosData = aimData.pva.projectForward(projectForwardTimeDt / 1E6f);
-        
+
         if (telemetry)
         {
-            telemetry->logSignal("ballistics:target_pos", projectedAimPosData.xPos, projectedAimPosData.yPos, projectedAimPosData.zPos);
-            telemetry->logSignal("ballistics:target_vel", projectedAimPosData.xVel, projectedAimPosData.yVel, projectedAimPosData.zVel);
+            telemetry->logSignal(
+                "ballistics:target_pos",
+                projectedAimPosData.xPos,
+                projectedAimPosData.yPos,
+                projectedAimPosData.zPos);
+            telemetry->logSignal(
+                "ballistics:target_vel",
+                projectedAimPosData.xVel,
+                projectedAimPosData.yVel,
+                projectedAimPosData.zVel);
             telemetry->logSignal("ballistics:omega", projectedAimPosData.omega);
             telemetry->logSignal("ballistics:theta", projectedAimPosData.theta);
         }
@@ -137,20 +144,25 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
             lastComputedSolution = std::nullopt;
             for (int i = 0; i < 4; i++)
             {
-                float currRadius = (i % 2 == 0) ? projectedAimPosData.rad0 : projectedAimPosData.rad1;
+                float currRadius =
+                    (i % 2 == 0) ? projectedAimPosData.rad0 : projectedAimPosData.rad1;
                 float currTheta = projectedAimPosData.theta + M_PI_2 * i;
 
-                aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState targetState(
-                    {projectedAimPosData.xPos + currRadius * cos(currTheta) - turretPosition.x,
-                     projectedAimPosData.yPos + currRadius * sin(currTheta) - turretPosition.y,
-                     projectedAimPosData.zPos + projectedAimPosData.plateHeights[i] - turretPosition.z},
-                    {projectedAimPosData.xVel - chassisVel.x,
-                     projectedAimPosData.yVel - chassisVel.y,
-                     projectedAimPosData.zVel},
-                    {projectedAimPosData.xAcc, projectedAimPosData.yAcc, projectedAimPosData.zAcc},
-                    currRadius,
-                    currTheta,
-                    projectedAimPosData.omega);
+                aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState
+                    targetState(
+                        {projectedAimPosData.xPos + currRadius * cos(currTheta) - turretPosition.x,
+                         projectedAimPosData.yPos + currRadius * sin(currTheta) - turretPosition.y,
+                         projectedAimPosData.zPos + projectedAimPosData.plateHeights[i] -
+                             turretPosition.z},
+                        {projectedAimPosData.xVel - chassisVel.x,
+                         projectedAimPosData.yVel - chassisVel.y,
+                         projectedAimPosData.zVel},
+                        {projectedAimPosData.xAcc,
+                         projectedAimPosData.yAcc,
+                         projectedAimPosData.zAcc},
+                        currRadius,
+                        currTheta,
+                        projectedAimPosData.omega);
 
                 BallisticsSolution currentSolution = BallisticsSolution();
                 currentSolution.distance = targetState.position.getLength();
@@ -178,7 +190,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
                     }
                 }
             }
-            
+
             if (telemetry)
             {
                 if (lastComputedSolution)
@@ -193,30 +205,34 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
         else
         {
             // Use pulse estimation for fast rotating targets
-            
+
             // Check if we already have a valid pulse estimation solution with an open fire window
             uint64_t currentTimeMicros = tap::arch::clock::getTimeMicroseconds();
-            bool hasValidPulseSolution = lastComputedSolution.has_value() && 
+            bool hasValidPulseSolution = lastComputedSolution.has_value() &&
                                          lastComputedSolution->usePulseEstimation &&
                                          currentTimeMicros <= lastComputedSolution->shotWindowEnd;
-            
+
             // Discard pulse solution if omega has dropped below threshold
             bool omegaBelowThreshold = fabsf(projectedAimPosData.omega) < OMEGA_THRESHOLD;
-            
+
             if (hasValidPulseSolution && !omegaBelowThreshold)
             {
                 // Keep existing solution - fire window is still open and omega still high
                 // Don't recalculate, this prevents constantly changing target plates
                 if (telemetry)
                 {
-                    uint64_t timeRemaining = lastComputedSolution->shotWindowEnd - currentTimeMicros;
-                    telemetry->logSignal("ballistics:pulse_window_remaining_us", static_cast<float>(timeRemaining));
+                    uint64_t timeRemaining =
+                        lastComputedSolution->shotWindowEnd - currentTimeMicros;
+                    telemetry->logSignal(
+                        "ballistics:pulse_window_remaining_us",
+                        static_cast<float>(timeRemaining));
                 }
                 return lastComputedSolution;
             }
             else
             {
-                // Either no existing solution, fire window closed, or omega dropped, so compute new solution
+                // Either no existing solution, fire window closed, or omega dropped, so compute new
+                // solution
                 lastComputedSolution = computePulseEstimation(
                     projectedAimPosData,
                     turretPosition,
@@ -229,18 +245,17 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
     return lastComputedSolution;
 }
 
-std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
-    computePulseEstimation(
-        const communication::serial::VisionCoprocessor::PositionData& projectedAimPosData,
-        const modm::Vector3f& turretPosition,
-        const modm::Vector2f& chassisVel,
-        float launchSpeed)
+std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computePulseEstimation(
+    const communication::serial::VisionCoprocessor::PositionData &projectedAimPosData,
+    const modm::Vector3f &turretPosition,
+    const modm::Vector2f &chassisVel,
+    float launchSpeed)
 {
     // Pulse Estimation:
     // 1. Estimate ToF using simple distance/launch_speed calculation
     // 2. Compute omega_total accounting for both rotation and translation
     // 3. Determine which plate will be "active" (shootable) at time ToF
-    // 4. Compute accurate ballistics solution for active plate 
+    // 4. Compute accurate ballistics solution for active plate
     // 5. Calculate shot timing window accounting for plate width and omega_total
 
     // Estimate approximate distance and ToF to robot center
@@ -249,7 +264,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
         projectedAimPosData.xPos + avgRadius * cos(projectedAimPosData.theta) - turretPosition.x,
         projectedAimPosData.yPos + avgRadius * sin(projectedAimPosData.theta) - turretPosition.y,
         projectedAimPosData.zPos - turretPosition.z);
-    
+
     float approxDistance = robotCenterPos.getLength();
     float estimatedToF = approxDistance / launchSpeed;
 
@@ -274,7 +289,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
 
     // Compute omega_total accounting for both rotation and translation
     float omegaTotal = tempState.computeOmegaTotal(robotPos3D, robotVel3D);
-    
+
     if (telemetry)
     {
         telemetry->logSignal("ballistics:pulse_omega_robot", projectedAimPosData.omega);
@@ -298,12 +313,12 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
 
     // Determine active plate based on omega_total and estimated ToF
     uint8_t activePlateIndex = tempState.determineActivePlate(
-        omegaTotal, 
-        estimatedToF, 
+        omegaTotal,
+        estimatedToF,
         PLATE_WIDTH,
         aimAngle,
         projectedAimPosData.theta);
-    
+
     if (telemetry)
     {
         telemetry->logSignal("ballistics:pulse_active_plate", static_cast<int>(activePlateIndex));
@@ -316,9 +331,10 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
     // 1. Linear motion of robot center (constant acceleration)
     // 2. Rotational motion of the plate around the center (constant angular velocity)
     float activePlateHeight = projectedAimPosData.plateHeights[activePlateIndex];
-    float activePlateRadius = (activePlateIndex % 2 == 0) ? projectedAimPosData.rad0 : projectedAimPosData.rad1;
+    float activePlateRadius =
+        (activePlateIndex % 2 == 0) ? projectedAimPosData.rad0 : projectedAimPosData.rad1;
     float activePlateTheta = projectedAimPosData.theta + activePlateIndex * M_PI_2;
-    
+
     // Active plate's current position (robot center + rotational offset)
     aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState activePlateState(
         {projectedAimPosData.xPos + activePlateRadius * cos(activePlateTheta) - turretPosition.x,
@@ -352,7 +368,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
         }
         return std::nullopt;
     }
-    
+
     if (telemetry)
     {
         telemetry->logSignal("ballistics:pulse_yaw", solution.yawAngle);
@@ -368,14 +384,14 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
     // Calculate when the active plate's CENTER will actually cross the aim line
     // Plate i is at angle: theta + i*π/2
     float activePlateAngle = projectedAimPosData.theta + activePlateIndex * M_PI_2;
-    
+
     // Angular distance from plate to aim line
     float angularOffset = activePlateAngle - aimAngle;
-    
+
     // Normalize to [-π, π]
     while (angularOffset > M_PI) angularOffset -= 2.0f * M_PI;
     while (angularOffset < -M_PI) angularOffset += 2.0f * M_PI;
-    
+
     // Calculate time for plate center to cross aim line
     float timeToPlateCenterCrossing;
     if (omegaTotal > 0)
@@ -407,26 +423,29 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
     // Convert to absolute timestamps in microseconds
     // Shot window is when we should fire
     uint64_t currentTimeMicros = tap::arch::clock::getTimeMicroseconds();
-    
+
     // We need to fire early enough that projectile arrives during plate crossing
     // Fire time = (plate crossing time) - (time of flight)
     float fireWindowStart = timeToCloseEdge - solution.timeOfFlight;
     float fireWindowEnd = timeToFarEdge - solution.timeOfFlight;
-    
+
     // Clamp to future times only (can't fire in the past)
     float startOffsetSeconds = (fireWindowStart > 0.0f) ? fireWindowStart : 0.0f;
-    float endOffsetSeconds = (fireWindowEnd > startOffsetSeconds) ? fireWindowEnd : startOffsetSeconds;
-    
+    float endOffsetSeconds =
+        (fireWindowEnd > startOffsetSeconds) ? fireWindowEnd : startOffsetSeconds;
+
     solution.shotWindowStart = currentTimeMicros + static_cast<uint64_t>(startOffsetSeconds * 1e6f);
     solution.shotWindowEnd = currentTimeMicros + static_cast<uint64_t>(endOffsetSeconds * 1e6f);
-    
+
     if (telemetry)
     {
         telemetry->logSignal("ballistics:pulse_angular_offset", angularOffset);
         telemetry->logSignal("ballistics:pulse_time_to_crossing", timeToPlateCenterCrossing);
         telemetry->logSignal("ballistics:pulse_window_start_offset", startOffsetSeconds);
         telemetry->logSignal("ballistics:pulse_window_end_offset", endOffsetSeconds);
-        telemetry->logSignal("ballistics:pulse_window_duration", endOffsetSeconds - startOffsetSeconds);
+        telemetry->logSignal(
+            "ballistics:pulse_window_duration",
+            endOffsetSeconds - startOffsetSeconds);
     }
 
     return solution;

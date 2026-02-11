@@ -51,7 +51,7 @@ namespace tap::errors
     {                                                                             \
         tap::errors::SystemError stringError(desc, __LINE__, __FILE__);           \
         (drivers)->errorController.addToErrorList(stringError);                   \
-            aruwsrc::communication::rtt::RttErrorHelper::logError((telemetry), desc); \
+        aruwsrc::communication::rtt::RttErrorHelper::logError((telemetry), desc); \
     } while (0)
 
 }  // namespace tap::errors

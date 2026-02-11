@@ -41,7 +41,7 @@ public:
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID,
-        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
+        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
     virtual ~CvBallisticsSolverMock();
 
     MOCK_METHOD(

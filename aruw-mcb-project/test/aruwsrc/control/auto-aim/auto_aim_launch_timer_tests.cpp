@@ -636,8 +636,8 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_within_window_allows_fire)
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
-        .shotWindowStart = 400'000,   // 400ms (before now)
-        .shotWindowEnd = 600'000,     // 600ms (after now)
+        .shotWindowStart = 400'000,  // 400ms (before now)
+        .shotWindowEnd = 600'000,    // 600ms (after now)
         .usePulseEstimation = true,
         .activePlateIndex = 1};
     EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
@@ -663,8 +663,8 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_before_window_denies_fire)
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
-        .shotWindowStart = 400'000,   // 400ms (after now)
-        .shotWindowEnd = 600'000,     // 600ms (after now)
+        .shotWindowStart = 400'000,  // 400ms (after now)
+        .shotWindowEnd = 600'000,    // 600ms (after now)
         .usePulseEstimation = true,
         .activePlateIndex = 1};
     EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
@@ -690,8 +690,8 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_after_window_denies_fire)
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
-        .shotWindowStart = 400'000,   // 400ms (before now)
-        .shotWindowEnd = 600'000,     // 600ms (before now)
+        .shotWindowStart = 400'000,  // 400ms (before now)
+        .shotWindowEnd = 600'000,    // 600ms (before now)
         .usePulseEstimation = true,
         .activePlateIndex = 1};
     EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
@@ -717,7 +717,7 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_with_agitator_delay_within_windo
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
-        .shotWindowStart = 450'000,   // Accounting for agitator delay
+        .shotWindowStart = 450'000,  // Accounting for agitator delay
         .shotWindowEnd = 650'000,
         .usePulseEstimation = true,
         .activePlateIndex = 1};

@@ -315,7 +315,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_persists_within_window)
     auto firstSolution = solution;
 
     // Advance time but stay within shot window
-    clock.time = 150000;  // 50ms later
+    clock.time = 150000;      // 50ms later
     aimData.timestamp = 101;  // New aim data
 
     solution = solver.computeTurretAimAngles();

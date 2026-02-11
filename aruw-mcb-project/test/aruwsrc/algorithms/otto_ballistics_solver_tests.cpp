@@ -315,7 +315,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_persists_within_window)
     auto firstSolution = solution;
 
     // Advance time but stay within shot window
-    clock.time = 150000;  // 50ms later
+    clock.time = 150000;      // 50ms later
     aimData.timestamp = 101;  // New aim data
 
     solution = solver.computeTurretAimAngles();
@@ -412,7 +412,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_selects_correct_plate_based_on
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
     EXPECT_TRUE(solution->usePulseEstimation);
-    
+
     // With theta=pi and omega=1.5 rad/s, and ToF ~= 3/15 = 0.2s
     // In 0.2s, robot rotates ~0.3 rad (17 degrees) - not enough for plate 2
     // So plate 0 or plate 1 should be selected (closest to arriving)
@@ -445,7 +445,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_plate_at_different_angles_sele
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
     EXPECT_TRUE(solution->usePulseEstimation);
-    
+
     // Plate 0 is currently at aim line, but likely already passing
     // The algorithm should select the next valid plate
     EXPECT_GE(solution->activePlateIndex, 0);
@@ -477,12 +477,12 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_yaw_aims_at_active_plate_not_c
 
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
-    
+
     // The yaw should point at the active plate's position, not just robot center
     // For a robot with significant radius, this should be measurably different
     // Center angle would be atan2(2, 2) = 0.7854 rad (45 deg)
     float centerAngle = atan2f(2.0f, 2.0f);
-    
+
     // If active plate is not 0, yaw should differ from center angle
     // (unless by coincidence the plate is at center angle)
     if (solution->activePlateIndex != 0 && solution->activePlateIndex != 2)
@@ -514,7 +514,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_clockwise_rotation_timing)
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
     EXPECT_TRUE(solution->usePulseEstimation);
-    
+
     // Should handle clockwise rotation correctly
     EXPECT_GE(solution->activePlateIndex, 0);
     EXPECT_LE(solution->activePlateIndex, 3);
@@ -548,7 +548,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_moving_robot_omega_total_diffe
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
     EXPECT_TRUE(solution->usePulseEstimation);
-    
+
     // Shot window should be valid and account for omega_total
     EXPECT_GT(solution->shotWindowEnd, solution->shotWindowStart);
     EXPECT_GE(solution->shotWindowStart, clock.time);
@@ -577,12 +577,12 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_shot_window_accounts_for_plate
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
     EXPECT_TRUE(solution->usePulseEstimation);
-    
+
     // Plate angular width = 0.135m / 0.2m = 0.675 rad
     // Time for plate to cross = 0.675 / 2.0 = 0.3375s = 337500 us
     // Fire window should be approximately this duration
     uint64_t windowDuration = solution->shotWindowEnd - solution->shotWindowStart;
-    
+
     // Window should be reasonable (between 100ms and 500ms for this configuration)
     EXPECT_GT(windowDuration, 100000);  // > 100ms
     EXPECT_LT(windowDuration, 500000);  // < 500ms
@@ -611,7 +611,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_with_different_plate_radii)
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
     EXPECT_TRUE(solution->usePulseEstimation);
-    
+
     // Solution should account for the active plate's specific radius
     // Smaller radius (0.15m) → larger angular width (0.135/0.15 = 0.9 rad)
     // Larger radius (0.25m) → smaller angular width (0.135/0.25 = 0.54 rad)
@@ -635,7 +635,7 @@ TEST(RobotOrbitKinematicStateTest, projectForward_plate_at_zero_angle)
         1.0f);               // Omega = 1 rad/s CCW
 
     auto futurePos = state.projectForward(1.0f);
-    
+
     // Center stays at (2, 0)
     // Plate rotates to angle 1 rad
     // New position: (2 + 0.5*cos(1), 0 + 0.5*sin(1))
@@ -655,11 +655,11 @@ TEST(RobotOrbitKinematicStateTest, projectForward_plate_at_90_degrees)
         {0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f},
         0.5f,
-        M_PI_2,       // Theta = 90 degrees (pointing up)
-        2.0f);        // Omega = 2 rad/s
+        M_PI_2,  // Theta = 90 degrees (pointing up)
+        2.0f);   // Omega = 2 rad/s
 
     auto futurePos = state.projectForward(0.5f);
-    
+
     // After 0.5s: angle = pi/2 + 2*0.5 = pi/2 + 1
     float futureAngle = M_PI_2 + 1.0f;
     EXPECT_NEAR(2.0f + 0.5f * cosf(futureAngle), futurePos.x, 1e-4f);
@@ -682,7 +682,7 @@ TEST(RobotOrbitKinematicStateTest, projectForward_with_linear_motion)
         1.0f);
 
     auto futurePos = state.projectForward(1.0f);
-    
+
     // Center moves to (3, 1, 0.5)
     // Plate offset: radius * (cos(1), sin(1))
     EXPECT_NEAR(3.0f + 0.5f * cosf(1.0f), futurePos.x, 1e-4f);
@@ -703,7 +703,7 @@ TEST(RobotOrbitKinematicStateTest, projectForward_with_acceleration)
         0.5f);
 
     auto futurePos = state.projectForward(2.0f);
-    
+
     // Center x: 0 + 1*2 + 0.5*2*4 = 2 + 4 = 6
     // Plate at angle pi + 0.5*2 = pi + 1
     EXPECT_NEAR(6.0f + 0.3f * cosf(M_PI + 1.0f), futurePos.x, 1e-4f);
@@ -721,7 +721,7 @@ TEST(RobotOrbitKinematicStateTest, projectForward_clockwise_rotation)
         -1.0f);  // Clockwise
 
     auto futurePos = state.projectForward(1.0f);
-    
+
     // Angle after 1s: pi/2 - 1
     float futureAngle = M_PI_2 - 1.0f;
     EXPECT_NEAR(0.4f * cosf(futureAngle), futurePos.x, 1e-4f);
@@ -742,9 +742,9 @@ TEST(RobotOrbitKinematicStateTest, computeOmegaTotal_pure_rotation)
 
     modm::Vector3f robotPos(2.0f, 0.0f, 0.0f);
     modm::Vector3f robotVel(0.0f, 0.0f, 0.0f);
-    
+
     float omegaTotal = state.computeOmegaTotal(robotPos, robotVel);
-    
+
     EXPECT_NEAR(1.5f, omegaTotal, 1e-4f);
 }
 
@@ -765,9 +765,9 @@ TEST(RobotOrbitKinematicStateTest, computeOmegaTotal_with_tangential_velocity)
 
     modm::Vector3f robotPos(2.0f, 0.0f, 0.0f);
     modm::Vector3f robotVel(0.0f, 2.0f, 0.0f);  // Moving perpendicular
-    
+
     float omegaTotal = state.computeOmegaTotal(robotPos, robotVel);
-    
+
     // omega_total = 0.5 + 1.0 = 1.5
     EXPECT_NEAR(1.5f, omegaTotal, 1e-4f);
 }
@@ -777,19 +777,14 @@ TEST(RobotOrbitKinematicStateTest, computeOmegaTotal_radial_velocity_no_contribu
     // Velocity purely radial (toward/away from us) contributes 0 to omega
     // r = (2, 0, 0), v = (1, 0, 0) (radial)
     // r × v = (0, 0, 0)
-    aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState state(
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f},
-        0.5f,
-        0.0f,
-        2.0f);
+    aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState
+        state({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 0.5f, 0.0f, 2.0f);
 
     modm::Vector3f robotPos(3.0f, 0.0f, 0.0f);
     modm::Vector3f robotVel(2.0f, 0.0f, 0.0f);  // Moving radially
-    
+
     float omegaTotal = state.computeOmegaTotal(robotPos, robotVel);
-    
+
     // Should equal omega_robot since radial velocity contributes nothing
     EXPECT_NEAR(2.0f, omegaTotal, 1e-4f);
 }
