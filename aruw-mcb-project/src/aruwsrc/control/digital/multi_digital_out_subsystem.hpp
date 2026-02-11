@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef NARY_DIGITAL_OUT_SUBSYSTEM_HPP_
-#define NARY_DIGITAL_OUT_SUBSYSTEM_HPP_
+#ifndef MULTI_DIGITAL_OUT_SUBSYSTEM_HPP_
+#define MULTI_DIGITAL_OUT_SUBSYSTEM_HPP_
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/subsystem.hpp"
@@ -27,7 +27,7 @@
 namespace aruwsrc::control::digital
 {
 template <uint16_t NUM_PINS>
-class NaryDigitalOutSubsystem : public DigitalOutSubsystem
+class MultiDigitalOutSubsystem : public DigitalOutSubsystem
 {
 public:
     /** Creates a new NaryDigitalOutSubsystem to handle n-number digital out pins tied to the same
@@ -37,7 +37,7 @@ public:
      * @param[in] offStates state pins should be in when off, based on order of pins. Also of size
      * NUM_PINS offStates[0] is the initial state of the subsystem so be intentional
      */
-    NaryDigitalOutSubsystem(
+    MultiDigitalOutSubsystem(
         tap::Drivers* drivers,
         tap::gpio::Digital& digital,
         const tap::gpio::Digital::OutputPin pins[NUM_PINS],
@@ -73,7 +73,7 @@ private:
     tap::gpio::Digital& digital;
     const tap::gpio::Digital::OutputPin pins[NUM_PINS];
     const bool offStates[NUM_PINS];
-};  // class NaryDigitalOutSubsystem
+};  // class MultiDigitalOutSubsystem
 
 }  // namespace aruwsrc::control::digital
-#endif  // NARY_DIGITAL_OUT_SUBSYSTEM_HPP_
+#endif  // MULTI_DIGITAL_OUT_SUBSYSTEM_HPP_
