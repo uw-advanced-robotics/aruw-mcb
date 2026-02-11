@@ -141,6 +141,4 @@ void ChassisAutoNavController::pushPoint(Position newPoint){
     path->pushPoint(newPoint);
 }
 
-bool ChassisAutoNavController
-
 }  // namespace aruwsrc::control::chassis

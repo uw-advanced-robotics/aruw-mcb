@@ -33,7 +33,7 @@ namespace aruwsrc::control::chassis
             PushAutoNavPointCommand(
                 const tap::Drivers& drivers,
                 aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-                aruwsrc::algorithms::AutoNavPath* path
+                Position point
             );
             void initialize() override;
             void execute() override;
@@ -44,7 +44,7 @@ namespace aruwsrc::control::chassis
         private:
             const tap::Drivers& drivers;
             aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
-            aruwsrc::algorithms::AutoNavPath* path;
+            Position point;
     };
 }
 

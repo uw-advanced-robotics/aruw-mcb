@@ -24,14 +24,14 @@ namespace aruwsrc::control::chassis
     PushAutoNavPointCommand::PushAutoNavPointCommand(
         const tap::Drivers& drivers,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-        aruwsrc::algorithms::AutoNavPath* path)
+        Position point)
         : drivers(drivers),
           autoNavController(autoNavController),
-          path(path)
+          point(point)
     {
     }
 
-    void PushAutoNavPointCommand::initialize() { autoNavController.attachPath(path); }
+    void PushAutoNavPointCommand::initialize() { autoNavController.pushPoint(point); }
 
     bool PushAutoNavPointCommand::isFinished() const { return true;}
 }

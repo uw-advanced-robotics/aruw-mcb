@@ -319,8 +319,12 @@ AutoNavCommand autoNavCommand(
 PushAutoNavPointCommand pushAutoNavPointX1Y1(
     *drivers(),
     autoNavController,
-    
-);
+    Position(1.0f, 1.0f, 0.0f));
+
+PushAutoNavPointCommand pushAutoNavPointX2Y0(
+    *drivers(),
+    autoNavController,
+    Position(2.0f, 0.0f, 0.0f));
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -637,9 +641,9 @@ HoldCommandMapping testAuto(
     drivers(),
     {&autoNavCommand},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-HoldCommandMapping pushAutoPathPoint(
+HoldCommandMapping pushAutoPathPoints(
     drivers(),
-    tap::control::Command
+    {&pushAutoNavPointX1Y1, &pushAutoNavPointX2Y0},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping rightSwitchMiddle(
     drivers(),
@@ -803,6 +807,7 @@ void registerHeroIoMappings(Drivers *drivers)
     // drivers->commandMapper.addMap(&shiftPressed);
     // drivers->commandMapper.addMap(&ctrlPressed);
     drivers->commandMapper.addMap(&testAuto);
+    drivers->commandMapper.addMap(&pushAutoPathPoints);
 }
 }  // namespace hero_control
 
