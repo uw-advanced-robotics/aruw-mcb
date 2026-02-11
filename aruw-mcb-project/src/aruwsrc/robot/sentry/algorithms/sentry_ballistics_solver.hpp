@@ -25,7 +25,7 @@
 #include "tap/algorithms/transforms/transform.hpp"
 
 #include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"

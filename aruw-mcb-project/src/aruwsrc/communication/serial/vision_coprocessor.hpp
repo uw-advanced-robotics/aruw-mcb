@@ -177,6 +177,117 @@ public:
                 quadraticKinematicProjection(dt, position.y - ry, velocity.y, acceleration.y) + ryf,
                 quadraticKinematicProjection(dt, position.z, velocity.z, acceleration.z));
         }
+
+        /**
+         * Computes the total angular velocity accounting for both rotation and translation.
+         * omega_total = omega_robot + (r × v)_z / |r|²
+         * @param robotPos Robot position relative to observer (turret)
+         * @param robotVel Robot velocity relative to observer (turret)
+         * @return Total angular velocity as seen from observer (rad/s)
+         */
+        inline float computeOmegaTotal(
+            const modm::Vector3f& robotPos,
+            const modm::Vector3f& robotVel) const
+        {
+            // Compute cross product (r × v)_z component
+            float crossProductZ = robotPos.x * robotVel.y - robotPos.y * robotVel.x;
+
+            // Magnitude squared of r (in x-y plane)
+            float rMagSquared = robotPos.x * robotPos.x + robotPos.y * robotPos.y;
+
+            // Avoid division by zero
+            if (rMagSquared < 1e-6f)
+            {
+                return omega;
+            }
+
+            float omegaFromTranslation = crossProductZ / rMagSquared;
+            return omega + omegaFromTranslation;
+        }
+
+        /**
+         * Determines the active plate index based on time of flight and total angular velocity.
+         * Finds the plate with a valid future fire window whose center is closest to ToF.
+         * @param omegaTotal Total angular velocity accounting for rotation and translation (rad/s)
+         * @param timeOfFlight Time for projectile to reach target (s)
+         * @param plateWidth Width of armor plate (m)
+         * @param aimAngle Angle of our aim line (from turret to robot center) in world frame (rad)
+         * @param currentTheta Angular position of plate 0 in world frame (rad)
+         * @return Active plate index (0-3), where 0 is current closest plate
+         */
+        inline uint8_t determineActivePlate(
+            float omegaTotal,
+            float timeOfFlight,
+            float plateWidth,
+            float aimAngle,
+            float currentTheta) const
+        {
+            // Minimum fire window duration to be considered valid (100ms)
+            constexpr float MIN_FIRE_WINDOW_S = 0.1f;
+            
+            uint8_t bestPlate = 0;
+            float bestTimeDifference = 1e9f;  // Large initial value
+            bool foundValidPlate = false;
+
+            // Check each plate (0-3) to find one with a valid fire window
+            for (int i = 0; i < 4; i++)
+            {
+                // Calculate actual angular position of plate i
+                float plateAngle = currentTheta + i * M_PI_2;
+                
+                // Angular distance from plate to aim line
+                float angularOffset = plateAngle - aimAngle;
+                
+                // Normalize to [-π, π]
+                while (angularOffset > M_PI) angularOffset -= 2.0f * M_PI;
+                while (angularOffset < -M_PI) angularOffset += 2.0f * M_PI;
+                
+                // Calculate time for plate center to reach aim line
+                float timeToCenterEdge;
+                if (omegaTotal > 0)
+                {
+                    // Counterclockwise rotation
+                    if (angularOffset < 0)
+                    {
+                        // Plate is behind, add full rotation
+                        angularOffset += 2.0f * M_PI;
+                    }
+                    timeToCenterEdge = angularOffset / omegaTotal;
+                }
+                else
+                {
+                    // Clockwise rotation
+                    if (angularOffset > 0)
+                    {
+                        // Plate is ahead, subtract full rotation
+                        angularOffset -= 2.0f * M_PI;
+                    }
+                    timeToCenterEdge = angularOffset / omegaTotal;  // angularOffset negative, omega negative
+                }
+                
+                // Calculate when we'd need to fire to hit this plate
+                // We need the far edge time to determine if the fire window is still open
+                float plateAngularWidth = plateWidth / radius;
+                float halfWidthTime = (plateAngularWidth / 2.0f) / fabsf(omegaTotal);
+                float timeToFarEdge = timeToCenterEdge + halfWidthTime;
+                float fireWindowEnd = timeToFarEdge - timeOfFlight;
+                
+                // Only consider plates whose fire window hasn't closed yet
+                // (with minimum window requirement)
+                if (fireWindowEnd >= MIN_FIRE_WINDOW_S)
+                {
+                    float timeDifference = fabsf(timeToCenterEdge - timeOfFlight);
+                    if (!foundValidPlate || timeDifference < bestTimeDifference)
+                    {
+                        bestPlate = i;
+                        bestTimeDifference = timeDifference;
+                        foundValidPlate = true;
+                    }
+                }
+            }
+
+            return bestPlate;
+        }
     };
 
     /**
@@ -210,6 +321,7 @@ public:
         float rad0;             ///< distance from center to plates 0 and 2
         float rad1;             ///< distance from center to plates 1 and 3
         float plateHeights[4];  ///< height of each plate off the robot center
+        // ^ measured from the ground to the center of the plate
 
         bool updated;  ///< whether or not this came from the most recent message
 

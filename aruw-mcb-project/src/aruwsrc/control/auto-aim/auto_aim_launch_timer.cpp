@@ -26,7 +26,7 @@ namespace aruwsrc::control::auto_aim
 AutoAimLaunchTimer::AutoAimLaunchTimer(
     uint32_t agitatorTypicalDelayMicroseconds,
     aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
-    aruwsrc::algorithms::OttoBallisticsSolver *ballistics)
+    aruwsrc::algorithms::CvBallisticsSolver *ballistics)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),
       ballistics(ballistics)
@@ -42,45 +42,36 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::NO_TARGET;
     }
 
-    if (!aimData.timing.updated)
-    {
-        return LaunchInclination::UNGATED;
-    }
-
-    if (aimData.timing.pulseInterval == 0)
-    {
-        return LaunchInclination::GATED_DENY;
-    }
-
+    // Get ballistics solution which contains pulse estimation timing windows
     auto ballisticsSolution = ballistics->computeTurretAimAngles();
     if (!ballisticsSolution.has_value())
     {
         return LaunchInclination::GATED_DENY;
     }
 
+    // If not using pulse estimation (omega below threshold), fall back to ungated mode
+    if (!ballisticsSolution->usePulseEstimation)
+    {
+        return LaunchInclination::UNGATED;
+    }
+
+    // Validate time of flight
     float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
     if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS)
     {
         return LaunchInclination::GATED_DENY;
     }
 
-    uint32_t timeOfFlightMicros = timeOfFlightSeconds * 1e6;
-    uint32_t now = tap::arch::clock::getTimeMicroseconds();
-    uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
+    // Check if we're within the shot timing window
+    // shotWindowStart and shotWindowEnd are absolute fire times (when to pull trigger)
+    // accounting for time of flight, so we just need to check if now + agitator delay
+    // is within the fire window
+    uint64_t now = tap::arch::clock::getTimeMicroseconds();
+    uint64_t effectiveFireTime = now + this->agitatorTypicalDelayMicroseconds;
 
-    uint32_t nextPlateTransitTime = aimData.timestamp + aimData.timing.offset;
-    int64_t projectedHitTimeAfterFirstWindow =
-        int64_t(projectedHitTime) - int64_t(nextPlateTransitTime);
-
-    int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % aimData.timing.pulseInterval;
-    if (offsetInFiringWindow < 0)
-    {
-        offsetInFiringWindow += aimData.timing.pulseInterval;
-    }
-
-    uint32_t maxHitTimeError = aimData.timing.duration / 2;
-    if (offsetInFiringWindow <= maxHitTimeError ||
-        offsetInFiringWindow >= aimData.timing.pulseInterval - maxHitTimeError)
+    // Allow shot if the current time (accounting for agitator delay) is within the fire window
+    if (effectiveFireTime >= ballisticsSolution->shotWindowStart &&
+        effectiveFireTime <= ballisticsSolution->shotWindowEnd)
     {
         return LaunchInclination::GATED_ALLOW;
     }

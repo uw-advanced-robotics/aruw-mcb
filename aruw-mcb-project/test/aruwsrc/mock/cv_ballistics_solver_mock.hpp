@@ -17,12 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OTTO_BALLISTICS_SOLVER_MOCK_HPP_
-#define OTTO_BALLISTICS_SOLVER_MOCK_HPP_
+#ifndef CV_BALLISTICS_SOLVER_MOCK_HPP_
+#define CV_BALLISTICS_SOLVER_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 
 namespace aruwsrc::mock
 {
@@ -31,7 +31,7 @@ namespace
 using namespace aruwsrc::algorithms;
 }
 
-class OttoBallisticsSolverMock : public OttoBallisticsSolver
+class OttoBallisticsSolverMock : public CvBallisticsSolver
 {
 public:
     OttoBallisticsSolverMock(
@@ -44,11 +44,11 @@ public:
     virtual ~OttoBallisticsSolverMock();
 
     MOCK_METHOD(
-        std::optional<OttoBallisticsSolver::BallisticsSolution>,
+        std::optional<CvBallisticsSolver::BallisticsSolution>,
         computeTurretAimAngles,
         (),
         (override));
 };  // class OttoBallisticsSolverMock
 }  // namespace aruwsrc::mock
 
-#endif  // OTTO_BALLISTICS_SOLVER_MOCK_HPP_
+#endif  // CV_BALLISTICS_SOLVER_MOCK_HPP_

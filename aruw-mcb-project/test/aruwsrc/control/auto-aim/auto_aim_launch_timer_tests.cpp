@@ -24,9 +24,9 @@
 #include "tap/mock/hold_repeat_command_mapping_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
-#include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
+#include "aruwsrc/mock/cv_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
@@ -187,6 +187,9 @@ struct TestParams
 
     bool ballisticsSuccess = true;
     uint32_t ballisticsTimeOfFlight;
+    bool usePulseEstimation = false;
+    uint64_t shotWindowStart = 0;
+    uint64_t shotWindowEnd = 0;
 
     TestParamsAimData aimData;
 
@@ -256,7 +259,7 @@ TEST_P(
     EXPECT_CALL(visionCoprocessor, getLastAimData(params.turretNumber))
         .WillOnce(ReturnPointee(&aimData));
 
-    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsResult;
+    std::optional<CvBallisticsSolver::BallisticsSolution> ballisticsResult;
     if (params.ballisticsSuccess)
     {
         ballisticsResult = {
@@ -264,6 +267,10 @@ TEST_P(
             .yawAngle{0},
             .distance{0},
             .timeOfFlight = params.ballisticsTimeOfFlight / 1'000'000.f,
+            .shotWindowStart = params.shotWindowStart,
+            .shotWindowEnd = params.shotWindowEnd,
+            .usePulseEstimation = params.usePulseEstimation,
+            .activePlateIndex = 0,
         };
     }
     else
@@ -589,3 +596,136 @@ INSTANTIATE_TEST_CASE_P(
         TEST_TIMING_SHOT_IN_LATE_HALF_OF_SECOND_WINDOW_WITH_HIGH_FREQUENCY_PULSE_ALLOWS_FIRE,
         TEST_TIMING_SHOT_TOO_EARLY_IN_SECOND_WINDOW_WITH_HIGH_FREQUENCY_PULSE_DENIES_FIRE,
         TEST_TIMING_SHOT_TOO_LATE_IN_SECOND_WINDOW_WITH_HIGH_FREQUENCY_PULSE_DENIES_FIRE));
+
+TEST_F(AutoAimLaunchTimerTest, pulse_estimation_jitter_aim_returns_ungated)
+{
+    VisionCoprocessor::TurretAimData aimData;
+    aimData.pva.updated = 1;
+
+    EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
+
+    CvBallisticsSolver::BallisticsSolution solution{
+        .pitchAngle = 0,
+        .yawAngle = 0,
+        .distance = 5.0f,
+        .timeOfFlight = 0.2f,
+        .shotWindowStart = 0,
+        .shotWindowEnd = 0,
+        .usePulseEstimation = false,  // Jitter aim mode
+        .activePlateIndex = 0};
+    EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
+
+    AutoAimLaunchTimer timer(100, &visionCoprocessor, &ballistics);
+    auto result = timer.getCurrentLaunchInclination(0);
+
+    ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::UNGATED, result);
+}
+
+TEST_F(AutoAimLaunchTimerTest, pulse_estimation_within_window_allows_fire)
+{
+    ClockStub clock;
+    clock.time = 500'000;  // 500ms
+
+    VisionCoprocessor::TurretAimData aimData;
+    aimData.pva.updated = 1;
+
+    EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
+
+    CvBallisticsSolver::BallisticsSolution solution{
+        .pitchAngle = 0,
+        .yawAngle = 0,
+        .distance = 5.0f,
+        .timeOfFlight = 0.2f,
+        .shotWindowStart = 400'000,   // 400ms (before now)
+        .shotWindowEnd = 600'000,     // 600ms (after now)
+        .usePulseEstimation = true,
+        .activePlateIndex = 1};
+    EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
+
+    AutoAimLaunchTimer timer(0, &visionCoprocessor, &ballistics);  // No agitator delay
+    auto result = timer.getCurrentLaunchInclination(0);
+
+    ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW, result);
+}
+
+TEST_F(AutoAimLaunchTimerTest, pulse_estimation_before_window_denies_fire)
+{
+    ClockStub clock;
+    clock.time = 300'000;  // 300ms
+
+    VisionCoprocessor::TurretAimData aimData;
+    aimData.pva.updated = 1;
+
+    EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
+
+    CvBallisticsSolver::BallisticsSolution solution{
+        .pitchAngle = 0,
+        .yawAngle = 0,
+        .distance = 5.0f,
+        .timeOfFlight = 0.2f,
+        .shotWindowStart = 400'000,   // 400ms (after now)
+        .shotWindowEnd = 600'000,     // 600ms (after now)
+        .usePulseEstimation = true,
+        .activePlateIndex = 1};
+    EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
+
+    AutoAimLaunchTimer timer(0, &visionCoprocessor, &ballistics);
+    auto result = timer.getCurrentLaunchInclination(0);
+
+    ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_DENY, result);
+}
+
+TEST_F(AutoAimLaunchTimerTest, pulse_estimation_after_window_denies_fire)
+{
+    ClockStub clock;
+    clock.time = 700'000;  // 700ms
+
+    VisionCoprocessor::TurretAimData aimData;
+    aimData.pva.updated = 1;
+
+    EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
+
+    CvBallisticsSolver::BallisticsSolution solution{
+        .pitchAngle = 0,
+        .yawAngle = 0,
+        .distance = 5.0f,
+        .timeOfFlight = 0.2f,
+        .shotWindowStart = 400'000,   // 400ms (before now)
+        .shotWindowEnd = 600'000,     // 600ms (before now)
+        .usePulseEstimation = true,
+        .activePlateIndex = 1};
+    EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
+
+    AutoAimLaunchTimer timer(0, &visionCoprocessor, &ballistics);
+    auto result = timer.getCurrentLaunchInclination(0);
+
+    ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_DENY, result);
+}
+
+TEST_F(AutoAimLaunchTimerTest, pulse_estimation_with_agitator_delay_within_window_allows_fire)
+{
+    ClockStub clock;
+    clock.time = 400'000;  // 400ms
+
+    VisionCoprocessor::TurretAimData aimData;
+    aimData.pva.updated = 1;
+
+    EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
+
+    CvBallisticsSolver::BallisticsSolution solution{
+        .pitchAngle = 0,
+        .yawAngle = 0,
+        .distance = 5.0f,
+        .timeOfFlight = 0.2f,
+        .shotWindowStart = 450'000,   // Accounting for agitator delay
+        .shotWindowEnd = 650'000,
+        .usePulseEstimation = true,
+        .activePlateIndex = 1};
+    EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
+
+    AutoAimLaunchTimer timer(50'000, &visionCoprocessor, &ballistics);  // 50ms agitator delay
+    auto result = timer.getCurrentLaunchInclination(0);
+
+    // effectiveFireTime = 400ms + 50ms = 450ms, which is at shotWindowStart
+    ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW, result);
+}

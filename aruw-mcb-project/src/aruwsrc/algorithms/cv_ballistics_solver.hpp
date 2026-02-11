@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OTTO_BALLISTICS_SOLVER_HPP_
-#define OTTO_BALLISTICS_SOLVER_HPP_
+#ifndef CV_BALLISTICS_SOLVER_HPP_
+#define CV_BALLISTICS_SOLVER_HPP_
 
 #include <optional>
 
@@ -55,7 +55,7 @@ namespace aruwsrc::algorithms
  * An object that computes the world-relative pitch and yaw turret angles based on CV aim data and
  * odometry measurements.
  */
-class OttoBallisticsSolver
+class CvBallisticsSolver
 {
 public:
     struct BallisticsSolution
@@ -68,6 +68,14 @@ public:
         float distance;
         /// The expected time-of-flight until impact (in seconds).
         float timeOfFlight;
+        /// Start of the shot timing window (absolute timestamp in microseconds), valid when usePulseEstimation is true.
+        uint64_t shotWindowStart;
+        /// End of the shot timing window (absolute timestamp in microseconds), valid when usePulseEstimation is true.
+        uint64_t shotWindowEnd;
+        /// Whether pulse estimation is being used (omega above threshold).
+        bool usePulseEstimation;
+        /// The active plate index being targeted (0-3).
+        uint8_t activePlateIndex;
     };
 
     /**
@@ -77,6 +85,8 @@ public:
      */
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
+    /// Omega threshold (rad/s) below which jitter aim is used instead of pulse estimation.
+    static constexpr float OMEGA_THRESHOLD = 1.0f;
     /// The width of a small armor plate, in m
     static constexpr float PLATE_WIDTH = 0.135f;
     /// The height of a small armor plate, in m
@@ -98,10 +108,10 @@ public:
         }
 
         return (abs(yawAngleError) < atan2f(
-                                         aruwsrc::algorithms::OttoBallisticsSolver::PLATE_WIDTH,
+                                         aruwsrc::algorithms::CvBallisticsSolver::PLATE_WIDTH,
                                          2.0f * targetDistance)) &&
                (abs(pitchAngleError) < atan2f(
-                                           aruwsrc::algorithms::OttoBallisticsSolver::PLATE_HEIGHT,
+                                           aruwsrc::algorithms::CvBallisticsSolver::PLATE_HEIGHT,
                                            2.0f * targetDistance));
     }
 
@@ -115,7 +125,7 @@ public:
      * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
      * for, see the VisionCoprocessor for more information about this id.
      */
-    OttoBallisticsSolver(
+    CvBallisticsSolver(
         const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
@@ -147,9 +157,19 @@ private:
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
 
+    /**
+     * Computes pulse estimation solution. Uses a two-pass ballistics approach to
+     * determine shot timing window based on robot rotation.
+     */
+    std::optional<BallisticsSolution> computePulseEstimation(
+        const communication::serial::VisionCoprocessor::PositionData& projectedAimPosData,
+        const modm::Vector3f& turretPosition,
+        const modm::Vector2f& chassisVel,
+        float launchSpeed);
+
 public:
     const uint8_t turretID;
 };
 }  // namespace aruwsrc::algorithms
 
-#endif  // OTTO_BALLISTICS_SOLVER_HPP_
+#endif  // CV_BALLISTICS_SOLVER_HPP_

@@ -39,7 +39,7 @@
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
@@ -278,7 +278,7 @@ StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
-OttoBallisticsSolver ballisticsSolver(
+CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     odometrySubsystem,
     turret,

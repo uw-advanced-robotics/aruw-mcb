@@ -41,7 +41,7 @@
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
@@ -290,7 +290,7 @@ aruwsrc::control::launcher::FrictionWheelInterface &frictionWheels = frictionWhe
 aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor =
     frictionWheelsSubsystem;
 
-OttoBallisticsSolver ballisticsSolver(
+CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     odometrySubsystem,
     turret,

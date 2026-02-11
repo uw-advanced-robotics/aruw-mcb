@@ -23,7 +23,7 @@
 #include "tap/control/command.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 
@@ -97,7 +97,7 @@ public:
         RobotTurretSubsystem *turretSubsystem,
         algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController,
         algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController,
-        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
+        aruwsrc::algorithms::CvBallisticsSolver *ballisticsSolver,
         const float userYawInputScalar,
         const float userPitchInputScalar,
         uint8_t turretID = 0);
@@ -134,7 +134,7 @@ private:
     algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController;
     algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController;
 
-    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
+    aruwsrc::algorithms::CvBallisticsSolver *ballisticsSolver;
 
     const float userYawInputScalar;
     const float userPitchInputScalar;

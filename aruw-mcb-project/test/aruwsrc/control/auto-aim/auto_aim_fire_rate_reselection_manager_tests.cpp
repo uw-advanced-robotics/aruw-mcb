@@ -27,7 +27,7 @@
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
-#include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
+#include "aruwsrc/mock/cv_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"

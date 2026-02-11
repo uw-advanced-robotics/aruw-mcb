@@ -26,7 +26,7 @@
 #include "hopper_subsystem_mock.hpp"
 #include "mecanum_chassis_subsystem_mock.hpp"
 #include "oled_display_mock.hpp"
-#include "otto_ballistics_solver_mock.hpp"
+#include "cv_ballistics_solver_mock.hpp"
 #include "referee_feedback_friction_wheel_subsystem_mock.hpp"
 #include "robot_turret_subsystem_mock.hpp"
 #include "sentry_request_subsystem_mock.hpp"
@@ -302,7 +302,7 @@ TurretCVCommandMock::TurretCVCommandMock(
         aruwsrc::control::turret::algorithms::Axis::YAW> *yawController,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::PITCH> *pitchController,
-    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
+    aruwsrc::algorithms::CvBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
     uint8_t turretID)
@@ -327,7 +327,7 @@ OttoBallisticsSolverMock::OttoBallisticsSolverMock(
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
-    : aruwsrc::algorithms::OttoBallisticsSolver(
+    : aruwsrc::algorithms::CvBallisticsSolver(
           visionCoprocessor,
           odometryInterface,
           turretSubsystem,

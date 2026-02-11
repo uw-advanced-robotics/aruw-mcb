@@ -20,7 +20,7 @@
 #ifndef SENTRY_AUTO_AIM_LAUNCH_TIMER_HPP_
 #define SENTRY_AUTO_AIM_LAUNCH_TIMER_HPP_
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 
