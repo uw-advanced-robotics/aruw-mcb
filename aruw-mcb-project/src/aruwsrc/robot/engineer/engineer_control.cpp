@@ -49,6 +49,7 @@
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/select_cube_position_command.hpp"
+#include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 #include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
@@ -445,8 +446,6 @@ SetpointMovePositionCommand leftCubePosition(cubeStorage, CUBE_STORAGE_LEFT_SETP
 SetpointMovePositionCommand rightCubePosition(cubeStorage, CUBE_STORAGE_RIGHT_SETPOINT);
 SetpointMovePositionCommand centerCubePosition(cubeStorage, CUBE_STORAGE_CENTER_SETPOINT);
 
-CubeStorageChooseAddCommand chooseCubeDirectionCommand(cubeStorage, wristRollSubsystem);
-
 WristMovePositionCommand wristDown(
     wristSubsystem,
     WRIST_PITCH_PICKUP,
@@ -457,11 +456,12 @@ ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem, wr
 
 SelectCubePositionCommand selectCubeAddPositionCommand(cubeStorage, wristRollSubsystem, true);
 SelectCubePositionCommand selectCubeRemovePositionCommand(cubeStorage, wristRollSubsystem, false);
+CubePositionDigitalOutCommand cubeStorageSuckOnCommand(cubeStorage, leftSuckSubsystem, rightSuckSubsystem, true);
+CubePositionDigitalOutCommand cubeStorageSuckOffCommand(cubeStorage, leftSuckSubsystem, rightSuckSubsystem, false);
 
 SequentialCommand<4> storeCubeCommand(std::array<Command *, 4>{{
     &selectCubeAddPositionCommand,
-    &suckOnCommand,
-    &releaseOnCommand,
+    &cubeStorageSuckOnCommand,
     // hand down
     // hand release cube
     // hand up
@@ -472,8 +472,7 @@ SequentialCommand<4> releaseCubeCommand(std::array<Command *, 4>{{
     &selectCubeRemovePositionCommand,
     // hand suction on
     // hand down
-    &suckOffCommand,
-    &releaseOffCommand,
+    &cubeStorageSuckOffCommand,
     // hand up
     &centerCubePosition,
 }});

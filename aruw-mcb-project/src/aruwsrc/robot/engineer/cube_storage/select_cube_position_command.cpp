@@ -35,6 +35,8 @@ SelectCubePositionCommand::SelectCubePositionCommand(  // two const references
 // turretToCubeTransformer(turretToCubeTransformer),
 // turretToSuctionTransformer(turretToSectionTransformer)
 {
+    addSubsystemRequirement(&cubeStorage);
+    addSubsystemRequirement(&jointSubsystem);
 }
 
 void SelectCubePositionCommand::initialize()
@@ -53,6 +55,7 @@ void SelectCubePositionCommand::initialize()
     }
 
     // multiply transformers here & give position to wrist
+    cubeStorage.setSetpointToCurrentCube();
 }
 
 void SelectCubePositionCommand::execute() {}
