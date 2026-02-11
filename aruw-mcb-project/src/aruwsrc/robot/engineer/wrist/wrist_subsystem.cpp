@@ -94,7 +94,6 @@ float WristSubsystem::calculateLeftMotorOutputForTheta1Theta2(
     float theta1Setpoint,
     float theta2Setpoint)
 {
-    // TODO: implement
     float theta1Error = encoderTheta1.getPosition().minDifference(setpointTheta1);
     float theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
 
@@ -139,15 +138,18 @@ void WristSubsystem::refresh()
     float errorTheta3 = encoderTheta3.getPosition().minDifference(setpointTheta3);
     float outMotorTheta3 = pidTheta3.runController(errorTheta3, encoderTheta3.getVelocity(), 2.0f);
 
-    motorLeft.setDesiredOutput(
-        std::clamp<int32_t>(
-            outMotorLeft, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
-    motorRight.setDesiredOutput(
-        std::clamp<int32_t>(
-            outMotorRight, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
-    motorTheta3.setDesiredOutput(
-        std::clamp<int32_t>(
-            outMotorTheta3, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
+    motorLeft.setDesiredOutput(std::clamp<int32_t>(
+        outMotorLeft,
+        -config.maxMotorDesiredOutput,
+        config.maxMotorDesiredOutput));
+    motorRight.setDesiredOutput(std::clamp<int32_t>(
+        outMotorRight,
+        -config.maxMotorDesiredOutput,
+        config.maxMotorDesiredOutput));
+    motorTheta3.setDesiredOutput(std::clamp<int32_t>(
+        outMotorTheta3,
+        -config.maxMotorDesiredOutput,
+        config.maxMotorDesiredOutput));
 
     // CMSISMat<3, 1> gantryToCOMTranslation =
     //     computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
@@ -157,7 +159,8 @@ void WristSubsystem::refresh()
     //         gantryToCOMTranslation,
     //         CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
 
-    // // we can compute the torque exerted on each joint by projecting the robot-space gravity torque
+    // // we can compute the torque exerted on each joint by projecting the robot-space gravity
+    // torque
     // // into the joint axis subspace
     // Vector pitchAxis(0, 1, 0);
     // Vector yawAxis = Transform(0, 0, 0, 0, -getPitch(), 0).apply(Vector(0, 0, 1));
@@ -186,9 +189,11 @@ void WristSubsystem::refresh()
     // float outRight = outYaw - outPitch;
 
     // motorLeft.setDesiredOutput(
-    //     std::clamp<int32_t>(outLeft, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
+    //     std::clamp<int32_t>(outLeft, -config.maxMotorDesiredOutput,
+    //     config.maxMotorDesiredOutput));
     // motorRight.setDesiredOutput(
-    //     std::clamp<int32_t>(outRight, -config.maxMotorDesiredOutput, config.maxMotorDesiredOutput));
+    //     std::clamp<int32_t>(outRight, -config.maxMotorDesiredOutput,
+    //     config.maxMotorDesiredOutput));
 }
 
 void WristSubsystem::refreshSafeDisconnect()

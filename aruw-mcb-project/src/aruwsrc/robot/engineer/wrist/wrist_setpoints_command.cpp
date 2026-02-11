@@ -36,7 +36,7 @@ void WristSetpointsCommand::execute()
     {
         const auto &setpoint = setpoints[currentSetpointIndex];
         wrist.setSetpointTheta2(setpoint.pitch);  // theta2 is pitch
-        wrist.setSetpointTheta1(setpoint.yaw);  // theta1 is yaw
+        wrist.setSetpointTheta1(setpoint.yaw);    // theta1 is yaw
         if (wrist.atSetpointTheta2(setpoint.epsilonPitch) &&
             wrist.atSetpointTheta1(setpoint.epsilonYaw))
         {

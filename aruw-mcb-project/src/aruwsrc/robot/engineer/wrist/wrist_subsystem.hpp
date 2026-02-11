@@ -97,7 +97,6 @@ private:
     tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
     const WristConfig config;
 
-
     const tap::algorithms::transforms::Position COM_POS =
         tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static
     static constexpr float WRIST_MASS_KG = 0.4;

@@ -41,12 +41,9 @@ static constexpr tap::encoder::CanEncoderId WRIST_THETA2_ENCODER_ID =
 static constexpr tap::encoder::CanEncoderId WRIST_THETA3_ENCODER_ID =
     tap::encoder::CanEncoderId::ID2;
 
-
 static constexpr uint32_t WRIST_HOME_THETA1 = 0;
 static constexpr uint32_t WRIST_HOME_THETA2 = 0;
 static constexpr uint32_t WRIST_HOME_THETA3 = 0;
-
-
 
 static constexpr float WRIST_ROLL_PID_KS = 0.0;
 static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA1_PID_CONFIG{

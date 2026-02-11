@@ -455,8 +455,8 @@ aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     &drivers()->controlOperatorInterface,
     &xDriveChassis);
 
-// NOTE: WristControllerCommand is defined in the TARGET_ENGI_2025 block where wristRollSubsystem exists
-// WristControllerCommand wristControllerCommand(
+// NOTE: WristControllerCommand is defined in the TARGET_ENGI_2025 block where wristRollSubsystem
+// exists WristControllerCommand wristControllerCommand(
 //     wristRollSubsystem,
 //     wristSubsystem,
 //     &drivers()->controlOperatorInterface,
@@ -489,30 +489,28 @@ CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
-SequentialCommand<10> storeCubeCommand(
-    std::array<Command*, 10>{
-        {&liftUpCommand,
-         &gantryRetractCommand,
-         &wristFoldInCommand,
-         &liftDownCommand,
-         &suckOffCommand,
-         &releaseOnCommand,
-         &gantryExtendCommand,
-         &liftUpCommand,
-         &gantryRetractCommand,
-         &cubeLiftSwitchDownCommand}});
-SequentialCommand<10> retrieveCubeCommand(
-    std::array<Command*, 10>{
-        {&liftDownCommand,
-         &gantryExtendCommand,
-         &wristFoldInCommand,
-         &gantryRetractCommand,
-         &suckOnCommand,
-         &releaseOffCommand,
-         &liftUpCommand,
-         &wristFoldOutCommand,
-         &liftDownCommand,
-         &cubeLiftSwitchUpCommand}});
+SequentialCommand<10> storeCubeCommand(std::array<Command*, 10>{
+    {&liftUpCommand,
+     &gantryRetractCommand,
+     &wristFoldInCommand,
+     &liftDownCommand,
+     &suckOffCommand,
+     &releaseOnCommand,
+     &gantryExtendCommand,
+     &liftUpCommand,
+     &gantryRetractCommand,
+     &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(std::array<Command*, 10>{
+    {&liftDownCommand,
+     &gantryExtendCommand,
+     &wristFoldInCommand,
+     &gantryRetractCommand,
+     &suckOnCommand,
+     &releaseOffCommand,
+     &liftUpCommand,
+     &wristFoldOutCommand,
+     &liftDownCommand,
+     &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
@@ -525,8 +523,8 @@ WristMovePositionCommand wristDown(
     WRIST_YAW_PICKUP);  // tuned to align for better suction
 WristMovePositionCommand wristOut(wristSubsystem, WRIST_PITCH_SCORE, WRIST_YAW_SCORE);
 
-// NOTE: ScorePositionCommand requires wristRollSubsystem which is only available in TARGET_ENGI_2025
-// ScorePositionCommand scorePositionCommand(
+// NOTE: ScorePositionCommand requires wristRollSubsystem which is only available in
+// TARGET_ENGI_2025 ScorePositionCommand scorePositionCommand(
 //     gantryLiftSubsystem,
 //     wristSubsystem,
 //     wristRollSubsystem);  // TODO: test that this works
@@ -617,7 +615,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&xDriveChassis);
     drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
     drivers->commandScheduler.registerSubsystem(&gantryExtensionSubsystem);
-    // drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);  // Only available in TARGET_ENGI_2025
+    // drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);  // Only available in
+    // TARGET_ENGI_2025
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
@@ -631,8 +630,9 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
     xDriveChassis.setDefaultCommand(&chassisDriveCommand);
     gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
     gantryExtensionSubsystem.setDefaultCommand(&gantryExtensionManualControl);
-    // wristSubsystem.setDefaultCommand(&wristControllerCommand);  // wristControllerCommand only available in TARGET_ENGI_2025
-    // wristRollSubsystem.setDefaultCommand(&wristControllerCommand);  // Only available in TARGET_ENGI_2025
+    // wristSubsystem.setDefaultCommand(&wristControllerCommand);  // wristControllerCommand only
+    // available in TARGET_ENGI_2025 wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
+    // // Only available in TARGET_ENGI_2025
     cubeLift.setDefaultCommand(&cubeManualControl);
 
     // clientDisplay.setDefaultCommand(&clientDisplayCommand);
@@ -1042,30 +1042,28 @@ CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
-SequentialCommand<10> storeCubeCommand(
-    std::array<Command*, 10>{
-        {&liftUpCommand,
-         &gantryRetractCommand,
-         &wristFoldInCommand,
-         &liftDownCommand,
-         &suckOffCommand,
-         &releaseOnCommand,
-         &gantryExtendCommand,
-         &liftUpCommand,
-         &gantryRetractCommand,
-         &cubeLiftSwitchDownCommand}});
-SequentialCommand<10> retrieveCubeCommand(
-    std::array<Command*, 10>{
-        {&liftDownCommand,
-         &gantryExtendCommand,
-         &wristFoldInCommand,
-         &gantryRetractCommand,
-         &suckOnCommand,
-         &releaseOffCommand,
-         &liftUpCommand,
-         &wristFoldOutCommand,
-         &liftDownCommand,
-         &cubeLiftSwitchUpCommand}});
+SequentialCommand<10> storeCubeCommand(std::array<Command*, 10>{
+    {&liftUpCommand,
+     &gantryRetractCommand,
+     &wristFoldInCommand,
+     &liftDownCommand,
+     &suckOffCommand,
+     &releaseOnCommand,
+     &gantryExtendCommand,
+     &liftUpCommand,
+     &gantryRetractCommand,
+     &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(std::array<Command*, 10>{
+    {&liftDownCommand,
+     &gantryExtendCommand,
+     &wristFoldInCommand,
+     &gantryRetractCommand,
+     &suckOnCommand,
+     &releaseOffCommand,
+     &liftUpCommand,
+     &wristFoldOutCommand,
+     &liftDownCommand,
+     &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
@@ -1078,8 +1076,8 @@ WristMovePositionCommand wristDown(
     WRIST_YAW_PICKUP);  // tuned to align for better suction
 WristMovePositionCommand wristOut(wristSubsystem, WRIST_PITCH_SCORE, WRIST_YAW_SCORE);
 
-// NOTE: ScorePositionCommand requires wristRollSubsystem which is only available in TARGET_ENGI_2025
-// ScorePositionCommand scorePositionCommand(
+// NOTE: ScorePositionCommand requires wristRollSubsystem which is only available in
+// TARGET_ENGI_2025 ScorePositionCommand scorePositionCommand(
 //     gantryLiftSubsystem,
 //     wristSubsystem,
 //     wristRollSubsystem);  // TODO: test that this works
