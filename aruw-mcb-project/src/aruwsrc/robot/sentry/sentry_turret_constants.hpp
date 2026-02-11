@@ -26,6 +26,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"  // for turretID enum (could go somewhere else)
 #include "modm/math/geometry/angle.hpp"
@@ -33,7 +34,7 @@
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
-#error "Do not include this file directly! Use turret_controller_constants.hpp instead."
+#error "Do not include this file directly! Use turret_constants.hpp instead."
 #endif
 
 namespace aruwsrc::control::turret
@@ -49,9 +50,12 @@ static constexpr float TORQUE_TO_DESIRED_OUT =
     1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
 static constexpr float TURRET_WEIGHT_KG = 1.44730f;     // From CAD
 
-static constexpr float TURRET_CG_X = -18.24;
-static constexpr float TURRET_CG_Z = 20.35;
-static constexpr float GRAVITY_COMPENSATION_SCALAR = 5118.6f;
+static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
+    TURRET_GRAVITY_CONFIG{
+        .cgX = -18.24f,
+        .cgZ = 20.35f,
+        .gravityCompensatorMax = 5118.6f,
+    };
 
 static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
 
@@ -81,7 +85,7 @@ static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
     0,
     0,
     0,
-    M_PI,
+    0,
     0,
     0);
 

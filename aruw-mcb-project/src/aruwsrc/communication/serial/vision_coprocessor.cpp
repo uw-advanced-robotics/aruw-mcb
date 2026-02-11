@@ -25,6 +25,7 @@
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using namespace tap::arch;
@@ -92,6 +93,7 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
         case CV_MESSAGE_TYPE_TURRET_AIM:
         {
             decodeToTurretAimData(completeMessage);
+            logVisionTelemetry();
             return;
         }
         case CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT:
@@ -229,6 +231,46 @@ void VisionCoprocessor::sendMessage()
 
 bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
 
+void VisionCoprocessor::logVisionTelemetry()
+{
+    if (!telemetry)
+    {
+        return;
+    }
+
+    // Even non-turret robots are required to declare a turret at the moment.
+    const auto& aimData = getLastAimData(0);
+
+    telemetry->logSignal("online:cv", isCvOnline());
+    telemetry->logSignal("cv:hasTarget", getSomeTurretHasTarget());
+    telemetry->logSignal("cv:timing_shots", getSomeTurretUsingTimedShots());
+
+    telemetry->logSignal("cv:aimData:updated", aimData.pva.updated);
+    telemetry->logSignal("cv:aimData:time", aimData.timestamp);
+    telemetry->logSignal("cv:aimData:pos", aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
+    telemetry->logSignal("cv:aimData:vel", aimData.pva.xVel, aimData.pva.yVel, aimData.pva.zVel);
+}
+
+void VisionCoprocessor::logRefereeTelemetry()
+{
+    if (!telemetry)
+    {
+        return;
+    }
+
+    auto& rxData = drivers->refSerial.getRobotData();
+
+    telemetry->logSignal("ref:curr_hp", rxData.currentHp);
+    telemetry->logSignal("ref:max_hp", rxData.maxHp);
+    telemetry->logSignal("ref:heat_17mm", rxData.turret.heat17ID1);
+    telemetry->logSignal("ref:heat_limit", rxData.turret.heatLimit);
+    telemetry->logSignal("ref:firing_freq", rxData.turret.firingFreq);
+    telemetry->logSignal("ref:remaining_projectiles_17mm", rxData.turret.bulletsRemaining17);
+    telemetry->logSignal("ref:chassis_power_buffer", rxData.chassis.powerBuffer);
+    telemetry->logSignal("ref:chassis_power_limit", rxData.chassis.powerConsumptionLimit);
+    telemetry->logSignal("ref:robot_level", rxData.robotLevel);
+}
+
 void VisionCoprocessor::sendShutdownMessage()
 {
     DJISerial::SerialMessage<1> shutdownMessage;
@@ -358,6 +400,8 @@ void VisionCoprocessor::sendRefereeRealtimeData()
         data->stageRemainTime = gameData.stageTimeRemaining;
         data->unixTime = gameData.unixTime;
         data->powerSupplyStatus = robotData.robotPower.value;
+
+        logRefereeTelemetry();
 
         message.setCRC16();
         drivers->uart.write(

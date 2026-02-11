@@ -23,7 +23,7 @@
 
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
-#include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
@@ -56,7 +56,8 @@ namespace aruwsrc::sentry::turret
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
 class TurretMajorWorldFrameController final
-    : public aruwsrc::control::turret::algorithms::TurretYawControllerInterface
+    : public aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+          control::turret::algorithms::Axis::YAW>
 {
 public:
     /**
@@ -77,7 +78,7 @@ public:
         const tap::algorithms::transforms::Transform& worldToMajor,
         const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
-        tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
+        tap::communication::sensors::imu::AbstractIMU& turretMajorIMU,
         const SentryTurretMinorSubsystem& turretLeft,
         const SentryTurretMinorSubsystem& turretRight,
         tap::algorithms::SmoothPid& positionPid,
@@ -126,7 +127,7 @@ private:
 
     aruwsrc::control::turret::TurretMotor& yawMotor;
 
-    tap::communication::sensors::imu::ImuInterface& turretMajorIMU;
+    tap::communication::sensors::imu::AbstractIMU& turretMajorIMU;
 
     const SentryTurretMinorSubsystem& turretLeft;
     const SentryTurretMinorSubsystem& turretRight;

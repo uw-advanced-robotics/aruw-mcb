@@ -95,8 +95,8 @@ public:
         communication::serial::VisionCoprocessor *visionCoprocessor,
         control::ControlOperatorInterface *controlOperatorInterface,
         RobotTurretSubsystem *turretSubsystem,
-        algorithms::TurretYawControllerInterface *yawController,
-        algorithms::TurretPitchControllerInterface *pitchController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController,
         aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
         const float userYawInputScalar,
         const float userPitchInputScalar,
@@ -131,8 +131,8 @@ private:
 
     RobotTurretSubsystem *turretSubsystem;
 
-    algorithms::TurretYawControllerInterface *yawController;
-    algorithms::TurretPitchControllerInterface *pitchController;
+    algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController;
+    algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController;
 
     aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
 

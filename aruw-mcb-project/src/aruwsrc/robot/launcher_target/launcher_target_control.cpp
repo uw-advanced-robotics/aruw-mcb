@@ -1,0 +1,134 @@
+/*
+ * Copyright (c) 2023-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#if defined(TARGET_LAUNCHER_TARGET)
+
+#include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/press_command_mapping.hpp"
+#include "tap/control/setpoint/commands/calibrate_command.hpp"
+#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
+#include "tap/control/setpoint/commands/unjam_integral_command.hpp"
+#include "tap/motor/dji_motor.hpp"
+
+#include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/launcher_target/launcher_target_constants.hpp"
+#include "aruwsrc/robot/launcher_target/launcher_target_drivers.hpp"
+#include "aruwsrc/robot/launcher_target/motor_subsystem.hpp"
+#include "aruwsrc/robot/launcher_target/random_moving_target_command.hpp"
+#include "aruwsrc/robot/launcher_target/stick_rpm_command.hpp"
+#include "aruwsrc/robot/launcher_target/terminal_moving_target_command.hpp"
+#include "aruwsrc/robot/robot_control.hpp"
+
+using namespace tap::control::setpoint;
+
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::launcher_target;
+using namespace aruwsrc::launcher_target::constants;
+// using namespace tap::control;
+
+/*
+ * NOTE: We are using the DoNotUse_getDrivers() function here
+ *      because this file defines all subsystems and command
+ *      and thus we must pass in the single statically allocated
+ *      Drivers class to all of these objects.
+ */
+driversFunc drivers = DoNotUse_getDrivers;
+
+namespace launcher_target_control
+{
+// m2006
+tap::motor::DjiMotor motor2006(
+    drivers(),
+    tap::motor::MOTOR3,          // id 3
+    tap::can::CanBus::CAN_BUS1,  // bus 1
+    false,
+    "2006 Motor",
+    true,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006);
+
+MotorSubsystem motorSubsystem2006(drivers(), motor2006, m2006VelocityPidConfig);
+
+// ----------
+// Commands
+// ----------
+
+StickRpmCommand leftVerticalManual(
+    &motorSubsystem2006,
+    &drivers()->remote,
+    tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
+    500.0f);
+
+RandomMovingTargetCommand randomMovingTargetCommand(&motorSubsystem2006);
+TerminalMovingTargetCommand terminalMovingTargetCommand(&motorSubsystem2006);
+// ------------------
+// command mappings
+// ------------------
+tap::control::PressCommandMapping leftUp(
+    drivers(),
+    {&randomMovingTargetCommand},
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+tap::control::PressCommandMapping leftDown(
+    drivers(),
+    {&terminalMovingTargetCommand},
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
+// inits
+
+void initializeSubsystems()
+{
+    motorSubsystem2006.initialize();
+    modm::platform::RandomNumberGenerator::enable();
+}
+
+void registerSubsystems(Drivers* drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &launcher_target_control::remoteSafeDisconnectFunction);
+    drivers->commandScheduler.registerSubsystem(&motorSubsystem2006);
+}
+
+void registerIoMappings(Drivers* drivers)
+{
+    motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
+    drivers->commandMapper.addMap(&leftUp);
+    drivers->commandMapper.addMap(&leftDown);
+}
+}  // namespace launcher_target_control
+
+namespace aruwsrc::launcher_target
+{
+void initSubsystemCommands(aruwsrc::launcher_target::Drivers* drivers)
+{
+    launcher_target_control::registerSubsystems(drivers);
+    launcher_target_control::initializeSubsystems();
+    launcher_target_control::registerIoMappings(drivers);
+}
+
+}  // namespace aruwsrc::launcher_target
+
+#endif

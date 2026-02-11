@@ -22,6 +22,8 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+
 namespace aruwsrc::characterizer
 {
 class Drivers : public tap::Drivers
@@ -31,9 +33,10 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers() : tap::Drivers(), rttTelemetry(this) {}
 
 public:
+    communication::rtt::RttTelemetry rttTelemetry;
 };  // class aruwsrc::MotortesterDrivers
 }  // namespace aruwsrc::characterizer
 

@@ -59,8 +59,8 @@ public:
         tap::Drivers *drivers,
         ControlOperatorInterface &controlOperatorInterface,
         TurretSubsystem *turretSubsystem,
-        algorithms::TurretYawControllerInterface *yawController,
-        algorithms::TurretPitchControllerInterface *pitchController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController,
+        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController,
         float userYawInputScalar,
         float userPitchInputScalar,
         uint8_t turretID = 0);
@@ -84,8 +84,8 @@ private:
 
     uint32_t prevTime = 0;
 
-    algorithms::TurretYawControllerInterface *yawController;
-    algorithms::TurretPitchControllerInterface *pitchController;
+    algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController;
+    algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController;
 
     const float userYawInputScalar;
     const float userPitchInputScalar;

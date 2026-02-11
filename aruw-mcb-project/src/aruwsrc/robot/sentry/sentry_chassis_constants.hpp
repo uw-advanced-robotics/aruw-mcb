@@ -101,17 +101,10 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 /**
  * Radius of the wheels (m)
  */
-static constexpr float WHEEL_RADIUS = 0.1016 * 1.413;  // This is being fudged
-/**
- * Distance from center of the two front wheels (m)
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.55f;
-/**
- * Distance from center of the front and rear wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.55f;
+static constexpr float FUDGE_FACTOR = 0.999141881817f;
+static constexpr float WHEEL_RADIUS = 0.1016f * FUDGE_FACTOR;
 
-static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+static constexpr float WHEELBASE_RADIUS = 0.55f;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
@@ -130,6 +123,10 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.25f,
     .beybladeRampRate = 100,
 };
+
+static constexpr float TRANSLATIONAL_MOTION_THRESHOLD = 0.25f;
+
+static constexpr float CAPBANK_ENERGY_THRESHOLD = 500.0f;
 
 }  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_

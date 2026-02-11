@@ -23,11 +23,13 @@
 
 #include "modm/architecture/interface/assert.hpp"
 
+#include "launcher_constants.hpp"
+
 namespace aruwsrc::control::launcher
 {
 FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     tap::Drivers *drivers,
-    FrictionWheelSubsystem *frictionWheels,
+    FrictionWheelInterface *frictionWheels,
     float defaultLaunchSpeed,
     bool alwaysUseDefaultLaunchSpeed,
     tap::communication::serial::RefSerialData::Rx::MechanismID barrel)
@@ -41,6 +43,10 @@ FrictionWheelSpinRefLimitedCommand::FrictionWheelSpinRefLimitedCommand(
     addSubsystemRequirement(frictionWheels);
 }
 
+#if defined(TARGET_FLYWHEEL_TESTING)
+FlywheelRpms testingRpms = flywheelTestingRpms;
+#endif
+
 void FrictionWheelSpinRefLimitedCommand::execute()
 {
     // @todo dubious
@@ -52,6 +58,41 @@ void FrictionWheelSpinRefLimitedCommand::execute()
     {
         frictionWheels->setDesiredLaunchSpeed(LAUNCHER_SPEED);
     }
+
+#if defined(TARGET_FLYWHEEL_TESTING)
+    frictionWheels->changeWheelVelocityState(0, true);
+    frictionWheels->changeWheelVelocityState(1, true);
+    frictionWheels->changeWheelVelocityState(2, true);
+    frictionWheels->changeWheelVelocityState(3, true);
+    frictionWheels->changeWheelVelocityState(4, true);
+
+    if (defaultLaunchSpeed == 0)
+    {
+        // left
+        frictionWheels->setIndividualVelocity(0, 0);
+        // right
+        frictionWheels->setIndividualVelocity(1, 0);
+        // lower
+        frictionWheels->setIndividualVelocity(2, 0);
+        // upper
+        frictionWheels->setIndividualVelocity(3, 0);
+        // small upper
+        frictionWheels->setIndividualVelocity(4, 0);
+    }
+    else
+    {
+        // left
+        frictionWheels->setIndividualVelocity(0, testingRpms.leftRpm);
+        // right
+        frictionWheels->setIndividualVelocity(1, testingRpms.rightRpm);
+        // lower
+        frictionWheels->setIndividualVelocity(2, testingRpms.lowerRpm);
+        // upper
+        frictionWheels->setIndividualVelocity(3, testingRpms.upperRpm);
+        // small upper
+        frictionWheels->setIndividualVelocity(4, testingRpms.smallUpperRpm);
+    }
+#endif
 }
 
 }  // namespace aruwsrc::control::launcher

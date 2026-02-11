@@ -34,21 +34,11 @@
 #include "turret_motor.hpp"
 #endif
 
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
-
-namespace aruwsrc::communication::can
-{
-class TurretMCBCanComm;
-}
-
-namespace aruwsrc::control::turret::algorithms
-{
-class TurretPitchControllerInterface;
-class TurretYawControllerInterface;
-}  // namespace aruwsrc::control::turret::algorithms
 
 namespace aruwsrc::control::turret
 {
@@ -75,7 +65,7 @@ public:
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,
         const TurretMotorConfig& yawMotorConfig,
-        const aruwsrc::communication::can::TurretMCBCanComm* turretMCB);
+        const tap::communication::sensors::imu::AbstractIMU* turretImu);
 
     void initialize() override;
 
@@ -91,10 +81,7 @@ public:
 
     mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
 
-    const inline aruwsrc::communication::can::TurretMCBCanComm* getTurretMCB() const
-    {
-        return turretMCB;
-    }
+    const inline tap::communication::sensors::imu::AbstractIMU* getIMU() const { return turretImu; }
 
 #ifdef ENV_UNIT_TESTS
     testing::NiceMock<mock::TurretMotorMock> pitchMotor;
@@ -107,7 +94,7 @@ public:
 #endif
 
 protected:
-    const aruwsrc::communication::can::TurretMCBCanComm* turretMCB;
+    const tap::communication::sensors::imu::AbstractIMU* turretImu;
 };  // class TurretSubsystem
 
 }  // namespace aruwsrc::control::turret

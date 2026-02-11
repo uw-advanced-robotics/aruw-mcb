@@ -42,7 +42,8 @@ public:
     {
         _17_MM,
         _42_MM,
-        COLLISION
+        COLLISION,
+        NONE,
     };
     struct PlateHitData
     {
@@ -97,7 +98,7 @@ public:
 
     inline PlateHitData getLastHitData() { return lastHitData; }
 
-    std::vector<PlateHitBinData> getPeakAnglesRadians();
+    const std::vector<PlateHitBinData> &getPeakAnglesRadians();
 
     void update();
 
@@ -109,7 +110,9 @@ public:
 
 private:
     static constexpr uint8_t BIN_NUMBER = 8;
+    CMSISMat<BIN_NUMBER, 1> binData{};
     static constexpr float BLUR_FACTOR = 0.5;
+    static constexpr float HIT_THRESH = 0.001;
 
     // clang-format off
     static constexpr float A = 0.5; 
@@ -142,6 +145,7 @@ private:
 
     bool calculatedPeakAngles = false;
     std::vector<PlateHitBinData> prevPeakBinData;
+    PlateHitBinData peakData[BIN_NUMBER];
 };
 
 }  // namespace aruwsrc::algorithms

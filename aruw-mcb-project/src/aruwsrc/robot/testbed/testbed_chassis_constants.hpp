@@ -108,13 +108,7 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  */
 static constexpr float WHEEL_RADIUS = 0.076;
 
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.395f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.395f;
-
-static constexpr float WHEELBASE_HYPOTENUSE =
-    (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-        ? 1
-        : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+static constexpr float WHEELBASE_RADIUS = 0.395;  // wrong
 
 /*
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y (m).
