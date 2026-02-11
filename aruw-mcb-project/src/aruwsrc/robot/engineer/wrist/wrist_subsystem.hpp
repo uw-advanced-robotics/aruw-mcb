@@ -74,7 +74,7 @@ public:
     float getSetpointTheta2() { return setpointTheta2; }
     float getSetpointTheta3() { return setpointTheta3; }
     float calculateLeftMotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
-    float calculateRightMotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
+    float calculateRightMotorOutputForTheta1(float theta1Setpoint);
 
     virtual void initialize() override;
 
@@ -91,12 +91,11 @@ public:
     virtual void refreshSafeDisconnect() override;
 
 private:
-    float setpointTheta1, setpointTheta2, setpointTheta3;
     tap::motor::MotorInterface &motorLeft, &motorRight, &motorTheta3;
     tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2, &encoderTheta3;
-    tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
     const WristConfig config;
-
+    float setpointTheta1, setpointTheta2, setpointTheta3;
+    tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
     const tap::algorithms::transforms::Position COM_POS =
         tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static
     static constexpr float WRIST_MASS_KG = 0.4;

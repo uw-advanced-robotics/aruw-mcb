@@ -94,20 +94,18 @@ float WristSubsystem::calculateLeftMotorOutputForTheta1Theta2(
     float theta1Setpoint,
     float theta2Setpoint)
 {
-    float theta1Error = encoderTheta1.getPosition().minDifference(setpointTheta1);
-    float theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
+    float theta1Error = encoderTheta1.getPosition().minDifference(theta1Setpoint);
+    float theta2Error = encoderTheta2.getPosition().minDifference(theta2Setpoint);
 
     float pidOutTheta1 = pidTheta1.runController(theta1Error, encoderTheta1.getVelocity(), 2.0f);
     float pidOutTheta2 = pidTheta2.runController(theta2Error, encoderTheta2.getVelocity(), 2.0f);
 
     return -pidOutTheta2 - pidOutTheta1;
 }
-float WristSubsystem::calculateRightMotorOutputForTheta1Theta2(
-    float theta1Setpoint,
-    float theta2Setpoint)
+float WristSubsystem::calculateRightMotorOutputForTheta1(
+    float theta1Setpoint)
 {
-    // TODO: implement
-    float theta1Error = encoderTheta1.getPosition().minDifference(setpointTheta1);
+    float theta1Error = encoderTheta1.getPosition().minDifference(theta1Setpoint);
     float pidOutTheta1 = pidTheta1.runController(theta1Error, encoderTheta1.getVelocity(), 2.0f);
     return -pidOutTheta1;
 }
@@ -133,7 +131,7 @@ void WristSubsystem::refresh()
     }
 
     float outMotorLeft = calculateLeftMotorOutputForTheta1Theta2(setpointTheta1, setpointTheta2);
-    float outMotorRight = calculateRightMotorOutputForTheta1Theta2(setpointTheta1, setpointTheta2);
+    float outMotorRight = calculateRightMotorOutputForTheta1(setpointTheta1);
 
     float errorTheta3 = encoderTheta3.getPosition().minDifference(setpointTheta3);
     float outMotorTheta3 = pidTheta3.runController(errorTheta3, encoderTheta3.getVelocity(), 2.0f);
