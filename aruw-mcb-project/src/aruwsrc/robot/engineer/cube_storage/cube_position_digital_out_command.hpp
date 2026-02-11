@@ -40,40 +40,32 @@ public:
         : cubeStorage(cubeStorage),
           leftSubsystem(leftSubsystem),
           rightSubsystem(rightSubsystem),
-          state(state),
-          running(false)
+          state(state)
     {
         addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(&leftSubsystem));
         addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(&rightSubsystem));
     }
 
-    inline void initialize() override {}
-
-    inline void execute() override
+    inline void initialize() override
     {
-        if (cubeStorage.getCurrentCube() == CubeStorageSubsystem::CubeOptions::LEFT)
+        switch (cubeStorage.getCurrentCube())
         {
-            leftSubsystem.set(state);
-            running = true;
-        }
-        else if (cubeStorage.getCurrentCube() == CubeStorageSubsystem::CubeOptions::RIGHT)
-        {
-            rightSubsystem.set(state);
-            running = true;
-        }
-        else
-        {
-            running = false;
-        }
+            case CubeStorageSubsystem::CubeOptions::LEFT:
+                leftSubsystem.set(state);
+                break;
+            case CubeStorageSubsystem::CubeOptions::RIGHT:
+                rightSubsystem.set(state);
+                break;
+            default:
+                break;  // do nothing, we don't know which one to change
+        };
     }
 
-    inline void end(bool) override
-    {
-        // would running still be true here?
-        running = false;
-    }
+    inline void execute() override {}
 
-    inline bool isFinished() const override { return false; }
+    inline void end(bool) override {}
+
+    inline bool isFinished() const override { return true; }
 
     const char* getName() const override { return "Cube Position Digital Output Command"; }
 
@@ -82,7 +74,6 @@ private:
     DigitalOutSubsystem& leftSubsystem;
     DigitalOutSubsystem& rightSubsystem;
     const bool state;
-    bool running;
 };  // class CubePositionDigitalOutCommand
 
 }  // namespace aruwsrc::engineer::cube_storage
