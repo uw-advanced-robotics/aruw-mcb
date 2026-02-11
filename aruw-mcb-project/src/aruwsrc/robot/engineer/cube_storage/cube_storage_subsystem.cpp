@@ -165,10 +165,12 @@ Transform CubeStorageSubsystem::getWristPos()
     return Transform(0, 0, 0, 0, 0, 0);
 }
 
-void CubeStorageSubsystem::checkForCubes()
+std::array<bool, 2> CubeStorageSubsystem::checkForCubes()
 {
     hasCube[CubeOptions::LEFT] = getPressure(CubeOptions::LEFT) > 1.0f;  // TODO: update this
     hasCube[CubeOptions::RIGHT] = getPressure(CubeOptions::RIGHT) > 1.0f;
+
+    return std::to_array(hasCube);
 }
 
 float CubeStorageSubsystem::getPressure(CubeOptions cube)

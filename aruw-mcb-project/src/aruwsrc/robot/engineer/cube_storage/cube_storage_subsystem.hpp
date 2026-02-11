@@ -62,7 +62,7 @@ public:
     bool storeWristPos(Transform wristPos);
     Transform getWristPos();
 
-    void checkForCubes();
+    std::array<bool, 2> checkForCubes();
 
     float getPressure(CubeOptions cube);
     bool isReady();
