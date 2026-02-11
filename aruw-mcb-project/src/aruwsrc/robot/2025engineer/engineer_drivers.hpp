@@ -29,6 +29,7 @@
 
 #else
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
@@ -48,6 +49,7 @@ public:
 
     Drivers()
         : tap::Drivers(),
+          rttTelemetry(this),
           controlOperatorInterface(this),
           oledDisplay(
               this,
@@ -71,6 +73,7 @@ public:
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
 #else
 public:
+    communication::rtt::RttTelemetry rttTelemetry;
     engineer::EngineerControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
     communication::serial::EngineerCVCommunication engineerCVCommunication;
