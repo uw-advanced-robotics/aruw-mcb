@@ -240,7 +240,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::
     // 1. Estimate ToF using simple distance/launch_speed calculation
     // 2. Compute omega_total accounting for both rotation and translation
     // 3. Determine which plate will be "active" (shootable) at time ToF
-    // 4. Compute accurate ballistics solution for active plate (single pass)
+    // 4. Compute accurate ballistics solution for active plate 
     // 5. Calculate shot timing window accounting for plate width and omega_total
 
     // Estimate approximate distance and ToF to robot center

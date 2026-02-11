@@ -182,10 +182,9 @@ public:
                 quadraticKinematicProjection(dt, position.y - ry, velocity.y, acceleration.y) + ryf,
                 quadraticKinematicProjection(dt, position.z, velocity.z, acceleration.z));
         }
-
         /**
          * Computes the total angular velocity accounting for both rotation and translation.
-         * omega_total = omega_robot + (r × v)_z / |r|²
+         * omega_total = omega_robot + (r x v)_z / |r|_squared
          * @param robotPos Robot position relative to observer (turret)
          * @param robotVel Robot velocity relative to observer (turret)
          * @return Total angular velocity as seen from observer (rad/s)
@@ -194,7 +193,7 @@ public:
             const modm::Vector3f& robotPos,
             const modm::Vector3f& robotVel) const
         {
-            // Compute cross product (r × v)_z component
+            // Compute cross product (r x v)_z component
             float crossProductZ = robotPos.x * robotVel.y - robotPos.y * robotVel.x;
 
             // Magnitude squared of r (in x-y plane)
@@ -203,7 +202,7 @@ public:
             // Avoid division by zero
             if (rMagSquared < 1e-6f)
             {
-                return omega;
+            return omega;
             }
 
             float omegaFromTranslation = crossProductZ / rMagSquared;
