@@ -18,6 +18,7 @@
  */
 
 #include "select_cube_position_command.hpp"
+
 #include "cube_storage_subsystem.hpp"
 
 namespace aruwsrc::engineer::cube_storage
@@ -38,17 +39,19 @@ SelectCubePositionCommand::SelectCubePositionCommand(  // two const references
 
 void SelectCubePositionCommand::initialize()
 {
-    if (addCube) {
+    if (addCube)
+    {
         cubeStorage.getCubeToAdd();
         cubeStorage.storeWristPos(Transform(0, 0, 0, 0, 0, 0));  // TODO: update; 3 motors on wrist
         // use transforms systems
-    } else {
+    }
+    else
+    {
         cubeStorage.getCubeToRemove();
         // jointSubsystem.setSetpoint(cubeStorage.getWristPos());
         // ^ make smth in jointsubsystem accept a transform, oliver problem i think?
     }
 
-    
     // multiply transformers here & give position to wrist
 }
 

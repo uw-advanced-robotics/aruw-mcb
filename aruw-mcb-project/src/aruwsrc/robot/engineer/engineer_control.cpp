@@ -455,33 +455,30 @@ WristMovePositionCommand wristDown(
     WRIST_YAW_PICKUP);  // tuned to align for better suction
 WristMovePositionCommand wristOut(wristSubsystem, WRIST_PITCH_SCORE, WRIST_YAW_SCORE);
 
-ScorePositionCommand scorePositionCommand(
-    extensionSubsystem,
-    wristSubsystem,
-    wristRollSubsystem); 
+ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem, wristRollSubsystem);
 
 SelectCubePositionCommand selectCubeAddPositionCommand(cubeStorage, wristRollSubsystem, true);
 SelectCubePositionCommand selectCubeRemovePositionCommand(cubeStorage, wristRollSubsystem, false);
 
-SequentialCommand<4> storeCubeCommand(std::array<Command *, 4>{
-    {&selectCubeAddPositionCommand, 
-    &suckOnCommand, 
-    &releaseOnCommand, 
+SequentialCommand<4> storeCubeCommand(std::array<Command *, 4>{{
+    &selectCubeAddPositionCommand,
+    &suckOnCommand,
+    &releaseOnCommand,
     // hand down
     // hand release cube
     // hand up
     &centerCubePosition,
-    }});
+}});
 
-SequentialCommand<4> releaseCubeCommand(std::array<Command *, 4>{
-    {&selectCubeRemovePositionCommand, 
+SequentialCommand<4> releaseCubeCommand(std::array<Command *, 4>{{
+    &selectCubeRemovePositionCommand,
     // hand suction on
     // hand down
-    &suckOffCommand, 
+    &suckOffCommand,
     &releaseOffCommand,
     // hand up
     &centerCubePosition,
-    }});
+}});
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());

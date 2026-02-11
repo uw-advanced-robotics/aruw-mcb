@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef CUBE_STORAGE_CHOOSE_ADD_COMMAND_HPP_
-#define CUBE_STORAGE_CHOOSE_ADD_COMMAND_HPP_
+#ifndef SELECT_CUBE_POSITION_COMMAND_HPP_
+#define SELECT_CUBE_POSITION_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -33,7 +33,7 @@ class SelectCubePositionCommand : public tap::control::Command
 public:
     SelectCubePositionCommand(
         CubeStorageSubsystem &cubeStorage,
-        aruwsrc::control::joint::JointSubsystem &jointSubsystem, 
+        aruwsrc::control::joint::JointSubsystem &jointSubsystem,
         bool addCube
         // TurretToCubeTransform &turretToCubeTransformer,
         // TurretToSuctionTransform &turretToSuctionTransformer

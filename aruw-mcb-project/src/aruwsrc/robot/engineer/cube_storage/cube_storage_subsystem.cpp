@@ -18,6 +18,7 @@
  */
 
 #include "cube_storage_subsystem.hpp"
+
 #include "engineer_cube_storage_constants.hpp"
 
 using namespace aruwsrc::control::joint::homing;
@@ -84,15 +85,17 @@ CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove()
  * sets the setpoint based on the current cube position
  * @return true if set sucessfully, false otherwise
  */
-bool CubeStorageSubsystem::setSetpointToCurrentCube() {
-    switch (currentCube) {
+bool CubeStorageSubsystem::setSetpointToCurrentCube()
+{
+    switch (currentCube)
+    {
         case CubeOptions::LEFT:
             setSetpoint(CUBE_STORAGE_RIGHT_SETPOINT);
             return true;
         case CubeOptions::RIGHT:
             setSetpoint(CUBE_STORAGE_LEFT_SETPOINT);
             return true;
-        default: 
+        default:
             return false;
     }
 }
