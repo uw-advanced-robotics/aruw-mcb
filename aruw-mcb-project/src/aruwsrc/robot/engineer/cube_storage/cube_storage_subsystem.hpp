@@ -23,14 +23,13 @@
 #include "tap/algorithms/transforms/transform.hpp"
 
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
-#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 
 using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::engineer::cube_storage
 {
 /**
- * Subsystem code for joints that don't need to be homed.
+ * Subsystem code for cube storage on 2026 engineer.
  */
 class CubeStorageSubsystem : public aruwsrc::control::joint::homing::TriggerHomedJointSubsystem
 {

@@ -21,7 +21,7 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
+#include "aruwsrc/control/digital/digital_out_subsystem.hpp"
 #include "cube_storage_subsystem.hpp"
 
 namespace aruwsrc::engineer::cube_storage
