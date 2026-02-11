@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef CUBE_STORAGE_CHOOSE_REMOVE_COMMAND_HPP_
-#define CUBE_STORAGE_CHOOSE_REMOVE_COMMAND_HPP_
+#ifndef CUBE_STORAGE_CHOOSE_ADD_COMMAND_HPP_
+#define CUBE_STORAGE_CHOOSE_ADD_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
@@ -28,15 +28,16 @@
 namespace aruwsrc::engineer::cube_storage
 
 {
-class CubeStorageChooseRemoveCommand : public tap::control::Command
+class SelectCubePositionCommand : public tap::control::Command
 {
 public:
-    CubeStorageChooseRemoveCommand(
+    SelectCubePositionCommand(
         CubeStorageSubsystem &cubeStorage,
-        aruwsrc::control::joint::JointSubsystem &jointSubsystem)
+        aruwsrc::control::joint::JointSubsystem &jointSubsystem, 
+        bool addCube
         // TurretToCubeTransform &turretToCubeTransformer,
         // TurretToSuctionTransform &turretToSuctionTransformer
-        ;
+    );
 
     void initialize() override;
 
@@ -46,13 +47,17 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Cube Storage Choose Remove Command"; }
+    const char *getName() const override { return "Select Cube Position Command"; }
 
 private:
     CubeStorageSubsystem &cubeStorage;
     aruwsrc::control::joint::JointSubsystem &jointSubsystem;
+    bool addCube;
 
-};  // class CubeStorageChooseRemoveCommand
+    // TurretToCubeTransform &turretToCubeTransformer;
+    // TurretToSuctionTransform &turretToSuctionTransformer;
+
+};  // class Select Cube Position Command
 
 }  // namespace aruwsrc::engineer::cube_storage
-#endif  // CUBE_STORAGE_CHOOSE_REMOVE_COMMAND_HPP_
+#endif  // SELECT_CUBE_POSITION_COMMAND_HPP_

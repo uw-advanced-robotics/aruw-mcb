@@ -17,13 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/cube_storage/cube_storage_choose_add_command.hpp"
+#include "select_cube_position_command.hpp"
+#include "cube_storage_subsystem.hpp"
 
 namespace aruwsrc::engineer::cube_storage
 {
-CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(  // two const references
+SelectCubePositionCommand::SelectCubePositionCommand(  // two const references
     CubeStorageSubsystem &cubeStorage,
-    aruwsrc::control::joint::JointSubsystem &jointSubsystem
+    aruwsrc::control::joint::JointSubsystem &jointSubsystem,
+    bool addCube
     // TurretToCubeTransform &turretToCubeTransformer,
     // TurretToSuctionTransform &turretToSuctionTransformer
     )
@@ -34,18 +36,25 @@ CubeStorageChooseAddCommand::CubeStorageChooseAddCommand(  // two const referenc
 {
 }
 
-void CubeStorageChooseAddCommand::initialize()
+void SelectCubePositionCommand::initialize()
 {
-    cubeStorage.getCubeToAdd();
-    cubeStorage.storeWristPos(Transform(0,0,0,0,0,0));  // TODO: update; 3 motors on wrist
-    // use transforms systems
+    if (addCube) {
+        cubeStorage.getCubeToAdd();
+        cubeStorage.storeWristPos(Transform(0, 0, 0, 0, 0, 0));  // TODO: update; 3 motors on wrist
+        // use transforms systems
+    } else {
+        cubeStorage.getCubeToRemove();
+        // jointSubsystem.setSetpoint(cubeStorage.getWristPos());
+        // ^ make smth in jointsubsystem accept a transform, oliver problem i think?
+    }
 
+    
     // multiply transformers here & give position to wrist
 }
 
-void CubeStorageChooseAddCommand::execute() {}
+void SelectCubePositionCommand::execute() {}
 
-void CubeStorageChooseAddCommand::end(bool) {}
+void SelectCubePositionCommand::end(bool) {}
 
-bool CubeStorageChooseAddCommand::isFinished() const { return true; }
+bool SelectCubePositionCommand::isFinished() const { return true; }
 }  // namespace aruwsrc::engineer::cube_storage

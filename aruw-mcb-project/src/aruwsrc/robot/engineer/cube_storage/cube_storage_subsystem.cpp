@@ -18,6 +18,7 @@
  */
 
 #include "cube_storage_subsystem.hpp"
+#include "engineer_cube_storage_constants.hpp"
 
 using namespace aruwsrc::control::joint::homing;
 using namespace aruwsrc::control::joint::homing::trigger;
@@ -79,6 +80,23 @@ CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove()
     }
 }
 
+/**
+ * sets the setpoint based on the current cube position
+ * @return true if set sucessfully, false otherwise
+ */
+bool CubeStorageSubsystem::setSetpointToCurrentCube() {
+    switch (currentCube) {
+        case CubeOptions::LEFT:
+            setSetpoint(CUBE_STORAGE_RIGHT_SETPOINT);
+            return true;
+        case CubeOptions::RIGHT:
+            setSetpoint(CUBE_STORAGE_LEFT_SETPOINT);
+            return true;
+        default: 
+            return false;
+    }
+}
+
 /* tell subsystem that you have added a cube
  * @param CubeOptions which cube you are adding
  * @return true for success, false for failure
@@ -127,7 +145,7 @@ bool CubeStorageSubsystem::storeWristPos(Transform newWristPosition)
 /**
  * @return wrist position for current cube position as a transform
  * if no current cube will return an empty transform
-*/
+ */
 Transform CubeStorageSubsystem::getWristPos()
 {
     if (currentCube != CubeOptions::ERROR)
@@ -138,10 +156,10 @@ Transform CubeStorageSubsystem::getWristPos()
         }
         else
         {
-            return Transform(0,0,0,0,0,0);
+            return Transform(0, 0, 0, 0, 0, 0);
         }
     }
-    return Transform(0,0,0,0,0,0);
+    return Transform(0, 0, 0, 0, 0, 0);
 }
 
 void CubeStorageSubsystem::checkForCubes()
@@ -159,8 +177,6 @@ float CubeStorageSubsystem::getPressure(CubeOptions cube)
     return std::numeric_limits<float>::quiet_NaN();
 }
 
-bool CubeStorageSubsystem::isReady() {
-    return currentCube != CubeOptions::ERROR;
-}
+bool CubeStorageSubsystem::isReady() { return currentCube != CubeOptions::ERROR; }
 
 }  // namespace aruwsrc::engineer::cube_storage
