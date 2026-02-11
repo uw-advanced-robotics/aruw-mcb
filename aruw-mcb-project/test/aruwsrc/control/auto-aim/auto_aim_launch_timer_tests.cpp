@@ -63,7 +63,7 @@ protected:
               std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}}),
           visionCoprocessor(&drivers),
           turretSubsystem(&drivers),
-          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};
+          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0, nullptr){};
 
     void SetUp() override {}
 
@@ -75,7 +75,7 @@ protected:
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
-    NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballistics;
+    NiceMock<aruwsrc::mock::CvBallisticsSolverMock> ballistics;
 };
 
 TEST_F(

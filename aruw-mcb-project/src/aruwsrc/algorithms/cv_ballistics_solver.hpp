@@ -22,7 +22,14 @@
 
 #include <optional>
 
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+
+namespace aruwsrc::communication::rtt
+{
+class RttTelemetry;
+}
 
 namespace aruwsrc::control::chassis
 {
@@ -116,14 +123,16 @@ public:
     }
 
     /**
-     * @param[in] drivers Pointer to a global drivers object.
+     * @param[in] visionCoprocessor Vision coprocessor for aim data.
      * @param[in] odometryInterface Odometry object, used for position odometry information.
+     * @param[in] turretSubsystem Turret subsystem for offset information.
      * @param[in] frictionWheels Friction wheels, used to determine the launch speed because leading
      * a target is a function of how fast a projectile is launched at.
      * @param[in] defaultLaunchSpeed The launch speed to be used in ballistics computation when the
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
      * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
      * for, see the VisionCoprocessor for more information about this id.
+     * @param[in] telemetry Pointer to the RTT telemetry instance for logging (can be nullptr).
      */
     CvBallisticsSolver(
         const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
@@ -131,7 +140,8 @@ public:
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
-        const uint8_t turretID);
+        const uint8_t turretID,
+        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -153,6 +163,12 @@ private:
     const float defaultLaunchSpeed;
     modm::Vector3f turretOrigin;
 
+public:
+    const uint8_t turretID;
+
+private:
+    aruwsrc::communication::rtt::RttTelemetry* telemetry;
+
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
@@ -166,9 +182,6 @@ private:
         const modm::Vector3f& turretPosition,
         const modm::Vector2f& chassisVel,
         float launchSpeed);
-
-public:
-    const uint8_t turretID;
 };
 }  // namespace aruwsrc::algorithms
 

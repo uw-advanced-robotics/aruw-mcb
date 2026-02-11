@@ -31,24 +31,25 @@ namespace
 using namespace aruwsrc::algorithms;
 }
 
-class OttoBallisticsSolverMock : public CvBallisticsSolver
+class CvBallisticsSolverMock : public CvBallisticsSolver
 {
 public:
-    OttoBallisticsSolverMock(
+    CvBallisticsSolverMock(
         const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
-        const uint8_t turretID);
-    virtual ~OttoBallisticsSolverMock();
+        const uint8_t turretID,
+        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
+    virtual ~CvBallisticsSolverMock();
 
     MOCK_METHOD(
         std::optional<CvBallisticsSolver::BallisticsSolution>,
         computeTurretAimAngles,
         (),
         (override));
-};  // class OttoBallisticsSolverMock
+};  // class CvBallisticsSolverMock
 }  // namespace aruwsrc::mock
 
 #endif  // CV_BALLISTICS_SOLVER_MOCK_HPP_

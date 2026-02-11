@@ -50,7 +50,7 @@ protected:
           pitchController(pitchMotor, {}),
           turretSubsystem(&drivers),
           visionCoprocessor(&drivers),
-          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
+          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0, nullptr),
           operatorInterface(&drivers),
           turretCvCommand(
               &visionCoprocessor,
@@ -89,7 +89,7 @@ protected:
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
 
 private:
-    NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballisticsSolver;
+    NiceMock<aruwsrc::mock::CvBallisticsSolverMock> ballisticsSolver;
 
 protected:
     tap::Drivers drivers;

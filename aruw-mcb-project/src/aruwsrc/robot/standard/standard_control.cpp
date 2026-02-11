@@ -130,9 +130,6 @@ using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::standard;
 
-// for fake sentry
-// using namespace aruwsrc::sentry::chassis;
-
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -256,10 +253,7 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(
-    *drivers(),
-    transformer,
-    &drivers()->rttTelemetry);
+StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
@@ -302,7 +296,8 @@ CvBallisticsSolver ballisticsSolver(
     turret,
     frictionWheelSpeedPredictor,
     aruwsrc::control::launcher::LAUNCHER_SPEED,  // defaultLaunchSpeed
-    0                                            // turretID
+    0,                                           // turretID
+    &drivers()->rttTelemetry                     // telemetry
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
@@ -650,7 +645,6 @@ HoldRepeatCommandMapping rightSwitchMiddle(
     {&spinFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
     true);
-
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
@@ -662,7 +656,6 @@ HoldRepeatCommandMapping leftSwitchDown(
     {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
-
 HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},

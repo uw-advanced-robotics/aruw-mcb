@@ -283,8 +283,9 @@ CvBallisticsSolver ballisticsSolver(
     odometrySubsystem,
     turret,
     frictionWheelSpeedPredictor,
-    15.0f,  // defaultLaunchSpeed
-    0       // turretID
+    15.0f,                   // defaultLaunchSpeed
+    0,                       // turretID
+    &drivers()->rttTelemetry  // telemetry
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,

@@ -320,22 +320,24 @@ TurretCVCommandMock::TurretCVCommandMock(
 }
 TurretCVCommandMock::~TurretCVCommandMock() {}
 
-OttoBallisticsSolverMock::OttoBallisticsSolverMock(
+CvBallisticsSolverMock::CvBallisticsSolverMock(
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
-    const uint8_t turretID)
+    const uint8_t turretID,
+    aruwsrc::communication::rtt::RttTelemetry* telemetry)
     : aruwsrc::algorithms::CvBallisticsSolver(
           visionCoprocessor,
           odometryInterface,
           turretSubsystem,
           frictionWheels,
           defaultLaunchSpeed,
-          turretID){};
+          turretID,
+          telemetry){};
 
-OttoBallisticsSolverMock::~OttoBallisticsSolverMock(){};
+CvBallisticsSolverMock::~CvBallisticsSolverMock(){};
 
 TurretControllerInterfaceMock::TurretControllerInterfaceMock(
     aruwsrc::control::turret::TurretMotor &turretMotor)

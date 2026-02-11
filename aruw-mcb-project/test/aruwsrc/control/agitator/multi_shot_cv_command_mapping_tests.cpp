@@ -53,7 +53,7 @@ protected:
           turretSubsystem(&drivers),
           visionCoprocessor(&drivers),
           operatorInterface(&drivers),
-          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
+          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0, nullptr),
           turretCvCommand(
               &visionCoprocessor,
               &operatorInterface,
@@ -100,7 +100,7 @@ private:
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
-    NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballisticsSolver;
+    NiceMock<aruwsrc::mock::CvBallisticsSolverMock> ballisticsSolver;
     NiceMock<aruwsrc::mock::TurretCVCommandMock> turretCvCommand;
 
     aruwsrc::control::governor::AutoAimLaunchTimer launchTimer;
