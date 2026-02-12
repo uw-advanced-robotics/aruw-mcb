@@ -38,6 +38,9 @@
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
+#include "aruwsrc/control/digital/digital_out_command.hpp"
+#include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
+#include "aruwsrc/control/digital/dual_digital_out_subsystem.hpp"
 #include "aruwsrc/control/joint/homing/homing_command.hpp"
 #include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
@@ -45,9 +48,6 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/2025engineer/cubelift_switch_command.hpp"
-#include "aruwsrc/robot/2025engineer/digital_out_command.hpp"
-#include "aruwsrc/robot/2025engineer/digital_out_subsystem.hpp"
-#include "aruwsrc/robot/2025engineer/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/2025engineer/engineer_cube_lift_constants.hpp"
 #include "aruwsrc/robot/2025engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/2025engineer/engineer_gantry_constants.hpp"
@@ -64,6 +64,7 @@
 
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::client_display::indicators;
+using namespace aruwsrc::control::digital;
 using namespace aruwsrc::control::joint;
 using namespace aruwsrc::control::joint::homing;
 using namespace aruwsrc::control::joint::homing::trigger;
@@ -233,7 +234,7 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak gantryExtensionLim
 LimitSwitchTrigger gantryExtensionTrigger(&gantryExtensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
-chassis::MecanumChassisSubsystem mechanumChassis(
+chassis::MecanumChassisSubsystem mecanumChassis(
     drivers(),
     &currentSensor,
     &voltageSensor,
@@ -241,7 +242,9 @@ chassis::MecanumChassisSubsystem mechanumChassis(
     leftBackChassisMotor,
     rightFrontChassisMotor,
     rightBackChassisMotor,
-    aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG);
+    aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
+    aruwsrc::control::chassis::WHEEL_RADIUS,
+    aruwsrc::control::chassis::EFFECTIVE_WHEELBASE);
 
 TriggerHomedJointSubsystem cubeLift(drivers(), cubeLiftMotor, cubeLiftTrigger, CUBE_LIFT_CONFIG);
 
@@ -269,15 +272,11 @@ TriggerHomedJointSubsystem gantryExtensionSubsystem(
 
 JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_CONFIG);
 
-DigitalOutSubsystem suckSubsystem(
+DualDigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true);
-
-DigitalOutSubsystem releaseSubsystem(
-    drivers(),
-    drivers()->digital,
+    true,
     tap::gpio::Digital::OutputPin::Z,
     false);
 
@@ -330,7 +329,7 @@ SetpointMovePositionCommand threeCubePosition(cubeLift, THREE_CUBE_SETPOINT);
 aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
-    &mechanumChassis);
+    &mecanumChassis);
 
 WristControllerCommand wristControllerCommand(
     wristRollSubsystem,
@@ -351,9 +350,7 @@ WristSetpointsCommand wristFoldOutCommand(
 
 DigitalOutCommand suckOffCommand(suckSubsystem, false);
 DigitalOutCommand suckOnCommand(suckSubsystem, true);
-DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
-DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
-DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
+DigitalOutToggleCommand suctionToggleCommand(suckSubsystem);
 
 // commands here for sequences, but setpoints never tuned
 SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
@@ -371,7 +368,6 @@ SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
      &wristFoldInCommand,
      &liftDownCommand,
      &suckOffCommand,
-     &releaseOnCommand,
      &gantryExtendCommand,
      &liftUpCommand,
      &gantryRetractCommand,
@@ -382,7 +378,6 @@ SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
      &wristFoldInCommand,
      &gantryRetractCommand,
      &suckOnCommand,
-     &releaseOffCommand,
      &liftUpCommand,
      &wristFoldOutCommand,
      &liftDownCommand,
@@ -414,12 +409,12 @@ tap::control::PressCommandMapping leftUp(
 
 tap::control::HoldCommandMapping rightMid(
     drivers(),
-    {&suckOffCommand, &releaseOffCommand},
+    {&suckOffCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 
 tap::control::HoldCommandMapping rightDown(
     drivers(),
-    {&suckOnCommand, &releaseOnCommand},
+    {&suckOnCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 tap::control::PressCommandMapping suctionToggle(
@@ -472,35 +467,33 @@ CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    mechanumChassis.initialize();
+    mecanumChassis.initialize();
     gantryLiftSubsystem.initialize();
     gantryExtensionSubsystem.initialize();
-    wristRollSubsystem.initialize();
-    wristSubsystem.initialize();
+    // wristRollSubsystem.initialize();
+    // wristSubsystem.initialize();
     cubeLift.initialize();
     suckSubsystem.initialize();
-    releaseSubsystem.initialize();
     // clientDicsplay.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&mechanumChassis);
+    drivers->commandScheduler.registerSubsystem(&mecanumChassis);
     drivers->commandScheduler.registerSubsystem(&gantryLiftSubsystem);
     drivers->commandScheduler.registerSubsystem(&gantryExtensionSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wristSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
-    drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers *)
 {
-    mechanumChassis.setDefaultCommand(&chassisDriveCommand);
+    mecanumChassis.setDefaultCommand(&chassisDriveCommand);
     gantryLiftSubsystem.setDefaultCommand(&gantryLiftManualControl);
     gantryExtensionSubsystem.setDefaultCommand(&gantryExtensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);

@@ -23,8 +23,8 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/board/board.hpp"
 #include "tap/display/oled_button_handler.hpp"
-#include "tap/display/sh1106.hpp"
-#include "tap/display/sh1107.hpp"
+#include "tap/display/sh1106/sh1106.hpp"
+#include "tap/display/sh1107/sh1107.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"

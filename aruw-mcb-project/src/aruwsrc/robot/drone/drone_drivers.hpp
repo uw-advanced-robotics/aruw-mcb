@@ -32,6 +32,7 @@
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #endif
 
 namespace aruwsrc::drone
@@ -43,15 +44,15 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
+    Drivers() : tap::Drivers(), turretImu(), controlOperatorInterface(this), rttTelemetry(this),  {}
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
-    aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> turretImu;
-#endif
+    aruwsrc::communication::sensors::imu::ism330::ISM330 turretImu;    
+    communication::rtt::RttTelemetry rttTelemetry;
 };
 
 }  // namespace aruwsrc::drone

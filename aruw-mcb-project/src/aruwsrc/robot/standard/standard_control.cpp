@@ -130,6 +130,9 @@ using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::standard;
 
+// for fake sentry
+// using namespace aruwsrc::sentry::chassis;
+
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -225,6 +228,8 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     rightFrontChassisMotor,
     rightBackChassisMotor,
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
+    aruwsrc::control::chassis::WHEEL_RADIUS,
+    aruwsrc::control::chassis::WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
 
 tap::encoder::CanEncoder parallelOmni(
@@ -251,7 +256,10 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+StandardAnderHeroTransformerSubsystem transformSubsystem(
+    *drivers(),
+    transformer,
+    &drivers()->rttTelemetry);
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
@@ -642,6 +650,7 @@ HoldRepeatCommandMapping rightSwitchMiddle(
     {&spinFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
     true);
+
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
@@ -653,6 +662,7 @@ HoldRepeatCommandMapping leftSwitchDown(
     {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
+
 HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},
