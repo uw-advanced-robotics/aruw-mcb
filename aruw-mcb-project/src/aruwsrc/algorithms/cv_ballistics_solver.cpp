@@ -145,7 +145,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
             for (int i = 0; i < 4; i++)
             {
                 float currRadius =
-                    (i % 2 == 0) ? projectedAimPosData.rad0 : projectedAimPosData.rad1;
+                    (i % 2 == 0) ? projectedAimPosData.radius0 : projectedAimPosData.radius1;
                 float currTheta = projectedAimPosData.theta + M_PI_2 * i;
 
                 aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState
@@ -259,7 +259,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     // 5. Calculate shot timing window accounting for plate width and omega_total
 
     // Estimate approximate distance and ToF to robot center
-    float avgRadius = (projectedAimPosData.rad0 + projectedAimPosData.rad1) / 2.0f;
+    float avgRadius = (projectedAimPosData.radius0 + projectedAimPosData.radius1) / 2.0f;
     modm::Vector3f robotCenterPos(
         projectedAimPosData.xPos + avgRadius * cos(projectedAimPosData.theta) - turretPosition.x,
         projectedAimPosData.yPos + avgRadius * sin(projectedAimPosData.theta) - turretPosition.y,
@@ -332,7 +332,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     // 2. Rotational motion of the plate around the center (constant angular velocity)
     float activePlateHeight = projectedAimPosData.plateHeights[activePlateIndex];
     float activePlateRadius =
-        (activePlateIndex % 2 == 0) ? projectedAimPosData.rad0 : projectedAimPosData.rad1;
+        (activePlateIndex % 2 == 0) ? projectedAimPosData.radius0 : projectedAimPosData.radius1;
     float activePlateTheta = projectedAimPosData.theta + activePlateIndex * M_PI_2;
 
     // Active plate's current position (robot center + rotational offset)

@@ -258,7 +258,7 @@ TEST_F(OttoBallisticsSolverTest, jitter_aim_low_omega)
     aimData.pva.zPos = 0;
     aimData.pva.omega = 0.5f;  // Below OMEGA_THRESHOLD (1.0)
     aimData.pva.rad0 = 0.2f;
-    aimData.pva.rad1 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
     aimData.pva.theta = 0;
     aimData.timestamp = 100;
 
@@ -280,7 +280,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_high_omega)
     aimData.pva.zPos = 0;
     aimData.pva.omega = 2.0f;  // Above OMEGA_THRESHOLD (1.0)
     aimData.pva.rad0 = 0.2f;
-    aimData.pva.rad1 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
     aimData.pva.theta = 0;
     aimData.timestamp = 100;
 
@@ -304,7 +304,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_persists_within_window)
     aimData.pva.zPos = 0;
     aimData.pva.omega = 2.0f;
     aimData.pva.rad0 = 0.2f;
-    aimData.pva.rad1 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
     aimData.pva.theta = 0;
     aimData.timestamp = 100;
 
@@ -335,7 +335,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_recalculates_after_window_expi
     aimData.pva.zPos = 0;
     aimData.pva.omega = 2.0f;
     aimData.pva.rad0 = 0.2f;
-    aimData.pva.rad1 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
     aimData.pva.theta = 0;
     aimData.timestamp = 100;
 
@@ -364,7 +364,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
     aimData.pva.zPos = 0;
     aimData.pva.omega = 2.0f;  // High omega
     aimData.pva.rad0 = 0.2f;
-    aimData.pva.rad1 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
     aimData.pva.theta = 0;
     aimData.timestamp = 100;
 

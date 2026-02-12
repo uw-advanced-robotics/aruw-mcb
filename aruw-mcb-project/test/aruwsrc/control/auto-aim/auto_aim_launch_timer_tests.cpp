@@ -240,8 +240,8 @@ TEST_P(
                 .theta{0},
                 .omega{0},
 
-                .rad0{0},
-                .rad1{0},
+                .radius0{0},
+                .radius1{0},
                 .plateHeights{0, 0, 0, 0},
 
                 .updated{params.aimData.pva.updated},
