@@ -194,7 +194,7 @@ public:
      */
     void refresh() override
     {
-        desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (1.0));
+        desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (2.0));
 #if defined(ALL_STANDARDS)
         if (drivers->refSerial.getRefSerialReceivingData() &&
             prevShotTime !=

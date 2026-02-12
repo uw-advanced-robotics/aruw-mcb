@@ -112,6 +112,11 @@ RefereeFeedbackFrictionWheelSubsystem<
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
+VelocityAgitatorSubsystem kickerAgitator(
+    drivers(),
+    constants::KICKER_PID_CONFIG,
+    constants::KICKER_AGITATOR_CONFIG);
+
 FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
 
 /* define commands ----------------------------------------------------------*/
