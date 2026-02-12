@@ -50,15 +50,13 @@ struct FlywheelRpms
     float rightRpm;
     float lowerRpm;
     float upperRpm;
-    float smallUpperRpm;
 };
 
 static constexpr FlywheelRpms flywheelTestingRpms{
     .leftRpm = 0.0f,
     .rightRpm = 0.0f,
     .lowerRpm = 60.0f,
-    .upperRpm = 60.0f,
-    .smallUpperRpm = 60.0f};
+    .upperRpm = 60.0f};
 #endif
 
 #if defined(ALL_SENTRIES)

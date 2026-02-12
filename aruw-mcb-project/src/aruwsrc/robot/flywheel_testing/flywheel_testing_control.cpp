@@ -33,6 +33,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
+#include "flywheel_testing_agitator_constants.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::control;
@@ -88,20 +89,11 @@ tap::motor::DjiMotor lowerFrictionWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Lower flywheel");
-tap::motor::DjiMotor upperSmallFrictionWheel(
-    drivers(),
-    aruwsrc::control::launcher::UPPER_SMALL_MOTOR_ID,
-    aruwsrc::control::launcher::CAN_BUS_MOTORS,
-    true,
-    "Upper small flywheel",
-    false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006);
-std::array<tap::motor::MotorInterface *, 5> wheels = {
+std::array<tap::motor::MotorInterface *, 4> wheels = {
     &leftFrictionWheel,
     &rightFrictionWheel,
     &lowerFrictionWheel,
-    &upperFrictionWheel,
-    &upperSmallFrictionWheel};
+    &upperFrictionWheel};
 RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
     5>
