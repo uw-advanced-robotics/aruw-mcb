@@ -24,8 +24,11 @@
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
@@ -33,16 +36,18 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
-#include "flywheel_testing_agitator_constants.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::control;
 using namespace tap::control::governor;
+using namespace tap::control::setpoint;
 using namespace aruwsrc::algorithms;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms::odometry::transforms;
-using namespace aruwsrc::control::chassis;
+
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::agitator;
+using namespace aruwsrc::control::chassis;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::flywheel_testing;
@@ -96,7 +101,7 @@ std::array<tap::motor::MotorInterface *, 4> wheels = {
     &upperFrictionWheel};
 RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
-    5>
+    4>
     frictionWheelsSubsystem(
         drivers(),
         wheels,
@@ -127,32 +132,48 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
+MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
+MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
+
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchUp(
     drivers(),
-    {&spinFrictionWheels},
+    {&spinFrictionWheels, &launchKicker},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+HoldCommandMapping rightSwitchDown(
+    drivers(),
+    {&loadKicker},
+    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
-void initializeSubsystems() { frictionWheels.initialize(); }
+void initializeSubsystems()
+{
+    frictionWheels.initialize();
+    kickerAgitator.initialize();
+}
 
 /* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems(Drivers *drivers)
+void registerFlywheelTestingSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&kickerAgitator);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultHeroCommands() { frictionWheels.setDefaultCommand(&stopFrictionWheels); }
+void setDefaultFlywheelTestingCommands() { frictionWheels.setDefaultCommand(&stopFrictionWheels); }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(Drivers *) {}
+void startFlywheelTestingCommands(Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(Drivers *drivers) { drivers->commandMapper.addMap(&rightSwitchUp); }
+void registerFlywheelTestingIoMappings(Drivers *drivers)
+{
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&rightSwitchDown);
+}
 }  // namespace flywheel_testing_control
 
 namespace aruwsrc::flywheel_testing
@@ -162,10 +183,10 @@ void initSubsystemCommands(aruwsrc::flywheel_testing::Drivers *drivers)
     drivers->commandScheduler.setSafeDisconnectFunction(
         &flywheel_testing_control::remoteSafeDisconnectFunction);
     flywheel_testing_control::initializeSubsystems();
-    flywheel_testing_control::registerHeroSubsystems(drivers);
-    flywheel_testing_control::setDefaultHeroCommands();
-    flywheel_testing_control::startHeroCommands(drivers);
-    flywheel_testing_control::registerHeroIoMappings(drivers);
+    flywheel_testing_control::registerFlywheelTestingSubsystems(drivers);
+    flywheel_testing_control::setDefaultFlywheelTestingCommands();
+    flywheel_testing_control::startFlywheelTestingCommands(drivers);
+    flywheel_testing_control::registerFlywheelTestingIoMappings(drivers);
 }
 }  // namespace aruwsrc::flywheel_testing
 

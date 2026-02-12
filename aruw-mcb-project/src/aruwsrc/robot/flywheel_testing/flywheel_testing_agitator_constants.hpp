@@ -35,7 +35,6 @@
 
 namespace aruwsrc::control::agitator::constants
 {
-
 static constexpr float DESIRED_LOAD_TIME_S = 0.25f;
 static constexpr float KICKER_DESIRED_LOAD_TIME_S = 0.1f;
 static constexpr float KICKER_FIRE_DISTANCE = M_TWOPI * 0.5f;
@@ -54,7 +53,7 @@ static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
     KICKER_AGITATOR_CONFIG = {
         .gearRatio = 1.0f / 36.0f,
-        .agitatorMotorId = tap::motor::MOTOR3,
+        .agitatorMotorId = tap::motor::MOTOR2,
         .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
         .isAgitatorInverted = false,
         .jammingVelocityDifference = 0,
@@ -89,4 +88,4 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config
 static constexpr uint16_t HEAT_LIMIT_BUFFER = 0;
 }  // namespace aruwsrc::control::agitator::constants
 
-#endif  // HERO_AGITATOR_CONSTANTS_HPP_
+#endif  // FLYWHEEL_TESTING_AGITATOR_CONSTANTS_HPP_
