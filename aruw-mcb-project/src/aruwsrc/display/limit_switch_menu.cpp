@@ -46,12 +46,12 @@ void LimitSwitchMenu::drawLimitSwitch(Digital::InputPin pin)
     DigitalBeamBreak beamBreak(&drivers->digital, pin, false);
     const char* pinName = "";
 
-    try
+    std::size_t idx = static_cast<std::size_t>(pin);
+    if (idx < InputPinNames.size())
     {
-        std::size_t idx = static_cast<std::size_t>(pin);
-        pinName = InputPinNames.at(idx).data();
+        pinName = InputPinNames[idx].data();
     }
-    catch (const std::out_of_range&)
+    else
     {
         pinName = "UNKNOWN PIN";
     }
@@ -62,12 +62,10 @@ void LimitSwitchMenu::drawLimitSwitch(Digital::InputPin pin)
     {
         getViewStack()->getDisplay() << "1";
         pins[pin] = 1;
-        pins[pin] = 1;
     }
     else
     {
         getViewStack()->getDisplay() << "0";
-        pins[pin] = 0;
         pins[pin] = 0;
     }
 

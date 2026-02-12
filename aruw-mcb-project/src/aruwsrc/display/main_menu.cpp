@@ -46,6 +46,7 @@ MainMenu::MainMenu(
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
       autotuneMenu(stack, drivers, ENTRIES),
+      limitSwitchMenu(stack, drivers),
       cvMenu(stack, drivers, visionCoprocessor),
       errorMenu(stack),
       hardwareTestMenu(stack, drivers),

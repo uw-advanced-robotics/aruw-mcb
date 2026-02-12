@@ -23,6 +23,7 @@
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/display/dummy_allocator.hpp"
+#include "modm/ui/menu/abstract_menu.hpp"
 #include "tap/display/vertical_scroll_logic_handler.hpp"
 #include "tap/drivers.hpp"
 
