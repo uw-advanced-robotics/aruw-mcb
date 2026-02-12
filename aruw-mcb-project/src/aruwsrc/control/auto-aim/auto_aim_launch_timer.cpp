@@ -49,8 +49,6 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
 
     auto ballisticsSolution = ballistics->computeTurretAimAngles();
 
-    // Pulse-estimation mode has explicit fire windows from ballistics and is valid
-    // even when the legacy timing fields are not populated.
     if (ballisticsSolution.has_value() && ballisticsSolution->usePulseEstimation)
     {
         float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
@@ -89,13 +87,11 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::GATED_DENY;
     }
 
-    uint64_t timeOfFlightMicros = static_cast<uint64_t>(timeOfFlightSeconds * 1e6f);
-    uint64_t now = tap::arch::clock::getTimeMicroseconds();
-    uint64_t projectedHitTime =
-        now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
+    uint32_t timeOfFlightMicros = timeOfFlightSeconds * 1e6;
+    uint32_t now = tap::arch::clock::getTimeMicroseconds();
+    uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 
-    uint64_t nextPlateTransitTime =
-        static_cast<uint64_t>(aimData.timestamp) + aimData.timing.offset;
+    uint32_t nextPlateTransitTime = aimData.timestamp + aimData.timing.offset;
     int64_t projectedHitTimeAfterFirstWindow =
         static_cast<int64_t>(projectedHitTime) - static_cast<int64_t>(nextPlateTransitTime);
 

@@ -624,7 +624,7 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_jitter_aim_returns_ungated)
 TEST_F(AutoAimLaunchTimerTest, pulse_estimation_within_window_allows_fire)
 {
     ClockStub clock;
-    clock.time = 500'000;  // 500ms
+    clock.time = 500;  // 500ms
 
     VisionCoprocessor::TurretAimData aimData;
     aimData.pva.updated = 1;
@@ -651,7 +651,7 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_within_window_allows_fire)
 TEST_F(AutoAimLaunchTimerTest, pulse_estimation_before_window_denies_fire)
 {
     ClockStub clock;
-    clock.time = 300'000;  // 300ms
+    clock.time = 300;  // 300ms
 
     VisionCoprocessor::TurretAimData aimData;
     aimData.pva.updated = 1;
@@ -678,7 +678,7 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_before_window_denies_fire)
 TEST_F(AutoAimLaunchTimerTest, pulse_estimation_after_window_denies_fire)
 {
     ClockStub clock;
-    clock.time = 700'000;  // 700ms
+    clock.time = 700;  // 700ms
 
     VisionCoprocessor::TurretAimData aimData;
     aimData.pva.updated = 1;
@@ -705,7 +705,7 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_after_window_denies_fire)
 TEST_F(AutoAimLaunchTimerTest, pulse_estimation_with_agitator_delay_within_window_allows_fire)
 {
     ClockStub clock;
-    clock.time = 400'000;  // 400ms
+    clock.time = 400;  // 400ms
 
     VisionCoprocessor::TurretAimData aimData;
     aimData.pva.updated = 1;

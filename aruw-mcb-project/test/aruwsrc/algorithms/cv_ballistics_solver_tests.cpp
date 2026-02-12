@@ -308,14 +308,14 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_persists_within_window)
     aimData.pva.theta = 0;
     aimData.timestamp = 100;
 
-    clock.time = 100000;  // Start at 100ms
+    clock.time = 100;  // Start at 100ms
 
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
     auto firstSolution = solution;
 
     // Advance time but stay within shot window
-    clock.time = 150000;      // 50ms later
+    clock.time = 150;      // 50ms later
     aimData.timestamp = 101;  // New aim data
 
     solution = solver.computeTurretAimAngles();
@@ -339,14 +339,14 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_recalculates_after_window_expi
     aimData.pva.theta = 0;
     aimData.timestamp = 100;
 
-    clock.time = 100000;
+    clock.time = 100;
 
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
     uint64_t firstWindowEnd = solution->shotWindowEnd;
 
     // Advance time past shot window
-    clock.time = firstWindowEnd + 100000;  // 100ms after window closed
+    clock.time = firstWindowEnd / 1000 + 100;  // 100ms after window closed
     aimData.timestamp = 200;
 
     solution = solver.computeTurretAimAngles();
@@ -368,7 +368,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
     aimData.pva.theta = 0;
     aimData.timestamp = 100;
 
-    clock.time = 100000;
+    clock.time = 100;
 
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
@@ -377,7 +377,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
     // Omega drops below threshold
     aimData.pva.omega = 0.5f;  // Below threshold
     aimData.timestamp = 101;
-    clock.time = 150000;
+    clock.time = 150;
 
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
