@@ -139,6 +139,40 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_zero_interval_returns
     ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_DENY, result);
 }
 
+TEST_F(
+    AutoAimLaunchTimerTest,
+    getCurrentLaunchInclination_before_first_window_wraps_and_allows_at_end_of_window)
+{
+    ClockStub clock;
+    clock.time = 1000;  // 1,000,000us
+
+    VisionCoprocessor::TurretAimData aimData = {};
+    aimData.pva.updated = 1;
+    aimData.timing.updated = 1;
+    aimData.timing.offset = 100'000;
+    aimData.timing.duration = 200'000;
+    aimData.timing.pulseInterval = 600'000;
+    aimData.timestamp = 1'000'000;
+
+    EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
+
+    CvBallisticsSolver::BallisticsSolution solution{
+        .pitchAngle = 0,
+        .yawAngle = 0,
+        .distance = 5.0f,
+        .timeOfFlight = 0.05f,  // projectedHitTime = 1,050,000us
+        .shotWindowStart = 0,
+        .shotWindowEnd = 0,
+        .usePulseEstimation = false,
+        .activePlateIndex = 0};
+    EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
+
+    AutoAimLaunchTimer timer(0, &visionCoprocessor, &ballistics);
+    auto result = timer.getCurrentLaunchInclination(0);
+
+    ASSERT_EQ(AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW, result);
+}
+
 static constexpr uint32_t TIME_MICROS = 1'000'000;
 
 static constexpr uint32_t DEFAULT_AGITATOR_LATENCY_MICROS = 100'000;
