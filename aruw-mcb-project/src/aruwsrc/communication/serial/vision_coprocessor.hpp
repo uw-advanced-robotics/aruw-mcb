@@ -323,8 +323,8 @@ public:
         float theta;  ///< angular position of the robot
         float omega;  ///< angular velocity of the robot
 
-        float radius0;             ///< distance from center to plates 0 and 2
-        float radius1;             ///< distance from center to plates 1 and 3
+        float radius0;          ///< distance from center to plates 0 and 2
+        float radius1;          ///< distance from center to plates 1 and 3
         float plateHeights[4];  ///< height of each plate off the robot center
         // ^ measured from the ground to the center of the plate
 
