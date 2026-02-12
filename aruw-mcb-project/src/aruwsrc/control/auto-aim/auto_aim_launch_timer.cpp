@@ -42,42 +42,76 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::NO_TARGET;
     }
 
-    // Get ballistics solution which contains pulse estimation timing windows
+    if (aimData.timing.updated && aimData.timing.pulseInterval == 0)
+    {
+        return LaunchInclination::GATED_DENY;
+    }
+
     auto ballisticsSolution = ballistics->computeTurretAimAngles();
+
+    // Pulse-estimation mode has explicit fire windows from ballistics and is valid
+    // even when the legacy timing fields are not populated.
+    if (ballisticsSolution.has_value() && ballisticsSolution->usePulseEstimation)
+    {
+        float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
+        if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS)
+        {
+            return LaunchInclination::GATED_DENY;
+        }
+
+        uint64_t now = tap::arch::clock::getTimeMicroseconds();
+        uint64_t effectiveFireTime = now + this->agitatorTypicalDelayMicroseconds;
+
+        if (effectiveFireTime >= ballisticsSolution->shotWindowStart &&
+            effectiveFireTime <= ballisticsSolution->shotWindowEnd)
+        {
+            return LaunchInclination::GATED_ALLOW;
+        }
+        else
+        {
+            return LaunchInclination::GATED_DENY;
+        }
+    }
+
+    if (!aimData.timing.updated)
+    {
+        return LaunchInclination::UNGATED;
+    }
+
     if (!ballisticsSolution.has_value())
     {
         return LaunchInclination::GATED_DENY;
     }
 
-    // If not using pulse estimation (omega below threshold), fall back to ungated mode
-    if (!ballisticsSolution->usePulseEstimation)
-    {
-        return LaunchInclination::UNGATED;
-    }
-
-    // Validate time of flight
     float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
     if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS)
     {
         return LaunchInclination::GATED_DENY;
     }
 
-    // Check if we're within the shot timing window
-    // shotWindowStart and shotWindowEnd are absolute fire times (when to pull trigger)
-    // accounting for time of flight, so we just need to check if now + agitator delay
-    // is within the fire window
+    uint64_t timeOfFlightMicros = static_cast<uint64_t>(timeOfFlightSeconds * 1e6f);
     uint64_t now = tap::arch::clock::getTimeMicroseconds();
-    uint64_t effectiveFireTime = now + this->agitatorTypicalDelayMicroseconds;
+    uint64_t projectedHitTime =
+        now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 
-    // Allow shot if the current time (accounting for agitator delay) is within the fire window
-    if (effectiveFireTime >= ballisticsSolution->shotWindowStart &&
-        effectiveFireTime <= ballisticsSolution->shotWindowEnd)
+    uint64_t nextPlateTransitTime =
+        static_cast<uint64_t>(aimData.timestamp) + aimData.timing.offset;
+    int64_t projectedHitTimeAfterFirstWindow =
+        static_cast<int64_t>(projectedHitTime) - static_cast<int64_t>(nextPlateTransitTime);
+
+    int64_t pulseInterval = static_cast<int64_t>(aimData.timing.pulseInterval);
+    int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % pulseInterval;
+    if (offsetInFiringWindow < 0)
+    {
+        offsetInFiringWindow += pulseInterval;
+    }
+
+    int64_t maxHitTimeError = static_cast<int64_t>(aimData.timing.duration) / 2;
+    if (offsetInFiringWindow <= maxHitTimeError ||
+        offsetInFiringWindow >= pulseInterval - maxHitTimeError)
     {
         return LaunchInclination::GATED_ALLOW;
     }
-    else
-    {
-        return LaunchInclination::GATED_DENY;
-    }
+    return LaunchInclination::GATED_DENY;
 }
 }  // namespace aruwsrc::control::auto_aim

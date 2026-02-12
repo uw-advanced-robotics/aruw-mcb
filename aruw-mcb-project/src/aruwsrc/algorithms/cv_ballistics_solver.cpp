@@ -397,7 +397,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     if (omegaTotal > 0)
     {
         // Counterclockwise rotation
-        if (angularOffset < 0)
+        if (angularOffset <= 0)
         {
             // Plate is behind, add full rotation
             angularOffset += 2.0f * M_PI;
@@ -407,7 +407,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     else
     {
         // Clockwise rotation
-        if (angularOffset > 0)
+        if (angularOffset >= 0)
         {
             // Plate is ahead, subtract full rotation
             angularOffset -= 2.0f * M_PI;
