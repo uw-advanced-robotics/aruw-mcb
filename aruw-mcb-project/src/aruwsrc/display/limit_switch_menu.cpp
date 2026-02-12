@@ -39,7 +39,7 @@ LimitSwitchMenu::LimitSwitchMenu(
 }
  
 
-void LimitSwitchMenu::drawLimitSwitch(tap::gpio::Digital::InputPin pin)
+void LimitSwitchMenu::drawLimitSwitch(Digital::InputPin pin)
 {
     DigitalBeamBreak beamBreak(&drivers->digital, pin, false);
     const char* pinName = "";
@@ -58,12 +58,12 @@ void LimitSwitchMenu::drawLimitSwitch(tap::gpio::Digital::InputPin pin)
     if (beamBreak.getLimitSwitchDepressed())
     {
         getViewStack()->getDisplay() << "1";
-        pins[pin] = 1;  
+        pins[pin] = 1;
     }
     else
     {
         getViewStack()->getDisplay() << "0";
-        pins[pin] = 0;  
+        pins[pin] = 0;
     }
 
     
@@ -93,18 +93,12 @@ bool LimitSwitchMenu::hasChanged()
     for (auto& [pin, status] : pins) {
         
         DigitalBeamBreak beamBreak(&(drivers->digital), pin, false);
-        int currState = -1;
-        if (beamBreak.getLimitSwitchDepressed()) {
-            currState = 1;
-        } else {
-            currState = 0;
-        }
-        
+        int currState = beamBreak.getLimitSwitchDepressed();
         if (currState != status) {
+            status = currState;
             return true;
         }
     }
-    
     return false;
 }
 
@@ -115,5 +109,14 @@ void LimitSwitchMenu::shortButtonPress(modm::MenuButtons::Button button)
         this->remove();
     }
 }
+
+// void LimitSwitchMenu::setPinValue(Digital::InputPin pin, int val) {
+//     for (const auto& pair : pins) {
+//         if (pair.first == pin) {
+//             pair.second = val;           wait how can i modify smth thats static constexpr
+//         }
+//     }
+// }
+
 }  // namespace display
 

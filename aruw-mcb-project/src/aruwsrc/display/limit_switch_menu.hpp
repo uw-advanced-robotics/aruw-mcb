@@ -28,7 +28,7 @@
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/display/vertical_scroll_logic_handler.hpp"
 
-
+using namespace tap::gpio;
 
 namespace aruwsrc
 {
@@ -55,7 +55,7 @@ public:
     static const char *getMenuName() { return "Limit Switch Menu"; }
 
 private:
-    static constexpr int LIMIT_SWITCH_MENU_ID = 16; // idk if theres a system for this, i j picked one that wasn't used
+    static constexpr int LIMIT_SWITCH_MENU_ID = 16;
     
     tap::Drivers *drivers;
     
@@ -63,7 +63,9 @@ private:
         "B", "C", "D", "T", "Button"
     };
 
-    void drawLimitSwitch(tap::gpio::Digital::InputPin pin);
+    void drawLimitSwitch(Digital::InputPin pin);
+
+    // void setPinValue(Digital::InputPin pin, int val);
     
     std::map<tap::gpio::Digital::InputPin, int> pins = {  //theres prolly a way to not hardcode it i assume but idk rn
         {tap::gpio::Digital::InputPin::B, -1},
@@ -74,12 +76,12 @@ private:
     };
 
     // is this right
-    // static constexpr std::array<std::pair<int, const char*>, 5> pins = {{
-        // {tap::gpio::Digital::InputPin::B, -1},
-        // {tap::gpio::Digital::InputPin::C, -1},
-        // {tap::gpio::Digital::InputPin::D, -1}, 
-        // {tap::gpio::Digital::InputPin::T, -1},
-        // {tap::gpio::Digital::InputPin::Button, -1}
+    // static constexpr std::array<std::pair<Digital::InputPin, int>, 5> pins = {{
+    //     {Digital::InputPin::B, -1},
+    //     {Digital::InputPin::C, -1},
+    //     {Digital::InputPin::D, -1}, 
+    //     {Digital::InputPin::T, -1},
+    //     {Digital::InputPin::Button, -1}
     // }};
     
 };
