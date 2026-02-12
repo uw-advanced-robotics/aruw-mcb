@@ -47,22 +47,22 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 2693,
+    .startEncoderValue = 2693, // tune
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = true,
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = M_PI_2,
-    .startEncoderValue = 3393,
-    .minAngle = 0,
+    .startAngle = 0, // straight down
+    .startEncoderValue = 3393, // tune
+    .minAngle = -M_PI,
     .maxAngle = M_PI,
     .limitMotorAngles = true,
 };
 
-static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
-    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 1.0f};
+static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams  // TODO tune
+    TURRET_GRAVITY_CONFIG{.cgX = 20.0f, .cgZ = 16.5f, .gravityCompensatorMax = -5200.0f};
 
 static const tap::algorithms::transforms::Transform TURRET_IMU_MOUNTING_TRANSFORM(
     0,

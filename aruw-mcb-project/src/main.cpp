@@ -143,6 +143,9 @@ int main()
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
             PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
 #endif
+#if defined(TARGET_DRONE)
+            PROFILE(drivers->profiler, drivers->turretImu.periodicIMUUpdate, ());
+#endif
 
 #ifdef TARGET_TESTBED
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
@@ -219,6 +222,11 @@ static void initializeIo(Drivers* drivers)
     drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->turretMajorImu.setCalibrationSamples(4000);
 #endif
+#if defined(TARGET_DRONE)
+    modm::delay_ms(2000);
+    drivers->turretImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->turretImu.setCalibrationSamples(4000);
+#endif
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
 #endif
@@ -265,6 +273,9 @@ static void updateIo(Drivers* drivers)
 #ifdef TARGET_SENTRY_ECLIPSE
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorImu.read();
+#endif
+#if defined(TARGET_DRONE)
+    drivers->turretImu.read();
 #endif
 
 #ifdef TARGET_TESTBED
