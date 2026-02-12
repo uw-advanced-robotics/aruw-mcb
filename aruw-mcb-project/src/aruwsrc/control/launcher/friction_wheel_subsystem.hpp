@@ -194,7 +194,7 @@ public:
      */
     void refresh() override
     {
-        desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (2.0));
+        desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (NUM_WHEELS));
 #if defined(ALL_STANDARDS)
         if (drivers->refSerial.getRefSerialReceivingData() &&
             prevShotTime !=
@@ -214,7 +214,7 @@ public:
             if (isWheelVelocityOverridden[i])
             {
                 individualVelocityRamping[i].setTarget(individualWheelVelocities[i]);
-                individualVelocityRamping[i].update(FRICTION_WHEEL_RAMP_SPEED * (2.0));
+                individualVelocityRamping[i].update(FRICTION_WHEEL_RAMP_SPEED * (NUM_WHEELS);
                 velocityPids[i].runControllerDerivateError(
                     individualVelocityRamping[i].getValue() -
                         getCurrentIndividualFrictionWheelSpeed(i),
