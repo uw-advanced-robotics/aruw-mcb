@@ -90,7 +90,6 @@ static void updateIo(Drivers* drivers);
 
 static void initializeI2C(Drivers* drivers);
 
-
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -147,7 +146,6 @@ int main()
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
-
 
 #if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) || \
     defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER) ||  \
@@ -277,7 +275,6 @@ static void updateIo(Drivers* drivers)
     drivers->stateMachine.updateState();
 #endif
 }
-
 
 static void initializeI2C(Drivers* drivers)
 {
