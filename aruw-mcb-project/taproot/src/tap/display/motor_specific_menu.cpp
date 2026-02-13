@@ -64,31 +64,75 @@ void MotorSpecificMenu::draw()
     currEncoderWrapped = associatedMotor->getInternalEncoder().getEncoder().getWrappedValue();
     currRPM = associatedMotor->getInternalEncoder().getShaftRPM();
 
+    if (associatedMotor->isMotorOnline())
+    {
+        motorWasOnline = true;
+    }
+
+    if (motorWasOnline)
+    {
+        hasMotorBeenOffline = associatedMotor->hasMotorBeenOffline();
+        if (hasMotorBeenOffline)
+        {
+            RAISE_ERROR(drivers, "Motor was disconnected");
+        }
+    }
+
     display << "  Motor ID: " << associatedMotor->getMotorIdentifier() << modm::endl
             << "  Des. Output: " << currDesiredOutput << modm::endl
             << "  Enc. Wrapped: " << currEncoderWrapped << modm::endl
             << "  RPM: " << currRPM << modm::endl
-            << "  Inverted: " << currIsInverted;
+            << "  Inverted: " << currIsInverted << modm::endl
+            << "  Has motor been offline: " << (hasMotorBeenOffline ? "YES" : "NO") << modm::endl
+            << "  (RIGHT or OK to reset offline flag)";
 }
 
 void MotorSpecificMenu::shortButtonPress(modm::MenuButtons::Button button)
 {
-    if (button == modm::MenuButtons::LEFT)
+    switch (button)
     {
-        this->remove();
+        case modm::MenuButtons::LEFT:
+            this->remove();
+            break;
+        case modm::MenuButtons::OK:
+        case modm::MenuButtons::RIGHT:
+            if (associatedMotor == nullptr) break;
+            resetMotorChangedFlag();
+            break;
+        default:
+            break;
     }
 }
 
 bool MotorSpecificMenu::hasChanged()
 {
+    bool sameOfflineStatus = (associatedMotor->hasMotorBeenOffline() == hasMotorBeenOffline);
     bool sameOutputDesired = (associatedMotor->getOutputDesired() == currDesiredOutput);
     bool sameInverted = (associatedMotor->isMotorInverted() == currIsInverted);
     bool sameEncoderWrapped =
         (associatedMotor->getInternalEncoder().getEncoder().getWrappedValue() ==
          currEncoderWrapped);
 
-    return !(sameOutputDesired && sameInverted && sameEncoderWrapped) &&
+    return !(sameOutputDesired && sameInverted && sameEncoderWrapped && sameOfflineStatus) &&
            updatePeriodicTimer.execute();
+}
+
+void MotorSpecificMenu::resetMotorChangedFlag()
+{
+    const tap::motor::MotorId identifier =
+        static_cast<tap::motor::MotorId>(associatedMotor->getMotorIdentifier());
+    const tap::can::CanBus Can = associatedMotor->getCanBus();
+    switch (Can)
+    {
+        case tap::can::CanBus::CAN_BUS1:
+            drivers->djiMotorTxHandler.getCan1MotorMutable(identifier)->resetHasBeenOffline();
+            break;
+        case tap::can::CanBus::CAN_BUS2:
+            drivers->djiMotorTxHandler.getCan2MotorMutable(identifier)->resetHasBeenOffline();
+            break;
+        default:
+            break;
+    }
 }
 }  // namespace display
 }  // namespace tap
