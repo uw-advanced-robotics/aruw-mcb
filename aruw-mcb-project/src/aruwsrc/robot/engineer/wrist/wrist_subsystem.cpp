@@ -27,16 +27,16 @@ namespace aruwsrc::engineer::wrist
 {
 WristSubsystem::WristSubsystem(
     tap::Drivers* drivers,
-    tap::motor::MotorInterface& motorLeft,
-    tap::motor::MotorInterface& motorRight,
+    tap::motor::MotorInterface& motorTheta2,
+    tap::motor::MotorInterface& motorTheta1,
     tap::motor::MotorInterface& motorTheta3,
     tap::encoder::EncoderInterface& encoderTheta1,
     tap::encoder::EncoderInterface& encoderTheta2,
     tap::encoder::EncoderInterface& encoderTheta3,
     const WristConfig config)
     : tap::control::Subsystem(drivers),
-      motorLeft(motorLeft),
-      motorRight(motorRight),
+      motorTheta2(motorTheta2),
+      motorTheta1(motorTheta1),
       motorTheta3(motorTheta3),
       encoderTheta1(encoderTheta1),
       encoderTheta2(encoderTheta2),
@@ -49,7 +49,7 @@ WristSubsystem::WristSubsystem(
       pidTheta2(config.theta2PidConfig),
       pidTheta3(config.theta3PidConfig)
 {
-    ts->motorLeft = motorLeft;
+    ts->motorTheta1 = motorTheta1;
 }
 
 float WristSubsystem::getTheta1() { return encoderTheta1.getPosition().getUnwrappedValue(); }
@@ -90,7 +90,7 @@ bool WristSubsystem::atSetpoint()
            atSetpointTheta3(config.epsilon);
 }
 
-float WristSubsystem::calculateLeftMotorOutputForTheta1Theta2(
+float WristSubsystem::calculateTheta2MotorOutputForTheta1Theta2(
     float theta1Setpoint,
     float theta2Setpoint)
 {
@@ -102,7 +102,7 @@ float WristSubsystem::calculateLeftMotorOutputForTheta1Theta2(
 
     return -pidOutTheta2 - pidOutTheta1;
 }
-float WristSubsystem::calculateRightMotorOutputForTheta1(float theta1Setpoint)
+float WristSubsystem::calculateTheta1MotorOutputForTheta1(float theta1Setpoint)
 {
     float theta1Error = encoderTheta1.getPosition().minDifference(theta1Setpoint);
     float pidOutTheta1 = pidTheta1.runController(theta1Error, encoderTheta1.getVelocity(), 2.0f);
@@ -111,8 +111,8 @@ float WristSubsystem::calculateRightMotorOutputForTheta1(float theta1Setpoint)
 
 void WristSubsystem::initialize()
 {
-    motorLeft.initialize();
-    motorRight.initialize();
+    motorTheta2.initialize();
+    motorTheta1.initialize();
     motorTheta3.initialize();
     encoderTheta1.initialize();
     encoderTheta2.initialize();
@@ -123,24 +123,25 @@ void WristSubsystem::refresh()
 {
     if (!encoderTheta1.isOnline() || !encoderTheta2.isOnline() || !encoderTheta3.isOnline())
     {
-        motorLeft.setDesiredOutput(0);
-        motorRight.setDesiredOutput(0);
+        motorTheta2.setDesiredOutput(0);
+        motorTheta1.setDesiredOutput(0);
         motorTheta3.setDesiredOutput(0);
         return;
     }
 
-    float outMotorLeft = calculateLeftMotorOutputForTheta1Theta2(setpointTheta1, setpointTheta2);
-    float outMotorRight = calculateRightMotorOutputForTheta1(setpointTheta1);
+    float outMotorTheta2 =
+        calculateTheta2MotorOutputForTheta1Theta2(setpointTheta1, setpointTheta2);
+    float outMotorTheta1 = calculateTheta1MotorOutputForTheta1(setpointTheta1);
 
     float errorTheta3 = encoderTheta3.getPosition().minDifference(setpointTheta3);
     float outMotorTheta3 = pidTheta3.runController(errorTheta3, encoderTheta3.getVelocity(), 2.0f);
 
-    motorLeft.setDesiredOutput(std::clamp<int32_t>(
-        outMotorLeft,
+    motorTheta2.setDesiredOutput(std::clamp<int32_t>(
+        outMotorTheta2,
         -config.maxMotorDesiredOutput,
         config.maxMotorDesiredOutput));
-    motorRight.setDesiredOutput(std::clamp<int32_t>(
-        outMotorRight,
+    motorTheta1.setDesiredOutput(std::clamp<int32_t>(
+        outMotorTheta1,
         -config.maxMotorDesiredOutput,
         config.maxMotorDesiredOutput));
     motorTheta3.setDesiredOutput(std::clamp<int32_t>(
@@ -195,8 +196,9 @@ void WristSubsystem::refresh()
 
 void WristSubsystem::refreshSafeDisconnect()
 {
-    motorLeft.setDesiredOutput(0);
-    motorRight.setDesiredOutput(0);
+    motorTheta1.setDesiredOutput(0);
+    motorTheta2.setDesiredOutput(0);
+    motorTheta3.setDesiredOutput(0);
 }
 
 Transform WristSubsystem::computeWristToCOM(

@@ -56,8 +56,8 @@ class WristSubsystem : public tap::control::Subsystem
 public:
     WristSubsystem(
         tap::Drivers* drivers,
-        tap::motor::MotorInterface& motorLeft,
-        tap::motor::MotorInterface& motorRight,
+        tap::motor::MotorInterface& motorTheta2,
+        tap::motor::MotorInterface& motorTheta1,
         tap::motor::MotorInterface& motorTheta3,
         tap::encoder::EncoderInterface& encoderTheta1,
         tap::encoder::EncoderInterface& encoderTheta2,
@@ -73,8 +73,8 @@ public:
     float getSetpointTheta1() { return setpointTheta1; }
     float getSetpointTheta2() { return setpointTheta2; }
     float getSetpointTheta3() { return setpointTheta3; }
-    float calculateLeftMotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
-    float calculateRightMotorOutputForTheta1(float theta1Setpoint);
+    float calculateTheta2MotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
+    float calculateTheta1MotorOutputForTheta1(float theta1Setpoint);
 
     virtual void initialize() override;
 
@@ -91,7 +91,7 @@ public:
     virtual void refreshSafeDisconnect() override;
 
 private:
-    tap::motor::MotorInterface &motorLeft, &motorRight, &motorTheta3;
+    tap::motor::MotorInterface &motorTheta2, &motorTheta1, &motorTheta3;
     tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2, &encoderTheta3;
     const WristConfig config;
     float setpointTheta1, setpointTheta2, setpointTheta3;
