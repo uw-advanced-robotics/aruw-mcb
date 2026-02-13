@@ -67,7 +67,7 @@ public:
         }
     }
 
-    const char* getName() const override { return "Nary Digital Out Subsystem"; }
+    const char* getName() const override { return "Multi Digital Out Subsystem"; }
 
 private:
     tap::gpio::Digital& digital;
