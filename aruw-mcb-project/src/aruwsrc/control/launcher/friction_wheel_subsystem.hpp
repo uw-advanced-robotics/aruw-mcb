@@ -176,7 +176,7 @@ public:
         float sum = 0;
         for (uint8_t i = 0; i < NUM_WHEELS; i++)
         {
-            sum += wheels[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+            sum += abs(wheels[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI);
         }
         return sum / NUM_WHEELS;
     }
@@ -189,12 +189,15 @@ public:
     {
         return wheels[index]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
     }
+
+    float avgVelocity = 0;
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
     void refresh() override
     {
-        desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (NUM_WHEELS));
+        desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (2.0));
+        avgVelocity = getCurrentAverageFrictionWheelSpeed();
 #if defined(ALL_STANDARDS)
         if (drivers->refSerial.getRefSerialReceivingData() &&
             prevShotTime !=
@@ -214,7 +217,7 @@ public:
             if (isWheelVelocityOverridden[i])
             {
                 individualVelocityRamping[i].setTarget(individualWheelVelocities[i]);
-                individualVelocityRamping[i].update(FRICTION_WHEEL_RAMP_SPEED * (NUM_WHEELS);
+                individualVelocityRamping[i].update(FRICTION_WHEEL_RAMP_SPEED * (2.0));
                 velocityPids[i].runControllerDerivateError(
                     individualVelocityRamping[i].getValue() -
                         getCurrentIndividualFrictionWheelSpeed(i),

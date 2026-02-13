@@ -55,7 +55,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
         .gearRatio = 1.0f / 36.0f,
         .agitatorMotorId = tap::motor::MOTOR2,
         .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
-        .isAgitatorInverted = false,
+        .isAgitatorInverted = true,
         .jammingVelocityDifference = 0,
         .jammingTime = 0,
         .jamLogicEnabled = false,

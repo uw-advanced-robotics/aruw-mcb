@@ -138,12 +138,12 @@ MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATO
 /* define command mappings --------------------------------------------------*/
 HoldCommandMapping rightSwitchUp(
     drivers(),
-    {&spinFrictionWheels, &launchKicker},
+    {&spinFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-HoldCommandMapping rightSwitchDown(
+HoldCommandMapping leftSwitchUp(
     drivers(),
-    {&loadKicker},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    {&launchKicker},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -172,7 +172,7 @@ void startFlywheelTestingCommands(Drivers *) {}
 void registerFlywheelTestingIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&rightSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
 }
 }  // namespace flywheel_testing_control
 
