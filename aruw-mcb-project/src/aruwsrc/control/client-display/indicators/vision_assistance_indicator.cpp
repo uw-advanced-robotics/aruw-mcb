@@ -54,7 +54,7 @@ modm::ResumableResult<void> VisionAssistanceIndicator::sendInitialGraphics()
     RF_BEGIN(0);
 
     // Send the graphics
-    RF_CALL(refSerialTransmitter.sendGraphic(&graphic));
+    RF_CALL(refSerialTransmitter.sendGraphic(&graphic, true, true, false));
 
     RF_END();
 }
@@ -106,7 +106,7 @@ modm::ResumableResult<void> VisionAssistanceIndicator::update()
     }
 
     // Send the graphics
-    RF_CALL(refSerialTransmitter.sendGraphic(&graphic));
+    RF_CALL(refSerialTransmitter.sendGraphic(&graphic, true, true, false));
     RF_END();
 }
 

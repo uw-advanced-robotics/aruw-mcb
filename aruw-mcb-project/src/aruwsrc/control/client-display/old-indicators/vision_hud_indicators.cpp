@@ -83,7 +83,7 @@ modm::ResumableResult<void> VisionHudIndicators::update()
             visionTargetFoundGraphics.graphicData[1].operation = operation;
         }
 
-        RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetFoundGraphics));
+        RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetFoundGraphics, true, true, false));
 
         updateVisionTargetFoundTimeout.restart(VISION_TARGET_FOUND_MAX_REFRESH_RATE);
         prevVisionIndicatorColor = newVisionIndicatorColor;

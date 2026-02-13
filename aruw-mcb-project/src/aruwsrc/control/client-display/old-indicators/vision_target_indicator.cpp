@@ -77,7 +77,7 @@ modm::ResumableResult<void> VisionTargetIndicator::update()
         enemyPositionScreenFrame.topRightY,
         &visionTargetGraphic.graphicData);
 
-    RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
+    RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic, true, true, false));
 
     RF_END();
 }
