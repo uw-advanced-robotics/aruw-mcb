@@ -45,17 +45,20 @@ template <size_t COMMANDS>
 class SequentialCommand : public Command
 {
 public:
-    SequentialCommand(std::array<Command*, COMMANDS> commands)
+    template <typename... Args>
+    SequentialCommand(Args*... args)
         : Command(),
-          commands(commands),
+          commands{static_cast<Command*>(args)...},
           currentCommand(0)
     {
+        static_assert(
+            sizeof...(Args) == COMMANDS,
+            "SequentialCommand Error: The number of commands passed does not match the template "
+            "size!");
+
         for (Command* command : commands)
         {
-            modm_assert(
-                command != nullptr,
-                "SequentialCommand::SequentialCommand",
-                "Null pointer command passed into sequential command.");
+            modm_assert(command != nullptr, "SequentialCommand", "Null command pointer passed!");
             this->commandRequirementsBitwise |= (command->getRequirementsBitwise());
         }
     }
@@ -113,6 +116,9 @@ private:
     size_t currentCommand;
     bool commandInitialized;
 };  // class SequentialCommand
+
+template <typename... Args>
+SequentialCommand(Args*...) -> SequentialCommand<sizeof...(Args)>;
 
 }  // namespace control
 
