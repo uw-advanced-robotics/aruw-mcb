@@ -24,6 +24,7 @@
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
+#include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
@@ -140,10 +141,10 @@ HoldCommandMapping rightSwitchUp(
     drivers(),
     {&spinFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-HoldCommandMapping leftSwitchUp(
+HoldRepeatCommandMapping leftSwitchUp(
     drivers(),
     {&launchKicker},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP), false);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
