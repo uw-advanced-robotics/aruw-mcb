@@ -90,10 +90,6 @@ static void updateIo(Drivers* drivers);
 
 static void initializeI2C(Drivers* drivers);
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
-// Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
-static void checkTurretMcbDisconnection(Drivers* drivers);
-#endif
 
 int main()
 {
@@ -152,9 +148,6 @@ int main()
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
-            checkTurretMcbDisconnection(drivers);
-#endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) || \
     defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER) ||  \
@@ -285,22 +278,6 @@ static void updateIo(Drivers* drivers)
 #endif
 }
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
-static void checkTurretMcbDisconnection(Drivers* drivers)
-{
-    bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
-    if (!turretMcbConnected &&
-        drivers->mpu6500.getImuState() !=
-            tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
-    {
-        tap::buzzer::playNote(&drivers->pwm, 1000);
-    }
-    else
-    {
-        tap::buzzer::silenceBuzzer(&drivers->pwm);
-    }
-}
-#endif
 
 static void initializeI2C(Drivers* drivers)
 {

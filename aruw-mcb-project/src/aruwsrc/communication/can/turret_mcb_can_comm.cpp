@@ -22,6 +22,7 @@
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
+#include "tap/communication/sensors/buzzer/buzzer.hpp"
 
 #include "modm/architecture/interface/can.hpp"
 
@@ -102,6 +103,12 @@ void TurretMCBCanComm::sendData()
     {
         yawRevolutions = 0;
         pitchRevolutions = 0;
+        // Scream!
+        tap::buzzer::playNote(&drivers->pwm, 1000);
+    }
+    else
+    {
+        tap::buzzer::silenceBuzzer(&drivers->pwm);
     }
 }
 
