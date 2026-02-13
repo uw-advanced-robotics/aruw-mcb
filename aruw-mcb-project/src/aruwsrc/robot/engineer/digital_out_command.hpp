@@ -16,38 +16,49 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-// add comments for why we made this for future ppls reference & why it isnt opposite
-#ifndef DIGITAL_OUT_TOGGLE_COMMAND_HPP_
-#define DIGITAL_OUT_TOGGLE_COMMAND_HPP_
+#ifndef DIGITAL_OUT_COMMAND_HPP_
+#define DIGITAL_OUT_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "digital_out_subsystem.hpp"
+#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
 
-namespace aruwsrc::control::digital
+namespace aruwsrc::engineer
 {
-class DigitalOutToggleCommand : public tap::control::Command
+class DigitalOutCommand : public tap::control::Command
 {
 public:
-    DigitalOutToggleCommand(DigitalOutSubsystem& subsystem) : subsystem(subsystem)
+    DigitalOutCommand(DigitalOutSubsystem& subsystem, const bool state)
+        : subsystem(subsystem),
+          state(state),
+          running(false)
     {
         addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(&subsystem));
     }
 
-    inline void initialize() override { subsystem.set(!subsystem.getState()); }
+    inline void initialize() override {}
 
-    inline void execute() override {}
+    inline void execute() override
+    {
+        subsystem.set(state);
+        running = true;
+    }
 
-    inline void end(bool) override {}
+    inline void end(bool) override
+    {
+        subsystem.refreshSafeDisconnect();
+        running = false;
+    }
 
-    inline bool isFinished() const override { return true; }
+    inline bool isFinished() const override { return false; }
 
-    const char* getName() const override { return "Digital Output Toggle Command"; }
+    const char* getName() const override { return "Digital Output Command"; }
 
 private:
     DigitalOutSubsystem& subsystem;
-};  // class DigitalOutToggleCommand
+    const bool state;
+    bool running;
+};  // class DigitalOutCommand
 
-}  // namespace aruwsrc::control::digital
-#endif  // DIGITAL_OUT_TOGGLE_COMMAND_HPP_
+}  // namespace aruwsrc::engineer
+#endif  // DIGITAL_OUT_COMMAND_HPP_

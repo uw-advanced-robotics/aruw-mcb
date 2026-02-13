@@ -22,7 +22,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/control/subsystem.hpp"
 
-namespace aruwsrc::control::digital
+namespace aruwsrc::engineer
 {
 class DigitalOutSubsystem : public tap::control::Subsystem
 {
@@ -42,19 +42,13 @@ public:
 
     inline void initialize() override {}
 
-    inline void refresh() override {}
+    inline void refresh() override { digital.set(pin, state ^ offState); }
 
     inline bool getState() { return state; }
 
     inline void refreshSafeDisconnect() override { digital.set(pin, offState); }
 
-    inline void set(bool s)
-    {
-        state = s;
-        updateStates();
-    }
-
-    inline void updateStates() { digital.set(pin, state ^ offState); }
+    inline void set(bool s) { state = s; }
 
     const char* getName() const override { return "Digital Out Subsystem"; }
 
@@ -65,5 +59,5 @@ private:
     bool state;
 };  // class DigitalOutSubsystem
 
-}  // namespace aruwsrc::control::digital
+}  // namespace aruwsrc::engineer
 #endif  // DIGITAL_OUT_SUBSYSTEM_HPP_

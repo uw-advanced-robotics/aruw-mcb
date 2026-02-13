@@ -21,9 +21,9 @@
 
 #include "tap/control/command.hpp"
 
-#include "digital_out_subsystem.hpp"
+#include "aruwsrc/robot/2025engineer/digital_out_subsystem.hpp"
 
-namespace aruwsrc::control::digital
+namespace aruwsrc::engineer
 {
 class DigitalOutCommand : public tap::control::Command
 {
@@ -60,5 +60,5 @@ private:
     bool running;
 };  // class DigitalOutCommand
 
-}  // namespace aruwsrc::control::digital
+}  // namespace aruwsrc::engineer
 #endif  // DIGITAL_OUT_COMMAND_HPP_
