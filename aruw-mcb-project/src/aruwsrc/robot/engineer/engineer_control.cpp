@@ -421,19 +421,19 @@ CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
 SequentialCommand storeCubeCommand(
-     &extensionInCommand,
-     &wristFoldInCommand,
-     &suckOffCommand,
-     &extensionOutCommand,
-     &extensionInCommand,
-     &cubeLiftSwitchDownCommand);
+    &extensionInCommand,
+    &wristFoldInCommand,
+    &suckOffCommand,
+    &extensionOutCommand,
+    &extensionInCommand,
+    &cubeLiftSwitchDownCommand);
 SequentialCommand retrieveCubeCommand(
-     &extensionOutCommand,
-     &wristFoldInCommand,
-     &extensionInCommand,
-     &suckOnCommand,
-     &wristFoldOutCommand,
-     &cubeLiftSwitchUpCommand);
+    &extensionOutCommand,
+    &wristFoldInCommand,
+    &extensionInCommand,
+    &suckOnCommand,
+    &wristFoldOutCommand,
+    &cubeLiftSwitchUpCommand);
 
 // commands for pickup/scoring positions
 SetpointMovePositionCommand extensionOut(extensionSubsystem, EXTENSION_SCORE);
