@@ -86,14 +86,6 @@ void AmmoIndicator::initialize()
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::YELLOW);
 
-    getUnusedGraphicName(graphicName);
-    RefSerialTransmitter::configGraphicGenerics(
-        &numberGraphic.graphicData,
-        graphicName,
-        Tx::GRAPHIC_ADD,
-        DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::YELLOW);
-
     updateAmmoCount(0, &numberGraphic);
 }
 

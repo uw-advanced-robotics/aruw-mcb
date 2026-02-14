@@ -88,8 +88,8 @@ private:
     /**
      * A number that shows the charge % of the Capacitor Bank.
      */
-    Tx::Graphic1Message capBankVoltageLevel;
-    tap::arch::PeriodicMilliTimer voltageUpdateTimer;
+    Tx::Graphic1Message numberGraphic;
+    tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
 
     Tx::GraphicColor previousColor;
 
@@ -99,6 +99,17 @@ private:
     Tx::GraphicCharacterMessage capBankTextGraphic;
 
     communication::can::cap_bank::State previousState;
+
+    static inline void updateVoltage(int32_t value, RefSerialData::Tx::Graphic1Message *graphic)
+    {
+        tap::communication::serial::RefSerialTransmitter::configInteger(
+            SIZE,
+            WIDTH,
+            NUMBER_X,
+            TEXT_Y,
+            value,
+            &graphic->graphicData);
+    }
 };
 }  // namespace aruwsrc::control::client_display::indicators
 
