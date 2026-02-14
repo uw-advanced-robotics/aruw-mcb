@@ -145,7 +145,7 @@ void RttLedAnimator::update(
 #endif
             break;
         }
-        case ConnectionState::Unidrictional:
+        case ConnectionState::Bidirectional:
         {
             // State 1: Recent RTT input received - bidirectional bounce animation
             if (animationTimer.execute())
@@ -200,7 +200,7 @@ void RttLedAnimator::update(
             break;
         }
 
-        case ConnectionState::Bidirectional:
+        case ConnectionState::Unidrictional:
         {
             // State 2: Sending telemetry but no recent RTT input - unidirectional sweep A->H
             const uint32_t sweepSteps = 7;  // steps from 0 to 7

@@ -49,7 +49,7 @@ void RttMenu::draw()
             << "Error Queue Size: " << telemetry->getErrorQueueSize() << modm::endl
             << "Processing Log Msg: " << (telemetry->getProcessingLogMessage() ? "True" : "False")
             << modm::endl
-            << "Processing Err Msg: " << (telemetry->getProcessingErrorMessage() ? "True" : "false")
+            << "Processing Err Msg: " << (telemetry->getProcessingErrorMessage() ? "True" : "False")
             << modm::endl;
 }
 
