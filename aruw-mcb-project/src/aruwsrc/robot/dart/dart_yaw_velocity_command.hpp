@@ -37,6 +37,7 @@ public:
         TriggerHomedJointSubsystem& subsystem,
         Remote::Channel channel);
 
+
     void initialize() override;
 
     void execute() override;

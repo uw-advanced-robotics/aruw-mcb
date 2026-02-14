@@ -42,14 +42,12 @@ void DartYawVelocityCommand::initialize() {}
 
 void DartYawVelocityCommand::execute()
 {
-    // float setpoint = subsystem.getSetpoint() + drivers->remote.getChannel(channel) * aruwscrc::dart::YAW_INPUT_SENSITIVITY;
-    // subsystem.setSetpoint(setpoint);
+    subsystem.setSetpoint(
+        subsystem.getSetpoint() +
+        drivers->remote.getChannel(channel) * aruwsrc::dart::YAW_INPUT_SENSITIVITY);
 }
 
-bool DartYawVelocityCommand::isFinished() const
-{
-    return false;
-}
+bool DartYawVelocityCommand::isFinished() const { return false; }
 
 void DartYawVelocityCommand::end(bool) {}
 }  // namespace aruwsrc::robot::dart

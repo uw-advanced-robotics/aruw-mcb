@@ -87,12 +87,24 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak limitSwitch(
     false);
 
 aruwsrc::control::joint::homing::trigger::LimitSwitchTrigger limit(&limitSwitch);
-
 aruwsrc::control::joint::homing::TriggerHomedJointSubsystem pullMotorSubsystem(
     drivers(),
     pullMotors,
     limit,
     PULL_MOTOR_CONFIG);
+
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak yawLimitSwitch(
+    &(drivers()->digital),
+    YAW_LIMITSWITCH_PORT,
+    false);
+LimitSwitchTrigger yawTrigger(&yawLimitSwitch);
+tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, LAUNCHER_CAN_BUS, true, "Yaw Motor");
+
+aruwsrc::control::joint::homing::TriggerHomedJointSubsystem yawSubsystem(
+    drivers(),
+    yawMotor,
+    yawTrigger,
+    YAW_HOME_CONFIG);
 
 HomingCommand pullMotorHomeCommand(pullMotorSubsystem);
 DartManualPullbackSetpointCommand manualPullbackCommand(
@@ -113,22 +125,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 DartReloaderSubsystem dartReloader(drivers(), reloaderMotor);
 
-tap::motor::DjiMotor yawMotor(drivers(), YAW_MOTOR_ID, LAUNCHER_CAN_BUS, true, "Yaw Motor", false);
-
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak yawLimitSwitch(
-    &drivers()->digital,
-    YAW_LIMITSWITCH_PORT,
-    false);
-
-LimitSwitchTrigger yawTrigger(&yawLimitSwitch);
-
 RotateMagazineCommand rotateMagazine(dartReloader);
-
-aruwsrc::control::joint::homing::TriggerHomedJointSubsystem yawSubsystem(
-    drivers(),
-    yawMotor,
-    yawTrigger,
-    YAW_HOME_CONFIG);
 
 DartServo dartServo(drivers());
 DartSetpointCommand dartPullback(pullMotorSubsystem, PULLBACK_PULL_POSITION);
@@ -141,15 +138,16 @@ HomingCommand yawHomeCommand(yawSubsystem);
 aruwsrc::robot::dart::DartYawPositionCommand dartYawPositionCommand(drivers(), &yawSubsystem, 0.0f);
 
 // yaw manual velocity control, LEFT_X
-// aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
-//     drivers(),
-//     &yawSubsystem,
-//     Remote::Channel::LEFT_HORIZONTAL);
+aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
+    drivers(),
+    yawSubsystem,
+    Remote::Channel::LEFT_HORIZONTAL);
 // grab the string and pullback to setpoint
 SequentialCommand<2> pullBackCommand(std::array<Command*, 2>{{&servoClose, &dartPullback}});
 
 // release the string to let the dart go, then go to reload position
-SequentialCommand<3> releaseDartAndReload(std::array<Command*, 3>{{&servoOpen, &dartGrab, &rotateMagazine}});
+SequentialCommand<3> releaseDartAndReload(
+    std::array<Command*, 3>{{&servoOpen, &dartGrab, &rotateMagazine}});
 
 SequentialCommand<2> homeAll(std::array<Command*, 2>{{&pullMotorHome, &yawHomeCommand}});
 
@@ -196,7 +194,7 @@ PressCommandMapping rightMidLeftDown(
     {&rotateMagazine},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
 
-// Left Down + Right Up -> Home Yaw 
+// Left Down + Right Up -> Home Yaw
 HoldCommandMapping homeYawMapping(
     drivers(),
     {&yawHomeCommand},
@@ -224,7 +222,7 @@ void setDefaultDartCommands(aruwsrc::dart::Drivers*)
 {
     pullMotorSubsystem.setDefaultCommand(&manualPullbackCommand);
 
-    // yawSubsystem.setDefaultCommand(&dartYawVelocityCommand);
+    yawSubsystem.setDefaultCommand(&dartYawVelocityCommand);
 }
 
 void startDartCommands(aruwsrc::dart::Drivers*) {}
@@ -236,7 +234,7 @@ void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
     drivers->commandMapper.addMap(&homePullbackMapping);
     drivers->commandMapper.addMap(&pullbackMapping);
     drivers->commandMapper.addMap(&rightMidLeftDown);
-    // drivers->commandMapper.addMap(&homeYawMapping);
+    drivers->commandMapper.addMap(&homeYawMapping);
 }
 
 }  // namespace dart_control
