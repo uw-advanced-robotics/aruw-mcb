@@ -281,6 +281,8 @@ private:
 
     bool limitSwitchDepressed;
 
+    bool buzzer_playing{false};
+
     ImuDataReceivedCallbackFunc imuDataReceivedCallbackFunc = nullptr;
 
     void handleXAxisMessage(const modm::can::Message& message);

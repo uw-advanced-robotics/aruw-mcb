@@ -104,11 +104,15 @@ void TurretMCBCanComm::sendData()
         yawRevolutions = 0;
         pitchRevolutions = 0;
         // Scream!
-        tap::buzzer::playNote(&drivers->pwm, 1000+400*sin(tap::arch::clock::getTimeMilliseconds()/100.0));
+        tap::buzzer::playNote(
+            &drivers->pwm,
+            1000 + 400 * sin(tap::arch::clock::getTimeMilliseconds() / 100.0));
+        buzzer_playing = true;
     }
-    else
+    else if (buzzer_playing)
     {
         tap::buzzer::silenceBuzzer(&drivers->pwm);
+        buzzer_playing = false;
     }
 }
 
