@@ -56,14 +56,14 @@ public:
 private:
 // X position of the text
 #if defined(TARGET_HERO_ZERO)
-    static constexpr uint16_t TEXT_X = 611;
-    static constexpr uint16_t NUMBER_X = 1018;
+    static constexpr uint16_t TEXT_X = 311;
+    static constexpr uint16_t NUMBER_X = 718;
 #else
-    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 150;
+    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 600;
     static constexpr uint16_t NUMBER_X = TEXT_X + 175;
 #endif
     // Y position of the text
-    static constexpr uint16_t TEXT_Y = 200;
+    static constexpr uint16_t TEXT_Y = 850;
     // WIDTH of the text
     static constexpr uint16_t WIDTH = 4;
 // SIZE of the text
@@ -78,6 +78,8 @@ private:
 
     Tx::Graphic1Message numberGraphic;
     tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
+
+    Tx::GraphicData backgroundGraphic;
 
     int bulletCount = 0;
 

@@ -61,13 +61,14 @@ public:
 
 private:
     /** The X location of the center of the cap bank bar on the screen, in pixels. */
-    static constexpr uint16_t CAP_CENTER_X = 1870;
+    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 600;
+    static constexpr uint16_t NUMBER_X = TEXT_X + 175;
     /** The Y location of the center of the cap bank bar on the screen, in pixels. */
-    static constexpr uint16_t CAP_CENTER_Y = 630;
+    static constexpr uint16_t TEXT_Y = 800;
     /** The height of the cap bank bar, in pixels. */
-    static constexpr uint16_t BOX_HEIGHT = 300;
-    /** The width of the cap bank bar, in pixels. */
-    static constexpr uint16_t BOX_WIDTH = 50;
+    static constexpr uint16_t SIZE = 40;
+    // WIDTH of the text
+    static constexpr uint16_t WIDTH = 4;
 
     // Indicator bar is in units of voltage squared so it is proportional to energy,
     //   but doesnt depend on differences in capacitance between robots, and limits can be easily
@@ -85,17 +86,12 @@ private:
     const communication::can::cap_bank::CapacitorBank *capBank;
 
     /**
-     * Background line for the status that highlights a few states.
-     */
-    Tx::Graphic1Message capBankBackgroundLine;
-
-    Tx::GraphicColor previousColor;
-
-    /**
-     * A line that shows the charge of the Capacitor Bank.
+     * A number that shows the charge % of the Capacitor Bank.
      */
     Tx::Graphic1Message capBankVoltageLevel;
     tap::arch::PeriodicMilliTimer voltageUpdateTimer;
+
+    Tx::GraphicColor previousColor;
 
     /**
      * A graphic that represents the current status of the Capacitor Bank.

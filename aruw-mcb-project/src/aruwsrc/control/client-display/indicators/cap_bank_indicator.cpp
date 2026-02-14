@@ -44,7 +44,6 @@ modm::ResumableResult<void> CapBankIndicator::sendInitialGraphics()
     RF_BEGIN(0);
 
     // remove initial graphics
-    RF_CALL(refSerialTransmitter.sendGraphic(&capBankBackgroundLine));
     RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
     RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
 
@@ -53,7 +52,6 @@ modm::ResumableResult<void> CapBankIndicator::sendInitialGraphics()
 
 modm::ResumableResult<void> CapBankIndicator::update()
 {
-    const int BOTTOM = CAP_CENTER_Y - BOX_HEIGHT / 2;
     float voltage_squared = 0;
     communication::can::cap_bank::State state = communication::can::cap_bank::UNKNOWN;
 
@@ -63,10 +61,6 @@ modm::ResumableResult<void> CapBankIndicator::update()
     {
         if (capBank->isOnline())
         {
-            capBankBackgroundLine.graphicData.operation =
-                capBankBackgroundLine.graphicData.operation == Tx::GRAPHIC_DELETE
-                    ? Tx::GRAPHIC_ADD
-                    : Tx::GRAPHIC_MODIFY;
             capBankVoltageLevel.graphicData.operation =
                 capBankVoltageLevel.graphicData.operation == Tx::GRAPHIC_DELETE
                     ? Tx::GRAPHIC_ADD
@@ -84,17 +78,12 @@ modm::ResumableResult<void> CapBankIndicator::update()
                 voltage_squared = VOLTAGE_SQUARED_MIN;
             }
 
-            RefSerialTransmitter::configLine(
-                BOX_WIDTH - 20,
-                CAP_CENTER_X,
-                std::min(
-                    (voltage_squared - VOLTAGE_SQUARED_MIN) /
-                        (VOLTAGE_SQUARED_MAX - VOLTAGE_SQUARED_MIN),
-                    1.0f) *
-                        (BOX_HEIGHT - 20) +
-                    BOTTOM + 10,
-                CAP_CENTER_X,
-                BOTTOM + 10,
+            RefSerialTransmitter::configInteger(
+                SIZE,
+                WIDTH,
+                NUMBER_X,
+                TEXT_Y,
+                voltage_squared / VOLTAGE_SQUARED_MAX,
                 &capBankVoltageLevel.graphicData);
 
             capBankVoltageLevel.graphicData.color = static_cast<uint8_t>(
@@ -109,42 +98,42 @@ modm::ResumableResult<void> CapBankIndicator::update()
             {
                 case communication::can::cap_bank::State::RESET:
                     strncpy(capBankTextGraphic.msg, "RST ", 5);
-                    capBankBackgroundLine.graphicData.color =
+                    capBankVoltageLevel.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
                 case communication::can::cap_bank::State::SAFE:
                     strncpy(capBankTextGraphic.msg, "SAFE", 5);
-                    capBankBackgroundLine.graphicData.color =
+                    capBankVoltageLevel.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
                     break;
                 case communication::can::cap_bank::State::CHARGE:
                     strncpy(capBankTextGraphic.msg, "CHRG", 5);
-                    capBankBackgroundLine.graphicData.color =
+                    capBankVoltageLevel.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case communication::can::cap_bank::State::CHARGE_DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "CHDS", 5);
-                    capBankBackgroundLine.graphicData.color =
+                    capBankVoltageLevel.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case communication::can::cap_bank::State::DISCHARGE:
                     strncpy(capBankTextGraphic.msg, "DSCH", 5);
-                    capBankBackgroundLine.graphicData.color =
+                    capBankVoltageLevel.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case communication::can::cap_bank::State::BATTERY_OFF:
                     strncpy(capBankTextGraphic.msg, "BOFF", 5);
-                    capBankBackgroundLine.graphicData.color =
+                    capBankVoltageLevel.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::CYAN);
                     break;
                 case communication::can::cap_bank::State::DISABLED:
                     strncpy(capBankTextGraphic.msg, "OFF ", 5);
-                    capBankBackgroundLine.graphicData.color =
+                    capBankVoltageLevel.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
                     break;
                 default:
                     strncpy(capBankTextGraphic.msg, "UNK ", 5);
-                    capBankBackgroundLine.graphicData.color =
+                    capBankVoltageLevel.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
             }
@@ -157,12 +146,11 @@ modm::ResumableResult<void> CapBankIndicator::update()
                 this->previousState = state;
                 RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
             }
-            if (capBankBackgroundLine.graphicData.color !=
-                static_cast<uint8_t>(this->previousColor))
+            if (capBankVoltageLevel.graphicData.color != static_cast<uint8_t>(this->previousColor))
             {
                 this->previousColor =
-                    static_cast<Tx::GraphicColor>(capBankBackgroundLine.graphicData.color);
-                RF_CALL(refSerialTransmitter.sendGraphic(&capBankBackgroundLine));
+                    static_cast<Tx::GraphicColor>(capBankVoltageLevel.graphicData.color);
+                RF_CALL(refSerialTransmitter.sendGraphic(&capBankVoltageLevel));
             }
             if (voltageUpdateTimer.execute())
             {
@@ -180,19 +168,11 @@ void CapBankIndicator::initialize()
 
     getUnusedGraphicName(capBankName);
     RefSerialTransmitter::configGraphicGenerics(
-        &capBankBackgroundLine.graphicData,
+        &capBankVoltageLevel.graphicData,
         capBankName,
         Tx::GRAPHIC_DELETE,
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::WHITE);
-
-    getUnusedGraphicName(capBankName);
-    RefSerialTransmitter::configGraphicGenerics(
-        &capBankVoltageLevel.graphicData,
-        capBankName,
-        Tx::GRAPHIC_DELETE,
-        DEFAULT_GRAPHIC_LAYER + 1,
-        Tx::GraphicColor::GREEN);
 
     getUnusedGraphicName(capBankName);
     RefSerialTransmitter::configGraphicGenerics(
@@ -204,29 +184,7 @@ void CapBankIndicator::initialize()
 
     if (capBank != nullptr)
     {
-        RefSerialTransmitter::configLine(
-            BOX_WIDTH,
-            CAP_CENTER_X,
-            CAP_CENTER_Y + BOX_HEIGHT / 2,
-            CAP_CENTER_X,
-            CAP_CENTER_Y - BOX_HEIGHT / 2,
-            &capBankBackgroundLine.graphicData);
-
-        RefSerialTransmitter::configLine(
-            BOX_WIDTH - 20,
-            CAP_CENTER_X,
-            CAP_CENTER_Y + BOX_HEIGHT / 2 - 10,
-            CAP_CENTER_X,
-            CAP_CENTER_Y - BOX_HEIGHT / 2 + 10,
-            &capBankVoltageLevel.graphicData);
-
-        RefSerialTransmitter::configCharacterMsg(
-            15,
-            3,
-            CAP_CENTER_X - 15 * 2,
-            CAP_CENTER_Y + BOX_HEIGHT / 2 + 15 + 5,
-            "",
-            &capBankTextGraphic);
+        RefSerialTransmitter::configCharacterMsg(SIZE, 3, TEXT_X, TEXT_Y, "", &capBankTextGraphic);
     }
 }
 }  // namespace aruwsrc::control::client_display::indicators
