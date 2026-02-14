@@ -21,7 +21,6 @@
 
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
