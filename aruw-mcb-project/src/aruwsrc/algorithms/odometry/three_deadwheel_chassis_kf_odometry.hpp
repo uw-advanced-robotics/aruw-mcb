@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
-#define DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
+#ifndef THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
+#define THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
@@ -28,7 +28,7 @@
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
-#include "aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_odometry_observer.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
@@ -42,7 +42,7 @@ namespace aruwsrc::algorithms::odometry
  * robots). For those robots that measure chassis position directly (sentry, for example), a
  * tweaked version of the kalman filter used in this implementation should be used.
  */
-class DeadwheelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
+class ThreeDeadwheelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
     /**
@@ -63,8 +63,8 @@ public:
      * chassis. When moving in the direction of the parallel deadwheel, the perpendicular deadwheel
      * should not move, and vice versa
      */
-    DeadwheelChassisKFOdometry(
-        const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry,
+    ThreeDeadwheelChassisKFOdometry(
+        const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry,
 #if defined(TARGET_SENTRY_ECLIPSE)
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
 #else
@@ -72,9 +72,11 @@ public:
 #endif
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
-        const float parallelCenterToWheelDistance,
-        const float parallelWheelChassisForwardRelativeAngleRadians,
-        const float perpendicularWheelChassisForwardRelativeAngleRadians);
+        const float initYaw,
+        const float parallelOneCenterToWheelDistance,
+        const float parallelTwoCenterToWheelDistance,
+        const float perpendicularCenterToWheelDistance,
+        const float odomFrameToRobotFrame);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
@@ -82,12 +84,14 @@ public:
 
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
-    inline float getYaw() const override { return chassisYaw; }
+    inline float getYaw() const override { return chassisYaw.getWrappedValue(); }
 
     /**
      * @brief Resets the KF back to the robot's boot position.
      */
     void reset();
+
+    void getOdometry();
 
     void update();
 
@@ -102,6 +106,8 @@ protected:
         POS_Y,
         VEL_Y,
         ACC_Y,
+        POS_ANG,
+        VEL_ANG,
         NUM_STATES,
     };
 
@@ -111,6 +117,9 @@ protected:
         ACC_X,
         VEL_Y,
         ACC_Y,
+        POS_ANG,
+        VEL_ANG_ODOM,
+        VEL_ANG_IMU,
         NUM_INPUTS,
     };
 
@@ -129,81 +138,85 @@ private:
 
     // clang-format off
     static constexpr float KF_A[STATES_SQUARED] = {
-        1, DT, 0.5 * DT * DT, 0, 0 , 0            ,
-        0, 1 , DT           , 0, 0 , 0            ,
-        0, 0 , 1            , 0, 0 , 0            ,
-        0, 0 , 0            , 1, DT, 0.5 * DT * DT,
-        0, 0 , 0            , 0, 1 , DT           ,
-        0, 0 , 0            , 0, 0 , 1            ,
+        1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0 ,
+        0, 1 , DT           , 0, 0 , 0            , 0, 0 ,
+        0, 0 , 1            , 0, 0 , 0            , 0, 0 ,
+        0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0 ,
+        0, 0 , 0            , 0, 1 , DT           , 0, 0 ,
+        0, 0 , 0            , 0, 0 , 1            , 0, 0 ,
+        0, 0 , 0            , 0, 0 , 0            , 1, DT,
+        0, 0 , 0            , 0, 0 , 0            , 0, 1 ,
     };
     static constexpr float KF_C[INPUTS_MULT_STATES] = {
-        0, 1, 0, 0, 0, 0,
-        0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 1,
+        0, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 1, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 0, 0,
+        0, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 0, 0, 0, 0, 1,
+        0, 0, 0, 0, 0, 0, 0, 1,
     };
 
     static constexpr float KF_R[INPUTS_SQUARED] = {
-        7.49565672e-05, 0, 0, 0,
-        0, 7.35872941e-04, 0, 0,
-        0, 0, 7.81982345e-05, 0,
-        0, 0, 0, 5.69132363e-04
-    };
+        7.49565672e-05, 0, 0, 0, 0, 0, 0,
+        0, 7.35872941e-04, 0, 0, 0, 0, 0,
+        0, 0, 7.81982345e-05, 0, 0, 0, 0,
+        0, 0, 0, 5.69132363e-04, 0, 0, 0,
+        0, 0, 0, 0, 5.69132363e-04, 0, 0,
+        0, 0, 0, 0, 0, 5.69132363e-04, 0,
+        0, 0, 0, 0, 0, 0, 5.69132363e-04,
+    }; //TODO: TUNE
 
     static constexpr float KF_Q[STATES_SQUARED] = {
-        9.0120570108e-06f, 5.4281168875e-04f, 5.6797949319e-02f, 4.3864560552e-07f, -7.6362940038e-05f, -7.9139054404e-03f,
-        5.4281168875e-04f, 1.9396555203e-01f, 1.8282498819e+01f, -8.3483362129e-05f, -1.8580184164e-02f, -1.7427705884e+00f,
-        5.6797949319e-02f, 1.8282498819e+01f, 1.7345126240e+03f, -7.4990656881e-03f, -1.7895295666e+00f, -1.6939745776e+02f,
-        4.3864560552e-07f, -8.3483362129e-05f, -7.4990656881e-03f, 4.7600903828e-06f, 4.9474361167e-04f, 4.6590765854e-02f,
-        -7.6362940038e-05f, -1.8580184164e-02f, -1.7895295666e+00f, 4.9474361167e-04f, 1.5265492535e-01f, 1.4482580576e+01f,
-        -7.9139054404e-03f, -1.7427705884e+00f, -1.6939745776e+02f, 4.6590765854e-02f, 1.4482580576e+01f, 1.3770822857e+03f,
-    };
+         9.0120570108e-06f,  5.4281168875e-04f,  5.6797949319e-02f,  4.3864560552e-07f, -7.6362940038e-05f, -7.9139054404e-03f, 0            , 0            ,
+         5.4281168875e-04f,  1.9396555203e-01f,  1.8282498819e+01f, -8.3483362129e-05f, -1.8580184164e-02f, -1.7427705884e+00f, 0            , 0            ,
+         5.6797949319e-02f,  1.8282498819e+01f,  1.7345126240e+03f, -7.4990656881e-03f, -1.7895295666e+00f, -1.6939745776e+02f, 0            , 0            ,
+         4.3864560552e-07f, -8.3483362129e-05f, -7.4990656881e-03f,  4.7600903828e-06f,  4.9474361167e-04f,  4.6590765854e-02f, 0            , 0            ,
+        -7.6362940038e-05f, -1.8580184164e-02f, -1.7895295666e+00f,  4.9474361167e-04f,  1.5265492535e-01f,  1.4482580576e+01f, 0            , 0            ,
+        -7.9139054404e-03f, -1.7427705884e+00f, -1.6939745776e+02f,  4.6590765854e-02f,  1.4482580576e+01f,  1.3770822857e+03f, 0            , 0            ,
+         0                ,  0                ,  0                ,  0                ,  0                ,  0                , 2.276528e-15f, 2.276528e-12f,
+         0                ,  0                ,  0                ,  0                ,  0                ,  0                , 2.276528e-12f, 2.276528e-09f,
+    }; //TODO: TUNE
     
     static constexpr float KF_P0[STATES_SQUARED] = {
-        1E-2, 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E-6, 0  , 0  , 0  , 0  ,
-        0  , 0  , 1E3, 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E-2, 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E-6, 0  ,
-        0  , 0  , 0  , 0  , 0  , 1E3,
-    };
+        1E-2, 0   , 0   , 0   , 0   , 0   , 0   , 0   ,
+        0   , 1E-6, 0   , 0   , 0   , 0   , 0   , 0   ,
+        0   , 0   , 1E+3, 0   , 0   , 0   , 0   , 0   ,
+        0   , 0   , 0   , 1E-2, 0   , 0   , 0   , 0   ,
+        0   , 0   , 0   , 0   , 1E-2, 0   , 0   , 0   ,
+        0   , 0   , 0   , 0   , 0   , 1E-2, 0   , 0   ,
+        0   , 0   , 0   , 0   , 0   , 0   , 1E-2, 0   ,
+        0   , 0   , 0   , 0   , 0   , 0   , 0   , 1E-2,
+    }; //TODO: TUNE
     // clang-format on
 
-    const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver& deadwheelOdometry;
+    const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
     const modm::Vector2f initPos;
+    const float initYaw;
 
     /// Chassis location in the world frame
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
     // Chassis yaw orientation in world frame (radians)
-    float chassisYaw = 0;
+    tap::algorithms::Angle chassisYaw;
 
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
 
-    const float parallelCenterToWheelDistance;
-    const float parallelWheelChassisForwardRelativeAngleRadians;
-    const float perpendicularWheelChassisForwardRelativeAngleRadians;
-    void updateChassisStateFromKF(float chassisYaw);
-    float perpendicularRaw;
-    float parallelRaw;
-    float filteredPerpendicular;
-    float filteredParallel;
+    tap::algorithms::Angle lastWrappedTheta = tap::algorithms::Angle(0.0f);
+    tap::algorithms::Angle imuTheta = tap::algorithms::Angle(0.0f);
 
-    static constexpr int FILTER_ORDER = 3;
-    float parallelFilterState[FILTER_ORDER] = {0.0f};
-    float perpendicularFilterState[FILTER_ORDER] = {0.0f};
-    float parallelNotchFilterState[3] = {0.0f};
-    float perpendicularNotchFilterState[3] = {0.0f};
+    const float parallelOneCenterToWheelDistance;
+    const float parallelTwoCenterToWheelDistance;
+    const float perpendicularCenterToWheelDistance;
+    const float odomFrameToRobotFrame;
+    void updateChassisStateFromKF();
 
-    static constexpr float IIR_A[FILTER_ORDER] = {1.000000f, -1.583541f, 0.656414f};
-    static constexpr float IIR_B[FILTER_ORDER] = {0.018218f, 0.036436f, 0.018218f};
-
-    float applyIirFilter(float input, float* state, const float* a, const float* b, int order);
+    float x[int(OdomState::NUM_STATES)];
 };
 }  // namespace aruwsrc::algorithms::odometry
 
-#endif  // CHASSIS_KF_ODOMETRY_HPP_
+#endif  // THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
