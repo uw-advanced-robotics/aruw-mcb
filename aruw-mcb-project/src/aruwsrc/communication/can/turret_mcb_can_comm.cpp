@@ -99,12 +99,12 @@ void TurretMCBCanComm::sendData()
         txCommandMsgBitmask.reset(TxCommandMsgBitmask::RECALIBRATE_IMU);
     }
 
-    if (!isConnected())
+    if (!isConnected() && this->getImuState() != ImuState::IMU_CALIBRATING)
     {
         yawRevolutions = 0;
         pitchRevolutions = 0;
         // Scream!
-        tap::buzzer::playNote(&drivers->pwm, 1000);
+        tap::buzzer::playNote(&drivers->pwm, 1000+400*sin(tap::arch::clock::getTimeMilliseconds()/100.0));
     }
     else
     {
