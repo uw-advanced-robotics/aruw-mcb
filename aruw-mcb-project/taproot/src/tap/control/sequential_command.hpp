@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2024-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -58,7 +58,10 @@ public:
 
         for (Command* command : commands)
         {
-            modm_assert(command != nullptr, "SequentialCommand", "Null command pointer passed!");
+            modm_assert(
+                command != nullptr,
+                "SequentialCommand::SequentialCommand",
+                "Null pointer command passed into sequential command.");
             this->commandRequirementsBitwise |= (command->getRequirementsBitwise());
         }
     }
