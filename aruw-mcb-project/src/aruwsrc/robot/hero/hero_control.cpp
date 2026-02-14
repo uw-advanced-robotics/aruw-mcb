@@ -101,7 +101,7 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
-#include "aruwsrc/control/chassis/push_auto_nav_point_command.hpp"
+#include "aruwsrc/control/chassis/test_auto_nav_command.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::control;
@@ -314,17 +314,17 @@ AutoNavCommand autoNavCommand(
     autoNavController,
     true,
     false,
-    true);
+    false);
 
-PushAutoNavPointCommand pushAutoNavPointX1Y1(
+TestAutoNavCommand pushAutoNavPointXSMALLY0(
     *drivers(),
     autoNavController,
-    Position(1.0f, 1.0f, 0.0f));
+    Position(0.8f, 7.0f, 0.0f));
 
-PushAutoNavPointCommand pushAutoNavPointX2Y0(
+TestAutoNavCommand pushAutoNavPointX0Y0(
     *drivers(),
     autoNavController,
-    Position(2.0f, 0.0f, 0.0f));
+    Position(0.5, 7.0f, 0.0f));
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -640,11 +640,11 @@ ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicato
 HoldCommandMapping testAuto(
     drivers(),
     {&autoNavCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping pushAutoPathPoints(
     drivers(),
-    {&pushAutoNavPointX1Y1, &pushAutoNavPointX2Y0},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
+    {&pushAutoNavPointXSMALLY0, &pushAutoNavPointX0Y0},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping rightSwitchMiddle(
     drivers(),
     {&spinFrictionWheels},

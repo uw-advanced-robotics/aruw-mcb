@@ -78,7 +78,7 @@ public:
      */
     bool hasChanged() const;
 
-    Position getFinalPosition();
+    Position* getFinalPosition();
 
     inline void clearPathChanged() { pathChanged = false; }
 

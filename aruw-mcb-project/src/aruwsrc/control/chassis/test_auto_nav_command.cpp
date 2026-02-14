@@ -17,21 +17,32 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "push_auto_nav_point_command.hpp"
+#include "test_auto_nav_command.hpp"
 
 namespace aruwsrc::control::chassis
 {
-    PushAutoNavPointCommand::PushAutoNavPointCommand(
+    TestAutoNavCommand::TestAutoNavCommand(
         const tap::Drivers& drivers,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-        Position point)
+        std::vector<Transform> transforms = std::vector<Transform>(),
+        tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem = nullptr)
         : drivers(drivers),
           autoNavController(autoNavController),
-          point(point)
+          transforms(transforms),
+          odometrySubsystem(odometrySubsystem)
     {
     }
 
-    void PushAutoNavPointCommand::initialize() { autoNavController.pushPoint(point); }
+    void TestAutoNavCommand::initialize() { 
+        Position currPosition = odometrySubsystem->getCurrentLocation2D().getAsPosition();
+        for(Transform transform : transforms) {
+            currPosition = currPosition + transform.getTranslation();
+            path.pushPoint(currPosition);
+        }
+        autoNavController.attachPath(&path);
+     }
+    void TestAutoNavCommand::execute() {}
+    void TestAutoNavCommand::end(bool) {}
 
-    bool PushAutoNavPointCommand::isFinished() const { return true;}
+    bool TestAutoNavCommand::isFinished() const { return true;}
 }

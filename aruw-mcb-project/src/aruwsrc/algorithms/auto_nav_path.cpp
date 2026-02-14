@@ -180,6 +180,6 @@ float AutoNavPath::getClosestParameterOnSegment(Position current, Position p1, P
     return tap::algorithms::limitVal(ratio, 0.0f, 1.0f) * Position::distance(p1, p2);
 }
 
-Position AutoNavPath::getFinalPosition(){
-    return setpointData.empty() ? Position(0, 0, 0) : setpointData.back();
+Position* AutoNavPath::getFinalPosition(){
+    return setpointData.empty() ? nullptr : &setpointData.back();
 }

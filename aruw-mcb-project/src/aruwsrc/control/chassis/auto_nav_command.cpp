@@ -49,8 +49,7 @@ AutoNavCommand::AutoNavCommand(
 }
 
 void AutoNavCommand::initialize() { 
-    autoNavController.initialize(); 
-    if(autoNavControll)
+    autoNavController.initialize();
 }
 
 void AutoNavCommand::execute()

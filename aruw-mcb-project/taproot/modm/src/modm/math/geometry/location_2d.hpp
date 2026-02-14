@@ -46,6 +46,9 @@ namespace modm
 		inline const Vector<T, 2>&
 		getPosition() const;
 
+		inline const tap::algorithms::transforms::Position
+		getAsPosition() const;
+
 		inline const T&
 		getX() const;
 
