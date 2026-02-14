@@ -40,10 +40,6 @@
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
-#include "aruwsrc/control/digital/digital_out_command.hpp"
-#include "aruwsrc/control/digital/digital_out_subsystem.hpp"
-#include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
-#include "aruwsrc/control/digital/dual_digital_out_subsystem.hpp"
 #include "aruwsrc/control/joint/homing/homing_command.hpp"
 #include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
@@ -51,6 +47,9 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/cubelift_switch_command.hpp"
+#include "aruwsrc/robot/engineer/digital_out_command.hpp"
+#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
+#include "aruwsrc/robot/engineer/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_cube_lift_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
@@ -67,6 +66,10 @@
 
 // #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -86,7 +89,6 @@
 
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::client_display::indicators;
-using namespace aruwsrc::control::digital;
 using namespace aruwsrc::control::joint;
 using namespace aruwsrc::control::joint::homing;
 using namespace aruwsrc::control::joint::homing::trigger;
@@ -284,7 +286,53 @@ aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
     WHEEL_RADIUS,
     WHEELBASE_RADIUS);
 
-// this could be useful i think
+tap::encoder::CanEncoder parallelOmniOne(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
+
+tap::encoder::CanEncoder parallelOmniTwo(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
+
+aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
+    &parallelOmniOne,
+    &parallelOmniTwo,
+    &perpendicularOmni,
+    DEADWHEEL_RADIUS);
+
+aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    deadwheels,
+    engTurret,
+    drivers()->mpu6500,
+    INITIAL_CHASSIS_POSITION_X,
+    INITIAL_CHASSIS_POSITION_Y,
+    INITIAL_CHASSIS_ORIENTATION,
+    parallelOneCenterToWheelDistance,
+    parallelTwoCenterToWheelDistance,
+    perpendicularCenterToWheelDistance,
+    odomFrameToRobotFrame);
+
+// transforms
+aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformer transformer(
+    odometrySubsystem,
+    engTurret);
+aruwsrc::algorithms::odometry::transforms::StandardAnderHeroTransformerSubsystem transformSubsystem(
+    *drivers(),
+    transformer);
+
+aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformAdapter transformAdapter(
+    transformer);
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
@@ -353,11 +401,15 @@ TriggerHomedJointSubsystem extensionSubsystem(
 
 JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_CONFIG);
 
-DualDigitalOutSubsystem suckSubsystem(
+DigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true,
+    true);
+
+DigitalOutSubsystem releaseSubsystem(
+    drivers(),
+    drivers()->digital,
     tap::gpio::Digital::OutputPin::Z,
     false);
 
@@ -409,7 +461,9 @@ WristSetpointsCommand wristFoldOutCommand(
 
 DigitalOutCommand suckOffCommand(suckSubsystem, false);
 DigitalOutCommand suckOnCommand(suckSubsystem, true);
-DigitalOutToggleCommand suctionToggleCommand(suckSubsystem);
+DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
+DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
+DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
 
 // commands here for sequences, but setpoints never tuned
 SetpointMovePositionCommand extensionInCommand(extensionSubsystem, 2);
@@ -424,6 +478,7 @@ SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
     {&extensionInCommand,
      &wristFoldInCommand,
      &suckOffCommand,
+     &releaseOnCommand,
      &extensionOutCommand,
      &extensionInCommand,
      &cubeLiftSwitchDownCommand}});
@@ -432,6 +487,7 @@ SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
      &wristFoldInCommand,
      &extensionInCommand,
      &suckOnCommand,
+     &releaseOffCommand,
      &wristFoldOutCommand,
      &cubeLiftSwitchUpCommand}});
 
@@ -460,12 +516,12 @@ tap::control::PressCommandMapping leftUp(
 
 tap::control::HoldCommandMapping rightMid(
     drivers(),
-    {&suckOffCommand},
+    {&suckOffCommand, &releaseOffCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 
 tap::control::HoldCommandMapping rightDown(
     drivers(),
-    {&suckOnCommand},
+    {&suckOnCommand, &releaseOnCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 tap::control::PressCommandMapping suctionToggle(
@@ -524,6 +580,7 @@ void initializeSubsystems()
     wristSubsystem.initialize();
     cubeLift.initialize();
     suckSubsystem.initialize();
+    releaseSubsystem.initialize();
     // clientDicsplay.initialize();
 }
 
@@ -536,6 +593,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
