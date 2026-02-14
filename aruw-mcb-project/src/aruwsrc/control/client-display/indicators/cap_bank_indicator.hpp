@@ -60,24 +60,20 @@ public:
     void initialize() override final;
 
 private:
-    /** The X location of the center of the cap bank bar on the screen, in pixels. */
-    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 600;
-    static constexpr uint16_t NUMBER_X = TEXT_X + 175;
-    /** The Y location of the center of the cap bank bar on the screen, in pixels. */
+    // X position of the text
+    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 700;
+    static constexpr uint16_t NUMBER_X = TEXT_X + 325;
+    // Y position of the text
     static constexpr uint16_t TEXT_Y = 800;
-    /** The height of the cap bank bar, in pixels. */
+    // SIZE of the text.
     static constexpr uint16_t SIZE = 40;
     // WIDTH of the text
     static constexpr uint16_t WIDTH = 4;
 
-    // Indicator bar is in units of voltage squared so it is proportional to energy,
-    //   but doesnt depend on differences in capacitance between robots, and limits can be easily
-    //   changed
-    // maximum displayed voltage of the supercapacitors (full charge)
     static constexpr uint16_t VOLTAGE_SQUARED_MAX = pow(30, 2);
-    // cap voltage below which the indicator bar turns from green to yellow
+    // cap voltage below which the number turns from green to yellow
     static constexpr uint16_t VOLTAGE_SQUARED_YELLOW = pow(20, 2);
-    // cap voltage below which the indicator bar turns from yellow to orange
+    // cap voltage below which the number turns from yellow to orange
     static constexpr uint16_t VOLTAGE_SQUARED_ORANGE = pow(15, 2);
     // minimum displayed voltage of the supercapacitors (minimum usable voltage)
     static constexpr uint16_t VOLTAGE_SQUARED_MIN =

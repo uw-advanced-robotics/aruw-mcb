@@ -59,7 +59,7 @@ private:
     static constexpr uint16_t TEXT_X = 311;
     static constexpr uint16_t NUMBER_X = 718;
 #else
-    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 600;
+    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 700;
     static constexpr uint16_t NUMBER_X = TEXT_X + 175;
 #endif
     // Y position of the text

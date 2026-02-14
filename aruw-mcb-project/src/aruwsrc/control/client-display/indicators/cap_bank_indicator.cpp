@@ -43,7 +43,7 @@ modm::ResumableResult<void> CapBankIndicator::sendInitialGraphics()
 
     RF_BEGIN(0);
 
-    // remove initial graphics
+    // send initial graphics
     RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
     RF_CALL(numberIndicator.initialize());
 
@@ -85,51 +85,45 @@ modm::ResumableResult<void> CapBankIndicator::update()
             switch (state)
             {
                 case communication::can::cap_bank::State::RESET:
-                    strncpy(capBankTextGraphic.msg, "RST ", 5);
-                    numberGraphic.graphicData.color =
+                    strncpy(capBankTextGraphic.msg + 4, "RST ", 5);
+                    capBankTextGraphic.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
                 case communication::can::cap_bank::State::SAFE:
-                    strncpy(capBankTextGraphic.msg, "SAFE", 5);
-                    numberGraphic.graphicData.color =
+                    strncpy(capBankTextGraphic.msg + 4, "SAFE", 5);
+                    capBankTextGraphic.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
                     break;
                 case communication::can::cap_bank::State::CHARGE:
-                    strncpy(capBankTextGraphic.msg, "CHRG", 5);
-                    numberGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                    strncpy(capBankTextGraphic.msg + 4, "CHRG", 5);
+                    capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case communication::can::cap_bank::State::CHARGE_DISCHARGE:
-                    strncpy(capBankTextGraphic.msg, "CHDS", 5);
-                    numberGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                    strncpy(capBankTextGraphic.msg + 4, "CHDS", 5);
+                    capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case communication::can::cap_bank::State::DISCHARGE:
-                    strncpy(capBankTextGraphic.msg, "DSCH", 5);
-                    numberGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                    strncpy(capBankTextGraphic.msg + 4, "DSCH", 5);
+                    capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case communication::can::cap_bank::State::BATTERY_OFF:
-                    strncpy(capBankTextGraphic.msg, "BOFF", 5);
-                    numberGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::CYAN);
+                    strncpy(capBankTextGraphic.msg + 4, "BOFF", 5);
+                    capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::CYAN);
                     break;
                 case communication::can::cap_bank::State::DISABLED:
-                    strncpy(capBankTextGraphic.msg, "OFF ", 5);
-                    numberGraphic.graphicData.color =
+                    strncpy(capBankTextGraphic.msg + 4, "OFFL", 5);
+                    capBankTextGraphic.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
                     break;
                 default:
-                    strncpy(capBankTextGraphic.msg, "UNK ", 5);
-                    numberGraphic.graphicData.color =
+                    strncpy(capBankTextGraphic.msg + 4, "UNKN", 5);
+                    capBankTextGraphic.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
             }
             // Update the text
-            capBankTextGraphic.graphicData.endAngle = 5;  // Sets the length of the string
+            capBankTextGraphic.graphicData.endAngle = 9;  // Sets the length of the string
 
-            // Send data
-            if (state != this->previousState)
-            {
-                this->previousState = state;
-                RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
-            }
             if (numberGraphic.graphicData.color != static_cast<uint8_t>(this->previousColor))
             {
                 this->previousColor =
@@ -138,6 +132,13 @@ modm::ResumableResult<void> CapBankIndicator::update()
 
             numberIndicator.setIndicatorState(voltage_squared / VOLTAGE_SQUARED_MAX);
             RF_CALL(numberIndicator.draw());
+        }
+
+        // Send data
+        if (state != this->previousState)
+        {
+            this->previousState = state;
+            RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
         }
     }
 
@@ -171,8 +172,12 @@ void CapBankIndicator::initialize()
             WIDTH,
             TEXT_X,
             TEXT_Y,
-            "",
+            "CAP:",
             &capBankTextGraphic);
+
+        strncpy(capBankTextGraphic.msg + 4, "UNKN", 5);
+        capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
+        capBankTextGraphic.graphicData.endAngle = 9;
 
         updateVoltage(0, &numberGraphic);
     }
