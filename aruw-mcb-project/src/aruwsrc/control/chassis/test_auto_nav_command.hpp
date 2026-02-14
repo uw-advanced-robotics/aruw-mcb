@@ -46,7 +46,6 @@ namespace aruwsrc::control::chassis
         private:
             const tap::Drivers& drivers;
             aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
-            Position point;
             std::vector<Transform> transforms;
             tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem;
             aruwsrc::algorithms::AutoNavPath path;

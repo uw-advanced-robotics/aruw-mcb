@@ -316,15 +316,14 @@ AutoNavCommand autoNavCommand(
     false,
     false);
 
-TestAutoNavCommand pushAutoNavPointXSMALLY0(
+TestAutoNavCommand ForwardBackTest(
     *drivers(),
     autoNavController,
-    Position(0.8f, 7.0f, 0.0f));
-
-TestAutoNavCommand pushAutoNavPointX0Y0(
-    *drivers(),
-    autoNavController,
-    Position(0.5, 7.0f, 0.0f));
+    std::vector<Transform>{
+        Transform(Position(0.3f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f)),
+        Transform(Position(-0.3f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f))
+    },
+    &odometrySubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
