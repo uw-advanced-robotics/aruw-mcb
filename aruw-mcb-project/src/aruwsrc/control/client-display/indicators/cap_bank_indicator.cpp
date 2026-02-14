@@ -122,7 +122,7 @@ modm::ResumableResult<void> CapBankIndicator::update()
                     break;
             }
             // Update the text
-            capBankTextGraphic.graphicData.endAngle = 9;  // Sets the length of the string
+            capBankTextGraphic.graphicData.endAngle = 8;  // Sets the length of the string
 
             if (numberGraphic.graphicData.color != static_cast<uint8_t>(this->previousColor))
             {
@@ -177,7 +177,7 @@ void CapBankIndicator::initialize()
 
         strncpy(capBankTextGraphic.msg + 4, "UNKN", 5);
         capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
-        capBankTextGraphic.graphicData.endAngle = 9;
+        capBankTextGraphic.graphicData.endAngle = 8;
 
         updateVoltage(0, &numberGraphic);
     }
