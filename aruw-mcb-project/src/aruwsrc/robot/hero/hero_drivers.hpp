@@ -40,9 +40,9 @@
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-
+#include "aruwsrc/robot/hero/hero_chassis_constants.hpp"
 #endif
-
+using namespace aruwsrc::control::chassis;
 namespace aruwsrc::hero
 {
 class Drivers : public tap::Drivers
@@ -98,7 +98,6 @@ public:
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
-    static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
 #endif
 };  // class aruwsrc::HeroDrivers
 }  // namespace aruwsrc::hero

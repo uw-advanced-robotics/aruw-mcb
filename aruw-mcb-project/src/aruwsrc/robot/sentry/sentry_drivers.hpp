@@ -41,9 +41,10 @@
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #endif
-
+using namespace aruwsrc::control::chassis;
 namespace aruwsrc::sentry
 {
 class Drivers : public tap::Drivers
@@ -100,7 +101,6 @@ public:
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
-    static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
 
 #endif
 };  // class aruwsrc::SentryDrivers
