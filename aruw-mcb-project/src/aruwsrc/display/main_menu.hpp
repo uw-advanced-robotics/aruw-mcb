@@ -42,7 +42,6 @@
 #include "sentry_strategy_menu.hpp"
 #include "turret_mcb_menu.hpp"
 
-
 namespace aruwsrc
 {
 class Drivers;

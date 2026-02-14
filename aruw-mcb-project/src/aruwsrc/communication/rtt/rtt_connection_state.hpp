@@ -36,7 +36,7 @@ constexpr const char* connectionStateNames[] = {
     "Bidirectional",
 };
 
-inline const char* connectionStateToString (ConnectionState state)
+inline const char* connectionStateToString(ConnectionState state)
 {
     return connectionStateNames[static_cast<int>(state)];
 }

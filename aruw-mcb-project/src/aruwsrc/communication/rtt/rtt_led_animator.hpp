@@ -25,7 +25,6 @@
 
 #include "aruwsrc/communication/rtt/rtt_connection_state.hpp"
 
-
 namespace tap
 {
 class Drivers;

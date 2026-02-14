@@ -34,7 +34,6 @@
 #include "modm/container/deque.hpp"
 #include "modm/processing/protothread.hpp"
 
-
 // Forward declarations
 namespace tap
 {

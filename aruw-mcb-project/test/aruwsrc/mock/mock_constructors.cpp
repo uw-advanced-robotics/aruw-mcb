@@ -236,8 +236,7 @@ OledDisplayMock::OledDisplayMock(
           mcbLite1,
           mcbLite2,
           nullptr,
-          nullptr,
-        )
+          nullptr, )
 {
 }
 OledDisplayMock::~OledDisplayMock() {}
