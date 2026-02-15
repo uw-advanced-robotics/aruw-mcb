@@ -59,9 +59,7 @@ public:
 
 private:
     static constexpr int RTT_MENU_ID = 16;
-
-    static constexpr int TURRET_MCB_MENU_ID = 12;
-
+    
     aruwsrc::communication::rtt::RttTelemetry *telemetry;
 
     tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
