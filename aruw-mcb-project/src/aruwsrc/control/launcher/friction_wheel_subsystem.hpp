@@ -84,16 +84,16 @@ public:
      * heating up. If `nullptr`, the default constructor will be used for the `SmoothPidConfig`,
      * which has all gains set to 0.
      */
+    template <std::size_t LUT_SIZE>
     FrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
+        const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
         tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
         : FrictionWheelInterface(drivers),
           drivers(drivers),
-          launchSpeedLinearInterpolator(
-              LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
-              MODM_ARRAY_SIZE(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)),
+          launchSpeedLinearInterpolator(launchSpeedToFrictionWheelRpmLUT, LUT_SIZE),
           flywheelConfigs(wheelConfigs),
           velocityPids(
               createVelocityPidArray(wheelConfigs, std::make_index_sequence<NUM_WHEELS>{})),
@@ -101,7 +101,6 @@ public:
               speedCorrectionPidConfig == nullptr ? SmoothPidConfig{} : *speedCorrectionPidConfig),
           individualVelocityRamping(
               createWheelRampingArray(std::make_index_sequence<NUM_WHEELS>{})),
-          desiredRpmRamp(0),
           wheels(wheels),
           frictionTestCommand(this)
     {
@@ -109,15 +108,18 @@ public:
     }
 
     // constructor for using a single wheelconfig for all wheels
+    template <std::size_t LUT_SIZE>
     FrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
+        const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
         tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
         : FrictionWheelSubsystem(
               drivers,
               wheels,
               createWheelConfigArray(wheelConfig, std::make_index_sequence<NUM_WHEELS>{}),
+              launchSpeedToFrictionWheelRpmLUT,
               speedCorrectionPidConfig)
     {
     }
@@ -270,24 +272,25 @@ private:
 
     tap::algorithms::SmoothPid speedCorrectionPid;
 
-    float desiredLaunchSpeed;
-
-    float speedCorrection = 0.0f;
-
-    float currentRPM = 0.0f;
-
-    bool isWheelVelocityOverridden[NUM_WHEELS] = {0};
-    float individualWheelVelocities[NUM_WHEELS] = {
-        0};  // is zero if wheel is using shared desiredLaunchSpeed
     std::array<tap::algorithms::Ramp, NUM_WHEELS> individualVelocityRamping;
-
-    tap::algorithms::Ramp desiredRpmRamp;
 
     std::array<Motor *, NUM_WHEELS> wheels;
 
-    float prevShotTime = 0.0f;
-
     FrictionWheelTestCommand frictionTestCommand;
+
+    float desiredLaunchSpeed{0.0f};
+
+    float speedCorrection{0.0f};
+
+    float currentRPM{0.0f};
+
+    std::array<bool, NUM_WHEELS> isWheelVelocityOverridden{false};
+    std::array<float, NUM_WHEELS> individualWheelVelocities{
+        0.0f};  // is zero if wheel is using shared desiredLaunchSpeed
+
+    tap::algorithms::Ramp desiredRpmRamp{0};
+
+    float prevShotTime{0.0f};
 
     /**
      * @param[in] launchSpeed Some launch speed in m/s. The speed will be

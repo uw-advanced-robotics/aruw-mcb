@@ -22,6 +22,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 
 using namespace aruwsrc;
@@ -50,6 +51,7 @@ protected:
               &drivers,
               std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
               WHEEL_CONFIGS_ARRAY,
+              LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
               tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
     {
     }
@@ -134,6 +136,7 @@ TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rollin
         &drivers,
         std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
         WHEEL_CONFIGS_ARRAY,
+        LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;

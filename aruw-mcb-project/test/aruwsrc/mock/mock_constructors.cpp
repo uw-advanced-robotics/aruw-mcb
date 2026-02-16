@@ -191,7 +191,7 @@ FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
           std::array<aruwsrc::control::launcher::FlywheelConfig, 2>{
               aruwsrc::control::launcher::WHEEL_CONFIG,
               aruwsrc::control::launcher::WHEEL_CONFIG},
-          nullptr)
+          aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
@@ -199,7 +199,11 @@ FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 TripleFrictionWheelSubsystemMock::TripleFrictionWheelSubsystemMock(
     tap::Drivers *drivers,
     std::array<tap::motor::MotorInterface *, 3> wheels)
-    : FrictionWheelSubsystem<3>(drivers, wheels, aruwsrc::control::launcher::WHEEL_CONFIG, nullptr)
+    : FrictionWheelSubsystem<3>(
+          drivers,
+          wheels,
+          aruwsrc::control::launcher::WHEEL_CONFIG,
+          aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)
 {
 }
 TripleFrictionWheelSubsystemMock::~TripleFrictionWheelSubsystemMock() {}
@@ -213,6 +217,7 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
           std::array<aruwsrc::control::launcher::FlywheelConfig, 2>{
               aruwsrc::control::launcher::WHEEL_CONFIG,
               aruwsrc::control::launcher::WHEEL_CONFIG},
+          aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
 {
 }

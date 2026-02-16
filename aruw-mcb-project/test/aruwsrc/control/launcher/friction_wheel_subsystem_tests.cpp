@@ -58,12 +58,14 @@ protected:
           frictionWheels(
               &drivers,
               std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
-              WHEEL_CONFIGS_ARRAY),
+              WHEEL_CONFIGS_ARRAY,
+              LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT),
           tripleFrictionWheels(
               &drivers,
               std::array<tap::motor::MotorInterface*, 3>{
                   {&leftFlywheel, &rightFlywheel, &thirdFlywheel}},
-              WHEEL_CONFIG)
+              WHEEL_CONFIG,
+              LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)
     {
     }
 

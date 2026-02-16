@@ -55,32 +55,38 @@ public:
      * @param[in] bulletSpeedLowPassAlpha The low pass alpha used to combine previous and new
      * projectle speed when computing a new predicted launch speed.
      */
+    template <std::size_t LUT_SIZE>
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
+        const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
         tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
         : FrictionWheelSubsystem<NUM_WHEELS>(
               drivers,
               wheels,
               wheelConfigs,
+              launchSpeedToFrictionWheelRpmLUT,
               speedCorrectionPidConfig),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }
 
     // constructor for using a single wheelConfig for all wheels
+    template <std::size_t LUT_SIZE>
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
+        const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
         tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
         : FrictionWheelSubsystem<NUM_WHEELS>(
               drivers,
               wheels,
               wheelConfig,
+              launchSpeedToFrictionWheelRpmLUT,
               speedCorrectionPidConfig),
           firingSystemMechanismID(firingSystemMechanismID)
     {
