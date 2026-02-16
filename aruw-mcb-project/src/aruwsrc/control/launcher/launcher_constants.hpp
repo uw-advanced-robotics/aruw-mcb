@@ -30,7 +30,6 @@
 
 #include "friction_wheel_interface.hpp"
 
-
 namespace aruwsrc::control::launcher
 {
 #if defined(TARGET_HERO_ZERO)

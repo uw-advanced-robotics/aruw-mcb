@@ -24,7 +24,6 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
-
 namespace aruwsrc::control::launcher
 {
 /**
