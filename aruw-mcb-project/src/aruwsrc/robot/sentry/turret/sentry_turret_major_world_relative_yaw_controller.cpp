@@ -27,7 +27,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const transforms::Transform& worldToMajor,
     const HolonomicChassisSubsystem& chassis,
     aruwsrc::control::turret::TurretMotor& yawMotor,
-    tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
+    tap::communication::sensors::imu::AbstractIMU& turretMajorIMU,
 #ifdef TARGET_SENTRY_NAME
     const SentryTurretMinorSubsystem& turretWidow,
 #else
@@ -127,6 +127,11 @@ WrappedFloat TurretMajorWorldFrameController::getMeasurement() const
     return yawMotor.getChassisFrameMeasuredAngle() + worldToMajor.getYaw();
 }
 
-bool TurretMajorWorldFrameController::isOnline() const { return turretMotor.isOnline(); }
+bool TurretMajorWorldFrameController::isOnline() const
+{
+    return turretMotor.isOnline() &&
+           turretMajorIMU.getImuState() !=
+               tap::communication::sensors::imu::AbstractIMU::ImuState::IMU_NOT_CONNECTED;
+}
 
 }  // namespace aruwsrc::sentry::turret

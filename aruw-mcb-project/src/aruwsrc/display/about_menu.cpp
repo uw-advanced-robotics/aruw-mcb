@@ -69,6 +69,7 @@ void AboutMenu::draw()
     display << "Sha: " << LAST_SHA << modm::endl;
     display << "Last Built: " << LAST_DATE << modm::endl;
     display << "Branch Name: " << BRANCH_NAME << modm::endl;
+
     drawn = true;
 }
 

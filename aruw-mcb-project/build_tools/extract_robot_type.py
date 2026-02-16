@@ -41,7 +41,7 @@ ROBOT_CLASS = {
     "STANDARD_VOID": "standard",
     "DRONE": "drone",
     "ENGINEER": "engineer",
-    "ENGI_2025": "engineer",
+    "ENGI_2025": "2025engineer",
     "SENTRY_ECLIPSE": "sentry",
     "SENTRY_NAME": "sentry",
     "HERO_ZERO": "hero",
@@ -49,7 +49,8 @@ ROBOT_CLASS = {
     "TESTBED": "testbed",
     "BLANK": "blank",
     "MOTOR_TESTER": "motor_tester",
-    "LAUNCHER_TARGET": "dart_target",
+    "FLYWHEEL_TESTING" : "flywheel_testing",
+    "LAUNCHER_TARGET" : "launcher_target",
     "CHARACTERIZER": "characterizer",
 }
 

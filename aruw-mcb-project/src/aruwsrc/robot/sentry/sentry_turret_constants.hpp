@@ -89,7 +89,7 @@ static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
     0,
     0,
     0,
-    M_PI,
+    0,
     0,
     0);
 

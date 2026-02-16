@@ -34,7 +34,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
-#include "tap/errors/create_errors.hpp"
+#include "aruwsrc/communication/rtt/create_rtt_error.hpp"
 
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
@@ -72,25 +72,27 @@ using namespace aruwsrc::blank;
 #elif defined(TARGET_MOTOR_TESTER)
 using namespace aruwsrc::motor_tester;
 #elif defined(TARGET_LAUNCHER_TARGET)
-using namespace aruwsrc::dart_target;
+using namespace aruwsrc::launcher_target;
+#elif defined(TARGET_FLYWHEEL_TESTING)
+using namespace aruwsrc::flywheel_testing;
 #elif defined(TARGET_CHARACTERIZER)
 using namespace aruwsrc::characterizer;
 #endif
 
 // Place any sort of input/output initialization here. For example, place
 // serial init stuff here.
-static void initializeIo(Drivers *drivers);
+static void initializeIo(Drivers* drivers);
 
 // Anything that you would like to be called place here. It will be called
 // very frequently. Use PeriodicMilliTimers if you don't want something to be
 // called as frequently.
-static void updateIo(Drivers *drivers);
+static void updateIo(Drivers* drivers);
 
-static void initializeI2C(Drivers *drivers);
+static void initializeI2C(Drivers* drivers);
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
-static void checkTurretMcbDisconnection(Drivers *drivers);
+static void checkTurretMcbDisconnection(Drivers* drivers);
 #endif
 
 int main()
@@ -104,7 +106,7 @@ int main()
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
-    Drivers *drivers = DoNotUse_getDrivers();
+    Drivers* drivers = DoNotUse_getDrivers();
 
     Board::initialize();
     initializeIo(drivers);
@@ -156,6 +158,16 @@ int main()
             checkTurretMcbDisconnection(drivers);
 #endif
 
+#if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) || \
+    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER) ||  \
+    defined(TARGET_ENGI_2025) || defined(TARGET_TESTBED) || defined(TARGET_MOTOR_TESTER) ||     \
+    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || \
+    defined(TARGET_DRONE) || defined(TARGET_BLANK)
+#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
+            PROFILE(drivers->profiler, ((Drivers*)drivers)->rttTelemetry.updateTelemetryAsync, ());
+#endif
+#endif
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
             // PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
 #endif
@@ -165,7 +177,7 @@ int main()
     return 0;
 }
 
-static void initializeIo(Drivers *drivers)
+static void initializeIo(Drivers* drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
@@ -196,8 +208,8 @@ static void initializeIo(Drivers *drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
-    ((Drivers *)drivers)->capacitorBank.initialize();
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
+    ((Drivers*)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
     drivers->turretMCBCanCommBus2.init();
@@ -231,7 +243,7 @@ static void initializeIo(Drivers *drivers)
 #endif
 }
 
-static void updateIo(Drivers *drivers)
+static void updateIo(Drivers* drivers)
 {
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
@@ -277,7 +289,7 @@ static void updateIo(Drivers *drivers)
 }
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
-static void checkTurretMcbDisconnection(Drivers *drivers)
+static void checkTurretMcbDisconnection(Drivers* drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
     if (!turretMcbConnected &&
@@ -293,7 +305,7 @@ static void checkTurretMcbDisconnection(Drivers *drivers)
 }
 #endif
 
-static void initializeI2C(Drivers *drivers)
+static void initializeI2C(Drivers* drivers)
 {
     drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
     modm::delay_ms(2000);  // Wait for the SDA and SCL lines to be pulled high

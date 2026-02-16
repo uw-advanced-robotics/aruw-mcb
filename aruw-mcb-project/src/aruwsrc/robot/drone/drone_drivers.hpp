@@ -22,11 +22,7 @@
 
 #include "tap/drivers.hpp"
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-
-#else
-
-#endif
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 
 namespace aruwsrc::drone
 {
@@ -37,14 +33,10 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers() : tap::Drivers(), rttTelemetry(this) {}
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-
-#else
 public:
-
-#endif
+    communication::rtt::RttTelemetry rttTelemetry;
 };  // class aruwsrc::DroneDrivers
 }  // namespace aruwsrc::drone
 

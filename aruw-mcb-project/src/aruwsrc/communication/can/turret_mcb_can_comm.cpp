@@ -28,7 +28,8 @@
 namespace aruwsrc::communication::can
 {
 TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus)
-    : canBus(canBus),
+    : AbstractIMU(),
+      canBus(canBus),
       drivers(drivers),
       currProcessingImuData{},
       lastCompleteImuData{},

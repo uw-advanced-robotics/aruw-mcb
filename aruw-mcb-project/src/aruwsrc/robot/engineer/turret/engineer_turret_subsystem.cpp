@@ -17,19 +17,14 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "engineer_turret_subsystem.hpp"
+#include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 namespace aruwsrc::engineer
 {
-float EngineerTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
+float EngineerTurretSubsystem::getWorldYaw() const { return getIMU()->getYaw(); }
 
-float EngineerTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
-
-uint32_t EngineerTurretSubsystem::getLastMeasurementTimeMicros() const
-{
-    return getTurretMCB()->getIMUDataTimestamp();
-}
+float EngineerTurretSubsystem::getWorldPitch() const { return getIMU()->getPitch(); }
 
 }  // namespace aruwsrc::engineer

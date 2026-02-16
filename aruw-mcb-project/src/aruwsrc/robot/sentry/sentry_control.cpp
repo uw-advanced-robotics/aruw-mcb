@@ -838,6 +838,8 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
+#include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
@@ -846,6 +848,7 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/image_indicator.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
@@ -998,16 +1001,18 @@ TurretMinorMotors turretRightMotors{
 
 };
 
-inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm1()
+inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm1()
 {
     return drivers()->turretMCBCanCommBus1;
 }
-inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm2()
+inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm2()
 {
     return drivers()->turretMCBCanCommBus2;
 }
 
 // /* define subsystems --------------------------------------------------------*/
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+
 BuzzerSubsystem buzzer(drivers());
 
 YawTurretSubsystem turretMajor(*drivers(), turretMajorYawMotor, turretMajor::YAW_MOTOR_CONFIG);
@@ -1030,7 +1035,7 @@ SentryTurretMinorSubsystem turretRight(
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretRight::turretID);
 
-SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
+SentryChassisWorldYawObserver chassisYawObserver(drivers()->mpu6500, turretMajor);
 
 // Turret Compensators
 TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
@@ -1113,7 +1118,10 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     leftBackMotor,
     rightFrontMotor,
     rightBackMotor,
-    {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f});
+    {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f},
+    WHEEL_RADIUS,
+    WHEELBASE_RADIUS,
+    &drivers()->capacitorBank);
 
 aruwsrc::communication::mcb_lite::VirtualCanEncoder parallelOmni(
     drivers(),
@@ -1175,8 +1183,11 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
 aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    transformer.getWorldToChassis(),
-    aruwsrc::control::chassis::BEYBLADE_CONFIG);
+    &transformAdapter,
+    aruwsrc::control::chassis::BEYBLADE_CONFIG,
+    capBankSubsystem,
+    0.15f,
+    1000.0f);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -1237,7 +1248,7 @@ TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     transformer.getWorldToTurretMajor(),
     chassis,
     turretMajor.getMutableMotor(),
-    drivers()->turretMajorImu,
+    drivers()->mpu6500,
     turretLeft,
     turretRight,
     turretMajorYawPosPid,
@@ -1263,7 +1274,7 @@ tap::motor::DjiMotor turretLeftFrictionWheelRight(
     turretLeft::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::MotorInterface *, 2> turretLeftWheels = {
+std::array<tap::motor::MotorInterface*, 2> turretLeftWheels = {
     &turretLeftFrictionWheelLeft,
     &turretLeftFrictionWheelRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -1287,7 +1298,7 @@ tap::motor::DjiMotor turretRightFrictionWheelRight(
     turretRight::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::MotorInterface *, 2> turretRightWheels = {
+std::array<tap::motor::MotorInterface*, 2> turretRightWheels = {
     &turretRightFrictionWheelLeft,
     &turretRightFrictionWheelRight};
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
@@ -1348,6 +1359,8 @@ aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand
     chassis,
     autoNavController,
     true);
+
+aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(drivers(), capBankSubsystem);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -1421,7 +1434,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     chassis,
     chassisYawObserver,
     odometrySubsystem,
-    drivers()->turretMajorImu,
+    drivers()->mpu6500,
     drivers()->chassisMcbLite,
     transformer,
     &imuCalibrateSuccessBuzzCommand,
@@ -1627,7 +1640,7 @@ tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers())
 CircleCrosshair circleCrosshair(refSerialTransmitter);
 ImageIndicator imageIndicator(refSerialTransmitter);
 
-std::vector<HudIndicator *> indicators = {&imageIndicator, &circleCrosshair};
+std::vector<HudIndicator*> indicators = {&imageIndicator, &circleCrosshair};
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, indicators);
 
@@ -1727,6 +1740,7 @@ PressCommandMapping bCtrlPressed(
     {&clientDisplayCommand},
     RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
 
+// safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -1753,7 +1767,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerSentrySubsystems(Drivers *drivers)
+void registerSentrySubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
@@ -1772,12 +1786,12 @@ void registerSentrySubsystems(Drivers *drivers)
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
-    // drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
-    drivers->stateMachine.attachAutoNavController(&autoNavController);
+    drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
+    // drivers->stateMachine.attachAutoNavController(&autoNavController);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultSentryCommands(Drivers *)
+void setDefaultSentryCommands(Drivers*)
 {
     chassis.setDefaultCommand(&chassisDriveCommand);
     turretMajor.setDefaultCommand(&majorManualCommand);
@@ -1791,14 +1805,14 @@ void setDefaultSentryCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSentryCommands(Drivers *drivers)
+void startSentryCommands(Drivers* drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
+    drivers->mpu6500.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerSentryIoMappings(Drivers *drivers)
+void registerSentryIoMappings(Drivers* drivers)
 {
     // commands with higher priority must be added later
     // friction wheels spin (separated due to dumb design in command mapper system)
@@ -1824,7 +1838,7 @@ void registerSentryIoMappings(Drivers *drivers)
 
 namespace aruwsrc::sentry
 {
-void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::sentry::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &sentry_control::remoteSafeDisconnectFunction);
@@ -1837,9 +1851,9 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 }  // namespace aruwsrc::sentry
 
 #ifndef PLATFORM_HOSTED
-std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
 {
-    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
         &sentry_control::gravityAutotuneCommandLeft,
         &sentry_control::gravityAutotuneCommandRight};
     return commands;

@@ -23,7 +23,7 @@
 
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
-#include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
@@ -79,7 +79,7 @@ public:
         const tap::algorithms::transforms::Transform& worldToMajor,
         const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
-        tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
+        tap::communication::sensors::imu::AbstractIMU& turretMajorIMU,
 #ifdef TARGET_SENTRY_NAME
         const SentryTurretMinorSubsystem& turretWidow,
 #else
@@ -132,7 +132,7 @@ private:
 
     aruwsrc::control::turret::TurretMotor& yawMotor;
 
-    tap::communication::sensors::imu::ImuInterface& turretMajorIMU;
+    tap::communication::sensors::imu::AbstractIMU& turretMajorIMU;
 
 #ifdef TARGET_SENTRY_NAME
     const SentryTurretMinorSubsystem& turretWidow;

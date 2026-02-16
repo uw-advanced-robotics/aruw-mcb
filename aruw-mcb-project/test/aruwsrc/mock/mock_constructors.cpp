@@ -108,7 +108,9 @@ MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
     testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
     testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
     testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
-    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+    float wheelRadius,
+    float effectiveWheelbase)
     : MecanumChassisSubsystem(
           drivers,
           currentSensor,
@@ -117,7 +119,9 @@ MecanumChassisSubsystemMock::MecanumChassisSubsystemMock(
           leftBackMotor,
           rightFrontMotor,
           rightBackMotor,
-          wheelVelocityPidConfig)
+          wheelVelocityPidConfig,
+          wheelRadius,
+          effectiveWheelbase)
 {
 }
 MecanumChassisSubsystemMock::~MecanumChassisSubsystemMock() {}
@@ -130,7 +134,9 @@ XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
     testing::NiceMock<tap::mock::MotorInterfaceMock> &leftBackMotor,
     testing::NiceMock<tap::mock::MotorInterfaceMock> &rightFrontMotor,
     testing::NiceMock<tap::mock::MotorInterfaceMock> &rightBackMotor,
-    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig)
+    tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+    float wheelRadius,
+    float wheelbaseRadius)
     : XDriveChassisSubsystem(
           drivers,
           currentSensor,
@@ -139,7 +145,9 @@ XDriveChassisSubsystemMock::XDriveChassisSubsystemMock(
           leftBackMotor,
           rightFrontMotor,
           rightBackMotor,
-          wheelVelocityPidConfig)
+          wheelVelocityPidConfig,
+          wheelRadius,
+          wheelbaseRadius)
 {
 }
 XDriveChassisSubsystemMock::~XDriveChassisSubsystemMock() {}

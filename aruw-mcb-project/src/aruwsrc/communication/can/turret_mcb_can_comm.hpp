@@ -22,7 +22,7 @@
 
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
-#include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 
@@ -50,7 +50,7 @@ namespace aruwsrc::communication::can
  * @note Since we use radians in this codebase, angle values that are sent from the turret MCB in
  * degrees are converted to radians by this object.
  */
-class TurretMCBCanComm : public tap::communication::sensors::imu::ImuInterface,
+class TurretMCBCanComm : public tap::communication::sensors::imu::AbstractIMU,
                          public tap::communication::sensors::limit_switch::LimitSwitchInterface
 {
 public:
@@ -195,7 +195,15 @@ public:
 
     mockable void sendData();
 
-    inline const char* getName() const { return "Turret MCB Imu"; }
+    inline const char* getName() const override { return "Turret MCB Imu"; }
+
+protected:
+    virtual inline float getAccelerationSensitivity() const override
+    {
+        // taken from BMI088 implementation
+        // this is dumb and we should update it in both places eventually
+        return 2 * 1.5f * tap::algorithms::ACCELERATION_GRAVITY / 32768.0f;
+    }
 
 private:
     using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
