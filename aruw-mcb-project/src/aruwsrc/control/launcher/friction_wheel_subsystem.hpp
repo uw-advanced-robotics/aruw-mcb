@@ -90,7 +90,7 @@ public:
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
-        tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
+        const tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
         : FrictionWheelInterface(drivers),
           drivers(drivers),
           launchSpeedLinearInterpolator(launchSpeedToFrictionWheelRpmLUT, LUT_SIZE),
@@ -114,7 +114,7 @@ public:
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
         const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
-        tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
+        const tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
         : FrictionWheelSubsystem(
               drivers,
               wheels,
