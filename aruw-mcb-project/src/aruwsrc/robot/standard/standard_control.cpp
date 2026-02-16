@@ -290,7 +290,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
         &getTurretMCBCanComm(),
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+        &aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
 aruwsrc::control::launcher::FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
 aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor =

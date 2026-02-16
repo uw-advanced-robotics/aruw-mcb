@@ -65,17 +65,30 @@ template <std::size_t NUM_WHEELS>
 class FrictionWheelSubsystem : public FrictionWheelInterface
 {
     friend class FrictionWheelTestCommand;
+    using Motor = tap::motor::MotorInterface;
 
 public:
-    using Motor = tap::motor::MotorInterface;
     /**
-     * Creates a new friction wheel subsystem
+     * @brief Construct a new Friction Wheel Subsystem. Designed to be used with any number of
+     * wheels. The constructor takes in an array of Motor pointers and an array of FlywheelConfigs
+     * corresponding to each wheel.
+     *
+     * @param drivers The global drivers object
+     * @param wheels A array of `Motor` pointers corresponding to each wheel in the friction
+     * wheel system. The order of the motors should correspond to the order of the `FlywheelConfigs`
+     * in the next parameter.
+     * @param wheelConfigs A array of `FlywheelConfig`s corresponding to each wheel in the friction
+     * wheel system.
+     * @param speedCorrectionPidConfig A `SmoothPidConfig` for the speed correction PID feedback
+     * from the launcher. This is to help fight against overspeeding caused by the friction wheels
+     * heating up. If `nullptr`, the default constructor will be used for the `SmoothPidConfig`,
+     * which has all gains set to 0.
      */
     FrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
-        aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
+        tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
         : FrictionWheelInterface(drivers),
           drivers(drivers),
           launchSpeedLinearInterpolator(
@@ -84,12 +97,12 @@ public:
           flywheelConfigs(wheelConfigs),
           velocityPids(
               createVelocityPidArray(wheelConfigs, std::make_index_sequence<NUM_WHEELS>{})),
-          speedCorrectionPid(LAUNCHER_SPEED_CORRECTION_PID_CONFIG),
+          speedCorrectionPid(
+              speedCorrectionPidConfig == nullptr ? SmoothPidConfig{} : *speedCorrectionPidConfig),
           individualVelocityRamping(
               createWheelRampingArray(std::make_index_sequence<NUM_WHEELS>{})),
           desiredRpmRamp(0),
           wheels(wheels),
-          turretMCB(turretMCB),
           frictionTestCommand(this)
     {
         this->setTestCommand(&frictionTestCommand);
@@ -100,12 +113,12 @@ public:
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
-        aruwsrc::communication::can::TurretMCBCanComm *turretMCB)
+        tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
         : FrictionWheelSubsystem(
               drivers,
               wheels,
               createWheelConfigArray(wheelConfig, std::make_index_sequence<NUM_WHEELS>{}),
-              turretMCB)
+              speedCorrectionPidConfig)
     {
     }
 
@@ -136,10 +149,6 @@ public:
         else
         {
             desiredRpmRamp.setTarget(launchSpeedToFrictionWheelRpm(speed));
-        }
-        if (turretMCB != nullptr)
-        {
-            turretMCB->setLaserStatus(!compareFloatClose(desiredLaunchSpeed, 0, 1E-5));
         }
     }
 
@@ -191,7 +200,7 @@ public:
     void refresh() override
     {
         desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (2.0));
-#if defined(ALL_STANDARDS)
+
         if (drivers->refSerial.getRefSerialReceivingData() &&
             prevShotTime !=
                 drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp)
@@ -203,7 +212,6 @@ public:
                 0.002f);
         }
         speedCorrection = speedCorrectionPid.getOutput();
-#endif
 
         for (uint8_t i = 0; i < NUM_WHEELS; i++)
         {
@@ -236,6 +244,8 @@ public:
     }
 
     const char *getName() const override { return "Friction wheels"; }
+
+    const tap::algorithms::Ramp &getDesiredRpmRamp() const { return desiredRpmRamp; }
 
 protected:
     /// The maximum launch speed that the user can request. The launch speed is limited between [0,
@@ -271,20 +281,9 @@ private:
         0};  // is zero if wheel is using shared desiredLaunchSpeed
     std::array<tap::algorithms::Ramp, NUM_WHEELS> individualVelocityRamping;
 
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-public:
     tap::algorithms::Ramp desiredRpmRamp;
 
     std::array<Motor *, NUM_WHEELS> wheels;
-
-private:
-#else
-    tap::algorithms::Ramp desiredRpmRamp;
-
-    std::array<Motor *, NUM_WHEELS> wheels;
-#endif
-
-    aruwsrc::communication::can::TurretMCBCanComm *turretMCB;
 
     float prevShotTime = 0.0f;
 

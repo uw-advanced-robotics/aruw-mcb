@@ -28,6 +28,9 @@
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
+#include "friction_wheel_interface.hpp"
+
+
 namespace aruwsrc::control::launcher
 {
 #if defined(TARGET_HERO_ZERO)
@@ -35,13 +38,6 @@ static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 3;
 #else
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 #endif
-
-struct FlywheelConfig
-{
-    tap::algorithms::SmoothPidConfig velocityPidConfig;
-    float orientation;
-    uint8_t stage = 0;
-};
 
 #if defined(TARGET_FLYWHEEL_TESTING)
 struct FlywheelRpms

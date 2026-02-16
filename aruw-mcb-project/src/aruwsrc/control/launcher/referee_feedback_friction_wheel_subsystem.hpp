@@ -59,21 +59,29 @@ public:
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
-        aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfigs, turretMCB),
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
+        tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
+        : FrictionWheelSubsystem<NUM_WHEELS>(
+              drivers,
+              wheels,
+              wheelConfigs,
+              speedCorrectionPidConfig),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }
 
-    // constructor for using a single wheelconfig for all wheels
+    // constructor for using a single wheelConfig for all wheels
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
-        aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfig, turretMCB),
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
+        tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
+        : FrictionWheelSubsystem<NUM_WHEELS>(
+              drivers,
+              wheels,
+              wheelConfig,
+              speedCorrectionPidConfig),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }

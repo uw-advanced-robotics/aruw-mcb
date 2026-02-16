@@ -50,7 +50,6 @@ protected:
               &drivers,
               std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
               WHEEL_CONFIGS_ARRAY,
-              nullptr,
               tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
     {
     }
@@ -135,7 +134,6 @@ TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rollin
         &drivers,
         std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
         WHEEL_CONFIGS_ARRAY,
-        nullptr,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;

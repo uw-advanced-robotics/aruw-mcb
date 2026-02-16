@@ -20,11 +20,25 @@
 #ifndef FRICTION_WHEEL_INTERFACE_HPP_
 #define FRICTION_WHEEL_INTERFACE_HPP_
 
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
+
 namespace aruwsrc::control::launcher
 {
+/**
+ * @brief Config struct for each flywheel in the friction wheel system. Contains the velocity PID
+ * config for the flywheel, as well as the orientation of the flywheel and what stage of the
+ * flywheel it is (currently unused beyond the velocity PID)
+ */
+struct FlywheelConfig
+{
+    tap::algorithms::SmoothPidConfig velocityPidConfig;
+    float orientation;
+    uint8_t stage = 0;
+};
+
 /**
  * A wrapper interface to hide the templates and allow FrictionWheelSubsystems to be easily passes
  * as parameters.

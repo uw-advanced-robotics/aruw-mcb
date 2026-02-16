@@ -213,7 +213,6 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
           std::array<aruwsrc::control::launcher::FlywheelConfig, 2>{
               aruwsrc::control::launcher::WHEEL_CONFIG,
               aruwsrc::control::launcher::WHEEL_CONFIG},
-          nullptr,
           tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
 {
 }
