@@ -48,7 +48,7 @@ protected:
               false),
           frictionWheels(
               &drivers,
-              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
+              std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
               WHEEL_CONFIGS_ARRAY,
               nullptr,
               tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
@@ -133,7 +133,7 @@ TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rollin
 {
     RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheelAveraged(
         &drivers,
-        std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
+        std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
         WHEEL_CONFIGS_ARRAY,
         nullptr,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);

@@ -184,7 +184,7 @@ SwerveModuleMock::~SwerveModuleMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
     tap::Drivers *drivers,
-    std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels)
+    std::array<tap::motor::MotorInterface *, 2> wheels)
     : FrictionWheelSubsystem<2>(
           drivers,
           wheels,
@@ -198,7 +198,7 @@ FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
 TripleFrictionWheelSubsystemMock::TripleFrictionWheelSubsystemMock(
     tap::Drivers *drivers,
-    std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 3> wheels)
+    std::array<tap::motor::MotorInterface *, 3> wheels)
     : FrictionWheelSubsystem<3>(drivers, wheels, aruwsrc::control::launcher::WHEEL_CONFIG, nullptr)
 {
 }
@@ -206,7 +206,7 @@ TripleFrictionWheelSubsystemMock::~TripleFrictionWheelSubsystemMock() {}
 
 RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystemMock(
     tap::Drivers *drivers,
-    std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels)
+    std::array<tap::motor::MotorInterface *, 2> wheels)
     : RefereeFeedbackFrictionWheelSubsystem<10, 2>(
           drivers,
           wheels,

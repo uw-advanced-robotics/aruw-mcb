@@ -67,11 +67,7 @@ class FrictionWheelSubsystem : public FrictionWheelInterface
     friend class FrictionWheelTestCommand;
 
 public:
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
-#else
     using Motor = tap::motor::MotorInterface;
-#endif
     /**
      * Creates a new friction wheel subsystem
      */

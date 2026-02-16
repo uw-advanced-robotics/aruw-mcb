@@ -46,11 +46,11 @@ class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem<NUM_
                                               public LaunchSpeedPredictorInterface
 {
 public:
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
-#else
+// #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+//     using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+// #else
     using Motor = tap::motor::MotorInterface;
-#endif
+// #endif
 
     /**
      * For all params but `firingSystemMechanismId` see the `FrictionWheelSubsystem`.
