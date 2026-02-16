@@ -51,7 +51,7 @@
             ]
         },
         {
-            "name": "MCB Sentinel 2026",
+            "name": "MCB Sentry Name",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",

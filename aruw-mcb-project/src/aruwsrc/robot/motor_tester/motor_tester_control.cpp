@@ -90,7 +90,7 @@ tap::motor::DjiMotor motor3510(
 // 6020
 tap::motor::DjiMotor motor6020(
     drivers(),
-    tap::motor::MOTOR7,          // id 3+4
+    tap::motor::MOTOR6,          // id 3+4
     tap::can::CanBus::CAN_BUS1,  // bus 1
     false,
     "6020 Motor",

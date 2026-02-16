@@ -151,7 +151,6 @@ static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(255.7f);
 static constexpr float PADDING = modm::toRadian(5);
 
 #ifdef TARGET_SENTRY_NAME
-// Single turret minor for SENTINEL 2026 - named "widow"
 namespace turretWidow
 {
 static constexpr uint8_t turretID = 0;
