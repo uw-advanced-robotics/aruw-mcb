@@ -35,7 +35,7 @@ class FrictionWheelSubsystemMock : public aruwsrc::control::launcher::FrictionWh
 public:
     FrictionWheelSubsystemMock(
         tap::Drivers *drivers,
-        std::array<tap::motor::MotorInterface*, 2> wheels);
+        std::array<tap::motor::MotorInterface *, 2> wheels);
     virtual ~FrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

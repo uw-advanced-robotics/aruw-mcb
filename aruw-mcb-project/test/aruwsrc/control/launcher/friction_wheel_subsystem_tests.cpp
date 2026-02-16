@@ -251,9 +251,8 @@ TEST_F(
 {
     ON_CALL(leftFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(leftFlywheel, setDesiredOutput(0));
-    EXPECT_CALL(
-        leftFlywheel,
-        setDesiredOutput(Lt(0)));  // wheel zero negative movement
+    EXPECT_CALL(leftFlywheel,
+                setDesiredOutput(Lt(0)));  // wheel zero negative movement
     ON_CALL(rightFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
     EXPECT_CALL(rightFlywheel, setDesiredOutput(0));
     EXPECT_CALL(rightFlywheel, setDesiredOutput(Gt(0)));  // wheel one positive movement
