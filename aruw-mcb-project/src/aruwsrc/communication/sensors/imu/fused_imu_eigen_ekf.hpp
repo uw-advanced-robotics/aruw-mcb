@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_EIGEN_EKF_HPP_
-#define ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_EIGEN_EKF_HPP_
+#ifndef FUSED_IMU_EIGEN_EKF_HPP_
+#define FUSED_IMU_EIGEN_EKF_HPP_
 
 #include <array>
 #include <cstddef>
@@ -139,4 +139,4 @@ private:
 
 }  // namespace aruwsrc::communication::sensors::imu
 
-#endif  // ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_EIGEN_EKF_HPP_
+#endif  // FUSED_IMU_EIGEN_EKF_HPP_
