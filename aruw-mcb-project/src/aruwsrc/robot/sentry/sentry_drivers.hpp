@@ -86,8 +86,9 @@ public:
                   GPIO_D12_H_ROW),
           turretMajorImu(
               {&turretMajorPrimaryImu, &turretMajorImuSecondary},
-              {tap::algorithms::transforms::Transform::identity(),
-               tap::algorithms::transforms::Transform::identity()},
+              // Jetson is forward, X forward, Y left
+              {tap::algorithms::transforms::Transform(-76.7f, -116.14f, 0.0f, 0.0f, 0.0f, 0.0f),
+               tap::algorithms::transforms::Transform(-76.7f, 116.04f, 0.0f, 0.0f, 0.0f, M_PI)},
               {aruwsrc::communication::sensors::imu::FusedImu<2>::ImuType::ISM330DHCX,
                aruwsrc::communication::sensors::imu::FusedImu<2>::ImuType::ISM330DHCX}),
 #else
