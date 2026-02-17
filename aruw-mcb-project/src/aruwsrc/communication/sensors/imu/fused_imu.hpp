@@ -26,7 +26,6 @@
 #include <cstdint>
 #include <utility>
 
-#include "aruwsrc/communication/sensors/imu/fused_imu_eigen_ekf.hpp"
 #include "tap/algorithms/transforms/dynamic_orientation.hpp"
 #include "tap/algorithms/transforms/dynamic_position.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
@@ -34,10 +33,13 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 
+#include "aruwsrc/communication/sensors/imu/fused_imu_eigen_ekf.hpp"
+
 namespace aruwsrc::communication::sensors::imu
 {
 /**
- * Fuses multiple IMU sensors using a Kalman filter to produce a single, (hopefully) more accurate IMU reading.
+ * Fuses multiple IMU sensors using a Kalman filter to produce a single, (hopefully) more accurate
+ * IMU reading.
  *
  * @tparam N Number of IMUs to fuse
  *
@@ -86,7 +88,8 @@ public:
          * By default we assume BW = ODR/2 from the sampling rate used by AbstractIMU::initialize().
          *
          * To avoid exploding R when sampleFrequency is set very high (or 0), BW is clamped to:
-         *   BW = clamp(0.5 * sampleFrequency, minEffectiveNoiseBandwidthHz, maxEffectiveNoiseBandwidthHz).
+         *   BW = clamp(0.5 * sampleFrequency, minEffectiveNoiseBandwidthHz,
+         * maxEffectiveNoiseBandwidthHz).
          */
         float minEffectiveNoiseBandwidthHz = 1.0f;
         float maxEffectiveNoiseBandwidthHz = 1000.0f;
@@ -96,16 +99,15 @@ public:
         std::array<float, 3> gyroProcessVarianceRateDiag = {6.0e-3f, 6.0e-3f, 8.0e-3f};
 
         // Initial covariance P0 diagonal
-        std::array<float, 6> initialStateVarianceDiag = {1.0f, 1.0f, 1.0f,
-                                                         1.0f, 1.0f, 1.0f};
+        std::array<float, 6> initialStateVarianceDiag = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 
         // For disconnected/invalid IMUs, inflate R to effectively ignore their measurements.
         float offlineMeasurementVarianceMultiplier = 1.0e6f;
         // Also inflate R for innovation outliers.
         float outlierVarianceMultiplier = 1.5f;
         // Innovation norm gates for outlier detection.
-        float accelInnovationGate = 20.0f;   // m/s^2
-        float gyroInnovationGate = 4.0f;     // rad/s
+        float accelInnovationGate = 20.0f;  // m/s^2
+        float gyroInnovationGate = 4.0f;    // rad/s
         // Clamp on adaptive R inflation due to innovations.
         float maxInnovationVarianceMultiplier = 4.0f;
     };
@@ -197,10 +199,14 @@ private:
     {
         switch (t)
         {
-            case ImuType::MPU6500: return cfg.mpu6500Noise;
-            case ImuType::BMI088: return cfg.bmi088Noise;
-            case ImuType::ISM330DHCX: return cfg.ism330dhcxNoise;
-            default: return cfg.bmi088Noise;
+            case ImuType::MPU6500:
+                return cfg.mpu6500Noise;
+            case ImuType::BMI088:
+                return cfg.bmi088Noise;
+            case ImuType::ISM330DHCX:
+                return cfg.ism330dhcxNoise;
+            default:
+                return cfg.bmi088Noise;
         }
     }
 
@@ -251,8 +257,7 @@ private:
     }
 
     void updateMeasurementCovariance(
-        const std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N>&
-            states,
+        const std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N>& states,
         const std::array<tap::algorithms::transforms::Vector, N>& accel,
         const std::array<tap::algorithms::transforms::Vector, N>& gyro,
         const std::array<bool, N>& validFlags);
@@ -286,18 +291,14 @@ private:
     static tap::communication::sensors::imu::ImuInterface::ImuState combineImuStates(
         const std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N>& states);
 
-    static inline bool isConnected(
-        tap::communication::sensors::imu::ImuInterface::ImuState state)
+    static inline bool isConnected(tap::communication::sensors::imu::ImuInterface::ImuState state)
     {
-        return state !=
-               tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CONNECTED;
+        return state != tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CONNECTED;
     }
 
-    static inline bool isValid(
-        tap::communication::sensors::imu::ImuInterface::ImuState state)
+    static inline bool isValid(tap::communication::sensors::imu::ImuInterface::ImuState state)
     {
-        return state ==
-                   tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED ||
+        return state == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED ||
                state ==
                    tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED;
     }
@@ -556,7 +557,8 @@ inline void FusedImu<N>::periodicIMUUpdate()
         imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(x[3], x[4], x[5]);
         prevImuState = imuState;
     }
-    else {
+    else
+    {
         // No valid IMU data available, reset to zero
         imuData.accG = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
         imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
@@ -674,9 +676,15 @@ inline tap::algorithms::transforms::Vector FusedImu<N>::transformAcceleration(
         fusionAngVel.x() * imuPosition.y() - fusionAngVel.y() * imuPosition.x());
 
     const tap::algorithms::transforms::DynamicPosition imuDynamics(
-        imuPosition.x(), imuPosition.y(), imuPosition.z(),
-        imuVelocity.x(), imuVelocity.y(), imuVelocity.z(),
-        imuAcc.x(), imuAcc.y(), imuAcc.z());
+        imuPosition.x(),
+        imuPosition.y(),
+        imuPosition.z(),
+        imuVelocity.x(),
+        imuVelocity.y(),
+        imuVelocity.z(),
+        imuAcc.x(),
+        imuAcc.y(),
+        imuAcc.z());
 
     return imuToFusion.apply(imuDynamics).getAcceleration();
 }
@@ -692,7 +700,9 @@ inline tap::algorithms::transforms::Vector FusedImu<N>::transformGyro(
         fusionToImu.getRoll(),
         fusionToImu.getPitch(),
         fusionToImu.getYaw(),
-        imuGyro.x(), imuGyro.y(), imuGyro.z());
+        imuGyro.x(),
+        imuGyro.y(),
+        imuGyro.z());
 
     const auto fusedDynamics = imuToFusion.apply(imuDynamics);
     const auto fusedAngVel = fusedDynamics.getAngularVelocity();

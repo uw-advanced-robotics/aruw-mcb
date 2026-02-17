@@ -35,7 +35,8 @@ namespace aruwsrc::communication::sensors::imu
  * Measurement z: N stacked copies of state (one per IMU)
  */
 template <size_t N>
-class FusedImuEigenEkf : public aruwsrc::algorithms::EigenExtendedKalmanFilter<6, static_cast<uint16_t>(N * 6)>
+class FusedImuEigenEkf
+    : public aruwsrc::algorithms::EigenExtendedKalmanFilter<6, static_cast<uint16_t>(N * 6)>
 {
 public:
     using Base = aruwsrc::algorithms::EigenExtendedKalmanFilter<6, static_cast<uint16_t>(N * 6)>;
@@ -102,7 +103,10 @@ public:
     }
 
 private:
-    static void stateTransitionFunction(const StateVector& state, StateVector& predictedState, float dt)
+    static void stateTransitionFunction(
+        const StateVector& state,
+        StateVector& predictedState,
+        float dt)
     {
         (void)dt;
         predictedState = state;
@@ -122,7 +126,10 @@ private:
         }
     }
 
-    static void stateJacobianFunction(const StateVector& state, StateMatrix& stateJacobian, float dt)
+    static void stateJacobianFunction(
+        const StateVector& state,
+        StateMatrix& stateJacobian,
+        float dt)
     {
         (void)state;
         (void)dt;

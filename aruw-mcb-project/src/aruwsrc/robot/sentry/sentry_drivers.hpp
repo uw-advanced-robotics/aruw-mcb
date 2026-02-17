@@ -82,8 +82,7 @@ public:
           turretMajorPrimaryImu(
               aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::BOARD_SPI_NSS),
           turretMajorImuSecondary(
-              aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::
-                  GPIO_D12_H_ROW),
+              aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::GPIO_D12_H_ROW),
           turretMajorImu(
               {&turretMajorPrimaryImu, &turretMajorImuSecondary},
               // Jetson is forward, X forward, Y left

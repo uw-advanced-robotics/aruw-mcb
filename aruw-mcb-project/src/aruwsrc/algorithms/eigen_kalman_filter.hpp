@@ -141,8 +141,8 @@ private:
     }
 
     template <typename MatrixT, typename DataT>
-    static inline MatrixT mapMatrix(const DataT (&data)[MatrixT::RowsAtCompileTime *
-                                                       MatrixT::ColsAtCompileTime])
+    static inline MatrixT mapMatrix(
+        const DataT (&data)[MatrixT::RowsAtCompileTime * MatrixT::ColsAtCompileTime])
     {
         return Eigen::Map<const MatrixT>(data);
     }

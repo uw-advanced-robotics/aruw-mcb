@@ -45,10 +45,8 @@ class EigenExtendedKalmanFilter
 public:
     using StateVector = Eigen::Matrix<float, STATES, 1, Eigen::DontAlign>;
     using InputVector = Eigen::Matrix<float, INPUTS, 1, Eigen::DontAlign>;
-    using StateMatrix =
-        Eigen::Matrix<float, STATES, STATES, Eigen::RowMajor | Eigen::DontAlign>;
-    using InputMatrix =
-        Eigen::Matrix<float, INPUTS, INPUTS, Eigen::RowMajor | Eigen::DontAlign>;
+    using StateMatrix = Eigen::Matrix<float, STATES, STATES, Eigen::RowMajor | Eigen::DontAlign>;
+    using InputMatrix = Eigen::Matrix<float, INPUTS, INPUTS, Eigen::RowMajor | Eigen::DontAlign>;
     using ObservationMatrix =
         Eigen::Matrix<float, INPUTS, STATES, Eigen::RowMajor | Eigen::DontAlign>;
     using KalmanGainMatrix =
@@ -208,8 +206,8 @@ protected:
     }
 
     template <typename MatrixT, typename DataT>
-    static inline MatrixT mapMatrix(const DataT (&data)[MatrixT::RowsAtCompileTime *
-                                                       MatrixT::ColsAtCompileTime])
+    static inline MatrixT mapMatrix(
+        const DataT (&data)[MatrixT::RowsAtCompileTime * MatrixT::ColsAtCompileTime])
     {
         return Eigen::Map<const MatrixT>(data);
     }

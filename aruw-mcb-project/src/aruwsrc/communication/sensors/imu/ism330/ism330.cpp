@@ -38,9 +38,13 @@ void ISM330::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 #ifndef PLATFORM_HOSTED
     switch (chipSelectPin)
     {
-        case ChipSelectPin::GPIO_D12_H_ROW: modm::platform::GpioD12::GpioOutput(); break;
+        case ChipSelectPin::GPIO_D12_H_ROW:
+            modm::platform::GpioD12::GpioOutput();
+            break;
         case ChipSelectPin::BOARD_SPI_NSS:
-        default: Board::SpiNss::GpioOutput(); break;
+        default:
+            Board::SpiNss::GpioOutput();
+            break;
     }
     ismNssHigh();
     Board::GenSpiMaster::connect<Board::SpiMiso::Miso, Board::SpiMosi::Mosi, Board::SpiSck::Sck>();
@@ -188,7 +192,9 @@ void ISM330::ismNssLow()
             modm::platform::GpioD12::setOutput(modm::GpioOutput::Low);
             break;
         case ChipSelectPin::BOARD_SPI_NSS:
-        default: Board::SpiNss::setOutput(modm::GpioOutput::Low); break;
+        default:
+            Board::SpiNss::setOutput(modm::GpioOutput::Low);
+            break;
     }
 #endif
 }
@@ -202,7 +208,9 @@ void ISM330::ismNssHigh()
             modm::platform::GpioD12::setOutput(modm::GpioOutput::High);
             break;
         case ChipSelectPin::BOARD_SPI_NSS:
-        default: Board::SpiNss::setOutput(modm::GpioOutput::High); break;
+        default:
+            Board::SpiNss::setOutput(modm::GpioOutput::High);
+            break;
     }
 #endif
 }
