@@ -474,22 +474,22 @@ CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
-SequentialCommand storeCubeCommand(
-    &extensionInCommand,
-    &wristFoldInCommand,
-    &suckOffCommand,
-    &releaseOnCommand,
-    &extensionOutCommand,
-    &extensionInCommand,
-    &cubeLiftSwitchDownCommand);
-SequentialCommand retrieveCubeCommand(
-    &extensionOutCommand,
-    &wristFoldInCommand,
-    &extensionInCommand,
-    &suckOnCommand,
-    &releaseOffCommand,
-    &wristFoldOutCommand,
-    &cubeLiftSwitchUpCommand);
+SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
+    {&extensionInCommand,
+     &wristFoldInCommand,
+     &suckOffCommand,
+     &releaseOnCommand,
+     &extensionOutCommand,
+     &extensionInCommand,
+     &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
+    {&extensionOutCommand,
+     &wristFoldInCommand,
+     &extensionInCommand,
+     &suckOnCommand,
+     &releaseOffCommand,
+     &wristFoldOutCommand,
+     &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
 SetpointMovePositionCommand extensionOut(extensionSubsystem, EXTENSION_SCORE);

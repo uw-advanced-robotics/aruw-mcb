@@ -367,28 +367,28 @@ CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
-SequentialCommand storeCubeCommand(
-    &liftUpCommand,
-    &gantryRetractCommand,
-    &wristFoldInCommand,
-    &liftDownCommand,
-    &suckOffCommand,
-    &releaseOnCommand,
-    &gantryExtendCommand,
-    &liftUpCommand,
-    &gantryRetractCommand,
-    &cubeLiftSwitchDownCommand);
-SequentialCommand retrieveCubeCommand(
-    &liftDownCommand,
-    &gantryExtendCommand,
-    &wristFoldInCommand,
-    &gantryRetractCommand,
-    &suckOnCommand,
-    &releaseOffCommand,
-    &liftUpCommand,
-    &wristFoldOutCommand,
-    &liftDownCommand,
-    &cubeLiftSwitchUpCommand);
+SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
+    {&liftUpCommand,
+     &gantryRetractCommand,
+     &wristFoldInCommand,
+     &liftDownCommand,
+     &suckOffCommand,
+     &releaseOnCommand,
+     &gantryExtendCommand,
+     &liftUpCommand,
+     &gantryRetractCommand,
+     &cubeLiftSwitchDownCommand}});
+SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
+    {&liftDownCommand,
+     &gantryExtendCommand,
+     &wristFoldInCommand,
+     &gantryRetractCommand,
+     &suckOnCommand,
+     &releaseOffCommand,
+     &liftUpCommand,
+     &wristFoldOutCommand,
+     &liftDownCommand,
+     &cubeLiftSwitchUpCommand}});
 
 // commands for pickup/scoring positions
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
