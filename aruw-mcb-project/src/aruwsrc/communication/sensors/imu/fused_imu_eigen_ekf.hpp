@@ -29,27 +29,26 @@
 namespace aruwsrc::communication::sensors::imu
 {
 /**
- * EKF wrapper specialized for fused IMU state/measurement model.
+ * EKF extension for fused IMU state/measurement model.
  *
  * State x: [ax, ay, az, gx, gy, gz]^T
- * Measurement z: N stacked copies of state (one per IMU).
+ * Measurement z: N stacked copies of state (one per IMU)
  */
 template <size_t N>
-class FusedImuEigenEkf
+class FusedImuEigenEkf : public aruwsrc::algorithms::EigenExtendedKalmanFilter<6, static_cast<uint16_t>(N * 6)>
 {
 public:
+    using Base = aruwsrc::algorithms::EigenExtendedKalmanFilter<6, static_cast<uint16_t>(N * 6)>;
     static constexpr uint16_t kStateSize = 6;
     static constexpr uint16_t kMeasurementSize = static_cast<uint16_t>(N * 6);
 
-    using KalmanFilter = aruwsrc::algorithms::EigenExtendedKalmanFilter<kStateSize, kMeasurementSize>;
-    using StateVector = typename KalmanFilter::StateVector;
-    using InputVector = typename KalmanFilter::InputVector;
-    using StateMatrix = typename KalmanFilter::StateMatrix;
-    using InputMatrix = typename KalmanFilter::InputMatrix;
-    using ObservationMatrix = typename KalmanFilter::ObservationMatrix;
+    using StateVector = typename Base::StateVector;
+    using InputVector = typename Base::InputVector;
+    using StateMatrix = typename Base::StateMatrix;
+    using InputMatrix = typename Base::InputMatrix;
 
     FusedImuEigenEkf(const StateMatrix& q, const InputMatrix& r, const StateMatrix& p0)
-        : ekf(
+        : Base(
               stateTransitionFunction,
               observationFunction,
               stateJacobianFunction,
@@ -60,22 +59,46 @@ public:
     {
     }
 
-    inline void init(const float (&initialX)[kStateSize]) { ekf.init(initialX); }
-    inline int performUpdate(const InputVector& z, float dt) { return ekf.performUpdate(z, dt); }
-
-    inline const std::array<float, kStateSize>& getStateVectorAsMatrix() const
+    int update(const InputVector& z) override
     {
-        return ekf.getStateVectorAsMatrix();
-    }
+        if (!this->initialized)
+        {
+            this->lastStatus = -1;
+            return this->lastStatus;
+        }
 
-    inline std::array<float, kMeasurementSize * kMeasurementSize>& getMeasurementCovariance()
-    {
-        return ekf.getMeasurementCovariance();
-    }
+        for (uint16_t block = 0; block < N; block++)
+        {
+            const uint16_t rowBase = static_cast<uint16_t>(block * kStateSize);
 
-    inline std::array<float, kStateSize * kStateSize>& getProcessCovariance()
-    {
-        return ekf.getProcessCovariance();
+            StateVector zBlock;
+            for (uint16_t i = 0; i < kStateSize; i++)
+            {
+                zBlock(static_cast<int>(i), 0) = z(static_cast<int>(rowBase + i), 0);
+            }
+
+            const StateVector yBlock = zBlock - this->xHat;
+
+            StateMatrix rBlock = StateMatrix::Zero();
+            for (uint16_t r = 0; r < kStateSize; r++)
+            {
+                for (uint16_t c = 0; c < kStateSize; c++)
+                {
+                    rBlock(static_cast<int>(r), static_cast<int>(c)) =
+                        this->Rdata[(rowBase + r) * kMeasurementSize + (rowBase + c)];
+                }
+            }
+
+            const StateMatrix sBlock = this->P + rBlock;
+            const StateMatrix kBlock = this->P * sBlock.inverse();
+
+            this->xHat = this->xHat + kBlock * yBlock;
+            this->P = (this->I - kBlock) * this->P;
+        }
+
+        this->syncStateArray();
+        this->lastStatus = 0;
+        return this->lastStatus;
     }
 
 private:
@@ -105,8 +128,6 @@ private:
         (void)dt;
         stateJacobian.setIdentity();
     }
-
-    KalmanFilter ekf;
 };
 
 }  // namespace aruwsrc::communication::sensors::imu
