@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
 
@@ -200,7 +201,7 @@ TEST_P(VelocityGetterTest, getVelocityWorldRelative)
 
     float heading = GetParam().worldRelHeading;
 
-    chassis.getVelocityWorldRelative(worldFrameExpectedVelocity, heading);
+    tap::algorithms::odometry::getVelocityWorldRelative(worldFrameExpectedVelocity, heading);
 
     // just a rotation matrix
 

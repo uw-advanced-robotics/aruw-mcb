@@ -23,6 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/imu/fused_imu.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 
 namespace aruwsrc::motor_tester
@@ -40,12 +41,14 @@ public:
               std::array<tap::communication::sensors::imu::AbstractIMU*, 1>{&this->mpu6500},
               std::array<tap::algorithms::transforms::Transform, 1>{
                   tap::algorithms::transforms::Transform::identity()}),
+          rttTelemetry(this),
           oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
     {
     }
 
 public:
     communication::sensors::imu::FusedImu<1> fusedImu;
+    communication::rtt::RttTelemetry rttTelemetry;
     display::OledDisplay oledDisplay;
 };  // class aruwsrc::MotortesterDrivers
 }  // namespace aruwsrc::motor_tester

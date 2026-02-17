@@ -29,9 +29,6 @@
 #ifdef PLATFORM_HOSTED
 #include <iostream>
 
-#include "tap/communication/tcp-server/json_messages.hpp"
-#include "tap/communication/tcp-server/tcp_server.hpp"
-
 #include "modm/architecture/interface/can_message.hpp"
 #endif
 

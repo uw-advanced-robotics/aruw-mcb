@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*
- * Copyright (c) 2024-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of Taproot.
  *
@@ -45,11 +45,17 @@ template <size_t COMMANDS>
 class SequentialCommand : public Command
 {
 public:
-    SequentialCommand(std::array<Command*, COMMANDS> commands)
+    template <typename... Args>
+    SequentialCommand(Args*... args)
         : Command(),
-          commands(commands),
+          commands{static_cast<Command*>(args)...},
           currentCommand(0)
     {
+        static_assert(
+            sizeof...(Args) == COMMANDS,
+            "SequentialCommand Error: The number of commands passed does not match the template "
+            "size!");
+
         for (Command* command : commands)
         {
             modm_assert(
@@ -113,6 +119,9 @@ private:
     size_t currentCommand;
     bool commandInitialized;
 };  // class SequentialCommand
+
+template <typename... Args>
+SequentialCommand(Args*...) -> SequentialCommand<sizeof...(Args)>;
 
 }  // namespace control
 

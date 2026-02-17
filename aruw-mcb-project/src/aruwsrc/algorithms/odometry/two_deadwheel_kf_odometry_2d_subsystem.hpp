@@ -17,16 +17,16 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
-#define DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#ifndef TWO_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#define TWO_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/algorithms/odometry/two_deadwheel_chassis_kf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
@@ -48,9 +48,9 @@ class ChassisSubsystemInterface;
 
 namespace aruwsrc::algorithms::odometry
 {
-class DeadwheelKFOdometry2DSubsystem
+class TwoDeadwheelKFOdometry2DSubsystem
     : public tap::control::Subsystem,
-      public aruwsrc::algorithms::odometry::DeadwheelChassisKFOdometry
+      public aruwsrc::algorithms::odometry::TwoDeadwheelChassisKFOdometry
 {
 public:
     /**
@@ -69,7 +69,7 @@ public:
      * @param[in] initialXPos initial world-frame x position of the chassis
      * @param[in] initialYPos initial world-frame y position of the chassis
      */
-    DeadwheelKFOdometry2DSubsystem(
+    TwoDeadwheelKFOdometry2DSubsystem(
         tap::Drivers &drivers,
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver &deadwheels,
 #if defined(TARGET_SENTRY_ECLIPSE)
@@ -100,4 +100,4 @@ private:
 
 }  // namespace aruwsrc::algorithms::odometry
 
-#endif  // DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#endif  // TWO_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
