@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_HPP_
-#define ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_HPP_
+#ifndef FUSED_IMU_HPP_
+#define FUSED_IMU_HPP_
 
 #include <array>
 #include <cmath>
@@ -748,4 +748,4 @@ inline tap::communication::sensors::imu::ImuInterface::ImuState FusedImu<N>::com
 }
 }  // namespace aruwsrc::communication::sensors::imu
 
-#endif  // ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_HPP_
+#endif  // FUSED_IMU_HPP_
