@@ -133,7 +133,7 @@ public:
               stateTransitionFunction,
               observationFunction,
               stateJacobianFunction,
-              observationJacobianFunction,
+              nullptr,
               makeQ(),
               makeR(),
               makeP0())
@@ -334,7 +334,7 @@ private:
         return mat;
     }
 
-    static inline void stateTransitionFunction(
+    static __attribute__((noinline)) void stateTransitionFunction(
         const StateVector& state,
         StateVector& predictedState,
         float dt)
@@ -343,7 +343,9 @@ private:
         predictedState = state;
     }
 
-    static inline void observationFunction(const StateVector& state, InputVector& predictedInput)
+    static __attribute__((noinline)) void observationFunction(
+        const StateVector& state,
+        InputVector& predictedInput)
     {
         for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
         {
@@ -357,7 +359,7 @@ private:
         }
     }
 
-    static inline void stateJacobianFunction(
+    static __attribute__((noinline)) void stateJacobianFunction(
         const StateVector& state,
         StateMatrix& stateJacobian,
         float dt)
@@ -365,24 +367,6 @@ private:
         (void)state;
         (void)dt;
         stateJacobian.setIdentity();
-    }
-
-    static inline void observationJacobianFunction(
-        const StateVector& state,
-        ObservationMatrix& observationJacobian)
-    {
-        (void)state;
-        observationJacobian.setZero();
-        for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
-        {
-            const size_t rowBase = imuIndex * kPerImuMeasurementSize;
-            observationJacobian(static_cast<int>(rowBase + 0), 0) = 1.0f;
-            observationJacobian(static_cast<int>(rowBase + 1), 1) = 1.0f;
-            observationJacobian(static_cast<int>(rowBase + 2), 2) = 1.0f;
-            observationJacobian(static_cast<int>(rowBase + 3), 3) = 1.0f;
-            observationJacobian(static_cast<int>(rowBase + 4), 4) = 1.0f;
-            observationJacobian(static_cast<int>(rowBase + 5), 5) = 1.0f;
-        }
     }
 
     inline StateMatrix makeQ()
@@ -750,9 +734,9 @@ inline tap::algorithms::transforms::Vector FusedImu<N>::transformGyro(
     const auto imuToFusion = mountingTransform.compose(fusionToImu.getInverse());
 
     const tap::algorithms::transforms::DynamicOrientation imuDynamics(
-        fusionToImu.getOrientation().getRoll(),
-        fusionToImu.getOrientation().getPitch(),
-        fusionToImu.getOrientation().getYaw(),
+        fusionToImu.getRoll(),
+        fusionToImu.getPitch(),
+        fusionToImu.getYaw(),
         imuGyro.x(), imuGyro.y(), imuGyro.z());
 
     const auto fusedDynamics = imuToFusion.apply(imuDynamics);

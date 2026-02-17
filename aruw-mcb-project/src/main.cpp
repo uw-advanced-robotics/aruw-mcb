@@ -142,10 +142,11 @@ int main()
 #if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
-            PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
 #ifdef TARGET_SENTRY_NAME
+            PROFILE(drivers->profiler, drivers->turretMajorPrimaryImu.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->turretMajorImuSecondary.periodicIMUUpdate, ());
 #endif
+            PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
 #endif
 
 #ifdef TARGET_TESTBED
@@ -222,12 +223,14 @@ static void initializeIo(Drivers* drivers)
     drivers->mpu6500.setCalibrationSamples(4000);
     drivers->chassisMcbLite.initialize();
     modm::delay_ms(2000);
-    drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    drivers->turretMajorImu.setCalibrationSamples(4000);
 #ifdef TARGET_SENTRY_NAME
+    drivers->turretMajorPrimaryImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->turretMajorPrimaryImu.setCalibrationSamples(4000);
     drivers->turretMajorImuSecondary.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->turretMajorImuSecondary.setCalibrationSamples(4000);
 #endif
+    drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->turretMajorImu.setCalibrationSamples(4000);
 #endif
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
@@ -275,9 +278,11 @@ static void updateIo(Drivers* drivers)
 
 #if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
     drivers->chassisMcbLite.updateSerial();
-    drivers->turretMajorImu.read();
 #ifdef TARGET_SENTRY_NAME
+    drivers->turretMajorPrimaryImu.read();
     drivers->turretMajorImuSecondary.read();
+#else
+    drivers->turretMajorImu.read();
 #endif
 #endif
 

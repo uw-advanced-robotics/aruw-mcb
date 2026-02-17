@@ -23,7 +23,8 @@
 #include <array>
 #include <cinttypes>
 #include <cstddef>
-#include <functional>
+#include <cmath>
+#include <cstdint>
 
 #ifndef EIGEN_DONT_VECTORIZE
 #define EIGEN_DONT_VECTORIZE
@@ -55,11 +56,10 @@ public:
     using KalmanGainMatrix =
         Eigen::Matrix<float, STATES, INPUTS, Eigen::RowMajor | Eigen::DontAlign>;
 
-    using StateTransitionFunction = std::function<void(const StateVector&, StateVector&, float)>;
-    using ObservationFunction = std::function<void(const StateVector&, InputVector&)>;
-    using StateJacobianFunction = std::function<void(const StateVector&, StateMatrix&, float)>;
-    using ObservationJacobianFunction =
-        std::function<void(const StateVector&, ObservationMatrix&)>;
+    using StateTransitionFunction = void (*)(const StateVector&, StateVector&, float);
+    using ObservationFunction = void (*)(const StateVector&, InputVector&);
+    using StateJacobianFunction = void (*)(const StateVector&, StateMatrix&, float);
+    using ObservationJacobianFunction = void (*)(const StateVector&, ObservationMatrix&);
 
     EigenExtendedKalmanFilter(
         StateTransitionFunction f,
@@ -79,6 +79,9 @@ public:
           P0(P),
           F(StateMatrix::Zero()),
           H(ObservationMatrix::Zero()),
+          HPscratch(ObservationMatrix::Zero()),
+          Sscratch(InputMatrix::Zero()),
+          Kscratch(KalmanGainMatrix::Zero()),
           zPred(InputVector::Zero()),
           initialized(false)
     {
@@ -105,6 +108,9 @@ public:
           P0(P0),
           F(StateMatrix::Zero()),
           H(ObservationMatrix::Zero()),
+          HPscratch(ObservationMatrix::Zero()),
+          Sscratch(InputMatrix::Zero()),
+          Kscratch(KalmanGainMatrix::Zero()),
           zPred(InputVector::Zero()),
           initialized(false)
     {
@@ -132,6 +138,7 @@ public:
     int predict(float dt)
     {
         debugStep = 1;
+        debugFlags = 0;
         if (!initialized)
         {
             lastStatus = -1;
@@ -147,6 +154,8 @@ public:
         debugStep = 4;
         const StateMatrix Q = mapMatrix<StateMatrix>(Qdata.data());
         P = F * P * F.transpose() + Q;
+        debugPNorm2 = P.squaredNorm();
+        if (!std::isfinite(debugPNorm2)) debugFlags |= 0x01;
         debugStep = 5;
         lastStatus = 0;
         return lastStatus;
@@ -163,29 +172,112 @@ public:
 
         debugStep = 11;
         debugStep = 111;
-        H_jacobian(xHat, H);
+        if (H_jacobian)
+        {
+            H_jacobian(xHat, H);
+        }
+        else
+        {
+            if constexpr ((INPUTS % STATES) == 0)
+            {
+                // Special-case repeated-identity observation model:
+                // z = [x; x; ...] + v. This avoids large H/S operations for multi-IMU fusion.
+                constexpr uint16_t kBlocks = INPUTS / STATES;
+                for (uint16_t block = 0; block < kBlocks; block++)
+                {
+                    debugStep = 113;
+                    const uint16_t rowBase = block * STATES;
+
+                    StateVector zBlock;
+                    for (uint16_t i = 0; i < STATES; i++)
+                    {
+                        zBlock(static_cast<int>(i), 0) = z(static_cast<int>(rowBase + i), 0);
+                    }
+
+                    const StateVector yBlock = zBlock - xHat;
+                    debugYNorm2 = yBlock.squaredNorm();
+
+                    StateMatrix Rblock = StateMatrix::Zero();
+                    for (uint16_t r = 0; r < STATES; r++)
+                    {
+                        for (uint16_t c = 0; c < STATES; c++)
+                        {
+                            Rblock(static_cast<int>(r), static_cast<int>(c)) =
+                                Rdata[(rowBase + r) * INPUTS + (rowBase + c)];
+                        }
+                    }
+
+                    const StateMatrix Sblock = P + Rblock;
+                    debugSMinDiag = Sblock.diagonal().minCoeff();
+                    debugSMaxDiag = Sblock.diagonal().maxCoeff();
+                    debugRMinDiag = Rblock.diagonal().minCoeff();
+                    debugRMaxDiag = Rblock.diagonal().maxCoeff();
+                    if (!std::isfinite(debugSMinDiag) || !std::isfinite(debugSMaxDiag))
+                    {
+                        debugFlags |= 0x08;
+                    }
+
+                    const StateMatrix Kblock = P * Sblock.inverse();
+                    debugKNorm2 = Kblock.squaredNorm();
+                    if (!std::isfinite(debugKNorm2)) debugFlags |= 0x10;
+
+                    xHat = xHat + Kblock * yBlock;
+                    debugXNorm2 = xHat.squaredNorm();
+                    if (!std::isfinite(debugXNorm2)) debugFlags |= 0x20;
+
+                    P = (I - Kblock) * P;
+                    debugPNorm2 = P.squaredNorm();
+                    if (!std::isfinite(debugPNorm2)) debugFlags |= 0x40;
+                }
+                debugStep = 18;
+                syncStateArray();
+                lastStatus = 0;
+                return lastStatus;
+            }
+            else
+            {
+                lastStatus = -2;
+                return lastStatus;
+            }
+        }
         debugStep = 112;
+        debugHNorm2 = H.squaredNorm();
+        if (!std::isfinite(debugHNorm2)) debugFlags |= 0x02;
         debugStep = 12;
         h(xHat, zPred);
 
         debugStep = 13;
         const InputVector y = z - zPred;
+        debugYNorm2 = y.squaredNorm();
+        if (!std::isfinite(debugYNorm2)) debugFlags |= 0x04;
         debugStep = 14;
         debugStep = 141;
-        const Eigen::Matrix<float, INPUTS, STATES, Eigen::RowMajor> HP = H * P;
+        HPscratch = H * P;
         debugStep = 142;
-        InputMatrix S = HP * H.transpose();
+        Sscratch = HPscratch * H.transpose();
         debugStep = 143;
-        S = S + mapMatrix<InputMatrix>(Rdata.data());
+        const InputMatrix R = mapMatrix<InputMatrix>(Rdata.data());
+        Sscratch = Sscratch + R;
+        debugRMinDiag = R.diagonal().minCoeff();
+        debugRMaxDiag = R.diagonal().maxCoeff();
         debugStep = 144;
-        S.diagonal().array() += 1.0e-6f;
+        Sscratch.diagonal().array() += 1.0e-6f;
+        debugSMinDiag = Sscratch.diagonal().minCoeff();
+        debugSMaxDiag = Sscratch.diagonal().maxCoeff();
+        if (!std::isfinite(debugSMinDiag) || !std::isfinite(debugSMaxDiag)) debugFlags |= 0x08;
 
         debugStep = 15;
-        const KalmanGainMatrix K = P * H.transpose() * S.inverse();
+        Kscratch = P * H.transpose() * Sscratch.inverse();
+        debugKNorm2 = Kscratch.squaredNorm();
+        if (!std::isfinite(debugKNorm2)) debugFlags |= 0x10;
         debugStep = 16;
-        xHat = xHat + K * y;
+        xHat = xHat + Kscratch * y;
+        debugXNorm2 = xHat.squaredNorm();
+        if (!std::isfinite(debugXNorm2)) debugFlags |= 0x20;
         debugStep = 17;
-        P = (I - K * H) * P;
+        P = (I - Kscratch * H) * P;
+        debugPNorm2 = P.squaredNorm();
+        if (!std::isfinite(debugPNorm2)) debugFlags |= 0x40;
         debugStep = 18;
         syncStateArray();
         lastStatus = 0;
@@ -208,6 +300,16 @@ public:
     inline std::array<float, STATES * STATES>& getProcessCovariance() { return Qdata; }
     inline int getLastStatus() const { return lastStatus; }
     inline uint8_t getDebugStep() const { return debugStep; }
+    inline float getDebugYNorm2() const { return debugYNorm2; }
+    inline float getDebugSMinDiag() const { return debugSMinDiag; }
+    inline float getDebugSMaxDiag() const { return debugSMaxDiag; }
+    inline float getDebugKNorm2() const { return debugKNorm2; }
+    inline float getDebugHNorm2() const { return debugHNorm2; }
+    inline float getDebugXNorm2() const { return debugXNorm2; }
+    inline float getDebugPNorm2() const { return debugPNorm2; }
+    inline float getDebugRMinDiag() const { return debugRMinDiag; }
+    inline float getDebugRMaxDiag() const { return debugRMaxDiag; }
+    inline uint8_t getDebugFlags() const { return debugFlags; }
 
 private:
     template <typename MatrixT, typename DataT>
@@ -260,11 +362,24 @@ private:
     const StateMatrix P0;
     StateMatrix F;
     ObservationMatrix H;
+    ObservationMatrix HPscratch;
+    InputMatrix Sscratch;
+    KalmanGainMatrix Kscratch;
     InputVector zPred;
     std::array<float, STATES> xHatArray{};
     bool initialized;
     int lastStatus = 0;
-    uint8_t debugStep = 0;
+    volatile uint8_t debugStep = 0;
+    volatile float debugYNorm2 = 0.0f;
+    volatile float debugSMinDiag = 0.0f;
+    volatile float debugSMaxDiag = 0.0f;
+    volatile float debugKNorm2 = 0.0f;
+    volatile float debugHNorm2 = 0.0f;
+    volatile float debugXNorm2 = 0.0f;
+    volatile float debugPNorm2 = 0.0f;
+    volatile float debugRMinDiag = 0.0f;
+    volatile float debugRMaxDiag = 0.0f;
+    volatile uint8_t debugFlags = 0;
 };
 }  // namespace aruwsrc::algorithms
 

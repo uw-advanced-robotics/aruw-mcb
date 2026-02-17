@@ -38,6 +38,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "aruwsrc/communication/sensors/imu/fused_imu.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
@@ -46,6 +47,12 @@
 
 namespace aruwsrc::sentry
 {
+#if defined(TARGET_SENTRY_NAME)
+using TurretMajorImuType = aruwsrc::communication::sensors::imu::FusedImu<2>;
+#else
+using TurretMajorImuType = aruwsrc::communication::sensors::imu::ism330::ISM330;
+#endif
+
 class Drivers : public tap::Drivers
 {
     friend class DriversSingleton;
@@ -72,11 +79,17 @@ public:
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, CAP_BANK_CAPACITANCE),
           chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
 #if defined(TARGET_SENTRY_NAME)
-          turretMajorImu(
+          turretMajorPrimaryImu(
               aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::BOARD_SPI_NSS),
           turretMajorImuSecondary(
               aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::
                   GPIO_D12_H_ROW),
+          turretMajorImu(
+              {&turretMajorPrimaryImu, &turretMajorImuSecondary},
+              {tap::algorithms::transforms::Transform::identity(),
+               tap::algorithms::transforms::Transform::identity()},
+              {aruwsrc::communication::sensors::imu::FusedImu<2>::ImuType::ISM330DHCX,
+               aruwsrc::communication::sensors::imu::FusedImu<2>::ImuType::ISM330DHCX}),
 #else
           turretMajorImu(),
 #endif
@@ -105,10 +118,11 @@ public:
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     aruwsrc::communication::can::cap_bank::CapacitorBank capacitorBank;
     aruwsrc::communication::mcb_lite::MCBLite chassisMcbLite;
-    aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImu;
 #if defined(TARGET_SENTRY_NAME)
+    aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorPrimaryImu;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImuSecondary;
 #endif
+    TurretMajorImuType turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
     static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
