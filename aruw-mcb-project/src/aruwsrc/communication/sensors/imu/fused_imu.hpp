@@ -21,23 +21,26 @@
 #define ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_HPP_
 
 #include <array>
+#include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <utility>
 
-#include "aruwsrc/algorithms/eigen_kalman_filter.hpp"
+#include "aruwsrc/algorithms/eigen_extended_kalman_filter.hpp"
 #include "tap/algorithms/transforms/dynamic_orientation.hpp"
 #include "tap/algorithms/transforms/dynamic_position.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/transforms/vector.hpp"
+#include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 
 namespace aruwsrc::communication::sensors::imu
 {
 /**
  * Fuses multiple IMU sensors using a Kalman filter to produce a single, (hopefully) more accurate IMU reading.
- * 
+ *
  * @tparam N Number of IMUs to fuse
- * 
+ *
  * @note hte FusedIMU is assumed to be virtually located at the center of
  *       rotation of the rigid body on which the physical IMUs are mounted. The transform for each
  *       IMU (imuTransforms) should describe the position and orientation offset from this fusion
@@ -47,15 +50,102 @@ template <size_t N>
 class FusedImu final : public tap::communication::sensors::imu::AbstractIMU
 {
 public:
+    /**
+     * Supported IMU types for noise tuning.
+     */
+    enum class ImuType : uint8_t
+    {
+        MPU6500 = 0,
+        BMI088 = 1,
+        ISM330DHCX = 2,
+    };
+
+    struct Config
+    {
+        struct ImuNoiseDensity
+        {
+            std::array<float, 3> accelNoiseDensityUgSqrtHz = {0.0f, 0.0f, 0.0f};
+            std::array<float, 3> gyroNoiseDensityMdpsSqrtHz = {0.0f, 0.0f, 0.0f};
+        };
+
+        ImuNoiseDensity mpu6500Noise = {
+            /* accel */ {300.0f, 300.0f, 300.0f},
+            /* gyro  */ {10.0f, 10.0f, 10.0f}};
+
+        ImuNoiseDensity bmi088Noise = {
+            /* accel */ {160.0f, 160.0f, 190.0f},
+            /* gyro  */ {14.0f, 14.0f, 14.0f}};
+
+        ImuNoiseDensity ism330dhcxNoise = {
+            /* accel */ {100.0f, 100.0f, 100.0f},
+            /* gyro  */ {8.0f, 8.0f, 8.0f}};
+
+        /**
+         * Effective bandwidth used to convert noise density -> variance.
+         *
+         * By default we assume BW = ODR/2 from the sampling rate used by AbstractIMU::initialize().
+         *
+         * To avoid exploding R when sampleFrequency is set very high (or 0), BW is clamped to:
+         *   BW = clamp(0.5 * sampleFrequency, minEffectiveNoiseBandwidthHz, maxEffectiveNoiseBandwidthHz).
+         */
+        float minEffectiveNoiseBandwidthHz = 1.0f;
+        float maxEffectiveNoiseBandwidthHz = 1000.0f;
+
+        // Higher default process noise for faster transient response in aggressive motion.
+        std::array<float, 3> accelProcessVarianceRateDiag = {2.0e-1f, 2.0e-1f, 3.0e-1f};
+        std::array<float, 3> gyroProcessVarianceRateDiag = {6.0e-3f, 6.0e-3f, 8.0e-3f};
+
+        // Initial covariance P0 diagonal
+        std::array<float, 6> initialStateVarianceDiag = {1.0f, 1.0f, 1.0f,
+                                                         1.0f, 1.0f, 1.0f};
+
+        // For disconnected/invalid IMUs, inflate R to effectively ignore their measurements.
+        float offlineMeasurementVarianceMultiplier = 1.0e6f;
+        // Also inflate R for innovation outliers.
+        float outlierVarianceMultiplier = 1.5f;
+        // Innovation norm gates for outlier detection.
+        float accelInnovationGate = 20.0f;   // m/s^2
+        float gyroInnovationGate = 4.0f;     // rad/s
+        // Clamp on adaptive R inflation due to innovations.
+        float maxInnovationVarianceMultiplier = 4.0f;
+    };
+
+    /**
+     * Constructor with per-IMU type selection.
+     *
+     * @param imus        IMU pointers
+     * @param transforms  fusion->imu transforms
+     * @param imuTypes    per-IMU type selector
+     * @param config      tuning config
+     */
     FusedImu(
         const std::array<tap::communication::sensors::imu::AbstractIMU*, N>& imus,
-        const std::array<tap::algorithms::transforms::Transform, N>& transforms)
+        const std::array<tap::algorithms::transforms::Transform, N>& transforms,
+        const std::array<ImuType, N>& imuTypes,
+        const Config& config = Config())
         : AbstractIMU(tap::algorithms::transforms::Transform::identity()),
+          config(config),
           imus(imus),
           imuTransforms(transforms),
-          kf(makeA(), makeC(), makeQ(), makeR(), makeP0())
+          imuTypes(imuTypes),
+          perImuNoise(selectPerImuNoise(imuTypes, config)),
+          kf(
+              stateTransitionFunction,
+              observationFunction,
+              stateJacobianFunction,
+              observationJacobianFunction,
+              makeQ(),
+              makeR(),
+              makeP0())
     {
-        updateMeasurementCovariance(getImuStates());
+        updateProcessCovariance(1.0f);
+        const auto zeroVec = makeVectorArray(tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f));
+        std::array<bool, N> invalidFlags{};
+        for (size_t i = 0; i < N; i++)
+        {
+            invalidFlags[i] = false;
+        }
+        updateMeasurementCovariance(getImuStates(), zeroVec, zeroVec, invalidFlags);
     }
 
     void setImuTransform(size_t index, const tap::algorithms::transforms::Transform& transform);
@@ -75,42 +165,114 @@ private:
     static constexpr size_t kStateSize = 6;
     static constexpr size_t kMeasurementSize = N * 6;
     static constexpr size_t kPerImuMeasurementSize = 6;
-    static constexpr std::array<float, kStateSize> kADiag = {1.0f, 1.0f, 1.0f,
-                                                             1.0f, 1.0f, 1.0f};
-    static constexpr std::array<float, kStateSize> kQDiag = {1.7e-3f, 1.3e-3f, 8.4e-3f,
-                                                             2.3e-5f, 2.0e-5f, 3.9e-6f};
-    static constexpr std::array<float, kStateSize> kP0Diag = {1.0f, 1.0f, 1.0f,
-                                                              1.0f, 1.0f, 1.0f};
 
     ImuState prevImuState;
 
-    using KalmanFilter = aruwsrc::algorithms::EigenKalmanFilter<kStateSize, kMeasurementSize>;
-    using MatrixA = typename KalmanFilter::MatrixA;
-    using MatrixC = typename KalmanFilter::MatrixC;
-    using MatrixQ = typename KalmanFilter::MatrixQ;
-    using MatrixR = typename KalmanFilter::MatrixR;
-    using MatrixP = typename KalmanFilter::MatrixP;
-    using VectorY = typename KalmanFilter::VectorY;
+    using KalmanFilter =
+        aruwsrc::algorithms::EigenExtendedKalmanFilter<kStateSize, kMeasurementSize>;
+    using StateVector = typename KalmanFilter::StateVector;
+    using InputVector = typename KalmanFilter::InputVector;
+    using StateMatrix = typename KalmanFilter::StateMatrix;
+    using InputMatrix = typename KalmanFilter::InputMatrix;
+    using ObservationMatrix = typename KalmanFilter::ObservationMatrix;
 
+    Config config;
     std::array<tap::communication::sensors::imu::AbstractIMU*, N> imus;
     std::array<tap::algorithms::transforms::Transform, N> imuTransforms;
 
+    // Per-IMU type and derived noise model selection.
+    std::array<ImuType, N> imuTypes;
+    std::array<typename Config::ImuNoiseDensity, N> perImuNoise;
+
+    float samplePeriodS = 0.001f;
+    uint32_t prevFilterUpdateTimeUs = 0;
+
     KalmanFilter kf;
     bool kfInitialized = false;
-    static constexpr float ACCEL_MEASUREMENT_VARIANCE = 1.8e-3f;
-    static constexpr float GYRO_MEASUREMENT_VARIANCE = 6.6e-6f;
+    bool reinitializeFilterAfterCalibration = false;
+
+    // Helpers for per-type selection and noise->variance conversion
+
+    static inline std::array<ImuType, N> makeDefaultImuTypes(ImuType type)
+    {
+        std::array<ImuType, N> types{};
+        for (size_t i = 0; i < N; i++)
+        {
+            types[i] = type;
+        }
+        return types;
+    }
+
+    static inline typename Config::ImuNoiseDensity selectNoiseForType(ImuType t, const Config& cfg)
+    {
+        switch (t)
+        {
+            case ImuType::MPU6500: return cfg.mpu6500Noise;
+            case ImuType::BMI088: return cfg.bmi088Noise;
+            case ImuType::ISM330DHCX: return cfg.ism330dhcxNoise;
+            default: return cfg.bmi088Noise;
+        }
+    }
+
+    static inline std::array<typename Config::ImuNoiseDensity, N> selectPerImuNoise(
+        const std::array<ImuType, N>& types,
+        const Config& cfg)
+    {
+        std::array<typename Config::ImuNoiseDensity, N> out{};
+        for (size_t i = 0; i < N; i++)
+        {
+            out[i] = selectNoiseForType(types[i], cfg);
+        }
+        return out;
+    }
+
+    inline float effectiveNoiseBandwidthHz() const
+    {
+        // BW = Fs/2 where Fs = 1/dt
+        const float dt = (samplePeriodS > 1.0e-9f) ? samplePeriodS : 1.0e-3f;
+        const float fs = 1.0f / dt;
+        float bw = 0.5f * fs;
+        if (bw < config.minEffectiveNoiseBandwidthHz) bw = config.minEffectiveNoiseBandwidthHz;
+        if (bw > config.maxEffectiveNoiseBandwidthHz) bw = config.maxEffectiveNoiseBandwidthHz;
+        return bw;
+    }
+
+    inline void measurementVarianceDiagForImu(
+        size_t imuIndex,
+        std::array<float, 3>& accelVarDiagOut,
+        std::array<float, 3>& gyroVarDiagOut) const
+    {
+        const float bw = effectiveNoiseBandwidthHz();
+
+        for (size_t a = 0; a < 3; a++)
+        {
+            const float nd_acc_mps2 =
+                (perImuNoise[imuIndex].accelNoiseDensityUgSqrtHz[a] * 1.0e-6f) *
+                tap::communication::sensors::imu::GRAVITY_MPS2;
+            accelVarDiagOut[a] = (nd_acc_mps2 * nd_acc_mps2) * bw;
+        }
+
+        for (size_t a = 0; a < 3; a++)
+        {
+            const float nd_gyr_rad =
+                modm::toRadian(perImuNoise[imuIndex].gyroNoiseDensityMdpsSqrtHz[a] * 1.0e-3f);
+            gyroVarDiagOut[a] = (nd_gyr_rad * nd_gyr_rad) * bw;
+        }
+    }
 
     void updateMeasurementCovariance(
         const std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N>&
-            states);
+            states,
+        const std::array<tap::algorithms::transforms::Vector, N>& accel,
+        const std::array<tap::algorithms::transforms::Vector, N>& gyro,
+        const std::array<bool, N>& validFlags);
+    void updateProcessCovariance(float dt);
 
     /**
      * Transform acceleration from IMU frame to fusion frame.
-     * Accounts for centripetal and Coriolis accelerations when IMU is at an offset
-     * position and the robot is rotating.
-     * 
+     *
      * @note Assumes the fusion frame origin is at the center of rotation of the rigid body.
-     * 
+     *
      * @param fusionToImu Transform from fusion frame to IMU frame (includes position offset)
      * @param imuAcc Acceleration measured by IMU in its own frame
      * @return Acceleration in fusion frame, corrected for inertial effects
@@ -122,7 +284,7 @@ private:
     /**
      * Transform angular velocity from IMU frame to fusion frame.
      * Accounts for the angular velocity of the reference frame transformation.
-     * 
+     *
      * @param fusionToImu Transform from fusion frame to IMU frame
      * @param imuGyro Angular velocity measured by IMU in its own frame
      * @return Angular velocity in fusion frame
@@ -162,7 +324,7 @@ private:
     }
 
     template <typename MatrixT>
-    static inline MatrixT makeDiagMatrix(const std::array<float, kStateSize>& diag)
+    static inline MatrixT makeStateDiagMatrix(const std::array<float, kStateSize>& diag)
     {
         MatrixT mat = MatrixT::Zero();
         for (size_t i = 0; i < kStateSize; i++)
@@ -172,30 +334,94 @@ private:
         return mat;
     }
 
-    static inline MatrixA makeA() { return makeDiagMatrix<MatrixA>(kADiag); }
-
-    static inline MatrixC makeC()
+    static inline void stateTransitionFunction(
+        const StateVector& state,
+        StateVector& predictedState,
+        float dt)
     {
-        MatrixC c = MatrixC::Zero();
+        (void)dt;
+        predictedState = state;
+    }
+
+    static inline void observationFunction(const StateVector& state, InputVector& predictedInput)
+    {
+        for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
+        {
+            const size_t base = imuIndex * kPerImuMeasurementSize;
+            predictedInput(static_cast<int>(base + 0), 0) = state(0, 0);
+            predictedInput(static_cast<int>(base + 1), 0) = state(1, 0);
+            predictedInput(static_cast<int>(base + 2), 0) = state(2, 0);
+            predictedInput(static_cast<int>(base + 3), 0) = state(3, 0);
+            predictedInput(static_cast<int>(base + 4), 0) = state(4, 0);
+            predictedInput(static_cast<int>(base + 5), 0) = state(5, 0);
+        }
+    }
+
+    static inline void stateJacobianFunction(
+        const StateVector& state,
+        StateMatrix& stateJacobian,
+        float dt)
+    {
+        (void)state;
+        (void)dt;
+        stateJacobian.setIdentity();
+    }
+
+    static inline void observationJacobianFunction(
+        const StateVector& state,
+        ObservationMatrix& observationJacobian)
+    {
+        (void)state;
+        observationJacobian.setZero();
         for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
         {
             const size_t rowBase = imuIndex * kPerImuMeasurementSize;
-            for (size_t row = 0; row < kPerImuMeasurementSize; row++)
-            {
-                c(static_cast<int>(rowBase + row), static_cast<int>(row)) = 1.0f;
-            }
+            observationJacobian(static_cast<int>(rowBase + 0), 0) = 1.0f;
+            observationJacobian(static_cast<int>(rowBase + 1), 1) = 1.0f;
+            observationJacobian(static_cast<int>(rowBase + 2), 2) = 1.0f;
+            observationJacobian(static_cast<int>(rowBase + 3), 3) = 1.0f;
+            observationJacobian(static_cast<int>(rowBase + 4), 4) = 1.0f;
+            observationJacobian(static_cast<int>(rowBase + 5), 5) = 1.0f;
         }
-        return c;
     }
 
-    static inline MatrixQ makeQ() { return makeDiagMatrix<MatrixQ>(kQDiag); }
-
-    static inline MatrixR makeR()
+    inline StateMatrix makeQ()
     {
-        return MatrixR::Zero();
+        std::array<float, kStateSize> qDiag = {
+            config.accelProcessVarianceRateDiag[0],
+            config.accelProcessVarianceRateDiag[1],
+            config.accelProcessVarianceRateDiag[2],
+            config.gyroProcessVarianceRateDiag[0],
+            config.gyroProcessVarianceRateDiag[1],
+            config.gyroProcessVarianceRateDiag[2]};
+        return makeStateDiagMatrix<StateMatrix>(qDiag);
     }
 
-    static inline MatrixP makeP0() { return makeDiagMatrix<MatrixP>(kP0Diag); }
+    inline InputMatrix makeR()
+    {
+        InputMatrix r = InputMatrix::Zero();
+
+        for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
+        {
+            std::array<float, 3> accVar{};
+            std::array<float, 3> gyrVar{};
+            measurementVarianceDiagForImu(imuIndex, accVar, gyrVar);
+
+            const size_t base = imuIndex * kPerImuMeasurementSize;
+            r(static_cast<int>(base + 0), static_cast<int>(base + 0)) = accVar[0];
+            r(static_cast<int>(base + 1), static_cast<int>(base + 1)) = accVar[1];
+            r(static_cast<int>(base + 2), static_cast<int>(base + 2)) = accVar[2];
+            r(static_cast<int>(base + 3), static_cast<int>(base + 3)) = gyrVar[0];
+            r(static_cast<int>(base + 4), static_cast<int>(base + 4)) = gyrVar[1];
+            r(static_cast<int>(base + 5), static_cast<int>(base + 5)) = gyrVar[2];
+        }
+        return r;
+    }
+
+    inline StateMatrix makeP0()
+    {
+        return makeStateDiagMatrix<StateMatrix>(config.initialStateVarianceDiag);
+    }
 
     template <size_t... Indices>
     static inline std::array<tap::algorithms::transforms::Vector, N> makeVectorArray(
@@ -210,7 +436,6 @@ private:
     {
         return makeVectorArray(value, std::make_index_sequence<N>{});
     }
-
 };
 
 template <size_t N>
@@ -235,7 +460,12 @@ template <size_t N>
 inline void FusedImu<N>::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 {
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
+    samplePeriodS = (sampleFrequency > 0.0f) ? (1.0f / sampleFrequency) : 0.001f;
+    prevFilterUpdateTimeUs = tap::arch::clock::getTimeMicroseconds();
+
+    updateProcessCovariance(samplePeriodS);
     kfInitialized = false;
+    reinitializeFilterAfterCalibration = true;
     requestCalibration();
 }
 
@@ -251,11 +481,24 @@ inline void FusedImu<N>::requestCalibration()
     }
 
     AbstractIMU::requestCalibration();
+    reinitializeFilterAfterCalibration = true;
 }
 
 template <size_t N>
 inline void FusedImu<N>::periodicIMUUpdate()
 {
+    const uint32_t nowUs = tap::arch::clock::getTimeMicroseconds();
+    if (prevFilterUpdateTimeUs != 0)
+    {
+        const uint32_t deltaUs = nowUs - prevFilterUpdateTimeUs;
+        const float dynamicDt = static_cast<float>(deltaUs) * 1.0e-6f;
+        if (dynamicDt > 1.0e-6f && dynamicDt < 0.1f)
+        {
+            samplePeriodS = dynamicDt;
+        }
+    }
+    prevFilterUpdateTimeUs = nowUs;
+
     auto states = getImuStates();
     auto combined = combineImuStates(states);
     if (imuState == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
@@ -305,7 +548,14 @@ inline void FusedImu<N>::periodicIMUUpdate()
         }
     }
 
-    updateMeasurementCovariance(states);
+    updateMeasurementCovariance(states, accel, gyro, validFlags);
+
+    // Reinitialize fused EKF state/covariance on first valid sample after calibration finishes.
+    if (reinitializeFilterAfterCalibration &&
+        imuState != tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+    {
+        kfInitialized = false;
+    }
 
     if (!kfInitialized && anyValid)
     {
@@ -319,11 +569,12 @@ inline void FusedImu<N>::periodicIMUUpdate()
         };
         kf.init(initialX);
         kfInitialized = true;
+        reinitializeFilterAfterCalibration = false;
     }
 
     if (kfInitialized)
     {
-        VectorY y;
+        InputVector y;
         tap::algorithms::transforms::Vector fallbackAccel(0.0f, 0.0f, 0.0f);
         tap::algorithms::transforms::Vector fallbackGyro(0.0f, 0.0f, 0.0f);
         const auto& x = kf.getStateVectorAsMatrix();
@@ -352,7 +603,8 @@ inline void FusedImu<N>::periodicIMUUpdate()
             }
         }
 
-        kf.performUpdate(y);
+        updateProcessCovariance(samplePeriodS);
+        (void)kf.performUpdate(y, samplePeriodS);
     }
 
     if (kfInitialized && anyValid)
@@ -365,13 +617,11 @@ inline void FusedImu<N>::periodicIMUUpdate()
         imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(x[3], x[4], x[5]);
         prevImuState = imuState;
     }
-    else
-    {
-        // No valid IMU data available
+    else {
+        // No valid IMU data available, reset to zero
         imuData.accG = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
         imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
         prevImuState = imuState;
-        imuState = ImuState::IMU_NOT_CONNECTED;
     }
 
     imuData.temperature = (temperatureCount > 0) ? temperatureSum / temperatureCount : 0.0f;
@@ -381,38 +631,91 @@ inline void FusedImu<N>::periodicIMUUpdate()
 
 template <size_t N>
 inline void FusedImu<N>::updateMeasurementCovariance(
-    const std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N>& states)
+    const std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N>& states,
+    const std::array<tap::algorithms::transforms::Vector, N>& accel,
+    const std::array<tap::algorithms::transforms::Vector, N>& gyro,
+    const std::array<bool, N>& validFlags)
 {
     auto& r = kf.getMeasurementCovariance();
-    
-    // Initialize entire covariance matrix to zero
+
     for (size_t i = 0; i < r.size(); i++)
     {
         r[i] = 0.0f;
     }
-    
-    // Set diagonal elements for each IMU's measurements
-    // R is a diagonal matrix where each IMU's measurements have independent noise
+
+    const auto& x = kf.getStateVectorAsMatrix();
+    const tap::algorithms::transforms::Vector predictedAccel(x[0], x[1], x[2]);
+    const tap::algorithms::transforms::Vector predictedGyro(x[3], x[4], x[5]);
+
     for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
     {
-        // Use different variances based on IMU connection state
         const bool connected = isConnected(states[imuIndex]);
-        const bool valid = connected && isValid(states[imuIndex]);
-        
-        // Higher variance for invalid/disconnected IMUs to reduce their influence
-        const float accelVar = valid ? ACCEL_MEASUREMENT_VARIANCE : ACCEL_MEASUREMENT_VARIANCE * 100.0f;
-        const float gyroVar = valid ? GYRO_MEASUREMENT_VARIANCE : GYRO_MEASUREMENT_VARIANCE * 100.0f;
+        const bool valid = connected && isValid(states[imuIndex]) && validFlags[imuIndex];
+
+        float accelMultiplier = 1.0f;
+        float gyroMultiplier = 1.0f;
+
+        if (!valid)
+        {
+            accelMultiplier = config.offlineMeasurementVarianceMultiplier;
+            gyroMultiplier = config.offlineMeasurementVarianceMultiplier;
+        }
+        else if (kfInitialized)
+        {
+            const float accelResidualNorm = std::sqrt(
+                std::pow(accel[imuIndex].x() - predictedAccel.x(), 2.0f) +
+                std::pow(accel[imuIndex].y() - predictedAccel.y(), 2.0f) +
+                std::pow(accel[imuIndex].z() - predictedAccel.z(), 2.0f));
+            const float gyroResidualNorm = std::sqrt(
+                std::pow(gyro[imuIndex].x() - predictedGyro.x(), 2.0f) +
+                std::pow(gyro[imuIndex].y() - predictedGyro.y(), 2.0f) +
+                std::pow(gyro[imuIndex].z() - predictedGyro.z(), 2.0f));
+
+            if (accelResidualNorm > config.accelInnovationGate)
+            {
+                const float ratio = accelResidualNorm / config.accelInnovationGate;
+                const float adaptiveScale = ratio * ratio * config.outlierVarianceMultiplier;
+                accelMultiplier = std::fmin(adaptiveScale, config.maxInnovationVarianceMultiplier);
+            }
+            if (gyroResidualNorm > config.gyroInnovationGate)
+            {
+                const float ratio = gyroResidualNorm / config.gyroInnovationGate;
+                const float adaptiveScale = ratio * ratio * config.outlierVarianceMultiplier;
+                gyroMultiplier = std::fmin(adaptiveScale, config.maxInnovationVarianceMultiplier);
+            }
+        }
+
+        std::array<float, 3> accVar{};
+        std::array<float, 3> gyrVar{};
+        measurementVarianceDiagForImu(imuIndex, accVar, gyrVar);
 
         const size_t base = imuIndex * kPerImuMeasurementSize;
-        
-        // Set diagonal elements: R[i,i] = r[i * kMeasurementSize + i]
-        r[(base + 0) * kMeasurementSize + (base + 0)] = accelVar;  // accel X
-        r[(base + 1) * kMeasurementSize + (base + 1)] = accelVar;  // accel Y
-        r[(base + 2) * kMeasurementSize + (base + 2)] = accelVar;  // accel Z
-        r[(base + 3) * kMeasurementSize + (base + 3)] = gyroVar;   // gyro X
-        r[(base + 4) * kMeasurementSize + (base + 4)] = gyroVar;   // gyro Y
-        r[(base + 5) * kMeasurementSize + (base + 5)] = gyroVar;   // gyro Z
+        r[(base + 0) * kMeasurementSize + (base + 0)] = accVar[0] * accelMultiplier;
+        r[(base + 1) * kMeasurementSize + (base + 1)] = accVar[1] * accelMultiplier;
+        r[(base + 2) * kMeasurementSize + (base + 2)] = accVar[2] * accelMultiplier;
+        r[(base + 3) * kMeasurementSize + (base + 3)] = gyrVar[0] * gyroMultiplier;
+        r[(base + 4) * kMeasurementSize + (base + 4)] = gyrVar[1] * gyroMultiplier;
+        r[(base + 5) * kMeasurementSize + (base + 5)] = gyrVar[2] * gyroMultiplier;
     }
+}
+
+template <size_t N>
+inline void FusedImu<N>::updateProcessCovariance(float dt)
+{
+    const float clampedDt = (dt > 1.0e-6f) ? dt : 1.0e-3f;
+    auto& q = kf.getProcessCovariance();
+
+    for (size_t i = 0; i < q.size(); i++)
+    {
+        q[i] = 0.0f;
+    }
+
+    q[0 * kStateSize + 0] = config.accelProcessVarianceRateDiag[0] * clampedDt;
+    q[1 * kStateSize + 1] = config.accelProcessVarianceRateDiag[1] * clampedDt;
+    q[2 * kStateSize + 2] = config.accelProcessVarianceRateDiag[2] * clampedDt;
+    q[3 * kStateSize + 3] = config.gyroProcessVarianceRateDiag[0] * clampedDt;
+    q[4 * kStateSize + 4] = config.gyroProcessVarianceRateDiag[1] * clampedDt;
+    q[5 * kStateSize + 5] = config.gyroProcessVarianceRateDiag[2] * clampedDt;
 }
 
 template <size_t N>
@@ -420,38 +723,22 @@ inline tap::algorithms::transforms::Vector FusedImu<N>::transformAcceleration(
     const tap::algorithms::transforms::Transform& fusionToImu,
     const tap::algorithms::transforms::Vector& imuAcc) const
 {
-    // Transform chain: IMU frame -> Fusion frame -> Robot mounting frame
-    // fusionToImu: fusion frame to IMU frame (includes IMU position offset and orientation)
-    // imuToFusion: IMU frame to fusion frame (inverse of fusionToImu)
-    // mountingTransform: fusion frame to robot mounting frame
     const auto imuToFusion = mountingTransform.compose(fusionToImu.getInverse());
-    
-    // For IMUs mounted at different positions on a rotating robot, we must account for:
-    // 1. Centripetal acceleration: ω × (ω × r) where r is IMU position offset
-    // 2. Euler acceleration: α × r (if angular acceleration present)
-    // 3. Coriolis acceleration: 2ω × v (but v=0 for rigidly mounted IMU in robot frame)
-    // 
-    // The DynamicPosition transform handles these automatically via:
-    //   af = R^T * (a - a_frame + ω × (2*(v_frame - v) + ω × (r - r_frame)))
-    // 
-    // Construct DynamicPosition at the IMU mounting location:
-    // - position: IMU offset from fusion center (encoded in fusionToImu.translation)
-    // - velocity: v = ω × r for rigidly mounted IMU
-    // - acceleration: what the IMU measures in its own frame
+
     const auto imuPosition = fusionToImu.getTranslation();
     const auto fusionAngVel = fusionToImu.getAngularVel();
-    
-    // For rigidly mounted IMU: v_imu = ω_fusion × r_imu
+
+    // For rigidly mounted IMU: v_imu = w_fusion x r_imu
     const auto imuVelocity = tap::algorithms::transforms::Vector(
         fusionAngVel.y() * imuPosition.z() - fusionAngVel.z() * imuPosition.y(),
         fusionAngVel.z() * imuPosition.x() - fusionAngVel.x() * imuPosition.z(),
         fusionAngVel.x() * imuPosition.y() - fusionAngVel.y() * imuPosition.x());
-    
+
     const tap::algorithms::transforms::DynamicPosition imuDynamics(
         imuPosition.x(), imuPosition.y(), imuPosition.z(),
         imuVelocity.x(), imuVelocity.y(), imuVelocity.z(),
         imuAcc.x(), imuAcc.y(), imuAcc.z());
-    
+
     return imuToFusion.apply(imuDynamics).getAcceleration();
 }
 
@@ -460,25 +747,17 @@ inline tap::algorithms::transforms::Vector FusedImu<N>::transformGyro(
     const tap::algorithms::transforms::Transform& fusionToImu,
     const tap::algorithms::transforms::Vector& imuGyro) const
 {
-    // Transform chain: IMU frame -> Fusion frame -> Robot mounting frame
-    // fusionToImu: fusion frame to IMU frame (includes IMU orientation)
-    // imuToFusion: IMU frame to fusion frame (inverse of fusionToImu)
-    // mountingTransform: fusion frame to robot mounting frame
     const auto imuToFusion = mountingTransform.compose(fusionToImu.getInverse());
-    
-    // Angular velocity must account for the rotation of reference frames:
-    //   ω_out = R^T * (ω_in - ω_frame)
-    // where ω_frame is the angular velocity of the frame transformation itself.
-    // 
-    // The DynamicOrientation transform handles this automatically.
-    // Since IMU orientation is constant in robot frame, we use zero angular rate.
+
     const tap::algorithms::transforms::DynamicOrientation imuDynamics(
-        0.0f, 0.0f, 0.0f,  // orientation (not used, only ω matters for transform)
+        fusionToImu.getOrientation().getRoll(),
+        fusionToImu.getOrientation().getPitch(),
+        fusionToImu.getOrientation().getYaw(),
         imuGyro.x(), imuGyro.y(), imuGyro.z());
-    
+
     const auto fusedDynamics = imuToFusion.apply(imuDynamics);
     const auto fusedAngVel = fusedDynamics.getAngularVelocity();
-    
+
     return tap::algorithms::transforms::Vector(
         fusedAngVel.getRollVelocity(),
         fusedAngVel.getPitchVelocity(),

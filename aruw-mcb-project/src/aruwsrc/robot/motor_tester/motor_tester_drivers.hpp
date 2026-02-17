@@ -20,6 +20,8 @@
 #ifndef MOTOR_TESTER_DRIVERS_HPP_
 #define MOTOR_TESTER_DRIVERS_HPP_
 
+#include <cstddef>
+
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/communication/sensors/imu/fused_imu.hpp"
@@ -35,19 +37,33 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
+    static constexpr size_t FUSED_IMU_COUNT = 1;
+    using FusedImuType = communication::sensors::imu::FusedImu<FUSED_IMU_COUNT>;
+
     Drivers()
         : tap::Drivers(),
+          // Previous 2x ISM330 fused setup (kept for quick restore):
+          // ism330Primary(),
+          // ism330Secondary(
+          //     aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelect::
+          //         SECONDARY_DIGITAL_OUT_F),
           fusedImu(
-              std::array<tap::communication::sensors::imu::AbstractIMU*, 1>{&this->mpu6500},
-              std::array<tap::algorithms::transforms::Transform, 1>{
-                  tap::algorithms::transforms::Transform::identity()}),
+              std::array<tap::communication::sensors::imu::AbstractIMU*, FUSED_IMU_COUNT>{
+                  &this->mpu6500},
+              std::array<tap::algorithms::transforms::Transform, FUSED_IMU_COUNT>{
+                  tap::algorithms::transforms::Transform::identity()},
+              std::array<FusedImuType::ImuType, FUSED_IMU_COUNT>{
+                  FusedImuType::ImuType::MPU6500}),
           rttTelemetry(this),
           oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
     {
     }
 
 public:
-    communication::sensors::imu::FusedImu<1> fusedImu;
+    // Previous 2x ISM330 fused setup:
+    // communication::sensors::imu::ism330::ISM330 ism330Primary;
+    // communication::sensors::imu::ism330::ISM330 ism330Secondary;
+    FusedImuType fusedImu;
     communication::rtt::RttTelemetry rttTelemetry;
     display::OledDisplay oledDisplay;
 };  // class aruwsrc::MotortesterDrivers
