@@ -29,13 +29,20 @@ using namespace modm::literals;
 namespace aruwsrc::communication::sensors::imu::ism330
 {
 using namespace tap::communication::sensors::imu;
-ISM330::ISM330() : AbstractIMU(){};
+ISM330* ISM330::spiOwner = nullptr;
+ISM330::ISM330(ChipSelectPin chipSelectPin) : AbstractIMU(), chipSelectPin(chipSelectPin){};
 
 void ISM330::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 {
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
 #ifndef PLATFORM_HOSTED
-    Board::SpiNss::GpioOutput();
+    switch (chipSelectPin)
+    {
+        case ChipSelectPin::GPIO_D12_H_ROW: modm::platform::GpioD12::GpioOutput(); break;
+        case ChipSelectPin::BOARD_SPI_NSS:
+        default: Board::SpiNss::GpioOutput(); break;
+    }
+    ismNssHigh();
     Board::GenSpiMaster::connect<Board::SpiMiso::Miso, Board::SpiMosi::Mosi, Board::SpiSck::Sck>();
     Board::GenSpiMaster::initialize<Board::SystemClock, 5625000_Hz>();
     Board::GenSpiMaster::setDataMode(Board::GenSpiMaster::DataMode::Mode3);
@@ -56,6 +63,9 @@ bool ISM330::read()
     while (true)
     {
         PT_WAIT_UNTIL(readTimeout.execute());
+        PT_WAIT_UNTIL((spiOwner == nullptr) || (spiOwner == this));
+        spiOwner = this;
+
         tx = CTRL1_XL | ISM330_READ_BIT;
         rx = 0;
         ismNssLow();
@@ -93,6 +103,7 @@ bool ISM330::read()
                 prevImuState = imuState;
             }
             imuState = ImuState::IMU_NOT_CONNECTED;
+            spiOwner = nullptr;
             // We don't want to update IMU received data time.
             continue;
         }
@@ -128,6 +139,7 @@ bool ISM330::read()
         {
             imuState = prevImuState;
         }
+        spiOwner = nullptr;
     }
     PT_END();
     return true;
@@ -170,14 +182,28 @@ uint8_t ISM330::spiReadRegister(uint8_t reg)
 void ISM330::ismNssLow()
 {
 #ifndef PLATFORM_HOSTED
-    Board::SpiNss::setOutput(modm::GpioOutput::Low);
+    switch (chipSelectPin)
+    {
+        case ChipSelectPin::GPIO_D12_H_ROW:
+            modm::platform::GpioD12::setOutput(modm::GpioOutput::Low);
+            break;
+        case ChipSelectPin::BOARD_SPI_NSS:
+        default: Board::SpiNss::setOutput(modm::GpioOutput::Low); break;
+    }
 #endif
 }
 
 void ISM330::ismNssHigh()
 {
 #ifndef PLATFORM_HOSTED
-    Board::SpiNss::setOutput(modm::GpioOutput::High);
+    switch (chipSelectPin)
+    {
+        case ChipSelectPin::GPIO_D12_H_ROW:
+            modm::platform::GpioD12::setOutput(modm::GpioOutput::High);
+            break;
+        case ChipSelectPin::BOARD_SPI_NSS:
+        default: Board::SpiNss::setOutput(modm::GpioOutput::High); break;
+    }
 #endif
 }
 

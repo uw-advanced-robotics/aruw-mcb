@@ -71,7 +71,15 @@ public:
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, CAP_BANK_CAPACITANCE),
           chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
+#if defined(TARGET_SENTRY_NAME)
+          turretMajorImu(
+              aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::BOARD_SPI_NSS),
+          turretMajorImuSecondary(
+              aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::
+                  GPIO_D12_H_ROW),
+#else
           turretMajorImu(),
+#endif
           plateHitTracker(this),
           stateMachine(refSerial, visionCoprocessor)
     {
@@ -98,6 +106,9 @@ public:
     aruwsrc::communication::can::cap_bank::CapacitorBank capacitorBank;
     aruwsrc::communication::mcb_lite::MCBLite chassisMcbLite;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImu;
+#if defined(TARGET_SENTRY_NAME)
+    aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImuSecondary;
+#endif
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
     static constexpr float CAP_BANK_CAPACITANCE = 4.358f;

@@ -34,7 +34,13 @@ using namespace tap::communication::sensors::imu;
 class ISM330 : public AbstractIMU, public modm::pt::Protothread
 {
 public:
-    ISM330();
+    enum class ChipSelectPin : uint8_t
+    {
+        BOARD_SPI_NSS = 0,
+        GPIO_D12_H_ROW = 1,
+    };
+
+    explicit ISM330(ChipSelectPin chipSelectPin = ChipSelectPin::BOARD_SPI_NSS);
     DISALLOW_COPY_AND_ASSIGN(ISM330);
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
 
@@ -54,6 +60,9 @@ public:
     void setODR(OutputDataRate odr);
 
 private:
+    // Shared SPI bus ownership across ISM330 instances on the same SPI peripheral.
+    static ISM330* spiOwner;
+
     float gyroScale;
     float accelScale;
     ImuState prevImuState = ImuState::IMU_NOT_CONNECTED;
@@ -72,6 +81,7 @@ private:
     // Pre-computed register values for non-blocking writes (protothread use)
     static constexpr uint8_t DEFAULT_CTRL1_XL_VALUE = DEFAULT_ODR | DEFAULT_ACCEL_RANGE;
     static constexpr uint8_t DEFAULT_CTRL2_G_VALUE = DEFAULT_ODR | DEFAULT_GYRO_RANGE;
+    ChipSelectPin chipSelectPin;
 
     // Pull CS low to read / write.
     void ismNssLow();
