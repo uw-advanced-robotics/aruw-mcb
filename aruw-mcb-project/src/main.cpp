@@ -159,10 +159,11 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) || \
-    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER) ||  \
-    defined(TARGET_ENGI_2025) || defined(TARGET_TESTBED) || defined(TARGET_MOTOR_TESTER) ||     \
-    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || \
-    defined(TARGET_DRONE) || defined(TARGET_BLANK)
+    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME) || \
+    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_TESTBED) ||          \
+    defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) ||                            \
+    defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || defined(TARGET_DRONE) ||             \
+    defined(TARGET_BLANK)
 #if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
             PROFILE(drivers->profiler, ((Drivers*)drivers)->rttTelemetry.updateTelemetryAsync, ());
 #endif

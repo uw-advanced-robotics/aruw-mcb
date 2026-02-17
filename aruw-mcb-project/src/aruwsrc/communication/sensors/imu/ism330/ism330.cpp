@@ -38,6 +38,7 @@ void ISM330::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
     Board::SpiNss::GpioOutput();
     Board::GenSpiMaster::connect<Board::SpiMiso::Miso, Board::SpiMosi::Mosi, Board::SpiSck::Sck>();
     Board::GenSpiMaster::initialize<Board::SystemClock, 5625000_Hz>();
+    Board::GenSpiMaster::setDataMode(Board::GenSpiMaster::DataMode::Mode3);
     modm::delay_ms(10);
     setODR(DEFAULT_ODR);
     setGyroRange(DEFAULT_GYRO_RANGE);
