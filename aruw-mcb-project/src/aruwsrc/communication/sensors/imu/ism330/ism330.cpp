@@ -29,22 +29,13 @@ using namespace modm::literals;
 namespace aruwsrc::communication::sensors::imu::ism330
 {
 using namespace tap::communication::sensors::imu;
-ISM330::ISM330(ChipSelect chipSelect) : AbstractIMU(), chipSelect(chipSelect){};
+ISM330::ISM330() : AbstractIMU(){};
 
 void ISM330::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 {
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
 #ifndef PLATFORM_HOSTED
-    switch (chipSelect)
-    {
-        case ChipSelect::PRIMARY_SPI_NSS:
-            Board::SpiNss::GpioOutput();
-            break;
-        case ChipSelect::SECONDARY_DIGITAL_OUT_F:
-            Board::DigitalOutPinF::GpioOutput();
-            break;
-    }
-    ismNssHigh();
+    Board::SpiNss::GpioOutput();
     Board::GenSpiMaster::connect<Board::SpiMiso::Miso, Board::SpiMosi::Mosi, Board::SpiSck::Sck>();
     Board::GenSpiMaster::initialize<Board::SystemClock, 5625000_Hz>();
     modm::delay_ms(10);
@@ -178,30 +169,14 @@ uint8_t ISM330::spiReadRegister(uint8_t reg)
 void ISM330::ismNssLow()
 {
 #ifndef PLATFORM_HOSTED
-    switch (chipSelect)
-    {
-        case ChipSelect::PRIMARY_SPI_NSS:
-            Board::SpiNss::setOutput(modm::GpioOutput::Low);
-            break;
-        case ChipSelect::SECONDARY_DIGITAL_OUT_F:
-            Board::DigitalOutPinF::setOutput(modm::GpioOutput::Low);
-            break;
-    }
+    Board::SpiNss::setOutput(modm::GpioOutput::Low);
 #endif
 }
 
 void ISM330::ismNssHigh()
 {
 #ifndef PLATFORM_HOSTED
-    switch (chipSelect)
-    {
-        case ChipSelect::PRIMARY_SPI_NSS:
-            Board::SpiNss::setOutput(modm::GpioOutput::High);
-            break;
-        case ChipSelect::SECONDARY_DIGITAL_OUT_F:
-            Board::DigitalOutPinF::setOutput(modm::GpioOutput::High);
-            break;
-    }
+    Board::SpiNss::setOutput(modm::GpioOutput::High);
 #endif
 }
 

@@ -34,15 +34,7 @@ using namespace tap::communication::sensors::imu;
 class ISM330 : public AbstractIMU, public modm::pt::Protothread
 {
 public:
-    enum class ChipSelect
-    {
-        // Uses Board::SpiNss (GpioE4).
-        PRIMARY_SPI_NSS,
-        // Uses Board::DigitalOutPinF (GpioD14).
-        SECONDARY_DIGITAL_OUT_F,
-    };
-
-    explicit ISM330(ChipSelect chipSelect = ChipSelect::PRIMARY_SPI_NSS);
+    ISM330();
     DISALLOW_COPY_AND_ASSIGN(ISM330);
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
 
@@ -62,7 +54,6 @@ public:
     void setODR(OutputDataRate odr);
 
 private:
-    ChipSelect chipSelect;
     float gyroScale;
     float accelScale;
     ImuState prevImuState = ImuState::IMU_NOT_CONNECTED;

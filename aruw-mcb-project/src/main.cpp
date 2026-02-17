@@ -120,11 +120,6 @@ int main()
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
-#if defined(TARGET_MOTOR_TESTER)
-            // PROFILE(drivers->profiler, ((Drivers *)drivers)->ism330Primary.periodicIMUUpdate, ());
-            // PROFILE(drivers->profiler, ((Drivers *)drivers)->ism330Secondary.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, ((Drivers *)drivers)->fusedImu.periodicIMUUpdate, ());
-#endif
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
@@ -208,13 +203,6 @@ static void initializeIo(Drivers* drivers)
     defined(TARGET_LAUNCHER_TARGET)
     ((Drivers*)drivers)->oledDisplay.initialize();
 #endif
-#if defined(TARGET_MOTOR_TESTER)
-    // ((Drivers*)drivers)->ism330Primary.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    // ((Drivers*)drivers)->ism330Secondary.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    // ((Drivers*)drivers)->ism330Primary.setCalibrationSamples(2000);
-    // ((Drivers*)drivers)->ism330Secondary.setCalibrationSamples(2000);
-    ((Drivers *)drivers)->fusedImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-#endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
@@ -259,11 +247,6 @@ static void updateIo(Drivers* drivers)
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->mpu6500.read();
-
-#if defined(TARGET_MOTOR_TESTER)
-    // ((Drivers*)drivers)->ism330Primary.read();
-    // ((Drivers*)drivers)->ism330Secondary.read();
-#endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
