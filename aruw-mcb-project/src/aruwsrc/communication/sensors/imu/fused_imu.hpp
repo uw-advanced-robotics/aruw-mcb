@@ -405,7 +405,7 @@ inline void FusedImu<N>::initialize(float sampleFrequency, float mahonyKp, float
     updateProcessCovariance(samplePeriodS);
     kfInitialized = false;
     reinitializeFilterAfterCalibration = true;
-    requestCalibration();
+    // requestCalibration();
 }
 
 template <size_t N>
