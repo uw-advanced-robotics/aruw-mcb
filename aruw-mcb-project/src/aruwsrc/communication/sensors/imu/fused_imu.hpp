@@ -26,7 +26,7 @@
 #include <cstdint>
 #include <utility>
 
-#include "aruwsrc/algorithms/eigen_extended_kalman_filter.hpp"
+#include "aruwsrc/communication/sensors/imu/fused_imu_eigen_ekf.hpp"
 #include "tap/algorithms/transforms/dynamic_orientation.hpp"
 #include "tap/algorithms/transforms/dynamic_position.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
@@ -129,14 +129,7 @@ public:
           imuTransforms(transforms),
           imuTypes(imuTypes),
           perImuNoise(selectPerImuNoise(imuTypes, config)),
-          kf(
-              stateTransitionFunction,
-              observationFunction,
-              stateJacobianFunction,
-              nullptr,
-              makeQ(),
-              makeR(),
-              makeP0())
+          filter(makeQ(), makeR(), makeP0())
     {
         updateProcessCovariance(1.0f);
         const auto zeroVec = makeVectorArray(tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f));
@@ -168,13 +161,10 @@ private:
 
     ImuState prevImuState;
 
-    using KalmanFilter =
-        aruwsrc::algorithms::EigenExtendedKalmanFilter<kStateSize, kMeasurementSize>;
-    using StateVector = typename KalmanFilter::StateVector;
-    using InputVector = typename KalmanFilter::InputVector;
-    using StateMatrix = typename KalmanFilter::StateMatrix;
-    using InputMatrix = typename KalmanFilter::InputMatrix;
-    using ObservationMatrix = typename KalmanFilter::ObservationMatrix;
+    using FilterWrapper = aruwsrc::communication::sensors::imu::FusedImuEigenEkf<N>;
+    using InputVector = typename FilterWrapper::InputVector;
+    using StateMatrix = typename FilterWrapper::StateMatrix;
+    using InputMatrix = typename FilterWrapper::InputMatrix;
 
     Config config;
     std::array<tap::communication::sensors::imu::AbstractIMU*, N> imus;
@@ -187,7 +177,7 @@ private:
     float samplePeriodS = 0.001f;
     uint32_t prevFilterUpdateTimeUs = 0;
 
-    KalmanFilter kf;
+    FilterWrapper filter;
     bool kfInitialized = false;
     bool reinitializeFilterAfterCalibration = false;
 
@@ -332,41 +322,6 @@ private:
             mat(static_cast<int>(i), static_cast<int>(i)) = diag[i];
         }
         return mat;
-    }
-
-    static __attribute__((noinline)) void stateTransitionFunction(
-        const StateVector& state,
-        StateVector& predictedState,
-        float dt)
-    {
-        (void)dt;
-        predictedState = state;
-    }
-
-    static __attribute__((noinline)) void observationFunction(
-        const StateVector& state,
-        InputVector& predictedInput)
-    {
-        for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
-        {
-            const size_t base = imuIndex * kPerImuMeasurementSize;
-            predictedInput(static_cast<int>(base + 0), 0) = state(0, 0);
-            predictedInput(static_cast<int>(base + 1), 0) = state(1, 0);
-            predictedInput(static_cast<int>(base + 2), 0) = state(2, 0);
-            predictedInput(static_cast<int>(base + 3), 0) = state(3, 0);
-            predictedInput(static_cast<int>(base + 4), 0) = state(4, 0);
-            predictedInput(static_cast<int>(base + 5), 0) = state(5, 0);
-        }
-    }
-
-    static __attribute__((noinline)) void stateJacobianFunction(
-        const StateVector& state,
-        StateMatrix& stateJacobian,
-        float dt)
-    {
-        (void)state;
-        (void)dt;
-        stateJacobian.setIdentity();
     }
 
     inline StateMatrix makeQ()
@@ -551,7 +506,7 @@ inline void FusedImu<N>::periodicIMUUpdate()
             gyro[firstValidIndex].y(),
             gyro[firstValidIndex].z(),
         };
-        kf.init(initialX);
+        filter.init(initialX);
         kfInitialized = true;
         reinitializeFilterAfterCalibration = false;
     }
@@ -561,7 +516,7 @@ inline void FusedImu<N>::periodicIMUUpdate()
         InputVector y;
         tap::algorithms::transforms::Vector fallbackAccel(0.0f, 0.0f, 0.0f);
         tap::algorithms::transforms::Vector fallbackGyro(0.0f, 0.0f, 0.0f);
-        const auto& x = kf.getStateVectorAsMatrix();
+        const auto& x = filter.getStateVectorAsMatrix();
         fallbackAccel = tap::algorithms::transforms::Vector(x[0], x[1], x[2]);
         fallbackGyro = tap::algorithms::transforms::Vector(x[3], x[4], x[5]);
         for (size_t i = 0; i < N; i++)
@@ -588,7 +543,7 @@ inline void FusedImu<N>::periodicIMUUpdate()
         }
 
         updateProcessCovariance(samplePeriodS);
-        (void)kf.performUpdate(y, samplePeriodS);
+        (void)filter.performUpdate(y, samplePeriodS);
     }
 
     if (kfInitialized && anyValid)
@@ -596,7 +551,7 @@ inline void FusedImu<N>::periodicIMUUpdate()
         // Use Kalman filter output as the fused sensor readings
         // Since we're fusing already-processed IMU data (using getAx(), getGx() etc.),
         // we output to the processed values (accG, gyroRadPerSec) not raw tick values
-        const auto& x = kf.getStateVectorAsMatrix();
+        const auto& x = filter.getStateVectorAsMatrix();
         imuData.accG = tap::algorithms::transforms::Vector(x[0], x[1], x[2]);
         imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(x[3], x[4], x[5]);
         prevImuState = imuState;
@@ -620,14 +575,14 @@ inline void FusedImu<N>::updateMeasurementCovariance(
     const std::array<tap::algorithms::transforms::Vector, N>& gyro,
     const std::array<bool, N>& validFlags)
 {
-    auto& r = kf.getMeasurementCovariance();
+    auto& r = filter.getMeasurementCovariance();
 
     for (size_t i = 0; i < r.size(); i++)
     {
         r[i] = 0.0f;
     }
 
-    const auto& x = kf.getStateVectorAsMatrix();
+    const auto& x = filter.getStateVectorAsMatrix();
     const tap::algorithms::transforms::Vector predictedAccel(x[0], x[1], x[2]);
     const tap::algorithms::transforms::Vector predictedGyro(x[3], x[4], x[5]);
 
@@ -687,7 +642,7 @@ template <size_t N>
 inline void FusedImu<N>::updateProcessCovariance(float dt)
 {
     const float clampedDt = (dt > 1.0e-6f) ? dt : 1.0e-3f;
-    auto& q = kf.getProcessCovariance();
+    auto& q = filter.getProcessCovariance();
 
     for (size_t i = 0; i < q.size(); i++)
     {

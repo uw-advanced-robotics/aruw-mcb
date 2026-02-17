@@ -1,0 +1,114 @@
+/*
+ * Copyright (c) 2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_EIGEN_EKF_HPP_
+#define ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_EIGEN_EKF_HPP_
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+
+#include "aruwsrc/algorithms/eigen_extended_kalman_filter.hpp"
+
+namespace aruwsrc::communication::sensors::imu
+{
+/**
+ * EKF wrapper specialized for fused IMU state/measurement model.
+ *
+ * State x: [ax, ay, az, gx, gy, gz]^T
+ * Measurement z: N stacked copies of state (one per IMU).
+ */
+template <size_t N>
+class FusedImuEigenEkf
+{
+public:
+    static constexpr uint16_t kStateSize = 6;
+    static constexpr uint16_t kMeasurementSize = static_cast<uint16_t>(N * 6);
+
+    using KalmanFilter = aruwsrc::algorithms::EigenExtendedKalmanFilter<kStateSize, kMeasurementSize>;
+    using StateVector = typename KalmanFilter::StateVector;
+    using InputVector = typename KalmanFilter::InputVector;
+    using StateMatrix = typename KalmanFilter::StateMatrix;
+    using InputMatrix = typename KalmanFilter::InputMatrix;
+    using ObservationMatrix = typename KalmanFilter::ObservationMatrix;
+
+    FusedImuEigenEkf(const StateMatrix& q, const InputMatrix& r, const StateMatrix& p0)
+        : ekf(
+              stateTransitionFunction,
+              observationFunction,
+              stateJacobianFunction,
+              nullptr,
+              q,
+              r,
+              p0)
+    {
+    }
+
+    inline void init(const float (&initialX)[kStateSize]) { ekf.init(initialX); }
+    inline int performUpdate(const InputVector& z, float dt) { return ekf.performUpdate(z, dt); }
+
+    inline const std::array<float, kStateSize>& getStateVectorAsMatrix() const
+    {
+        return ekf.getStateVectorAsMatrix();
+    }
+
+    inline std::array<float, kMeasurementSize * kMeasurementSize>& getMeasurementCovariance()
+    {
+        return ekf.getMeasurementCovariance();
+    }
+
+    inline std::array<float, kStateSize * kStateSize>& getProcessCovariance()
+    {
+        return ekf.getProcessCovariance();
+    }
+
+private:
+    static void stateTransitionFunction(const StateVector& state, StateVector& predictedState, float dt)
+    {
+        (void)dt;
+        predictedState = state;
+    }
+
+    static void observationFunction(const StateVector& state, InputVector& predictedInput)
+    {
+        for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
+        {
+            const size_t base = imuIndex * 6;
+            predictedInput(static_cast<int>(base + 0), 0) = state(0, 0);
+            predictedInput(static_cast<int>(base + 1), 0) = state(1, 0);
+            predictedInput(static_cast<int>(base + 2), 0) = state(2, 0);
+            predictedInput(static_cast<int>(base + 3), 0) = state(3, 0);
+            predictedInput(static_cast<int>(base + 4), 0) = state(4, 0);
+            predictedInput(static_cast<int>(base + 5), 0) = state(5, 0);
+        }
+    }
+
+    static void stateJacobianFunction(const StateVector& state, StateMatrix& stateJacobian, float dt)
+    {
+        (void)state;
+        (void)dt;
+        stateJacobian.setIdentity();
+    }
+
+    KalmanFilter ekf;
+};
+
+}  // namespace aruwsrc::communication::sensors::imu
+
+#endif  // ARUWSRC_COMMUNICATION_SENSORS_IMU_FUSED_IMU_EIGEN_EKF_HPP_
