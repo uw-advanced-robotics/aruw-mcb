@@ -125,7 +125,7 @@ int main()
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_SENTRY_NAME)
-            ((Drivers *)drivers)->plateHitTracker.update();
+            ((Drivers*)drivers)->plateHitTracker.update();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
@@ -203,7 +203,7 @@ static void initializeIo(Drivers* drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
     defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
-    ((Drivers *)drivers)->oledDisplay.initialize();
+    ((Drivers*)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
@@ -253,7 +253,7 @@ static void updateIo(Drivers* drivers)
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
     defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
-    ((Drivers *)drivers)->oledDisplay.updateDisplay();
+    ((Drivers*)drivers)->oledDisplay.updateDisplay();
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
