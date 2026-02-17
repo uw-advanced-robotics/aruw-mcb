@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARUWSRC_EIGEN_KALMAN_FILTER_HPP_
-#define ARUWSRC_EIGEN_KALMAN_FILTER_HPP_
+#ifndef EIGEN_KALMAN_FILTER_HPP_
+#define EIGEN_KALMAN_FILTER_HPP_
 
 #include <array>
 #include <cinttypes>
@@ -197,4 +197,4 @@ private:
 };
 }  // namespace aruwsrc::algorithms
 
-#endif  // ARUWSRC_EIGEN_KALMAN_FILTER_HPP_
+#endif  // EIGEN_KALMAN_FILTER_HPP_
