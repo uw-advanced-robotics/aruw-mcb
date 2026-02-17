@@ -23,13 +23,8 @@
 
 namespace aruwsrc::standard
 {
-float StandardTurretSubsystem::getWorldYaw() const { return getTurretMCB()->getYaw(); }
+float StandardTurretSubsystem::getWorldYaw() const { return getIMU()->getYaw(); }
 
-float StandardTurretSubsystem::getWorldPitch() const { return getTurretMCB()->getPitch(); }
-
-uint32_t StandardTurretSubsystem::getLastMeasurementTimeMicros() const
-{
-    return getTurretMCB()->getIMUDataTimestamp();
-}
+float StandardTurretSubsystem::getWorldPitch() const { return getIMU()->getPitch(); }
 
 }  // namespace aruwsrc::standard

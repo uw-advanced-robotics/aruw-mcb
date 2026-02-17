@@ -32,6 +32,8 @@
 #include "aruwsrc/robot/testbed/testbed_chassis_constants.hpp"
 #elif defined(TARGET_SENTRY_ECLIPSE)
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
+#elif defined(TARGET_ENGI_2025)
+#include "aruwsrc/robot/2025engineer/engineer_chassis_constants.hpp"
 #else  // by default use engineer constants (for robots that don't use them)
 #include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"
 #endif

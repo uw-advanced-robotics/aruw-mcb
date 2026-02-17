@@ -36,8 +36,10 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
-#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
+#
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
@@ -133,6 +135,9 @@ using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::standard;
+
+// for fake sentry
+// using namespace aruwsrc::sentry::chassis;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -278,6 +283,8 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     rightFrontChassisMotor,
     rightBackChassisMotor,
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
+    aruwsrc::control::chassis::WHEEL_RADIUS,
+    aruwsrc::control::chassis::WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
 
 tap::encoder::CanEncoder parallelOmni(
@@ -360,7 +367,10 @@ StandardAndHeroTransformer transformer(odometrySubsystem, turret);
 StandardAndHeroTransformer kfTransformer(chassisKFOdometrySubsystem, turret);
 StandardAndHeroTransformer cfTransformer(chassisCFOdometrySubsystem, turret);
 
-StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+StandardAnderHeroTransformerSubsystem transformSubsystem(
+    *drivers(),
+    transformer,
+    &drivers()->rttTelemetry);
 StandardAnderHeroTransformerSubsystem kfTransformSubsystem(*drivers(), kfTransformer);
 StandardAnderHeroTransformerSubsystem cfTransformSubsystem(*drivers(), cfTransformer);
 
@@ -801,6 +811,7 @@ HoldRepeatCommandMapping rightSwitchMiddle(
     {&spinFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
     true);
+
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
@@ -812,6 +823,7 @@ HoldRepeatCommandMapping leftSwitchDown(
     {&autoNavBeybladeResetCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
+
 HoldCommandMapping leftSwitchUp(
     drivers(),
     {&autoNavBeybladeKfResetCommand},

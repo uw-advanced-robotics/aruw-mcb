@@ -20,7 +20,7 @@ import subprocess
 from SCons.Script import *
 
 ROBOT_IPS = {
-    "TARGET_STANDARD_NULL": "192.168.1.143",
+    "TARGET_STANDARD_NULL": "192.168.1.144",
     "TARGET_STANDARD_VOID": "192.168.1.166",
     "TARGET_SENTRY_ECLIPSE": "192.168.1.231",
     "TARGET_HERO_ZERO": "192.168.1.169",

@@ -19,6 +19,8 @@
 
 #include "chassis_cf_odometry.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/architecture/clock.hpp"
 
 namespace aruwsrc::algorithms::odometry
@@ -61,9 +63,7 @@ void ChassisCFOdometry::update()
     float chassis_x_vel, chassis_y_vel;
 
     modm::Matrix<float, 3, 1> chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
-    tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
-        chassisVelocity,
-        chassisYaw);
+    tap::algorithms::odometry::getVelocityWorldRelative(chassisVelocity, chassisYaw);
 
     chassis_x_vel = chassisVelocity[0][0] * WHEEL_RADIUS_SCALE;
     chassis_y_vel = chassisVelocity[1][0] * WHEEL_RADIUS_SCALE;

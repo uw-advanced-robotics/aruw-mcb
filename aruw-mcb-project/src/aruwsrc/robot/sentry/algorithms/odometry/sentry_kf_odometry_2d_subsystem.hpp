@@ -25,7 +25,7 @@
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/odometry/deadwheel_chassis_kf_odometry.hpp"
+#include "aruwsrc/algorithms/odometry/two_deadwheel_chassis_kf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "modm/math/geometry/location_2d.hpp"
@@ -48,8 +48,9 @@ class ChassisSubsystemInterface;
 
 namespace aruwsrc::sentry::algorithms::odometry
 {
-class SentryKFOdometry2DSubsystem : public tap::control::Subsystem,
-                                    public aruwsrc::algorithms::odometry::DeadwheelChassisKFOdometry
+class SentryKFOdometry2DSubsystem
+    : public tap::control::Subsystem,
+      public aruwsrc::algorithms::odometry::TwoDeadwheelChassisKFOdometry
 {
 public:
     /**

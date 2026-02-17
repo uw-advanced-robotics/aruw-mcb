@@ -19,6 +19,8 @@
 
 #include "chassis_kf_odometry.hpp"
 
+#include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::algorithms::odometry
@@ -56,9 +58,7 @@ void ChassisKFOdometry::update()
 
     // get chassis frame velocity as measured by the motor encoders
     auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
-    tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
-        chassisVelocity,
-        chassisYaw);
+    tap::algorithms::odometry::getVelocityWorldRelative(chassisVelocity, chassisYaw);
     chassisVelocity[0][0] *= WHEEL_RADIUS_SCALE;
     chassisVelocity[1][0] *= WHEEL_RADIUS_SCALE;
 
