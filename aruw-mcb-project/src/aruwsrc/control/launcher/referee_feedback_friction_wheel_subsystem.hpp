@@ -62,7 +62,7 @@ public:
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-        const tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
+        const tap::algorithms::SmoothPidConfig speedCorrectionPidConfig = {})
         : FrictionWheelSubsystem<NUM_WHEELS>(
               drivers,
               wheels,
@@ -81,7 +81,7 @@ public:
         FlywheelConfig wheelConfig,
         const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
         tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-        const tap::algorithms::SmoothPidConfig *speedCorrectionPidConfig = nullptr)
+        const tap::algorithms::SmoothPidConfig speedCorrectionPidConfig = {})
         : FrictionWheelSubsystem<NUM_WHEELS>(
               drivers,
               wheels,
