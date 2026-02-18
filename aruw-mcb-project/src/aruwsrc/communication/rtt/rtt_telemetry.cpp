@@ -23,6 +23,7 @@
 
 #include "tap/architecture/clock.hpp"
 
+#include "aruwsrc/build_info.hpp"
 #include "aruwsrc/communication/rtt/create_rtt_error.hpp"
 #include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
 
@@ -325,37 +326,7 @@ void RttTelemetry::sendQueuedMessages(bool ozone)
 
 void RttTelemetry::logHeartbeatInfo()
 {
-    const char* robotName;
-// this is stupid
-#if defined(TARGET_STANDARD_NULL)
-    robotName = "TARGET_STANDARD_NULL";
-#elif defined(TARGET_STANDARD_VOID)
-    robotName = "TARGET_STANDARD_VOID";
-#elif defined(TARGET_DRONE)
-    robotName = "TARGET_DRONE";
-#elif defined(TARGET_ENGINEER)
-    robotName = "TARGET_ENGINEER";
-#elif defined(TARGET_ENGI_2025)
-    robotName = "TARGET_ENGI_2025";
-#elif defined(TARGET_SENTRY_ECLIPSE)
-    robotName = "TARGET_SENTRY_ECLIPSE";
-#elif defined(TARGET_HERO_ZERO)
-    robotName = "TARGET_HERO_ZERO";
-#elif defined(TARGET_DART)
-    robotName = "TARGET_DART";
-#elif defined(TARGET_TESTBED)
-    robotName = "TARGET_TESTBED";
-#elif defined(TARGET_BLANK)
-    robotName = "TARGET_BLANK";
-#elif defined(TARGET_MOTOR_TESTER)
-    robotName = "TARGET_MOTOR_TESTER";
-#elif defined(TARGET_LAUNCHER_TARGET)
-    robotName = "TARGET_LAUNCHER_TARGET";
-#elif defined(TARGET_CHARACTERIZER)
-    robotName = "TARGET_CHARACTERIZER";
-#else
-    robotName = "TARGET_UNKNOWN";
-#endif
+    const char* robotName = ROBOT_NAME;
 
     static uint32_t lastLoopTime = 0;
     uint32_t currentTime = tap::arch::clock::getTimeMicroseconds();
@@ -363,7 +334,7 @@ void RttTelemetry::logHeartbeatInfo()
     lastLoopTime = currentTime;
 
     // Convert currentTime to seconds
-    float time = currentTime / 1000.0f;
+    float time = currentTime / 1000000.0f;
     logSignal("dt_us", dt);
     logSignal("robot", robotName);
     logSignal("time", time);
