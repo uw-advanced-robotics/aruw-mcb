@@ -316,13 +316,10 @@ private:
     static inline MatrixT makeStateDiagMatrix(const std::array<float, kStateSize>& diag)
     {
         MatrixT mat{};
-        for (auto& v : mat.data)
-        {
-            v = 0.0f;
-        }
+        zeroMatrix(mat);
         for (size_t i = 0; i < kStateSize; i++)
         {
-            mat.data[i * kStateSize + i] = diag[i];
+            setMatrixElem(mat, i, i, diag[i]);
         }
         return mat;
     }
@@ -346,20 +343,17 @@ private:
         for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
         {
             auto& rBlock = rBlocks[imuIndex];
-            for (auto& v : rBlock.data)
-            {
-                v = 0.0f;
-            }
+            zeroMatrix(rBlock);
             std::array<float, 3> accVar{};
             std::array<float, 3> gyrVar{};
             measurementVarianceDiagForImu(imuIndex, accVar, gyrVar);
 
-            rBlock.data[0 * kStateSize + 0] = accVar[0];
-            rBlock.data[1 * kStateSize + 1] = accVar[1];
-            rBlock.data[2 * kStateSize + 2] = accVar[2];
-            rBlock.data[3 * kStateSize + 3] = gyrVar[0];
-            rBlock.data[4 * kStateSize + 4] = gyrVar[1];
-            rBlock.data[5 * kStateSize + 5] = gyrVar[2];
+            setMatrixElem(rBlock, 0, 0, accVar[0]);
+            setMatrixElem(rBlock, 1, 1, accVar[1]);
+            setMatrixElem(rBlock, 2, 2, accVar[2]);
+            setMatrixElem(rBlock, 3, 3, gyrVar[0]);
+            setMatrixElem(rBlock, 4, 4, gyrVar[1]);
+            setMatrixElem(rBlock, 5, 5, gyrVar[2]);
         }
         return rBlocks;
     }
@@ -381,6 +375,24 @@ private:
         const tap::algorithms::transforms::Vector& value)
     {
         return makeVectorArray(value, std::make_index_sequence<N>{});
+    }
+
+    template <typename MatrixT>
+    static inline void zeroMatrix(MatrixT& m)
+    {
+        FilterWrapper::zeroMatrix(m);
+    }
+
+    template <typename MatrixT>
+    static inline void setMatrixElem(MatrixT& m, size_t row, size_t col, float value)
+    {
+        FilterWrapper::setMatrixElement(m, row, col, value);
+    }
+
+    template <typename VectorT>
+    static inline void setVectorElem(VectorT& v, size_t row, float value)
+    {
+        FilterWrapper::setVectorElement(v, row, value);
     }
 
 };
@@ -531,21 +543,21 @@ inline void FusedImu<N>::periodicIMUUpdate()
                 {
                     // Use the current prediction for missing sensors, producing near-zero innovation.
                     const auto& x = filter.getStateVectorAsMatrix();
-                    zBlock.data[0] = x[0];
-                    zBlock.data[1] = x[1];
-                    zBlock.data[2] = x[2];
-                    zBlock.data[3] = x[3];
-                    zBlock.data[4] = x[4];
-                    zBlock.data[5] = x[5];
+                    setVectorElem(zBlock, 0, x[0]);
+                    setVectorElem(zBlock, 1, x[1]);
+                    setVectorElem(zBlock, 2, x[2]);
+                    setVectorElem(zBlock, 3, x[3]);
+                    setVectorElem(zBlock, 4, x[4]);
+                    setVectorElem(zBlock, 5, x[5]);
                 }
                 else
                 {
-                    zBlock.data[0] = accel[i].x();
-                    zBlock.data[1] = accel[i].y();
-                    zBlock.data[2] = accel[i].z();
-                    zBlock.data[3] = gyro[i].x();
-                    zBlock.data[4] = gyro[i].y();
-                    zBlock.data[5] = gyro[i].z();
+                    setVectorElem(zBlock, 0, accel[i].x());
+                    setVectorElem(zBlock, 1, accel[i].y());
+                    setVectorElem(zBlock, 2, accel[i].z());
+                    setVectorElem(zBlock, 3, gyro[i].x());
+                    setVectorElem(zBlock, 4, gyro[i].y());
+                    setVectorElem(zBlock, 5, gyro[i].z());
                 }
 
                 (void)filter.updateSingleImu(static_cast<uint16_t>(i), zBlock);
@@ -632,16 +644,13 @@ inline void FusedImu<N>::updateMeasurementCovariance(
         measurementVarianceDiagForImu(imuIndex, accVar, gyrVar);
 
         auto& rBlock = rBlocks[imuIndex];
-        for (auto& v : rBlock.data)
-        {
-            v = 0.0f;
-        }
-        rBlock.data[0 * kStateSize + 0] = accVar[0] * accelMultiplier;
-        rBlock.data[1 * kStateSize + 1] = accVar[1] * accelMultiplier;
-        rBlock.data[2 * kStateSize + 2] = accVar[2] * accelMultiplier;
-        rBlock.data[3 * kStateSize + 3] = gyrVar[0] * gyroMultiplier;
-        rBlock.data[4 * kStateSize + 4] = gyrVar[1] * gyroMultiplier;
-        rBlock.data[5 * kStateSize + 5] = gyrVar[2] * gyroMultiplier;
+        zeroMatrix(rBlock);
+        setMatrixElem(rBlock, 0, 0, accVar[0] * accelMultiplier);
+        setMatrixElem(rBlock, 1, 1, accVar[1] * accelMultiplier);
+        setMatrixElem(rBlock, 2, 2, accVar[2] * accelMultiplier);
+        setMatrixElem(rBlock, 3, 3, gyrVar[0] * gyroMultiplier);
+        setMatrixElem(rBlock, 4, 4, gyrVar[1] * gyroMultiplier);
+        setMatrixElem(rBlock, 5, 5, gyrVar[2] * gyroMultiplier);
     }
 }
 

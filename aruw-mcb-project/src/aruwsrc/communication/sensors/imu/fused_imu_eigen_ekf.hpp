@@ -29,6 +29,116 @@
 namespace aruwsrc::communication::sensors::imu
 {
 /**
+ * Backend adapter specialized by the concrete EKF type selected in
+ * `ExtendedKalmanFilter`.
+ */
+template <typename FilterT>
+struct FusedImuEkfBackendAdapter;
+
+template <uint16_t States, uint16_t Inputs>
+struct FusedImuEkfBackendAdapter<aruwsrc::algorithms::ExtendedKalmanFilterCmsis<States, Inputs>>
+{
+    using FilterType = aruwsrc::algorithms::ExtendedKalmanFilterCmsis<States, Inputs>;
+    static constexpr bool usesCmsisBackend = true;
+
+    static inline int predict(FilterType& filter, float dt)
+    {
+        filter.predict(dt);
+        return 0;
+    }
+
+    template <typename MatrixT>
+    static inline void setIdentity(MatrixT& matrix)
+    {
+        matrix.constructIdentityMatrix();
+    }
+
+    template <typename MatrixT>
+    static inline void setZero(MatrixT& matrix)
+    {
+        for (auto& value : matrix.data)
+        {
+            value = 0.0f;
+        }
+    }
+
+    template <typename MatrixT>
+    static inline void setMatrixElement(
+        MatrixT& matrix,
+        size_t row,
+        size_t col,
+        float value,
+        size_t columnCount)
+    {
+        matrix.data[row * columnCount + col] = value;
+    }
+
+    template <typename VectorT>
+    static inline void setVectorElement(VectorT& vector, size_t row, float value)
+    {
+        vector.data[row] = value;
+    }
+
+    template <typename MatrixT>
+    static inline float getMatrixElement(
+        const MatrixT& matrix,
+        size_t row,
+        size_t col,
+        size_t columnCount)
+    {
+        return matrix.data[row * columnCount + col];
+    }
+};
+
+template <uint16_t States, uint16_t Inputs>
+struct FusedImuEkfBackendAdapter<aruwsrc::algorithms::ExtendedKalmanFilterEigen<States, Inputs>>
+{
+    using FilterType = aruwsrc::algorithms::ExtendedKalmanFilterEigen<States, Inputs>;
+    static constexpr bool usesCmsisBackend = false;
+
+    static inline int predict(FilterType& filter, float dt) { return filter.predict(dt); }
+
+    template <typename MatrixT>
+    static inline void setIdentity(MatrixT& matrix)
+    {
+        matrix.setIdentity();
+    }
+
+    template <typename MatrixT>
+    static inline void setZero(MatrixT& matrix)
+    {
+        matrix.setZero();
+    }
+
+    template <typename MatrixT>
+    static inline void setMatrixElement(
+        MatrixT& matrix,
+        size_t row,
+        size_t col,
+        float value,
+        size_t /* columnCount */)
+    {
+        matrix(static_cast<int>(row), static_cast<int>(col)) = value;
+    }
+
+    template <typename VectorT>
+    static inline void setVectorElement(VectorT& vector, size_t row, float value)
+    {
+        vector(static_cast<int>(row), 0) = value;
+    }
+
+    template <typename MatrixT>
+    static inline float getMatrixElement(
+        const MatrixT& matrix,
+        size_t row,
+        size_t col,
+        size_t /* columnCount */)
+    {
+        return matrix(static_cast<int>(row), static_cast<int>(col));
+    }
+};
+
+/**
  * EKF extension for fused IMU state/measurement model.
  *
  * State x: [ax, ay, az, gx, gy, gz]^T
@@ -40,13 +150,14 @@ class FusedImuEigenEkf
 {
 public:
     using Base = aruwsrc::algorithms::ExtendedKalmanFilter<6, 6>;
-    static constexpr uint16_t kStateSize = 6;
+    static constexpr uint16_t stateSize = 6;
 
     using StateVector = typename Base::StateVector;
     using InputVector = typename Base::InputVector;
     using StateMatrix = typename Base::StateMatrix;
     using InputMatrix = typename Base::InputMatrix;
     using ObservationMatrix = typename Base::ObservationMatrix;
+    using BackendAdapter = FusedImuEkfBackendAdapter<Base>;
 
     FusedImuEigenEkf(
         const StateMatrix& q,
@@ -65,11 +176,24 @@ public:
     }
 
     int update(const InputVector& z) { return updateSingleImu(0, z); }
+    int predict(float dt) { return BackendAdapter::predict(static_cast<Base&>(*this), dt); }
 
-    int predict(float dt)
+    template <typename MatrixT>
+    static inline void zeroMatrix(MatrixT& matrix)
     {
-        Base::predict(dt);
-        return 0;
+        BackendAdapter::setZero(matrix);
+    }
+
+    template <typename MatrixT>
+    static inline void setMatrixElement(MatrixT& matrix, size_t row, size_t col, float value)
+    {
+        BackendAdapter::setMatrixElement(matrix, row, col, value, stateSize);
+    }
+
+    template <typename VectorT>
+    static inline void setVectorElement(VectorT& vector, size_t row, float value)
+    {
+        BackendAdapter::setVectorElement(vector, row, value);
     }
 
     int updateSingleImu(uint16_t imuIndex, const InputVector& zBlock)
@@ -80,9 +204,17 @@ public:
         }
 
         auto& measurementCovariance = this->getMeasurementCovariance();
-        for (size_t i = 0; i < kStateSize * kStateSize; i++)
+        for (int r = 0; r < static_cast<int>(stateSize); r++)
         {
-            measurementCovariance[i] = measurementCovarianceBlocks[imuIndex].data[i];
+            for (int c = 0; c < static_cast<int>(stateSize); c++)
+            {
+                measurementCovariance[static_cast<size_t>(r) * stateSize + static_cast<size_t>(c)] =
+                    BackendAdapter::getMatrixElement(
+                        measurementCovarianceBlocks[imuIndex],
+                        static_cast<size_t>(r),
+                        static_cast<size_t>(c),
+                        stateSize);
+            }
         }
 
         return Base::update(zBlock);
@@ -115,7 +247,7 @@ private:
     {
         (void)state;
         (void)dt;
-        stateJacobian.constructIdentityMatrix();
+        BackendAdapter::setIdentity(stateJacobian);
     }
 
     static void observationJacobianFunction(
@@ -123,7 +255,7 @@ private:
         ObservationMatrix& observationJacobian)
     {
         (void)state;
-        observationJacobian.constructIdentityMatrix();
+        BackendAdapter::setIdentity(observationJacobian);
     }
 
     std::array<InputMatrix, N> measurementCovarianceBlocks{};
