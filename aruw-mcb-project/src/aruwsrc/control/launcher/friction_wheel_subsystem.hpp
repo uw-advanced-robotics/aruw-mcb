@@ -313,7 +313,7 @@ private:
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         std::index_sequence<Is...>)
     {
-        return {{((void)Is, tap::algorithms::SmoothPid(wheelConfigs[0].velocityPidConfig))...}};
+        return {{((void)Is, tap::algorithms::SmoothPid(wheelConfigs[Is].velocityPidConfig))...}};
     }
 
     template <size_t... Is>

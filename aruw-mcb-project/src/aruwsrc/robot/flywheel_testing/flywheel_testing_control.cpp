@@ -100,13 +100,18 @@ std::array<tap::motor::MotorInterface *, 4> wheels = {
     &rightFrictionWheel,
     &lowerFrictionWheel,
     &upperFrictionWheel};
+std::array<FlywheelConfig, 4> wheelConfigs = {
+    aruwsrc::control::launcher::LEFT_WHEEL_CONFIG, 
+    aruwsrc::control::launcher::WHEEL_CONFIG, 
+    aruwsrc::control::launcher::WHEEL_CONFIG,
+    aruwsrc::control::launcher::WHEEL_CONFIG};
 RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
     4>
     frictionWheelsSubsystem(
         drivers(),
         wheels,
-        aruwsrc::control::launcher::WHEEL_CONFIG,
+        wheelConfigs,
         &getTurretMCBCanComm(),
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 

@@ -53,10 +53,10 @@ struct FlywheelRpms
 };
 
 static constexpr FlywheelRpms flywheelTestingRpms{
-    .leftRpm = 0.0f,
-    .rightRpm = 0.0f,
-    .lowerRpm = 60.0f,
-    .upperRpm = 60.0f};
+    .leftRpm = 6000.0f,
+    .rightRpm = 6000.0f,
+    .lowerRpm = 6000.0f,
+    .upperRpm = 6000.0f};
 #endif
 
 #if defined(ALL_SENTRIES)
@@ -97,6 +97,13 @@ static constexpr float LAUNCHER_PID_KI = 100.0f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
+static constexpr tap::algorithms::SmoothPidConfig LEFT_VELOCITY_PID_CONFIG(
+    LAUNCHER_PID_KP,
+    LAUNCHER_PID_KI,
+    LAUNCHER_PID_KD,
+    LAUNCHER_PID_MAX_ERROR_SUM,
+    tap::motor::DjiMotor::MAX_OUTPUT_C620);
+static constexpr FlywheelConfig LEFT_WHEEL_CONFIG = {LEFT_VELOCITY_PID_CONFIG, 270.0f};
 #else
 static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 100.0f;
