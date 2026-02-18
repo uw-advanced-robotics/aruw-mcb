@@ -24,7 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "aruwsrc/algorithms/eigen_extended_kalman_filter.hpp"
+#include "aruwsrc/algorithms/extended_kalman_filter.hpp"
 
 namespace aruwsrc::communication::sensors::imu
 {
@@ -36,16 +36,17 @@ namespace aruwsrc::communication::sensors::imu
  */
 template <size_t N>
 class FusedImuEigenEkf
-    : public aruwsrc::algorithms::EigenExtendedKalmanFilter<6, 6>
+    : public aruwsrc::algorithms::ExtendedKalmanFilter<6, 6>
 {
 public:
-    using Base = aruwsrc::algorithms::EigenExtendedKalmanFilter<6, 6>;
+    using Base = aruwsrc::algorithms::ExtendedKalmanFilter<6, 6>;
     static constexpr uint16_t kStateSize = 6;
 
     using StateVector = typename Base::StateVector;
     using InputVector = typename Base::InputVector;
     using StateMatrix = typename Base::StateMatrix;
     using InputMatrix = typename Base::InputMatrix;
+    using ObservationMatrix = typename Base::ObservationMatrix;
 
     FusedImuEigenEkf(
         const StateMatrix& q,
@@ -55,7 +56,7 @@ public:
               stateTransitionFunction,
               observationFunction,
               stateJacobianFunction,
-              nullptr,
+              observationJacobianFunction,
               q,
               rBlocks[0],
               p0),
@@ -63,31 +64,28 @@ public:
     {
     }
 
-    int update(const InputVector& z) override { return updateSingleImu(0, z); }
+    int update(const InputVector& z) { return updateSingleImu(0, z); }
+
+    int predict(float dt)
+    {
+        Base::predict(dt);
+        return 0;
+    }
 
     int updateSingleImu(uint16_t imuIndex, const InputVector& zBlock)
     {
-        if (!this->initialized)
-        {
-            this->lastStatus = -1;
-            return this->lastStatus;
-        }
-
         if (imuIndex >= static_cast<uint16_t>(N))
         {
             return -3;
         }
 
-        const StateVector yBlock = zBlock - this->xHat;
-        StateMatrix sBlock = this->P + measurementCovarianceBlocks[imuIndex];
-        sBlock.diagonal().array() += 1.0e-6f;
-        const StateMatrix kBlock = this->P * sBlock.inverse();
+        auto& measurementCovariance = this->getMeasurementCovariance();
+        for (size_t i = 0; i < kStateSize * kStateSize; i++)
+        {
+            measurementCovariance[i] = measurementCovarianceBlocks[imuIndex].data[i];
+        }
 
-        this->xHat = this->xHat + kBlock * yBlock;
-        this->P = (this->I - kBlock) * this->P;
-        this->syncStateArray();
-        this->lastStatus = 0;
-        return this->lastStatus;
+        return Base::update(zBlock);
     }
 
     inline std::array<InputMatrix, N>& getMeasurementCovarianceBlocks()
@@ -117,7 +115,15 @@ private:
     {
         (void)state;
         (void)dt;
-        stateJacobian.setIdentity();
+        stateJacobian.constructIdentityMatrix();
+    }
+
+    static void observationJacobianFunction(
+        const StateVector& state,
+        ObservationMatrix& observationJacobian)
+    {
+        (void)state;
+        observationJacobian.constructIdentityMatrix();
     }
 
     std::array<InputMatrix, N> measurementCovarianceBlocks{};

@@ -315,10 +315,14 @@ private:
     template <typename MatrixT>
     static inline MatrixT makeStateDiagMatrix(const std::array<float, kStateSize>& diag)
     {
-        MatrixT mat = MatrixT::Zero();
+        MatrixT mat{};
+        for (auto& v : mat.data)
+        {
+            v = 0.0f;
+        }
         for (size_t i = 0; i < kStateSize; i++)
         {
-            mat(static_cast<int>(i), static_cast<int>(i)) = diag[i];
+            mat.data[i * kStateSize + i] = diag[i];
         }
         return mat;
     }
@@ -342,17 +346,20 @@ private:
         for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
         {
             auto& rBlock = rBlocks[imuIndex];
-            rBlock = InputMatrix::Zero();
+            for (auto& v : rBlock.data)
+            {
+                v = 0.0f;
+            }
             std::array<float, 3> accVar{};
             std::array<float, 3> gyrVar{};
             measurementVarianceDiagForImu(imuIndex, accVar, gyrVar);
 
-            rBlock(0, 0) = accVar[0];
-            rBlock(1, 1) = accVar[1];
-            rBlock(2, 2) = accVar[2];
-            rBlock(3, 3) = gyrVar[0];
-            rBlock(4, 4) = gyrVar[1];
-            rBlock(5, 5) = gyrVar[2];
+            rBlock.data[0 * kStateSize + 0] = accVar[0];
+            rBlock.data[1 * kStateSize + 1] = accVar[1];
+            rBlock.data[2 * kStateSize + 2] = accVar[2];
+            rBlock.data[3 * kStateSize + 3] = gyrVar[0];
+            rBlock.data[4 * kStateSize + 4] = gyrVar[1];
+            rBlock.data[5 * kStateSize + 5] = gyrVar[2];
         }
         return rBlocks;
     }
@@ -524,21 +531,21 @@ inline void FusedImu<N>::periodicIMUUpdate()
                 {
                     // Use the current prediction for missing sensors, producing near-zero innovation.
                     const auto& x = filter.getStateVectorAsMatrix();
-                    zBlock(0, 0) = x[0];
-                    zBlock(1, 0) = x[1];
-                    zBlock(2, 0) = x[2];
-                    zBlock(3, 0) = x[3];
-                    zBlock(4, 0) = x[4];
-                    zBlock(5, 0) = x[5];
+                    zBlock.data[0] = x[0];
+                    zBlock.data[1] = x[1];
+                    zBlock.data[2] = x[2];
+                    zBlock.data[3] = x[3];
+                    zBlock.data[4] = x[4];
+                    zBlock.data[5] = x[5];
                 }
                 else
                 {
-                    zBlock(0, 0) = accel[i].x();
-                    zBlock(1, 0) = accel[i].y();
-                    zBlock(2, 0) = accel[i].z();
-                    zBlock(3, 0) = gyro[i].x();
-                    zBlock(4, 0) = gyro[i].y();
-                    zBlock(5, 0) = gyro[i].z();
+                    zBlock.data[0] = accel[i].x();
+                    zBlock.data[1] = accel[i].y();
+                    zBlock.data[2] = accel[i].z();
+                    zBlock.data[3] = gyro[i].x();
+                    zBlock.data[4] = gyro[i].y();
+                    zBlock.data[5] = gyro[i].z();
                 }
 
                 (void)filter.updateSingleImu(static_cast<uint16_t>(i), zBlock);
@@ -625,13 +632,16 @@ inline void FusedImu<N>::updateMeasurementCovariance(
         measurementVarianceDiagForImu(imuIndex, accVar, gyrVar);
 
         auto& rBlock = rBlocks[imuIndex];
-        rBlock = InputMatrix::Zero();
-        rBlock(0, 0) = accVar[0] * accelMultiplier;
-        rBlock(1, 1) = accVar[1] * accelMultiplier;
-        rBlock(2, 2) = accVar[2] * accelMultiplier;
-        rBlock(3, 3) = gyrVar[0] * gyroMultiplier;
-        rBlock(4, 4) = gyrVar[1] * gyroMultiplier;
-        rBlock(5, 5) = gyrVar[2] * gyroMultiplier;
+        for (auto& v : rBlock.data)
+        {
+            v = 0.0f;
+        }
+        rBlock.data[0 * kStateSize + 0] = accVar[0] * accelMultiplier;
+        rBlock.data[1 * kStateSize + 1] = accVar[1] * accelMultiplier;
+        rBlock.data[2 * kStateSize + 2] = accVar[2] * accelMultiplier;
+        rBlock.data[3 * kStateSize + 3] = gyrVar[0] * gyroMultiplier;
+        rBlock.data[4 * kStateSize + 4] = gyrVar[1] * gyroMultiplier;
+        rBlock.data[5 * kStateSize + 5] = gyrVar[2] * gyroMultiplier;
     }
 }
 
