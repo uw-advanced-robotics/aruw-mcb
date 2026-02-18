@@ -48,7 +48,7 @@
 namespace aruwsrc::sentry
 {
 #if defined(TARGET_SENTRY_NAME)
-using TurretMajorImuType = aruwsrc::communication::sensors::imu::FusedImu<2>;
+using TurretMajorImuType = aruwsrc::communication::sensors::imu::FusedImu<3>;
 #else
 using TurretMajorImuType = aruwsrc::communication::sensors::imu::ism330::ISM330;
 #endif
@@ -56,6 +56,22 @@ using TurretMajorImuType = aruwsrc::communication::sensors::imu::ism330::ISM330;
 class Drivers : public tap::Drivers
 {
     friend class DriversSingleton;
+
+#if defined(TARGET_SENTRY_NAME)
+    using TurretMajorTransform = tap::algorithms::transforms::Transform;
+    using TurretMajorFusedImuType = aruwsrc::communication::sensors::imu::FusedImu<3>;
+
+    static inline const std::array<TurretMajorTransform, 3> turretMajorImuTransforms = {
+        // Jetson is forward, X forward, Y left.
+        TurretMajorTransform(-76.7f, -116.14f, 0.0f, 0.0f, 0.0f, 0.0f),
+        TurretMajorTransform(-76.7f, 116.04f, 0.0f, 0.0f, 0.0f, M_PI),
+        TurretMajorTransform(-14.97f, -115.5f, 0.0f, 0.0f, 0.0f,M_PI_2)};
+
+    static inline const std::array<TurretMajorFusedImuType::ImuType, 3> turretMajorImuTypes = {
+        TurretMajorFusedImuType::ImuType::ISM330DHCX,
+        TurretMajorFusedImuType::ImuType::ISM330DHCX,
+        TurretMajorFusedImuType::ImuType::MPU6500};
+#endif
 
 #ifdef ENV_UNIT_TESTS
 public:
@@ -84,12 +100,9 @@ public:
           turretMajorImuSecondary(
               aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::GPIO_D12_H_ROW),
           turretMajorImu(
-              {&turretMajorPrimaryImu, &turretMajorImuSecondary},
-              // Jetson is forward, X forward, Y left
-              {tap::algorithms::transforms::Transform(-76.7f, -116.14f, 0.0f, 0.0f, 0.0f, 0.0f),
-               tap::algorithms::transforms::Transform(-76.7f, 116.04f, 0.0f, 0.0f, 0.0f, M_PI)},
-              {aruwsrc::communication::sensors::imu::FusedImu<2>::ImuType::ISM330DHCX,
-               aruwsrc::communication::sensors::imu::FusedImu<2>::ImuType::ISM330DHCX}),
+              {&turretMajorPrimaryImu, &turretMajorImuSecondary, &mpu6500},
+              turretMajorImuTransforms,
+              turretMajorImuTypes),
 #else
           turretMajorImu(),
 #endif
