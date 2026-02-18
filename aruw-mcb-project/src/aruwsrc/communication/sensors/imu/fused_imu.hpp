@@ -158,13 +158,11 @@ public:
 
 private:
     static constexpr size_t kStateSize = 6;
-    static constexpr size_t kMeasurementSize = N * 6;
     static constexpr size_t kPerImuMeasurementSize = 6;
 
     ImuState prevImuState;
 
     using FilterWrapper = aruwsrc::communication::sensors::imu::FusedImuEigenEkf<N>;
-    using InputVector = typename FilterWrapper::InputVector;
     using StateMatrix = typename FilterWrapper::StateMatrix;
     using InputMatrix = typename FilterWrapper::InputMatrix;
 
@@ -337,25 +335,26 @@ private:
         return makeStateDiagMatrix<StateMatrix>(qDiag);
     }
 
-    inline InputMatrix makeR()
+    inline std::array<InputMatrix, N> makeR()
     {
-        InputMatrix r = InputMatrix::Zero();
+        std::array<InputMatrix, N> rBlocks{};
 
         for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
         {
+            auto& rBlock = rBlocks[imuIndex];
+            rBlock = InputMatrix::Zero();
             std::array<float, 3> accVar{};
             std::array<float, 3> gyrVar{};
             measurementVarianceDiagForImu(imuIndex, accVar, gyrVar);
 
-            const size_t base = imuIndex * kPerImuMeasurementSize;
-            r(static_cast<int>(base + 0), static_cast<int>(base + 0)) = accVar[0];
-            r(static_cast<int>(base + 1), static_cast<int>(base + 1)) = accVar[1];
-            r(static_cast<int>(base + 2), static_cast<int>(base + 2)) = accVar[2];
-            r(static_cast<int>(base + 3), static_cast<int>(base + 3)) = gyrVar[0];
-            r(static_cast<int>(base + 4), static_cast<int>(base + 4)) = gyrVar[1];
-            r(static_cast<int>(base + 5), static_cast<int>(base + 5)) = gyrVar[2];
+            rBlock(0, 0) = accVar[0];
+            rBlock(1, 1) = accVar[1];
+            rBlock(2, 2) = accVar[2];
+            rBlock(3, 3) = gyrVar[0];
+            rBlock(4, 4) = gyrVar[1];
+            rBlock(5, 5) = gyrVar[2];
         }
-        return r;
+        return rBlocks;
     }
 
     inline StateMatrix makeP0()
@@ -514,37 +513,36 @@ inline void FusedImu<N>::periodicIMUUpdate()
 
     if (kfInitialized)
     {
-        InputVector y;
-        tap::algorithms::transforms::Vector fallbackAccel(0.0f, 0.0f, 0.0f);
-        tap::algorithms::transforms::Vector fallbackGyro(0.0f, 0.0f, 0.0f);
-        const auto& x = filter.getStateVectorAsMatrix();
-        fallbackAccel = tap::algorithms::transforms::Vector(x[0], x[1], x[2]);
-        fallbackGyro = tap::algorithms::transforms::Vector(x[3], x[4], x[5]);
-        for (size_t i = 0; i < N; i++)
+        updateProcessCovariance(samplePeriodS);
+        if (filter.predict(samplePeriodS) == 0)
         {
-            const size_t base = i * kPerImuMeasurementSize;
-            if (!validFlags[i])
+            for (size_t i = 0; i < N; i++)
             {
-                y(static_cast<int>(base + 0), 0) = fallbackAccel.x();
-                y(static_cast<int>(base + 1), 0) = fallbackAccel.y();
-                y(static_cast<int>(base + 2), 0) = fallbackAccel.z();
-                y(static_cast<int>(base + 3), 0) = fallbackGyro.x();
-                y(static_cast<int>(base + 4), 0) = fallbackGyro.y();
-                y(static_cast<int>(base + 5), 0) = fallbackGyro.z();
-            }
-            else
-            {
-                y(static_cast<int>(base + 0), 0) = accel[i].x();
-                y(static_cast<int>(base + 1), 0) = accel[i].y();
-                y(static_cast<int>(base + 2), 0) = accel[i].z();
-                y(static_cast<int>(base + 3), 0) = gyro[i].x();
-                y(static_cast<int>(base + 4), 0) = gyro[i].y();
-                y(static_cast<int>(base + 5), 0) = gyro[i].z();
+                typename FilterWrapper::StateVector zBlock;
+                if (!validFlags[i])
+                {
+                    // Use the current prediction for missing sensors, producing near-zero innovation.
+                    const auto& x = filter.getStateVectorAsMatrix();
+                    zBlock(0, 0) = x[0];
+                    zBlock(1, 0) = x[1];
+                    zBlock(2, 0) = x[2];
+                    zBlock(3, 0) = x[3];
+                    zBlock(4, 0) = x[4];
+                    zBlock(5, 0) = x[5];
+                }
+                else
+                {
+                    zBlock(0, 0) = accel[i].x();
+                    zBlock(1, 0) = accel[i].y();
+                    zBlock(2, 0) = accel[i].z();
+                    zBlock(3, 0) = gyro[i].x();
+                    zBlock(4, 0) = gyro[i].y();
+                    zBlock(5, 0) = gyro[i].z();
+                }
+
+                (void)filter.updateSingleImu(static_cast<uint16_t>(i), zBlock);
             }
         }
-
-        updateProcessCovariance(samplePeriodS);
-        (void)filter.performUpdate(y, samplePeriodS);
     }
 
     if (kfInitialized && anyValid)
@@ -577,12 +575,7 @@ inline void FusedImu<N>::updateMeasurementCovariance(
     const std::array<tap::algorithms::transforms::Vector, N>& gyro,
     const std::array<bool, N>& validFlags)
 {
-    auto& r = filter.getMeasurementCovariance();
-
-    for (size_t i = 0; i < r.size(); i++)
-    {
-        r[i] = 0.0f;
-    }
+    auto& rBlocks = filter.getMeasurementCovarianceBlocks();
 
     const auto& x = filter.getStateVectorAsMatrix();
     const tap::algorithms::transforms::Vector predictedAccel(x[0], x[1], x[2]);
@@ -630,13 +623,14 @@ inline void FusedImu<N>::updateMeasurementCovariance(
         std::array<float, 3> gyrVar{};
         measurementVarianceDiagForImu(imuIndex, accVar, gyrVar);
 
-        const size_t base = imuIndex * kPerImuMeasurementSize;
-        r[(base + 0) * kMeasurementSize + (base + 0)] = accVar[0] * accelMultiplier;
-        r[(base + 1) * kMeasurementSize + (base + 1)] = accVar[1] * accelMultiplier;
-        r[(base + 2) * kMeasurementSize + (base + 2)] = accVar[2] * accelMultiplier;
-        r[(base + 3) * kMeasurementSize + (base + 3)] = gyrVar[0] * gyroMultiplier;
-        r[(base + 4) * kMeasurementSize + (base + 4)] = gyrVar[1] * gyroMultiplier;
-        r[(base + 5) * kMeasurementSize + (base + 5)] = gyrVar[2] * gyroMultiplier;
+        auto& rBlock = rBlocks[imuIndex];
+        rBlock = InputMatrix::Zero();
+        rBlock(0, 0) = accVar[0] * accelMultiplier;
+        rBlock(1, 1) = accVar[1] * accelMultiplier;
+        rBlock(2, 2) = accVar[2] * accelMultiplier;
+        rBlock(3, 3) = gyrVar[0] * gyroMultiplier;
+        rBlock(4, 4) = gyrVar[1] * gyroMultiplier;
+        rBlock(5, 5) = gyrVar[2] * gyroMultiplier;
     }
 }
 

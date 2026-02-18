@@ -36,31 +36,39 @@ namespace aruwsrc::communication::sensors::imu
  */
 template <size_t N>
 class FusedImuEigenEkf
-    : public aruwsrc::algorithms::EigenExtendedKalmanFilter<6, static_cast<uint16_t>(N * 6)>
+    : public aruwsrc::algorithms::EigenExtendedKalmanFilter<6, 6>
 {
 public:
-    using Base = aruwsrc::algorithms::EigenExtendedKalmanFilter<6, static_cast<uint16_t>(N * 6)>;
+    using Base = aruwsrc::algorithms::EigenExtendedKalmanFilter<6, 6>;
     static constexpr uint16_t kStateSize = 6;
-    static constexpr uint16_t kMeasurementSize = static_cast<uint16_t>(N * 6);
 
     using StateVector = typename Base::StateVector;
     using InputVector = typename Base::InputVector;
     using StateMatrix = typename Base::StateMatrix;
     using InputMatrix = typename Base::InputMatrix;
 
-    FusedImuEigenEkf(const StateMatrix& q, const InputMatrix& r, const StateMatrix& p0)
+    FusedImuEigenEkf(
+        const StateMatrix& q,
+        const std::array<InputMatrix, N>& rBlocks,
+        const StateMatrix& p0)
         : Base(
               stateTransitionFunction,
               observationFunction,
               stateJacobianFunction,
               nullptr,
               q,
-              r,
-              p0)
+              rBlocks[0],
+              p0),
+          measurementCovarianceBlocks(rBlocks)
     {
     }
 
     int update(const InputVector& z) override
+    {
+        return updateSingleImu(0, z);
+    }
+
+    int updateSingleImu(uint16_t imuIndex, const StateVector& zBlock)
     {
         if (!this->initialized)
         {
@@ -68,38 +76,28 @@ public:
             return this->lastStatus;
         }
 
-        for (uint16_t block = 0; block < N; block++)
+        if (imuIndex >= static_cast<uint16_t>(N))
         {
-            const uint16_t rowBase = static_cast<uint16_t>(block * kStateSize);
-
-            StateVector zBlock;
-            for (uint16_t i = 0; i < kStateSize; i++)
-            {
-                zBlock(static_cast<int>(i), 0) = z(static_cast<int>(rowBase + i), 0);
-            }
-
-            const StateVector yBlock = zBlock - this->xHat;
-
-            StateMatrix rBlock = StateMatrix::Zero();
-            for (uint16_t r = 0; r < kStateSize; r++)
-            {
-                for (uint16_t c = 0; c < kStateSize; c++)
-                {
-                    rBlock(static_cast<int>(r), static_cast<int>(c)) =
-                        this->Rdata[(rowBase + r) * kMeasurementSize + (rowBase + c)];
-                }
-            }
-
-            const StateMatrix sBlock = this->P + rBlock;
-            const StateMatrix kBlock = this->P * sBlock.inverse();
-
-            this->xHat = this->xHat + kBlock * yBlock;
-            this->P = (this->I - kBlock) * this->P;
+            this->lastStatus = -3;
+            return this->lastStatus;
         }
 
+        const StateVector yBlock = zBlock - this->xHat;
+
+        StateMatrix sBlock = this->P + measurementCovarianceBlocks[imuIndex];
+        sBlock.diagonal().array() += 1.0e-6f;
+        const StateMatrix kBlock = this->P * sBlock.inverse();
+
+        this->xHat = this->xHat + kBlock * yBlock;
+        this->P = (this->I - kBlock) * this->P;
         this->syncStateArray();
         this->lastStatus = 0;
         return this->lastStatus;
+    }
+
+    inline std::array<InputMatrix, N>& getMeasurementCovarianceBlocks()
+    {
+        return measurementCovarianceBlocks;
     }
 
 private:
@@ -114,16 +112,7 @@ private:
 
     static void observationFunction(const StateVector& state, InputVector& predictedInput)
     {
-        for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
-        {
-            const size_t base = imuIndex * 6;
-            predictedInput(static_cast<int>(base + 0), 0) = state(0, 0);
-            predictedInput(static_cast<int>(base + 1), 0) = state(1, 0);
-            predictedInput(static_cast<int>(base + 2), 0) = state(2, 0);
-            predictedInput(static_cast<int>(base + 3), 0) = state(3, 0);
-            predictedInput(static_cast<int>(base + 4), 0) = state(4, 0);
-            predictedInput(static_cast<int>(base + 5), 0) = state(5, 0);
-        }
+        predictedInput = state;
     }
 
     static void stateJacobianFunction(
@@ -135,6 +124,8 @@ private:
         (void)dt;
         stateJacobian.setIdentity();
     }
+
+    std::array<InputMatrix, N> measurementCovarianceBlocks{};
 };
 
 }  // namespace aruwsrc::communication::sensors::imu
