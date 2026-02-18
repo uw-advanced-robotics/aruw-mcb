@@ -39,7 +39,6 @@ LimitSwitchMenu::LimitSwitchMenu(
       drivers(drivers)
 {
 }
- 
 
 void LimitSwitchMenu::drawLimitSwitch(Digital::InputPin pin)
 {
@@ -93,7 +92,8 @@ bool LimitSwitchMenu::hasChanged()
     {
         DigitalBeamBreak beamBreak(&(drivers->digital), pin, false);
         int currState = beamBreak.getLimitSwitchDepressed();
-        if (currState != status) {
+        if (currState != status)
+        {
             return true;
         }
     }

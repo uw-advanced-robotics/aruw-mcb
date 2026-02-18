@@ -23,9 +23,10 @@
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/display/dummy_allocator.hpp"
-#include "modm/ui/menu/abstract_menu.hpp"
 #include "tap/display/vertical_scroll_logic_handler.hpp"
 #include "tap/drivers.hpp"
+
+#include "modm/ui/menu/abstract_menu.hpp"
 
 using namespace tap::gpio;
 
@@ -56,7 +57,7 @@ public:
 
 private:
     static constexpr int LIMIT_SWITCH_MENU_ID = 16;
-    
+
     tap::Drivers *drivers;
 
     static constexpr std::array<std::string_view, 5> InputPinNames{"B", "C", "D", "T", "Button"};
@@ -64,8 +65,9 @@ private:
     void drawLimitSwitch(Digital::InputPin pin);
 
     // void setPinValue(Digital::InputPin pin, int val);
-    
-    std::map<tap::gpio::Digital::InputPin, int> pins = {  //theres prolly a way to not hardcode it i assume but idk rn
+
+    std::map<tap::gpio::Digital::InputPin, int> pins = {
+        // theres prolly a way to not hardcode it i assume but idk rn
         {tap::gpio::Digital::InputPin::B, -1},
         {tap::gpio::Digital::InputPin::C, -1},
         {tap::gpio::Digital::InputPin::D, -1},
@@ -76,7 +78,7 @@ private:
     // static constexpr std::array<std::pair<Digital::InputPin, int>, 5> pins = {{
     //     {Digital::InputPin::B, -1},
     //     {Digital::InputPin::C, -1},
-    //     {Digital::InputPin::D, -1}, 
+    //     {Digital::InputPin::D, -1},
     //     {Digital::InputPin::T, -1},
     //     {Digital::InputPin::Button, -1}
     // }};
