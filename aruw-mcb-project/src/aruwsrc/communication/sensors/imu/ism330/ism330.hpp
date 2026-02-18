@@ -70,8 +70,10 @@ private:
     static constexpr AccelerometerRangeConfig DEFAULT_ACCEL_RANGE = G4_CONFIG;
 
     // Pre-computed register values for non-blocking writes (protothread use)
-    static constexpr uint8_t DEFAULT_CTRL1_XL_VALUE = (uint8_t) DEFAULT_ODR | (uint8_t) DEFAULT_ACCEL_RANGE;
-    static constexpr uint8_t DEFAULT_CTRL2_G_VALUE = (uint8_t) DEFAULT_ODR | (uint8_t) DEFAULT_GYRO_RANGE;
+    static constexpr uint8_t DEFAULT_CTRL1_XL_VALUE =
+        (uint8_t)DEFAULT_ODR | (uint8_t)DEFAULT_ACCEL_RANGE;
+    static constexpr uint8_t DEFAULT_CTRL2_G_VALUE =
+        (uint8_t)DEFAULT_ODR | (uint8_t)DEFAULT_GYRO_RANGE;
 
     // Pull CS low to read / write.
     void ismNssLow();
