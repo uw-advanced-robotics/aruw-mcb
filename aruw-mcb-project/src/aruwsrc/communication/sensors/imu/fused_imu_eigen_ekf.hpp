@@ -63,12 +63,9 @@ public:
     {
     }
 
-    int update(const InputVector& z) override
-    {
-        return updateSingleImu(0, z);
-    }
+    int update(const InputVector& z) override { return updateSingleImu(0, z); }
 
-    int updateSingleImu(uint16_t imuIndex, const StateVector& zBlock)
+    int updateSingleImu(uint16_t imuIndex, const InputVector& zBlock)
     {
         if (!this->initialized)
         {
@@ -78,12 +75,10 @@ public:
 
         if (imuIndex >= static_cast<uint16_t>(N))
         {
-            this->lastStatus = -3;
-            return this->lastStatus;
+            return -3;
         }
 
         const StateVector yBlock = zBlock - this->xHat;
-
         StateMatrix sBlock = this->P + measurementCovarianceBlocks[imuIndex];
         sBlock.diagonal().array() += 1.0e-6f;
         const StateMatrix kBlock = this->P * sBlock.inverse();

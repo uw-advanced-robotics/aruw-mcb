@@ -375,6 +375,7 @@ private:
     {
         return makeVectorArray(value, std::make_index_sequence<N>{});
     }
+
 };
 
 template <size_t N>
@@ -518,7 +519,7 @@ inline void FusedImu<N>::periodicIMUUpdate()
         {
             for (size_t i = 0; i < N; i++)
             {
-                typename FilterWrapper::StateVector zBlock;
+                typename FilterWrapper::InputVector zBlock;
                 if (!validFlags[i])
                 {
                     // Use the current prediction for missing sensors, producing near-zero innovation.
