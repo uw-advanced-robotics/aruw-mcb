@@ -96,19 +96,23 @@ modm::ResumableResult<void> CapBankIndicator::update()
                     break;
                 case communication::can::cap_bank::State::CHARGE:
                     strncpy(capBankTextGraphic.msg + 4, "CHRG", 5);
-                    capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                    capBankTextGraphic.graphicData.color =
+                        static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case communication::can::cap_bank::State::CHARGE_DISCHARGE:
                     strncpy(capBankTextGraphic.msg + 4, "CHDS", 5);
-                    capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                    capBankTextGraphic.graphicData.color =
+                        static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case communication::can::cap_bank::State::DISCHARGE:
                     strncpy(capBankTextGraphic.msg + 4, "DSCH", 5);
-                    capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                    capBankTextGraphic.graphicData.color =
+                        static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
                 case communication::can::cap_bank::State::BATTERY_OFF:
                     strncpy(capBankTextGraphic.msg + 4, "BOFF", 5);
-                    capBankTextGraphic.graphicData.color = static_cast<uint8_t>(Tx::GraphicColor::CYAN);
+                    capBankTextGraphic.graphicData.color =
+                        static_cast<uint8_t>(Tx::GraphicColor::CYAN);
                     break;
                 case communication::can::cap_bank::State::DISABLED:
                     strncpy(capBankTextGraphic.msg + 4, "OFFL", 5);
