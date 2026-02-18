@@ -65,7 +65,7 @@ class Drivers : public tap::Drivers
         // Jetson is forward, X forward, Y left.
         TurretMajorTransform(-76.7f, -116.14f, 0.0f, 0.0f, 0.0f, 0.0f),
         TurretMajorTransform(-76.7f, 116.04f, 0.0f, 0.0f, 0.0f, M_PI),
-        TurretMajorTransform(-14.97f, -115.5f, 0.0f, 0.0f, 0.0f,M_PI_2)};
+        TurretMajorTransform(-14.97f, -115.5f, 0.0f, 0.0f, 0.0f, M_PI_2)};
 
     static inline const std::array<TurretMajorFusedImuType::ImuType, 3> turretMajorImuTypes = {
         TurretMajorFusedImuType::ImuType::ISM330DHCX,

@@ -145,8 +145,7 @@ struct FusedImuEkfBackendAdapter<aruwsrc::algorithms::ExtendedKalmanFilterEigen<
  * Measurement z: N stacked copies of state (one per IMU)
  */
 template <size_t N>
-class FusedImuEigenEkf
-    : public aruwsrc::algorithms::ExtendedKalmanFilter<6, 6>
+class FusedImuEigenEkf : public aruwsrc::algorithms::ExtendedKalmanFilter<6, 6>
 {
 public:
     using Base = aruwsrc::algorithms::ExtendedKalmanFilter<6, 6>;

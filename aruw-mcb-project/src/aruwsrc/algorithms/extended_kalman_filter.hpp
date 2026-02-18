@@ -61,8 +61,7 @@ public:
     using StateTransitionFunction = std::function<void(const StateVector&, StateVector&, float)>;
     using ObservationFunction = std::function<void(const StateVector&, InputVector&)>;
     using StateJacobianFunction = std::function<void(const StateVector&, StateMatrix&, float)>;
-    using ObservationJacobianFunction =
-        std::function<void(const StateVector&, ObservationMatrix&)>;
+    using ObservationJacobianFunction = std::function<void(const StateVector&, ObservationMatrix&)>;
 
     ExtendedKalmanFilterCmsis(
         StateTransitionFunction f,

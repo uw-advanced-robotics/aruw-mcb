@@ -394,7 +394,6 @@ private:
     {
         FilterWrapper::setVectorElement(v, row, value);
     }
-
 };
 
 template <size_t N>
@@ -541,7 +540,8 @@ inline void FusedImu<N>::periodicIMUUpdate()
                 typename FilterWrapper::InputVector zBlock;
                 if (!validFlags[i])
                 {
-                    // Use the current prediction for missing sensors, producing near-zero innovation.
+                    // Use the current prediction for missing sensors, producing near-zero
+                    // innovation.
                     const auto& x = filter.getStateVectorAsMatrix();
                     setVectorElem(zBlock, 0, x[0]);
                     setVectorElem(zBlock, 1, x[1]);
