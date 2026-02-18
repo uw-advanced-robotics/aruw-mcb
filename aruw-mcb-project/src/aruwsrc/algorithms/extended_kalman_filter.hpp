@@ -265,7 +265,7 @@ private:
 /**
  * Eigen backend EKF implementation.
  *
- * Uses fixed-size Eigen matrices and is preferred for larger matrix sizes.
+ * Uses fixed-size Eigen matrices and is needed for >10x10
  */
 template <uint16_t STATES, uint16_t INPUTS>
 class ExtendedKalmanFilterEigen

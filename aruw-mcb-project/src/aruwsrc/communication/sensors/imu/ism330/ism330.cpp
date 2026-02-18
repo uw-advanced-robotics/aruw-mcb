@@ -30,21 +30,33 @@ namespace aruwsrc::communication::sensors::imu::ism330
 {
 using namespace tap::communication::sensors::imu;
 ISM330* ISM330::spiOwner = nullptr;
-ISM330::ISM330(ChipSelectPin chipSelectPin) : AbstractIMU(), chipSelectPin(chipSelectPin){};
+#ifdef PLATFORM_HOSTED
+namespace
+{
+void noopChipSelectControl() {}
+}  // namespace
+#endif
+
+ISM330::ISM330()
+#ifndef PLATFORM_HOSTED
+    : ISM330(chipSelectFromGpio<Board::SpiNss>())
+#else
+    : ISM330({noopChipSelectControl, noopChipSelectControl, noopChipSelectControl})
+#endif
+{
+}
+
+ISM330::ISM330(ChipSelectControl chipSelectControl)
+    : AbstractIMU(),
+      chipSelectControl(chipSelectControl){};
 
 void ISM330::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 {
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
 #ifndef PLATFORM_HOSTED
-    switch (chipSelectPin)
+    if (chipSelectControl.initialize != nullptr)
     {
-        case ChipSelectPin::GPIO_D12_H_ROW:
-            modm::platform::GpioD12::GpioOutput();
-            break;
-        case ChipSelectPin::BOARD_SPI_NSS:
-        default:
-            Board::SpiNss::GpioOutput();
-            break;
+        chipSelectControl.initialize();
     }
     ismNssHigh();
     Board::GenSpiMaster::connect<Board::SpiMiso::Miso, Board::SpiMosi::Mosi, Board::SpiSck::Sck>();
@@ -186,15 +198,9 @@ uint8_t ISM330::spiReadRegister(uint8_t reg)
 void ISM330::ismNssLow()
 {
 #ifndef PLATFORM_HOSTED
-    switch (chipSelectPin)
+    if (chipSelectControl.setLow != nullptr)
     {
-        case ChipSelectPin::GPIO_D12_H_ROW:
-            modm::platform::GpioD12::setOutput(modm::GpioOutput::Low);
-            break;
-        case ChipSelectPin::BOARD_SPI_NSS:
-        default:
-            Board::SpiNss::setOutput(modm::GpioOutput::Low);
-            break;
+        chipSelectControl.setLow();
     }
 #endif
 }
@@ -202,15 +208,9 @@ void ISM330::ismNssLow()
 void ISM330::ismNssHigh()
 {
 #ifndef PLATFORM_HOSTED
-    switch (chipSelectPin)
+    if (chipSelectControl.setHigh != nullptr)
     {
-        case ChipSelectPin::GPIO_D12_H_ROW:
-            modm::platform::GpioD12::setOutput(modm::GpioOutput::High);
-            break;
-        case ChipSelectPin::BOARD_SPI_NSS:
-        default:
-            Board::SpiNss::setOutput(modm::GpioOutput::High);
-            break;
+        chipSelectControl.setHigh();
     }
 #endif
 }

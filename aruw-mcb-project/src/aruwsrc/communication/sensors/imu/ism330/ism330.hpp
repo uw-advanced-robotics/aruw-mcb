@@ -34,13 +34,25 @@ using namespace tap::communication::sensors::imu;
 class ISM330 : public AbstractIMU, public modm::pt::Protothread
 {
 public:
-    enum class ChipSelectPin : uint8_t
+    struct ChipSelectControl
     {
-        BOARD_SPI_NSS = 0,
-        GPIO_D12_H_ROW = 1,
+        void (*initialize)();
+        void (*setLow)();
+        void (*setHigh)();
     };
 
-    explicit ISM330(ChipSelectPin chipSelectPin = ChipSelectPin::BOARD_SPI_NSS);
+    ISM330();
+    explicit ISM330(ChipSelectControl chipSelectControl);
+
+    template <typename ChipSelectGpio>
+    static constexpr ChipSelectControl chipSelectFromGpio()
+    {
+        return {
+            &ChipSelectGpioOps<ChipSelectGpio>::initialize,
+            &ChipSelectGpioOps<ChipSelectGpio>::setLow,
+            &ChipSelectGpioOps<ChipSelectGpio>::setHigh};
+    }
+
     DISALLOW_COPY_AND_ASSIGN(ISM330);
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
 
@@ -81,7 +93,15 @@ private:
     // Pre-computed register values for non-blocking writes (protothread use)
     static constexpr uint8_t DEFAULT_CTRL1_XL_VALUE = DEFAULT_ODR | DEFAULT_ACCEL_RANGE;
     static constexpr uint8_t DEFAULT_CTRL2_G_VALUE = DEFAULT_ODR | DEFAULT_GYRO_RANGE;
-    ChipSelectPin chipSelectPin;
+    ChipSelectControl chipSelectControl;
+
+    template <typename ChipSelectGpio>
+    struct ChipSelectGpioOps
+    {
+        static void initialize() { ChipSelectGpio::setOutput(true); }
+        static void setLow() { ChipSelectGpio::setOutput(false); }
+        static void setHigh() { ChipSelectGpio::setOutput(true); }
+    };
 
     // Pull CS low to read / write.
     void ismNssLow();

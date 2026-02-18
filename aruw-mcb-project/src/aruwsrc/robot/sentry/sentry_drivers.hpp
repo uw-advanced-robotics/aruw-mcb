@@ -96,9 +96,11 @@ public:
           chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
 #if defined(TARGET_SENTRY_NAME)
           turretMajorPrimaryImu(
-              aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::BOARD_SPI_NSS),
+              aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
+                  Board::SpiNss>()),
           turretMajorImuSecondary(
-              aruwsrc::communication::sensors::imu::ism330::ISM330::ChipSelectPin::GPIO_D12_H_ROW),
+              aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
+                  modm::platform::GpioD12>()),
           turretMajorImu(
               {&turretMajorPrimaryImu, &turretMajorImuSecondary, &mpu6500},
               turretMajorImuTransforms,
