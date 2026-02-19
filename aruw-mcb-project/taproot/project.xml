@@ -14,29 +14,17 @@
 
 
     <option name="modm:platform:uart:1:buffer.rx">256</option>
-
     <option name="modm:platform:uart:1:buffer.tx">256</option>
-
     <option name="modm:platform:uart:2:buffer.rx">512</option>
-
     <option name="modm:platform:uart:2:buffer.tx">512</option>
-
     <option name="modm:platform:uart:3:buffer.rx">2048</option>
-
     <option name="modm:platform:uart:3:buffer.tx">2048</option>
-
     <option name="modm:platform:uart:6:buffer.rx">256</option>
-
     <option name="modm:platform:uart:6:buffer.tx">256</option>
-
     <option name="modm:platform:uart:7:buffer.rx">512</option>
-
     <option name="modm:platform:uart:7:buffer.tx">512</option>
-
     <option name="modm:platform:uart:8:buffer.rx">256</option>
-
     <option name="modm:platform:uart:8:buffer.tx">256</option>
-
   </options>
   <modules>
     <module>modm:architecture:clock</module>
@@ -88,6 +76,5 @@
     <module>modm:ui:menu</module>
 
     <module>modm:platform:random</module>
-
   </modules>
 </library>
