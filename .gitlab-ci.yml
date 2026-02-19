@@ -155,8 +155,6 @@ before_script:
   stage: Build Libraries
   only: *default_only
   needs: []
-  variables:
-    GIT_SUBMODULE_STRATEGY: none
   script:
     - cd aruw-mcb-project
     - scons build robot=STANDARD_VOID compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
