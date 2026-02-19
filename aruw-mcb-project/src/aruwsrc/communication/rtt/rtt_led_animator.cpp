@@ -139,7 +139,7 @@ void RttLedAnimator::update(
             for (int i = 0; i < 8; ++i)
             {
                 auto pin = static_cast<tap::gpio::Leds::LedPin>(i);
-                drivers->leds.set(pin, !groupFlashOn);
+                drivers->leds.set(pin, groupFlashOn);
             }
 
 #endif
