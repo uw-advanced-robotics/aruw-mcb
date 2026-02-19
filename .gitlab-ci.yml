@@ -115,6 +115,7 @@ before_script:
       paths:
         - aruw-mcb-project/build/hardware/scons-release/modm/
         - aruw-mcb-project/build/hardware/scons-release/src/tap/
+        - aruw-mcb-project/build/hardware/scons-release/ext/
         - aruw-mcb-project/build/hardware/scons-release/.sconsign
       policy: pull
     - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG
@@ -138,6 +139,7 @@ before_script:
         - aruw-mcb-project/build/tests/scons-fast/modm/
         - aruw-mcb-project/build/tests/scons-fast/src/tap/
         - aruw-mcb-project/build/tests/scons-fast/test/tap/
+        - aruw-mcb-project/build/hardware/scons-release/ext/
         - aruw-mcb-project/build/tests/scons-fast/.sconsign
       policy: pull
     - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG-test
@@ -163,6 +165,7 @@ before_script:
     paths:
       - aruw-mcb-project/build/hardware/scons-release/modm/
       - aruw-mcb-project/build/hardware/scons-release/src/tap/
+      - aruw-mcb-project/build/hardware/scons-release/ext/
       - aruw-mcb-project/build/hardware/scons-release/.sconsign
     fallback_keys:
       - mcb-libs-develop
@@ -181,6 +184,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/modm/
       - aruw-mcb-project/build/tests/scons-fast/src/tap/
       - aruw-mcb-project/build/tests/scons-fast/test/tap/
+      - aruw-mcb-project/build/hardware/scons-release/ext/
       - aruw-mcb-project/build/tests/scons-fast/.sconsign
     fallback_keys:
       - mcb-test-libs-develop
