@@ -17,26 +17,29 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ERROR_MENU_HPP_
-#define ERROR_MENU_HPP_
+#ifndef ERROR_SPECIFIC_MENU_HPP_
+#define ERROR_SPECIFIC_MENU_HPP_
 
-#include "tap/display/dummy_allocator.hpp"
+#include "tap/architecture/periodic_timer.hpp"
+
+#include "modm/ui/menu/abstract_menu.hpp"
 #include "tap/display/vertical_scroll_logic_handler.hpp"
 #include "tap/drivers.hpp"
 
-#include "modm/ui/menu/abstract_menu.hpp"
+#include "tap/display/dummy_allocator.hpp"
+#include "tap/errors/system_error.hpp"
 
 namespace aruwsrc
 {
 namespace display
 {
-class ErrorMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class ErrorSpecificMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-    ErrorMenu(
+    ErrorSpecificMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
         tap::Drivers *drivers,
-        int entriesToDisplay);
+        const tap::errors::SystemError* currError);
 
     void draw() override;
 
@@ -46,21 +49,17 @@ public:
 
     bool hasChanged() override;
 
-    static const char *getMenuName() { return "Error Menu"; }
+    static const char *getMenuName() { return "Error Specific Menu"; }
+
 
 private:
-    static constexpr int ERROR_MENU_ID = 3;
-    tap::Drivers *drivers;
-    tap::display::VerticalScrollLogicHandler vertScrollHandler;
-
-    uint32_t okTapNum = 0;
-    std::size_t prevErrorCount = 0;
-
-};  // class ErrorMenu
-
-std::string wrapText(std::string_view text, size_t maxCharsPerLine);
-
+    tap::Drivers* drivers;
+    const tap::errors::SystemError* currError;
+    std::string currDescription;
+    int currLineNum;
+    std::string currFile;
+};
 }  // namespace display
 }  // namespace aruwsrc
 
-#endif  // ERROR_MENU_HPP_
+#endif  // ERROR_SPECIFIC_MENU_HPP_

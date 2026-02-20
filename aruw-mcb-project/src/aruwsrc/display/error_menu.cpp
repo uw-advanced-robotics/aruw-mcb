@@ -18,7 +18,7 @@
  */
 
 #include "error_menu.hpp"
-
+#include "error_specific_menu.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/error_controller.hpp"
 #include "tap/errors/system_error.hpp"
@@ -49,18 +49,33 @@ void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
         case modm::MenuButtons::UP:
         case modm::MenuButtons::DOWN:
             vertScrollHandler.onShortButtonPress(button);
-            rightTapNum = 0;
+            okTapNum = 0;
             break;
         case modm::MenuButtons::RIGHT:
-            rightTapNum++;
-            if (rightTapNum < 2)
+
+            okTapNum = 0;
+            int targetIndex = vertScrollHandler.getCursorIndex();
+            int8_t index = 0;
+            for (const auto &error : drivers->errorController.getErrorList())
+            {
+                if (index == targetIndex)
+                {
+                    this->getViewStack()->push(
+                        new ErrorSpecificMenu(getViewStack(), drivers, &error)); // why reference for error
+                    break;
+                }
+                index++;
+            }
+            break;
+
+        case modm::MenuButtons::OK:
+            okTapNum++;
+            if (okTapNum < 2)
             {
                 break;
             }
             drivers->errorController.removeSystemErrorAtIndex(vertScrollHandler.getCursorIndex());
-            rightTapNum = 0;
-            break;
-        case modm::MenuButtons::OK:
+            okTapNum = 0;
             break;
         default:
             break;
@@ -89,7 +104,7 @@ void ErrorMenu::draw()
     display.clear();
     display.setCursor(0, 2);
     display << ErrorMenu::getMenuName() << modm::endl;
-    display << "Tap RIGHT twice to remove error" << modm::endl;
+    display << "Tap OK twice to remove error" << modm::endl;
 
     int numErrors = drivers->errorController.getErrorList().getSize();
     if (numErrors == 0)
@@ -119,8 +134,7 @@ void ErrorMenu::draw()
             bool isSelected = (index == vertScrollHandler.getCursorIndex());
             display << (isSelected ? "> " : "  ");
 
-            const std::string text = std::string(error.getDescription()) + " [" +
-                                     std::string(error.getFilename()) + ':' +
+            const std::string text = '[' + std::string(error.getFilename()) + ':' +
                                      std::to_string(error.getLineNumber()) + ']';
 
             size_t currentLineLen = 2;  // Start at 2 because of "> " or "  "
@@ -162,15 +176,15 @@ void ErrorMenu::draw()
         // move to next error
         index++;
     }
-}
+};
 
-std::string ErrorMenu::wrapText(std::string_view text, size_t maxCharsPerLine)
+std::string wrapText(std::string_view text, size_t maxCharsPerLine)
 {
     std::string buffer;
     // Pre-allocate once to avoid "re-alloc and move" cycles
     buffer.reserve(text.size() + (text.size() / maxCharsPerLine) * 2);
 
-    int lineLen = 0;
+    size_t lineLen = 0;
     size_t pos = 0;
 
     while (pos < text.length())
@@ -219,6 +233,7 @@ std::string ErrorMenu::wrapText(std::string_view text, size_t maxCharsPerLine)
         pos = nextSpace + 1;
     }
     return buffer;
-};
+}
+
 }  // namespace display
 }  // namespace aruwsrc
