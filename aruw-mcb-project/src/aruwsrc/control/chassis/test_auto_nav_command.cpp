@@ -34,7 +34,10 @@ namespace aruwsrc::control::chassis
     }
 
     void TestAutoNavCommand::initialize() { 
-        Position currPosition = odometrySubsystem->getCurrentLocation2D().getAsPosition();
+        Position currPosition = Position(
+            odometrySubsystem->getCurrentLocation2D().getX(),
+            odometrySubsystem->getCurrentLocation2D().getY(),
+            0.0f);
         for(Transform transform : transforms) {
             currPosition = transform.apply(currPosition);
             path.pushPoint(currPosition);

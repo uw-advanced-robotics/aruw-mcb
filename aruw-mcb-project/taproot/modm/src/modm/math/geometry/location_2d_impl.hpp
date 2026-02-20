@@ -49,13 +49,6 @@ modm::Location2D<T>::getPosition() const
 }
 
 template <typename T>
-inline const tap::algorithms::transforms::Position
-modm::Location2D<T>::getAsPosition() const
-{
-	return tap::algorithms::transforms::Position(this->position.x, this->position.y, 0.0f);
-}
-
-template <typename T>
 inline const T&
 modm::Location2D<T>::getX() const
 {
