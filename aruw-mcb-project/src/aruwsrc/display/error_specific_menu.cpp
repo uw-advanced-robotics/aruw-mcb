@@ -42,7 +42,6 @@ void ErrorSpecificMenu::draw()
 {
     const auto& errorList = drivers->errorController.getErrorList();
     const tap::errors::SystemError* currError = nullptr;
-    // Validate error index
     if (index < 0 || index >= static_cast<int>(errorList.getSize()))
     {
         RAISE_ERROR(drivers, "ErrorSpecificMenu has invalid error index");
@@ -103,12 +102,6 @@ void ErrorSpecificMenu::shortButtonPress(modm::MenuButtons::Button button)
     }
 }
 
-// bool ErrorSpecificMenu::hasChanged() {
-//     bool sameDes = (currDescription == currError->getDescription());
-//     bool sameName = (currFile == currError->getFilename());
-//     bool sameLine = (currLineNum == currError->getLineNumber());
-//     return !(sameDes && sameName && sameLine);
-// }
 bool ErrorSpecificMenu::hasChanged()
 {
     const auto& errorList = drivers->errorController.getErrorList();

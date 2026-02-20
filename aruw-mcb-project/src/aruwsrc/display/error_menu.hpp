@@ -55,8 +55,7 @@ private:
 
     uint32_t okTapNum = 0;
     std::size_t prevErrorCount = 0;
-
-};  // class ErrorMenu
+};
 
 std::string wrapText(std::string_view text, size_t maxCharsPerLine);
 
