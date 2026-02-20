@@ -642,7 +642,7 @@ HoldCommandMapping testAuto(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 HoldCommandMapping pushAutoPathPoints(
     drivers(),
-    {&pushAutoNavPointXSMALLY0, &pushAutoNavPointX0Y0},
+    {&ForwardBackTest},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 HoldCommandMapping rightSwitchMiddle(
     drivers(),
