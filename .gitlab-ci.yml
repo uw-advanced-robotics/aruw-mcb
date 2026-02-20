@@ -139,7 +139,7 @@ before_script:
         - aruw-mcb-project/build/tests/scons-fast/modm/
         - aruw-mcb-project/build/tests/scons-fast/src/tap/
         - aruw-mcb-project/build/tests/scons-fast/test/tap/
-        - aruw-mcb-project/build/hardware/scons-release/ext/
+        - aruw-mcb-project/build/tests/scons-fast/ext/
         - aruw-mcb-project/build/tests/scons-fast/.sconsign
       policy: pull
     - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG-test
@@ -182,7 +182,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/modm/
       - aruw-mcb-project/build/tests/scons-fast/src/tap/
       - aruw-mcb-project/build/tests/scons-fast/test/tap/
-      - aruw-mcb-project/build/hardware/scons-release/ext/
+      - aruw-mcb-project/build/tests/scons-fast/ext/
       - aruw-mcb-project/build/tests/scons-fast/.sconsign
     fallback_keys:
       - mcb-test-libs-develop
