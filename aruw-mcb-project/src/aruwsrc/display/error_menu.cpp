@@ -18,10 +18,12 @@
  */
 
 #include "error_menu.hpp"
-#include "error_specific_menu.hpp"
+
 #include "tap/drivers.hpp"
 #include "tap/errors/error_controller.hpp"
 #include "tap/errors/system_error.hpp"
+
+#include "error_specific_menu.hpp"
 
 namespace aruwsrc
 {
@@ -51,21 +53,12 @@ void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
             vertScrollHandler.onShortButtonPress(button);
             okTapNum = 0;
             break;
-        case modm::MenuButtons::RIGHT: 
-            {
+        case modm::MenuButtons::RIGHT:
+        {
             okTapNum = 0;
             int targetIndex = vertScrollHandler.getCursorIndex();
-            int8_t index = 0;
-            for (const auto &error : drivers->errorController.getErrorList())
-            {
-                if (index == targetIndex)
-                {
-                    this->getViewStack()->push(
-                        new ErrorSpecificMenu(getViewStack(), drivers, &error)); // why reference for error
-                    break;
-                }
-                index++;
-            }
+            this->getViewStack()->push(
+                new ErrorSpecificMenu(getViewStack(), drivers, targetIndex));  // Pass index
             break;
         }
         case modm::MenuButtons::OK:
@@ -119,10 +112,6 @@ void ErrorMenu::draw()
     }
 
     int8_t index = 0;
-
-    // There is no way to get the font width directly, but you can give it a character and get its
-    // width. There is also no getFont(), so we cannot see the font, only works with monospaced
-    // fonts.
     size_t MAX_CHARS_PER_LINE = display.getWidth() / display.getStringWidth("a");
 
     for (const auto &error : drivers->errorController.getErrorList())
@@ -130,50 +119,28 @@ void ErrorMenu::draw()
         if (index >= vertScrollHandler.getSmallestIndexDisplayed() &&
             index <= vertScrollHandler.getLargestIndexDisplayed())
         {
-            // Draw selector
             bool isSelected = (index == vertScrollHandler.getCursorIndex());
+
+            const std::string text = std::string(error.getDescription());
+
+            std::string wrapped = wrapText(text, MAX_CHARS_PER_LINE - 2);
+
             display << (isSelected ? "> " : "  ");
 
-            const std::string text = '[' + std::string(error.getFilename()) + ':' +
-                                     std::to_string(error.getLineNumber()) + ']';
-
-            size_t currentLineLen = 2;  // Start at 2 because of "> " or "  "
-            size_t pos = 0;
-            // Print error with wrapping
-            while (pos < text.size())
+            for (char c : wrapped)
             {
-                // manual scan for next space
-                size_t nextSpace = pos;
-                while (nextSpace < text.size() && text[nextSpace] != ' ') nextSpace++;
-
-                size_t wordLen = nextSpace - pos;
-                bool needsSpace = (currentLineLen > 2);
-
-                // wrap check
-                if (currentLineLen + wordLen + (needsSpace ? 1 : 0) > MAX_CHARS_PER_LINE)
+                if (c == '\n')
                 {
                     display << modm::endl << "  ";
-                    currentLineLen = 2;
-                    needsSpace = false;
                 }
-
-                if (needsSpace)
+                else
                 {
-                    display << ' ';
-                    currentLineLen++;
+                    display << c;
                 }
-
-                // print characters
-                for (size_t i = pos; i < pos + wordLen; ++i) display << text[i];
-
-                currentLineLen += wordLen;
-                pos = (nextSpace < text.size()) ? nextSpace + 1 : nextSpace;
             }
 
-            // End the error item
-            display << modm::endl;
+            display << modm::endl << modm::endl;
         }
-        // move to next error
         index++;
     }
 };

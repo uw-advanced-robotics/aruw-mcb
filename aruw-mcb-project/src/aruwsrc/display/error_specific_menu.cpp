@@ -18,30 +18,55 @@
  */
 
 #include "error_specific_menu.hpp"
-#include "error_menu.hpp"
+
 #include "tap/drivers.hpp"
+#include "tap/errors/create_errors.hpp"
 #include "tap/errors/error_controller.hpp"
 #include "tap/errors/system_error.hpp"
-#include "tap/errors/create_errors.hpp"
 
-namespace aruwsrc::display {
+#include "error_menu.hpp"
+
+namespace aruwsrc::display
+{
 ErrorSpecificMenu::ErrorSpecificMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    tap::Drivers *drivers,
-    const tap::errors::SystemError* error)
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+    tap::Drivers* drivers,
+    int errorIndex)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, 1),
       drivers(drivers),
-      currError(error)
-{}
+      index(errorIndex)
+{
+}
 
-void ErrorSpecificMenu::draw() {
-    if (currError == nullptr)
+void ErrorSpecificMenu::draw()
+{
+    const auto& errorList = drivers->errorController.getErrorList();
+    const tap::errors::SystemError* currError = nullptr;
+    // Validate error index
+    if (index < 0 || index >= static_cast<int>(errorList.getSize()))
     {
-        RAISE_ERROR(drivers, "ErrorSpecificMenu has a nullptr error");
+        RAISE_ERROR(drivers, "ErrorSpecificMenu has invalid error index");
         return;
     }
 
-    modm::GraphicDisplay &display = getViewStack()->getDisplay();
+    int idx = 0;
+    for (const auto& err : errorList)
+    {
+        if (idx == index)
+        {
+            currError = &err;
+            break;
+        }
+        idx++;
+    }
+
+    if (currError == nullptr)
+    {
+        RAISE_ERROR(drivers, "ErrorSpecificMenu could not find error");
+        return;
+    }
+
+    modm::GraphicDisplay& display = getViewStack()->getDisplay();
     display.clear();
     display.setCursor(0, 2);
 
@@ -49,32 +74,58 @@ void ErrorSpecificMenu::draw() {
     currDescription = currError->getDescription();
     currLineNum = currError->getLineNumber();
 
-       
     size_t MAX_CHARS_PER_LINE = display.getWidth() / display.getStringWidth("a");
-    std::string linenum = std::to_string(currLineNum) + ": ";
-    std::string wrapped = wrapText(currDescription, MAX_CHARS_PER_LINE - linenum.length());
-
-    display << linenum.c_str();
-    for (char c : wrapped) {
-        display << c;
+    std::string wrappedFile = wrapText(currFile, MAX_CHARS_PER_LINE);
+    for (char c : wrappedFile)
+    {
+        if (c == '\n')
+        {
+            display << modm::endl;
+        }
+        else
+        {
+            display << c;
+        }
     }
-    display << modm::endl;
+
+    display << modm::endl << modm::endl;
+
+    display << "Line: " << currLineNum << modm::endl;
 }
 
 void ErrorSpecificMenu::update() {}
 
-void ErrorSpecificMenu::shortButtonPress(modm::MenuButtons::Button button) {
+void ErrorSpecificMenu::shortButtonPress(modm::MenuButtons::Button button)
+{
     if (button == modm::MenuButtons::LEFT)
     {
         this->remove();
-    } 
+    }
 }
 
-bool ErrorSpecificMenu::hasChanged() {
-    bool sameDes = (currDescription == currError->getDescription());
-    bool sameName = (currFile == currError->getFilename());
-    bool sameLine = (currLineNum == currError->getLineNumber());
-    return !(sameDes && sameName && sameLine);
+// bool ErrorSpecificMenu::hasChanged() {
+//     bool sameDes = (currDescription == currError->getDescription());
+//     bool sameName = (currFile == currError->getFilename());
+//     bool sameLine = (currLineNum == currError->getLineNumber());
+//     return !(sameDes && sameName && sameLine);
+// }
+bool ErrorSpecificMenu::hasChanged()
+{
+    const auto& errorList = drivers->errorController.getErrorList();
+    int idx = 0;
+    for (const auto& err : errorList)
+    {
+        if (idx == index)
+        {
+            bool sameDes = (currDescription == err.getDescription());
+            bool sameName = (currFile == err.getFilename());
+            bool sameLine = (currLineNum == static_cast<int>(err.getLineNumber()));
+            return !(sameDes && sameName && sameLine);
+        }
+        idx++;
+    }
+
+    return false;
 }
 
-}
+}  // namespace aruwsrc::display

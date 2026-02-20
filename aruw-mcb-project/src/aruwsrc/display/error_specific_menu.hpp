@@ -21,25 +21,25 @@
 #define ERROR_SPECIFIC_MENU_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
-
-#include "modm/ui/menu/abstract_menu.hpp"
+#include "tap/display/dummy_allocator.hpp"
 #include "tap/display/vertical_scroll_logic_handler.hpp"
 #include "tap/drivers.hpp"
-
-#include "tap/display/dummy_allocator.hpp"
 #include "tap/errors/system_error.hpp"
+
+#include "modm/ui/menu/abstract_menu.hpp"
 
 namespace aruwsrc
 {
 namespace display
 {
-class ErrorSpecificMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
+class ErrorSpecificMenu
+    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
     ErrorSpecificMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
         tap::Drivers *drivers,
-        const tap::errors::SystemError* currError);
+        int errorIdx);
 
     void draw() override;
 
@@ -51,13 +51,12 @@ public:
 
     static const char *getMenuName() { return "Error Specific Menu"; }
 
-
 private:
-    tap::Drivers* drivers;
-    const tap::errors::SystemError* currError;
+    tap::Drivers *drivers;
     std::string currDescription;
     int currLineNum;
     std::string currFile;
+    int index;
 };
 }  // namespace display
 }  // namespace aruwsrc
