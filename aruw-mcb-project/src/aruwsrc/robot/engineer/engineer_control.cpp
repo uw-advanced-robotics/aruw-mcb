@@ -285,17 +285,8 @@ aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
 
 // this could be useful i think
 
-EngineerTransformSubsystem transformerSubsystem(*drivers(), transformer);
-EngineerTransformAdapter transformAdapter(transformer);
-
-aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
-    *drivers(),
-    xDriveChassis,
-    &transformAdapter,
-    aruwsrc::control::chassis::BEYBLADE_CONFIG,
-    capBankSubsystem,  // TODO: dont have rn :/
-    0.15f,
-    1000.0f);
+// TODO: add autonavcontroller + autonav command to this when all requirements (capbank,
+// beyblade config, transform adapter are all finished)
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
@@ -314,12 +305,11 @@ aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
 
 BuzzerSubsystem engineerBuzzer(drivers());
 
-c
 
-    NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
-        engineerBuzzer,
-        IMU_CALIBRATE_SUCCESS_NOTES,
-        IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
+NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
+    engineerBuzzer,
+    IMU_CALIBRATE_SUCCESS_NOTES,
+    IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
 
 NoteSequenceCommand imuCalibrateFailBuzzCommand(
     engineerBuzzer,
@@ -527,13 +517,6 @@ tap::control::PressCommandMapping cyclePositions(
     drivers(),
     {&scorePositionCommand},
     RemoteMapState({Remote::Key::C}));
-
-tap::control::HoldCommandMapping testAuto(
-    drivers(),
-    {&autoNavCommand},
-    tap::control::RemoteMapState(
-        Remote::Switch::RIGHT_SWITCH,
-        Remote::SwitchState::DOWN));  // probably delete before merge to develop
 
 CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
     drivers(),
