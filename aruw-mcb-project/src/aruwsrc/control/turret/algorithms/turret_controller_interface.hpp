@@ -22,6 +22,8 @@
 
 #include "tap/algorithms/wrapped_float.hpp"
 
+#include "turret_compensator_interface.hpp"
+
 using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
@@ -47,7 +49,13 @@ public:
     /**
      * @param[in] TurretMotor A `TurretMotor` object accessible for children objects to use.
      */
-    TurretControllerInterface(TurretMotor &turretMotor) : turretMotor(turretMotor) {}
+    TurretControllerInterface(
+        TurretMotor &turretMotor,
+        const std::vector<TurretCompensatorInterface *> compensators = {})
+        : turretMotor(turretMotor),
+          compensators(compensators)
+    {
+    }
 
     /**
      * Initializes the controller, resetting any controllers and configuring any variables that need
@@ -66,6 +74,23 @@ public:
      * is operating. Units radians.
      */
     virtual void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) = 0;
+
+    /**
+     * Calculates the total output from all attached compensators.
+     *
+     * @param[in] state The current turret state.
+     * @return The total output.
+     */
+    virtual float calculateCompensationEffort(
+        TurretCompensatorInterface::TurretCompensatorState state)
+    {
+        debugVar = compensators.size();
+        if (compensators.empty()) return 0.0f;
+
+        float total = 0.0f;
+        for (const auto &ff : compensators) total += ff->calculateCompensationEffort(state);
+        return total;
+    }
 
     /**
      * Sets the controller setpoint, but doesn't run the controller.
@@ -118,23 +143,27 @@ public:
     virtual WrappedFloat convertChassisAngleToControllerFrame(
         WrappedFloat chassisFrameAngle) const = 0;
 
+    float debugVar = 0.0f;
+
 protected:
     TurretMotor &turretMotor;
+    const std::vector<TurretCompensatorInterface *> compensators;
 };
 
-class TurretPitchControllerInterface : public TurretControllerInterface
+enum class Axis
 {
-public:
-    TurretPitchControllerInterface(TurretMotor &turretMotor)
-        : TurretControllerInterface(turretMotor)
-    {
-    }
+    PITCH,
+    YAW
 };
 
-class TurretYawControllerInterface : public TurretControllerInterface
+template <Axis AXIS>
+class TurretAxisControllerInterface : public TurretControllerInterface
 {
 public:
-    TurretYawControllerInterface(TurretMotor &turretMotor) : TurretControllerInterface(turretMotor)
+    TurretAxisControllerInterface(
+        TurretMotor &turretMotor,
+        const std::vector<TurretCompensatorInterface *> compensators = {})
+        : TurretControllerInterface(turretMotor, compensators)
     {
     }
 };

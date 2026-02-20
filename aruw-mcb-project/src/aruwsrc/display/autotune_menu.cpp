@@ -24,20 +24,20 @@
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 
 // weak function defined if not specifed by user
-modm_weak std::vector<aruwsrc::control::autotune::GravityAutotuneInterface*>
-getGravityAutotuneCommands()
+modm_weak std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
 {
-    return std::vector<aruwsrc::control::autotune::GravityAutotuneInterface*>{};
-}
+    return std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*>{};
+};
 namespace aruwsrc::display
 {
 AutotuneMenu::AutotuneMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>>* vs,
     tap::Drivers* drivers,
     int entriesToDisplay)
-    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, 1),
+    : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>(vs, 1),
       drivers(drivers),
-      verticalScroll(drivers, 0, entriesToDisplay)
+      verticalScroll(drivers, 0, entriesToDisplay),
+      autotuneSpecificMenu(vs, drivers, nullptr)
 {
     verticalScroll.setSize(getCommandNumber());
 }
@@ -61,8 +61,9 @@ void AutotuneMenu::draw()
 
     for (int8_t commandId = commandMinIndex; commandId <= commandMaxIndex; ++commandId)
     {
-        display << (verticalScroll.getCursorIndex() == commandId ? "> " : "  ");
-        display << "Gravity Autotune Command " << (commandId + 1) << modm::endl;
+        const int8_t idx = verticalScroll.getCursorIndex();
+        display << (idx == commandId ? "> " : "  ");
+        display << getAutotuneCommands()[commandId]->getName() << (commandId + 1) << modm::endl;
     }
 }
 
@@ -85,14 +86,13 @@ void AutotuneMenu::shortButtonPress(modm::MenuButtons::Button button)
                 break;
             }
 
-            int8_t idx = verticalScroll.getCursorIndex();
+            const int8_t idx = verticalScroll.getCursorIndex();
             // Index is selecting a gravity autotune command, so push the corresponding menu.
-            if (idx < static_cast<int>(getGravityAutotuneCommands().size()))
+            if (idx < static_cast<int>(getAutotuneCommands().size()))
             {
-                this->getViewStack()->push(new GravityAutotuneMenu(
-                    getViewStack(),
-                    drivers,
-                    getGravityAutotuneCommands()[idx]));
+                this->getViewStack()->push(
+                    new (&autotuneSpecificMenu)
+                        AutotuneSpecificMenu(getViewStack(), drivers, getAutotuneCommands()[idx]));
             }
             break;
         }

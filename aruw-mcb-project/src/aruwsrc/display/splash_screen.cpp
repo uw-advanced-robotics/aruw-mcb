@@ -34,7 +34,8 @@ SplashScreen::SplashScreen(
     communication::can::TurretMCBCanComm* turretMCBCanCommBus2,
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite1,
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite2,
-    communication::can::cap_bank::CapacitorBank* capacitorBank)
+    communication::can::cap_bank::CapacitorBank* capacitorBank,
+    aruwsrc::communication::rtt::RttTelemetry* rttTelemetry)
     : modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(
           vs,
           SPLASH_SCREEN_MENU_ID),
@@ -44,7 +45,18 @@ SplashScreen::SplashScreen(
       turretMCBCanCommBus2(turretMCBCanCommBus2),
       mcbLite1(mcbLite1),
       mcbLite2(mcbLite2),
-      capacitorBank(capacitorBank)
+      capacitorBank(capacitorBank),
+      rttTelemetry(rttTelemetry),
+      mainMenu(
+          vs,
+          drivers,
+          visionCoprocessor,
+          turretMCBCanCommBus1,
+          turretMCBCanCommBus2,
+          mcbLite1,
+          mcbLite2,
+          capacitorBank,
+          rttTelemetry)
 {
 }
 
@@ -74,7 +86,7 @@ void SplashScreen::shortButtonPress(modm::MenuButtons::Button button)
             break;
         case modm::MenuButtons::RIGHT:
         {
-            MainMenu* mm = new MainMenu(
+            MainMenu* mm = new (&mainMenu) MainMenu(
                 getViewStack(),
                 drivers,
                 visionCoprocessor,
@@ -82,7 +94,8 @@ void SplashScreen::shortButtonPress(modm::MenuButtons::Button button)
                 turretMCBCanCommBus2,
                 mcbLite1,
                 mcbLite2,
-                capacitorBank);
+                capacitorBank,
+                rttTelemetry);
             mm->initialize();
             getViewStack()->push(mm);
             break;

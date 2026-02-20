@@ -41,7 +41,8 @@ MainMenu::MainMenu(
     communication::can::TurretMCBCanComm* turretMCBCanCommBus2,
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite1,
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite2,
-    communication::can::cap_bank::CapacitorBank* capacitorBank)
+    communication::can::cap_bank::CapacitorBank* capacitorBank,
+    aruwsrc::communication::rtt::RttTelemetry* rttTelemetry)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
@@ -60,12 +61,14 @@ MainMenu::MainMenu(
       aboutMenu(stack),
       sentryStrategyMenu(stack, visionCoprocessor),
       capBankMenu(stack, capacitorBank),
+      rttMenu(stack, rttTelemetry),
       visionCoprocessor(visionCoprocessor),
       turretMCBCanCommBus1(turretMCBCanCommBus1),
       turretMCBCanCommBus2(turretMCBCanCommBus2),
       mcbLite1(mcbLite1),
       mcbLite2(mcbLite2),
-      capacitorBank(capacitorBank)
+      capacitorBank(capacitorBank),
+      rttTelemetry(rttTelemetry)
 {
 }
 
@@ -159,6 +162,11 @@ void MainMenu::initialize()
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addCapacitorBankMenuCallback));
+    addEntry(
+        RttMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addRttMenuCallback));
 
     setTitle("Main Menu");
 }
@@ -263,6 +271,12 @@ void MainMenu::addCapacitorBankMenuCallback()
 {
     CapacitorBankMenu* cbm = new (&capBankMenu) CapacitorBankMenu(getViewStack(), capacitorBank);
     getViewStack()->push(cbm);
+}
+
+void MainMenu::addRttMenuCallback()
+{
+    RttMenu* rttm = new (&rttMenu) RttMenu(getViewStack(), rttTelemetry);
+    getViewStack()->push(rttm);
 }
 
 }  // namespace display

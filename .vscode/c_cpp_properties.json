@@ -40,12 +40,15 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_SENTRY_ECLIPSE"
+                "TARGET_SENTRY_ECLIPSE",
+                "BUILD_TARGET=\"TARGET_SENTRY_ECLIPSE\""
             ]
         },
         {
@@ -56,12 +59,15 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_STANDARD_VOID"
+                "TARGET_STANDARD_VOID",
+                "BUILD_TARGET=\"TARGET_STANDARD_VOID\""
             ]
         },
         {
@@ -72,12 +78,15 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_STANDARD_NULL"
+                "TARGET_STANDARD_NULL",
+                "BUILD_TARGET=\"TARGET_STANDARD_NULL\""
             ]
         },
         {
@@ -88,12 +97,34 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_DART"
+                "TARGET_DART",
+                "BUILD_TARGET=\"TARGET_DART\""
+            ]
+        },
+        {
+            "name": "MCB 2025 Engineer",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_ENGI_2025",
+                "BUILD_TARGET=\"TARGET_ENGI_2025\""
             ]
         },
         {
@@ -104,12 +135,15 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_ENGINEER"
+                "TARGET_ENGINEER",
+                "BUILD_TARGET=\"TARGET_ENGINEER\""
             ]
         },
         {
@@ -120,12 +154,15 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_DRONE"
+                "TARGET_DRONE",
+                "BUILD_TARGET=\"TARGET_DRONE\""
             ]
         },
         {
@@ -136,12 +173,15 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_TESTBED"
+                "TARGET_TESTBED",
+                "BUILD_TARGET=\"TARGET_TESTBED\""
             ]
         },
         {
@@ -152,12 +192,15 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_BLANK"
+                "TARGET_BLANK",
+                "BUILD_TARGET=\"TARGET_BLANK\""
             ]
         },
         {
@@ -168,12 +211,51 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_MOTOR_TESTER",
+                "BUILD_TARGET=\"TARGET_MOTOR_TESTER\""
+            ]
+        },
+        {
+            "name": "MCB Launcher Target",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
+            ],
+            "compilerPath": "arm-none-eabi-g++",
+            "intelliSenseMode": "gcc-arm",
+            "defines": [
+                "TARGET_LAUNCHER_TARGET",
+                "BUILD_TARGET=\"TARGET_LAUNCHER_TARGET\""
+            ]
+        },
+        {
+            "name": "MCB Flywheel Testing",
+            "includePath": [
+                "${default}",
+                "aruw-mcb-project/taproot/modm/src",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
+                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
                 "aruw-mcb-project/taproot/ext"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_MOTOR_TESTER"
+                "TARGET_FLYWHEEL_TESTING",
+                "BUILD_TARGET=\"TARGET_FLYWHEEL_TESTING\""
             ]
         },
         {
@@ -184,12 +266,15 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_CHARACTERIZER"
+                "TARGET_CHARACTERIZER",
+                "BUILD_TARGET=\"TARGET_CHARACTERIZER\""
             ]
         },
         {
@@ -200,12 +285,15 @@
                 "aruw-mcb-project/taproot/modm/ext/cmsis/core",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/device",
                 "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext"
+                "aruw-mcb-project/taproot/ext",
+                "segger-rtt/RTT",
+                "segger-rtt/Config"
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_HERO_ZERO"
+                "TARGET_HERO_ZERO",
+                "BUILD_TARGET=\"TARGET_HERO_ZERO\""
             ]
         }
     ],

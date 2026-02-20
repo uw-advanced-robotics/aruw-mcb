@@ -39,6 +39,9 @@ namespace aruwsrc::drone
 #elif defined(TARGET_ENGINEER)
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 namespace aruwsrc::engineer
+#elif defined(TARGET_ENGI_2025)
+#include "aruwsrc/robot/2025engineer/engineer_drivers.hpp"
+namespace aruwsrc::engineer
 #elif defined(TARGET_DART)
 #include "aruwsrc/robot/dart/dart_drivers.hpp"
 namespace aruwsrc::dart
@@ -51,6 +54,12 @@ namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 namespace aruwsrc::motor_tester
+#elif defined(TARGET_LAUNCHER_TARGET)
+#include "aruwsrc/robot/launcher_target/launcher_target_drivers.hpp"
+namespace aruwsrc::launcher_target
+#elif defined(TARGET_FLYWHEEL_TESTING)
+#include "aruwsrc/robot/flywheel_testing/flywheel_testing_drivers.hpp"
+namespace aruwsrc::flywheel_testing
 #elif defined(TARGET_CHARACTERIZER)
 #include "aruwsrc/robot/characterizer/characterizer_drivers.hpp"
 namespace aruwsrc::characterizer

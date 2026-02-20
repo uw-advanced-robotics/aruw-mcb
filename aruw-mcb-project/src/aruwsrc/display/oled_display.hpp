@@ -23,8 +23,8 @@
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/board/board.hpp"
 #include "tap/display/oled_button_handler.hpp"
-#include "tap/display/sh1106.hpp"
-#include "tap/display/sh1107.hpp"
+#include "tap/display/sh1106/sh1106.hpp"
+#include "tap/display/sh1107/sh1107.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
@@ -52,7 +52,8 @@ public:
         communication::can::TurretMCBCanComm *turretMCBCanCommBus2,
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
-        communication::can::cap_bank::CapacitorBank *capacitorBank = nullptr);
+        communication::can::cap_bank::CapacitorBank *capacitorBank,
+        aruwsrc::communication::rtt::RttTelemetry *rttTelemetry);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 

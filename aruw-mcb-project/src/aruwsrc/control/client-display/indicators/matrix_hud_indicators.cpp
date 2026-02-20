@@ -58,7 +58,7 @@ MatrixHudIndicators::MatrixHudIndicators(
     tap::Drivers &drivers,
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-    const aruwsrc::control::launcher::FrictionWheelSubsystem &frictionWheelSubsystem,
+    const aruwsrc::control::launcher::FrictionWheelInterface &frictionWheelSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
     const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor)
@@ -138,7 +138,7 @@ void MatrixHudIndicators::updateIndicatorState()
     if (shooterState == ShooterState::READY_TO_FIRE)
     {
 #if defined(TARGET_HERO_PERSEUS)
-        auto turretMCB = turretSubsystem.getTurretMCB();
+        auto turretMCB = turretSubsystem.getIMU();
         assert(turretMCB != nullptr);
         if (!turretMCB->getLimitSwitchDepressed())
         {

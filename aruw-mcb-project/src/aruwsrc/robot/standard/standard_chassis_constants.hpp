@@ -37,6 +37,7 @@ namespace aruwsrc::control::chassis
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
+
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {50, 4'500},
     {60, 5'700},
@@ -111,21 +112,14 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 static constexpr float WHEEL_RADIUS = 0.1016;
 
 #if defined(TARGET_STANDARD_NULL)
-
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
-
-static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;         // 41.275mm -> m
-static constexpr float CENTER_TO_WHEELBASE_RADIUS = 141 / 1000.0f;  // 141mm -> m
+static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
+static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;     // 141mm -> m
 static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
 static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
 
 #elif defined(TARGET_STANDARD_VOID)
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.33f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.33f;
-
-static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;         // 41.275mm -> m
-static constexpr float CENTER_TO_WHEELBASE_RADIUS = 141 / 1000.0f;  // 141mm -> m
+static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
+static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;     // 141mm -> m
 static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
 static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
 
@@ -134,11 +128,6 @@ static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIAN
 #error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
 
 #endif
-
-static constexpr float WHEELBASE_HYPOTENUSE =
-    (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-        ? 1
-        : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
 
 /*
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y (m).
@@ -158,8 +147,8 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 50,
 };
 
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
 
 }  // namespace aruwsrc::control::chassis
 
