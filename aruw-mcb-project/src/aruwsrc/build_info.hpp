@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -16,28 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef BUILD_INFO_HPP_
+#define BUILD_INFO_HPP_
 
-#ifndef DART_DRIVERS_HPP_
-#define DART_DRIVERS_HPP_
+#define STRINGIFYMACRO(s) MACROSTR(s)
+#define MACROSTR(s) #s
 
-#include "tap/drivers.hpp"
+static constexpr char ROBOT_NAME[] = BUILD_TARGET;
+static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
+static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
+static constexpr char LAST_DATE[] = STRINGIFYMACRO(BUILD_DATE);
+static constexpr char BRANCH_NAME[] = STRINGIFYMACRO(BUILD_BRANCH_NAME);
 
-#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
-
-namespace aruwsrc::dart
-{
-class Drivers : public tap::Drivers
-{
-    friend class DriversSingleton;
-
-#ifdef ENV_UNIT_TESTS
-public:
-#endif
-    Drivers() : tap::Drivers(), rttTelemetry(this) {}
-
-public:
-    communication::rtt::RttTelemetry rttTelemetry;
-};  // class aruwsrc::DartDrivers
-}  // namespace aruwsrc::dart
-
-#endif  // DART_DRIVERS_HPP_
+#endif  // BUILD_INFO_HPP_

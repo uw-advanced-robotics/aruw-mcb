@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,27 +17,30 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_DRIVERS_HPP_
-#define DART_DRIVERS_HPP_
+#ifndef RTT_CONNECTION_STATE_HPP_
+#define RTT_CONNECTION_STATE_HPP_
 
-#include "tap/drivers.hpp"
-
-#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
-
-namespace aruwsrc::dart
+namespace aruwsrc::communication::rtt
 {
-class Drivers : public tap::Drivers
+// Enum to track state of RTT connection
+enum class ConnectionState : int
 {
-    friend class DriversSingleton;
+    Ozone = 0,
+    Unidrictional = 1,
+    Bidirectional = 2,
+};
 
-#ifdef ENV_UNIT_TESTS
-public:
-#endif
-    Drivers() : tap::Drivers(), rttTelemetry(this) {}
+constexpr const char* connectionStateNames[] = {
+    "Ozone",
+    "Unidirectional",
+    "Bidirectional",
+};
 
-public:
-    communication::rtt::RttTelemetry rttTelemetry;
-};  // class aruwsrc::DartDrivers
-}  // namespace aruwsrc::dart
+inline const char* connectionStateToString(ConnectionState state)
+{
+    return connectionStateNames[static_cast<int>(state)];
+}
 
-#endif  // DART_DRIVERS_HPP_
+}  // namespace aruwsrc::communication::rtt
+
+#endif  // RTT_CONNECTION_STATE_HPP_

@@ -17,17 +17,17 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
-#define SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#ifndef THREE_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#define THREE_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/algorithms/odometry/two_deadwheel_chassis_kf_odometry.hpp"
-#include "aruwsrc/algorithms/odometry/two_deadwheel_odometry_observer.hpp"
-#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_chassis_kf_odometry.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_odometry_observer.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector2.hpp"
 
@@ -46,11 +46,11 @@ namespace tap::control::chassis
 class ChassisSubsystemInterface;
 }
 
-namespace aruwsrc::sentry::algorithms::odometry
+namespace aruwsrc::algorithms::odometry
 {
-class SentryKFOdometry2DSubsystem
+class ThreeDeadwheelKFOdometry2DSubsystem
     : public tap::control::Subsystem,
-      public aruwsrc::algorithms::odometry::TwoDeadwheelChassisKFOdometry
+      public aruwsrc::algorithms::odometry::ThreeDeadwheelChassisKFOdometry
 {
 public:
     /**
@@ -69,22 +69,37 @@ public:
      * @param[in] initialXPos initial world-frame x position of the chassis
      * @param[in] initialYPos initial world-frame y position of the chassis
      */
-    SentryKFOdometry2DSubsystem(
+    ThreeDeadwheelKFOdometry2DSubsystem(
         tap::Drivers &drivers,
-        const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver &deadwheels,
+        const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver &deadwheels,
+#if defined(TARGET_SENTRY_ECLIPSE)
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
+#else
+        const aruwsrc::control::turret::TurretSubsystem &yawObserver,
+#endif
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,
         float initialYPos,
-        const float centerToWheelDistance);
+        float initialYaw,
+        const float parallelOneCenterToWheelDistance,
+        const float parallelTwoCenterToWheelDistance,
+        const float perpendicularCenterToWheelDistance,
+        const float odomFrameToRobotFrame);
 
     void refresh() override;
 
     void overrideOdometryPosition(const float positionX, const float positionY);
 
     void overrideOdometryOrientation(const float deltaYaw);
+
+private:
+#if defined(TARGET_SENTRY_ECLIPSE)
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface &chassisYawObserver;
+#else
+    aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver chassisYawObserver;
+#endif
 };
 
-}  // namespace aruwsrc::sentry::algorithms::odometry
+}  // namespace aruwsrc::algorithms::odometry
 
-#endif  // SENTRY_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
+#endif  // THREE_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_

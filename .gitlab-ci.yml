@@ -82,7 +82,7 @@ before_script:
 
     - python3 ./taproot-scripts/check_license_headers.py
         -p aruw-mcb
-        -i './**/__init__.py' 'taproot/**/*' 'taproot-scripts/**/*' 'aruw-mcb-project/taproot/**/*' 'docs/**/*' 'aruw-mcb-project/robot-type/robot_type.hpp'
+        -i './**/__init__.py' 'taproot/**/*' 'taproot-scripts/**/*' 'aruw-mcb-project/taproot/**/*' 'docs/**/*' 'aruw-mcb-project/robot-type/robot_type.hpp' 'segger-rtt/**/*'
         -o 'Advanced Robotics at the University of Washington'
 
     - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
@@ -115,6 +115,7 @@ before_script:
       paths:
         - aruw-mcb-project/build/hardware/scons-release/modm/
         - aruw-mcb-project/build/hardware/scons-release/src/tap/
+        - aruw-mcb-project/build/hardware/scons-release/ext/
         - aruw-mcb-project/build/hardware/scons-release/.sconsign
       policy: pull
     - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG
@@ -138,6 +139,7 @@ before_script:
         - aruw-mcb-project/build/tests/scons-fast/modm/
         - aruw-mcb-project/build/tests/scons-fast/src/tap/
         - aruw-mcb-project/build/tests/scons-fast/test/tap/
+        - aruw-mcb-project/build/tests/scons-fast/ext/
         - aruw-mcb-project/build/tests/scons-fast/.sconsign
       policy: pull
     - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG-test
@@ -153,8 +155,6 @@ before_script:
   stage: Build Libraries
   only: *default_only
   needs: []
-  variables:
-    GIT_SUBMODULE_STRATEGY: none
   script:
     - cd aruw-mcb-project
     - scons build robot=STANDARD_VOID compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
@@ -163,6 +163,7 @@ before_script:
     paths:
       - aruw-mcb-project/build/hardware/scons-release/modm/
       - aruw-mcb-project/build/hardware/scons-release/src/tap/
+      - aruw-mcb-project/build/hardware/scons-release/ext/
       - aruw-mcb-project/build/hardware/scons-release/.sconsign
     fallback_keys:
       - mcb-libs-develop
@@ -181,6 +182,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/modm/
       - aruw-mcb-project/build/tests/scons-fast/src/tap/
       - aruw-mcb-project/build/tests/scons-fast/test/tap/
+      - aruw-mcb-project/build/tests/scons-fast/ext/
       - aruw-mcb-project/build/tests/scons-fast/.sconsign
     fallback_keys:
       - mcb-test-libs-develop
