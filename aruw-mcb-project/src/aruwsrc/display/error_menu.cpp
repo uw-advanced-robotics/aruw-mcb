@@ -51,8 +51,8 @@ void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
             vertScrollHandler.onShortButtonPress(button);
             okTapNum = 0;
             break;
-        case modm::MenuButtons::RIGHT:
-
+        case modm::MenuButtons::RIGHT: 
+            {
             okTapNum = 0;
             int targetIndex = vertScrollHandler.getCursorIndex();
             int8_t index = 0;
@@ -67,7 +67,7 @@ void ErrorMenu::shortButtonPress(modm::MenuButtons::Button button)
                 index++;
             }
             break;
-
+        }
         case modm::MenuButtons::OK:
             okTapNum++;
             if (okTapNum < 2)
