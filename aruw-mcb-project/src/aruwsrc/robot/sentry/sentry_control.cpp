@@ -46,9 +46,9 @@
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
-#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
@@ -899,10 +899,7 @@ HoldRepeatCommandMapping leftMidRightUpAg(
 // auto drive & auto aim
 HoldCommandMapping leftMidRightMid(
     drivers(),
-    {&majorManualCommand,
-     &turretLeftManualCommand,
-     &turretRightManualCommand,
-     &autoNavCommand},
+    {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand, &autoNavCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // manual aim

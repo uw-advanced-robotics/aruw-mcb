@@ -21,31 +21,33 @@
 
 namespace aruwsrc::control::chassis
 {
-    TestAutoNavCommand::TestAutoNavCommand(
-        const tap::Drivers& drivers,
-        aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-        std::vector<Transform> transforms = std::vector<Transform>(),
-        tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem = nullptr)
-        : drivers(drivers),
-          autoNavController(autoNavController),
-          transforms(transforms),
-          odometrySubsystem(odometrySubsystem)
-    {
-    }
-
-    void TestAutoNavCommand::initialize() { 
-        Position currPosition = Position(
-            odometrySubsystem->getCurrentLocation2D().getX(),
-            odometrySubsystem->getCurrentLocation2D().getY(),
-            0.0f);
-        for(Transform transform : transforms) {
-            currPosition = transform.apply(currPosition);
-            path.pushPoint(currPosition);
-        }
-        autoNavController.attachPath(&path);
-     }
-    void TestAutoNavCommand::execute() {}
-    void TestAutoNavCommand::end(bool) {}
-
-    bool TestAutoNavCommand::isFinished() const { return true;}
+TestAutoNavCommand::TestAutoNavCommand(
+    const tap::Drivers& drivers,
+    aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
+    std::vector<Transform> transforms = std::vector<Transform>(),
+    tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem = nullptr)
+    : drivers(drivers),
+      autoNavController(autoNavController),
+      transforms(transforms),
+      odometrySubsystem(odometrySubsystem)
+{
 }
+
+void TestAutoNavCommand::initialize()
+{
+    Position currPosition = Position(
+        odometrySubsystem->getCurrentLocation2D().getX(),
+        odometrySubsystem->getCurrentLocation2D().getY(),
+        0.0f);
+    for (Transform transform : transforms)
+    {
+        currPosition = transform.apply(currPosition);
+        path.pushPoint(currPosition);
+    }
+    autoNavController.attachPath(&path);
+}
+void TestAutoNavCommand::execute() {}
+void TestAutoNavCommand::end(bool) {}
+
+bool TestAutoNavCommand::isFinished() const { return true; }
+}  // namespace aruwsrc::control::chassis

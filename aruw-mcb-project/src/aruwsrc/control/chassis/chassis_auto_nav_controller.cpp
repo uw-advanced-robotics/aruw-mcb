@@ -131,14 +131,18 @@ Position ChassisAutoNavController::calculateSetPoint(
     return lookaheadPos;
 }
 
-bool ChassisAutoNavController::atSetpoint(){
+bool ChassisAutoNavController::atSetpoint()
+{
     Position curr = transformer->getWorldToChassis().getTranslation();
-    if(path->getFinalPosition() == nullptr){
+    if (path->getFinalPosition() == nullptr)
+    {
         return false;
     }
     Position goal = *path->getFinalPosition();
-    return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0.01); // tolerance = 1 cm
+    return tap::algorithms::compareFloatClose(
+        (curr - goal).magnitude(),
+        0,
+        0.01);  // tolerance = 1 cm
 }
-
 
 }  // namespace aruwsrc::control::chassis

@@ -66,8 +66,8 @@
 
 // #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
-#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/auto_nav_command.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -293,7 +293,7 @@ aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     xDriveChassis,
     &transformAdapter,
     aruwsrc::control::chassis::BEYBLADE_CONFIG,
-    capBankSubsystem, //TODO: dont have rn :/
+    capBankSubsystem,  // TODO: dont have rn :/
     0.15f,
     1000.0f);
 
@@ -316,10 +316,10 @@ BuzzerSubsystem engineerBuzzer(drivers());
 
 c
 
-NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
-    engineerBuzzer,
-    IMU_CALIBRATE_SUCCESS_NOTES,
-    IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
+    NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
+        engineerBuzzer,
+        IMU_CALIBRATE_SUCCESS_NOTES,
+        IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
 
 NoteSequenceCommand imuCalibrateFailBuzzCommand(
     engineerBuzzer,
@@ -531,7 +531,9 @@ tap::control::PressCommandMapping cyclePositions(
 tap::control::HoldCommandMapping testAuto(
     drivers(),
     {&autoNavCommand},
-    tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN)); // probably delete before merge to develop
+    tap::control::RemoteMapState(
+        Remote::Switch::RIGHT_SWITCH,
+        Remote::SwitchState::DOWN));  // probably delete before merge to develop
 
 CycleStateCommandMapping<ScorePositions, 3, ScorePositionCommand> cPressed(
     drivers(),
@@ -588,7 +590,7 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
     drivers->commandMapper.addMap(&suctionToggle);
 
     drivers->commandMapper.addMap(&leftUp);
-    drivers->commandMapper.addMap(&rightMid);  
+    drivers->commandMapper.addMap(&rightMid);
     drivers->commandMapper.addMap(&rightDown);
     drivers->commandMapper.addMap(&vPressed);
     drivers->commandMapper.addMap(&bPressed);
@@ -599,7 +601,7 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers *drivers)
     // drivers->commandMapper.addMap(&retrieveCube);
     // drivers->commandMapper.addMap(&cyclePositions);
     // drivers->commandMapper.addMap(&cPressed);
-    
+
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }

@@ -35,7 +35,9 @@ AutoNavCommand::AutoNavCommand(
     const tap::Drivers& drivers,
     chassis::HolonomicChassisSubsystem& chassis,
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-    bool autoNavOnlyInGame, bool beybladeEnabled, bool ends)
+    bool autoNavOnlyInGame,
+    bool beybladeEnabled,
+    bool ends)
     : drivers(drivers),
       chassis(chassis),
       autoNavController(autoNavController),
@@ -48,9 +50,7 @@ AutoNavCommand::AutoNavCommand(
     addSubsystemRequirement(&chassis);
 }
 
-void AutoNavCommand::initialize() { 
-    autoNavController.initialize();
-}
+void AutoNavCommand::initialize() { autoNavController.initialize(); }
 
 void AutoNavCommand::execute()
 {
@@ -72,11 +72,9 @@ void AutoNavCommand::execute()
 }
 
 void AutoNavCommand::end(bool) { chassis.setZeroRPM(); }
-bool AutoNavCommand::isFinished() const {
-    return ends ? autoNavController.atSetpoint() : false; 
-}
-}
+bool AutoNavCommand::isFinished() const { return ends ? autoNavController.atSetpoint() : false; }
+}  // namespace control::chassis
 
-  // namespace control::chassis::sentry
+// namespace control::chassis::sentry
 
 }  // namespace aruwsrc

@@ -20,37 +20,36 @@
 #ifndef TEST_AUTO_NAV_COMMAND_HPP_
 #define TEST_AUTO_NAV_COMMAND_HPP_
 
+#include <aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp>
+
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
+
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
-#include <aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp>
 
 namespace aruwsrc::control::chassis
 {
+class TestAutoNavCommand : public tap::control::Command
+{
+public:
+    TestAutoNavCommand(
+        const tap::Drivers& drivers,
+        aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
+        std::vector<Transform> transforms,
+        tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem);
+    void initialize() override;
+    void execute() override;
+    void end(bool) override;
+    bool isFinished() const override;
+    const char* getName() const override { return "test autonav command"; }
 
-    class TestAutoNavCommand : public tap::control::Command
-    {
-        public:
-            TestAutoNavCommand(
-                const tap::Drivers& drivers,
-                aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-                std::vector<Transform> transforms,
-                tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem
-            );
-            void initialize() override;
-            void execute() override;
-            void end(bool) override;
-            bool isFinished() const override;
-            const char* getName() const override { return "test autonav command";}
-        
-        private:
-            const tap::Drivers& drivers;
-            aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
-            std::vector<Transform> transforms;
-            tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem;
-            aruwsrc::algorithms::AutoNavPath path;
-    };
-}
+private:
+    const tap::Drivers& drivers;
+    aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
+    std::vector<Transform> transforms;
+    tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem;
+    aruwsrc::algorithms::AutoNavPath path;
+};
+}  // namespace aruwsrc::control::chassis
 
-#endif // PUSH_AUTO_NAV_POINT_COMMAND_HPP_
-
+#endif  // PUSH_AUTO_NAV_POINT_COMMAND_HPP_

@@ -54,15 +54,13 @@
 #include "aruwsrc/control/cap-bank/cap_bank_sprint_command.hpp"
 #include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/cap-bank/cap_bank_toggle_command.hpp"
-#include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/auto_nav_command.hpp"
-
+#include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/wiggle_drive_command.hpp"
-#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
@@ -75,6 +73,7 @@
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 
 //#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+#include "aruwsrc/control/chassis/test_auto_nav_command.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -101,7 +100,6 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
-#include "aruwsrc/control/chassis/test_auto_nav_command.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::control;
@@ -304,25 +302,18 @@ aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     chassis,
     &transformAdapter,
     aruwsrc::control::chassis::BEYBLADE_CONFIG,
-    capBankSubsystem, 
+    capBankSubsystem,
     0.15f,
     1000.0f);
 
-AutoNavCommand autoNavCommand(
-    *drivers(),
-    chassis,
-    autoNavController,
-    true,
-    false,
-    false);
+AutoNavCommand autoNavCommand(*drivers(), chassis, autoNavController, true, false, false);
 
 TestAutoNavCommand ForwardBackTest(
     *drivers(),
     autoNavController,
     std::vector<Transform>{
         Transform(Position(0.3f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f)),
-        Transform(Position(-0.3f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f))
-    },
+        Transform(Position(-0.3f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f))},
     &odometrySubsystem);
 
 ChassisImuDriveCommand chassisImuDriveCommand(

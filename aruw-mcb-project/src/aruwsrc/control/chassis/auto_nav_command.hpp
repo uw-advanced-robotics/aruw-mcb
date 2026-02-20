@@ -52,7 +52,9 @@ public:
         const tap::Drivers& drivers,
         chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-        bool autoNavOnlyInGame = false, bool beybladeEnabled = true, bool ends = false);
+        bool autoNavOnlyInGame = false,
+        bool beybladeEnabled = true,
+        bool ends = false);
 
     void initialize() override;
 
@@ -80,6 +82,6 @@ private:
 
 };  // class AutoNavBeybladeCommand
 
-}  // namespace aruwsrc::control::chassis::sentry
+}  // namespace aruwsrc::control::chassis
 
 #endif  // AUTO_NAV_BEYBLADE_COMMAND_HPP_
