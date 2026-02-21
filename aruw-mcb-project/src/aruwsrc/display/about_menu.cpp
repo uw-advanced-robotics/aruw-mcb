@@ -21,34 +21,10 @@
 
 #include "tap/drivers.hpp"
 
-#define STRINGIFYMACRO(s) MACROSTR(s)
-#define MACROSTR(s) #s
+#include "aruwsrc/build_info.hpp"
 
 namespace aruwsrc::display
 {
-#if defined(TARGET_DRONE)
-static constexpr char ROBOT_NAME[] = "TARGET_DRONE";
-#elif defined(TARGET_ENGINEER)
-static constexpr char ROBOT_NAME[] = "TARGET_ENGINEER";
-#elif defined(TARGET_ENGI_2025)
-static constexpr char ROBOT_NAME[] = "TARGET_ENGI_2025";
-#elif defined(TARGET_SENTRY_ECLIPSE)
-static constexpr char ROBOT_NAME[] = "TARGET_SENTRY_ECLIPSE";
-#elif defined(TARGET_HERO_ZERO)
-static constexpr char ROBOT_NAME[] = "TARGET_HERO_ZERO";
-#elif defined(TARGET_STANDARD_NULL)
-static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_NULL";
-#elif defined(TARGET_STANDARD_VOID)
-static constexpr char ROBOT_NAME[] = "TARGET_STANDARD_VOID";
-#else
-static constexpr char ROBOT_NAME[] = "TARGET_UNKNOWN";
-#endif
-
-static constexpr char LAST_USER[] = STRINGIFYMACRO(BUILD_USERNAME);
-static constexpr char LAST_SHA[] = STRINGIFYMACRO(BUILD_SHA);
-static constexpr char LAST_DATE[] = STRINGIFYMACRO(BUILD_DATE);
-static constexpr char BRANCH_NAME[] = STRINGIFYMACRO(BUILD_BRANCH_NAME);
-
 AboutMenu::AboutMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID)
 
@@ -67,6 +43,7 @@ void AboutMenu::draw()
     display << "Sha: " << LAST_SHA << modm::endl;
     display << "Last Built: " << LAST_DATE << modm::endl;
     display << "Branch Name: " << BRANCH_NAME << modm::endl;
+
     drawn = true;
 }
 

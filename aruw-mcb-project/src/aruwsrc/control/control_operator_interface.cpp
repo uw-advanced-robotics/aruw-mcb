@@ -23,6 +23,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
@@ -60,6 +61,20 @@ float ControlOperatorInterface::getChassisXInput()
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
     uint32_t dt = currTime - prevChassisXInputCalledTime;
     prevChassisXInputCalledTime = currTime;
+
+    if (telemetry && prevLoggedRemoteUpdateCounter != updateCounter)
+    {
+        telemetry->logSignal(
+            "remote:stick:left",
+            drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
+            drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL));
+        telemetry->logSignal(
+            "remote:stick:right",
+            drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
+            drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL));
+        telemetry->logSignal("remote:wheel", drivers->remote.getChannel(Remote::Channel::WHEEL));
+        prevLoggedRemoteUpdateCounter = updateCounter;
+    }
 
     if (prevUpdateCounterX != updateCounter)
     {

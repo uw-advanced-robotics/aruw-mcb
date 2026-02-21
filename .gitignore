@@ -2,6 +2,7 @@
 
 Pipfile
 aruw-mcb-project/build
+aruw-mcb-project/ext/segger-rtt
 aruw-mcb-project/Pipfile.lock
 project.xml.log
 **/.DS_Store
