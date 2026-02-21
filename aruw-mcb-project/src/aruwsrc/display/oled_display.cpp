@@ -35,7 +35,8 @@ OledDisplay::OledDisplay(
     communication::can::TurretMCBCanComm *turretMCBCanCommBus2,
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
-    communication::can::cap_bank::CapacitorBank *capacitorBank)
+    communication::can::cap_bank::CapacitorBank *capacitorBank,
+    aruwsrc::communication::rtt::RttTelemetry *rttTelemetry)
     : display(),
       viewStack(&display),
       buttonHandler(
@@ -54,7 +55,8 @@ OledDisplay::OledDisplay(
           turretMCBCanCommBus2,
           mcbLite1,
           mcbLite2,
-          capacitorBank),
+          capacitorBank,
+          rttTelemetry),
       drivers(drivers)
 {
 }

@@ -57,7 +57,9 @@ public:
               &turretMCBCanCommBus1,
               &turretMCBCanCommBus2,
               nullptr,
-              nullptr),
+              nullptr,
+              nullptr,
+              &rttTelemetry),
           engineerCVCommunication(this),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)

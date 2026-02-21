@@ -1043,7 +1043,7 @@ SentryTurretMinorSubsystem turretRight(
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretRight::turretID);
 
-SentryChassisWorldYawObserver chassisYawObserver(drivers()->mpu6500, turretMajor);
+SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
 
 // Turret Compensators
 TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
@@ -1816,7 +1816,7 @@ void setDefaultSentryCommands(Drivers*)
 void startSentryCommands(Drivers* drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->mpu6500.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
+    drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
 }
 
 /* register io mappings here ------------------------------------------------*/
