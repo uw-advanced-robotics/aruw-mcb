@@ -28,8 +28,6 @@ void ChassisAutoNavController::initialize()
 
     lastSetPoint = transformer->getWorldToChassis().getTranslation();
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
-    aruwsrc::algorithms::AutoNavPath emptyPath;
-    path = &emptyPath;
 }
 
 void ChassisAutoNavController::runController(
