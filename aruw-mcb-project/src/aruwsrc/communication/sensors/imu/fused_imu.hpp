@@ -110,7 +110,24 @@ public:
         float gyroInnovationGate = 4.0f;    // rad/s
         // Clamp on adaptive R inflation due to innovations.
         float maxInnovationVarianceMultiplier = 4.0f;
+
+        // Clamp measurement variance blocks to keep covariance numerically safe.
+        float minMeasurementVariance = 1.0e-8f;
+        float maxMeasurementVariance = 1.0e8f;
     };
+
+    struct TimingProfile
+    {
+        uint32_t totalUs = 0;
+        uint32_t collectUs = 0;
+        uint32_t covUs = 0;
+        uint32_t predictUs = 0;
+        uint32_t updateUs = 0;
+        uint32_t mahonyUs = 0;
+        uint16_t updates = 0;
+    };
+
+    using TimingTelemetryCallback = void (*)(const char* label, uint32_t value);
 
     /**
      * Constructor with per-IMU type selection.
@@ -133,6 +150,15 @@ public:
           perImuNoise(selectPerImuNoise(imuTypes, config)),
           filter(makeQ(), makeR(), makeP0())
     {
+        accelInnovationGateSq = config.accelInnovationGate * config.accelInnovationGate;
+        gyroInnovationGateSq = config.gyroInnovationGate * config.gyroInnovationGate;
+        for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
+        {
+            measurementVarianceDiagForImu(
+                imuIndex,
+                baseAccelVariance[imuIndex],
+                baseGyroVariance[imuIndex]);
+        }
         updateProcessCovariance(1.0f);
         const auto zeroVec = makeVectorArray(tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f));
         std::array<bool, N> invalidFlags{};
@@ -156,6 +182,16 @@ public:
         return tap::communication::sensors::imu::GRAVITY_MPS2;
     }
 
+    inline const TimingProfile& getTimingProfile() const { return timingProfile; }
+    inline void setTimingTelemetryCallback(
+        TimingTelemetryCallback callback,
+        uint16_t decimation = 200U)
+    {
+        timingTelemetryCallback = callback;
+        timingTelemetryDecimation = (decimation == 0U) ? 1U : decimation;
+        timingTelemetryCounter = 0U;
+    }
+
 private:
     static constexpr size_t kStateSize = 6;
     static constexpr size_t kPerImuMeasurementSize = 6;
@@ -173,6 +209,10 @@ private:
     // Per-IMU type and derived noise model selection.
     std::array<ImuType, N> imuTypes;
     std::array<typename Config::ImuNoiseDensity, N> perImuNoise;
+    std::array<std::array<float, 3>, N> baseAccelVariance{};
+    std::array<std::array<float, 3>, N> baseGyroVariance{};
+    float accelInnovationGateSq = 400.0f;
+    float gyroInnovationGateSq = 16.0f;
 
     float samplePeriodS = 0.001f;
     uint32_t prevFilterUpdateTimeUs = 0;
@@ -180,6 +220,10 @@ private:
     FilterWrapper filter;
     bool kfInitialized = false;
     bool reinitializeFilterAfterCalibration = false;
+    TimingProfile timingProfile{};
+    TimingTelemetryCallback timingTelemetryCallback = nullptr;
+    uint16_t timingTelemetryDecimation = 200U;
+    uint16_t timingTelemetryCounter = 0U;
 
     // Helpers for per-type selection and noise->variance conversion
 
@@ -420,6 +464,13 @@ inline void FusedImu<N>::initialize(float sampleFrequency, float mahonyKp, float
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
     samplePeriodS = (sampleFrequency > 0.0f) ? (1.0f / sampleFrequency) : 0.001f;
     prevFilterUpdateTimeUs = tap::arch::clock::getTimeMicroseconds();
+    for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
+    {
+        measurementVarianceDiagForImu(
+            imuIndex,
+            baseAccelVariance[imuIndex],
+            baseGyroVariance[imuIndex]);
+    }
 
     updateProcessCovariance(samplePeriodS);
     kfInitialized = false;
@@ -445,17 +496,20 @@ inline void FusedImu<N>::requestCalibration()
 template <size_t N>
 inline void FusedImu<N>::periodicIMUUpdate()
 {
-    const uint32_t nowUs = tap::arch::clock::getTimeMicroseconds();
+    const uint32_t cycleStartUs = tap::arch::clock::getTimeMicroseconds();
+    uint32_t stageStartUs = cycleStartUs;
+    timingProfile = {};
+
     if (prevFilterUpdateTimeUs != 0)
     {
-        const uint32_t deltaUs = nowUs - prevFilterUpdateTimeUs;
+        const uint32_t deltaUs = cycleStartUs - prevFilterUpdateTimeUs;
         const float dynamicDt = static_cast<float>(deltaUs) * 1.0e-6f;
         if (dynamicDt > 1.0e-6f && dynamicDt < 0.1f)
         {
             samplePeriodS = dynamicDt;
         }
     }
-    prevFilterUpdateTimeUs = nowUs;
+    prevFilterUpdateTimeUs = cycleStartUs;
 
     auto states = getImuStates();
     auto combined = combineImuStates(states);
@@ -506,7 +560,15 @@ inline void FusedImu<N>::periodicIMUUpdate()
         }
     }
 
+    uint32_t nowUs = tap::arch::clock::getTimeMicroseconds();
+    timingProfile.collectUs = nowUs - stageStartUs;
+    stageStartUs = nowUs;
+
     updateMeasurementCovariance(states, accel, gyro, validFlags);
+
+    nowUs = tap::arch::clock::getTimeMicroseconds();
+    timingProfile.covUs = nowUs - stageStartUs;
+    stageStartUs = nowUs;
 
     // Reinitialize fused EKF state/covariance on first valid sample after calibration finishes.
     if (reinitializeFilterAfterCalibration &&
@@ -535,20 +597,25 @@ inline void FusedImu<N>::periodicIMUUpdate()
         updateProcessCovariance(samplePeriodS);
         if (filter.predict(samplePeriodS) == 0)
         {
+            nowUs = tap::arch::clock::getTimeMicroseconds();
+            timingProfile.predictUs = nowUs - stageStartUs;
+            stageStartUs = nowUs;
+
+            const auto& x = filter.getStateVectorAsMatrix();
+            typename FilterWrapper::InputVector zPredicted;
+            setVectorElem(zPredicted, 0, x[0]);
+            setVectorElem(zPredicted, 1, x[1]);
+            setVectorElem(zPredicted, 2, x[2]);
+            setVectorElem(zPredicted, 3, x[3]);
+            setVectorElem(zPredicted, 4, x[4]);
+            setVectorElem(zPredicted, 5, x[5]);
+
             for (size_t i = 0; i < N; i++)
             {
                 typename FilterWrapper::InputVector zBlock;
                 if (!validFlags[i])
                 {
-                    // Use the current prediction for missing sensors, producing near-zero
-                    // innovation.
-                    const auto& x = filter.getStateVectorAsMatrix();
-                    setVectorElem(zBlock, 0, x[0]);
-                    setVectorElem(zBlock, 1, x[1]);
-                    setVectorElem(zBlock, 2, x[2]);
-                    setVectorElem(zBlock, 3, x[3]);
-                    setVectorElem(zBlock, 4, x[4]);
-                    setVectorElem(zBlock, 5, x[5]);
+                    zBlock = zPredicted;
                 }
                 else
                 {
@@ -561,7 +628,18 @@ inline void FusedImu<N>::periodicIMUUpdate()
                 }
 
                 (void)filter.updateSingleImu(static_cast<uint16_t>(i), zBlock);
+                timingProfile.updates++;
             }
+
+            nowUs = tap::arch::clock::getTimeMicroseconds();
+            timingProfile.updateUs = nowUs - stageStartUs;
+            stageStartUs = nowUs;
+        }
+        else
+        {
+            nowUs = tap::arch::clock::getTimeMicroseconds();
+            timingProfile.predictUs = nowUs - stageStartUs;
+            stageStartUs = nowUs;
         }
     }
 
@@ -586,6 +664,22 @@ inline void FusedImu<N>::periodicIMUUpdate()
     imuData.temperature = (temperatureCount > 0) ? temperatureSum / temperatureCount : 0.0f;
 
     AbstractIMU::periodicIMUUpdate();
+    nowUs = tap::arch::clock::getTimeMicroseconds();
+    timingProfile.mahonyUs = nowUs - stageStartUs;
+    timingProfile.totalUs = nowUs - cycleStartUs;
+
+    if (timingTelemetryCallback != nullptr)
+    {
+        timingTelemetryCounter++;
+        if ((timingTelemetryCounter % timingTelemetryDecimation) == 0U)
+        {
+            timingTelemetryCallback("perf:fused_imu:total_us", timingProfile.totalUs);
+            timingTelemetryCallback("perf:fused_imu:update_us", timingProfile.updateUs);
+            timingTelemetryCallback("perf:fused_imu:collect_us", timingProfile.collectUs);
+            timingTelemetryCallback("perf:fused_imu:cov_us", timingProfile.covUs);
+            timingTelemetryCallback("perf:fused_imu:n_updates", timingProfile.updates);
+        }
+    }
 }
 
 template <size_t N>
@@ -598,8 +692,12 @@ inline void FusedImu<N>::updateMeasurementCovariance(
     auto& rBlocks = filter.getMeasurementCovarianceBlocks();
 
     const auto& x = filter.getStateVectorAsMatrix();
-    const tap::algorithms::transforms::Vector predictedAccel(x[0], x[1], x[2]);
-    const tap::algorithms::transforms::Vector predictedGyro(x[3], x[4], x[5]);
+    const float predAx = x[0];
+    const float predAy = x[1];
+    const float predAz = x[2];
+    const float predGx = x[3];
+    const float predGy = x[4];
+    const float predGz = x[5];
 
     for (size_t imuIndex = 0; imuIndex < N; imuIndex++)
     {
@@ -616,41 +714,57 @@ inline void FusedImu<N>::updateMeasurementCovariance(
         }
         else if (kfInitialized)
         {
-            const float accelResidualNorm = std::sqrt(
-                std::pow(accel[imuIndex].x() - predictedAccel.x(), 2.0f) +
-                std::pow(accel[imuIndex].y() - predictedAccel.y(), 2.0f) +
-                std::pow(accel[imuIndex].z() - predictedAccel.z(), 2.0f));
-            const float gyroResidualNorm = std::sqrt(
-                std::pow(gyro[imuIndex].x() - predictedGyro.x(), 2.0f) +
-                std::pow(gyro[imuIndex].y() - predictedGyro.y(), 2.0f) +
-                std::pow(gyro[imuIndex].z() - predictedGyro.z(), 2.0f));
+            const float dax = accel[imuIndex].x() - predAx;
+            const float day = accel[imuIndex].y() - predAy;
+            const float daz = accel[imuIndex].z() - predAz;
+            const float dgx = gyro[imuIndex].x() - predGx;
+            const float dgy = gyro[imuIndex].y() - predGy;
+            const float dgz = gyro[imuIndex].z() - predGz;
+            const float accelResidualSq = dax * dax + day * day + daz * daz;
+            const float gyroResidualSq = dgx * dgx + dgy * dgy + dgz * dgz;
 
-            if (accelResidualNorm > config.accelInnovationGate)
+            if (accelResidualSq > accelInnovationGateSq)
             {
-                const float ratio = accelResidualNorm / config.accelInnovationGate;
-                const float adaptiveScale = ratio * ratio * config.outlierVarianceMultiplier;
+                const float ratioSq = accelResidualSq / accelInnovationGateSq;
+                const float adaptiveScale = ratioSq * config.outlierVarianceMultiplier;
                 accelMultiplier = std::fmin(adaptiveScale, config.maxInnovationVarianceMultiplier);
             }
-            if (gyroResidualNorm > config.gyroInnovationGate)
+            if (gyroResidualSq > gyroInnovationGateSq)
             {
-                const float ratio = gyroResidualNorm / config.gyroInnovationGate;
-                const float adaptiveScale = ratio * ratio * config.outlierVarianceMultiplier;
+                const float ratioSq = gyroResidualSq / gyroInnovationGateSq;
+                const float adaptiveScale = ratioSq * config.outlierVarianceMultiplier;
                 gyroMultiplier = std::fmin(adaptiveScale, config.maxInnovationVarianceMultiplier);
             }
         }
 
-        std::array<float, 3> accVar{};
-        std::array<float, 3> gyrVar{};
-        measurementVarianceDiagForImu(imuIndex, accVar, gyrVar);
-
         auto& rBlock = rBlocks[imuIndex];
-        zeroMatrix(rBlock);
-        setMatrixElem(rBlock, 0, 0, accVar[0] * accelMultiplier);
-        setMatrixElem(rBlock, 1, 1, accVar[1] * accelMultiplier);
-        setMatrixElem(rBlock, 2, 2, accVar[2] * accelMultiplier);
-        setMatrixElem(rBlock, 3, 3, gyrVar[0] * gyroMultiplier);
-        setMatrixElem(rBlock, 4, 4, gyrVar[1] * gyroMultiplier);
-        setMatrixElem(rBlock, 5, 5, gyrVar[2] * gyroMultiplier);
+        float r00 = baseAccelVariance[imuIndex][0] * accelMultiplier;
+        float r11 = baseAccelVariance[imuIndex][1] * accelMultiplier;
+        float r22 = baseAccelVariance[imuIndex][2] * accelMultiplier;
+        float r33 = baseGyroVariance[imuIndex][0] * gyroMultiplier;
+        float r44 = baseGyroVariance[imuIndex][1] * gyroMultiplier;
+        float r55 = baseGyroVariance[imuIndex][2] * gyroMultiplier;
+
+        if (r00 < config.minMeasurementVariance) r00 = config.minMeasurementVariance;
+        if (r11 < config.minMeasurementVariance) r11 = config.minMeasurementVariance;
+        if (r22 < config.minMeasurementVariance) r22 = config.minMeasurementVariance;
+        if (r33 < config.minMeasurementVariance) r33 = config.minMeasurementVariance;
+        if (r44 < config.minMeasurementVariance) r44 = config.minMeasurementVariance;
+        if (r55 < config.minMeasurementVariance) r55 = config.minMeasurementVariance;
+
+        if (r00 > config.maxMeasurementVariance) r00 = config.maxMeasurementVariance;
+        if (r11 > config.maxMeasurementVariance) r11 = config.maxMeasurementVariance;
+        if (r22 > config.maxMeasurementVariance) r22 = config.maxMeasurementVariance;
+        if (r33 > config.maxMeasurementVariance) r33 = config.maxMeasurementVariance;
+        if (r44 > config.maxMeasurementVariance) r44 = config.maxMeasurementVariance;
+        if (r55 > config.maxMeasurementVariance) r55 = config.maxMeasurementVariance;
+
+        setMatrixElem(rBlock, 0, 0, r00);
+        setMatrixElem(rBlock, 1, 1, r11);
+        setMatrixElem(rBlock, 2, 2, r22);
+        setMatrixElem(rBlock, 3, 3, r33);
+        setMatrixElem(rBlock, 4, 4, r44);
+        setMatrixElem(rBlock, 5, 5, r55);
     }
 }
 
@@ -659,12 +773,7 @@ inline void FusedImu<N>::updateProcessCovariance(float dt)
 {
     const float clampedDt = (dt > 1.0e-6f) ? dt : 1.0e-3f;
     auto& q = filter.getProcessCovariance();
-
-    for (size_t i = 0; i < q.size(); i++)
-    {
-        q[i] = 0.0f;
-    }
-
+    // Q is diagonal and off-diagonals are initialized to zero once.
     q[0 * kStateSize + 0] = config.accelProcessVarianceRateDiag[0] * clampedDt;
     q[1 * kStateSize + 1] = config.accelProcessVarianceRateDiag[1] * clampedDt;
     q[2 * kStateSize + 2] = config.accelProcessVarianceRateDiag[2] * clampedDt;
