@@ -232,7 +232,9 @@ OledDisplayMock::OledDisplayMock(
           turretMCBCanCommBus1,
           turretMCBCanCommBus2,
           mcbLite1,
-          mcbLite2)
+          mcbLite2,
+          nullptr,
+          nullptr)
 {
 }
 OledDisplayMock::~OledDisplayMock() {}
