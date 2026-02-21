@@ -23,8 +23,8 @@
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/drivers.hpp"
-#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "modm/architecture/interface/can_message.hpp"
 
 namespace aruwsrc::communication::can
@@ -51,7 +51,6 @@ public:
     {
         rttTelemetry->logSignal((std::string(namePrefix) + "_AI0").c_str(), this->ai0);
         rttTelemetry->logSignal((std::string(namePrefix) + "_AI1").c_str(), this->ai1);
-        
     }
 
 private:

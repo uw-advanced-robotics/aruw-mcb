@@ -40,10 +40,8 @@ uint32_t computeResolution(const AnalogSensorEncoder::Calibration& calibration)
 
 uint32_t computeHomePosition(const AnalogSensorEncoder::Calibration& calibration)
 {
-    uint16_t clampedZero = tap::algorithms::limitVal(
-        calibration.rawZero,
-        calibration.rawMin,
-        calibration.rawMax);
+    uint16_t clampedZero =
+        tap::algorithms::limitVal(calibration.rawZero, calibration.rawMin, calibration.rawMax);
     return static_cast<uint32_t>(clampedZero - calibration.rawMin);
 }
 }  // namespace
@@ -82,10 +80,7 @@ float AnalogSensorEncoder::getVelocity() const
     return WrappedEncoder::getVelocity();
 }
 
-void AnalogSensorEncoder::update()
-{
-    updateFromSensor();
-}
+void AnalogSensorEncoder::update() { updateFromSensor(); }
 
 void AnalogSensorEncoder::logTelemetry(
     communication::rtt::RttTelemetry& rttTelemetry,
@@ -129,10 +124,7 @@ uint16_t AnalogSensorEncoder::readRaw() const
 
 uint32_t AnalogSensorEncoder::rawToTicks(uint16_t raw) const
 {
-    uint16_t clamped = tap::algorithms::limitVal(
-        raw,
-        calibration.rawMin,
-        calibration.rawMax);
+    uint16_t clamped = tap::algorithms::limitVal(raw, calibration.rawMin, calibration.rawMax);
 
     return static_cast<uint32_t>(clamped - calibration.rawMin);
 }
