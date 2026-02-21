@@ -39,6 +39,7 @@
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/fused_imu.hpp"
+#include "aruwsrc/communication/sensors/imu/fused_imu_mekf.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
@@ -48,7 +49,9 @@
 namespace aruwsrc::sentry
 {
 #if defined(TARGET_SENTRY_NAME)
-using TurretMajorImuType = aruwsrc::communication::sensors::imu::FusedImu<3>;
+using TurretMajorImuEkfType = aruwsrc::communication::sensors::imu::FusedImu<3>;
+using TurretMajorImuMekfType = aruwsrc::communication::sensors::imu::FusedImuMekf<3>;
+using TurretMajorImuType = TurretMajorImuEkfType;
 #else
 using TurretMajorImuType = aruwsrc::communication::sensors::imu::ism330::ISM330;
 #endif
@@ -59,18 +62,21 @@ class Drivers : public tap::Drivers
 
 #if defined(TARGET_SENTRY_NAME)
     using TurretMajorTransform = tap::algorithms::transforms::Transform;
-    using TurretMajorFusedImuType = aruwsrc::communication::sensors::imu::FusedImu<3>;
-
     static inline const std::array<TurretMajorTransform, 3> turretMajorImuTransforms = {
         // Jetson is forward, X forward, Y left.
         TurretMajorTransform(-76.7f, -116.14f, 0.0f, 0.0f, 0.0f, 0.0f),
         TurretMajorTransform(-76.7f, 116.04f, 0.0f, 0.0f, 0.0f, M_PI),
         TurretMajorTransform(-14.97f, -115.5f, 0.0f, 0.0f, 0.0f, M_PI_2)};
 
-    static inline const std::array<TurretMajorFusedImuType::ImuType, 3> turretMajorImuTypes = {
-        TurretMajorFusedImuType::ImuType::ISM330DHCX,
-        TurretMajorFusedImuType::ImuType::ISM330DHCX,
-        TurretMajorFusedImuType::ImuType::MPU6500};
+    static inline const std::array<TurretMajorImuEkfType::ImuType, 3> turretMajorImuTypesEkf = {
+        TurretMajorImuEkfType::ImuType::ISM330DHCX,
+        TurretMajorImuEkfType::ImuType::ISM330DHCX,
+        TurretMajorImuEkfType::ImuType::MPU6500};
+
+    static inline const std::array<TurretMajorImuMekfType::ImuType, 3> turretMajorImuTypesMekf = {
+        TurretMajorImuMekfType::ImuType::ISM330DHCX,
+        TurretMajorImuMekfType::ImuType::ISM330DHCX,
+        TurretMajorImuMekfType::ImuType::MPU6500};
 #endif
 
 #ifdef ENV_UNIT_TESTS
@@ -102,10 +108,14 @@ public:
           turretMajorImuSecondary(
               aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
                   modm::platform::GpioD12>()),
+          turretMajorImuMekf(
+              {&turretMajorPrimaryImu, &turretMajorImuSecondary, &mpu6500},
+              turretMajorImuTransforms,
+              turretMajorImuTypesMekf),
           turretMajorImu(
               {&turretMajorPrimaryImu, &turretMajorImuSecondary, &mpu6500},
               turretMajorImuTransforms,
-              turretMajorImuTypes),
+              turretMajorImuTypesEkf),
 #else
           turretMajorImu(),
 #endif
@@ -137,6 +147,7 @@ public:
 #if defined(TARGET_SENTRY_NAME)
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorPrimaryImu;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImuSecondary;
+    TurretMajorImuMekfType turretMajorImuMekf;
 #endif
     TurretMajorImuType turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;

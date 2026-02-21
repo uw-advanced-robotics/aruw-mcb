@@ -325,8 +325,8 @@ void RttTelemetry::sendQueuedMessages(bool ozone)
         out.append(msg.data, msg.length);
         if (ozone)
         {
-            // After sending timestamp, break to avoid flooding in ozone mode
-            break;
+            first = true;  // Reset for prints/errors since heartbeat is not sent in ozone
+            first = false;
         }
     }
     out += ',';
