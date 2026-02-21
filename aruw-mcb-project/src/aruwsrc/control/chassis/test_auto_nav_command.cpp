@@ -29,21 +29,25 @@ TestAutoNavCommand::TestAutoNavCommand(
     : drivers(drivers),
       autoNavController(autoNavController),
       transforms(transforms),
-      odometrySubsystem(odometrySubsystem)
+      odometrySubsystem(odometrySubsystem),
+      currPosition(0.0f, 0.0f, 0.0f)
 {
 }
 
 void TestAutoNavCommand::initialize()
 {
-    Position currPosition = Position(
-        odometrySubsystem->getCurrentLocation2D().getX(),
-        odometrySubsystem->getCurrentLocation2D().getY(),
-        0.0f);
-    for (Transform transform : transforms)
-    {
-        currPosition = transform.apply(currPosition);
-        path.pushPoint(currPosition);
-    }
+    // currPosition = Position(
+    //     odometrySubsystem->getCurrentLocation2D().getX(),
+    //     odometrySubsystem->getCurrentLocation2D().getY(),
+    //     0.0f);
+    // for (Transform transform : transforms)
+    // {
+    //     currPosition = transform.apply(currPosition);
+    //     path.pushPoint(currPosition);
+    // }
+    // autoNavController.attachPath(&path);
+    path.pushPoint(Position(0.5f, 7.0f, 0.0f));
+    path.pushPoint(Position(0.0f, 0.0f, 0.0f));
     autoNavController.attachPath(&path);
 }
 void TestAutoNavCommand::execute() {}

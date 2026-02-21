@@ -49,6 +49,7 @@ private:
     std::vector<Transform> transforms;
     tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem;
     aruwsrc::algorithms::AutoNavPath path;
+    Position currPosition;
 };
 }  // namespace aruwsrc::control::chassis
 

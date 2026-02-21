@@ -627,7 +627,7 @@ std::vector<HudIndicator *> hudIndicators = {
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
 /* define command mappings --------------------------------------------------*/
-HoldCommandMapping testAuto(
+ToggleCommandMapping testAuto(
     drivers(),
     {&autoNavCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));

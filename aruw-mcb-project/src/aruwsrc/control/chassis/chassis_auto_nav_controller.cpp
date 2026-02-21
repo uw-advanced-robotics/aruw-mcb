@@ -19,6 +19,7 @@
 #include "chassis_auto_nav_controller.hpp"
 
 #include "tap/communication/serial/ref_serial_data.hpp"
+#include "tap/architecture/periodic_timer.hpp"
 
 namespace aruwsrc::control::chassis
 {
@@ -28,6 +29,13 @@ void ChassisAutoNavController::initialize()
 
     lastSetPoint = transformer->getWorldToChassis().getTranslation();
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
+    path1.pushPoint(Position(0.0f, 0.0f, 0.0f));
+    path1.pushPoint(Position(0.5f, 0.0f, 0.0f));
+
+    attachPath(&path1);
+
+    setDesiredSpeed(1.0f);
+    
 }
 
 void ChassisAutoNavController::runController(
@@ -39,11 +47,11 @@ void ChassisAutoNavController::runController(
         transformer->getWorldToChassis().getTranslation();  // works bc transformer always makes z 0
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
                                                // this constant with a function in the future
-    Position setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
+    setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
 
-    Vector moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
+    moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
 
-    Vector posError = setpoint - currentPos;
+    posError = setpoint - currentPos;
 
     // make if can sprint (above 25%)
     // add a boolean for sprinting check posError over a threshold (make a constant in chassis
@@ -90,7 +98,9 @@ void ChassisAutoNavController::runController(
     float r = rotateSpeedRamp.getValue();
 
     // convert world frame translation to chassis frame
-    Vector chassisFrameMoveVector = transformer->getWorldToChassis().apply(moveVector);
+    chassisFrameMoveVector = transformer->getWorldToChassis().apply(moveVector);
+    time = tap::arch::clock::getTimeMilliseconds();
+    errorMag = posError.magnitude();
 
     // set outputs
     chassis.setDesiredOutput(chassisFrameMoveVector.x(), chassisFrameMoveVector.y(), r);

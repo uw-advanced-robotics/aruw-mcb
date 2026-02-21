@@ -84,7 +84,10 @@ public:
     // Sets the maximum speed the chassis moves at, in units of Meters per Second
     inline void setDesiredSpeed(float speed) { this->desiredSpeed = speed; }
 
-    inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
+    inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { 
+        debugVar = 100;
+        this->path = path; 
+    }
 
 private:
     aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
@@ -92,6 +95,14 @@ private:
     float lastParameter;
     Position lastSetPoint;
     tap::Drivers& drivers;
+    float time;
+    float errorMag;
+    float debugVar;
+    aruwsrc::algorithms::AutoNavPath path1;
+    Vector chassisFrameMoveVector = Vector(0, 0, 0);
+    Position setpoint = Position(0, 0, 0);
+    Vector moveVector = Vector(0, 0, 0);
+    Vector posError = Vector(0, 0, 0);
 
     const aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer;
 
