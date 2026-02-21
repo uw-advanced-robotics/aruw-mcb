@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ARUW_ANALOG_SENSOR_ENCODER_HPP_
-#define ARUW_ANALOG_SENSOR_ENCODER_HPP_
+#ifndef ANALOG_SENSOR_ENCODER_HPP_
+#define ANALOG_SENSOR_ENCODER_HPP_
 
 #include "tap/communication/sensors/encoder/wrapped_encoder.hpp"
 #include "tap/util_macros.hpp"
