@@ -101,8 +101,8 @@ std::array<tap::motor::MotorInterface *, 4> wheels = {
     &lowerFrictionWheel,
     &upperFrictionWheel};
 std::array<FlywheelConfig, 4> wheelConfigs = {
-    aruwsrc::control::launcher::LEFT_WHEEL_CONFIG, 
-    aruwsrc::control::launcher::WHEEL_CONFIG, 
+    aruwsrc::control::launcher::LEFT_WHEEL_CONFIG,
+    aruwsrc::control::launcher::WHEEL_CONFIG,
     aruwsrc::control::launcher::WHEEL_CONFIG,
     aruwsrc::control::launcher::WHEEL_CONFIG};
 RefereeFeedbackFrictionWheelSubsystem<
@@ -149,7 +149,8 @@ HoldCommandMapping rightSwitchUp(
 HoldRepeatCommandMapping leftSwitchUp(
     drivers(),
     {&launchKicker},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP), false);
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+    false);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
