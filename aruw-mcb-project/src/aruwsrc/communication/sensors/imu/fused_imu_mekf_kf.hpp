@@ -311,8 +311,7 @@ public:
         if (signalFilterInitialized)
         {
             const auto& xSignal = signalFilter.getStateVectorAsMatrix();
-            fusedAccel =
-                tap::algorithms::transforms::Vector(xSignal[0], xSignal[1], xSignal[2]);
+            fusedAccel = tap::algorithms::transforms::Vector(xSignal[0], xSignal[1], xSignal[2]);
             fusedGyro = tap::algorithms::transforms::Vector(xSignal[3], xSignal[4], xSignal[5]);
         }
         else if (firstValidIndex != N)
@@ -336,16 +335,14 @@ public:
         (void)runAccelUpdate(fusedAccel, fusedAccelVarianceDiag);
 
         updateEulerFromQuaternion();
-        imuData.gyroRadPerSec =
-            tap::algorithms::transforms::Vector(
-                fusedGyro.x() - gyroBias[0],
-                fusedGyro.y() - gyroBias[1],
-                fusedGyro.z() - gyroBias[2]);
-        imuData.accG =
-            tap::algorithms::transforms::Vector(
-                fusedAccel.x() - accelBias[0],
-                fusedAccel.y() - accelBias[1],
-                fusedAccel.z() - accelBias[2]);
+        imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(
+            fusedGyro.x() - gyroBias[0],
+            fusedGyro.y() - gyroBias[1],
+            fusedGyro.z() - gyroBias[2]);
+        imuData.accG = tap::algorithms::transforms::Vector(
+            fusedAccel.x() - accelBias[0],
+            fusedAccel.y() - accelBias[1],
+            fusedAccel.z() - accelBias[2]);
         imuData.temperature = (tempCount > 0) ? (tempSum / tempCount) : 0.0f;
     }
 
@@ -407,7 +404,7 @@ private:
         return v;
     }
 
-    // dont hate me chinmay 
+    // dont hate me chinmay
     static inline float wrapAngle(float x)
     {
         while (x >= M_PI) x -= M_TWOPI;
@@ -540,9 +537,8 @@ private:
         {
             for (size_t a = 0; a < 3; a++)
             {
-                const float ndAcc =
-                    (perImuNoise[i].accelNoiseDensityUgSqrtHz[a] * 1.0e-6f) *
-                    tap::communication::sensors::imu::GRAVITY_MPS2;
+                const float ndAcc = (perImuNoise[i].accelNoiseDensityUgSqrtHz[a] * 1.0e-6f) *
+                                    tap::communication::sensors::imu::GRAVITY_MPS2;
                 accelVar[i][a] = ndAcc * ndAcc * bw;
 
                 const float ndGyro =
@@ -615,9 +611,8 @@ private:
         const float bw = effectiveNoiseBandwidthHz();
         for (size_t a = 0; a < 3; a++)
         {
-            const float ndAcc =
-                (perImuNoise[imuIndex].accelNoiseDensityUgSqrtHz[a] * 1.0e-6f) *
-                tap::communication::sensors::imu::GRAVITY_MPS2;
+            const float ndAcc = (perImuNoise[imuIndex].accelNoiseDensityUgSqrtHz[a] * 1.0e-6f) *
+                                tap::communication::sensors::imu::GRAVITY_MPS2;
             accelVarDiagOut[a] = ndAcc * ndAcc * bw;
 
             const float ndGyro =
@@ -675,7 +670,8 @@ private:
                 {
                     const float ratioSq = gyroResidualSq / gyroInnovationGateSq;
                     const float adaptiveScale = ratioSq * config.outlierVarianceMultiplier;
-                    gyroMultiplier = std::fmin(adaptiveScale, config.maxInnovationVarianceMultiplier);
+                    gyroMultiplier =
+                        std::fmin(adaptiveScale, config.maxInnovationVarianceMultiplier);
                 }
             }
 
@@ -848,8 +844,7 @@ private:
         {
             for (size_t c = r + 1; c < kErrorStateSize; c++)
             {
-                const float sym =
-                    0.5f * (P[r * kErrorStateSize + c] + P[c * kErrorStateSize + r]);
+                const float sym = 0.5f * (P[r * kErrorStateSize + c] + P[c * kErrorStateSize + r]);
                 P[r * kErrorStateSize + c] = sym;
                 P[c * kErrorStateSize + r] = sym;
             }
@@ -971,8 +966,7 @@ private:
 
     inline bool invert3x3(const float a[9], float invOut[9]) const
     {
-        const float det = a[0] * (a[4] * a[8] - a[5] * a[7]) -
-                          a[1] * (a[3] * a[8] - a[5] * a[6]) +
+        const float det = a[0] * (a[4] * a[8] - a[5] * a[7]) - a[1] * (a[3] * a[8] - a[5] * a[6]) +
                           a[2] * (a[3] * a[7] - a[4] * a[6]);
         if (std::fabs(det) < 1.0e-12f)
         {
@@ -1015,10 +1009,7 @@ private:
         const float gxBody = gBody[0];
         const float gyBody = gBody[1];
         const float gzBody = gBody[2];
-        const float h[3] = {
-            gxBody + accelBias[0],
-            gyBody + accelBias[1],
-            gzBody + accelBias[2]};
+        const float h[3] = {gxBody + accelBias[0], gyBody + accelBias[1], gzBody + accelBias[2]};
         const float r[3] = {ax - h[0], ay - h[1], az - h[2]};
         const float normError = std::fabs(norm - g);
         const float innovationNorm = std::sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
@@ -1051,7 +1042,8 @@ private:
         S[6] = -gyBody * PHt[0 * 3 + 0] + gxBody * PHt[1 * 3 + 0] + PHt[8 * 3 + 0];
         S[7] = -gyBody * PHt[0 * 3 + 1] + gxBody * PHt[1 * 3 + 1] + PHt[8 * 3 + 1];
         S[8] = -gyBody * PHt[0 * 3 + 2] + gxBody * PHt[1 * 3 + 2] + PHt[8 * 3 + 2];
-        const float accelVarianceScale = config.accelMeasurementVarianceScale * dynamicVarianceScale;
+        const float accelVarianceScale =
+            config.accelMeasurementVarianceScale * dynamicVarianceScale;
         const float r0 = clampf(accelVarDiag[0] * accelVarianceScale, 1.0e-8f, 1.0e5f);
         const float r1 = clampf(accelVarDiag[1] * accelVarianceScale, 1.0e-8f, 1.0e5f);
         const float r2 = clampf(accelVarDiag[2] * accelVarianceScale, 1.0e-8f, 1.0e5f);
@@ -1152,18 +1144,12 @@ private:
             gyroBias[2] + dbgz,
             -config.maxGyroBiasAbsRadPerSec,
             config.maxGyroBiasAbsRadPerSec);
-        accelBias[0] = clampf(
-            accelBias[0] + dbax,
-            -config.maxAccelBiasAbsMps2,
-            config.maxAccelBiasAbsMps2);
-        accelBias[1] = clampf(
-            accelBias[1] + dbay,
-            -config.maxAccelBiasAbsMps2,
-            config.maxAccelBiasAbsMps2);
-        accelBias[2] = clampf(
-            accelBias[2] + dbaz,
-            -config.maxAccelBiasAbsMps2,
-            config.maxAccelBiasAbsMps2);
+        accelBias[0] =
+            clampf(accelBias[0] + dbax, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
+        accelBias[1] =
+            clampf(accelBias[1] + dbay, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
+        accelBias[2] =
+            clampf(accelBias[2] + dbaz, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
 
         // Covariance update in Joseph form:
         // P = (I - K H) P (I - K H)^T + K R K^T
@@ -1307,7 +1293,8 @@ private:
     static inline bool isValid(tap::communication::sensors::imu::ImuInterface::ImuState state)
     {
         return state == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED ||
-               state == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED;
+               state ==
+                   tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED;
     }
 
     static tap::communication::sensors::imu::ImuInterface::ImuState combineImuStates(
@@ -1320,7 +1307,8 @@ private:
             {
                 return tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING;
             }
-            if (state == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED ||
+            if (state ==
+                    tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED ||
                 state == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED)
             {
                 anyConnected = true;
@@ -1332,7 +1320,8 @@ private:
         }
         for (auto state : states)
         {
-            if (state == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED)
+            if (state ==
+                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED)
             {
                 return tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED;
             }
@@ -1356,7 +1345,6 @@ private:
             recomputeImuToFusionTransform(i);
         }
     }
-
 };
 }  // namespace aruwsrc::communication::sensors::imu
 
