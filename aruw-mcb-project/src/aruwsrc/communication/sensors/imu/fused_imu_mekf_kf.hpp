@@ -31,9 +31,9 @@
 #include "tap/algorithms/transforms/dynamic_position.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/transforms/vector.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
-#include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/sensors/imu/fused_imu_eigen_ekf.hpp"
 
