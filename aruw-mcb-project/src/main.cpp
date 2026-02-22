@@ -158,7 +158,8 @@ int main()
 #ifdef TARGET_SENTRY_NAME
             PROFILE(drivers->profiler, drivers->turretMajorPrimaryImu.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->turretMajorImuSecondary.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, drivers->turretMajorImuMekf.periodicIMUUpdate, ());
+            // PROFILE(drivers->profiler, drivers->turretMajorImuMekf.periodicIMUUpdate, ());
+            PROFILE(drivers->profiler, drivers->turretMajorImuMekfKf.periodicIMUUpdate, ());
 #endif
             // EKF fused IMU update intentionally disabled while isolating MEKF behavior.
             // PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
@@ -243,8 +244,10 @@ static void initializeIo(Drivers* drivers)
     drivers->turretMajorPrimaryImu.setCalibrationSamples(4000);
     drivers->turretMajorImuSecondary.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->turretMajorImuSecondary.setCalibrationSamples(4000);
-    drivers->turretMajorImuMekf.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    drivers->turretMajorImuMekf.setCalibrationSamples(4000);
+    // drivers->turretMajorImuMekf.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    // drivers->turretMajorImuMekf.setCalibrationSamples(4000);
+    drivers->turretMajorImuMekfKf.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->turretMajorImuMekfKf.setCalibrationSamples(4000);
 #endif
     // EKF fused IMU initialization intentionally disabled while isolating MEKF behavior.
     // drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
@@ -252,7 +255,8 @@ static void initializeIo(Drivers* drivers)
 #ifdef TARGET_SENTRY_NAME
     fusedImuTelemetryDrivers = drivers;
     // drivers->turretMajorImu.setTimingTelemetryCallback(logFusedImuTimingSignal, 200U);
-    drivers->turretMajorImuMekf.setTimingTelemetryCallback(logFusedImuTimingSignal, 200U);
+    // drivers->turretMajorImuMekf.setTimingTelemetryCallback(logFusedImuTimingSignal, 200U);
+    drivers->turretMajorImuMekfKf.setTimingTelemetryCallback(logFusedImuTimingSignal, 200U);
 #endif
 #endif
 #ifdef TARGET_TESTBED

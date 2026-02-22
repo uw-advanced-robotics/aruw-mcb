@@ -323,11 +323,11 @@ void RttTelemetry::sendQueuedMessages(bool ozone)
         }
         first = false;
         out.append(msg.data, msg.length);
-        if (ozone)
-        {
-            first = true;  // Reset for prints/errors since heartbeat is not sent in ozone
-            first = false;
-        }
+        // if (ozone)
+        // {
+        //     first = true;  // Reset for prints/errors since heartbeat is not sent in ozone
+        //     first = false;
+        // }
     }
     out += ',';
     appendEvents(out, errorQueue, "_ERROR_", available);

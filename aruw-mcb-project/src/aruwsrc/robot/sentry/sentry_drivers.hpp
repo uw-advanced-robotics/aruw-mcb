@@ -39,7 +39,8 @@
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/fused_imu.hpp"
-#include "aruwsrc/communication/sensors/imu/fused_imu_mekf.hpp"
+// #include "aruwsrc/communication/sensors/imu/fused_imu_mekf.hpp"
+#include "aruwsrc/communication/sensors/imu/fused_imu_mekf_kf.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
@@ -50,7 +51,8 @@ namespace aruwsrc::sentry
 {
 #if defined(TARGET_SENTRY_NAME)
 using TurretMajorImuEkfType = aruwsrc::communication::sensors::imu::FusedImu<3>;
-using TurretMajorImuMekfType = aruwsrc::communication::sensors::imu::FusedImuMekf<3>;
+// using TurretMajorImuMekfType = aruwsrc::communication::sensors::imu::FusedImuMekf<3>;
+using TurretMajorImuMekfKfType = aruwsrc::communication::sensors::imu::FusedImuMekfKf<3>;
 using TurretMajorImuType = TurretMajorImuEkfType;
 #else
 using TurretMajorImuType = aruwsrc::communication::sensors::imu::ism330::ISM330;
@@ -73,10 +75,10 @@ class Drivers : public tap::Drivers
         TurretMajorImuEkfType::ImuType::ISM330DHCX,
         TurretMajorImuEkfType::ImuType::MPU6500};
 
-    static inline const std::array<TurretMajorImuMekfType::ImuType, 3> turretMajorImuTypesMekf = {
-        TurretMajorImuMekfType::ImuType::ISM330DHCX,
-        TurretMajorImuMekfType::ImuType::ISM330DHCX,
-        TurretMajorImuMekfType::ImuType::MPU6500};
+    static inline const std::array<TurretMajorImuMekfKfType::ImuType, 3> turretMajorImuTypesMekf = {
+        TurretMajorImuMekfKfType::ImuType::ISM330DHCX,
+        TurretMajorImuMekfKfType::ImuType::ISM330DHCX,
+        TurretMajorImuMekfKfType::ImuType::MPU6500};
 #endif
 
 #ifdef ENV_UNIT_TESTS
@@ -108,7 +110,8 @@ public:
           turretMajorImuSecondary(
               aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
                   modm::platform::GpioD12>()),
-          turretMajorImuMekf(
+          // turretMajorImuMekf(
+          turretMajorImuMekfKf(
               {&turretMajorPrimaryImu, &turretMajorImuSecondary, &mpu6500},
               turretMajorImuTransforms,
               turretMajorImuTypesMekf),
@@ -147,7 +150,8 @@ public:
 #if defined(TARGET_SENTRY_NAME)
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorPrimaryImu;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImuSecondary;
-    TurretMajorImuMekfType turretMajorImuMekf;
+    // TurretMajorImuMekfType turretMajorImuMekf;
+    TurretMajorImuMekfKfType turretMajorImuMekfKf;
 #endif
     TurretMajorImuType turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
