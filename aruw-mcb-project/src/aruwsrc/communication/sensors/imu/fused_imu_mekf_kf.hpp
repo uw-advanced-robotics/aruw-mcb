@@ -33,6 +33,7 @@
 #include "tap/algorithms/transforms/vector.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/sensors/imu/fused_imu_eigen_ekf.hpp"
 
@@ -353,9 +354,9 @@ public:
         return tap::communication::sensors::imu::GRAVITY_MPS2;
     }
 
-    inline float getYaw() const override { return WrappedFloat(yawRad).getWrappedValue(); }
-    inline float getPitch() const override { return WrappedFloat(pitchRad).getWrappedValue(); }
-    inline float getRoll() const override { return WrappedFloat(rollRad).getWrappedValue(); }
+    inline float getYaw() const override { return Angle(yawRad).getWrappedValue(); }
+    inline float getPitch() const override { return Angle(pitchRad).getWrappedValue(); }
+    inline float getRoll() const override { return Angle(rollRad).getWrappedValue(); }
 
 private:
     static constexpr size_t signalStateSize = 6;
