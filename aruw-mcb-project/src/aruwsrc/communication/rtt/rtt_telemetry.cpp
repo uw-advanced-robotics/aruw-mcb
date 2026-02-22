@@ -113,10 +113,10 @@ bool RttTelemetry::updateTelemetryAsync()
 
             // In Ozone mode (idle, no messages received yet), don't send telemetry
             // heartbeat info, only prints and errors are allowed
-            ozoneMode = !firstInputReceived;
+            // ozoneMode = !firstInputReceived;
 
             logHeartbeatInfo();
-            sendQueuedMessages(ozoneMode);
+            sendQueuedMessages();
         }
 
         // Yield to allow other protothreads to run
@@ -283,7 +283,7 @@ void RttTelemetry::appendEvents(
     out += ']';
 }
 
-void RttTelemetry::sendQueuedMessages(bool ozone)
+void RttTelemetry::sendQueuedMessages()
 {
     // Send only if there are any messages, errors, or prints to send
     if (messageQueue.isEmpty() && errorQueue.isEmpty() && printQueue.isEmpty())

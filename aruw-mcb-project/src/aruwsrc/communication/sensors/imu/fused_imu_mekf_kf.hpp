@@ -75,8 +75,8 @@ public:
         float minAccelNormMps2 = 4.0f;
         float maxAccelNormMps2 = 15.0f;
 
-        float gyroBiasRandomWalkStdRadPerSec = 2.0e-4f;
-        float accelBiasRandomWalkStdMps2 = 4.0e-3f;
+        float gyroBiasRandomWalkStdRadPerSec = 5.0e-5f;
+        float accelBiasRandomWalkStdMps2 = 1.0e-3f;
         float initialAngleStdRad = 0.2f;
         float initialGyroBiasStdRadPerSec = 0.1f;
         float initialAccelBiasStdMps2 = 0.5f;
@@ -96,16 +96,14 @@ public:
         float accelMeasurementVarianceScale = 8.0f;
         float accelDynamicVarianceGain = 2.0f;
         float accelDynamicVarianceMaxScale = 40.0f;
+        float accelNisGate = 16.0f;
         float attitudeCorrectionGain = 0.10f;
+        float gyroBiasCorrectionGain = 1.0e-6f;
+        float accelBiasCorrectionGain = 1.0e-7f;
+        float maxGyroBiasAbsRadPerSec = 2.0e-2f;
+        float maxAccelBiasAbsMps2 = 1.0e-1f;
         bool suppressYawCorrectionFromAccel = true;
     };
-
-    struct TimingProfile
-    {
-        uint32_t periodicUs = 0;
-    };
-
-    using TimingTelemetryCallback = void (*)(const char* label, uint32_t value);
 
     FusedImuMekfKf(
         const std::array<tap::communication::sensors::imu::AbstractIMU*, N>& imus,
@@ -136,6 +134,7 @@ public:
         signalFilterInitialized = false;
         filterInitialized = false;
         pendingReinitializeAfterCalibration = true;
+        resetFilterState();
         requestCalibration();
     }
 
@@ -144,6 +143,7 @@ public:
         signalFilterInitialized = false;
         filterInitialized = false;
         pendingReinitializeAfterCalibration = true;
+        resetFilterState();
         for (auto* imu : imus)
         {
             if (imu != nullptr)
@@ -177,7 +177,6 @@ public:
     void periodicIMUUpdate() override
     {
         const uint32_t cycleStartUs = tap::arch::clock::getTimeMicroseconds();
-        timingProfile.periodicUs = 0;
 
         if (prevFilterUpdateTimeUs != 0U)
         {
@@ -200,7 +199,6 @@ public:
             imuData.accG = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.temperature = 0.0f;
-            emitTiming(cycleStartUs, tap::arch::clock::getTimeMicroseconds());
             return;
         }
 
@@ -241,14 +239,11 @@ public:
             }
         }
 
-        uint32_t nowUs = tap::arch::clock::getTimeMicroseconds();
-
         if (!anyValid)
         {
             imuData.accG = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.temperature = 0.0f;
-            emitTiming(cycleStartUs, tap::arch::clock::getTimeMicroseconds());
             return;
         }
 
@@ -260,6 +255,7 @@ public:
         }
 
         updatePerImuNoiseVariance();
+        updateFusedMeasurementVariance(validFlags);
 
         if (!signalFilterInitialized && firstValidIndex != N)
         {
@@ -327,6 +323,8 @@ public:
 
         if (!filterInitialized)
         {
+            gyroBias = {0.0f, 0.0f, 0.0f};
+            accelBias = {0.0f, 0.0f, 0.0f};
             initializeOrientationFromAccel(fusedAccel);
             initializeCovariance();
             filterInitialized = true;
@@ -335,24 +333,20 @@ public:
 
         predictWithGyro(fusedGyro, samplePeriodS);
 
-        for (size_t i = 0; i < N; i++)
-        {
-            if (!validFlags[i])
-            {
-                continue;
-            }
-            (void)runAccelUpdate(accel[i], accelVar[i]);
-        }
+        (void)runAccelUpdate(fusedAccel, fusedAccelVarianceDiag);
 
         updateEulerFromQuaternion();
         imuData.gyroRadPerSec =
-            tap::algorithms::transforms::Vector(fusedGyro.x(), fusedGyro.y(), fusedGyro.z());
+            tap::algorithms::transforms::Vector(
+                fusedGyro.x() - gyroBias[0],
+                fusedGyro.y() - gyroBias[1],
+                fusedGyro.z() - gyroBias[2]);
         imuData.accG =
-            tap::algorithms::transforms::Vector(fusedAccel.x(), fusedAccel.y(), fusedAccel.z());
+            tap::algorithms::transforms::Vector(
+                fusedAccel.x() - accelBias[0],
+                fusedAccel.y() - accelBias[1],
+                fusedAccel.z() - accelBias[2]);
         imuData.temperature = (tempCount > 0) ? (tempSum / tempCount) : 0.0f;
-
-        nowUs = tap::arch::clock::getTimeMicroseconds();
-        emitTiming(cycleStartUs, nowUs);
     }
 
     inline const char* getName() const override { return "FusedIMUMEKFKF"; }
@@ -364,16 +358,6 @@ public:
     inline float getYaw() const override { return wrapAngle(yawRad); }
     inline float getPitch() const override { return pitchRad; }
     inline float getRoll() const override { return rollRad; }
-
-    inline const TimingProfile& getTimingProfile() const { return timingProfile; }
-    inline void setTimingTelemetryCallback(
-        TimingTelemetryCallback callback,
-        uint16_t decimation = 200U)
-    {
-        timingTelemetryCallback = callback;
-        timingTelemetryDecimation = (decimation == 0U) ? 1U : decimation;
-        timingTelemetryCounter = 0U;
-    }
 
 private:
     static constexpr size_t kSignalStateSize = 6;
@@ -393,6 +377,8 @@ private:
     std::array<std::array<float, 3>, N> gyroVar{};
     std::array<std::array<float, 3>, N> baseAccelVariance{};
     std::array<std::array<float, 3>, N> baseGyroVariance{};
+    std::array<float, 3> fusedAccelVarianceDiag = {1.0e-3f, 1.0e-3f, 1.0e-3f};
+    std::array<float, 3> fusedGyroVarianceDiag = {1.0e-4f, 1.0e-4f, 1.0e-4f};
     float accelInnovationGateSq = 400.0f;
     float gyroInnovationGateSq = 16.0f;
     SignalFilterWrapper signalFilter;
@@ -405,17 +391,14 @@ private:
 
     // Nominal state
     std::array<float, kQuatSize> q = {1.0f, 0.0f, 0.0f, 0.0f};
+    std::array<float, 3> gyroBias = {0.0f, 0.0f, 0.0f};
+    std::array<float, 3> accelBias = {0.0f, 0.0f, 0.0f};
     // Error covariance P (9x9 row-major)
     std::array<float, kErrorStateSize * kErrorStateSize> P{};
 
     float rollRad = 0.0f;
     float pitchRad = 0.0f;
     float yawRad = 0.0f;
-
-    TimingProfile timingProfile{};
-    TimingTelemetryCallback timingTelemetryCallback = nullptr;
-    uint16_t timingTelemetryDecimation = 200U;
-    uint16_t timingTelemetryCounter = 0U;
 
     static inline float clampf(float v, float lo, float hi)
     {
@@ -424,6 +407,7 @@ private:
         return v;
     }
 
+    // dont hate me chinmay 
     static inline float wrapAngle(float x)
     {
         while (x >= M_PI) x -= M_TWOPI;
@@ -566,6 +550,59 @@ private:
                 gyroVar[i][a] = ndGyro * ndGyro * bw;
                 baseAccelVariance[i][a] = accelVar[i][a];
                 baseGyroVariance[i][a] = gyroVar[i][a];
+            }
+        }
+    }
+
+    inline void updateFusedMeasurementVariance(const std::array<bool, N>& validFlags)
+    {
+        constexpr float minVar = 1.0e-12f;
+        for (size_t axis = 0; axis < 3; axis++)
+        {
+            float accelPrecisionSum = 0.0f;
+            float gyroPrecisionSum = 0.0f;
+            bool anyAccelValid = false;
+            bool anyGyroValid = false;
+            for (size_t i = 0; i < N; i++)
+            {
+                if (!validFlags[i])
+                {
+                    continue;
+                }
+                const float accelAxisVar = clampf(accelVar[i][axis], minVar, 1.0e8f);
+                const float gyroAxisVar = clampf(gyroVar[i][axis], minVar, 1.0e8f);
+                accelPrecisionSum += 1.0f / accelAxisVar;
+                gyroPrecisionSum += 1.0f / gyroAxisVar;
+                anyAccelValid = true;
+                anyGyroValid = true;
+            }
+
+            if (anyAccelValid && accelPrecisionSum > 0.0f)
+            {
+                fusedAccelVarianceDiag[axis] = 1.0f / accelPrecisionSum;
+            }
+            else
+            {
+                float accelMean = 0.0f;
+                for (size_t i = 0; i < N; i++)
+                {
+                    accelMean += clampf(accelVar[i][axis], minVar, 1.0e8f);
+                }
+                fusedAccelVarianceDiag[axis] = accelMean / static_cast<float>(N);
+            }
+
+            if (anyGyroValid && gyroPrecisionSum > 0.0f)
+            {
+                fusedGyroVarianceDiag[axis] = 1.0f / gyroPrecisionSum;
+            }
+            else
+            {
+                float gyroMean = 0.0f;
+                for (size_t i = 0; i < N; i++)
+                {
+                    gyroMean += clampf(gyroVar[i][axis], minVar, 1.0e8f);
+                }
+                fusedGyroVarianceDiag[axis] = gyroMean / static_cast<float>(N);
             }
         }
     }
@@ -763,6 +800,8 @@ private:
     inline void resetFilterState()
     {
         q = {1.0f, 0.0f, 0.0f, 0.0f};
+        gyroBias = {0.0f, 0.0f, 0.0f};
+        accelBias = {0.0f, 0.0f, 0.0f};
         for (size_t i = 0; i < P.size(); i++)
         {
             P[i] = 0.0f;
@@ -795,6 +834,36 @@ private:
         P[8 * kErrorStateSize + 8] = accelBiasVar;
     }
 
+    inline void enforceCovarianceNumerics()
+    {
+        for (size_t i = 0; i < P.size(); i++)
+        {
+            if (!std::isfinite(P[i]))
+            {
+                P[i] = 0.0f;
+            }
+        }
+
+        for (size_t r = 0; r < kErrorStateSize; r++)
+        {
+            for (size_t c = r + 1; c < kErrorStateSize; c++)
+            {
+                const float sym =
+                    0.5f * (P[r * kErrorStateSize + c] + P[c * kErrorStateSize + r]);
+                P[r * kErrorStateSize + c] = sym;
+                P[c * kErrorStateSize + r] = sym;
+            }
+        }
+
+        constexpr float kMinDiag = 1.0e-10f;
+        constexpr float kMaxDiag = 1.0e6f;
+        for (size_t d = 0; d < kErrorStateSize; d++)
+        {
+            const size_t idx = d * kErrorStateSize + d;
+            P[idx] = clampf(P[idx], kMinDiag, kMaxDiag);
+        }
+    }
+
     inline void initializeOrientationFromAccel(const tap::algorithms::transforms::Vector& acc)
     {
         const float ax = acc.x();
@@ -809,9 +878,9 @@ private:
 
     inline void predictWithGyro(const tap::algorithms::transforms::Vector& gyroMeas, float dt)
     {
-        const float wx = gyroMeas.x();
-        const float wy = gyroMeas.y();
-        const float wz = gyroMeas.z();
+        const float wx = gyroMeas.x() - gyroBias[0];
+        const float wy = gyroMeas.y() - gyroBias[1];
+        const float wz = gyroMeas.z() - gyroBias[2];
 
         const std::array<float, 4> omegaQ = {0.0f, wx, wy, wz};
         std::array<float, 4> dq = quatMul(q, omegaQ);
@@ -874,13 +943,30 @@ private:
         }
 
         // Qd diagonal
-        const float gyroVarAvg = (gyroVar[0][0] + gyroVar[0][1] + gyroVar[0][2]) * (1.0f / 3.0f);
+        const float gyroVarAvg =
+            (fusedGyroVarianceDiag[0] + fusedGyroVarianceDiag[1] + fusedGyroVarianceDiag[2]) *
+            (1.0f / 3.0f);
         const float qTheta = clampf(gyroVarAvg * dt, 1.0e-12f, 1.0f);
+        const float qBg = clampf(
+            config.gyroBiasRandomWalkStdRadPerSec * config.gyroBiasRandomWalkStdRadPerSec * dt,
+            1.0e-14f,
+            1.0f);
+        const float qBa = clampf(
+            config.accelBiasRandomWalkStdMps2 * config.accelBiasRandomWalkStdMps2 * dt,
+            1.0e-14f,
+            1.0f);
         pNew[0 * kErrorStateSize + 0] += qTheta;
         pNew[1 * kErrorStateSize + 1] += qTheta;
         pNew[2 * kErrorStateSize + 2] += qTheta;
+        pNew[3 * kErrorStateSize + 3] += qBg;
+        pNew[4 * kErrorStateSize + 4] += qBg;
+        pNew[5 * kErrorStateSize + 5] += qBg;
+        pNew[6 * kErrorStateSize + 6] += qBa;
+        pNew[7 * kErrorStateSize + 7] += qBa;
+        pNew[8 * kErrorStateSize + 8] += qBa;
 
         P = pNew;
+        enforceCovarianceNumerics();
     }
 
     inline bool invert3x3(const float a[9], float invOut[9]) const
@@ -929,7 +1015,10 @@ private:
         const float gxBody = gBody[0];
         const float gyBody = gBody[1];
         const float gzBody = gBody[2];
-        const float h[3] = {gxBody, gyBody, gzBody};
+        const float h[3] = {
+            gxBody + accelBias[0],
+            gyBody + accelBias[1],
+            gzBody + accelBias[2]};
         const float r[3] = {ax - h[0], ay - h[1], az - h[2]};
         const float normError = std::fabs(norm - g);
         const float innovationNorm = std::sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
@@ -938,7 +1027,7 @@ private:
             1.0f,
             config.accelDynamicVarianceMaxScale);
 
-        // H = [ skew(gBody) 0 I ] has only 6 non-zero terms in the first 3 columns.
+        // H = [ skew(gBody) 0 I ] has non-zeros only in cols {0,1,2,6,7,8}.
         // Compute PHt = P * H^T using this sparsity.
         float PHt[kErrorStateSize * 3];
         for (size_t i = 0; i < kErrorStateSize; i++)
@@ -946,29 +1035,41 @@ private:
             const float pi0 = P[i * kErrorStateSize + 0];
             const float pi1 = P[i * kErrorStateSize + 1];
             const float pi2 = P[i * kErrorStateSize + 2];
-            PHt[i * 3 + 0] = -pi1 * gzBody + pi2 * gyBody;
-            PHt[i * 3 + 1] = pi0 * gzBody - pi2 * gxBody;
-            PHt[i * 3 + 2] = -pi0 * gyBody + pi1 * gxBody;
+            PHt[i * 3 + 0] = -pi1 * gzBody + pi2 * gyBody + P[i * kErrorStateSize + 6];
+            PHt[i * 3 + 1] = pi0 * gzBody - pi2 * gxBody + P[i * kErrorStateSize + 7];
+            PHt[i * 3 + 2] = -pi0 * gyBody + pi1 * gxBody + P[i * kErrorStateSize + 8];
         }
 
-        // S = H*PHt + R (3x3), also using sparse H.
+        // S = H*PHt + R (3x3)
         float S[9];
-        S[0] = -gzBody * PHt[1 * 3 + 0] + gyBody * PHt[2 * 3 + 0];
-        S[1] = -gzBody * PHt[1 * 3 + 1] + gyBody * PHt[2 * 3 + 1];
-        S[2] = -gzBody * PHt[1 * 3 + 2] + gyBody * PHt[2 * 3 + 2];
-        S[3] = gzBody * PHt[0 * 3 + 0] - gxBody * PHt[2 * 3 + 0];
-        S[4] = gzBody * PHt[0 * 3 + 1] - gxBody * PHt[2 * 3 + 1];
-        S[5] = gzBody * PHt[0 * 3 + 2] - gxBody * PHt[2 * 3 + 2];
-        S[6] = -gyBody * PHt[0 * 3 + 0] + gxBody * PHt[1 * 3 + 0];
-        S[7] = -gyBody * PHt[0 * 3 + 1] + gxBody * PHt[1 * 3 + 1];
-        S[8] = -gyBody * PHt[0 * 3 + 2] + gxBody * PHt[1 * 3 + 2];
+        S[0] = -gzBody * PHt[1 * 3 + 0] + gyBody * PHt[2 * 3 + 0] + PHt[6 * 3 + 0];
+        S[1] = -gzBody * PHt[1 * 3 + 1] + gyBody * PHt[2 * 3 + 1] + PHt[6 * 3 + 1];
+        S[2] = -gzBody * PHt[1 * 3 + 2] + gyBody * PHt[2 * 3 + 2] + PHt[6 * 3 + 2];
+        S[3] = gzBody * PHt[0 * 3 + 0] - gxBody * PHt[2 * 3 + 0] + PHt[7 * 3 + 0];
+        S[4] = gzBody * PHt[0 * 3 + 1] - gxBody * PHt[2 * 3 + 1] + PHt[7 * 3 + 1];
+        S[5] = gzBody * PHt[0 * 3 + 2] - gxBody * PHt[2 * 3 + 2] + PHt[7 * 3 + 2];
+        S[6] = -gyBody * PHt[0 * 3 + 0] + gxBody * PHt[1 * 3 + 0] + PHt[8 * 3 + 0];
+        S[7] = -gyBody * PHt[0 * 3 + 1] + gxBody * PHt[1 * 3 + 1] + PHt[8 * 3 + 1];
+        S[8] = -gyBody * PHt[0 * 3 + 2] + gxBody * PHt[1 * 3 + 2] + PHt[8 * 3 + 2];
         const float accelVarianceScale = config.accelMeasurementVarianceScale * dynamicVarianceScale;
-        S[0] += clampf(accelVarDiag[0] * accelVarianceScale, 1.0e-8f, 1.0e5f);
-        S[4] += clampf(accelVarDiag[1] * accelVarianceScale, 1.0e-8f, 1.0e5f);
-        S[8] += clampf(accelVarDiag[2] * accelVarianceScale, 1.0e-8f, 1.0e5f);
+        const float r0 = clampf(accelVarDiag[0] * accelVarianceScale, 1.0e-8f, 1.0e5f);
+        const float r1 = clampf(accelVarDiag[1] * accelVarianceScale, 1.0e-8f, 1.0e5f);
+        const float r2 = clampf(accelVarDiag[2] * accelVarianceScale, 1.0e-8f, 1.0e5f);
+        S[0] += r0;
+        S[4] += r1;
+        S[8] += r2;
 
         float SInv[9];
         if (!invert3x3(S, SInv))
+        {
+            return false;
+        }
+
+        const float sr0 = SInv[0] * r[0] + SInv[1] * r[1] + SInv[2] * r[2];
+        const float sr1 = SInv[3] * r[0] + SInv[4] * r[1] + SInv[5] * r[2];
+        const float sr2 = SInv[6] * r[0] + SInv[7] * r[1] + SInv[8] * r[2];
+        const float nis = r[0] * sr0 + r[1] * sr1 + r[2] * sr2;
+        if (nis > config.accelNisGate)
         {
             return false;
         }
@@ -988,10 +1089,23 @@ private:
             }
         }
 
-        // State correction
-        float dthx = K[0 * 3 + 0] * r[0] + K[0 * 3 + 1] * r[1] + K[0 * 3 + 2] * r[2];
-        float dthy = K[1 * 3 + 0] * r[0] + K[1 * 3 + 1] * r[1] + K[1 * 3 + 2] * r[2];
-        float dthz = K[2 * 3 + 0] * r[0] + K[2 * 3 + 1] * r[1] + K[2 * 3 + 2] * r[2];
+        // Apply correction gains directly to Kalman gain rows so state and covariance
+        // updates remain internally consistent.
+        for (size_t k = 0; k < 3; k++)
+        {
+            K[0 * 3 + k] *= config.attitudeCorrectionGain;
+            K[1 * 3 + k] *= config.attitudeCorrectionGain;
+            K[2 * 3 + k] *= config.attitudeCorrectionGain;
+            K[3 * 3 + k] *= config.gyroBiasCorrectionGain;
+            K[4 * 3 + k] *= config.gyroBiasCorrectionGain;
+            K[5 * 3 + k] *= config.gyroBiasCorrectionGain;
+            K[6 * 3 + k] *= config.accelBiasCorrectionGain;
+            K[7 * 3 + k] *= config.accelBiasCorrectionGain;
+            K[8 * 3 + k] *= config.accelBiasCorrectionGain;
+        }
+
+        // Remove unobservable yaw-like attitude correction from accelerometer update by
+        // projecting attitude-gain rows onto the plane normal to gravity.
         if (config.suppressYawCorrectionFromAccel)
         {
             const float gNormSq = gBody[0] * gBody[0] + gBody[1] * gBody[1] + gBody[2] * gBody[2];
@@ -1001,53 +1115,131 @@ private:
                 const float gux = gBody[0] * invGNorm;
                 const float guy = gBody[1] * invGNorm;
                 const float guz = gBody[2] * invGNorm;
-                const float yawLikeComp = dthx * gux + dthy * guy + dthz * guz;
-                dthx -= yawLikeComp * gux;
-                dthy -= yawLikeComp * guy;
-                dthz -= yawLikeComp * guz;
+                for (size_t k = 0; k < 3; k++)
+                {
+                    const float kx = K[0 * 3 + k];
+                    const float ky = K[1 * 3 + k];
+                    const float kz = K[2 * 3 + k];
+                    const float yawLikeComp = kx * gux + ky * guy + kz * guz;
+                    K[0 * 3 + k] = kx - yawLikeComp * gux;
+                    K[1 * 3 + k] = ky - yawLikeComp * guy;
+                    K[2 * 3 + k] = kz - yawLikeComp * guz;
+                }
             }
         }
-        dthx *= config.attitudeCorrectionGain;
-        dthy *= config.attitudeCorrectionGain;
-        dthz *= config.attitudeCorrectionGain;
+        // State correction
+        const float dthx = K[0 * 3 + 0] * r[0] + K[0 * 3 + 1] * r[1] + K[0 * 3 + 2] * r[2];
+        const float dthy = K[1 * 3 + 0] * r[0] + K[1 * 3 + 1] * r[1] + K[1 * 3 + 2] * r[2];
+        const float dthz = K[2 * 3 + 0] * r[0] + K[2 * 3 + 1] * r[1] + K[2 * 3 + 2] * r[2];
+        const float dbgx = K[3 * 3 + 0] * r[0] + K[3 * 3 + 1] * r[1] + K[3 * 3 + 2] * r[2];
+        const float dbgy = K[4 * 3 + 0] * r[0] + K[4 * 3 + 1] * r[1] + K[4 * 3 + 2] * r[2];
+        const float dbgz = K[5 * 3 + 0] * r[0] + K[5 * 3 + 1] * r[1] + K[5 * 3 + 2] * r[2];
+        const float dbax = K[6 * 3 + 0] * r[0] + K[6 * 3 + 1] * r[1] + K[6 * 3 + 2] * r[2];
+        const float dbay = K[7 * 3 + 0] * r[0] + K[7 * 3 + 1] * r[1] + K[7 * 3 + 2] * r[2];
+        const float dbaz = K[8 * 3 + 0] * r[0] + K[8 * 3 + 1] * r[1] + K[8 * 3 + 2] * r[2];
         const std::array<float, 4> dq = {1.0f, 0.5f * dthx, 0.5f * dthy, 0.5f * dthz};
         q = quatMul(q, dq);
         quatNormalize(q);
+        gyroBias[0] = clampf(
+            gyroBias[0] + dbgx,
+            -config.maxGyroBiasAbsRadPerSec,
+            config.maxGyroBiasAbsRadPerSec);
+        gyroBias[1] = clampf(
+            gyroBias[1] + dbgy,
+            -config.maxGyroBiasAbsRadPerSec,
+            config.maxGyroBiasAbsRadPerSec);
+        gyroBias[2] = clampf(
+            gyroBias[2] + dbgz,
+            -config.maxGyroBiasAbsRadPerSec,
+            config.maxGyroBiasAbsRadPerSec);
+        accelBias[0] = clampf(
+            accelBias[0] + dbax,
+            -config.maxAccelBiasAbsMps2,
+            config.maxAccelBiasAbsMps2);
+        accelBias[1] = clampf(
+            accelBias[1] + dbay,
+            -config.maxAccelBiasAbsMps2,
+            config.maxAccelBiasAbsMps2);
+        accelBias[2] = clampf(
+            accelBias[2] + dbaz,
+            -config.maxAccelBiasAbsMps2,
+            config.maxAccelBiasAbsMps2);
 
-        // P = (I - K H) P, exploiting that only cols 0..2 of (I-KH) are non-trivial.
-        std::array<float, kErrorStateSize * kErrorStateSize> pNew;
-        for (size_t rIdx = 0; rIdx < kErrorStateSize; rIdx++)
+        // Covariance update in Joseph form:
+        // P = (I - K H) P (I - K H)^T + K R K^T
+        // This remains valid even after gain shaping
+        float H[3 * kErrorStateSize] = {};
+        H[0 * kErrorStateSize + 1] = -gzBody;
+        H[0 * kErrorStateSize + 2] = gyBody;
+        H[0 * kErrorStateSize + 6] = 1.0f;
+        H[1 * kErrorStateSize + 0] = gzBody;
+        H[1 * kErrorStateSize + 2] = -gxBody;
+        H[1 * kErrorStateSize + 7] = 1.0f;
+        H[2 * kErrorStateSize + 0] = -gyBody;
+        H[2 * kErrorStateSize + 1] = gxBody;
+        H[2 * kErrorStateSize + 8] = 1.0f;
+
+        std::array<float, kErrorStateSize * kErrorStateSize> iMinusKH{};
+        for (size_t i = 0; i < kErrorStateSize; i++)
         {
-            const float ki0 = K[rIdx * 3 + 0];
-            const float ki1 = K[rIdx * 3 + 1];
-            const float ki2 = K[rIdx * 3 + 2];
-            const float m0 = ((rIdx == 0U) ? 1.0f : 0.0f) - (ki1 * gzBody - ki2 * gyBody);
-            const float m1 = ((rIdx == 1U) ? 1.0f : 0.0f) - (-ki0 * gzBody + ki2 * gxBody);
-            const float m2 = ((rIdx == 2U) ? 1.0f : 0.0f) - (ki0 * gyBody - ki1 * gxBody);
-            for (size_t cIdx = 0; cIdx < kErrorStateSize; cIdx++)
+            iMinusKH[i * kErrorStateSize + i] = 1.0f;
+        }
+        for (size_t i = 0; i < kErrorStateSize; i++)
+        {
+            for (size_t j = 0; j < kErrorStateSize; j++)
             {
-                float s = m0 * P[0 * kErrorStateSize + cIdx] + m1 * P[1 * kErrorStateSize + cIdx] +
-                          m2 * P[2 * kErrorStateSize + cIdx];
-                if (rIdx >= 3)
+                float s = 0.0f;
+                for (size_t k = 0; k < 3; k++)
                 {
-                    s += P[rIdx * kErrorStateSize + cIdx];
+                    s += K[i * 3 + k] * H[k * kErrorStateSize + j];
                 }
-                pNew[rIdx * kErrorStateSize + cIdx] = s;
+                iMinusKH[i * kErrorStateSize + j] -= s;
             }
         }
 
-        // Keep symmetric
-        for (size_t rIdx = 0; rIdx < kErrorStateSize; rIdx++)
+        std::array<float, kErrorStateSize * kErrorStateSize> tmp{};
+        std::array<float, kErrorStateSize * kErrorStateSize> pNew{};
+        for (size_t r = 0; r < kErrorStateSize; r++)
         {
-            for (size_t cIdx = rIdx + 1; cIdx < kErrorStateSize; cIdx++)
+            for (size_t c = 0; c < kErrorStateSize; c++)
             {
-                const float sym = 0.5f * (pNew[rIdx * kErrorStateSize + cIdx] +
-                                          pNew[cIdx * kErrorStateSize + rIdx]);
-                pNew[rIdx * kErrorStateSize + cIdx] = sym;
-                pNew[cIdx * kErrorStateSize + rIdx] = sym;
+                float s = 0.0f;
+                for (size_t k = 0; k < kErrorStateSize; k++)
+                {
+                    s += iMinusKH[r * kErrorStateSize + k] * P[k * kErrorStateSize + c];
+                }
+                tmp[r * kErrorStateSize + c] = s;
             }
         }
+        for (size_t r = 0; r < kErrorStateSize; r++)
+        {
+            for (size_t c = 0; c < kErrorStateSize; c++)
+            {
+                float s = 0.0f;
+                for (size_t k = 0; k < kErrorStateSize; k++)
+                {
+                    s += tmp[r * kErrorStateSize + k] * iMinusKH[c * kErrorStateSize + k];
+                }
+                pNew[r * kErrorStateSize + c] = s;
+            }
+        }
+
+        const float rDiag[3] = {r0, r1, r2};
+        for (size_t r = 0; r < kErrorStateSize; r++)
+        {
+            for (size_t c = 0; c < kErrorStateSize; c++)
+            {
+                float s = 0.0f;
+                for (size_t k = 0; k < 3; k++)
+                {
+                    s += K[r * 3 + k] * rDiag[k] * K[c * 3 + k];
+                }
+                pNew[r * kErrorStateSize + c] += s;
+            }
+        }
+
         P = pNew;
+        enforceCovarianceNumerics();
         return true;
     }
 
@@ -1165,20 +1357,6 @@ private:
         }
     }
 
-    inline void emitTiming(uint32_t cycleStartUs, uint32_t nowUs)
-    {
-        timingProfile.periodicUs = nowUs - cycleStartUs;
-        if (timingTelemetryCallback == nullptr)
-        {
-            return;
-        }
-        timingTelemetryCounter++;
-        if ((timingTelemetryCounter % timingTelemetryDecimation) != 0U)
-        {
-            return;
-        }
-        timingTelemetryCallback("perf:fused_imu_mekf_kf:periodic_us", timingProfile.periodicUs);
-    }
 };
 }  // namespace aruwsrc::communication::sensors::imu
 

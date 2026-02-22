@@ -95,19 +95,6 @@ static void initializeI2C(Drivers* drivers);
 static void checkTurretMcbDisconnection(Drivers* drivers);
 #endif
 
-#if defined(TARGET_SENTRY_NAME)
-static Drivers* fusedImuTelemetryDrivers = nullptr;
-
-static void logFusedImuTimingSignal(const char* label, uint32_t value)
-{
-    if (fusedImuTelemetryDrivers == nullptr)
-    {
-        return;
-    }
-    fusedImuTelemetryDrivers->rttTelemetry.logSignal(label, value);
-}
-#endif
-
 int main()
 {
 #ifdef PLATFORM_HOSTED
@@ -158,11 +145,8 @@ int main()
 #ifdef TARGET_SENTRY_NAME
             PROFILE(drivers->profiler, drivers->turretMajorPrimaryImu.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->turretMajorImuSecondary.periodicIMUUpdate, ());
-            // PROFILE(drivers->profiler, drivers->turretMajorImuMekf.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, drivers->turretMajorImuMekfKf.periodicIMUUpdate, ());
+            PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
 #endif
-            // EKF fused IMU update intentionally disabled while isolating MEKF behavior.
-            // PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
 #endif
 
 #ifdef TARGET_TESTBED
@@ -244,19 +228,8 @@ static void initializeIo(Drivers* drivers)
     drivers->turretMajorPrimaryImu.setCalibrationSamples(4000);
     drivers->turretMajorImuSecondary.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->turretMajorImuSecondary.setCalibrationSamples(4000);
-    // drivers->turretMajorImuMekf.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    // drivers->turretMajorImuMekf.setCalibrationSamples(4000);
-    drivers->turretMajorImuMekfKf.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    drivers->turretMajorImuMekfKf.setCalibrationSamples(4000);
-#endif
-    // EKF fused IMU initialization intentionally disabled while isolating MEKF behavior.
-    // drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    // drivers->turretMajorImu.setCalibrationSamples(4000);
-#ifdef TARGET_SENTRY_NAME
-    fusedImuTelemetryDrivers = drivers;
-    // drivers->turretMajorImu.setTimingTelemetryCallback(logFusedImuTimingSignal, 200U);
-    // drivers->turretMajorImuMekf.setTimingTelemetryCallback(logFusedImuTimingSignal, 200U);
-    drivers->turretMajorImuMekfKf.setTimingTelemetryCallback(logFusedImuTimingSignal, 200U);
+    drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
+    drivers->turretMajorImu.setCalibrationSamples(4000);
 #endif
 #endif
 #ifdef TARGET_TESTBED
