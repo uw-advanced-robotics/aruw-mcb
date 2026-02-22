@@ -20,6 +20,7 @@
 #ifndef FUSED_IMU_MEKF_KF_HPP_
 #define FUSED_IMU_MEKF_KF_HPP_
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstddef>
@@ -259,7 +260,7 @@ public:
 
         if (!signalFilterInitialized && firstValidIndex != N)
         {
-            const float initialX[kSignalStateSize] = {
+            const float initialX[signalStateSize] = {
                 accel[firstValidIndex].x(),
                 accel[firstValidIndex].y(),
                 accel[firstValidIndex].z(),
@@ -352,14 +353,14 @@ public:
         return tap::communication::sensors::imu::GRAVITY_MPS2;
     }
 
-    inline float getYaw() const override { return wrapAngle(yawRad); }
-    inline float getPitch() const override { return pitchRad; }
-    inline float getRoll() const override { return rollRad; }
+    inline float getYaw() const override { return WrappedFloat(yawRad).getWrappedValue(); }
+    inline float getPitch() const override { return WrappedFloat(pitchRad).getWrappedValue(); }
+    inline float getRoll() const override { return WrappedFloat(rollRad).getWrappedValue(); }
 
 private:
-    static constexpr size_t kSignalStateSize = 6;
-    static constexpr size_t kErrorStateSize = 9;
-    static constexpr size_t kQuatSize = 4;
+    static constexpr size_t signalStateSize = 6;
+    static constexpr size_t errorStateSize = 9;
+    static constexpr size_t quatSize = 4;
     using SignalFilterWrapper = aruwsrc::communication::sensors::imu::FusedImuEigenEkf<N>;
     using SignalStateMatrix = typename SignalFilterWrapper::StateMatrix;
     using SignalInputMatrix = typename SignalFilterWrapper::InputMatrix;
@@ -387,22 +388,15 @@ private:
     bool pendingReinitializeAfterCalibration = false;
 
     // Nominal state
-    std::array<float, kQuatSize> q = {1.0f, 0.0f, 0.0f, 0.0f};
+    std::array<float, quatSize> q = {1.0f, 0.0f, 0.0f, 0.0f};
     std::array<float, 3> gyroBias = {0.0f, 0.0f, 0.0f};
     std::array<float, 3> accelBias = {0.0f, 0.0f, 0.0f};
     // Error covariance P (9x9 row-major)
-    std::array<float, kErrorStateSize * kErrorStateSize> P{};
+    std::array<float, errorStateSize * errorStateSize> P{};
 
     float rollRad = 0.0f;
     float pitchRad = 0.0f;
     float yawRad = 0.0f;
-
-    static inline float clampf(float v, float lo, float hi)
-    {
-        if (v < lo) return lo;
-        if (v > hi) return hi;
-        return v;
-    }
 
     // dont hate me chinmay
     static inline float wrapAngle(float x)
@@ -472,11 +466,11 @@ private:
     }
 
     template <typename MatrixT>
-    static inline MatrixT makeSignalStateDiagMatrix(const std::array<float, kSignalStateSize>& diag)
+    static inline MatrixT makeSignalStateDiagMatrix(const std::array<float, signalStateSize>& diag)
     {
         MatrixT mat{};
         zeroMatrix(mat);
-        for (size_t i = 0; i < kSignalStateSize; i++)
+        for (size_t i = 0; i < signalStateSize; i++)
         {
             setMatrixElem(mat, i, i, diag[i]);
         }
@@ -485,7 +479,7 @@ private:
 
     inline SignalStateMatrix makeSignalQ()
     {
-        std::array<float, kSignalStateSize> qDiag = {
+        std::array<float, signalStateSize> qDiag = {
             config.accelProcessVarianceRateDiag[0],
             config.accelProcessVarianceRateDiag[1],
             config.accelProcessVarianceRateDiag[2],
@@ -565,8 +559,8 @@ private:
                 {
                     continue;
                 }
-                const float accelAxisVar = clampf(accelVar[i][axis], minVar, 1.0e8f);
-                const float gyroAxisVar = clampf(gyroVar[i][axis], minVar, 1.0e8f);
+                const float accelAxisVar = std::clamp(accelVar[i][axis], minVar, 1.0e8f);
+                const float gyroAxisVar = std::clamp(gyroVar[i][axis], minVar, 1.0e8f);
                 accelPrecisionSum += 1.0f / accelAxisVar;
                 gyroPrecisionSum += 1.0f / gyroAxisVar;
                 anyAccelValid = true;
@@ -582,7 +576,7 @@ private:
                 float accelMean = 0.0f;
                 for (size_t i = 0; i < N; i++)
                 {
-                    accelMean += clampf(accelVar[i][axis], minVar, 1.0e8f);
+                    accelMean += std::clamp(accelVar[i][axis], minVar, 1.0e8f);
                 }
                 fusedAccelVarianceDiag[axis] = accelMean / static_cast<float>(N);
             }
@@ -596,7 +590,7 @@ private:
                 float gyroMean = 0.0f;
                 for (size_t i = 0; i < N; i++)
                 {
-                    gyroMean += clampf(gyroVar[i][axis], minVar, 1.0e8f);
+                    gyroMean += std::clamp(gyroVar[i][axis], minVar, 1.0e8f);
                 }
                 fusedGyroVarianceDiag[axis] = gyroMean / static_cast<float>(N);
             }
@@ -682,12 +676,12 @@ private:
             float r33 = baseGyroVariance[imuIndex][0] * gyroMultiplier;
             float r44 = baseGyroVariance[imuIndex][1] * gyroMultiplier;
             float r55 = baseGyroVariance[imuIndex][2] * gyroMultiplier;
-            r00 = clampf(r00, config.minMeasurementVariance, config.maxMeasurementVariance);
-            r11 = clampf(r11, config.minMeasurementVariance, config.maxMeasurementVariance);
-            r22 = clampf(r22, config.minMeasurementVariance, config.maxMeasurementVariance);
-            r33 = clampf(r33, config.minMeasurementVariance, config.maxMeasurementVariance);
-            r44 = clampf(r44, config.minMeasurementVariance, config.maxMeasurementVariance);
-            r55 = clampf(r55, config.minMeasurementVariance, config.maxMeasurementVariance);
+            r00 = std::clamp(r00, config.minMeasurementVariance, config.maxMeasurementVariance);
+            r11 = std::clamp(r11, config.minMeasurementVariance, config.maxMeasurementVariance);
+            r22 = std::clamp(r22, config.minMeasurementVariance, config.maxMeasurementVariance);
+            r33 = std::clamp(r33, config.minMeasurementVariance, config.maxMeasurementVariance);
+            r44 = std::clamp(r44, config.minMeasurementVariance, config.maxMeasurementVariance);
+            r55 = std::clamp(r55, config.minMeasurementVariance, config.maxMeasurementVariance);
             setMatrixElem(rBlock, 0, 0, r00);
             setMatrixElem(rBlock, 1, 1, r11);
             setMatrixElem(rBlock, 2, 2, r22);
@@ -701,12 +695,12 @@ private:
     {
         const float clampedDt = (dt > 1.0e-6f) ? dt : 1.0e-3f;
         auto& qSignal = signalFilter.getProcessCovariance();
-        qSignal[0 * kSignalStateSize + 0] = config.accelProcessVarianceRateDiag[0] * clampedDt;
-        qSignal[1 * kSignalStateSize + 1] = config.accelProcessVarianceRateDiag[1] * clampedDt;
-        qSignal[2 * kSignalStateSize + 2] = config.accelProcessVarianceRateDiag[2] * clampedDt;
-        qSignal[3 * kSignalStateSize + 3] = config.gyroProcessVarianceRateDiag[0] * clampedDt;
-        qSignal[4 * kSignalStateSize + 4] = config.gyroProcessVarianceRateDiag[1] * clampedDt;
-        qSignal[5 * kSignalStateSize + 5] = config.gyroProcessVarianceRateDiag[2] * clampedDt;
+        qSignal[0 * signalStateSize + 0] = config.accelProcessVarianceRateDiag[0] * clampedDt;
+        qSignal[1 * signalStateSize + 1] = config.accelProcessVarianceRateDiag[1] * clampedDt;
+        qSignal[2 * signalStateSize + 2] = config.accelProcessVarianceRateDiag[2] * clampedDt;
+        qSignal[3 * signalStateSize + 3] = config.gyroProcessVarianceRateDiag[0] * clampedDt;
+        qSignal[4 * signalStateSize + 4] = config.gyroProcessVarianceRateDiag[1] * clampedDt;
+        qSignal[5 * signalStateSize + 5] = config.gyroProcessVarianceRateDiag[2] * clampedDt;
     }
 
     inline static void quatNormalize(std::array<float, 4>& qInOut)
@@ -819,15 +813,15 @@ private:
             config.initialGyroBiasStdRadPerSec * config.initialGyroBiasStdRadPerSec;
         const float accelBiasVar = config.initialAccelBiasStdMps2 * config.initialAccelBiasStdMps2;
 
-        P[0 * kErrorStateSize + 0] = angleVar;
-        P[1 * kErrorStateSize + 1] = angleVar;
-        P[2 * kErrorStateSize + 2] = angleVar;
-        P[3 * kErrorStateSize + 3] = gyroBiasVar;
-        P[4 * kErrorStateSize + 4] = gyroBiasVar;
-        P[5 * kErrorStateSize + 5] = gyroBiasVar;
-        P[6 * kErrorStateSize + 6] = accelBiasVar;
-        P[7 * kErrorStateSize + 7] = accelBiasVar;
-        P[8 * kErrorStateSize + 8] = accelBiasVar;
+        P[0 * errorStateSize + 0] = angleVar;
+        P[1 * errorStateSize + 1] = angleVar;
+        P[2 * errorStateSize + 2] = angleVar;
+        P[3 * errorStateSize + 3] = gyroBiasVar;
+        P[4 * errorStateSize + 4] = gyroBiasVar;
+        P[5 * errorStateSize + 5] = gyroBiasVar;
+        P[6 * errorStateSize + 6] = accelBiasVar;
+        P[7 * errorStateSize + 7] = accelBiasVar;
+        P[8 * errorStateSize + 8] = accelBiasVar;
     }
 
     inline void enforceCovarianceNumerics()
@@ -840,22 +834,22 @@ private:
             }
         }
 
-        for (size_t r = 0; r < kErrorStateSize; r++)
+        for (size_t r = 0; r < errorStateSize; r++)
         {
-            for (size_t c = r + 1; c < kErrorStateSize; c++)
+            for (size_t c = r + 1; c < errorStateSize; c++)
             {
-                const float sym = 0.5f * (P[r * kErrorStateSize + c] + P[c * kErrorStateSize + r]);
-                P[r * kErrorStateSize + c] = sym;
-                P[c * kErrorStateSize + r] = sym;
+                const float sym = 0.5f * (P[r * errorStateSize + c] + P[c * errorStateSize + r]);
+                P[r * errorStateSize + c] = sym;
+                P[c * errorStateSize + r] = sym;
             }
         }
 
-        constexpr float kMinDiag = 1.0e-10f;
-        constexpr float kMaxDiag = 1.0e6f;
-        for (size_t d = 0; d < kErrorStateSize; d++)
+        constexpr float minDiag = 1.0e-10f;
+        constexpr float maxDiag = 1.0e6f;
+        for (size_t d = 0; d < errorStateSize; d++)
         {
-            const size_t idx = d * kErrorStateSize + d;
-            P[idx] = clampf(P[idx], kMinDiag, kMaxDiag);
+            const size_t idx = d * errorStateSize + d;
+            P[idx] = std::clamp(P[idx], minDiag, maxDiag);
         }
     }
 
@@ -896,44 +890,44 @@ private:
         const float a20 = dtwy;
         const float a21 = -dtwx;
         const float negDt = -dt;
-        std::array<float, kErrorStateSize * kErrorStateSize> tmp;
-        std::array<float, kErrorStateSize * kErrorStateSize> pNew;
+        std::array<float, errorStateSize * errorStateSize> tmp;
+        std::array<float, errorStateSize * errorStateSize> pNew;
         // tmp = Phi * P (sparse row update on first 3 rows)
-        for (size_t c = 0; c < kErrorStateSize; c++)
+        for (size_t c = 0; c < errorStateSize; c++)
         {
-            const float p0c = P[0 * kErrorStateSize + c];
-            const float p1c = P[1 * kErrorStateSize + c];
-            const float p2c = P[2 * kErrorStateSize + c];
-            tmp[0 * kErrorStateSize + c] =
-                p0c + a01 * p1c + a02 * p2c + negDt * P[3 * kErrorStateSize + c];
-            tmp[1 * kErrorStateSize + c] =
-                a10 * p0c + p1c + a12 * p2c + negDt * P[4 * kErrorStateSize + c];
-            tmp[2 * kErrorStateSize + c] =
-                a20 * p0c + a21 * p1c + p2c + negDt * P[5 * kErrorStateSize + c];
+            const float p0c = P[0 * errorStateSize + c];
+            const float p1c = P[1 * errorStateSize + c];
+            const float p2c = P[2 * errorStateSize + c];
+            tmp[0 * errorStateSize + c] =
+                p0c + a01 * p1c + a02 * p2c + negDt * P[3 * errorStateSize + c];
+            tmp[1 * errorStateSize + c] =
+                a10 * p0c + p1c + a12 * p2c + negDt * P[4 * errorStateSize + c];
+            tmp[2 * errorStateSize + c] =
+                a20 * p0c + a21 * p1c + p2c + negDt * P[5 * errorStateSize + c];
         }
-        for (size_t r = 3; r < kErrorStateSize; r++)
+        for (size_t r = 3; r < errorStateSize; r++)
         {
-            for (size_t c = 0; c < kErrorStateSize; c++)
+            for (size_t c = 0; c < errorStateSize; c++)
             {
-                tmp[r * kErrorStateSize + c] = P[r * kErrorStateSize + c];
+                tmp[r * errorStateSize + c] = P[r * errorStateSize + c];
             }
         }
 
         // pNew = tmp * Phi^T (sparse column update on first 3 cols)
-        for (size_t r = 0; r < kErrorStateSize; r++)
+        for (size_t r = 0; r < errorStateSize; r++)
         {
-            const float tr0 = tmp[r * kErrorStateSize + 0];
-            const float tr1 = tmp[r * kErrorStateSize + 1];
-            const float tr2 = tmp[r * kErrorStateSize + 2];
-            pNew[r * kErrorStateSize + 0] =
-                tr0 + a01 * tr1 + a02 * tr2 + negDt * tmp[r * kErrorStateSize + 3];
-            pNew[r * kErrorStateSize + 1] =
-                a10 * tr0 + tr1 + a12 * tr2 + negDt * tmp[r * kErrorStateSize + 4];
-            pNew[r * kErrorStateSize + 2] =
-                a20 * tr0 + a21 * tr1 + tr2 + negDt * tmp[r * kErrorStateSize + 5];
-            for (size_t c = 3; c < kErrorStateSize; c++)
+            const float tr0 = tmp[r * errorStateSize + 0];
+            const float tr1 = tmp[r * errorStateSize + 1];
+            const float tr2 = tmp[r * errorStateSize + 2];
+            pNew[r * errorStateSize + 0] =
+                tr0 + a01 * tr1 + a02 * tr2 + negDt * tmp[r * errorStateSize + 3];
+            pNew[r * errorStateSize + 1] =
+                a10 * tr0 + tr1 + a12 * tr2 + negDt * tmp[r * errorStateSize + 4];
+            pNew[r * errorStateSize + 2] =
+                a20 * tr0 + a21 * tr1 + tr2 + negDt * tmp[r * errorStateSize + 5];
+            for (size_t c = 3; c < errorStateSize; c++)
             {
-                pNew[r * kErrorStateSize + c] = tmp[r * kErrorStateSize + c];
+                pNew[r * errorStateSize + c] = tmp[r * errorStateSize + c];
             }
         }
 
@@ -941,24 +935,24 @@ private:
         const float gyroVarAvg =
             (fusedGyroVarianceDiag[0] + fusedGyroVarianceDiag[1] + fusedGyroVarianceDiag[2]) *
             (1.0f / 3.0f);
-        const float qTheta = clampf(gyroVarAvg * dt, 1.0e-12f, 1.0f);
-        const float qBg = clampf(
+        const float qTheta = std::clamp(gyroVarAvg * dt, 1.0e-12f, 1.0f);
+        const float qBg = std::clamp(
             config.gyroBiasRandomWalkStdRadPerSec * config.gyroBiasRandomWalkStdRadPerSec * dt,
             1.0e-14f,
             1.0f);
-        const float qBa = clampf(
+        const float qBa = std::clamp(
             config.accelBiasRandomWalkStdMps2 * config.accelBiasRandomWalkStdMps2 * dt,
             1.0e-14f,
             1.0f);
-        pNew[0 * kErrorStateSize + 0] += qTheta;
-        pNew[1 * kErrorStateSize + 1] += qTheta;
-        pNew[2 * kErrorStateSize + 2] += qTheta;
-        pNew[3 * kErrorStateSize + 3] += qBg;
-        pNew[4 * kErrorStateSize + 4] += qBg;
-        pNew[5 * kErrorStateSize + 5] += qBg;
-        pNew[6 * kErrorStateSize + 6] += qBa;
-        pNew[7 * kErrorStateSize + 7] += qBa;
-        pNew[8 * kErrorStateSize + 8] += qBa;
+        pNew[0 * errorStateSize + 0] += qTheta;
+        pNew[1 * errorStateSize + 1] += qTheta;
+        pNew[2 * errorStateSize + 2] += qTheta;
+        pNew[3 * errorStateSize + 3] += qBg;
+        pNew[4 * errorStateSize + 4] += qBg;
+        pNew[5 * errorStateSize + 5] += qBg;
+        pNew[6 * errorStateSize + 6] += qBa;
+        pNew[7 * errorStateSize + 7] += qBa;
+        pNew[8 * errorStateSize + 8] += qBa;
 
         P = pNew;
         enforceCovarianceNumerics();
@@ -1013,22 +1007,22 @@ private:
         const float r[3] = {ax - h[0], ay - h[1], az - h[2]};
         const float normError = std::fabs(norm - g);
         const float innovationNorm = std::sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
-        const float dynamicVarianceScale = clampf(
+        const float dynamicVarianceScale = std::clamp(
             1.0f + config.accelDynamicVarianceGain * (normError * normError + innovationNorm),
             1.0f,
             config.accelDynamicVarianceMaxScale);
 
         // H = [ skew(gBody) 0 I ] has non-zeros only in cols {0,1,2,6,7,8}.
         // Compute PHt = P * H^T using this sparsity.
-        float PHt[kErrorStateSize * 3];
-        for (size_t i = 0; i < kErrorStateSize; i++)
+        float PHt[errorStateSize * 3];
+        for (size_t i = 0; i < errorStateSize; i++)
         {
-            const float pi0 = P[i * kErrorStateSize + 0];
-            const float pi1 = P[i * kErrorStateSize + 1];
-            const float pi2 = P[i * kErrorStateSize + 2];
-            PHt[i * 3 + 0] = -pi1 * gzBody + pi2 * gyBody + P[i * kErrorStateSize + 6];
-            PHt[i * 3 + 1] = pi0 * gzBody - pi2 * gxBody + P[i * kErrorStateSize + 7];
-            PHt[i * 3 + 2] = -pi0 * gyBody + pi1 * gxBody + P[i * kErrorStateSize + 8];
+            const float pi0 = P[i * errorStateSize + 0];
+            const float pi1 = P[i * errorStateSize + 1];
+            const float pi2 = P[i * errorStateSize + 2];
+            PHt[i * 3 + 0] = -pi1 * gzBody + pi2 * gyBody + P[i * errorStateSize + 6];
+            PHt[i * 3 + 1] = pi0 * gzBody - pi2 * gxBody + P[i * errorStateSize + 7];
+            PHt[i * 3 + 2] = -pi0 * gyBody + pi1 * gxBody + P[i * errorStateSize + 8];
         }
 
         // S = H*PHt + R (3x3)
@@ -1044,9 +1038,9 @@ private:
         S[8] = -gyBody * PHt[0 * 3 + 2] + gxBody * PHt[1 * 3 + 2] + PHt[8 * 3 + 2];
         const float accelVarianceScale =
             config.accelMeasurementVarianceScale * dynamicVarianceScale;
-        const float r0 = clampf(accelVarDiag[0] * accelVarianceScale, 1.0e-8f, 1.0e5f);
-        const float r1 = clampf(accelVarDiag[1] * accelVarianceScale, 1.0e-8f, 1.0e5f);
-        const float r2 = clampf(accelVarDiag[2] * accelVarianceScale, 1.0e-8f, 1.0e5f);
+        const float r0 = std::clamp(accelVarDiag[0] * accelVarianceScale, 1.0e-8f, 1.0e5f);
+        const float r1 = std::clamp(accelVarDiag[1] * accelVarianceScale, 1.0e-8f, 1.0e5f);
+        const float r2 = std::clamp(accelVarDiag[2] * accelVarianceScale, 1.0e-8f, 1.0e5f);
         S[0] += r0;
         S[4] += r1;
         S[8] += r2;
@@ -1067,8 +1061,8 @@ private:
         }
 
         // K = PHt * SInv (9x3)
-        float K[kErrorStateSize * 3];
-        for (size_t i = 0; i < kErrorStateSize; i++)
+        float K[errorStateSize * 3];
+        for (size_t i = 0; i < errorStateSize; i++)
         {
             for (size_t j = 0; j < 3; j++)
             {
@@ -1132,95 +1126,96 @@ private:
         const std::array<float, 4> dq = {1.0f, 0.5f * dthx, 0.5f * dthy, 0.5f * dthz};
         q = quatMul(q, dq);
         quatNormalize(q);
-        gyroBias[0] = clampf(
+        gyroBias[0] = std::clamp(
             gyroBias[0] + dbgx,
             -config.maxGyroBiasAbsRadPerSec,
             config.maxGyroBiasAbsRadPerSec);
-        gyroBias[1] = clampf(
+        gyroBias[1] = std::clamp(
             gyroBias[1] + dbgy,
             -config.maxGyroBiasAbsRadPerSec,
             config.maxGyroBiasAbsRadPerSec);
-        gyroBias[2] = clampf(
+        gyroBias[2] = std::clamp(
             gyroBias[2] + dbgz,
             -config.maxGyroBiasAbsRadPerSec,
             config.maxGyroBiasAbsRadPerSec);
         accelBias[0] =
-            clampf(accelBias[0] + dbax, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
+            std::clamp(accelBias[0] + dbax, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
         accelBias[1] =
-            clampf(accelBias[1] + dbay, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
+            std::clamp(accelBias[1] + dbay, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
         accelBias[2] =
-            clampf(accelBias[2] + dbaz, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
+            std::clamp(accelBias[2] + dbaz, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
 
         // Covariance update in Joseph form:
         // P = (I - K H) P (I - K H)^T + K R K^T
         // This remains valid even after gain shaping
-        float H[3 * kErrorStateSize] = {};
-        H[0 * kErrorStateSize + 1] = -gzBody;
-        H[0 * kErrorStateSize + 2] = gyBody;
-        H[0 * kErrorStateSize + 6] = 1.0f;
-        H[1 * kErrorStateSize + 0] = gzBody;
-        H[1 * kErrorStateSize + 2] = -gxBody;
-        H[1 * kErrorStateSize + 7] = 1.0f;
-        H[2 * kErrorStateSize + 0] = -gyBody;
-        H[2 * kErrorStateSize + 1] = gxBody;
-        H[2 * kErrorStateSize + 8] = 1.0f;
+        // more expensive tho
+        float H[3 * errorStateSize] = {};
+        H[0 * errorStateSize + 1] = -gzBody;
+        H[0 * errorStateSize + 2] = gyBody;
+        H[0 * errorStateSize + 6] = 1.0f;
+        H[1 * errorStateSize + 0] = gzBody;
+        H[1 * errorStateSize + 2] = -gxBody;
+        H[1 * errorStateSize + 7] = 1.0f;
+        H[2 * errorStateSize + 0] = -gyBody;
+        H[2 * errorStateSize + 1] = gxBody;
+        H[2 * errorStateSize + 8] = 1.0f;
 
-        std::array<float, kErrorStateSize * kErrorStateSize> iMinusKH{};
-        for (size_t i = 0; i < kErrorStateSize; i++)
+        std::array<float, errorStateSize * errorStateSize> iMinusKH{};
+        for (size_t i = 0; i < errorStateSize; i++)
         {
-            iMinusKH[i * kErrorStateSize + i] = 1.0f;
+            iMinusKH[i * errorStateSize + i] = 1.0f;
         }
-        for (size_t i = 0; i < kErrorStateSize; i++)
+        for (size_t i = 0; i < errorStateSize; i++)
         {
-            for (size_t j = 0; j < kErrorStateSize; j++)
+            for (size_t j = 0; j < errorStateSize; j++)
             {
                 float s = 0.0f;
                 for (size_t k = 0; k < 3; k++)
                 {
-                    s += K[i * 3 + k] * H[k * kErrorStateSize + j];
+                    s += K[i * 3 + k] * H[k * errorStateSize + j];
                 }
-                iMinusKH[i * kErrorStateSize + j] -= s;
+                iMinusKH[i * errorStateSize + j] -= s;
             }
         }
 
-        std::array<float, kErrorStateSize * kErrorStateSize> tmp{};
-        std::array<float, kErrorStateSize * kErrorStateSize> pNew{};
-        for (size_t r = 0; r < kErrorStateSize; r++)
+        std::array<float, errorStateSize * errorStateSize> tmp{};
+        std::array<float, errorStateSize * errorStateSize> pNew{};
+        for (size_t r = 0; r < errorStateSize; r++)
         {
-            for (size_t c = 0; c < kErrorStateSize; c++)
+            for (size_t c = 0; c < errorStateSize; c++)
             {
                 float s = 0.0f;
-                for (size_t k = 0; k < kErrorStateSize; k++)
+                for (size_t k = 0; k < errorStateSize; k++)
                 {
-                    s += iMinusKH[r * kErrorStateSize + k] * P[k * kErrorStateSize + c];
+                    s += iMinusKH[r * errorStateSize + k] * P[k * errorStateSize + c];
                 }
-                tmp[r * kErrorStateSize + c] = s;
+                tmp[r * errorStateSize + c] = s;
             }
         }
-        for (size_t r = 0; r < kErrorStateSize; r++)
+        for (size_t r = 0; r < errorStateSize; r++)
         {
-            for (size_t c = 0; c < kErrorStateSize; c++)
+            for (size_t c = 0; c < errorStateSize; c++)
             {
                 float s = 0.0f;
-                for (size_t k = 0; k < kErrorStateSize; k++)
+                for (size_t k = 0; k < errorStateSize; k++)
                 {
-                    s += tmp[r * kErrorStateSize + k] * iMinusKH[c * kErrorStateSize + k];
+                    s += tmp[r * errorStateSize + k] * iMinusKH[c * errorStateSize + k];
                 }
-                pNew[r * kErrorStateSize + c] = s;
+                pNew[r * errorStateSize + c] = s;
             }
         }
 
         const float rDiag[3] = {r0, r1, r2};
-        for (size_t r = 0; r < kErrorStateSize; r++)
+        for (size_t r = 0; r < errorStateSize; r++)
         {
-            for (size_t c = 0; c < kErrorStateSize; c++)
+            for (size_t c = 0; c < errorStateSize; c++)
             {
                 float s = 0.0f;
                 for (size_t k = 0; k < 3; k++)
                 {
                     s += K[r * 3 + k] * rDiag[k] * K[c * 3 + k];
                 }
-                pNew[r * kErrorStateSize + c] += s;
+                pNew[r * errorStateSize + c] += s;
             }
         }
 
