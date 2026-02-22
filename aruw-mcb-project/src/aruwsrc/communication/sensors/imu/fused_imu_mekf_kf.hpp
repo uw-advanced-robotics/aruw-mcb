@@ -1138,12 +1138,18 @@ private:
             gyroBias[2] + dbgz,
             -config.maxGyroBiasAbsRadPerSec,
             config.maxGyroBiasAbsRadPerSec);
-        accelBias[0] =
-            std::clamp(accelBias[0] + dbax, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
-        accelBias[1] =
-            std::clamp(accelBias[1] + dbay, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
-        accelBias[2] =
-            std::clamp(accelBias[2] + dbaz, -config.maxAccelBiasAbsMps2, config.maxAccelBiasAbsMps2);
+        accelBias[0] = std::clamp(
+            accelBias[0] + dbax,
+            -config.maxAccelBiasAbsMps2,
+            config.maxAccelBiasAbsMps2);
+        accelBias[1] = std::clamp(
+            accelBias[1] + dbay,
+            -config.maxAccelBiasAbsMps2,
+            config.maxAccelBiasAbsMps2);
+        accelBias[2] = std::clamp(
+            accelBias[2] + dbaz,
+            -config.maxAccelBiasAbsMps2,
+            config.maxAccelBiasAbsMps2);
 
         // Covariance update in Joseph form:
         // P = (I - K H) P (I - K H)^T + K R K^T
