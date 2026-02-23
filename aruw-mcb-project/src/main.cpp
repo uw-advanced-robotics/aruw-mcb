@@ -90,6 +90,8 @@ static void updateIo(Drivers* drivers);
 
 static void initializeI2C(Drivers* drivers);
 
+int bob = 0;
+
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers* drivers);
@@ -116,7 +118,7 @@ int main()
     {
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
-
+        
         if (sendMotorTimeout.execute())
         {
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
@@ -153,7 +155,7 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
-            checkTurretMcbDisconnection(drivers);
+           // checkTurretMcbDisconnection(drivers);
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) || \
@@ -170,7 +172,9 @@ int main()
             // PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
 #endif
         }
+        //modm::delay_us(10000);
         modm::delay_us(10);
+        bob += 100;
     }
     return 0;
 }
@@ -240,13 +244,14 @@ static void initializeIo(Drivers* drivers)
     // drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
 }
-
+int bill = 0;
 static void updateIo(Drivers* drivers)
 {
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->mpu6500.read();
+
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
@@ -283,6 +288,7 @@ static void updateIo(Drivers* drivers)
 #if defined(TARGET_SENTRY_ECLIPSE)
     drivers->stateMachine.updateState();
 #endif
+bill += 100;
 }
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
