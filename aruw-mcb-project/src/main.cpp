@@ -90,7 +90,7 @@ static void updateIo(Drivers* drivers);
 
 static void initializeI2C(Drivers* drivers);
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_NAME)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers* drivers);
 #endif
@@ -152,7 +152,7 @@ int main()
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
+#if defined(TARGET_SENTRY_ECLIPSE)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
             PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
 #ifdef TARGET_SENTRY_NAME
@@ -171,7 +171,7 @@ int main()
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_NAME)
             checkTurretMcbDisconnection(drivers);
 #endif
 
@@ -209,7 +209,8 @@ static void initializeIo(Drivers* drivers)
 
     initializeI2C(drivers);
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+    defined(TARGET_SENTRY_NAME)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
@@ -229,7 +230,7 @@ static void initializeIo(Drivers* drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
     ((Drivers*)drivers)->capacitorBank.initialize();
 #endif
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
+#if defined(TARGET_SENTRY_ECLIPSE)
     drivers->turretMCBCanCommBus2.init();
     // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
     // dictates command length
@@ -321,7 +322,7 @@ static void updateIo(Drivers* drivers)
 #endif
 }
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_NAME)
 static void checkTurretMcbDisconnection(Drivers* drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();

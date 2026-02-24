@@ -64,6 +64,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -139,7 +140,7 @@ aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor turretMajorYawMotor(
     false,
     "Major Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * 0.6f,  // pulley ratio
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(27.0f / 95.0f),  // pulley ratio
     0,
     &turretMajorYawEncoder);
 
@@ -166,7 +167,7 @@ TurretMinorMotors turretWidowMotors{
         drivers(),
         turretWidow::PITCH_MOTOR_ID,
         turretWidow::CAN_BUS_MOTORS,
-        false,
+        true,
         "Widow Minor Pitch Turret",
         true,
         1.0,
@@ -179,7 +180,7 @@ TurretMinorMotors turretWidowMotors{
 
 inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanCommWidow()
 {
-    return drivers()->turretMCBCanCommBus2;
+    return drivers()->turretMCBCanCommBus1;
 }
 
 // /* define subsystems --------------------------------------------------------*/
@@ -193,13 +194,16 @@ SentryTurretMinorSubsystem turretWidow(
     turretWidowMotors.yawMotor,
     turretWidowMotors.pitchMotorConfig,
     turretWidowMotors.yawMotorConfig,
-    &drivers()->turretMCBCanCommBus2,  // @todo: figure out how to put this in config
+    &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretWidow::turretID);
 
 SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
 
 // Turret Compensators
 TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
+TurretSpringForceOffset turretSpringCompensation(
+    TURRET_SPRING_CONFIG,
+    turretWidowMotors.pitchMotor.isMotorInverted());
 
 struct TurretMinorChassisControllers
 {
@@ -212,7 +216,7 @@ TurretMinorChassisControllers turretWidowChassisControllers{
     .pitchController = ChassisFrameTurretController<Axis::PITCH>(
         turretWidow.pitchMotor,
         minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
-        {&turretGravityCompensation}),
+        {&turretGravityCompensation, &turretSpringCompensation}),
     .yawController = ChassisFrameTurretController<Axis::YAW>(
         turretWidow.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
@@ -358,22 +362,22 @@ SmoothPid turretWidowWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_
 TurretMinorWorldControllers turretWidowWorldControllers{
     .pitchController = WorldFrameTurretImuCascadePidTurretController<Axis::PITCH>(
         transformer.getWorldToTurretWidow(),
-        drivers()->turretMCBCanCommBus2,
+        getTurretMCBCanCommWidow(),
         turretWidow.pitchMotor,
         turretWidowWorldPitchPosPid,
         turretWidowWorldPitchVelPid,
-        {&turretGravityCompensation}),
+        {&turretGravityCompensation, &turretSpringCompensation}),
 
     .yawController = WorldFrameTurretImuCascadePidTurretController<Axis::YAW>(
         transformer.getWorldToTurretWidow(),
-        drivers()->turretMCBCanCommBus2,
+        getTurretMCBCanCommWidow(),
         turretWidow.yawMotor,
         turretWidowWorldYawPosPid,
         turretWidowWorldYawVelPid)
 
 };
 
-TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
+TurretMajorWorldFrameController turretMajorWorldYawController(
     transformer.getWorldToTurretMajor(),
     chassis,
     turretMajor.getMutableMotor(),
@@ -488,7 +492,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
         {
-            &drivers()->turretMCBCanCommBus2,
+            &getTurretMCBCanCommWidow(),
             &turretWidow,
             &turretWidowChassisControllers.yawController,
             &turretWidowChassisControllers.pitchController,
@@ -512,8 +516,7 @@ autotune::GravityAutotuneCommand<9> gravityAutotuneCommandWidow(
      &turretWidowChassisControllers.pitchController,
      turretWidowMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
-     TORQUE_TO_DESIRED_OUT},
-    &chassis);
+     TORQUE_TO_DESIRED_OUT});
 
 SentryTurretCVCommand::TurretConfig turretWidowCVConfig(
     turretWidow,

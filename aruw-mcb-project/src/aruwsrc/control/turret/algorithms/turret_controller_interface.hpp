@@ -84,7 +84,6 @@ public:
     virtual float calculateCompensationEffort(
         TurretCompensatorInterface::TurretCompensatorState state)
     {
-        debugVar = compensators.size();
         if (compensators.empty()) return 0.0f;
 
         float total = 0.0f;
@@ -142,8 +141,6 @@ public:
      */
     virtual WrappedFloat convertChassisAngleToControllerFrame(
         WrappedFloat chassisFrameAngle) const = 0;
-
-    float debugVar = 0.0f;
 
 protected:
     TurretMotor &turretMotor;

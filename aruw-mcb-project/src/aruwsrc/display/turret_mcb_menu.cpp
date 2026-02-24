@@ -42,14 +42,14 @@ void TurretMCBMenu::draw()
             << "Limit switch depressed: " << turretMCBCanComm->getLimitSwitchDepressed()
             << modm::endl;
     display.printf(
-        "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\n Yaw Accel (deg/s^2): %.2f\n"
-        "Pitch (deg): %.2f\nPitch Velocity (deg/s): %.2f\n Pitch Accel (deg/s^2): %.2f\n",
-        static_cast<double>(turretMCBCanComm->getYaw()),
-        static_cast<double>(turretMCBCanComm->getGz()),
+        "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\n Z Accel (deg/s^2): %.2f\n"
+        "Pitch (deg): %.2f\nPitch Velocity (deg/s): %.2f\n X Accel (m/s^2): %.2f\n",
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getYaw())),
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getGz())),
         static_cast<double>(turretMCBCanComm->getAz()),
-        static_cast<double>(turretMCBCanComm->getPitch()),
-        static_cast<double>(turretMCBCanComm->getGy()),
-        static_cast<double>(turretMCBCanComm->getAy()));
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getPitch())),
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getGy())),
+        static_cast<double>(turretMCBCanComm->getAx()));
 }
 
 void TurretMCBMenu::update() {}

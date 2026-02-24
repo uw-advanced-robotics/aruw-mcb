@@ -209,7 +209,7 @@ private:
     using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
 
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
-    static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
+    static constexpr float ANGLE_FIXED_POINT_PRECISION = M_TWOPI / UINT16_MAX;
     static constexpr float CMPS2_TO_MPS2 = 0.01;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
 

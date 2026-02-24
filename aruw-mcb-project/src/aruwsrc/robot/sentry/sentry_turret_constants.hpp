@@ -27,6 +27,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"  // for turretID enum (could go somewhere else)
 #include "modm/math/geometry/angle.hpp"
@@ -56,10 +57,18 @@ static constexpr float TURRET_WEIGHT_KG = 1.44730f;     // From CAD
 
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{
-        .cgX = -18.24f,
-        .cgZ = 20.35f,
-        .gravityCompensatorMax = 5118.6f,
+        .cgX = 31.81f,
+        .cgZ = -37.36f,
+        .gravityCompensatorMax = -8777.7f,
     };
+static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
+    .turretPitchMountX = -25.0f,
+    .turretPitchMountZ = 0.0f,
+    .turretYawMountX = -24.4f,
+    .turretYawMountZ = -70.5f,
+    .springConstant = -10.0f,
+    .springFreeLength = 55.0f,
+};
 
 static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
 
@@ -147,7 +156,7 @@ static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
 static constexpr float FEEDFORWARD_GAIN = 0.0f;
 }  // namespace turretMajor
 
-static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(255.7f);
+static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(334);
 static constexpr float PADDING = modm::toRadian(5);
 
 #ifdef TARGET_SENTRY_NAME
@@ -155,16 +164,16 @@ namespace turretWidow
 {
 static constexpr uint8_t turretID = 0;
 
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
-static constexpr float CENTER_OF_FREEDOM = modm::toRadian(90);
+static constexpr float CENTER_OF_FREEDOM = modm::toRadian(0);
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 3142,
+    .startEncoderValue = 2693,
     .minAngle = CENTER_OF_FREEDOM - ANGLES_OF_FREEDOM / 2.f + PADDING,
     .maxAngle = CENTER_OF_FREEDOM + ANGLES_OF_FREEDOM / 2.f - PADDING,
     .limitMotorAngles = true,
@@ -172,9 +181,9 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 1364,
-    .minAngle = modm::toRadian(-18),  // actual CAD limit -20
-    .maxAngle = modm::toRadian(33),   // actual CAD limit is 35
+    .startEncoderValue = 7357,
+    .minAngle = modm::toRadian(-13),  // actual CAD limit is -14
+    .maxAngle = modm::toRadian(45),   // actual CAD limit is -48
     .limitMotorAngles = true,
 };
 
@@ -283,20 +292,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
 };
 
 static constexpr tap::algorithms::SmoothPidConfig LEFT_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 5'300.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
-    .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.5f,
-    .errDeadzone = 0.0f,
-};
-
-static constexpr tap::algorithms::SmoothPidConfig RIGHT_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 5'000.0f,
+    .kp = 3'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -322,7 +318,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 6'000.0f,
+    .kp = 4'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,

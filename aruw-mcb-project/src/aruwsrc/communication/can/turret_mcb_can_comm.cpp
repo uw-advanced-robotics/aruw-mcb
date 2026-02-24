@@ -114,8 +114,8 @@ void TurretMCBCanComm::handleXAxisMessage(const modm::can::Message& message)
 
     const AxisMessageData* xAxisMessage = reinterpret_cast<const AxisMessageData*>(message.data);
 
-    currProcessingImuData.roll = modm::toRadian(
-        static_cast<float>(xAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+    currProcessingImuData.roll =
+        static_cast<float>(xAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION;
     currProcessingImuData.rawRollVelocity = xAxisMessage->angleAngularVelocityRaw;
     currProcessingImuData.xAcceleration =
         static_cast<float>(xAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
@@ -143,8 +143,8 @@ void TurretMCBCanComm::handleYAxisMessage(const modm::can::Message& message)
         return;
     }
 
-    currProcessingImuData.pitch = modm::toRadian(
-        static_cast<float>(yAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+    currProcessingImuData.pitch =
+        static_cast<float>(yAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION;
     currProcessingImuData.rawPitchVelocity = yAxisMessage->angleAngularVelocityRaw;
     currProcessingImuData.yAcceleration =
         static_cast<float>(yAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
@@ -160,8 +160,8 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
         return;
     }
 
-    currProcessingImuData.yaw = modm::toRadian(
-        static_cast<float>(zAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION);
+    currProcessingImuData.yaw =
+        static_cast<float>(zAxisMessage->angleFixedPoint) * ANGLE_FIXED_POINT_PRECISION;
     currProcessingImuData.rawYawVelocity = zAxisMessage->angleAngularVelocityRaw;
     currProcessingImuData.zAcceleration =
         static_cast<float>(zAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
