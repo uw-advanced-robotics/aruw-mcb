@@ -127,7 +127,7 @@ public:
      * Blocking function that's already called by protothread, so no need to call manually. Only
      * public for use by `modm_abort()`.
      */
-    mockable void sendQueuedMessages(bool ozone);
+    mockable void sendQueuedMessages();
 
 #if !defined(ENV_UNIT_TESTS) || !defined(PLATFORM_HOSTED)
 private:

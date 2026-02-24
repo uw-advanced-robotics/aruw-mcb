@@ -91,6 +91,7 @@ void AbstractIMU::computeOffsets()
     if (calibrationSample >= offsetSampleCount)
     {
         calibrationSample = 0;
+
         imuData.gyroRadPerSec = {0, 0, 0};
         imuData.accG = {0, 0, 0};
         imuData.accRaw = {0, 0, 0};
@@ -100,9 +101,6 @@ void AbstractIMU::computeOffsets()
         imuData.accOffsetRaw = imuData.accOffsetRaw / offsetSampleCount;
         imuState = ImuState::IMU_CALIBRATED;
         mahonyAlgorithm.reset();
-
-
-    
     }
 }
 

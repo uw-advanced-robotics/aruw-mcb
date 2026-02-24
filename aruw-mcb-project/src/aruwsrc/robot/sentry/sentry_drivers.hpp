@@ -38,7 +38,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
-#include "aruwsrc/communication/sensors/imu/fused_imu.hpp"
+#include "aruwsrc/communication/sensors/imu/fused_imu_mekf_kf.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
@@ -48,7 +48,7 @@
 namespace aruwsrc::sentry
 {
 #if defined(TARGET_SENTRY_NAME)
-using TurretMajorImuType = aruwsrc::communication::sensors::imu::FusedImu<3>;
+using TurretMajorImuType = aruwsrc::communication::sensors::imu::FusedImuMekfKf<3>;
 #else
 using TurretMajorImuType = aruwsrc::communication::sensors::imu::ism330::ISM330;
 #endif
@@ -59,18 +59,16 @@ class Drivers : public tap::Drivers
 
 #if defined(TARGET_SENTRY_NAME)
     using TurretMajorTransform = tap::algorithms::transforms::Transform;
-    using TurretMajorFusedImuType = aruwsrc::communication::sensors::imu::FusedImu<3>;
-
     static inline const std::array<TurretMajorTransform, 3> turretMajorImuTransforms = {
         // Jetson is forward, X forward, Y left.
         TurretMajorTransform(-76.7f, -116.14f, 0.0f, 0.0f, 0.0f, 0.0f),
         TurretMajorTransform(-76.7f, 116.04f, 0.0f, 0.0f, 0.0f, M_PI),
         TurretMajorTransform(-14.97f, -115.5f, 0.0f, 0.0f, 0.0f, M_PI_2)};
 
-    static inline const std::array<TurretMajorFusedImuType::ImuType, 3> turretMajorImuTypes = {
-        TurretMajorFusedImuType::ImuType::ISM330DHCX,
-        TurretMajorFusedImuType::ImuType::ISM330DHCX,
-        TurretMajorFusedImuType::ImuType::MPU6500};
+    static inline const std::array<TurretMajorImuType::ImuType, 3> turretMajorImuTypes = {
+        TurretMajorImuType::ImuType::ISM330DHCX,
+        TurretMajorImuType::ImuType::ISM330DHCX,
+        TurretMajorImuType::ImuType::MPU6500};
 #endif
 
 #ifdef ENV_UNIT_TESTS
