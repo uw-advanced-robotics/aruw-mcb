@@ -90,7 +90,8 @@ static void updateIo(Drivers* drivers);
 
 static void initializeI2C(Drivers* drivers);
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_NAME)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || \
+    defined(TARGET_SENTRY_NAME)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers* drivers);
 #endif
@@ -171,7 +172,8 @@ int main()
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_NAME)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || \
+    defined(TARGET_SENTRY_NAME)
             checkTurretMcbDisconnection(drivers);
 #endif
 
@@ -322,7 +324,8 @@ static void updateIo(Drivers* drivers)
 #endif
 }
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_NAME)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || \
+    defined(TARGET_SENTRY_NAME)
 static void checkTurretMcbDisconnection(Drivers* drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
