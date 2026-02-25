@@ -20,6 +20,8 @@
 #ifndef AUTO_AIM_FIRE_RATE_RESELECTION_MANAGER_HPP_
 #define AUTO_AIM_FIRE_RATE_RESELECTION_MANAGER_HPP_
 
+#include <cmath>
+
 #include "tap/control/command.hpp"
 #include "tap/control/command_scheduler.hpp"
 #include "tap/drivers.hpp"
@@ -44,6 +46,8 @@ public:
     static constexpr float LOW_RPS = 10;
     static constexpr float MID_RPS = 20;
     static constexpr float HIGH_RPS = 30;
+    static constexpr float RANGE_FOR_MAX_FIRE_RATE_METERS = 2.0f;
+    static constexpr float RANGE_FOR_MIN_FIRE_RATE_METERS = 10.0f;
 
     /**
      * @param[in] visionCoprocessor reference to the vision coprocessor
@@ -65,23 +69,53 @@ public:
     {
     }
 
-    inline uint32_t getFireRatePeriod() final
+    inline float getFireRateRps() final
     {
+#ifdef USE_VISION_COPROCESSOR_SENT_FIRE_RATE
         auto fireRate = visionCoprocessor.getLastAimData(turretID).pva.firerate;
         switch (fireRate)
         {
             case aruwsrc::communication::serial::VisionCoprocessor::FireRate::ZERO:
-                return 0;
+                return 0.0f;
             case aruwsrc::communication::serial::VisionCoprocessor::FireRate::LOW:
-                return rpsToPeriodMS(LOW_RPS);
+                return LOW_RPS;
             case aruwsrc::communication::serial::VisionCoprocessor::FireRate::MEDIUM:
-                return rpsToPeriodMS(MID_RPS);
+                return MID_RPS;
             case aruwsrc::communication::serial::VisionCoprocessor::FireRate::HIGH:
-                return rpsToPeriodMS(HIGH_RPS);
+                return HIGH_RPS;
             default:
                 RAISE_ERROR((&drivers), "Illegal fire rate value encountered");
-                return 0;
+                return 0.0f;
         }
+#else
+        const auto &aimData = visionCoprocessor.getLastAimData(turretID).pva;
+        if (!aimData.updated)
+        {
+            return 0.0f;
+        }
+
+        const float rangeMeters =
+            std::sqrt(aimData.xPos * aimData.xPos + aimData.yPos * aimData.yPos + aimData.zPos * aimData.zPos);
+
+        if (rangeMeters <= RANGE_FOR_MAX_FIRE_RATE_METERS)
+        {
+            return HIGH_RPS;
+        }
+        if (rangeMeters >= RANGE_FOR_MIN_FIRE_RATE_METERS)
+        {
+            return LOW_RPS;
+        }
+
+        const float interpolationRatio =
+            (rangeMeters - RANGE_FOR_MAX_FIRE_RATE_METERS) /
+            (RANGE_FOR_MIN_FIRE_RATE_METERS - RANGE_FOR_MAX_FIRE_RATE_METERS);
+        return HIGH_RPS + interpolationRatio * (LOW_RPS - HIGH_RPS);
+#endif
+    }
+
+    inline uint32_t getFireRatePeriod() final
+    {
+        return rpsToPeriodMS(getFireRateRps());
     }
 
     inline control::agitator::FireRateReadinessState getFireRateReadinessState() final

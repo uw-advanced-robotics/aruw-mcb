@@ -25,7 +25,7 @@ using namespace tap::algorithms;
 
 ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
     const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry,
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_NAME)
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
 #else
     aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver& chassisYawObserver,

@@ -20,66 +20,106 @@
 #ifndef CONSTANT_FIRE_RATE_AGITATOR_COMMAND_HPP_
 #define CONSTANT_FIRE_RATE_AGITATOR_COMMAND_HPP_
 
-#include "tap/control/setpoint/commands/move_integral_command.hpp"
+#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
+#include "aruwsrc/control/agitator/fire_rate_reselection_manager_interface.hpp"
 
 namespace aruwsrc::control::agitator
 {
 /**
- * A move-integral-compatible command that continuously spins the agitator at a velocity derived
- * from target shot rate and agitator pocket count.
- *
- * This command intentionally does not finish when an integral target is reached.
+ * A command that runs in one of two modes:
+ * 1) Constant-velocity mode for higher shot rates.
+ * 2) Normal move-integral mode for low shot rates.
  */
-class ConstantFireRateAgitatorCommand : public tap::control::setpoint::MoveIntegralCommand
+class ConstantFireRateAgitatorCommand : public ConstantVelocityAgitatorCommand
 {
 public:
     struct Config
     {
+        tap::control::setpoint::MoveIntegralCommand::Config moveIntegralConfig;
         float targetShotRateRps;
         int agitatorPocketCount;
+        float minConstantVelocityRpm;
+        FireRateReselectionManagerInterface* fireRateReselectionManager = nullptr;
     };
 
     ConstantFireRateAgitatorCommand(
         tap::control::setpoint::IntegrableSetpointSubsystem& integrableSetpointSubsystem,
         const Config& config)
-        : tap::control::setpoint::MoveIntegralCommand(
-              integrableSetpointSubsystem,
-              makeMoveIntegralConfig(config)),
-          desiredSetpoint(
-              config.targetShotRateRps * (M_TWOPI / static_cast<float>(config.agitatorPocketCount)))
+        : ConstantVelocityAgitatorCommand(integrableSetpointSubsystem, config.moveIntegralConfig),
+          constantVelocitySetpoint(
+              config.targetShotRateRps * (M_TWOPI / static_cast<float>(config.agitatorPocketCount))),
+          slowSetpoint(config.moveIntegralConfig.desiredSetpoint),
+          fireRateReselectionManager(config.fireRateReselectionManager),
+          agitatorPocketCount(config.agitatorPocketCount),
+          minConstantVelocityRpm(config.minConstantVelocityRpm),
+          targetVelocityRpm(
+              config.targetShotRateRps * 60.0f / static_cast<float>(config.agitatorPocketCount))
     {
     }
 
     const char* getName() const override { return "constant fire rate agitator command"; }
 
-    void initialize() override { integrableSetpointSubsystem.setSetpoint(desiredSetpoint); }
-
-    void execute() override {}
-
-    void end(bool) override { integrableSetpointSubsystem.setSetpoint(0); }
-
-    bool isFinished() const override
+    void setFireRateReselectionManager(FireRateReselectionManagerInterface* manager)
     {
-        return integrableSetpointSubsystem.isJammed() || !integrableSetpointSubsystem.isOnline();
+        fireRateReselectionManager = manager;
+    }
+
+    void initialize() override
+    {
+        if (shouldUseManagerDrivenFireRate())
+        {
+            updateTargetVelocityFromManager();
+        }
+        const bool useSlowMoveIntegral = shouldUseSlowMoveIntegral();
+        config.desiredSetpoint = useSlowMoveIntegral ? slowSetpoint : constantVelocitySetpoint;
+        enableConstantRotation(!useSlowMoveIntegral);
+        ConstantVelocityAgitatorCommand::initialize();
+    }
+
+    void execute() override
+    {
+        if (!shouldUseManagerDrivenFireRate())
+        {
+            return;
+        }
+
+        updateTargetVelocityFromManager();
+        if (!shouldUseSlowMoveIntegral())
+        {
+            config.desiredSetpoint = constantVelocitySetpoint;
+            integrableSetpointSubsystem.setSetpoint(config.desiredSetpoint);
+        }
     }
 
 private:
-
-    float actualFireRate;
-
-    static tap::control::setpoint::MoveIntegralCommand::Config makeMoveIntegralConfig(
-        const Config& config)
+    bool shouldUseManagerDrivenFireRate() const
     {
-        const float setpoint =
-            config.targetShotRateRps * (M_TWOPI / static_cast<float>(config.agitatorPocketCount));
-        return tap::control::setpoint::MoveIntegralCommand::Config{
-            setpoint,
-            setpoint,
-            0.0f,
-        };
+        return fireRateReselectionManager != nullptr &&
+               fireRateReselectionManager->getFireRateReadinessState() ==
+                   FireRateReadinessState::READY_USE_RATE_LIMITING;
     }
 
-    float desiredSetpoint;
+    void updateTargetVelocityFromManager()
+    {
+        if (fireRateReselectionManager == nullptr)
+        {
+            return;
+        }
+
+        const float targetShotRateRps = fireRateReselectionManager->getFireRateRps();
+        constantVelocitySetpoint =
+            targetShotRateRps * (M_TWOPI / static_cast<float>(agitatorPocketCount));
+        targetVelocityRpm = targetShotRateRps * 60.0f / static_cast<float>(agitatorPocketCount);
+    }
+
+    bool shouldUseSlowMoveIntegral() const { return targetVelocityRpm < minConstantVelocityRpm; }
+
+    float constantVelocitySetpoint;
+    float slowSetpoint;
+    FireRateReselectionManagerInterface* fireRateReselectionManager;
+    int agitatorPocketCount;
+    float minConstantVelocityRpm;
+    float targetVelocityRpm;
 };
 }  // namespace aruwsrc::control::agitator
 

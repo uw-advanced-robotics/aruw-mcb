@@ -124,37 +124,32 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
     defined(TARGET_SENTRY_NAME)
             ((Drivers*)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
     defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
     defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
-
-#if defined(TARGET_SENTRY_ECLIPSE)
-            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
-            PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
-#ifdef TARGET_SENTRY_NAME
+#ifdef defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->turretMajorPrimaryImu.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->turretMajorImuSecondary.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
-#endif
 #endif
 
 #ifdef TARGET_TESTBED
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
     defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
@@ -165,7 +160,7 @@ int main()
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) ||   \
-    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME) || \
+    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME) || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_TESTBED) ||           \
     defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) ||                            \
     defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || defined(TARGET_DRONE) ||             \
@@ -198,7 +193,7 @@ static void initializeIo(Drivers* drivers)
 
     initializeI2C(drivers);
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || \
     defined(TARGET_SENTRY_NAME)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
@@ -208,7 +203,7 @@ static void initializeIo(Drivers* drivers)
     drivers->turretMCBCanCommBus1.init();
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)  || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
     defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
     ((Drivers*)drivers)->oledDisplay.initialize();
@@ -216,24 +211,16 @@ static void initializeIo(Drivers* drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) 
     ((Drivers*)drivers)->capacitorBank.initialize();
 #endif
-#if defined(TARGET_SENTRY_ECLIPSE)
-    drivers->turretMCBCanCommBus2.init();
-    // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
-    // dictates command length
-    drivers->mpu6500.setCalibrationSamples(4000);
-    drivers->chassisMcbLite.initialize();
-    modm::delay_ms(2000);
-#ifdef TARGET_SENTRY_NAME
+#if defined(TARGET_SENTRY_NAME)
     drivers->turretMajorPrimaryImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->turretMajorPrimaryImu.setCalibrationSamples(4000);
     drivers->turretMajorImuSecondary.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->turretMajorImuSecondary.setCalibrationSamples(4000);
     drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->turretMajorImu.setCalibrationSamples(4000);
-#endif
 #endif
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
@@ -264,13 +251,13 @@ static void updateIo(Drivers* drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)  || \
     defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
     defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
     ((Drivers*)drivers)->oledDisplay.updateDisplay();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)  || \
     defined(TARGET_SENTRY_NAME)
     drivers->visionCoprocessor.updateSerial();
 #endif
@@ -279,14 +266,10 @@ static void updateIo(Drivers* drivers)
     drivers->engineerCVCommunication.updateSerial();
 #endif
 
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
+#if defined(TARGET_SENTRY_NAME)
     drivers->chassisMcbLite.updateSerial();
-#ifdef TARGET_SENTRY_NAME
     drivers->turretMajorPrimaryImu.read();
     drivers->turretMajorImuSecondary.read();
-#else
-    drivers->turretMajorImu.read();
-#endif
 #endif
 
 #ifdef TARGET_TESTBED
@@ -302,7 +285,7 @@ static void updateIo(Drivers* drivers)
     // drivers->ism330.read();
 #endif
 
-#if defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
+#if defined(TARGET_SENTRY_NAME)
     drivers->stateMachine.updateState();
 #endif
 }

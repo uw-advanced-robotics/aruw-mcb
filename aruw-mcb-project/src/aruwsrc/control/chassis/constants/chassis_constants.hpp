@@ -30,7 +30,7 @@
 #include "aruwsrc/robot/hero/hero_chassis_constants.hpp"
 #elif defined(TARGET_TESTBED)
 #include "aruwsrc/robot/testbed/testbed_chassis_constants.hpp"
-#elif defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_SENTRY_NAME)
+#elif defined(TARGET_SENTRY_NAME)
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #elif defined(TARGET_ENGI_2025)
 #include "aruwsrc/robot/2025engineer/engineer_chassis_constants.hpp"

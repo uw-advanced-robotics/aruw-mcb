@@ -26,7 +26,7 @@ namespace aruwsrc::algorithms::odometry
 ThreeDeadwheelKFOdometry2DSubsystem::ThreeDeadwheelKFOdometry2DSubsystem(
     tap::Drivers &drivers,
     const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver &deadwheels,
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_NAME)
     tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
 #else
     const aruwsrc::control::turret::TurretSubsystem &yawObserver,
@@ -42,7 +42,7 @@ ThreeDeadwheelKFOdometry2DSubsystem::ThreeDeadwheelKFOdometry2DSubsystem(
     : Subsystem(&drivers),
       ThreeDeadwheelChassisKFOdometry(
           deadwheels,
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_NAME)
           yawObserver,
 #else
           chassisYawObserver,

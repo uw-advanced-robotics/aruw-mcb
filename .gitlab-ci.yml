@@ -296,18 +296,6 @@ before_script:
 
 # Sentry (Beehive) build
 
-"Sentry Eclipse: MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: SENTRY_ECLIPSE
-
-"Sentry Eclipse: Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: SENTRY_ECLIPSE
-
 "Sentry Name: MCB Build":
   extends:
     - .mcb_build

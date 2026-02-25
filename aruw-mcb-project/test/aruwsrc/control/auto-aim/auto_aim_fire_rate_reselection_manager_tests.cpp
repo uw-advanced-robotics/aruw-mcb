@@ -67,6 +67,7 @@ protected:
 
     void SetUp() override
     {
+        aimData.pva.updated = true;
         ON_CALL(visionCoprocessor, getLastAimData(0)).WillByDefault(ReturnRef(aimData));
     }
 
@@ -124,7 +125,11 @@ TEST_F(AutoAimFireRateManagerTest, getFireRateReadinessState_not_ready_zero_fire
         .WillByDefault(Return(true));
     ON_CALL(visionCoprocessor, isCvOnline).WillByDefault(Return(true));
 
+#ifdef USE_VISION_COPROCESSOR_SENT_FIRE_RATE
     aimData.pva.firerate = VisionCoprocessor::FireRate::ZERO;
+#else
+    aimData.pva.updated = false;
+#endif
 
     EXPECT_EQ(FireRateReadinessState::NOT_READY, fireRateManager.getFireRateReadinessState());
 }
@@ -149,7 +154,7 @@ TEST_F(AutoAimFireRateManagerTest, getFireRateReadinessState_ready_nonzero_firer
         fireRateManager.getFireRateReadinessState());
 }
 
-using TestParams = std::tuple<uint32_t, VisionCoprocessor::FireRate>;
+using TestParams = std::tuple<uint32_t, VisionCoprocessor::FireRate, float>;
 
 class AutoAimFireRateManagerTestParameterized : public AutoAimFireRateManagerTest,
                                                 public WithParamInterface<TestParams>
@@ -157,6 +162,9 @@ class AutoAimFireRateManagerTestParameterized : public AutoAimFireRateManagerTes
     void SetUp() override
     {
         aimData.pva.firerate = std::get<1>(GetParam());
+        aimData.pva.xPos = std::get<2>(GetParam());
+        aimData.pva.yPos = 0;
+        aimData.pva.zPos = 0;
         AutoAimFireRateManagerTest::SetUp();
     }
 };
@@ -166,19 +174,48 @@ TEST_P(AutoAimFireRateManagerTestParameterized, getFireRatePeriod)
     EXPECT_EQ(std::get<0>(GetParam()), fireRateManager.getFireRatePeriod());
 }
 
-static constexpr TestParams TEST_ZERO_FIRERATE{0, VisionCoprocessor::FireRate::ZERO};
+#ifdef USE_VISION_COPROCESSOR_SENT_FIRE_RATE
+static constexpr TestParams TEST_ZERO_FIRERATE{
+    0,
+    VisionCoprocessor::FireRate::ZERO,
+    0.0f};
 
 static TestParams TEST_LOW_FIRERATE{
     uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::LOW_RPS)),
-    VisionCoprocessor::FireRate::LOW};
+    VisionCoprocessor::FireRate::LOW,
+    1.0f};
 
 static TestParams TEST_MID_FIRERATE{
     uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::MID_RPS)),
-    VisionCoprocessor::FireRate::MEDIUM};
+    VisionCoprocessor::FireRate::MEDIUM,
+    6.0f};
 
 static TestParams TEST_HIGH_FIRERATE{
     uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::HIGH_RPS)),
-    VisionCoprocessor::FireRate::HIGH};
+    VisionCoprocessor::FireRate::HIGH,
+    12.0f};
+#else
+// Range-based mode ignores the vision firerate enum and derives fire rate from target range.
+static TestParams TEST_ZERO_FIRERATE{
+    uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::HIGH_RPS)),
+    VisionCoprocessor::FireRate::ZERO,
+    1.0f};
+
+static TestParams TEST_LOW_FIRERATE{
+    uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::HIGH_RPS)),
+    VisionCoprocessor::FireRate::LOW,
+    1.0f};
+
+static TestParams TEST_MID_FIRERATE{
+    uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::MID_RPS)),
+    VisionCoprocessor::FireRate::MEDIUM,
+    6.0f};
+
+static TestParams TEST_HIGH_FIRERATE{
+    uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::LOW_RPS)),
+    VisionCoprocessor::FireRate::HIGH,
+    12.0f};
+#endif
 
 INSTANTIATE_TEST_CASE_P(
     AutoAimFireRateManagerTest,

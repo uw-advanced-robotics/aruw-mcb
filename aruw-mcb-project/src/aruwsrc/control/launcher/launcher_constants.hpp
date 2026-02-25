@@ -88,12 +88,6 @@ static constexpr float LAUNCHER_PID_KI = 31.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
-#elif defined(TARGET_SENTRY_ECLIPSE)
-static constexpr float LAUNCHER_PID_KP = 14.0106f;
-static constexpr float LAUNCHER_PID_KI = 31.6228f;
-static constexpr float LAUNCHER_PID_KD = 0.0f;
-static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;
 #elif defined(TARGET_SENTRY_NAME)
 static constexpr float LAUNCHER_PID_KP = 14.0106f;
 static constexpr float LAUNCHER_PID_KI = 31.6228f;
@@ -162,15 +156,6 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {23.89f, 6600.0f}, {24.12f, 6700.0f}, {24.93f, 6800.0f}, {25.17f, 6900.0f}, {26.03f, 7000.0f},
     {26.28f, 7200.0f}, {26.38f, 7300.0f}, {27.15f, 7400.0f}, {27.48f, 7500.0f}, {27.50f, 7600.0f},
     {28.19f, 7800.0f}, {29.40f, 7900.0f}};
-#elif defined(TARGET_SENTRY_ECLIPSE)
-static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},      {11.33f, 4500.0f}, {11.34f, 4600.0f}, {12.3f, 4700.0f},  {13.39f, 4900.0f},
-    {14.32f, 5000.0f}, {14.78f, 5100.0f}, {15.91f, 5350.0f}, {16.4f, 5500.0f},  {18.28f, 5600.0f},
-    {19.18f, 5700.0f}, {19.58f, 5900.0f}, {20.21f, 6100.0f}, {20.76f, 6200.0f}, {20.88f, 6600.0f},
-    {21.52f, 6700.0f}, {22.45f, 6900.0f}, {22.91f, 7000.0f}, {24.14f, 7100.0f}, {24.16f, 7200.0f},
-    {24.61f, 7300.0f},
-
-};
 #elif defined(TARGET_SENTRY_NAME)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},      {11.33f, 4500.0f}, {11.34f, 4600.0f}, {12.3f, 4700.0f},  {13.39f, 4900.0f},
@@ -194,8 +179,6 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #elif defined(TARGET_HERO_ZERO)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
-#elif defined(TARGET_SENTRY_ECLIPSE)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #elif defined(TARGET_SENTRY_NAME)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #endif
