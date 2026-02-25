@@ -139,7 +139,7 @@ int main()
     defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
-#ifdef defined(TARGET_SENTRY_NAME)
+#if defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->turretMajorPrimaryImu.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->turretMajorImuSecondary.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
