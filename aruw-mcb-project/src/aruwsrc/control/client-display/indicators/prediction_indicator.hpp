@@ -1,0 +1,65 @@
+/*
+ * Copyright (c) 2026-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef PREDICTION_INDICATOR_HPP_
+#define PREDICTION_INDICATOR_HPP_
+
+#include "tap/algorithms/ballistics.hpp"
+#include "tap/communication/referee/state_hud_indicator.hpp"
+#include "tap/communication/serial/ref_serial.hpp"
+
+#include "../projection_utils.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "modm/processing/resumable.hpp"
+
+#include "hud_indicator.hpp"
+
+namespace aruwsrc::control::client_display::indicators
+{
+using namespace aruwsrc::algorithms::odometry::transforms;
+using namespace tap::communication::serial;
+/**
+ * Draws a box showing where a shot fired right now would hit on a robot, based on data from vision.
+ */
+class PredictionIndicator : public HudIndicator, protected modm::Resumable<2>
+{
+public:
+    PredictionIndicator(
+        aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
+        tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
+        const Transform &worldToTurretTransform);
+
+    void initialize() override final;
+
+    modm::ResumableResult<void> update() override final;
+
+private:
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
+    const Transform &worldToCameraTransform;
+
+    Tx::Graphic1Message hitPredictionGraphic;
+
+    // In world frame
+    Position enemyPosition;
+};
+
+}  // namespace aruwsrc::control::client_display::indicators
+
+#endif  // PREDICTION_INDICATOR_HPP_
