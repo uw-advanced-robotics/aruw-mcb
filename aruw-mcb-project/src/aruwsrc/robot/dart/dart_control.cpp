@@ -139,9 +139,8 @@ aruwsrc::robot::dart::DartYawPositionCommand dartYawPositionCommand(drivers(), &
 
 // yaw manual velocity control, LEFT_X
 aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
-    drivers(),
     yawSubsystem,
-    Remote::Channel::LEFT_HORIZONTAL);
+    &drivers()->controlOperatorInterface);
 // grab the string and pullback to setpoint
 SequentialCommand<2> pullBackCommand(std::array<Command*, 2>{{&servoClose, &dartPullback}});
 
@@ -205,6 +204,7 @@ void initializeSubsystems()
     dartServo.initialize();
     pullMotorSubsystem.initialize();
     dartReloader.initialize();
+    yawSubsystem.initialize();
 }
 
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)

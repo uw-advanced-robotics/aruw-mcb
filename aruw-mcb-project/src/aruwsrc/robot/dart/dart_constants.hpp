@@ -47,7 +47,8 @@ static constexpr tap::algorithms::SmoothPidConfig DART_RELOADER_PID_CONFIG = {
     .errDeadzone = 0.0f,
 };
 static constexpr float DART_MAGAZINE_TOLERANCE = 0.0125f;
-static constexpr float YAW_INPUT_SENSITIVITY = 1.0;
+static constexpr float YAW_INPUT_SENSITIVITY =
+    0.0001;  // mutliplied by joystick input for changing setpoint with manual control
 static constexpr tap::gpio::Digital::InputPin YAW_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::D;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
@@ -56,28 +57,31 @@ static constexpr float YAW_LEADSCREW_THREAD_PITCH = 0.002;       // 2 mm
 static constexpr float DART_LAUNCHER_YAW_RADIAL_LENGTH = 0.763;  // 76.3 cm
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 80.0,  // should be in realm of 10000s
+    .kp = 100000.0f,  // should be in realm of 10000s
     .ki = 0.0f,
-    .kd = 20.0f,
+    .kd = 40000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .errDeadzone = 0.002f,
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config YAW_HOME_CONFIG = {
-    .super = {
-        .lowerBound = 0.0f, 
-        .upperBound = 0.0f,
-        .epsilon = 1.0f,
-        .encoderRatio = YAW_MOTOR_GEAR_RATIO * YAW_LEADSCREW_THREAD_PITCH,
-        .posPidConfig = YAW_PID_CONFIG,
-        .maxOutput = YAW_PID_CONFIG.maxOutput,
-        .staticFeedforward = 0,
-    },
-    .home = 0.0f,
-    .homingSpeed = 10.0f, // MAYBE CHANGE
-    .homingReversed = false // TODO: CHANGE IF HOMES THE WRONG WAY
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
+    YAW_HOME_CONFIG = {
+        .super =
+            {
+                .lowerBound = 0.0f,
+                .upperBound = 0.06f, // TODO: this is just for saftey while testing, eventually find real upper
+                .epsilon = 0.002f,
+                .maxSetpointIncrement = 0.05f,
+                .encoderRatio = YAW_MOTOR_GEAR_RATIO * YAW_LEADSCREW_THREAD_PITCH,
+                .posPidConfig = YAW_PID_CONFIG,
+                .maxOutput = YAW_PID_CONFIG.maxOutput,
+                .staticFeedforward = 0,
+            },
+        .home = 0.0f,
+        .homingSpeed = 0.01f,    // MAYBE CHANGE
+        .homingReversed = false  // TODO: CHANGE IF HOMES THE WRONG WAY
 };
 
 static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 1.0f;
@@ -98,23 +102,23 @@ static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
     PULL_MOTOR_CONFIG{
-                      .super =
-                          {
-                              .lowerBound = 0.0f,
-                              .upperBound = 500.0f,
-                              .epsilon = 1.0,
-                              .posPidConfig{
-                                  .kp = 80.0f,  
-                                  .ki = 0.0f,
-                                  .kd = 20.0f,
-                                  .maxICumulative = 0.0f,
-                                  .maxOutput = 5000.0f},  // these max outs seem safe for now
-                              .maxOutput = 3000.0f,
+        .super =
+            {
+                .lowerBound = 0.0f,
+                .upperBound = 500.0f,
+                .epsilon = 1.0,
+                .posPidConfig{
+                    .kp = 80.0f,
+                    .ki = 0.0f,
+                    .kd = 20.0f,
+                    .maxICumulative = 0.0f,
+                    .maxOutput = 5000.0f},  // these max outs seem safe for now
+                .maxOutput = 3000.0f,
 
-                          },
-                      .home = 0.0f,
-                      .homingSpeed = 50.0f, //TODO CHANGE
-                      .homingReversed = true};
+            },
+        .home = 0.0f,
+        .homingSpeed = 50.0f,  // TODO CHANGE
+        .homingReversed = true};
 
 }  // namespace aruwsrc::dart
 #endif

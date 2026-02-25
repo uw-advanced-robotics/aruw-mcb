@@ -21,7 +21,7 @@
 
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
-
+#include "dart_control_operator_interface.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
 using namespace aruwsrc::control::joint::homing;
@@ -33,9 +33,8 @@ class DartYawVelocityCommand : public tap::control::Command
 {
 public:
     DartYawVelocityCommand(
-        tap::Drivers* drivers,
         TriggerHomedJointSubsystem& subsystem,
-        Remote::Channel channel);
+        aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface);
 
 
     void initialize() override;
@@ -49,9 +48,9 @@ public:
     const char* getName() const override { return "COMMAND_NAME"; }
 
 private:
-    tap::Drivers* drivers;
     TriggerHomedJointSubsystem& subsystem;
-    Remote::Channel channel;
+    aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface;
+    double debub_position;
 };  // class CLASS_NAME
 
 }  // namespace aruwsrc::robot::dart

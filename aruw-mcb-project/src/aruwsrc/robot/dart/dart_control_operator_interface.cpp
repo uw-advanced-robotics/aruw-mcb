@@ -26,4 +26,8 @@ float DartControlOperatorInterface::getPullbackVelocity()
     return drivers->remote.getChannel(tap::communication::serial::Remote::Channel::RIGHT_VERTICAL);
 }
 
+float DartControlOperatorInterface::getYawVelocity()
+{
+    return drivers->remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_HORIZONTAL);
+}
 }  // namespace aruwsrc::control::dart
