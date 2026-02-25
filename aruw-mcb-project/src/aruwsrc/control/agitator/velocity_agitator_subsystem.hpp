@@ -20,6 +20,7 @@
 #ifndef VELOCITY_AGITATOR_SUBSYSTEM_HPP_
 #define VELOCITY_AGITATOR_SUBSYSTEM_HPP_
 
+#include "tap/architecture/clock.hpp"
 #include "tap/architecture/conditional_timer.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/subsystem.hpp"
@@ -128,6 +129,9 @@ public:
     {
         subsystemJamStatus = false;
         jamChecker.restart();
+        lastProjectileLaunchDetectedAtMs = tap::arch::clock::getTimeMilliseconds();
+        hasPreviousShaftRpmSample = false;
+        previousShaftRpmMagnitude = 0.0f;
     }
 
     /**
@@ -180,6 +184,18 @@ private:
 
     /// Runes the velocity PID controller
     void runVelocityPidControl();
+
+    bool checkaidenClemjamCondition();
+
+    /// Last ref-reported projectile launch timestamp value observed for the configured barrel.
+    uint32_t lastRefLaunchTimestamp = 0;
+    /// Local time in ms when we last observed a projectile launch.
+    uint32_t lastProjectileLaunchDetectedAtMs = 0;
+    /// Previous shaft RPM magnitude sample for fallback launch detection when ref is down.
+    float previousShaftRpmMagnitude = 0.0f;
+    bool hasPreviousShaftRpmSample = false;
+    bool refSerialReceivingData;
+    float currentShaftRpmMagnitude = 0.0f;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
