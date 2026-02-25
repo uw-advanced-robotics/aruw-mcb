@@ -21,12 +21,15 @@
 #define PREDICTION_INDICATOR_HPP_
 
 #include "tap/algorithms/ballistics.hpp"
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "../projection_utils.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
@@ -44,7 +47,11 @@ public:
     PredictionIndicator(
         aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
-        const Transform &worldToTurretTransform);
+        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+        const float defaultLaunchSpeed,
+        const Transform &worldToTurret);
 
     void initialize() override final;
 
@@ -52,12 +59,14 @@ public:
 
 private:
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
-    const Transform &worldToCameraTransform;
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter;
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
+    const control::turret::RobotTurretSubsystem &turretSubsystem;
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
+    const float defaultLaunchSpeed;
+    const Transform &worldToTurret;
 
     Tx::Graphic1Message hitPredictionGraphic;
-
-    // In world frame
-    Position enemyPosition;
 };
 
 }  // namespace aruwsrc::control::client_display::indicators

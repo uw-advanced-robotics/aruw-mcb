@@ -25,19 +25,99 @@ namespace aruwsrc::control::client_display::indicators
 {
 PredictionIndicator::PredictionIndicator(
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-    RefSerialTransmitter &refSerialTransmitter,
-    const Transform &worldToCameraTransform)
+    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
+    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
+    const control::turret::RobotTurretSubsystem &turretSubsystem,
+    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const float defaultLaunchSpeed,
+    const Transform &worldToTurret)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),
-      worldToCameraTransform(worldToCameraTransform),
-      enemyPosition(0, 0, 0)
+      refSerialTransmitter(refSerialTransmitter),
+      odometryInterface(odometryInterface),
+      turretSubsystem(turretSubsystem),
+      frictionWheels(frictionWheels),
+      defaultLaunchSpeed(defaultLaunchSpeed),
+      worldToTurret(worldToTurret)
 {
 }
 
 modm::ResumableResult<void> PredictionIndicator::update()
 {
+    RF_BEGIN(1);
+    const float plateHeight = 0.15f;  // TODO get this from CV or something instead of hardcoding it
 
+    // if the friction wheel launch speed is 0, use a default launch speed so ballistics
+    // gives a reasonable computation
+    float launchSpeed = frictionWheels.getPredictedLaunchSpeed();
 
-    
+    if (compareFloatClose(launchSpeed, 0.0f, 1e-5f))
+    {
+        launchSpeed = defaultLaunchSpeed;
+    }
+    float pitch = turretSubsystem.getWorldPitch();
+
+    // defines the turret where the chassis is, under the assumption that the chassis origin and
+    // turret origin coincide
+    modm::Vector3f turretPosition(odometryInterface.getCurrentLocation2D().getPosition(), 0);
+
+    // Puts turret in it's place in world frame
+    // If no offset, skip all offsetting
+    if (turretSubsystem.getTurretOffset() != modm::Vector3f(0, 0, 0))
+    {
+        // make this in here to minimize resource usage I guess
+        modm::Vector3f turretOffset = turretSubsystem.getTurretOffset();
+        // yaw is 0, so chassis frame and world frame share orientation. They may not share
+        // translation, so we still need to add that.
+        if (compareFloatClose(odometryInterface.getYaw(), 0.0f, 1e-5f))
+        {
+            // Assume that z is parallel to yaw and needs not adjusting.
+            // This breaks if the robot rolls, but we'd need to implement 3D odometry anyways
+            // soooo not my problem! For now, skips 3D vector rotation.
+            rotateVector(&turretOffset.x, &turretOffset.y, odometryInterface.getYaw());
+        }
+        turretPosition += turretOffset;
+    }
+
+    modm::Vector3f turretRotation = modm::Vector3f(turretSubsystem.getWorldYaw(), pitch, 0);
+
+    ballistics::SecondOrderKinematicState predictedShotLandingState(
+        turretPosition,
+        turretRotation * launchSpeed,
+        modm::Vector3f(0, -tap::algorithms::ACCELERATION_GRAVITY, 0));
+
+    // calculate the time it would take for the shot to reach the plate height
+    float time = (-predictedShotLandingState.velocity.z -
+                  sqrtf(
+                      powf(predictedShotLandingState.velocity.z, 2) -
+                      2 * tap::algorithms::ACCELERATION_GRAVITY *
+                          (predictedShotLandingState.position.z - plateHeight))) /
+                 tap::algorithms::ACCELERATION_GRAVITY;
+
+    // calculate the position of the shot when it reaches the plate height
+    modm::Vector3f predictedShotLandingPosition = predictedShotLandingState.projectForward(time);
+
+    // project the predicted shot landing position into the camera frame and then to screen
+    // coordinates
+    ProjectedResult result = convertCameraFrameToScreenFrame(Position(
+        predictedShotLandingPosition.getX(),
+        predictedShotLandingPosition.getY(),
+        predictedShotLandingPosition.getZ()));
+
+    // If the predicted landing position is not in frame, delete the graphic
+    if (!result.inFrame)
+    {
+        hitPredictionGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
+    }
+    else
+    {
+        hitPredictionGraphic.graphicData.operation =
+            hitPredictionGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
+                                                                             : Tx::GRAPHIC_MODIFY;
+    }
+
+    // Send the graphics
+    RF_CALL(refSerialTransmitter.sendGraphic(&graphic, true, true, false));
+    RF_END();
 }
 }  // namespace aruwsrc::control::client_display::indicators
