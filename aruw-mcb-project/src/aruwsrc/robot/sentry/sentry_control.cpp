@@ -33,6 +33,7 @@
 #include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_voltage_current_sensor.hpp"
+#include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
@@ -551,9 +552,11 @@ aruwsrc::control::launcher::
         turretWidow::barrelID);
 
 // Agitator commands (turret widow)
-ConstantVelocityAgitatorCommand turretWidowRotateAgitator(
+ConstantFireRateAgitatorCommand turretWidowRotateAgitator(
     turretWidowAgitator,
-    constants::AGITATOR_ROTATE_CONFIG);
+    ConstantFireRateAgitatorCommand::Config{
+        constants::SENTRY_NAME_TARGET_SHOT_RATE_RPS,
+        constants::AGITATOR_NUM_POCKETS});
 UnjamSpokeAgitatorCommand turretWidowUnjamAgitator(
     turretWidowAgitator,
     constants::AGITATOR_UNJAM_CONFIG);
@@ -561,6 +564,16 @@ MoveUnjamIntegralComprisedCommand turretWidowRotateAndUnjamAgitator(
     *drivers(),
     turretWidowAgitator,
     turretWidowRotateAgitator,
+    turretWidowUnjamAgitator);
+ConstantFireRateAgitatorCommand turretWidowManualConstantSpinAgitator(
+    turretWidowAgitator,
+    ConstantFireRateAgitatorCommand::Config{
+        constants::MANUAL_CONSTANT_FIRE_RATE_RPS,
+        constants::AGITATOR_NUM_POCKETS});
+MoveUnjamIntegralComprisedCommand turretWidowManualConstantSpinAndUnjamAgitator(
+    *drivers(),
+    turretWidowAgitator,
+    turretWidowManualConstantSpinAgitator,
     turretWidowUnjamAgitator);
 
 AutoAimFireRateReselectionManager fireRateReselectionManagerTurretWidow(
@@ -605,7 +618,7 @@ GovernorLimitedCommand<5> turretWidowRotateAndUnjamAgitatorWithHeatAndCVLimiting
 
 GovernorLimitedCommand<2> turretWidowAgitatorManualSpin(
     {&turretWidowAgitator},
-    turretWidowRotateAndUnjamAgitator,
+    turretWidowManualConstantSpinAndUnjamAgitator,
     {&heatLimitGovernorTurretWidow, &frictionWheelsOnGovernorTurretWidow});
 
 /* define client display / HUD related items --------------------------------*/

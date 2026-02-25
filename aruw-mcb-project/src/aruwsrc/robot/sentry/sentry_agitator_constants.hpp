@@ -47,6 +47,8 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
 static constexpr int AGITATOR_NUM_POCKETS = 8;          // number of balls in one rotation
 static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
+static constexpr float MANUAL_CONSTANT_FIRE_RATE_RPS = 60.0f;
+static constexpr float SENTRY_NAME_TARGET_SHOT_RATE_RPS = 60.0f;
 
 #ifdef TARGET_SENTRY_NAME
 // Single turret minor agitator for sentry 2026
