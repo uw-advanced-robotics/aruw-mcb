@@ -38,6 +38,9 @@
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
+#include "aruwsrc/control/digital/digital_out_command.hpp"
+#include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
+#include "aruwsrc/control/digital/dual_digital_out_subsystem.hpp"
 #include "aruwsrc/control/joint/homing/homing_command.hpp"
 #include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
@@ -45,9 +48,6 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/2025engineer/cubelift_switch_command.hpp"
-#include "aruwsrc/robot/2025engineer/digital_out_command.hpp"
-#include "aruwsrc/robot/2025engineer/digital_out_subsystem.hpp"
-#include "aruwsrc/robot/2025engineer/digital_out_toggle_command.hpp"
 #include "aruwsrc/robot/2025engineer/engineer_cube_lift_constants.hpp"
 #include "aruwsrc/robot/2025engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/2025engineer/engineer_gantry_constants.hpp"
@@ -64,6 +64,7 @@
 
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::client_display::indicators;
+using namespace aruwsrc::control::digital;
 using namespace aruwsrc::control::joint;
 using namespace aruwsrc::control::joint::homing;
 using namespace aruwsrc::control::joint::homing::trigger;
@@ -271,15 +272,11 @@ TriggerHomedJointSubsystem gantryExtensionSubsystem(
 
 JointSubsystem wristRollSubsystem(drivers(), wristRollMotor, WRIST_ROLL_CONFIG);
 
-DigitalOutSubsystem suckSubsystem(
+DualDigitalOutSubsystem suckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true);
-
-DigitalOutSubsystem releaseSubsystem(
-    drivers(),
-    drivers()->digital,
+    true,
     tap::gpio::Digital::OutputPin::Z,
     false);
 
@@ -353,9 +350,7 @@ WristSetpointsCommand wristFoldOutCommand(
 
 DigitalOutCommand suckOffCommand(suckSubsystem, false);
 DigitalOutCommand suckOnCommand(suckSubsystem, true);
-DigitalOutCommand releaseOffCommand(releaseSubsystem, false);
-DigitalOutCommand releaseOnCommand(releaseSubsystem, true);
-DigitalOutToggleCommand suctionToggleCommand(suckSubsystem, releaseSubsystem);
+DigitalOutToggleCommand suctionToggleCommand(suckSubsystem);
 
 // commands here for sequences, but setpoints never tuned
 SetpointMovePositionCommand liftUpCommand(gantryLiftSubsystem, 2);
@@ -373,7 +368,6 @@ SequentialCommand storeCubeCommand(
     &wristFoldInCommand,
     &liftDownCommand,
     &suckOffCommand,
-    &releaseOnCommand,
     &gantryExtendCommand,
     &liftUpCommand,
     &gantryRetractCommand,
@@ -384,7 +378,6 @@ SequentialCommand retrieveCubeCommand(
     &wristFoldInCommand,
     &gantryRetractCommand,
     &suckOnCommand,
-    &releaseOffCommand,
     &liftUpCommand,
     &wristFoldOutCommand,
     &liftDownCommand,
@@ -416,12 +409,12 @@ tap::control::PressCommandMapping leftUp(
 
 tap::control::HoldCommandMapping rightMid(
     drivers(),
-    {&suckOffCommand, &releaseOffCommand},
+    {&suckOffCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
 
 tap::control::HoldCommandMapping rightDown(
     drivers(),
-    {&suckOnCommand, &releaseOnCommand},
+    {&suckOnCommand},
     tap::control::RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
 
 tap::control::PressCommandMapping suctionToggle(
@@ -481,7 +474,6 @@ void initializeSubsystems()
     // wristSubsystem.initialize();
     cubeLift.initialize();
     suckSubsystem.initialize();
-    releaseSubsystem.initialize();
     // clientDicsplay.initialize();
 }
 
@@ -495,7 +487,6 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers *drivers)
     // drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeLift);
     drivers->commandScheduler.registerSubsystem(&suckSubsystem);
-    drivers->commandScheduler.registerSubsystem(&releaseSubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
