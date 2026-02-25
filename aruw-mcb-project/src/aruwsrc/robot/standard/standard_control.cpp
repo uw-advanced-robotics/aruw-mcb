@@ -35,6 +35,10 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
 
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
+#include "tap/control/command_composition_helper.hpp"
+
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
 #
@@ -79,6 +83,7 @@
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
+#include "aruwsrc/control/trigger_cv_governor_command.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
@@ -142,15 +147,15 @@ using namespace aruwsrc::standard;
  *      Drivers class to all of these objects.
  */
 driversFunc drivers = DoNotUse_getDrivers;
-
 namespace standard_control
 {
 inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
+using Compose = CommandCompositionHelper;
 
-/* define subsystems --------------------------------------------------------*/
+/* define subsystems ----------------------------c---------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
 tap::motor::DjiMotor pitchMotor(
@@ -558,6 +563,8 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
+ToggleCvGovernorCommand toggleCvGovernorCommand(&cvOnTargetGovernor, true);
+
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
@@ -647,38 +654,63 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
-HoldRepeatCommandMapping rightSwitchMiddle(
+Trigger rightSwitchMiddle = Trigger(
+    drivers(),
+    TriggerHelpers::checkSwitchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID))
+        .whileTrue(&spinFrictionWheels);
+/*HoldRepeatCommandMapping rightSwitchMiddle(
     drivers(),
     {&spinFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
-    true);
+    true);*/
 
-HoldRepeatCommandMapping rightSwitchUp(
+Trigger rightSwitchUp = Trigger(
+    drivers(),
+    TriggerHelpers::checkSwitchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
+        .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}));
+/*HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    true);
+    true);*/
 
-HoldRepeatCommandMapping leftSwitchDown(
+Trigger leftSwitchDown = Trigger(
+    drivers(),
+    TriggerHelpers::checkSwitchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN))
+        .whileTrue(&beybladeCommand);
+/*HoldRepeatCommandMapping leftSwitchDown(
     drivers(),
     {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-    true);
+    true);*/
 
-HoldCommandMapping leftSwitchUp(
+Trigger leftSwitchUp = Trigger(
+    drivers(),
+    TriggerHelpers::checkSwitchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP))
+        .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
+/*HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));*/
 
+Trigger rPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::R)
+        .onTrue(&toggleCvGovernorCommand);
+/*
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
     RemoteMapState({Remote::Key::R}),
     true,
     &cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
+*/
 
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
+Trigger fToggled =
+    TriggerHelpers::button(drivers(), Remote::Key::F)
+        .toggleOnTrue(&beybladeCommand);
+//ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
+// TODO figure out how to convert to trigger-based control
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
@@ -687,22 +719,40 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
     cvOnTargetGovernor,
     &rotateAgitator);
 
-HoldRepeatCommandMapping leftMousePressedBPressed(
+Trigger leftMousePressedBPressed =
+    (TriggerHelpers::leftMouseButton(drivers()) && TriggerHelpers::button(drivers(), Remote::Key::B))
+        .whileTrue(&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched);
+/*HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
     {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
-    false);
-HoldCommandMapping rightMousePressed(
+    false);*/
+
+Trigger rightMousePressed =
+    TriggerHelpers::rightMouseButton(drivers())
+        .whileTrue(&turretCVCommand);
+/*HoldCommandMapping rightMousePressed(
     drivers(),
     {&turretCVCommand},
-    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+    RemoteMapState(RemoteMapState::MouseButton::RIGHT));*/
 
-PressCommandMapping zPressed(
+Trigger zPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::Z)
+        .onTrue(&turretUTurnCommandLimited);
+/*PressCommandMapping zPressed(
     drivers(),
     {&turretUTurnCommandLimited},
-    RemoteMapState({Remote::Key::Z}));
+    RemoteMapState({Remote::Key::Z}));*/
+
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
-PressCommandMapping bNotCtrlPressedRightSwitchDown(
+Trigger bNotCtrlPressedRightSwitchDown =
+    (TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN) &&
+        TriggerHelpers::button(drivers(), Remote::Key::B) &&
+        !TriggerHelpers::button(drivers(), Remote::Key::CTRL) &&
+        !TriggerHelpers::leftMouseButton(drivers()) &&
+        !TriggerHelpers::rightMouseButton(drivers()))
+            .onTrue(&imuCalibrateCommand);
+/*PressCommandMapping bNotCtrlPressedRightSwitchDown(
     drivers(),
     {&imuCalibrateCommand},
     RemoteMapState(
@@ -711,24 +761,35 @@ PressCommandMapping bNotCtrlPressedRightSwitchDown(
         {Remote::Key::B},
         {Remote::Key::CTRL},
         false,
-        false));
+        false));*/
+
 // The user can press b+ctrl when the remote right switch is in the down position to restart the
 // client display command. This is necessary since we don't know when the robot is connected to the
 // server and thus don't know when to start sending the initial HUD graphics.
-PressCommandMapping bCtrlPressed(
+Trigger bCtrlPressed =
+    (TriggerHelpers::button(drivers(), Remote::Key::B) && TriggerHelpers::button(drivers(), Remote::Key::CTRL))
+        .onTrue(&clientDisplayCommand);
+/*PressCommandMapping bCtrlPressed(
     drivers(),
     {&clientDisplayCommand},
-    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));*/
 
-// The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
+// The user can press q to enable wiggle driving. Wiggling is cancelled
 // automatically once a different drive mode is chosen.
-ToggleCommandMapping qPressed(drivers(), {&wiggleCommand}, RemoteMapState({Remote::Key::Q}));
+Trigger qPressed = 
+    TriggerHelpers::button(drivers(), Remote::Key::Q)
+        .toggleOnTrue(&wiggleCommand);
+//ToggleCommandMapping qPressed(drivers(), {&wiggleCommand}, RemoteMapState({Remote::Key::Q}));
 
-PressCommandMapping xPressed(
+Trigger xPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::X)
+        .onTrue(&chassisAutorotateCommand);
+/*PressCommandMapping xPressed(
     drivers(),
     {&chassisAutorotateCommand},
-    RemoteMapState({Remote::Key::X}));
+    RemoteMapState({Remote::Key::X}));*/
 
+// TODO figure out how to convert to trigger-based control
 CycleStateCommandMapping<
     MultiShotCvCommandMapping::LaunchMode,
     MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
@@ -742,18 +803,29 @@ CycleStateCommandMapping<
         RemoteMapState({Remote::Key::E}));
 
 // cap bank
-PressCommandMapping cShiftPressed(
+Trigger cShiftPressed = 
+    (TriggerHelpers::button(drivers(), Remote::Key::C) && TriggerHelpers::button(drivers(), Remote::Key::SHIFT))
+        .onTrue(&capBankToggleCommand);
+/*PressCommandMapping cShiftPressed(
     drivers(),
     {&capBankToggleCommand},
-    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
-HoldCommandMapping shiftPressed(
+    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));*/
+
+Trigger shiftPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::SHIFT)
+        .whileTrue(&capBankSprintCommand);
+/*HoldCommandMapping shiftPressed(
     drivers(),
     {&capBankSprintCommand},
-    RemoteMapState({Remote::Key::SHIFT}));
-HoldCommandMapping ctrlPressed(
+    RemoteMapState({Remote::Key::SHIFT}));*/
+
+Trigger ctrlPressed = 
+    TriggerHelpers::button(drivers(), Remote::Key::CTRL)
+        .whileTrue(&capBankHalfSprintCommand);
+/*HoldCommandMapping ctrlPressed(
     drivers(),
     {&capBankHalfSprintCommand},
-    RemoteMapState({Remote::Key::CTRL}));
+    RemoteMapState({Remote::Key::CTRL}));*/
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -812,7 +884,7 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *drivers)
+/*void registerStandardIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
@@ -832,7 +904,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&cShiftPressed);
     drivers->commandMapper.addMap(&shiftPressed);
     drivers->commandMapper.addMap(&ctrlPressed);
-}
+}*/
 }  // namespace standard_control
 
 namespace aruwsrc::standard
@@ -845,7 +917,7 @@ void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
     standard_control::registerStandardSubsystems(drivers);
     standard_control::setDefaultStandardCommands(drivers);
     standard_control::startStandardCommands(drivers);
-    standard_control::registerStandardIoMappings(drivers);
+    //standard_control::registerStandardIoMappings(drivers);
 }
 }  // namespace aruwsrc::standard
 

@@ -45,9 +45,13 @@ template <size_t COMMANDS, bool RACE>
 class ConcurrentTemplateCommand : public Command
 {
 public:
-    ConcurrentTemplateCommand(std::array<Command*, COMMANDS> commands, const char* name)
+    ConcurrentTemplateCommand(
+        std::array<Command*, COMMANDS> commands,
+        const char* name,
+        Command* deadlineCommand = nullptr)
         : Command(),
           commands(commands),
+          deadlineCommand(deadlineCommand),
           name(name),
           finishedCommands(0),
           allCommands(0)
@@ -126,6 +130,9 @@ public:
 
     bool isFinished() const override
     {
+        if (deadlineCommand != nullptr &&
+            (finishedCommands & (1ull << deadlineCommand->getGlobalIdentifier())))
+            return true;
         if (RACE)
         {
             return this->finishedCommands != 0;
@@ -135,6 +142,7 @@ public:
 
 private:
     std::array<Command*, COMMANDS> commands;
+    Command* deadlineCommand;
     const char* name;
     command_scheduler_bitmap_t finishedCommands;
     command_scheduler_bitmap_t allCommands;
@@ -151,6 +159,12 @@ using ConcurrentCommand = ConcurrentTemplateCommand<COMMANDS, false>;
  */
 template <size_t COMMANDS>
 using ConcurrentRaceCommand = ConcurrentTemplateCommand<COMMANDS, true>;
+
+/**
+ * Runs commands in parallel untill a specific deadline command is finished.
+ */
+template <size_t COMMANDS>
+using ConcurrentDeadlineCommand = ConcurrentTemplateCommand<COMMANDS, false>;
 
 }  // namespace control
 

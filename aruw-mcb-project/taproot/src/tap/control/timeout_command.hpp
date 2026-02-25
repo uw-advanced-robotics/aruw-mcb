@@ -21,36 +21,42 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_COMMAND_MAPPER_MOCK_HPP_
-#define TAPROOT_COMMAND_MAPPER_MOCK_HPP_
+#ifndef TAPROOT_TIMEOUT_COMMAND_HPP_
+#define TAPROOT_TIMEOUT_COMMAND_HPP_
 
-#include <memory>
+#include <functional>
 
-#include <gmock/gmock.h>
+#include <tap/architecture/clock.hpp>
 
-#include "tap/control/command_mapper.hpp"
+#include "command.hpp"
 
-namespace tap::control
+namespace tap
 {
-class TriggerBinding;
-}
-
-namespace tap::mock
+namespace control
 {
-class CommandMapperMock : public tap::control::CommandMapper
+class TimeoutCommand : public Command
 {
 public:
-    explicit CommandMapperMock(tap::Drivers* drivers);
-    ~CommandMapperMock() override;
+    TimeoutCommand(uint32_t timeout) : Command(), timeout(timeout) {}
 
-    void addTriggerBinding(std::unique_ptr<tap::control::TriggerBinding> binding) override;
+    void initialize() override { startTime = tap::arch::clock::getTimeMilliseconds(); }
 
-    MOCK_METHOD(void, pollTriggerBindings, (), (override));
-    // MOCK_METHOD(std::size_t, getSize, (), (const, override));
+    void execute() override {}
 
-    MOCK_METHOD(void, addTriggerBindingRaw, (tap::control::TriggerBinding*), ());
+    void end(bool) override {}
+
+    bool isFinished() const override
+    {
+        return tap::arch::clock::getTimeMilliseconds() - startTime > timeout;
+    }
+
+    const char* getName() const override { return "timeout command"; }
+
+private:
+    uint32_t timeout;
+    uint32_t startTime;
 };
+}  // namespace control
+}  // namespace tap
 
-}  // namespace tap::mock
-
-#endif  // TAPROOT_COMMAND_MAPPER_MOCK_HPP_
+#endif

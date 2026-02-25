@@ -21,36 +21,47 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_COMMAND_MAPPER_MOCK_HPP_
-#define TAPROOT_COMMAND_MAPPER_MOCK_HPP_
+#ifndef TAPROOT_TRIGGER_HPP_
+#define TAPROOT_TRIGGER_HPP_
 
-#include <memory>
+#include <functional>
 
-#include <gmock/gmock.h>
+#include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
-#include "tap/control/command_mapper.hpp"
-
-namespace tap::control
+namespace tap
 {
-class TriggerBinding;
-}
-
-namespace tap::mock
+namespace control
 {
-class CommandMapperMock : public tap::control::CommandMapper
+class Trigger
 {
 public:
-    explicit CommandMapperMock(tap::Drivers* drivers);
-    ~CommandMapperMock() override;
+    Trigger(Drivers *drivers, std::function<bool()> condition);
 
-    void addTriggerBinding(std::unique_ptr<tap::control::TriggerBinding> binding) override;
+    bool get() const { return condition(); };
 
-    MOCK_METHOD(void, pollTriggerBindings, (), (override));
-    // MOCK_METHOD(std::size_t, getSize, (), (const, override));
+    Trigger operator&&(const Trigger &other) const;
 
-    MOCK_METHOD(void, addTriggerBindingRaw, (tap::control::TriggerBinding*), ());
+    Trigger operator||(const Trigger &other) const;
+
+    Trigger operator^(const Trigger &other) const;
+
+    Trigger operator!() const;
+
+    Trigger onTrue(Command *command);
+    Trigger onFalse(Command *command);
+    Trigger whileTrue(Command *command);
+    Trigger whileFalse(Command *command);
+    Trigger toggleOnTrue(Command *command);
+    Trigger toggleOnFalse(Command *command);
+    Trigger onChange(Command *command);
+    Trigger debounce(Command *command, uint32_t timeout);
+
+private:
+    Drivers *drivers;
+    std::function<bool()> condition;
 };
+}  // namespace control
+}  // namespace tap
 
-}  // namespace tap::mock
-
-#endif  // TAPROOT_COMMAND_MAPPER_MOCK_HPP_
+#endif
