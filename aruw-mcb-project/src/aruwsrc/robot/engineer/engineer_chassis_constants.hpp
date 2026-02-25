@@ -25,6 +25,7 @@
 
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "modm/math/interpolation/linear.hpp"
+#include "tap/algorithms/transforms/position.hpp"
 
 // Do not include this file directly: use chassis_constants.hpp instead.
 #ifndef CHASSIS_CONSTANTS_HPP_
@@ -159,6 +160,22 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.5f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
     .beybladeRampRate = 100,
+};
+
+/**
+ * Engineer auto nav path
+ */
+static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_START_POSITION = Position(0.5f, 0.5f);  // TODO: find actual start position
+static const float ENGINEER_AUTO_NAV_MARIGIN = 0.05f; // Addition marigin between target above robot width
+static const float ENGINEER_AUTO_NAV_POINT_OFFSET_X = WIDTH_BETWEEN_WHEELS_X / 2 + ENGINEER_AUTO_NAV_MARIGIN;
+static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_PATH_POINTS[] = {
+    ENGINEER_AUTO_NAV_START_POSITION,
+    Position(0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X, 3.555f), // First cube pickup
+    Position(3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X, 0.540f), // First cube dropoff
+    Position(0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X, 3.825f), // Second cube pickup
+    Position(3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X, 1.620f), // Second cube dropoff
+    Position(0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X, 4.095f), // Third cube pickup
+    Position(3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X, 2.700f), // Third cube dropoff
 };
 
 static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
