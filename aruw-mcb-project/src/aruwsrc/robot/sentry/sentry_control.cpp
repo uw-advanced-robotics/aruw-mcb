@@ -416,7 +416,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         turretWidowWheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
-        &getTurretMCBCanCommWidow(),
+        aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
         turretWidow::barrelID);
 
 // Agitators
