@@ -49,8 +49,8 @@ public:
         communication::rtt::RttTelemetry* rttTelemetry,
         const char* namePrefix = "ANALOG_SENSOR") const
     {
-        rttTelemetry->logSignal((std::string(namePrefix) + "_AI0").c_str(), this->ai0);
-        rttTelemetry->logSignal((std::string(namePrefix) + "_AI1").c_str(), this->ai1);
+        rttTelemetry->logSignal((std::string(namePrefix) + "_ai0").c_str(), this->ai0);
+        rttTelemetry->logSignal((std::string(namePrefix) + "_ai1").c_str(), this->ai1);
     }
 
 private:
