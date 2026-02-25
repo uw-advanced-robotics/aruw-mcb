@@ -52,6 +52,4 @@ void TestAutoNavCommand::initialize()
     }
     autoNavController.attachPath(&path);
 }
-
-bool TestAutoNavCommand::isFinished() const { return true; }
 }  // namespace aruwsrc::control::chassis

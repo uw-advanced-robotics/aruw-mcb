@@ -43,7 +43,6 @@ public:
         bool beybladeEnabled = true,
         bool ends = false);
     void initialize() override;
-    bool isFinished() const override;
     const char* getName() const override { return "test autonav command"; }
 
 private:
