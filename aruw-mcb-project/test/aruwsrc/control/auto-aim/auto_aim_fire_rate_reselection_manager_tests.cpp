@@ -175,10 +175,7 @@ TEST_P(AutoAimFireRateManagerTestParameterized, getFireRatePeriod)
 }
 
 #ifdef USE_VISION_COPROCESSOR_SENT_FIRE_RATE
-static constexpr TestParams TEST_ZERO_FIRERATE{
-    0,
-    VisionCoprocessor::FireRate::ZERO,
-    0.0f};
+static constexpr TestParams TEST_ZERO_FIRERATE{0, VisionCoprocessor::FireRate::ZERO, 0.0f};
 
 static TestParams TEST_LOW_FIRERATE{
     uint32_t(round(1000.0f / AutoAimFireRateReselectionManager::LOW_RPS)),

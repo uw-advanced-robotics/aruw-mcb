@@ -94,8 +94,9 @@ public:
             return 0.0f;
         }
 
-        const float rangeMeters =
-            std::sqrt(aimData.xPos * aimData.xPos + aimData.yPos * aimData.yPos + aimData.zPos * aimData.zPos);
+        const float rangeMeters = std::sqrt(
+            aimData.xPos * aimData.xPos + aimData.yPos * aimData.yPos +
+            aimData.zPos * aimData.zPos);
 
         if (rangeMeters <= RANGE_FOR_MAX_FIRE_RATE_METERS)
         {
@@ -113,10 +114,7 @@ public:
 #endif
     }
 
-    inline uint32_t getFireRatePeriod() final
-    {
-        return rpsToPeriodMS(getFireRateRps());
-    }
+    inline uint32_t getFireRatePeriod() final { return rpsToPeriodMS(getFireRateRps()); }
 
     inline control::agitator::FireRateReadinessState getFireRateReadinessState() final
     {

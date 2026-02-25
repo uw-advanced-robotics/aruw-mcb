@@ -47,7 +47,8 @@ public:
         const Config& config)
         : ConstantVelocityAgitatorCommand(integrableSetpointSubsystem, config.moveIntegralConfig),
           constantVelocitySetpoint(
-              config.targetShotRateRps * (M_TWOPI / static_cast<float>(config.agitatorPocketCount))),
+              config.targetShotRateRps *
+              (M_TWOPI / static_cast<float>(config.agitatorPocketCount))),
           slowSetpoint(config.moveIntegralConfig.desiredSetpoint),
           fireRateReselectionManager(config.fireRateReselectionManager),
           agitatorPocketCount(config.agitatorPocketCount),

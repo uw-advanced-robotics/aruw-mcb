@@ -124,18 +124,17 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_NAME)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME)
             ((Drivers*)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_SENTRY_NAME)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || \
+    defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_ENGINEER) || \
+    defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) ||                       \
     defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
@@ -149,8 +148,7 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || \
-    defined(TARGET_SENTRY_NAME)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
@@ -159,12 +157,11 @@ int main()
             checkTurretMcbDisconnection(drivers);
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) ||   \
-    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_TESTBED) ||           \
-    defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) ||                            \
-    defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || defined(TARGET_DRONE) ||             \
-    defined(TARGET_BLANK)
+#if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) || \
+    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME) || defined(TARGET_ENGINEER) ||     \
+    defined(TARGET_ENGI_2025) || defined(TARGET_TESTBED) || defined(TARGET_MOTOR_TESTER) ||     \
+    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || \
+    defined(TARGET_DRONE) || defined(TARGET_BLANK)
 #if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
             PROFILE(drivers->profiler, ((Drivers*)drivers)->rttTelemetry.updateTelemetryAsync, ());
 #endif
@@ -193,8 +190,7 @@ static void initializeIo(Drivers* drivers)
 
     initializeI2C(drivers);
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || \
-    defined(TARGET_SENTRY_NAME)
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_NAME)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
@@ -203,15 +199,15 @@ static void initializeIo(Drivers* drivers)
     drivers->turretMCBCanCommBus1.init();
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)  || \
-    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_ENGINEER) || \
+    defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) ||                       \
     defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
     ((Drivers*)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) 
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
     ((Drivers*)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_NAME)
@@ -251,14 +247,13 @@ static void updateIo(Drivers* drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)  || \
-    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || \
+    defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) ||                       \
     defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_SENTRY_NAME)
     ((Drivers*)drivers)->oledDisplay.updateDisplay();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)  || \
-    defined(TARGET_SENTRY_NAME)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME)
     drivers->visionCoprocessor.updateSerial();
 #endif
 
