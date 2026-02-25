@@ -38,6 +38,7 @@
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 #include "tap/control/command_composition_helper.hpp"
+#include "tap/control/timeout_command.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
@@ -664,10 +665,12 @@ Trigger rightSwitchMiddle = Trigger(
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
     true);*/
 
+TimeoutCommand timeoutCmd(3000);
 Trigger rightSwitchUp = Trigger(
     drivers(),
     TriggerHelpers::checkSwitchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
-        .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}));
+        .whileTrue(Compose::sequence<3>(Compose::withTimeout(&spinFrictionWheels, 3000), &stopFrictionWheels, &timeoutCmd));
+//Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}
 /*HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},

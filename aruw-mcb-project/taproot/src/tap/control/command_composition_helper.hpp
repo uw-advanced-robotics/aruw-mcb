@@ -36,6 +36,7 @@
 #include "sequential_command.hpp"
 #include "timeout_command.hpp"
 
+// TODO summary: none of the command groups are rescheduled after initial time the command group runs, parallel command group isnt scheduled at all
 namespace tap
 {
 namespace control
@@ -52,14 +53,15 @@ struct CommandCompositionHelper
         return new SequentialCommand<COMMANDS>(args...);
     }
 
+    //TODO concurrentcommands arent rescheduled correctly on whileTrue
     /**
      * Creates a command group that runs commands in parallel.
      * @return ConcurrentCommand* of the input commands.
      */
-    template <size_t COMMANDS>
+    template <size_t COMMANDS> // TODO not scheduled
     static ConcurrentCommand<COMMANDS>* parallel(std::array<Command*, COMMANDS> commands)
     {
-        return new ConcurrentCommand(commands, "concurrent command: parallel");
+        return new ConcurrentCommand<COMMANDS>(commands, "concurrent command: parallel");
     }
 
     /**
@@ -69,7 +71,7 @@ struct CommandCompositionHelper
     static ConcurrentRaceCommand<2>* onlyWhile(Command* command, std::function<bool()> condition)
     {
         std::function<bool()> negated = [condition]() { return !condition(); };
-        return new ConcurrentRaceCommand(
+        return new ConcurrentRaceCommand<2>(
             std::array<Command*, 2>{command, new ConditionalCommand(negated)},
             "conditional race: onlyWhile");
     }
@@ -80,7 +82,7 @@ struct CommandCompositionHelper
      */
     static ConcurrentRaceCommand<2>* until(Command* command, std::function<bool()> condition)
     {
-        return new ConcurrentRaceCommand(
+        return new ConcurrentRaceCommand<2>(
             std::array<Command*, 2>{command, new ConditionalCommand(condition)},
             "conditional race: until");
     }
@@ -91,7 +93,7 @@ struct CommandCompositionHelper
      */
     static ConcurrentRaceCommand<2>* withTimeout(Command* command, uint32_t timeout)
     {
-        return new ConcurrentRaceCommand(
+        return new ConcurrentRaceCommand<2>(
             std::array<Command*, 2>{command, new TimeoutCommand(timeout)},
             "concurrent race: withTimeout");
     }
@@ -101,9 +103,9 @@ struct CommandCompositionHelper
      * finished.
      * @return ConcurrentDeadlineCommand of input command deadlined with the input command.
      */
-    static ConcurrentDeadlineCommand<1>* deadlineWith(Command* command, Command* deadlineCommand)
+    static ConcurrentDeadlineCommand<1>* deadlineWith(Command* command, Command* deadlineCommand) 
     {
-        return new ConcurrentDeadlineCommand(
+        return new ConcurrentDeadlineCommand<1>(
             std::array<Command*, 1>{command},
             "concurrent deadline",
             deadlineCommand);
