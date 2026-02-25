@@ -47,7 +47,7 @@ public:
 
     inline void sendRTTTelemetry(
         communication::rtt::RttTelemetry* rttTelemetry,
-        const char* namePrefix = "ANALOG_SENSOR") const
+        const char* namePrefix = "sensor:analog_sensor") const
     {
         rttTelemetry->logSignal((std::string(namePrefix) + "_ai0").c_str(), this->ai0);
         rttTelemetry->logSignal((std::string(namePrefix) + "_ai1").c_str(), this->ai1);
