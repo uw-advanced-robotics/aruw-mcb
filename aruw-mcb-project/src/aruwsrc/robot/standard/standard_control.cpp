@@ -46,7 +46,7 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
-#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
+#include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
@@ -516,7 +516,16 @@ GovernorLimitedCommand<1> turretUTurnCommandLimited(
     {&imuCalibrateDoneGovernor});
 
 // base rotate/unjam commands
-ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
+ManualFireRateReselectionManager manualFireRateReselectionManager;
+
+ConstantFireRateAgitatorCommand rotateAgitator(
+    agitator,
+    ConstantFireRateAgitatorCommand::Config{
+        constants::AGITATOR_ROTATE_CONFIG,
+        constants::MANUAL_CONSTANT_FIRE_RATE_RPS,
+        constants::AGITATOR_NUM_POCKETS,
+        constants::MIN_CONSTANT_FIRE_RATE_RPM,
+        &manualFireRateReselectionManager});
 
 UnjamSpokeAgitatorCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
@@ -533,7 +542,6 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
-ManualFireRateReselectionManager manualFireRateReselectionManager;
 FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
 
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
