@@ -62,7 +62,7 @@ public:
 
     void logTelemetry(
         communication::rtt::RttTelemetry& rttTelemetry,
-        const char* namePrefix = "ANALOG_SENSOR") const;
+        const char* namePrefix = "sensor:analog_encoder") const;
 
     DISALLOW_COPY_AND_ASSIGN(AnalogSensorEncoder)
 
