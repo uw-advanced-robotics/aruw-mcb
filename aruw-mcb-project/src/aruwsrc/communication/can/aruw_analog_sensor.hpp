@@ -29,12 +29,11 @@
 
 namespace aruwsrc::communication::can
 {
-static constexpr uint16_t ANALOG_SENSOR_CAN_ID = 0x1D6;
 
 class AruwAnalogSensor : public tap::can::CanRxListener
 {
 public:
-    AruwAnalogSensor(tap::Drivers* drivers, tap::can::CanBus canBus);
+    AruwAnalogSensor(tap::Drivers* drivers, tap::can::CanBus canBus, uint16_t canId = 0x1D6);
 
     void processMessage(const modm::can::Message& message) override;
 
@@ -57,6 +56,7 @@ private:
     uint16_t ai0 = 0;
     uint16_t ai1 = 0;
 
+    const uint16_t CAN_ID;
     tap::arch::MilliTimeout heartbeat;
 };
 }  // namespace aruwsrc::communication::can

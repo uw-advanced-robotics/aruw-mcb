@@ -21,8 +21,8 @@
 
 namespace aruwsrc::communication::can
 {
-AruwAnalogSensor::AruwAnalogSensor(tap::Drivers* drivers, tap::can::CanBus canBus)
-    : tap::can::CanRxListener(drivers, ANALOG_SENSOR_CAN_ID, canBus)
+AruwAnalogSensor::AruwAnalogSensor(tap::Drivers* drivers, tap::can::CanBus canBus, uint16_t canId)
+    : tap::can::CanRxListener(drivers, canId, canBus), CAN_ID(canId)
 {
 }
 
