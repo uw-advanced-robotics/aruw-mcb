@@ -29,13 +29,6 @@ void ChassisAutoNavController::initialize()
 
     lastSetPoint = transformer->getWorldToChassis().getTranslation();
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
-    path1.pushPoint(Position(0.0f, 0.0f, 0.0f));
-    path1.pushPoint(Position(0.5f, 0.0f, 0.0f));
-
-    attachPath(&path1);
-
-    setDesiredSpeed(1.0f);
-    
 }
 
 void ChassisAutoNavController::runController(
@@ -99,7 +92,6 @@ void ChassisAutoNavController::runController(
 
     // convert world frame translation to chassis frame
     chassisFrameMoveVector = transformer->getWorldToChassis().apply(moveVector);
-    time = tap::arch::clock::getTimeMilliseconds();
     errorMag = posError.magnitude();
 
     // set outputs

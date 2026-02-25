@@ -38,7 +38,7 @@ bool AutoNavPath::hasChanged() const { return pathChanged; }
 
 float AutoNavPath::positionToClosestParameter(const Position pos) const
 {
-    float minDistance = F32_MAX;
+float minDistance = F32_MAX;
     float minClosest = 0.0f;
     float currParameter = 0.0f;
 

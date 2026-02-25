@@ -24,22 +24,25 @@
 
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 
 namespace aruwsrc::control::chassis
 {
-class TestAutoNavCommand : public tap::control::Command
+class TestAutoNavCommand : public AutoNavCommand
 {
 public:
     TestAutoNavCommand(
         const tap::Drivers& drivers,
+        chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
         std::vector<Transform> transforms,
-        tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem);
+        tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem,
+        bool autoNavOnlyInGame = false,
+        bool beybladeEnabled = true,
+        bool ends = false);
     void initialize() override;
-    void execute() override;
-    void end(bool) override;
     bool isFinished() const override;
     const char* getName() const override { return "test autonav command"; }
 
@@ -49,7 +52,6 @@ private:
     std::vector<Transform> transforms;
     tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem;
     aruwsrc::algorithms::AutoNavPath path;
-    Position currPosition;
 };
 }  // namespace aruwsrc::control::chassis
 

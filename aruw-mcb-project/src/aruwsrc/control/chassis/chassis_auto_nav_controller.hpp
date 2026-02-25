@@ -85,7 +85,6 @@ public:
     inline void setDesiredSpeed(float speed) { this->desiredSpeed = speed; }
 
     inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { 
-        debugVar = 100;
         this->path = path; 
     }
 
@@ -95,10 +94,7 @@ private:
     float lastParameter;
     Position lastSetPoint;
     tap::Drivers& drivers;
-    float time;
     float errorMag;
-    float debugVar;
-    aruwsrc::algorithms::AutoNavPath path1;
     Vector chassisFrameMoveVector = Vector(0, 0, 0);
     Position setpoint = Position(0, 0, 0);
     Vector moveVector = Vector(0, 0, 0);

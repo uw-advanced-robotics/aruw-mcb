@@ -23,35 +23,35 @@ namespace aruwsrc::control::chassis
 {
 TestAutoNavCommand::TestAutoNavCommand(
     const tap::Drivers& drivers,
+    chassis::HolonomicChassisSubsystem& chassis,
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
     std::vector<Transform> transforms = std::vector<Transform>(),
-    tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem = nullptr)
+    tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem = nullptr,
+    bool autoNavOnlyInGame = false,
+    bool beybladeEnabled = true,
+    bool ends = false)
     : drivers(drivers),
       autoNavController(autoNavController),
       transforms(transforms),
       odometrySubsystem(odometrySubsystem),
-      currPosition(0.0f, 0.0f, 0.0f)
+      AutoNavCommand(drivers, chassis, autoNavController, autoNavOnlyInGame, beybladeEnabled, ends)
 {
 }
 
 void TestAutoNavCommand::initialize()
 {
-    // currPosition = Position(
-    //     odometrySubsystem->getCurrentLocation2D().getX(),
-    //     odometrySubsystem->getCurrentLocation2D().getY(),
-    //     0.0f);
-    // for (Transform transform : transforms)
-    // {
-    //     currPosition = transform.apply(currPosition);
-    //     path.pushPoint(currPosition);
-    // }
-    // autoNavController.attachPath(&path);
-    path.pushPoint(Position(0.5f, 7.0f, 0.0f));
-    path.pushPoint(Position(0.0f, 0.0f, 0.0f));
+    AutoNavCommand::initialize();
+    Position currPosition = Position(
+        odometrySubsystem->getCurrentLocation2D().getX(),
+        odometrySubsystem->getCurrentLocation2D().getY(),
+        0.0f);
+    for (Transform transform : transforms)
+    {
+        currPosition = transform.apply(currPosition);
+        path.pushPoint(currPosition);
+    }
     autoNavController.attachPath(&path);
 }
-void TestAutoNavCommand::execute() {}
-void TestAutoNavCommand::end(bool) {}
 
 bool TestAutoNavCommand::isFinished() const { return true; }
 }  // namespace aruwsrc::control::chassis
