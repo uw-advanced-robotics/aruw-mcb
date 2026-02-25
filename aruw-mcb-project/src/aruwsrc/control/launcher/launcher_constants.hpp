@@ -95,8 +95,8 @@ static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;
 #elif defined(TARGET_SENTRY_NAME)
-static constexpr float LAUNCHER_PID_KP = 30.0f;
-static constexpr float LAUNCHER_PID_KI = 200.0f;
+static constexpr float LAUNCHER_PID_KP = 14.0106f;
+static constexpr float LAUNCHER_PID_KI = 31.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;

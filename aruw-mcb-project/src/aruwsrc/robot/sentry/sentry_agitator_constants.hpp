@@ -55,7 +55,7 @@ namespace turretWidow
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR4,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     .jammingVelocityDifference = M_TWOPI,
     .jammingTime = 300,
