@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
