@@ -16,49 +16,38 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef DIGITAL_OUT_COMMAND_HPP_
-#define DIGITAL_OUT_COMMAND_HPP_
+
+// add comments for why we made this for future ppls reference & why it isnt opposite
+#ifndef DIGITAL_OUT_TOGGLE_COMMAND_HPP_
+#define DIGITAL_OUT_TOGGLE_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/robot/engineer/digital_out_subsystem.hpp"
+#include "digital_out_subsystem.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::control::digital
 {
-class DigitalOutCommand : public tap::control::Command
+class DigitalOutToggleCommand : public tap::control::Command
 {
 public:
-    DigitalOutCommand(DigitalOutSubsystem& subsystem, const bool state)
-        : subsystem(subsystem),
-          state(state),
-          running(false)
+    DigitalOutToggleCommand(DigitalOutSubsystem& subsystem) : subsystem(subsystem)
     {
         addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(&subsystem));
     }
 
-    inline void initialize() override {}
+    inline void initialize() override { subsystem.set(!subsystem.getState()); }
 
-    inline void execute() override
-    {
-        subsystem.set(state);
-        running = true;
-    }
+    inline void execute() override {}
 
-    inline void end(bool) override
-    {
-        subsystem.refreshSafeDisconnect();
-        running = false;
-    }
+    inline void end(bool) override {}
 
-    inline bool isFinished() const override { return false; }
+    inline bool isFinished() const override { return true; }
 
-    const char* getName() const override { return "Digital Output Command"; }
+    const char* getName() const override { return "Digital Output Toggle Command"; }
 
 private:
     DigitalOutSubsystem& subsystem;
-    const bool state;
-    bool running;
-};  // class DigitalOutCommand
+};  // class DigitalOutToggleCommand
 
-}  // namespace aruwsrc::engineer
-#endif  // DIGITAL_OUT_COMMAND_HPP_
+}  // namespace aruwsrc::control::digital
+#endif  // DIGITAL_OUT_TOGGLE_COMMAND_HPP_
