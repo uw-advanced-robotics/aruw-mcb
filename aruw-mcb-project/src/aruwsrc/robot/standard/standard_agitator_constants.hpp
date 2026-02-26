@@ -43,7 +43,7 @@ static constexpr float MANUAL_CONSTANT_FIRE_RATE_RPS = 30.0f;
 static constexpr float MIN_CONSTANT_FIRE_RATE_RPM = 10.0f;
 static constexpr uint32_t AIDEN_CLEMJAM_TIMEOUT_MS = 400;
 static constexpr float AIDEN_CLEMJAM_MIN_SETPOINT = 8.0f;
-static constexpr float AIDEN_CLEMJAM_PROJECTILE_LAUNCH_RPM_DROP_THRESHOLD = 1000.0f;
+static constexpr float AIDEN_CLEMJAM_PROJECTILE_LAUNCH_RPM_DROP_THRESHOLD = 400.0f;
 
 #if defined(TARGET_STANDARD_NULL)
 
@@ -78,7 +78,8 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .aidenClemjamEnabled = true,
     .aidenClemjamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .aidenClemjamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
-    .aidenClemjamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    .aidenClemjamBarrelId =
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     .aidenClemjamProjectileLaunchRpmDropThreshold =
         AIDEN_CLEMJAM_PROJECTILE_LAUNCH_RPM_DROP_THRESHOLD,
 };
@@ -132,7 +133,8 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .aidenClemjamEnabled = true,
     .aidenClemjamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .aidenClemjamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
-    .aidenClemjamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    .aidenClemjamBarrelId =
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     .aidenClemjamProjectileLaunchRpmDropThreshold =
         AIDEN_CLEMJAM_PROJECTILE_LAUNCH_RPM_DROP_THRESHOLD,
 };

@@ -196,6 +196,7 @@ private:
     bool hasPreviousShaftRpmSample = false;
     bool refSerialReceivingData;
     float currentShaftRpmMagnitude = 0.0f;
+    float shaftRpmDrop = 0.0f;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

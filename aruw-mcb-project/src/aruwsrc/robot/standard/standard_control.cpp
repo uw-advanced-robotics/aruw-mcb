@@ -559,6 +559,11 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor});
 
+GovernorLimitedCommand<2> agitatorManualSpin(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor, &frictionWheelsOnGovernor});
+
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(
     ((tap::Drivers *)(drivers())),
@@ -664,7 +669,7 @@ HoldRepeatCommandMapping rightSwitchMiddle(
 
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+    {&spinFrictionWheels, &agitatorManualSpin},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
@@ -698,7 +703,7 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
 
 HoldRepeatCommandMapping leftMousePressedBPressed(
     drivers(),
-    {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
+    {&agitatorManualSpin},
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
     false);
 HoldCommandMapping rightMousePressed(
