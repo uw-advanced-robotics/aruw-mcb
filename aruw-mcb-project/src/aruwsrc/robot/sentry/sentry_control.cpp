@@ -222,41 +222,37 @@ TurretMinorChassisControllers turretWidowChassisControllers{
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
 
-VirtualDjiMotor rightFrontMotor(
+DjiMotor rightFrontMotor(
     drivers(),
     MOTOR1,
-    tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
+    tap::can::CanBus::CAN_BUS2,
     false,
     "Right Front Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-VirtualDjiMotor leftFrontMotor(
+DjiMotor leftFrontMotor(
     drivers(),
     MOTOR2,
-    tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
+    tap::can::CanBus::CAN_BUS2,
     false,
     "Left Front Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-VirtualDjiMotor leftBackMotor(
+DjiMotor leftBackMotor(
     drivers(),
     MOTOR3,
-    tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
+    tap::can::CanBus::CAN_BUS2,
     false,
     "Left Back Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-VirtualDjiMotor rightBackMotor(
+DjiMotor rightBackMotor(
     drivers(),
     MOTOR4,
-    tap::can::CanBus::CAN_BUS1,
-    &(drivers()->chassisMcbLite),
+    tap::can::CanBus::CAN_BUS2,
     false,
     "Right Back Motor",
     false,
@@ -723,10 +719,10 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     buzzer.initialize();
-    chassis.initialize();
+    // chassis.initialize();
     turretWidow.initialize();
-    turretMajor.initialize();
-    odometrySubsystem.initialize();
+    // turretMajor.initialize();
+    // odometrySubsystem.initialize();
     transformerSubsystem.initialize();
     arucoResetSubsystem.initialize();
 
@@ -744,10 +740,10 @@ void initializeSubsystems()
 void registerSentrySubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&buzzer);
-    drivers->commandScheduler.registerSubsystem(&turretMajor);
-    drivers->commandScheduler.registerSubsystem(&chassis);
+    // drivers->commandScheduler.registerSubsystem(&turretMajor);
+    // drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretWidow);
-    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);

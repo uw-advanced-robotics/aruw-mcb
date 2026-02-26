@@ -156,6 +156,9 @@ bool VelocityAgitatorSubsystem::checkaidenClemjamCondition()
             lastProjectileLaunchDetectedAtMs = now;
         }
     }
+    else {
+        return false;
+    }
     // not working on standard?
     // else if (hasPreviousShaftRpmSample)
     // {
@@ -167,13 +170,13 @@ bool VelocityAgitatorSubsystem::checkaidenClemjamCondition()
     // }
 
     // Only evaluate timeout if we are actively attempting to rotate the agitator to fire.
-    if (std::fabs(velocitySetpoint) < config.aidenClemjamMinSetpoint)
-    {
-        lastProjectileLaunchDetectedAtMs = now;
-        previousShaftRpmMagnitude = currentShaftRpmMagnitude;
-        hasPreviousShaftRpmSample = true;
-        return false;
-    }
+    // if (std::fabs(velocitySetpoint) < config.aidenClemjamMinSetpoint)
+    // {
+    //     lastProjectileLaunchDetectedAtMs = now;
+    //     previousShaftRpmMagnitude = currentShaftRpmMagnitude;
+    //     hasPreviousShaftRpmSample = true;
+    //     return false;
+    // }
 
     if (lastProjectileLaunchDetectedAtMs == 0)
     {

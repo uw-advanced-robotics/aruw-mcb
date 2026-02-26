@@ -209,6 +209,7 @@ static void initializeIo(Drivers* drivers)
     ((Drivers*)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_NAME)
+    drivers->mpu6500.setCalibrationSamples(4000);
     drivers->turretMajorPrimaryImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->turretMajorPrimaryImu.setCalibrationSamples(4000);
     drivers->turretMajorImuSecondary.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
