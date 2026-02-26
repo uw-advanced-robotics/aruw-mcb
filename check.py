@@ -192,7 +192,6 @@ class BuildTarget(Enum):
     SENTRY_NAME = "SENTRY_NAME"
     DART = "DART"
     ENGINEER = "ENGINEER"
-    ENGI_2025 = "ENGI_2025"
     DRONE = "DRONE"
     TESTBED = "TESTBED"
     BLANK = "BLANK"

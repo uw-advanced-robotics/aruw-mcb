@@ -182,7 +182,7 @@ public:
         float sum = 0;
         for (uint8_t i = 0; i < NUM_WHEELS; i++)
         {
-            sum += wheels[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+            sum += abs(wheels[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI);
         }
         return sum / NUM_WHEELS;
     }
@@ -195,13 +195,15 @@ public:
     {
         return wheels[index]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
     }
+
+    float avgVelocity = 0;
     /**
      * Updates flywheel RPM ramp by elapsed time and sends motor output.
      */
     void refresh() override
     {
         desiredRpmRamp.update(FRICTION_WHEEL_RAMP_SPEED * (2.0));
-
+        avgVelocity = getCurrentAverageFrictionWheelSpeed();
         if (drivers->refSerial.getRefSerialReceivingData() &&
             prevShotTime !=
                 drivers->refSerial.getRobotData().turret.lastReceivedLaunchingInfoTimestamp)
@@ -307,7 +309,7 @@ private:
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
         std::index_sequence<Is...>)
     {
-        return {{((void)Is, tap::algorithms::SmoothPid(wheelConfigs[0].velocityPidConfig))...}};
+        return {{((void)Is, tap::algorithms::SmoothPid(wheelConfigs[Is].velocityPidConfig))...}};
     }
 
     template <size_t... Is>

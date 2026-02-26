@@ -26,6 +26,8 @@
 #include "aruwsrc/robot/sentry/sentry_agitator_constants.hpp"
 #elif defined(TARGET_HERO_ZERO)
 #include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
+#elif defined(TARGET_FLYWHEEL_TESTING)
+#include "aruwsrc/robot/flywheel_testing/flywheel_testing_agitator_constants.hpp"
 #endif
 
 #endif  // AGITATOR_CONSTANTS_HPP_
