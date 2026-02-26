@@ -156,7 +156,8 @@ bool VelocityAgitatorSubsystem::checkaidenClemjamCondition()
             lastProjectileLaunchDetectedAtMs = now;
         }
     }
-    else {
+    else
+    {
         return false;
     }
     // not working on standard?

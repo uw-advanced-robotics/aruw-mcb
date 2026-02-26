@@ -131,7 +131,7 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) ||       \
     defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
     defined(TARGET_SENTRY_NAME)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
@@ -197,7 +197,7 @@ static void initializeIo(Drivers* drivers)
     drivers->turretMCBCanCommBus1.init();
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) ||       \
     defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
     defined(TARGET_SENTRY_NAME)
     ((Drivers*)drivers)->oledDisplay.initialize();
@@ -246,7 +246,7 @@ static void updateIo(Drivers* drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) ||       \
     defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
     defined(TARGET_SENTRY_NAME)
     ((Drivers*)drivers)->oledDisplay.updateDisplay();
