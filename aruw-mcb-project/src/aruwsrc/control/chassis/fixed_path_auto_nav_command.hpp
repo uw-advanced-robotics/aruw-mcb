@@ -37,7 +37,7 @@ public:
         chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
         const Position* pathPoints,
-        size_t numPathPoints,
+        float desiredSpeed,
         bool autoNavOnlyInGame = false,
         bool beybladeEnabled = true);
 

@@ -30,7 +30,7 @@ FixedPathAutoNavCommand::FixedPathAutoNavCommand(
     chassis::HolonomicChassisSubsystem& chassis,
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
     const Position* pathPoints,
-    size_t numPathPoints,
+    float desiredSpeed,
     bool autoNavOnlyInGame,
     bool beybladeEnabled)
     : AutoNavCommand(
@@ -43,11 +43,12 @@ FixedPathAutoNavCommand::FixedPathAutoNavCommand(
       autoNavController(autoNavController),
       path()
 {
-    for (int i = 0; i < numPathPoints; i++)
+    for (int i = 0; i < sizeof(pathPoints); i++)
     {
         path.pushPoint(pathPoints[i]);
     }
 
+    autoNavController.setDesiredSpeed(desiredSpeed);
     autoNavController.attachPath(&path);
 }
 
