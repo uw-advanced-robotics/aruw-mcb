@@ -112,7 +112,7 @@ RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         wheels,
         wheelConfigs,
-        &getTurretMCBCanComm(),
+        aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 VelocityAgitatorSubsystem kickerAgitator(

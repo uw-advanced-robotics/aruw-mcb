@@ -36,7 +36,7 @@ class TripleFrictionWheelSubsystemMock
 public:
     TripleFrictionWheelSubsystemMock(
         tap::Drivers *drivers,
-        std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 3> wheels);
+        std::array<tap::motor::MotorInterface *, 3> wheels);
     virtual ~TripleFrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

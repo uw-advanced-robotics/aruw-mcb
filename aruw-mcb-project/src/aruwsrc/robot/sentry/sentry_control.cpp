@@ -490,7 +490,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         turretLeftWheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
-        &getTurretMCBCanComm2(),
+        aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
         turretLeft::barrelID);
 tap::motor::DjiMotor turretRightFrictionWheelLeft(
     drivers(),
@@ -514,8 +514,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         turretRightWheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
-        &getTurretMCBCanComm1(),
-        turretRight::barrelID);  // @todo idk what they actually are
+        aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+        turretRight::barrelID);
 
 // Agitators
 VelocityAgitatorSubsystem turretLeftAgitator(

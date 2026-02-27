@@ -60,7 +60,7 @@ protected:
               false),
           frictionWheels(
               &drivers,
-              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}}),
+              std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}}),
           visionCoprocessor(&drivers),
           turretSubsystem(&drivers),
           ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};

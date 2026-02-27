@@ -46,11 +46,7 @@ class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem<NUM_
                                               public LaunchSpeedPredictorInterface
 {
 public:
-#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-    using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
-#else
     using Motor = tap::motor::MotorInterface;
-#endif
 
     /**
      * For all params but `firingSystemMechanismId` see the `FrictionWheelSubsystem`.
@@ -59,25 +55,39 @@ public:
      * @param[in] bulletSpeedLowPassAlpha The low pass alpha used to combine previous and new
      * projectle speed when computing a new predicted launch speed.
      */
+    template <std::size_t LUT_SIZE>
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
-        aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfigs, turretMCB),
+        const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
+        const tap::algorithms::SmoothPidConfig speedCorrectionPidConfig = {})
+        : FrictionWheelSubsystem<NUM_WHEELS>(
+              drivers,
+              wheels,
+              wheelConfigs,
+              launchSpeedToFrictionWheelRpmLUT,
+              speedCorrectionPidConfig),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }
 
-    // constructor for using a single wheelconfig for all wheels
+    // constructor for using a single wheelConfig for all wheels
+    template <std::size_t LUT_SIZE>
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
-        aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
-        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfig, turretMCB),
+        const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
+        const tap::algorithms::SmoothPidConfig speedCorrectionPidConfig = {})
+        : FrictionWheelSubsystem<NUM_WHEELS>(
+              drivers,
+              wheels,
+              wheelConfig,
+              launchSpeedToFrictionWheelRpmLUT,
+              speedCorrectionPidConfig),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }
