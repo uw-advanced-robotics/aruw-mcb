@@ -73,7 +73,7 @@
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 
 //#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
-#include "aruwsrc/control/chassis/test_auto_nav_command.hpp"
+#include "aruwsrc/control/chassis/fixed_path_auto_nav_command.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -100,6 +100,7 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
+#include "tap/algorithms/transforms/position.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::control;
@@ -308,13 +309,19 @@ aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
 
 AutoNavCommand autoNavCommand(*drivers(), chassis, autoNavController, true, false, false);
 
-TestAutoNavCommand ForwardBackTest(
+static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_PATH_POINTS[] = {
+    Position(0, 0, 0),          // Start
+    Position(0, 1, 0) // First cube pickup
+};
+
+FixedPathAutoNavCommand ForwardBackTest(
     *drivers(),
+    chassis,
     autoNavController,
-    std::vector<Transform>{
-        Transform(Position(0.3f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f)),
-        Transform(Position(-0.3f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f))},
-    &odometrySubsystem);
+    ENGINEER_AUTO_NAV_PATH_POINTS,
+    0.5f, // desired speed in m/s
+    true,
+    false);
 
 ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
