@@ -25,11 +25,11 @@ TestAutoNavCommand::TestAutoNavCommand(
     const tap::Drivers& drivers,
     chassis::HolonomicChassisSubsystem& chassis,
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-    std::vector<Transform> transforms = std::vector<Transform>(),
-    tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem = nullptr,
-    bool autoNavOnlyInGame = false,
-    bool beybladeEnabled = true,
-    bool ends = false)
+    std::vector<Transform> transforms,
+    tap::algorithms::odometry::Odometry2DInterface* odometrySubsystem,
+    bool autoNavOnlyInGame,
+    bool beybladeEnabled,
+    bool ends)
     : drivers(drivers),
       autoNavController(autoNavController),
       transforms(transforms),

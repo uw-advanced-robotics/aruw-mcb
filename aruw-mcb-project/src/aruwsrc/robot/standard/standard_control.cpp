@@ -108,6 +108,9 @@
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+#include "tap/algorithms/transforms/position.hpp"
+#include "aruwsrc/control/chassis/fixed_path_auto_nav_command.hpp"
+#include "tap/control/toggle_command_mapping.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -320,6 +323,30 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     transformAdapter);
 
 /* define commands ----------------------------------------------------------*/
+
+static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_PATH_POINTS[] = {         
+    Position(0, 1, 0),
+    Position(0, 0, 0) 
+};
+
+aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    &transformAdapter,
+    aruwsrc::control::chassis::BEYBLADE_CONFIG,
+    capBankSubsystem,
+    0.15f,
+    1000.0f);
+
+aruwsrc::control::chassis::FixedPathAutoNavCommand ForwardBackTest(
+    *drivers(),
+    chassis,
+    autoNavController,
+    ENGINEER_AUTO_NAV_PATH_POINTS,
+    0.5f, // desired speed in m/s
+    false,
+    false);
+
 aruwsrc::control::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
@@ -647,6 +674,11 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
+ToggleCommandMapping testAuto(
+    drivers(),
+    {&ForwardBackTest},
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
 HoldRepeatCommandMapping rightSwitchMiddle(
     drivers(),
     {&spinFrictionWheels},
@@ -665,10 +697,10 @@ HoldRepeatCommandMapping leftSwitchDown(
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
 
-HoldCommandMapping leftSwitchUp(
+/*HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));*/
 
 CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
     drivers(),
@@ -794,10 +826,10 @@ void initializeSubsystems()
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
+    /*chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);*/
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -814,10 +846,10 @@ void startStandardCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerStandardIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchMiddle);
+    /*drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
+    //drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
@@ -831,7 +863,8 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&vPressed);
     drivers->commandMapper.addMap(&cShiftPressed);
     drivers->commandMapper.addMap(&shiftPressed);
-    drivers->commandMapper.addMap(&ctrlPressed);
+    drivers->commandMapper.addMap(&ctrlPressed);*/
+    drivers->commandMapper.addMap(&testAuto);
 }
 }  // namespace standard_control
 
