@@ -43,7 +43,7 @@ PredictionIndicator::PredictionIndicator(
 {
 }
 
-float aex, aey, aez, abx, aby, arx, ary, arz, arp, arw, arw2;
+float aex, aey, aez, abx, aby, arx, ary, arz, arp, arw, arw2, adx, ady, adz;
 modm::ResumableResult<void> PredictionIndicator::update()
 {
     constexpr float plateHeight = 0.2f;  // TODO don't hardcode this
@@ -97,10 +97,13 @@ modm::ResumableResult<void> PredictionIndicator::update()
         launchSpeed * cosf(turretSubsystem.getWorldPitch()) * cosf(turretSubsystem.getWorldYaw()),
         launchSpeed * cosf(turretSubsystem.getWorldPitch()) * sinf(turretSubsystem.getWorldYaw()),
         launchSpeed * sinf(turretSubsystem.getWorldPitch()));
+    adx = launchVelocity.x;
+    ady = launchVelocity.y;
+    adz = launchVelocity.z;
 
     ballistics::SecondOrderKinematicState predictedShotLandingState(
         turretPosition,
-        launchVelocity,  // x component of the launch velocity
+        launchVelocity, 
         modm::Vector3f(0, -tap::algorithms::ACCELERATION_GRAVITY, 0));
 
     RF_BEGIN(1);
@@ -132,7 +135,7 @@ modm::ResumableResult<void> PredictionIndicator::update()
     aby = result.screenY;
 
     // If the predicted landing position is not in frame, delete the graphic
-    if (!result.inFrame)
+    if (result.screenX < 10 || result.screenX + 10 > SCREEN_WIDTH || result.screenY < 10 || result.screenY + 10 > SCREEN_HEIGHT)
     {
         hitPredictionGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }
