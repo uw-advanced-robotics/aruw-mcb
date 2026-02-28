@@ -261,7 +261,6 @@ static void updateIo(Drivers* drivers)
 #endif
 
 #if defined(TARGET_SENTRY_NAME)
-    drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorPrimaryImu.read();
     drivers->turretMajorImuSecondary.read();
 #endif

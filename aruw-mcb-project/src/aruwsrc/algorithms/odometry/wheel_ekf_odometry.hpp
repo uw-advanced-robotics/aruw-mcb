@@ -82,8 +82,6 @@ public:
 
     void overrideOdometryPosition(const float positionX, const float positionY);
 
-    int a = -2;
-
 protected:
     enum class OdomState
     {
@@ -122,12 +120,13 @@ private:
     /// Assumed time difference between calls to `update`, in seconds.
     static constexpr float DT = 0.002f;       // Nominal EKF update period
     static constexpr float MIN_DT = 0.0005f;  // Lower bound on dt for stability
+    static constexpr float MAX_DT = 0.02f;    // Upper bound on dt to avoid large prediction jumps
     static constexpr float WHEEL_RADIUS_SCALE = 1.0f;  // Wheel radius calibration scale
 
     static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE = 1.0f;  // Base wheel speed variance
     static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 1.2f;        // Accel noise variance
-    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.05f;        // Gyro noise variance
-    static constexpr float YAW_MEASUREMENT_VARIANCE = 0.02f;             // Yaw observer variance
+    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.2f;         // Gyro noise variance
+    static constexpr float YAW_MEASUREMENT_VARIANCE = 0.05f;             // Yaw observer variance
 
     // Process noise covariance matrix (Q) - how much we trust the motion model.
     // State order: POS_X, POS_Y, VEL_X, VEL_Y, YAW, YAW_RATE, ACC_X, ACC_Y.
@@ -169,7 +168,6 @@ private:
         0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
     };
     // clang-format on
-        // clang-format on
 
     const tap::motor::DjiMotor* chassisMotors[4];
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;

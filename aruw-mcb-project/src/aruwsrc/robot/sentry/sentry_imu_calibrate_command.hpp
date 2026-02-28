@@ -26,7 +26,6 @@
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
@@ -44,12 +43,12 @@ namespace aruwsrc::sentry
  * TurretMCBCanComm object.
  *
  * When this command is scheduled, it performs the following actions:
- * 1. Wait until the turret is online and either the chassis mpu6500 or turret MCB IMU is online.
+ * 1. Wait until the turrets are online and the chassis turret-MCB IMU is online.
  * 2. Command the pitch and yaw turret gimbals to move to PI/2 radians (forward and flat).
  * 3. Command the chassis to stay still.
  * 4. Pause until the chassis/turret subsystems are no longer moving.
  * 5. Send a calibration signal to the turret MCB.
- * 6. Send signal to onboard IMU to recalibrate.
+ * 6. Send calibration requests to onboard and chassis/turret IMUs.
  * 7. Wait until calibration is complete and then end the command.
  */
 class SentryImuCalibrateCommand : public aruwsrc::control::imu::ImuCalibrateCommand
@@ -85,7 +84,7 @@ public:
         algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-        aruwsrc::communication::mcb_lite::MCBLite &chassisMCBLite,
+        aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
@@ -109,12 +108,11 @@ protected:
 
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu;
-    aruwsrc::communication::mcb_lite::MCBLite &chassisMCBLite;
+    aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm;
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
-    // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
 };
 }  // namespace aruwsrc::sentry
 

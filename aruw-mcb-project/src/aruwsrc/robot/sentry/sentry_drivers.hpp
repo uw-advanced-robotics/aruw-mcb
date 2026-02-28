@@ -36,7 +36,6 @@
 #include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
 #include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/fused_imu_mekf_kf.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
@@ -84,7 +83,7 @@ public:
               &visionCoprocessor,
               &turretMCBCanCommBus1,
               &turretMCBCanCommBus2,
-              &chassisMcbLite,
+              nullptr,
               nullptr,
               &capacitorBank,
               &rttTelemetry),
@@ -92,7 +91,6 @@ public:
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(this, tap::can::CanBus::CAN_BUS1, CAP_BANK_CAPACITANCE),
-          chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
 #if defined(TARGET_SENTRY_NAME)
           turretMajorPrimaryImu(
               aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
@@ -131,7 +129,6 @@ public:
     aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     aruwsrc::communication::can::cap_bank::CapacitorBank capacitorBank;
-    aruwsrc::communication::mcb_lite::MCBLite chassisMcbLite;
 #if defined(TARGET_SENTRY_NAME)
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorPrimaryImu;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImuSecondary;

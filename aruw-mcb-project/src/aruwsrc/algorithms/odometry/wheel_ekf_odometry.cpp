@@ -110,7 +110,7 @@ void FourWheelEKFOdometry::update()
 
     uint32_t currentTime = tap::arch::clock::getTimeMicroseconds();
     float dt = prevTime == 0 ? DT : (currentTime - prevTime) / 1e6f;
-    dt = std::max(dt, MIN_DT);
+    dt = std::clamp(dt, MIN_DT, MAX_DT);
     prevTime = currentTime;
 
     // Get individual wheel velocities and convert to linear velocities
@@ -130,7 +130,7 @@ void FourWheelEKFOdometry::update()
         yawForRotation = modm::Angle::normalize(yawForRotation - yawOffset);
     }
 
-    // Rotate acceleration from MCB frame to the world frame
+    // Rotate acceleration from MCB frame to the world frame.
     tap::algorithms::rotateVector(
         &imuAccelWorld.x,
         &imuAccelWorld.y,
@@ -169,7 +169,7 @@ void FourWheelEKFOdometry::update()
     measurement.data[int(OdomInput::YAW)] = z_pred.data[int(OdomInput::YAW)] + yaw_residual;
 
     // Perform correction step.
-    a = ekf.update(measurement);
+    ekf.update(measurement);
 
     // Update the location and velocity accessor objects with values from the state vector
     updateChassisStateFromEKF();

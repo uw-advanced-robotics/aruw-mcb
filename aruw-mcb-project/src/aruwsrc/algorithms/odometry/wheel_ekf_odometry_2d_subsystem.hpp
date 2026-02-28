@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
+#include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/subsystem.hpp"
 
 #include "modm/math/geometry.hpp"
@@ -55,12 +56,14 @@ public:
      * @param[in] drivers pointer to aruwsrc drivers
      * @param[in] chassisMotors array of 4 chassis motor pointers
      * @param[in] yawObserver yaw observer used to provide world-frame yaw measurements
+     * @param[in] imu IMU source used for acceleration and yaw-rate measurements
      * @param[in] initPos initial position of chassis on boot
      */
     WheelEKFOdometry2DSubsystem(
         tap::Drivers& drivers,
         const tap::motor::DjiMotor* chassisMotors[4],
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& yawObserver,
+        tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos);
 
     void refresh() override;

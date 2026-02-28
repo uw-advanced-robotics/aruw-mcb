@@ -27,11 +27,8 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
-#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
-#include "aruwsrc/communication/mcb-lite/motor/virtual_double_dji_motor.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_voltage_current_sensor.hpp"
+#include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -108,8 +105,6 @@ using namespace aruwsrc::sentry::algorithms;
 using namespace aruwsrc::sentry::algorithms::odometry;
 using namespace aruwsrc::sentry::turret;
 using namespace aruwsrc::sentry::turret::cv;
-using namespace aruwsrc::communication::mcb_lite;
-using namespace aruwsrc::communication::mcb_lite::motor;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -123,26 +118,15 @@ namespace sentry_control
 {
 MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
-aruwsrc::communication::mcb_lite::VirtualCanEncoder turretMajorYawEncoder(
-    drivers(),
-    tap::encoder::CanEncoderId::ID0,
-    &drivers()->chassisMcbLite,
-    tap::can::CanBus::CAN_BUS2,
-    false,
-    1.0f,
-    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue);
-
-aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor turretMajorYawMotor(
+tap::motor::DjiMotor turretMajorYawMotor(
     drivers(),
     tap::motor::MOTOR5,
     turretMajor::CAN_BUS_MOTOR,
-    &drivers()->chassisMcbLite,
     false,
     "Major Yaw Turret",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(27.0f / 95.0f),  // pulley ratio
-    0,
-    &turretMajorYawEncoder);
+    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue);
 
 struct TurretMinorMotors
 {
@@ -181,6 +165,13 @@ TurretMinorMotors turretWidowMotors{
 inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanCommWidow()
 {
     return drivers()->turretMCBCanCommBus1;
+}
+// the other one
+inline aruwsrc::communication::can::TurretMCBCanComm &getChassisTurretMCBCanComm()
+{
+    return (&getTurretMCBCanCommWidow() == &drivers()->turretMCBCanCommBus1)
+               ? drivers()->turretMCBCanCommBus2
+               : drivers()->turretMCBCanCommBus1;
 }
 
 // /* define subsystems --------------------------------------------------------*/
@@ -258,8 +249,9 @@ DjiMotor rightBackMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::communication::mcb_lite::VirtualVoltageCurrentSensor voltageCurrentSensor(
-    &drivers()->chassisMcbLite);
+aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2);
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     drivers(),
@@ -274,40 +266,14 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
 
-aruwsrc::communication::mcb_lite::VirtualCanEncoder parallelOmni(
-    drivers(),
-    tap::encoder::CanEncoderId::ID1,
-    &drivers()->chassisMcbLite,
-    tap::can::CanBus::CAN_BUS2,
-    true);
+const tap::motor::DjiMotor* sentryChassisMotorsForEkf[4] = {
+    &leftFrontMotor, &rightFrontMotor, &leftBackMotor, &rightBackMotor};
 
-aruwsrc::communication::mcb_lite::VirtualCanEncoder perpendicularOmni(
-    drivers(),
-    tap::encoder::CanEncoderId::ID4,
-    &drivers()->chassisMcbLite,
-    tap::can::CanBus::CAN_BUS2);
-
-// aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver deadwheels(
-//     &parallelOmni,
-//     &perpendicularOmni,
-//     DEADWHEEL_RADIUS);
-
-// aruwsrc::algorithms::odometry::DeadwheelKFOdometry2DSubsystem odometrySubsystem(
-//     *drivers(),
-//     deadwheels,
-//     chassisYawObserver,
-//     drivers()->chassisMcbLite.imu,
-//     INITIAL_CHASSIS_POSITION_X,
-//     INITIAL_CHASSIS_POSITION_Y,
-//     CENTER_TO_WHEELBASE_RADIUS,
-//     PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS,
-//     PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS);
-
-aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
-    drivers(),
-    chassis,
+aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    sentryChassisMotorsForEkf,
     chassisYawObserver,
-    drivers()->chassisMcbLite.imu,
+    getChassisTurretMCBCanComm(),
     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
 
 SentryTransforms transformer(
@@ -501,7 +467,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     chassisYawObserver,
     odometrySubsystem,
     drivers()->turretMajorImu,
-    drivers()->chassisMcbLite,
+    getChassisTurretMCBCanComm(),
     transformer,
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
@@ -718,6 +684,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
+    voltageCurrentSensor.initialize();
     buzzer.initialize();
     // chassis.initialize();
     turretWidow.initialize();

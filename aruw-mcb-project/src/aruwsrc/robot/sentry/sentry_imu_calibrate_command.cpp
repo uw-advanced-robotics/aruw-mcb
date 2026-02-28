@@ -43,7 +43,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-    aruwsrc::communication::mcb_lite::MCBLite &chassisMCBLite,
+    aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime)
@@ -58,7 +58,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       yawObserver(yawObserver),
       odometryInterface(odometryInterface),
       turretMajorImu(turretMajorImu),
-      chassisMCBLite(chassisMCBLite),
+      chassisImuComm(chassisImuComm),
       transformer(transformer),
       successChime(successChime),
       failChime(failChime)
@@ -116,10 +116,8 @@ void SentryImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
-            // Only start calibrating if the turret is online and if there is an IMU online to be
-            // calibrated. The onboard Mpu6500 will never be in the `IMU_NOT_CONNECTED` state unless
-            // the Mpu6500 is shorted (which has never happened). The turret MCB will only be
-            // offline if the turret MCB is unplugged.
+            // Only start calibrating if all turret MCB IMUs are online and the dedicated chassis
+            // turret-MCB IMU is online.
             bool turretMCBsReady = true;
             bool turretsOnline = true;
 
@@ -129,8 +127,7 @@ void SentryImuCalibrateCommand::execute()
                 turretsOnline &= config.turret->isOnline();
             }
 
-            if (turretsOnline && (turretMCBsReady || (drivers->mpu6500.getImuState() !=
-                                                      Mpu6500::ImuState::IMU_NOT_CONNECTED)))
+            if (turretsOnline && turretMCBsReady && chassisImuComm.isConnected())
             {
                 calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -168,7 +165,7 @@ void SentryImuCalibrateCommand::execute()
 
                 drivers->mpu6500.requestCalibration();
 
-                chassisMCBLite.imu.requestCalibration();
+                chassisImuComm.requestCalibration();
                 turretMajorImu.requestCalibration();
 
                 calibrationState = CalibrationState::CALIBRATING_IMU;
