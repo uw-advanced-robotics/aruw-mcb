@@ -38,37 +38,20 @@ LimitSwitchMenu::LimitSwitchMenu(
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(stack, LIMIT_SWITCH_MENU_ID),
       drivers(drivers)
 {
+    for (size_t i = 0; i < NUM_PINS; ++i)
+    {
+        pins[i] = {static_cast<tap::gpio::Digital::InputPin>(i), InputPinNames[i], -1};
+    }
 }
 
-void LimitSwitchMenu::drawLimitSwitch(Digital::InputPin pin)
+void LimitSwitchMenu::drawLimitSwitch(PinEntry& entry)
 {
-    DigitalBeamBreak beamBreak(&drivers->digital, pin, false);
-    const char* pinName = "";
+    DigitalBeamBreak beamBreak(&drivers->digital, entry.pin, false);
+    int state = beamBreak.getLimitSwitchDepressed() ? 1 : 0;
 
-    std::size_t idx = static_cast<std::size_t>(pin);
-    if (idx < InputPinNames.size())
-    {
-        pinName = InputPinNames[idx].data();
-    }
-    else
-    {
-        pinName = "UNKNOWN PIN";
-    }
+    getViewStack()->getDisplay() << "Pin " << entry.name << ": " << state << modm::endl;
 
-    getViewStack()->getDisplay() << "Pin " << pinName << ": ";
-
-    if (beamBreak.getLimitSwitchDepressed())
-    {
-        getViewStack()->getDisplay() << "1";
-        pins[pin] = 1;
-    }
-    else
-    {
-        getViewStack()->getDisplay() << "0";
-        pins[pin] = 0;
-    }
-
-    getViewStack()->getDisplay() << modm::endl;
+    entry.lastState = state;
 }
 
 void LimitSwitchMenu::draw()
@@ -78,9 +61,9 @@ void LimitSwitchMenu::draw()
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
-    for (const auto& [pin, status] : pins)
+    for (auto& entry : pins)
     {
-        drawLimitSwitch(pin);
+        drawLimitSwitch(entry);
     }
 }
 
@@ -88,11 +71,11 @@ void LimitSwitchMenu::update() {}
 
 bool LimitSwitchMenu::hasChanged()
 {
-    for (auto& [pin, status] : pins)
+    for (auto& entry : pins)
     {
-        DigitalBeamBreak beamBreak(&(drivers->digital), pin, false);
+        DigitalBeamBreak beamBreak(&(drivers->digital), entry.pin, false);
         int currState = beamBreak.getLimitSwitchDepressed();
-        if (currState != status)
+        if (currState != entry.lastState)
         {
             return true;
         }
@@ -108,13 +91,5 @@ void LimitSwitchMenu::shortButtonPress(modm::MenuButtons::Button button)
         this->remove();
     }
 }
-
-// void LimitSwitchMenu::setPinValue(Digital::InputPin pin, int val) {
-//     for (const auto& pair : pins) {
-//         if (pair.first == pin) {
-//             pair.second = val;           wait how can i modify smth thats static constexpr
-//         }
-//     }
-// }
 
 }  // namespace aruwsrc::display
