@@ -24,6 +24,7 @@ ROBOT_IPS = {
     "TARGET_STANDARD_VOID": "192.168.1.166",
     "TARGET_HERO_ZERO": "192.168.1.169",
     "TARGET_ENGINEER": "192.168.0.232",
+    "TARGET_SENTRY_NAME": "192.168.1.197"
 }
 
 def run_ozone(env, source, robot=""):
