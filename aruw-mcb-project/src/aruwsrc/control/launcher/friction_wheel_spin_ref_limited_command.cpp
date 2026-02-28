@@ -64,7 +64,6 @@ void FrictionWheelSpinRefLimitedCommand::execute()
     frictionWheels->changeWheelVelocityState(1, true);
     frictionWheels->changeWheelVelocityState(2, true);
     frictionWheels->changeWheelVelocityState(3, true);
-    frictionWheels->changeWheelVelocityState(4, true);
 
     if (defaultLaunchSpeed == 0)
     {
@@ -76,8 +75,6 @@ void FrictionWheelSpinRefLimitedCommand::execute()
         frictionWheels->setIndividualVelocity(2, 0);
         // upper
         frictionWheels->setIndividualVelocity(3, 0);
-        // small upper
-        frictionWheels->setIndividualVelocity(4, 0);
     }
     else
     {
@@ -89,8 +86,6 @@ void FrictionWheelSpinRefLimitedCommand::execute()
         frictionWheels->setIndividualVelocity(2, testingRpms.lowerRpm);
         // upper
         frictionWheels->setIndividualVelocity(3, testingRpms.upperRpm);
-        // small upper
-        frictionWheels->setIndividualVelocity(4, testingRpms.smallUpperRpm);
     }
 #endif
 }

@@ -45,8 +45,6 @@
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
 #include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"
-#elif defined(TARGET_ENGI_2025)
-#include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"
 #else
 // necessary to satiate vision_coprocessor and tests which relies on this
 // header for number of turrets and gravity compensation values

@@ -25,6 +25,10 @@
 extern "C"
 {
 #include "SEGGER_RTT.h"
+#if defined(_WIN32) || defined(SEGGER_RTT_LOCK_EMBOS)
+    void OS_SIM_EnterCriticalSection(void){};
+    void OS_SIM_LeaveCriticalSection(void){};
+#endif
 }
 
 #undef BUFFER_SIZE_UP

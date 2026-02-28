@@ -43,8 +43,8 @@ void SetpointMoveManualCommand::execute()
     float setpoint = subsystem.getSetpoint();
     switch (setpointType)
     {
-        case SetpointType::CUBE_LIFT:
-            setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;
+        case SetpointType::CUBE_STORAGE:
+            setpoint += operatorInterface->getCubeStorageVelocity() * moveSpeed;
             break;
         case SetpointType::EXTENSION:
             setpoint += operatorInterface->getGantryExtensionVelocity() * moveSpeed;

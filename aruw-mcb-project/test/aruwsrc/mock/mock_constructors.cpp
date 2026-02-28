@@ -184,36 +184,40 @@ SwerveModuleMock::~SwerveModuleMock() {}
 
 FrictionWheelSubsystemMock::FrictionWheelSubsystemMock(
     tap::Drivers *drivers,
-    std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels)
+    std::array<tap::motor::MotorInterface *, 2> wheels)
     : FrictionWheelSubsystem<2>(
           drivers,
           wheels,
           std::array<aruwsrc::control::launcher::FlywheelConfig, 2>{
               aruwsrc::control::launcher::WHEEL_CONFIG,
               aruwsrc::control::launcher::WHEEL_CONFIG},
-          nullptr)
+          aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)
 {
 }
 FrictionWheelSubsystemMock::~FrictionWheelSubsystemMock() {}
 
 TripleFrictionWheelSubsystemMock::TripleFrictionWheelSubsystemMock(
     tap::Drivers *drivers,
-    std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 3> wheels)
-    : FrictionWheelSubsystem<3>(drivers, wheels, aruwsrc::control::launcher::WHEEL_CONFIG, nullptr)
+    std::array<tap::motor::MotorInterface *, 3> wheels)
+    : FrictionWheelSubsystem<3>(
+          drivers,
+          wheels,
+          aruwsrc::control::launcher::WHEEL_CONFIG,
+          aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)
 {
 }
 TripleFrictionWheelSubsystemMock::~TripleFrictionWheelSubsystemMock() {}
 
 RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystemMock(
     tap::Drivers *drivers,
-    std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels)
+    std::array<tap::motor::MotorInterface *, 2> wheels)
     : RefereeFeedbackFrictionWheelSubsystem<10, 2>(
           drivers,
           wheels,
           std::array<aruwsrc::control::launcher::FlywheelConfig, 2>{
               aruwsrc::control::launcher::WHEEL_CONFIG,
               aruwsrc::control::launcher::WHEEL_CONFIG},
-          nullptr,
+          aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
           tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
 {
 }
@@ -232,7 +236,9 @@ OledDisplayMock::OledDisplayMock(
           turretMCBCanCommBus1,
           turretMCBCanCommBus2,
           mcbLite1,
-          mcbLite2)
+          mcbLite2,
+          nullptr,
+          nullptr)
 {
 }
 OledDisplayMock::~OledDisplayMock() {}
