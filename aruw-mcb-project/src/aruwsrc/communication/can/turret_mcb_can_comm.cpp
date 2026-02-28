@@ -19,10 +19,6 @@
 
 #include "turret_mcb_can_comm.hpp"
 
-#include <algorithm>
-#include <cmath>
-#include <limits>
-
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -31,21 +27,6 @@
 
 namespace aruwsrc::communication::can
 {
-namespace
-{
-constexpr float ROTATION_COMPONENT_SCALE = 1000.0f;
-constexpr float TRANSLATION_COMPONENT_SCALE = 10.0f;
-constexpr uint8_t IMU_MOUNTING_SYNC_BURST_COUNT = 20;
-
-inline int16_t quantizeTransformComponent(float value, float scale)
-{
-    return static_cast<int16_t>(std::clamp(
-        std::lround(value * scale),
-        static_cast<long>(std::numeric_limits<int16_t>::min()),
-        static_cast<long>(std::numeric_limits<int16_t>::max())));
-}
-}  // namespace
-
 TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus)
     : AbstractIMU(),
       canBus(canBus),
@@ -84,12 +65,6 @@ TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBu
           canBus,
           this,
           &TurretMCBCanComm::handleTimeSynchronizationRequest),
-      imuMountingRequestRxHandler(
-          drivers,
-          IMU_MOUNTING_REQUEST_RX_CAN_ID,
-          canBus,
-          this,
-          &TurretMCBCanComm::handleImuMountingTransformRequest),
       txCommandMsgBitmask(),
       sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
 {
@@ -103,7 +78,6 @@ void TurretMCBCanComm::init()
     zAxisMessageHandler.attachSelfToRxHandler();
     turretStatusRxHandler.attachSelfToRxHandler();
     timeSynchronizationRxHandler.attachSelfToRxHandler();
-    imuMountingRequestRxHandler.attachSelfToRxHandler();
 }
 
 void TurretMCBCanComm::initialize(float, float, float)
@@ -127,17 +101,9 @@ void TurretMCBCanComm::sendData()
 {
     if (sendMcbDataTimer.execute())
     {
-        txCommandMsgBitmask.update(
-            TxCommandMsgBitmask::RECALIBRATE_IMU_SAMPLE_COUNT_VALID,
-            hasRequestedCalibrationSampleCount);
-
-        modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 3);
+        modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 1);
         txMsg.setExtended(false);
         txMsg.data[0] = txCommandMsgBitmask.value;
-        const uint16_t calibrationSampleCount =
-            hasRequestedCalibrationSampleCount ? requestedCalibrationSampleCount : 0;
-        txMsg.data[1] = static_cast<uint8_t>(calibrationSampleCount & 0xFFu);
-        txMsg.data[2] = static_cast<uint8_t>((calibrationSampleCount >> 8) & 0xFFu);
         drivers->can.sendMessage(canBus, txMsg);
 
         if (txCommandMsgBitmask.any(TxCommandMsgBitmask::RECALIBRATE_IMU))
@@ -148,9 +114,6 @@ void TurretMCBCanComm::sendData()
 
         // set this calibrate flag to false so the calibrate command is only sent once
         txCommandMsgBitmask.reset(TxCommandMsgBitmask::RECALIBRATE_IMU);
-        txCommandMsgBitmask.reset(TxCommandMsgBitmask::RECALIBRATE_IMU_SAMPLE_COUNT_VALID);
-        requestedCalibrationSampleCount = 0;
-        hasRequestedCalibrationSampleCount = false;
     }
 
     if (!isConnected())
@@ -164,8 +127,6 @@ void TurretMCBCanComm::sendData()
         rollRevolutions = 0;
         imuState = ImuState::IMU_NOT_CONNECTED;
     }
-
-    sendImuMountingTransformSync();
 }
 
 void TurretMCBCanComm::handleXAxisMessage(const modm::can::Message& message)
@@ -300,133 +261,6 @@ void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message
     *reinterpret_cast<uint32_t*>(syncResponseMessage.data) =
         tap::arch::clock::getTimeMicroseconds();
     drivers->can.sendMessage(canBus, syncResponseMessage);
-}
-
-void TurretMCBCanComm::setImuMountingTransforms(
-    const tap::algorithms::transforms::Transform& bmi088MountingTransform,
-    const tap::algorithms::transforms::Transform& ism330MountingTransform)
-{
-    clearImuMountingTransforms();
-    setImuMountingTransform(RemoteImuType::BMI088, bmi088MountingTransform);
-    setImuMountingTransform(RemoteImuType::ISM330, ism330MountingTransform);
-}
-
-void TurretMCBCanComm::clearImuMountingTransforms() { hasRemoteImuMountingTransform.fill(false); }
-
-void TurretMCBCanComm::setImuMountingTransform(
-    RemoteImuType imuType,
-    const tap::algorithms::transforms::Transform& mountingTransform)
-{
-    const size_t imuIndex = static_cast<size_t>(imuType);
-    if (imuIndex >= remoteImuMountingTransforms.size())
-    {
-        return;
-    }
-
-    remoteImuMountingTransforms[imuIndex] = mountingTransform;
-    hasRemoteImuMountingTransform[imuIndex] = true;
-}
-
-void TurretMCBCanComm::queueImuMountingTransformSync()
-{
-    imuMountingSyncBurstsRemaining = IMU_MOUNTING_SYNC_BURST_COUNT;
-}
-
-void TurretMCBCanComm::handleImuMountingTransformRequest(const modm::can::Message&)
-{
-    if (hasAnyImuMountingTransformsConfigured())
-    {
-        queueImuMountingTransformSync();
-    }
-}
-
-bool TurretMCBCanComm::sendImuMountingTransformSyncMessage(
-    RemoteImuType imuType,
-    TransformMessagePart part,
-    const tap::algorithms::transforms::Transform& transform)
-{
-    if (!drivers->can.isReadyToSend(canBus))
-    {
-        return false;
-    }
-
-    modm::can::Message msg(IMU_MOUNTING_TX_CAN_ID, sizeof(ImuMountingTransformMessageData));
-    msg.setExtended(false);
-    auto* payload = reinterpret_cast<ImuMountingTransformMessageData*>(msg.data);
-    payload->imuType = static_cast<uint8_t>(imuType);
-    payload->part = static_cast<uint8_t>(part);
-
-    if (part == TransformMessagePart::TRANSLATION)
-    {
-        const auto translation = transform.getTranslation();
-        payload->componentA =
-            quantizeTransformComponent(translation.x(), TRANSLATION_COMPONENT_SCALE);
-        payload->componentB =
-            quantizeTransformComponent(translation.y(), TRANSLATION_COMPONENT_SCALE);
-        payload->componentC =
-            quantizeTransformComponent(translation.z(), TRANSLATION_COMPONENT_SCALE);
-    }
-    else
-    {
-        payload->componentA =
-            quantizeTransformComponent(transform.getRoll(), ROTATION_COMPONENT_SCALE);
-        payload->componentB =
-            quantizeTransformComponent(transform.getPitch(), ROTATION_COMPONENT_SCALE);
-        payload->componentC =
-            quantizeTransformComponent(transform.getYaw(), ROTATION_COMPONENT_SCALE);
-    }
-
-    drivers->can.sendMessage(canBus, msg);
-    return true;
-}
-
-bool TurretMCBCanComm::hasAnyImuMountingTransformsConfigured() const
-{
-    for (bool hasTransform : hasRemoteImuMountingTransform)
-    {
-        if (hasTransform)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-void TurretMCBCanComm::sendImuMountingTransformSync()
-{
-    if (!hasAnyImuMountingTransformsConfigured() || imuMountingSyncBurstsRemaining == 0 ||
-        !isConnected())
-    {
-        return;
-    }
-
-    bool burstSuccess = true;
-    bool sentAny = false;
-    for (size_t i = 0; i < remoteImuMountingTransforms.size(); i++)
-    {
-        if (!hasRemoteImuMountingTransform[i])
-        {
-            continue;
-        }
-
-        sentAny = true;
-        const auto imuType = static_cast<RemoteImuType>(i);
-        const auto& transform = remoteImuMountingTransforms[i];
-
-        const bool sentTranslation = sendImuMountingTransformSyncMessage(
-            imuType,
-            TransformMessagePart::TRANSLATION,
-            transform);
-        const bool sentRotation =
-            sendImuMountingTransformSyncMessage(imuType, TransformMessagePart::ROTATION, transform);
-
-        burstSuccess &= sentTranslation && sentRotation;
-    }
-
-    if (sentAny && burstSuccess)
-    {
-        imuMountingSyncBurstsRemaining--;
-    }
 }
 
 TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(

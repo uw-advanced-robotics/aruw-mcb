@@ -20,10 +20,6 @@
 #ifndef SENTRY_CHASSIS_CONSTANTS_HPP_
 #define SENTRY_CHASSIS_CONSTANTS_HPP_
 
-#include <cmath>
-
-#include "tap/algorithms/transforms/transform.hpp"
-
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 
@@ -131,25 +127,6 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
 static constexpr float TRANSLATIONAL_MOTION_THRESHOLD = 0.25f;
 
 static constexpr float CAPBANK_ENERGY_THRESHOLD = 500.0f;
-
-namespace chassisImu
-{
-static const tap::algorithms::transforms::Transform CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM(
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f);
-
-static const tap::algorithms::transforms::Transform CHASSIS_MCB_ISM330_MOUNTING_TRANSFORM(
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    -M_PI_2);
-}  // namespace chassisImu
 
 }  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_

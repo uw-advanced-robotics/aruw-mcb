@@ -745,13 +745,6 @@ void startSentryCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
-
-    getTurretMCBCanCommWidow().setImuMountingTransforms(
-        turretMajor::TURRET_MCB_BMI088_MOUNTING_TRANSFORM,
-        turretMajor::TURRET_MCB_ISM330_MOUNTING_TRANSFORM);
-    getChassisTurretMCBCanComm().setImuMountingTransforms(
-        aruwsrc::control::chassis::chassisImu::CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM,
-        aruwsrc::control::chassis::chassisImu::CHASSIS_MCB_ISM330_MOUNTING_TRANSFORM);
 }
 
 /* register io mappings here ------------------------------------------------*/

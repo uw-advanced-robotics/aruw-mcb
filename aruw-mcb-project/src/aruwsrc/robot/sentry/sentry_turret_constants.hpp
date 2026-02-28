@@ -40,7 +40,11 @@
 
 namespace aruwsrc::control::turret
 {
+#ifdef TARGET_SENTRY_NAME
 static constexpr uint8_t NUM_TURRETS = 1;
+#else
+static constexpr uint8_t NUM_TURRETS = 2;
+#endif
 
 static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 
@@ -66,7 +70,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 55.0f,
 };
 
-static constexpr float TURRET_MINOR_OFFSET = 0.0f;
+static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
 
 static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .kp = 0.042f,
@@ -97,22 +101,6 @@ static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
     M_PI,
     0,
     0);
-
-static const tap::algorithms::transforms::Transform TURRET_MCB_BMI088_MOUNTING_TRANSFORM(
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f);
-
-static const tap::algorithms::transforms::Transform TURRET_MCB_ISM330_MOUNTING_TRANSFORM(
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    -M_PI_2);
 
 namespace chassisFrameController
 {
@@ -159,7 +147,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 
 }  // namespace worldFrameCascadeController
 
-static constexpr tap::can::CanBus CAN_BUS_MOTOR = tap::can::CanBus::CAN_BUS2;
+// Turret Major has a double DJI motor, so we need to have two CAN Buses
+static constexpr tap::can::CanBus CAN_BUS_MOTOR = tap::can::CanBus::CAN_BUS1;
 
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
 static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
@@ -196,6 +185,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
+static constexpr float majorToTurretR = 0.145;
 static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
