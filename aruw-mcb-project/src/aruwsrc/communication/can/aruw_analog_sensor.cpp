@@ -32,11 +32,57 @@ void AruwAnalogSensor::processMessage(const modm::can::Message& message)
     this->heartbeat.restart(100);
     this->ai1 = message.data[1] << 8 | message.data[0];
     this->ai0 = message.data[3] << 8 | message.data[2];
+
+    for (UpdateListener* listener : listeners)
+    {
+        if (listener != nullptr)
+        {
+            listener->onAnalogSensorUpdated();
+        }
+    }
 }
 
 void AruwAnalogSensor::initialize()
 {
     this->attachSelfToRxHandler();
     this->heartbeat.restart(0);
+}
+
+bool AruwAnalogSensor::addUpdateListener(UpdateListener* listener)
+{
+    if (listener == nullptr)
+    {
+        return false;
+    }
+
+    for (UpdateListener* existingListener : listeners)
+    {
+        if (existingListener == listener)
+        {
+            return true;
+        }
+    }
+
+    for (UpdateListener*& listenerSlot : listeners)
+    {
+        if (listenerSlot == nullptr)
+        {
+            listenerSlot = listener;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void AruwAnalogSensor::removeUpdateListener(const UpdateListener* listener)
+{
+    for (UpdateListener*& listenerSlot : listeners)
+    {
+        if (listenerSlot == listener)
+        {
+            listenerSlot = nullptr;
+        }
+    }
 }
 }  // namespace aruwsrc::communication::can

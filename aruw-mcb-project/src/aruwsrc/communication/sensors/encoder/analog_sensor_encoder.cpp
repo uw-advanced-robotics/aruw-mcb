@@ -61,6 +61,18 @@ AnalogSensorEncoder::AnalogSensorEncoder(
       calibration(calibration),
       lastUpdateMicros(0)
 {
+    if (this->sensor != nullptr)
+    {
+        this->sensor->addUpdateListener(this);
+    }
+}
+
+AnalogSensorEncoder::~AnalogSensorEncoder()
+{
+    if (this->sensor != nullptr)
+    {
+        this->sensor->removeUpdateListener(this);
+    }
 }
 
 bool AnalogSensorEncoder::isOnline() const
@@ -81,6 +93,8 @@ float AnalogSensorEncoder::getVelocity() const
 }
 
 void AnalogSensorEncoder::update() { updateFromSensor(); }
+
+void AnalogSensorEncoder::onAnalogSensorUpdated() { updateFromSensor(); }
 
 void AnalogSensorEncoder::logTelemetry(
     communication::rtt::RttTelemetry& rttTelemetry,

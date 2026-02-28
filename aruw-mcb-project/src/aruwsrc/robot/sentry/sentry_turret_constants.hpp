@@ -94,13 +94,12 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .limitMotorAngles = false,
 };
 
-// Analog yaw encoder boilerplate. Keep disabled until calibrated.
 static constexpr tap::can::CanBus YAW_ANALOG_SENSOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 static constexpr uint16_t YAW_ANALOG_SENSOR_CAN_ID = 0x1D6;
-static constexpr uint8_t YAW_ANALOG_SENSOR_CHANNEL = 0;  // 0 = AI0, 1 = AI1
+static constexpr uint8_t YAW_ANALOG_SENSOR_CHANNEL = 1;  // 0 = AI0, 1 = AI1
 static constexpr bool YAW_ANALOG_SENSOR_INVERTED = false;
-static constexpr uint16_t YAW_ANALOG_RAW_MIN = 0;
-static constexpr uint16_t YAW_ANALOG_RAW_MAX = 4095;
+static constexpr uint16_t YAW_ANALOG_RAW_MIN = 164;
+static constexpr uint16_t YAW_ANALOG_RAW_MAX = 1603;
 static constexpr uint16_t YAW_ANALOG_RAW_ZERO = 0;
 static constexpr float YAW_ANALOG_OUTPUT_RANGE_RADIANS = M_TWOPI;
 
