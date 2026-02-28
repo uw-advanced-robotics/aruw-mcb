@@ -169,9 +169,10 @@ inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanCommWidow()
 // the other one
 inline aruwsrc::communication::can::TurretMCBCanComm &getChassisTurretMCBCanComm()
 {
-    return (&getTurretMCBCanCommWidow() == &drivers()->turretMCBCanCommBus1)
-               ? drivers()->turretMCBCanCommBus2
-               : drivers()->turretMCBCanCommBus1;
+    // return (&getTurretMCBCanCommWidow() == &drivers()->turretMCBCanCommBus1)
+    //            ? drivers()->turretMCBCanCommBus2
+    //            : drivers()->turretMCBCanCommBus1;
+    return drivers()->turretMCBCanCommBus2;
 }
 
 // /* define subsystems --------------------------------------------------------*/
