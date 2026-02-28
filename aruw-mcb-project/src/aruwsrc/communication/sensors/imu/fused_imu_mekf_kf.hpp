@@ -140,6 +140,18 @@ public:
         requestCalibration();
     }
 
+    void setCalibrationSamples(int sampleCount)
+    {
+        for (auto* imu : imus)
+        {
+            if (imu != nullptr)
+            {
+                imu->setCalibrationSamples(sampleCount);
+            }
+        }
+        offsetSampleCount = sampleCount;
+    }
+
     void requestCalibration() override
     {
         signalFilterInitialized = false;

@@ -98,6 +98,22 @@ static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
     0,
     0);
 
+static const tap::algorithms::transforms::Transform TURRET_MCB_BMI088_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f);
+
+static const tap::algorithms::transforms::Transform TURRET_MCB_ISM330_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    -M_PI_2);
+
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {

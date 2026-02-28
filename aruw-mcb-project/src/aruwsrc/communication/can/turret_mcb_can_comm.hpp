@@ -20,6 +20,9 @@
 #ifndef TURRET_MCB_CAN_COMM_HPP_
 #define TURRET_MCB_CAN_COMM_HPP_
 
+#include <array>
+#include <cstddef>
+
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
@@ -61,11 +64,13 @@ public:
         OPEN_HOPPER = modm::Bit0,
         RECALIBRATE_IMU = modm::Bit1,
         TURN_LASER_ON = modm::Bit2,
+        RECALIBRATE_IMU_SAMPLE_COUNT_VALID = modm::Bit3,
     };
     MODM_FLAGS8(TxCommandMsgBitmask);
 
     enum CanIDs
     {
+        IMU_MOUNTING_TX_CAN_ID = 0x1f6,
         TURRET_MCB_TX_CAN_ID = 0x1f7,
         SYNC_RX_CAN_ID = 0x1f8,
         SYNC_TX_CAN_ID = 0x1f9,
@@ -74,6 +79,14 @@ public:
         Y_AXIS_RX_CAN_ID = 0x1fc,
         Z_AXIS_RX_CAN_ID = 0x1fd,
     };
+
+    enum class RemoteImuType : uint8_t
+    {
+        BMI088 = 0,
+        ISM330 = 1,
+        MPU6500 = 2,
+    };
+    static constexpr size_t NUM_REMOTE_IMU_TYPES = 3;
 
     TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus);
     DISALLOW_COPY_AND_ASSIGN(TurretMCBCanComm);
@@ -189,8 +202,28 @@ public:
     mockable inline void requestCalibration() override
     {
         txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
+        txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU_SAMPLE_COUNT_VALID);
+        requestedCalibrationSampleCount = DEFAULT_REMOTE_IMU_CALIBRATION_SAMPLES;
+        hasRequestedCalibrationSampleCount = true;
         imuState = ImuState::IMU_CALIBRATING;
     }
+
+    inline void requestCalibration(uint16_t calibrationSampleCount)
+    {
+        requestedCalibrationSampleCount = calibrationSampleCount;
+        hasRequestedCalibrationSampleCount = true;
+        txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
+        txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU_SAMPLE_COUNT_VALID);
+        imuState = ImuState::IMU_CALIBRATING;
+    }
+
+    void setImuMountingTransforms(
+        const tap::algorithms::transforms::Transform& bmi088MountingTransform,
+        const tap::algorithms::transforms::Transform& ism330MountingTransform);
+    void clearImuMountingTransforms();
+    void setImuMountingTransform(
+        RemoteImuType imuType,
+        const tap::algorithms::transforms::Transform& mountingTransform);
 
     mockable void sendData();
 
@@ -211,6 +244,11 @@ private:
     static constexpr float ANGLE_FIXED_POINT_PRECISION = M_TWOPI / UINT16_MAX;
     static constexpr float CMPS2_TO_MPS2 = 0.01;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
+#if defined(TARGET_SENTRY)
+    static constexpr uint16_t DEFAULT_REMOTE_IMU_CALIBRATION_SAMPLES = 4000;
+#else
+    static constexpr uint16_t DEFAULT_REMOTE_IMU_CALIBRATION_SAMPLES = 1500;
+#endif
 
     class TurretMcbRxHandler : public tap::can::CanRxListener
     {
@@ -241,6 +279,21 @@ private:
         uint8_t statusBitmask;
         uint8_t imuState;
         int16_t temperatureCentiC;
+    } modm_packed;
+
+    enum class TransformMessagePart : uint8_t
+    {
+        TRANSLATION = 0,
+        ROTATION = 1,
+    };
+
+    struct ImuMountingTransformMessageData
+    {
+        uint8_t imuType;
+        uint8_t part;
+        int16_t componentA;
+        int16_t componentB;
+        int16_t componentC;
     } modm_packed;
 
     struct ImuData
@@ -289,6 +342,16 @@ private:
     bool limitSwitchDepressed;
 
     ImuDataReceivedCallbackFunc imuDataReceivedCallbackFunc = nullptr;
+    std::array<tap::algorithms::transforms::Transform, NUM_REMOTE_IMU_TYPES>
+        remoteImuMountingTransforms{
+            tap::algorithms::transforms::Transform::identity(),
+            tap::algorithms::transforms::Transform::identity(),
+            tap::algorithms::transforms::Transform::identity()};
+    std::array<bool, NUM_REMOTE_IMU_TYPES> hasRemoteImuMountingTransform{false, false, false};
+    bool wasConnectedLastSend = false;
+    uint8_t imuMountingSyncBurstsRemaining = 0;
+    uint16_t requestedCalibrationSampleCount = 0;
+    bool hasRequestedCalibrationSampleCount = false;
 
     void handleXAxisMessage(const modm::can::Message& message);
 
@@ -328,6 +391,14 @@ private:
             revolutionCounter--;
         }
     }
+
+    void queueImuMountingTransformSync();
+    bool sendImuMountingTransformSyncMessage(
+        RemoteImuType imuType,
+        TransformMessagePart part,
+        const tap::algorithms::transforms::Transform& transform);
+    bool hasAnyImuMountingTransformsConfigured() const;
+    void sendImuMountingTransformSync();
 };
 }  // namespace aruwsrc::communication::can
 
