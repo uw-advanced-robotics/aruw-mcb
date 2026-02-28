@@ -79,6 +79,8 @@ public:
     DISALLOW_COPY_AND_ASSIGN(TurretMCBCanComm);
 
     mockable void init();
+    mockable void initialize(float sampleFrequency, float mahonyKp, float mahonyKi) override;
+    mockable void periodicIMUUpdate() override;
 
     mockable inline void attachImuDataReceivedCallback(ImuDataReceivedCallbackFunc func)
     {
@@ -101,7 +103,7 @@ public:
      */
     mockable inline float getGx() const override
     {
-        return static_cast<float>(lastCompleteImuData.rawRollVelocity) * IMU_SCALING_FACTOR;
+        return imuData.gyroRadPerSec.x();
     }
 
     /**
@@ -124,7 +126,7 @@ public:
      */
     mockable inline float getGy() const override
     {
-        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) * IMU_SCALING_FACTOR;
+        return imuData.gyroRadPerSec.y();
     }
 
     /**
@@ -140,14 +142,14 @@ public:
     /**
      * @return turret yaw angle in radians, normalized between [-pi, pi]
      */
-    mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
+    mockable inline float getYaw() const override { return lastCompleteImuData.yaw; }
 
     /**
      * @return turret yaw angular velocity in rad/sec
      */
     mockable inline float getGz() const override
     {
-        return static_cast<float>(lastCompleteImuData.rawYawVelocity) * IMU_SCALING_FACTOR;
+        return imuData.gyroRadPerSec.z();
     }
 
     /**
@@ -160,12 +162,12 @@ public:
         return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
     }
 
-    mockable inline float getAx() const override { return lastCompleteImuData.xAcceleration; }
+    mockable inline float getAx() const override { return imuData.accG.x(); }
 
-    mockable inline float getAy() const override { return lastCompleteImuData.yAcceleration; }
+    mockable inline float getAy() const override { return imuData.accG.y(); }
 
-    mockable inline float getAz() const override { return lastCompleteImuData.zAcceleration; }
-    mockable inline float getTemp() const { return lastCompleteImuData.temperature; }
+    mockable inline float getAz() const override { return imuData.accG.z(); }
+    mockable inline float getTemp() const { return imuData.temperature; }
     mockable inline ImuState getImuState() const override
     {
         return isConnected() ? imuState : ImuState::IMU_NOT_CONNECTED;
@@ -193,9 +195,10 @@ public:
         txCommandMsgBitmask.update(TxCommandMsgBitmask::TURN_LASER_ON, isOn);
     }
 
-    mockable inline void requestCalibration()
+    mockable inline void requestCalibration() override
     {
         txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
+        imuState = ImuState::IMU_CALIBRATING;
     }
 
     mockable void sendData();

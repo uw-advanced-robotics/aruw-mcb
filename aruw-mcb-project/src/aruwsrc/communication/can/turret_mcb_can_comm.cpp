@@ -80,6 +80,23 @@ void TurretMCBCanComm::init()
     timeSynchronizationRxHandler.attachSelfToRxHandler();
 }
 
+void TurretMCBCanComm::initialize(float, float, float)
+{
+    imuData = {};
+    currProcessingImuData = {};
+    lastCompleteImuData = {};
+    prevIMUDataReceivedTime = 0;
+    yawRevolutions = 0;
+    pitchRevolutions = 0;
+    rollRevolutions = 0;
+    imuState = ImuState::IMU_NOT_CONNECTED;
+}
+
+void TurretMCBCanComm::periodicIMUUpdate()
+{
+    // IMU fusion/calibration is performed on the turret MCB side.
+}
+
 void TurretMCBCanComm::sendData()
 {
     if (sendMcbDataTimer.execute())
@@ -101,6 +118,10 @@ void TurretMCBCanComm::sendData()
 
     if (!isConnected())
     {
+        imuData = {};
+        currProcessingImuData = {};
+        lastCompleteImuData = {};
+        prevIMUDataReceivedTime = 0;
         yawRevolutions = 0;
         pitchRevolutions = 0;
         rollRevolutions = 0;
@@ -185,6 +206,17 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
     updateRevolutionCounter(currProcessingImuData.yaw, lastCompleteImuData.yaw, yawRevolutions);
 
     lastCompleteImuData = currProcessingImuData;
+    imuData.accG = tap::algorithms::transforms::Vector(
+        lastCompleteImuData.xAcceleration,
+        lastCompleteImuData.yAcceleration,
+        lastCompleteImuData.zAcceleration);
+    imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(
+        static_cast<float>(lastCompleteImuData.rawRollVelocity) * IMU_SCALING_FACTOR,
+        static_cast<float>(lastCompleteImuData.rawPitchVelocity) * IMU_SCALING_FACTOR,
+        static_cast<float>(lastCompleteImuData.rawYawVelocity) * IMU_SCALING_FACTOR);
+    // imuData.accRaw = imuData.accG;
+    // imuData.gyroRaw = imuData.gyroRadPerSec;
+    prevIMUDataReceivedTime = lastCompleteImuData.turretDataTimestamp;
 
     if (imuDataReceivedCallbackFunc != nullptr)
     {
@@ -210,7 +242,10 @@ void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
             imuState = ImuState::IMU_NOT_CONNECTED;
         }
 
-        lastCompleteImuData.temperature = static_cast<float>(status->temperatureCentiC) * 0.01f;
+        const float temperature = static_cast<float>(status->temperatureCentiC) * 0.01f;
+        lastCompleteImuData.temperature = temperature;
+        currProcessingImuData.temperature = temperature;
+        imuData.temperature = temperature;
     }
     else
     {
