@@ -165,6 +165,11 @@ public:
     mockable inline float getAy() const override { return lastCompleteImuData.yAcceleration; }
 
     mockable inline float getAz() const override { return lastCompleteImuData.zAcceleration; }
+    mockable inline float getTemp() const { return lastCompleteImuData.temperature; }
+    mockable inline ImuState getImuState() const override
+    {
+        return isConnected() ? imuState : ImuState::IMU_NOT_CONNECTED;
+    }
 
     mockable inline uint32_t getIMUDataTimestamp() const
     {
@@ -237,6 +242,13 @@ private:
         uint8_t seq;
     } modm_packed;
 
+    struct TurretStatusMessageData
+    {
+        uint8_t statusBitmask;
+        uint8_t imuState;
+        int16_t temperatureCentiC;
+    } modm_packed;
+
     struct ImuData
     {
         float yaw;                     ///< Normalized yaw value, between [-pi, pi]
@@ -248,6 +260,7 @@ private:
         float xAcceleration;           ///< (m/s^2) X-Acceleration
         float yAcceleration;           ///< (m/s^2) Y-Acceleration
         float zAcceleration;           ///< (m/s^2) Z-Acceleration
+        float temperature;             ///< (degC)
         uint32_t turretDataTimestamp;  ///< Timestamp that the IMU data was received
         uint8_t seq;                   ///< Sequence number for synchronizing axis messages
     };

@@ -68,6 +68,7 @@ TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBu
       txCommandMsgBitmask(),
       sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
 {
+    imuState = ImuState::IMU_NOT_CONNECTED;
 }
 
 void TurretMCBCanComm::init()
@@ -102,6 +103,8 @@ void TurretMCBCanComm::sendData()
     {
         yawRevolutions = 0;
         pitchRevolutions = 0;
+        rollRevolutions = 0;
+        imuState = ImuState::IMU_NOT_CONNECTED;
     }
 }
 
@@ -191,7 +194,29 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
 
 void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
 {
-    limitSwitchDepressed = message.data[0] & 0b1;
+    if (message.getLength() >= sizeof(TurretStatusMessageData))
+    {
+        const TurretStatusMessageData* status =
+            reinterpret_cast<const TurretStatusMessageData*>(message.data);
+        limitSwitchDepressed = status->statusBitmask & 0b1;
+
+        const uint8_t stateRaw = status->imuState;
+        if (stateRaw <= static_cast<uint8_t>(ImuState::IMU_CALIBRATED))
+        {
+            imuState = static_cast<ImuState>(stateRaw);
+        }
+        else
+        {
+            imuState = ImuState::IMU_NOT_CONNECTED;
+        }
+
+        lastCompleteImuData.temperature = static_cast<float>(status->temperatureCentiC) * 0.01f;
+    }
+    else
+    {
+        // Legacy status payload: only limit switch bit.
+        limitSwitchDepressed = message.data[0] & 0b1;
+    }
 }
 
 void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message&)
