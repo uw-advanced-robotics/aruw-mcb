@@ -84,6 +84,12 @@ TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBu
           canBus,
           this,
           &TurretMCBCanComm::handleTimeSynchronizationRequest),
+      imuMountingRequestRxHandler(
+          drivers,
+          IMU_MOUNTING_REQUEST_RX_CAN_ID,
+          canBus,
+          this,
+          &TurretMCBCanComm::handleImuMountingTransformRequest),
       txCommandMsgBitmask(),
       sendMcbDataTimer(SEND_MCB_DATA_TIMEOUT)
 {
@@ -97,6 +103,7 @@ void TurretMCBCanComm::init()
     zAxisMessageHandler.attachSelfToRxHandler();
     turretStatusRxHandler.attachSelfToRxHandler();
     timeSynchronizationRxHandler.attachSelfToRxHandler();
+    imuMountingRequestRxHandler.attachSelfToRxHandler();
 }
 
 void TurretMCBCanComm::initialize(float, float, float)
@@ -118,13 +125,6 @@ void TurretMCBCanComm::periodicIMUUpdate()
 
 void TurretMCBCanComm::sendData()
 {
-    const bool connectedNow = isConnected();
-    if (connectedNow && !wasConnectedLastSend && hasAnyImuMountingTransformsConfigured())
-    {
-        queueImuMountingTransformSync();
-    }
-    wasConnectedLastSend = connectedNow;
-
     if (sendMcbDataTimer.execute())
     {
         txCommandMsgBitmask.update(
@@ -309,7 +309,6 @@ void TurretMCBCanComm::setImuMountingTransforms(
     clearImuMountingTransforms();
     setImuMountingTransform(RemoteImuType::BMI088, bmi088MountingTransform);
     setImuMountingTransform(RemoteImuType::ISM330, ism330MountingTransform);
-    queueImuMountingTransformSync();
 }
 
 void TurretMCBCanComm::clearImuMountingTransforms() { hasRemoteImuMountingTransform.fill(false); }
@@ -331,6 +330,14 @@ void TurretMCBCanComm::setImuMountingTransform(
 void TurretMCBCanComm::queueImuMountingTransformSync()
 {
     imuMountingSyncBurstsRemaining = IMU_MOUNTING_SYNC_BURST_COUNT;
+}
+
+void TurretMCBCanComm::handleImuMountingTransformRequest(const modm::can::Message&)
+{
+    if (hasAnyImuMountingTransformsConfigured())
+    {
+        queueImuMountingTransformSync();
+    }
 }
 
 bool TurretMCBCanComm::sendImuMountingTransformSyncMessage(

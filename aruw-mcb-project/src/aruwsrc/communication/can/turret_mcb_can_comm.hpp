@@ -70,6 +70,7 @@ public:
 
     enum CanIDs
     {
+        IMU_MOUNTING_REQUEST_RX_CAN_ID = 0x1f5,
         IMU_MOUNTING_TX_CAN_ID = 0x1f6,
         TURRET_MCB_TX_CAN_ID = 0x1f7,
         SYNC_RX_CAN_ID = 0x1f8,
@@ -330,6 +331,7 @@ private:
     TurretMcbRxHandler turretStatusRxHandler;
 
     TurretMcbRxHandler timeSynchronizationRxHandler;
+    TurretMcbRxHandler imuMountingRequestRxHandler;
 
     tap::arch::MilliTimeout imuConnectedTimeout;
 
@@ -348,7 +350,6 @@ private:
             tap::algorithms::transforms::Transform::identity(),
             tap::algorithms::transforms::Transform::identity()};
     std::array<bool, NUM_REMOTE_IMU_TYPES> hasRemoteImuMountingTransform{false, false, false};
-    bool wasConnectedLastSend = false;
     uint8_t imuMountingSyncBurstsRemaining = 0;
     uint16_t requestedCalibrationSampleCount = 0;
     bool hasRequestedCalibrationSampleCount = false;
@@ -362,6 +363,7 @@ private:
     void handleTurretMessage(const modm::can::Message& message);
 
     void handleTimeSynchronizationRequest(const modm::can::Message& message);
+    void handleImuMountingTransformRequest(const modm::can::Message& message);
 
     /**
      * Updates the passed in revolutionCounter if a revolution increment or decrement has been
