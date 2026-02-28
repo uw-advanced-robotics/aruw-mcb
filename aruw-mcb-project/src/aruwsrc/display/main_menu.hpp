@@ -78,9 +78,7 @@ private:
 
     ImuCalibrateMenu imuCalibrateMenu;
     AutotuneMenu autotuneMenu;
-#if defined(TARGET_ENGINEER) || defined(TARGET_DART)
     LimitSwitchMenu limitSwitchMenu;
-#endif
     CVMenu cvMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
