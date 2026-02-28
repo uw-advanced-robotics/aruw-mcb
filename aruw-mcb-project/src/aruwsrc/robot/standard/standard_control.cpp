@@ -108,6 +108,7 @@
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/prediction_indicator.hpp"
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
@@ -630,6 +631,15 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 
+PredictionIndicator predictionIndicator(
+    drivers()->visionCoprocessor,
+    refSerialTransmitter,
+    odometrySubsystem,
+    turret,
+    frictionWheelSpeedPredictor,
+    30
+    );
+
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
@@ -637,7 +647,8 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &visionTargetIndicator};
+    &visionTargetIndicator,
+    &predictionIndicator};
 
 aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
     *drivers(),

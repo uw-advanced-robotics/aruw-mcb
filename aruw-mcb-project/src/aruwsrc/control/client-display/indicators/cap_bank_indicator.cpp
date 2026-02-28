@@ -47,6 +47,8 @@ modm::ResumableResult<void> CapBankIndicator::sendInitialGraphics()
     RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
     RF_CALL(numberIndicator.initialize());
 
+    RF_CALL(refSerialTransmitter.sendGraphic(&backgroundGraphic));
+
     RF_END();
 }
 
@@ -134,7 +136,7 @@ modm::ResumableResult<void> CapBankIndicator::update()
                     static_cast<Tx::GraphicColor>(numberGraphic.graphicData.color);
             }
 
-            numberIndicator.setIndicatorState(voltage_squared / VOLTAGE_SQUARED_MAX);
+            numberIndicator.setIndicatorState(voltage_squared / VOLTAGE_SQUARED_MAX * 100);
             RF_CALL(numberIndicator.draw());
         }
 
@@ -168,6 +170,22 @@ void CapBankIndicator::initialize()
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::WHITE);
+
+    getUnusedGraphicName(graphicName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &backgroundGraphic.graphicData,
+        graphicName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER - 1,
+        Tx::GraphicColor::BLACK);
+
+    RefSerialTransmitter::configLine(
+        3,
+        TEXT_X - 10,
+        TEXT_Y - 10,
+        TEXT_X + 200,
+        TEXT_Y + 10,
+        &backgroundGraphic.graphicData);
 
     if (capBank != nullptr)
     {

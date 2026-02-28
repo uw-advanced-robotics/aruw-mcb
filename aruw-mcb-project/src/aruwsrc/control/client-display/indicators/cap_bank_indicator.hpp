@@ -85,6 +85,7 @@ private:
      * A number that shows the charge % of the Capacitor Bank.
      */
     Tx::Graphic1Message numberGraphic;
+    Tx::Graphic1Message backgroundGraphic;
     tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
 
     Tx::GraphicColor previousColor;

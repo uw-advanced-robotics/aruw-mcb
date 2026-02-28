@@ -50,8 +50,7 @@ public:
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const float defaultLaunchSpeed,
-        const Transform &worldToTurret);
+        const float defaultLaunchSpeed);
 
     void initialize() override final;
 
@@ -64,9 +63,14 @@ private:
     const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
-    const Transform &worldToTurret;
+
+    modm::Vector3f predictedShotLandingPosition;
 
     Tx::Graphic1Message hitPredictionGraphic;
+    
+    static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
+
+    RefSerialData::Tx::GraphicColor INDICATOR_COLOR = RefSerialData::Tx::GraphicColor::CYAN;
 };
 
 }  // namespace aruwsrc::control::client_display::indicators

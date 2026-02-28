@@ -29,8 +29,7 @@ PredictionIndicator::PredictionIndicator(
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-    const float defaultLaunchSpeed,
-    const Transform &worldToTurret)
+    const float defaultLaunchSpeed)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),
       refSerialTransmitter(refSerialTransmitter),
@@ -38,14 +37,14 @@ PredictionIndicator::PredictionIndicator(
       turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
-      worldToTurret(worldToTurret)
+      predictedShotLandingPosition(0, 0, 0)
 {
 }
 
+float aex, aey, aez, abx, aby, arx, ary, arz, arp, arw, arw2;
 modm::ResumableResult<void> PredictionIndicator::update()
 {
-    const float plateHeight = 0.15f;  // TODO don't hardcode thus
-    modm::Vector3f predictedShotLandingPosition;
+    const float plateHeight = 0.3f;  // TODO don't hardcode this
     float time;
     ProjectedResult result;
 
@@ -61,10 +60,10 @@ modm::ResumableResult<void> PredictionIndicator::update()
     // defines the turret where the chassis is, under the assumption that the chassis origin and
     // turret origin coincide
     modm::Vector3f turretPosition(odometryInterface.getCurrentLocation2D().getPosition(), 0);
-    modm::Vector3f turretRotation(
-        turretSubsystem.getWorldYaw(),
-        turretSubsystem.getWorldPitch(),
-        0);
+
+    arp = turretSubsystem.getWorldPitch();
+    arw = turretSubsystem.getWorldYaw();
+    arw2 = odometryInterface.getYaw();
 
     // Puts turret in it's place in world frame
     // If no offset, skip all offsetting
@@ -84,19 +83,31 @@ modm::ResumableResult<void> PredictionIndicator::update()
         turretPosition += turretOffset;
     }
 
+    arx = turretPosition.x;
+    ary = turretPosition.y;
+    arz = turretPosition.z;
+        
+    modm::Vector3f launchVelocity = modm::Vector3f(
+        launchSpeed * cosf(turretSubsystem.getWorldPitch()) * cosf(turretSubsystem.getWorldYaw()),
+        launchSpeed * cosf(turretSubsystem.getWorldPitch()) * sinf(turretSubsystem.getWorldYaw()),
+        launchSpeed * sinf(turretSubsystem.getWorldPitch()));
+
     ballistics::SecondOrderKinematicState predictedShotLandingState(
         turretPosition,
-        turretRotation * launchSpeed,
+        launchVelocity,  // x component of the launch velocity
         modm::Vector3f(0, -tap::algorithms::ACCELERATION_GRAVITY, 0));
+
     RF_BEGIN(1);
 
     // calculate the time it would take for the shot to reach the plate height
-    time = (-predictedShotLandingState.velocity.z -
-            sqrtf(
-                powf(predictedShotLandingState.velocity.z, 2) -
-                2 * tap::algorithms::ACCELERATION_GRAVITY *
-                    (predictedShotLandingState.position.z - plateHeight))) /
-           tap::algorithms::ACCELERATION_GRAVITY;
+    // time = (-predictedShotLandingState.velocity.z -
+    //         sqrtf(
+    //             powf(predictedShotLandingState.velocity.z, 2) -
+    //             2 * tap::algorithms::ACCELERATION_GRAVITY *
+    //                 (predictedShotLandingState.position.z - plateHeight))) /
+    //        tap::algorithms::ACCELERATION_GRAVITY;
+
+    time = 0.1;
 
     // calculate the position of the shot when it reaches the plate height
     predictedShotLandingPosition = predictedShotLandingState.projectForward(time);
@@ -107,6 +118,12 @@ modm::ResumableResult<void> PredictionIndicator::update()
         predictedShotLandingPosition.getX(),
         predictedShotLandingPosition.getY(),
         predictedShotLandingPosition.getZ()));
+    
+    aex = predictedShotLandingPosition.getX();
+    aey = predictedShotLandingPosition.getY();
+    aez = predictedShotLandingPosition.getZ();
+    abx = result.screenX;
+    aby = result.screenY;
 
     // If the predicted landing position is not in frame, delete the graphic
     if (!result.inFrame)
@@ -118,10 +135,30 @@ modm::ResumableResult<void> PredictionIndicator::update()
         hitPredictionGraphic.graphicData.operation =
             hitPredictionGraphic.graphicData.operation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD
                                                                              : Tx::GRAPHIC_MODIFY;
+        RefSerialTransmitter::configRectangle(
+            INDICATOR_LINE_THICKNESS,
+            result.screenX - 10,
+            result.screenY - 10,
+            result.screenX + 10,
+            result.screenY + 10,
+            &hitPredictionGraphic.graphicData);
     }
 
     // Send the graphics
     RF_CALL(refSerialTransmitter.sendGraphic(&hitPredictionGraphic, true, true, false));
     RF_END();
+}
+
+void PredictionIndicator::initialize()
+{
+    uint8_t indicatorName[3];
+
+    getUnusedGraphicName(indicatorName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &hitPredictionGraphic.graphicData,
+        indicatorName,
+        Tx::GRAPHIC_DELETE,
+        DEFAULT_GRAPHIC_LAYER + 1,
+        INDICATOR_COLOR);
 }
 }  // namespace aruwsrc::control::client_display::indicators
