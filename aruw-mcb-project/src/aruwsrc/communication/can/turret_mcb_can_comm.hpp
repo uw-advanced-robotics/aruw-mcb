@@ -101,10 +101,7 @@ public:
     /**
      * @return turret yaw angular velocity in rad/sec
      */
-    mockable inline float getGx() const override
-    {
-        return imuData.gyroRadPerSec.x();
-    }
+    mockable inline float getGx() const override { return imuData.gyroRadPerSec.x(); }
 
     /**
      * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
@@ -124,10 +121,7 @@ public:
     /**
      * @return turret pitch angular velocity in rad/sec
      */
-    mockable inline float getGy() const override
-    {
-        return imuData.gyroRadPerSec.y();
-    }
+    mockable inline float getGy() const override { return imuData.gyroRadPerSec.y(); }
 
     /**
      * @return An unwrapped (not normalized) turret pitch angle, in rad. This object keeps track of
@@ -147,10 +141,7 @@ public:
     /**
      * @return turret yaw angular velocity in rad/sec
      */
-    mockable inline float getGz() const override
-    {
-        return imuData.gyroRadPerSec.z();
-    }
+    mockable inline float getGz() const override { return imuData.gyroRadPerSec.z(); }
 
     /**
      * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
