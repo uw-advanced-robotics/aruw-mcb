@@ -131,6 +131,10 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
+#if defined(TARGET_SENTRY_NAME)
+            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
+#endif
+
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) ||       \
     defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
     defined(TARGET_SENTRY_NAME)
@@ -191,6 +195,10 @@ static void initializeIo(Drivers* drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_NAME)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
+#endif
+
+#if defined(TARGET_SENTRY_NAME)
+    drivers->turretMCBCanCommBus2.init();
 #endif
 
 #if defined(TARGET_ENGINEER)
