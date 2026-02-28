@@ -98,14 +98,14 @@ protected:
 
     enum class OdomInput
     {
-        WHEEL_0 = 0,      // Wheel 0 linear speed (m/s)
-        WHEEL_1,          // Wheel 1 linear speed (m/s)
-        WHEEL_2,          // Wheel 2 linear speed (m/s)
-        WHEEL_3,          // Wheel 3 linear speed (m/s)
-        ACC_X,            // IMU acceleration X (world)
-        ACC_Y,            // IMU acceleration Y (world)
-        GYRO_Z,           // IMU yaw rate (rad/s)
-        YAW,              // External yaw observation (rad)
+        WHEEL_0 = 0,  // Wheel 0 linear speed (m/s)
+        WHEEL_1,      // Wheel 1 linear speed (m/s)
+        WHEEL_2,      // Wheel 2 linear speed (m/s)
+        WHEEL_3,      // Wheel 3 linear speed (m/s)
+        ACC_X,        // IMU acceleration X (world)
+        ACC_Y,        // IMU acceleration Y (world)
+        GYRO_Z,       // IMU yaw rate (rad/s)
+        YAW,          // External yaw observation (rad)
         NUM_INPUTS,
     };
 
@@ -124,48 +124,43 @@ private:
     static constexpr float WHEEL_RADIUS_SCALE = 1.0f;  // Wheel radius calibration scale
 
     static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE = 1.0f;  // Base wheel speed variance
-    static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 1.2f;        // Accel noise variance
-    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.2f;         // Gyro noise variance
-    static constexpr float YAW_MEASUREMENT_VARIANCE = 0.05f;             // Yaw observer variance
+    static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 1.2f;   // Accel noise variance
+    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.2f;    // Gyro noise variance
+    static constexpr float YAW_MEASUREMENT_VARIANCE = 0.05f;        // Yaw observer variance
 
     // Process noise covariance matrix (Q) - how much we trust the motion model.
     // State order: POS_X, POS_Y, VEL_X, VEL_Y, YAW, YAW_RATE, ACC_X, ACC_Y.
     // Larger values = less trust in model, more responsive to measurements
     static constexpr float EKF_Q[STATES_SQUARED] = {
-        5.44086e-09f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         5.44086e-09f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         2.47185e-05f, 0.0f,         0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         2.47185e-05f, 0.0f,         0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         3.91168e-08f, 0.0f,         0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         2.93711e-05f, 0.0f,         0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.2437e-05f,  0.0f,
-        0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         0.0f,         8.2437e-05f,
+        5.44086e-09f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        5.44086e-09f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        2.47185e-05f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        2.47185e-05f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        3.91168e-08f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        2.93711e-05f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        8.2437e-05f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        8.2437e-05f,
     };
 
     // Measurement noise covariance matrix (R).
     // Measurement order: WHEEL_0..WHEEL_3, ACC_X, ACC_Y, GYRO_Z, YAW.
     // Higher value means less trust
     static constexpr float EKF_R[INPUTS_SQUARED] = {
-        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,
-        0.0f,        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,
-        0.0f,        0.0f,        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,        0.0f,
-        0.0f,        0.0f,        0.0f,        9.66511e-03f, 0.0f,        0.0f,        0.0f,        0.0f,
-        0.0f,        0.0f,        0.0f,        0.0f,        9.66825e-03f, 0.0f,        0.0f,        0.0f,
-        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        9.66825e-03f, 0.0f,        0.0f,
-        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        3.69454e-04f, 0.0f,
-        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        0.0f,        2.04033e-07f,
+        9.66511e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        9.66511e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        9.66511e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        9.66511e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        9.66825e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        9.66825e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        3.69454e-04f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        2.04033e-07f,
     };
 
     // Initial state covariance matrix P0
     static constexpr float EKF_P0[STATES_SQUARED] = {
-        1E3, 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 1E3, 0  , 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 1E3, 0  , 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 1E3, 0  , 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 1E3, 0  , 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 1E3, 0  , 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 1E3, 0  ,
-        0  , 0  , 0  , 0  , 0  , 0  , 0  , 1E3,
+        1E3, 0,   0, 0, 0, 0,   0, 0, 0, 1E3, 0,   0, 0, 0, 0,   0, 0, 0, 1E3, 0,   0, 0,
+        0,   0,   0, 0, 0, 1E3, 0, 0, 0, 0,   0,   0, 0, 0, 1E3, 0, 0, 0, 0,   0,   0, 0,
+        0,   1E3, 0, 0, 0, 0,   0, 0, 0, 0,   1E3, 0, 0, 0, 0,   0, 0, 0, 0,   1E3,
     };
     // clang-format on
 

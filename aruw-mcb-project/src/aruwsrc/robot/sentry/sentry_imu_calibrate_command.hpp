@@ -112,7 +112,6 @@ protected:
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
-
 };
 }  // namespace aruwsrc::sentry
 

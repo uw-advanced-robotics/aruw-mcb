@@ -155,8 +155,10 @@ void FourWheelEKFOdometry::update()
     ekf.predict(dt);
 
     // Wrap yaw residual to avoid discontinuities at +/-pi.
-    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector z_pred;
-    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector x_current;
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector
+        z_pred;
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::StateVector
+        x_current;
     const auto& stateArray = ekf.getStateVectorAsMatrix();
     for (int i = 0; i < int(OdomState::NUM_STATES); i++)
     {
