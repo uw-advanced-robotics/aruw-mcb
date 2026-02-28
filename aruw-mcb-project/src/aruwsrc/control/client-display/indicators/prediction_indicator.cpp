@@ -62,7 +62,10 @@ modm::ResumableResult<void> PredictionIndicator::update()
 
     // defines the turret where the chassis is, under the assumption that the chassis origin and
     // turret origin coincide
-    modm::Vector3f turretPosition(odometryInterface.getCurrentLocation2D().getX(), odometryInterface.getCurrentLocation2D().getY(), 0);
+    modm::Vector3f turretPosition(
+        odometryInterface.getCurrentLocation2D().getX(),
+        odometryInterface.getCurrentLocation2D().getY(),
+        0);
 
     arp = turretSubsystem.getWorldPitch();
     arw = turretSubsystem.getWorldYaw();
@@ -89,7 +92,7 @@ modm::ResumableResult<void> PredictionIndicator::update()
     arx = turretPosition.x;
     ary = turretPosition.y;
     arz = turretPosition.z;
-        
+
     modm::Vector3f launchVelocity = modm::Vector3f(
         launchSpeed * cosf(turretSubsystem.getWorldPitch()) * cosf(turretSubsystem.getWorldYaw()),
         launchSpeed * cosf(turretSubsystem.getWorldPitch()) * sinf(turretSubsystem.getWorldYaw()),
@@ -114,11 +117,14 @@ modm::ResumableResult<void> PredictionIndicator::update()
 
     // calculate the position of the shot when it reaches the plate height
     predictedShotLandingPosition = predictedShotLandingState.projectForward(time);
-    predictedPosition = tap::algorithms::transforms::Position(predictedShotLandingPosition.x, predictedShotLandingPosition.y, predictedShotLandingPosition.z);
+    predictedPosition = tap::algorithms::transforms::Position(
+        predictedShotLandingPosition.x,
+        predictedShotLandingPosition.y,
+        predictedShotLandingPosition.z);
     // project the predicted shot landing position into the camera frame and then to screen
     // coordinates
     result = convertCameraFrameToScreenFrame(worldToCameraTransform.apply(predictedPosition));
-    
+
     aex = predictedShotLandingPosition.getX();
     aey = predictedShotLandingPosition.getY();
     aez = predictedShotLandingPosition.getZ();

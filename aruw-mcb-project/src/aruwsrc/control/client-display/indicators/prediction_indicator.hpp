@@ -69,7 +69,7 @@ private:
     modm::Vector3f predictedShotLandingPosition;
 
     Tx::Graphic1Message hitPredictionGraphic;
-    
+
     static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
 
     RefSerialData::Tx::GraphicColor INDICATOR_COLOR = RefSerialData::Tx::GraphicColor::CYAN;
