@@ -77,9 +77,8 @@ private:
     const char *bulletsRemainingText = "AMMO: ";
 
     Tx::Graphic1Message numberGraphic;
+    Tx::Graphic1Message backgroundGraphic;
     tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
-
-    Tx::GraphicData backgroundGraphic;
 
     int bulletCount = 0;
 

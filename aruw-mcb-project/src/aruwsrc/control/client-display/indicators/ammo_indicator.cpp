@@ -57,8 +57,9 @@ modm::ResumableResult<void> AmmoIndicator::sendInitialGraphics()
 {
     RF_BEGIN(0);
 
+    // send initial graphics
+    RF_CALL(refSerialTransmitter.sendGraphic(&backgroundGraphic));
     RF_CALL(refSerialTransmitter.sendGraphic(&textGraphic));
-
     RF_CALL(numberIndicator.initialize());
 
     RF_END();
@@ -85,6 +86,22 @@ void AmmoIndicator::initialize()
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
         Tx::GraphicColor::YELLOW);
+
+    getUnusedGraphicName(graphicName);
+    RefSerialTransmitter::configGraphicGenerics(
+        &backgroundGraphic.graphicData,
+        graphicName,
+        Tx::GRAPHIC_ADD,
+        DEFAULT_GRAPHIC_LAYER,
+        Tx::GraphicColor::BLACK);
+
+    RefSerialTransmitter::configLine(
+        SIZE + 10,
+        TEXT_X - 5,
+        TEXT_Y - SIZE / 2,
+        NUMBER_X + 125,
+        TEXT_Y - SIZE / 2,
+        &backgroundGraphic.graphicData);
 
     updateAmmoCount(0, &numberGraphic);
 }

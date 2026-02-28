@@ -50,6 +50,7 @@ public:
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+        const Transform &worldToCameraTransform,
         const float defaultLaunchSpeed);
 
     void initialize() override final;
@@ -62,6 +63,7 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
+    const Transform &worldToCameraTransform;
     const float defaultLaunchSpeed;
 
     modm::Vector3f predictedShotLandingPosition;

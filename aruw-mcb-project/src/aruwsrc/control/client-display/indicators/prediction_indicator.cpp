@@ -29,6 +29,7 @@ PredictionIndicator::PredictionIndicator(
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const Transform &worldToCameraTransform,
     const float defaultLaunchSpeed)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),
@@ -36,6 +37,7 @@ PredictionIndicator::PredictionIndicator(
       odometryInterface(odometryInterface),
       turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
+      worldToCameraTransform(worldToCameraTransform),
       defaultLaunchSpeed(defaultLaunchSpeed),
       predictedShotLandingPosition(0, 0, 0)
 {
@@ -44,13 +46,14 @@ PredictionIndicator::PredictionIndicator(
 float aex, aey, aez, abx, aby, arx, ary, arz, arp, arw, arw2;
 modm::ResumableResult<void> PredictionIndicator::update()
 {
-    const float plateHeight = 0.3f;  // TODO don't hardcode this
+    constexpr float plateHeight = 0.2f;  // TODO don't hardcode this
     float time;
     ProjectedResult result;
 
     // if the friction wheel launch speed is 0, use a default launch speed so ballistics
     // gives a reasonable computation
     float launchSpeed = frictionWheels.getPredictedLaunchSpeed();
+    tap::algorithms::transforms::Position predictedPosition(0, 0, 0);
 
     if (compareFloatClose(launchSpeed, 0.0f, 1e-5f))
     {
@@ -59,7 +62,7 @@ modm::ResumableResult<void> PredictionIndicator::update()
 
     // defines the turret where the chassis is, under the assumption that the chassis origin and
     // turret origin coincide
-    modm::Vector3f turretPosition(odometryInterface.getCurrentLocation2D().getPosition(), 0);
+    modm::Vector3f turretPosition(odometryInterface.getCurrentLocation2D().getX(), odometryInterface.getCurrentLocation2D().getY(), 0);
 
     arp = turretSubsystem.getWorldPitch();
     arw = turretSubsystem.getWorldYaw();
@@ -111,13 +114,10 @@ modm::ResumableResult<void> PredictionIndicator::update()
 
     // calculate the position of the shot when it reaches the plate height
     predictedShotLandingPosition = predictedShotLandingState.projectForward(time);
-
+    predictedPosition = tap::algorithms::transforms::Position(predictedShotLandingPosition.x, predictedShotLandingPosition.y, predictedShotLandingPosition.z);
     // project the predicted shot landing position into the camera frame and then to screen
     // coordinates
-    result = convertCameraFrameToScreenFrame(Position(
-        predictedShotLandingPosition.getX(),
-        predictedShotLandingPosition.getY(),
-        predictedShotLandingPosition.getZ()));
+    result = convertCameraFrameToScreenFrame(worldToCameraTransform.apply(predictedPosition));
     
     aex = predictedShotLandingPosition.getX();
     aey = predictedShotLandingPosition.getY();
@@ -158,7 +158,7 @@ void PredictionIndicator::initialize()
         &hitPredictionGraphic.graphicData,
         indicatorName,
         Tx::GRAPHIC_DELETE,
-        DEFAULT_GRAPHIC_LAYER + 1,
+        DEFAULT_GRAPHIC_LAYER,
         INDICATOR_COLOR);
 }
 }  // namespace aruwsrc::control::client_display::indicators

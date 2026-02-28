@@ -637,6 +637,7 @@ PredictionIndicator predictionIndicator(
     odometrySubsystem,
     turret,
     frictionWheelSpeedPredictor,
+    transformAdapter.getWorldToVTM(),
     30
     );
 
