@@ -62,7 +62,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kd = 40000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
-    .errDeadzone = 0.002f,
+    .errDeadzone = 0.00002f,
     .errorDerivativeFloor = 0.0f,
 };
 
@@ -70,9 +70,9 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
     YAW_HOME_CONFIG = {
         .super =
             {
-                .lowerBound = 0.0f,
-                .upperBound = 0.06f, // TODO: this is just for saftey while testing, eventually find real upper
-                .epsilon = 0.002f,
+                .lowerBound = -0.06f,
+                .upperBound = 0.00f, 
+                .epsilon = 0.00002f,
                 .maxSetpointIncrement = 0.05f,
                 .encoderRatio = YAW_MOTOR_GEAR_RATIO * YAW_LEADSCREW_THREAD_PITCH,
                 .posPidConfig = YAW_PID_CONFIG,
@@ -80,8 +80,8 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
                 .staticFeedforward = 0,
             },
         .home = 0.0f,
-        .homingSpeed = 0.01f,    // MAYBE CHANGE
-        .homingReversed = false  // TODO: CHANGE IF HOMES THE WRONG WAY
+        .homingSpeed = 0.007f,    
+        .homingReversed = true  
 };
 
 static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 1.0f;
@@ -117,7 +117,7 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
 
             },
         .home = 0.0f,
-        .homingSpeed = 50.0f,  // TODO CHANGE
+        .homingSpeed = 50.0f,  
         .homingReversed = true};
 
 }  // namespace aruwsrc::dart

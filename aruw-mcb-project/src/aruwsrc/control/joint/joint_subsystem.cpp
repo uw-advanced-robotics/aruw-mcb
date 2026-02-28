@@ -79,6 +79,7 @@ bool JointSubsystem::isOnline() const { return motor.isMotorOnline(); }
 
 void JointSubsystem::runPosPidController(float dt)
 {
+    debug_position = getPosition();
     error = setpoint.getValue() - getPosition();
     motorDesiredOutput = posPid.runController(error, getVelocity(), dt) + staticFeedforward;
     motor.setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
@@ -86,7 +87,6 @@ void JointSubsystem::runPosPidController(float dt)
 
 void JointSubsystem::refresh()
 {
-    debug_position = getPosition();
     this->updateSetpoint();
     runPosPidController(2.0f);  // todo: should be 0.002 but would requires retune
 }

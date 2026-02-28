@@ -233,7 +233,7 @@ void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
     drivers->commandMapper.addMap(&closeServoMapping);
     drivers->commandMapper.addMap(&homePullbackMapping);
     drivers->commandMapper.addMap(&pullbackMapping);
-    drivers->commandMapper.addMap(&rightMidLeftDown);
+    // drivers->commandMapper.addMap(&rightMidLeftDown);
     drivers->commandMapper.addMap(&homeYawMapping);
 }
 

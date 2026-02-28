@@ -89,7 +89,7 @@ public:
             {
                 calibrationState = CalibrationState::CALIBRATION_COMPLETE;
                 resetEncoderValue();
-                setSetpoint(home);
+                setSetpoint(getPosition());
             }
             else
             {
