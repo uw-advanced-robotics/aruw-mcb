@@ -364,7 +364,7 @@ tap::motor::DjiMotor turretWidowFrictionWheelLeft(
     aruwsrc::control::launcher::LEFT_MOTOR_ID,
     turretWidow::CAN_BUS_MOTORS,
     false,
-    "Left flywheel");
+    "Right flywheel");
 tap::motor::DjiMotor turretWidowFrictionWheelRight(
     drivers(),
     aruwsrc::control::launcher::RIGHT_MOTOR_ID,
