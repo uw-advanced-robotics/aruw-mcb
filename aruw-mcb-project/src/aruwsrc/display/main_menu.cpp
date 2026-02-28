@@ -105,13 +105,13 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addMotorMenuCallback));
-    #if defined(TARGET_ENGINEER) || defined(TARGET_DART)
+#if defined(TARGET_ENGINEER) || defined(TARGET_DART)
     addEntry(
         LimitSwitchMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addLimitSwitchMenuCallback));
-    #endif
+#endif
     addEntry(
         RefSerialMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
