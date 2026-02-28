@@ -1,0 +1,187 @@
+/*
+ * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "cube_storage_subsystem.hpp"
+
+#include "engineer_cube_storage_constants.hpp"
+
+using namespace aruwsrc::control::joint::homing;
+using namespace aruwsrc::control::joint::homing::trigger;
+
+namespace aruwsrc::engineer::cube_storage
+{
+CubeStorageSubsystem::CubeStorageSubsystem(
+    tap::Drivers *drivers,
+    tap::motor::MotorInterface &motor,
+    TriggerInterface &trigger,
+    Config config)
+    : Subsystem(drivers),
+      TriggerHomedJointSubsystem(drivers, motor, trigger, config)
+{
+}
+
+void CubeStorageSubsystem::initialize()
+{
+    TriggerHomedJointSubsystem::initialize();
+    currentCube = CubeOptions::ERROR;
+    hasCube[CubeOptions::LEFT] = false;
+    hasCube[CubeOptions::RIGHT] = false;
+}
+
+CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToAdd()
+{
+    checkForCubes();
+    if (!hasCube[CubeOptions::LEFT])
+    {
+        currentCube = CubeOptions::LEFT;
+    }
+    else if (!hasCube[CubeOptions::RIGHT])
+    {
+        currentCube = CubeOptions::RIGHT;
+    }
+    else
+    {
+        currentCube = CubeOptions::ERROR;
+    }
+    return currentCube;
+}
+
+CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCurrentCube() { return currentCube; }
+
+CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove()
+{
+    checkForCubes();
+    if (hasCube[CubeOptions::LEFT])
+    {
+        return CubeOptions::LEFT;
+    }
+    else if (hasCube[CubeOptions::RIGHT])
+    {
+        return CubeOptions::RIGHT;
+    }
+    else
+    {
+        return CubeOptions::ERROR;
+    }
+}
+
+/**
+ * sets the setpoint based on the current cube position
+ * @return true if set sucessfully, false otherwise
+ */
+bool CubeStorageSubsystem::setSetpointToCurrentCube()
+{
+    switch (currentCube)
+    {
+        case CubeOptions::LEFT:
+            setSetpoint(CUBE_STORAGE_RIGHT_SETPOINT);
+            return true;
+        case CubeOptions::RIGHT:
+            setSetpoint(CUBE_STORAGE_LEFT_SETPOINT);
+            return true;
+        default:
+            return false;
+    }
+}
+
+/* tell subsystem that you have added a cube
+ * @param CubeOptions which cube you are adding
+ * @return true for success, false for failure
+ */
+bool CubeStorageSubsystem::addCube()
+{
+    if (currentCube != CubeOptions::ERROR)
+    {
+        hasCube[currentCube] = 1;
+        return true;
+    }
+    return false;
+}
+
+/* tell subsystem that you have added a cube
+ * @param CubeOptions which cube you are adding
+ * @return true for success, false for failure
+ */
+bool CubeStorageSubsystem::removeCube()
+{
+    if (currentCube != CubeOptions::ERROR)
+    {
+        hasCube[currentCube] = 0;
+        return true;
+    }
+    return false;
+}
+
+bool CubeStorageSubsystem::storeWristPos(Transform newWristPosition)
+{
+    if (currentCube != CubeOptions::ERROR)
+    {
+        if (!hasCube[currentCube])
+        {
+            wristPos[currentCube] = newWristPosition;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return false;
+}
+
+/**
+ * @return wrist position for current cube position as a transform
+ * if no current cube will return an empty transform
+ */
+Transform CubeStorageSubsystem::getWristPos()
+{
+    if (currentCube != CubeOptions::ERROR)
+    {
+        if (hasCube[currentCube])
+        {
+            return wristPos[currentCube];
+        }
+        else
+        {
+            return Transform(0, 0, 0, 0, 0, 0);
+        }
+    }
+    return Transform(0, 0, 0, 0, 0, 0);
+}
+
+std::array<bool, 2> CubeStorageSubsystem::checkForCubes()
+{
+    hasCube[CubeOptions::LEFT] = getPressure(CubeOptions::LEFT) > 1.0f;  // TODO: update this
+    hasCube[CubeOptions::RIGHT] = getPressure(CubeOptions::RIGHT) > 1.0f;
+
+    return std::to_array(hasCube);
+}
+
+float CubeStorageSubsystem::getPressure(CubeOptions cube)
+{
+    if (cube != CubeOptions::ERROR)
+    {
+        return 1.0f;  // TODO: update to read the pressure
+    }
+    return std::numeric_limits<float>::quiet_NaN();
+}
+
+bool CubeStorageSubsystem::isReady() { return currentCube != CubeOptions::ERROR; }
+
+}  // namespace aruwsrc::engineer::cube_storage
