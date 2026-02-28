@@ -291,9 +291,9 @@ static void updateIo(Drivers* drivers)
 static void checkTurretMcbDisconnection(Drivers* drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
-    #if defined(TARGET_SENTRY_NAME)
-        turretMcbConnected = turretMcbConnected && drivers->turretMCBCanCommBus2.isConnected();
-    #endif
+#if defined(TARGET_SENTRY_NAME)
+    turretMcbConnected = turretMcbConnected && drivers->turretMCBCanCommBus2.isConnected();
+#endif
     if (!turretMcbConnected &&
         drivers->mpu6500.getImuState() !=
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)

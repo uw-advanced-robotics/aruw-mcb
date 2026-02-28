@@ -37,11 +37,23 @@ TEST(TurretMCBCanComm, sendData_hopper_cover_data)
     tap::Drivers drivers;
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
-    modm::can::Message blankMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
-    modm::can::Message filledMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {1}, false);
-
-    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(blankMsg)));
-    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(filledMsg)));
+    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, _))
+        .WillOnce([](tap::can::CanBus, const modm::can::Message& msg) {
+            EXPECT_EQ(msg.identifier, TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID);
+            EXPECT_EQ(msg.getLength(), 3);
+            EXPECT_EQ(msg.data[0], 0);
+            EXPECT_EQ(msg.data[1], 0);
+            EXPECT_EQ(msg.data[2], 0);
+            return true;
+        })
+        .WillOnce([](tap::can::CanBus, const modm::can::Message& msg) {
+            EXPECT_EQ(msg.identifier, TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID);
+            EXPECT_EQ(msg.getLength(), 3);
+            EXPECT_EQ(msg.data[0], 1);
+            EXPECT_EQ(msg.data[1], 0);
+            EXPECT_EQ(msg.data[2], 0);
+            return true;
+        });
 
     clock.time = 10'000;
     dut.setOpenHopperCover(false);
@@ -59,11 +71,33 @@ TEST(TurretMCBCanComm, sendData_calibrate_imu_data)
     tap::Drivers drivers;
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
-    modm::can::Message blankMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
-    modm::can::Message filledMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0b10}, false);
+#if defined(TARGET_SENTRY)
+    constexpr uint16_t expectedCalibrationSamples = 4000;
+#else
+    constexpr uint16_t expectedCalibrationSamples = 1500;
+#endif
+    constexpr uint8_t expectedCalibrationSamplesLsb =
+        static_cast<uint8_t>(expectedCalibrationSamples & 0xFFu);
+    constexpr uint8_t expectedCalibrationSamplesMsb =
+        static_cast<uint8_t>((expectedCalibrationSamples >> 8) & 0xFFu);
 
-    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, blankMsg));
-    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, filledMsg));
+    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, _))
+        .WillOnce([=](tap::can::CanBus, const modm::can::Message& msg) {
+            EXPECT_EQ(msg.identifier, TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID);
+            EXPECT_EQ(msg.getLength(), 3);
+            EXPECT_EQ(msg.data[0], 0b1010);  // recalibrate + sample-count-valid
+            EXPECT_EQ(msg.data[1], expectedCalibrationSamplesLsb);
+            EXPECT_EQ(msg.data[2], expectedCalibrationSamplesMsb);
+            return true;
+        })
+        .WillOnce([](tap::can::CanBus, const modm::can::Message& msg) {
+            EXPECT_EQ(msg.identifier, TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID);
+            EXPECT_EQ(msg.getLength(), 3);
+            EXPECT_EQ(msg.data[0], 0);
+            EXPECT_EQ(msg.data[1], 0);
+            EXPECT_EQ(msg.data[2], 0);
+            return true;
+        });
 
     clock.time = 10'000;
     dut.requestCalibration();
@@ -80,11 +114,23 @@ TEST(TurretMCBCanComm, sendData_laser_data)
     tap::Drivers drivers;
     TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
 
-    modm::can::Message blankMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
-    modm::can::Message filledMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0b100}, false);
-
-    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(blankMsg)));
-    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(filledMsg)));
+    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, _))
+        .WillOnce([](tap::can::CanBus, const modm::can::Message& msg) {
+            EXPECT_EQ(msg.identifier, TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID);
+            EXPECT_EQ(msg.getLength(), 3);
+            EXPECT_EQ(msg.data[0], 0);
+            EXPECT_EQ(msg.data[1], 0);
+            EXPECT_EQ(msg.data[2], 0);
+            return true;
+        })
+        .WillOnce([](tap::can::CanBus, const modm::can::Message& msg) {
+            EXPECT_EQ(msg.identifier, TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID);
+            EXPECT_EQ(msg.getLength(), 3);
+            EXPECT_EQ(msg.data[0], 0b100);
+            EXPECT_EQ(msg.data[1], 0);
+            EXPECT_EQ(msg.data[2], 0);
+            return true;
+        });
 
     clock.time = 10'000;
     dut.setLaserStatus(false);
