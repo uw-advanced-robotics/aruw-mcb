@@ -43,7 +43,6 @@ PredictionIndicator::PredictionIndicator(
 {
 }
 
-float aex, aey, aez, abx, aby, arx, ary, arz, arp, arw, arw2, adx, ady, adz;
 modm::ResumableResult<void> PredictionIndicator::update()
 {
     constexpr float plateHeight = 0.2f;  // TODO don't hardcode this
@@ -62,14 +61,33 @@ modm::ResumableResult<void> PredictionIndicator::update()
 
     // defines the turret where the chassis is, under the assumption that the chassis origin and
     // turret origin coincide
-    modm::Vector3f turretPosition(
-        odometryInterface.getCurrentLocation2D().getX(),
-        odometryInterface.getCurrentLocation2D().getY(),
-        0);
+    modm::Vector3f launchVelocity;
+    modm::Vector3f turretPosition;
+
+    ballistics::SecondOrderKinematicState predictedShotLandingState(
+        turretPosition,
+        launchVelocity,
+        modm::Vector3f(0, -tap::algorithms::ACCELERATION_GRAVITY, 0));
+
+    RF_BEGIN(0);
 
     arp = turretSubsystem.getWorldPitch();
     arw = turretSubsystem.getWorldYaw();
     arw2 = odometryInterface.getYaw();
+
+    launchVelocity = modm::Vector3f(
+        launchSpeed * cosf(turretSubsystem.getWorldPitch()) * cosf(turretSubsystem.getWorldYaw()) + odometryInterface.getCurrentVelocity2D().getX(),
+        launchSpeed * cosf(turretSubsystem.getWorldPitch()) * sinf(turretSubsystem.getWorldYaw() + odometryInterface.getCurrentVelocity2D().getY()),
+        launchSpeed * sinf(-turretSubsystem.getWorldPitch()));
+
+    adx = launchVelocity.x;
+    ady = launchVelocity.y;
+    adz = launchVelocity.z;
+
+    turretPosition = modm::Vector3f(
+        odometryInterface.getCurrentLocation2D().getX(),
+        odometryInterface.getCurrentLocation2D().getY(),
+        0);
 
     // Puts turret in it's place in world frame
     // If no offset, skip all offsetting
@@ -89,34 +107,19 @@ modm::ResumableResult<void> PredictionIndicator::update()
         turretPosition += turretOffset;
     }
 
-    arx = turretPosition.x;
-    ary = turretPosition.y;
+    arx = odometryInterface.getCurrentLocation2D().getX();
+    ary = odometryInterface.getCurrentLocation2D().getY();
     arz = turretPosition.z;
 
-    modm::Vector3f launchVelocity = modm::Vector3f(
-        launchSpeed * cosf(turretSubsystem.getWorldPitch()) * cosf(turretSubsystem.getWorldYaw()),
-        launchSpeed * cosf(turretSubsystem.getWorldPitch()) * sinf(turretSubsystem.getWorldYaw()),
-        launchSpeed * sinf(turretSubsystem.getWorldPitch()));
-    adx = launchVelocity.x;
-    ady = launchVelocity.y;
-    adz = launchVelocity.z;
-
-    ballistics::SecondOrderKinematicState predictedShotLandingState(
-        turretPosition,
-        launchVelocity, 
-        modm::Vector3f(0, -tap::algorithms::ACCELERATION_GRAVITY, 0));
-
-    RF_BEGIN(1);
-
     // calculate the time it would take for the shot to reach the plate height
-    // time = (-predictedShotLandingState.velocity.z -
-    //         sqrtf(
-    //             powf(predictedShotLandingState.velocity.z, 2) -
-    //             2 * tap::algorithms::ACCELERATION_GRAVITY *
-    //                 (predictedShotLandingState.position.z - plateHeight))) /
-    //        tap::algorithms::ACCELERATION_GRAVITY;
+    time = (-predictedShotLandingState.velocity.z -
+            sqrtf(
+                powf(predictedShotLandingState.velocity.z, 2) -
+                2 * tap::algorithms::ACCELERATION_GRAVITY *
+                    (predictedShotLandingState.position.z - plateHeight))) /
+           tap::algorithms::ACCELERATION_GRAVITY;
 
-    time = 0.1;
+    at = time;
 
     // calculate the position of the shot when it reaches the plate height
     predictedShotLandingPosition = predictedShotLandingState.projectForward(time);
@@ -135,7 +138,8 @@ modm::ResumableResult<void> PredictionIndicator::update()
     aby = result.screenY;
 
     // If the predicted landing position is not in frame, delete the graphic
-    if (result.screenX < 10 || result.screenX + 10 > SCREEN_WIDTH || result.screenY < 10 || result.screenY + 10 > SCREEN_HEIGHT)
+    if (result.screenX < 10 || result.screenX + 10 > SCREEN_WIDTH || result.screenY < 10 ||
+        result.screenY + 10 > SCREEN_HEIGHT)
     {
         hitPredictionGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
     }

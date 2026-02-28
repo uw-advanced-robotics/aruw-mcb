@@ -55,7 +55,7 @@ public:
 
 private:
     // X position of the text
-    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 300;
+    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 350;
     static constexpr uint16_t NUMBER_X = TEXT_X + 175;
     // Y position of the text
     static constexpr uint16_t TEXT_Y = 900;
@@ -63,7 +63,6 @@ private:
     static constexpr uint16_t SIZE = 40;
     // WIDTH of the text
     static constexpr uint16_t WIDTH = 4;
-
 
     Tx::GraphicCharacterMessage textGraphic;
     const char *bulletsRemainingText = "AMMO: ";

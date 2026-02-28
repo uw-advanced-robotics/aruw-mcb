@@ -41,7 +41,7 @@ using namespace tap::communication::serial;
 /**
  * Draws a box showing where a shot fired right now would hit on a robot, based on data from vision.
  */
-class PredictionIndicator : public HudIndicator, protected modm::Resumable<2>
+class PredictionIndicator : public HudIndicator, protected modm::Resumable<1>
 {
 public:
     PredictionIndicator(
@@ -73,6 +73,8 @@ private:
     static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
 
     RefSerialData::Tx::GraphicColor INDICATOR_COLOR = RefSerialData::Tx::GraphicColor::CYAN;
+
+    float aex, aey, aez, abx, aby, arx, ary, arz, arp, arw, arw2, adx, ady, adz, at;
 };
 
 }  // namespace aruwsrc::control::client_display::indicators
