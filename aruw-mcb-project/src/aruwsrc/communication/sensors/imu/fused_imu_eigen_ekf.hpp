@@ -41,11 +41,7 @@ struct FusedImuEkfBackendAdapter<aruwsrc::algorithms::ExtendedKalmanFilterCmsis<
     using FilterType = aruwsrc::algorithms::ExtendedKalmanFilterCmsis<States, Inputs>;
     static constexpr bool usesCmsisBackend = true;
 
-    static inline int predict(FilterType& filter, float dt)
-    {
-        filter.predict(dt);
-        return 0;
-    }
+    static inline void predict(FilterType& filter, float dt) { filter.predict(dt); }
 
     template <typename MatrixT>
     static inline void setIdentity(MatrixT& matrix)
@@ -96,7 +92,7 @@ struct FusedImuEkfBackendAdapter<aruwsrc::algorithms::ExtendedKalmanFilterEigen<
     using FilterType = aruwsrc::algorithms::ExtendedKalmanFilterEigen<States, Inputs>;
     static constexpr bool usesCmsisBackend = false;
 
-    static inline int predict(FilterType& filter, float dt) { return filter.predict(dt); }
+    static inline void predict(FilterType& filter, float dt) { filter.predict(dt); }
 
     template <typename MatrixT>
     static inline void setIdentity(MatrixT& matrix)
@@ -149,7 +145,7 @@ class FusedImuEigenEkf : public aruwsrc::algorithms::ExtendedKalmanFilter<6, 6>
 {
 public:
     using Base = aruwsrc::algorithms::ExtendedKalmanFilter<6, 6>;
-    static constexpr uint16_t stateSize = 6;
+    static constexpr size_t stateSize = 6;
 
     using StateVector = typename Base::StateVector;
     using InputVector = typename Base::InputVector;
@@ -175,7 +171,7 @@ public:
     }
 
     int update(const InputVector& z) { return updateSingleImu(0, z); }
-    int predict(float dt) { return BackendAdapter::predict(static_cast<Base&>(*this), dt); }
+    void predict(float dt) { BackendAdapter::predict(static_cast<Base&>(*this), dt); }
 
     template <typename MatrixT>
     static inline void zeroMatrix(MatrixT& matrix)
@@ -203,16 +199,15 @@ public:
         }
 
         auto& measurementCovariance = this->getMeasurementCovariance();
-        for (int r = 0; r < static_cast<int>(stateSize); r++)
+        for (size_t r = 0; r < stateSize; r++)
         {
-            for (int c = 0; c < static_cast<int>(stateSize); c++)
+            for (size_t c = 0; c < stateSize; c++)
             {
-                measurementCovariance[static_cast<size_t>(r) * stateSize + static_cast<size_t>(c)] =
-                    BackendAdapter::getMatrixElement(
-                        measurementCovarianceBlocks[imuIndex],
-                        static_cast<size_t>(r),
-                        static_cast<size_t>(c),
-                        stateSize);
+                measurementCovariance[r * stateSize + c] = BackendAdapter::getMatrixElement(
+                    measurementCovarianceBlocks[imuIndex],
+                    r,
+                    c,
+                    stateSize);
             }
         }
 

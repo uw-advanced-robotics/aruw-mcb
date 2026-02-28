@@ -126,10 +126,11 @@ public:
         resetFilterState();
     }
 
-    void initialize(float sampleFrequency, float mahonyKp, float mahonyKi) override
+    void initialize(
+        float sampleFrequency,
+        [[maybe_unused]] float mahonyKp,
+        [[maybe_unused]] float mahonyKi) override
     {
-        (void)mahonyKp;
-        (void)mahonyKi;
         AbstractIMU::initialize(sampleFrequency, 0.0f, 0.0f);
         samplePeriodS = (sampleFrequency > 0.0f) ? (1.0f / sampleFrequency) : 0.001f;
         prevFilterUpdateTimeUs = tap::arch::clock::getTimeMicroseconds();
@@ -220,6 +221,7 @@ public:
             {
                 continue;
             }
+            anyValid = true;
 
             const tap::algorithms::transforms::Vector imuAcc(
                 imus[i]->getAx(),
@@ -234,7 +236,6 @@ public:
             gyro[i] = transformGyro(imuTransforms[i], imuToFusionTransforms[i], imuGyro);
             tempSum += imus[i]->getTemp();
             tempCount++;
-            anyValid = true;
             if (firstValidIndex == N)
             {
                 firstValidIndex = i;
@@ -277,33 +278,31 @@ public:
         if (signalFilterInitialized)
         {
             updateSignalProcessCovariance(samplePeriodS);
-            if (signalFilter.predict(samplePeriodS) == 0)
+            signalFilter.predict(samplePeriodS);
+            const auto& xPred = signalFilter.getStateVectorAsMatrix();
+            SignalInputVector zPredicted;
+            setVectorElem(zPredicted, 0, xPred[0]);
+            setVectorElem(zPredicted, 1, xPred[1]);
+            setVectorElem(zPredicted, 2, xPred[2]);
+            setVectorElem(zPredicted, 3, xPred[3]);
+            setVectorElem(zPredicted, 4, xPred[4]);
+            setVectorElem(zPredicted, 5, xPred[5]);
+            for (size_t i = 0; i < N; i++)
             {
-                const auto& xPred = signalFilter.getStateVectorAsMatrix();
-                SignalInputVector zPredicted;
-                setVectorElem(zPredicted, 0, xPred[0]);
-                setVectorElem(zPredicted, 1, xPred[1]);
-                setVectorElem(zPredicted, 2, xPred[2]);
-                setVectorElem(zPredicted, 3, xPred[3]);
-                setVectorElem(zPredicted, 4, xPred[4]);
-                setVectorElem(zPredicted, 5, xPred[5]);
-                for (size_t i = 0; i < N; i++)
+                if (!validFlags[i])
                 {
-                    if (!validFlags[i])
-                    {
-                        (void)signalFilter.updateSingleImu(static_cast<uint16_t>(i), zPredicted);
-                    }
-                    else
-                    {
-                        SignalInputVector zBlock;
-                        setVectorElem(zBlock, 0, accel[i].x());
-                        setVectorElem(zBlock, 1, accel[i].y());
-                        setVectorElem(zBlock, 2, accel[i].z());
-                        setVectorElem(zBlock, 3, gyro[i].x());
-                        setVectorElem(zBlock, 4, gyro[i].y());
-                        setVectorElem(zBlock, 5, gyro[i].z());
-                        (void)signalFilter.updateSingleImu(static_cast<uint16_t>(i), zBlock);
-                    }
+                    (void)signalFilter.updateSingleImu(static_cast<uint16_t>(i), zPredicted);
+                }
+                else
+                {
+                    SignalInputVector zBlock;
+                    setVectorElem(zBlock, 0, accel[i].x());
+                    setVectorElem(zBlock, 1, accel[i].y());
+                    setVectorElem(zBlock, 2, accel[i].z());
+                    setVectorElem(zBlock, 3, gyro[i].x());
+                    setVectorElem(zBlock, 4, gyro[i].y());
+                    setVectorElem(zBlock, 5, gyro[i].z());
+                    (void)signalFilter.updateSingleImu(static_cast<uint16_t>(i), zBlock);
                 }
             }
         }
@@ -380,13 +379,13 @@ private:
     std::array<float, 3> fusedGyroVarianceDiag = {1.0e-4f, 1.0e-4f, 1.0e-4f};
     float accelInnovationGateSq = 400.0f;
     float gyroInnovationGateSq = 16.0f;
-    SignalFilterWrapper signalFilter;
-
     float samplePeriodS = 0.001f;
     uint32_t prevFilterUpdateTimeUs = 0U;
     bool signalFilterInitialized = false;
     bool filterInitialized = false;
     bool pendingReinitializeAfterCalibration = false;
+
+    SignalFilterWrapper signalFilter;
 
     // Nominal state
     std::array<float, quatSize> q = {1.0f, 0.0f, 0.0f, 0.0f};
@@ -398,14 +397,6 @@ private:
     float rollRad = 0.0f;
     float pitchRad = 0.0f;
     float yawRad = 0.0f;
-
-    // dont hate me chinmay
-    static inline float wrapAngle(float x)
-    {
-        while (x >= M_PI) x -= M_TWOPI;
-        while (x < -M_PI) x += M_TWOPI;
-        return x;
-    }
 
     static inline typename Config::ImuNoiseDensity selectNoiseForType(ImuType t, const Config& cfg)
     {
@@ -1236,6 +1227,7 @@ private:
         const tap::algorithms::transforms::Transform& imuToFusion,
         const tap::algorithms::transforms::Vector& imuAcc) const
     {
+        /// TODO: Issue #862. Turn IMU position into a vector for cross
         const auto imuPosition = fusionToImu.getTranslation();
         const auto fusionAngVel = fusionToImu.getAngularVel();
         const auto imuVelocity = tap::algorithms::transforms::Vector(
@@ -1347,7 +1339,7 @@ private:
             recomputeImuToFusionTransform(i);
         }
     }
-};
+};  // namespace aruwsrc::communication::sensors::imu
 }  // namespace aruwsrc::communication::sensors::imu
 
 #endif  // FUSED_IMU_MEKF_KF_HPP_
