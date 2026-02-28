@@ -28,7 +28,9 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/can/aruw_analog_sensor.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
+#include "aruwsrc/communication/sensors/encoder/analog_sensor_encoder.hpp"
 #include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -118,6 +120,27 @@ namespace sentry_control
 {
 MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
+aruwsrc::communication::can::AruwAnalogSensor turretMajorYawAnalogSensor(
+    drivers(),
+    turretMajor::YAW_ANALOG_SENSOR_CAN_BUS,
+    turretMajor::YAW_ANALOG_SENSOR_CAN_ID);
+
+aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Calibration
+    turretMajorYawAnalogCalibration{
+        .rawMin = turretMajor::YAW_ANALOG_RAW_MIN,
+        .rawMax = turretMajor::YAW_ANALOG_RAW_MAX,
+        .rawZero = turretMajor::YAW_ANALOG_RAW_ZERO,
+        .outputRangeRadians = turretMajor::YAW_ANALOG_OUTPUT_RANGE_RADIANS,
+    };
+
+aruwsrc::communication::sensors::encoder::AnalogSensorEncoder turretMajorYawAnalogEncoder(
+    &turretMajorYawAnalogSensor,
+    turretMajor::YAW_ANALOG_SENSOR_CHANNEL == 0
+        ? aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Channel::AI0
+        : aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Channel::AI1,
+    turretMajorYawAnalogCalibration,
+    turretMajor::YAW_ANALOG_SENSOR_INVERTED);
+
 tap::motor::DjiMotor turretMajorYawMotor(
     drivers(),
     tap::motor::MOTOR5,
@@ -126,7 +149,8 @@ tap::motor::DjiMotor turretMajorYawMotor(
     "Major Yaw Turret",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(27.0f / 95.0f),  // pulley ratio
-    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue);
+    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue,
+    &turretMajorYawAnalogEncoder);
 
 struct TurretMinorMotors
 {
@@ -689,6 +713,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
+    turretMajorYawAnalogSensor.initialize();
     buzzer.initialize();
     chassis.initialize();
     turretWidow.initialize();
@@ -696,10 +721,6 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
     transformerSubsystem.initialize();
     arucoResetSubsystem.initialize();
-
-    // rightOmni.initialize();
-    // leftOmni.initialize();
-
     turretWidowFrictionWheels.initialize();
 
     turretWidowAgitator.initialize();
