@@ -30,34 +30,24 @@ class DigitalOutCommand : public tap::control::Command
 public:
     DigitalOutCommand(DigitalOutSubsystem& subsystem, const bool state)
         : subsystem(subsystem),
-          state(state),
-          running(false)
+          state(state)
     {
         addSubsystemRequirement(dynamic_cast<tap::control::Subsystem*>(&subsystem));
     }
 
-    inline void initialize() override {}
+    inline void initialize() override { subsystem.set(state); }
 
-    inline void execute() override
-    {
-        subsystem.set(state);
-        running = true;
-    }
+    inline void execute() override {}
 
-    inline void end(bool) override
-    {
-        subsystem.refreshSafeDisconnect();
-        running = false;
-    }
+    inline void end(bool) override {}
 
-    inline bool isFinished() const override { return false; }
+    inline bool isFinished() const override { return true; }
 
     const char* getName() const override { return "Digital Output Command"; }
 
 private:
     DigitalOutSubsystem& subsystem;
     const bool state;
-    bool running;
 };  // class DigitalOutCommand
 
 }  // namespace aruwsrc::control::digital
