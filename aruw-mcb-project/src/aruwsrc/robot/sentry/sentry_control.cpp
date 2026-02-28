@@ -690,10 +690,10 @@ void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
     buzzer.initialize();
-    // chassis.initialize();
+    chassis.initialize();
     turretWidow.initialize();
-    // turretMajor.initialize();
-    // odometrySubsystem.initialize();
+    turretMajor.initialize();
+    odometrySubsystem.initialize();
     transformerSubsystem.initialize();
     arucoResetSubsystem.initialize();
 
@@ -711,10 +711,10 @@ void initializeSubsystems()
 void registerSentrySubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&buzzer);
-    // drivers->commandScheduler.registerSubsystem(&turretMajor);
-    // drivers->commandScheduler.registerSubsystem(&chassis);
+    drivers->commandScheduler.registerSubsystem(&turretMajor);
+    drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretWidow);
-    // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
@@ -724,7 +724,7 @@ void registerSentrySubsystems(Drivers *drivers)
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
-    // drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
+    drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
     drivers->stateMachine.attachAutoNavController(&autoNavController);
 }
 
