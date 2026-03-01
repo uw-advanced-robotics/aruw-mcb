@@ -100,7 +100,7 @@ static constexpr uint8_t YAW_ANALOG_SENSOR_CHANNEL = 1;  // 0 = AI0, 1 = AI1
 static constexpr bool YAW_ANALOG_SENSOR_INVERTED = false;
 static constexpr uint16_t YAW_ANALOG_RAW_MIN = 164;
 static constexpr uint16_t YAW_ANALOG_RAW_MAX = 1603;
-static constexpr uint16_t YAW_ANALOG_RAW_ZERO = 800-164;
+static constexpr uint16_t YAW_ANALOG_RAW_ZERO = 800 - 164;
 static constexpr float YAW_ANALOG_OUTPUT_RANGE_RADIANS = M_TWOPI;
 
 static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TRANSFORM(

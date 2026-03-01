@@ -159,23 +159,19 @@ void SentryImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
-            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) &&
-                shit)
+            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) && shit)
             {
                 turretMajor.getMutableMotor().setChassisFrameSetpoint(
                     (turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle() +
                      LAMPREY_SHIT_BUMP));
             }
 
-            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) &&
-                !shit)
+            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) && !shit)
             {
                 lampreyAligned = true;
                 turretMajorInternalEncoder.alignWith(&turretMajorLampreyEncoder);
                 turretMajor.getMutableMotor().setChassisFrameSetpoint(
-                Angle(turretMajor.getReadOnlyMotor()
-                        .getConfig()
-                        .startAngle));
+                    Angle(turretMajor.getReadOnlyMotor().getConfig().startAngle));
             }
 
             bool turretsNotMoving = true;
@@ -289,9 +285,8 @@ void SentryImuCalibrateCommand::end(bool)
 
 bool SentryImuCalibrateCommand::isLampreyShit()
 {
-    turretMajorLampreyEncoderHighpassValue =
-        turretMajorLampreyEncoderHighpass.filterData(
-            turretMajorLampreyEncoder.getPosition().getUnwrappedValue());
+    turretMajorLampreyEncoderHighpassValue = turretMajorLampreyEncoderHighpass.filterData(
+        turretMajorLampreyEncoder.getPosition().getUnwrappedValue());
     turretMajorLampreyEncoderLowpassValue =
         turretMajorLampreyEncoderLowpass.filterData(turretMajorLampreyEncoderHighpassValue);
     loopCounter++;
@@ -307,15 +302,17 @@ bool SentryImuCalibrateCommand::isLampreyShit()
     {
         return true;
     }
-    else {
+    else
+    {
         if (std::fabs(turretMajorLampreyEncoderLowpass.filterData(0)) < LAMPREY_SHIT_THRESHOLD)
         {
             return false;
-        } else{
+        }
+        else
+        {
             return true;
         }
     }
-
 }
 
 }  // namespace aruwsrc::sentry

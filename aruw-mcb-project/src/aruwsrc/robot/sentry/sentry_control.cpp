@@ -27,8 +27,8 @@
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
-#include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
+#include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/can/aruw_analog_sensor.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/sensors/encoder/analog_sensor_encoder.hpp"
@@ -150,10 +150,10 @@ tap::motor::DjiMotor turretMajorYawMotor(
     true,
     "Major Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (27.0f / 95.0f),  // pulley ratio
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(27.0f / 95.0f),  // pulley ratio
     turretMajor::YAW_MOTOR_CONFIG.startEncoderValue
     // &turretMajorYawAnalogEncoder
-    );
+);
 
 struct TurretMinorMotors
 {
@@ -248,7 +248,7 @@ DjiMotor rightFrontMotor(
     true,
     "Right Front Motor",
     false,
-    (-17.0f/268.0f));
+    (-17.0f / 268.0f));
 
 DjiMotor leftFrontMotor(
     drivers(),
@@ -257,7 +257,7 @@ DjiMotor leftFrontMotor(
     true,
     "Left Front Motor",
     false,
-    (-17.0f/268.0f));
+    (-17.0f / 268.0f));
 
 DjiMotor leftBackMotor(
     drivers(),
@@ -266,7 +266,7 @@ DjiMotor leftBackMotor(
     true,
     "Left Back Motor",
     false,
-    (-17.0f/268.0f));
+    (-17.0f / 268.0f));
 
 DjiMotor rightBackMotor(
     drivers(),
@@ -275,7 +275,7 @@ DjiMotor rightBackMotor(
     true,
     "Right Back Motor",
     false,
-    (-17.0f/268.0f));  
+    (-17.0f / 268.0f));
 
 aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
     drivers(),
@@ -313,7 +313,6 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     chassisYawObserver,
     drivers()->turretMCBCanCommBus2,
     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
-
 
 SentryTransforms transformer(
     odometrySubsystem,
