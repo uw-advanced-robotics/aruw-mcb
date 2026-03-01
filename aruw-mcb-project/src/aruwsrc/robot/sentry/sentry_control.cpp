@@ -504,6 +504,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     getChassisTurretMCBCanComm(),
     transformer,
     turretMajorYawAnalogEncoder,
+    *turretMajorYawMotor.getEncoder(),
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
