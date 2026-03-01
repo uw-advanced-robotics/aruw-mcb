@@ -39,7 +39,6 @@
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
 
-
 namespace aruwsrc::sentry
 {
 /**
