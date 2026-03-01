@@ -286,8 +286,8 @@ bool SentryImuCalibrateCommand::isLampreyShit()
     }
     const float turretMajorLampreyEncoderHighpassValue =
         turretMajorLampreyEncoderHighpass.filterData(
-            turretMajorLampreyEncoder.getPosition().getWrappedValue());
-    return turretMajorLampreyEncoderHighpassValue > LAMPREY_SHIT_THRESHOLD;
+            turretMajorLampreyEncoder.getPosition().getUnwrappedValue());
+    return std::fabs(turretMajorLampreyEncoderHighpassValue) > LAMPREY_SHIT_THRESHOLD;
 }
 
 }  // namespace aruwsrc::sentry
