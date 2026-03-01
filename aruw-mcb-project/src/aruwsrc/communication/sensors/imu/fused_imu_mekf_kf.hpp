@@ -197,9 +197,7 @@ public:
         const auto logCycleTime = [&](const char* label) {
             if (telemetry != nullptr)
             {
-                telemetry->logSignal(
-                    label,
-                    tap::arch::clock::getTimeMicroseconds() - cycleStartUs);
+                telemetry->logSignal(label, tap::arch::clock::getTimeMicroseconds() - cycleStartUs);
             }
         };
 

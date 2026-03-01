@@ -22,8 +22,8 @@
 
 #include <array>
 #include <cinttypes>
-#include <cstddef>
 #include <cmath>
+#include <cstddef>
 #include <type_traits>
 
 #include "tap/algorithms/cmsis_mat.hpp"

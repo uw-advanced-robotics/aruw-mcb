@@ -24,8 +24,8 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 
 namespace aruwsrc::algorithms::odometry
