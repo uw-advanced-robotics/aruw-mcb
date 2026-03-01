@@ -503,6 +503,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     drivers()->turretMajorImu,
     getChassisTurretMCBCanComm(),
     transformer,
+    turretMajorYawAnalogEncoder,
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 

@@ -21,8 +21,11 @@
 
 #include <vector>
 
+#include "tap/algorithms/filter/butterworth.hpp"
+#include "tap/algorithms/filter/discrete_filter.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/timeout.hpp"
+#include "tap/communication/sensors/encoder/encoder_interface.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
@@ -35,6 +38,8 @@
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
+
+
 namespace aruwsrc::sentry
 {
 /**
@@ -86,6 +91,7 @@ public:
         tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
         aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
+        tap::encoder::EncoderInterface &turretMajorLampreyEncoder,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
@@ -110,8 +116,13 @@ protected:
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu;
     aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm;
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
+    tap::encoder::EncoderInterface &turretMajorLampreyEncoder;
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
+
+private:
+    bool isLampreyShit();
+    tap::algorithms::filter::DiscreteFilter<3> turretMajorLampreyEncoderHighpass;
 };
 }  // namespace aruwsrc::sentry
 

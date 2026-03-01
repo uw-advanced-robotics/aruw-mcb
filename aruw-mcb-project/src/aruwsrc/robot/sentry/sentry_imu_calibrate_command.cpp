@@ -45,6 +45,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
     aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
+    tap::encoder::EncoderInterface &turretMajorLampreyEncoder,
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime)
     : aruwsrc::control::imu::ImuCalibrateCommand(
@@ -60,8 +61,13 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       turretMajorImu(turretMajorImu),
       chassisImuComm(chassisImuComm),
       transformer(transformer),
+      turretMajorLampreyEncoder(turretMajorLampreyEncoder),
       successChime(successChime),
-      failChime(failChime)
+      failChime(failChime),
+      turretMajorLampreyEncoderHighpass(
+          tap::algorithms::filter::butterworth<2, tap::algorithms::filter::FilterType::HIGHPASS>(
+              780.0f,
+              1 / 500.0f))
 {
     for (auto &config : turretsAndControllers)
     {
@@ -144,6 +150,13 @@ void SentryImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
+            if (isLampreyShit())
+            {
+                turretMajor.getMutableMotor().setChassisFrameSetpoint(
+                    turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle() +
+                    Angle(modm::toRadian(10.0f)));
+            }
+
             bool turretsNotMoving = true;
             for (auto &config : turretsAndControllers)
             {
@@ -153,7 +166,7 @@ void SentryImuCalibrateCommand::execute()
 
             turretsNotMoving &= turretMajorReachedCenterAndNotMoving(turretMajor);
 
-            if (calibrationTimer.isExpired() && turretsNotMoving)
+            if (calibrationTimer.isExpired() && turretsNotMoving && !isLampreyShit())
             {
                 // enter calibration phase
                 calibrationTimer.stop();
@@ -250,6 +263,14 @@ void SentryImuCalibrateCommand::end(bool)
     // }
 
     // turretMajor->yawMotor.setMotorOutput(0);
+}
+
+bool SentryImuCalibrateCommand::isLampreyShit()
+{
+    const float turretMajorLampreyEncoderHighpassValue =
+        turretMajorLampreyEncoderHighpass.filterData(
+            turretMajorLampreyEncoder.getPosition().getWrappedValue());
+    return turretMajorLampreyEncoderHighpassValue > modm::toRadian(30.0f);
 }
 
 }  // namespace aruwsrc::sentry
