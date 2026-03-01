@@ -154,13 +154,16 @@ void SentryImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
-            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) && isLampreyShit())
+            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) &&
+                isLampreyShit())
             {
                 turretMajor.getMutableMotor().setChassisFrameSetpoint(
-                   (turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle() + LAMPREY_SHIT_BUMP));
+                    (turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle() +
+                     LAMPREY_SHIT_BUMP));
             }
 
-            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) && !isLampreyShit())
+            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) &&
+                !isLampreyShit())
             {
                 lampreyAligned = true;
                 turretMajorInternalEncoder.alignWith(&turretMajorLampreyEncoder);
@@ -277,7 +280,8 @@ void SentryImuCalibrateCommand::end(bool)
 bool SentryImuCalibrateCommand::isLampreyShit()
 {
     loopCounter++;
-    if (loopCounter < MIN_SATURATION_LOOPS){
+    if (loopCounter < MIN_SATURATION_LOOPS)
+    {
         return true;
     }
     const float turretMajorLampreyEncoderHighpassValue =
