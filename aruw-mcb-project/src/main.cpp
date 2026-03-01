@@ -295,20 +295,30 @@ static void updateIo(Drivers* drivers)
     defined(TARGET_SENTRY_NAME)
 static void checkTurretMcbDisconnection(Drivers* drivers)
 {
-    bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
-#if defined(TARGET_SENTRY_NAME)
-    turretMcbConnected = turretMcbConnected && drivers->turretMCBCanCommBus2.isConnected();
-#endif
-    if (!turretMcbConnected &&
-        drivers->mpu6500.getImuState() !=
-            tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
-    {
-        tap::buzzer::playNote(&drivers->pwm, 1000);
-    }
-    else
-    {
-        tap::buzzer::silenceBuzzer(&drivers->pwm);
-    }
+    // bool turretMcbConnected1 = drivers->turretMCBCanCommBus1.isConnected();
+    // bool turretMcbConnected2 = drivers->turretMCBCanCommBus2.isConnected();
+    // if (!turretMcbConnected1 && turretMcbConnected2 &&
+    //     drivers->mpu6500.getImuState() !=
+    //         tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+    // {
+    //     tap::buzzer::playNote(&drivers->pwm, 1000);
+    // }
+    // else if (!turretMcbConnected2 && turretMcbConnected1 &&
+    //          drivers->mpu6500.getImuState() !=
+    //              tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+    // {
+    //     tap::buzzer::playNote(&drivers->pwm, 1500);
+    // }
+    // else if (!turretMcbConnected1 && !turretMcbConnected2 &&
+    //          drivers->mpu6500.getImuState() !=
+    //              tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+    // {
+    //     tap::buzzer::playNote(&drivers->pwm, 2000);
+    // }
+    // else
+    // {
+    //     tap::buzzer::silenceBuzzer(&drivers->pwm);
+    // }
 }
 #endif
 

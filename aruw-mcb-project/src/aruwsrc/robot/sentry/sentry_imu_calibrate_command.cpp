@@ -69,7 +69,11 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       turretMajorLampreyEncoderHighpass(
           tap::algorithms::filter::butterworth<2, tap::algorithms::filter::FilterType::HIGHPASS>(
               780.0f,
-              1 / 500.0f))
+              1.0f / 500.0f)),
+      turretMajorLampreyEncoderLowpass(
+          tap::algorithms::filter::butterworth<2, tap::algorithms::filter::FilterType::LOWPASS>(
+              10.0f,
+              1.0f / 500.0f))
 {
     for (auto &config : turretsAndControllers)
     {
@@ -99,7 +103,7 @@ void SentryImuCalibrateCommand::initialize()
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();
-
+    lampreyAligned = false;
     loopCounter = 0;
 }
 
@@ -116,6 +120,7 @@ static inline bool turretMajorReachedCenterAndNotMoving(
 
 void SentryImuCalibrateCommand::execute()
 {
+    bool shit = isLampreyShit();
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
@@ -155,7 +160,7 @@ void SentryImuCalibrateCommand::execute()
             }
 
             if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) &&
-                isLampreyShit())
+                shit)
             {
                 turretMajor.getMutableMotor().setChassisFrameSetpoint(
                     (turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle() +
@@ -163,10 +168,14 @@ void SentryImuCalibrateCommand::execute()
             }
 
             if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) &&
-                !isLampreyShit())
+                !shit)
             {
                 lampreyAligned = true;
                 turretMajorInternalEncoder.alignWith(&turretMajorLampreyEncoder);
+                turretMajor.getMutableMotor().setChassisFrameSetpoint(
+                Angle(turretMajor.getReadOnlyMotor()
+                        .getConfig()
+                        .startAngle));
             }
 
             bool turretsNotMoving = true;
@@ -260,8 +269,9 @@ void SentryImuCalibrateCommand::execute()
 
 bool SentryImuCalibrateCommand::isFinished() const
 {
-    return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
-           calibrationState == CalibrationState::CALIBRATION_FAIL;
+    // return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
+    //        calibrationState == CalibrationState::CALIBRATION_FAIL;
+    return false;
 }
 
 void SentryImuCalibrateCommand::end(bool)
@@ -279,15 +289,33 @@ void SentryImuCalibrateCommand::end(bool)
 
 bool SentryImuCalibrateCommand::isLampreyShit()
 {
+    turretMajorLampreyEncoderHighpassValue =
+        turretMajorLampreyEncoderHighpass.filterData(
+            turretMajorLampreyEncoder.getPosition().getUnwrappedValue());
+    turretMajorLampreyEncoderLowpassValue =
+        turretMajorLampreyEncoderLowpass.filterData(turretMajorLampreyEncoderHighpassValue);
     loopCounter++;
+    if (std::fabs(turretMajorLampreyEncoderHighpassValue) > LAMPREY_SHIT_THRESHOLD)
+    {
+        if (turretMajorLampreyEncoderHighpassValue > turretMajorLampreyEncoderLowpassValue)
+        {
+            turretMajorLampreyEncoderLowpass.setSteadyState(turretMajorLampreyEncoderHighpassValue);
+        }
+        return true;
+    }
     if (loopCounter < MIN_SATURATION_LOOPS)
     {
         return true;
     }
-    const float turretMajorLampreyEncoderHighpassValue =
-        turretMajorLampreyEncoderHighpass.filterData(
-            turretMajorLampreyEncoder.getPosition().getUnwrappedValue());
-    return std::fabs(turretMajorLampreyEncoderHighpassValue) > LAMPREY_SHIT_THRESHOLD;
+    else {
+        if (std::fabs(turretMajorLampreyEncoderLowpass.filterData(0)) < LAMPREY_SHIT_THRESHOLD)
+        {
+            return false;
+        } else{
+            return true;
+        }
+    }
+
 }
 
 }  // namespace aruwsrc::sentry

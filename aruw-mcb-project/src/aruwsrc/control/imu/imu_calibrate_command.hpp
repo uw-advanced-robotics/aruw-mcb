@@ -89,7 +89,7 @@ public:
     const float positionZeroThreshold;
 
     static constexpr float DEFAULT_VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4f);
-    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
+    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.03f);
 
     struct TurretIMUCalibrationConfig
     {

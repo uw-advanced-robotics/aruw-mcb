@@ -28,6 +28,7 @@
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/communication/can/aruw_analog_sensor.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/sensors/encoder/analog_sensor_encoder.hpp"
@@ -146,12 +147,13 @@ tap::motor::DjiMotor turretMajorYawMotor(
     drivers(),
     tap::motor::MOTOR5,
     turretMajor::CAN_BUS_MOTOR,
-    false,
+    true,
     "Major Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(27.0f / 95.0f),  // pulley ratio
-    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue,
-    &turretMajorYawAnalogEncoder);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (27.0f / 95.0f),  // pulley ratio
+    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue
+    // &turretMajorYawAnalogEncoder
+    );
 
 struct TurretMinorMotors
 {
@@ -243,37 +245,37 @@ DjiMotor rightFrontMotor(
     drivers(),
     MOTOR1,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "Right Front Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    (-17.0f/268.0f));
 
 DjiMotor leftFrontMotor(
     drivers(),
     MOTOR2,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "Left Front Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    (-17.0f/268.0f));
 
 DjiMotor leftBackMotor(
     drivers(),
     MOTOR3,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "Left Back Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    (-17.0f/268.0f));
 
 DjiMotor rightBackMotor(
     drivers(),
     MOTOR4,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "Right Back Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    (-17.0f/268.0f));  
 
 aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
     drivers(),
@@ -292,18 +294,26 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
 
-const tap::motor::DjiMotor *sentryChassisMotorsForEkf[4] = {
-    &leftFrontMotor,
-    &rightFrontMotor,
-    &leftBackMotor,
-    &rightBackMotor};
+// const tap::motor::DjiMotor *sentryChassisMotorsForEkf[4] = {
+//     &leftFrontMotor,
+//     &rightFrontMotor,
+//     &leftBackMotor,
+//     &rightBackMotor};
 
-aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
-    *drivers(),
-    sentryChassisMotorsForEkf,
+// aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
+//     *drivers(),
+//     sentryChassisMotorsForEkf,
+//     chassisYawObserver,
+//     getChassisTurretMCBCanComm(),
+//     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
+
+aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+    drivers(),
+    chassis,
     chassisYawObserver,
-    getChassisTurretMCBCanComm(),
+    drivers()->turretMCBCanCommBus2,
     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
+
 
 SentryTransforms transformer(
     odometrySubsystem,
@@ -443,15 +453,16 @@ TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     turretMajor,
-    turretMajorWorldYawController,
+    turretMajorChassisYawController,
+    // turretMajorWorldYawController,
     MAJOR_USER_YAW_INPUT_SCALAR);
 
 TurretMinorSentryControlCommand turretWidowManualCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     turretWidow,
-    turretWidowWorldControllers.yawController,
-    turretWidowWorldControllers.pitchController,
+    turretWidowChassisControllers.yawController,
+    turretWidowChassisControllers.pitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR);
 

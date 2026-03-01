@@ -137,7 +137,7 @@ public:
         filterInitialized = false;
         pendingReinitializeAfterCalibration = true;
         resetFilterState();
-        requestCalibration();
+        // requestCalibration();
     }
 
     void setCalibrationSamples(int sampleCount)
