@@ -91,6 +91,7 @@ public:
         aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
         tap::encoder::EncoderInterface &turretMajorLampreyEncoder,
+        tap::encoder::EncoderInterface &turretMajorInternalEncoder,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
@@ -116,10 +117,16 @@ protected:
     aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm;
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
     tap::encoder::EncoderInterface &turretMajorLampreyEncoder;
+    tap::encoder::EncoderInterface &turretMajorInternalEncoder;
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
 private:
+    static constexpr float LAMPREY_SHIT_THRESHOLD = modm::toRadian(30.0f);
+    static constexpr float LAMPREY_SHIT_BUMP = modm::toRadian(10.0f);
+    static constexpr uint32_t MIN_SATURATION_LOOPS = 10;
+    uint32_t loopCounter{0};
+    bool lampreyAligned{false};
     bool isLampreyShit();
     tap::algorithms::filter::DiscreteFilter<3> turretMajorLampreyEncoderHighpass;
 };
