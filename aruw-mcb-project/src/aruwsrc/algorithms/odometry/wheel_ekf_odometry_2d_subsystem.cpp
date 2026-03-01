@@ -28,9 +28,10 @@ WheelEKFOdometry2DSubsystem::WheelEKFOdometry2DSubsystem(
     const tap::motor::DjiMotor* chassisMotors[4],
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& yawObserver,
     tap::communication::sensors::imu::ImuInterface& imu,
-    const modm::Vector2f initPos)
+    const modm::Vector2f initPos,
+    aruwsrc::communication::rtt::RttTelemetry* telemetry)
     : Subsystem(&drivers),
-      FourWheelEKFOdometry(chassisMotors, yawObserver, imu, initPos)
+      FourWheelEKFOdometry(chassisMotors, yawObserver, imu, initPos, telemetry)
 {
 }
 

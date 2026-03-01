@@ -29,6 +29,11 @@
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector.hpp"
 
+namespace aruwsrc::communication::rtt
+{
+class RttTelemetry;
+}
+
 namespace aruwsrc::algorithms::odometry
 {
 /**
@@ -63,7 +68,8 @@ public:
         const tap::motor::DjiMotor* chassisMotors[4],
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
-        const modm::Vector2f initPos);
+        const modm::Vector2f initPos,
+        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
@@ -186,6 +192,7 @@ private:
 
     /// Measurement vector for the EKF
     float z[int(OdomInput::NUM_INPUTS)];
+    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
 
     void updateChassisStateFromEKF();
 

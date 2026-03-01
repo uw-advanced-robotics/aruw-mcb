@@ -101,7 +101,9 @@ public:
           turretMajorImu(
               {&turretMajorPrimaryImu, &turretMajorImuSecondary, &mpu6500},
               turretMajorImuTransforms,
-              turretMajorImuTypes),
+              turretMajorImuTypes,
+              TurretMajorImuType::Config(),
+              &rttTelemetry),
 #else
           turretMajorImu(),
 #endif

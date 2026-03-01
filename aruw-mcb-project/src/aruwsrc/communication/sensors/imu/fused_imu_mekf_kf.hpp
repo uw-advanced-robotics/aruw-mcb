@@ -35,6 +35,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/fused_imu_eigen_ekf.hpp"
 
 namespace aruwsrc::communication::sensors::imu
@@ -111,14 +112,16 @@ public:
         const std::array<tap::communication::sensors::imu::AbstractIMU*, N>& imus,
         const std::array<tap::algorithms::transforms::Transform, N>& transforms,
         const std::array<ImuType, N>& imuTypes,
-        const Config& config = Config())
+        const Config& config = Config(),
+        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr)
         : AbstractIMU(tap::algorithms::transforms::Transform::identity()),
           config(config),
           imus(imus),
           imuTransforms(transforms),
           imuToFusionTransforms(transforms),
           perImuNoise(selectPerImuNoise(imuTypes, config)),
-          signalFilter(makeSignalQ(), makeSignalR(), makeSignalP0())
+          signalFilter(makeSignalQ(), makeSignalR(), makeSignalP0()),
+          telemetry(telemetry)
     {
         accelInnovationGateSq = config.accelInnovationGate * config.accelInnovationGate;
         gyroInnovationGateSq = config.gyroInnovationGate * config.gyroInnovationGate;
@@ -191,6 +194,14 @@ public:
     void periodicIMUUpdate() override
     {
         const uint32_t cycleStartUs = tap::arch::clock::getTimeMicroseconds();
+        const auto logCycleTime = [&](const char* label) {
+            if (telemetry != nullptr)
+            {
+                telemetry->logSignal(
+                    label,
+                    tap::arch::clock::getTimeMicroseconds() - cycleStartUs);
+            }
+        };
 
         if (prevFilterUpdateTimeUs != 0U)
         {
@@ -213,6 +224,7 @@ public:
             imuData.accG = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.temperature = 0.0f;
+            logCycleTime("perf/fused_imu/periodic_total_us");
             return;
         }
 
@@ -258,6 +270,7 @@ public:
             imuData.accG = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.temperature = 0.0f;
+            logCycleTime("perf/fused_imu/periodic_total_us");
             return;
         }
 
@@ -286,6 +299,7 @@ public:
 
         updateSignalMeasurementCovariance(states, accel, gyro, validFlags);
 
+        const uint32_t signalFilterStartUs = tap::arch::clock::getTimeMicroseconds();
         if (signalFilterInitialized)
         {
             updateSignalProcessCovariance(samplePeriodS);
@@ -319,6 +333,12 @@ public:
                 }
             }
         }
+        if (telemetry != nullptr)
+        {
+            telemetry->logSignal(
+                "perf/fused_imu/signal_filter_us",
+                tap::arch::clock::getTimeMicroseconds() - signalFilterStartUs);
+        }
 
         tap::algorithms::transforms::Vector fusedGyro(0.0f, 0.0f, 0.0f);
         tap::algorithms::transforms::Vector fusedAccel(0.0f, 0.0f, 0.0f);
@@ -344,6 +364,7 @@ public:
             pendingReinitializeAfterCalibration = false;
         }
 
+        const uint32_t mekfStartUs = tap::arch::clock::getTimeMicroseconds();
         predictWithGyro(fusedGyro, samplePeriodS);
 
         (void)runAccelUpdate(fusedAccel, fusedAccelVarianceDiag);
@@ -358,6 +379,13 @@ public:
             fusedAccel.y() - accelBias[1],
             fusedAccel.z() - accelBias[2]);
         imuData.temperature = (tempCount > 0) ? (tempSum / tempCount) : 0.0f;
+        if (telemetry != nullptr)
+        {
+            telemetry->logSignal(
+                "perf/fused_imu/mekf_us",
+                tap::arch::clock::getTimeMicroseconds() - mekfStartUs);
+        }
+        logCycleTime("perf/fused_imu/periodic_total_us");
     }
 
     inline const char* getName() const override { return "FusedIMUMEKFKF"; }
@@ -393,6 +421,7 @@ private:
     float accelInnovationGateSq = 400.0f;
     float gyroInnovationGateSq = 16.0f;
     SignalFilterWrapper signalFilter;
+    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
 
     float samplePeriodS = 0.001f;
     uint32_t prevFilterUpdateTimeUs = 0U;

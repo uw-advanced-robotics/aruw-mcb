@@ -38,6 +38,10 @@ namespace motor
 class DjiMotor;
 }
 }  // namespace tap
+namespace aruwsrc::communication::rtt
+{
+class RttTelemetry;
+}
 namespace aruwsrc::algorithms::odometry
 {
 /**
@@ -64,7 +68,8 @@ public:
         const tap::motor::DjiMotor* chassisMotors[4],
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& yawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
-        const modm::Vector2f initPos);
+        const modm::Vector2f initPos,
+        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
 
     void refresh() override;
 };

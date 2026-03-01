@@ -114,13 +114,33 @@ int main()
     while (1)
     {
         // do this as fast as you can
+        const uint32_t updateIoStartUs = tap::arch::clock::getTimeMicroseconds();
         PROFILE(drivers->profiler, updateIo, (drivers));
+        drivers->rttTelemetry.logSignal(
+            "perf/main/update_io_us",
+            tap::arch::clock::getTimeMicroseconds() - updateIoStartUs);
 
         if (sendMotorTimeout.execute())
         {
+            const uint32_t loop500HzStartUs = tap::arch::clock::getTimeMicroseconds();
+
+            uint32_t callStartUs = tap::arch::clock::getTimeMicroseconds();
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
+            drivers->rttTelemetry.logSignal(
+                "perf/main/mpu6500_periodic_us",
+                tap::arch::clock::getTimeMicroseconds() - callStartUs);
+
+            callStartUs = tap::arch::clock::getTimeMicroseconds();
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
+            drivers->rttTelemetry.logSignal(
+                "perf/main/scheduler_run_us",
+                tap::arch::clock::getTimeMicroseconds() - callStartUs);
+
+            callStartUs = tap::arch::clock::getTimeMicroseconds();
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
+            drivers->rttTelemetry.logSignal(
+                "perf/main/motor_can_tx_us",
+                tap::arch::clock::getTimeMicroseconds() - callStartUs);
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME)
             ((Drivers*)drivers)->plateHitTracker.update();
@@ -141,9 +161,23 @@ int main()
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 #if defined(TARGET_SENTRY_NAME)
+            callStartUs = tap::arch::clock::getTimeMicroseconds();
             PROFILE(drivers->profiler, drivers->turretMajorPrimaryImu.periodicIMUUpdate, ());
+            drivers->rttTelemetry.logSignal(
+                "perf/main/turret_imu_primary_us",
+                tap::arch::clock::getTimeMicroseconds() - callStartUs);
+
+            callStartUs = tap::arch::clock::getTimeMicroseconds();
             PROFILE(drivers->profiler, drivers->turretMajorImuSecondary.periodicIMUUpdate, ());
+            drivers->rttTelemetry.logSignal(
+                "perf/main/turret_imu_secondary_us",
+                tap::arch::clock::getTimeMicroseconds() - callStartUs);
+
+            callStartUs = tap::arch::clock::getTimeMicroseconds();
             PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
+            drivers->rttTelemetry.logSignal(
+                "perf/main/turret_imu_fused_us",
+                tap::arch::clock::getTimeMicroseconds() - callStartUs);
 #endif
 
 #ifdef TARGET_TESTBED
@@ -172,6 +206,10 @@ int main()
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
             // PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
 #endif
+
+            drivers->rttTelemetry.logSignal(
+                "perf/main/loop_500hz_us",
+                tap::arch::clock::getTimeMicroseconds() - loop500HzStartUs);
         }
         modm::delay_us(10);
     }

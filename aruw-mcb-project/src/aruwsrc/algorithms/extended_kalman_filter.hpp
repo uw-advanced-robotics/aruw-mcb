@@ -23,7 +23,7 @@
 #include <array>
 #include <cinttypes>
 #include <cstddef>
-#include <functional>
+#include <cmath>
 #include <type_traits>
 
 #include "tap/algorithms/cmsis_mat.hpp"
@@ -58,10 +58,10 @@ public:
     using ObservationMatrix = tap::algorithms::CMSISMat<INPUTS, STATES>;
     using KalmanGainMatrix = tap::algorithms::CMSISMat<STATES, INPUTS>;
 
-    using StateTransitionFunction = std::function<void(const StateVector&, StateVector&, float)>;
-    using ObservationFunction = std::function<void(const StateVector&, InputVector&)>;
-    using StateJacobianFunction = std::function<void(const StateVector&, StateMatrix&, float)>;
-    using ObservationJacobianFunction = std::function<void(const StateVector&, ObservationMatrix&)>;
+    using StateTransitionFunction = void (*)(const StateVector&, StateVector&, float);
+    using ObservationFunction = void (*)(const StateVector&, InputVector&);
+    using StateJacobianFunction = void (*)(const StateVector&, StateMatrix&, float);
+    using ObservationJacobianFunction = void (*)(const StateVector&, ObservationMatrix&);
 
     ExtendedKalmanFilterCmsis(
         StateTransitionFunction f,
@@ -136,11 +136,20 @@ public:
 
         StateVector xHat_prev = xHat;
         f(xHat_prev, xHat, dt);
-
-        P = F * P * Ft + Q;
+        (void)arm_mat_mult_f32(&F.matrix, &P.matrix, &FP.matrix);
+        (void)arm_mat_mult_f32(&FP.matrix, &Ft.matrix, &P_pred.matrix);
+        (void)arm_mat_add_f32(&P_pred.matrix, &Q.matrix, &P.matrix);
     }
 
-    int update(const InputVector& z)
+    int update(const InputVector& z) { return updateImpl(z, -1); }
+
+    int updateWrapped(const InputVector& z, uint16_t wrappedIndex)
+    {
+        return updateImpl(z, wrappedIndex < INPUTS ? static_cast<int>(wrappedIndex) : -1);
+    }
+
+private:
+    int updateImpl(const InputVector& z, int wrappedResidualIndex)
     {
         if (!initialized)
         {
@@ -158,6 +167,11 @@ public:
         if (arm_mat_sub_f32(&z.matrix, &z_pred.matrix, &y.matrix) != ARM_MATH_SUCCESS)
         {
             return 1;
+        }
+        if (wrappedResidualIndex >= 0)
+        {
+            float& wrappedResidual = y.data[static_cast<size_t>(wrappedResidualIndex)];
+            wrappedResidual = std::atan2(std::sin(wrappedResidual), std::cos(wrappedResidual));
         }
 
         if (arm_mat_mult_f32(&H.matrix, &P.matrix, &HP.matrix) != ARM_MATH_SUCCESS)
@@ -216,6 +230,7 @@ public:
         return 13;
     }
 
+public:
     void performUpdate(const InputVector& z, float dt)
     {
         predict(dt);
@@ -252,6 +267,8 @@ private:
     StateMatrix KH;
     StateMatrix IKH;
     StateMatrix P_new;
+    StateMatrix FP;
+    StateMatrix P_pred;
     InputMatrix HP;
     InputMatrix S;
     InputMatrix S_inv;
