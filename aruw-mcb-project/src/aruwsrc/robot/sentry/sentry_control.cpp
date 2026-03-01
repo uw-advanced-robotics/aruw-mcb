@@ -55,6 +55,7 @@
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
+#include "aruwsrc/control/governor/imu_not_calibrated_governor.hpp"
 #include "aruwsrc/control/governor/match_running_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
@@ -468,6 +469,11 @@ SentryManualDriveCommand chassisDriveCommand(
     &(drivers()->controlOperatorInterface),
     &chassis);
 
+NoteSequenceCommand imuNotCalibratedCommand(
+    buzzer,
+    IMU_NOT_CALIBRATED_NOTES,
+    IMU_NOT_CALIBRATED_NOTE_LENGTH_MS);
+
 NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
     buzzer,
     IMU_CALIBRATE_SUCCESS_NOTES,
@@ -499,6 +505,13 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     transformer,
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
+
+ImuNotCalibratedGovernor imuNotCalibratedGovernor(drivers(), drivers()->mpu6500);
+
+GovernorLimitedCommand<1> imuNotCalibratedCommandLimited(
+    {&buzzer},
+    imuNotCalibratedCommand,
+    {&imuNotCalibratedGovernor});
 
 autotune::GravityAutotuneCommand<9> gravityAutotuneCommandWidow(
     drivers(),
@@ -759,6 +772,8 @@ void setDefaultSentryCommands(Drivers *)
     turretWidowFrictionWheels.setDefaultCommand(&stopTurretWidowFrictionWheelSpinCommand);
 
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
+
+    buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
