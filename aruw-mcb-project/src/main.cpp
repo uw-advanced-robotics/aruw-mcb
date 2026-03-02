@@ -306,13 +306,16 @@ static void checkTurretMcbDisconnection(Drivers* drivers)
 
     bool isCalibrating =
         drivers->mpu6500.getImuState() ==
-            tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING ||
+            tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING;
+#if defined(TARGET_SENTRY_NAME)
+        isCalibrating = isCalibrating ||
         drivers->turretMajorPrimaryImu.getImuState() ==
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING ||
         drivers->turretMajorImuSecondary.getImuState() ==
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING ||
         drivers->turretMajorImu.getImuState() ==
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING;
+    #endif
     if (isCalibrating)
     {
         return;
