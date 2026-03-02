@@ -102,9 +102,9 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  * Radius of the wheels (m)
  */
 static constexpr float FUDGE_FACTOR = 0.999141881817f;
-static constexpr float WHEEL_RADIUS = 0.1016f * FUDGE_FACTOR;
+static constexpr float WHEEL_RADIUS = 0.0762f * FUDGE_FACTOR;
 
-static constexpr float WHEELBASE_RADIUS = 0.55f;
+static constexpr float WHEELBASE_RADIUS = 0.23864f;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
@@ -114,7 +114,7 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
  * @see `GIMBAL_X_OFFSET`.
  */
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
-static constexpr float CHASSIS_GEARBOX_RATIO = (1.0f / 19.0f);
+static constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRotationalSpeedFractionOfMax = 0.4f,

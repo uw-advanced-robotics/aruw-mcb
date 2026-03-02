@@ -243,39 +243,39 @@ TurretMinorChassisControllers turretWidowChassisControllers{
 
 DjiMotor rightFrontMotor(
     drivers(),
-    MOTOR1,
+    MOTOR2,
     tap::can::CanBus::CAN_BUS2,
-    true,
+    false,
     "Right Front Motor",
     false,
-    (-17.0f / 268.0f));
+    CHASSIS_GEARBOX_RATIO);
 
 DjiMotor leftFrontMotor(
     drivers(),
-    MOTOR2,
+    MOTOR1,
     tap::can::CanBus::CAN_BUS2,
-    true,
+    false,
     "Left Front Motor",
     false,
-    (-17.0f / 268.0f));
+    CHASSIS_GEARBOX_RATIO);
 
 DjiMotor leftBackMotor(
     drivers(),
-    MOTOR3,
+    MOTOR4,
     tap::can::CanBus::CAN_BUS2,
-    true,
+    false,
     "Left Back Motor",
     false,
-    (-17.0f / 268.0f));
+    CHASSIS_GEARBOX_RATIO);
 
 DjiMotor rightBackMotor(
     drivers(),
-    MOTOR4,
+    MOTOR3,
     tap::can::CanBus::CAN_BUS2,
-    true,
+    false,
     "Right Back Motor",
     false,
-    (-17.0f / 268.0f));
+    CHASSIS_GEARBOX_RATIO);
 
 aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
     drivers(),
@@ -357,7 +357,7 @@ struct TurretMinorWorldControllers
 // // @todo surely there's a better way to construct this
 SmoothPid turretWidowWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretWidowWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretWidowWorldYawVelPid(minorPidConfigs::LEFT_YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretWidowWorldYawVelPid(minorPidConfigs::MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretWidowWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 
 TurretMinorWorldControllers turretWidowWorldControllers{
@@ -453,16 +453,16 @@ TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     turretMajor,
-    turretMajorChassisYawController,
-    // turretMajorWorldYawController,
+    // turretMajorChassisYawController,
+    turretMajorWorldYawController,
     MAJOR_USER_YAW_INPUT_SCALAR);
 
 TurretMinorSentryControlCommand turretWidowManualCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     turretWidow,
-    turretWidowChassisControllers.yawController,
-    turretWidowChassisControllers.pitchController,
+    turretWidowWorldControllers.yawController,
+    turretWidowWorldControllers.pitchController,
     MINOR_USER_YAW_INPUT_SCALAR,
     MINOR_USER_PITCH_INPUT_SCALAR);
 

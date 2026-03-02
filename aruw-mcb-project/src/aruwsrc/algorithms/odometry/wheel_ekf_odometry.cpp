@@ -154,6 +154,12 @@ void FourWheelEKFOdometry::update()
 
     // Perform correction step with wrapped yaw residual to avoid discontinuities at +/-pi.
     ekf.updateWrapped(measurement, static_cast<uint16_t>(OdomInput::YAW));
+    if (yawMeasurementValid)
+    {
+        auto& xState = ekf.getMutableStateVector();
+        xState[int(OdomState::YAW)] = yawForRotation;
+        xState[int(OdomState::YAW_RATE)] = measurement.data[int(OdomInput::GYRO_Z)];
+    }
 
     // Update the location and velocity accessor objects with values from the state vector
     updateChassisStateFromEKF();
@@ -191,9 +197,10 @@ void FourWheelEKFOdometry::updateMeasurementCovariance(
         wheelAccelIndicator *= 0.25f;
     }
 
-    float imuAccelMagnitude = imuAccelWorld.getLength();
-    float slipIndicator = std::max(0.0f, wheelAccelIndicator - imuAccelMagnitude);
-    float slipScale = 1.0f + slipIndicator;
+    const float imuAccelMagnitude = imuAccelWorld.getLength();
+    const float slipIndicator = std::max(0.0f, wheelAccelIndicator - imuAccelMagnitude);
+    const float boundedSlip = std::clamp(slipIndicator * 0.1f, 0.0f, MAX_WHEEL_SLIP_SCALE - 1.0f);
+    const float slipScale = 1.0f + boundedSlip;
 
     for (int i = 0; i < 4; i++)
     {

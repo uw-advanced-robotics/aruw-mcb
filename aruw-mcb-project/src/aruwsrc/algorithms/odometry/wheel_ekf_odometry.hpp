@@ -129,10 +129,11 @@ private:
     static constexpr float MAX_DT = 0.02f;    // Upper bound on dt to avoid large prediction jumps
     static constexpr float WHEEL_RADIUS_SCALE = 1.0f;  // Wheel radius calibration scale
 
-    static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE = 1.0f;  // Base wheel speed variance
-    static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 1.2f;   // Accel noise variance
-    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.2f;    // Gyro noise variance
-    static constexpr float YAW_MEASUREMENT_VARIANCE = 0.05f;        // Yaw observer variance
+    static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE = 0.02f;  // Base wheel speed variance
+    static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 2.0f;    // Accel noise variance
+    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.02f;    // Gyro noise variance
+    static constexpr float YAW_MEASUREMENT_VARIANCE = 1.0e-4f;       // Yaw observer variance
+    static constexpr float MAX_WHEEL_SLIP_SCALE = 5.0f;
 
     // Process noise covariance matrix (Q) - how much we trust the motion model.
     // State order: POS_X, POS_Y, VEL_X, VEL_Y, YAW, YAW_RATE, ACC_X, ACC_Y.

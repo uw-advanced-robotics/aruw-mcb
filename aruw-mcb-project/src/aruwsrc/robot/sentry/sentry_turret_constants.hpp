@@ -131,12 +131,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace worldFrameCascadeController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    // .kp = 10.0f,
-    .kp = 0.0f,
+    .kp = 10.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.2f,
-    .maxOutput = 6.0f,
+    .maxOutput = 20.0f,
     .tRDerivativeKalman = 40.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
@@ -144,12 +143,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    // .kp = 2000.0f,
-    .kp = 0.0f,
+    .kp = 4000.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 500.0f,
     .maxICumulative = 1'500.0f,
-    .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.6),
+    .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 1),
     .tRDerivativeKalman = 60'000.0f,  // Gain needs to be so high for the motors to actually do
                                       // anything that motor encoder resolution becomes a problem
     .tQProportionalKalman = 1.0f,
@@ -206,9 +204,6 @@ static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID
 namespace minorPidConfigs
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME = {
-    // .kp = 100'000.0f,
-    // .ki = 300.0f,
-    // .kd = 7'000.0f,
     .kp = 50000.0f,
     .ki = 0.0f,
     .kd = 3000.0f,
@@ -222,9 +217,6 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME =
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME = {
-    // .kp = 120'000.0f,
-    // .ki = 12.0f,
-    // .kd = 6'800.0f,
     .kp = 80000.0f,
     .ki = 0.0f,
     .kd = 3000.0f,
@@ -237,13 +229,10 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
     .errDeadzone = 0.0f,
 };
 
-static constexpr tap::algorithms::SmoothPidConfig LEFT_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-    // .kp = 3'000.0f,
-    // .ki = 0.0f,
-    // .kd = 10.0f,
-    .kp = 0.0f,
+static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
+    .kp = 3'000.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 10.0f,
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
@@ -254,10 +243,7 @@ static constexpr tap::algorithms::SmoothPidConfig LEFT_YAW_PID_CONFIG_WORLD_FRAM
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
-    // .kp = 20.0f,
-    // .ki = 0.0f,
-    // .kd = 0.0f,
-    .kp = 0.0f,
+    .kp = 20.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 1.0f,
@@ -270,12 +256,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_VEL = {
-    // .kp = 3'000.0f,
-    // .ki = 40.0f,
-    // .kd = 5.0f,
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
+    .kp = 3'000.0f,
+    .ki = 40.0f,
+    .kd = 5.0f,
     .maxICumulative = 100.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
@@ -286,10 +269,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_V
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_POS = {
-    // .kp = 20.0f,
-    // .ki = 0.0f,
-    // .kd = 0.0f,
-    .kp = 0.0f,
+    .kp = 20.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.05f,
