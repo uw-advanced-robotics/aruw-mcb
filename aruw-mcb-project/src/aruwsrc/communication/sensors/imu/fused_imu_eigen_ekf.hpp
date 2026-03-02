@@ -202,21 +202,90 @@ public:
             return -3;
         }
 
-        auto& measurementCovariance = this->getMeasurementCovariance();
-        for (int r = 0; r < static_cast<int>(stateSize); r++)
+        if constexpr (BackendAdapter::usesCmsisBackend)
         {
-            for (int c = 0; c < static_cast<int>(stateSize); c++)
-            {
-                measurementCovariance[static_cast<size_t>(r) * stateSize + static_cast<size_t>(c)] =
-                    BackendAdapter::getMatrixElement(
-                        measurementCovarianceBlocks[imuIndex],
-                        static_cast<size_t>(r),
-                        static_cast<size_t>(c),
-                        stateSize);
-            }
-        }
+            // Fast path specialized for this signal filter:
+            // H = I and R is diagonal, so we can run exact sequential scalar KF updates.
+            auto& x = this->getMutableStateVector();
+            auto& P = this->getMutableStateCovariance();
+            const auto& Rblock = measurementCovarianceBlocks[imuIndex];
 
-        return Base::update(zBlock);
+            constexpr uint16_t dim = stateSize;
+            float kVec[dim];
+            float rowVec[dim];
+
+            for (uint16_t j = 0; j < dim; j++)
+            {
+                const float rjj = BackendAdapter::getMatrixElement(Rblock, j, j, stateSize);
+                const float s = P[static_cast<size_t>(j) * dim + static_cast<size_t>(j)] + rjj;
+                if (s <= 1.0e-12f)
+                {
+                    continue;
+                }
+
+                const float invS = 1.0f / s;
+                const float innovation = zBlock.data[j] - x[j];
+
+                for (uint16_t i = 0; i < dim; i++)
+                {
+                    rowVec[i] = P[static_cast<size_t>(j) * dim + static_cast<size_t>(i)];
+                }
+
+                for (uint16_t i = 0; i < dim; i++)
+                {
+                    const float ki = P[static_cast<size_t>(i) * dim + static_cast<size_t>(j)] * invS;
+                    kVec[i] = ki;
+                    x[i] += ki * innovation;
+                }
+
+                for (uint16_t i = 0; i < dim; i++)
+                {
+                    const float ki = kVec[i];
+                    for (uint16_t k = 0; k < dim; k++)
+                    {
+                        P[static_cast<size_t>(i) * dim + static_cast<size_t>(k)] -=
+                            ki * rowVec[k];
+                    }
+                }
+            }
+
+            for (uint16_t r = 0; r < dim; r++)
+            {
+                for (uint16_t c = r + 1; c < dim; c++)
+                {
+                    const float sym = 0.5f * (P[static_cast<size_t>(r) * dim + static_cast<size_t>(c)] +
+                                              P[static_cast<size_t>(c) * dim + static_cast<size_t>(r)]);
+                    P[static_cast<size_t>(r) * dim + static_cast<size_t>(c)] = sym;
+                    P[static_cast<size_t>(c) * dim + static_cast<size_t>(r)] = sym;
+                }
+
+                const size_t diagIdx = static_cast<size_t>(r) * dim + static_cast<size_t>(r);
+                if (P[diagIdx] < 1.0e-12f)
+                {
+                    P[diagIdx] = 1.0e-12f;
+                }
+            }
+
+            return 0;
+        }
+        else
+        {
+            auto& measurementCovariance = this->getMeasurementCovariance();
+            for (int r = 0; r < static_cast<int>(stateSize); r++)
+            {
+                for (int c = 0; c < static_cast<int>(stateSize); c++)
+                {
+                    measurementCovariance[static_cast<size_t>(r) * stateSize + static_cast<size_t>(c)] =
+                        BackendAdapter::getMatrixElement(
+                            measurementCovarianceBlocks[imuIndex],
+                            static_cast<size_t>(r),
+                            static_cast<size_t>(c),
+                            stateSize);
+                }
+            }
+
+            return Base::update(zBlock);
+        }
     }
 
     inline std::array<InputMatrix, N>& getMeasurementCovarianceBlocks()

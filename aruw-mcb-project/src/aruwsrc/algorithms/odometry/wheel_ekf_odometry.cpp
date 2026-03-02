@@ -99,7 +99,9 @@ void FourWheelEKFOdometry::reset()
 
 void FourWheelEKFOdometry::update()
 {
-    const uint32_t cycleStartUs = tap::arch::clock::getTimeMicroseconds();
+    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector
+        measurement;
+
     float measuredYaw = 0.0f;
     bool yawMeasurementValid = chassisYawObserver.getChassisWorldYaw(&measuredYaw);
     if (yawMeasurementValid)
@@ -123,7 +125,7 @@ void FourWheelEKFOdometry::update()
     {
         float motorVel = chassisMotors[i]->getEncoder()->getVelocity();  // rad/s (after gear ratio)
         wheelSpeeds[i] = motorVel * WHEEL_CONFIGS[i].wheelRadius;        // m/s
-        z[int(OdomInput::WHEEL_0) + i] = wheelSpeeds[i];
+        measurement.data[int(OdomInput::WHEEL_0) + i] = wheelSpeeds[i];
     }
 
     // Get IMU acceleration data in chassis frame
@@ -140,39 +142,21 @@ void FourWheelEKFOdometry::update()
         &imuAccelWorld.y,
         aruwsrc::communication::serial::VisionCoprocessor::MCB_ROTATION_OFFSET + yawForRotation);
 
-    z[int(OdomInput::ACC_X)] = imuAccelWorld.x;
-    z[int(OdomInput::ACC_Y)] = imuAccelWorld.y;
-    z[int(OdomInput::GYRO_Z)] = imu.getGz();
-    z[int(OdomInput::YAW)] = yawForRotation;
+    measurement.data[int(OdomInput::ACC_X)] = imuAccelWorld.x;
+    measurement.data[int(OdomInput::ACC_Y)] = imuAccelWorld.y;
+    measurement.data[int(OdomInput::GYRO_Z)] = imu.getGz();
+    measurement.data[int(OdomInput::YAW)] = yawForRotation;
 
     updateMeasurementCovariance(wheelSpeeds, imuAccelWorld, yawMeasurementValid, dt);
 
-    // Create measurement vector
-    ExtendedKalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)>::InputVector
-        measurement;
-    for (int i = 0; i < int(OdomInput::NUM_INPUTS); i++)
-    {
-        measurement.data[i] = z[i];
-    }
-
-    const uint32_t predictStartUs = tap::arch::clock::getTimeMicroseconds();
     // Perform prediction step.
     ekf.predict(dt);
-    const uint32_t updateStartUs = tap::arch::clock::getTimeMicroseconds();
 
     // Perform correction step with wrapped yaw residual to avoid discontinuities at +/-pi.
     ekf.updateWrapped(measurement, static_cast<uint16_t>(OdomInput::YAW));
 
     // Update the location and velocity accessor objects with values from the state vector
     updateChassisStateFromEKF();
-
-    if (telemetry != nullptr)
-    {
-        const uint32_t cycleEndUs = tap::arch::clock::getTimeMicroseconds();
-        telemetry->logSignal("perf/wheel_ekf/predict_us", updateStartUs - predictStartUs);
-        telemetry->logSignal("perf/wheel_ekf/update_us", cycleEndUs - updateStartUs);
-        telemetry->logSignal("perf/wheel_ekf/total_us", cycleEndUs - cycleStartUs);
-    }
 }
 
 void FourWheelEKFOdometry::updateChassisStateFromEKF()

@@ -125,6 +125,7 @@ public:
     {
         accelInnovationGateSq = config.accelInnovationGate * config.accelInnovationGate;
         gyroInnovationGateSq = config.gyroInnovationGate * config.gyroInnovationGate;
+        initializeNoiseVarianceScales();
         this->recomputeImuToFusionTransforms();
         resetFilterState();
     }
@@ -193,27 +194,62 @@ public:
 
     void periodicIMUUpdate() override
     {
-        const uint32_t cycleStartUs = tap::arch::clock::getTimeMicroseconds();
-        const auto logCycleTime = [&](const char* label) {
-            if (telemetry != nullptr)
-            {
-                telemetry->logSignal(label, tap::arch::clock::getTimeMicroseconds() - cycleStartUs);
-            }
-        };
-
         if (prevFilterUpdateTimeUs != 0U)
         {
-            const uint32_t deltaUs = cycleStartUs - prevFilterUpdateTimeUs;
+            const uint32_t nowUs = tap::arch::clock::getTimeMicroseconds();
+            const uint32_t deltaUs = nowUs - prevFilterUpdateTimeUs;
             const float dtMeasured = static_cast<float>(deltaUs) * 1.0e-6f;
             if (dtMeasured > 1.0e-6f && dtMeasured < 0.05f)
             {
                 samplePeriodS = dtMeasured;
             }
+            prevFilterUpdateTimeUs = nowUs;
         }
-        prevFilterUpdateTimeUs = cycleStartUs;
+        else
+        {
+            prevFilterUpdateTimeUs = tap::arch::clock::getTimeMicroseconds();
+        }
 
-        const auto states = getImuStates();
-        imuState = combineImuStates(states);
+        std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N> states{};
+        bool anyConnected = false;
+        bool anyNotCalibrated = false;
+        bool anyCalibrating = false;
+        for (size_t i = 0; i < N; i++)
+        {
+            states[i] = imus[i]->getImuState();
+            if (states[i] == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+            {
+                anyCalibrating = true;
+            }
+            if (states[i] ==
+                    tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED ||
+                states[i] == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED)
+            {
+                anyConnected = true;
+            }
+            if (states[i] ==
+                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED)
+            {
+                anyNotCalibrated = true;
+            }
+        }
+        if (anyCalibrating)
+        {
+            imuState = tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING;
+        }
+        else if (!anyConnected)
+        {
+            imuState = tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CONNECTED;
+        }
+        else if (anyNotCalibrated)
+        {
+            imuState =
+                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED;
+        }
+        else
+        {
+            imuState = tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED;
+        }
         if (imuState == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
         {
             pendingReinitializeAfterCalibration = true;
@@ -222,7 +258,6 @@ public:
             imuData.accG = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.temperature = 0.0f;
-            logCycleTime("perf/fused_imu/periodic_total_us");
             return;
         }
 
@@ -252,8 +287,8 @@ public:
                 imus[i]->getGy(),
                 imus[i]->getGz());
 
-            accel[i] = transformAcceleration(imuTransforms[i], imuToFusionTransforms[i], imuAcc);
-            gyro[i] = transformGyro(imuTransforms[i], imuToFusionTransforms[i], imuGyro);
+            accel[i] = transformAcceleration(i, imuAcc);
+            gyro[i] = transformGyro(i, imuGyro);
             tempSum += imus[i]->getTemp();
             tempCount++;
             anyValid = true;
@@ -268,7 +303,6 @@ public:
             imuData.accG = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.gyroRadPerSec = tap::algorithms::transforms::Vector(0.0f, 0.0f, 0.0f);
             imuData.temperature = 0.0f;
-            logCycleTime("perf/fused_imu/periodic_total_us");
             return;
         }
 
@@ -297,7 +331,6 @@ public:
 
         updateSignalMeasurementCovariance(states, accel, gyro, validFlags);
 
-        const uint32_t signalFilterStartUs = tap::arch::clock::getTimeMicroseconds();
         if (signalFilterInitialized)
         {
             updateSignalProcessCovariance(samplePeriodS);
@@ -331,12 +364,6 @@ public:
                 }
             }
         }
-        if (telemetry != nullptr)
-        {
-            telemetry->logSignal(
-                "perf/fused_imu/signal_filter_us",
-                tap::arch::clock::getTimeMicroseconds() - signalFilterStartUs);
-        }
 
         tap::algorithms::transforms::Vector fusedGyro(0.0f, 0.0f, 0.0f);
         tap::algorithms::transforms::Vector fusedAccel(0.0f, 0.0f, 0.0f);
@@ -362,7 +389,6 @@ public:
             pendingReinitializeAfterCalibration = false;
         }
 
-        const uint32_t mekfStartUs = tap::arch::clock::getTimeMicroseconds();
         predictWithGyro(fusedGyro, samplePeriodS);
 
         (void)runAccelUpdate(fusedAccel, fusedAccelVarianceDiag);
@@ -377,13 +403,6 @@ public:
             fusedAccel.y() - accelBias[1],
             fusedAccel.z() - accelBias[2]);
         imuData.temperature = (tempCount > 0) ? (tempSum / tempCount) : 0.0f;
-        if (telemetry != nullptr)
-        {
-            telemetry->logSignal(
-                "perf/fused_imu/mekf_us",
-                tap::arch::clock::getTimeMicroseconds() - mekfStartUs);
-        }
-        logCycleTime("perf/fused_imu/periodic_total_us");
     }
 
     inline const char* getName() const override { return "FusedIMUMEKFKF"; }
@@ -410,6 +429,8 @@ private:
     std::array<tap::algorithms::transforms::Transform, N> imuTransforms;
     std::array<tap::algorithms::transforms::Transform, N> imuToFusionTransforms;
     std::array<typename Config::ImuNoiseDensity, N> perImuNoise;
+    std::array<std::array<float, 3>, N> accelNoiseVarianceScalePerHz{};
+    std::array<std::array<float, 3>, N> gyroNoiseVarianceScalePerHz{};
     std::array<std::array<float, 3>, N> accelVar{};
     std::array<std::array<float, 3>, N> gyroVar{};
     std::array<std::array<float, 3>, N> baseAccelVariance{};
@@ -571,13 +592,8 @@ private:
         {
             for (size_t a = 0; a < 3; a++)
             {
-                const float ndAcc = (perImuNoise[i].accelNoiseDensityUgSqrtHz[a] * 1.0e-6f) *
-                                    tap::communication::sensors::imu::GRAVITY_MPS2;
-                accelVar[i][a] = ndAcc * ndAcc * bw;
-
-                const float ndGyro =
-                    modm::toRadian(perImuNoise[i].gyroNoiseDensityMdpsSqrtHz[a] * 1.0e-3f);
-                gyroVar[i][a] = ndGyro * ndGyro * bw;
+                accelVar[i][a] = accelNoiseVarianceScalePerHz[i][a] * bw;
+                gyroVar[i][a] = gyroNoiseVarianceScalePerHz[i][a] * bw;
                 baseAccelVariance[i][a] = accelVar[i][a];
                 baseGyroVariance[i][a] = gyroVar[i][a];
             }
@@ -645,13 +661,8 @@ private:
         const float bw = effectiveNoiseBandwidthHz();
         for (size_t a = 0; a < 3; a++)
         {
-            const float ndAcc = (perImuNoise[imuIndex].accelNoiseDensityUgSqrtHz[a] * 1.0e-6f) *
-                                tap::communication::sensors::imu::GRAVITY_MPS2;
-            accelVarDiagOut[a] = ndAcc * ndAcc * bw;
-
-            const float ndGyro =
-                modm::toRadian(perImuNoise[imuIndex].gyroNoiseDensityMdpsSqrtHz[a] * 1.0e-3f);
-            gyroVarDiagOut[a] = ndGyro * ndGyro * bw;
+            accelVarDiagOut[a] = accelNoiseVarianceScalePerHz[imuIndex][a] * bw;
+            gyroVarDiagOut[a] = gyroNoiseVarianceScalePerHz[imuIndex][a] * bw;
         }
     }
 
@@ -1191,67 +1202,29 @@ private:
             -config.maxAccelBiasAbsMps2,
             config.maxAccelBiasAbsMps2);
 
-        // Covariance update in Joseph form:
-        // P = (I - K H) P (I - K H)^T + K R K^T
-        // This remains valid even after gain shaping
-        // more expensive tho
-        float H[3 * errorStateSize] = {};
-        H[0 * errorStateSize + 1] = -gzBody;
-        H[0 * errorStateSize + 2] = gyBody;
-        H[0 * errorStateSize + 6] = 1.0f;
-        H[1 * errorStateSize + 0] = gzBody;
-        H[1 * errorStateSize + 2] = -gxBody;
-        H[1 * errorStateSize + 7] = 1.0f;
-        H[2 * errorStateSize + 0] = -gyBody;
-        H[2 * errorStateSize + 1] = gxBody;
-        H[2 * errorStateSize + 8] = 1.0f;
-
-        std::array<float, errorStateSize * errorStateSize> iMinusKH{};
-        for (size_t i = 0; i < errorStateSize; i++)
-        {
-            iMinusKH[i * errorStateSize + i] = 1.0f;
-        }
-        for (size_t i = 0; i < errorStateSize; i++)
-        {
-            for (size_t j = 0; j < errorStateSize; j++)
-            {
-                float s = 0.0f;
-                for (size_t k = 0; k < 3; k++)
-                {
-                    s += K[i * 3 + k] * H[k * errorStateSize + j];
-                }
-                iMinusKH[i * errorStateSize + j] -= s;
-            }
-        }
-
-        std::array<float, errorStateSize * errorStateSize> tmp{};
+        // Covariance update in Joseph form, rewritten to avoid dense 9x9 products:
+        // P = P - K*PHt^T - (K*PHt^T)^T + K*S*K^T
+        // where PHt = P*H^T and S = H*P*H^T + R (already computed prev)
         std::array<float, errorStateSize * errorStateSize> pNew{};
+        std::array<float, errorStateSize * 3> KS{};
+        std::array<float, errorStateSize * errorStateSize> KPHtT{};
+        std::array<float, errorStateSize * errorStateSize> KSKT{};
+
+        // KS = K * S
         for (size_t r = 0; r < errorStateSize; r++)
         {
-            for (size_t c = 0; c < errorStateSize; c++)
+            for (size_t c = 0; c < 3; c++)
             {
                 float s = 0.0f;
-                for (size_t k = 0; k < errorStateSize; k++)
+                for (size_t k = 0; k < 3; k++)
                 {
-                    s += iMinusKH[r * errorStateSize + k] * P[k * errorStateSize + c];
+                    s += K[r * 3 + k] * S[k * 3 + c];
                 }
-                tmp[r * errorStateSize + c] = s;
-            }
-        }
-        for (size_t r = 0; r < errorStateSize; r++)
-        {
-            for (size_t c = 0; c < errorStateSize; c++)
-            {
-                float s = 0.0f;
-                for (size_t k = 0; k < errorStateSize; k++)
-                {
-                    s += tmp[r * errorStateSize + k] * iMinusKH[c * errorStateSize + k];
-                }
-                pNew[r * errorStateSize + c] = s;
+                KS[r * 3 + c] = s;
             }
         }
 
-        const float rDiag[3] = {r0, r1, r2};
+        // KPHtT = K * PHt^T
         for (size_t r = 0; r < errorStateSize; r++)
         {
             for (size_t c = 0; c < errorStateSize; c++)
@@ -1259,9 +1232,33 @@ private:
                 float s = 0.0f;
                 for (size_t k = 0; k < 3; k++)
                 {
-                    s += K[r * 3 + k] * rDiag[k] * K[c * 3 + k];
+                    s += K[r * 3 + k] * PHt[c * 3 + k];
                 }
-                pNew[r * errorStateSize + c] += s;
+                KPHtT[r * errorStateSize + c] = s;
+            }
+        }
+
+        // KSKT = (K*S) * K^T
+        for (size_t r = 0; r < errorStateSize; r++)
+        {
+            for (size_t c = 0; c < errorStateSize; c++)
+            {
+                float s = 0.0f;
+                for (size_t k = 0; k < 3; k++)
+                {
+                    s += KS[r * 3 + k] * K[c * 3 + k];
+                }
+                KSKT[r * errorStateSize + c] = s;
+            }
+        }
+
+        for (size_t r = 0; r < errorStateSize; r++)
+        {
+            for (size_t c = 0; c < errorStateSize; c++)
+            {
+                pNew[r * errorStateSize + c] =
+                    P[r * errorStateSize + c] - KPHtT[r * errorStateSize + c] -
+                    KPHtT[c * errorStateSize + r] + KSKT[r * errorStateSize + c];
             }
         }
 
@@ -1271,48 +1268,17 @@ private:
     }
 
     inline tap::algorithms::transforms::Vector transformAcceleration(
-        const tap::algorithms::transforms::Transform& fusionToImu,
-        const tap::algorithms::transforms::Transform& imuToFusion,
+        size_t imuIndex,
         const tap::algorithms::transforms::Vector& imuAcc) const
     {
-        const auto imuPosition = fusionToImu.getTranslation();
-        const auto fusionAngVel = fusionToImu.getAngularVel();
-        const auto imuVelocity = tap::algorithms::transforms::Vector(
-            fusionAngVel.y() * imuPosition.z() - fusionAngVel.z() * imuPosition.y(),
-            fusionAngVel.z() * imuPosition.x() - fusionAngVel.x() * imuPosition.z(),
-            fusionAngVel.x() * imuPosition.y() - fusionAngVel.y() * imuPosition.x());
-        const tap::algorithms::transforms::DynamicPosition imuDynamics(
-            imuPosition.x(),
-            imuPosition.y(),
-            imuPosition.z(),
-            imuVelocity.x(),
-            imuVelocity.y(),
-            imuVelocity.z(),
-            imuAcc.x(),
-            imuAcc.y(),
-            imuAcc.z());
-        const auto fusedDynamics = imuToFusion.apply(imuDynamics);
-        return fusedDynamics.getAcceleration();
+        return imuToFusionTransforms[imuIndex].apply(imuAcc);
     }
 
     inline tap::algorithms::transforms::Vector transformGyro(
-        const tap::algorithms::transforms::Transform& fusionToImu,
-        const tap::algorithms::transforms::Transform& imuToFusion,
+        size_t imuIndex,
         const tap::algorithms::transforms::Vector& imuGyro) const
     {
-        const tap::algorithms::transforms::DynamicOrientation imuDynamics(
-            fusionToImu.getRoll(),
-            fusionToImu.getPitch(),
-            fusionToImu.getYaw(),
-            imuGyro.x(),
-            imuGyro.y(),
-            imuGyro.z());
-        const auto fusedDynamics = imuToFusion.apply(imuDynamics);
-        const auto fusedAngVel = fusedDynamics.getAngularVelocity();
-        return tap::algorithms::transforms::Vector(
-            fusedAngVel.getRollVelocity(),
-            fusedAngVel.getPitchVelocity(),
-            fusedAngVel.getYawVelocity());
+        return imuToFusionTransforms[imuIndex].apply(imuGyro);
     }
 
     inline std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N> getImuStates()
@@ -1384,6 +1350,24 @@ private:
         for (size_t i = 0; i < N; i++)
         {
             recomputeImuToFusionTransform(i);
+        }
+    }
+
+    inline void initializeNoiseVarianceScales()
+    {
+        constexpr float gravityScale = tap::communication::sensors::imu::GRAVITY_MPS2 * 1.0e-6f;
+        constexpr float mdpsToRad = static_cast<float>(M_PI) / 180000.0f;
+        for (size_t i = 0; i < N; i++)
+        {
+            for (size_t a = 0; a < 3; a++)
+            {
+                const float ndAcc =
+                    perImuNoise[i].accelNoiseDensityUgSqrtHz[a] * gravityScale;
+                const float ndGyro =
+                    perImuNoise[i].gyroNoiseDensityMdpsSqrtHz[a] * mdpsToRad;
+                accelNoiseVarianceScalePerHz[i][a] = ndAcc * ndAcc;
+                gyroNoiseVarianceScalePerHz[i][a] = ndGyro * ndGyro;
+            }
         }
     }
 };

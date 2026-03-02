@@ -238,6 +238,8 @@ public:
     }
 
     const std::array<float, STATES>& getStateVectorAsMatrix() const { return xHat.data; }
+    inline std::array<float, STATES>& getMutableStateVector() { return xHat.data; }
+    inline std::array<float, STATES * STATES>& getMutableStateCovariance() { return P.data; }
     inline std::array<float, INPUTS * INPUTS>& getMeasurementCovariance() { return R.data; }
     inline std::array<float, STATES * STATES>& getProcessCovariance() { return Q.data; }
 

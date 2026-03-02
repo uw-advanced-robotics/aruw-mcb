@@ -190,8 +190,6 @@ private:
     float prevWheelSpeeds[4]{0, 0, 0, 0};
     bool prevWheelSpeedsValid = false;
 
-    /// Measurement vector for the EKF
-    float z[int(OdomInput::NUM_INPUTS)];
     aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
 
     void updateChassisStateFromEKF();

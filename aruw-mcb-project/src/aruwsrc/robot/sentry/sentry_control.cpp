@@ -294,25 +294,26 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
 
-// const tap::motor::DjiMotor *sentryChassisMotorsForEkf[4] = {
-//     &leftFrontMotor,
-//     &rightFrontMotor,
-//     &leftBackMotor,
-//     &rightBackMotor};
+const tap::motor::DjiMotor *sentryChassisMotorsForEkf[4] = {
+    &leftFrontMotor,
+    &rightFrontMotor,
+    &leftBackMotor,
+    &rightBackMotor};
 
-// aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
-//     *drivers(),
-//     sentryChassisMotorsForEkf,
-//     chassisYawObserver,
-//     getChassisTurretMCBCanComm(),
-//     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
-
-aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
-    drivers(),
-    chassis,
+aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
+    *drivers(),
+    sentryChassisMotorsForEkf,
     chassisYawObserver,
-    drivers()->turretMCBCanCommBus2,
-    modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
+    getChassisTurretMCBCanComm(),
+    modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y),
+    &drivers()->rttTelemetry);
+
+// aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+//     drivers(),
+//     chassis,
+//     chassisYawObserver,
+//     drivers()->turretMCBCanCommBus2,
+//     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
 
 SentryTransforms transformer(
     odometrySubsystem,
