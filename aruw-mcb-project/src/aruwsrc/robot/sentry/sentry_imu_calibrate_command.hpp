@@ -68,7 +68,7 @@ public:
      *
      * @note is 0 for max precision on sentry, which chassis-rel controllers can reach.
      */
-    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.12f);  // 10x encoder
 
     /**
      * @param[in] drivers A pointer to the global drivers object.

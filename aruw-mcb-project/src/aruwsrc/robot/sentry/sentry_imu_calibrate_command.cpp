@@ -159,14 +159,14 @@ void SentryImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
-            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) && shit)
+            if (!lampreyAligned && shit)
             {
                 turretMajor.getMutableMotor().setChassisFrameSetpoint(
                     (turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle() +
                      LAMPREY_SHIT_BUMP));
             }
 
-            if (!lampreyAligned && turretMajorReachedCenterAndNotMoving(turretMajor) && !shit)
+            if (!lampreyAligned && !shit)
             {
                 lampreyAligned = true;
                 turretMajorInternalEncoder.alignWith(&turretMajorLampreyEncoder);

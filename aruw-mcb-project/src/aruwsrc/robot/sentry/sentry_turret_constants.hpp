@@ -100,7 +100,7 @@ static constexpr uint8_t YAW_ANALOG_SENSOR_CHANNEL = 1;  // 0 = AI0, 1 = AI1
 static constexpr bool YAW_ANALOG_SENSOR_INVERTED = false;
 static constexpr uint16_t YAW_ANALOG_RAW_MIN = 164;
 static constexpr uint16_t YAW_ANALOG_RAW_MAX = 1603;
-static constexpr uint16_t YAW_ANALOG_RAW_ZERO = 800 - 164;
+static constexpr uint16_t YAW_ANALOG_RAW_ZERO = 800 + 164;
 static constexpr float YAW_ANALOG_OUTPUT_RANGE_RADIANS = M_TWOPI;
 
 static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TRANSFORM(
@@ -114,12 +114,13 @@ static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 115000.0f,
-    .ki = 300.0f,
+    .kp = 130000.0f,
+    .ki = 0.0f,
     .kd = 8000.0f,
-    .maxICumulative = 9'800.0f,
+    .maxICumulative = 0.0f,
     .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.2),
-    .tRDerivativeKalman = 100.0f,
+    .tQDerivativeKalman = 10.0f,
+    .tRDerivativeKalman = 1.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
