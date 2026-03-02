@@ -84,6 +84,7 @@ env.Append(
     ]
 )
 env.Tool("generate_ozone_projects")
+env.Tool("probe_rs_flash")
 
 print(
     "Configured {0} parallel build jobs (-j{0}), {1}".format(
@@ -109,6 +110,7 @@ if args["COMPILE_SRC"]:
         env.Alias("size", env.Size(program))
         env.Alias("gdb", env.DebugGdbRemote(program))
         env.Alias("run", [env.ProgramOpenOcd(program)])
+        env.Alias("flash", [env.ProgramProbeRsFlash(program)])
         env.Alias("ozone", env.RunOzoneConfig(program, args["ROBOT_TYPE"]))
         env.Alias("all", ["build", "size"])
         env.Default("all")  # For the hardware target env, "all" runs if you don't

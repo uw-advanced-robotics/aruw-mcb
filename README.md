@@ -180,6 +180,10 @@ The below commands require that your working directory is `aruw-mcb/aruw-mcb-pro
 - `scons build`: Builds the firmware image for the hardware target. Creates a "release" folder located in `build/hardware/` which contains the final `.elf` file as well as the intermediate object files (`.o`).
 - `scons build-tests`: Builds a program which hosts our unit tests. This executable can be run on your host computer (only supported on Linux) and prints results for each unit test run.
 - `scons run`: Builds as with `scons build` and then programs the board.
+- `scons flash`: Builds as with `scons build` and flashes via `probe-rs`.
+  - `scons flash`: flashes over a locally connected USB probe.
+  - `scons flash ip=<PI_IP> token=<TOKEN>`: flashes via remote `probe-rs serve` on a Raspberry Pi.
+  - Optional overrides: `host=ws://<HOST>:<PORT>`, `chip=STM32F427II`, `speed=<kHz>`, `probe=<VID:PID[:SERIAL]>`, `verify=true`.
 - `scons run-tests`: Builds and runs the unit test program.
 - `scons size`: Prints statistics on program size and (statically-)allocated memory. Note that the reported available heap space is an upper bound, and this tool has no way of knowing about the real size of dynamic allocations.
 
@@ -190,6 +194,11 @@ Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [pro
     "<target>" is one of:
         - "build": build all code for the hardware platform.
         - "run": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.
+        - "flash": build all code for the hardware platform, and deploy it via probe-rs.
+            - default: local USB probe.
+            - "ip=<IP>": connect to a remote `probe-rs serve` host.
+            - "token=<TOKEN>": auth token for remote `probe-rs serve` host.
+            - "host=ws://<HOST>:<PORT>": optional websocket URL override for remote flashing.
         - "build-tests": build core code and tests for the current host platform.
         - "run-tests": build core code and tests for the current host platform, and execute them locally with the test runner.
         - "build-sim": build all code for the simulated environment, for the current host platform.

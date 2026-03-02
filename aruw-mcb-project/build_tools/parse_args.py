@@ -22,7 +22,7 @@ from build_tools import extract_robot_type
 CMD_LINE_ARGS                       = 1
 TEST_BUILD_TARGET_ACCEPTED_ARGS     = ["build-tests", "run-tests", "run-tests-gcov"]
 SIM_BUILD_TARGET_ACCEPTED_ARGS      = ["build-sim", "run-sim"]
-HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "size", "gdb", "all", "ozone"]
+HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "flash", "size", "gdb", "all", "ozone"]
 VALID_BUILD_PROFILES                = ["debug", "release", "fast"]
 VALID_PROFILING_TYPES               = ["true", "false"]
 VALID_COMPILE_LIB_TYPES             = ["mcb", "sim", "test", "none"]
@@ -31,6 +31,11 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
     \"<target>\" is one of:\n\
         - \"build\": build all code for the hardware platform.\n\
         - \"run\": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.\n\
+        - \"flash\": build all code for the hardware platform, and deploy it via probe-rs.\n\
+            - default: local USB probe.\n\
+            - \"ip=<IP>\": connect to a remote `probe-rs serve` host.\n\
+            - \"token=<TOKEN>\": auth token for remote `probe-rs serve` host.\n\
+            - \"host=ws://<HOST>:<PORT>\": optional override for remote websocket URL (defaults to `ws://<IP>:3000`).\n\
         - \"build-tests\": build core code and tests for the current host platform.\n\
         - \"run-tests\": build core code and tests for the current host platform, and execute them locally with the test runner.\n\
         - \"run-tests-gcov\": builds core code and tests, executes them locally, and captures and prints code coverage information\n\
