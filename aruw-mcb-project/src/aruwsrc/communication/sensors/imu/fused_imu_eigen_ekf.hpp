@@ -233,7 +233,8 @@ public:
 
                 for (uint16_t i = 0; i < dim; i++)
                 {
-                    const float ki = P[static_cast<size_t>(i) * dim + static_cast<size_t>(j)] * invS;
+                    const float ki =
+                        P[static_cast<size_t>(i) * dim + static_cast<size_t>(j)] * invS;
                     kVec[i] = ki;
                     x[i] += ki * innovation;
                 }
@@ -243,8 +244,7 @@ public:
                     const float ki = kVec[i];
                     for (uint16_t k = 0; k < dim; k++)
                     {
-                        P[static_cast<size_t>(i) * dim + static_cast<size_t>(k)] -=
-                            ki * rowVec[k];
+                        P[static_cast<size_t>(i) * dim + static_cast<size_t>(k)] -= ki * rowVec[k];
                     }
                 }
             }
@@ -253,8 +253,9 @@ public:
             {
                 for (uint16_t c = r + 1; c < dim; c++)
                 {
-                    const float sym = 0.5f * (P[static_cast<size_t>(r) * dim + static_cast<size_t>(c)] +
-                                              P[static_cast<size_t>(c) * dim + static_cast<size_t>(r)]);
+                    const float sym =
+                        0.5f * (P[static_cast<size_t>(r) * dim + static_cast<size_t>(c)] +
+                                P[static_cast<size_t>(c) * dim + static_cast<size_t>(r)]);
                     P[static_cast<size_t>(r) * dim + static_cast<size_t>(c)] = sym;
                     P[static_cast<size_t>(c) * dim + static_cast<size_t>(r)] = sym;
                 }
@@ -275,12 +276,13 @@ public:
             {
                 for (int c = 0; c < static_cast<int>(stateSize); c++)
                 {
-                    measurementCovariance[static_cast<size_t>(r) * stateSize + static_cast<size_t>(c)] =
-                        BackendAdapter::getMatrixElement(
-                            measurementCovarianceBlocks[imuIndex],
-                            static_cast<size_t>(r),
-                            static_cast<size_t>(c),
-                            stateSize);
+                    measurementCovariance
+                        [static_cast<size_t>(r) * stateSize + static_cast<size_t>(c)] =
+                            BackendAdapter::getMatrixElement(
+                                measurementCovarianceBlocks[imuIndex],
+                                static_cast<size_t>(r),
+                                static_cast<size_t>(c),
+                                stateSize);
                 }
             }
 

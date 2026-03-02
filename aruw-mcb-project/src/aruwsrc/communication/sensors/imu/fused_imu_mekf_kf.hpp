@@ -217,13 +217,15 @@ public:
         for (size_t i = 0; i < N; i++)
         {
             states[i] = imus[i]->getImuState();
-            if (states[i] == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+            if (states[i] ==
+                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
             {
                 anyCalibrating = true;
             }
             if (states[i] ==
                     tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED ||
-                states[i] == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED)
+                states[i] ==
+                    tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED)
             {
                 anyConnected = true;
             }
@@ -243,8 +245,7 @@ public:
         }
         else if (anyNotCalibrated)
         {
-            imuState =
-                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED;
+            imuState = tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED;
         }
         else
         {
@@ -1361,10 +1362,8 @@ private:
         {
             for (size_t a = 0; a < 3; a++)
             {
-                const float ndAcc =
-                    perImuNoise[i].accelNoiseDensityUgSqrtHz[a] * gravityScale;
-                const float ndGyro =
-                    perImuNoise[i].gyroNoiseDensityMdpsSqrtHz[a] * mdpsToRad;
+                const float ndAcc = perImuNoise[i].accelNoiseDensityUgSqrtHz[a] * gravityScale;
+                const float ndGyro = perImuNoise[i].gyroNoiseDensityMdpsSqrtHz[a] * mdpsToRad;
                 accelNoiseVarianceScalePerHz[i][a] = ndAcc * ndAcc;
                 gyroNoiseVarianceScalePerHz[i][a] = ndGyro * ndGyro;
             }
