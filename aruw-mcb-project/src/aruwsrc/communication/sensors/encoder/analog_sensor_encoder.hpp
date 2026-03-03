@@ -20,13 +20,13 @@
 #ifndef ANALOG_SENSOR_ENCODER_HPP_
 #define ANALOG_SENSOR_ENCODER_HPP_
 
+#include "tap/algorithms/filter/butterworth.hpp"
+#include "tap/algorithms/filter/discrete_filter.hpp"
 #include "tap/communication/sensors/encoder/wrapped_encoder.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/communication/can/aruw_analog_sensor.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
-#include "tap/algorithms/filter/butterworth.hpp"
-#include "tap/algorithms/filter/discrete_filter.hpp"
 
 namespace aruwsrc::communication::sensors::encoder
 {
