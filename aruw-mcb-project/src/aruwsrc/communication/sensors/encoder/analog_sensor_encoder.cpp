@@ -59,7 +59,11 @@ AnalogSensorEncoder::AnalogSensorEncoder(
       sensor(sensor),
       channel(channel),
       calibration(calibration),
-      lastUpdateMicros(0)
+      lastUpdateMicros(0),
+      lowpassFilter(tap::algorithms::filter::butterworth<2, tap::algorithms::filter::FilterType::LOWPASS>(
+         100.0f,
+         1.0f / 500.0f
+          ))
 {
     if (this->sensor != nullptr)
     {
@@ -123,7 +127,13 @@ void AnalogSensorEncoder::updateFromSensor()
     lastUpdateMicros = now;
 
     uint16_t raw = readRaw();
-    updateEncoderValue(rawToTicks(raw));
+
+    
+    filtered = static_cast<uint16_t>(lowpassFilter.filterData(raw));
+
+
+
+    updateEncoderValue(rawToTicks(filtered));
 }
 
 uint16_t AnalogSensorEncoder::readRaw() const

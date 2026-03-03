@@ -25,6 +25,8 @@
 
 #include "aruwsrc/communication/can/aruw_analog_sensor.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "tap/algorithms/filter/butterworth.hpp"
+#include "tap/algorithms/filter/discrete_filter.hpp"
 
 namespace aruwsrc::communication::sensors::encoder
 {
@@ -78,6 +80,8 @@ private:
     Channel channel;
     Calibration calibration;
     mutable uint32_t lastUpdateMicros;
+    tap::algorithms::filter::DiscreteFilter<3> lowpassFilter;
+    uint16_t filtered;
 };
 
 }  // namespace aruwsrc::communication::sensors::encoder
