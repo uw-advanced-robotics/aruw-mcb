@@ -37,7 +37,8 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
         - \"run-tests-gcov\": builds core code and tests, executes them locally, and captures and prints code coverage information\n\
         - \"build-sim\": build all code for the simulated environment, for the current host platform.\n\
         - \"run-sim\": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
-        - \"ozone\": builds the code and launches ozone.\n\
+        - \"ozone\": builds the code and launches ozone, defaulting to using USB for robot connection.\n\
+            - \"ip=<IP>\": sets the IP address of the robot to connect to.\
     \"<ROBOT_TYPE>\" enables the appropriate build flags for the hardware target that the code should be built for.\n\
         - <ROBOT_TYPE> must be one of or a unique substring from the following:\n\
             - STANDARD_NULL, STANDARD_VOID, DRONE, ENGINEER, SENTRY_ECLIPSE, HERO_ZERO, DART\n\
