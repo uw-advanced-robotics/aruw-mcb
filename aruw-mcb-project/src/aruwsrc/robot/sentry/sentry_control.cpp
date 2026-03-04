@@ -87,6 +87,7 @@
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret/turret_minor_control_command.hpp"
+#include "aruwsrc/control/chassis/fixed_path_auto_nav_command.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -377,7 +378,7 @@ SentryTransforms transformer(
         .imuSyncConfig = IMU_SYNC_PID_CONFIG,
     });
 
-SentryTransformSubsystem transformerSubsystem(*drivers(), transformer);
+SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
@@ -394,6 +395,16 @@ aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     capBankSubsystem,
     0.15f,
     1000.0f);
+
+Position points[2] = {Position(0.34f, 6.34f, 0.0f), Position(0.84f, 6.34f, 0.0f)};
+aruwsrc::control::chassis::FixedPathAutoNavCommand ForwardTest(
+    *drivers(),
+    chassis,
+    autoNavController,
+    points,
+    0.6f, // desired speed in m/s
+    false,
+    false);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -937,6 +948,10 @@ HoldCommandMapping leftDownRightDown(
     {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
+HoldCommandMapping testMapping(
+    drivers(),
+    {&ForwardTest},
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 // Restart HUD
 PressCommandMapping bCtrlPressed(
     drivers(),
@@ -1021,19 +1036,21 @@ void registerSentryIoMappings(Drivers* drivers)
     // friction wheels spin (separated due to dumb design in command mapper system)
     drivers->commandMapper.addMap(&rightUp);
 
-    drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive & auto aim
-    drivers->commandMapper.addMap(&leftDownRightUp);   // manual drive, auto aim, gated-fire
-    drivers->commandMapper.addMap(&leftDownRightUpAg);
+    // drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive & auto aim
+    // drivers->commandMapper.addMap(&leftDownRightUp);   // manual drive, auto aim, gated-fire
+    // drivers->commandMapper.addMap(&leftDownRightUpAg);
     drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
 
-    drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
-    drivers->commandMapper.addMap(&leftMidRightUpAg);
-    drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
-    drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
+    drivers->commandMapper.addMap(&testMapping);
 
-    drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
-    drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
-    drivers->commandMapper.addMap(&leftUpRightUpAg);
+    // drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
+    // drivers->commandMapper.addMap(&leftMidRightUpAg);
+    // drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
+    // drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
+
+    // drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
+    // drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
+    // drivers->commandMapper.addMap(&leftUpRightUpAg);
     drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
 }
 
