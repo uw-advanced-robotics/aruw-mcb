@@ -21,24 +21,30 @@ import subprocess
 
 from SCons.Script import *
 
-REMOTE_HELP_CHECKED = False
-REMOTE_SUPPORTED = False
-
-
 def _as_bool(value, default):
     if value is None:
         return default
     return str(value).strip().lower() in ("1", "true", "yes", "on")
 
 
-def _probe_rs_common_args(remote):
+def _resolve_probe_rs_binary():
+    probe_rs_override = ARGUMENTS.get("probe_rs", "")
+    if probe_rs_override:
+        if os.path.sep in probe_rs_override:
+            return probe_rs_override
+        resolved = shutil.which(probe_rs_override)
+        return resolved if resolved is not None else probe_rs_override
+
+    return shutil.which("probe-rs")
+
+
+def _probe_rs_common_args():
     common_args = []
 
     chip = ARGUMENTS.get("chip", "STM32F427II")
     protocol = ARGUMENTS.get("protocol", "swd")
     speed_khz = ARGUMENTS.get("speed", "4000")
     probe = ARGUMENTS.get("probe", "")
-    connect_under_reset = _as_bool(ARGUMENTS.get("connect_under_reset", "true"), True)
     non_interactive = _as_bool(ARGUMENTS.get("non_interactive", "true"), True)
 
     if chip:
@@ -49,40 +55,15 @@ def _probe_rs_common_args(remote):
         common_args += ["--speed", str(speed_khz)]
     if probe:
         common_args += ["--probe", probe]
-    if connect_under_reset:
-        common_args += ["--connect-under-reset"]
     if non_interactive:
         common_args += ["--non-interactive"]
-
-    if remote:
-        ip = ARGUMENTS.get("ip", "")
-        host = ARGUMENTS.get("host", f"ws://{ip}:3000")
-        token = ARGUMENTS.get("token", os.environ.get("PROBE_RS_TOKEN", "aruw"))
-
-        common_args += ["--host", host, "--token", token]
 
     return common_args
 
 
-def _check_remote_support(probe_rs):
-    global REMOTE_HELP_CHECKED
-    global REMOTE_SUPPORTED
-
-    if REMOTE_HELP_CHECKED:
-        return REMOTE_SUPPORTED
-
-    REMOTE_HELP_CHECKED = True
-    help_proc = subprocess.run(
-        [probe_rs, "download", "--help"], capture_output=True, text=True, check=False
-    )
-    help_text = (help_proc.stdout or "") + (help_proc.stderr or "")
-    REMOTE_SUPPORTED = ("--host" in help_text) and ("--token" in help_text)
-    return REMOTE_SUPPORTED
-
-
 def probe_rs_flash(env, source):
     def call_probe_rs_flash(target, source, env):
-        probe_rs = shutil.which("probe-rs")
+        probe_rs = _resolve_probe_rs_binary()
         if probe_rs is None:
             raise Exception(
                 "probe-rs is not installed or not on PATH. "
@@ -90,15 +71,7 @@ def probe_rs_flash(env, source):
             )
 
         elf_path = source[0].abspath
-        remote = ARGUMENTS.get("ip", "") != ""
-
-        if remote and not _check_remote_support(probe_rs):
-            raise Exception(
-                "This probe-rs build does not support remote hosts (--host/--token). "
-                "Install probe-rs with remote support on this machine."
-            )
-
-        common_args = _probe_rs_common_args(remote)
+        common_args = _probe_rs_common_args()
         verify = _as_bool(ARGUMENTS.get("verify", "false"), False)
 
         download_cmd = [probe_rs, "download"] + common_args
@@ -108,8 +81,7 @@ def probe_rs_flash(env, source):
 
         reset_cmd = [probe_rs, "reset"] + common_args
 
-        mode = "remote" if remote else "local"
-        print(f"Flashing via probe-rs ({mode}): {elf_path}")
+        print(f"Flashing via probe-rs (local): {elf_path}")
         subprocess.run(download_cmd, check=True)
         subprocess.run(reset_cmd, check=True)
 
