@@ -33,53 +33,51 @@ namespace aruwsrc::engineer
 static constexpr tap::can::CanBus CAN_BUS_WRIST = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId WRIST_LEFT_MOTOR_ID = tap::motor::MotorId::MOTOR4;
 static constexpr tap::motor::MotorId WRIST_RIGHT_MOTOR_ID = tap::motor::MotorId::MOTOR5;
-static constexpr tap::motor::MotorId WRIST_ROLL_MOTOR_ID = tap::motor::MotorId::MOTOR6;
-static constexpr tap::encoder::CanEncoderId WRIST_PITCH_ENCODER_ID =
+static constexpr tap::motor::MotorId WRIST_THETA3_MOTOR_ID = tap::motor::MotorId::MOTOR6;
+static constexpr tap::encoder::CanEncoderId WRIST_THETA1_ENCODER_ID =
     tap::encoder::CanEncoderId::ID0;
-static constexpr tap::encoder::CanEncoderId WRIST_YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID1;
+static constexpr tap::encoder::CanEncoderId WRIST_THETA2_ENCODER_ID =
+    tap::encoder::CanEncoderId::ID1;
+static constexpr tap::encoder::CanEncoderId WRIST_THETA3_ENCODER_ID =
+    tap::encoder::CanEncoderId::ID2;
+
+static constexpr uint32_t WRIST_HOME_THETA1 = 0;
+static constexpr uint32_t WRIST_HOME_THETA2 = 0;
+static constexpr uint32_t WRIST_HOME_THETA3 = 0;
+
+static constexpr float WRIST_ROLL_PID_KS = 0.0;
+static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA1_PID_CONFIG{
+    .kp = 0,
+    .ki = 0.0f,
+    .kd = 0,
+    .maxICumulative = 0.0f,
+    .maxOutput = 3000.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA2_PID_CONFIG{
+    .kp = 0,
+    .ki = 0.0f,
+    .kd = 0,
+    .maxICumulative = 0.0f,
+    .maxOutput = 3000.0f,
+};
+
+static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA3_PID_CONFIG{
+    .kp = 0,
+    .ki = 0.0f,
+    .kd = 0,
+    .maxICumulative = 0.0f,
+    .maxOutput = 3000.0f,
+};
 
 static constexpr wrist::WristConfig WRIST_CONFIG{
-    .pitchPidConfig =
-        {
-            .kp = 10000.0f,
-            .ki = 0.0f,  // 10.0f,
-            .kd = 700.0f,
-            .maxICumulative = 1000.0f,
-            .maxOutput = 5000.0f,
-            .tQDerivativeKalman = 1.0f,
-            .tRDerivativeKalman = 30.0f,
-            .tQProportionalKalman = 1.0f,
-            .tRProportionalKalman = 0.0f,
-            .errDeadzone = 0.0f,
-            .errorDerivativeFloor = 0.025f,
-        },
-    .yawPidConfig =
-        {
-            .kp = 16000.0f,
-            .ki = 0.0f,  // 500.0f,
-            .kd = 1000.0f,
-            .maxICumulative = 500.0f,
-            .maxOutput = 5500.0f,
-            .tQDerivativeKalman = 1.0f,
-            .tRDerivativeKalman = 30.0f,
-            .tQProportionalKalman = 1.0f,
-            .tRProportionalKalman = 0.0f,
-            .errDeadzone = 0.0f,
-            .errorDerivativeFloor = 0.0,
-        },
-    .minPitch = 0.0f - M_PI_4,
-    .maxPitch = M_PI_2 +
-                0.04f,  // allow wrist to pitch down a bit more to allow more adjustment for scoring
-    .minYaw = -M_PI_2,
-    .maxYaw = M_PI,
+    .theta1PidConfig = WRIST_THETA1_PID_CONFIG,
+    .theta2PidConfig = WRIST_THETA2_PID_CONFIG,
+    .theta3PidConfig = WRIST_THETA3_PID_CONFIG,
     .ratio = 30.0f / 40.0f,
     .maxMotorDesiredOutput = 5500,
 };
 
-static constexpr uint32_t WRIST_HOME_PITCH = 2454;
-static constexpr uint32_t WRIST_HOME_YAW = 1961;
-
-static constexpr float WRIST_ROLL_PID_KS = 0.0;
 static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
     .kp = 200.0f,
     .ki = 0.0f,
@@ -101,28 +99,36 @@ static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_ROLL_CLICK_VELOCITY = 0.5f;
 
 static constexpr wrist::Setpoint WRIST_IN_SETPOINT{
-    .pitch = 0,
-    .yaw = 0,
-    .epsilonPitch = 0.1f,
-    .epsilonYaw = 0.1f,
+    .theta1 = 0,
+    .theta2 = 0,
+    .theta3 = 0,
+    .epsilonTheta1 = 0.1f,
+    .epsilonTheta2 = 0.1f,
+    .epsilonTheta3 = 0.1f,
 };
 static constexpr wrist::Setpoint WRIST_TOP_SETPOINT{
-    .pitch = 1.5f,
-    .yaw = 0,
-    .epsilonPitch = 0.1f,
-    .epsilonYaw = 0.1f,
+    .theta1 = 0,
+    .theta2 = 0,
+    .theta3 = 0,
+    .epsilonTheta1 = 0.1f,
+    .epsilonTheta2 = 0.1f,
+    .epsilonTheta3 = 0.1f,
 };
 static constexpr wrist::Setpoint WRIST_BOTTOM_SETPOINT{
-    .pitch = 1.5f,
-    .yaw = M_PI,
-    .epsilonPitch = 0.1f,
-    .epsilonYaw = 0.1f,
+    .theta1 = 0,
+    .theta2 = 0,
+    .theta3 = 0,
+    .epsilonTheta1 = 0.1f,
+    .epsilonTheta2 = 0.1f,
+    .epsilonTheta3 = 0.1f,
 };
 static constexpr wrist::Setpoint WRIST_OUT_SETPOINT{
-    .pitch = 0,
-    .yaw = M_PI,
-    .epsilonPitch = 0.1f,
-    .epsilonYaw = 0.1f,
+    .theta1 = 0,
+    .theta2 = 0,
+    .theta3 = 0,
+    .epsilonTheta1 = 0.1f,
+    .epsilonTheta2 = 0.1f,
+    .epsilonTheta3 = 0.1f,
 };
 
 }  // namespace aruwsrc::engineer
