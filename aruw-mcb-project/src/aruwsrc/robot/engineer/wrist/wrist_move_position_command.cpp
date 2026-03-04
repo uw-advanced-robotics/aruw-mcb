@@ -22,19 +22,22 @@ namespace aruwsrc::engineer::wrist
 {
 WristMovePositionCommand::WristMovePositionCommand(
     WristSubsystem &wrist,
-    float pitchSetpoint,
-    float yawSetpoint)
+    float theta1setpoint,
+    float theta2setpoint,
+    float theta3setpoint)
+
     : wrist(wrist),
-      pitchSetpoint(pitchSetpoint),
-      yawSetpoint(yawSetpoint)
+      theta1setpoint(theta1setpoint),
+      theta2setpoint(theta2setpoint),
+      theta3setpoint(theta3setpoint)
 {
     addSubsystemRequirement(&wrist);
 }
 
 void WristMovePositionCommand::initialize()
 {
-    wrist.setSetpointPitch(pitchSetpoint);
-    wrist.setSetpointYaw(yawSetpoint);
+    wrist.setSetpointTheta2(theta2setpoint);  // theta2 is pitch
+    wrist.setSetpointTheta1(theta1setpoint);  // theta1 is yaw
 }
 
 void WristMovePositionCommand::execute() {}
