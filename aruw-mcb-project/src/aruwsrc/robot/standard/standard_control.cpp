@@ -338,12 +338,13 @@ aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     0.15f,
     1000.0f);
 
+Position points[2] = {Position(0.0f, 0.0f, 0.0f), Position(0.5f, 0.0f, 0.0f)};
 aruwsrc::control::chassis::FixedPathAutoNavCommand ForwardBackTest(
     *drivers(),
     chassis,
     autoNavController,
-    ENGINEER_AUTO_NAV_PATH_POINTS,
-    0.5f, // desired speed in m/s
+    points,
+    0.6f, // desired speed in m/s
     false,
     false);
 
@@ -826,10 +827,10 @@ void initializeSubsystems()
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers *)
 {
-    /*chassis.setDefaultCommand(&chassisAutorotateCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
-    clientDisplay.setDefaultCommand(&clientDisplayCommand);*/
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
