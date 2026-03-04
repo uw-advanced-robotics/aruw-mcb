@@ -377,7 +377,7 @@ SentryTransforms transformer(
         .imuSyncConfig = IMU_SYNC_PID_CONFIG,
     });
 
-SentryTransformSubsystem transformerSubsystem(*drivers(), transformer);
+SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
 SentryTransformAdapter transformAdapter(transformer);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
