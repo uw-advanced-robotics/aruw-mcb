@@ -21,30 +21,20 @@
 
 namespace aruwsrc::communication::sensors::encoder
 {
-
-FakeEncoder::FakeEncoder(
-    float fakePosition,
-    float fakeVelocity)
-    : WrappedEncoder(
-          false,
-          10000),
-    fakePosition(fakePosition),
-    fakeVelocity(fakeVelocity)
-{}
-
-bool FakeEncoder::isOnline() const
+FakeEncoder::FakeEncoder(float fakePosition, float fakeVelocity)
+    : WrappedEncoder(false, 10000),
+      fakePosition(fakePosition),
+      fakeVelocity(fakeVelocity)
 {
-    return true; 
 }
+
+bool FakeEncoder::isOnline() const { return true; }
 
 tap::algorithms::WrappedFloat FakeEncoder::getPosition() const
 {
     return WrappedEncoder::getPosition();
 }
 
-float FakeEncoder::getVelocity() const
-{
-    return WrappedEncoder::getVelocity();
-}
+float FakeEncoder::getVelocity() const { return WrappedEncoder::getVelocity(); }
 
 }  // namespace aruwsrc::communication::sensors::encoder

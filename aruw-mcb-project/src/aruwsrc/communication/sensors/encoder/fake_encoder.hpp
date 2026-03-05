@@ -27,9 +27,7 @@ namespace aruwsrc::communication::sensors::encoder
 class FakeEncoder : public tap::encoder::WrappedEncoder
 {
 public:
-
-    FakeEncoder(float fakePosition,
-    float fakeVelocity);
+    FakeEncoder(float fakePosition, float fakeVelocity);
 
     void initialize() override {}
 
@@ -47,7 +45,6 @@ private:
     float fakePosition;
     float fakeVelocity;
     void update();
-
 };
 
 }  // namespace aruwsrc::communication::sensors::encoder

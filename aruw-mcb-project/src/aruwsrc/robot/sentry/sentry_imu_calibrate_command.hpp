@@ -28,8 +28,8 @@
 #include "tap/communication/sensors/encoder/encoder_interface.hpp"
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/communication/sensors/encoder/fake_encoder.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/sensors/encoder/fake_encoder.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"

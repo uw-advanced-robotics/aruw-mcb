@@ -212,15 +212,16 @@ void SentryImuCalibrateCommand::execute()
                 if (!lampreyAligned)
                 {
                     lampreyShitAverage /= lampreySamples;
-                    aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder = aruwsrc::communication::sensors::encoder::FakeEncoder(lampreyShitAverage, 0);
+                    aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder =
+                        aruwsrc::communication::sensors::encoder::FakeEncoder(
+                            lampreyShitAverage,
+                            0);
                     turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
                 }
 
                 turretMajor.getMutableMotor().setChassisFrameSetpoint(
-                    Angle(turretMajor.getReadOnlyMotor()
-                            .getConfig()
-                            .startAngle));
-                
+                    Angle(turretMajor.getReadOnlyMotor().getConfig().startAngle));
+
                 bool turretsNotMoving = true;
                 for (auto &config : turretsAndControllers)
                 {
@@ -230,7 +231,8 @@ void SentryImuCalibrateCommand::execute()
 
                 turretsNotMoving &= turretMajorReachedCenterAndNotMoving(turretMajor);
 
-                if (turretsNotMoving) {
+                if (turretsNotMoving)
+                {
                     // reset odometry
                     yawObserver.overrideChassisYaw(0);
                     odometryInterface.reset();
