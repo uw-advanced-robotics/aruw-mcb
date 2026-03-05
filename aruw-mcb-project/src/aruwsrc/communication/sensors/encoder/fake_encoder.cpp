@@ -27,7 +27,7 @@ FakeEncoder::FakeEncoder(
     float fakeVelocity)
     : WrappedEncoder(
           false,
-          4096),
+          10000),
     fakePosition(fakePosition),
     fakeVelocity(fakeVelocity)
 {}
