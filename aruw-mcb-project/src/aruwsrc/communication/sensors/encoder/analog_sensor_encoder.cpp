@@ -62,7 +62,7 @@ AnalogSensorEncoder::AnalogSensorEncoder(
       lastUpdateMicros(0),
       lowpassFilter(
           tap::algorithms::filter::butterworth<2, tap::algorithms::filter::FilterType::LOWPASS>(
-              100.0f,
+              20.0f,
               1.0f / 500.0f))
 {
     if (this->sensor != nullptr)
@@ -86,17 +86,17 @@ bool AnalogSensorEncoder::isOnline() const
 
 tap::algorithms::WrappedFloat AnalogSensorEncoder::getPosition() const
 {
-    const_cast<AnalogSensorEncoder*>(this)->updateFromSensor();
+    // const_cast<AnalogSensorEncoder*>(this)->updateFromSensor();
     return WrappedEncoder::getPosition();
 }
 
 float AnalogSensorEncoder::getVelocity() const
 {
-    const_cast<AnalogSensorEncoder*>(this)->updateFromSensor();
+    // const_cast<AnalogSensorEncoder*>(this)->updateFromSensor();
     return WrappedEncoder::getVelocity();
 }
 
-void AnalogSensorEncoder::update() { updateFromSensor(); }
+// void AnalogSensorEncoder::update() { updateFromSensor(); }
 
 void AnalogSensorEncoder::onAnalogSensorUpdated() { updateFromSensor(); }
 
@@ -127,6 +127,8 @@ void AnalogSensorEncoder::updateFromSensor()
     lastUpdateMicros = now;
 
     uint16_t raw = readRaw();
+
+    raw = std::clamp(raw, calibration.rawMin, calibration.rawMax);
 
     filtered = static_cast<uint16_t>(lowpassFilter.filterData(raw));
 

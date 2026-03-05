@@ -121,6 +121,7 @@ static inline bool turretMajorReachedCenterAndNotMoving(
 void SentryImuCalibrateCommand::execute()
 {
     bool shit = isLampreyShit();
+    shit = false;
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
@@ -159,20 +160,21 @@ void SentryImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
-            if (!lampreyAligned && shit)
-            {
-                turretMajor.getMutableMotor().setChassisFrameSetpoint(
-                    (turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle() +
-                     LAMPREY_SHIT_BUMP));
-            }
+            // if (!lampreyAligned && shit)
+            // {
+            //     turretMajor.getMutableMotor().setChassisFrameSetpoint(
+            //         (turretMajor.getReadOnlyMotor().getChassisFrameMeasuredAngle() +
+            //          LAMPREY_SHIT_BUMP));
+            // }
 
-            if (!lampreyAligned && !shit)
-            {
-                lampreyAligned = true;
-                turretMajorInternalEncoder.alignWith(&turretMajorLampreyEncoder);
-                turretMajor.getMutableMotor().setChassisFrameSetpoint(
-                    Angle(turretMajor.getReadOnlyMotor().getConfig().startAngle));
-            }
+            // if (!lampreyAligned && !shit)
+            // {
+            //     lampreyAligned = true;
+            //     turretMajorInternalEncoder.alignWith(&turretMajorLampreyEncoder);
+            //     // turretMajor.getMutableMotor().setChassisFrameSetpoint(
+            //     //     Angle(turretMajor.getReadOnlyMotor().getConfig().startAngle));
+            // }
+            lampreyAligned = true;
 
             bool turretsNotMoving = true;
             for (auto &config : turretsAndControllers)
