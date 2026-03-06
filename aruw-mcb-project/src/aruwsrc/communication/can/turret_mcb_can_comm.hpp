@@ -178,6 +178,18 @@ public:
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
     }
 
+    inline ImuInterface::ImuState getImuState() const override
+    {
+        if (isConnected())
+        {
+            return imuState;
+        }
+        else
+        {
+            return ImuInterface::ImuState::IMU_NOT_CONNECTED;
+        }
+    }
+
     mockable inline void setOpenHopperCover(bool isOpen)
     {
         txCommandMsgBitmask.update(TxCommandMsgBitmask::OPEN_HOPPER, isOpen);
