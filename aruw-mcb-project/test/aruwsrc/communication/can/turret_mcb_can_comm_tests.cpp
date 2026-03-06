@@ -239,6 +239,45 @@ TEST(TurretMCBCanComm, sendTimeSyncData)
     drivers.canRxHandler.CanRxHandler::pollCanData();
 }
 
+TEST(TurretMCBCanComm, receive_status_updates_imu_state_and_connection_heartbeat)
+{
+    ClockStub clock;
+    clock.time = 10'000;
+
+    tap::Drivers drivers;
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
+
+    ON_CALL(drivers.canRxHandler, attachReceiveHandler)
+        .WillByDefault([&](tap::can::CanRxListener* const listener) {
+            drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
+        });
+
+    modm::can::Message statusMsg(TurretMCBCanComm::CanIDs::TURRET_STATUS_RX_CAN_ID, 4, 0, false);
+    statusMsg.data[0] = 0b1;  // limit switch depressed
+    statusMsg.data[1] = static_cast<uint8_t>(
+        tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING);
+    tap::arch::convertToLittleEndian<int16_t>(2534, statusMsg.data + 2);  // 25.34C
+
+    ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
+        .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
+            *message = statusMsg;
+            return true;
+        });
+
+    dut.init();
+    drivers.canRxHandler.CanRxHandler::pollCanData();
+
+    EXPECT_TRUE(dut.getLimitSwitchDepressed());
+    EXPECT_EQ(
+        dut.getImuState(),
+        tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING);
+    EXPECT_TRUE(dut.isConnected());
+    EXPECT_NEAR(dut.getTemp(), 25.34f, 1E-4f);
+
+    clock.time += 90'000;
+    EXPECT_TRUE(dut.isConnected());
+}
+
 TEST(TurretMCBCanComm, sendImuMountingTransforms_onRequest_sends8BytePayloads)
 {
     ClockStub clock;

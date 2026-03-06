@@ -263,6 +263,10 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
 
 void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
 {
+    // Status frames are a heartbeat and should keep the remote IMU marked connected,
+    // even when axis packets pause during calibration/transitions.
+    imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
+
     if (message.getLength() >= sizeof(TurretStatusMessageData))
     {
         const TurretStatusMessageData* status =
