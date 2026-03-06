@@ -308,7 +308,11 @@ TEST(TurretMCBCanComm, sendImuMountingTransforms_onRequest_sends8BytePayloads)
         tap::algorithms::transforms::Transform(1.0f, -2.0f, 3.0f, 0.1f, -0.2f, 0.3f));
 
     modm::can::Message commandMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
-    modm::can::Message translationMsg(TurretMCBCanComm::CanIDs::IMU_MOUNTING_TX_CAN_ID, 8, 0, false);
+    modm::can::Message translationMsg(
+        TurretMCBCanComm::CanIDs::IMU_MOUNTING_TX_CAN_ID,
+        8,
+        0,
+        false);
     translationMsg.data[0] = static_cast<uint8_t>(TurretMCBCanComm::RemoteImuType::BMI088);
     translationMsg.data[1] = 0;
     tap::arch::convertToLittleEndian<int16_t>(10, translationMsg.data + 2);

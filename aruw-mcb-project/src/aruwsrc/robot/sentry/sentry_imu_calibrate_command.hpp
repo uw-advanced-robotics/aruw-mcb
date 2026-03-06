@@ -43,8 +43,10 @@
 // namespace aruwsrc::sentry
 // {
 // /**
-//  * A command whose job is to perform a calibration of the turret and chassis IMUs. Requires that the
-//  * robot has a turret and a chassis subsystem. Also requires that a turret IMU is connected via the
+//  * A command whose job is to perform a calibration of the turret and chassis IMUs. Requires that
+//  the
+//  * robot has a turret and a chassis subsystem. Also requires that a turret IMU is connected via
+//  the
 //  * TurretMCBCanComm object.
 //  *
 //  * When this command is scheduled, it performs the following actions:
@@ -75,7 +77,8 @@
 //      * @param[in] drivers A pointer to the global drivers object.
 //      * @param[in] turretsAndControllers A list of TurretIMUCalibrationConfig structs containing
 //      * turret and turret IMU information necessary for calibrating the IMU
-//      * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the desired
+//      * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the
+//      desired
 //      * movement to 0).
 //      */
 

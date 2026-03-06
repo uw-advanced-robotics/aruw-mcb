@@ -199,7 +199,9 @@
 //             fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
 //             lampreyShitAverage += turretMajorLampreyEncoder.getPosition().getUnwrappedValue();
 //             lampreySamples++;
-//             // lampreyDebugAverage2 = lampreyDebugAverage2 + (turretMajorLampreyEncoder.getPosition().getUnwrappedValue() - lampreyDebugAverage2) / lampreySamples;
+//             // lampreyDebugAverage2 = lampreyDebugAverage2 +
+//             (turretMajorLampreyEncoder.getPosition().getUnwrappedValue() - lampreyDebugAverage2)
+//             / lampreySamples;
 //             // lampreyShitAverage /= lampreySamples;
 
 //             fakeLampreyEncoder.setFakePosition(lampreyShitAverage);
@@ -233,7 +235,7 @@
 //             fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
 //             if (!lampreyAligned)
 //             {
-                
+
 //                 turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
 //                 lampreyAligned = true;
 //             }
@@ -262,7 +264,8 @@
 //                 dt,
 //                 config.turret->pitchMotor.getChassisFrameSetpoint());
 //         }
-//         config.yawController->runController(dt, config.turret->yawMotor.getChassisFrameSetpoint());
+//         config.yawController->runController(dt,
+//         config.turret->yawMotor.getChassisFrameSetpoint());
 //     }
 
 //     if (calibrationState == CalibrationState::LOCKING_TURRET)
@@ -457,12 +460,7 @@ void SentryImuCalibrateCommand::execute()
         Angle(modm::toRadian(aidenChangeThisNumberInUnitsOfDeg)));
 }
 
-bool SentryImuCalibrateCommand::isFinished() const
-{
-    return false;
-}
+bool SentryImuCalibrateCommand::isFinished() const { return false; }
 
-void SentryImuCalibrateCommand::end(bool)
-{
-}
-}
+void SentryImuCalibrateCommand::end(bool) {}
+}  // namespace aruwsrc::sentry

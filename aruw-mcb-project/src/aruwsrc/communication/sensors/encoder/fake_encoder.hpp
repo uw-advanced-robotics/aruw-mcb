@@ -33,19 +33,16 @@ public:
 
     bool isOnline() const override;
 
-    inline tap::algorithms::WrappedFloat getPosition() const override {
+    inline tap::algorithms::WrappedFloat getPosition() const override
+    {
         return tap::algorithms::WrappedFloat(fakePosition, 0, M_TWOPI);
     }
 
     float getVelocity() const override;
 
-    inline void setFakePosition(float position) {
-        this->fakePosition = position;
-    };
+    inline void setFakePosition(float position) { this->fakePosition = position; };
 
-    void setFakeVelocity(float velocity) {
-        this->fakeVelocity = velocity;
-    };
+    void setFakeVelocity(float velocity) { this->fakeVelocity = velocity; };
 
 private:
     float fakePosition;
