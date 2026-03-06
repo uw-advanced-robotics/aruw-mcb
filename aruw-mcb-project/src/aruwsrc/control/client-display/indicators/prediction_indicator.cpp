@@ -38,38 +38,35 @@ PredictionIndicator::PredictionIndicator(
       turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       worldToCameraTransform(worldToCameraTransform),
-      defaultLaunchSpeed(defaultLaunchSpeed),
-      predictedShotLandingPosition(0, 0, 0)
+      defaultLaunchSpeed(defaultLaunchSpeed)
 {
 }
 
 modm::ResumableResult<void> PredictionIndicator::update()
 {
-    constexpr float plateHeight = 0.2f;  // TODO don't hardcode this
+    constexpr float plateHeight = 0.05f;  // TODO don't hardcode this
     float time;
     ProjectedResult result;
 
     // if the friction wheel launch speed is 0, use a default launch speed so ballistics
     // gives a reasonable computation
-    float launchSpeed = frictionWheels.getPredictedLaunchSpeed();
-    tap::algorithms::transforms::Position predictedPosition(0, 0, 0);
+    float launchSpeed;
 
-    if (compareFloatClose(launchSpeed, 0.0f, 1e-5f))
-    {
-        launchSpeed = defaultLaunchSpeed;
-    }
 
     // defines the turret where the chassis is, under the assumption that the chassis origin and
     // turret origin coincide
     modm::Vector3f launchVelocity;
     modm::Vector3f turretPosition;
-
-    ballistics::SecondOrderKinematicState predictedShotLandingState(
-        turretPosition,
-        launchVelocity,
-        modm::Vector3f(0, -tap::algorithms::ACCELERATION_GRAVITY, 0));
+    tap::algorithms::transforms::Position predictedPosition(0 0, 0);
 
     RF_BEGIN(0);
+
+    launchSpeed = frictionWheels.getPredictedLaunchSpeed();
+
+    if (compareFloatClose(launchSpeed, 0.0f, 1e-5f))
+    {
+        launchSpeed = defaultLaunchSpeed;
+    }
 
     arp = turretSubsystem.getWorldPitch();
     arw = turretSubsystem.getWorldYaw();
@@ -112,28 +109,28 @@ modm::ResumableResult<void> PredictionIndicator::update()
     arz = turretPosition.z;
 
     // calculate the time it would take for the shot to reach the plate height
-    time = (-predictedShotLandingState.velocity.z -
+    time = (-launchVelocity.z -
             sqrtf(
-                powf(predictedShotLandingState.velocity.z, 2) -
+                powf(launchVelocity.z, 2) -
                 2 * tap::algorithms::ACCELERATION_GRAVITY *
-                    (predictedShotLandingState.position.z - plateHeight))) /
+                    (turretPosition.z - plateHeight))) /
            tap::algorithms::ACCELERATION_GRAVITY;
 
     at = time;
 
     // calculate the position of the shot when it reaches the plate height
-    predictedShotLandingPosition = predictedShotLandingState.projectForward(time);
     predictedPosition = tap::algorithms::transforms::Position(
-        predictedShotLandingPosition.x,
-        predictedShotLandingPosition.y,
-        predictedShotLandingPosition.z);
+        turretPosition.x + launchVelocity.x * time,
+        turretPosition.y + launchVelocity.y * time,
+        plateHeight);
+
     // project the predicted shot landing position into the camera frame and then to screen
     // coordinates
     result = convertCameraFrameToScreenFrame(worldToCameraTransform.apply(predictedPosition));
 
-    aex = predictedShotLandingPosition.getX();
-    aey = predictedShotLandingPosition.getY();
-    aez = predictedShotLandingPosition.getZ();
+    aex = predictedPosition.x();
+    aey = predictedPosition.y();
+    aez = predictedPosition.z();
     abx = result.screenX;
     aby = result.screenY;
 

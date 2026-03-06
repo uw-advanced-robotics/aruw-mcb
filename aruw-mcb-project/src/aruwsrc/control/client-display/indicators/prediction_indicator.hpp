@@ -66,8 +66,6 @@ private:
     const Transform &worldToCameraTransform;
     const float defaultLaunchSpeed;
 
-    modm::Vector3f predictedShotLandingPosition;
-
     Tx::Graphic1Message hitPredictionGraphic;
 
     static constexpr uint16_t INDICATOR_LINE_THICKNESS = 3;
