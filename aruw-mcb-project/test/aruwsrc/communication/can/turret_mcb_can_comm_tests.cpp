@@ -238,3 +238,56 @@ TEST(TurretMCBCanComm, sendTimeSyncData)
 
     drivers.canRxHandler.CanRxHandler::pollCanData();
 }
+
+TEST(TurretMCBCanComm, sendImuMountingTransforms_onRequest_sends8BytePayloads)
+{
+    ClockStub clock;
+    clock.time = 10'000;
+
+    tap::Drivers drivers;
+    TurretMCBCanComm dut(&drivers, tap::can::CanBus::CAN_BUS1);
+
+    ON_CALL(drivers.canRxHandler, attachReceiveHandler)
+        .WillByDefault([&](tap::can::CanRxListener* const listener) {
+            drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
+        });
+    ON_CALL(drivers.can, isReadyToSend(tap::can::CanBus::CAN_BUS1)).WillByDefault(Return(true));
+
+    modm::can::Message requestMsg(
+        TurretMCBCanComm::CanIDs::IMU_MOUNTING_REQUEST_RX_CAN_ID,
+        0,
+        0,
+        false);
+    ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
+        .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
+            *message = requestMsg;
+            return true;
+        });
+
+    dut.setImuMountingTransform(
+        TurretMCBCanComm::RemoteImuType::BMI088,
+        tap::algorithms::transforms::Transform(1.0f, -2.0f, 3.0f, 0.1f, -0.2f, 0.3f));
+
+    modm::can::Message commandMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
+    modm::can::Message translationMsg(TurretMCBCanComm::CanIDs::IMU_MOUNTING_TX_CAN_ID, 8, 0, false);
+    translationMsg.data[0] = static_cast<uint8_t>(TurretMCBCanComm::RemoteImuType::BMI088);
+    translationMsg.data[1] = 0;
+    tap::arch::convertToLittleEndian<int16_t>(10, translationMsg.data + 2);
+    tap::arch::convertToLittleEndian<int16_t>(-20, translationMsg.data + 4);
+    tap::arch::convertToLittleEndian<int16_t>(30, translationMsg.data + 6);
+
+    modm::can::Message rotationMsg(TurretMCBCanComm::CanIDs::IMU_MOUNTING_TX_CAN_ID, 8, 0, false);
+    rotationMsg.data[0] = static_cast<uint8_t>(TurretMCBCanComm::RemoteImuType::BMI088);
+    rotationMsg.data[1] = 1;
+    tap::arch::convertToLittleEndian<int16_t>(100, rotationMsg.data + 2);
+    tap::arch::convertToLittleEndian<int16_t>(-200, rotationMsg.data + 4);
+    tap::arch::convertToLittleEndian<int16_t>(300, rotationMsg.data + 6);
+
+    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(commandMsg)));
+    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(translationMsg)));
+    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(rotationMsg)));
+
+    dut.init();
+    drivers.canRxHandler.CanRxHandler::pollCanData();
+    dut.sendData();
+}
