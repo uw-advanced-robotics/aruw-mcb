@@ -199,9 +199,9 @@ void SentryImuCalibrateCommand::execute()
             fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
             lampreyShitAverage += turretMajorLampreyEncoder.getPosition().getUnwrappedValue();
             lampreySamples++;
-            // lampreyDebugAverage2 = lampreyDebugAverage2 +
-            (turretMajorLampreyEncoder.getPosition().getUnwrappedValue() - lampreyDebugAverage2) /
-                lampreySamples;
+            lampreyDebugAverage2 += (turretMajorLampreyEncoder.getPosition().getUnwrappedValue() -
+                                     lampreyDebugAverage2) /
+                                    lampreySamples;
             // lampreyShitAverage /= lampreySamples;
 
             fakeLampreyEncoder.setFakePosition(lampreyShitAverage);
