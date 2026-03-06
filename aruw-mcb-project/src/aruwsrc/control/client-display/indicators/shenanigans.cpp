@@ -17,42 +17,48 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "circle_crosshair.hpp"
+#include "shenanigans.hpp"
 
 using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display::indicators
 {
-CircleCrosshair::CircleCrosshair(RefSerialTransmitter &refSerialTransmitter)
+Shenanigans::Shenanigans(RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter)
 {
 }
 
-void CircleCrosshair::initialize()
+void Shenanigans::initialize()
 {
-    uint8_t crosshairName[3];
+    //std::srand(std::time(0));
+    //OFFSET_X = std::rand() % (SCREEN_WIDTH*7/10) - SCREEN_WIDTH/2*7/10;
+    //OFFSET_Y = std::rand() % (SCREEN_HEIGHT*7/10) - SCREEN_HEIGHT/2*7/10;
+    //COLOR = static_cast<Tx::GraphicColor>(std::rand() % 8);
 
-    getUnusedGraphicName(crosshairName);
+    uint8_t shenanigansName[3];
+
+    getUnusedGraphicName(shenanigansName);
     RefSerialTransmitter::configGraphicGenerics(
-        &crosshairGraphics.graphicData,
-        crosshairName,
+        &shenanigansGraphics.graphicData,
+        shenanigansName,
         Tx::GRAPHIC_ADD,
         DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::PINK);
+        COLOR);
 
-    RefSerialTransmitter::configCircle(
-        LINE_THICKNESS,
-        CRICLE_X,
-        CRICLE_Y,
-        CRICLE_SIZE,
-        &crosshairGraphics.graphicData);
+    RefSerialTransmitter::configCharacterMsg(
+        FONTSIZE,
+        LINEWIDTH,
+        OFFSET_X+SCREEN_WIDTH / 2,
+        OFFSET_Y+SCREEN_HEIGHT / 2,
+        "Shenanigans",
+        &shenanigansGraphics);
 }
 
-modm::ResumableResult<void> CircleCrosshair::sendInitialGraphics()
+modm::ResumableResult<void> Shenanigans::sendInitialGraphics()
 {
     RF_BEGIN(0)
 
-    RF_CALL(refSerialTransmitter.sendGraphic(&crosshairGraphics));
+    RF_CALL(refSerialTransmitter.sendGraphic(&shenanigansGraphics));
 
     RF_END();
 }

@@ -71,6 +71,7 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
+#include "aruwsrc/control/client-display/indicators/shenanigans.hpp"
 
 //#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
@@ -609,6 +610,8 @@ CircleCrosshair circleCrosshair(refSerialTransmitter);
 
 DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTransmitter);
 
+Shenanigans shenanigans(refSerialTransmitter);
+
 TextHudIndicators textHudIndicators(
     *drivers(),
     agitator,
@@ -635,7 +638,8 @@ std::vector<HudIndicator *> hudIndicators = {
     &circleCrosshair,
     &damageIndicator,
     &textHudIndicators,
-    &visionTargetIndicator};
+    &visionTargetIndicator,
+    &shenanigans};
 
 aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
     *drivers(),

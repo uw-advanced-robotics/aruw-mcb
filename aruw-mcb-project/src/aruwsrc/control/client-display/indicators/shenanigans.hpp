@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CIRCLE_CROSSHAIR_HPP_
-#define CIRCLE_CROSSHAIR_HPP_
+#ifndef SHENANIGANS_HPP_
+#define SHENANIGANS_HPP_
 
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
@@ -27,54 +27,41 @@
 
 #include "hud_indicator.hpp"
 
+#include <cstdint>
+#include <ctime>
+
 namespace aruwsrc::control::client_display::indicators
 {
-class CircleCrosshair : public HudIndicator, protected modm::Resumable<2>
+class Shenanigans : public HudIndicator, protected modm::Resumable<2>
 {
 public:
     /**
-     * Makes a dot circle crosshair on the screen.
+     * Makes a shenanigans on the screen.
      *
      * @param[in] refSerialTransmitter RefSerialTransmitter instance.
      */
-    CircleCrosshair(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
+    Shenanigans(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     void initialize() override final;
 
     modm::ResumableResult<void> sendInitialGraphics() override final;
 
 private:
-    // Offset from the center of the screen for the crosshair
-#ifdef TARGET_STANDARD_NULL
-    static constexpr int16_t OFFSET_X = 25;
-    static constexpr int16_t OFFSET_Y = -75;
-#elif defined(TARGET_STANDARD_VOID)
-    static constexpr int16_t OFFSET_X = -5;
-    static constexpr int16_t OFFSET_Y = -50;
-#elif defined(TARGET_HERO_ZERO)
-    static constexpr int16_t OFFSET_X = 2;
-    static constexpr int16_t OFFSET_Y = -42;
-#else
+    static constexpr int SCREEN_WIDTH = 1920;
+    static constexpr int SCREEN_HEIGHT = 1080;
+
     static constexpr int16_t OFFSET_X = 0;
     static constexpr int16_t OFFSET_Y = 0;
-#endif
+    static constexpr Tx::GraphicColor COLOR = Tx::GraphicColor::YELLOW;
 
-    // X position of the circle
-    static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2 + OFFSET_X;
-    // Y position of the circle
-    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2 + OFFSET_Y;
-    // SIZE of the circle
-    static constexpr uint16_t CRICLE_SIZE = 50;
-// Thickness of the line
-#if defined(TARGET_HERO_ZERO)
-    static constexpr uint16_t LINE_THICKNESS = 10;
-#else
-    static constexpr uint16_t LINE_THICKNESS = 5;
-#endif
+    static constexpr uint16_t FONTSIZE = 50;
+    static constexpr uint16_t LINEWIDTH = 5;
 
-    Tx::Graphic1Message crosshairGraphics;
+    float value = 0;
+
+    Tx::GraphicCharacterMessage shenanigansGraphics;
 };
 
 }  // namespace aruwsrc::control::client_display::indicators
 
-#endif  // CIRCLE_CROSSHAIR_HPP_
+#endif  // SHENANIGANS_HPP_
