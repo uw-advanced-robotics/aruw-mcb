@@ -113,10 +113,13 @@ Position ChassisAutoNavController::calculateSetPoint(
         path->clearPathChanged();
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
     }
+    
+    float robotParam = path->estimateRobotProgress(current, lastParameter);
 
-    float distOfClosest = path->positionToClosestParameter(current);
+    float distAlongPath = path->parametertoDistance(robotParam);
+    lastParameter = robotParam;
 
-    Position lookaheadPos = path->parametertoPosition(distOfClosest + lookaheadDistance);
+    Position lookaheadPos = path->parametertoPosition(distAlongPath + lookaheadDistance);
 
     if (!pathTransitionTimeout.isExpired())
         return aruwsrc::algorithms::quadraticBezierInterpolation(

@@ -171,6 +171,16 @@ Position AutoNavPath::parametertoPosition(const float parameter) const
         (parameter - currParameter) / segmentDistance);
 }
 
+float AutoNavPath::parametertoDistance(const float parameter) const
+{
+    size_t pointIndex;
+    float totalDistance = 0;
+    for(pointIndex = 0; pointIndex < setpointData.size() - 1; pointIndex++){
+        totalDistance += Position::distance(setpointData[pointIndex], setpointData[pointIndex + 1]);
+    }
+    return parameter * totalDistance;
+}
+
 float AutoNavPath::getClosestParameterOnSegment(Position current, Position p1, Position p2) const
 {
     Vector distance1 = p2 - p1;
