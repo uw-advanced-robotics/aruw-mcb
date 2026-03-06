@@ -200,8 +200,8 @@ void SentryImuCalibrateCommand::execute()
             lampreyShitAverage += turretMajorLampreyEncoder.getPosition().getUnwrappedValue();
             lampreySamples++;
             // lampreyDebugAverage2 = lampreyDebugAverage2 +
-            (turretMajorLampreyEncoder.getPosition().getUnwrappedValue() - lampreyDebugAverage2)
-            / lampreySamples;
+            (turretMajorLampreyEncoder.getPosition().getUnwrappedValue() - lampreyDebugAverage2) /
+                lampreySamples;
             // lampreyShitAverage /= lampreySamples;
 
             fakeLampreyEncoder.setFakePosition(lampreyShitAverage);
@@ -235,11 +235,11 @@ void SentryImuCalibrateCommand::execute()
             fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
             if (!lampreyAligned)
             {
-
                 turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
                 lampreyAligned = true;
             }
-            if (lampreyAligned) {
+            if (lampreyAligned)
+            {
                 turretMajor.getMutableMotor().setChassisFrameSetpoint(Angle(0));
 
                 // reset odometry
@@ -264,8 +264,7 @@ void SentryImuCalibrateCommand::execute()
                 dt,
                 config.turret->pitchMotor.getChassisFrameSetpoint());
         }
-        config.yawController->runController(dt,
-        config.turret->yawMotor.getChassisFrameSetpoint());
+        config.yawController->runController(dt, config.turret->yawMotor.getChassisFrameSetpoint());
     }
 
     if (calibrationState == CalibrationState::LOCKING_TURRET)
