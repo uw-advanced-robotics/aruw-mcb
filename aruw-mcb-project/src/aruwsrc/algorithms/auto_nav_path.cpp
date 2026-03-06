@@ -88,7 +88,7 @@ float AutoNavPath::estimateRobotProgress(const Position robotPos, const float la
     float currParameter = 0.0f;
 
     // float minDistance = F32_MAX;
-    float minParam = 0.0f;
+    float minParam = F32_MAX;
 
     float prevDistance = F32_MAX;
     float prevParam = 0.0f;
