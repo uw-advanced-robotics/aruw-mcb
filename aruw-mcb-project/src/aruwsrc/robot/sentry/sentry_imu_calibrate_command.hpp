@@ -1,152 +1,3 @@
-// /*
-//  * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
-//  *
-//  * This file is part of aruw-mcb.
-//  *
-//  * aruw-mcb is free software: you can redistribute it and/or modify
-//  * it under the terms of the GNU General Public License as published by
-//  * the Free Software Foundation, either version 3 of the License, or
-//  * (at your option) any later version.
-//  *
-//  * aruw-mcb is distributed in the hope that it will be useful,
-//  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  * GNU General Public License for more details.
-//  *
-//  * You should have received a copy of the GNU General Public License
-//  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
-//  */
-// #ifndef SENTRY_IMU_CALIBRATE_COMMAND_HPP_
-// #define SENTRY_IMU_CALIBRATE_COMMAND_HPP_
-
-// #include <vector>
-
-// #include "tap/algorithms/filter/butterworth.hpp"
-// #include "tap/algorithms/filter/discrete_filter.hpp"
-// #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
-// #include "tap/architecture/timeout.hpp"
-// #include "tap/communication/sensors/encoder/encoder_interface.hpp"
-// #include "tap/control/command.hpp"
-
-// #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-// #include "aruwsrc/communication/sensors/encoder/fake_encoder.hpp"
-// #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
-// #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-// #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
-// #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-// #include "aruwsrc/control/turret/turret_subsystem.hpp"
-// #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
-// #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
-// #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
-// #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
-
-// namespace aruwsrc::sentry
-// {
-// /**
-//  * A command whose job is to perform a calibration of the turret and chassis IMUs. Requires that
-//  the
-//  * robot has a turret and a chassis subsystem. Also requires that a turret IMU is connected via
-//  the
-//  * TurretMCBCanComm object.
-//  *
-//  * When this command is scheduled, it performs the following actions:
-//  * 1. Wait until the turrets are online and the chassis turret-MCB IMU is online.
-//  * 2. Command the pitch and yaw turret gimbals to move to PI/2 radians (forward and flat).
-//  * 3. Command the chassis to stay still.
-//  * 4. Pause until the chassis/turret subsystems are no longer moving.
-//  * 5. Send a calibration signal to the turret MCB.
-//  * 6. Send calibration requests to onboard and chassis/turret IMUs.
-//  * 7. Wait until calibration is complete and then end the command.
-//  */
-// class SentryImuCalibrateCommand : public aruwsrc::control::imu::ImuCalibrateCommand
-// {
-// public:
-//     /**
-//      * Threshold around 0 where turret pitch and yaw velocity is considered to be 0, in radians/s
-//      */
-//     static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4);
-//     /**
-//      * Threshold around 0 where turret pitch and yaw position from the center considered to be 0,
-//      * in radians.
-//      *
-//      * @note is 0 for max precision on sentry, which chassis-rel controllers can reach.
-//      */
-//     static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.24f);  // 10x encoder
-
-//     /**
-//      * @param[in] drivers A pointer to the global drivers object.
-//      * @param[in] turretsAndControllers A list of TurretIMUCalibrationConfig structs containing
-//      * turret and turret IMU information necessary for calibrating the IMU
-//      * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the
-//      desired
-//      * movement to 0).
-//      */
-
-//     SentryImuCalibrateCommand(
-//         tap::Drivers *drivers,
-//         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-//         aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
-//         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-//             control::turret::algorithms::Axis::YAW> &turretMajorController,
-//         aruwsrc::control::chassis::HolonomicChassisSubsystem &chassis,
-//         algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
-//         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-//         tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-//         aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
-//         aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
-//         tap::encoder::EncoderInterface &turretMajorLampreyEncoder,
-//         tap::encoder::EncoderInterface &turretMajorInternalEncoder,
-//         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
-//         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
-
-//     const char *getName() const override { return "Sentry calibrate IMU"; }
-
-//     void initialize() override;
-
-//     void execute() override;
-
-//     bool isFinished() const override;
-
-//     void end(bool interrupted) override;
-
-// protected:
-//     aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
-//     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-//         control::turret::algorithms::Axis::YAW> &turretMajorController;
-
-//     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver;
-
-//     tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-//     tap::communication::sensors::imu::AbstractIMU &turretMajorImu;
-//     aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm;
-//     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
-//     tap::encoder::EncoderInterface &turretMajorLampreyEncoder;
-//     tap::encoder::EncoderInterface &turretMajorInternalEncoder;
-//     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
-//     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
-
-// private:
-//     static constexpr float LAMPREY_SHIT_THRESHOLD = 0.02f;
-//     static constexpr float LAMPREY_SHIT_BUMP = modm::toRadian(10.0f);
-//     static constexpr uint32_t MIN_SATURATION_LOOPS = 10;
-//     uint32_t loopCounter{0};
-//     bool lampreyAligned{false};
-//     bool isLampreyShit();
-//     tap::algorithms::filter::DiscreteFilter<3> turretMajorLampreyEncoderHighpass;
-//     tap::algorithms::filter::DiscreteFilter<3> turretMajorLampreyEncoderLowpass;
-//     float turretMajorLampreyEncoderHighpassValue = 0;
-//     float turretMajorLampreyEncoderLowpassValue = 0;
-//     float lampreyShitAverage = 0;
-//     float lampreySamples = 0;
-//     float debugPos = 0;
-//     float lampreyPos = 0;
-//     float lampreyDebugAverage2 = 0;
-//     float fakeLampreyEncoderDebugPos = 0;
-//     aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
-// };
-// }  // namespace aruwsrc::sentry
-
-// #endif  // SENTRY_IMU_CALIBRATE_COMMAND_HPP_
 /*
  * Copyright (c) 2020-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
@@ -192,8 +43,10 @@
 namespace aruwsrc::sentry
 {
 /**
- * A command whose job is to perform a calibration of the turret and chassis IMUs. Requires that the
- * robot has a turret and a chassis subsystem. Also requires that a turret IMU is connected via the
+ * A command whose job is to perform a calibration of the turret and chassis IMUs. Requires that
+ the
+ * robot has a turret and a chassis subsystem. Also requires that a turret IMU is connected via
+ the
  * TurretMCBCanComm object.
  *
  * When this command is scheduled, it performs the following actions:
@@ -224,7 +77,8 @@ public:
      * @param[in] drivers A pointer to the global drivers object.
      * @param[in] turretsAndControllers A list of TurretIMUCalibrationConfig structs containing
      * turret and turret IMU information necessary for calibrating the IMU
-     * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the desired
+     * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the
+     desired
      * movement to 0).
      */
 
@@ -289,7 +143,6 @@ private:
     float lampreyDebugAverage2 = 0;
     float fakeLampreyEncoderDebugPos = 0;
     aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
-    float aidenChangeThisNumberInUnitsOfDeg = 0;
 };
 }  // namespace aruwsrc::sentry
 
