@@ -258,9 +258,15 @@ TEST(TurretMCBCanComm, receive_status_updates_imu_state_and_connection_heartbeat
         tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING);
     tap::arch::convertToLittleEndian<int16_t>(2534, statusMsg.data + 2);  // 25.34C
 
+    bool statusDelivered = false;
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
         .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
+            if (statusDelivered)
+            {
+                return false;
+            }
             *message = statusMsg;
+            statusDelivered = true;
             return true;
         });
 
