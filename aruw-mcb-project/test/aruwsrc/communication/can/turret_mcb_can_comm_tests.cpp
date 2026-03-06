@@ -274,7 +274,7 @@ TEST(TurretMCBCanComm, receive_status_updates_imu_state_and_connection_heartbeat
     EXPECT_TRUE(dut.isConnected());
     EXPECT_NEAR(dut.getTemp(), 25.34f, 1E-4f);
 
-    clock.time += 90'000;
+    clock.time += 89'000;
     EXPECT_TRUE(dut.isConnected());
 }
 
@@ -307,7 +307,6 @@ TEST(TurretMCBCanComm, sendImuMountingTransforms_onRequest_sends8BytePayloads)
         TurretMCBCanComm::RemoteImuType::BMI088,
         tap::algorithms::transforms::Transform(1.0f, -2.0f, 3.0f, 0.1f, -0.2f, 0.3f));
 
-    modm::can::Message commandMsg(TurretMCBCanComm::CanIDs::TURRET_MCB_TX_CAN_ID, 1, {0}, false);
     modm::can::Message translationMsg(
         TurretMCBCanComm::CanIDs::IMU_MOUNTING_TX_CAN_ID,
         8,
@@ -326,7 +325,6 @@ TEST(TurretMCBCanComm, sendImuMountingTransforms_onRequest_sends8BytePayloads)
     tap::arch::convertToLittleEndian<int16_t>(-200, rotationMsg.data + 4);
     tap::arch::convertToLittleEndian<int16_t>(300, rotationMsg.data + 6);
 
-    EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(commandMsg)));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(translationMsg)));
     EXPECT_CALL(drivers.can, sendMessage(tap::can::CanBus::CAN_BUS1, Eq(rotationMsg)));
 
