@@ -16,24 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef WRIST_MOVE_POSITION_COMMAND_HPP_
-#define WRIST_MOVE_POSITION_COMMAND_HPP_
+#ifndef SELECT_CUBE_POSITION_COMMAND_HPP_
+#define SELECT_CUBE_POSITION_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
-namespace aruwsrc::engineer::wrist
+#include "cube_storage_subsystem.hpp"
+
+namespace aruwsrc::engineer::cube_storage
 
 {
-class WristMovePositionCommand : public tap::control::Command
+class SelectCubePositionCommand : public tap::control::Command
 {
 public:
-    WristMovePositionCommand(
-        WristSubsystem &wrist,
-        float theta1setpoint,
-        float theta2setpoint,
-        float theta3setpoint);
+    SelectCubePositionCommand(
+        CubeStorageSubsystem &cubeStorage,
+        aruwsrc::control::joint::JointSubsystem &jointSubsystem,
+        bool addCube
+        // TurretToCubeTransform &turretToCubeTransformer,
+        // TurretToSuctionTransform &turretToSuctionTransformer
+    );
 
     void initialize() override;
 
@@ -43,13 +47,17 @@ public:
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "Wrist Move Position Command"; }
+    const char *getName() const override { return "Select Cube Position Command"; }
 
 private:
-    WristSubsystem &wrist;
-    float theta1setpoint, theta2setpoint, theta3setpoint;
+    CubeStorageSubsystem &cubeStorage;
+    aruwsrc::control::joint::JointSubsystem &jointSubsystem;
+    bool addCube;
 
-};  // class WristMovePositionCommand
+    // TurretToCubeTransform &turretToCubeTransformer;
+    // TurretToSuctionTransform &turretToSuctionTransformer;
 
-}  // namespace aruwsrc::engineer::wrist
-#endif  // WRIST_MOVE_POSITION_COMMAND_HPP_
+};  // class Select Cube Position Command
+
+}  // namespace aruwsrc::engineer::cube_storage
+#endif  // SELECT_CUBE_POSITION_COMMAND_HPP_

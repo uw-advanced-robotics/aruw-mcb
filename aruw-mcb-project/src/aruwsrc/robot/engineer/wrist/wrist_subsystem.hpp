@@ -31,14 +31,19 @@ namespace aruwsrc::engineer::wrist
 {
 struct WristConfig
 {
-    tap::algorithms::SmoothPidConfig pitchPidConfig;
-    tap::algorithms::SmoothPidConfig yawPidConfig;
+    // Joints ordered based on distance from base of wrist
+    // theta 1 is "azimuth/roll", theta 2 is "pitch"
+    // theta 3 is on very end and ONLY "roll"
+    tap::algorithms::SmoothPidConfig theta1PidConfig;
+    tap::algorithms::SmoothPidConfig theta2PidConfig;
+    tap::algorithms::SmoothPidConfig theta3PidConfig;
 
-    // Minimum and maximum setpoints for pitch and yaw
-    float minPitch = 0.0f;
-    float maxPitch = 0.0f;
-    float minYaw = 0.0f;
-    float maxYaw = 0.0f;
+    float theta1Min = 0.0f;
+    float theta1Max = 0.0f;
+    float theta2Min = 0.0f;
+    float theta2Max = 0.0f;
+    float theta3Min = 0.0f;
+    float theta3Max = 0.0f;
 
     float ratio = 1.0f;     // differential pitch gear teeth / yaw gear teeth
     float epsilon = 1e-4f;  // angular tolerance used to determine if we reached the setpoint
@@ -50,30 +55,34 @@ class WristSubsystem : public tap::control::Subsystem
 {
 public:
     WristSubsystem(
-        tap::Drivers *drivers,
-        tap::motor::MotorInterface &motorLeft,
-        tap::motor::MotorInterface &motorRight,
-        tap::encoder::EncoderInterface &encoderPitch,
-        tap::encoder::EncoderInterface &encoderYaw,
+        tap::Drivers* drivers,
+        tap::motor::MotorInterface& motorTheta1,
+        tap::motor::MotorInterface& motorTheta2,
+        tap::motor::MotorInterface& motorTheta3,
+        tap::encoder::EncoderInterface& encoderTheta1,
+        tap::encoder::EncoderInterface& encoderTheta2,
+        tap::encoder::EncoderInterface& encoderTheta3,
         const WristConfig config);
 
-    float getPitch();
-
-    float getYaw();
-
-    float getSetpointPitch() { return setpointPitch; }
-
-    float getSetpointYaw() { return setpointYaw; }
-
-    void setSetpointPitch(float setpoint);
-
-    void setSetpointYaw(float setpoint);
+    float getTheta1();
+    float getTheta2();
+    float getTheta3();
+    void setSetpointTheta1(float setpoint);
+    void setSetpointTheta2(float setpoint);
+    void setSetpointTheta3(float setpoint);
+    float getSetpointTheta1() { return setpointTheta1; }
+    float getSetpointTheta2() { return setpointTheta2; }
+    float getSetpointTheta3() { return setpointTheta3; }
+    float calculateTheta2MotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
+    float calculateTheta1MotorOutputForTheta1(float theta1Setpoint);
 
     virtual void initialize() override;
 
-    bool atSetpointPitch(float epsilon = 1e-4);
+    bool atSetpointTheta1(float epsilon = 1e-4);
 
-    bool atSetpointYaw(float epsilon = 1e-4);
+    bool atSetpointTheta2(float epsilon = 1e-4);
+
+    bool atSetpointTheta3(float epsilon = 1e-4);
 
     bool atSetpoint();
 
@@ -82,13 +91,11 @@ public:
     virtual void refreshSafeDisconnect() override;
 
 private:
-    tap::motor::MotorInterface &motorLeft, &motorRight;
-    tap::encoder::EncoderInterface &encoderPitch, &encoderYaw;
-    tap::algorithms::SmoothPid pidPitch, pidYaw;
+    tap::motor::MotorInterface &motorTheta1, &motorTheta2, &motorTheta3;
+    tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2, &encoderTheta3;
     const WristConfig config;
-
-    float setpointPitch, setpointYaw;
-
+    float setpointTheta1, setpointTheta2, setpointTheta3;
+    tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
     const tap::algorithms::transforms::Position COM_POS =
         tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static
     static constexpr float WRIST_MASS_KG = 0.4;
