@@ -111,22 +111,6 @@ static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
     0,
     0);
 
-static const tap::algorithms::transforms::Transform TURRET_MCB_BMI088_MOUNTING_TRANSFORM(
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f);
-
-static const tap::algorithms::transforms::Transform TURRET_MCB_ISM330_MOUNTING_TRANSFORM(
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    -M_PI_2);
-
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
@@ -215,6 +199,22 @@ static constexpr float majorToTurretR = 0.145;
 static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
+
+static const tap::algorithms::transforms::Transform TURRET_MCB1_BMI088_MOUNTING_TRANSFORM(
+    0.0f,
+    0.20667f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f);
+
+static const tap::algorithms::transforms::Transform TURRET_MCB1_ISM330_MOUNTING_TRANSFORM(
+    0.00868f,
+    0.1734f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f);
 }  // namespace turretWidow
 
 namespace minorPidConfigs

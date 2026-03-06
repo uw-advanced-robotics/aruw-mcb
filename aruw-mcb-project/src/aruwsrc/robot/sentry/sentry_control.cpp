@@ -797,8 +797,8 @@ void startSentryCommands(Drivers *drivers)
     getTurretMCBCanCommWidow().setRemoteCalibrationSampleCount(4000);
     getChassisTurretMCBCanComm().setRemoteCalibrationSampleCount(4000);
     getTurretMCBCanCommWidow().setImuMountingTransforms(
-        turretMajor::TURRET_MCB_BMI088_MOUNTING_TRANSFORM,
-        turretMajor::TURRET_MCB_ISM330_MOUNTING_TRANSFORM);
+        turretWidow::TURRET_MCB1_BMI088_MOUNTING_TRANSFORM,
+        turretWidow::TURRET_MCB1_ISM330_MOUNTING_TRANSFORM);
     getChassisTurretMCBCanComm().setImuMountingTransforms(
         aruwsrc::control::chassis::chassisImu::CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM,
         aruwsrc::control::chassis::chassisImu::CHASSIS_MCB_ISM330_MOUNTING_TRANSFORM);
