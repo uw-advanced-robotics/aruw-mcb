@@ -175,6 +175,7 @@ public:
 
     mockable inline float getAz() const override { return imuData.accG.z(); }
     mockable inline float getTemp() const { return imuData.temperature; }
+    
     mockable inline ImuState getImuState() const override
     {
         return isConnected() ? imuState : ImuState::IMU_NOT_CONNECTED;
@@ -190,18 +191,6 @@ public:
     mockable inline bool isConnected() const
     {
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
-    }
-
-    inline ImuInterface::ImuState getImuState() const override
-    {
-        if (isConnected())
-        {
-            return imuState;
-        }
-        else
-        {
-            return ImuInterface::ImuState::IMU_NOT_CONNECTED;
-        }
     }
 
     mockable inline void setOpenHopperCover(bool isOpen)
