@@ -69,7 +69,7 @@ public:
      *
      * @note is 0 for max precision on sentry, which chassis-rel controllers can reach.
      */
-    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.12f);  // 10x encoder
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.24f);  // 10x encoder
 
     /**
      * @param[in] drivers A pointer to the global drivers object.
@@ -135,6 +135,10 @@ private:
     float turretMajorLampreyEncoderLowpassValue = 0;
     float lampreyShitAverage = 0;
     float lampreySamples = 0;
+    float debugPos = 0;
+    float lampreyPos = 0;
+    float fakeLampreyEncoderDebugPos = 0;
+    aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
 };
 }  // namespace aruwsrc::sentry
 

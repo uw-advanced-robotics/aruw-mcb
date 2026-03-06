@@ -115,9 +115,9 @@ namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 130000.0f,
-    .ki = 0.0f,
+    .ki = 3000.0f,
     .kd = 8000.0f,
-    .maxICumulative = 0.0f,
+    .maxICumulative = 10000.0f,
     .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.2),
     .tQDerivativeKalman = 10.0f,
     .tRDerivativeKalman = 1.0f,

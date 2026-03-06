@@ -73,7 +73,8 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       turretMajorLampreyEncoderLowpass(
           tap::algorithms::filter::butterworth<2, tap::algorithms::filter::FilterType::LOWPASS>(
               10.0f,
-              1.0f / 500.0f))
+              1.0f / 500.0f)),
+      fakeLampreyEncoder(0, 0)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -107,6 +108,8 @@ void SentryImuCalibrateCommand::initialize()
     loopCounter = 0;
     lampreyShitAverage = 0;
     lampreySamples = 0;
+    debugPos = 0;
+    lampreyPos = 0;
 }
 
 static inline bool turretMajorReachedCenterAndNotMoving(
@@ -191,8 +194,13 @@ void SentryImuCalibrateCommand::execute()
         }
         case CalibrationState::CALIBRATING_IMU:
 
+            debugPos = turretMajorInternalEncoder.getPosition().getUnwrappedValue();
+            lampreyPos = turretMajorLampreyEncoder.getPosition().getUnwrappedValue();
+            fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
             lampreyShitAverage += turretMajorLampreyEncoder.getPosition().getUnwrappedValue();
             lampreySamples++;
+
+            fakeLampreyEncoder.setFakePosition(lampreyShitAverage);
 
             if (calibrationLongTimeout.isExpired())
             {
@@ -208,19 +216,27 @@ void SentryImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
-
-                if (!lampreyAligned)
-                {
-                    lampreyShitAverage /= lampreySamples;
-                    aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder =
-                        aruwsrc::communication::sensors::encoder::FakeEncoder(
-                            lampreyShitAverage,
-                            0);
-                    turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
-                }
-
-                turretMajor.getMutableMotor().setChassisFrameSetpoint(
-                    Angle(turretMajor.getReadOnlyMotor().getConfig().startAngle));
+            }
+            break;
+        case CalibrationState::WAITING_CALIBRATION_COMPLETE:
+            if (calibrationTimer.isExpired())
+            {
+                calibrationState = CalibrationState::CALIBRATION_SUCCESS;
+                if (successChime) drivers->commandScheduler.addCommand(successChime);
+            }
+            break;
+        case CalibrationState::CALIBRATION_SUCCESS:
+            lampreyShitAverage /= lampreySamples;
+            fakeLampreyEncoder.setFakePosition(lampreyShitAverage);
+            fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
+            if (!lampreyAligned)
+            {
+                
+                turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
+                lampreyAligned = true;
+            }
+            if (lampreyAligned) {
+                turretMajor.getMutableMotor().setChassisFrameSetpoint(Angle(0));
 
                 bool turretsNotMoving = true;
                 for (auto &config : turretsAndControllers)
@@ -237,13 +253,6 @@ void SentryImuCalibrateCommand::execute()
                     yawObserver.overrideChassisYaw(0);
                     odometryInterface.reset();
                 }
-            }
-            break;
-        case CalibrationState::WAITING_CALIBRATION_COMPLETE:
-            if (calibrationTimer.isExpired())
-            {
-                calibrationState = CalibrationState::CALIBRATION_SUCCESS;
-                if (successChime) drivers->commandScheduler.addCommand(successChime);
             }
             break;
         default:

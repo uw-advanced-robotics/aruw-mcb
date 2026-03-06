@@ -30,11 +30,6 @@ FakeEncoder::FakeEncoder(float fakePosition, float fakeVelocity)
 
 bool FakeEncoder::isOnline() const { return true; }
 
-tap::algorithms::WrappedFloat FakeEncoder::getPosition() const
-{
-    return WrappedEncoder::getPosition();
-}
-
 float FakeEncoder::getVelocity() const { return WrappedEncoder::getVelocity(); }
 
 }  // namespace aruwsrc::communication::sensors::encoder
