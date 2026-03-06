@@ -71,7 +71,7 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(AnalogSensorEncoder)
 
-private:
+protected:
     void updateFromSensor();
     uint16_t readRaw() const;
     uint32_t rawToTicks(uint16_t raw) const;
