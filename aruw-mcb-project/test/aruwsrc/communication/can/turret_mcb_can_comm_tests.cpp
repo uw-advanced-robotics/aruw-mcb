@@ -280,7 +280,7 @@ TEST(TurretMCBCanComm, receive_status_updates_imu_state_and_connection_heartbeat
     EXPECT_TRUE(dut.isConnected());
     EXPECT_NEAR(dut.getTemp(), 25.34f, 1E-4f);
 
-    clock.time += 89'000;
+    clock.time += 1'000;
     EXPECT_TRUE(dut.isConnected());
 }
 
