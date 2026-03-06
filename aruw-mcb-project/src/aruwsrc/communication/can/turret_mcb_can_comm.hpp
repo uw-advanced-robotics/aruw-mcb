@@ -174,8 +174,9 @@ public:
     mockable inline float getAy() const override { return imuData.accG.y(); }
 
     mockable inline float getAz() const override { return imuData.accG.z(); }
+
     mockable inline float getTemp() const { return imuData.temperature; }
-    
+
     mockable inline ImuState getImuState() const override
     {
         return isConnected() ? imuState : ImuState::IMU_NOT_CONNECTED;
