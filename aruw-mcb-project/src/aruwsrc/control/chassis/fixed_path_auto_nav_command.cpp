@@ -18,6 +18,7 @@
  */
 
 #include "fixed_path_auto_nav_command.hpp"
+#include <span>
 
 using aruwsrc::algorithms::AutoNavPath;
 
@@ -29,7 +30,7 @@ FixedPathAutoNavCommand::FixedPathAutoNavCommand(
     const tap::Drivers& drivers,
     chassis::HolonomicChassisSubsystem& chassis,
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-    const Position* pathPoints,
+    std::span<const Position> pathPoints,
     float desiredSpeed,
     bool autoNavOnlyInGame,
     bool beybladeEnabled)
@@ -43,9 +44,9 @@ FixedPathAutoNavCommand::FixedPathAutoNavCommand(
       autoNavController(autoNavController),
       path()
 {
-    for (size_t i = 0; i < sizeof(pathPoints); i++)
+    for (const Position& p : pathPoints)
     {
-        path.pushPoint(pathPoints[i]);
+        path.pushPoint(p);
     }
 
     autoNavController.setDesiredSpeed(desiredSpeed);

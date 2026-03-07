@@ -27,6 +27,8 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "tap/algorithms/transforms/position.hpp"
 
+#include <span>
+
 namespace aruwsrc::control::chassis
 {
 class FixedPathAutoNavCommand : public AutoNavCommand
@@ -36,7 +38,7 @@ public:
         const tap::Drivers& drivers,
         chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-        const Position* pathPoints,
+        std::span<const Position> pathPoints,
         float desiredSpeed,
         bool autoNavOnlyInGame = false,
         bool beybladeEnabled = true);
