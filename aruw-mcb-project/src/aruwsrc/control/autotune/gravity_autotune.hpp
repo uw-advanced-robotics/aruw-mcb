@@ -112,7 +112,8 @@ protected:
         const float motorValue = static_cast<float>(this->config.motor->getMotorOutput());
         averagingTorques += (motorValue - averagingTorques) / (sampleCount);
 
-        const float angleValue = this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
+        const float angleValue =
+            this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
         averagingAngles += (angleValue - averagingAngles) / sampleCount;
     }
 
