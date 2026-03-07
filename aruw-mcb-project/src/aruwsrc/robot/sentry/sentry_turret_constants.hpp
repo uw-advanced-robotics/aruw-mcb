@@ -30,6 +30,7 @@
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"  // for turretID enum (could go somewhere else)
+#include "modm/container/pair.hpp"
 #include "modm/math/geometry/angle.hpp"
 #include "modm/math/geometry/vector3.hpp"
 
@@ -103,6 +104,11 @@ static constexpr uint16_t YAW_ANALOG_RAW_MAX = 10000;
 static constexpr uint16_t YAW_ANALOG_RAW_ZERO = 4550;
 static constexpr float YAW_ANALOG_OUTPUT_RANGE_RADIANS = M_TWOPI;
 
+static constexpr modm::Pair<uint32_t, float> LAMPREY_CALIBRATION_MAP[] = {
+    modm::Pair<uint32_t, float>{0, 0},
+    modm::Pair<uint32_t, float>{4096, M_TWOPI},
+};
+
 static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TRANSFORM(
     0,
     0,
@@ -115,7 +121,7 @@ namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 130000.0f,
-    .ki = 3000.0f,
+    .ki = 0.0f,
     .kd = 8000.0f,
     .maxICumulative = 10000.0f,
     .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.2),

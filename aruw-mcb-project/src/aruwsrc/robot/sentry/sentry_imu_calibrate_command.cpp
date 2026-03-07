@@ -281,9 +281,9 @@ void SentryImuCalibrateCommand::execute()
 
 bool SentryImuCalibrateCommand::isFinished() const
 {
-    // return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
-    //        calibrationState == CalibrationState::CALIBRATION_FAIL;
-    return false;
+    return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
+           calibrationState == CalibrationState::CALIBRATION_FAIL;
+    // return false;
 }
 
 void SentryImuCalibrateCommand::end(bool)

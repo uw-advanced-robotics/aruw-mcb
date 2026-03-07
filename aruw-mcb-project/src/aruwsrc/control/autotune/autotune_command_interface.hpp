@@ -69,7 +69,7 @@ public:
     virtual void drawCalibrationResult(modm::GraphicDisplay &display) const = 0;
 };
 
-template <typename T, uint32_t numTestPoints>
+template <uint32_t numTestPoints, turret::algorithms::Axis axis>
 class TurretAutotuneCommand : public TurretAutotuneInterface
 {
 public:
@@ -80,11 +80,12 @@ public:
      */
     struct TurretCalibrationConfig
     {
-        /// A `TurretSubsystem` that this command will control (will lock the turret).
-        turret::TurretSubsystem *turret;
-        /// A chassis relative pitch controller used to lock the turret.
-        turret::algorithms::ChassisFrameTurretController<turret::algorithms::Axis::PITCH>
-            *pitchController;
+        /// A `Subsystem` that this command will control
+        tap::control::Subsystem *turret;
+        /// The motor to use
+        turret::TurretMotor *motor;
+        /// A chassis relative controller used to lock the turret.
+        turret::algorithms::ChassisFrameTurretController<axis> *controller;
         /// If the pitch motor is inverted
         bool isMotorInverted;
         /// Mass of the pitching part of the turret in units of Kg
@@ -128,8 +129,10 @@ public:
 
         if (allZero)
         {
-            const float minAngle = config.turret->pitchMotor.getConfig().minAngle;
-            const float maxAngle = config.turret->pitchMotor.getConfig().maxAngle;
+            const float nudge =
+                config.motor->getConfig().limitMotorAngles ? modm::toRadian(5.0f) : 0.0f;
+            const float minAngle = config.motor->getConfig().minAngle + nudge;
+            const float maxAngle = config.motor->getConfig().maxAngle - nudge;
 
             for (size_t i = 0; i < numTestPoints; ++i)
             {
@@ -137,10 +140,6 @@ public:
             }
         }
     }
-
-    virtual T calculate(
-        std::array<float, numTestPoints> Angles,
-        std::array<float, numTestPoints> Torques) const = 0;
 
     /**
      * @brief   Returns the current calibration state.
@@ -169,8 +168,8 @@ public:
         samplePointCount = 0;
         currentPointIndex = 0;
 
-        config.pitchController->initialize();
-        config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[currentPointIndex]));
+        config.controller->initialize();
+        config.motor->setChassisFrameSetpoint(Angle(points[currentPointIndex]));
 
         calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
         calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -197,11 +196,7 @@ public:
      *   When stable and the timer expires, transitions to `MEASURING_TORQUE`.
      *
      * - **MEASURING_TORQUE**
-     *   Collects a fixed number of torque and location samples from the turret's pitch motor,
-     *   averaging.
-     *   After samples are collected:
-     *     - If more points remain, transitions to `NEXT_LOCATION`.
-     *     - If all points are measured, transitions to `DONE`.
+     *   Calls `onMeasurementSample` at each sample point to record torque/angle data for averaging.
      *
      * - **NEXT_LOCATION**
      *   Moves the turret to the next target angle for measurement,
@@ -224,7 +219,7 @@ public:
             case TurretAutotuneInterface::CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
             {
                 bool allOnline = true;
-                const bool turretsOnline = config.turret->isOnline();
+                const bool turretsOnline = config.motor->isOnline();
 
                 if (chassis != nullptr)
                 {
@@ -244,9 +239,8 @@ public:
             break;
             case TurretAutotuneInterface::CalibrationState::LOCKING_TURRET:
             {
-                const bool turretNotMoving = turretReachedPointAndNotMoving(
-                    config.turret,
-                    config.turret->pitchMotor.getChassisFrameSetpoint());
+                const bool turretNotMoving =
+                    turretReachedPointAndNotMoving(config.motor->getChassisFrameSetpoint());
 
                 if (!turretNotMoving)
                 {
@@ -268,26 +262,16 @@ public:
                 {
                     // Increment sample point first so it's not 0 when first average
                     samplePointCount++;
-
-                    // Add to the running average of the motors value and angle measurements
-                    const float motorValue =
-                        static_cast<float>(config.turret->pitchMotor.getMotorOutput());
-                    averagingTorques += (motorValue - averagingTorques) / (samplePointCount);
-
-                    const float angleValue =
-                        config.turret->pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue();
-                    averagingAngles += (angleValue - averagingAngles) / samplePointCount;
+                    onMeasurementSample(currentPointIndex, samplePointCount);
+                    calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
+                    calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
                 }
                 else
                 {
-                    // Store averaged values
-                    measuredTorques[currentPointIndex] = averagingTorques;
-                    measuredAngles[currentPointIndex] = averagingAngles;
+                    onMeasurementComplete(currentPointIndex);
 
                     // Switch to next point and reset averaging
                     currentPointIndex++;
-                    averagingTorques = 0;
-                    averagingAngles = 0;
                     samplePointCount = 0;
 
                     // Exit measuring when done taking samples
@@ -304,7 +288,8 @@ public:
 
             case TurretAutotuneInterface::CalibrationState::NEXT_LOCATION:
             {
-                config.turret->pitchMotor.setChassisFrameSetpoint(Angle(points[currentPointIndex]));
+                config.motor->setChassisFrameSetpoint(Angle(points[currentPointIndex]));
+
                 calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
                 calibrationState = TurretAutotuneInterface::CalibrationState::LOCKING_TURRET;
@@ -314,8 +299,7 @@ public:
             case TurretAutotuneInterface::CalibrationState::DONE:
             {
                 // Turn off in case calculation takes awhile
-                config.turret->yawMotor.setMotorOutput(0);
-                config.turret->pitchMotor.setMotorOutput(0);
+                config.motor->setMotorOutput(0);
                 calibrationState = TurretAutotuneInterface::CalibrationState::CALIBRATION_SUCCESS;
             }
             break;
@@ -330,9 +314,7 @@ public:
         float dt = (currTime - prevTime);
         prevTime = currTime;
 
-        config.pitchController->runController(
-            dt,
-            config.turret->pitchMotor.getChassisFrameSetpoint());
+        config.controller->runController(dt, config.motor->getChassisFrameSetpoint());
     };
 
     void end(bool) override
@@ -341,7 +323,6 @@ public:
         {
             case TurretAutotuneInterface::CalibrationState::CALIBRATION_SUCCESS:
             {
-                calibrationResult = calculate(measuredAngles, measuredTorques);
                 if (successChime) drivers->commandScheduler.addCommand(successChime);
             }
             break;
@@ -357,16 +338,7 @@ public:
                calibrationState == TurretAutotuneInterface::CalibrationState::CALIBRATION_FAIL;
     }
 
-    std::array<float, numTestPoints> getMeasuredAngles() const { return measuredAngles; }
-    std::array<float, numTestPoints> getMeasuredTorques() const { return measuredTorques; }
-
-    /**
-     * @brief   Retrieves the last computed center of mass calibration result.
-     * @return  Array containing {cgX_mm, cgZ_mm, magnitude_desOut}.
-     */
-    T getCalibrationResult() const { return calibrationResult; }
-
-private:
+protected:
     tap::Drivers *drivers;
     TurretCalibrationConfig config;
     chassis::HolonomicChassisSubsystem *chassis;
@@ -380,15 +352,13 @@ private:
 
     TurretAutotuneInterface::CalibrationState calibrationState;
 
-    inline bool turretReachedPointAndNotMoving(
-        control::turret::TurretSubsystem *turret,
-        const WrappedFloat setpoint) const
+    inline bool turretReachedPointAndNotMoving(const WrappedFloat setpoint) const
     {
         return compareFloatClose(
                    0.0f,
-                   turret->pitchMotor.getChassisFrameVelocity(),
+                   config.motor->getChassisFrameVelocity(),
                    velocityZeroThreshold) &&
-               (turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(setpoint) <
+               (config.motor->getChassisFrameMeasuredAngle().minDifference(setpoint) <
                 positionZeroThreshold);
     }
 
@@ -413,12 +383,6 @@ private:
     // Value to store what sample number we're currently at
     uint32_t samplePointCount = 0;
 
-    // Value to store the averaging torque values
-    float averagingTorques = 0;
-
-    // Value to store the averaging angle values
-    float averagingAngles = 0;
-
     /**
      * Timeout that we set after initially starting the turret PID controller to allow any residual
      * movement from starting the new PID controller to be resolved.
@@ -430,21 +394,14 @@ private:
      */
     tap::arch::MilliTimeout calibrationFailTimeout;
 
-protected:
     // Thresholds to determine if the turret is "not moving" and "at position"
     static constexpr float DEFAULT_POSITION_THRESHOLD = modm::toRadian(3);
-    static constexpr float DEFAULT_VELOCITY_THRESHOLD = modm::toRadian(1e-4f);
-
-    // Array of torque measurements received post averaging
-    std::array<float, numTestPoints> measuredTorques{};
-
-    // Array of angle measurements received post averaging
-    std::array<float, numTestPoints> measuredAngles{};
+    static constexpr float DEFAULT_VELOCITY_THRESHOLD = modm::toRadian(1);
 
     /**
      * Amount of time the turret has to have passed `turretReachedPointAndNotMoving()`
      */
-    static constexpr uint32_t WAIT_TIME_TURRET_RESPONSE_MS = 1000;
+    static constexpr uint32_t WAIT_TIME_TURRET_RESPONSE_MS = 500;
 
     /**
      * Wait timeout for the command to wait until it gives up.
@@ -457,12 +414,13 @@ protected:
      */
     static constexpr uint32_t NUM_SAMPLE_POINTS = 2000;
 
-    /**
-     * Place to store the last calibration result
-     */
-    T calibrationResult{};
-
     TurretCalibrationConfig getCalibrationConfig() const { return config; }
+
+    /**
+     * @brief Hooks for child classes to sample extra data
+     */
+    virtual void onMeasurementSample(size_t pointIndex, uint32_t sampleCount) = 0;
+    virtual void onMeasurementComplete(size_t pointIndex) = 0;
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 

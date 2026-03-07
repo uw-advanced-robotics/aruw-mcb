@@ -475,28 +475,32 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
-autotune::GravityAutotuneCommand<9> gravityAutotuneCommand(
-    drivers(),
-    {&turret,
-     &chassisFramePitchTurretController,
-     pitchMotor.isMotorInverted(),
-     TURRET_WEIGHT_KG,
-     TORQUE_TO_DESIRED_OUT},
-    &chassis);
+autotune::GravityAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
+    gravityAutotuneCommand(
+        drivers(),
+        {&turret,
+         &turret.pitchMotor,
+         &chassisFramePitchTurretController,
+         pitchMotor.isMotorInverted(),
+         TURRET_WEIGHT_KG,
+         TORQUE_TO_DESIRED_OUT},
+        &chassis);
 
-autotune::SpringAutotuneCommand<9> springAutotuneCommand(
-    drivers(),
-    {&turret,
-     &chassisFramePitchTurretController,
-     pitchMotor.isMotorInverted(),
-     TURRET_WEIGHT_KG,
-     TORQUE_TO_DESIRED_OUT},
-    &turretSpringCompensation,
-    &turretGravityCompensation,
-    &chassis,
-    {},
-    &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand);
+autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
+    springAutotuneCommand(
+        drivers(),
+        {&turret,
+         &turret.pitchMotor,
+         &chassisFramePitchTurretController,
+         pitchMotor.isMotorInverted(),
+         TURRET_WEIGHT_KG,
+         TORQUE_TO_DESIRED_OUT},
+        &turretSpringCompensation,
+        &turretGravityCompensation,
+        &chassis,
+        {},
+        &imuCalibrateSuccessBuzzCommand,
+        &imuCalibrateFailBuzzCommand);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 

@@ -48,10 +48,14 @@ public:
         aruwsrc::communication::can::AruwAnalogSensor* sensor,
         AnalogSensorEncoder::Channel channel,
         const Calibration& calibration,
-        const modm::Pair<float, float> (&lookupTableConfig)[LUT_SIZE],
-        bool isInverted = false);
+        const modm::Pair<uint32_t, float> (&lookupTableConfig)[LUT_SIZE],
+        bool isInverted = false)
+        : AnalogSensorEncoder(sensor, channel, calibration, isInverted),
+          lookupTable(lookupTableConfig, LUT_SIZE)
+    {
+    }
 
-    // Overrided to redirect the callback
+    // Overrode to redirect the callback
     void onAnalogSensorUpdated() override { this->updateFromSensor(); };
 
     uint16_t getRaw() const { return raw; }

@@ -36,23 +36,22 @@
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t numTestPoints>
-class GravityAutotuneCommand : public TurretAutotuneCommand<std::array<float, 3>, numTestPoints>
+template <uint32_t numTestPoints, turret::algorithms::Axis axis>
+class GravityAutotuneCommand : public TurretAutotuneCommand<numTestPoints, axis>
 {
 public:
     GravityAutotuneCommand(
         tap::Drivers *drivers,
-        const TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::TurretCalibrationConfig
-            &config,
+        const TurretAutotuneCommand<numTestPoints, axis>::TurretCalibrationConfig &config,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
         const std::array<float, numTestPoints> points = {},
         const float velocityZeroThreshold =
-            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_VELOCITY_THRESHOLD,
+            TurretAutotuneCommand<numTestPoints, axis>::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold =
-            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_POSITION_THRESHOLD,
+            TurretAutotuneCommand<numTestPoints, axis>::DEFAULT_POSITION_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
-        : TurretAutotuneCommand<std::array<float, 3>, numTestPoints>(
+        : TurretAutotuneCommand<numTestPoints, axis>(
               drivers,
               config,
               chassis,
@@ -71,18 +70,16 @@ public:
      * @return std::array<float,3> cgX, cgZ, and magnitude of the center of mass
      * with cgX, and cgZ in units of mm and magnitude in units of desOut.
      */
-    std::array<float, 3> calculate(
-        std::array<float, numTestPoints> Angles,
-        std::array<float, numTestPoints> Torques) const override
+    std::array<float, 3> calculate() const
     {
         Eigen::MatrixXd X(numTestPoints, 2);
         Eigen::VectorXd Y(numTestPoints);
 
         for (uint32_t i = 0; i < numTestPoints; ++i)
         {
-            X(i, 0) = std::cos(Angles[i]);  // corresponds to A (m·g·x)
-            X(i, 1) = std::sin(Angles[i]);  // corresponds to B (−m·g·z)
-            Y(i) = Torques[i];
+            X(i, 0) = std::cos(measuredAngles[i]);  // corresponds to A (m·g·x)
+            X(i, 1) = std::sin(measuredAngles[i]);  // corresponds to B (−m·g·z)
+            Y(i) = measuredTorques[i];
         }
         // Solve least squares: torque = A·cos(theta) + B·sin(theta)
         Eigen::Vector2d params = X.colPivHouseholderQr().solve(Y);
@@ -96,7 +93,7 @@ public:
 
     void drawCalibrationResult(modm::GraphicDisplay &display) const
     {
-        const std::array<float, 3> result = this->getCalibrationResult();
+        const std::array<float, 3> result = calculate();
         const float X = result[0];
         const float Z = result[1];
         const float scalar = result[2];
@@ -106,6 +103,26 @@ public:
             static_cast<double>(X),
             static_cast<double>(Z));
         display.printf("Gravity Compensation\n Scalar: %.1f\n", static_cast<double>(scalar));
+    }
+
+protected:
+    void onMeasurementSample([[maybe_unused]] size_t pointIndex, uint32_t sampleCount) override
+    {
+        // Add to the running average of the motors value and angle measurements
+        const float motorValue = static_cast<float>(this->config.motor->getMotorOutput());
+        averagingTorques += (motorValue - averagingTorques) / (sampleCount);
+
+        const float angleValue = this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
+        averagingAngles += (angleValue - averagingAngles) / sampleCount;
+    }
+
+    void onMeasurementComplete(size_t pointIndex) override
+    {
+        measuredTorques[pointIndex] = averagingTorques;
+        measuredAngles[pointIndex] = averagingAngles;
+
+        averagingTorques = 0.0f;
+        averagingAngles = 0.0f;
     }
 
 private:
@@ -122,6 +139,15 @@ private:
         return calibrationNum * 1000 * this->getCalibrationConfig().torqueToDesiredOut /
                this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
     }
+
+    // Array of torque measurements received post averaging
+    std::array<float, numTestPoints> measuredTorques{};
+
+    // Array of angle measurements received post averaging
+    std::array<float, numTestPoints> measuredAngles{};
+
+    float averagingTorques{0.0f};
+    float averagingAngles{0.0f};
 
 };  // class autotune
 }  // namespace aruwsrc::control::autotune

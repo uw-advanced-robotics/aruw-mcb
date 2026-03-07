@@ -34,11 +34,11 @@
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t numTestPoints>
-class SpringAutotuneCommand : public TurretAutotuneCommand<std::array<float, 4>, numTestPoints>
+template <uint32_t numTestPoints, turret::algorithms::Axis axis>
+class SpringAutotuneCommand : public TurretAutotuneCommand<numTestPoints, axis>
 {
 private:
-    using TurretAutoCommand = TurretAutotuneCommand<std::array<float, 4>, numTestPoints>;
+    using TurretTuneCommand = TurretAutotuneCommand<numTestPoints, axis>;
 
 public:
     /**
@@ -61,7 +61,7 @@ public:
      */
     SpringAutotuneCommand(
         tap::Drivers *drivers,
-        const TurretAutoCommand::TurretCalibrationConfig &config,
+        const TurretTuneCommand::TurretCalibrationConfig &config,
         const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce,
         const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce =
             nullptr,
@@ -69,9 +69,9 @@ public:
         const std::array<float, numTestPoints> points = {},
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
-        const float velocityZeroThreshold = TurretAutoCommand::DEFAULT_VELOCITY_THRESHOLD,
-        const float positionZeroThreshold = TurretAutoCommand::DEFAULT_POSITION_THRESHOLD)
-        : TurretAutoCommand(
+        const float velocityZeroThreshold = TurretTuneCommand::DEFAULT_VELOCITY_THRESHOLD,
+        const float positionZeroThreshold = TurretTuneCommand::DEFAULT_POSITION_THRESHOLD)
+        : TurretTuneCommand(
               drivers,
               config,
               chassis,
@@ -86,20 +86,6 @@ public:
     }
     const char *getName() const override { return "Spring Gravity Autotune Command"; }
 
-    std::array<float, 4> calculate(
-        std::array<float, numTestPoints> Angles,
-        std::array<float, numTestPoints> Torques) const override
-    {
-        if (gravityForce)
-        {
-            return calculateJustSpring(Angles, Torques);
-        }
-        else
-        {
-            return calculateCOMandSpring(Angles, Torques);
-        }
-    }
-
     void drawCalibrationResult(modm::GraphicDisplay &display) const override
     {
         if (gravityForce)
@@ -112,9 +98,39 @@ public:
         }
     }
 
+protected:
+    void onMeasurementSample([[maybe_unused]] size_t pointIndex, uint32_t sampleCount) override
+    {
+        // Add to the running average of the motors value and angle measurements
+        const float motorValue = static_cast<float>(this->config.motor->getMotorOutput());
+        averagingTorques += (motorValue - averagingTorques) / (sampleCount);
+
+        const float angleValue =
+            this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
+        averagingAngles += (angleValue - averagingAngles) / sampleCount;
+    }
+
+    void onMeasurementComplete(size_t pointIndex) override
+    {
+        measuredTorques[pointIndex] = averagingTorques;
+        measuredAngles[pointIndex] = averagingAngles;
+
+        averagingTorques = 0.0f;
+        averagingAngles = 0.0f;
+    }
+
 private:
     const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce;
     const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce;
+
+    // Array of torque measurements received post averaging
+    std::array<float, numTestPoints> measuredTorques{};
+
+    // Array of angle measurements received post averaging
+    std::array<float, numTestPoints> measuredAngles{};
+
+    float averagingTorques{0.0f};
+    float averagingAngles{0.0f};
 
     /**
      * @brief Helper function that turns the calibration result into
@@ -132,7 +148,7 @@ private:
 
     void drawCalibrationResultSpringGrav(modm::GraphicDisplay &display) const
     {
-        const std::array<float, 4> result = this->getCalibrationResult();
+        const std::array<float, 4> result = calculateCOMandSpring(measuredAngles, measuredTorques);
         const float X = result[0];
         const float Z = result[1];
         const float scalar = result[2];
@@ -147,7 +163,7 @@ private:
 
     void drawCalibrationResultJustSpring(modm::GraphicDisplay &display) const
     {
-        const std::array<float, 4> result = this->getCalibrationResult();
+        const std::array<float, 4> result = calculateJustSpring(measuredAngles, measuredTorques);
         const float K = result[3];
         display.printf("Spring Constant K: %.2f", static_cast<double>(K));
     }
@@ -214,4 +230,4 @@ private:
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 
-#endif  // GRAVITY_AUTOTUNE_HPP_
+#endif  // SPRING_AUTOTUNE_HPP_

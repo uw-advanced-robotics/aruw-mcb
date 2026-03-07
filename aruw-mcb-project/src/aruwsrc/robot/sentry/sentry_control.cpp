@@ -40,6 +40,7 @@
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
+#include "aruwsrc/control/autotune/lamprey_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
@@ -135,12 +136,13 @@ aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Calibration
         .outputRangeRadians = turretMajor::YAW_ANALOG_OUTPUT_RANGE_RADIANS,
     };
 
-aruwsrc::communication::sensors::encoder::AnalogSensorEncoder turretMajorYawAnalogEncoder(
+aruwsrc::communication::sensors::encoder::LampreyEncoder turretMajorYawAnalogEncoder(
     &turretMajorYawAnalogSensor,
     turretMajor::YAW_ANALOG_SENSOR_CHANNEL == 0
         ? aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Channel::AI0
         : aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Channel::AI1,
     turretMajorYawAnalogCalibration,
+    turretMajor::LAMPREY_CALIBRATION_MAP,
     turretMajor::YAW_ANALOG_SENSOR_INVERTED);
 
 tap::motor::DjiMotor turretMajorYawMotor(
@@ -526,13 +528,24 @@ GovernorLimitedCommand<1> imuNotCalibratedCommandLimited(
     imuNotCalibratedCommand,
     {&imuNotCalibratedGovernor});
 
-autotune::GravityAutotuneCommand<9> gravityAutotuneCommandWidow(
+autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommandWidow(
     drivers(),
     {&turretWidow,
+     &turretWidow.pitchMotor,
      &turretWidowChassisControllers.pitchController,
      turretWidowMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT});
+
+autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
+    drivers(),
+    {&turretMajor,
+     &turretMajor.getMutableMotor(),
+     &turretMajorChassisYawController,
+     turretMajorYawMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    turretMajorYawAnalogEncoder);
 
 SentryTurretCVCommand::TurretConfig turretWidowCVConfig(
     turretWidow,
@@ -847,7 +860,8 @@ void initSubsystemCommands(aruwsrc::sentry::Drivers *drivers)
 std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
 {
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
-        &sentry_control::gravityAutotuneCommandWidow};
+        &sentry_control::gravityAutotuneCommandWidow,
+        &sentry_control::lampreyAutotuneCommand};
     return commands;
 }
 #endif

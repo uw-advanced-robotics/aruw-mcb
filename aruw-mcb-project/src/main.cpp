@@ -315,6 +315,9 @@ static void checkTurretMcbDisconnection(Drivers* drivers)
                     drivers->turretMajorImu.getImuState() ==
                         tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING;
 #endif
+#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+    turretMcbConnected2 = true;
+#endif
     if (isCalibrating)
     {
         return;

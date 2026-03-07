@@ -30,29 +30,30 @@
 #ifndef LAMPREY_AUTOTUNE_HPP_
 #define LAMPREY_AUTOTUNE_HPP_
 
+#include "aruwsrc/communication/sensors/encoder/lamprey_encoder.hpp"
 #include "modm/ui/display.hpp"
 
 #include "autotune_command_interface.hpp"
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t numTestPoints>
-class LampreyAutotuneCommand : public TurretAutotuneCommand<std::array<float, 3>, numTestPoints>
+template <uint32_t numTestPoints, turret::algorithms::Axis axis>
+class LampreyAutotuneCommand : public TurretAutotuneCommand<numTestPoints, axis>
 {
+    using TurretTuneCommand = TurretAutotuneCommand<numTestPoints, axis>;
+
 public:
     LampreyAutotuneCommand(
         tap::Drivers *drivers,
-        const TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::TurretCalibrationConfig
-            &config,
+        const TurretTuneCommand::TurretCalibrationConfig &config,
+        const aruwsrc::communication::sensors::encoder::LampreyEncoder &encoder,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
         const std::array<float, numTestPoints> points = {},
-        const float velocityZeroThreshold =
-            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_VELOCITY_THRESHOLD,
-        const float positionZeroThreshold =
-            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_POSITION_THRESHOLD,
+        const float velocityZeroThreshold = TurretTuneCommand::DEFAULT_VELOCITY_THRESHOLD,
+        const float positionZeroThreshold = TurretTuneCommand::DEFAULT_POSITION_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
-        : TurretAutotuneCommand<std::array<float, 3>, numTestPoints>(
+        : TurretTuneCommand(
               drivers,
               config,
               chassis,
@@ -60,55 +61,54 @@ public:
               velocityZeroThreshold,
               positionZeroThreshold,
               successChime,
-              failChime)
+              failChime),
+          encoder(encoder)
     {
     }
-    const char *getName() const override { return "Gravity Autotune Command"; }
+    const char *getName() const override { return "Lamprey Autotune Command"; }
 
-    /**
-     * @brief Calculates the center of mass with least squares
-     *
-     * @return std::array<float,3> cgX, cgZ, and magnitude of the center of mass
-     * with cgX, and cgZ in units of mm and magnitude in units of desOut.
-     */
-    std::array<float, 3> calculate(
-        std::array<float, numTestPoints> Angles,
-        std::array<float, numTestPoints> Torques) const override
+    void drawCalibrationResult(modm::GraphicDisplay &display) const override
     {
-        Eigen::MatrixXd X(numTestPoints, 2);
-        Eigen::VectorXd Y(numTestPoints);
+        display.printf("Lamprey Map (Tick : Angle):\n");
 
-        for (uint32_t i = 0; i < numTestPoints; ++i)
+        // Iterate through all points and print them pair by pair, on new lines
+        for (size_t i = 0; i < numTestPoints; ++i)
         {
-            X(i, 0) = std::cos(Angles[i]);  // corresponds to A (m·g·x)
-            X(i, 1) = std::sin(Angles[i]);  // corresponds to B (−m·g·z)
-            Y(i) = Torques[i];
+            display.printf(
+                "%lu : %.3f rad\n",
+                static_cast<uint32_t>(measuredEncoderValueMap[i].first),  // Tick
+                static_cast<double>(measuredEncoderValueMap[i].second));  // Angle
         }
-        // Solve least squares: torque = A·cos(theta) + B·sin(theta)
-        Eigen::Vector2d params = X.colPivHouseholderQr().solve(Y);
+    }
 
-        const float A = params(0);
-        const float B = params(1);
-        const float magnitude = std::sqrt(A * A + B * B);
-
-        return {calibrationResultToMM(A), calibrationResultToMM(B), magnitude};
-    };
-
-    void drawCalibrationResult(modm::GraphicDisplay &display) const
+protected:
+    void onMeasurementSample([[maybe_unused]] size_t pointIndex, uint32_t sampleCount) override
     {
-        const std::array<float, 3> result = this->getCalibrationResult();
-        const float X = result[0];
-        const float Z = result[1];
-        const float scalar = result[2];
+        averageLampreyTick += (encoder.getTicks() - averageLampreyTick) / sampleCount;
 
-        display.printf(
-            "Center of mass position:\n\tcgX: %.2f mm\n\tcgZ: %.2f mm\n",
-            static_cast<double>(X),
-            static_cast<double>(Z));
-        display.printf("Gravity Compensation\n Scalar: %.1f\n", static_cast<double>(scalar));
+        const float angleValue =
+            this->config.motor->getChassisFrameMeasuredAngle().getUnwrappedValue();
+        averageAngle += (angleValue - averageAngle) / sampleCount;
+    }
+
+    void onMeasurementComplete(size_t pointIndex) override
+    {
+        measuredEncoderValueMap[pointIndex] = {
+            static_cast<uint32_t>(averageLampreyTick),
+            Angle(averageAngle).getWrappedValue()};
+
+        averageLampreyTick = 0.0f;
+        averageAngle = 0.0f;
     }
 
 private:
+    std::array<modm::Pair<uint32_t, float>, numTestPoints> measuredEncoderValueMap{};
+
+    float averageLampreyTick{0.0f};
+    float averageAngle{0.0f};
+
+    const aruwsrc::communication::sensors::encoder::LampreyEncoder &encoder;
+
     /**
      * @brief Helper function that turns the calibration result into
      * units of mm.
