@@ -148,7 +148,7 @@ static const tap::algorithms::transforms::Transform CHASSIS_MCB_ISM330_MOUNTING_
     0.003253f,
     0.0f,
     0.0f,
-    M_PI_2);
+    0.0f);
 }  // namespace chassisImu
 }  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_
