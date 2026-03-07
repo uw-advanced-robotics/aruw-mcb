@@ -294,7 +294,7 @@ tap::encoder::CanEncoder parallelOmniOne(
 
 tap::encoder::CanEncoder parallelOmniTwo(
     drivers(),
-    tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
+    tap::encoder::CanEncoderId::ID2,
     tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
     true);                            // TODO: find correct inversion
 
