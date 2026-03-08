@@ -314,7 +314,7 @@ private:
         std::size_t available,
         std::size_t currentSize,
         const char* queueName);
-        
+
     void appendEvents(
         char* out_buf,
         std::size_t& out_len,
