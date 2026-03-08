@@ -314,9 +314,10 @@ private:
         std::size_t available,
         std::size_t currentSize,
         const char* queueName);
-
+        
     void appendEvents(
-        std::string& out,
+        char* out_buf,
+        std::size_t& out_len,
         modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
         const char* label,
         std::size_t available);
