@@ -51,24 +51,24 @@ MainMenu::MainMenu(
       errorMenu(stack, drivers, ENTRIES),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers, ENTRIES),
-      //   commandSchedulerMenu(stack, drivers, ENTRIES),
+      commandSchedulerMenu(stack, drivers, ENTRIES),
       refSerialMenu(stack, drivers),
-      //   imuMenu(stack, &drivers->mpu6500),
-      //   turretStatusMenuBus1(stack, turretMCBCanCommBus1),
-      //   turretStatusMenuBus2(stack, turretMCBCanCommBus2),
-      //   mcbLiteMenu1(stack, mcbLite1),
-      //   mcbLiteMenu2(stack, mcbLite2),
-      //   aboutMenu(stack),
-      //   sentryStrategyMenu(stack, visionCoprocessor),
-      //   capBankMenu(stack, capacitorBank),
-      //   rttMenu(stack, rttTelemetry),
-      visionCoprocessor(visionCoprocessor)
-//   turretMCBCanCommBus1(turretMCBCanCommBus1),
-//   turretMCBCanCommBus2(turretMCBCanCommBus2),
-//   mcbLite1(mcbLite1),
-//   mcbLite2(mcbLite2)
-//   capacitorBank(capacitorBank)
-//   rttTelemetry(rttTelemetry)
+      imuMenu(stack, &drivers->mpu6500),
+      turretStatusMenuBus1(stack, turretMCBCanCommBus1),
+      turretStatusMenuBus2(stack, turretMCBCanCommBus2),
+      mcbLiteMenu1(stack, mcbLite1),
+      mcbLiteMenu2(stack, mcbLite2),
+      aboutMenu(stack),
+      sentryStrategyMenu(stack, visionCoprocessor),
+      capBankMenu(stack, capacitorBank),
+      rttMenu(stack, rttTelemetry),
+      visionCoprocessor(visionCoprocessor),
+      turretMCBCanCommBus1(turretMCBCanCommBus1),
+      turretMCBCanCommBus2(turretMCBCanCommBus2),
+      mcbLite1(mcbLite1),
+      mcbLite2(mcbLite2),
+      capacitorBank(capacitorBank),
+      rttTelemetry(rttTelemetry)
 {
 }
 
@@ -105,61 +105,61 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addMotorMenuCallback));
-    // addEntry(
-    //     CommandSchedulerMenu::getMenuName(),
-    //     modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-    //         this,
-    //         &MainMenu::addCommandSchedulerCallback));
+    addEntry(
+        CommandSchedulerMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addCommandSchedulerCallback));
     addEntry(
         RefSerialMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addRefSerialMenuCallback));
-    // addEntry(
-    //     imuMenu.getMenuName(),
-    //     modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-    //         this,
-    //         &MainMenu::addImuMenuCallback));
-    // if (this->turretMCBCanCommBus1 != nullptr)
-    //     addEntry(
-    //         "Turret MCB Menu Bus 1",
-    //         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-    //             this,
-    //             &MainMenu::addTurretMCBMenuBus1Callback));
-    // if (this->turretMCBCanCommBus2 != nullptr)
-    //     addEntry(
-    //         "Turret MCB Menu Bus 2",
-    //         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-    //             this,
-    //             &MainMenu::addTurretMCBMenuBus2Callback));
-    // if (this->mcbLite1 != nullptr)
-    //     addEntry(
-    //         "MCB Lite Menu 1",
-    //         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-    //             this,
-    //             &MainMenu::addMCBLiteMenu1Callback));
-    // if (this->mcbLite2 != nullptr)
-    //     addEntry(
-    //         "MCB Lite Menu 2",
-    //         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-    //             this,
-    //             &MainMenu::addMCBLiteMenu2Callback));
-    // addEntry(
-    //     AboutMenu::getMenuName(),
-    //     modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-    //         this,
-    //         &MainMenu::addAboutMenuCallback));
-    // if (this->capacitorBank != nullptr)
-    //     addEntry(
-    //         CapacitorBankMenu::getMenuName(),
-    //         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-    //             this,
-    //             &MainMenu::addCapacitorBankMenuCallback));
-    // addEntry(
-    //     RttMenu::getMenuName(),
-    //     modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-    //         this,
-    //         &MainMenu::addRttMenuCallback));
+    addEntry(
+        imuMenu.getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addImuMenuCallback));
+    if (this->turretMCBCanCommBus1 != nullptr)
+        addEntry(
+            "Turret MCB Menu Bus 1",
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addTurretMCBMenuBus1Callback));
+    if (this->turretMCBCanCommBus2 != nullptr)
+        addEntry(
+            "Turret MCB Menu Bus 2",
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addTurretMCBMenuBus2Callback));
+    if (this->mcbLite1 != nullptr)
+        addEntry(
+            "MCB Lite Menu 1",
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addMCBLiteMenu1Callback));
+    if (this->mcbLite2 != nullptr)
+        addEntry(
+            "MCB Lite Menu 2",
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addMCBLiteMenu2Callback));
+    addEntry(
+        AboutMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addAboutMenuCallback));
+    if (this->capacitorBank != nullptr)
+        addEntry(
+            CapacitorBankMenu::getMenuName(),
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+                this,
+                &MainMenu::addCapacitorBankMenuCallback));
+    addEntry(
+        RttMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addRttMenuCallback));
 
     setTitle("Main Menu");
 }
@@ -201,12 +201,12 @@ void MainMenu::addMotorMenuCallback()
     getViewStack()->push(mm);
 }
 
-// void MainMenu::addCommandSchedulerCallback()
-// {
-//     CommandSchedulerMenu* csm =
-//         new (&commandSchedulerMenu) CommandSchedulerMenu(getViewStack(), drivers, ENTRIES);
-//     getViewStack()->push(csm);
-// }
+void MainMenu::addCommandSchedulerCallback()
+{
+    CommandSchedulerMenu* csm =
+        new (&commandSchedulerMenu) CommandSchedulerMenu(getViewStack(), drivers, ENTRIES);
+    getViewStack()->push(csm);
+}
 
 void MainMenu::addRefSerialMenuCallback()
 {
@@ -214,64 +214,63 @@ void MainMenu::addRefSerialMenuCallback()
     getViewStack()->push(rsm);
 }
 
-// void MainMenu::addImuMenuCallback()
-// {
-//     tap::communication::sensors::imu::ImuMenu* imc =
-//         new (&imuMenu) tap::communication::sensors::imu::ImuMenu(getViewStack(),
-//         &drivers->mpu6500);
-//     getViewStack()->push(imc);
-// }
+void MainMenu::addImuMenuCallback()
+{
+    tap::communication::sensors::imu::ImuMenu* imc =
+        new (&imuMenu) tap::communication::sensors::imu::ImuMenu(getViewStack(), &drivers->mpu6500);
+    getViewStack()->push(imc);
+}
 
-// void MainMenu::addTurretMCBMenuBus1Callback()
-// {
-//     TurretMCBMenu* tsm =
-//         new (&turretStatusMenuBus1) TurretMCBMenu(getViewStack(), turretMCBCanCommBus1);
-//     getViewStack()->push(tsm);
-// }
+void MainMenu::addTurretMCBMenuBus1Callback()
+{
+    TurretMCBMenu* tsm =
+        new (&turretStatusMenuBus1) TurretMCBMenu(getViewStack(), turretMCBCanCommBus1);
+    getViewStack()->push(tsm);
+}
 
-// void MainMenu::addTurretMCBMenuBus2Callback()
-// {
-//     TurretMCBMenu* tsm =
-//         new (&turretStatusMenuBus2) TurretMCBMenu(getViewStack(), turretMCBCanCommBus2);
-//     getViewStack()->push(tsm);
-// }
+void MainMenu::addTurretMCBMenuBus2Callback()
+{
+    TurretMCBMenu* tsm =
+        new (&turretStatusMenuBus2) TurretMCBMenu(getViewStack(), turretMCBCanCommBus2);
+    getViewStack()->push(tsm);
+}
 
-// void MainMenu::addMCBLiteMenu1Callback()
-// {
-//     MCBLiteMenu* mlm = new (&mcbLiteMenu1) MCBLiteMenu(getViewStack(), mcbLite1);
-//     getViewStack()->push(mlm);
-// }
+void MainMenu::addMCBLiteMenu1Callback()
+{
+    MCBLiteMenu* mlm = new (&mcbLiteMenu1) MCBLiteMenu(getViewStack(), mcbLite1);
+    getViewStack()->push(mlm);
+}
 
-// void MainMenu::addMCBLiteMenu2Callback()
-// {
-//     MCBLiteMenu* mlm = new (&mcbLiteMenu2) MCBLiteMenu(getViewStack(), mcbLite2);
-//     getViewStack()->push(mlm);
-// }
+void MainMenu::addMCBLiteMenu2Callback()
+{
+    MCBLiteMenu* mlm = new (&mcbLiteMenu2) MCBLiteMenu(getViewStack(), mcbLite2);
+    getViewStack()->push(mlm);
+}
 
-// void MainMenu::addAboutMenuCallback()
-// {
-//     AboutMenu* abtm = new (&aboutMenu) AboutMenu(getViewStack());
-//     getViewStack()->push(abtm);
-// }
+void MainMenu::addAboutMenuCallback()
+{
+    AboutMenu* abtm = new (&aboutMenu) AboutMenu(getViewStack());
+    getViewStack()->push(abtm);
+}
 
-// void MainMenu::addSentryStrategyMenuCallback()
-// {
-//     SentryStrategyMenu* ssm =
-//         new (&sentryStrategyMenu) SentryStrategyMenu(getViewStack(), visionCoprocessor);
-//     getViewStack()->push(ssm);
-// }
+void MainMenu::addSentryStrategyMenuCallback()
+{
+    SentryStrategyMenu* ssm =
+        new (&sentryStrategyMenu) SentryStrategyMenu(getViewStack(), visionCoprocessor);
+    getViewStack()->push(ssm);
+}
 
-// void MainMenu::addCapacitorBankMenuCallback()
-// {
-//     CapacitorBankMenu* cbm = new (&capBankMenu) CapacitorBankMenu(getViewStack(), capacitorBank);
-//     getViewStack()->push(cbm);
-// }
+void MainMenu::addCapacitorBankMenuCallback()
+{
+    CapacitorBankMenu* cbm = new (&capBankMenu) CapacitorBankMenu(getViewStack(), capacitorBank);
+    getViewStack()->push(cbm);
+}
 
-// void MainMenu::addRttMenuCallback()
-// {
-//     RttMenu* rttm = new (&rttMenu) RttMenu(getViewStack(), rttTelemetry);
-//     getViewStack()->push(rttm);
-// }
+void MainMenu::addRttMenuCallback()
+{
+    RttMenu* rttm = new (&rttMenu) RttMenu(getViewStack(), rttTelemetry);
+    getViewStack()->push(rttm);
+}
 
 }  // namespace display
 
