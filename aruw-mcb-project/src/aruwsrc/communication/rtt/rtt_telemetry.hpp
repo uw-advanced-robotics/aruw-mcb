@@ -127,7 +127,7 @@ public:
      * Blocking function that's already called by protothread, so no need to call manually. Only
      * public for use by `modm_abort()`.
      */
-    mockable void sendQueuedMessages(bool ozone);
+    mockable void sendQueuedMessages();
 
 #if !defined(ENV_UNIT_TESTS) || !defined(PLATFORM_HOSTED)
 private:
@@ -312,11 +312,11 @@ private:
         modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
         std::size_t requiredSpace,
         std::size_t available,
-        std::size_t currentSize,
-        const char* queueName);
+        std::size_t currentSize);
 
     void appendEvents(
-        std::string& out,
+        char* out_buf,
+        std::size_t& out_len,
         modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
         const char* label,
         std::size_t available);
