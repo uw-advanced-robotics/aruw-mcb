@@ -116,7 +116,8 @@ bool RttTelemetry::updateTelemetryAsync()
             {
                 logHeartbeatInfo();
             }
-            else {
+            else
+            {
                 logHeartbeatInfo();
                 sendQueuedMessages();
             }
