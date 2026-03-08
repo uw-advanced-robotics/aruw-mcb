@@ -35,6 +35,7 @@ void RMULStateMachine::updateState()
     }
 
     uint16_t health = refSerial.getRobotData().currentHp;
+    health = HEALING_THRESHOLD + ATTACKING_THRESHOLD;
 
     switch (state)
     {
@@ -67,9 +68,9 @@ void RMULStateMachine::updateState()
 
                 if (patrolTimer.execute())
                 {
-                    uint8_t newPatrolState = (patrolState + 1) % MODM_ARRAY_SIZE(PATROL_POINTS);
+                    uint8_t newPatrolState = (patrolState + 1) % MODM_ARRAY_SIZE(PATROL_POINTS_T);
                     updatePath(std::array<const Position, 2>(
-                        {PATROL_POINTS[patrolState], PATROL_POINTS[newPatrolState]}));
+                        {PATROL_POINTS_T[patrolState], PATROL_POINTS_T[newPatrolState]}));
                     patrolState = newPatrolState;
                 }
             }
@@ -112,7 +113,8 @@ bool RMULStateMachine::safeToAttack()
     bool projectilesSufficient =
         refSerial.getRobotData().turret.bulletsRemaining17 >= PROJECTILE_COUNT_THRESHOLD;
     bool visionOnline = visionCoprocessor.isCvOnline();
-    return projectilesSufficient && visionOnline;
+    // return projectilesSufficient && visionOnline;
+    return true;
 }
 
 }  // namespace aruwsrc::algorithms::strategy_state_machine

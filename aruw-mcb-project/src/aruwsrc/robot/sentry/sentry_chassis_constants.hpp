@@ -30,8 +30,8 @@
 namespace aruwsrc::control::chassis
 {
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.34f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 6.34f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -148,7 +148,7 @@ static const tap::algorithms::transforms::Transform CHASSIS_MCB_ISM330_MOUNTING_
     0.003253f,
     0.0f,
     0.0f,
-    0.0f);
+    M_PI_2);
 }  // namespace chassisImu
 }  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_
