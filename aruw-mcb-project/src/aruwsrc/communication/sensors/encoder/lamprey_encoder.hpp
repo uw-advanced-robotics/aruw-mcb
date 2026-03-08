@@ -48,25 +48,18 @@ public:
         aruwsrc::communication::can::AruwAnalogSensor* sensor,
         AnalogSensorEncoder::Channel channel,
         const Calibration& calibration,
-        const modm::Pair<uint32_t, float> (&lookupTableConfig)[LUT_SIZE],
+        const modm::Pair<float, float> (&lookupTableConfig)[LUT_SIZE],
         bool isInverted = false)
         : AnalogSensorEncoder(sensor, channel, calibration, isInverted),
           lookupTable(lookupTableConfig, LUT_SIZE)
     {
     }
 
-    // Overrode to redirect the callback
-    void onAnalogSensorUpdated() override { this->updateFromSensor(); };
-
     uint16_t getRaw() const { return raw; }
     uint32_t getTicks() const { return ticks; }
 
-private:
-    modm::interpolation::Linear<modm::Pair<uint32_t, float>> lookupTable;
-    uint_fast16_t raw{0};
-    uint32_t ticks{0};
-
-    void updateFromSensor()
+protected:
+    void updateFromSensor() override
     {
         if (this->sensor == nullptr)
         {
@@ -80,19 +73,33 @@ private:
         }
         lastUpdateMicros = now;
 
-        raw = this->readRaw();
-
         const uint16_t rawClamped =
             std::clamp(this->readRaw(), calibration.rawMin, calibration.rawMax);
 
+        // Get raw ticks
         ticks = rawToTicks(rawClamped);
 
-        const float position = lookupTable.interpolate(ticks);
+        // Get the non-linear position in radians from your lookup table
+        const float positionRadians = lookupTable.interpolate(static_cast<float>(ticks));
 
-        filtered = static_cast<uint16_t>(lowpassFilter.filterData(position));
+        // Calculate the encoder's resolution (matching the base class logic)
+        uint32_t resolution = 1;
+        if (calibration.rawMax > calibration.rawMin)
+        {
+            resolution = calibration.rawMax - calibration.rawMin + 1;
+        }
 
-        updateEncoderValue(filtered);
+        // Convert radians back to linearized ticks
+        float fraction = positionRadians / calibration.outputRangeRadians;
+        uint32_t linearizedTicks = static_cast<uint32_t>(fraction * static_cast<float>(resolution));
+
+        updateEncoderValue(linearizedTicks);
     };
+
+private:
+    modm::interpolation::Linear<modm::Pair<float, float>> lookupTable;
+    uint_fast16_t raw{0};
+    uint32_t ticks{0};
 };
 
 }  // namespace aruwsrc::communication::sensors::encoder

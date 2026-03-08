@@ -281,9 +281,9 @@ void SentryImuCalibrateCommand::execute()
 
 bool SentryImuCalibrateCommand::isFinished() const
 {
-    return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
-           calibrationState == CalibrationState::CALIBRATION_FAIL;
-    // return false;
+    // return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
+    //        calibrationState == CalibrationState::CALIBRATION_FAIL;
+    return false;
 }
 
 void SentryImuCalibrateCommand::end(bool)
@@ -297,38 +297,6 @@ void SentryImuCalibrateCommand::end(bool)
     // }
 
     // turretMajor->yawMotor.setMotorOutput(0);
-}
-
-bool SentryImuCalibrateCommand::isLampreyShit()
-{
-    turretMajorLampreyEncoderHighpassValue = turretMajorLampreyEncoderHighpass.filterData(
-        turretMajorLampreyEncoder.getPosition().getUnwrappedValue());
-    turretMajorLampreyEncoderLowpassValue =
-        turretMajorLampreyEncoderLowpass.filterData(turretMajorLampreyEncoderHighpassValue);
-    loopCounter++;
-    if (std::fabs(turretMajorLampreyEncoderHighpassValue) > LAMPREY_SHIT_THRESHOLD)
-    {
-        if (turretMajorLampreyEncoderHighpassValue > turretMajorLampreyEncoderLowpassValue)
-        {
-            turretMajorLampreyEncoderLowpass.setSteadyState(turretMajorLampreyEncoderHighpassValue);
-        }
-        return true;
-    }
-    if (loopCounter < MIN_SATURATION_LOOPS)
-    {
-        return true;
-    }
-    else
-    {
-        if (std::fabs(turretMajorLampreyEncoderLowpass.filterData(0)) < LAMPREY_SHIT_THRESHOLD)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
 }
 
 }  // namespace aruwsrc::sentry
