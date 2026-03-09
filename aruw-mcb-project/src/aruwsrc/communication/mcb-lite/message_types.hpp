@@ -171,10 +171,11 @@ struct VoltageCurrentMessage
     uint16_t current;
 } modm_packed;
 
-struct AnalogSensorMessage {
+struct AnalogSensorMessage
+{
     uint16_t ai0;
     uint16_t ai1;
-    
+
 } modm_packed;
 
 }  // namespace aruwsrc::communication::mcb_lite

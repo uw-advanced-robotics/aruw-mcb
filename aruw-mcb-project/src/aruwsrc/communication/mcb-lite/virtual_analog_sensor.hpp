@@ -20,10 +20,11 @@
 #ifndef VIRTUAL_ANALOG_SENSOR_HPP_
 #define VIRTUAL_ANALOG_SENSOR_HPP_
 
-#include "aruwsrc/communication/can/aruw_analog_sensor.hpp"
+#include <cstdint>
+
 #include "tap/drivers.hpp"
 
-#include <cstdint>
+#include "aruwsrc/communication/can/aruw_analog_sensor.hpp"
 
 namespace aruwsrc::communication::mcb_lite
 {
@@ -35,7 +36,9 @@ class VirtualAnalogSensor : public aruwsrc::communication::can::AruwAnalogSensor
 
 public:
     VirtualAnalogSensor(tap::Drivers* drivers, tap::can::CanBus canBus, uint16_t canId = 0x1D6)
-        : AruwAnalogSensor(drivers, canBus, canId) {}
+        : AruwAnalogSensor(drivers, canBus, canId)
+    {
+    }
 
     void initialize() {}
 
