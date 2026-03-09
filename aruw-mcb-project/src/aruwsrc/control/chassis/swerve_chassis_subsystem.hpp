@@ -87,7 +87,6 @@ public:
 
     Module* getModule(unsigned int i);
 
-
     /**
      * Used to index into the modules array and desiredModuleSpeeds matrix.
      */

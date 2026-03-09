@@ -61,7 +61,7 @@ void RMULStateMachine::updateState()
             // pathTimeout.restart(PATH_LENGTH_MILLIS);
             // if (pathTimeout.isExpired())
             // {
-                // Patrol
+            // Patrol
             if (patrolTimer.isStopped())
             {
                 patrolTimer.restart(PATROL_SEGMENT_LENGTH_MILLIS);
