@@ -104,10 +104,20 @@ static constexpr uint16_t YAW_ANALOG_RAW_MAX = 10000;
 static constexpr uint16_t YAW_ANALOG_RAW_ZERO = 4550;
 static constexpr float YAW_ANALOG_OUTPUT_RANGE_RADIANS = M_TWOPI;
 
-static constexpr modm::Pair<uint32_t, float> LAMPREY_CALIBRATION_MAP[] = {
-    modm::Pair<uint32_t, float>{0, 0},
-    modm::Pair<uint32_t, float>{4096, M_TWOPI},
-};
+static constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[] = {
+    {0.0f, 0.000000000f},    {70.0f, 0.053926382f},   {289.0f, 0.230385222f},
+    {541.0f, 0.414017592f},  {588.0f, 0.423332489f},  {816.0f, 0.595537759f},
+    {1073.0f, 0.772367484f}, {1311.0f, 0.951635755f}, {1557.0f, 1.131002224f},
+    {1783.0f, 1.310205198f}, {2114.0f, 1.489850019f}, {2305.0f, 1.672643039f},
+    {2515.0f, 1.854085659f}, {2747.0f, 2.033110839f}, {3058.0f, 2.209519599f},
+    {3395.0f, 2.391769859f}, {3709.0f, 2.568024849f}, {4014.0f, 2.746368619f},
+    {4322.0f, 2.924789409f}, {4680.0f, 3.106335379f}, {4859.0f, 3.285434699f},
+    {5079.0f, 3.465885859f}, {5366.0f, 3.648361659f}, {5687.0f, 3.826956249f},
+    {6114.0f, 4.006152129f}, {6507.0f, 4.185609319f}, {6886.0f, 4.364767049f},
+    {7210.0f, 4.541015839f}, {7636.0f, 4.717918139f}, {7727.0f, 4.901065089f},
+    {8012.0f, 5.081168389f}, {8282.0f, 5.262635449f}, {8581.0f, 5.442081669f},
+    {8922.0f, 5.621436339f}, {9232.0f, 5.800632689f}, {9546.0f, 5.979011279f},
+    {9839.0f, 6.159154629f}, {10000.0f, 6.283185307f}};
 
 static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TRANSFORM(
     0,
@@ -120,8 +130,8 @@ static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 130000.0f,
-    .ki = 2000.0f,
+    .kp = 160000.0f,
+    .ki = 0.0f,
     .kd = 8000.0f,
     .maxICumulative = 10000.0f,
     .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.2),

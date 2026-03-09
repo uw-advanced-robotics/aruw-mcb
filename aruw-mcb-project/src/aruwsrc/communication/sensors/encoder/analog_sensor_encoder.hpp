@@ -20,8 +20,6 @@
 #ifndef ANALOG_SENSOR_ENCODER_HPP_
 #define ANALOG_SENSOR_ENCODER_HPP_
 
-#include "tap/algorithms/filter/butterworth.hpp"
-#include "tap/algorithms/filter/discrete_filter.hpp"
 #include "tap/communication/sensors/encoder/wrapped_encoder.hpp"
 #include "tap/util_macros.hpp"
 
@@ -72,7 +70,7 @@ public:
     DISALLOW_COPY_AND_ASSIGN(AnalogSensorEncoder)
 
 protected:
-    void updateFromSensor();
+    virtual void updateFromSensor();
     uint16_t readRaw() const;
     uint32_t rawToTicks(uint16_t raw) const;
 
@@ -80,8 +78,6 @@ protected:
     Channel channel;
     Calibration calibration;
     mutable uint32_t lastUpdateMicros;
-    tap::algorithms::filter::DiscreteFilter<3> lowpassFilter;
-    uint16_t filtered;
 };
 
 }  // namespace aruwsrc::communication::sensors::encoder
