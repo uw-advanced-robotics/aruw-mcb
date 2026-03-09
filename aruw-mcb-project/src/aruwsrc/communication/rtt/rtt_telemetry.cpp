@@ -29,15 +29,15 @@
 
 namespace
 {
-bool writeRttLine(const std::string& line)
+bool writeRttLine(const uint8_t* line, std::size_t len)
 {
     // RTT modes: Skip drops if full, Trim sends partial, Block waits for space.
     // Telemetry uses Skip so JSON lines are either complete or not sent.
     auto written = aruwsrc::communication::rtt::seggerRttWriteWithMode(
-        reinterpret_cast<const uint8_t*>(line.data()),
-        line.size(),
+        line,
+        len,
         aruwsrc::communication::rtt::RttWriteMode::NoBlockSkip);
-    return written == line.size();
+    return written == len;
 }
 }  // namespace
 
@@ -215,8 +215,7 @@ bool RttTelemetry::ensureSpaceOrClearQueue(
     modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
     std::size_t requiredSpace,
     std::size_t available,
-    std::size_t currentSize,
-    const char* queueName)
+    std::size_t currentSize)
 {
     if (currentSize + requiredSpace > available)
     {
@@ -224,7 +223,6 @@ bool RttTelemetry::ensureSpaceOrClearQueue(
         {
             queue.removeBack();
         }
-        // Use a static, zero-allocation error string
         RAISE_ERROR(drivers, this, "RTT Telemetry buffer full. Cleared queue.");
         return false;
     }
@@ -262,7 +260,7 @@ void RttTelemetry::appendEvents(
             if (msg.data[i] == '"' || msg.data[i] == '\\') extra++;
         }
 
-        if (!ensureSpaceOrClearQueue(queue, extra + 2, available, out_len, label))
+        if (!ensureSpaceOrClearQueue(queue, extra + 2, available, out_len))
         {
             break;
         }
@@ -294,7 +292,6 @@ void RttTelemetry::sendQueuedMessages()
         return;
     }
 
-    // THE FIX: Static buffer in BSS RAM instead of dynamic heap allocation
     static char out_buf[2048];
     std::size_t out_len = 0;
 
@@ -312,7 +309,7 @@ void RttTelemetry::sendQueuedMessages()
         const auto& msg = messageQueue.getBack();
         const std::size_t extra = (first ? 0 : 1) + msg.length;
 
-        if (!ensureSpaceOrClearQueue(messageQueue, extra + 2, max_write, out_len, "message")) break;
+        if (!ensureSpaceOrClearQueue(messageQueue, extra + 2, max_write, out_len)) break;
 
         messageQueue.removeBack();
         if (!first) append(',');
@@ -328,13 +325,7 @@ void RttTelemetry::sendQueuedMessages()
     append('}');
     append('\n');
 
-    // Write the raw buffer directly
-    auto written = aruwsrc::communication::rtt::seggerRttWriteWithMode(
-        reinterpret_cast<const uint8_t*>(out_buf),
-        out_len,
-        aruwsrc::communication::rtt::RttWriteMode::NoBlockSkip);
-
-    if (written != out_len)
+    if (!writeRttLine(reinterpret_cast<const uint8_t*>(out_buf), out_len))
     {
         RAISE_ERROR(drivers, this, "Failed to write RTT telemetry line.");
     }

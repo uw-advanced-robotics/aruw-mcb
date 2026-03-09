@@ -312,8 +312,7 @@ private:
         modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
         std::size_t requiredSpace,
         std::size_t available,
-        std::size_t currentSize,
-        const char* queueName);
+        std::size_t currentSize);
 
     void appendEvents(
         char* out_buf,
