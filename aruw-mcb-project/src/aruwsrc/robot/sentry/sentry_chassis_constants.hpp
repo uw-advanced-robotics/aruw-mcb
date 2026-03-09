@@ -122,7 +122,7 @@ static constexpr float CAPBANK_ENERGY_THRESHOLD = 500.0f;
 
 namespace chassisImu
 {
-static const tap::algorithms::transforms::Transform CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM(
+inline const tap::algorithms::transforms::Transform CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM(
     0.04117f,
     0.0f,
     0.04945f,
@@ -130,7 +130,7 @@ static const tap::algorithms::transforms::Transform CHASSIS_MCB_BMI088_MOUNTING_
     0.0f,
     0.0f);
 
-static const tap::algorithms::transforms::Transform CHASSIS_MCB_ISM330_MOUNTING_TRANSFORM(
+inline const tap::algorithms::transforms::Transform CHASSIS_MCB_ISM330_MOUNTING_TRANSFORM(
     0.09811f,
     0.0f,
     0.003253f,
