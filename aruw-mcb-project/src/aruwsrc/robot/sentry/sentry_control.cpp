@@ -302,20 +302,20 @@ const tap::motor::DjiMotor *sentryChassisMotorsForEkf[4] = {
     &leftBackMotor,
     &rightBackMotor};
 
-aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
-    *drivers(),
-    sentryChassisMotorsForEkf,
-    chassisYawObserver,
-    getChassisTurretMCBCanComm(),
-    modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y),
-    &drivers()->rttTelemetry);
-
-// aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
-//     drivers(),
-//     chassis,
+// aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
+//     *drivers(),
+//     sentryChassisMotorsForEkf,
 //     chassisYawObserver,
-//     drivers()->turretMCBCanCommBus2,
-//     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
+//     getChassisTurretMCBCanComm(),
+//     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y),
+//     &drivers()->rttTelemetry);
+
+aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+    drivers(),
+    chassis,
+    chassisYawObserver,
+    drivers()->turretMCBCanCommBus2,
+    modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
 
 SentryTransforms transformer(
     odometrySubsystem,
@@ -689,56 +689,53 @@ HoldCommandMapping leftUpRightDown(
     {&imuCalibrateCommand},
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
 
-// manual aim and shoot
+// manual drive, auto aim, cv-gated fire
 HoldCommandMapping leftMidRightUp(
     drivers(),
-    {&turretWidowManualCommand},
+    {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
 
-// manual aim and shoot
+// manual drive, auto aim, cv-gated fire
 HoldRepeatCommandMapping leftMidRightUpAg(
     drivers(),
-    {&turretWidowAgitatorManualSpin},
+    {&turretWidowRotateAndUnjamAgitatorWithHeatAndCVLimiting},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP),
     false);
 
-// auto drive & auto aim
+// manual drive & auto aim
 HoldCommandMapping leftMidRightMid(
     drivers(),
-    {&majorManualCommand, &turretWidowManualCommand, &autoNavBeybladeCommand},
+    {&chassisDriveCommand, &turretCVCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // manual aim
 HoldCommandMapping leftMidRightDown(
     drivers(),
-    {
-        &majorManualCommand,
-        &turretWidowManualCommand,
-    },
+    {&majorManualCommand, &turretWidowManualCommand},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
-// manual drive, auto aim, cv-gated fire
+// manual aim and shoot
 HoldCommandMapping leftDownRightUp(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
+    {&majorManualCommand, &turretWidowManualCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
 
 HoldRepeatCommandMapping leftDownRightUpAg(
     drivers(),
-    {&turretWidowRotateAndUnjamAgitatorWithHeatAndCVLimiting},
+    {&turretWidowAgitatorManualSpin},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP),
     false);
 
-// manual drive & auto aim
+// manual drive
 HoldCommandMapping leftDownRightMid(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
+    {&chassisDriveCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
 
-// manual drive
+// manual drive + manual aim
 HoldCommandMapping leftDownRightDown(
     drivers(),
-    {&chassisDriveCommand},
+    {&chassisDriveCommand, &majorManualCommand, &turretWidowManualCommand},
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
 
 // Restart HUD
@@ -824,15 +821,15 @@ void registerSentryIoMappings(Drivers *drivers)
     // friction wheels spin (separated due to dumb design in command mapper system)
     drivers->commandMapper.addMap(&rightUp);
 
-    drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive & auto aim
-    drivers->commandMapper.addMap(&leftDownRightUp);   // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive
+    drivers->commandMapper.addMap(&leftDownRightUp);   // manual aim + shoot
     drivers->commandMapper.addMap(&leftDownRightUpAg);
-    drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive
+    drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive + manual aim
 
-    drivers->commandMapper.addMap(&leftMidRightUp);  // manual aim and shoot
+    drivers->commandMapper.addMap(&leftMidRightUp);  // manual drive, auto aim, gated-fire
     drivers->commandMapper.addMap(&leftMidRightUpAg);
-    drivers->commandMapper.addMap(&leftMidRightMid);   // auto drive & auto aim
-    drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
+    drivers->commandMapper.addMap(&leftMidRightMid);    // manual drive & auto aim
+    drivers->commandMapper.addMap(&leftMidRightDown);   // manual aim
 
     drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
     drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire

@@ -36,9 +36,11 @@ bool SentryControlOperatorInterface::isTurretControlMode()
     Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
     Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
 
-    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
-           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::MID) ||
-           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN);
+    // Manual-aim-enabled modes from the 2026 sentry table:
+    // left mid + right down, left down + right up, left down + right down.
+    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN) ||
+           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
 }
 
 bool SentryControlOperatorInterface::isDriveMode()
@@ -46,7 +48,10 @@ bool SentryControlOperatorInterface::isDriveMode()
     Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
     Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
 
-    return (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
+    // Manual-drive-enabled modes from the 2026 sentry table:
+    // left mid + (right up/right mid), left down + (right mid/right down).
+    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::MID) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::MID) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
 }
@@ -190,14 +195,14 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
 
-    return -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+    return drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL);
 }
 
 float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
 
-    return -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+    return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
 }
 
 float SentryControlOperatorInterface::getTurretMinor2YawVelocity()

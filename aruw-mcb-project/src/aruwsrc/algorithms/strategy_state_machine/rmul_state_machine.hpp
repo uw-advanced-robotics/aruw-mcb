@@ -118,7 +118,7 @@ private:
     int PROJECTILE_COUNT_THRESHOLD = 100;  // Minimum number of projectiles to attack
 
     // Speed at which the robot moves when healing, in m/s
-    float SPEED = 50.0f;
+    float SPEED = 1.0f;
 
     const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
     const Position POINT_1 = Position(1.2, 2.1, 0);   // BOTTOM_MIDDLE
@@ -137,7 +137,7 @@ private:
     const Position POINT_T_1 = Position(0, 0, 0);
     const Position POINT_T_2 = Position(1, 0, 0);
 
-    const Position PATROL_POINTS_T[2]{POINT_T_1, POINT_T_2};
+    const Position PATROL_POINTS_T[2]{POINT_T_1, POINT_T_1 + Vector(1, 0, 0)};
 
     const std::array<const Position, 2> ATTACKING_PATH = {POINT_T_1, POINT_T_2};
 

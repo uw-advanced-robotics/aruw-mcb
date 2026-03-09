@@ -121,7 +121,7 @@ static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
-    .beybladeRotationalSpeedFractionOfMax = 0.4f,
+    .beybladeRotationalSpeedFractionOfMax = 0.0f,
     .beybladeTranslationalSpeedMultiplier = 0.5f,
     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.8f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.25f,
@@ -148,7 +148,7 @@ static const tap::algorithms::transforms::Transform CHASSIS_MCB_ISM330_MOUNTING_
     0.003253f,
     0.0f,
     0.0f,
-    M_PI_2);
+    0.0f);
 }  // namespace chassisImu
 }  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_
