@@ -239,4 +239,11 @@ void MCBLite::processVoltageCurrentMessage(const ReceivedSerialMessage& complete
     }
 }
 
+void MCBLite::processAnalogSensorMessage(const ReceivedSerialMessage& completeMessage) {
+    const AnalogSensorMessage* message = reinterpret_cast<const AnalogSensorMessage*>(completeMessage.data);
+    if (this->analogSensor != nullptr) {
+        this->analogSensor->processAnalogSensorUARTMessage(message->ai0, message->ai1);    
+    
+    }
+}
 }  // namespace aruwsrc::communication::mcb_lite

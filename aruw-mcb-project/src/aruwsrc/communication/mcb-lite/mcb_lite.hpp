@@ -37,6 +37,7 @@
 #include "virtual_leds.hpp"
 #include "virtual_pwm.hpp"
 #include "virtual_voltage_current_sensor.hpp"
+#include "virtual_analog_sensor.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
@@ -80,6 +81,7 @@ public:
     VirtualLEDs leds;
     VirtualPWM pwm;
 
+
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);
 
@@ -90,6 +92,8 @@ private:
         VirtualCanEncoder** encoders);
 
     void processVoltageCurrentMessage(const ReceivedSerialMessage& completeMessage);
+    
+    void processAnalogSensorMessage(const ReceivedSerialMessage& completeMessage);
 
     tap::communication::serial::Uart::UartPort port;
 
@@ -103,6 +107,7 @@ private:
     VirtualCanEncoder* can2Encoders[8];
 
     VirtualVoltageCurrentSensor* voltageCurrentSensor;
+    VirtualAnalogSensor* analogSensor;
 
     bool initialized = false;
 };
