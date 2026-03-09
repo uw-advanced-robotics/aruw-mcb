@@ -27,7 +27,6 @@
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/drivers.hpp"
-#include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
@@ -48,7 +47,7 @@ namespace aruwsrc::control::chassis
 /**
  * Abstract subsystem for a holonomic chassis
  *
- * The chassis is in a right handed coordinate system with the x coordinate pointing torwards the
+ * The chassis is in a right handed coordinate system with the x coordinate pointing towards the
  * front of the chassis. As such, when looking down at the robot from above, the positive y
  * coordinate is to the left of the robot, and positive z is up. Also, the chassis rotation is
  * positive when rotating counterclockwise around the z axis.
@@ -171,15 +170,13 @@ public:
     virtual void limitChassisPower() = 0;
 
     /**
-     * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
+     * Converts the velocity matrix from raw RPM to wheel velocity in rad/s.
      */
     inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
     {
-        static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
+        static constexpr float ratio = 2.0f * M_PI / 60.0f;
         return mat * ratio;
     }
-
-    virtual float mpsToRpm(float mps) const = 0;
 
 };  // class HolonomicChassisSubsystem
 

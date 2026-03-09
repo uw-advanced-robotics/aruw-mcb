@@ -110,11 +110,6 @@ public:
      */
     mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
-    float mpsToRpm(float mps) const override
-    {
-        return mps / (M_TWOPI * WHEEL_RADIUS) * 60.0f / CHASSIS_GEARBOX_RATIO;
-    }
-
 protected:
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
@@ -130,10 +125,14 @@ private:
     // wheel velocity PID variables
     tap::algorithms::SmoothPid velocityPid[4];
 
+    std::array<int32_t, 4> desOutput;
+
     float velocityPidErrors[4];
 
     // ✨ the motors ✨
     tap::motor::MotorInterface* motors[4];
+
+    uint32_t lastUpdateTime{0};
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

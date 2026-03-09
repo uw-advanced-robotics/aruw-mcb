@@ -65,7 +65,6 @@ public:
 
     Module* getModule(unsigned int i);
 
-    inline float mpsToRpm(float mps) const override { return modules[0]->wheel.mpsToRpm(mps); }
 
     /**
      * Used to index into the modules array and desiredModuleSpeeds matrix.

@@ -123,7 +123,7 @@ void Holonomic4MotorChassisSubsystem::limitChassisPower()
         // velocityErrorFrac for each motor.
         float modifiedPowerLimitFrac =
             limitVal(NUM_MOTORS * powerLimitFrac * velocityErrorFrac, 0.0f, 1.0f);
-        motors[i]->setDesiredOutput(motors[i]->getOutputDesired() * modifiedPowerLimitFrac);
+        motors[i]->setDesiredOutput(desOutput[i] * modifiedPowerLimitFrac);
     }
 }
 
@@ -168,20 +168,27 @@ void Holonomic4MotorChassisSubsystem::calculateOutput(
 
     desiredRotation = r;
 }
+float DEBUG_WHEEL_RPM{0.0f};
 
 void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(int i)
 {
-    // We divide by the gearbox ratio here because the PID is currently tuned for the internal RPM
-    // and not the wheel rpm
-    velocityPidErrors[i] = *desiredWheelRPM[i] - motors[i]->getEncoder()->getVelocity() * 60.0f /
-                                                     M_TWOPI / CHASSIS_GEARBOX_RATIO;
+    const float now = tap::arch::clock::getTimeMilliseconds();
+    const float dt = now - lastUpdateTime;
+    lastUpdateTime = now;
 
-    // dt is also set to 1 here because the current constants were for modm pid didn't use it
-    velocityPid[i].runControllerDerivateError(velocityPidErrors[i], 1);
+    velocityPidErrors[i] =
+        *desiredWheelRPM[i] - motors[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+
+    DEBUG_WHEEL_RPM = motors[0]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+
+    velocityPid[i].runControllerDerivateError(velocityPidErrors[i], dt);
+
+    const float staticFrictionFF = VELOCITY_PID_KS * (signbit(*desiredWheelRPM[i]) ? -1.0f : 1.0f);
 
     float value =
-        VELOCITY_PID_KV * (*desiredWheelRPM[i]) + velocityPid[i].getOutput() + VELOCITY_PID_KS;
-    motors[i]->setDesiredOutput(value);
+        VELOCITY_PID_KV * (*desiredWheelRPM[i]) + velocityPid[i].getOutput() + staticFrictionFF;
+    // Actual desOut is set after limitChassisPower
+    desOutput[i] = value;
 }
 
 modm::Matrix<float, 3, 1> Holonomic4MotorChassisSubsystem::getActualVelocityChassisRelative() const

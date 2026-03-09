@@ -245,36 +245,36 @@ TurretMinorChassisControllers turretWidowChassisControllers{
 
 DjiMotor rightFrontMotor(
     drivers(),
-    MOTOR2,
+    MOTOR1,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "Right Front Motor",
     false,
     CHASSIS_GEARBOX_RATIO);
 
 DjiMotor leftFrontMotor(
     drivers(),
-    MOTOR1,
+    MOTOR2,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "Left Front Motor",
     false,
     CHASSIS_GEARBOX_RATIO);
 
 DjiMotor leftBackMotor(
     drivers(),
-    MOTOR4,
+    MOTOR3,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "Left Back Motor",
     false,
     CHASSIS_GEARBOX_RATIO);
 
 DjiMotor rightBackMotor(
     drivers(),
-    MOTOR3,
+    MOTOR4,
     tap::can::CanBus::CAN_BUS2,
-    false,
+    true,
     "Right Back Motor",
     false,
     CHASSIS_GEARBOX_RATIO);
@@ -291,7 +291,7 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     leftBackMotor,
     rightFrontMotor,
     rightBackMotor,
-    {.kp = 5.0f, .ki = 0.0f, .kd = 0.0f, .maxOutput = 16000.0f, .errDeadzone = 100.0f},
+    WHEEL_VELOCITY_PID_CONFIG,
     WHEEL_RADIUS,
     WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
@@ -828,8 +828,8 @@ void registerSentryIoMappings(Drivers *drivers)
 
     drivers->commandMapper.addMap(&leftMidRightUp);  // manual drive, auto aim, gated-fire
     drivers->commandMapper.addMap(&leftMidRightUpAg);
-    drivers->commandMapper.addMap(&leftMidRightMid);    // manual drive & auto aim
-    drivers->commandMapper.addMap(&leftMidRightDown);   // manual aim
+    drivers->commandMapper.addMap(&leftMidRightMid);   // manual drive & auto aim
+    drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
 
     drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
     drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire

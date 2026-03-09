@@ -23,6 +23,7 @@
 #include <cmath>
 
 #include "tap/algorithms/transforms/transform.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
@@ -35,11 +36,10 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
- *
- * Since the engineer has no power limiting, this lookup table doesn't matter much, just set some
- * high values.
  */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1, 8'000}};
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
+    {1, 250},
+    {1, 250}};  // TODO: TUNE!
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -61,27 +61,15 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 10.0f;
-static constexpr float VELOCITY_PID_KI = 0.0f;
-static constexpr float VELOCITY_PID_KD = 0.0f;
-static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
-static constexpr float VELOCITY_PID_KV = 0.05f;
-static constexpr float VELOCITY_PID_KS = 300.0;
-
-/**
- * This max output is measured in the c620 robomaster translated current.
- * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
- * The corresponding speed controller output torque current range is
- * -20 ~ 0 ~ 20 A.
- */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
-
+static constexpr float VELOCITY_PID_KV = 0.0f;
+static constexpr float VELOCITY_PID_KS = 0.0f;
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
-    .kp = VELOCITY_PID_KP,
-    .ki = VELOCITY_PID_KI,
-    .kd = VELOCITY_PID_KD,
-    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
-    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+    .kp = 300.0f,
+    .ki = 14.0f,
+    .kd = 10.0f,
+    .maxICumulative = 2000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 1.0f,
 };
 
 /**
@@ -121,7 +109,7 @@ static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
-    .beybladeRotationalSpeedFractionOfMax = 0.0f,
+    .beybladeRotationalSpeedFractionOfMax = 0.9f,
     .beybladeTranslationalSpeedMultiplier = 0.5f,
     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.8f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.25f,

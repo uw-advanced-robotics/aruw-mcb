@@ -41,17 +41,19 @@ public:
     /**
      * Max acceleration in rpm/s^2 of the chassis in the x direction
      */
-    static constexpr float MAX_ACCELERATION_X = 8'000.0f;  // TODO: change these values
-    static constexpr float MAX_DECELERATION_X = 20'000.0f;
-    static constexpr float MAX_ACCELERATION_Y = 8'000.0f;  // TODO: change the values?
-    static constexpr float MAX_DECELERATION_Y = 20'000.0f;
-    static constexpr float MAX_ACCELERATION_R = 10'000.0f;  // TODO: change the values?
+    static constexpr float MAX_ACCELERATION_X = 4'000.0f;
+    static constexpr float MAX_DECELERATION_X = 10'000.0f;
+    static constexpr float MAX_X_SPEED = 100.0f;
+    static constexpr float MAX_ACCELERATION_Y = 4'000.0f;
+    static constexpr float MAX_DECELERATION_Y = 10'000.0f;
+    static constexpr float MAX_Y_SPEED = 100.0f;
+    static constexpr float MAX_ACCELERATION_R = 10'000.0f;
     static constexpr float MAX_DECELERATION_R = 20'000.0f;
-    static constexpr float MAX_CHASSIS_YAW_SPEED = 200;         // TODO: refine this
-    static constexpr float MAX_TURRET1_MINOR_YAW_SPEED = 10;    // TODO: refine this
-    static constexpr float MAX_TURRET2_MINOR_YAW_SPEED = 10;    // TODO: refine this
-    static constexpr float MAX_TURRET1_MINOR_PITCH_SPEED = 10;  // TODO: refine this
-    static constexpr float MAX_TURRET2_MINOR_PITCH_SPEED = 10;  // TODO: refine this
+    static constexpr float MAX_CHASSIS_YAW_SPEED = 100.0f;
+    static constexpr float MAX_TURRET1_MINOR_YAW_SPEED = 10;
+    static constexpr float MAX_TURRET2_MINOR_YAW_SPEED = 10;
+    static constexpr float MAX_TURRET1_MINOR_PITCH_SPEED = 10;
+    static constexpr float MAX_TURRET2_MINOR_PITCH_SPEED = 10;
 
     SentryControlOperatorInterface(tap::Drivers *drivers)
         : ControlOperatorInterface(drivers),
@@ -152,7 +154,7 @@ private:
 
     uint32_t prevChassisXInputCalledTime = 0;
     uint32_t prevChassisYInputCalledTime = 0;
-    uint32_t prevChassisYawnputCalledTime = 0;
+    uint32_t prevChassisYawInputCalledTime = 0;
     uint32_t prevTurretMajorYawInputCalledTime = 0;
     uint32_t prevTurretMinor1YawInputCalledTime = 0;
     uint32_t prevTurretMinor2YawInputCalledTime = 0;
