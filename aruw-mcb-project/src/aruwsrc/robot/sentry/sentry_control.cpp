@@ -87,7 +87,6 @@
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
 #include "aruwsrc/robot/sentry/turret/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret/turret_minor_control_command.hpp"
-#include "aruwsrc/control/chassis/fixed_path_auto_nav_command.hpp"
 
 using namespace tap::algorithms;
 using namespace tap::control;

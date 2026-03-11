@@ -98,7 +98,6 @@
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
-#include "tap/algorithms/transforms/position.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::control;

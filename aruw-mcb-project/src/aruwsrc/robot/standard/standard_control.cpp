@@ -75,6 +75,8 @@
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 
 //#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+#include "tap/control/toggle_command_mapping.hpp"
+
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
@@ -108,8 +110,7 @@
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
-#include "tap/algorithms/transforms/position.hpp"
-#include "tap/control/toggle_command_mapping.hpp"
+
 
 #ifdef PLATFORM_HOSTED
 #include "tap/communication/can/can.hpp"
