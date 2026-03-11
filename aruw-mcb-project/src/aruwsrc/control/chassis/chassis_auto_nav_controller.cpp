@@ -28,6 +28,7 @@ void ChassisAutoNavController::initialize()
 
     lastSetPoint = transformer->getWorldToChassis().getTranslation();
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
+    translateSpeedRamp.setValue(0);  // assumes that we start the path at a standstill
 }
 
 void ChassisAutoNavController::runController(
@@ -59,7 +60,9 @@ void ChassisAutoNavController::runController(
 
     if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
     {
-        moveVector = posError / lookaheadDist * (desiredSpeed / WHEEL_RADIUS / M_TWOPI * 60);
+        translateSpeedRamp.update(MAX_TRANSLATION_ACCELERATION);
+        moveVector = posError / lookaheadDist *
+                     (translateSpeedRamp.getValue() / WHEEL_RADIUS / M_TWOPI * 60);
     }
 
     // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
