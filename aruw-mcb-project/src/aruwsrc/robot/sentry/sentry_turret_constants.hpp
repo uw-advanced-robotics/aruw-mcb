@@ -130,11 +130,11 @@ inline const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 160000.0f,
-    .ki = 0.0f,
-    .kd = 8000.0f,
-    .maxICumulative = 10000.0f,
-    .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.2),
+    .kp = 98'472.8047f,
+    .ki = 100'000.0f,
+    .kd = 10'423.45311f,
+    .maxICumulative = 3'000.0f,
+    .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620),
     .tQDerivativeKalman = 10.0f,
     .tRDerivativeKalman = 1.0f,
     .tQProportionalKalman = 1.0f,
@@ -236,11 +236,11 @@ inline const tap::algorithms::transforms::Transform TURRET_MCB1_ISM330_MOUNTING_
 namespace minorPidConfigs
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 50000.0f,
-    .ki = 0.0f,
-    .kd = 3000.0f,
-    .maxICumulative = 2'000.0f,
-    .maxOutput = 15'000.0f,
+    .kp = 70'000.0f,
+    .ki = 5'000.0f,
+    .kd = 3'500.0f,
+    .maxICumulative = 250.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 80.0f,
     .tQProportionalKalman = 1.0f,
@@ -249,16 +249,17 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME =
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME = {
-    .kp = 80000.0f,
-    .ki = 0.0f,
-    .kd = 3000.0f,
+    .kp = 80'000.0f,
+    .ki = 10'000.0f,
+    .kd = 3'000.0f,
     .maxICumulative = 4'000.0f,
-    .maxOutput = 15'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 60.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
+    .antiSaturation = true,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL = {

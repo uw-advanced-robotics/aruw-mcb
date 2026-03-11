@@ -91,7 +91,7 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          capacitorBank(this, tap::can::CanBus::CAN_BUS1, aruwsrc::control::chassis::CAP_BANK_CAPACITANCE)),
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, aruwsrc::control::chassis::CAP_BANK_CAPACITANCE),
 #if defined(TARGET_SENTRY_NAME)
           turretMajorPrimaryImu(
               aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<

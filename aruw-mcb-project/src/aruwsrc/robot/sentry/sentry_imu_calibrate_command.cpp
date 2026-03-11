@@ -66,14 +66,6 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       turretMajorInternalEncoder(turretMajorInternalEncoder),
       successChime(successChime),
       failChime(failChime),
-      turretMajorLampreyEncoderHighpass(
-          tap::algorithms::filter::butterworth<2, tap::algorithms::filter::FilterType::HIGHPASS>(
-              780.0f,
-              1.0f / 500.0f)),
-      turretMajorLampreyEncoderLowpass(
-          tap::algorithms::filter::butterworth<2, tap::algorithms::filter::FilterType::LOWPASS>(
-              10.0f,
-              1.0f / 500.0f)),
       fakeLampreyEncoder(0, 0)
 {
     for (auto &config : turretsAndControllers)
@@ -119,7 +111,7 @@ static inline bool turretMajorReachedCenterAndNotMoving(
                0.0f,
                turret.getReadOnlyMotor().getChassisFrameVelocity(),
                SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           (turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0) <
+           (abs(turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0)) <
             SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
@@ -169,14 +161,13 @@ void SentryImuCalibrateCommand::execute()
                 turretsNotMoving &=
                     turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
             }
-
             turretsNotMoving &= turretMajorReachedCenterAndNotMoving(turretMajor);
 
             if (calibrationTimer.isExpired() && turretsNotMoving)
             {
                 // enter calibration phase
                 calibrationTimer.stop();
-
+                calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 for (auto &config : turretsAndControllers)
                 {
                     config.turretMCBCanComm->requestCalibration();
@@ -202,9 +193,7 @@ void SentryImuCalibrateCommand::execute()
             lampreyDebugAverage2 += (turretMajorLampreyEncoder.getPosition().getUnwrappedValue() -
                                      lampreyDebugAverage2) /
                                     lampreySamples;
-            // lampreyShitAverage /= lampreySamples;
 
-            fakeLampreyEncoder.setFakePosition(lampreyShitAverage);
 
             if (calibrationLongTimeout.isExpired())
             {
@@ -252,7 +241,7 @@ void SentryImuCalibrateCommand::execute()
     }
 
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTime;
+    float dt = (currTime - prevTime) / 1000.0f;
     prevTime = currTime;
 
     for (auto &config : turretsAndControllers)

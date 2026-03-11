@@ -78,7 +78,7 @@ void TurretMajorWorldFrameController::initialize()
 //       rationale: it is not at all intuitive or expected for angle limiting to occur here; makes
 //       code difficult to trace, follow, and maintain
 void TurretMajorWorldFrameController::runController(
-    const uint32_t dt,
+    const float dt,
     const WrappedFloat desiredSetpoint)
 {
     worldFrameSetpoint = desiredSetpoint;
