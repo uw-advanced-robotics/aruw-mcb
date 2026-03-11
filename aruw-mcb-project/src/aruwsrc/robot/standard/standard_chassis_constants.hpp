@@ -99,7 +99,7 @@ static constexpr float AUTOROTATION_PID_KP = 300.0f;
 static constexpr float AUTOROTATION_PID_KD = 10.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 400.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 300.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = AUTOROTATION_PD_MAX_P;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = AUTOROTATION_PID_MAX_P;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
