@@ -194,7 +194,6 @@ void SentryImuCalibrateCommand::execute()
                                      lampreyDebugAverage2) /
                                     lampreySamples;
 
-
             if (calibrationLongTimeout.isExpired())
             {
                 if (failChime) drivers->commandScheduler.addCommand(failChime);

@@ -227,7 +227,7 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
     currProcessingImuData.zAcceleration =
         static_cast<float>(zAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
 
-    //unfudge
+    // unfudge
     currProcessingImuData.yaw -= M_PI_2;
 
     /**
