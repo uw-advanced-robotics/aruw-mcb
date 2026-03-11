@@ -109,7 +109,6 @@
 #include "aruwsrc/robot/standard/standard_drivers.hpp"
 #include "aruwsrc/robot/standard/standard_turret_subsystem.hpp"
 #include "tap/algorithms/transforms/position.hpp"
-#include "aruwsrc/control/chassis/fixed_path_auto_nav_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 
 #ifdef PLATFORM_HOSTED
@@ -324,34 +323,6 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     transformAdapter);
 
 /* define commands ----------------------------------------------------------*/
-
-static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_PATH_POINTS[] = {         
-    Position(0, 1, 0),
-    Position(0, 0, 0) 
-};
-
-aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
-    *drivers(),
-    chassis,
-    &transformAdapter,
-    aruwsrc::control::chassis::BEYBLADE_CONFIG,
-    capBankSubsystem,
-    0.15f,
-    1000.0f);
-
-Position points[] = {
-    Position(0.0f, 0.0f, 0.0f),
-    Position(1.0f, 0.0f, 0.0f),
-    Position(0.0f, 0.0f, 0.0f)
-};
-aruwsrc::control::chassis::FixedPathAutoNavCommand ForwardBackTest(
-    *drivers(),
-    chassis,
-    autoNavController,
-    points,
-    0.6f, // desired speed in m/s
-    false,
-    false);
 
 aruwsrc::control::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
     drivers(),
@@ -680,10 +651,6 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
-ToggleCommandMapping testAuto(
-    drivers(),
-    {&ForwardBackTest},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
 
 HoldRepeatCommandMapping rightSwitchMiddle(
     drivers(),
@@ -870,7 +837,6 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&cShiftPressed);
     drivers->commandMapper.addMap(&shiftPressed);
     drivers->commandMapper.addMap(&ctrlPressed);*/
-    drivers->commandMapper.addMap(&testAuto);
 }
 }  // namespace standard_control
 
