@@ -30,8 +30,8 @@ namespace aruwsrc::robot::dart
 DartYawVelocityCommand::DartYawVelocityCommand(
     TriggerHomedJointSubsystem& subsystem,
     aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface)
-    : controlOperatorInterface(controlOperatorInterface),
-      subsystem(subsystem)
+    : subsystem(subsystem),
+      controlOperatorInterface(controlOperatorInterface)
 {
     addSubsystemRequirement(&subsystem);
 }
@@ -40,7 +40,6 @@ void DartYawVelocityCommand::initialize() {}
 
 void DartYawVelocityCommand::execute()
 {
-
     subsystem.setSetpoint(
         subsystem.getSetpoint() +
         controlOperatorInterface->getYawVelocity() * aruwsrc::dart::YAW_INPUT_SENSITIVITY);

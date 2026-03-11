@@ -70,8 +70,8 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
     YAW_HOME_CONFIG = {
         .super =
             {
-                .lowerBound = -0.24f, // these have been tuned
-                .upperBound = 0.00f, 
+                .lowerBound = -0.24f,  // these have been tuned
+                .upperBound = 0.00f,
                 .epsilon = 0.00002f,
                 .maxSetpointIncrement = 0.05f,
                 .encoderRatio = YAW_MOTOR_GEAR_RATIO * YAW_LEADSCREW_THREAD_PITCH,
@@ -80,9 +80,9 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
                 .staticFeedforward = 0,
             },
         .home = 0.0f,
-        .homingSpeed = 0.007f, // could make this a little faster, but safe speed that homes in a reasonable time
-        .homingReversed = true  
-};
+        .homingSpeed = 0.007f,  // could make this a little faster, but safe speed that homes in a
+                                // reasonable time
+        .homingReversed = true};
 
 static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 1.0f;
 
@@ -117,7 +117,7 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
 
             },
         .home = 0.0f,
-        .homingSpeed = 50.0f,  
+        .homingSpeed = 50.0f,
         .homingReversed = true};
 
 }  // namespace aruwsrc::dart

@@ -21,8 +21,10 @@
 
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
-#include "dart_control_operator_interface.hpp"
+
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
+
+#include "dart_control_operator_interface.hpp"
 
 using namespace aruwsrc::control::joint::homing;
 using tap::communication::serial::Remote;
@@ -35,7 +37,6 @@ public:
     DartYawVelocityCommand(
         TriggerHomedJointSubsystem& subsystem,
         aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface);
-
 
     void initialize() override;
 

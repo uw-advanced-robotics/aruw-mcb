@@ -145,8 +145,8 @@ aruwsrc::robot::dart::DartYawVelocityCommand dartYawVelocityCommand(
 SequentialCommand<2> pullBackCommand(std::array<Command*, 2>{{&servoClose, &dartPullback}});
 
 // release the string to let the dart go, then go to reload position
-SequentialCommand<3> releaseDartAndReload(
-    std::array<Command*, 3>{{&servoOpen, &dartGrab, &rotateMagazine}});
+SequentialCommand<3> releaseDartAndReload(std::array<Command*, 3>{
+    {&servoOpen, &dartGrab, &rotateMagazine}});
 
 SequentialCommand<2> homeAll(std::array<Command*, 2>{{&pullMotorHome, &yawHomeCommand}});
 
