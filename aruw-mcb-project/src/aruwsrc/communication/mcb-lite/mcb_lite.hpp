@@ -37,6 +37,7 @@
 #include "virtual_imu_interface.hpp"
 #include "virtual_leds.hpp"
 #include "virtual_pwm.hpp"
+#include "virtual_servo.hpp"
 #include "virtual_voltage_current_sensor.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -94,6 +95,8 @@ private:
 
     void processAnalogSensorMessage(const ReceivedSerialMessage& completeMessage);
 
+    void processServoFeedbackMessage(const ReceivedSerialMessage& completeMessage);
+
     tap::communication::serial::Uart::UartPort port;
 
     IMUMessage currentIMUData;
@@ -107,6 +110,7 @@ private:
 
     VirtualVoltageCurrentSensor* voltageCurrentSensor;
     VirtualAnalogSensor* analogSensor;
+    VirtualServo* servo;
 
     bool initialized = false;
 };

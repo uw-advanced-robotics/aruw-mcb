@@ -144,6 +144,14 @@ void MCBLite::sendData()
                 sizeof(pwm.pwmTimerStartMessage));
             pwm.hasNewData = false;
         }
+
+        if (this->servo->hasNewTarget) {
+
+        }
+
+        if(this->servo->updatePwmRamp) {
+
+        }
     }
 }
 
@@ -179,6 +187,8 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
             case MessageTypes::VOLTAGE_CURRENT_MESSAGE:
                 processVoltageCurrentMessage(completeMessage);
                 break;
+            case MessageTypes::SERVO_FEEDBACK_MESSAGE:
+                processServoFeedbackMessage(completeMessage);
             default:
                 break;
         }
@@ -246,6 +256,15 @@ void MCBLite::processAnalogSensorMessage(const ReceivedSerialMessage& completeMe
     if (this->analogSensor != nullptr)
     {
         this->analogSensor->processAnalogSensorUARTMessage(message->ai0, message->ai1);
+    }
+}
+
+void MCBLite::processServoFeedbackMessage(const ReceivedSerialMessage& completeMessage) {
+    const ServoFeedbackMessage* message =
+        reinterpret_cast<const ServoFeedbackMessage*>(completeMessage.data);
+    if (this->servo != nullptr)
+    {
+        this->servo->processservoUARTMessage(message->pin,message->currentPwm, message->isRampTargetMet);
     }
 }
 }  // namespace aruwsrc::communication::mcb_lite
