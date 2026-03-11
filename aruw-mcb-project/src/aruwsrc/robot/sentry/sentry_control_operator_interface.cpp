@@ -106,6 +106,9 @@ float SentryControlOperatorInterface::getChassisXVelocity()
     float finalX =
         maxChassisSpeed * limitVal(chassisXInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
+    // Limit with sign
+    finalX = abs(finalX) > MAX_X_SPEED ? (finalX > 0 ? MAX_X_SPEED : -MAX_X_SPEED) : finalX;
+
     chassisXInputRamp.setTarget(finalX);
 
     applyAccelerationToRamp(
@@ -141,6 +144,9 @@ float SentryControlOperatorInterface::getChassisYVelocity()
     float finalY =
         maxChassisSpeed * limitVal(chassisYInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
+    // Limit with sign
+    finalY = abs(finalY) > MAX_Y_SPEED ? (finalY > 0 ? MAX_Y_SPEED : -MAX_Y_SPEED) : finalY;
+
     chassisYInputRamp.setTarget(finalY);
 
     applyAccelerationToRamp(
@@ -157,8 +163,8 @@ float SentryControlOperatorInterface::getChassisYawVelocity()
 
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevChassisYawnputCalledTime;  // @todo typo lol
-    prevChassisYawnputCalledTime = currTime;
+    uint32_t dt = currTime - prevChassisYawInputCalledTime;
+    prevChassisYawInputCalledTime = currTime;
 
     if (prevUpdateCounterChassisYawInput != updateCounter)
     {
@@ -181,7 +187,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity()
         MAX_DECELERATION_R,
         static_cast<float>(dt) / 1E3);
 
-    return chassisYawInputRamp.getValue() * 20;
+    return chassisYawInputRamp.getValue();
 }
 
 float SentryControlOperatorInterface::getTurretMajorYawVelocity()
@@ -195,7 +201,7 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
 
-    return drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL);
+    return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL);
 }
 
 float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()

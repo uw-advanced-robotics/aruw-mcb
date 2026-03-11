@@ -119,7 +119,7 @@ static constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[] = {
     {8922.0f, 5.621436339f}, {9232.0f, 5.800632689f}, {9546.0f, 5.979011279f},
     {9839.0f, 6.159154629f}, {10000.0f, 6.283185307f}};
 
-static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TRANSFORM(
+inline const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TRANSFORM(
     0,
     0,
     0,
@@ -216,7 +216,7 @@ static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
 
-static const tap::algorithms::transforms::Transform TURRET_MCB1_BMI088_MOUNTING_TRANSFORM(
+inline const tap::algorithms::transforms::Transform TURRET_MCB1_BMI088_MOUNTING_TRANSFORM(
     0.0f,
     0.20667f,
     0.0f,
@@ -224,7 +224,7 @@ static const tap::algorithms::transforms::Transform TURRET_MCB1_BMI088_MOUNTING_
     0.0f,
     0.0f);
 
-static const tap::algorithms::transforms::Transform TURRET_MCB1_ISM330_MOUNTING_TRANSFORM(
+inline const tap::algorithms::transforms::Transform TURRET_MCB1_ISM330_MOUNTING_TRANSFORM(
     0.00868f,
     0.1734f,
     0.0f,

@@ -63,7 +63,7 @@ void ChassisAutoNavController::runController(
 
     if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
     {
-        moveVector = posError / lookaheadDist * chassis.mpsToRpm(desiredSpeed);
+        moveVector = posError / lookaheadDist * (desiredSpeed / WHEEL_RADIUS * M_TWOPI * 60);
     }
 
     // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled

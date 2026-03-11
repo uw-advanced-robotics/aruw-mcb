@@ -37,7 +37,7 @@ class ChassisAutoNavController
 {
 public:
     // how much farther ahead along the path the robot movement aims for
-    const float LOOKAHEAD_DISTANCE = 0.2f;
+    const float LOOKAHEAD_DISTANCE = 10.0f;
 
     // how long the controller takes to smoothly transition to an updated path
     const uint32_t PATH_TRANSITION_TIME_MILLIS = 400;
@@ -102,6 +102,8 @@ private:
 
     const float translationalMotionThreshold;
     const float capbankEnergyThreshold;
+
+    Vector lastCommandedVelocity{0.0f, 0.0f, 0.0f};
 };
 }  // namespace aruwsrc::control::chassis
 
