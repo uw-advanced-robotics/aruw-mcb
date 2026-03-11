@@ -263,7 +263,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
 };
 
 static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 3'000.0f,
+    .kp = 3'750.0f,
     .ki = 0.0f,
     .kd = 10.0f,
     .maxICumulative = 0.0f,
@@ -289,7 +289,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 3'000.0f,
+    .kp = 5'000.0f,
     .ki = 40.0f,
     .kd = 5.0f,
     .maxICumulative = 100.0f,
