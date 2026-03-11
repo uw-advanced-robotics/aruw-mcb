@@ -100,8 +100,6 @@ private:
 
     aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
 
-    float desiredSpeed = 0;
-
     const float translationalMotionThreshold;
     const float capbankEnergyThreshold;
 };
