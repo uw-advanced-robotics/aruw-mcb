@@ -132,8 +132,6 @@ private:
     uint32_t loopCounter{0};
     bool lampreyAligned{false};
     bool isLampreyShit();
-    tap::algorithms::filter::DiscreteFilter<3> turretMajorLampreyEncoderHighpass;
-    tap::algorithms::filter::DiscreteFilter<3> turretMajorLampreyEncoderLowpass;
     float turretMajorLampreyEncoderHighpassValue = 0;
     float turretMajorLampreyEncoderLowpassValue = 0;
     float lampreyShitAverage = 0;
