@@ -39,6 +39,7 @@
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 
@@ -70,7 +71,10 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          capacitorBank(this, tap::can::CanBus::CAN_BUS1, CAP_BANK_CAPACITANCE),
+          capacitorBank(
+              this,
+              tap::can::CanBus::CAN_BUS1,
+              aruwsrc::control::chassis::CAP_BANK_CAPACITANCE),
           plateHitTracker(this),
           refSerialTransmitter(this),
           interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
@@ -100,7 +104,6 @@ public:
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
-    static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard

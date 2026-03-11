@@ -40,6 +40,7 @@
 #include "aruwsrc/communication/sensors/imu/fused_imu_mekf_kf.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #endif
@@ -90,7 +91,7 @@ public:
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          capacitorBank(this, tap::can::CanBus::CAN_BUS1, CAP_BANK_CAPACITANCE),
+          capacitorBank(this, tap::can::CanBus::CAN_BUS1, aruwsrc::control::chassis::CAP_BANK_CAPACITANCE)),
 #if defined(TARGET_SENTRY_NAME)
           turretMajorPrimaryImu(
               aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
@@ -138,7 +139,6 @@ public:
     TurretMajorImuType turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
-    static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
 
 #endif
 };  // class aruwsrc::SentryDrivers
