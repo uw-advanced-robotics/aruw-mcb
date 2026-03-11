@@ -45,12 +45,9 @@ void ChassisAutoNavController::runController(
 
     Vector posError = setpoint - currentPos;
 
-    // make if can sprint (above 25%)
-    // add a boolean for sprinting check posError over a threshold (make a constant in chassis
-    // constants)
     if (posError.magnitude() > translationalMotionThreshold &&
         capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold)
-    {  // is it translating
+    {
 
         capBankSubsystem.changeSprintMode(
             aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
@@ -63,7 +60,7 @@ void ChassisAutoNavController::runController(
 
     if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
     {
-        moveVector = posError / lookaheadDist * chassis.mpsToRpm(desiredSpeed);
+        moveVector = posError / lookaheadDist * (desiredSpeed / WHEEL_RADIUS * M_TWOPI * 60);
     }
 
     // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
