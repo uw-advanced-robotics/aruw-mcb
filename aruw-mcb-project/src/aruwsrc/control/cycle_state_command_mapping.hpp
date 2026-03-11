@@ -67,12 +67,12 @@ public:
      */
     CycleStateCommandMapping(
         tap::Drivers *drivers,
-        const tap::control::RemoteMapState &rms,
+        const tap::control::GenericRemoteMapState &rms,
         T initialState,
         C *stateChangeObject,
         StateChangedFn stateChangedFn,
-        std::optional<tap::control::RemoteMapState> reverseMapState = std::nullopt)
-        : tap::control::CommandMapping(drivers, {}, rms),
+        std::optional<tap::control::GenericRemoteMapState> reverseMapState = std::nullopt)
+        : tap::control::CommandMapping(drivers, {}, &rms),
           state(initialState),
           stateChangeObject(stateChangeObject),
           stateChangedFn(stateChangedFn),
@@ -85,10 +85,10 @@ public:
      */
     ~CycleStateCommandMapping() override = default;
 
-    void executeCommandMapping(const tap::control::RemoteMapState &currState) override
+    void executeCommandMapping(const tap::control::GenericRemoteMapState &currState) override
     {
         if (mappingSubset(currState) &&
-            !(mapState.getNegKeysUsed() && negKeysSubset(mapState, currState)))
+            !(mapState->getNegKeysUsed() && negKeysSubset(*mapState, currState)))
         {
             // mapping pressed, state needs updating first time pressed
             if (!pressed)
@@ -123,7 +123,7 @@ protected:
     T state;
     C *stateChangeObject;
     StateChangedFn stateChangedFn;
-    std::optional<tap::control::RemoteMapState> reverseMapState;
+    std::optional<tap::control::GenericRemoteMapState> reverseMapState;
 };
 }  // namespace aruwsrc::control
 
