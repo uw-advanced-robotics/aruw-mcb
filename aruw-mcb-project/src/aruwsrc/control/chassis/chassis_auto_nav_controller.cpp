@@ -48,7 +48,6 @@ void ChassisAutoNavController::runController(
     if (posError.magnitude() > translationalMotionThreshold &&
         capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold)
     {
-
         capBankSubsystem.changeSprintMode(
             aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
     }
