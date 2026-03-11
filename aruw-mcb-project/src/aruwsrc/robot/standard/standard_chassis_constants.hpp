@@ -56,7 +56,7 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
  * The minimum desired wheel speed for chassis rotation when translational scaling via
  * calculateRotationTranslationalGain is performed.
  */
-static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
+static constexpr float MIN_ROTATION_THRESHOLD = 80.0f;
 
 /**
  * Pin to use for current sensing
