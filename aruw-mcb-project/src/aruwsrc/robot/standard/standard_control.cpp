@@ -339,7 +339,11 @@ aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     0.15f,
     1000.0f);
 
-Position points[2] = {Position(0.0f, 0.0f, 0.0f), Position(0.5f, 0.0f, 0.0f)};
+Position points[] = {
+    Position(0.0f, 0.0f, 0.0f),
+    Position(1.0f, 0.0f, 0.0f),
+    Position(0.0f, 0.0f, 0.0f)
+};
 aruwsrc::control::chassis::FixedPathAutoNavCommand ForwardBackTest(
     *drivers(),
     chassis,

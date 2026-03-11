@@ -73,7 +73,7 @@ public:
      */
     Position parametertoPosition(const float parameter) const;
 
-    float parametertoDistance(const float parameter) const;
+    float totalDistance() const;
 
     /**
      * Returns whether the path was updated.
