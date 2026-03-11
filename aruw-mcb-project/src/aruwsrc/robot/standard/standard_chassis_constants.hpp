@@ -40,12 +40,12 @@ static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
  */
 
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 4'500},
-    {60, 5'700},
-    {70, 6'400},
-    {80, 6'700},
-    {100, 7'000},
-    {120, 8'000},
+    {50, 234},
+    {60, 296},
+    {70, 333},
+    {80, 349},
+    {100, 365},
+    {120, 416},
 };
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
@@ -68,12 +68,12 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 19.0f;
-static constexpr float VELOCITY_PID_KI = 0.0f;
-static constexpr float VELOCITY_PID_KD = 0.0f;
+static constexpr float VELOCITY_PID_KP = 300.0f;
+static constexpr float VELOCITY_PID_KI = 14.0f;
+static constexpr float VELOCITY_PID_KD = 10.0f;
 static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float VELOCITY_PID_KV = 0.07f;
-static constexpr float VELOCITY_PID_KS = 400.0f;
+static constexpr float VELOCITY_PID_KS = 1.0f;
 
 /**
  * This max output is measured in the c620 robomaster translated current.
@@ -92,13 +92,14 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
 };
 
 /**
- * Rotation PID: A PD controller for chassis autorotation.
+ * Rotation PD: A PD controller for chassis autorotation, which causes the chassis to follow the
+ * turret's pointing direction
  */
-static constexpr float AUTOROTATION_PID_KP = 3'000.0f;
-static constexpr float AUTOROTATION_PID_KD = 0.0f;
-static constexpr float AUTOROTATION_PID_MAX_P = 4'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 0.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5'500.0f;
+static constexpr float AUTOROTATION_PID_KP = 300.0f;
+static constexpr float AUTOROTATION_PID_KD = 10.0f;
+static constexpr float AUTOROTATION_PID_MAX_P = 400.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 300.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = AUTOROTATION_PD_MAX_P;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
