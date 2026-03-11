@@ -40,6 +40,7 @@ void DartYawVelocityCommand::initialize() {}
 
 void DartYawVelocityCommand::execute()
 {
+
     subsystem.setSetpoint(
         subsystem.getSetpoint() +
         controlOperatorInterface->getYawVelocity() * aruwsrc::dart::YAW_INPUT_SENSITIVITY);

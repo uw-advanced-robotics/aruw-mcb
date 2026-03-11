@@ -61,7 +61,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 40000.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .maxOutput = 2000.0f,
     .errDeadzone = 0.00002f,
     .errorDerivativeFloor = 0.0f,
 };
@@ -70,7 +70,7 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
     YAW_HOME_CONFIG = {
         .super =
             {
-                .lowerBound = -0.06f,
+                .lowerBound = -0.24f, // these have been tuned
                 .upperBound = 0.00f, 
                 .epsilon = 0.00002f,
                 .maxSetpointIncrement = 0.05f,
@@ -80,7 +80,7 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
                 .staticFeedforward = 0,
             },
         .home = 0.0f,
-        .homingSpeed = 0.007f,    
+        .homingSpeed = 0.007f, // could make this a little faster, but safe speed that homes in a reasonable time
         .homingReversed = true  
 };
 

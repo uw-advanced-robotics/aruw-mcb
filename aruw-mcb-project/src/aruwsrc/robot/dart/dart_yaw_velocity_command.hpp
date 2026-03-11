@@ -50,7 +50,6 @@ public:
 private:
     TriggerHomedJointSubsystem& subsystem;
     aruwsrc::control::dart::DartControlOperatorInterface* controlOperatorInterface;
-    double debub_position;
 };  // class CLASS_NAME
 
 }  // namespace aruwsrc::robot::dart
