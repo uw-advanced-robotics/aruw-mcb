@@ -211,7 +211,7 @@ RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
-        &getTurretMCBCanComm(),
+        aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM);
 
 FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;

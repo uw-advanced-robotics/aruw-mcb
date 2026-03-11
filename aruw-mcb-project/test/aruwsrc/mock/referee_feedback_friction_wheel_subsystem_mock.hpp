@@ -34,7 +34,7 @@ class RefereeFeedbackFrictionWheelSubsystemMock
 public:
     RefereeFeedbackFrictionWheelSubsystemMock(
         tap::Drivers *drivers,
-        std::array<testing::NiceMock<tap::mock::DjiMotorMock> *, 2> wheels);
+        std::array<tap::motor::MotorInterface *, 2> wheels);
     virtual ~RefereeFeedbackFrictionWheelSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

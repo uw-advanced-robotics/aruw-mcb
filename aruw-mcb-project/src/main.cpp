@@ -61,8 +61,6 @@ using namespace aruwsrc::hero;
 using namespace aruwsrc::drone;
 #elif defined(TARGET_ENGINEER)
 using namespace aruwsrc::engineer;
-#elif defined(TARGET_ENGI_2025)
-using namespace aruwsrc::engineer;
 #elif defined(TARGET_DART)
 using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
@@ -133,8 +131,7 @@ int main()
 #endif
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
-    defined(TARGET_LAUNCHER_TARGET)
+    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
 
@@ -156,11 +153,11 @@ int main()
             checkTurretMcbDisconnection(drivers);
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) || \
-    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER) ||  \
-    defined(TARGET_ENGI_2025) || defined(TARGET_TESTBED) || defined(TARGET_MOTOR_TESTER) ||     \
-    defined(TARGET_LAUNCHER_TARGET) || defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || \
-    defined(TARGET_DRONE) || defined(TARGET_BLANK)
+#if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) ||   \
+    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER) ||    \
+    defined(TARGET_TESTBED) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
+    defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || defined(TARGET_DRONE) ||             \
+    defined(TARGET_BLANK)
 #if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
             PROFILE(drivers->profiler, ((Drivers*)drivers)->rttTelemetry.updateTelemetryAsync, ());
 #endif
@@ -199,8 +196,7 @@ static void initializeIo(Drivers* drivers)
 #endif
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
-    defined(TARGET_LAUNCHER_TARGET)
+    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
     ((Drivers*)drivers)->oledDisplay.initialize();
 #endif
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
@@ -249,8 +245,7 @@ static void updateIo(Drivers* drivers)
     drivers->mpu6500.read();
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025) || defined(TARGET_MOTOR_TESTER) || \
-    defined(TARGET_LAUNCHER_TARGET)
+    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
     ((Drivers*)drivers)->oledDisplay.updateDisplay();
 #endif
 
