@@ -81,11 +81,11 @@ public:
      */
     virtual void initKeys(const std::list<tap::communication::serial::Remote::Key> &keySet)
     {
-        uint16_t keys =
-            std::accumulate(keySet.begin(), keySet.end(), static_cast<uint16_t>(0),
-                [](uint16_t acc, Remote::Key key) {
-                    return acc | (1 << static_cast<uint16_t>(key));
-                });
+        uint16_t keys = std::accumulate(
+            keySet.begin(),
+            keySet.end(),
+            static_cast<uint16_t>(0),
+            [](uint16_t acc, Remote::Key key) { return acc | (1 << static_cast<uint16_t>(key)); });
         initKeys(keys);
     }
 
@@ -95,11 +95,11 @@ public:
     virtual void initNegKeys(const std::list<tap::communication::serial::Remote::Key> &negKeySet)
     {
         // extract a bit form of the key set.
-        uint16_t negKeys =
-        std::accumulate(negKeySet.begin(), negKeySet.end(), static_cast<uint16_t>(0),
-            [](uint16_t acc, Remote::Key key) {
-                return acc | (1 << static_cast<uint16_t>(key));
-            });
+        uint16_t negKeys = std::accumulate(
+            negKeySet.begin(),
+            negKeySet.end(),
+            static_cast<uint16_t>(0),
+            [](uint16_t acc, Remote::Key key) { return acc | (1 << static_cast<uint16_t>(key)); });
         initNegKeys(negKeys);
     }
     /**
