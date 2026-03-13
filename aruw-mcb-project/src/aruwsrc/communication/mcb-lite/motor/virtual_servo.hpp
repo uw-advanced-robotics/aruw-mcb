@@ -23,48 +23,52 @@
 #include "tap/motor/servo.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
-#include "mcb_lite.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::communication::mcb_lite
+namespace aruwsrc::communication::mcb_lite::motor
 {
 class VirtualServo : public tap::motor::Servo
 {
     friend class MCBLite;
+    friend class VirtualServoRxHandler;
 
 public:
-    VirtualServo::VirtualServo(
+    VirtualServo(
     tap::Drivers *drivers,
     tap::gpio::Pwm::Pin pwmPin,
     float maximumPwm,
     float minimumPwm,
-    float pwmRampSpeed, MCBLite* mcbLite)
+    float pwmRampSpeed,
+    aruwsrc::communication::mcb_lite::MCBLite* mcbLite)
     : Servo(drivers, pwmPin, maximumPwm, minimumPwm, pwmRampSpeed), minPwm(minimumPwm), maxPwm(maximumPwm), rampSpeed(pwmRampSpeed), mcbLite(mcbLite) {};
 
-    void VirtualServo::setTargetPwm(float pwm)
+    void setTargetPwm(float pwm)
 {
     float targetPwm = tap::algorithms::limitVal<float>(pwm, minPwm, maxPwm);
     // send servo message
 }
 
-void VirtualServo::updateSendPwmRamp() {} // send message
+void updateSendPwmRamp() {} // send message
 
-float VirtualServo::getPWM() const {return currentPwm; } // need to read message 
+float getPWM() const {return currentPwm; } // need to read message 
 
-bool VirtualServo::isRampTargetMet() const { return isTargetReached; } // need to read message 
+bool isRampTargetMet() const { return isTargetReached; } // need to read message 
 
 private: 
-    void processservoUARTMessage(tap::gpio::Pwm::Pin pin, float currentPwm, bool isRampTargetMet) {
+    void processServoUARTMessage( float currentPwm, bool isRampTargetMet) {
         this->currentPwm = currentPwm;
         this->isTargetReached = isRampTargetMet;
     }
-    MCBLite* mcbLite;
+
     float minPwm, maxPwm, rampSpeed;
+    tap::gpio::Pwm::Pin pin;
+    aruwsrc::communication::mcb_lite::MCBLite* mcbLite;
     float currentPwm = 0;
     bool hasNewTarget, updatePwmRamp = 0;
     bool isTargetReached = 0;
 };
-}  // namespace aruwsrc::communication::mcb_lite
+}  // namespace aruwsrc::communication::mcb_lite::motor
 
 #endif  // VIRTUAL_SERVO_HPP_

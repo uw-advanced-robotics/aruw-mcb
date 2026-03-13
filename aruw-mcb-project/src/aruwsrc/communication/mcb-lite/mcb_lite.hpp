@@ -28,6 +28,7 @@
 #include "modm/container/queue.hpp"
 #include "motor/virtual_can_rx_handler.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
+#include "motor/virtual_servo_rx_handler.hpp"
 
 #include "message_types.hpp"
 #include "virtual_analog.hpp"
@@ -37,7 +38,6 @@
 #include "virtual_imu_interface.hpp"
 #include "virtual_leds.hpp"
 #include "virtual_pwm.hpp"
-#include "virtual_servo.hpp"
 #include "virtual_voltage_current_sensor.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -76,6 +76,7 @@ public:
 
     motor::VirtualCanRxHandler canRxHandler;
     motor::VirtualDJIMotorTxHandler motorTxHandler;
+    motor::VirtualServoRxHandler servoRxHandler;
     VirtualIMUInterface imu;
     VirtualAnalog analog;
     VirtualDigital digital;
@@ -110,7 +111,6 @@ private:
 
     VirtualVoltageCurrentSensor* voltageCurrentSensor;
     VirtualAnalogSensor* analogSensor;
-    VirtualServo* servo;
 
     bool initialized = false;
 };

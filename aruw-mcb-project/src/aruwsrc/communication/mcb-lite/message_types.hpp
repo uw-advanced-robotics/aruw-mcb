@@ -181,7 +181,7 @@ struct AnalogSensorMessage
 
 } modm_packed;
 
-// Servo messages Lite -> MCB
+// Servo messages MCB -> Lite
 struct ServoTargetMessage {
     tap::gpio::Pwm::Pin pin;
     float target;
@@ -192,7 +192,7 @@ struct ServoRampMessage {
     float rampSpeed;
 } modm_packed;
 
-// Servo Messages MCB -> Lite
+// Servo Messages Lite -> MCB
 struct ServoFeedbackMessage {
     tap::gpio::Pwm::Pin pin;
     float currentPwm;
