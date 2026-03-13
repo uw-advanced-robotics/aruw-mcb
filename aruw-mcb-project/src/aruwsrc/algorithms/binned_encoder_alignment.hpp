@@ -17,26 +17,36 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cmath>
+#include <numeric>
 
 #include "modm/math/geometry.hpp"
 
 namespace algorithms::binnedAlignment
 {
-float calculatePosition(
-    float localEncoderPosition,
-    float globalEncoderPosition,
-    float gearRatioNumerator,
-    float gearRatioDenominator,
-    float localOffset)
-
+struct Ratio
 {
-    const float r = gearRatioNumerator / gearRatioDenominator;
+    uint32_t num;
+    uint32_t den;
+
+    constexpr Ratio(uint32_t n, uint32_t d)
+    {
+        const uint32_t common = std::gcd(n, d);
+        num = n / common;
+        den = d / common;
+    }
+};
+template <uint32_t NUM, uint32_t DEN>
+float calculatePosition(float localEncoderPosition, float globalEncoderPosition, float localOffset)
+{
+    const Ratio ratio(NUM, DEN);
+
+    const float r = static_cast<float>(ratio.num) / ratio.den;
 
     const float position = localEncoderPosition * r + localOffset +
                            std::round(
                                (globalEncoderPosition - localEncoderPosition * r - localOffset) /
-                               (M_TWOPI / gearRatioDenominator)) *
-                               (M_TWOPI / gearRatioDenominator);
+                               (M_TWOPI / static_cast<float>(ratio.den))) *
+                               (M_TWOPI / static_cast<float>(ratio.den));
 
     return position;
 }
