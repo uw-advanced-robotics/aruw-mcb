@@ -67,11 +67,11 @@ public:
      */
     CycleStateCommandMapping(
         tap::Drivers *drivers,
-        const tap::control::GenericRemoteMapState *rms,
+        const tap::control::RemoteMapState *rms,
         T initialState,
         C *stateChangeObject,
         StateChangedFn stateChangedFn,
-        std::optional<tap::control::GenericRemoteMapState> reverseMapState = std::nullopt)
+        std::optional<tap::control::RemoteMapState> reverseMapState = std::nullopt)
         : tap::control::CommandMapping(drivers, {}, rms),
           state(initialState),
           stateChangeObject(stateChangeObject),
@@ -123,7 +123,7 @@ protected:
     T state;
     C *stateChangeObject;
     StateChangedFn stateChangedFn;
-    std::optional<tap::control::GenericRemoteMapState> reverseMapState;
+    std::optional<tap::control::RemoteMapState> reverseMapState;
 };
 }  // namespace aruwsrc::control
 

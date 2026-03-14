@@ -16,10 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "tap/drivers.hpp"
+#include "tap/control/remote_map_state.hpp"
 
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 
@@ -45,7 +47,9 @@ class CycleStateCommandMappingTest : public Test
 {
 protected:
     CycleStateCommandMappingTest()
-        : cmdMapping(
+        : rms(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+          reverseRMS(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+          cmdMapping(
               &drivers,
               &rms,
               TestCycleClass::STATE_1,
@@ -53,19 +57,13 @@ protected:
               &TestCycleClass::increment,
               reverseRMS)
     {
-        rms.initKeys({Remote::Key::Q});
-        reverseRMS.initKeys({Remote::Key::E});
-        nonMatchingRMS.initKeys({Remote::Key::R});
     }
 
     tap::Drivers drivers;
-
-    tap::control::GenericRemoteMapState rms;
-    tap::control::GenericRemoteMapState reverseRMS;
-    tap::control::GenericRemoteMapState nonMatchingRMS;
-
+    tap::control::RemoteMapState rms;
+    tap::control::RemoteMapState reverseRMS;
+    tap::control::RemoteMapState nonMatchingRMS;
     TestCycleClass testCycleClass;
-
     CycleStateCommandMapping<
         TestCycleClass::SpecialState,
         TestCycleClass::MAX_STATES,
@@ -76,17 +74,14 @@ protected:
 TEST_F(CycleStateCommandMappingTest, executeCommandMapping_state_matches)
 {
     InSequence seq;
-
     EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_2));
     EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_3));
     EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_1));
 
     cmdMapping.executeCommandMapping(rms);
     cmdMapping.executeCommandMapping(nonMatchingRMS);
-
     cmdMapping.executeCommandMapping(rms);
     cmdMapping.executeCommandMapping(nonMatchingRMS);
-
     cmdMapping.executeCommandMapping(rms);
 }
 
@@ -113,7 +108,6 @@ TEST_F(
 TEST_F(CycleStateCommandMappingTest, executeCommandMapping_reverse_state_matches)
 {
     InSequence seq;
-
     EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_3));
     EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_2));
     EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_1));
@@ -121,12 +115,9 @@ TEST_F(CycleStateCommandMappingTest, executeCommandMapping_reverse_state_matches
 
     cmdMapping.executeCommandMapping(reverseRMS);
     cmdMapping.executeCommandMapping(nonMatchingRMS);
-
     cmdMapping.executeCommandMapping(reverseRMS);
     cmdMapping.executeCommandMapping(nonMatchingRMS);
-
     cmdMapping.executeCommandMapping(reverseRMS);
     cmdMapping.executeCommandMapping(nonMatchingRMS);
-
     cmdMapping.executeCommandMapping(reverseRMS);
 }
