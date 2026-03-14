@@ -30,10 +30,12 @@ namespace aruwsrc::engineer::wrist
 {
 struct Setpoint
 {
-    float pitch;
-    float yaw;
-    float epsilonPitch;
-    float epsilonYaw;
+    float theta1;
+    float theta2;
+    float theta3;
+    float epsilonTheta1;
+    float epsilonTheta2;
+    float epsilonTheta3;
 };
 
 class WristSetpointsCommand : public tap::control::Command

@@ -45,9 +45,9 @@ public:
     virtual float getChassisRInput() override;
 
     /**
-     * @return The cube lift velocity.
+     * @return The cube storage velocity.
      */
-    mockable float getCubeLiftVelocity();
+    mockable float getCubeStorageVelocity();
 
     /**
      * @return The gantry lift velocity
@@ -96,6 +96,11 @@ public:
      * control mode.
      */
     bool isGantryWristControlMode();
+
+    /**
+     * @return whether or not the control switch is set to cube storage control mode.
+     */
+    bool isCubeStorageControlMode();
 
 private:
     tap::Drivers *drivers;

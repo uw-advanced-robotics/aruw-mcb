@@ -57,15 +57,15 @@ protected:
               false),
           frictionWheels(
               &drivers,
-              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
+              std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
               WHEEL_CONFIGS_ARRAY,
-              nullptr),
+              LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT),
           tripleFrictionWheels(
               &drivers,
-              std::array<NiceMock<tap::mock::DjiMotorMock>*, 3>{
+              std::array<tap::motor::MotorInterface*, 3>{
                   {&leftFlywheel, &rightFlywheel, &thirdFlywheel}},
-              WHEEL_CONFIG,  // added benefit of testing both constructors for us
-              nullptr)
+              WHEEL_CONFIG,
+              LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT)
     {
     }
 
@@ -95,10 +95,10 @@ TEST_F(FrictionWheelSubsystemTest, endingHardwareTestCommand__sets_desired_speed
 
 TEST_F(FrictionWheelSubsystemTest, refresh__0_output_when_desired_speed_0_shaft_rpm_0)
 {
-    ON_CALL(frictionWheels.wheels[0]->getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
-    EXPECT_CALL(*frictionWheels.wheels[0], setDesiredOutput(0)).Times(2);
-    ON_CALL(frictionWheels.wheels[1]->getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
-    EXPECT_CALL(*frictionWheels.wheels[1], setDesiredOutput(0)).Times(2);
+    ON_CALL(leftFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(leftFlywheel, setDesiredOutput(0)).Times(2);
+    ON_CALL(rightFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(rightFlywheel, setDesiredOutput(0)).Times(2);
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
 
     clock.time = 0;
@@ -114,10 +114,10 @@ TEST_F(FrictionWheelSubsystemTest, refresh__0_output_when_desired_speed_0_shaft_
 
 TEST_F(FrictionWheelSubsystemTest, refresh__positive_output_when_desired_speed_10_shaft_rpm_0)
 {
-    ON_CALL(frictionWheels.wheels[0]->getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
-    EXPECT_CALL(*frictionWheels.wheels[0], setDesiredOutput(Gt(0)));
-    ON_CALL(frictionWheels.wheels[1]->getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
-    EXPECT_CALL(*frictionWheels.wheels[1], setDesiredOutput(Gt(0)));
+    ON_CALL(leftFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(leftFlywheel, setDesiredOutput(Gt(0)));
+    ON_CALL(rightFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(rightFlywheel, setDesiredOutput(Gt(0)));
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
 
     frictionWheels.setDesiredLaunchSpeed(10);
@@ -131,12 +131,10 @@ TEST_F(FrictionWheelSubsystemTest, refresh__positive_output_when_desired_speed_1
 
 TEST_F(FrictionWheelSubsystemTest, refresh__negative_output_when_desired_speed_0_shaft_rpm_negative)
 {
-    ON_CALL(frictionWheels.wheels[0]->getInternalEncoder(), getShaftRPM)
-        .WillByDefault(Return(1000));
-    EXPECT_CALL(*frictionWheels.wheels[0], setDesiredOutput(Lt(0)));
-    ON_CALL(frictionWheels.wheels[1]->getInternalEncoder(), getShaftRPM)
-        .WillByDefault(Return(1000));
-    EXPECT_CALL(*frictionWheels.wheels[1], setDesiredOutput(Lt(0)));
+    ON_CALL(leftFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
+    EXPECT_CALL(leftFlywheel, setDesiredOutput(Lt(0)));
+    ON_CALL(rightFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(1000));
+    EXPECT_CALL(rightFlywheel, setDesiredOutput(Lt(0)));
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
 
     clock.time = 0;
@@ -157,7 +155,7 @@ TEST_F(FrictionWheelSubsystemTest, refresh_updates_desiredRpmRamp_when_target_no
 
     uint32_t time = 0;
     clock.time = time;
-    float prevRpmTarget = frictionWheels.desiredRpmRamp.getValue();
+    float prevRpmTarget = frictionWheels.getDesiredRpmRamp().getValue();
 
     for (int i = 0; i < 1000; i++)
     {
@@ -165,10 +163,10 @@ TEST_F(FrictionWheelSubsystemTest, refresh_updates_desiredRpmRamp_when_target_no
         clock.time = time;
         frictionWheels.refresh();
 
-        if (!frictionWheels.desiredRpmRamp.isTargetReached())
+        if (!frictionWheels.getDesiredRpmRamp().isTargetReached())
         {
-            EXPECT_NE(prevRpmTarget, frictionWheels.desiredRpmRamp.getValue());
-            prevRpmTarget = frictionWheels.desiredRpmRamp.getValue();
+            EXPECT_NE(prevRpmTarget, frictionWheels.getDesiredRpmRamp().getValue());
+            prevRpmTarget = frictionWheels.getDesiredRpmRamp().getValue();
         }
     }
 }
@@ -181,7 +179,7 @@ TEST_F(
     {
         const auto& tuple = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[i];
         frictionWheels.setDesiredLaunchSpeed(tuple.first);
-        EXPECT_NEAR(frictionWheels.desiredRpmRamp.getTarget(), tuple.second, 1E-3);
+        EXPECT_NEAR(frictionWheels.getDesiredRpmRamp().getTarget(), tuple.second, 1E-3);
     }
 }
 
@@ -200,7 +198,7 @@ TEST_F(
         float middleRpm = (firstTuple.second + secondTuple.second) / 2.0f;
 
         frictionWheels.setDesiredLaunchSpeed(middleSpeed);
-        EXPECT_NEAR(frictionWheels.desiredRpmRamp.getTarget(), middleRpm, 1E-1);
+        EXPECT_NEAR(frictionWheels.getDesiredRpmRamp().getTarget(), middleRpm, 1E-1);
     }
 }
 
@@ -208,7 +206,7 @@ TEST_F(FrictionWheelSubsystemTest, setDesiredLaunchSpeed__negative_launch_speed_
 {
     frictionWheels.setDesiredLaunchSpeed(-100);
 
-    EXPECT_EQ(0, frictionWheels.desiredRpmRamp.getTarget());
+    EXPECT_EQ(0, frictionWheels.getDesiredRpmRamp().getTarget());
 }
 
 TEST_F(
@@ -220,18 +218,18 @@ TEST_F(
 
     frictionWheels.setDesiredLaunchSpeed(tuple.first + 10);
 
-    EXPECT_EQ(tuple.second, frictionWheels.desiredRpmRamp.getTarget());
+    EXPECT_EQ(tuple.second, frictionWheels.getDesiredRpmRamp().getTarget());
 }
 
 TEST_F(
     FrictionWheelSubsystemTest,
     changeWheelVelocityState__wheel_zero_changed_to_zero_rpm_wheel_one_normal)
 {
-    ON_CALL(frictionWheels.wheels[0]->getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
-    EXPECT_CALL(*frictionWheels.wheels[0], setDesiredOutput(0)).Times(2);
-    ON_CALL(frictionWheels.wheels[1]->getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
-    EXPECT_CALL(*frictionWheels.wheels[1], setDesiredOutput(0));
-    EXPECT_CALL(*frictionWheels.wheels[1], setDesiredOutput(Gt(0)));  // wheel one positive movement
+    ON_CALL(leftFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(leftFlywheel, setDesiredOutput(0)).Times(2);
+    ON_CALL(rightFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(rightFlywheel, setDesiredOutput(0));
+    EXPECT_CALL(rightFlywheel, setDesiredOutput(Gt(0)));  // wheel one positive movement
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
 
     clock.time = 0;
@@ -251,14 +249,13 @@ TEST_F(
     FrictionWheelSubsystemTest,
     changeWheelVelocityState__wheel_zero_changed_to_negative_rpm_wheel_one_normal)
 {
-    ON_CALL(frictionWheels.wheels[0]->getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
-    EXPECT_CALL(*frictionWheels.wheels[0], setDesiredOutput(0));
-    EXPECT_CALL(
-        *frictionWheels.wheels[0],
-        setDesiredOutput(Lt(0)));  // wheel zero negative movement
-    ON_CALL(frictionWheels.wheels[1]->getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
-    EXPECT_CALL(*frictionWheels.wheels[1], setDesiredOutput(0));
-    EXPECT_CALL(*frictionWheels.wheels[1], setDesiredOutput(Gt(0)));  // wheel one positive movement
+    ON_CALL(leftFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(leftFlywheel, setDesiredOutput(0));
+    EXPECT_CALL(leftFlywheel,
+                setDesiredOutput(Lt(0)));  // wheel zero negative movement
+    ON_CALL(rightFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(rightFlywheel, setDesiredOutput(0));
+    EXPECT_CALL(rightFlywheel, setDesiredOutput(Gt(0)));  // wheel one positive movement
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
 
     clock.time = 0;
@@ -276,18 +273,15 @@ TEST_F(
 
 TEST_F(FrictionWheelSubsystemTest, modularFlywheel_triple_wheel_movement)
 {
-    ON_CALL(tripleFrictionWheels.wheels[0]->getInternalEncoder(), getShaftRPM)
-        .WillByDefault(Return(0));
-    EXPECT_CALL(*tripleFrictionWheels.wheels[0], setDesiredOutput(0));
-    EXPECT_CALL(*tripleFrictionWheels.wheels[0], setDesiredOutput(Gt(0)));
-    ON_CALL(tripleFrictionWheels.wheels[1]->getInternalEncoder(), getShaftRPM)
-        .WillByDefault(Return(0));
-    EXPECT_CALL(*tripleFrictionWheels.wheels[1], setDesiredOutput(0));
-    EXPECT_CALL(*tripleFrictionWheels.wheels[1], setDesiredOutput(Gt(0)));
-    ON_CALL(tripleFrictionWheels.wheels[2]->getInternalEncoder(), getShaftRPM)
-        .WillByDefault(Return(0));
-    EXPECT_CALL(*tripleFrictionWheels.wheels[2], setDesiredOutput(0));
-    EXPECT_CALL(*tripleFrictionWheels.wheels[2], setDesiredOutput(Gt(0)));
+    ON_CALL(leftFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(leftFlywheel, setDesiredOutput(0));
+    EXPECT_CALL(leftFlywheel, setDesiredOutput(Gt(0)));
+    ON_CALL(rightFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(rightFlywheel, setDesiredOutput(0));
+    EXPECT_CALL(rightFlywheel, setDesiredOutput(Gt(0)));
+    ON_CALL(rightFlywheel.getInternalEncoder(), getShaftRPM).WillByDefault(Return(0));
+    EXPECT_CALL(thirdFlywheel, setDesiredOutput(0));
+    EXPECT_CALL(thirdFlywheel, setDesiredOutput(Gt(0)));
     ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(ROBOT_DATA));
 
     clock.time = 0;

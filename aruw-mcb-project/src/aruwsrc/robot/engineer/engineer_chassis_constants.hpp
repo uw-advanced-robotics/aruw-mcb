@@ -33,6 +33,14 @@
 
 namespace aruwsrc::control::chassis
 {
+// Initial position of the chassis in the field (meters)
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;  // TODO: find initial position of chassis
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;  // TODO: find initial position of chassis
+
+// Initial orientation of the chassis in the field (radians)
+static constexpr float INITIAL_CHASSIS_ORIENTATION =
+    0.0f;  // TODO: find initial orientation of chassis
+
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  *
@@ -107,6 +115,24 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  */
 static constexpr float WHEEL_RADIUS = 0.076f;
 /**
+ * Radius of the deadwheels (m)
+ */
+static constexpr float DEADWHEEL_RADIUS = 0.0f;  // TODO: measue radius of deadwheels.
+/**
+ * Distance from the center axis of the robot to each deadwheel (m)
+ */
+static constexpr float parallelOneCenterToWheelDistance =
+    0.0f;  // TODO: measure distance from center to parallel deadwheel one.
+static constexpr float parallelTwoCenterToWheelDistance =
+    0.0f;  // TODO: measure distance from center to odomFrameToRobotFrame deadwheel two.
+static constexpr float perpendicularCenterToWheelDistance =
+    0.0f;  // TODO: measure distance from center to the perpendiculatr deadwheel.
+/**
+ * Relative orientation of dead wheels (rad)
+ */
+static constexpr float odomFrameToRobotFrame =
+    0.0f;  // TODO: measure distance from center to deadwheel one.
+/**
  * Distance from center of the two front wheels (m)
  */
 static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
@@ -115,7 +141,7 @@ static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
  */
 static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
 
-static constexpr float WHEELBASE_HYPOTENUSE = 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+static constexpr float WHEELBASE_RADIUS = 0.46f;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.

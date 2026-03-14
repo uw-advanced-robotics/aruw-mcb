@@ -63,23 +63,6 @@ public:
                leftBackMotor.isMotorOnline() && rightBackMotor.isMotorOnline();
     }
 
-    virtual inline float getLeftFrontRpmActual() const
-    {
-        return leftFrontMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
-    }
-    virtual inline float getLeftBackRpmActual() const
-    {
-        return leftBackMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
-    }
-    virtual inline float getRightFrontRpmActual() const
-    {
-        return rightFrontMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
-    }
-    virtual inline float getRightBackRpmActual() const
-    {
-        return rightBackMotor.getEncoder()->getVelocity() / M_TWOPI * 60.f;
-    }
-
     inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
 
     void initialize() override;

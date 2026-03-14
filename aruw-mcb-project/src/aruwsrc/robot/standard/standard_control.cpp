@@ -36,8 +36,10 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
-#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
+#
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
@@ -129,6 +131,9 @@ using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::standard;
+
+// for fake sentry
+// using namespace aruwsrc::sentry::chassis;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -225,6 +230,8 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     rightFrontChassisMotor,
     rightBackChassisMotor,
     aruwsrc::control::chassis::WHEEL_VELOCITY_PID_CONFIG,
+    aruwsrc::control::chassis::WHEEL_RADIUS,
+    aruwsrc::control::chassis::WHEELBASE_RADIUS,
     &drivers()->capacitorBank);
 
 tap::encoder::CanEncoder parallelOmni(
@@ -251,7 +258,10 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
+StandardAnderHeroTransformerSubsystem transformSubsystem(
+    *drivers(),
+    transformer,
+    &drivers()->rttTelemetry);
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
@@ -281,8 +291,9 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
-        &getTurretMCBCanComm(),
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+        aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+        aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
 aruwsrc::control::launcher::FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
 aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor =
@@ -642,6 +653,7 @@ HoldRepeatCommandMapping rightSwitchMiddle(
     {&spinFrictionWheels},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
     true);
+
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
     {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
@@ -653,6 +665,7 @@ HoldRepeatCommandMapping leftSwitchDown(
     {&beybladeCommand},
     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
     true);
+
 HoldCommandMapping leftSwitchUp(
     drivers(),
     {&turretCVCommand, &chassisDriveCommand},

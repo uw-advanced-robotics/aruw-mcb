@@ -71,7 +71,9 @@ protected:
               lbm,
               rfm,
               rbm,
-              MOCK_WHEEL_VELOCITY_PID_CONFIG),
+              MOCK_WHEEL_VELOCITY_PID_CONFIG,
+              WHEEL_RADIUS,
+              WHEELBASE_RADIUS),
           controlOperatorInterface(&drivers),
           robotData{}
     {

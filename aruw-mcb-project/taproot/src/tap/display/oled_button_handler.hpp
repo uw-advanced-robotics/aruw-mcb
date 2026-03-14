@@ -27,6 +27,8 @@
 #include "modm/math/filter/debounce.hpp"
 #include "modm/ui/menu/view_stack.hpp"
 
+#include "tap/communication/gpio/analog.hpp"
+
 namespace tap
 {
 class Drivers;
@@ -62,7 +64,9 @@ public:
     };
 
     // Constructor for setting custom ADC button values
-    OledButtonHandler(tap::Drivers *drivers, const AnalogConfig analogConfig = DEFAULT_ADC_CONFIG);
+    OledButtonHandler(tap::Drivers *drivers,
+        const tap::gpio::Analog::Pin pin = tap::gpio::Analog::Pin::OledJoystick,
+        const AnalogConfig analogConfig = DEFAULT_ADC_CONFIG);
 
     /**
      * Updates the status of the current button and returns the updated button.
@@ -93,6 +97,7 @@ private:
     modm::filter::Debounce<int> rightButtonPressed;
     modm::filter::Debounce<int> okButtonPressed;
 
+    const tap::gpio::Analog::Pin pin;
     const struct AnalogConfig adcConfig;
 };  // class OledButtonHandler
 }  // namespace display

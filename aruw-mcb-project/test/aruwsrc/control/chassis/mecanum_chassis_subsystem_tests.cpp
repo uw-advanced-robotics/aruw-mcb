@@ -41,10 +41,8 @@ static constexpr float WHEEL_VEL = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 3.
 // translational chassis velocity in m/s, if WHEEL_VEL velocity commanded in X or Y direction
 static constexpr float CHASSIS_VEL = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS;
 // rotational chassis velocity in rad/s, if WHEEL_VEL velocity commanded in R direction
-static constexpr float A = (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-                               ? 1
-                               : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
-static constexpr float CHASSIS_VEL_R = WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS / ::A;
+static constexpr float CHASSIS_VEL_R =
+    WHEEL_VEL * WHEEL_VEL_RPM_TO_MPS * WHEEL_RADIUS / WHEELBASE_RADIUS;
 
 static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 1,
@@ -77,7 +75,9 @@ protected:
               leftBackMotor,
               rightFrontMotor,
               rightBackMotor,
-              MOCK_WHEEL_VELOCITY_PID_CONFIG)
+              MOCK_WHEEL_VELOCITY_PID_CONFIG,
+              WHEEL_RADIUS,
+              WHEELBASE_RADIUS)
     {
     }
 

@@ -26,8 +26,10 @@
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/interpolate.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"
 
 namespace aruwsrc::control::chassis
 {
@@ -46,13 +48,20 @@ public:
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
-        const Transform& worldToChassis,
-        const aruwsrc::control::chassis::BeybladeConfig beybladeConfig)
+        aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer,
+        const aruwsrc::control::chassis::BeybladeConfig beybladeConfig,
+        aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
+        float translationalMotionThreshold,
+        float capbankEnergyThreshold)
         : chassis(chassis),
           lastSetPoint(Position(-1, -1, 0)),
           drivers(drivers),
-          worldToChassis(worldToChassis),
-          beybladeConfig(beybladeConfig)
+          transformer(transformer),
+          beybladeConfig(beybladeConfig),
+          capBankSubsystem(capBankSubsystem),
+          translationalMotionThreshold(translationalMotionThreshold),
+          capbankEnergyThreshold(capbankEnergyThreshold)
+
     {
     }
 
@@ -79,7 +88,7 @@ private:
     Position lastSetPoint;
     tap::Drivers& drivers;
 
-    const Transform& worldToChassis;
+    const aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer;
 
     aruwsrc::control::chassis::BeybladeConfig beybladeConfig;
 
@@ -87,7 +96,12 @@ private:
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp;
 
+    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
+
     float desiredSpeed = 0;
+
+    const float translationalMotionThreshold;
+    const float capbankEnergyThreshold;
 };
 }  // namespace aruwsrc::control::chassis
 

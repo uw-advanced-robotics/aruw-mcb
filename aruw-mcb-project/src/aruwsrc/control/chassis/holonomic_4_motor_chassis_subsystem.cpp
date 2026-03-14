@@ -76,13 +76,15 @@ void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r
             drivers->refSerial.getRefSerialReceivingData(),
             HolonomicChassisSubsystem::getChassisPowerLimit(drivers)));
 }
-
+modm::Matrix<float, 3, 1> state;
 void Holonomic4MotorChassisSubsystem::refresh()
 {
     for (int i = 0; i < getNumChassisMotors(); i++)
     {
         updateMotorRpmPid(i);
     }
+
+    state = getActualVelocityChassisRelative();
 
     limitChassisPower();
 }
@@ -132,8 +134,7 @@ void Holonomic4MotorChassisSubsystem::calculateOutput(
     float maxWheelSpeed)
 {
     // this is the distance between the center of the chassis to the wheel
-    float chassisRotationRatio = sqrtf(
-        powf(WIDTH_BETWEEN_WHEELS_X / 2.0f, 2.0f) + powf(WIDTH_BETWEEN_WHEELS_Y / 2.0f, 2.0f));
+    float chassisRotationRatio = WHEELBASE_RADIUS;
 
     // to take into account the location of the turret so we rotate around the turret rather
     // than the center of the chassis, we calculate the offset and than multiply however

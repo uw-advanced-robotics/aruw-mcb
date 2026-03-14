@@ -24,6 +24,7 @@
 
 #include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 
@@ -40,15 +41,15 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), controlOperatorInterface(this) {}
-
+    Drivers() : tap::Drivers(), controlOperatorInterface(this), rttTelemetry(this) {}
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
 #else
+
 public:
     control::dart::DartControlOperatorInterface controlOperatorInterface;
-
+    communication::rtt::RttTelemetry rttTelemetry;
 #endif
 };  // class aruwsrc::DartDrivers
 }  // namespace aruwsrc::dart

@@ -49,6 +49,8 @@ public:
         Motor& rightFrontMotor,
         Motor& rightBackMotor,
         tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+        float wheelRadius,
+        float wheelbaseRadius,
         communication::can::cap_bank::CapacitorBank* capacitorBank = nullptr);
 };
 

@@ -84,6 +84,8 @@ public:
 
     void setUpperBound(float upperBound);
 
+    bool isReady() { return true; };
+
 protected:
     float debug_position, error, motorDesiredOutput;
     tap::algorithms::Ramp setpoint;

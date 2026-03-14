@@ -40,6 +40,8 @@ XDriveChassisSubsystem::XDriveChassisSubsystem(
     Motor& rightFrontMotor,
     Motor& rightBackMotor,
     tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
+    float wheelRadius,
+    float wheelbaseRadius,
     communication::can::cap_bank::CapacitorBank* capacitorBank)
     : Holonomic4MotorChassisSubsystem(
           drivers,
@@ -52,19 +54,19 @@ XDriveChassisSubsystem::XDriveChassisSubsystem(
           wheelVelocityPidConfig,
           capacitorBank)
 {
-    wheelVelToChassisVelMat[X][LF] = 1;
-    wheelVelToChassisVelMat[X][RF] = -1;
-    wheelVelToChassisVelMat[X][LB] = 1;
-    wheelVelToChassisVelMat[X][RB] = -1;
-    wheelVelToChassisVelMat[Y][LF] = -1;
-    wheelVelToChassisVelMat[Y][RF] = -1;
-    wheelVelToChassisVelMat[Y][LB] = 1;
-    wheelVelToChassisVelMat[Y][RB] = 1;
-    wheelVelToChassisVelMat[R][LF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][LB] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RB] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
+    wheelVelToChassisVelMat[X][LF] = M_SQRT2;
+    wheelVelToChassisVelMat[X][RF] = -M_SQRT2;
+    wheelVelToChassisVelMat[X][LB] = M_SQRT2;
+    wheelVelToChassisVelMat[X][RB] = -M_SQRT2;
+    wheelVelToChassisVelMat[Y][LF] = -M_SQRT2;
+    wheelVelToChassisVelMat[Y][RF] = -M_SQRT2;
+    wheelVelToChassisVelMat[Y][LB] = M_SQRT2;
+    wheelVelToChassisVelMat[Y][RB] = M_SQRT2;
+    wheelVelToChassisVelMat[R][LF] = -1.0 / wheelbaseRadius;
+    wheelVelToChassisVelMat[R][RF] = -1.0 / wheelbaseRadius;
+    wheelVelToChassisVelMat[R][LB] = -1.0 / wheelbaseRadius;
+    wheelVelToChassisVelMat[R][RB] = -1.0 / wheelbaseRadius;
+    wheelVelToChassisVelMat *= (wheelRadius / 4);
 }
 
 }  // namespace aruwsrc::control::chassis

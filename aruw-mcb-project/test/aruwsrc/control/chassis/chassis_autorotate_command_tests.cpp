@@ -69,7 +69,9 @@ protected:
               lbm,
               rfm,
               rbm,
-              MOCK_WHEEL_VELOCITY_PID_CONFIG),
+              MOCK_WHEEL_VELOCITY_PID_CONFIG,
+              WHEEL_RADIUS,
+              WHEELBASE_RADIUS),
           turret(&drivers),
           controlOperatorInterface(&drivers),
           turretConfig{0, 0, 0, M_PI, false}
