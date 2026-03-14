@@ -47,7 +47,7 @@ protected:
     CycleStateCommandMappingTest()
         : cmdMapping(
               &drivers,
-              rms,
+              &rms,
               TestCycleClass::STATE_1,
               &testCycleClass,
               &TestCycleClass::increment,
