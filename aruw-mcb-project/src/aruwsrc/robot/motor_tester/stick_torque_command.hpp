@@ -27,7 +27,8 @@ public:
     }
 
     void execute() override
-    {
+    {   
+        channelValue = drivers->remote.getChannel(channel);
         motorSubsystem->setDesiredOutput(drivers->remote.getChannel(channel) * sensitivity * tap::motor::DjiMotor::MAX_OUTPUT_C620);
     }
 
@@ -40,6 +41,7 @@ private:
     tap::Drivers* drivers;
     tap::communication::serial::Remote::Channel channel;
     MotorSubsystem* motorSubsystem;
+    float channelValue;
     float sensitivity;
 };
 }
