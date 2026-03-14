@@ -23,11 +23,17 @@
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "tap/communication/serial/remote.hpp"
+#include "tap/drivers.hpp"
+
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_constants.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
+
+#include "motor_tester_subsystem.hpp"
+#include "stick_torque_command.hpp"
 
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;
@@ -45,6 +51,25 @@ namespace motor_tester_control
 {
 
 // motors, subsystems, commands, etc.
+tap::motor::DjiMotor motor(
+    drivers(),
+    tap::motor::MotorId::MOTOR1, //prob need to change this
+    tap::can::CanBus::CAN_BUS1, //idk if this needs to change
+    false, //isInverted
+    "Motor1" //name
+);
+
+tap::algorithms::SmoothPidConfig pidConfig = aruwsrc::motor_tester::constants::gm6020VelocityPidConfig; //need to tune PID
+
+MotorSubsystem motorSubsystem(drivers(), motor, pidConfig);
+
+StickTorqueCommand stickTorqueCommand(
+    drivers(),
+    tap::communication::serial::Remote::Channel::RIGHT_VERTICAL, 
+    &motorSubsystem,
+    0.5f //sensitivity
+);
+
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -58,6 +83,8 @@ void registerSubsystems(Drivers* drivers)
 }
 
 void registerIoMappings(Drivers* drivers) {}
+
+
 
 }  // namespace motor_tester_control
 
