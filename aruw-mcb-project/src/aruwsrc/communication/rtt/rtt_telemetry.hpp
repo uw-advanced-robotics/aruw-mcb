@@ -24,7 +24,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <string>
 #include <type_traits>
 
 #include "tap/util_macros.hpp"
@@ -93,16 +92,13 @@ public:
     template <typename... Args>
     void println(const char* first, Args... rest)
     {
-        std::string msg;
-        msg.reserve(MAX_MESSAGE_SIZE);
-
-        auto append = [&](const char* s) {
-            if (s) msg += s;
-        };
+        char msg[MAX_MESSAGE_SIZE] = {0};
+        std::size_t msgLen = 0;
+        auto append = [&](const char* s) { appendString(msg, msgLen, sizeof(msg), s); };
 
         (append(first), ..., append(rest));
 
-        queuePrintMessage(msg.c_str());
+        queuePrintMessage(msg);
     }
 
     ConnectionState getConnectionState() const { return connectionState; }
@@ -144,16 +140,13 @@ protected:
     template <typename... Args>
     void logError(const char* first, Args... rest)
     {
-        std::string msg;
-        msg.reserve(MAX_MESSAGE_SIZE);
-
-        auto append = [&](const char* s) {
-            if (s) msg += s;
-        };
+        char msg[MAX_MESSAGE_SIZE] = {0};
+        std::size_t msgLen = 0;
+        auto append = [&](const char* s) { appendString(msg, msgLen, sizeof(msg), s); };
 
         (append(first), ..., append(rest));
 
-        queueErrorMessage(msg.c_str());
+        queueErrorMessage(msg);
     }
 
 #if !defined(ENV_UNIT_TESTS) || !defined(PLATFORM_HOSTED)
@@ -226,8 +219,27 @@ private:
      */
     void logHeartbeatInfo();
 
+    static void appendChar(char* out, std::size_t& outLen, std::size_t maxLen, char c)
+    {
+        if (out == nullptr || maxLen == 0) return;
+        if (outLen + 1 < maxLen)
+        {
+            out[outLen++] = c;
+            out[outLen] = '\0';
+        }
+    }
+
+    static void appendString(char* out, std::size_t& outLen, std::size_t maxLen, const char* s)
+    {
+        if (s == nullptr) return;
+        while (*s != '\0')
+        {
+            appendChar(out, outLen, maxLen, *s++);
+        }
+    }
+
     template <class T>
-    void append_json_value(std::string& out, const T& v)
+    void append_json_value(char* out, std::size_t& outLen, std::size_t maxLen, const T& v)
     {
         if constexpr (std::is_floating_point_v<T>)
         {
@@ -246,25 +258,31 @@ private:
             {
                 std::snprintf(buf, sizeof(buf), "%d.%03d", vq / 1000, vq % 1000);
             }
-            out += buf;
+            appendString(out, outLen, maxLen, buf);
         }
         else if constexpr (std::is_integral_v<T> && !std::is_same_v<T, bool>)
         {
-            out += std::to_string(static_cast<long long>(v));
+            char buf[32];
+            std::snprintf(buf, sizeof(buf), "%lld", static_cast<long long>(v));
+            appendString(out, outLen, maxLen, buf);
         }
         else if constexpr (std::is_same_v<T, bool>)
         {
-            out += (v ? "true" : "false");
+            appendString(out, outLen, maxLen, (v ? "true" : "false"));
         }
         else if constexpr (std::is_convertible_v<T, const char*>)
         {
-            out += '"';
-            for (const char* p = static_cast<const char*>(v); *p; ++p)
+            appendChar(out, outLen, maxLen, '"');
+            const char* value = v;
+            if (value != nullptr)
             {
-                if (*p == '"' || *p == '\\') out += '\\';
-                out += *p;
+                for (const char* p = value; *p; ++p)
+                {
+                    if (*p == '"' || *p == '\\') appendChar(out, outLen, maxLen, '\\');
+                    appendChar(out, outLen, maxLen, *p);
+                }
             }
-            out += '"';
+            appendChar(out, outLen, maxLen, '"');
         }
         else
         {
@@ -275,31 +293,35 @@ private:
     template <typename T>
     void emit_scalar_json_and_queue(const char* label, const T& v)
     {
-        std::string msg;
-        msg.reserve(64);
-        msg += "\"";
-        msg += label;
-        msg += "\":";
-        append_json_value(msg, v);
-        queueMessage(msg.c_str());
+        char msg[MAX_MESSAGE_SIZE] = {0};
+        std::size_t msgLen = 0;
+
+        appendChar(msg, msgLen, sizeof(msg), '"');
+        appendString(msg, msgLen, sizeof(msg), label);
+        appendString(msg, msgLen, sizeof(msg), "\":");
+        append_json_value(msg, msgLen, sizeof(msg), v);
+
+        queueMessage(msg);
     }
 
     template <typename T, size_t N>
     void emit_array_json_and_queue(const char* label, const T (&arr)[N])
     {
-        std::string msg;
-        msg.reserve(32 + N * 16);
-        msg += "\"";
-        msg += label;
-        msg += "\":[";
+        char msg[MAX_MESSAGE_SIZE] = {0};
+        std::size_t msgLen = 0;
+
+        appendChar(msg, msgLen, sizeof(msg), '"');
+        appendString(msg, msgLen, sizeof(msg), label);
+        appendString(msg, msgLen, sizeof(msg), "\":[");
 
         for (size_t i = 0; i < N; ++i)
         {
-            if (i) msg += ',';
-            append_json_value(msg, arr[i]);
+            if (i) appendChar(msg, msgLen, sizeof(msg), ',');
+            append_json_value(msg, msgLen, sizeof(msg), arr[i]);
         }
-        msg += "]";
-        queueMessage(msg.c_str());
+        appendChar(msg, msgLen, sizeof(msg), ']');
+
+        queueMessage(msg);
     }
 
     /**
