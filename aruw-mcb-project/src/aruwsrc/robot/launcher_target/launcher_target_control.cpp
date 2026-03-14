@@ -18,10 +18,12 @@
  */
 
 #if defined(TARGET_LAUNCHER_TARGET)
+#include <memory>
 
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -84,15 +86,18 @@ TerminalMovingTargetCommand terminalMovingTargetCommand(&motorSubsystem2006);
 // ------------------
 // command mappings
 // ------------------
-tap::control::PressCommandMapping leftUp(
+auto leftUpRms = tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
+auto leftUp = std::make_unique<tap::control::PressCommandMapping>(
     drivers(),
-    {&randomMovingTargetCommand},
-    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    std::vector<tap::control::Command*>{&randomMovingTargetCommand},
+    &leftUpRms);
 
-tap::control::PressCommandMapping leftDown(
+auto leftDownRms =
+    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
+auto leftDown = std::make_unique<tap::control::PressCommandMapping>(
     drivers(),
-    {&terminalMovingTargetCommand},
-    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+    std::vector<tap::control::Command*>{&terminalMovingTargetCommand},
+    &leftDownRms);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -115,8 +120,8 @@ void registerSubsystems(Drivers* drivers)
 void registerIoMappings(Drivers* drivers)
 {
     motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
-    drivers->commandMapper.addMap(&leftUp);
-    drivers->commandMapper.addMap(&leftDown);
+    drivers->commandMapper.addMap(std::move(leftUp));
+    drivers->commandMapper.addMap(std::move(leftDown));
 }
 }  // namespace launcher_target_control
 

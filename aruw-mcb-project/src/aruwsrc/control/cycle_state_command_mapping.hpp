@@ -67,12 +67,12 @@ public:
      */
     CycleStateCommandMapping(
         tap::Drivers *drivers,
-        const tap::control::GenericRemoteMapState &rms,
+        const tap::control::GenericRemoteMapState *rms,
         T initialState,
         C *stateChangeObject,
         StateChangedFn stateChangedFn,
         std::optional<tap::control::GenericRemoteMapState> reverseMapState = std::nullopt)
-        : tap::control::CommandMapping(drivers, {}, &rms),
+        : tap::control::CommandMapping(drivers, {}, rms),
           state(initialState),
           stateChangeObject(stateChangeObject),
           stateChangedFn(stateChangedFn),

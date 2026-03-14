@@ -18,6 +18,7 @@
  */
 
 #if defined(TARGET_FLYWHEEL_TESTING)
+#include <memory>
 
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_mapper.hpp"
@@ -25,6 +26,7 @@
 #include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
@@ -142,14 +144,17 @@ MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_R
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
 /* define command mappings --------------------------------------------------*/
-HoldCommandMapping rightSwitchUp(
+auto rightUpRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP);
+auto rightSwitchUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&spinFrictionWheels},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-HoldRepeatCommandMapping leftSwitchUp(
+    std::vector<Command *>{&spinFrictionWheels},
+    &rightUpRms);
+
+auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
+auto leftSwitchUp = std::make_unique<HoldRepeatCommandMapping>(
     drivers(),
-    {&launchKicker},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+    std::vector<Command *>{&launchKicker},
+    &leftUpRms,
     false);
 
 // Safe disconnect function
@@ -178,8 +183,8 @@ void startFlywheelTestingCommands(Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerFlywheelTestingIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(std::move(rightSwitchUp));
+    drivers->commandMapper.addMap(std::move(leftSwitchUp));
 }
 }  // namespace flywheel_testing_control
 

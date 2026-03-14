@@ -669,9 +669,10 @@ Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
         .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
 
+auto rPressedRms = RemoteMapState({Remote::Key::R});
 auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
     drivers(),
-    RemoteMapState({Remote::Key::R}),
+    &rPressedRms,
     true,
     &cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
@@ -721,12 +722,13 @@ Trigger qPressed = TriggerHelpers::button(drivers(), Remote::Key::Q).toggleOnTru
 Trigger xPressed =
     TriggerHelpers::button(drivers(), Remote::Key::X).onTrue(&chassisAutorotateCommand);
 
+auto vPressedRms = RemoteMapState({Remote::Key::V});
 auto vPressed = std::make_unique<CycleStateCommandMapping<
     MultiShotCvCommandMapping::LaunchMode,
     MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
     MultiShotCvCommandMapping>>(
     drivers(),
-    RemoteMapState({Remote::Key::V}),
+    &vPressedRms,
     MultiShotCvCommandMapping::LIMITED_20HZ,
     &leftMousePressedBNotPressed,
     &MultiShotCvCommandMapping::setShooterState,
