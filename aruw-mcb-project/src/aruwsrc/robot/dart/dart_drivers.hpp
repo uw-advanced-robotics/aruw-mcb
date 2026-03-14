@@ -49,8 +49,8 @@ public:
 
 public:
     control::dart::DartControlOperatorInterface controlOperatorInterface;
-    communication::rtt::RttTelemetry rttTelemetry;
 #endif
+    communication::rtt::RttTelemetry rttTelemetry;
 };  // class aruwsrc::DartDrivers
 }  // namespace aruwsrc::dart
 
