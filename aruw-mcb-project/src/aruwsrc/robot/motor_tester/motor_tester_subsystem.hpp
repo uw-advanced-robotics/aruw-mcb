@@ -38,7 +38,7 @@ public:
         float motorPosition = motor.getEncoder()->getPosition().getUnwrappedValue();
         float positionError = desiredPosition - motorPosition;
 
-        desiredOutput = pid.runController(positionError, -motor.getEncoder()->getVelocity(), 0.002f);
+        //desiredOutput = pid.runController(positionError, -motor.getEncoder()->getVelocity(), 0.002f);
 
         motor.setDesiredOutput(desiredOutput);
     }
