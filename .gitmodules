@@ -2,7 +2,6 @@
 	path = taproot
 	url = https://gitlab.com/aruw/controls/taproot.git
 	branch = develop
-
 [submodule "taproot-scripts"]
 	path = taproot-scripts
 	url = https://gitlab.com/aruw/controls/taproot-scripts.git
