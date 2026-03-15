@@ -232,6 +232,8 @@ void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
     drivers->commandMapper.addMap(&closeServoMapping);
     drivers->commandMapper.addMap(&homePullbackMapping);
     drivers->commandMapper.addMap(&pullbackMapping);
+    //  TODO: uncomment when dart squad reassembles this, currently not attached and dont wanna risk
+    //  robot damage
     // drivers->commandMapper.addMap(&rightMidLeftDown);
     drivers->commandMapper.addMap(&homeYawMapping);
 }
