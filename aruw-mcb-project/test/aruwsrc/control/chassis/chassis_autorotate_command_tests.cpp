@@ -108,19 +108,30 @@ TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
 
     ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(false));
 
-    ON_CALL(controlOperatorInterface, getChassisXInput)
-        .WillByDefault(Return(std::get<0>(GetParam())));
-    ON_CALL(controlOperatorInterface, getChassisYInput)
-        .WillByDefault(Return(std::get<1>(GetParam())));
-    ON_CALL(controlOperatorInterface, getChassisRInput)
-        .WillByDefault(Return(std::get<2>(GetParam())));
+    // Get the raw requested inputs from the test parameters
+    float requestedX = std::get<0>(GetParam());
+    float requestedY = std::get<1>(GetParam());
+    float requestedR = std::get<2>(GetParam());
+
+    ON_CALL(controlOperatorInterface, getChassisXInput).WillByDefault(Return(requestedX));
+    ON_CALL(controlOperatorInterface, getChassisYInput).WillByDefault(Return(requestedY));
+    ON_CALL(controlOperatorInterface, getChassisRInput).WillByDefault(Return(requestedR));
+
+    // Get the max speed
+    float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+        drivers.refSerial.getRefSerialReceivingData(),
+        HolonomicChassisSubsystem::getChassisPowerLimit(&drivers));
+
+    float expectedX = tap::algorithms::limitVal(requestedX, -maxWheelSpeed, maxWheelSpeed);
+    float expectedY = tap::algorithms::limitVal(requestedY, -maxWheelSpeed, maxWheelSpeed);
+    float expectedR = requestedR;
 
     EXPECT_CALL(
         chassis,
         setDesiredOutput(
-            FloatNear(std::get<0>(GetParam()), 1E-3),
-            FloatNear(std::get<1>(GetParam()), 1E-3),
-            FloatNear(std::get<2>(GetParam()), 1E-3)));
+            FloatNear(expectedX, 1E-3),
+            FloatNear(expectedY, 1E-3),
+            FloatNear(expectedR, 1E-3)));
 
     cac.execute();
 }
