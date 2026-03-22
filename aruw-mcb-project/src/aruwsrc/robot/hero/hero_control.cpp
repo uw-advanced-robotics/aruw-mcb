@@ -222,7 +222,7 @@ VelocityAgitatorSubsystem kickerAgitator(
     constants::KICKER_PID_CONFIG,
     constants::KICKER_AGITATOR_CONFIG);
 
-VelocityAgitatorSubsystem waterwheelAgitator(
+VelocityAgitatorSubsystem carsonator(
     drivers(),
     constants::WATERWHEEL_PID_CONFIG,
     constants::WATERWHEEL_AGITATOR_CONFIG);
@@ -251,8 +251,7 @@ tap::motor::DjiMotor yawMotor(
     "Yaw Turret",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508,
-    0,
-    &yawEncoder);
+    0);
 HeroTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -488,21 +487,21 @@ FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 namespace waterwheel
 {
 MoveIntegralCommand rotateWaterwheel(
-    waterwheelAgitator,
+    carsonator,
     constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
 
 UnjamIntegralCommand unjamWaterwheel(
-    waterwheelAgitator,
+    carsonator,
     constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
 
 MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     *drivers(),
-    waterwheelAgitator,
+    carsonator,
     rotateWaterwheel,
     unjamWaterwheel);
 
 GovernorLimitedCommand<2> feedWaterwheelWhenBallNotReady(
-    {&waterwheelAgitator},
+    {&carsonator},
     rotateAndUnjamWaterwheel,
     {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
 }  // namespace waterwheel
@@ -576,7 +575,7 @@ DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTra
 
 TextHudIndicators textHudIndicators(
     *drivers(),
-    waterwheelAgitator,
+    carsonator,
     imuCalibrateCommand,
     {&beybladeCommand},
     refSerialTransmitter);
@@ -703,7 +702,7 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
     clientDisplay.initialize();
     kickerAgitator.initialize();
-    waterwheelAgitator.initialize();
+    carsonator.initialize();
     turret.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
@@ -718,7 +717,7 @@ void registerHeroSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&kickerAgitator);
-    drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
+    drivers->commandScheduler.registerSubsystem(&carsonator);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
@@ -731,7 +730,7 @@ void setDefaultHeroCommands()
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
+    carsonator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }

@@ -58,8 +58,8 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
     WATERWHEEL_AGITATOR_CONFIG = {
         .gearRatio = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *
                      (24.0f / 152.0f),  // M3508 * (Pulley Teeth / Agitator Teeth)
-        .agitatorMotorId = tap::motor::MOTOR4,
-        .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+        .agitatorMotorId = tap::motor::MOTOR6,
+        .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
         .isAgitatorInverted = false,
         /**
          * The jamming constants. Agitator is considered jammed if difference between the velocity
