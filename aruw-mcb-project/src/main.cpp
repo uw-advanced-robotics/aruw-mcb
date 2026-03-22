@@ -55,7 +55,7 @@ tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 using namespace aruwsrc::standard;
 #elif defined(ALL_SENTRIES)
 using namespace aruwsrc::sentry;
-#elif defined(TARGET_HERO_ZERO)
+#elif defined(TARGET_HERO_NAME)
 using namespace aruwsrc::hero;
 #elif defined(TARGET_DRONE)
 using namespace aruwsrc::drone;
@@ -88,7 +88,7 @@ static void updateIo(Drivers* drivers);
 
 static void initializeI2C(Drivers* drivers);
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME) || defined(TARGET_ENGINEER)
 // Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
 static void checkTurretMcbDisconnection(Drivers* drivers);
 #endif
@@ -121,16 +121,16 @@ int main()
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME) || defined(TARGET_SENTRY_ECLIPSE)
             ((Drivers*)drivers)->plateHitTracker.update();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER)
             PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(TARGET_HERO_NAME) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
             PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
 #endif
@@ -145,16 +145,16 @@ int main()
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME) || defined(TARGET_SENTRY_ECLIPSE)
             PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME) || defined(TARGET_ENGINEER)
             checkTurretMcbDisconnection(drivers);
 #endif
 
 #if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) ||   \
-    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER) ||    \
+    defined(TARGET_HERO_NAME) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER) ||    \
     defined(TARGET_TESTBED) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
     defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || defined(TARGET_DRONE) ||             \
     defined(TARGET_BLANK)
@@ -163,7 +163,7 @@ int main()
 #endif
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME)
             // PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
 #endif
         }
@@ -186,7 +186,7 @@ static void initializeIo(Drivers* drivers)
 
     initializeI2C(drivers);
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_HERO_NAME) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
 #endif
@@ -195,14 +195,14 @@ static void initializeIo(Drivers* drivers)
     drivers->turretMCBCanCommBus1.init();
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(TARGET_HERO_NAME) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
     ((Drivers*)drivers)->oledDisplay.initialize();
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+#if defined(TARGET_HERO_NAME) || defined(ALL_STANDARDS)
     drivers->mpu6500.setCalibrationSamples(2000);
 #endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_HERO_NAME) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
     ((Drivers*)drivers)->capacitorBank.initialize();
 #endif
 #if defined(TARGET_SENTRY_ECLIPSE)
@@ -231,7 +231,7 @@ static void initializeIo(Drivers* drivers)
         tap::gpio::Digital::InputPullMode::PullUp);
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME)
     // modm::delay_ms(2000);
     // drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
 #endif
@@ -244,12 +244,12 @@ static void updateIo(Drivers* drivers)
     drivers->remote.read();
     drivers->mpu6500.read();
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME) || defined(TARGET_SENTRY_ECLIPSE) || \
     defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
     ((Drivers*)drivers)->oledDisplay.updateDisplay();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME) || defined(TARGET_SENTRY_ECLIPSE)
     drivers->visionCoprocessor.updateSerial();
 #endif
 
@@ -266,12 +266,12 @@ static void updateIo(Drivers* drivers)
     drivers->lite.updateSerial();
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
+#if defined(TARGET_HERO_NAME) || defined(ALL_STANDARDS)
     drivers->interRobotTransmitter.updateState();
     drivers->interRobotTransmitter.sendMessage();
 #endif
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME)
     // drivers->ism330.read();
 #endif
 
@@ -280,7 +280,7 @@ static void updateIo(Drivers* drivers)
 #endif
 }
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
+#if defined(ALL_STANDARDS) || defined(TARGET_HERO_NAME) || defined(TARGET_ENGINEER)
 static void checkTurretMcbDisconnection(Drivers* drivers)
 {
     bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();

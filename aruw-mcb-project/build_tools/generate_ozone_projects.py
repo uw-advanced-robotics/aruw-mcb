@@ -23,23 +23,28 @@ ROBOT_IPS = {
     "TARGET_STANDARD_NULL": "192.168.1.144",
     "TARGET_STANDARD_VOID": "192.168.1.166",
     "TARGET_SENTRY_ECLIPSE": "192.168.1.231",
-    "TARGET_HERO_ZERO": "192.168.1.169",
+    "TARGET_HERO_NAME": "192.168.1.169",
     "TARGET_ENGINEER": "192.168.0.232",
 }
+
 
 def run_ozone(env, source, robot=""):
     def call_run_ozone(target, source, env):
         jdebug = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"
         import sys
+
         if sys.platform == "win32":
             os.startfile(jdebug)
         elif sys.platform == "darwin":
-            subprocess.call(['open', '-n', '-a', 'Ozone.app', '--args', jdebug])
+            subprocess.call(["open", "-n", "-a", "Ozone.app", "--args", jdebug])
         else:
-            subprocess.call(['xdg-open', jdebug])
+            subprocess.call(["xdg-open", jdebug])
 
     action = Action(call_run_ozone, cmdstr="Launching Ozone...")
-    return env.AlwaysBuild(env.Alias("ozone_run", [generate_ozone(env, robot), source], action))
+    return env.AlwaysBuild(
+        env.Alias("ozone_run", [generate_ozone(env, robot), source], action)
+    )
+
 
 def generate_ozone(env, robot=""):
     def call_generate_ozone(target, source, env):
@@ -55,13 +60,19 @@ def generate_ozone(env, robot=""):
 
         if ip != "":
             print(f"Using IP({ip}) connection...")
-            project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"IP\", \"{ip}\");")
+            project_content = project_content.replace(
+                "${OZONE_CONNECTION}", f'Project.SetHostIF ("IP", "{ip}");'
+            )
         else:
             print(f"Using USB connection...")
-            project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"USB\", \"\");")
+            project_content = project_content.replace(
+                "${OZONE_CONNECTION}", f'Project.SetHostIF ("USB", "");'
+            )
 
-        project_content = project_content.replace("${BUILD_DIR}", env['BUILDPATH'])
-        project_content = project_content.replace("${BUILD_DIR_LOWER}", env['BUILDPATH'].lower())
+        project_content = project_content.replace("${BUILD_DIR}", env["BUILDPATH"])
+        project_content = project_content.replace(
+            "${BUILD_DIR_LOWER}", env["BUILDPATH"].lower()
+        )
 
         target.append(env.File(project_file_path))
         target.append(env.File(f"{project_file_path}.user"))
@@ -76,11 +87,13 @@ def generate_ozone(env, robot=""):
             w.write(project_user_content)
 
     action = Action(call_generate_ozone, cmdstr="Generating Ozone config...")
-    return env.AlwaysBuild(env.Alias("ozone_generate", '', action))
+    return env.AlwaysBuild(env.Alias("ozone_generate", "", action))
+
 
 def generate(env, **kw):
     env.AddMethod(run_ozone, "RunOzoneConfig")
     env.AddMethod(generate_ozone, "GenerateOzoneConfig")
+
 
 def exists(env):
     return True

@@ -51,7 +51,7 @@ private:
 #elif defined(TARGET_STANDARD_VOID)
     static constexpr int16_t OFFSET_X = -5;
     static constexpr int16_t OFFSET_Y = -50;
-#elif defined(TARGET_HERO_ZERO)
+#elif defined(TARGET_HERO_NAME)
     static constexpr int16_t OFFSET_X = 2;
     static constexpr int16_t OFFSET_Y = -42;
 #else
@@ -66,7 +66,7 @@ private:
     // SIZE of the circle
     static constexpr uint16_t CRICLE_SIZE = 2;
 // Thickness of the line
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NAME)
     static constexpr uint16_t LINE_THICKNESS = 10;
 #else
     static constexpr uint16_t LINE_THICKNESS = 5;

@@ -273,8 +273,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_HERO_ZERO",
-                "BUILD_TARGET=\"TARGET_HERO_ZERO\""
+                "TARGET_HERO_NAME",
+                "BUILD_TARGET=\"TARGET_HERO_NAME\""
             ]
         }
     ],
