@@ -67,9 +67,9 @@ static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 1250.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
-    .kd = 0.4f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 2000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -81,9 +81,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1500.0f,
-    .ki = 1.0f,
-    .kd = 0.3f,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
     .maxICumulative = 10.0f,
     .maxOutput = 2000,
     .tQDerivativeKalman = 1.0f,
@@ -95,7 +95,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 60.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -109,9 +109,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 1400.0f,
-    .ki = 0.1f,
-    .kd = 0.4f,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 2000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -123,9 +123,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1400.0f,
-    .ki = 5.0f,
-    .kd = 0.5f,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
     .maxICumulative = 5.0f,
     .maxOutput = 2000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -137,7 +137,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 400.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 5'000.0f,
