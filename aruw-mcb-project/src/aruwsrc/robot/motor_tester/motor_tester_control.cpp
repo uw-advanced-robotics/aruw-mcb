@@ -28,6 +28,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
+#include "aruwsrc/control/motor/damiao_motor.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -55,6 +56,9 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace motor_tester_control
 {
+static constexpr float DAMIAO_4310_MAX_RPM =
+    aruwsrc::control::motor::DamiaoMotor::DM4310_V_MAX * 60.0f / M_TWOPI;
+
 // m2006
 tap::motor::DjiMotor motor2006(
     drivers(),
@@ -97,6 +101,14 @@ tap::motor::DjiMotor motor6020(
     true,
     (1.0f));
 
+aruwsrc::control::motor::DamiaoMotor damiao4310(
+    drivers(),
+    aruwsrc::control::motor::DamiaoMotorId::DAMIAO_MOTOR1,
+    tap::can::CanBus::CAN_BUS1,
+    false,
+    "Damiao 4310",
+    0x011);
+
 MotorSubsystem motorSubsystem2006(drivers(), motor2006, m2006VelocityPidConfig);
 
 MotorSubsystem motorSubsystem3505(drivers(), motor3508, rm3508VelocityPidConfig);
@@ -104,6 +116,8 @@ MotorSubsystem motorSubsystem3505(drivers(), motor3508, rm3508VelocityPidConfig)
 MotorSubsystem motorSubsystem6020(drivers(), motor6020, gm6020VelocityPidConfig);
 
 MotorSubsystem motorSubsystem3510(drivers(), motor3510, rm3510VelocityPidConfig);
+
+MotorSubsystem motorSubsystemDamiao4310(drivers(), damiao4310, damiao4310VelocityPidConfig);
 
 // ----------
 // Commands
@@ -132,6 +146,12 @@ StickRpmCommand wheelManual(
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::WHEEL,
     320.0f);
+
+StickRpmCommand rightHorizontalManual(
+    &motorSubsystemDamiao4310,
+    &drivers()->remote,
+    tap::communication::serial::Remote::Channel::RIGHT_HORIZONTAL,
+    DAMIAO_4310_MAX_RPM);
 
 // agitator rotate/unjam commands
 MoveIntegralCommand rotateAgitator(agitator, AGITATOR_ROTATE_CONFIG);
@@ -168,6 +188,7 @@ void initializeSubsystems()
     motorSubsystem3505.initialize();
     motorSubsystem6020.initialize();
     motorSubsystem3510.initialize();
+    motorSubsystemDamiao4310.initialize();
 }
 
 void registerSubsystems(Drivers* drivers)
@@ -179,6 +200,7 @@ void registerSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&motorSubsystem3505);
     drivers->commandScheduler.registerSubsystem(&motorSubsystem6020);
     drivers->commandScheduler.registerSubsystem(&motorSubsystem3510);
+    drivers->commandScheduler.registerSubsystem(&motorSubsystemDamiao4310);
 }
 
 void registerIoMappings(Drivers* drivers)
@@ -189,6 +211,7 @@ void registerIoMappings(Drivers* drivers)
     motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
     motorSubsystem3505.setDefaultCommand(&rightVerticalManual);
     motorSubsystem3510.setDefaultCommand(&leftHorizontalManual);
+    motorSubsystemDamiao4310.setDefaultCommand(&rightHorizontalManual);
 }
 
 }  // namespace motor_tester_control
