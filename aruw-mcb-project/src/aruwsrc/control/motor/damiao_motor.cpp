@@ -23,7 +23,6 @@
 
 namespace aruwsrc::control::motor
 {
-
 DamiaoMotor::DamiaoMotor(
     tap::Drivers* drivers,
     DamiaoMotorId motorId,
@@ -77,10 +76,7 @@ bool DamiaoMotor::isMotorOnline() const
     return !motorDisconnectTimeout.isExpired() && !motorDisconnectTimeout.isStopped();
 }
 
-int16_t DamiaoMotor::getOutputDesired() const
-{
-    return static_cast<int16_t>(desiredOutputMilliNm);
-}
+int16_t DamiaoMotor::getOutputDesired() const { return static_cast<int16_t>(desiredOutputMilliNm); }
 
 int8_t DamiaoMotor::getTemperature() const { return temperatureMos; }
 

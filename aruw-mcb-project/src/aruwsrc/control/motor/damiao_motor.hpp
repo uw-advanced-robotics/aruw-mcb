@@ -32,7 +32,6 @@
 
 namespace aruwsrc::control::motor
 {
-
 class DamiaoMotorEncoder : public tap::encoder::EncoderInterface
 {
 public:
@@ -152,7 +151,12 @@ private:
 
     static float uintToFloat(uint16_t xInt, float xMin, float xMax, uint8_t bits);
 
-    bool sendMitCommand(float targetPosition, float targetVelocity, float kp, float kd, float torqueNm);
+    bool sendMitCommand(
+        float targetPosition,
+        float targetVelocity,
+        float kp,
+        float kd,
+        float torqueNm);
 
     bool sendRawFrame(const uint8_t* data, uint8_t dataLen, uint16_t frameId) const;
 
