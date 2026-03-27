@@ -18,7 +18,9 @@ void TurretSetpointKalmanFilter::initialize(tap::algorithms::WrappedFloat initia
     float x0[int(TrackerState::NUM_STATES)] = {initialPosition.getWrappedValue(), 0.0f};
     ekf.init(x0);
 }
-void TurretSetpointKalmanFilter::update(const tap::algorithms::WrappedFloat& measuredPosition, float dt)
+void TurretSetpointKalmanFilter::update(
+    const tap::algorithms::WrappedFloat& measuredPosition,
+    float dt)
 {
     ekf.predict(dt);
 
@@ -51,7 +53,9 @@ void TurretSetpointKalmanFilter::stateTransitionFunction(
     x_pred.data[int(TrackerState::VEL)] = x_prev.data[int(TrackerState::VEL)];
 }
 
-void TurretSetpointKalmanFilter::observationFunction(const EKF::StateVector& x, EKF::InputVector& h_x)
+void TurretSetpointKalmanFilter::observationFunction(
+    const EKF::StateVector& x,
+    EKF::InputVector& h_x)
 {
     h_x.data[int(TrackerInput::MEASURED_POS)] = x.data[int(TrackerState::POS)];
 }

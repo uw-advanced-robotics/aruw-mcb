@@ -20,9 +20,10 @@
 #ifndef TIME_DELAY_AUTOTUNE_HPP_
 #define TIME_DELAY_AUTOTUNE_HPP_
 
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
+
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "modm/ui/display.hpp"
-#include "tap/communication/sensors/imu/abstract_imu.hpp"
 
 #include "autotune_command_interface.hpp"
 
