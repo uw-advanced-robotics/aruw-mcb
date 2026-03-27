@@ -271,7 +271,7 @@ private:
     StateMatrix P_new;
     StateMatrix FP;
     StateMatrix P_pred;
-    InputMatrix HP;
+    ObservationMatrix HP;
     InputMatrix S;
     InputMatrix S_inv;
     InputVector z_pred;

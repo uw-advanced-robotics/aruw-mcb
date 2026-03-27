@@ -28,6 +28,7 @@
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_stos_controller.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"  // for turretID enum (could go somewhere else)
 #include "modm/container/pair.hpp"
@@ -231,6 +232,10 @@ inline const tap::algorithms::transforms::Transform TURRET_MCB1_ISM330_MOUNTING_
     0.0f,
     0.0f,
     0.0f);
+
+inline constexpr aruwsrc::control::turret::algorithms::OptimalSTOSController::STOSConstants
+    turretWidowSTOSConstants =
+        {.J_TOTAL = 0.007f, .TAU_MAX = 1.3f, .B_DAMP = 0.001f, .W_D = 115.0f, .ZETA = 0.15, .SYSTEM_DELAY_SEC = 0.012f};
 }  // namespace turretWidow
 
 namespace minorPidConfigs

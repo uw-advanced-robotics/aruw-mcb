@@ -39,6 +39,7 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/lamprey_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -68,6 +69,7 @@
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
@@ -353,7 +355,7 @@ SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL
 struct TurretMinorWorldControllers
 {
     WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> pitchController;
-    WorldFrameTurretImuCascadePidTurretController<Axis::YAW> yawController;
+    WorldFrameTurretImuSTOSTurretController<Axis::YAW> yawController;
 };
 
 // // @todo surely there's a better way to construct this
@@ -371,12 +373,14 @@ TurretMinorWorldControllers turretWidowWorldControllers{
         turretWidowWorldPitchVelPid,
         {&turretGravityCompensation, &turretSpringCompensation}),
 
-    .yawController = WorldFrameTurretImuCascadePidTurretController<Axis::YAW>(
+    .yawController = WorldFrameTurretImuSTOSTurretController<Axis::YAW>(
         transformer.getWorldToTurretWidow(),
         getTurretMCBCanCommWidow(),
         turretWidow.yawMotor,
-        turretWidowWorldYawPosPid,
-        turretWidowWorldYawVelPid)
+        turretWidow::turretWidowSTOSConstants,
+        5,
+        .25)
+    /// @TODO: Make the constants passed in and proper
 
 };
 
@@ -546,6 +550,21 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     turretMajorYawAnalogEncoder);
+
+autotune::FreqSweepAutotuneCommand<1, Axis::YAW> freqSweepAutotuneCommand(
+    drivers(),
+    {&turretWidow,
+     &turretWidow.yawMotor,
+     &turretWidowChassisControllers.yawController,
+     turretWidowMotors.yawMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    12'000.0f,
+    &getTurretMCBCanCommWidow(),
+    &turretWidowChassisControllers.pitchController,
+    &turretMajor,
+    &turretMajorChassisYawController,
+    &drivers()->turretMajorImu);
 
 SentryTurretCVCommand::TurretConfig turretWidowCVConfig(
     turretWidow,
@@ -796,7 +815,7 @@ void setDefaultSentryCommands(Drivers *)
 
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 
-    buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
+    // buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -858,7 +877,8 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
 {
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
         &sentry_control::gravityAutotuneCommandWidow,
-        &sentry_control::lampreyAutotuneCommand};
+        &sentry_control::lampreyAutotuneCommand,
+        &sentry_control::freqSweepAutotuneCommand};
     return commands;
 }
 #endif

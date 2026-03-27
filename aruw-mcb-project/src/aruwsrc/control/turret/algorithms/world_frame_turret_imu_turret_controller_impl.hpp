@@ -268,7 +268,6 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
                 .pitchChassisFrame = 0.0f,
                 .yaw = chassisFrame.getWrappedValue()});
     }
-
     this->turretMotor.setMotorOutput(pidOutput);
 }
 

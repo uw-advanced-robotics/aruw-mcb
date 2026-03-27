@@ -212,7 +212,7 @@ public:
      *   over the period of the `calibrationFailTimeout` to ensure the user can regain
      *   control.
      */
-    void execute() override
+    virtual void execute() override
     {
         switch (calibrationState)
         {
@@ -310,8 +310,7 @@ public:
 
         checkSafetyTimeout();
         uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-        // Have to use ms to share turret controller
-        float dt = (currTime - prevTime);
+        float dt = (currTime - prevTime) / 1000.0f;
         prevTime = currTime;
 
         config.controller->runController(dt, config.motor->getChassisFrameSetpoint());
@@ -358,7 +357,7 @@ protected:
                    0.0f,
                    config.motor->getChassisFrameVelocity(),
                    velocityZeroThreshold) &&
-               (config.motor->getChassisFrameMeasuredAngle().minDifference(setpoint) <
+               (abs(config.motor->getChassisFrameMeasuredAngle().minDifference(setpoint)) <
                 positionZeroThreshold);
     }
 
