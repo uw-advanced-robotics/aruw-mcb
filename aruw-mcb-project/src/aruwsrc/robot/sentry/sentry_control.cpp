@@ -304,13 +304,13 @@ const tap::motor::DjiMotor *sentryChassisMotorsForEkf[4] = {
     &leftBackMotor,
     &rightBackMotor};
 
-// aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
-//     *drivers(),
-//     sentryChassisMotorsForEkf,
-//     chassisYawObserver,
-//     getChassisTurretMCBCanComm(),
-//     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y),
-//     &drivers()->rttTelemetry);
+aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem ekfOdometrySubsystem(
+    *drivers(),
+    sentryChassisMotorsForEkf,
+    chassisYawObserver,
+    getChassisTurretMCBCanComm(),
+    modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y),
+    &drivers()->rttTelemetry);
 
 aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
     drivers(),
@@ -330,7 +330,7 @@ SentryTransforms transformer(
     });
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
-SentryTransformAdapter transformAdapter(transformer);
+SentryTransformAdapter transformAdapter(transformer, &ekfOdometrySubsystem);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
@@ -774,6 +774,7 @@ void initializeSubsystems()
     turretWidow.initialize();
     turretMajor.initialize();
     odometrySubsystem.initialize();
+    ekfOdometrySubsystem.initialize();
     transformerSubsystem.initialize();
     arucoResetSubsystem.initialize();
     turretWidowFrictionWheels.initialize();
@@ -791,6 +792,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretWidow);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&ekfOdometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
