@@ -57,6 +57,7 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
  * calculateRotationTranslationalGain is performed.
  */
 static constexpr float MIN_ROTATION_THRESHOLD = 80.0f;
+static constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
 
 /**
  * Pin to use for current sensing
@@ -139,7 +140,6 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
  * @see `GIMBAL_X_OFFSET`.
  */
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
-static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRotationalSpeedFractionOfMax = 0.9f,
