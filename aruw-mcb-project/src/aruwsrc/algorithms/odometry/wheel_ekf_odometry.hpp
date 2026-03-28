@@ -47,6 +47,28 @@ namespace aruwsrc::algorithms::odometry
 class FourWheelEKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
 public:
+    enum class VisionMeasurementSource
+    {
+        GENERIC = 0,
+        LIDAR,
+        APRIL_TAG,
+    };
+
+    struct VisionPositionMeasurement
+    {
+        modm::Vector2f position;
+        float positionVarianceX;
+        float positionVarianceY;
+        VisionMeasurementSource source = VisionMeasurementSource::GENERIC;
+    };
+
+    struct VisionPoseMeasurement : public VisionPositionMeasurement
+    {
+        float yaw = 0.0f;
+        float yawVariance = 0.0f;
+        bool hasYaw = true;
+    };
+
     struct ChassisWheelConfig
     {
         float wheelRadius;     // Wheel radius in meters
@@ -79,12 +101,50 @@ public:
 
     inline float getYaw() const override { return chassisYaw; }
 
+    inline modm::Location2D<float> getControlPredictedLocation2D() const
+    {
+        return controlPredictedLocation;
+    }
+
+    inline modm::Vector2f getControlPredictedVelocity2D() const { return controlPredictedVelocity; }
+
+    inline float getControlPredictedYaw() const { return controlPredictedYaw; }
+
     /**
      * @brief Resets the EKF back to the robot's boot position.
      */
     void reset();
 
+    /**
+     * Propagates the chassis state using wheel, IMU, and yaw-observer measurements only.
+     *
+     * Vision corrections should be applied separately through the explicit fusion methods below.
+     */
     void update();
+
+    /**
+     * Applies a position-only correction to the EKF state using an external localization source
+     * such as LiDAR.
+     */
+    void fuseVisionPosition(const VisionPositionMeasurement& measurement);
+
+    /**
+     * Applies a full pose correction to the EKF state using an external localization source
+     * such as an AprilTag-based pose estimate.
+     */
+    void fuseVisionPose(const VisionPoseMeasurement& measurement);
+
+    void fuseLidarPosition(
+        const modm::Vector2f& position,
+        float positionVarianceX,
+        float positionVarianceY);
+
+    void fuseAprilTagPose(
+        const modm::Vector2f& position,
+        float yaw,
+        float positionVarianceX,
+        float positionVarianceY,
+        float yawVariance);
 
     void overrideOdometryPosition(const float positionX, const float positionY);
 
@@ -129,45 +189,55 @@ private:
     static constexpr float MAX_DT = 0.02f;    // Upper bound on dt to avoid large prediction jumps
     static constexpr float WHEEL_RADIUS_SCALE = 1.0f;  // Wheel radius calibration scale
 
-    static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE = 0.02f;  // Base wheel speed variance
-    static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 2.0f;    // Accel noise variance
-    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.02f;    // Gyro noise variance
-    static constexpr float YAW_MEASUREMENT_VARIANCE = 1.0e-4f;       // Yaw observer variance
-    static constexpr float MAX_WHEEL_SLIP_SCALE = 5.0f;
+    static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE =
+        1.0f;  // Base wheel speed variance
+    static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE =
+        1.2f;  // Accel noise variance
+    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE =
+        0.1f;  // Gyro noise variance
+    static constexpr float YAW_MEASUREMENT_VARIANCE = 1.0e-4f;  // Yaw observer variance
+    static constexpr float MAX_WHEEL_SLIP_SCALE =
+        100.0f;  // Maximum wheel measurement variance scale under slip
+    static constexpr float MIN_VISION_MEASUREMENT_VARIANCE = 1.0e-6f;
 
     // Process noise covariance matrix (Q) - how much we trust the motion model.
     // State order: POS_X, POS_Y, VEL_X, VEL_Y, YAW, YAW_RATE, ACC_X, ACC_Y.
     // Larger values = less trust in model, more responsive to measurements
     static constexpr float EKF_Q[STATES_SQUARED] = {
-        5.44086e-09f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        5.44086e-09f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        2.47185e-05f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        2.47185e-05f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        3.91168e-08f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        2.93711e-05f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        8.2437e-05f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        8.2437e-05f,
+        1E2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1E2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1E1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1E1f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 1E-2f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 5E0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 5E0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 5E0f,
     };
 
     // Measurement noise covariance matrix (R).
     // Measurement order: WHEEL_0..WHEEL_3, ACC_X, ACC_Y, GYRO_Z, YAW.
     // Higher value means less trust
     static constexpr float EKF_R[INPUTS_SQUARED] = {
-        9.66511e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        9.66511e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        9.66511e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        9.66511e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        9.66825e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        9.66825e-03f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        3.69454e-04f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        2.04033e-07f,
+        1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 1.2f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.2f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0e-1f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0e-4f,
     };
 
     // Initial state covariance matrix P0
     static constexpr float EKF_P0[STATES_SQUARED] = {
-        1E3, 0,   0, 0, 0, 0,   0, 0, 0, 1E3, 0,   0, 0, 0, 0,   0, 0, 0, 1E3, 0,   0, 0,
-        0,   0,   0, 0, 0, 1E3, 0, 0, 0, 0,   0,   0, 0, 0, 1E3, 0, 0, 0, 0,   0,   0, 0,
-        0,   1E3, 0, 0, 0, 0,   0, 0, 0, 0,   1E3, 0, 0, 0, 0,   0, 0, 0, 0,   1E3,
+        1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f,
     };
     // clang-format on
 
@@ -183,6 +253,11 @@ private:
     modm::Vector2f velocity;
     // Chassis yaw orientation in world frame (radians)
     float chassisYaw = 0;
+
+    /// Control-only propagated state before any vision/LiDAR correction is applied.
+    modm::Location2D<float> controlPredictedLocation;
+    modm::Vector2f controlPredictedVelocity;
+    float controlPredictedYaw = 0;
     float yawOffset = 0.0f;
     bool yawOffsetInitialized = false;
 
@@ -200,6 +275,8 @@ private:
         const modm::Vector2f& imuAccelWorld,
         bool yawMeasurementValid,
         float dt);
+    void fuseScalarMeasurement(OdomState state, float measurement, float variance, bool wrapResidual);
+    void captureControlPredictedState();
 
     // EKF function definitions
     static void stateTransitionFunction(

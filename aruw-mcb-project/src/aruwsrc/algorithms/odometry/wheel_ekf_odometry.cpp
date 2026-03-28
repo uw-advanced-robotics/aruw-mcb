@@ -88,6 +88,12 @@ void FourWheelEKFOdometry::reset()
     float initialX[int(OdomState::NUM_STATES)] =
         {initPos.x, initPos.y, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ekf.init(initialX);
+    location = modm::Location2D<float>(initPos.x, initPos.y, 0.0f);
+    velocity = modm::Vector2f(0.0f, 0.0f);
+    chassisYaw = 0.0f;
+    controlPredictedLocation = location;
+    controlPredictedVelocity = velocity;
+    controlPredictedYaw = chassisYaw;
     prevTime = 0;
     prevWheelSpeedsValid = false;
     yawOffsetInitialized = false;
@@ -163,6 +169,69 @@ void FourWheelEKFOdometry::update()
 
     // Update the location and velocity accessor objects with values from the state vector
     updateChassisStateFromEKF();
+    captureControlPredictedState();
+}
+
+void FourWheelEKFOdometry::fuseVisionPosition(const VisionPositionMeasurement& measurement)
+{
+    fuseScalarMeasurement(
+        OdomState::POS_X,
+        measurement.position.x,
+        measurement.positionVarianceX,
+        false);
+    fuseScalarMeasurement(
+        OdomState::POS_Y,
+        measurement.position.y,
+        measurement.positionVarianceY,
+        false);
+    updateChassisStateFromEKF();
+}
+
+void FourWheelEKFOdometry::fuseVisionPose(const VisionPoseMeasurement& measurement)
+{
+    fuseVisionPosition(measurement);
+
+    if (measurement.hasYaw)
+    {
+        float fusedYaw = measurement.yaw;
+        if (yawOffsetInitialized)
+        {
+            fusedYaw = modm::Angle::normalize(fusedYaw - yawOffset);
+        }
+        fuseScalarMeasurement(OdomState::YAW, fusedYaw, measurement.yawVariance, true);
+        updateChassisStateFromEKF();
+    }
+}
+
+void FourWheelEKFOdometry::fuseLidarPosition(
+    const modm::Vector2f& position,
+    float positionVarianceX,
+    float positionVarianceY)
+{
+    VisionPositionMeasurement measurement{
+        position,
+        positionVarianceX,
+        positionVarianceY,
+        VisionMeasurementSource::LIDAR};
+    fuseVisionPosition(measurement);
+}
+
+void FourWheelEKFOdometry::fuseAprilTagPose(
+    const modm::Vector2f& position,
+    float yaw,
+    float positionVarianceX,
+    float positionVarianceY,
+    float yawVariance)
+{
+    VisionPoseMeasurement measurement{};
+    measurement.position = position;
+    measurement.positionVarianceX = positionVarianceX;
+    measurement.positionVarianceY = positionVarianceY;
+    measurement.source = VisionMeasurementSource::APRIL_TAG;
+    measurement.yaw = yaw;
+    measurement.yawVariance = yawVariance;
+    measurement.hasYaw = true;
+    fuseVisionPose(measurement);
 }
 
 void FourWheelEKFOdometry::updateChassisStateFromEKF()
@@ -177,6 +246,13 @@ void FourWheelEKFOdometry::updateChassisStateFromEKF()
     // Set location
     location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
     location.setOrientation(chassisYaw);
+}
+
+void FourWheelEKFOdometry::captureControlPredictedState()
+{
+    controlPredictedLocation = location;
+    controlPredictedVelocity = velocity;
+    controlPredictedYaw = chassisYaw;
 }
 
 void FourWheelEKFOdometry::updateMeasurementCovariance(
@@ -224,6 +300,73 @@ void FourWheelEKFOdometry::updateMeasurementCovariance(
         prevWheelSpeeds[i] = wheelSpeeds[i];
     }
     prevWheelSpeedsValid = true;
+}
+
+void FourWheelEKFOdometry::fuseScalarMeasurement(
+    OdomState state,
+    float measurement,
+    float variance,
+    bool wrapResidual)
+{
+    const int stateIndex = int(state);
+    auto& x = ekf.getMutableStateVector();
+    auto& P = ekf.getMutableStateCovariance();
+
+    variance = std::max(variance, MIN_VISION_MEASUREMENT_VARIANCE);
+
+    float innovation = measurement - x[stateIndex];
+    if (wrapResidual)
+    {
+        innovation = std::atan2(std::sin(innovation), std::cos(innovation));
+    }
+
+    const float innovationCovariance =
+        P[stateIndex * int(OdomState::NUM_STATES) + stateIndex] + variance;
+    if (innovationCovariance <= MIN_VISION_MEASUREMENT_VARIANCE)
+    {
+        return;
+    }
+
+    float kalmanGain[int(OdomState::NUM_STATES)] = {0.0f};
+    float measurementRow[int(OdomState::NUM_STATES)] = {0.0f};
+
+    for (int i = 0; i < int(OdomState::NUM_STATES); i++)
+    {
+        kalmanGain[i] =
+            P[i * int(OdomState::NUM_STATES) + stateIndex] / innovationCovariance;
+        measurementRow[i] = P[stateIndex * int(OdomState::NUM_STATES) + i];
+    }
+
+    for (int i = 0; i < int(OdomState::NUM_STATES); i++)
+    {
+        x[i] += kalmanGain[i] * innovation;
+    }
+
+    for (int row = 0; row < int(OdomState::NUM_STATES); row++)
+    {
+        for (int col = 0; col < int(OdomState::NUM_STATES); col++)
+        {
+            P[row * int(OdomState::NUM_STATES) + col] -= kalmanGain[row] * measurementRow[col];
+        }
+    }
+
+    for (int row = 0; row < int(OdomState::NUM_STATES); row++)
+    {
+        for (int col = row + 1; col < int(OdomState::NUM_STATES); col++)
+        {
+            const float symmetrizedCovariance =
+                0.5f *
+                (P[row * int(OdomState::NUM_STATES) + col] +
+                 P[col * int(OdomState::NUM_STATES) + row]);
+            P[row * int(OdomState::NUM_STATES) + col] = symmetrizedCovariance;
+            P[col * int(OdomState::NUM_STATES) + row] = symmetrizedCovariance;
+        }
+
+        const int diagonalIndex = row * int(OdomState::NUM_STATES) + row;
+        P[diagonalIndex] = std::max(P[diagonalIndex], MIN_VISION_MEASUREMENT_VARIANCE);
+    }
+
+    x[int(OdomState::YAW)] = modm::Angle::normalize(x[int(OdomState::YAW)]);
 }
 
 void FourWheelEKFOdometry::overrideOdometryPosition(const float positionX, const float positionY)
