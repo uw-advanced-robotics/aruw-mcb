@@ -248,29 +248,29 @@ LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
 //     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 // JointSubsystem wristRollSubsystem(drivers(), wristMotorThree, WRIST_ROLL_CONFIG);
-tap::encoder::CanEncoder wristEncoderTheta1(
-    drivers(),
-    aruwsrc::engineer::WRIST_THETA1_ENCODER_ID,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    false,
-    1,
-    WRIST_HOME_THETA1);
+// tap::encoder::CanEncoder wristEncoderTheta1(
+//     drivers(),
+//     aruwsrc::engineer::WRIST_THETA1_ENCODER_ID,
+//     aruwsrc::control::chassis::CAN_BUS_ARM_ENCODERS,
+//     false,
+//     1,
+//     WRIST_HOME_THETA1);
 
-tap::encoder::CanEncoder wristEncoderTheta2(
-    drivers(),
-    aruwsrc::engineer::WRIST_THETA2_ENCODER_ID,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    false,
-    1,
-    WRIST_HOME_THETA2);
+// tap::encoder::CanEncoder wristEncoderTheta2(
+//     drivers(),
+//     aruwsrc::engineer::WRIST_THETA2_ENCODER_ID,
+//     aruwsrc::control::chassis::CAN_BUS_ARM_ENCODERS,
+//     false,
+//     1,
+//     WRIST_HOME_THETA2);
 
-tap::encoder::CanEncoder wristEncoderTheta3(
-    drivers(),
-    aruwsrc::engineer::WRIST_THETA3_ENCODER_ID,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    false,
-    1,
-    WRIST_HOME_THETA3);
+// tap::encoder::CanEncoder wristEncoderTheta3(
+//     drivers(),
+//     aruwsrc::engineer::WRIST_THETA3_ENCODER_ID,
+//     aruwsrc::control::chassis::CAN_BUS_ARM_ENCODERS,
+//     false,
+//     1,
+//     WRIST_HOME_THETA3);
 
 // VirtualDjiMotor extensionMotor(
 //     drivers(),
