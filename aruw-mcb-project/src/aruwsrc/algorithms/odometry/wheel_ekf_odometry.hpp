@@ -26,6 +26,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/algorithms/extended_kalman_filter.hpp"
+#include "aruwsrc/algorithms/odometry/vision_odometry_data_provider.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/geometry/vector.hpp"
 
@@ -44,7 +45,8 @@ namespace aruwsrc::algorithms::odometry
  * The EKF provides better handling of nonlinear dynamics and can incorporate more complex
  * motion models compared to the linear Kalman filter.
  */
-class FourWheelEKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
+class FourWheelEKFOdometry : public tap::algorithms::odometry::Odometry2DInterface,
+                             public VisionOdometryDataProvider
 {
 public:
     enum class VisionMeasurementSource
@@ -97,9 +99,18 @@ public:
 
     inline modm::Vector2f getCurrentVelocity2D() const final { return velocity; }
 
+    inline modm::Location2D<float> getVisionCurrentLocation2D() const final { return location; }
+
+    inline modm::Vector2f getVisionCurrentVelocity2D() const final
+    {
+        return controlPredictedVelocity;
+    }
+
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
     inline float getYaw() const override { return chassisYaw; }
+
+    inline float getVisionYaw() const final { return chassisYaw; }
 
     inline modm::Location2D<float> getControlPredictedLocation2D() const
     {

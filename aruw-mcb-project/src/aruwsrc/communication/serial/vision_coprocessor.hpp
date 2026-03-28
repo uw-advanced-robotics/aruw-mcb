@@ -169,6 +169,9 @@ public:
         float xPos;   ///< x position of the chassis in the world frame (in m).
         float yPos;   ///< y position of the chassis in the world frame (in m).
         float zPos;   ///< z position of the chassis in the world frame (in m).
+        float xVel;   ///< x velocity of the chassis in the world frame (in m/s).
+        float yVel;   ///< y velocity of the chassis in the world frame (in m/s).
+        float zVel;   ///< z velocity of the chassis in the world frame (in m/s).
         float roll;   ///< world frame roll of the chassis (in rad).
         float pitch;  ///< world frame pitch of the chassis (in rad).
         float yaw;    ///< world frame yaw of the chassis (in rad).
