@@ -84,7 +84,7 @@ public:
           gravityForce(gravityForce)
     {
     }
-    const char *getName() const override { return "Spring Gravity Autotune Command"; }
+    const char *getName() const override { return "Spring Gravity Autotune Command "; }
 
     void drawCalibrationResult(modm::GraphicDisplay &display) const override
     {

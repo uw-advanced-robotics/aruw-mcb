@@ -17,16 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * @file gravity_autotune.hpp
- *
- * @brief   Implements gravity-based center-of-mass autotuning for turret calibration.
- *
- * Defines the GravityAutotuneCommand command, which locks the turret at specified
- * test points, measures torque/angle, and estimates the turret's center of
- * mass using least squares regression.
- */
-
 #ifndef LAMPREY_AUTOTUNE_HPP_
 #define LAMPREY_AUTOTUNE_HPP_
 
@@ -65,7 +55,7 @@ public:
           encoder(encoder)
     {
     }
-    const char *getName() const override { return "Lamprey Autotune Command"; }
+    const char *getName() const override { return "Lamprey Autotune Command "; }
 
     void drawCalibrationResult(modm::GraphicDisplay &display) const override
     {
@@ -108,21 +98,6 @@ private:
     float averageAngle{0.0f};
 
     const aruwsrc::communication::sensors::encoder::LampreyEncoder &encoder;
-
-    /**
-     * @brief Helper function that turns the calibration result into
-     * units of mm.
-     *
-     * @param calibrationNum Value from the COM calculation
-     * @return float `COMLocation` in mm
-     */
-    inline float calibrationResultToMM(float calibrationNum) const
-    {
-        // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm
-        return calibrationNum * 1000 * this->getCalibrationConfig().torqueToDesiredOut /
-               this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
-    }
-
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 

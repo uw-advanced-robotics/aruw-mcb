@@ -91,8 +91,10 @@ private:
     static constexpr AccelerometerRangeConfig DEFAULT_ACCEL_RANGE = G4_CONFIG;
 
     // Pre-computed register values for non-blocking writes (protothread use)
-    static constexpr uint8_t DEFAULT_CTRL1_XL_VALUE = DEFAULT_ODR | DEFAULT_ACCEL_RANGE;
-    static constexpr uint8_t DEFAULT_CTRL2_G_VALUE = DEFAULT_ODR | DEFAULT_GYRO_RANGE;
+    static constexpr uint8_t DEFAULT_CTRL1_XL_VALUE =
+        static_cast<uint8_t>(DEFAULT_ODR) | DEFAULT_ACCEL_RANGE;
+    static constexpr uint8_t DEFAULT_CTRL2_G_VALUE =
+        static_cast<uint8_t>(DEFAULT_ODR) | DEFAULT_GYRO_RANGE;
     ChipSelectControl chipSelectControl;
 
     template <typename ChipSelectGpio>

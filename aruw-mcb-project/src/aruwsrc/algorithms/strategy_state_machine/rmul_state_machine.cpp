@@ -111,9 +111,9 @@ void RMULStateMachine::attachAutoNavController(ChassisAutoNavController *autoNav
 
 bool RMULStateMachine::safeToAttack()
 {
-    bool projectilesSufficient =
-        refSerial.getRobotData().turret.bulletsRemaining17 >= PROJECTILE_COUNT_THRESHOLD;
-    bool visionOnline = visionCoprocessor.isCvOnline();
+    // bool projectilesSufficient =
+    // refSerial.getRobotData().turret.bulletsRemaining17 >= PROJECTILE_COUNT_THRESHOLD;
+    // bool visionOnline = visionCoprocessor.isCvOnline();
     // return projectilesSufficient && visionOnline;
     return true;
 }

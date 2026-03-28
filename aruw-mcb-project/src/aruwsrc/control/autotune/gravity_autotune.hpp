@@ -62,7 +62,7 @@ public:
               failChime)
     {
     }
-    const char *getName() const override { return "Gravity Autotune Command"; }
+    const char *getName() const override { return "Gravity Autotune Command "; }
 
     /**
      * @brief Calculates the center of mass with least squares
