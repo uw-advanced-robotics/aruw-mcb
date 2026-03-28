@@ -304,7 +304,7 @@ const tap::motor::DjiMotor *sentryChassisMotorsForEkf[4] = {
     &leftBackMotor,
     &rightBackMotor};
 
-aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem ekfOdometrySubsystem(
+aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     sentryChassisMotorsForEkf,
     chassisYawObserver,
@@ -312,7 +312,7 @@ aruwsrc::algorithms::odometry::WheelEKFOdometry2DSubsystem ekfOdometrySubsystem(
     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y),
     &drivers()->rttTelemetry);
 
-aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
+aruwsrc::algorithms::odometry::ChassisCFOdometry cfOdometrySubsystem(
     drivers(),
     chassis,
     chassisYawObserver,
@@ -330,7 +330,7 @@ SentryTransforms transformer(
     });
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
-SentryTransformAdapter transformAdapter(transformer, &ekfOdometrySubsystem);
+SentryTransformAdapter transformAdapter(transformer, &odometrySubsystem);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
@@ -774,7 +774,7 @@ void initializeSubsystems()
     turretWidow.initialize();
     turretMajor.initialize();
     odometrySubsystem.initialize();
-    ekfOdometrySubsystem.initialize();
+    cfOdometrySubsystem.initialize();
     transformerSubsystem.initialize();
     arucoResetSubsystem.initialize();
     turretWidowFrictionWheels.initialize();
@@ -792,7 +792,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretWidow);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    drivers->commandScheduler.registerSubsystem(&ekfOdometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&cfOdometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
