@@ -16,20 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef PLATFORM_HOSTED
 #include <cstdio>
 
 #include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
 #include "modm/architecture/interface/assert.hpp"
-
 // This replaces the weak implementation in libmodm.a
-extern "C" void modm_abandon(const modm::AssertionInfo &info)
+modm_extern_c void modm_abandon(const modm::AssertionInfo &info)
 {
     using namespace aruwsrc::communication::rtt;
 
     char logBuffer[128];
     int len;
 
-    // Format the header (Note: using info.name instead of info->name)
     len = snprintf(
         logBuffer,
         sizeof(logBuffer),
@@ -75,3 +74,4 @@ extern "C" void modm_abandon(const modm::AssertionInfo &info)
             RttWriteMode::BlockIfFull);
     }
 }
+#endif
