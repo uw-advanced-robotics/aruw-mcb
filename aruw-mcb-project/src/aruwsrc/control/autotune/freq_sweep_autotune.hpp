@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TIME_DELAY_AUTOTUNE_HPP_
-#define TIME_DELAY_AUTOTUNE_HPP_
+#ifndef FREQ_SWEEP_AUTOTUNE_HPP_
+#define FREQ_SWEEP_AUTOTUNE_HPP_
 
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 

@@ -20,7 +20,6 @@
 
 #include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
 #include "modm/architecture/interface/assert.hpp"
-#include "modm/platform/core/heap_table.hpp"
 
 // This replaces the weak implementation in libmodm.a
 extern "C" void modm_abandon(const modm::AssertionInfo &info)
