@@ -327,10 +327,10 @@ static void checkTurretMcbDisconnection(Drivers* drivers)
     {
         tap::buzzer::playNote(&drivers->pwm, 1000);
     }
-    else if (!turretMcbConnected2 && turretMcbConnected1)
-    {
-        tap::buzzer::playNote(&drivers->pwm, 1500);
-    }
+    // else if (!turretMcbConnected2 && turretMcbConnected1)
+    // {
+    //     tap::buzzer::playNote(&drivers->pwm, 1500);
+    // }
     else if (!turretMcbConnected1 && !turretMcbConnected2)
     {
         tap::buzzer::playNote(&drivers->pwm, 2000);
