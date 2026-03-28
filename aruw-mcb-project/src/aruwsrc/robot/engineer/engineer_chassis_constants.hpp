@@ -116,7 +116,7 @@ static constexpr float WHEEL_RADIUS = 0.076f;
 /**
  * Radius of the deadwheels (m)
  */
-static constexpr float DEADWHEEL_RADIUS = 0.032f;
+static constexpr float DEADWHEEL_RADIUS = 0.016f;
 /**
  * Distance from the center axis of the robot to each deadwheel (m)
  */
