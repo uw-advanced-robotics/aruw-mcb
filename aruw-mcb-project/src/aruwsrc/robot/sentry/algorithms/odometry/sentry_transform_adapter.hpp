@@ -20,8 +20,8 @@
 #ifndef SENTRY_TRANSFORM_ADAPTER_HPP_
 #define SENTRY_TRANSFORM_ADAPTER_HPP_
 
-#include "aruwsrc/algorithms/odometry/vision_odometry_data_provider.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/vision_odometry_data_provider.hpp"
 
 #include "sentry_transforms.hpp"
 

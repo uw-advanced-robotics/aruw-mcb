@@ -332,8 +332,7 @@ void FourWheelEKFOdometry::fuseScalarMeasurement(
 
     for (int i = 0; i < int(OdomState::NUM_STATES); i++)
     {
-        kalmanGain[i] =
-            P[i * int(OdomState::NUM_STATES) + stateIndex] / innovationCovariance;
+        kalmanGain[i] = P[i * int(OdomState::NUM_STATES) + stateIndex] / innovationCovariance;
         measurementRow[i] = P[stateIndex * int(OdomState::NUM_STATES) + i];
     }
 
@@ -354,10 +353,8 @@ void FourWheelEKFOdometry::fuseScalarMeasurement(
     {
         for (int col = row + 1; col < int(OdomState::NUM_STATES); col++)
         {
-            const float symmetrizedCovariance =
-                0.5f *
-                (P[row * int(OdomState::NUM_STATES) + col] +
-                 P[col * int(OdomState::NUM_STATES) + row]);
+            const float symmetrizedCovariance = 0.5f * (P[row * int(OdomState::NUM_STATES) + col] +
+                                                        P[col * int(OdomState::NUM_STATES) + row]);
             P[row * int(OdomState::NUM_STATES) + col] = symmetrizedCovariance;
             P[col * int(OdomState::NUM_STATES) + row] = symmetrizedCovariance;
         }

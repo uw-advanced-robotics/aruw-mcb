@@ -200,13 +200,10 @@ private:
     static constexpr float MAX_DT = 0.02f;    // Upper bound on dt to avoid large prediction jumps
     static constexpr float WHEEL_RADIUS_SCALE = 1.0f;  // Wheel radius calibration scale
 
-    static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE =
-        1.0f;  // Base wheel speed variance
-    static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE =
-        1.2f;  // Accel noise variance
-    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE =
-        0.1f;  // Gyro noise variance
-    static constexpr float YAW_MEASUREMENT_VARIANCE = 1.0e-4f;  // Yaw observer variance
+    static constexpr float BASE_WHEEL_MEASUREMENT_VARIANCE = 1.0f;  // Base wheel speed variance
+    static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 1.2f;   // Accel noise variance
+    static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.1f;    // Gyro noise variance
+    static constexpr float YAW_MEASUREMENT_VARIANCE = 1.0e-4f;      // Yaw observer variance
     static constexpr float MAX_WHEEL_SLIP_SCALE =
         100.0f;  // Maximum wheel measurement variance scale under slip
     static constexpr float MIN_VISION_MEASUREMENT_VARIANCE = 1.0e-6f;
@@ -215,40 +212,31 @@ private:
     // State order: POS_X, POS_Y, VEL_X, VEL_Y, YAW, YAW_RATE, ACC_X, ACC_Y.
     // Larger values = less trust in model, more responsive to measurements
     static constexpr float EKF_Q[STATES_SQUARED] = {
-        1E2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1E2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1E1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1E1f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 1E-2f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 5E0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 5E0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 5E0f,
+        1E2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E2f, 0.0f,  0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        0.0f, 1E1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E-2f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 5E0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        0.0f, 0.0f, 5E0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  5E0f,
     };
 
     // Measurement noise covariance matrix (R).
     // Measurement order: WHEEL_0..WHEEL_3, ACC_X, ACC_Y, GYRO_Z, YAW.
     // Higher value means less trust
     static constexpr float EKF_R[INPUTS_SQUARED] = {
-        1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 1.2f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.2f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0e-1f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0e-4f,
+        1.0f, 0.0f, 0.0f,    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,    0.0f,
+        0.0f, 0.0f, 0.0f,    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,    0.0f,
+        0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.2f, 0.0f,    0.0f,
+        0.0f, 0.0f, 0.0f,    0.0f, 0.0f, 0.0f, 1.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,    0.0f,
+        0.0f, 0.0f, 1.0e-1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0e-4f,
     };
 
     // Initial state covariance matrix P0
     static constexpr float EKF_P0[STATES_SQUARED] = {
-        1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f,
+        1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1E3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1E3f,
     };
     // clang-format on
 
@@ -286,7 +274,11 @@ private:
         const modm::Vector2f& imuAccelWorld,
         bool yawMeasurementValid,
         float dt);
-    void fuseScalarMeasurement(OdomState state, float measurement, float variance, bool wrapResidual);
+    void fuseScalarMeasurement(
+        OdomState state,
+        float measurement,
+        float variance,
+        bool wrapResidual);
     void captureControlPredictedState();
 
     // EKF function definitions
