@@ -7,7 +7,7 @@
                 "ENV_UNIT_TESTS",
                 "PLATFORM_HOSTED",
                 "RUN_WITH_PROFILING",
-                "STANDARD_VOID"
+                "STANDARD_PHOBOS"
             ],
             "includePath": [
                 "${default}",
@@ -66,8 +66,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_STANDARD_VOID",
-                "BUILD_TARGET=\"TARGET_STANDARD_VOID\""
+                "TARGET_STANDARD_PHOBOS",
+                "BUILD_TARGET=\"TARGET_STANDARD_PHOBOS\""
             ]
         },
         {

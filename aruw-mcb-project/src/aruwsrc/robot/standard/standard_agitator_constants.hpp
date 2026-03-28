@@ -89,7 +89,7 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
         .targetCycleCount = 3,
 };
-#elif defined(TARGET_STANDARD_VOID)
+#elif defined(TARGET_STANDARD_PHOBOS)
 // position PID terms
 // PID terms for standard
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {

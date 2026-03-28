@@ -15,14 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
-from SCons.Script import *
-
 from build_tools.parse_args import USAGE
+from SCons.Script import *
 
 # TODO: Make this sync up with check.py and c_cpp_properties.json if possible
 VALID_ROBOT_TYPES = [
     "STANDARD_NULL",
-    "STANDARD_VOID",
+    "STANDARD_PHOBOS",
     "DRONE",
     "ENGINEER",
     "SENTRY_ECLIPSE",
@@ -38,7 +37,7 @@ VALID_ROBOT_TYPES = [
 
 ROBOT_CLASS = {
     "STANDARD_NULL": "standard",
-    "STANDARD_VOID": "standard",
+    "STANDARD_PHOBOS": "standard",
     "DRONE": "drone",
     "ENGINEER": "engineer",
     "SENTRY_ECLIPSE": "sentry",
@@ -47,16 +46,22 @@ ROBOT_CLASS = {
     "TESTBED": "testbed",
     "BLANK": "blank",
     "MOTOR_TESTER": "motor_tester",
-    "FLYWHEEL_TESTING" : "flywheel_testing",
-    "LAUNCHER_TARGET" : "launcher_target",
+    "FLYWHEEL_TESTING": "flywheel_testing",
+    "LAUNCHER_TARGET": "launcher_target",
     "CHARACTERIZER": "characterizer",
 }
 
 # Make sure that all robots have a class
 assert all([robot in ROBOT_CLASS.keys() for robot in VALID_ROBOT_TYPES])
 
+
 def search_for_robot_type(query):
-    return [robot for robot in VALID_ROBOT_TYPES if query.lower() in robot.lower()] if query else []
+    return (
+        [robot for robot in VALID_ROBOT_TYPES if query.lower() in robot.lower()]
+        if query
+        else []
+    )
+
 
 def get_robot_type():
     robot_query = ARGUMENTS.get("robot")
@@ -73,7 +78,7 @@ def get_robot_type():
         prompt += "--> "
         robot_query = input(prompt)
         robot_type_matches = search_for_robot_type(robot_query)
-    
+
     # Check against valid robot type
     if len(robot_type_matches) != 1:
         raise Exception(USAGE)

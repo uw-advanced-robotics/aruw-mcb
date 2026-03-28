@@ -66,7 +66,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-#elif defined(TARGET_STANDARD_VOID)
+#elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 8184,
@@ -108,7 +108,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 0.0f,
 };
 
-#elif defined(TARGET_STANDARD_VOID)
+#elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr float TORQUE_TO_DESIRED_OUT =
     1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
 static constexpr float TURRET_WEIGHT_KG = 1.646f;       // 1.646kg from CAD
@@ -214,7 +214,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-#elif defined(TARGET_STANDARD_VOID)
+#elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 1050.0f,
     .ki = 0.0f,
@@ -351,7 +351,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-#elif defined(TARGET_STANDARD_VOID)
+#elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 25'000.0f,
     .ki = 200.0f,
