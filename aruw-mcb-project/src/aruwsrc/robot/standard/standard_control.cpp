@@ -536,10 +536,11 @@ FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 ManualFireRateReselectionManager manualFireRateReselectionManager;
 FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
 
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&frictionWheelsOnGovernor, &fireRateLimitGovernor});
+    // {&frictionWheelsOnGovernor, &fireRateLimitGovernor});
+    {&fireRateLimitGovernor});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
@@ -656,7 +657,7 @@ HoldRepeatCommandMapping rightSwitchMiddle(
 
 HoldRepeatCommandMapping rightSwitchUp(
     drivers(),
-    {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
+    {&spinFrictionWheels, &rotateAndUnjamAgitator},
     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
     true);
 
