@@ -26,4 +26,22 @@ namespace aruwsrc::control::buzzer
 
 // TODO: Write function implementations
 
+BuzzerSubsystem::BuzzerSubsystem(tap::Drivers* drivers)
+	: Subsystem(drivers)
+	{}
+
+void playFrequency(float frequency) {
+    tap::buzzer::playNote(gpio::Pwm *pwmController, frequency)
+}
+
+void playNote(uint8_t note) {
+
+}
+
+void stop() {
+
+}
+
+
+
 }  // namespace aruwsrc::control::buzzer
