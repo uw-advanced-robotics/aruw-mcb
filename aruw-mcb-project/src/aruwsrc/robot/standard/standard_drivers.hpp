@@ -97,13 +97,55 @@ public:
     communication::rtt::RttTelemetry rttTelemetry;
     display::OledDisplay oledDisplay;
     communication::can::TurretMCBCanComm turretMCBCanCommBus1;
-    communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     communication::can::cap_bank::CapacitorBank capacitorBank;
     algorithms::PlateHitTracker plateHitTracker;
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
+
+    void init(const float mainLoopFrequency)
+    {
+        visionCoprocessor.initializeCV();
+        turretMCBCanCommBus1.init();
+        oledDisplay.initialize();
+        mpu6500.setCalibrationSamples(2000);
+        capacitorBank.initialize();
+    }
+
+    void updateIo()
+    {
+        oledDisplay.updateDisplay();
+        visionCoprocessor.updateSerial();
+        interRobotTransmitter.updateState();
+        interRobotTransmitter.sendMessage();
+    }
+
+    void update()
+    {
+        plateHitTracker.update();
+        turretMCBCanCommBus1.sendData();
+        oledDisplay.updateMenu();
+        visionCoprocessor.sendMessage();
+        rttTelemetry.updateTelemetryAsync();
+        checkTurretMcbDisconnection(this);
+    }
+
+private:
+    inline void checkTurretMcbDisconnection(Drivers* drivers)
+    {
+        bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
+        if (!turretMcbConnected &&
+            drivers->mpu6500.getImuState() !=
+                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+        {
+            tap::buzzer::playNote(&drivers->pwm, 1000);
+        }
+        else
+        {
+            tap::buzzer::silenceBuzzer(&drivers->pwm);
+        }
+    }
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard

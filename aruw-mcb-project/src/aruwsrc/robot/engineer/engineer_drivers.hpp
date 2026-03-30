@@ -84,6 +84,37 @@ public:
 
     communication::can::TurretMCBCanComm turretMCBCanCommBus1;
     communication::can::TurretMCBCanComm turretMCBCanCommBus2;
+
+    void init(const float)
+    {
+        turretMCBCanCommBus1.init();
+        turretMCBCanCommBus2.init();
+        engineerCVCommunication.initializeCV();
+        oledDisplay.initialize();
+        digital.configureInputPullMode(
+            tap::gpio::Digital::B,
+            tap::gpio::Digital::InputPullMode::PullUp);
+        digital.configureInputPullMode(
+            tap::gpio::Digital::D,
+            tap::gpio::Digital::InputPullMode::PullUp);
+        digital.configureInputPullMode(
+            tap::gpio::Digital::T,
+            tap::gpio::Digital::InputPullMode::PullUp);
+    }
+
+    void updateIO()
+    {
+        oledDisplay.updateDisplay();
+        engineerCVCommunication.updateSerial();
+    }
+
+    void update()
+    {
+        turretMCBCanCommBus1.sendData();
+        turretMCBCanCommBus2.sendData();
+        oledDisplay.updateMenu();
+        rttTelemetry.updateTelemetryAsync();
+    }
 #endif
 };  // class aruwsrc::EngineerDrivers
 }  // namespace aruwsrc::engineer
