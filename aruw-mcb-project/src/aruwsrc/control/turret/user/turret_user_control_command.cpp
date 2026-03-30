@@ -64,7 +64,7 @@ bool TurretUserControlCommand::isReady()
     // ELSE:
     //     RETURN false (not ready)
     // Controllers have an isOnline() method to check hardware status
-    return (yawController->isOnline() && pitchController->isOnline() && this->isFinished());
+    return (yawController->isOnline() && pitchController->isOnline() && !this->isFinished());
 }
 
 // STEP 2 (Turret User Control): Implement initialize method
@@ -115,7 +115,7 @@ void TurretUserControlCommand::execute()
     //     CALL runController with time delta and new setpoint
     //     This updates motor outputs to track the desired position
     yawController->runController(dt, yaw_setpoint);
-    yawController->runController(dt, pitch_setpoint);
+    pitchController->runController(dt, pitch_setpoint);
 }
 
 // STEP 4B (Turret User Control): Implement isFinished
@@ -132,7 +132,7 @@ bool TurretUserControlCommand::isFinished() const
 }
 
 // STEP 4C (Turret User Control): Implement end
-void TurretUserControlCommand::end(bool interrupted)
+void TurretUserControlCommand::end(bool)
 {
     // TODO: Clean up when command ends
     // This method ensures the robot is left in a safe state
