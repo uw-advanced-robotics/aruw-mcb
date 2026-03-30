@@ -26,20 +26,21 @@ namespace aruwsrc::control::buzzer
 
 // TODO: Write function implementations
 
-BuzzerSubsystem::BuzzerSubsystem(tap::Drivers* drivers)
+BuzzerSubsystem::BuzzerSubsystem(tap::Drivers* drivers) 
 	: Subsystem(drivers)
 	{}
+    //sarahnote: need to add "BuzzerSubsystem::" as part of buzzersubsystem class to have it recognize .hpp vars and drivers
 
-void playFrequency(float frequency) {
-    tap::buzzer::playNote(gpio::Pwm *pwmController, frequency)
+void BuzzerSubsystem::playFrequency(float frequency) {
+    tap::buzzer::playNote(&drivers->pwm, frequency)
 }
 
-void playNote(uint8_t note) {
-
+void BuzzerSubsystem::playNote(uint8_t note) {
+    playFrequency(NOTE_FREQUENCIES[note])
 }
 
-void stop() {
-
+void BuzzerSubsystem::stop() {
+    tap::buzzer::silenceBuzzer(&drivers->pwm);
 }
 
 
