@@ -34,6 +34,7 @@
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/robot/engineer/custom_controller.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 
 #endif
@@ -52,6 +53,7 @@ public:
         : tap::Drivers(),
           rttTelemetry(this),
           controlOperatorInterface(this),
+          customController(this),
           oledDisplay(
               this,
               nullptr,
@@ -79,6 +81,7 @@ public:
 public:
     communication::rtt::RttTelemetry rttTelemetry;
     engineer::EngineerControlOperatorInterface controlOperatorInterface;
+    engineer::CustomController customController;
     display::OledDisplay oledDisplay;
     communication::serial::EngineerCVCommunication engineerCVCommunication;
 
