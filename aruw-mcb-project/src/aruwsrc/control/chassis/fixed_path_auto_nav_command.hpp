@@ -16,25 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef FIXED_PATH_AUTO_NAC_COMMAND_HPP_
 #define FIXED_PATH_AUTO_NAC_COMMAND_HPP_
 
+#include <span>
+
+#include "tap/algorithms/transforms/position.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
-#include "tap/algorithms/transforms/position.hpp"
-
-#include <span>
 
 namespace aruwsrc::control::chassis
 {
 class FixedPathAutoNavCommand : public AutoNavCommand
 {
 public:
-    FixedPathAutoNavCommand(    
+    FixedPathAutoNavCommand(
         const tap::Drivers& drivers,
         chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,

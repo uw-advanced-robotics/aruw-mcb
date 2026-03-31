@@ -18,8 +18,8 @@
  */
 #include "chassis_auto_nav_controller.hpp"
 
-#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/architecture/periodic_timer.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 
 namespace aruwsrc::control::chassis
 {
@@ -113,7 +113,7 @@ Position ChassisAutoNavController::calculateSetPoint(
         path->clearPathChanged();
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
     }
-    
+
     float robotParam = path->estimateRobotProgress(current, lastParameter);
 
     lastParameter = robotParam;
@@ -131,7 +131,6 @@ Position ChassisAutoNavController::calculateSetPoint(
     return lookaheadPos;
 }
 
-
 bool ChassisAutoNavController::atSetpoint()
 {
     Position curr = transformer->getWorldToChassis().getTranslation();
@@ -140,10 +139,10 @@ bool ChassisAutoNavController::atSetpoint()
         return false;
     }
     Position goal = *path->getFinalPosition();
-    return tap::algorithms::compareFloatClose(
-        (curr - goal).magnitude(),
-        0,
-        0.2) && path->estimateRobotProgress(transformer->getWorldToChassis().getTranslation(), lastParameter) > 0.80f * path->totalDistance();  // tolerance = 1 cm
+    return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0.2) &&
+            path->estimateRobotProgress(
+                transformer->getWorldToChassis().getTranslation(),
+                lastParameter) > 0.80f * path->totalDistance();  // tolerance = 1 cm
 }
 
 }  // namespace aruwsrc::control::chassis

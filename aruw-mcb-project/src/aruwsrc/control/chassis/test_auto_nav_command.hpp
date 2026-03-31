@@ -24,8 +24,8 @@
 
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
-#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 
 namespace aruwsrc::control::chassis

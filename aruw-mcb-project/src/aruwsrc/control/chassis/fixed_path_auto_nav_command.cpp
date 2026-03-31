@@ -18,6 +18,7 @@
  */
 
 #include "fixed_path_auto_nav_command.hpp"
+
 #include <span>
 
 using aruwsrc::algorithms::AutoNavPath;

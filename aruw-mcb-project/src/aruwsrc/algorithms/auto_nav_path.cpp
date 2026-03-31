@@ -38,7 +38,7 @@ bool AutoNavPath::hasChanged() const { return pathChanged; }
 
 float AutoNavPath::positionToClosestParameter(const Position pos) const
 {
-float minDistance = F32_MAX;
+    float minDistance = F32_MAX;
     float minClosest = 0.0f;
     float currParameter = 0.0f;
 
@@ -175,7 +175,8 @@ float AutoNavPath::totalDistance() const
 {
     size_t pointIndex;
     float totalDistance = 0;
-    for(pointIndex = 0; pointIndex < setpointData.size() - 1; pointIndex++){
+    for (pointIndex = 0; pointIndex < setpointData.size() - 1; pointIndex++)
+    {
         totalDistance += Position::distance(setpointData[pointIndex], setpointData[pointIndex + 1]);
     }
     return totalDistance;

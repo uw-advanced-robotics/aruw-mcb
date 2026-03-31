@@ -368,7 +368,6 @@ aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
 
 BuzzerSubsystem engineerBuzzer(drivers());
 
-
 NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
     engineerBuzzer,
     IMU_CALIBRATE_SUCCESS_NOTES,

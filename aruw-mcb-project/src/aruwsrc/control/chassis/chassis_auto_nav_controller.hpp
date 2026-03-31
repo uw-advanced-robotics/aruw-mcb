@@ -84,9 +84,7 @@ public:
     // Sets the maximum speed the chassis moves at, in units of Meters per Second
     inline void setDesiredSpeed(float speed) { this->desiredSpeed = speed; }
 
-    inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { 
-        this->path = path; 
-    }
+    inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
 
 private:
     aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
