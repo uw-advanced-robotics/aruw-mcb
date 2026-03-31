@@ -69,7 +69,7 @@ public:
     control::ControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
 
-    void init(const float mainLoopFrequency) { oledDisplay.initialize(); }
+    void init(const float) { oledDisplay.initialize(); }
 
     void updateIo() { oledDisplay.updateDisplay(); }
 

@@ -102,7 +102,7 @@ public:
             tap::gpio::Digital::InputPullMode::PullUp);
     }
 
-    void updateIO()
+    void updateIo()
     {
         oledDisplay.updateDisplay();
         engineerCVCommunication.updateSerial();

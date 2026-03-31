@@ -60,7 +60,8 @@ public:
 
     void init(const float) { lite.initialize(); }
 
-    void updateIO() { lite.updateSerial(); }
+    void updateIo() { lite.updateSerial(); }
+
     void update()
     {
         lite.sendData();

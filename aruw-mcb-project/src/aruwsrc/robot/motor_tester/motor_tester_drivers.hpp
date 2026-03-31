@@ -45,15 +45,12 @@ public:
     communication::rtt::RttTelemetry rttTelemetry;
     display::OledDisplay oledDisplay;
 
-    void init(const float mainLoopFrequency) {
-        oledDisplay.initialize();
-    }
+    void init(const float) { oledDisplay.initialize(); }
 
-    void updateIo() {
-        oledDisplay.updateDisplay();
-    }
+    void updateIo() { oledDisplay.updateDisplay(); }
 
-    void update() {
+    void update()
+    {
         oledDisplay.updateMenu();
         rttTelemetry.updateTelemetryAsync();
     }
