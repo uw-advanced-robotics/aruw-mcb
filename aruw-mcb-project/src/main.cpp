@@ -255,6 +255,7 @@ static void updateIo(Drivers* drivers)
 
 #if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
     drivers->engineerCVCommunication.updateSerial();
+    drivers->customController.update();
 #endif
 
 #ifdef TARGET_SENTRY_ECLIPSE

@@ -24,8 +24,6 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
-
 namespace aruwsrc::engineer
 {
 using ReceivedSerialMessage = tap::communication::serial::DJISerial::ReceivedSerialMessage;
