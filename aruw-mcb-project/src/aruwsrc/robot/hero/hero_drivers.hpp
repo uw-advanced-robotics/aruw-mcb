@@ -100,7 +100,7 @@ public:
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
 
-    void init(const float mainLoopFrequency)
+    void init(const float)
     {
         visionCoprocessor.initializeCV();
         oledDisplay.initialize();
@@ -116,7 +116,33 @@ public:
         interRobotTransmitter.updateState();
         interRobotTransmitter.sendMessage();
     }
-    
+
+    void update()
+    {
+        rttTelemetry.updateTelemetryAsync();
+        plateHitTracker.update();
+        turretMCBCanCommBus1.sendData();
+        oledDisplay.updateMenu();
+        visionCoprocessor.sendMessage();
+        checkTurretMcbDisconnection(this);
+    }
+
+private:
+    inline void checkTurretMcbDisconnection(Drivers* drivers)
+    {
+        bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
+        if (!turretMcbConnected &&
+            drivers->mpu6500.getImuState() !=
+                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+        {
+            tap::buzzer::playNote(&drivers->pwm, 1000);
+        }
+        else
+        {
+            tap::buzzer::silenceBuzzer(&drivers->pwm);
+        }
+    }
+
 #endif
 };  // class aruwsrc::HeroDrivers
 }  // namespace aruwsrc::hero

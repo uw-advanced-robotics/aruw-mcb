@@ -63,13 +63,12 @@ public:
               this,
               &visionCoprocessor,
               &turretMCBCanCommBus1,
-              &turretMCBCanCommBus2,
+              nullptr,
               nullptr,
               nullptr,
               &capacitorBank,
               &rttTelemetry),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
-          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(
               this,
@@ -88,7 +87,6 @@ public:
     testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
-    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
 #else
 public:
@@ -104,7 +102,7 @@ public:
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
 
-    void init(const float mainLoopFrequency)
+    void init(const float)
     {
         visionCoprocessor.initializeCV();
         turretMCBCanCommBus1.init();
