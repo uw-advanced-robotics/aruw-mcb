@@ -56,7 +56,7 @@ public:
         : tap::Drivers(),
           rttTelemetry(this),
           controlOperatorInterface(this),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &rttTelemetry),
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &rttTelemetry)
     {
     }
 
