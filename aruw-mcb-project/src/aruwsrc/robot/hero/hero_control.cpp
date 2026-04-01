@@ -728,12 +728,12 @@ void registerHeroSubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
-    // chassis.setDefaultCommand(&chassisAutorotateCommand);
-    // frictionWheels.setDefaultCommand(&stopFrictionWheels); //TODO: uncomment before merging
-    // turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    // waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
-    // kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
-    // clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
+    frictionWheels.setDefaultCommand(&stopFrictionWheels);
+    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
+    kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -751,22 +751,22 @@ void startHeroCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerHeroIoMappings(Drivers *drivers)
 {
-    // drivers->commandMapper.addMap(&rightSwitchMiddle);
-    // drivers->commandMapper.addMap(&rightSwitchUp);
-    // drivers->commandMapper.addMap(&leftMousePressedBNotPressedVNotPressed);
-    // drivers->commandMapper.addMap(&leftMousePressedBPressed);
-    // drivers->commandMapper.addMap(&leftMousePressedVPressed);
-    // drivers->commandMapper.addMap(&rightMousePressed);
-    // drivers->commandMapper.addMap(&leftSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchUp);
-    // drivers->commandMapper.addMap(&fToggled);
-    // drivers->commandMapper.addMap(&zPressed);
-    // drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-    // drivers->commandMapper.addMap(&bCtrlPressed);
-    // drivers->commandMapper.addMap(&rPressed);
-    // drivers->commandMapper.addMap(&cShiftPressed);
-    // drivers->commandMapper.addMap(&shiftPressed);
-    // drivers->commandMapper.addMap(&ctrlPressed);
+    drivers->commandMapper.addMap(&rightSwitchMiddle);
+    drivers->commandMapper.addMap(&rightSwitchUp);
+    drivers->commandMapper.addMap(&leftMousePressedBNotPressedVNotPressed);
+    drivers->commandMapper.addMap(&leftMousePressedBPressed);
+    drivers->commandMapper.addMap(&leftMousePressedVPressed);
+    drivers->commandMapper.addMap(&rightMousePressed);
+    drivers->commandMapper.addMap(&leftSwitchDown);
+    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(&fToggled);
+    drivers->commandMapper.addMap(&zPressed);
+    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
+    drivers->commandMapper.addMap(&bCtrlPressed);
+    drivers->commandMapper.addMap(&rPressed);
+    drivers->commandMapper.addMap(&cShiftPressed);
+    drivers->commandMapper.addMap(&shiftPressed);
+    drivers->commandMapper.addMap(&ctrlPressed);
 }
 }  // namespace hero_control
 
