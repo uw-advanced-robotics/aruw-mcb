@@ -67,11 +67,6 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace flywheel_testing_control
 {
-inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
-{
-    return drivers()->turretMCBCanCommBus1;
-}
-
 /* define subsystems --------------------------------------------------------*/
 tap::motor::DjiMotor leftFrictionWheel(
     drivers(),
