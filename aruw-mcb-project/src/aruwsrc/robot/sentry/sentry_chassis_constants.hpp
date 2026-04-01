@@ -52,7 +52,6 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
  */
 static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
 
-
 /// @see power_limiter.hpp for what these mean
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
