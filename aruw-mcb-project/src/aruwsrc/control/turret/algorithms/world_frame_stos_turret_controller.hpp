@@ -31,7 +31,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 #include "turret_controller_interface.hpp"
-#include "turret_kalman.hpp"
+#include "turret_setpoint_kalman.hpp"
 
 using namespace tap::algorithms;
 

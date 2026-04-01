@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef TURRET_KALMAN_HPP_
-#define TURRET_KALMAN_HPP_
+#ifndef TURRET_SETPOINT_KALMAN_HPP_
+#define TURRET_SETPOINT_KALMAN_HPP_
 
 #include "tap/algorithms/wrapped_float.hpp"
 
@@ -80,4 +80,4 @@ private:
 
 }  // namespace aruwsrc::control::turret::algorithms
 
-#endif  // TURRET_KALMAN_HPP_
+#endif  // TURRET_SETPOINT_KALMAN_HPP_
