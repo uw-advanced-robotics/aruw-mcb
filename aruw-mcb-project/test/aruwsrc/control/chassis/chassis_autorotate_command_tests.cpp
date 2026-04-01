@@ -118,9 +118,7 @@ TEST_P(TurretOfflineTest, runExecuteTestTurretOffline)
     ON_CALL(controlOperatorInterface, getChassisRInput).WillByDefault(Return(requestedR));
 
     // Get the max speed
-    float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers.refSerial.getRefSerialReceivingData(),
-        HolonomicChassisSubsystem::getChassisPowerLimit(&drivers));
+    float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed();
 
     float expectedX = tap::algorithms::limitVal(requestedX, -maxWheelSpeed, maxWheelSpeed);
     float expectedY = tap::algorithms::limitVal(requestedY, -maxWheelSpeed, maxWheelSpeed);

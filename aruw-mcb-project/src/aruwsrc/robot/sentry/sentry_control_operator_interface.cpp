@@ -94,9 +94,7 @@ float SentryControlOperatorInterface::getChassisXVelocity()
         prevUpdateCounterChassisXInput = updateCounter;
     }
 
-    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers->refSerial.getRefSerialReceivingData(),
-        control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed();
 
     float finalX =
         maxChassisSpeed * limitVal(chassisXInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
@@ -129,9 +127,7 @@ float SentryControlOperatorInterface::getChassisYVelocity()
         prevUpdateCounterChassisYInput = updateCounter;
     }
 
-    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers->refSerial.getRefSerialReceivingData(),
-        control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed();
 
     float finalY =
         maxChassisSpeed * limitVal(chassisYInput.getInterpolatedValue(currTime), -1.0f, 1.0f);

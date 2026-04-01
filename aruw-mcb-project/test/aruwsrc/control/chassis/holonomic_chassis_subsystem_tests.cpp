@@ -242,44 +242,6 @@ INSTANTIATE_TEST_SUITE_P(
     VelocityGetterTest,
     ValuesIn(velocityGetterValuesToTest));
 
-class MaxWheelSpeedGetterTest : public TestWithParam<std::tuple<bool, int, float>>
-{
-};
-
-TEST_P(MaxWheelSpeedGetterTest, getMaxWheelSpeed)
-{
-    float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-        std::get<0>(GetParam()),
-        std::get<1>(GetParam()));
-
-    EXPECT_NEAR(std::get<2>(GetParam()), maxWheelSpeed, 1E-3);
-}
-
-static constexpr int POWER_TO_SPEED_LUT_ELEMENTS = MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT);
-
-std::tuple<bool, int, float> maxWheelSpeedValuesToTest[] = {
-    {false, 0, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {false, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first - 1, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {false, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {true, 0, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {true, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first - 1, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {true, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {true,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].first,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].second},
-    {true,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].first + 1,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].second},
-    {false,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].first,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-};
-
-INSTANTIATE_TEST_SUITE_P(
-    HolonomicChassisSubsystem,
-    MaxWheelSpeedGetterTest,
-    ValuesIn(maxWheelSpeedValuesToTest));
-
 struct ActualVelocityParam
 {
     float lfVel, lbVel, rfVel, rbVel;
