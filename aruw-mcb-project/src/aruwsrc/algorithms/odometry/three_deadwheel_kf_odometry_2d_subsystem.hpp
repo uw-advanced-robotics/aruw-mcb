@@ -87,7 +87,6 @@ public:
     void overrideOdometryPosition(const float positionX, const float positionY);
 
     void overrideOdometryOrientation(const float deltaYaw);
-
 };
 
 }  // namespace aruwsrc::algorithms::odometry
