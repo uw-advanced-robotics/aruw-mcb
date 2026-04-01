@@ -68,27 +68,18 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 300.0f;
-static constexpr float VELOCITY_PID_KI = 14.0f;
-static constexpr float VELOCITY_PID_KD = 10.0f;
-static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float VELOCITY_PID_KV = 0.07f;
 static constexpr float VELOCITY_PID_KS = 1.0f;
 
-/**
- * This max output is measured in the c620 robomaster translated current.
- * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
- * The corresponding speed controller output torque current range is
- * -20 ~ 0 ~ 20 A.
- */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C620;
-
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
-    .kp = VELOCITY_PID_KP,
-    .ki = VELOCITY_PID_KI,
-    .kd = VELOCITY_PID_KD,
-    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
-    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+    .kp = 300.0f,
+    .ki = 14.0f,
+    .kd = 1.0f,
+    .maxICumulative = 1000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 0.5f,
+    .smoothDeadzone = true,
+    .antiSaturation = true,
 };
 
 /**
