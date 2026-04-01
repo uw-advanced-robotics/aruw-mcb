@@ -25,6 +25,7 @@
 #include "modm/math/geometry.hpp"
 
 // See this paper: https://ieeexplore.ieee.org/document/1264127
+// This is the implementation for case 1.
 namespace aruwsrc::control::turret::algorithms
 {
 class OptimalSTOSController
@@ -33,7 +34,7 @@ private:
     float a, U_b2;
     float a1, a2, T_d;
     float E_pos, E_neg;
-    float S1_const, S4_const;
+    float S1_const, S4_const, x_star_const;
 
     float J_TOTAL;
     float TAU_MAX;
@@ -45,12 +46,12 @@ private:
 public:
     struct STOSConstants
     {
-        float J_TOTAL;
-        float TAU_MAX;
-        float B_DAMP;
-        float W_D;
-        float ZETA;
-        float SYSTEM_DELAY_SEC;
+        float J_TOTAL;           // Rigid body inertia
+        float TAU_MAX;           // Max torque
+        float B_DAMP;            // Rigid body damping
+        float W_D;               // Damped natural frequency of flexible system
+        float ZETA;              // Damping ratio of the flexible system
+        float SYSTEM_DELAY_SEC;  // Total system delay (sensing + computation + actuation)
     };
 
     OptimalSTOSController(STOSConstants constants)
@@ -97,6 +98,17 @@ private:
     // Evaluates the IEEE Eq. 21 STOS Switching Logic for the 2nd Quadrant
     float evaluateF1(float xe, float v)
     {
+        // in the little x_star region
+        if (xe >= x_star_const && v <= S4_const)
+        {
+            return (-a2 * TAU_MAX);
+        }
+
+        if (v <= S1_const && xe < x_star_const)
+        {
+            return a1 * TAU_MAX;
+        }
+
         // 1. Calculate the Dynamic S2 Curve (Boundary between +U and +a2_kick)
         float arg2 = 1.0f + (a * v - a2 * U_b2 * (1.0f - E_pos)) / (U_b2 * (a1 + a2 * E_pos));
         if (arg2 < 1e-6f) arg2 = 1e-6f;  // Safety clamp for log
@@ -127,10 +139,10 @@ private:
     void calculateConstants()
     {
         a = B_DAMP / J_TOTAL;
-        U_b2 = TAU_MAX / J_TOTAL;
+        float b2 = 1 / J_TOTAL;
+        U_b2 = TAU_MAX * b2;
 
-        float denom = std::sqrt(1.0f - (ZETA * ZETA));
-        float M = std::exp(-(ZETA * static_cast<float>(M_PI)) / denom);
+        float M = std::exp(-(ZETA * M_PI) / std::sqrt(1.0f - (ZETA * ZETA)));
         a1 = 1.0f / (1.0f + M);
         a2 = M / (1.0f + M);
         T_d = static_cast<float>(M_PI) / W_D;
@@ -140,6 +152,9 @@ private:
 
         S1_const = (a1 * U_b2 / a) * (1.0f - E_neg);
         S4_const = (a2 * U_b2 / a) * (E_pos - 1.0f);
+
+        x_star_const = (U_b2 / (a * a)) * std::log((a1 + a2 * E_pos) / (a2 + a1 * E_neg)) -
+                       (U_b2 * a2 / (a * a)) * (E_pos - 1.0f) - (a1 * U_b2) / (a)*T_d;
     }
 };
 }  // namespace aruwsrc::control::turret::algorithms
