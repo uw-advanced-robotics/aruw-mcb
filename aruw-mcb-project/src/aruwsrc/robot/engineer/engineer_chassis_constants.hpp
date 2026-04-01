@@ -166,7 +166,7 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
  * Engineer auto nav path
  */
 static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_START_POSITION =
-    Position(0.5f, 0.5f);  // TODO: find actual start position
+    Position(0.5f, 0.5f, 0);  // TODO: find actual start position
 static const float ENGINEER_AUTO_NAV_MARIGIN =
     0.05f;  // Addition marigin between target above robot width
 static const float ENGINEER_AUTO_NAV_POINT_OFFSET_X =
