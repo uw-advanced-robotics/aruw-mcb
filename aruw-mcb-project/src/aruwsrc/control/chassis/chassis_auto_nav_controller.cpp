@@ -140,9 +140,9 @@ bool ChassisAutoNavController::atSetpoint()
     }
     Position goal = *path->getFinalPosition();
     return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0.2) &&
-        path->estimateRobotProgress(
-            transformer->getWorldToChassis().getTranslation(),
-            lastParameter) > 0.80f * path->totalDistance();  // tolerance = 1 cm
+           path->estimateRobotProgress(
+               transformer->getWorldToChassis().getTranslation(),
+               lastParameter) > 0.80f * path->totalDistance();  // tolerance = 1 cm
 }
 
 }  // namespace aruwsrc::control::chassis

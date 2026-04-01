@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef FIXED_PATH_AUTO_NAC_COMMAND_HPP_
-#define FIXED_PATH_AUTO_NAC_COMMAND_HPP_
+#ifndef FIXED_PATH_AUTO_NAV_COMMAND_HPP_
+#define FIXED_PATH_AUTO_NAV_COMMAND_HPP_
 
 #include <span>
 
