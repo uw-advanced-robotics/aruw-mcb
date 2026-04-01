@@ -822,7 +822,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
-    //drivers->commandMapper.addMap(&leftSwitchUp);
+    // drivers->commandMapper.addMap(&leftSwitchUp);
     drivers->commandMapper.addMap(&rPressed);
     drivers->commandMapper.addMap(&fToggled);
     drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
