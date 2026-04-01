@@ -81,13 +81,13 @@ private:
     };
 
     static constexpr TextIndicatorData agitatorJammed =
-        {"Jammed", Tx::GraphicColor::ORANGE, 1030, 840, 20, 3};
+        {"Jammed", Tx::GraphicColor::ORANGE, 1500, 850, 50, 6};
     static constexpr TextIndicatorData imuCalibrating =
-        {"Calibrating", Tx::GraphicColor::ORANGE, 730, 840, 20, 3};
+        {"Calibrating", Tx::GraphicColor::ORANGE, 1300, 800, 50, 6};
     static constexpr TextIndicatorData notSpinning =
-        {"SPIN!", Tx::GraphicColor::PURPLISH_RED, 730, 800, 100, 10};
+        {"SPIN!", Tx::GraphicColor::PURPLISH_RED, 1500, 750, 50, 6};
     static constexpr TextIndicatorData sentryLow =
-        {"SENTRY", Tx::GraphicColor::YELLOW, 680, 840, 60, 10};
+        {"SENTRY", Tx::GraphicColor::YELLOW, 1500, 700, 50, 6};
 
     static constexpr TextIndicatorData INDICATOR_LIST[NUM_TEXT_HUD_INDICATORS] = {
         agitatorJammed,

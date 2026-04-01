@@ -82,7 +82,7 @@ modm::ResumableResult<void> VisionTargetIndicator::update()
         &visionTargetGraphic,
         true,
         true,
-        visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_MODIFY));
+        visionTargetGraphic.graphicData.operation != Tx::GRAPHIC_MODIFY));
 
     RF_END();
 }
