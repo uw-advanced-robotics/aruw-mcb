@@ -71,24 +71,9 @@ public:
         R = 2,
     };
 
-    static inline float getMaxWheelSpeed(bool refSerialOnline, float chassisPowerLimit)
+    static inline float getMaxWheelSpeed()
     {
-        if (!refSerialOnline)
-        {
-            chassisPowerLimit = 0;
-        }
-
-        // only re-interpolate when needed (since this function is called a lot and the chassis
-        // power limit rarely changes, this helps cut down on unnecessary array
-        // searching/interpolation)
-        if (lastComputedMaxWheelSpeed.first != (int)chassisPowerLimit)
-        {
-            lastComputedMaxWheelSpeed.first = (int)chassisPowerLimit;
-            lastComputedMaxWheelSpeed.second =
-                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPowerLimit);
-        }
-
-        return lastComputedMaxWheelSpeed.second;
+        return MAX_CHASSIS_WHEEL_SPEED_RPM;
     }
 
     static inline float getChassisPowerLimit(tap::Drivers* drivers)
@@ -158,7 +143,6 @@ public:
 
     mockable inline float getDesiredRotation() const { return desiredRotation; }
 
-    static modm::Pair<int, float> lastComputedMaxWheelSpeed;
     static communication::can::cap_bank::CapacitorBank* capacitorBank;
 
     float desiredRotation = 0;

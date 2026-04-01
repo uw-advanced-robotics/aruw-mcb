@@ -50,9 +50,7 @@ void AutoNavBeybladeCommand::initialize() { autoNavController.initialize(); }
 
 void AutoNavBeybladeCommand::execute()
 {
-    const float maxWheelSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers.refSerial.getRefSerialReceivingData(),
-        drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
+    const float maxWheelSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed();
 
     const GameData gameData = drivers.refSerial.getGameData();
 

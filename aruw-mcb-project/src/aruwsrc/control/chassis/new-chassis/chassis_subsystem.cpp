@@ -31,9 +31,6 @@ namespace aruwsrc
 {
 namespace control::chassis::new_chassis
 {
-modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
-    CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
-
 ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
     std::vector<Wheel>* wheels,

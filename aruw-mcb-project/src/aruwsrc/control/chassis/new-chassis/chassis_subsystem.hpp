@@ -76,21 +76,7 @@ public:
 
     static inline float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
     {
-        if (!refSerialOnline)
-        {
-            chassisPower = 0;
-        }
-
-        // only re-interpolate when needed (since this function is called a lot and the chassis
-        // power rarely changes, this helps cut down on unnecessary array searching/interpolation)
-        if (lastComputedMaxWheelSpeed.first != chassisPower)
-        {
-            lastComputedMaxWheelSpeed.first = chassisPower;
-            lastComputedMaxWheelSpeed.second =
-                CHASSIS_POWER_TO_SPEED_INTERPOLATOR.interpolate(chassisPower);
-        }
-
-        return lastComputedMaxWheelSpeed.second;
+       return MAX_CHASSIS_WHEEL_SPEED_RPM;
     }
 
     inline int getNumChassisWheels() const { return wheels.size(); }
@@ -170,8 +156,6 @@ public:
     const char* getName() const override { return "Chassis"; }
 
     mockable inline float getDesiredRotation() const { return desiredRotation; }
-
-    static modm::Pair<int, float> lastComputedMaxWheelSpeed;
 
     float desiredRotation = 0;
 

@@ -72,9 +72,7 @@ void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r
         x,
         y,
         r,
-        getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            HolonomicChassisSubsystem::getChassisPowerLimit(drivers)));
+        getMaxWheelSpeed());
 }
 modm::Matrix<float, 3, 1> state;
 void Holonomic4MotorChassisSubsystem::refresh()

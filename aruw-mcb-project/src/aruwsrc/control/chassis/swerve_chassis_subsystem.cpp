@@ -76,9 +76,7 @@ void SwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
         x,
         y,
         r,
-        getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            HolonomicChassisSubsystem::getChassisPowerLimit(drivers)));
+        getMaxWheelSpeed());
 }
 
 void SwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)

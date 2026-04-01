@@ -27,8 +27,6 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::chassis
 {
-modm::Pair<int, float> HolonomicChassisSubsystem::lastComputedMaxWheelSpeed =
-    CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
 
 communication::can::cap_bank::CapacitorBank* HolonomicChassisSubsystem::capacitorBank = nullptr;
 
