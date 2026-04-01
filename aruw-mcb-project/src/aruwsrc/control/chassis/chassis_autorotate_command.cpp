@@ -134,8 +134,7 @@ void ChassisAutorotateCommand::execute()
         }
 
         const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+            );
 
         // the x/y translational speed is limited to this value, this means when rotation is
         // large, the translational speed will be clamped to a smaller value to compensate
