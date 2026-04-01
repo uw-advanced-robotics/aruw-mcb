@@ -112,8 +112,6 @@ int main()
 
         if (sendMotorTimeout.execute())
         {
-            const uint32_t loop500HzStartUs = tap::arch::clock::getTimeMicroseconds();
-
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());

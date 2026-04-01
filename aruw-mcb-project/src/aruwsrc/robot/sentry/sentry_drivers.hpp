@@ -47,17 +47,12 @@
 
 namespace aruwsrc::sentry
 {
-#if defined(TARGET_SENTRY_NAME)
 using TurretMajorImuType = aruwsrc::communication::sensors::imu::FusedImuMekfKf<3>;
-#else
-using TurretMajorImuType = aruwsrc::communication::sensors::imu::ism330::ISM330;
-#endif
 
 class Drivers : public tap::Drivers
 {
     friend class DriversSingleton;
 
-#if defined(TARGET_SENTRY_NAME)
     using TurretMajorTransform = tap::algorithms::transforms::Transform;
     static inline const std::array<TurretMajorTransform, 3> turretMajorImuTransforms = {
         // Jetson is forward, X forward, Y left.
@@ -69,7 +64,6 @@ class Drivers : public tap::Drivers
         TurretMajorImuType::ImuType::ISM330DHCX,
         TurretMajorImuType::ImuType::ISM330DHCX,
         TurretMajorImuType::ImuType::MPU6500};
-#endif
 
 #ifdef ENV_UNIT_TESTS
 public:
@@ -95,7 +89,6 @@ public:
               this,
               tap::can::CanBus::CAN_BUS1,
               aruwsrc::control::chassis::CAP_BANK_CAPACITANCE),
-#if defined(TARGET_SENTRY_NAME)
           turretMajorPrimaryImu(
               aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
                   Board::SpiNss>()),
@@ -108,9 +101,6 @@ public:
               turretMajorImuTypes,
               TurretMajorImuType::Config(),
               &rttTelemetry),
-#else
-          turretMajorImu(),
-#endif
           plateHitTracker(this),
           stateMachine(refSerial, visionCoprocessor)
     {
@@ -135,10 +125,8 @@ public:
     aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     aruwsrc::communication::can::cap_bank::CapacitorBank capacitorBank;
-#if defined(TARGET_SENTRY_NAME)
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorPrimaryImu;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImuSecondary;
-#endif
     TurretMajorImuType turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
@@ -151,32 +139,39 @@ public:
         oledDisplay.initialize();
         capacitorBank.initialize();
         mpu6500.setCalibrationSamples(4000);
-        chassisMcbLite.initialize();
         modm::delay_ms(2000);
         turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
         turretMajorImu.setCalibrationSamples(4000);
+        turretMajorPrimaryImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        turretMajorPrimaryImu.setCalibrationSamples(4000);
+        turretMajorImuSecondary.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        turretMajorImuSecondary.setCalibrationSamples(4000);
     }
 
     void updateIo()
     {
         oledDisplay.updateDisplay();
         visionCoprocessor.updateSerial();
-        chassisMcbLite.updateSerial();
-        turretMajorImu.read();
+        turretMajorPrimaryImu.read();
+        turretMajorImuSecondary.read();
         stateMachine.updateState();
     }
 
     void update()
     {
+        const uint32_t loop500HzStartUs = tap::arch::clock::getTimeMicroseconds();
         plateHitTracker.update();
         turretMCBCanCommBus1.sendData();
         turretMCBCanCommBus2.sendData();
         oledDisplay.updateMenu();
-        chassisMcbLite.sendData();
         turretMajorImu.periodicIMUUpdate();
+        turretMajorPrimaryImu.periodicIMUUpdate();
+        turretMajorImuSecondary.periodicIMUUpdate();
         visionCoprocessor.sendMessage();
         rttTelemetry.updateTelemetryAsync();
         checkTurretMcbDisconnection(this);
+
+        rttTelemetry.logSignal("p_ml", tap::arch::clock::getTimeMicroseconds() - loop500HzStartUs);
     }
 
 private:
