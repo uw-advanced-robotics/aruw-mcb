@@ -74,10 +74,7 @@ public:
         R = 2,
     };
 
-    static inline float getMaxWheelSpeed()
-    {
-       return MAX_CHASSIS_WHEEL_SPEED_RPM;
-    }
+    static inline float getMaxWheelSpeed() { return MAX_CHASSIS_WHEEL_SPEED_RPM; }
 
     inline int getNumChassisWheels() const { return wheels.size(); }
 

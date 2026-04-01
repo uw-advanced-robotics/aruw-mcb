@@ -85,8 +85,7 @@ float ControlOperatorInterface::getChassisXInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        );
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed();
 
     float finalX = maxChassisSpeed *
                    limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);

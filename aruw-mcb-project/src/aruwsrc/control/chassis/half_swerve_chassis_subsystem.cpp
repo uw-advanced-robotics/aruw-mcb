@@ -72,11 +72,7 @@ void HalfSwerveChassisSubsystem::setDesiredOutput(float x, float y, float r)
     r = modules[0]->wheel.rpmToMps(r) / 0.230f;  // convert input from motor rpm to rad/s
     // TODO: REPLACE WITH CONSTANT FROM CONSTANTS FILE
     //^simplified tank drive rotation calculation that doesnt take width_y into account
-    swerveDriveCalculate(
-        x,
-        y,
-        r,
-        getMaxWheelSpeed());
+    swerveDriveCalculate(x, y, r, getMaxWheelSpeed());
 }
 
 void HalfSwerveChassisSubsystem::swerveDriveCalculate(float x, float y, float r, float maxWheelRPM)

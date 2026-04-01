@@ -36,7 +36,6 @@ using tap::motor::DjiMotor;
 
 namespace aruwsrc::control::chassis
 {
-
 /**
  * The minimum desired wheel speed for chassis rotation when translational scaling via
  * calculateRotationTranslationalGain is performed.
@@ -118,7 +117,9 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
 };
 
 static constexpr float MAX_3508_PRE_GEARBOX_RPM = 482.0f * (1 / (187.0f / 3591.0f));
-static constexpr float MAX_CHASSIS_WHEEL_SPEED_RPM = MAX_3508_PRE_GEARBOX_RPM * CHASSIS_GEARBOX_RATIO; // Max theoretical M3508 wheel speed post gearbox
+static constexpr float MAX_CHASSIS_WHEEL_SPEED_RPM =
+    MAX_3508_PRE_GEARBOX_RPM *
+    CHASSIS_GEARBOX_RATIO;  // Max theoretical M3508 wheel speed post gearbox
 
 }  // namespace aruwsrc::control::chassis
 

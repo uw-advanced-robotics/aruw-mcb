@@ -71,10 +71,7 @@ public:
         R = 2,
     };
 
-    static inline float getMaxWheelSpeed()
-    {
-        return MAX_CHASSIS_WHEEL_SPEED_RPM;
-    }
+    static inline float getMaxWheelSpeed() { return MAX_CHASSIS_WHEEL_SPEED_RPM; }
 
     static inline float getChassisPowerLimit(tap::Drivers* drivers)
     {

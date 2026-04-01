@@ -133,8 +133,7 @@ void ChassisAutorotateCommand::execute()
                 lowPassFilter(desiredRotationAverage, desiredRotation, autorotateSmoothingAlpha);
         }
 
-        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-            );
+        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed();
 
         // the x/y translational speed is limited to this value, this means when rotation is
         // large, the translational speed will be clamped to a smaller value to compensate

@@ -27,7 +27,6 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::chassis
 {
-
 communication::can::cap_bank::CapacitorBank* HolonomicChassisSubsystem::capacitorBank = nullptr;
 
 HolonomicChassisSubsystem::HolonomicChassisSubsystem(
@@ -82,8 +81,7 @@ float HolonomicChassisSubsystem::calculateRotationTranslationalGain(
     // MIN_ROTATION_THRESHOLD
     if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
     {
-        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-            );
+        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed();
 
         // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
         // power(max revolve speed, 2)

@@ -37,7 +37,8 @@ using namespace aruwsrc::control::chassis;
 using namespace aruwsrc;
 using namespace testing;
 
-static constexpr float MAX_SPEED = MAX_CHASSIS_WHEEL_SPEED_RPM; // Max theoretical M3508 wheel speed in m/s post gearbox
+static constexpr float MAX_SPEED =
+    MAX_CHASSIS_WHEEL_SPEED_RPM;  // Max theoretical M3508 wheel speed in m/s post gearbox
 
 static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 1,

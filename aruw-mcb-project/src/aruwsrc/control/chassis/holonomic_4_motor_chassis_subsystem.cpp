@@ -68,11 +68,7 @@ void Holonomic4MotorChassisSubsystem::initialize()
 
 void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
-    calculateOutput(
-        x,
-        y,
-        r,
-        getMaxWheelSpeed());
+    calculateOutput(x, y, r, getMaxWheelSpeed());
 }
 modm::Matrix<float, 3, 1> state;
 void Holonomic4MotorChassisSubsystem::refresh()
