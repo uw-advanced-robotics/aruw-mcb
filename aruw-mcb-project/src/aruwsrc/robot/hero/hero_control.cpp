@@ -237,13 +237,13 @@ tap::motor::DjiMotor pitchMotor(
     true,
     1,
     PITCH_MOTOR_CONFIG.startEncoderValue);
-tap::encoder::CanEncoder yawEncoder(
-    drivers(),
-    tap::encoder::CanEncoderId::ID3,
-    tap::can::CanBus::CAN_BUS2,
-    false,
-    1.0,
-    YAW_MOTOR_CONFIG.startEncoderValue);
+// tap::encoder::CanEncoder yawEncoder(
+//     drivers(),
+//     tap::encoder::CanEncoderId::ID3,
+//     tap::can::CanBus::CAN_BUS2,
+//     false,
+//     1.0,
+//     YAW_MOTOR_CONFIG.startEncoderValue);
 tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
@@ -251,7 +251,7 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (1 / 2.0f),
     0);
 HeroTurretSubsystem turret(
     drivers(),
@@ -487,13 +487,9 @@ FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
 namespace waterwheel
 {
-MoveIntegralCommand rotateWaterwheel(
-    carsonator,
-    constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+MoveIntegralCommand rotateWaterwheel(carsonator, constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
 
-UnjamIntegralCommand unjamWaterwheel(
-    carsonator,
-    constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
+UnjamIntegralCommand unjamWaterwheel(carsonator, constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
 
 MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     *drivers(),
@@ -631,10 +627,12 @@ auto leftSwitchUp = std::make_unique<HoldCommandMapping>(
     std::vector<Command *>{&chassisDriveCommand, &turretCVCommand},
     &leftUpRms);
 
+auto leftMouseBNotPressedVNotPressedRms =
+    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B, Remote::Key::V});
 auto leftMousePressedBNotPressedVNotPressed = std::make_unique<MultiShotCvCommandMapping>(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B, Remote::Key::V}),
+    leftMouseBNotPressedVNotPressedRms,
     std::nullopt,
     kicker::cvOnTargetGovernor);
 

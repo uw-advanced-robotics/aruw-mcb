@@ -43,7 +43,6 @@ static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {1, 250},
     {1, 250}};  // TODO: TUNE!
 
-
 static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
     tap::algorithms::transforms::Transform(
         0.1426,
@@ -90,14 +89,12 @@ static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C620;
 
-
 // mechanical chassis constants
 /**
  * Radius of the wheels (m)
  */
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
-
 
 /// @see power_limiter.hpp for what these mean
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
@@ -109,7 +106,7 @@ static constexpr float VELOCITY_PID_KS = 0.0f;
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 30.0f,
     .ki = 14.0f,
-    .kd = 10.0f,
+    .kd = 0.0f,
     .maxICumulative = 2000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .errDeadzone = 1.0f,
@@ -119,8 +116,10 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
-static constexpr float AUTOROTATION_PID_KD = 57.3f;
+// static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
+static constexpr float AUTOROTATION_PID_KP = 300.0f;
+// static constexpr float AUTOROTATION_PID_KD = 57.3f;
+static constexpr float AUTOROTATION_PID_KD = 0.0f;  
 static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
@@ -158,8 +157,6 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.25f,
     .beybladeRampRate = 100,
 };
-
-
 
 }  // namespace aruwsrc::control::chassis
 
