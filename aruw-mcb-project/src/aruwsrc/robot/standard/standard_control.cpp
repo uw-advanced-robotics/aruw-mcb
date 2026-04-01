@@ -819,7 +819,7 @@ void startStandardCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerStandardIoMappings(Drivers *drivers)
 {
-    /*drivers->commandMapper.addMap(&rightSwitchMiddle);
+    drivers->commandMapper.addMap(&rightSwitchMiddle);
     drivers->commandMapper.addMap(&rightSwitchUp);
     drivers->commandMapper.addMap(&leftSwitchDown);
     //drivers->commandMapper.addMap(&leftSwitchUp);
@@ -836,7 +836,7 @@ void registerStandardIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(&vPressed);
     drivers->commandMapper.addMap(&cShiftPressed);
     drivers->commandMapper.addMap(&shiftPressed);
-    drivers->commandMapper.addMap(&ctrlPressed);*/
+    drivers->commandMapper.addMap(&ctrlPressed);
 }
 }  // namespace standard_control
 
