@@ -59,8 +59,10 @@ protected:
     uint32_t updateCounter = 0;
 };
 
-static constexpr float MAX_CHASSIS_SPEED =
-    aruwsrc::control::chassis::CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
+static constexpr float MAX_3508_PRE_GEARBOX_RPM = 482.0f * (1 / (187.0f / 3591.0f));
+static constexpr float MAX_CHASSIS_WHEEL_SPEED_RPM = MAX_3508_PRE_GEARBOX_RPM * CHASSIS_GEARBOX_RATIO; // Max theoretical M3508 wheel speed post gearbox
+
+// static constexpr float MAX_CHASSIS_SPEED = 
 
 using COIChassisTuple = std::tuple<float, bool, bool, float>;
 

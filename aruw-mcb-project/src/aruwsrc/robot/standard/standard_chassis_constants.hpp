@@ -36,23 +36,6 @@ namespace aruwsrc::control::chassis
 {
 static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
 /**
- * Maps max power (in Watts) to max chassis wheel speed (RPM).
- */
-
-// static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-//     {50, 234},
-//     {60, 296},
-//     {70, 333},
-//     {80, 349},
-//     {100, 365},
-//     {120, 416},
-// };
-
-// static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
-//     CHASSIS_POWER_TO_MAX_SPEED_LUT,
-//     MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
-
-/**
  * The minimum desired wheel speed for chassis rotation when translational scaling via
  * calculateRotationTranslationalGain is performed.
  */

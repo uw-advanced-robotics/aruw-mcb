@@ -36,17 +36,6 @@
 namespace aruwsrc::control::chassis
 {
 static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
-/**
- * Maps max power (in Watts) to max chassis wheel speed (RPM).
- */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 4'500},
-    {60, 5'700},
-    {70, 6'400},
-    {80, 6'700},
-    {100, 7'000},
-    {120, 8'000},
-};
 
 static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
     tap::algorithms::transforms::Transform(
@@ -64,10 +53,6 @@ static const tap::algorithms::transforms::Transform ISM330_MCB_MOUNTING_TRANSFOR
         modm::toRadian(90),
         0,
         modm::toRadian(135));
-
-static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
-    CHASSIS_POWER_TO_MAX_SPEED_LUT,
-    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
 
 /**
  * The minimum desired wheel speed for chassis rotation when translational scaling via
@@ -153,6 +138,11 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.7f,
     .beybladeRampRate = 50,
 };
+
+static constexpr float MAX_3508_PRE_GEARBOX_RPM = 482.0f * (1 / (187.0f / 3591.0f));
+static constexpr float MAX_CHASSIS_WHEEL_SPEED_RPM = MAX_3508_PRE_GEARBOX_RPM * CHASSIS_GEARBOX_RATIO; // Max theoretical M3508 wheel speed post gearbox
+
+
 }  // namespace aruwsrc::control::chassis
 
 #endif  // HERO_CHASSIS_CONSTANTS_HPP_
