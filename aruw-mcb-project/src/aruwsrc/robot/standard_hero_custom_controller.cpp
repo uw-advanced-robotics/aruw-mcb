@@ -19,14 +19,15 @@
 
 #include "standard_hero_custom_controller.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc
 {
 void StandardHeroCustomController::initialize()
 {
     drivers->uart.init<CUSTOM_CONTROLLER_RX_UART_PORT, CUSTOM_CONTROLLER_BAUD_RATE>();
 }
 
-void StandardHeroCustomController::messageReceiveAndReadCallback(const ReceivedSerialMessage& message)
+void StandardHeroCustomController::messageReceiveAndReadCallback(
+    const ReceivedSerialMessage& message)
 {
     if (message.messageType == CUSTOM_CONTROLLER_MESSAGE_TYPE)
     {
@@ -37,10 +38,11 @@ void StandardHeroCustomController::messageReceiveAndReadCallback(const ReceivedS
         controller.x = wire.x / INT_TO_FLOAT_CONV;
         controller.y = wire.y / INT_TO_FLOAT_CONV;
         controller.z = wire.z / INT_TO_FLOAT_CONV;
-        for (int i = 0; i < NUM_BUTTONS; i++) {
+        for (int i = 0; i < NUM_BUTTONS; i++)
+        {
             controller.buttons[i] = wire.buttons[i];
         }
-        
+
         lastRead = tap::arch::clock::getTimeMilliseconds();
         connected = true;
     }
@@ -58,4 +60,4 @@ void StandardHeroCustomController::update()
 void StandardHeroCustomController::reset() { controller = {}; }
 
 bool StandardHeroCustomController::isConnected() const { return connected; }
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc

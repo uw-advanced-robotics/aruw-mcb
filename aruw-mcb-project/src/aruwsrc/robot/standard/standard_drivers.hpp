@@ -42,7 +42,7 @@
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-
+#include "aruwsrc/robot/standard_hero_custom_controller.hpp"
 #endif
 
 namespace aruwsrc::standard
@@ -57,6 +57,7 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
+          customController(this),
           visionCoprocessor(this),
           rttTelemetry(this),
           oledDisplay(
@@ -93,6 +94,7 @@ public:
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
+    StandardHeroCustomController customController;
     communication::serial::VisionCoprocessor visionCoprocessor;
     communication::rtt::RttTelemetry rttTelemetry;
     display::OledDisplay oledDisplay;

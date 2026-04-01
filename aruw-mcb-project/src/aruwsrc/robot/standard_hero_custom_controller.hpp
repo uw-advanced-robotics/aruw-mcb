@@ -67,14 +67,12 @@ private:
     static constexpr float INT_TO_FLOAT_CONV = 1000.0f;
     static const int REMOTE_DISCONNECT_TIMEOUT = 100;
 
-
     struct StandardHeroControllerInfoWire
     {
         uint16_t x, y, z;
         uint8_t buttons[NUM_BUTTONS];
     } modm_packed;
-    
-    
+
     struct StandardHeroControllerInfo
     {
         float x, y, z;
@@ -86,6 +84,6 @@ private:
     bool connected = false;
     uint32_t lastRead = 0;
 };
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc
 
 #endif
