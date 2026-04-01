@@ -23,6 +23,7 @@
 #include "aruwsrc/util_macros.hpp"
 
 #if defined(TARGET_ENGINEER)
+#include <memory>
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
@@ -31,6 +32,7 @@
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
@@ -307,9 +309,9 @@ tap::encoder::CanEncoder parallelOmniOne(
 
 tap::encoder::CanEncoder parallelOmniTwo(
     drivers(),
-    tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
-    true);                            // TODO: find correct inversion
+    tap::encoder::CanEncoderId::ID2,
+    tap::can::CanBus::CAN_BUS2,  // TODO: find correct CAN bus
+    true);                       // TODO: find correct inversion
 
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
@@ -522,10 +524,11 @@ SequentialCommand<3> removeCubeCommand(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-tap::control::PressCommandMapping leftUp(
+auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
+auto leftUp = std::make_unique<tap::control::PressCommandMapping>(
     drivers(),
-    {&cubeStorageHome, &extensionHome},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+    std::vector<Command*>{&cubeStorageHome, &extensionHome},
+    &leftUpRms);
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -575,7 +578,7 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
     // drivers->commandMapper.addMap(&retrieveCube);
     // drivers->commandMapper.addMap(&cyclePositions);
     // drivers->commandMapper.addMap(&cPressed);
-    drivers->commandMapper.addMap(&leftUp);
+    drivers->commandMapper.addMap(std::move(leftUp));
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }

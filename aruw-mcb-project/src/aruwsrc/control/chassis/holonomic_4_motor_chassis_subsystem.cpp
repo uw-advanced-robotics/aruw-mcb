@@ -172,14 +172,12 @@ float DEBUG_WHEEL_RPM{0.0f};
 
 void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(int i)
 {
-    const float now = tap::arch::clock::getTimeMilliseconds();
-    const float dt = now - lastUpdateTime;
+    const uint32_t now = tap::arch::clock::getTimeMilliseconds();
+    const float dt = (now - lastUpdateTime) / 1000.0f;
     lastUpdateTime = now;
 
     velocityPidErrors[i] =
         *desiredWheelRPM[i] - motors[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
-
-    DEBUG_WHEEL_RPM = motors[0]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
 
     velocityPid[i].runControllerDerivateError(velocityPidErrors[i], dt);
 

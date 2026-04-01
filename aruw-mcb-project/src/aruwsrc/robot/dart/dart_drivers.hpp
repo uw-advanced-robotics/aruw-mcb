@@ -37,6 +37,13 @@ public:
 
 public:
     communication::rtt::RttTelemetry rttTelemetry;
+
+    void init(const float) {}
+
+    void updateIo() {}
+
+    void update() { rttTelemetry.updateTelemetryAsync(); }
+
 };  // class aruwsrc::DartDrivers
 }  // namespace aruwsrc::dart
 

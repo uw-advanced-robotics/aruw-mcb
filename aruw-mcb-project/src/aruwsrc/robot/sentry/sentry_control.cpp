@@ -22,6 +22,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -678,90 +679,117 @@ ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, indicators)
 
 /* define command mappings --------------------------------------------------*/
 
-HoldCommandMapping rightUp(
+RemoteMapState rightUpRms = RemoteMapState({Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP});
+auto rightUp = std::make_unique<HoldCommandMapping>(
     drivers(),
     {&turretWidowFrictionWheelSpinCommand},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+    &rightUpRms);
 
 // auto nav + auto aim + cv gated fire
-HoldRepeatCommandMapping leftUpRightUp(
+RemoteMapState leftUpRightUpRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
+auto leftUpRightUp = std::make_unique<HoldRepeatCommandMapping>(
     drivers(),
-    {&autoNavBeybladeCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    std::vector<Command*>{&autoNavBeybladeCommand, &turretCVCommand},
+    &leftUpRightUpRms,
     true);
 
-HoldRepeatCommandMapping leftUpRightUpAg(
+auto leftUpRightUpAg = std::make_unique<HoldRepeatCommandMapping>(
     drivers(),
     {&turretWidowRotateAndUnjamAgitatorWithHeatAndCVLimiting},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP),
+    &leftUpRightUpRms,
     false);
 
 // auto nav + auto aim
-HoldCommandMapping leftUpRightMid(
+RemoteMapState leftUpRightMidRms =
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID);
+auto leftUpRightMid = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&autoNavBeybladeCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
+    std::vector<Command*>{&autoNavBeybladeCommand, &turretCVCommand},
+    &leftUpRightMidRms);
 
 // imu calibrate
-HoldCommandMapping leftUpRightDown(
+RemoteMapState leftUpRightDownRms =
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN);
+auto leftUpRightDown = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&imuCalibrateCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+    std::vector<Command*>{&imuCalibrateCommand},
+    &leftUpRightDownRms);
+
+// manual aim and shoot
+RemoteMapState leftMidRightUpRms =
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP);
+auto leftMidRightUp = std::make_unique<HoldCommandMapping>(
+    drivers(),
+    std::vector<Command*>{&turretWidowManualCommand},
+    &leftMidRightUpRms);
+
+// manual aim and shoot
+auto leftMidRightUpAg = std::make_unique<HoldRepeatCommandMapping>(
+    drivers(),
+    std::vector<Command*>{&turretWidowAgitatorManualSpin},
+    &leftMidRightUpRms,
+    false);
+
+// auto drive & auto aim
+RemoteMapState leftMidRightMidRms =
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID);
+auto leftMidRightMid = std::make_unique<HoldCommandMapping>(
+    drivers(),
+    std::vector<Command*>{
+        &majorManualCommand,
+        &turretWidowManualCommand,
+        &autoNavBeybladeCommand},
+    &leftMidRightMidRms);
+
+// manual aim
+RemoteMapState leftMidRightDownRms =
+    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN);
+auto leftMidRightDown = std::make_unique<HoldCommandMapping>(
+    drivers(),
+    std::vector<Command*>{
+        &majorManualCommand,
+        &turretWidowManualCommand,
+    },
+    &leftMidRightDownRms);
 
 // manual drive, auto aim, cv-gated fire
-HoldCommandMapping leftMidRightUp(
+RemoteMapState leftDownRightUpRms =
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP);
+auto leftDownRightUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+    std::vector<Command*>{&chassisDriveCommand, &turretCVCommand},
+    &leftDownRightUpRms);
 
-// manual drive, auto aim, cv-gated fire
-HoldRepeatCommandMapping leftMidRightUpAg(
+auto leftDownRightUpAg = std::make_unique<HoldRepeatCommandMapping>(
     drivers(),
-    {&turretWidowRotateAndUnjamAgitatorWithHeatAndCVLimiting},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP),
+    std::vector<Command*>{
+        &turretWidowAgitatorManualSpin,
+    },
+    &leftDownRightUpRms,
     false);
 
 // manual drive & auto aim
-HoldCommandMapping leftMidRightMid(
+RemoteMapState leftDownRightMidRms =
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID);
+auto leftDownRightMid = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&chassisDriveCommand, &turretCVCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
-
-// manual aim
-HoldCommandMapping leftMidRightDown(
-    drivers(),
-    {&majorManualCommand, &turretWidowManualCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
-
-// manual aim and shoot
-HoldCommandMapping leftDownRightUp(
-    drivers(),
-    {&majorManualCommand, &turretWidowManualCommand},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
-
-HoldRepeatCommandMapping leftDownRightUpAg(
-    drivers(),
-    {&turretWidowAgitatorManualSpin},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP),
-    false);
+    std::vector<Command*>{&chassisDriveCommand, &turretCVCommand},
+    &leftDownRightMidRms);
 
 // manual drive
-HoldCommandMapping leftDownRightMid(
+RemoteMapState leftDownRightDownRms =
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN);
+auto leftDownRightDown = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&chassisDriveCommand},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
-
-// manual drive + manual aim
-HoldCommandMapping leftDownRightDown(
-    drivers(),
-    {&chassisDriveCommand, &majorManualCommand, &turretWidowManualCommand},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+    std::vector<Command*>{&chassisDriveCommand},
+    &leftDownRightDownRms);
 
 // Restart HUD
-PressCommandMapping bCtrlPressed(
+RemoteMapState ctrlBRms = RemoteMapState({Remote::Key::CTRL, Remote::Key::B});
+auto bCtrlPressed = std::make_unique<PressCommandMapping>(
     drivers(),
-    {&clientDisplayCommand},
-    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+    std::vector<Command*>{&clientDisplayCommand},
+    &ctrlBRms);
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 /* initialize subsystems ----------------------------------------------------*/
@@ -840,22 +868,23 @@ void registerSentryIoMappings(Drivers *drivers)
 {
     // commands with higher priority must be added later
     // friction wheels spin (separated due to dumb design in command mapper system)
-    drivers->commandMapper.addMap(&rightUp);
+    drivers->commandMapper.addMap(std::move(rightUp));
 
-    drivers->commandMapper.addMap(&leftDownRightMid);  // manual drive
-    drivers->commandMapper.addMap(&leftDownRightUp);   // manual aim + shoot
-    drivers->commandMapper.addMap(&leftDownRightUpAg);
-    drivers->commandMapper.addMap(&leftDownRightDown);  // manual drive + manual aim
+    drivers->commandMapper.addMap(std::move(leftDownRightMid));  // manual drive & auto aim
+    drivers->commandMapper.addMap(
+        std::move(leftDownRightUp));  // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(std::move(leftDownRightUpAg));
+    drivers->commandMapper.addMap(std::move(leftDownRightDown));  // manual drive
 
-    drivers->commandMapper.addMap(&leftMidRightUp);  // manual drive, auto aim, gated-fire
-    drivers->commandMapper.addMap(&leftMidRightUpAg);
-    drivers->commandMapper.addMap(&leftMidRightMid);   // manual drive & auto aim
-    drivers->commandMapper.addMap(&leftMidRightDown);  // manual aim
+    drivers->commandMapper.addMap(std::move(leftMidRightUp));  // manual aim and shoot
+    drivers->commandMapper.addMap(std::move(leftMidRightUpAg));
+    drivers->commandMapper.addMap(std::move(leftMidRightMid));   // auto drive & auto aim
+    drivers->commandMapper.addMap(std::move(leftMidRightDown));  // manual aim
 
-    drivers->commandMapper.addMap(&leftUpRightMid);  // auto nav + auto aim
-    drivers->commandMapper.addMap(&leftUpRightUp);   // auto nav + auto aim + cv gated fire
-    drivers->commandMapper.addMap(&leftUpRightUpAg);
-    drivers->commandMapper.addMap(&leftUpRightDown);  // imu calibrate
+    drivers->commandMapper.addMap(std::move(leftUpRightMid));  // auto nav + auto aim
+    drivers->commandMapper.addMap(std::move(leftUpRightUp));  // auto nav + auto aim + cv gated fire
+    drivers->commandMapper.addMap(std::move(leftUpRightUpAg));
+    drivers->commandMapper.addMap(std::move(leftUpRightDown));  // imu calibrate
 }
 
 }  // namespace sentry_control

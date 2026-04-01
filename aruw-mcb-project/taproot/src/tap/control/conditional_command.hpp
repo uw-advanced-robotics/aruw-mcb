@@ -21,45 +21,39 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_COMMAND_MAPPER_MOCK_HPP_
-#define TAPROOT_COMMAND_MAPPER_MOCK_HPP_
+#ifndef TAPROOT_CONDITIONAL_COMMAND_HPP_
+#define TAPROOT_CONDITIONAL_COMMAND_HPP_
 
-#include <memory>
+#include <functional>
 
-#include <gmock/gmock.h>
+#include "command.hpp"
 
-#include "tap/control/command_mapper.hpp"
-
-namespace tap::control
+namespace tap
 {
-class TriggerBinding;
-}
-
-namespace tap::mock
+namespace control
 {
-class CommandMapperMock : public tap::control::CommandMapper
+/**
+ * Class for a command that runs until a certain condition becomes false.
+ */
+class ConditionalCommand : public Command
 {
 public:
-    explicit CommandMapperMock(tap::Drivers* drivers);
-    ~CommandMapperMock() override;
+    ConditionalCommand(std::function<bool()> condition) : Command(), condition(condition) {}
 
-    void addTriggerBinding(std::unique_ptr<tap::control::TriggerBinding> binding) override;
+    void initialize() override {}
 
-    MOCK_METHOD(void, pollTriggerBindings, (), (override));
+    void execute() override {}
 
-    MOCK_METHOD(void, addTriggerBindingRaw, (tap::control::TriggerBinding*), ());
+    void end(bool) override {}
 
-    MOCK_METHOD(
-        void,
-        handleKeyStateChange,
-        (tap::communication::serial::Remote&, uint16_t),
-        (override));
+    bool isFinished() const override { return !condition(); }
 
-    MOCK_METHOD(void, addMap, (std::unique_ptr<tap::control::CommandMapping>), (override));
+    const char* getName() const override { return "conditional command"; }
 
-    MOCK_METHOD(std::size_t, getCommandMappingSize, (), (const override));
+private:
+    std::function<bool()> condition;
 };
+}  // namespace control
+}  // namespace tap
 
-}  // namespace tap::mock
-
-#endif  // TAPROOT_COMMAND_MAPPER_MOCK_HPP_
+#endif

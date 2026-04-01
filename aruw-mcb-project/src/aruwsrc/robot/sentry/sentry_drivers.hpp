@@ -143,6 +143,59 @@ public:
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 
+    void init(const float mainLoopFrequency)
+    {
+        visionCoprocessor.initializeCV();
+        turretMCBCanCommBus1.init();
+        turretMCBCanCommBus2.init();
+        oledDisplay.initialize();
+        capacitorBank.initialize();
+        mpu6500.setCalibrationSamples(4000);
+        chassisMcbLite.initialize();
+        modm::delay_ms(2000);
+        turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        turretMajorImu.setCalibrationSamples(4000);
+    }
+
+    void updateIo()
+    {
+        oledDisplay.updateDisplay();
+        visionCoprocessor.updateSerial();
+        chassisMcbLite.updateSerial();
+        turretMajorImu.read();
+        stateMachine.updateState();
+    }
+
+    void update()
+    {
+        plateHitTracker.update();
+        turretMCBCanCommBus1.sendData();
+        turretMCBCanCommBus2.sendData();
+        oledDisplay.updateMenu();
+        chassisMcbLite.sendData();
+        turretMajorImu.periodicIMUUpdate();
+        visionCoprocessor.sendMessage();
+        rttTelemetry.updateTelemetryAsync();
+        checkTurretMcbDisconnection(this);
+    }
+
+private:
+    inline void checkTurretMcbDisconnection(Drivers* drivers)
+    {
+        bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected() &&
+                                  drivers->turretMCBCanCommBus2.isConnected();
+        if (!turretMcbConnected &&
+            drivers->mpu6500.getImuState() !=
+                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+        {
+            tap::buzzer::playNote(&drivers->pwm, 1000);
+        }
+        else
+        {
+            tap::buzzer::silenceBuzzer(&drivers->pwm);
+        }
+    }
+
 #endif
 };  // class aruwsrc::SentryDrivers
 }  // namespace aruwsrc::sentry

@@ -86,13 +86,7 @@ static void initializeIo(Drivers* drivers);
 // called as frequently.
 static void updateIo(Drivers* drivers);
 
-static void initializeI2C(Drivers* drivers);
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || \
-    defined(TARGET_SENTRY_NAME)
-// Check if the turret MCB on CAN 1 is disconnected and sounds buzzer if it is
-static void checkTurretMcbDisconnection(Drivers* drivers);
-#endif
+// static void initializeI2C(Drivers* drivers);
 
 int main()
 {
@@ -123,61 +117,7 @@ int main()
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME)
-            ((Drivers*)drivers)->plateHitTracker.update();
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || \
-    defined(TARGET_SENTRY_NAME)
-            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
-#endif
-
-#if defined(TARGET_SENTRY_NAME)
-            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
-#endif
-
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) ||       \
-    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
-    defined(TARGET_SENTRY_NAME)
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#endif
-#if defined(TARGET_SENTRY_NAME)
-            PROFILE(drivers->profiler, drivers->turretMajorPrimaryImu.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, drivers->turretMajorImuSecondary.periodicIMUUpdate, ());
-            PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
-#endif
-
-#ifdef TARGET_TESTBED
-            PROFILE(drivers->profiler, drivers->lite.sendData, ());
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME)
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || \
-    defined(TARGET_SENTRY_NAME)
-            checkTurretMcbDisconnection(drivers);
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID) ||   \
-    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME) || defined(TARGET_ENGINEER) ||       \
-    defined(TARGET_TESTBED) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
-    defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || defined(TARGET_DRONE) ||             \
-    defined(TARGET_BLANK)
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
-            PROFILE(drivers->profiler, ((Drivers*)drivers)->rttTelemetry.updateTelemetryAsync, ());
-#endif
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-            // PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
-#endif
-
-            drivers->rttTelemetry.logSignal(
-                "p_ml",
-                tap::arch::clock::getTimeMicroseconds() - loop500HzStartUs);
+            drivers->update();
         }
         modm::delay_us(10);
     }
@@ -195,62 +135,7 @@ static void initializeIo(Drivers* drivers)
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
-
-    initializeI2C(drivers);
-
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_NAME)
-    drivers->visionCoprocessor.initializeCV();
-    drivers->turretMCBCanCommBus1.init();
-#endif
-
-#if defined(TARGET_SENTRY_NAME)
-    drivers->turretMCBCanCommBus2.init();
-#endif
-
-#if defined(TARGET_ENGINEER)
-    drivers->turretMCBCanCommBus1.init();
-#endif
-
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) ||       \
-    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
-    defined(TARGET_SENTRY_NAME)
-    ((Drivers*)drivers)->oledDisplay.initialize();
-#endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
-    drivers->mpu6500.setCalibrationSamples(2000);
-#endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
-    ((Drivers*)drivers)->capacitorBank.initialize();
-#endif
-#if defined(TARGET_SENTRY_NAME)
-    drivers->mpu6500.setCalibrationSamples(4000);
-    drivers->turretMajorPrimaryImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    drivers->turretMajorPrimaryImu.setCalibrationSamples(4000);
-    drivers->turretMajorImuSecondary.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    drivers->turretMajorImuSecondary.setCalibrationSamples(4000);
-    drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-    drivers->turretMajorImu.setCalibrationSamples(4000);
-#endif
-#ifdef TARGET_TESTBED
-    drivers->lite.initialize();
-#endif
-#if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
-    drivers->engineerCVCommunication.initializeCV();
-    drivers->digital.configureInputPullMode(
-        tap::gpio::Digital::B,
-        tap::gpio::Digital::InputPullMode::PullUp);
-    drivers->digital.configureInputPullMode(
-        tap::gpio::Digital::D,
-        tap::gpio::Digital::InputPullMode::PullUp);
-    drivers->digital.configureInputPullMode(
-        tap::gpio::Digital::T,
-        tap::gpio::Digital::InputPullMode::PullUp);
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-    // modm::delay_ms(2000);
-    // drivers->ism330.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
-#endif
+    drivers->init(MAIN_LOOP_FREQUENCY);
 }
 
 static void updateIo(Drivers* drivers)
@@ -259,96 +144,17 @@ static void updateIo(Drivers* drivers)
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->mpu6500.read();
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) ||       \
-    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
-    defined(TARGET_SENTRY_NAME)
-    ((Drivers*)drivers)->oledDisplay.updateDisplay();
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_NAME)
-    drivers->visionCoprocessor.updateSerial();
-#endif
-
-#if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
-    drivers->engineerCVCommunication.updateSerial();
-#endif
-
-#if defined(TARGET_SENTRY_NAME)
-    drivers->turretMajorPrimaryImu.read();
-    drivers->turretMajorImuSecondary.read();
-#endif
-
-#ifdef TARGET_TESTBED
-    drivers->lite.updateSerial();
-#endif
-
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
-    drivers->interRobotTransmitter.updateState();
-    drivers->interRobotTransmitter.sendMessage();
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-    // drivers->ism330.read();
-#endif
-
-#if defined(TARGET_SENTRY_NAME)
-    drivers->stateMachine.updateState();
-#endif
+    drivers->commandMapper.pollTriggerBindings();
+    drivers->updateIo();
 }
 
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER) || \
-    defined(TARGET_SENTRY_NAME)
-static void checkTurretMcbDisconnection(Drivers* drivers)
-{
-    bool turretMcbConnected1 = drivers->turretMCBCanCommBus1.isConnected();
-    bool turretMcbConnected2 = drivers->turretMCBCanCommBus2.isConnected();
+// static void initializeI2C(Drivers* drivers)
+// {
+//     drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
+//     modm::delay_ms(2000);  // Wait for the SDA and SCL lines to be pulled high
 
-    bool isCalibrating = drivers->mpu6500.getImuState() ==
-                         tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING;
-#if defined(TARGET_SENTRY_NAME)
-    isCalibrating = isCalibrating ||
-                    drivers->turretMajorPrimaryImu.getImuState() ==
-                        tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING ||
-                    drivers->turretMajorImuSecondary.getImuState() ==
-                        tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING ||
-                    drivers->turretMajorImu.getImuState() ==
-                        tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING;
-#endif
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS)
-    turretMcbConnected2 = true;
-#endif
-    if (isCalibrating)
-    {
-        return;
-    }
-
-    if (!turretMcbConnected1 && turretMcbConnected2)
-    {
-        tap::buzzer::playNote(&drivers->pwm, 1000);
-    }
-    // else if (!turretMcbConnected2 && turretMcbConnected1)
-    // {
-    //     tap::buzzer::playNote(&drivers->pwm, 1500);
-    // }
-    else if (!turretMcbConnected1 && !turretMcbConnected2)
-    {
-        tap::buzzer::playNote(&drivers->pwm, 2000);
-    }
-    // else
-    // {
-    //     tap::buzzer::silenceBuzzer(&drivers->pwm);
-    // }
-}
-#endif
-
-static void initializeI2C(Drivers* drivers)
-{
-    drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
-    modm::delay_ms(2000);  // Wait for the SDA and SCL lines to be pulled high
-
-    Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
-        Board::I2CMaster::PullUps::External);
-    Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
-    Board::I2CMaster::reset();
-}
+//     Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+//         Board::I2CMaster::PullUps::External);
+//     Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+//     Board::I2CMaster::reset();
+// }

@@ -47,6 +47,7 @@ MainMenu::MainMenu(
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
       autotuneMenu(stack, drivers, ENTRIES),
+      limitSwitchMenu(stack, drivers),
       cvMenu(stack, drivers, visionCoprocessor),
       errorMenu(stack, drivers, ENTRIES),
       hardwareTestMenu(stack, drivers),
@@ -105,6 +106,13 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addMotorMenuCallback));
+#if defined(TARGET_ENGINEER) || defined(TARGET_DART)
+    addEntry(
+        LimitSwitchMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addLimitSwitchMenuCallback));
+#endif
     addEntry(
         CommandSchedulerMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
@@ -174,6 +182,12 @@ void MainMenu::addAutotuneMenuCallback()
 {
     AutotuneMenu* atm = new (&autotuneMenu) AutotuneMenu(getViewStack(), drivers, ENTRIES);
     getViewStack()->push(atm);
+}
+
+void MainMenu::addLimitSwitchMenuCallback()
+{
+    LimitSwitchMenu* lsm = new (&limitSwitchMenu) LimitSwitchMenu(getViewStack(), drivers);
+    getViewStack()->push(lsm);
 }
 
 void MainMenu::addCVMenuCallback()
