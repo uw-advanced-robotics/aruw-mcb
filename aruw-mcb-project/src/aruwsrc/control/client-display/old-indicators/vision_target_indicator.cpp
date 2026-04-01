@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -77,7 +77,12 @@ modm::ResumableResult<void> VisionTargetIndicator::update()
         enemyPositionScreenFrame.topRightY,
         &visionTargetGraphic.graphicData);
 
-    RF_CALL(refSerialTransmitter.sendGraphic(&visionTargetGraphic));
+    // Do not double send modifies so we don't saturate the serial.
+    RF_CALL(refSerialTransmitter.sendGraphic(
+        &visionTargetGraphic,
+        true,
+        true,
+        visionTargetGraphic.graphicData.operation == Tx::GRAPHIC_MODIFY));
 
     RF_END();
 }
