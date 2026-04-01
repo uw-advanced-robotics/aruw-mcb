@@ -166,19 +166,19 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
  * Engineer auto nav path
  */
 static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_START_POSITION =
-    Position(0.5f, 0.5f, 0);  // TODO: find actual start position
+    tap::algorithms::transforms::Position(0.5f, 0.5f, 0);  // TODO: find actual start position
 static const float ENGINEER_AUTO_NAV_MARIGIN =
     0.05f;  // Addition marigin between target above robot width
 static const float ENGINEER_AUTO_NAV_POINT_OFFSET_X =
     WIDTH_BETWEEN_WHEELS_X / 2 + ENGINEER_AUTO_NAV_MARIGIN;
 static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_PATH_POINTS[] = {
     ENGINEER_AUTO_NAV_START_POSITION,
-    Position(0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X, 3.555f, 0),  // First cube pickup
-    Position(3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X, 0.540f, 0),  // First cube dropoff
-    Position(0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X, 3.825f, 0),  // Second cube pickup
-    Position(3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X, 1.620f, 0),  // Second cube dropoff
-    Position(0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X, 4.095f, 0),  // Third cube pickup
-    Position(3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X, 2.700f, 0),  // Third cube dropoff
+    tap::algorithms::transforms::Position(0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X, 3.555f, 0),  // First cube pickup
+    tap::algorithms::transforms::Position(3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X, 0.540f, 0),  // First cube dropoff
+    tap::algorithms::transforms::Position(0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X, 3.825f, 0),  // Second cube pickup
+    tap::algorithms::transforms::Position(3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X, 1.620f, 0),  // Second cube dropoff
+    tap::algorithms::transforms::Position(0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X, 4.095f, 0),  // Third cube pickup
+    tap::algorithms::transforms::Position(3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X, 2.700f, 0),  // Third cube dropoff
 };
 
 static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
