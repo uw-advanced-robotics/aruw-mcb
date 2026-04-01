@@ -151,17 +151,6 @@ public:
     bool isMotorOnline() const override;
 
     /**
-     * @return 'true' if the motor has been offline since
-     *     the last time 'resetHasBeenOffline()' has been called.
-     */
-    bool hasMotorBeenOffline() const;
-
-    /**
-     * @brief Resets the offline flag.
-     */
-    void resetHasBeenOffline()const;
-
-    /**
      * Serializes send data and deposits it in a message to be sent.
      */
     mockable void serializeCanSendData(modm::can::Message* txMessage) const;
@@ -215,8 +204,6 @@ private:
     bool motorInverted;
 
     bool currentControl;
-
-    mutable bool offlineFlag = false;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<Encoder> internalEncoder;
