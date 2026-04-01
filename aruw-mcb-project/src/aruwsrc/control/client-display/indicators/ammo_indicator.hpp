@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -54,29 +54,21 @@ public:
     modm::ResumableResult<void> update() override final;
 
 private:
-// X position of the text
-#if defined(TARGET_HERO_ZERO)
-    static constexpr uint16_t TEXT_X = 611;
-    static constexpr uint16_t NUMBER_X = 1018;
-#else
-    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 150;
+    // X position of the text
+    static constexpr uint16_t TEXT_X = SCREEN_WIDTH / 2 - 350;
     static constexpr uint16_t NUMBER_X = TEXT_X + 175;
-#endif
     // Y position of the text
-    static constexpr uint16_t TEXT_Y = 200;
+    static constexpr uint16_t TEXT_Y = 900;
+    // SIZE of the text
+    static constexpr uint16_t SIZE = 40;
     // WIDTH of the text
     static constexpr uint16_t WIDTH = 4;
-// SIZE of the text
-#if defined(TARGET_HERO_ZERO)
-    static constexpr uint16_t SIZE = 80;
-#else
-    static constexpr uint16_t SIZE = 40;
-#endif
 
     Tx::GraphicCharacterMessage textGraphic;
     const char *bulletsRemainingText = "AMMO: ";
 
     Tx::Graphic1Message numberGraphic;
+    Tx::Graphic1Message backgroundGraphic;
     tap::communication::referee::StateHUDIndicator<int32_t> numberIndicator;
 
     int bulletCount = 0;
