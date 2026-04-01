@@ -65,11 +65,7 @@ public:
      */
     ThreeDeadwheelChassisKFOdometry(
         const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry,
-#if defined(TARGET_SENTRY_NAME)
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
-#else
-        aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver& chassisYawObserver,
-#endif
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
         const float initYaw,
@@ -165,7 +161,8 @@ private:
         0, 0, 0, 0, 5.69132363e-04, 0, 0,
         0, 0, 0, 0, 0, 5.69132363e-04, 0,
         0, 0, 0, 0, 0, 0, 5.69132363e-04,
-    }; //TODO: TUNE
+    }; 
+    /// @TODO: TUNE
 
     static constexpr float KF_Q[STATES_SQUARED] = {
          9.0120570108e-06f,  5.4281168875e-04f,  5.6797949319e-02f,  4.3864560552e-07f, -7.6362940038e-05f, -7.9139054404e-03f, 0            , 0            ,
@@ -176,7 +173,8 @@ private:
         -7.9139054404e-03f, -1.7427705884e+00f, -1.6939745776e+02f,  4.6590765854e-02f,  1.4482580576e+01f,  1.3770822857e+03f, 0            , 0            ,
          0                ,  0                ,  0                ,  0                ,  0                ,  0                , 2.276528e-15f, 2.276528e-12f,
          0                ,  0                ,  0                ,  0                ,  0                ,  0                , 2.276528e-12f, 2.276528e-09f,
-    }; //TODO: TUNE
+    }; 
+    /// @TODO: TUNE
     
     static constexpr float KF_P0[STATES_SQUARED] = {
         1E-2, 0   , 0   , 0   , 0   , 0   , 0   , 0   ,
@@ -187,7 +185,8 @@ private:
         0   , 0   , 0   , 0   , 0   , 1E-2, 0   , 0   ,
         0   , 0   , 0   , 0   , 0   , 0   , 1E-2, 0   ,
         0   , 0   , 0   , 0   , 0   , 0   , 0   , 1E-2,
-    }; //TODO: TUNE
+    }; 
+    /// @TODO: TUNE
     // clang-format on
 
     const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry;

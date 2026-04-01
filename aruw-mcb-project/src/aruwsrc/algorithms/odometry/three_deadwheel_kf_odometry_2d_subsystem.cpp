@@ -26,11 +26,7 @@ namespace aruwsrc::algorithms::odometry
 ThreeDeadwheelKFOdometry2DSubsystem::ThreeDeadwheelKFOdometry2DSubsystem(
     tap::Drivers &drivers,
     const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver &deadwheels,
-#if defined(TARGET_SENTRY_NAME)
     tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
-#else
-    const aruwsrc::control::turret::TurretSubsystem &yawObserver,
-#endif
     tap::communication::sensors::imu::ImuInterface &imu,
     float initialXPos,
     float initialYPos,
@@ -42,19 +38,14 @@ ThreeDeadwheelKFOdometry2DSubsystem::ThreeDeadwheelKFOdometry2DSubsystem(
     : Subsystem(&drivers),
       ThreeDeadwheelChassisKFOdometry(
           deadwheels,
-#if defined(TARGET_SENTRY_NAME)
           yawObserver,
-#else
-          chassisYawObserver,
-#endif
           imu,
           modm::Vector2f(initialXPos, initialYPos),
           initialYaw,
           parallelOneCenterToWheelDistance,
           parallelTwoCenterToWheelDistance,
           perpendicularCenterToWheelDistance,
-          odomFrameToRobotFrame),
-      chassisYawObserver(yawObserver)
+          odomFrameToRobotFrame)
 {
 }
 

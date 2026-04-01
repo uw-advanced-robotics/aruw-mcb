@@ -328,7 +328,7 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
 aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
     deadwheels,
-    engTurret,
+    yawObserver,
     drivers()->mpu6500,
     INITIAL_CHASSIS_POSITION_X,
     INITIAL_CHASSIS_POSITION_Y,
