@@ -74,7 +74,7 @@ public:
         R = 2,
     };
 
-    static inline float getMaxWheelSpeed(bool refSerialOnline, int chassisPower)
+    static inline float getMaxWheelSpeed()
     {
        return MAX_CHASSIS_WHEEL_SPEED_RPM;
     }
