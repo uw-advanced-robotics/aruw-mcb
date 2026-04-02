@@ -58,7 +58,15 @@ public:
 #endif
     aruwsrc::communication::mcb_lite::MCBLite lite;
 
-public:
+    void init(const float) { lite.initialize(); }
+
+    void updateIo() { lite.updateSerial(); }
+
+    void update()
+    {
+        lite.sendData();
+        rttTelemetry.updateTelemetryAsync();
+    }
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 
