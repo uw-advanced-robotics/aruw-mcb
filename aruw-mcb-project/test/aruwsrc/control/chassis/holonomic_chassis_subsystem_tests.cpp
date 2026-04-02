@@ -37,8 +37,7 @@ using namespace testing;
 
 // See this paper for equations: https://www.hindawi.com/journals/js/2015/347379/.
 
-static constexpr float WHEEL_VEL =
-    MAX_CHASSIS_WHEEL_SPEED_RPM / 3.0f * M_TWOPI / 60.0f;
+static constexpr float WHEEL_VEL = MAX_CHASSIS_WHEEL_SPEED_RPM / 3.0f * M_TWOPI / 60.0f;
 // translational chassis velocity in m/s, if WHEEL_VEL velocity commanded in X or Y direction
 static constexpr float CHASSIS_VEL = WHEEL_VEL * WHEEL_RADIUS;
 // rotational chassis velocity in rad/s, if WHEEL_VEL velocity commanded in R direction
