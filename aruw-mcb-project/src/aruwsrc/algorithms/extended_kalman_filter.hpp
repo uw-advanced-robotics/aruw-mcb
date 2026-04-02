@@ -141,32 +141,52 @@ public:
         (void)arm_mat_add_f32(&P_pred.matrix, &Q.matrix, &P.matrix);
     }
 
-    int update(const InputVector& z) { return updateImpl(z, -1); }
+    int update(const InputVector& z) { return static_cast<int>(updateImpl(z, -1)); }
 
     int updateWrapped(const InputVector& z, uint16_t wrappedIndex)
     {
-        return updateImpl(z, wrappedIndex < INPUTS ? static_cast<int>(wrappedIndex) : -1);
+        return static_cast<int>(
+            updateImpl(z, wrappedIndex < INPUTS ? static_cast<int>(wrappedIndex) : -1));
     }
 
 private:
-    int updateImpl(const InputVector& z, int wrappedResidualIndex)
+    enum CMSISErrorCodes : int
+    {
+        NOT_INITIALIZED = -1,
+        TRANSPOSE_H_FAILED = 1,
+        CALCULATE_Y_FAILED = 2,
+        H_TIMES_P_FAILED = 3,
+        H_TIMES_Ht_FAILED = 4,
+        ADDING_R_TO_S_FAILED = 5,
+        S_INVERSION_FAILED = 6,
+        P_TIMES_Ht_FAILED = 7,
+        K_TIMES_S_INV_FAILED = 8,
+        K_TIMES_Y_FAILED = 9,
+        ADDING_KY_TO_XHAT_FAILED = 10,
+        K_TIMES_H_FAILED = 11,
+        IKH_SUBTRACTION_FAILED = 12,
+        IKH_TIMES_P_FAILED = 13,
+        SUCCESS = 0
+    };
+    CMSISErrorCodes updateImpl(const InputVector& z, int wrappedResidualIndex)
     {
         if (!initialized)
         {
-            return -1;
+            return NOT_INITIALIZED;
         }
 
         H_jacobian(xHat, H);
+        // Ht
         if (arm_mat_trans_f32(&H.matrix, &Ht.matrix) != ARM_MATH_SUCCESS)
         {
-            return 0;
+            return TRANSPOSE_H_FAILED;
         }
 
         h(xHat, z_pred);
-
+        // y = z - z_pred
         if (arm_mat_sub_f32(&z.matrix, &z_pred.matrix, &y.matrix) != ARM_MATH_SUCCESS)
         {
-            return 1;
+            return CALCULATE_Y_FAILED;
         }
         if (wrappedResidualIndex >= 0)
         {
@@ -174,60 +194,73 @@ private:
             wrappedResidual = std::atan2(std::sin(wrappedResidual), std::cos(wrappedResidual));
         }
 
+        // S = H * P * Ht + R
+
+        // Hp = H * P
         if (arm_mat_mult_f32(&H.matrix, &P.matrix, &HP.matrix) != ARM_MATH_SUCCESS)
         {
-            return 2;
+            return H_TIMES_P_FAILED;
         }
+        // S = Hp * Ht
         if (arm_mat_mult_f32(&HP.matrix, &Ht.matrix, &S.matrix) != ARM_MATH_SUCCESS)
         {
-            return 3;
+            return H_TIMES_Ht_FAILED;
         }
+        // S = S + R -> S = H * P * Ht + R
         if (arm_mat_add_f32(&S.matrix, &R.matrix, &S.matrix) != ARM_MATH_SUCCESS)
         {
-            return 4;
+            return ADDING_R_TO_S_FAILED;
         }
         for (uint16_t i = 0; i < INPUTS; i++)
         {
             S.data[i * INPUTS + i] += 1.0e-6f;
         }
 
+        // S^-1
         if (arm_mat_inverse_f32(&S.matrix, &S_inv.matrix) != ARM_MATH_SUCCESS)
         {
-            return 5;
+            return S_INVERSION_FAILED;
         }
+        // K = P * Ht
         if (arm_mat_mult_f32(&P.matrix, &Ht.matrix, &K.matrix) != ARM_MATH_SUCCESS)
         {
-            return 6;
+            return P_TIMES_Ht_FAILED;
         }
+        // K = K * S^-1
         if (arm_mat_mult_f32(&K.matrix, &S_inv.matrix, &K_tmp.matrix) != ARM_MATH_SUCCESS)
         {
-            return 7;
+            return K_TIMES_S_INV_FAILED;
         }
         K = K_tmp;
 
+        // xHat = xHat + K * y
         if (arm_mat_mult_f32(&K.matrix, &y.matrix, &K_y.matrix) != ARM_MATH_SUCCESS)
         {
-            return 8;
+            return K_TIMES_Y_FAILED;
         }
         if (arm_mat_add_f32(&xHat.matrix, &K_y.matrix, &xHat.matrix) != ARM_MATH_SUCCESS)
         {
-            return 9;
+            return ADDING_KY_TO_XHAT_FAILED;
         }
 
+        // P = (I - K * H) * P
+        // KH = K * H
         if (arm_mat_mult_f32(&K.matrix, &H.matrix, &KH.matrix) != ARM_MATH_SUCCESS)
         {
-            return 10;
+            return K_TIMES_H_FAILED;
         }
+        // IKH = I - KH
         if (arm_mat_sub_f32(&I.matrix, &KH.matrix, &IKH.matrix) != ARM_MATH_SUCCESS)
         {
-            return 11;
+            return IKH_SUBTRACTION_FAILED;
         }
+        // P = IKH * P
         if (arm_mat_mult_f32(&IKH.matrix, &P.matrix, &P_new.matrix) != ARM_MATH_SUCCESS)
         {
-            return 12;
+            return IKH_TIMES_P_FAILED;
         }
         P = P_new;
-        return 13;
+        return SUCCESS;
     }
 
 public:
@@ -304,6 +337,13 @@ public:
     using StateJacobianFunction = void (*)(const StateVector&, StateMatrix&, float);
     using ObservationJacobianFunction = void (*)(const StateVector&, ObservationMatrix&);
 
+    enum EigenErrorCodes
+    {
+        NOT_INITIALIZED = -1,
+        NO_H_JACOBIAN = -2,
+        SUCCESS = 0
+    };
+
     ExtendedKalmanFilterEigen(
         StateTransitionFunction f,
         ObservationFunction h,
@@ -375,7 +415,7 @@ public:
         xHat = mapVector<StateVector>(initialX);
         P = P0;
         initialized = true;
-        lastStatus = 0;
+        lastStatus = SUCCESS;
         syncStateArray();
     }
 
@@ -383,8 +423,8 @@ public:
     {
         if (!initialized)
         {
-            lastStatus = -1;
-            return lastStatus;
+            lastStatus = NOT_INITIALIZED;
+            return static_cast<int>(lastStatus);
         }
 
         F_jacobian(xHat, F, dt);
@@ -393,22 +433,22 @@ public:
 
         const StateMatrix Q = mapMatrix<StateMatrix>(Qdata.data());
         P = F * P * F.transpose() + Q;
-        lastStatus = 0;
-        return lastStatus;
+        lastStatus = SUCCESS;
+        return static_cast<int>(lastStatus);
     }
 
     virtual int update(const InputVector& z)
     {
         if (!initialized)
         {
-            lastStatus = -1;
-            return lastStatus;
+            lastStatus = NOT_INITIALIZED;
+            return static_cast<int>(lastStatus);
         }
 
         if (!H_jacobian)
         {
-            lastStatus = -2;
-            return lastStatus;
+            lastStatus = NO_H_JACOBIAN;
+            return static_cast<int>(lastStatus);
         }
 
         H_jacobian(xHat, H);
@@ -425,14 +465,14 @@ public:
         xHat = xHat + Kscratch * y;
         P = (I - Kscratch * H) * P;
         syncStateArray();
-        lastStatus = 0;
-        return lastStatus;
+        lastStatus = SUCCESS;
+        return static_cast<int>(lastStatus);
     }
 
     int performUpdate(const InputVector& z, float dt)
     {
         const int predictStatus = predict(dt);
-        if (predictStatus != 0)
+        if (static_cast<EigenErrorCodes>(predictStatus) != SUCCESS)
         {
             return predictStatus;
         }
@@ -443,7 +483,7 @@ public:
 
     inline std::array<float, INPUTS * INPUTS>& getMeasurementCovariance() { return Rdata; }
     inline std::array<float, STATES * STATES>& getProcessCovariance() { return Qdata; }
-    inline int getLastStatus() const { return lastStatus; }
+    inline EigenErrorCodes getLastStatus() const { return lastStatus; }
 
 protected:
     template <typename MatrixT, typename DataT>
@@ -502,7 +542,7 @@ protected:
     InputVector zPred;
     std::array<float, STATES> xHatArray{};
     bool initialized;
-    int lastStatus = 0;
+    EigenErrorCodes lastStatus = NOT_INITIALIZED;
 };
 
 /**

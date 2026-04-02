@@ -90,6 +90,9 @@
 #include "aruwsrc/robot/sentry/turret/turret_major_control_command.hpp"
 #include "aruwsrc/robot/sentry/turret/turret_minor_control_command.hpp"
 
+/// @TODO: test lamprey autotune's new 0 aligning -Aiden
+/// @TODO: test binned alignment
+
 using namespace tap::algorithms;
 using namespace tap::control;
 using namespace tap::communication::serial;
@@ -562,10 +565,10 @@ autotune::FreqSweepAutotuneCommand<1, Axis::YAW> freqSweepAutotuneCommand(
      TORQUE_TO_DESIRED_OUT},
     12'000.0f,
     &getTurretMCBCanCommWidow(),
-    &turretWidowChassisControllers.pitchController,
-    &turretMajor,
-    &turretMajorChassisYawController,
-    &drivers()->turretMajorImu);
+    {&turretWidowChassisControllers.pitchController,
+     &turretMajor,
+     &turretMajorChassisYawController,
+     &drivers()->turretMajorImu});
 
 SentryTurretCVCommand::TurretConfig turretWidowCVConfig(
     turretWidow,

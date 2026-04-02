@@ -33,29 +33,24 @@ template <uint32_t numTestPoints, turret::algorithms::Axis axis>
 class FreqSweepAutotuneCommand : public TurretAutotuneCommand<numTestPoints, axis>
 {
     using TurretTuneCommand = TurretAutotuneCommand<numTestPoints, axis>;
-    using TurretTuneCommand::calibrationFailTimeout;
-    using TurretTuneCommand::calibrationState;
-    using TurretTuneCommand::calibrationTimer;
-    using TurretTuneCommand::chassis;
-    using TurretTuneCommand::checkSafetyTimeout;
-    using TurretTuneCommand::config;
-    using TurretTuneCommand::currentPointIndex;
-    using TurretTuneCommand::MAX_CALIBRATION_WAITTIME_MS;
-    using TurretTuneCommand::prevTime;
-    using TurretTuneCommand::WAIT_TIME_TURRET_RESPONSE_MS;
 
 public:
+    struct FreqSweepOptionalSystemsConfig
+    {
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            control::turret::algorithms::Axis::PITCH> *turretMinorPitchController = nullptr;
+        aruwsrc::control::turret::YawTurretSubsystem *turretMajorSubsystem = nullptr;
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            control::turret::algorithms::Axis::YAW> *turretMajorController = nullptr;
+        tap::communication::sensors::imu::AbstractIMU *turretMajorImu = nullptr;
+    };
+
     FreqSweepAutotuneCommand(
         tap::Drivers *drivers,
         const TurretTuneCommand::TurretCalibrationConfig &config,
         const float desiredOutKick,
         aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm,
-        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            control::turret::algorithms::Axis::PITCH> *turretMinorPitchController = nullptr,
-        aruwsrc::control::turret::YawTurretSubsystem *turretMajorSubsystem = nullptr,
-        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            control::turret::algorithms::Axis::YAW> *turretMajorController = nullptr,
-        tap::communication::sensors::imu::AbstractIMU *turretMajorIMU = nullptr,
+        FreqSweepOptionalSystemsConfig optionalSystemsConfig = {},
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
@@ -70,10 +65,10 @@ public:
               failChime),
           desiredOutKick(desiredOutKick),
           turretMCBCanComm(turretMCBCanComm),
-          turretMinorPitchController(turretMinorPitchController),
-          turretMajorSubsystem(turretMajorSubsystem),
-          turretMajorController(turretMajorController),
-          turretMajorImu(turretMajorIMU)
+          turretMinorPitchController(optionalSystemsConfig.turretMinorPitchController),
+          turretMajorSubsystem(optionalSystemsConfig.turretMajorSubsystem),
+          turretMajorController(optionalSystemsConfig.turretMajorController),
+          turretMajorImu(optionalSystemsConfig.turretMajorImu)
     {
         if (turretMajorSubsystem)
         {
@@ -84,71 +79,74 @@ public:
 
     void execute() override
     {
-        switch (calibrationState)
+        switch (this->calibrationState)
         {
             case TurretAutotuneInterface::CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
             {
-                config.motor->setChassisFrameSetpoint(Angle(0));
-                reverse = false;
+                this->config.motor->setChassisFrameSetpoint(Angle(0));
                 freq = 3.0f;
                 currentPhase = 0.0f;
                 lastTimeMs = 0.0f;
                 bool allOnline = true;
-                const bool turretsOnline = config.motor->isOnline();
+                const bool turretsOnline = this->config.motor->isOnline();
 
-                if (chassis != nullptr)
+                if (this->chassis != nullptr)
                 {
-                    allOnline &= chassis->allMotorsOnline();
+                    allOnline &= this->chassis->allMotorsOnline();
                 }
 
                 allOnline &= turretsOnline;
 
                 // Calibration timer to give people a chance to move out of the way
-                if (allOnline && calibrationTimer.execute())
+                if (allOnline && this->calibrationTimer.execute())
                 {
-                    calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
-                    calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
-                    calibrationState = TurretAutotuneInterface::CalibrationState::LOCKING_TURRET;
+                    this->calibrationFailTimeout.restart(this->MAX_CALIBRATION_WAITTIME_MS);
+                    this->calibrationTimer.restart(this->WAIT_TIME_TURRET_RESPONSE_MS);
+                    this->calibrationState =
+                        TurretAutotuneInterface::CalibrationState::LOCKING_TURRET;
                 }
-                onMeasurementSample(currentPointIndex, currentPointIndex);
+                onMeasurementSample(this->currentPointIndex, this->currentPointIndex);
             }
             break;
             case TurretAutotuneInterface::CalibrationState::LOCKING_TURRET:
             {
-                if (this->turretReachedPointAndNotMoving(config.motor->getChassisFrameSetpoint()))
+                if (this->turretReachedPointAndNotMoving(
+                        this->config.motor->getChassisFrameSetpoint()))
                 {
-                    calibrationState = TurretAutotuneInterface::CalibrationState::MEASURING_TORQUE;
+                    this->calibrationState =
+                        TurretAutotuneInterface::CalibrationState::MEASURING_TORQUE;
                 };
-                onMeasurementSample(currentPointIndex, currentPointIndex);
+                onMeasurementSample(this->currentPointIndex, this->currentPointIndex);
             }
             break;
 
             case TurretAutotuneInterface::CalibrationState::MEASURING_TORQUE:
             {
                 uint32_t currentTimeMs = tap::arch::clock::getTimeMilliseconds();
-                const float dt = (currentTimeMs - lastTimeMs) / 1000.0f;
-                lastTimeMs = currentTimeMs;
+                const float dt = (currentTimeMs - this->lastTimeMs) / 1000.0f;
+                this->lastTimeMs = currentTimeMs;
 
                 currentPhase += 2.0f * M_PI * freq * dt;
                 if (currentPhase > 2.0f * M_PI) currentPhase -= 2.0f * M_PI;
 
-                config.motor->setMotorOutput(desiredOutKick * sin(currentPhase));
-                calibrationTimer.restart(MAX_CALIBRATION_WAITTIME_MS);
+                this->config.motor->setMotorOutput(this->desiredOutKick * sin(currentPhase));
+                this->calibrationTimer.restart(this->MAX_CALIBRATION_WAITTIME_MS);
 
                 freq *= 1.0001f;
                 if (freq > 250.0f)
-                    calibrationState = TurretAutotuneInterface::CalibrationState::NEXT_LOCATION;
+                    this->calibrationState =
+                        TurretAutotuneInterface::CalibrationState::NEXT_LOCATION;
 
-                onMeasurementSample(currentPointIndex, currentPointIndex);
-                currentPointIndex++;
+                onMeasurementSample(this->currentPointIndex, this->currentPointIndex);
+                this->currentPointIndex++;
             }
             break;
             // Stabilize yourself
             case TurretAutotuneInterface::CalibrationState::NEXT_LOCATION:
             {
-                if (calibrationTimer.isExpired())
+                if (this->calibrationTimer.isExpired())
                 {
-                    calibrationState = TurretAutotuneInterface::CalibrationState::DONE;
+                    this->calibrationState = TurretAutotuneInterface::CalibrationState::DONE;
                 }
             }
             break;
@@ -156,57 +154,60 @@ public:
             case TurretAutotuneInterface::CalibrationState::DONE:
             {
                 // Turn off in case calculation takes awhile
-                config.motor->setMotorOutput(0);
-                calibrationState = TurretAutotuneInterface::CalibrationState::CALIBRATION_SUCCESS;
+                this->config.motor->setMotorOutput(0);
+                this->calibrationState =
+                    TurretAutotuneInterface::CalibrationState::CALIBRATION_SUCCESS;
             }
             break;
 
             default:
                 break;
         }
-        if (calibrationState != TurretAutotuneInterface::CalibrationState::MEASURING_TORQUE)
-        {
-            checkSafetyTimeout();
-            uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-            float dt = (currTime - prevTime) / 1000.0f;
-            prevTime = currTime;
+        uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+        float dt = (currTime - this->prevTime) / 1000.0f;
 
-            config.controller->runController(dt, config.motor->getChassisFrameSetpoint());
-            if (turretMajorController)
-            {
-                turretMajorController->runController(dt, turretMajorController->getSetpoint());
-            }
-            if (turretMinorPitchController)
-            {
-                turretMinorPitchController->runController(dt, Angle(0));
-            }
+        if (this->calibrationState != TurretAutotuneInterface::CalibrationState::MEASURING_TORQUE)
+        {
+            this->checkSafetyTimeout();
+            this->prevTime = currTime;
+
+            this->config.controller->runController(
+                dt,
+                this->config.motor->getChassisFrameSetpoint());
+        }
+
+        if (turretMajorController)
+        {
+            turretMajorController->runController(dt, turretMajorController->getSetpoint());
+        }
+        if (turretMinorPitchController)
+        {
+            turretMinorPitchController->runController(dt, Angle(0));
         }
     }
 
     void drawCalibrationResult(modm::GraphicDisplay &display) const override
     {
-        display.printf("8======D\n");
+        display.printf("Frequency sweep done! Enjoy :3 \n");
     }
 
 protected:
-    void onMeasurementSample(
-        [[maybe_unused]] size_t pointIndex,
-        [[maybe_unused]] uint32_t sampleCount) override
+    void onMeasurementSample(size_t, uint32_t) override
     {
-        angle_d_motor = config.motor->getChassisFrameVelocity();
+        angleDMotor = this->config.motor->getChassisFrameVelocity();
 
-        angle_d_imu = turretMCBCanComm->getGz();
+        angleDImu = this->turretMCBCanComm->getGz();
 
-        desired_out_setpoint = config.motor->getMotorOutput();
-        motor_frame_angle = config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
+        desiredOutSetpoint = this->config.motor->getMotorOutput();
+        motorFrameAngle = this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
 
         if (turretMajorImu)
         {
-            turret_major_d_imu = turretMajorImu->getGz();
+            turretMajorDImu = turretMajorImu->getGz();
         }
     }
 
-    void onMeasurementComplete([[maybe_unused]] size_t pointIndex) override {}
+    void onMeasurementComplete(size_t) override {}
 
 private:
     const float desiredOutKick;
@@ -218,30 +219,14 @@ private:
         control::turret::algorithms::Axis::YAW> *turretMajorController;
     tap::communication::sensors::imu::AbstractIMU *turretMajorImu;
 
-    float angle_d_motor{0.0f};
-    float angle_d_imu{0.0f};
-    float turret_major_d_imu{0.0f};
-    float desired_out_setpoint{0.0f};
-    float motor_frame_angle{0.0f};
+    float angleDMotor{0.0f};
+    float angleDImu{0.0f};
+    float turretMajorDImu{0.0f};
+    float desiredOutSetpoint{0.0f};
+    float motorFrameAngle{0.0f};
     float freq{0.0f};
     float currentPhase{0.0f};
     float lastTimeMs{0.0f};
-    bool reverse{false};
-
-    /**
-     * @brief Helper function that turns the calibration result into
-     * units of mm.
-     *
-     * @param calibrationNum Value from the COM calculation
-     * @return float `COMLocation` in mm
-     */
-    inline float calibrationResultToMM(float calibrationNum) const
-    {
-        // desOut*m * mm/m * Nm/desOut * s^2/m * 1/kg = mm
-        return calibrationNum * 1000 * this->getCalibrationConfig().torqueToDesiredOut /
-               this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
-    }
-
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 

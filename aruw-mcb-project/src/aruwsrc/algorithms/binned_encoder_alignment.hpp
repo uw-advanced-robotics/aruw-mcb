@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef BINNED_ALIGNMENT_HPP_
-#define BINNED_ALIGNMENT_HPP_
+#ifndef BINNED_ENCODER_ALIGNMENT_HPP_
+#define BINNED_ENCODER_ALIGNMENT_HPP_
 
 #include <cmath>
 #include <numeric>
@@ -55,4 +55,4 @@ float calculatePosition(float localEncoderPosition, float globalEncoderPosition,
 }
 }  // namespace algorithms::binnedAlignment
 
-#endif  // BINNED_ALIGNMENT_HPP_
+#endif  // BINNED_ENCODER_ALIGNMENT_HPP_

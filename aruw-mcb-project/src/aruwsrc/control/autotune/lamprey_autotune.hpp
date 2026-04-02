@@ -89,6 +89,11 @@ protected:
 
         averageLampreyTick = 0.0f;
         averageAngle = 0.0f;
+
+        if (pointIndex == numTestPoints - 1)
+        {
+            alignArray();
+        }
     }
 
 private:
@@ -98,6 +103,32 @@ private:
     float averageAngle{0.0f};
 
     const aruwsrc::communication::sensors::encoder::LampreyEncoder &encoder;
+
+    void alignArray()
+    {
+        size_t min_tick_index = 0;
+
+        float angle_value = 0.0f;
+        for (size_t i = 0; i < numTestPoints; ++i)
+        {
+            if (measuredEncoderValueMap[i].first < measuredEncoderValueMap[min_tick_index].first)
+            {
+                min_tick_index = i;
+            }
+        }
+        angle_value = measuredEncoderValueMap[min_tick_index].second;
+
+        for (size_t i = 0; i < numTestPoints; ++i)
+        {
+            measuredEncoderValueMap[i].second -= angle_value;
+
+            // wrap
+            if (measuredEncoderValueMap[i].second < 0)
+            {
+                measuredEncoderValueMap[i].second += 2 * M_PI;
+            }
+        }
+    }
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 
