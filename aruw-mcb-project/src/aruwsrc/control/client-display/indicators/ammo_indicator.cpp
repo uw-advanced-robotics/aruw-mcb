@@ -59,7 +59,6 @@ modm::ResumableResult<void> AmmoIndicator::sendInitialGraphics()
 
     // send initial graphics
     RF_CALL(refSerialTransmitter.sendGraphic(&backgroundGraphic));
-    RF_CALL(refSerialTransmitter.sendGraphic(&textGraphic));
     RF_CALL(numberIndicator.initialize());
 
     RF_END();
@@ -68,16 +67,6 @@ modm::ResumableResult<void> AmmoIndicator::sendInitialGraphics()
 void AmmoIndicator::initialize()
 {
     uint8_t graphicName[3];
-
-    getUnusedGraphicName(graphicName);
-    RefSerialTransmitter::configGraphicGenerics(
-        &textGraphic.graphicData,
-        graphicName,
-        Tx::GRAPHIC_ADD,
-        DEFAULT_GRAPHIC_LAYER,
-        Tx::GraphicColor::YELLOW);
-
-    RefSerialTransmitter::configCharacterMsg(SIZE, WIDTH, TEXT_X, TEXT_Y, "AMMO: ", &textGraphic);
 
     getUnusedGraphicName(graphicName);
     RefSerialTransmitter::configGraphicGenerics(
@@ -97,10 +86,10 @@ void AmmoIndicator::initialize()
 
     RefSerialTransmitter::configLine(
         SIZE + 10,
-        TEXT_X - 5,
-        TEXT_Y - SIZE / 2,
+        NUMBER_X - 5,
+        NUMBER_Y - SIZE / 2,
         NUMBER_X + 125,
-        TEXT_Y - SIZE / 2,
+        NUMBER_Y - SIZE / 2,
         &backgroundGraphic.graphicData);
 
     updateAmmoCount(0, &numberGraphic);
