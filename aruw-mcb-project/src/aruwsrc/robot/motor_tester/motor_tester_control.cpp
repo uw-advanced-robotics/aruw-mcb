@@ -18,9 +18,11 @@
  */
 
 #if defined(TARGET_MOTOR_TESTER)
+#include <memory>
 
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -148,12 +150,13 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 // command mappings
 // ------------------
 
-tap::control::HoldRepeatCommandMapping leftSwitchUp(
+auto leftSwitchUpRms = tap::control::RemoteMapState(
+    tap::communication::serial::Remote::Switch::LEFT_SWITCH,
+    tap::communication::serial::Remote::SwitchState::UP);
+auto leftSwitchUp = std::make_unique<tap::control::HoldRepeatCommandMapping>(
     drivers(),
-    {&rotateAndUnjamAgitator},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::UP),
+    std::vector<tap::control::Command*>{&rotateAndUnjamAgitator},
+    &leftSwitchUpRms,
     true);
 
 // Safe disconnect function
@@ -183,7 +186,7 @@ void registerSubsystems(Drivers* drivers)
 
 void registerIoMappings(Drivers* drivers)
 {
-    drivers->commandMapper.addMap(&leftSwitchUp);
+    drivers->commandMapper.addMap(std::move(leftSwitchUp));
 
     motorSubsystem6020.setDefaultCommand(&wheelManual);
     motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
