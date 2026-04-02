@@ -38,7 +38,7 @@ using namespace testing;
 // See this paper for equations: https://www.hindawi.com/journals/js/2015/347379/.
 
 static constexpr float WHEEL_VEL =
-    CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 3.0f * M_TWOPI / 60.0f;
+    MAX_CHASSIS_WHEEL_SPEED_RPM / 3.0f * M_TWOPI / 60.0f;
 // translational chassis velocity in m/s, if WHEEL_VEL velocity commanded in X or Y direction
 static constexpr float CHASSIS_VEL = WHEEL_VEL * WHEEL_RADIUS;
 // rotational chassis velocity in rad/s, if WHEEL_VEL velocity commanded in R direction
@@ -112,8 +112,8 @@ TEST_F(
 TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_max_velocity)  // holonomic
 {
     EXPECT_NEAR(
-        powf(MIN_ROTATION_THRESHOLD / CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second, 2.0f),
-        chassis.calculateRotationTranslationalGain(CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second),
+        powf(MIN_ROTATION_THRESHOLD / MAX_CHASSIS_WHEEL_SPEED_RPM, 2.0f),
+        chassis.calculateRotationTranslationalGain(MAX_CHASSIS_WHEEL_SPEED_RPM),
         1E-3);
 }
 
@@ -124,7 +124,7 @@ TEST_F(
     EXPECT_NEAR(
         0,
         chassis.calculateRotationTranslationalGain(
-            CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second + MIN_ROTATION_THRESHOLD),
+            MAX_CHASSIS_WHEEL_SPEED_RPM + MIN_ROTATION_THRESHOLD),
         1E-3);
 }
 
@@ -145,7 +145,7 @@ TEST_F(
     calculateRotationTranslationalGain_half_rotation)  // holonomic
 {
     EXPECT_THAT(
-        chassis.calculateRotationTranslationalGain(CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 2),
+        chassis.calculateRotationTranslationalGain(MAX_CHASSIS_WHEEL_SPEED_RPM / 2),
         InClosedRange(0.0f, 1.0f));
 }
 

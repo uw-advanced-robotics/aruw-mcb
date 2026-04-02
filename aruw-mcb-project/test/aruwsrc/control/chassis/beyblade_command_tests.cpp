@@ -41,10 +41,10 @@ using aruwsrc::mock::TurretSubsystemMock;
 using namespace tap::communication::serial;
 
 static constexpr float MAX_R =
-    BEYBLADE_CONFIG.beybladeRotationalSpeedFractionOfMax * CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
+    BEYBLADE_CONFIG.beybladeRotationalSpeedFractionOfMax * MAX_CHASSIS_WHEEL_SPEED_RPM;
 
 static constexpr float BASE_DESIRED_OUT =
-    CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second * BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier;
+    MAX_CHASSIS_WHEEL_SPEED_RPM * BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier;
 
 static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 1,
@@ -122,7 +122,7 @@ protected:
         float scaledX = x * BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier;
         float scaledY = y * BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier;
 
-        float maxWheelSpeed = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
+        float maxWheelSpeed = MAX_CHASSIS_WHEEL_SPEED_RPM;
         float translationalSpeedThreshold =
             BEYBLADE_CONFIG.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
             BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
