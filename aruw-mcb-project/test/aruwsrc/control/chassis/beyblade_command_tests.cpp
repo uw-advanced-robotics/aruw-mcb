@@ -115,6 +115,28 @@ protected:
                 FloatNear(rotation, 1E-3)));
     }
 
+    float getExpectedMaxR() const
+    {
+        float expectedLimit = MAX_R;
+
+        float scaledX = x * BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier;
+        float scaledY = y * BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier;
+
+        float maxWheelSpeed = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
+        float translationalSpeedThreshold =
+            BEYBLADE_CONFIG.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
+            BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+
+        // If translating fast, the rotation ceiling is throttled
+        if (fabsf(scaledX) > translationalSpeedThreshold ||
+            fabsf(scaledY) > translationalSpeedThreshold)
+        {
+            expectedLimit *= BEYBLADE_CONFIG.beybladeRotationalSpeedMultiplierWhenTranslating;
+        }
+
+        return expectedLimit;
+    }
+
     tap::Drivers d;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
@@ -130,15 +152,17 @@ protected:
 
 TEST_P(BeybladeCommandTest, single_execute)
 {
-    setupDesiredOutputExpectations(std::min(MAX_R, BEYBLADE_CONFIG.beybladeRampRate));
+    setupDesiredOutputExpectations(std::min(getExpectedMaxR(), BEYBLADE_CONFIG.beybladeRampRate));
     bc.execute();
 }
 
 TEST_P(BeybladeCommandTest, multiple_execute)
 {
+    testing::InSequence seq;
     for (int i = 1; i < 10; i++)
     {
-        setupDesiredOutputExpectations(std::min(MAX_R, i * BEYBLADE_CONFIG.beybladeRampRate));
+        setupDesiredOutputExpectations(
+            std::min(getExpectedMaxR(), i * BEYBLADE_CONFIG.beybladeRampRate));
     }
 
     for (int i = 1; i < 10; i++)

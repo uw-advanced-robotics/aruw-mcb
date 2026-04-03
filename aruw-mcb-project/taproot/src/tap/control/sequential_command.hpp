@@ -82,6 +82,7 @@ public:
 
     void execute() override
     {
+        if (this->currentCommand >= COMMANDS) return;
         if (!this->commandInitialized)
         {
             if (this->commands[this->currentCommand]->isReady())
@@ -106,7 +107,7 @@ public:
 
     void end(bool interrupted) override
     {
-        if (this->currentCommand != COMMANDS)
+        if (this->commandInitialized && this->currentCommand != COMMANDS)
         {
             this->commands[this->currentCommand]->end(interrupted);
         }

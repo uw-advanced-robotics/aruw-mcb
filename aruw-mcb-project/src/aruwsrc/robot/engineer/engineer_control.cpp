@@ -18,7 +18,12 @@
  */
 
 // Guys please dont make fun of me
+
 #if defined(TARGET_ENGINEER)
+
+#include "aruwsrc/util_macros.hpp"
+
+#include <memory>
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
@@ -27,6 +32,7 @@
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
