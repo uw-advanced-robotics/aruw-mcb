@@ -4,13 +4,16 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/drivers.hpp"
+#include "tap/communication/serial/remote.hpp"
+
 
 namespace aruwsrc::motor_tester {
 
 class MotorSubsystem : public tap::control::Subsystem
 {
 public:
-    inline MotorSubsystem(
+    MotorSubsystem(
         tap::Drivers* drivers,
         tap::motor::MotorInterface& motor,
         tap::algorithms::SmoothPidConfig pidConfig)
@@ -22,39 +25,40 @@ public:
 
     void initialize() override {motor.initialize();}
 
-    float getDesiredOutput() const { return desiredOutput; }
+   
+    void setDesiredRPM(float rpm){desiredRPM = rpm;}
+
     void setDesiredOutput(float desiredOutput)
     {
-        if (desiredOutput > tap::motor::DjiMotor::MAX_OUTPUT_C620) {
-            desiredOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620;
-        } else if (desiredOutput < -tap::motor::DjiMotor::MAX_OUTPUT_C620) {
-            desiredOutput = -tap::motor::DjiMotor::MAX_OUTPUT_C620;
-        }
         this->desiredOutput = desiredOutput;
         motor.setDesiredOutput(static_cast<int32_t>(desiredOutput));
     }
 
     void refresh() override
     {
-        float motorPosition = motor.getEncoder()->getPosition().getUnwrappedValue();
-        float positionError = desiredPosition - motorPosition;
+        const uint32_t currentTime = tap::arch::clock::getTimeMilliseconds();
+        const uint32_t dt = currentTime - prevTime;
+        prevTime = currentTime;
 
-        //desiredOutput = pid.runController(positionError, -motor.getEncoder()->getVelocity(), 0.002f);
-
-        //motor.setDesiredOutput(desiredOutput);
+        const float velocityError = desiredRPM - motor.getEncoder()->getVelocity()*60.0f / M_TWOPI;
+        pid.runControllerDerivateError(velocityError, dt);
+        motor.setDesiredOutput(pid.getOutput());
     }
 
-    float getDesiredPosition() const { return desiredPosition; }
-    void setDesiredPosition(float desiredPosition) { this->desiredPosition = desiredPosition; }
-
+    void stop()
+    {
+        desiredRPM = 0;
+        this->motor.setDesiredOutput(0);
+    }
 
     
 
 
 private:
 
+    float desiredRPM = 0;
     float desiredOutput = 0;
-    float desiredPosition = 0;
+    uint32_t prevTime = 0;
     tap::motor::MotorInterface& motor;
     tap::algorithms::SmoothPid pid;
 };

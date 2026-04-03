@@ -5,7 +5,7 @@
 #include "tap/drivers.hpp"
 #include "tap/communication/serial/remote.hpp"
 
-#include "motor_tester_subsystem.hpp"
+#include "motor_subsystem.hpp"
 
 
 namespace aruwsrc::motor_tester {
