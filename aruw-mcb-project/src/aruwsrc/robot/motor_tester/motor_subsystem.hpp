@@ -1,5 +1,5 @@
-#ifndef MOTOR_TESTER_SUBSYSTEM_HPP_
-#define MOTOR_TESTER_SUBSYSTEM_HPP_
+#ifndef MOTOR_SUBSYSTEM_HPP_
+#define MOTOR_SUBSYSTEM_HPP_
 
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -63,4 +63,4 @@ private:
 
 }
 
-#endif // MOTOR_TESTER_SUBSYSTEM_HPP_
+#endif // MOTOR_SUBSYSTEM_HPP_
