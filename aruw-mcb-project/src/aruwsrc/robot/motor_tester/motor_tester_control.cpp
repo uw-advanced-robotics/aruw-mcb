@@ -78,10 +78,8 @@ void initializeSubsystems() {}
 
 void registerSubsystems(Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&motorSubsystem);
     drivers->commandScheduler.setSafeDisconnectFunction(
         &motor_tester_control::remoteSafeDisconnectFunction);
-    motorSubsystem.setDefaultCommand(&stickTorqueCommand);
 }
 
 void registerIoMappings(Drivers* drivers) {}
