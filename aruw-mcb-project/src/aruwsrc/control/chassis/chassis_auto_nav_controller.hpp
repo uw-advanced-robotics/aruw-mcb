@@ -45,6 +45,8 @@ public:
     // distance from setpoint under which robot is considered "on target"
     const float POS_ERROR_THRESHOLD = 0.01;
 
+    const float MAX_TRANSLATION_ACCELERATION = 1.0f;
+
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
@@ -82,7 +84,7 @@ public:
 
     void pushPoint(Position newPoint);
     // Sets the maximum speed the chassis moves at, in units of Meters per Second
-    inline void setDesiredSpeed(float speed) { this->desiredSpeed = speed; }
+    inline void setDesiredSpeed(float speed) { this->translateSpeedRamp.setTarget(speed); }
 
     inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
 
@@ -104,11 +106,9 @@ private:
 
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;
-    tap::algorithms::Ramp rotateSpeedRamp;
+    tap::algorithms::Ramp rotateSpeedRamp, translateSpeedRamp;
 
     aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
-
-    float desiredSpeed = 0;
 
     const float translationalMotionThreshold;
     const float capbankEnergyThreshold;

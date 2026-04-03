@@ -31,9 +31,6 @@ extern "C"
 #endif
 }
 
-#undef BUFFER_SIZE_UP
-#define BUFFER_SIZE_UP (4096)
-
 namespace
 {
 const unsigned telemetryBufferIndex = 0;
