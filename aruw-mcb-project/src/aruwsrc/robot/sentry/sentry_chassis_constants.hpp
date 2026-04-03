@@ -39,7 +39,7 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {1, 250},
+    {1, 200},
     {1, 250}};  // TODO: TUNE!
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
@@ -50,7 +50,7 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
  * The minimum desired wheel speed for chassis rotation when translational scaling via
  * calculateRotationTranslationalGain is performed.
  */
-static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
+static constexpr float MIN_ROTATION_THRESHOLD = 40.0f;
 
 /// @see power_limiter.hpp for what these mean
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;

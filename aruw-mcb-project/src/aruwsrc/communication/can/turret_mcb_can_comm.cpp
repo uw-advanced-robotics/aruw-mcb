@@ -227,9 +227,6 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
     currProcessingImuData.zAcceleration =
         static_cast<float>(zAxisMessage->linearAcceleration) * CMPS2_TO_MPS2;
 
-    /// @TODO: unfudge
-    currProcessingImuData.yaw -= M_PI_2;
-
     /**
      * Since this is the last axis data received for a full IMU data message,
      * apply post-processing and update the lastCompleteImuData to the processed data.
