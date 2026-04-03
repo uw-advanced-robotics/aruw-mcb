@@ -26,6 +26,7 @@
 #include "tap/communication/serial/uart.hpp"
 #include "modm/architecture/interface/assert.h"
 #include "virtual_servo.hpp"
+#include "aruwsrc/communication/mcb-lite/message_types.hpp"
 
 using namespace tap::communication::serial;
 
@@ -36,6 +37,7 @@ namespace aruwsrc::communication::mcb_lite::motor
  */
 class VirtualServoRxHandler
 {
+    friend class aruwsrc::communication::mcb_lite::MCBLite;
 public:
     VirtualServoRxHandler(tap::Drivers* drivers);
 

@@ -23,15 +23,17 @@
 #include "tap/motor/servo.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 
 using namespace tap::communication::serial;
-
+namespace aruwsrc::communication::mcb_lite {
+class MCBLite;
+}
 namespace aruwsrc::communication::mcb_lite::motor
 {
+
 class VirtualServo : public tap::motor::Servo
 {
-    friend class MCBLite;
+    friend class aruwsrc::communication::mcb_lite::MCBLite;
     friend class VirtualServoRxHandler;
 
 public:
@@ -41,20 +43,39 @@ public:
     float maximumPwm,
     float minimumPwm,
     float pwmRampSpeed,
-    aruwsrc::communication::mcb_lite::MCBLite* mcbLite)
-    : Servo(drivers, pwmPin, maximumPwm, minimumPwm, pwmRampSpeed), minPwm(minimumPwm), maxPwm(maximumPwm), rampSpeed(pwmRampSpeed), mcbLite(mcbLite) {};
+    aruwsrc::communication::mcb_lite::MCBLite* mcbLite,
+    bool isServoOne)
+    : Servo(drivers, pwmPin, maximumPwm, minimumPwm, pwmRampSpeed), pin(pwmPin), minPwm(minimumPwm), maxPwm(maximumPwm), rampSpeed(pwmRampSpeed), mcbLite(mcbLite) {
+        
+        mcbLite->servoRxHandler.attachReceiveHandler(this, isServoOne);
+
+        targetMessage.messageType = MessageTypes::SERVO_TARGET_MESSAGE;
+        rampMessage.messageType = MessageTypes::SERVO_RAMP_MESSAGE;
+        ServoRampMessage rampData;
+        rampData.pin = pin;
+        rampData.rampSpeed = pwmRampSpeed;
+        memcpy(rampMessage.data, &rampData, sizeof(ServoRampMessage));
+        rampMessage.setCRC16();
+        hasNewRamp = true;
+
+    };
 
     void setTargetPwm(float pwm)
 {
     float targetPwm = tap::algorithms::limitVal<float>(pwm, minPwm, maxPwm);
-    // send servo message
+    updateMessages(targetPwm);
+    hasNewTarget = true;
+
 }
 
-void updateSendPwmRamp() {} // send message
+float getPWM() const { return currentPwm; }  
 
-float getPWM() const {return currentPwm; } // need to read message 
+bool isRampTargetMet() const { return isTargetReached; }
 
-bool isRampTargetMet() const { return isTargetReached; } // need to read message 
+void attachSelfToRxHandler() {
+    mcbLite->servoRxHandler.attachReceiveHandler(&motorOne);
+    mcbLite->servoRxHandler.attachReceiveHandler(&motorTwo);
+}
 
 private: 
     void processServoUARTMessage( float currentPwm, bool isRampTargetMet) {
@@ -62,12 +83,25 @@ private:
         this->isTargetReached = isRampTargetMet;
     }
 
+    void updateMessages(float pwm) {
+        ServoTargetMessage targetData;
+        targetData.pin = pin;
+        targetData.target = pwm;
+        memcpy(targetMessage.data, &targetData, sizeof(ServoTargetMessage));
+        targetMessage.setCRC16();
+    }
+
+
+
     float minPwm, maxPwm, rampSpeed;
     tap::gpio::Pwm::Pin pin;
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite;
     float currentPwm = 0;
-    bool hasNewTarget, updatePwmRamp = 0;
+    bool hasNewTarget = 0; 
+    bool hasNewRamp = 0;   
     bool isTargetReached = 0;
+    DJISerial::SerialMessage<sizeof(ServoTargetMessage)> targetMessage;
+    DJISerial::SerialMessage<sizeof(ServoRampMessage)> rampMessage;
 };
 }  // namespace aruwsrc::communication::mcb_lite::motor
 
