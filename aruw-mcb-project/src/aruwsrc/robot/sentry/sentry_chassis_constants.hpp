@@ -40,7 +40,7 @@ static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {1, 200},
-    {1, 250}};  // TODO: TUNE!
+    {2, 250}};  // TODO: TUNE!
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -62,7 +62,7 @@ static constexpr float VELOCITY_PID_KS = 0.0f;
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 300.0f,
     .ki = 14.0f,
-    .kd = 10.0f,
+    .kd = 0.1f,
     .maxICumulative = 2000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .errDeadzone = 1.0f,
