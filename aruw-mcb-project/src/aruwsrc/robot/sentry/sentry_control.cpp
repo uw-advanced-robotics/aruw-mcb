@@ -91,7 +91,7 @@
 #include "aruwsrc/robot/sentry/turret/turret_minor_control_command.hpp"
 
 /// @TODO: test lamprey autotune's new 0 aligning -Aiden
-/// @TODO: test binned alignment
+/// @TODO: test binned alignment - Aiden
 
 using namespace tap::algorithms;
 using namespace tap::control;

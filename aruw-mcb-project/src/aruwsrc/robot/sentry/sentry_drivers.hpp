@@ -139,7 +139,6 @@ public:
         oledDisplay.initialize();
         capacitorBank.initialize();
         mpu6500.setCalibrationSamples(4000);
-        modm::delay_ms(2000);
         turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
         turretMajorImu.setCalibrationSamples(4000);
         turretMajorPrimaryImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
