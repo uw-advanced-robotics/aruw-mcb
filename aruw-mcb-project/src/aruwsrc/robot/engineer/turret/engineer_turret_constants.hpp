@@ -35,6 +35,7 @@
 namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
+static constexpr float YAW_3508_OUTPUT_MAX = tap::motor::DjiMotor::MAX_OUTPUT_C620;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
@@ -164,7 +165,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .maxOutput = YAW_3508_OUTPUT_MAX,
     .tQDerivativeKalman = 0.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 0.0f,
@@ -182,7 +183,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 10'000.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .maxOutput = YAW_3508_OUTPUT_MAX,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,

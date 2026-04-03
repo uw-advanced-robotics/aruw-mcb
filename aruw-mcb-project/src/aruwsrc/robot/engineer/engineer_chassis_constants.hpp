@@ -83,8 +83,8 @@ static constexpr float VELOCITY_PID_KS = 0.0;
 
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 300.0f,
-    .ki = 14.0f,
-    .kd = 10.0f,
+    .ki = 1400.0f,
+    .kd = 0.1f,
     .maxICumulative = 2000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .errDeadzone = 1.0f,

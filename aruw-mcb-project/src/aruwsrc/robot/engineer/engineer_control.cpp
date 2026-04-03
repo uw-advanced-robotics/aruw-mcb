@@ -127,10 +127,10 @@ namespace aruwsrc
 {
 namespace control
 {
-// inline tap::communication::sensors::imu::AbstractIMU& getTurretIMU()
-// {
-//     return drivers()->turretMcbLite.imu;
-// }
+inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
+{
+    return drivers()->turretMCBCanCommBus1;
+}
 
 /// @TODO: make a virtualMotor
 tap::motor::DjiMotor pitchTurretMotor(
@@ -150,7 +150,7 @@ tap::motor::DjiMotor yawTurretMotor(
     false,
     "Yaw Turret",
     true,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (16.0f / 60.0f),
     YAW_MOTOR_CONFIG.startEncoderValue);
 
 /// @TODO: make the turretMCB a MCB lite
@@ -162,7 +162,7 @@ EngineerTurretSubsystem engTurret(
     YAW_MOTOR_CONFIG,
     &drivers()->turretMCBCanCommBus1);
 
-// aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
@@ -356,20 +356,30 @@ aruwsrc::algorithms::odometry::transforms::StandardAnderHeroTransformerSubsystem
 aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformAdapter transformAdapter(
     transformer);
 
-// aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
-// drivers(),
-// &drivers()->controlOperatorInterface,
-// &xDriveChassis,
-// &engTurret.yawMotor,
-// aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
+drivers(),
+&drivers()->controlOperatorInterface,
+&xDriveChassis,
+&engTurret.yawMotor,
+aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-// aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-//     aruwsrc::control::turret::algorithms::Axis::PITCH>
-//     chassisFramePitchTurretController(engTurret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
+aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+    aruwsrc::control::turret::algorithms::Axis::PITCH>
+    chassisFramePitchTurretController(engTurret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
 
-// aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-//     aruwsrc::control::turret::algorithms::Axis::YAW>
-//     chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
+aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+    aruwsrc::control::turret::algorithms::Axis::YAW>
+    chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
+
+
+user::TurretUserControlCommand turretUserChassisRelativeCommand(
+    drivers(),
+    drivers()->controlOperatorInterface,
+    &engTurret,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR);
 
 BuzzerSubsystem engineerBuzzer(drivers());
 
@@ -383,27 +393,27 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-// imu::ImuCalibrateCommand imuCalibrateCommand(
-//     drivers(),
-//     {{
-//         &getTurretIMU(),
-//         &engTurret,
-//         &chassisFrameYawTurretController,
-//         &chassisFramePitchTurretController,
-//         true,
-//     }},
-//     &xDriveChassis,
-//     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-//     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-//     &imuCalibrateSuccessBuzzCommand,
-//     &imuCalibrateFailBuzzCommand,
-//     nullptr,
-//     // {&drivers()->ism330});
-//     {&drivers()->mpu6500});
+imu::ImuCalibrateCommand imuCalibrateCommand(
+    drivers(),
+    {{
+        &getTurretMCBCanComm(),
+        &engTurret,
+        &chassisFrameYawTurretController,
+        &chassisFramePitchTurretController,
+        true,
+    }},
+    &xDriveChassis,
+    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    &imuCalibrateSuccessBuzzCommand,
+    &imuCalibrateFailBuzzCommand,
+    nullptr,
+    // {&drivers()->ism330});
+    {&drivers()->mpu6500});
 
-// aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
-//     drivers(),
-//     imuCalibrateCommand);
+aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
+    drivers(),
+    imuCalibrateCommand);
 
 CubeStorageSubsystem cubeStorage(
     drivers(),
@@ -545,6 +555,7 @@ void initializeSubsystems()
     // extensionSubsystem.initialize();
     // wristRollSubsystem.initialize();
     // wristSubsystem.initialize();
+    engTurret.initialize();
     cubeStorage.initialize();
     leftSuckSubsystem.initialize();
     rightSuckSubsystem.initialize();
@@ -565,6 +576,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&engTurret);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
@@ -576,6 +588,7 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
     // wristSubsystem.setDefaultCommand(&wristControllerCommand);
     // wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
+    engTurret.setDefaultCommand(&turretUserChassisRelativeCommand);
 
     // clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }

@@ -44,6 +44,10 @@ public:
 
     virtual float getChassisRInput() override;
 
+    float getTurretYawInput(uint8_t turretID) override;
+
+    float getTurretPitchInput(uint8_t turretID) override;
+
     /**
      * @return The cube storage velocity.
      */
