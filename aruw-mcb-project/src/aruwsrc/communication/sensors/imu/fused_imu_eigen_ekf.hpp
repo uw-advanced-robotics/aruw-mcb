@@ -299,9 +299,8 @@ private:
     static void stateTransitionFunction(
         const StateVector& state,
         StateVector& predictedState,
-        float dt)
+        float /* dt */)
     {
-        (void)dt;
         predictedState = state;
     }
 
@@ -311,20 +310,17 @@ private:
     }
 
     static void stateJacobianFunction(
-        const StateVector& state,
+        const StateVector& /* state */,
         StateMatrix& stateJacobian,
-        float dt)
+        float /* dt */)
     {
-        (void)state;
-        (void)dt;
         BackendAdapter::setIdentity(stateJacobian);
     }
 
     static void observationJacobianFunction(
-        const StateVector& state,
+        const StateVector& /* state */,
         ObservationMatrix& observationJacobian)
     {
-        (void)state;
         BackendAdapter::setIdentity(observationJacobian);
     }
 

@@ -60,6 +60,9 @@ public:
     void drawCalibrationResult(modm::GraphicDisplay &display) const override
     {
         display.printf("Lamprey Map (Tick : Angle):\n");
+        display.printf(
+            "You may need to add {max_tick, 2 * pi} as it likely \n"
+            "didn't get measured but is needed for a full map.\n");
 
         // Iterate through all points and print them pair by pair, on new lines
         for (size_t i = 0; i < numTestPoints; ++i)

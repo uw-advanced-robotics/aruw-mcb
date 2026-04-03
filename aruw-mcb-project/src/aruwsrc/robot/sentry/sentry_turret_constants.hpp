@@ -42,11 +42,7 @@
 
 namespace aruwsrc::control::turret
 {
-#ifdef TARGET_SENTRY_NAME
 static constexpr uint8_t NUM_TURRETS = 1;
-#else
-static constexpr uint8_t NUM_TURRETS = 2;
-#endif
 
 static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 

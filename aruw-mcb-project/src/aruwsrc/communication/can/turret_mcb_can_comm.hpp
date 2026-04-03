@@ -50,9 +50,6 @@ namespace aruwsrc::communication::can
  * microcontroller. Reads IMU data and sends instructions to the turret microcontroller. Follows the
  * protocol described in the wiki here:
  * https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Turret-MCB-Comm-Protocol.
- *
- * @note Since we use radians in this codebase, angle values that are sent from the turret MCB in
- * degrees are converted to radians by this object.
  */
 class TurretMCBCanComm : public tap::communication::sensors::imu::AbstractIMU,
                          public tap::communication::sensors::limit_switch::LimitSwitchInterface
@@ -103,12 +100,8 @@ public:
         imuDataReceivedCallbackFunc = func;
     }
 
-#if defined(TARGET_SENTRY_NAME)
     static constexpr float IMU_SCALING_FACTOR =
         1 / tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
-#else
-    static constexpr float IMU_SCALING_FACTOR = 2000.0 / 32768.0;
-#endif
     /**
      * @return turret yaw angle in radians, normalized between [-pi, pi]
      */
@@ -232,6 +225,7 @@ protected:
     {
         // taken from BMI088 implementation
         // this is dumb and we should update it in both places eventually
+        /// @TODO: UPDATE on this and TurretMCB
         return 2 * 1.5f * tap::algorithms::ACCELERATION_GRAVITY / 32768.0f;
     }
 
@@ -376,7 +370,7 @@ private:
      *
      * A revolution increment is detected if the difference between the new and old angle is < -pi,
      * and a decrement is detected if the difference is > pi. Put simply, if the angle measurement
-     * jumped unexpectly, it is assumed that a revolution has ocurred.
+     * jumped unexpectedly, it is assumed that a revolution has occurred.
      *
      * @param[in] newAngle A new angle measurement, in radians.
      * @param[in] prevAngle The old (previous) angle measurement, in radians.

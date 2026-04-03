@@ -71,9 +71,6 @@ public:
             /* accel */ {100.0f, 100.0f, 100.0f},
             /* gyro  */ {8.0f, 8.0f, 8.0f}};
 
-        float minEffectiveNoiseBandwidthHz = 1.0f;
-        float maxEffectiveNoiseBandwidthHz = 1000.0f;
-
         float accelGateMps2 = 4.0f;
         float minAccelNormMps2 = 4.0f;
         float maxAccelNormMps2 = 15.0f;
@@ -130,10 +127,8 @@ public:
         resetFilterState();
     }
 
-    void initialize(float sampleFrequency, float mahonyKp, float mahonyKi) override
+    void initialize(float sampleFrequency, float /* mahonyKp */, float /* mahonyKi */) override
     {
-        (void)mahonyKp;
-        (void)mahonyKi;
         AbstractIMU::initialize(sampleFrequency, 0.0f, 0.0f);
         samplePeriodS = (sampleFrequency > 0.0f) ? (1.0f / sampleFrequency) : 0.001f;
         prevFilterUpdateTimeUs = tap::arch::clock::getTimeMicroseconds();
@@ -581,8 +576,6 @@ private:
         const float dt = (samplePeriodS > 1.0e-9f) ? samplePeriodS : 1.0e-3f;
         const float fs = 1.0f / dt;
         float bw = 0.5f * fs;
-        if (bw < config.minEffectiveNoiseBandwidthHz) bw = config.minEffectiveNoiseBandwidthHz;
-        if (bw > config.maxEffectiveNoiseBandwidthHz) bw = config.maxEffectiveNoiseBandwidthHz;
         return bw;
     }
 
@@ -689,6 +682,7 @@ private:
 
             float accelMultiplier = 1.0f;
             float gyroMultiplier = 1.0f;
+            // Set variance high enough to effectively ignore
             if (!valid)
             {
                 accelMultiplier = config.offlineMeasurementVarianceMultiplier;
