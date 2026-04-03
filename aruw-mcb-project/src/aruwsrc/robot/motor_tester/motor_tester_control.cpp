@@ -30,7 +30,7 @@
 #include "aruwsrc/robot/robot_control.hpp"
 
 #include "motor_subsystem.hpp"
-#include "stick_torque_command.hpp"
+#include "stick_rpm_command.hpp"
 
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;
@@ -53,35 +53,40 @@ tap::motor::DjiMotor motor(
     tap::motor::MOTOR1, //prob need to change this
     tap::can::CanBus::CAN_BUS1, //idk if this needs to change
     false, //isInverted
-    "Motor1" //name
+    "Motor1", //name
+    true,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508
 );
 
-tap::algorithms::SmoothPidConfig pidConfig = aruwsrc::motor_tester::constants::gm6020VelocityPidConfig; //need to tune PID
+MotorSubsystem motorSubsystem(drivers(), motor, rm3508VelocityPidConfig);
 
-MotorSubsystem motorSubsystem(drivers(), motor, pidConfig);
-
-StickTorqueCommand stickTorqueCommand(
-    drivers(),
-    tap::communication::serial::Remote::Channel::RIGHT_VERTICAL, 
+StickRpmCommand stickRpmCommand(
     &motorSubsystem,
-    0.5f //sensitivity
+    &drivers()->remote,
+    tap::communication::serial::Remote::Channel::RIGHT_VERTICAL, 
+    482.0f
 );
 
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems() {}
+void initializeSubsystems() 
+{
+    motorSubsystem.initialize();
+}
 
 void registerSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&motorSubsystem);
     drivers->commandScheduler.setSafeDisconnectFunction(
         &motor_tester_control::remoteSafeDisconnectFunction);
-    motorSubsystem.setDefaultCommand(&stickTorqueCommand);
 }
 
-void registerIoMappings(Drivers* drivers) {}
+void registerIoMappings(Drivers* drivers) 
+{
+    motorSubsystem.setDefaultCommand(&stickRpmCommand);
+}
 
 
 
