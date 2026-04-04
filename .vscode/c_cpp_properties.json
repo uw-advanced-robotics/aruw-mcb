@@ -52,7 +52,7 @@
             ]
         },
         {
-            "name": "MCB Standard Void",
+            "name": "MCB Standard Phobos",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",

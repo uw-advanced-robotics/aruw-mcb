@@ -45,8 +45,8 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 #else
-static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
-static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR6;
+static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR7;
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 #endif
 
 #if defined(TARGET_STANDARD_NULL)
@@ -77,9 +77,9 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 5191,
-    .minAngle = modm::toRadian(-18),
-    .maxAngle = modm::toRadian(28),
+    .startEncoderValue = 3100,
+    .minAngle = modm::toRadian(-38),
+    .maxAngle = modm::toRadian(9),
     .limitMotorAngles = true,
 };
 #else
@@ -216,11 +216,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 
 #elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 1050.0f,
+    .kp = 5.0f,
     .ki = 0.0f,
-    .kd = 0.3f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 2000.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.25f,
+    .maxOutput = 7.5f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -230,11 +230,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1500.0f,
+    .kp = 5.0f,
     .ki = 0.0f,
-    .kd = 0.1875f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 5000.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.25f,
+    .maxOutput = 7.5f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -244,11 +244,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 350.0f,
+    .kp = 937.5f,
     .ki = 0.0f,
-    .kd = 15.0f,
+    .kd = 2.5f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA / 2.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -258,11 +258,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 1500.0f,
-    .ki = 0.1f,
-    .kd = 0.3f,
-    .maxICumulative = 200.0f,
-    .maxOutput = 2000.0f,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -272,11 +272,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1500.0f,
-    .ki = 0.1f,
-    .kd = 0.3f,
-    .maxICumulative = 200.0f,
-    .maxOutput = 2000.0f,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -286,11 +286,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 200.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
-    .kd = 1.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .maxOutput = 0.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -306,13 +306,13 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 namespace world_rel_chassis_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 25'000.0f,
-    .ki = 0.0f,
-    .kd = 5'000.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 40.0f,
+    .kp = 98'472.8047f,
+    .ki = 100'000.0f,
+    .kd = 10'423.45311f,
+    .maxICumulative = 3'000.0f,
+    .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620),
+    .tQDerivativeKalman = 10.0f,
+    .tRDerivativeKalman = 1.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -353,13 +353,13 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 
 #elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 25'000.0f,
-    .ki = 200.0f,
-    .kd = 5'000.2f,
-    .maxICumulative = 5000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .kp = 17'500.0f,
+    .ki = 1'250.0f,
+    .kd = 875.0f,
+    .maxICumulative = 62.5f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA / 4.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 70.0f,
+    .tRDerivativeKalman = 80.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -367,17 +367,18 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 80'000.0f,
-    .ki = 200.0f,
-    .kd = 5'000.0f,
-    .maxICumulative = 7000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 10.0f,
+    .tRDerivativeKalman = 60.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 2.0f,
+    .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
+    .antiSaturation = true,
 };
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
