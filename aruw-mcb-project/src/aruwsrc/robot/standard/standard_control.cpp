@@ -161,7 +161,7 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     PITCH_MOTOR_ID,
     CAN_BUS_MOTORS,
-    false,
+    true,
     "Pitch Turret",
     true,
     1,
