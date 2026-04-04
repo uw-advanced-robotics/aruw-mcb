@@ -17,10 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 #if defined(TARGET_DART)
+#include <memory>
 
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
@@ -89,30 +91,35 @@ DartCloseCommand servoClose(dartLauncher);
 
 RotateMagazineCommand rotateMagazine(dartReloader);
 
-HoldCommandMapping rightUpLeftUp(
+auto rightUpLeftUpRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
+auto rightUpLeftUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&dartPullback},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    std::vector<Command*>{&dartPullback},
+    &rightUpLeftUpRms);
 
-HoldCommandMapping rightUpLeftDown(
+auto rightUpLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
+auto rightUpLeftDown = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&dartRelease},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+    std::vector<Command*>{&dartRelease},
+    &rightUpLeftDownRms);
 
-HoldCommandMapping rightDownLeftUp(
+auto rightDownLeftUpRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
+auto rightDownLeftUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&servoOpen},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+    std::vector<Command*>{&servoOpen},
+    &rightDownLeftUpRms);
 
-HoldCommandMapping rightDownLeftDown(
+auto rightDownLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
+auto rightDownLeftDown = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&servoClose},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+    std::vector<Command*>{&servoClose},
+    &rightDownLeftDownRms);
 
-PressCommandMapping rightMidLeftDown(
+auto rightMidLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
+auto rightMidLeftDown = std::make_unique<PressCommandMapping>(
     drivers(),
-    {&rotateMagazine},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
+    std::vector<Command*>{&rotateMagazine},
+    &rightMidLeftDownRms);
 
 void initializeSubsystems()
 {
@@ -135,11 +142,11 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandMapper.addMap(&rightUpLeftUp);
-    drivers->commandMapper.addMap(&rightUpLeftDown);
-    drivers->commandMapper.addMap(&rightDownLeftUp);
-    drivers->commandMapper.addMap(&rightDownLeftDown);
-    drivers->commandMapper.addMap(&rightMidLeftDown);
+    drivers->commandMapper.addMap(std::move(rightUpLeftUp));
+    drivers->commandMapper.addMap(std::move(rightUpLeftDown));
+    drivers->commandMapper.addMap(std::move(rightDownLeftUp));
+    drivers->commandMapper.addMap(std::move(rightDownLeftDown));
+    drivers->commandMapper.addMap(std::move(rightMidLeftDown));
 }
 
 }  // namespace dart_control

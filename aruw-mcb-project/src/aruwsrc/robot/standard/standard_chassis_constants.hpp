@@ -57,7 +57,10 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
  * calculateRotationTranslationalGain is performed.
  */
 static constexpr float MIN_ROTATION_THRESHOLD = 80.0f;
+<<<<<<< HEAD
 static constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
+=======
+>>>>>>> develop
 
 /**
  * Pin to use for current sensing
@@ -69,6 +72,7 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
+<<<<<<< HEAD
 static constexpr float VELOCITY_PID_KP = 300.0f;
 static constexpr float VELOCITY_PID_KI = 14.0f;
 static constexpr float VELOCITY_PID_KD = 10.0f;
@@ -83,13 +87,20 @@ static constexpr float VELOCITY_PID_KS = 1.0f;
  * -20 ~ 0 ~ 20 A.
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C620;
+=======
+static constexpr float VELOCITY_PID_KV = 0.07f;
+static constexpr float VELOCITY_PID_KS = 1.0f;
+>>>>>>> develop
 
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
-    .kp = VELOCITY_PID_KP,
-    .ki = VELOCITY_PID_KI,
-    .kd = VELOCITY_PID_KD,
-    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
-    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+    .kp = 300.0f,
+    .ki = 14.0f,
+    .kd = 1.0f,
+    .maxICumulative = 1000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 0.5f,
+    .smoothDeadzone = true,
+    .antiSaturation = true,
 };
 
 /**
