@@ -31,8 +31,8 @@ namespace aruwsrc::communication::mcb_lite
 MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port)
     : DJISerial(drivers, port),
       canRxHandler(motor::VirtualCanRxHandler(drivers)),
-      servoRxHandler(motor::VirtualServoRxHandler(drivers)),
       motorTxHandler(motor::VirtualDJIMotorTxHandler(drivers)),
+    servoRxHandler(motor::VirtualServoRxHandler(drivers)),
       imu(),
       analog(),
       digital(),

@@ -22,6 +22,8 @@
 
 #include "tap/motor/servo.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
+#include "aruwsrc/communication/mcb-lite/message_types.hpp"
+
 
 
 using namespace tap::communication::serial;
@@ -40,61 +42,27 @@ public:
     VirtualServo(
     tap::Drivers *drivers,
     tap::gpio::Pwm::Pin pwmPin,
-    float maximumPwm,
     float minimumPwm,
+    float maximumPwm,
     float pwmRampSpeed,
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite,
-    bool isServoOne)
-    : Servo(drivers, pwmPin, maximumPwm, minimumPwm, pwmRampSpeed), pin(pwmPin), minPwm(minimumPwm), maxPwm(maximumPwm), rampSpeed(pwmRampSpeed), mcbLite(mcbLite) {
-        
-        mcbLite->servoRxHandler.attachReceiveHandler(this, isServoOne);
+    bool isServoOne);
 
-        targetMessage.messageType = MessageTypes::SERVO_TARGET_MESSAGE;
-        rampMessage.messageType = MessageTypes::SERVO_RAMP_MESSAGE;
-        ServoRampMessage rampData;
-        rampData.pin = pin;
-        rampData.rampSpeed = pwmRampSpeed;
-        memcpy(rampMessage.data, &rampData, sizeof(ServoRampMessage));
-        rampMessage.setCRC16();
-        hasNewRamp = true;
+    void setTargetPwm(float pwm);
 
-    };
+    float getPWM() const;
 
-    void setTargetPwm(float pwm)
-{
-    float targetPwm = tap::algorithms::limitVal<float>(pwm, minPwm, maxPwm);
-    updateMessages(targetPwm);
-    hasNewTarget = true;
+    bool isRampTargetMet() const;
 
-}
-
-float getPWM() const { return currentPwm; }  
-
-bool isRampTargetMet() const { return isTargetReached; }
-
-void attachSelfToRxHandler() {
-    mcbLite->servoRxHandler.attachReceiveHandler(&motorOne);
-    mcbLite->servoRxHandler.attachReceiveHandler(&motorTwo);
-}
 
 private: 
-    void processServoUARTMessage( float currentPwm, bool isRampTargetMet) {
-        this->currentPwm = currentPwm;
-        this->isTargetReached = isRampTargetMet;
-    }
+    void processServoUARTMessage( float currentPwm, bool isRampTargetMet);
 
-    void updateMessages(float pwm) {
-        ServoTargetMessage targetData;
-        targetData.pin = pin;
-        targetData.target = pwm;
-        memcpy(targetMessage.data, &targetData, sizeof(ServoTargetMessage));
-        targetMessage.setCRC16();
-    }
+    void updateMessages(float pwm);
 
 
-
-    float minPwm, maxPwm, rampSpeed;
     tap::gpio::Pwm::Pin pin;
+    float minPwm, maxPwm, rampSpeed;
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite;
     float currentPwm = 0;
     bool hasNewTarget = 0; 
