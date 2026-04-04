@@ -131,6 +131,38 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace hero_control
 {
+class HeroTurretDisabledCommand : public tap::control::Command
+{
+public:
+    explicit HeroTurretDisabledCommand(TurretSubsystem* turretSubsystem)
+        : turretSubsystem(turretSubsystem)
+    {
+        addSubsystemRequirement(turretSubsystem);
+    }
+
+    const char* getName() const override { return "hero turret disabled"; }
+
+    void initialize() override { zeroTurret(); }
+
+    void execute() override
+    {
+        zeroTurret();
+    }
+
+    bool isFinished() const override { return false; }
+
+    void end(bool) override { zeroTurret(); }
+
+private:
+    TurretSubsystem* turretSubsystem;
+
+    void zeroTurret()
+    {
+        turretSubsystem->yawMotor.setMotorOutput(0);
+        turretSubsystem->pitchMotor.setMotorOutput(0);
+    }
+};
+
 inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
@@ -415,6 +447,8 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
+HeroTurretDisabledCommand turretDisabledCommand(&turret);
+
 cv::TurretCVCommand turretCVCommand(
     &drivers()->visionCoprocessor,
     &drivers()->controlOperatorInterface,
@@ -624,7 +658,10 @@ auto leftSwitchDown = std::make_unique<HoldCommandMapping>(
 auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
 auto leftSwitchUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&chassisDriveCommand, &turretCVCommand},
+    std::vector<Command *>{
+        &chassisDriveCommand,
+        // &turretCVCommand,
+    },
     &leftUpRms);
 
 auto leftMouseBNotPressedVNotPressedRms =
@@ -753,9 +790,11 @@ void registerHeroSubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
+    // chassis.setDefaultCommand(&chassisAutorotateCommand);
+    chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
-    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    // turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    turret.setDefaultCommand(&turretDisabledCommand);
     carsonator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
@@ -781,11 +820,11 @@ void registerHeroIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(std::move(leftMousePressedBNotPressedVNotPressed));
     drivers->commandMapper.addMap(std::move(leftMousePressedBPressed));
     drivers->commandMapper.addMap(std::move(leftMousePressedVPressed));
-    drivers->commandMapper.addMap(std::move(rightMousePressed));
+    // drivers->commandMapper.addMap(std::move(rightMousePressed));
     drivers->commandMapper.addMap(std::move(leftSwitchDown));
     drivers->commandMapper.addMap(std::move(leftSwitchUp));
     drivers->commandMapper.addMap(std::move(fToggled));
-    drivers->commandMapper.addMap(std::move(zPressed));
+    // drivers->commandMapper.addMap(std::move(zPressed));
     drivers->commandMapper.addMap(std::move(bNotCtrlPressedRightSwitchDown));
     drivers->commandMapper.addMap(std::move(bCtrlPressed));
     drivers->commandMapper.addMap(std::move(rPressed));
