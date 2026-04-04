@@ -115,56 +115,7 @@ int main()
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
-<<<<<<< HEAD
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
-            ((Drivers*)drivers)->plateHitTracker.update();
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER)
-            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
-#endif
-
-#if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(TARGET_ENGINEER) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#endif
-
-#if defined(TARGET_SENTRY_ECLIPSE)
-            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
-            PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
-            PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
-#endif
-
-#ifdef TARGET_TESTBED
-            PROFILE(drivers->profiler, drivers->lite.sendData, ());
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
-            checkTurretMcbDisconnection(drivers);
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_PHOBOS) ||   \
-    defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE) || defined(TARGET_ENGINEER) ||    \
-    defined(TARGET_TESTBED) || defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET) || \
-    defined(TARGET_CHARACTERIZER) || defined(TARGET_DART) || defined(TARGET_DRONE) ||             \
-    defined(TARGET_BLANK)
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
-            PROFILE(drivers->profiler, ((Drivers*)drivers)->rttTelemetry.updateTelemetryAsync, ());
-#endif
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO)
-            // PROFILE(drivers->profiler, drivers->ism330.periodicIMUUpdate, ());
-#endif
-=======
             drivers->update();
->>>>>>> develop
         }
         modm::delay_us(10);
     }
@@ -195,29 +146,10 @@ static void updateIo(Drivers* drivers)
     drivers->updateIo();
 }
 
-<<<<<<< HEAD
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_ENGINEER)
-static void checkTurretMcbDisconnection(Drivers* drivers)
-{
-    bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
-    if (!turretMcbConnected &&
-        drivers->mpu6500.getImuState() !=
-            tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
-    {
-        // tap::buzzer::playNote(&drivers->pwm, 1000);
-    }
-    else
-    {
-        tap::buzzer::silenceBuzzer(&drivers->pwm);
-    }
-}
-#endif
-=======
 // static void initializeI2C(Drivers* drivers)
 // {
 //     drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
 //     modm::delay_ms(2000);  // Wait for the SDA and SCL lines to be pulled high
->>>>>>> develop
 
 //     Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
 //         Board::I2CMaster::PullUps::External);

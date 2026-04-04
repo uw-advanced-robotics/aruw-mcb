@@ -657,18 +657,10 @@ Trigger rightSwitchMiddle =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
         .onTrue(&spinFrictionWheels);
 
-<<<<<<< HEAD
-HoldRepeatCommandMapping rightSwitchUp(
-    drivers(),
-    {&spinFrictionWheels, &rotateAndUnjamAgitator},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    true);
-=======
 Trigger rightSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
         .whileTrue(Compose::parallel<2>(
             {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}));
->>>>>>> develop
 
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
