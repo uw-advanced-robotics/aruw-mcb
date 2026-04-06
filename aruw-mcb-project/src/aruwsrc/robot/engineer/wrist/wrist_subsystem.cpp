@@ -221,4 +221,20 @@ Transform WristSubsystem::computeWristToCOM(
 
     return wristOrientation.compose(Transform(COMPos, Orientation(0, 0, 0)));
 }
+
+Transform WristSubsystem::computeWristOrientation(float theta1, float theta2) const
+{
+    return Transform(
+        tap::algorithms::CMSISMat<3, 1>({0, 0, 0}),
+        tap::algorithms::CMSISMat<3, 3>(
+            {cosf(theta2),
+             0,
+             sinf(theta2),
+             sinf(theta1) * sinf(theta2),
+             cosf(theta1),
+             -sinf(theta1) * cosf(theta2),
+             -cosf(theta1) * sinf(theta2),
+             sinf(theta1),
+             cosf(theta1) * cosf(theta2)}));
+}
 }  // namespace aruwsrc::engineer::wrist

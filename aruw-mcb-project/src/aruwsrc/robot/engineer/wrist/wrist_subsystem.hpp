@@ -90,6 +90,9 @@ public:
 
     virtual void refreshSafeDisconnect() override;
 
+    tap::algorithms::transforms::Transform computeWristOrientation(float yawJoint, float pitchJoint)
+        const;
+
 private:
     tap::motor::MotorInterface &motorTheta1, &motorTheta2, &motorTheta3;
     tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2, &encoderTheta3;
