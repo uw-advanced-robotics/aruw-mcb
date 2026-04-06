@@ -26,7 +26,6 @@
 
 namespace aruwsrc::engineer::algorithms
 {
-
 struct PointMass
 {
     float mass;  // kg
