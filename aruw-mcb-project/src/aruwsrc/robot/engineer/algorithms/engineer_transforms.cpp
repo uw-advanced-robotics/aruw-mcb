@@ -96,6 +96,10 @@ void EngineerTransforms::updateTransforms()
     // update requested transforms
 
     Transform worldToTurretYaw = worldToChassis.composeStatic(chassisToTurretYaw);
+    worldToTurretYaw.updateRotation(
+        turretPitchImu.getRoll(),  // could be either inherited or use turret imu, either works
+        worldToTurretYaw.getPitch(),
+        turretPitchImu.getYaw());
 
     worldToTurretPitch = worldToTurretYaw.composeStatic(turretYawToTurretPitch);
     worldToTurretPitch.updateRotation(0, turretPitchImu.getPitch(), turretPitchImu.getYaw());
