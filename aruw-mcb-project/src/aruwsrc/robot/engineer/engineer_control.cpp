@@ -357,11 +357,11 @@ aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformAdapter trans
     transformer);
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
-drivers(),
-&drivers()->controlOperatorInterface,
-&xDriveChassis,
-&engTurret.yawMotor,
-aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+    drivers(),
+    &drivers()->controlOperatorInterface,
+    &xDriveChassis,
+    &engTurret.yawMotor,
+    aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
 aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
     aruwsrc::control::turret::algorithms::Axis::PITCH>
@@ -370,7 +370,6 @@ aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
 aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
     aruwsrc::control::turret::algorithms::Axis::YAW>
     chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
-
 
 user::TurretUserControlCommand turretUserChassisRelativeCommand(
     drivers(),
