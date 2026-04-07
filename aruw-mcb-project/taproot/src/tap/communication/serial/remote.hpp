@@ -171,6 +171,8 @@ public:
         return (remote.key & (1 << static_cast<uint8_t>(key))) != 0;
     }
 
+    uint16_t getKeys() const { return remote.key; }
+
     /**
      * @return the number of times remote info has been received.
      */

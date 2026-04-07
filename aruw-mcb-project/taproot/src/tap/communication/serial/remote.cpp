@@ -26,6 +26,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/serial/uart.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
@@ -141,9 +142,21 @@ void Remote::parseBuffer()
         RAISE_ERROR(drivers, "invalid remote joystick values");
     }
 
-    drivers->commandMapper.pollTriggerBindings();
-    drivers->commandMapper.handleKeyStateChange(*this, remote.key);
+    tap::control::RemoteMapState mapState;
+    mapState.initKeys(remote.key);
+    if (remote.mouse.l)
+    {
+        mapState.initLMouseButton();
+    }
+    if (remote.mouse.r)
+    {
+        mapState.initRMouseButton();
+    }
+    mapState.initLSwitch(remote.leftSwitch);
+    mapState.initRSwitch(remote.rightSwitch);
 
+    // drivers->commandMapper.handleKeyStateChange(*this, remote.key);
+    drivers->commandMapper.sumedh_fixes_things(mapState);
     remote.updateCounter++;
 }
 

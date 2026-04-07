@@ -135,10 +135,12 @@ public:
     mockable std::size_t getCommandMappingSize() const { return commandsToRun.size(); }
 
     /**
-     * @return The CommandMapping located at the specificed index, or
+     * @return The CommandMapping located at the specified index, or
      *      `nullptr` of the index is out of bounds.
      */
     mockable const CommandMapping *getCommandMappingAtIndex(std::size_t index) const;
+
+    void sumedh_fixes_things(GenericRemoteMapState& mapState);
 
 private:
     std::vector<std::unique_ptr<TriggerBinding>> triggerBindings;

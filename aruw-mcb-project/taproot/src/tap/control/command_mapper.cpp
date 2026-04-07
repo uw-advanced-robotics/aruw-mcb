@@ -77,6 +77,13 @@ void CommandMapper::handleKeyStateChange(Remote &remote, uint16_t key)
     }
 }
 
+void CommandMapper::sumedh_fixes_things(GenericRemoteMapState& mapState) {
+    for (std::unique_ptr<CommandMapping> &cmdMap : commandsToRun)
+    {
+        cmdMap->executeCommandMapping(mapState);
+    }
+}
+
 void CommandMapper::addMap(std::unique_ptr<CommandMapping> mapping)
 {
     commandsToRun.push_back(std::move(mapping));
