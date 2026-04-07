@@ -30,7 +30,8 @@
 namespace tap::communication::sensors::imu
 {
 class ImuInterface;
-}
+class AbstractIMU;
+}  // namespace tap::communication::sensors::imu
 namespace aruwsrc::control::turret
 {
 class TurretSubsystem;
@@ -61,6 +62,7 @@ class EngineerTransforms
 public:
     EngineerTransforms(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
+        const tap::communication::sensors::imu::AbstractIMU& chassisImu,
         const aruwsrc::control::turret::TurretSubsystem& turret,
         const tap::communication::sensors::imu::ImuInterface& turretPitchImu,
         const aruwsrc::control::joint::JointSubsystem& extension,
@@ -124,6 +126,7 @@ protected:
 
 private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
+    const tap::communication::sensors::imu::AbstractIMU& chassisImu;
     const aruwsrc::control::turret::TurretSubsystem& turret;
     const tap::communication::sensors::imu::ImuInterface&
         turretPitchImu;  // should be abstract imu, but blocked by mcb lite / virtual imu

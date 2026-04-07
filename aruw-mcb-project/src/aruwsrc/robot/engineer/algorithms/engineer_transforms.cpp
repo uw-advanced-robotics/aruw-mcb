@@ -19,6 +19,7 @@
 
 #include "engineer_transforms.hpp"
 
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
@@ -32,6 +33,7 @@ namespace aruwsrc::engineer::algorithms
 {
 EngineerTransforms::EngineerTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
+    const tap::communication::sensors::imu::AbstractIMU& chassisImu,
     const aruwsrc::control::turret::TurretSubsystem& turret,
     const tap::communication::sensors::imu::ImuInterface& turretPitchImu,
     const aruwsrc::control::joint::JointSubsystem& extension,
@@ -39,6 +41,7 @@ EngineerTransforms::EngineerTransforms(
     const aruwsrc::control::joint::JointSubsystem& roll,
     const aruwsrc::control::joint::JointSubsystem& cubeStorage)
     : chassisOdometry(chassisOdometry),
+      chassisImu(chassisImu),
       turret(turret),
       turretPitchImu(turretPitchImu),
       extension(extension),
@@ -71,7 +74,11 @@ void EngineerTransforms::updateTransforms()
     // update joint transforms
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
     worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
-    worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
+    // use odometry yaw because it likely filters more information than imu alone, but only for yaw
+    worldToChassis.updateRotation(
+        chassisImu.getRoll(),
+        chassisImu.getPitch(),
+        chassisPose.getOrientation());
     // worldToChassis.updateAngularVelocity(0., 0., chassisImu.getGz());
 
     chassisToTurretYaw.updateRotation(0, 0, chassisPose.getOrientation());
