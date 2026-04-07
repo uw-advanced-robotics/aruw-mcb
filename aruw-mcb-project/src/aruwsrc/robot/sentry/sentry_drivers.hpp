@@ -116,6 +116,7 @@ public:
         mpu6500.setCalibrationSamples(4000);
         chassisMcbLite.initialize();
         modm::delay_ms(2000);
+        turretMajorImu.setNumSamples(5);
         turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
         turretMajorImu.setCalibrationSamples(4000);
     }

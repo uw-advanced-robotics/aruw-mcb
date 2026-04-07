@@ -130,22 +130,21 @@ bool Mpu6500::read()
         float accRawX = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff);
         float accRawY = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 2);
         float accRawZ = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 4);
-        imuData.accRaw = tap::algorithms::transforms::Vector(accRawX, accRawY, accRawZ);
+        curImuData.accRaw = tap::algorithms::transforms::Vector(accRawX, accRawY, accRawZ);
 
         float gyroRawX = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 8);
         float gyroRawY = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 10);
         float gyroRawZ = LITTLE_ENDIAN_INT16_TO_FLOAT(rxBuff + 12);
-        imuData.gyroRaw = tap::algorithms::transforms::Vector(gyroRawX, gyroRawY, gyroRawZ);
+        curImuData.gyroRaw = tap::algorithms::transforms::Vector(gyroRawX, gyroRawY, gyroRawZ);
 
-        applyMountingTransformToRaw(imuData);
+        applyMountingTransformToRaw(curImuData);
 
-        imuData.accG =
-            (imuData.accRaw - imuData.accOffsetRaw) * GRAVITY_MPS2 / ACCELERATION_SENSITIVITY;
+        curImuData.accG =
+            (curImuData.accRaw - imuData.accOffsetRaw) * GRAVITY_MPS2 / ACCELERATION_SENSITIVITY;
+        curImuData.gyroRadPerSec = (curImuData.gyroRaw - imuData.gyroOffsetRaw) / LSB_PER_RAD_PER_S;
+        curImuData.temperature = parseTemp(static_cast<float>(rxBuff[6] << 8 | rxBuff[7]));
 
-        imuData.gyroRadPerSec = (imuData.gyroRaw - imuData.gyroOffsetRaw) / LSB_PER_RAD_PER_S;
-
-        imuData.temperature = parseTemp(static_cast<float>(rxBuff[6] << 8 | rxBuff[7]));
-
+        updateImuMeasurement();
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
     }
     PT_END();
