@@ -102,8 +102,14 @@ void EngineerTransforms::updateTransforms()
         turretPitchImu.getYaw());
 
     worldToTurretPitch = worldToTurretYaw.composeStatic(turretYawToTurretPitch);
-    worldToTurretPitch.updateRotation(0, turretPitchImu.getPitch(), turretPitchImu.getYaw());
-    worldToTurretPitch.updateAngularVelocity(0, turretPitchImu.getGy(), turretPitchImu.getGz());
+    worldToTurretPitch.updateRotation(
+        turretPitchImu.getRoll(),
+        turretPitchImu.getPitch(),
+        turretPitchImu.getYaw());
+    worldToTurretPitch.updateAngularVelocity(
+        turretPitchImu.getGx(),
+        turretPitchImu.getGy(),
+        turretPitchImu.getGz());
 
     worldToRealsense = worldToTurretYaw.composeStatic(TURRET_YAW_TO_REALSENSE);
 
