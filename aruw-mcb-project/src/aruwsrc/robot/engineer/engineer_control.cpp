@@ -377,6 +377,7 @@ aruwsrc::communication::mcb_lite::VirtualIMUInterface turretPitchImu;  // placeh
 // transforms
 EngineerTransforms transformer(
     odometrySubsystem,
+    drivers()->chassisIsm,
     engTurret,
     turretPitchImu,
     extensionSubsystem,
