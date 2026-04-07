@@ -301,8 +301,6 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
 
 LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
-aruwsrc::communication::mcb_lite::VirtualIMUInterface turretPitchImu;  // placeholder
-
 /* define subsystems --------------------------------------------------------*/
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
@@ -373,6 +371,8 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
     parallelTwoCenterToWheelDistance,
     perpendicularCenterToWheelDistance,
     odomFrameToRobotFrame);
+
+aruwsrc::communication::mcb_lite::VirtualIMUInterface turretPitchImu;  // placeholder
 
 // transforms
 EngineerTransforms transformer(
