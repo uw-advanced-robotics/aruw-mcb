@@ -36,7 +36,7 @@ static const tap::algorithms::transforms::Transform TURRET_PITCH_TO_EXTENSION_ZE
     0,
     0,
     0);
-static const tap::algorithms::transforms::Transform WRIST_ROLL_TO_END_EFFECTOR(0, 0, 0, 0, 0, 0);
+static const tap::algorithms::transforms::Transform WRIST_TO_END_EFFECTOR(0, 0, 0, 0, 0, 0);
 static const tap::algorithms::transforms::Transform EXTENSION_TO_VTM_GIMBAL(0, 0, 0, 0, 0, 0);
 static const tap::algorithms::transforms::Transform TURRET_YAW_TO_CUBE_STORE_FRAME(
     0,
@@ -62,8 +62,8 @@ static const tap::algorithms::transforms::Transform CUBE_STORE_CENTER_TO_CUBE_ST
     0,
     0);
 
-static const tap::algorithms::transforms::Transform END_EFFECTOR_TO_WRIST_ROLL =
-    WRIST_ROLL_TO_END_EFFECTOR.getInverse();
+static const tap::algorithms::transforms::Transform END_EFFECTOR_TO_WRIST =
+    WRIST_TO_END_EFFECTOR.getInverse();
 static const tap::algorithms::transforms::Transform VTM_GIMBAL_TO_EXTENSION =
     EXTENSION_TO_VTM_GIMBAL.getInverse();
 static const tap::algorithms::transforms::Transform CUBE_STORE_1_TO_CUBE_STORE_CENTER =
@@ -78,7 +78,7 @@ static const tap::algorithms::transforms::Transform TURRET_YAW_TO_CUBE_DIST =
 // static constexpr float TRUE_WRIST_ROLL_OFFSET = 0;
 
 // Center of Masses
-static const PointMass MASS_BEYOND_WRIST_ROLL{
+static const PointMass MASS_BEYOND_WRIST{
     .mass = 1,
     .location = tap::algorithms::transforms::Position(0, 0, 0)};
 static constexpr float EXTENSION_STATIONARY_MASS = 1;

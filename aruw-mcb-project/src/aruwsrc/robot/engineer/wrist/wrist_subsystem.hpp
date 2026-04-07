@@ -38,12 +38,8 @@ struct WristConfig
     tap::algorithms::SmoothPidConfig theta2PidConfig;
     tap::algorithms::SmoothPidConfig theta3PidConfig;
 
-    float theta1Min = 0.0f;
-    float theta1Max = 0.0f;
-    float theta2Min = 0.0f;
-    float theta2Max = 0.0f;
-    float theta3Min = 0.0f;
-    float theta3Max = 0.0f;
+    float theta2Min;
+    float theta2Max;
 
     float ratio = 1.0f;     // differential pitch gear teeth / yaw gear teeth
     float epsilon = 1e-4f;  // angular tolerance used to determine if we reached the setpoint
@@ -61,43 +57,54 @@ public:
         tap::motor::MotorInterface& motorTheta3,
         tap::encoder::EncoderInterface& encoderTheta1,
         tap::encoder::EncoderInterface& encoderTheta2,
-        tap::encoder::EncoderInterface& encoderTheta3,
         const WristConfig config);
 
-    float getTheta1();
-    float getTheta2();
-    float getTheta3();
+    float getTheta1() const;
+    float getTheta2() const;
+    float getTheta3() const;
+
     void setSetpointTheta1(float setpoint);
     void setSetpointTheta2(float setpoint);
     void setSetpointTheta3(float setpoint);
-    float getSetpointTheta1() { return setpointTheta1; }
-    float getSetpointTheta2() { return setpointTheta2; }
-    float getSetpointTheta3() { return setpointTheta3; }
-    float calculateTheta2MotorOutputForTheta1Theta2(float theta1Setpoint, float theta2Setpoint);
-    float calculateTheta1MotorOutputForTheta1(float theta1Setpoint);
+
+    /**
+     * Sets the desired rotation for the entire wrist
+     * */
+    void setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint);
+
+    inline float getSetpointTheta1() { return setpointTheta1.getWrappedValue(); }
+    inline float getSetpointTheta2() { return setpointTheta2; }
+    inline float getSetpointTheta3() { return setpointTheta3.getWrappedValue(); }
 
     virtual void initialize() override;
 
-    bool atSetpointTheta1(float epsilon = 1e-4);
+    bool atSetpointTheta1(float epsilon = 1e-4) const;
 
-    bool atSetpointTheta2(float epsilon = 1e-4);
+    bool atSetpointTheta2(float epsilon = 1e-4) const;
 
-    bool atSetpointTheta3(float epsilon = 1e-4);
+    bool atSetpointTheta3(float epsilon = 1e-4) const;
 
-    bool atSetpoint();
+    bool atSetpoint() const;
 
     virtual void refresh() override;
 
     virtual void refreshSafeDisconnect() override;
 
-    tap::algorithms::transforms::Transform computeWristOrientation(float yawJoint, float pitchJoint)
-        const;
+    bool isOnline() const;
+
+    tap::algorithms::transforms::Orientation getOrientation() const;
+
+    static tap::algorithms::transforms::Orientation getHypotheticalOrientation(
+        float theta1,
+        float theta2,
+        float theta3);
 
 private:
-    tap::motor::MotorInterface &motorTheta1, &motorTheta2, &motorTheta3;
-    tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2, &encoderTheta3;
     const WristConfig config;
-    float setpointTheta1, setpointTheta2, setpointTheta3;
+    tap::motor::MotorInterface &motorTheta1, &motorTheta2, &motorTheta3;
+    tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2;
+    tap::algorithms::WrappedFloat setpointTheta1, setpointTheta3;
+    float setpointTheta2;
     tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
     const tap::algorithms::transforms::Position COM_POS =
         tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static

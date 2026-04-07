@@ -260,7 +260,6 @@ tap::motor::DjiMotor wristMotorThree(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-JointSubsystem wristRollSubsystem(drivers(), wristMotorThree, WRIST_ROLL_CONFIG);
 tap::encoder::CanEncoder wristEncoderTheta1(
     drivers(),
     aruwsrc::engineer::WRIST_THETA1_ENCODER_ID,
@@ -276,14 +275,6 @@ tap::encoder::CanEncoder wristEncoderTheta2(
     false,
     1,
     WRIST_HOME_THETA2);
-
-tap::encoder::CanEncoder wristEncoderTheta3(
-    drivers(),
-    aruwsrc::engineer::WRIST_THETA3_ENCODER_ID,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    false,
-    1,
-    WRIST_HOME_THETA3);
 
 tap::motor::DjiMotor extensionMotor(
     drivers(),
@@ -328,7 +319,6 @@ WristSubsystem wristSubsystem(
     wristMotorThree,
     wristEncoderTheta1,
     wristEncoderTheta2,
-    wristEncoderTheta3,
     WRIST_CONFIG);
 
 TriggerHomedJointSubsystem extensionSubsystem(
@@ -382,7 +372,6 @@ EngineerTransforms transformer(
     turretPitchImu,
     extensionSubsystem,
     wristSubsystem,
-    wristRollSubsystem,
     cubeStorage);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
@@ -490,10 +479,18 @@ SetpointMovePositionCommand leftCubePosition(cubeStorage, CUBE_STORAGE_LEFT_SETP
 SetpointMovePositionCommand rightCubePosition(cubeStorage, CUBE_STORAGE_RIGHT_SETPOINT);
 SetpointMovePositionCommand centerCubePosition(cubeStorage, CUBE_STORAGE_CENTER_SETPOINT);
 
-ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem, wristRollSubsystem);
+ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem);
 
-SelectCubePositionCommand selectCubeAddPositionCommand(cubeStorage, wristRollSubsystem, true);
-SelectCubePositionCommand selectCubeRemovePositionCommand(cubeStorage, wristRollSubsystem, false);
+SelectCubePositionCommand selectCubeAddPositionCommand(
+    cubeStorage,
+    true,
+    transformer.getCubeStore1ToEndEffector(),
+    transformer.getCubeStore2ToEndEffector());
+SelectCubePositionCommand selectCubeRemovePositionCommand(
+    cubeStorage,
+    false,
+    transformer.getCubeStore1ToEndEffector(),
+    transformer.getCubeStore2ToEndEffector());
 CubePositionDigitalOutCommand cubeStorageSuckOnCommand(
     cubeStorage,
     leftSuckSubsystem,
@@ -535,7 +532,6 @@ void initializeSubsystems()
 {
     chassisSubsystem.initialize();
     extensionSubsystem.initialize();
-    wristRollSubsystem.initialize();
     wristSubsystem.initialize();
     cubeStorage.initialize();
     leftSuckSubsystem.initialize();
@@ -548,7 +544,6 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
     drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
@@ -562,7 +557,6 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
     chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
     extensionSubsystem.setDefaultCommand(&extensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
-    wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
 
     // clientDisplay.setDefaultCommand(&clientDisplayCommand);

@@ -67,7 +67,6 @@ public:
         const tap::communication::sensors::imu::ImuInterface& turretPitchImu,
         const aruwsrc::control::joint::JointSubsystem& extension,
         const aruwsrc::engineer::wrist::WristSubsystem& wrist,
-        const aruwsrc::control::joint::JointSubsystem& roll,
         const aruwsrc::control::joint::JointSubsystem& cubeStorage);
 
     void updateTransforms();
@@ -94,7 +93,7 @@ public:
     inline const Transform& getVtmGimbalToEndEffector() const { return vtmGimbalToEndEffector; }
 
     inline const PointMass& getCOMBeyondTurretPitch() const { return COMBeyondTurretPitch; }
-    inline const PointMass& getCOMBeyondWristRoll() const { return COMBeyondWristRoll; }
+    inline const PointMass& getCOMBeyondWrist() const { return COMBeyondWrist; }
 
     static Transform getHypotheticalChassisToTurretYaw(float yawAngle)
     {
@@ -113,11 +112,6 @@ public:
             Orientation(0, 0, 0));
     }
 
-    static Transform getHypotheticalWristToWristRoll(float rollAngle)
-    {
-        return Transform(WRIST_ROLL_TO_END_EFFECTOR.getTranslation(), Orientation(rollAngle, 0, 0));
-    }
-
 protected:
     inline const tap::algorithms::odometry::Odometry2DInterface& getChassisOdometry() const
     {
@@ -129,10 +123,9 @@ private:
     const tap::communication::sensors::imu::AbstractIMU& chassisImu;
     const aruwsrc::control::turret::TurretSubsystem& turret;
     const tap::communication::sensors::imu::ImuInterface&
-        turretPitchImu;  // should be abstract imu, but blocked by mcb lite / virtual imu
+        turretPitchImu;  // TODO: should be abstract imu, but blocked by mcb lite / virtual imu
     const aruwsrc::control::joint::JointSubsystem& extension;
     const aruwsrc::engineer::wrist::WristSubsystem& wrist;
-    const aruwsrc::control::joint::JointSubsystem& roll;
     const aruwsrc::control::joint::JointSubsystem& cubeStorage;
 
     // Joint Transforms
@@ -141,7 +134,6 @@ private:
     Transform turretYawToTurretPitch;
     Transform turretPitchToExtension;
     Transform extensionToWrist;
-    Transform wristToWristRoll;
 
     Transform cubeStoreFrameToCubeStoreCenter;
 
@@ -156,7 +148,7 @@ private:
 
     // Subtree Center of Masses
     PointMass COMBeyondTurretPitch;
-    PointMass COMBeyondWristRoll;
+    PointMass COMBeyondWrist;
 };
 
 }  // namespace aruwsrc::engineer::algorithms

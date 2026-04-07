@@ -38,7 +38,6 @@ EngineerTransforms::EngineerTransforms(
     const tap::communication::sensors::imu::ImuInterface& turretPitchImu,
     const aruwsrc::control::joint::JointSubsystem& extension,
     const aruwsrc::engineer::wrist::WristSubsystem& wrist,
-    const aruwsrc::control::joint::JointSubsystem& roll,
     const aruwsrc::control::joint::JointSubsystem& cubeStorage)
     : chassisOdometry(chassisOdometry),
       chassisImu(chassisImu),
@@ -46,14 +45,12 @@ EngineerTransforms::EngineerTransforms(
       turretPitchImu(turretPitchImu),
       extension(extension),
       wrist(wrist),
-      roll(roll),
       cubeStorage(cubeStorage),
       worldToChassis(Transform::identity()),
       chassisToTurretYaw(getHypotheticalChassisToTurretYaw(0)),
       turretYawToTurretPitch(getHypotheticalTurretYawToTurretPitch(0)),
       turretPitchToExtension(getHypotheticalTurretPitchToExtension(0)),
       extensionToWrist(Transform::identity()),
-      wristToWristRoll(Transform::identity()),
       cubeStoreFrameToCubeStoreCenter(Transform::identity()),
       worldToTurretPitch(Transform::identity()),
       worldToRealsense(Transform::identity()),
@@ -63,9 +60,9 @@ EngineerTransforms::EngineerTransforms(
       vtmGimbalToEndEffector(Transform::identity()),
       endEffectorToCubeDist(Transform::identity()),
       COMBeyondTurretPitch(
-          {.mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass + MASS_BEYOND_WRIST_ROLL.mass,
+          {.mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass + MASS_BEYOND_WRIST.mass,
            .location = Position(0, 0, 0)}),
-      COMBeyondWristRoll(MASS_BEYOND_WRIST_ROLL)
+      COMBeyondWrist(MASS_BEYOND_WRIST)
 {
 }
 
@@ -87,9 +84,7 @@ void EngineerTransforms::updateTransforms()
         turret.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
     turretYawToTurretPitch.updateRotation(0, turretPitchImu.getPitch(), 0);
     turretPitchToExtension = getHypotheticalTurretPitchToExtension(extension.getPosition());
-    extensionToWrist.updateRotation(
-        wrist.computeWristOrientation(0, 0).getRotation());  // TODO: update
-    wristToWristRoll.updateRotation(roll.getPosition(), 0, 0);
+    extensionToWrist.updateRotation(wrist.getOrientation());
 
     cubeStoreFrameToCubeStoreCenter.updateRotation(0, 0, cubeStorage.getPosition());
 
@@ -115,8 +110,7 @@ void EngineerTransforms::updateTransforms()
 
     Transform cubeStoreCenterToTurretYaw =
         TURRET_YAW_TO_CUBE_STORE_FRAME.composeStatic(cubeStoreFrameToCubeStoreCenter);
-    Transform extensionToEndEffector =
-        extensionToWrist.composeStatic(wristToWristRoll).composeStatic(WRIST_ROLL_TO_END_EFFECTOR);
+    Transform extensionToEndEffector = extensionToWrist.composeStatic(WRIST_TO_END_EFFECTOR);
     Transform turretYawToEndEffector = turretYawToTurretPitch.composeStatic(turretPitchToExtension)
                                            .composeStatic(extensionToEndEffector);
     cubeStore1ToEndEffector =
@@ -134,13 +128,11 @@ void EngineerTransforms::updateTransforms()
 
     // COMs
     // TODO: optimize redundancies
-    Transform worldToWristRoll = worldToTurretPitch.composeStatic(turretPitchToExtension)
-                                     .composeStatic(extensionToWrist)
-                                     .composeStatic(wristToWristRoll);
+    Transform worldToWrist =
+        worldToTurretPitch.composeStatic(turretPitchToExtension).composeStatic(extensionToWrist);
 
     // TODO: tap should have a single operation for this
-    COMBeyondWristRoll.location =
-        worldToWristRoll.getInverse().apply(MASS_BEYOND_WRIST_ROLL.location);
+    COMBeyondWrist.location = worldToWrist.getInverse().apply(MASS_BEYOND_WRIST.location);
     PointMass COMBetweenTurretPitchAndWrist{
         .mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass,
         .location = worldToTurretPitch.getInverse().apply(
@@ -150,7 +142,7 @@ void EngineerTransforms::updateTransforms()
                 0,
                 0))};
 
-    COMBeyondTurretPitch = PointMass::merge(COMBetweenTurretPitchAndWrist, COMBeyondWristRoll);
+    COMBeyondTurretPitch = PointMass::merge(COMBetweenTurretPitchAndWrist, COMBeyondWrist);
 }
 
 }  // namespace aruwsrc::engineer::algorithms
