@@ -81,7 +81,10 @@ void EngineerTransforms::updateTransforms()
         chassisPose.getOrientation());
     // worldToChassis.updateAngularVelocity(0., 0., chassisImu.getGz());
 
-    chassisToTurretYaw.updateRotation(0, 0, chassisPose.getOrientation());
+    chassisToTurretYaw.updateRotation(
+        0,
+        0,
+        turret.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
     turretYawToTurretPitch.updateRotation(0, turretPitchImu.getPitch(), 0);
     turretPitchToExtension = getHypotheticalTurretPitchToExtension(extension.getPosition());
     extensionToWrist.updateRotation(
