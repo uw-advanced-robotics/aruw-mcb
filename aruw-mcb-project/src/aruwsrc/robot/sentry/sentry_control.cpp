@@ -768,8 +768,6 @@ auto leftDownRightUpAg = std::make_unique<HoldRepeatCommandMapping>(
     &leftDownRightUpRms,
     false);
 
-auto &leftDownRightUpAg_watch = *leftDownRightUpAg;
-
 // manual drive & auto aim
 RemoteMapState leftDownRightMidRms =
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID);

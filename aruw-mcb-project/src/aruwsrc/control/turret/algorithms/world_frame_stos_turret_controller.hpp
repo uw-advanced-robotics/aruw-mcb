@@ -110,7 +110,6 @@ private:
     WrappedFloat worldFrameSetpoint;
     TurretSetpointKalmanFilter setpointFilter;
 
-    bool isLQRTest{false};
     float DEBUG1{0.08f};
     float DEBUG2{0.0f};
     float DEBUG3{0.0f};
