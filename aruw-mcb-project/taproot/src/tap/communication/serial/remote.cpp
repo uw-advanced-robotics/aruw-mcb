@@ -31,6 +31,8 @@
 
 #include "remote_serial_constants.hpp"
 
+#include "tap/control/remote_map_state.hpp"
+
 namespace tap::communication::serial
 {
 void Remote::initialize()
@@ -141,7 +143,19 @@ void Remote::parseBuffer()
         RAISE_ERROR(drivers, "invalid remote joystick values");
     }
 
-    drivers->commandMapper.handleKeyStateChange(*this, remote.key);
+    tap::control::RemoteMapState mapState;
+    mapState.initKeys(remote.key);
+    if(remote.mouse.l){
+        mapState.initLMouseButton();
+    }
+    if(remote.mouse.r){
+        mapState.initRMouseButton();
+    }
+    mapState.initLSwitch(remote.leftSwitch);
+    mapState.initRSwitch(remote.rightSwitch);
+
+    // drivers->commandMapper.handleKeyStateChange(*this, remote.key);
+    drivers->commandMapper.sumedh_fixes_things(mapState);
     remote.updateCounter++;
 }
 
