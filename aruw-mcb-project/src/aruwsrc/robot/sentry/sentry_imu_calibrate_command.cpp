@@ -276,7 +276,7 @@ bool SentryImuCalibrateCommand::isFinished() const
 
 void SentryImuCalibrateCommand::end(bool)
 {
-    // TODO: this being commented out causes turrets to hold position when this deschedules
+    // TODO: this being commented out causes turrets to hold position when this deschedule
     // change if you want
     // for (auto &config : turretsAndControllers)
     // {

@@ -768,6 +768,8 @@ auto leftDownRightUpAg = std::make_unique<HoldRepeatCommandMapping>(
     &leftDownRightUpRms,
     false);
 
+auto &leftDownRightUpAg_watch = *leftDownRightUpAg;
+
 // manual drive & auto aim
 RemoteMapState leftDownRightMidRms =
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID);
@@ -845,13 +847,13 @@ void setDefaultSentryCommands(Drivers *)
 
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 
-    // buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
+    buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
 void startSentryCommands(Drivers *drivers)
 {
-    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+    // drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
     getTurretMCBCanCommWidow().setRemoteCalibrationSampleCount(4000);
     getChassisTurretMCBCanComm().setRemoteCalibrationSampleCount(4000);

@@ -163,7 +163,7 @@ void SentryTurretCVCommand::execute()
                     SCAN_LOW_PASS_ALPHA);  // lowpass filter
 
                 widowPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
-                widowYawSetpoint = majorSetpoint + SCAN_TURRET_LEFT_YAW;
+                widowYawSetpoint = majorSetpoint;
             }
         }
     }

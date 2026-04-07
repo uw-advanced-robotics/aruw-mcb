@@ -321,16 +321,12 @@ void VisionCoprocessor::sendOdometryData()
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
 
     auto& worldToChassis = transformer->getVisionWorldToChassis();
-    const modm::Vector2f chassisVelocity = transformer->getVisionChassisVelocity2d();
 
     // chassis odometry
     odometryData->timestamp = getTimeMicroseconds();
     odometryData->chassisOdometry.xPos = worldToChassis.getX();
     odometryData->chassisOdometry.yPos = worldToChassis.getY();
     odometryData->chassisOdometry.zPos = worldToChassis.getZ();
-    odometryData->chassisOdometry.xVel = chassisVelocity.x;
-    odometryData->chassisOdometry.yVel = chassisVelocity.y;
-    odometryData->chassisOdometry.zVel = 0.0f;
     odometryData->chassisOdometry.pitch = worldToChassis.getPitch();
     odometryData->chassisOdometry.roll = worldToChassis.getRoll();
     odometryData->chassisOdometry.yaw = worldToChassis.getYaw();

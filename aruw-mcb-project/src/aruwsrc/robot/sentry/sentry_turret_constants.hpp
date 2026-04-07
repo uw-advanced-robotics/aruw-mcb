@@ -219,7 +219,7 @@ inline const tap::algorithms::transforms::Transform TURRET_MCB1_BMI088_MOUNTING_
     0.0f,
     0.0f,
     0.0f,
-    0.0f);
+    -3.1415926535f);
 
 inline const tap::algorithms::transforms::Transform TURRET_MCB1_ISM330_MOUNTING_TRANSFORM(
     0.00868f,
@@ -227,7 +227,7 @@ inline const tap::algorithms::transforms::Transform TURRET_MCB1_ISM330_MOUNTING_
     0.0f,
     0.0f,
     0.0f,
-    0.0f);
+    -3.1415926535f * .5f);
 
 inline constexpr aruwsrc::control::turret::algorithms::OptimalSTOSController::STOSConstants
     turretWidowSTOSConstants = {
