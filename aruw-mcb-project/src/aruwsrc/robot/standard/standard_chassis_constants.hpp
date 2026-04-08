@@ -57,9 +57,9 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
  * calculateRotationTranslationalGain is performed.
  */
 static constexpr float MIN_ROTATION_THRESHOLD = 80.0f;
-#if defined(TARGET_STANDARD_PHOBOS)
+// #if defined(TARGET_STANDARD_PHOBOS)
 static constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
-#endif
+// #endif
 /**
  * Pin to use for current sensing
  */
