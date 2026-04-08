@@ -47,13 +47,4 @@ void VirtualServoRxHandler::processServoFeedbackMessage(const DJISerial::Receive
     }
 }
 
-void VirtualServoRxHandler::removeServoHandler(const VirtualServo& servo)
-{
-    if (servoOne != nullptr && servoOne->pin == servo.pin) {
-        servoOne = nullptr;
-    } else if (servoTwo != nullptr && servoTwo->pin == servo.pin) {
-        servoTwo = nullptr;
-    }
-}
-
 }  // namespace aruwsrc::communication::mcb_lite::motor
