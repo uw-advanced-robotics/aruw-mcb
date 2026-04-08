@@ -52,8 +52,8 @@ class WristSubsystem : public tap::control::Subsystem
 public:
     WristSubsystem(
         tap::Drivers* drivers,
-        tap::motor::MotorInterface& motorTheta1,
-        tap::motor::MotorInterface& motorTheta2,
+        tap::motor::MotorInterface& motorDifferential1,
+        tap::motor::MotorInterface& motorDifferential2,
         tap::motor::MotorInterface& motorTheta3,
         tap::encoder::EncoderInterface& encoderTheta1,
         tap::encoder::EncoderInterface& encoderTheta2,
@@ -66,6 +66,8 @@ public:
     void setSetpointTheta1(float setpoint);
     void setSetpointTheta2(float setpoint);
     void setSetpointTheta3(float setpoint);
+
+    void homeTheta3(float currPos);
 
     /**
      * Sets the desired rotation for the entire wrist
@@ -101,21 +103,11 @@ public:
 
 private:
     const WristConfig config;
-    tap::motor::MotorInterface &motorTheta1, &motorTheta2, &motorTheta3;
+    tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;
     tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2;
     tap::algorithms::WrappedFloat setpointTheta1, setpointTheta3;
     float setpointTheta2;
     tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
-    const tap::algorithms::transforms::Position COM_POS =
-        tap::algorithms::transforms::Position(0.164, 0, 0.041);  // cant be static
-    static constexpr float WRIST_MASS_KG = 0.4;
-    static constexpr float M3508_TORQUE_CONSTANT =
-        (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
-
-    tap::algorithms::transforms::Transform computeWristToCOM(
-        float yawJoint,
-        float pitchJoint,
-        tap::algorithms::transforms::Position COMPos) const;
 };
 }  // namespace aruwsrc::engineer::wrist
 

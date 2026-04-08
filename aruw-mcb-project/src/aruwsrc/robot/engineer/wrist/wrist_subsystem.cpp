@@ -27,16 +27,16 @@ namespace aruwsrc::engineer::wrist
 {
 WristSubsystem::WristSubsystem(
     tap::Drivers* drivers,
-    tap::motor::MotorInterface& motorTheta1,
-    tap::motor::MotorInterface& motorTheta2,
+    tap::motor::MotorInterface& motorDifferential1,
+    tap::motor::MotorInterface& motorDifferential2,
     tap::motor::MotorInterface& motorTheta3,
     tap::encoder::EncoderInterface& encoderTheta1,
     tap::encoder::EncoderInterface& encoderTheta2,
     const WristConfig config)
     : config(config),
       tap::control::Subsystem(drivers),
-      motorTheta1(motorTheta1),
-      motorTheta2(motorTheta2),
+      motorDifferential1(motorDifferential1),
+      motorDifferential2(motorDifferential2),
       motorTheta3(motorTheta3),
       encoderTheta1(encoderTheta1),
       encoderTheta2(encoderTheta2),
@@ -48,7 +48,7 @@ WristSubsystem::WristSubsystem(
       pidTheta2(config.theta2PidConfig),
       pidTheta3(config.theta3PidConfig)
 {
-    ts->motorTheta1 = motorTheta1;
+    ts->motorDifferential2 = motorDifferential2;
 }
 
 float WristSubsystem::getTheta1() const { return encoderTheta1.getPosition().getUnwrappedValue(); }
@@ -69,6 +69,11 @@ void WristSubsystem::setSetpointTheta2(float setpoint)
 void WristSubsystem::setSetpointTheta3(float setpoint)
 {
     setpointTheta3.setUnwrappedValue(setpoint);
+}
+
+void WristSubsystem::homeTheta3(float)
+{
+    motorTheta3.resetEncoderValue();  // TODO: once supported, pass argument in
 }
 
 void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint)
@@ -106,8 +111,8 @@ bool WristSubsystem::atSetpoint() const
 
 void WristSubsystem::initialize()
 {
-    motorTheta2.initialize();
-    motorTheta1.initialize();
+    motorDifferential1.initialize();
+    motorDifferential2.initialize();
     motorTheta3.initialize();
     encoderTheta1.initialize();
     encoderTheta2.initialize();
@@ -117,8 +122,8 @@ void WristSubsystem::refresh()
 {
     if (!isOnline())
     {
-        motorTheta2.setDesiredOutput(0);
-        motorTheta1.setDesiredOutput(0);
+        motorDifferential1.setDesiredOutput(0);
+        motorDifferential2.setDesiredOutput(0);
         motorTheta3.setDesiredOutput(0);
         return;
     }
@@ -132,99 +137,35 @@ void WristSubsystem::refresh()
     float pidOutTheta3 =
         pidTheta3.runController(errorTheta3, motorTheta3.getEncoder()->getVelocity(), 2.0f);
 
-    float outMotorTheta2 = -pidOutTheta2 - pidOutTheta1;
-    float outMotorTheta1 = -pidOutTheta1;
+    // differential
+    float outMotorDifferential1 = -pidOutTheta2 - pidOutTheta1;
+    float outMotorDifferential2 = -pidOutTheta1;
 
-    motorTheta2.setDesiredOutput(std::clamp<int32_t>(
-        outMotorTheta2,
+    motorDifferential1.setDesiredOutput(std::clamp<int32_t>(
+        outMotorDifferential1,
         -config.maxMotorDesiredOutput,
         config.maxMotorDesiredOutput));
-    motorTheta1.setDesiredOutput(std::clamp<int32_t>(
-        outMotorTheta1,
+    motorDifferential2.setDesiredOutput(std::clamp<int32_t>(
+        outMotorDifferential2,
         -config.maxMotorDesiredOutput,
         config.maxMotorDesiredOutput));
     motorTheta3.setDesiredOutput(std::clamp<int32_t>(
         pidOutTheta3,
         -config.maxMotorDesiredOutput,
         config.maxMotorDesiredOutput));
-
-    // CMSISMat<3, 1> gantryToCOMTranslation =
-    //     computeWristToCOM(getYaw(), getPitch(), COM_POS).getTranslation().coordinates();
-
-    // Vector gravityTorque(
-    //     tap::algorithms::cross(
-    //         gantryToCOMTranslation,
-    //         CMSISMat<3, 1>({0, 0, -9.8f * WRIST_MASS_KG})));
-
-    // // we can compute the torque exerted on each joint by projecting the robot-space gravity
-    // torque
-    // // into the joint axis subspace
-    // Vector pitchAxis(0, 1, 0);
-    // Vector yawAxis = Transform(0, 0, 0, 0, -getPitch(), 0).apply(Vector(0, 0, 1));
-
-    // // torque applied on each joint by gravity
-    // float gravityPitchTorque = gravityTorque.dot(pitchAxis);
-    // float gravityYawTorque = gravityTorque.dot(yawAxis);
-
-    // // gravity torque halved because we have two motors
-    // float outPitch = pidPitch.runController(
-    //                      encoderPitch.getPosition().minDifference(setpointPitch),
-    //                      encoderPitch.getVelocity(),
-    //                      2.0f) -
-    //                  gravityPitchTorque / 2 * M3508_TORQUE_CONSTANT;
-
-    // // gear ratio only applied to gravity compensation here because pid was tuned without it
-    // // gravity torque halved because we have two motors
-    // float outYaw = pidYaw.runController(
-    //                    encoderYaw.getPosition().minDifference(setpointYaw),
-    //                    encoderYaw.getVelocity(),
-    //                    2.0f) -
-    //                gravityYawTorque / 2 * M3508_TORQUE_CONSTANT * config.ratio;
-
-    // // differential
-    // float outLeft = outYaw + outPitch;
-    // float outRight = outYaw - outPitch;
-
-    // motorLeft.setDesiredOutput(
-    //     std::clamp<int32_t>(outLeft, -config.maxMotorDesiredOutput,
-    //     config.maxMotorDesiredOutput));
-    // motorRight.setDesiredOutput(
-    //     std::clamp<int32_t>(outRight, -config.maxMotorDesiredOutput,
-    //     config.maxMotorDesiredOutput));
 }
 
 void WristSubsystem::refreshSafeDisconnect()
 {
-    motorTheta1.setDesiredOutput(0);
-    motorTheta2.setDesiredOutput(0);
+    motorDifferential2.setDesiredOutput(0);
+    motorDifferential1.setDesiredOutput(0);
     motorTheta3.setDesiredOutput(0);
 }
 
 bool WristSubsystem::isOnline() const
 {
-    return motorTheta2.isMotorOnline() && motorTheta1.isMotorOnline() &&
+    return motorDifferential1.isMotorOnline() && motorDifferential2.isMotorOnline() &&
            motorTheta3.isMotorOnline() && encoderTheta1.isOnline() && encoderTheta2.isOnline();
-}
-
-Transform WristSubsystem::computeWristToCOM(
-    float yawJoint,
-    float pitchJoint,
-    tap::algorithms::transforms::Position COMPos) const
-{
-    Transform wristOrientation(
-        tap::algorithms::CMSISMat<3, 1>({0, 0, 0}),
-        tap::algorithms::CMSISMat<3, 3>(
-            {cosf(pitchJoint) * cosf(yawJoint),
-             -cosf(yawJoint) * sinf(pitchJoint),
-             sinf(pitchJoint),
-             sinf(yawJoint),
-             cosf(yawJoint),
-             0,
-             -sinf(pitchJoint) * cosf(yawJoint),
-             -sinf(pitchJoint) * sinf(yawJoint),
-             cosf(pitchJoint)}));
-
-    return wristOrientation.compose(Transform(COMPos, Orientation(0, 0, 0)));
 }
 
 Orientation WristSubsystem::getOrientation() const
