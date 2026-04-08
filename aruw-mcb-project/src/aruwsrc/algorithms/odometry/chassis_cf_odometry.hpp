@@ -25,6 +25,7 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
+#include "aruwsrc/algorithms/odometry/vision_odometry_data_provider.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "modm/math/geometry/location_2d.hpp"
@@ -35,7 +36,8 @@ namespace aruwsrc::algorithms::odometry
  * An odometry interface that uses a complementary filter to measure odometry.
  */
 class ChassisCFOdometry : public tap::algorithms::odometry::Odometry2DInterface,
-                          public tap::control::Subsystem
+                          public tap::control::Subsystem,
+                          public aruwsrc::algorithms::odometry::VisionOdometryDataProvider
 {
 public:
     /**
@@ -60,6 +62,10 @@ public:
     inline uint32_t getLastComputedOdometryTime() const final { return prevTime; }
 
     inline float getYaw() const override { return chassisYaw; }
+
+    virtual modm::Location2D<float> getVisionCurrentLocation2D() const override { return location; }
+    virtual modm::Vector2f getVisionCurrentVelocity2D() const override { return velocity; }
+    virtual float getVisionYaw() const override { return chassisYaw; }
 
     /**
      * @brief Resets the KF back to the robot's boot position.

@@ -324,7 +324,7 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry cfOdometrySubsystem(
     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
 
 SentryTransforms transformer(
-    odometrySubsystem,
+    cfOdometrySubsystem,
     turretMajor,
     turretWidow,
     getTurretMCBCanCommWidow(),
@@ -334,12 +334,12 @@ SentryTransforms transformer(
     });
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
-SentryTransformAdapter transformAdapter(transformer, &odometrySubsystem);
+SentryTransformAdapter transformAdapter(transformer, &cfOdometrySubsystem);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
     drivers()->visionCoprocessor,
-    odometrySubsystem,
+    cfOdometrySubsystem,
     transformAdapter);
 
 aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
@@ -801,7 +801,7 @@ void initializeSubsystems()
     chassis.initialize();
     turretWidow.initialize();
     turretMajor.initialize();
-    odometrySubsystem.initialize();
+    // odometrySubsystem.initialize();
     cfOdometrySubsystem.initialize();
     transformerSubsystem.initialize();
     arucoResetSubsystem.initialize();
@@ -819,7 +819,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretWidow);
-    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&cfOdometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
