@@ -105,8 +105,9 @@ private:
     const WristConfig config;
     tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;
     tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2;
-    tap::algorithms::WrappedFloat setpointTheta1, setpointTheta3;
+    tap::algorithms::WrappedFloat setpointTheta1;
     float setpointTheta2;
+    tap::algorithms::WrappedFloat setpointTheta3;
     tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
 };
 }  // namespace aruwsrc::engineer::wrist

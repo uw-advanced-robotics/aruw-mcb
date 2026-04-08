@@ -33,8 +33,8 @@ WristSubsystem::WristSubsystem(
     tap::encoder::EncoderInterface& encoderTheta1,
     tap::encoder::EncoderInterface& encoderTheta2,
     const WristConfig config)
-    : config(config),
-      tap::control::Subsystem(drivers),
+    : tap::control::Subsystem(drivers),
+      config(config),
       motorDifferential1(motorDifferential1),
       motorDifferential2(motorDifferential2),
       motorTheta3(motorTheta3),
@@ -73,7 +73,7 @@ void WristSubsystem::setSetpointTheta3(float setpoint)
 
 void WristSubsystem::homeTheta3(float)
 {
-    motorTheta3.resetEncoderValue();  // TODO: once supported, pass argument in
+    motorTheta3.getEncoder()->resetEncoderValue();  // TODO: once supported, pass argument in
 }
 
 void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint)
