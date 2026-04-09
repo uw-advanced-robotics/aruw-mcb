@@ -35,12 +35,14 @@ public:
 
     float getEstimatedPosition() const;
     float getEstimatedVelocity() const;
+    float getEstimatedAcceleration() const;
 
 protected:
     enum class TrackerState
     {
         POS = 0,
         VEL,
+        ACCEL,
         NUM_STATES
     };
 
@@ -59,11 +61,15 @@ private:
     static constexpr int INPUTS_SQUARED =
         static_cast<int>(TrackerInput::NUM_INPUTS) * static_cast<int>(TrackerInput::NUM_INPUTS);
 
-    static constexpr float EKF_Q[STATES_SQUARED] = {1e-15f, 0.0f, 0.0f, 1.0f};
+    // Q Matrix (Process Noise): Updated for 3x3.
+    static constexpr float EKF_Q[STATES_SQUARED] =
+        {1e-15f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 10.0f};
 
     static constexpr float EKF_R[INPUTS_SQUARED] = {1e-1f};
 
-    static constexpr float EKF_P0[STATES_SQUARED] = {1.0f, 0.0f, 0.0f, 1.0f};
+    // P0 Matrix (Initial Covariance): Updated for 3x3
+    static constexpr float EKF_P0[STATES_SQUARED] =
+        {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
     // EKF Callbacks
     static void stateTransitionFunction(

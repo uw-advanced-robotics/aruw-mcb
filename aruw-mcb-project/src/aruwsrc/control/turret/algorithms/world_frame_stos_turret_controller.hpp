@@ -116,7 +116,8 @@ private:
     float DEBUGV{0.0f};
     float DEBUGP{0.0f};
     float B_DAMP{0.0443f};
-    bool filter{false};
+    float J_FF{0.0073f};
+    float FRICTION_FF{0.001f};
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

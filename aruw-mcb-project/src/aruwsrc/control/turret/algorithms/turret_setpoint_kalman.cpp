@@ -33,9 +33,11 @@ TurretSetpointKalmanFilter::TurretSetpointKalmanFilter()
 
 void TurretSetpointKalmanFilter::initialize(tap::algorithms::WrappedFloat initialPosition)
 {
-    float x0[int(TrackerState::NUM_STATES)] = {initialPosition.getWrappedValue(), 0.0f};
+    // Initialize 3 states: [POS, VEL, ACCEL]
+    float x0[int(TrackerState::NUM_STATES)] = {initialPosition.getWrappedValue(), 0.0f, 0.0f};
     ekf.init(x0);
 }
+
 void TurretSetpointKalmanFilter::update(
     const tap::algorithms::WrappedFloat& measuredPosition,
     float dt)
@@ -51,6 +53,7 @@ void TurretSetpointKalmanFilter::update(
 
     ekf.update(z);
 }
+
 float TurretSetpointKalmanFilter::getEstimatedPosition() const
 {
     return ekf.getStateVectorAsMatrix()[int(TrackerState::POS)];
@@ -61,14 +64,27 @@ float TurretSetpointKalmanFilter::getEstimatedVelocity() const
     return ekf.getStateVectorAsMatrix()[int(TrackerState::VEL)];
 }
 
+float TurretSetpointKalmanFilter::getEstimatedAcceleration() const
+{
+    return ekf.getStateVectorAsMatrix()[int(TrackerState::ACCEL)];
+}
+
 void TurretSetpointKalmanFilter::stateTransitionFunction(
     const EKF::StateVector& x_prev,
     EKF::StateVector& x_pred,
     float dt)
 {
-    x_pred.data[int(TrackerState::POS)] =
-        x_prev.data[int(TrackerState::POS)] + (x_prev.data[int(TrackerState::VEL)] * dt);
-    x_pred.data[int(TrackerState::VEL)] = x_prev.data[int(TrackerState::VEL)];
+    // pos = pos + vel*dt + 0.5*accel*dt^2
+    x_pred.data[int(TrackerState::POS)] = x_prev.data[int(TrackerState::POS)] +
+                                          (x_prev.data[int(TrackerState::VEL)] * dt) +
+                                          (0.5f * x_prev.data[int(TrackerState::ACCEL)] * dt * dt);
+
+    // vel = vel + accel*dt
+    x_pred.data[int(TrackerState::VEL)] =
+        x_prev.data[int(TrackerState::VEL)] + (x_prev.data[int(TrackerState::ACCEL)] * dt);
+
+    // accel = accel (constant acceleration assumption between steps)
+    x_pred.data[int(TrackerState::ACCEL)] = x_prev.data[int(TrackerState::ACCEL)];
 }
 
 void TurretSetpointKalmanFilter::observationFunction(
@@ -83,18 +99,30 @@ void TurretSetpointKalmanFilter::stateJacobianFunction(
     EKF::StateMatrix& F,
     float dt)
 {
+    // Row 1: d(pos_pred) / d(pos, vel, accel)
     F.data[0] = 1.0f;
     F.data[1] = dt;
-    F.data[2] = 0.0f;
-    F.data[3] = 1.0f;
+    F.data[2] = 0.5f * dt * dt;
+
+    // Row 2: d(vel_pred) / d(pos, vel, accel)
+    F.data[3] = 0.0f;
+    F.data[4] = 1.0f;
+    F.data[5] = dt;
+
+    // Row 3: d(accel_pred) / d(pos, vel, accel)
+    F.data[6] = 0.0f;
+    F.data[7] = 0.0f;
+    F.data[8] = 1.0f;
 }
 
 void TurretSetpointKalmanFilter::observationJacobianFunction(
     const EKF::StateVector&,
     EKF::ObservationMatrix& H)
 {
+    // d(measured_pos) / d(pos, vel, accel)
     H.data[0] = 1.0f;
     H.data[1] = 0.0f;
+    H.data[2] = 0.0f;
 }
 
 }  // namespace aruwsrc::control::turret::algorithms

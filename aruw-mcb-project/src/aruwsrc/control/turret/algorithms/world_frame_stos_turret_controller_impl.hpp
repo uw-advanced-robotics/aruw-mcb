@@ -128,26 +128,39 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
         chassisFrame + (worldFrameSetpoint - worldFrameAngle),
         chassisFrame);
 
-    // float vel = worldFrameVelocity;
+    float targetVel = setpointFilter.getEstimatedVelocity();
+    float targetAccel = setpointFilter.getEstimatedAcceleration();
+
     DEBUGV = velError;
     DEBUGP = posError;
-    float torqueFF = (0.0443 * this->turretMotor.getChassisFrameVelocity());
+
+    float kA = J_FF;         // Tune this to your turret's inertia
+    float kV = B_DAMP;       // Your existing velocity constant
+    float kS = FRICTION_FF;  // Your existing friction constant
+
+    float frictionFF = 0.0;
+    if (std::abs(targetVel) > 0.001)
+    {
+        frictionFF = std::signbit(targetVel) ? -kS : kS;
+    }
+
+    float torqueFF = (targetAccel * kA) + (targetVel * kV) + frictionFF;
 
     const float LINEAR_ZONE = DEBUG1;
 
     if (std::abs(posError) < LINEAR_ZONE)
     {
-        float friction = signbit(posError) ? -0.01 : 0.01;
-        pidOutput = friction + torqueFF;
-        pidOutput += (posError * lqrT) + (velError * lqrTd);
+        float feedback = (posError * lqrT) + (velError * lqrTd);
+
+        pidOutput = torqueFF + feedback;
     }
     else
     {
         pidOutput = stosController.getOptimalTorque(posError, -velError);
     }
     /// convert to torque @TODO: Make passed in or smth
+    DEBUG3 = pidOutput;
     pidOutput *= (16384.0f / 1.3f);
-    DEBUG3 = pidOutput / (16384.0f / 1.3f);
 
     if constexpr (AXIS == Axis::PITCH)
     {
@@ -174,13 +187,21 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
 template <Axis AXIS>
 void WorldFrameTurretImuSTOSTurretController<AXIS>::setSetpoint(WrappedFloat desiredSetpoint)
 {
-    const WrappedFloat chassisFrameYaw = this->turretMotor.getChassisFrameMeasuredAngle();
-    const WrappedFloat worldFrameYawAngle = Angle(worldToTurret.getYaw());
+    const WrappedFloat chassisFrameAngle = this->turretMotor.getChassisFrameMeasuredAngle();
+    const WrappedFloat worldFrameAngle = Angle(0);
+    if constexpr (AXIS == Axis::PITCH)
+    {
+        worldFrameAngle = Angle(worldToTurret.getPitch());
+    }
+    else
+    {
+        worldFrameAngle = Angle(worldToTurret.getYaw());
+    }
 
     updateWorldFrameSetpoint(
         desiredSetpoint,
-        chassisFrameYaw,
-        worldFrameYawAngle,
+        chassisFrameAngle,
+        worldFrameAngle,
         worldFrameSetpoint,
         this->turretMotor);
 }
@@ -188,7 +209,14 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::setSetpoint(WrappedFloat des
 template <Axis AXIS>
 WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::getMeasurement() const
 {
-    return Angle(worldToTurret.getYaw());
+    if constexpr (AXIS == Axis::PITCH)
+    {
+        return Angle(worldToTurret.getPitch());
+    }
+    else
+    {
+        return Angle(worldToTurret.getYaw());
+    }
 }
 
 template <Axis AXIS>
@@ -201,24 +229,44 @@ template <Axis AXIS>
 WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::convertControllerAngleToChassisFrame(
     WrappedFloat controllerFrameAngle) const
 {
-    const WrappedFloat worldFrameYawAngle = Angle(worldToTurret.getYaw());
-
-    return transformWorldFrameValueToChassisFrame(
-        this->turretMotor.getChassisFrameMeasuredAngle(),
-        worldFrameYawAngle,
-        controllerFrameAngle);
+    if constexpr (AXIS == Axis::PITCH)
+    {
+        return transformWorldFrameValueToChassisFrame(
+            this->turretMotor.getChassisFrameMeasuredAngle(),
+            Angle(worldToTurret.getPitch()),
+            controllerFrameAngle);
+    }
+    else
+    {
+        return transformWorldFrameValueToChassisFrame(
+            this->turretMotor.getChassisFrameMeasuredAngle(),
+            Angle(worldToTurret.getYaw()),
+            controllerFrameAngle);
+    }
 }
 
 template <Axis AXIS>
 WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::convertChassisAngleToControllerFrame(
     WrappedFloat chassisFrameAngle) const
 {
-    const WrappedFloat worldFrameYawAngle = Angle(worldToTurret.getYaw());
+    if constexpr (AXIS == Axis::PITCH)
+    {
+        const WrappedFloat worldFramePitchAngle = Angle(worldToTurret.getPitch());
 
-    return transformChassisFrameToWorldFrame(
-        this->turretMotor.getChassisFrameMeasuredAngle(),
-        worldFrameYawAngle,
-        chassisFrameAngle);
+        return transformChassisFrameToWorldFrame(
+            this->turretMotor.getChassisFrameMeasuredAngle(),
+            worldFramePitchAngle,
+            chassisFrameAngle);
+    }
+    else
+    {
+        const WrappedFloat worldFrameYawAngle = Angle(worldToTurret.getYaw());
+
+        return transformChassisFrameToWorldFrame(
+            this->turretMotor.getChassisFrameMeasuredAngle(),
+            worldFrameYawAngle,
+            chassisFrameAngle);
+    }
 }
 }  // namespace aruwsrc::control::turret::algorithms
 

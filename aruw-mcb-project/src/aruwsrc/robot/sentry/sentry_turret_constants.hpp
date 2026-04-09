@@ -231,11 +231,11 @@ inline const tap::algorithms::transforms::Transform TURRET_MCB1_ISM330_MOUNTING_
 
 inline constexpr aruwsrc::control::turret::algorithms::OptimalSTOSController::STOSConstants
     turretWidowSTOSConstants = {
-        .J_TOTAL = 0.007f,
+        .J_TOTAL = 0.0073f,
         .TAU_MAX = 1.3f,
         .B_DAMP = 0.001f,
-        .W_D = 115.0f,
-        .ZETA = 0.15,
+        .W_D = 80.8f,
+        .ZETA = 0.33,
         .SYSTEM_DELAY_SEC = 0.012f};
 }  // namespace turretWidow
 
