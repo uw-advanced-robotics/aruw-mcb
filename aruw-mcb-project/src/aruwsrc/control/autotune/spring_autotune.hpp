@@ -20,7 +20,7 @@
 /**
  * @file spring_autotune.hpp
  *
- * @brief   Implements spring auto-tuning for turret calibration.
+ * @brief Implements spring auto-tuning for turret calibration.
  *
  */
 
@@ -30,7 +30,7 @@
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 
-#include "autotune_command_interface.hpp"
+#include "turret_autotune_command.hpp"
 
 namespace aruwsrc::control::autotune
 {
@@ -42,10 +42,10 @@ private:
 
 public:
     /**
-     * @brief Construct a new Spring Autotune Command object. If gravityForce is nullptr,
-     * the system will attempt to calculate both center of mass and spring constant. If
-     * gravityForce is provided, it will only calculate the spring constant by subtracting the
-     * gravity force values from the torque readings.
+     * Construct a new Spring Autotune Command object. If `gravityForce` is `nullptr`, the system
+     * will attempt to calculate both center of mass and spring constant. If gravityForce is
+     * provided, it will only calculate the spring constant by subtracting the gravity force values
+     * from the torque readings.
      *
      * @param drivers Pointer to global drivers object.
      * @param config Configuration for the turret autotune.
@@ -133,11 +133,10 @@ private:
     float averagingAngles{0.0f};
 
     /**
-     * @brief Helper function that turns the calibration result into
-     * units of mm.
+     * @brief Helper function that turns the calibration result into units of mm.
      *
      * @param calibrationNum Value from the COM calculation
-     * @return float `COMLocation` in mm
+     * @return `calibrationNum` in mm
      */
     inline float calibrationResultToMM(float calibrationNum) const
     {
@@ -169,9 +168,9 @@ private:
     }
 
     /**
-     * @brief Calculates the center of mass and spring constant with least squares as one go
+     * @brief Calculates the center of mass and spring constant with least squares simultaneously.
      *
-     * @return std::array<float,4> cgX, cgZ, magnitude, and K.
+     * @return {cgX, cgZ, magnitude, K}
      */
     std::array<float, 4> calculateCOMandSpring(
         std::array<float, NUM_TEST_POINTS> Angles,
@@ -199,10 +198,10 @@ private:
     };
 
     /**
-     * @brief Calculates the center of spring constant with least squares subtracting gravity if it
-     * is able too
+     * @brief Calculates the spring constant with least squares, subtracting gravity if it is able
+     * to.
      *
-     * @return std::array<float,4> K, 0, 0, 0
+     * @return {0, 0, 0, K}
      */
     std::array<float, 4> calculateJustSpring(
         std::array<float, NUM_TEST_POINTS> Angles,

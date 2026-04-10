@@ -32,7 +32,7 @@
 
 #include "modm/ui/display.hpp"
 
-#include "autotune_command_interface.hpp"
+#include "turret_autotune_command.hpp"
 
 namespace aruwsrc::control::autotune
 {
