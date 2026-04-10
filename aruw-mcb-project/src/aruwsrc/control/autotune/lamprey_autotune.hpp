@@ -27,10 +27,10 @@
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t numTestPoints, turret::algorithms::Axis axis>
-class LampreyAutotuneCommand : public TurretAutotuneCommand<numTestPoints, axis>
+template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
+class LampreyAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>
 {
-    using TurretTuneCommand = TurretAutotuneCommand<numTestPoints, axis>;
+    using TurretTuneCommand = TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>;
 
 public:
     LampreyAutotuneCommand(
@@ -38,7 +38,7 @@ public:
         const TurretTuneCommand::TurretCalibrationConfig &config,
         const aruwsrc::communication::sensors::encoder::LampreyEncoder &encoder,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
-        const std::array<float, numTestPoints> points = {},
+        const std::array<float, NUM_TEST_POINTS> points = {},
         const float velocityZeroThreshold = TurretTuneCommand::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold = TurretTuneCommand::DEFAULT_POSITION_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
@@ -65,7 +65,7 @@ public:
             "didn't get measured but is needed for a full map.\n");
 
         // Iterate through all points and print them pair by pair, on new lines
-        for (size_t i = 0; i < numTestPoints; ++i)
+        for (size_t i = 0; i < NUM_TEST_POINTS; ++i)
         {
             display.printf(
                 "%lu : %.3f rad\n",
@@ -93,14 +93,14 @@ protected:
         averageLampreyTick = 0.0f;
         averageAngle = 0.0f;
 
-        if (pointIndex == numTestPoints - 1)
+        if (pointIndex == NUM_TEST_POINTS - 1)
         {
             alignArray();
         }
     }
 
 private:
-    std::array<modm::Pair<uint32_t, float>, numTestPoints> measuredEncoderValueMap{};
+    std::array<modm::Pair<uint32_t, float>, NUM_TEST_POINTS> measuredEncoderValueMap{};
 
     float averageLampreyTick{0.0f};
     float averageAngle{0.0f};
@@ -112,7 +112,7 @@ private:
         size_t min_tick_index = 0;
 
         float angle_value = 0.0f;
-        for (size_t i = 0; i < numTestPoints; ++i)
+        for (size_t i = 0; i < NUM_TEST_POINTS; ++i)
         {
             if (measuredEncoderValueMap[i].first < measuredEncoderValueMap[min_tick_index].first)
             {
@@ -121,7 +121,7 @@ private:
         }
         angle_value = measuredEncoderValueMap[min_tick_index].second;
 
-        for (size_t i = 0; i < numTestPoints; ++i)
+        for (size_t i = 0; i < NUM_TEST_POINTS; ++i)
         {
             measuredEncoderValueMap[i].second -= angle_value;
 

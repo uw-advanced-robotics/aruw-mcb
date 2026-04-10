@@ -34,11 +34,11 @@
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t numTestPoints, turret::algorithms::Axis axis>
-class SpringAutotuneCommand : public TurretAutotuneCommand<numTestPoints, axis>
+template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
+class SpringAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>
 {
 private:
-    using TurretTuneCommand = TurretAutotuneCommand<numTestPoints, axis>;
+    using TurretTuneCommand = TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>;
 
 public:
     /**
@@ -66,7 +66,7 @@ public:
         const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce =
             nullptr,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
-        const std::array<float, numTestPoints> points = {},
+        const std::array<float, NUM_TEST_POINTS> points = {},
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         const float velocityZeroThreshold = TurretTuneCommand::DEFAULT_VELOCITY_THRESHOLD,
@@ -124,10 +124,10 @@ private:
     const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce;
 
     // Array of torque measurements received post averaging
-    std::array<float, numTestPoints> measuredTorques{};
+    std::array<float, NUM_TEST_POINTS> measuredTorques{};
 
     // Array of angle measurements received post averaging
-    std::array<float, numTestPoints> measuredAngles{};
+    std::array<float, NUM_TEST_POINTS> measuredAngles{};
 
     float averagingTorques{0.0f};
     float averagingAngles{0.0f};
@@ -174,13 +174,13 @@ private:
      * @return std::array<float,4> cgX, cgZ, magnitude, and K.
      */
     std::array<float, 4> calculateCOMandSpring(
-        std::array<float, numTestPoints> Angles,
-        std::array<float, numTestPoints> Torques) const
+        std::array<float, NUM_TEST_POINTS> Angles,
+        std::array<float, NUM_TEST_POINTS> Torques) const
     {
-        Eigen::MatrixXd X(numTestPoints, 3);
-        Eigen::VectorXd Y(numTestPoints);
+        Eigen::MatrixXd X(NUM_TEST_POINTS, 3);
+        Eigen::VectorXd Y(NUM_TEST_POINTS);
 
-        for (uint32_t i = 0; i < numTestPoints; ++i)
+        for (uint32_t i = 0; i < NUM_TEST_POINTS; ++i)
         {
             X(i, 0) = std::cos(Angles[i]);  // corresponds to A (m·g·x)
             X(i, 1) = std::sin(Angles[i]);  // corresponds to B (−m·g·z)
@@ -205,13 +205,13 @@ private:
      * @return std::array<float,4> K, 0, 0, 0
      */
     std::array<float, 4> calculateJustSpring(
-        std::array<float, numTestPoints> Angles,
-        std::array<float, numTestPoints> Torques) const
+        std::array<float, NUM_TEST_POINTS> Angles,
+        std::array<float, NUM_TEST_POINTS> Torques) const
     {
-        Eigen::MatrixXd X(numTestPoints, 1);
-        Eigen::VectorXd Y(numTestPoints);
+        Eigen::MatrixXd X(NUM_TEST_POINTS, 1);
+        Eigen::VectorXd Y(NUM_TEST_POINTS);
 
-        for (uint32_t i = 0; i < numTestPoints; ++i)
+        for (uint32_t i = 0; i < NUM_TEST_POINTS; ++i)
         {
             // remove the gravity component from the torque readings
             const float Torque = Torques[i] - gravityForce->calculateCompensationEffort(

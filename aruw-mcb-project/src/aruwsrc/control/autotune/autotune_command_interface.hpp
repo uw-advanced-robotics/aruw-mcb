@@ -69,7 +69,7 @@ public:
     virtual void drawCalibrationResult(modm::GraphicDisplay &display) const = 0;
 };
 
-template <uint32_t numTestPoints, turret::algorithms::Axis axis>
+template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
 class TurretAutotuneCommand : public TurretAutotuneInterface
 {
 public:
@@ -85,7 +85,7 @@ public:
         /// The motor to use
         turret::TurretMotor *motor;
         /// A chassis relative controller used to lock the turret.
-        turret::algorithms::ChassisFrameTurretController<axis> *controller;
+        turret::algorithms::ChassisFrameTurretController<AXIS> *controller;
         /// If the pitch motor is inverted
         bool isMotorInverted;
         /// Mass of the pitching part of the turret in units of Kg
@@ -101,7 +101,7 @@ public:
         tap::Drivers *drivers,
         const TurretCalibrationConfig &config,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
-        const std::array<float, numTestPoints> points = {},
+        const std::array<float, NUM_TEST_POINTS> points = {},
         const float velocityZeroThreshold = DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold = DEFAULT_POSITION_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
@@ -123,9 +123,10 @@ public:
         }
 
         // Fill the points array with evenly spaced points if the array is all zeros
-        bool allZero = std::all_of(this->points.begin(), this->points.end(), [](float v) {
-            return v == 0.0f;
-        });
+        bool allZero = std::all_of(
+            this->points.begin(),
+            this->points.end(),
+            [](float v) { return v == 0.0f; });
 
         if (allZero)
         {
@@ -134,9 +135,9 @@ public:
             const float minAngle = config.motor->getConfig().minAngle + nudge;
             const float maxAngle = config.motor->getConfig().maxAngle - nudge;
 
-            for (size_t i = 0; i < numTestPoints; ++i)
+            for (size_t i = 0; i < NUM_TEST_POINTS; ++i)
             {
-                this->points[i] = minAngle + i * (maxAngle - minAngle) / (numTestPoints - 1);
+                this->points[i] = minAngle + i * (maxAngle - minAngle) / (NUM_TEST_POINTS - 1);
             }
         }
     }
@@ -341,7 +342,7 @@ protected:
     tap::Drivers *drivers;
     TurretCalibrationConfig config;
     chassis::HolonomicChassisSubsystem *chassis;
-    std::array<float, numTestPoints> points;
+    std::array<float, NUM_TEST_POINTS> points;
 
     const float velocityZeroThreshold;
     const float positionZeroThreshold;

@@ -29,10 +29,10 @@
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t numTestPoints, turret::algorithms::Axis axis>
-class FreqSweepAutotuneCommand : public TurretAutotuneCommand<numTestPoints, axis>
+template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
+class FreqSweepAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>
 {
-    using TurretTuneCommand = TurretAutotuneCommand<numTestPoints, axis>;
+    using TurretTuneCommand = TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>;
 
 public:
     struct FreqSweepOptionalSystemsConfig
