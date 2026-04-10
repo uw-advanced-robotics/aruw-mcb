@@ -119,6 +119,8 @@ public:
      */
     mockable void handleKeyStateChange(tap::communication::serial::Remote &remote, uint16_t key);
 
+    void executeMapping(GenericRemoteMapState& mapState);
+
     /**
      * Verifies the mapping passed in can be added to `commandsToRun`
      * and if possible adds the mapping.
