@@ -71,10 +71,7 @@ void WristSubsystem::setSetpointTheta3(float setpoint)
     setpointTheta3.setUnwrappedValue(setpoint);
 }
 
-void WristSubsystem::homeTheta3(float)
-{
-    motorTheta3.getEncoder()->resetEncoderValue();  // TODO: once supported, pass argument in
-}
+void WristSubsystem::homeTheta3(float pos) { motorTheta3.getEncoder()->resetEncoderValue(pos); }
 
 void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint)
 {
