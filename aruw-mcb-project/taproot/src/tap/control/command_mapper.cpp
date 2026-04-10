@@ -67,8 +67,7 @@ void CommandMapper::handleKeyStateChange(Remote &remote, uint16_t key)
 {
     // Make a new map state that represents the current state of the remote,
     // to be passed in to each of the CommandMappings.
-    GenericRemoteMapState mapState;
-
+    RemoteMapState mapState;
     mapState.initKeys(key);
     mapState.updateState(remote);
     for (std::unique_ptr<CommandMapping> &cmdMap : commandsToRun)
@@ -76,14 +75,6 @@ void CommandMapper::handleKeyStateChange(Remote &remote, uint16_t key)
         cmdMap->executeCommandMapping(mapState);
     }
 }
-
-void CommandMapper::executeMapping(GenericRemoteMapState& mapState) {
-    for (std::unique_ptr<CommandMapping> &cmdMap : commandsToRun)
-    {
-        cmdMap->executeCommandMapping(mapState);
-    }
-}
-
 
 void CommandMapper::addMap(std::unique_ptr<CommandMapping> mapping)
 {

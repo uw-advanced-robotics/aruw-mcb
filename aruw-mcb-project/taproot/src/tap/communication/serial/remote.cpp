@@ -28,7 +28,6 @@
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
-#include "tap/control/remote_map_state.hpp"
 
 #include "remote_serial_constants.hpp"
 
@@ -143,19 +142,8 @@ void Remote::parseBuffer()
     }
 
     drivers->commandMapper.pollTriggerBindings();
-    tap::control::RemoteMapState mapState;
-    mapState.initKeys(remote.key);
-    if(remote.mouse.l){
-        mapState.initLMouseButton();
-    }
-    if(remote.mouse.r){
-        mapState.initRMouseButton();
-    }
-    mapState.initLSwitch(remote.leftSwitch);
-    mapState.initRSwitch(remote.rightSwitch);
-    drivers->commandMapper.executeMapping(mapState);
+    drivers->commandMapper.handleKeyStateChange(*this, remote.key);
 
-    //drivers->commandMapper.handleKeyStateChange(*this, remote.key);
     remote.updateCounter++;
 }
 

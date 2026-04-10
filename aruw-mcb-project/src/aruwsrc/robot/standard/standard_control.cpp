@@ -32,6 +32,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/remote_map_state.hpp"
+#include "tap/control/repeat_command.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -39,7 +40,6 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
-#include "tap/control/repeat_command.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
@@ -655,13 +655,13 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 // Remote related mappings
 Trigger rightSwitchMiddle =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
-        .onTrue(&spinFrictionWheels).onFalse(&stopFrictionWheels);
+        .onTrue(&spinFrictionWheels)
+        .onFalse(&stopFrictionWheels);
 
 RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 Trigger rightSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(Compose::parallel<2>(
-            {&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
+        .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
 
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
