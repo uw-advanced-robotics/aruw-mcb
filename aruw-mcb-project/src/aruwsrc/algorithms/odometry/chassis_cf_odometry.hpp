@@ -25,9 +25,9 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
-#include "aruwsrc/algorithms/odometry/vision_odometry_data_provider.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/algorithms/odometry/vision_odometry_data_provider.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
 namespace aruwsrc::algorithms::odometry
