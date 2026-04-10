@@ -440,7 +440,7 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     drivers()->controlOperatorInterface,
     &turret,
-    &worldFrameYawChassisImuController,
+    &chassisFrameYawTurretController, //sus, chassis frame IMU was nan, investigate
     &chassisFramePitchTurretController,
     &worldFrameYawTurretImuController,
     &worldFramePitchTurretImuController,
@@ -793,8 +793,8 @@ void setDefaultHeroCommands()
     // chassis.setDefaultCommand(&chassisAutorotateCommand);
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
-    // turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    turret.setDefaultCommand(&turretDisabledCommand);
+    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    // turret.setDefaultCommand(&turretDisabledCommand);
     carsonator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
