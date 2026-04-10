@@ -23,7 +23,7 @@ from datetime import datetime
 from SCons.Script import *
 
 FLEET_API_ENDPOINT = "https://fleet.aruw.org/fleet-api/"
-CACHE_FILE_PATH = "./build_tools/build_target_ip_cache.json"
+CACHE_FILE_PATH = "./build_tools/build_target_ip_cache.json"  # should be present in .gitignore
 
 def run_ozone(env, source, robot=""):
     def call_run_ozone(target, source, env):
@@ -32,7 +32,8 @@ def run_ozone(env, source, robot=""):
         if sys.platform == "win32":
             os.startfile(jdebug)
         elif sys.platform == "darwin":
-            subprocess.call(['open', '-n', '-a', 'Ozone.app', '--args', jdebug])
+            # subprocess.call(['open', '-n', '-a', 'Ozone.app', '--args', jdebug])
+            pass
         else:
             subprocess.call(['xdg-open', jdebug])
 
