@@ -413,6 +413,10 @@ void TurretMCBCanComm::sendImuMountingTransformSync()
         const bool sentRotation =
             sendImuMountingTransformSyncMessage(imuType, TransformMessagePart::ROTATION, transform);
     }
+    if (sentAny)
+    {
+        imuMountingTransformQueued = false;
+    }
 }
 
 void TurretMCBCanComm::sendCalibrationSamplesSync()
@@ -427,6 +431,7 @@ void TurretMCBCanComm::sendCalibrationSamplesSync()
     auto* payload = reinterpret_cast<CalibrationSamplesMessageData*>(msg.data);
     payload->samples = remoteCalibrationSampleCount;
     drivers->can.sendMessage(canBus, msg);
+    calibrationSamplesSyncQueued = false;
 }
 
 TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(
