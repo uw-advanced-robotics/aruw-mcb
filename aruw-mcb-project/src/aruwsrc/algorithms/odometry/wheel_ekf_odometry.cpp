@@ -143,10 +143,7 @@ void FourWheelEKFOdometry::update()
     }
 
     // Rotate acceleration from MCB frame to the world frame.
-    tap::algorithms::rotateVector(
-        &imuAccelWorld.x,
-        &imuAccelWorld.y,
-        aruwsrc::communication::serial::VisionCoprocessor::MCB_ROTATION_OFFSET + yawForRotation);
+    tap::algorithms::rotateVector(&imuAccelWorld.x, &imuAccelWorld.y, yawForRotation);
 
     measurement.data[int(OdomInput::ACC_X)] = imuAccelWorld.x;
     measurement.data[int(OdomInput::ACC_Y)] = imuAccelWorld.y;
