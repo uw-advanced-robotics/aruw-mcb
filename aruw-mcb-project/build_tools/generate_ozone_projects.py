@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+# Copyright (c) 2024-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
 #
 # This file is part of aruw-mcb.
 #
@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 import os
+import json
 import subprocess
 from requests import get
 from datetime import datetime
@@ -22,6 +23,7 @@ from datetime import datetime
 from SCons.Script import *
 
 FLEET_API_ENDPOINT = "https://fleet.aruw.org/fleet-api/"
+CACHE_FILE_PATH = "./build_tools/build_target_ip_cache.json"
 
 def run_ozone(env, source, robot=""):
     def call_run_ozone(target, source, env):
@@ -55,37 +57,81 @@ def generate_ozone(env, robot=""):
             print(f"Using USB connection...")
             project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"USB\", \"\");")
 
+        def load_ip_cache():
+            try:
+                with open(CACHE_FILE_PATH, "r") as f:
+                    return json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                return {}
+
+        def save_ip_cache(cache_data):
+            try:
+                with open(CACHE_FILE_PATH, "w") as f:
+                    json.dump(cache_data, f, indent=4)
+            except Exception as e:
+                print(f"Warning: Failed to save IP cache: {e}")
+
+        def update_cache_from_api(fleet_status):
+            cache = load_ip_cache()
+            latest_ips = {}
+
+            for pi in fleet_status:
+                target_name = pi.get("mcbData", {}).get("buildTarget")
+                ip = pi.get("ip")
+                date_str = pi.get("mcbData", {}).get("lastUpdate")
+
+                if not target_name or not ip or not date_str:
+                    continue
+
+                try:
+                    timestamp = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+                except (ValueError, TypeError):
+                    continue
+
+                if target_name not in latest_ips or timestamp > latest_ips[target_name]["timestamp"]:
+                    latest_ips[target_name] = {"ip": ip, "timestamp": timestamp}
+
+            updated = False
+            for target_name, data in latest_ips.items():
+                if cache.get(target_name) != data["ip"]:
+                    cache[target_name] = data["ip"]
+                    updated = True
+
+            if updated:
+                save_ip_cache(cache)
+                
+            return cache
+
         def fetch_robot_ip(robot_target):
             if not robot_target:
                 return None
                 
+            fleet_status = None
             try:
-                fleet_status = get(FLEET_API_ENDPOINT, timeout=6).json()
-                fleet_status = fleet_status.get("robotPis", [])
+                print('Querying Fleet Status...')
+                response = get(FLEET_API_ENDPOINT, timeout=6)
+                response.raise_for_status()
+                fleet_status = response.json().get("robotPis", [])
             except Exception as e:
-                print(f"Unable to query Fleet API: {e}")
-                return None
+                print(f"Unable to query Fleet Status: {e}")
                 
-            def get_last_update(pi):
-                try:
-                    date_str = pi.get("mcbData", {}).get("lastUpdate")
-                    return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")
-                except (ValueError, TypeError):
-                    return datetime.min
+            if fleet_status is not None:
+                cache = update_cache_from_api(fleet_status)
+                ip = cache.get(robot_target)
+                if not ip:
+                    print(f"No Pis found in Fleet Status with matching MCB build target for '{robot_target}'")
+                return ip
+            else:
+                print("Attempting to use locally cached IP...")
+                cache = load_ip_cache()
+                ip = cache.get(robot_target)
+                if ip:
+                    print(f"Found cached IP for '{robot_target}'.")
+                    return ip
+                else:
+                    print(f"No cached IP found for '{robot_target}'.")
+                    return None
 
-            pi_candidates = [
-                pi for pi in fleet_status
-                if pi.get("mcbData", {}).get("buildTarget") == robot_target and pi.get("mcbData", {}).get("lastUpdate")
-            ]
-            
-            if not pi_candidates:
-                print(f"No Pis found with matching MCB build target for '{robot_target}'")
-                return None
-
-            pi_match = max(pi_candidates, key=get_last_update)
-            return pi_match.get("ip")
-
-        # Look for SCons variables (ip=x / usb=1) OR options (--ip=x / --usb)
         ip_arg = ARGUMENTS.get("ip") or GetOption("ip")
         usb_arg = "usb" in ARGUMENTS or GetOption("usb")
 
