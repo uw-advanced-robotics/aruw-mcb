@@ -17,7 +17,6 @@
 import os
 import json
 import subprocess
-from requests import get
 from datetime import datetime
 
 from SCons.Script import *
@@ -104,6 +103,8 @@ def generate_ozone(env, robot=""):
             return cache
 
         def fetch_robot_ip(robot_target):
+            from requests import get
+            
             if not robot_target:
                 return None
                 
