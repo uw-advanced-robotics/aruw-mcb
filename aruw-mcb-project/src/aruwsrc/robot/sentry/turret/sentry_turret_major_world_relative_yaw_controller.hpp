@@ -80,17 +80,10 @@ public:
         const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
         tap::communication::sensors::imu::AbstractIMU& turretMajorIMU,
-#ifdef TARGET_SENTRY_NAME
         const SentryTurretMinorSubsystem& turretWidow,
-#else
-        const SentryTurretMinorSubsystem& turretLeft,
-        const SentryTurretMinorSubsystem& turretRight,
-#endif
         tap::algorithms::SmoothPid& positionPid,
         tap::algorithms::SmoothPid& velocityPid,
-        float maxVelErrorInput,
-        float minorMajorTorqueRatio,
-        float feedforwardGain);
+        float maxVelErrorInput);
 
     void initialize() final;
 
@@ -112,16 +105,15 @@ public:
 
     bool isOnline() const final;
 
-    // @todo see todo in interface class
-    WrappedFloat convertControllerAngleToChassisFrame(WrappedFloat controllerFrameAngle) const final
+    WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat /* controllerFrameAngle */) const final
     {
-        controllerFrameAngle = controllerFrameAngle;  // to make pipeline not complain
         return Angle(0.0);
     };
 
-    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final
+    WrappedFloat convertChassisAngleToControllerFrame(
+        WrappedFloat /* chassisFrameAngle */) const final
     {
-        chassisFrameAngle = chassisFrameAngle;  // to make pipelien not complain
         return Angle(0.0);
     };
 
@@ -134,12 +126,7 @@ private:
 
     tap::communication::sensors::imu::AbstractIMU& turretMajorIMU;
 
-#ifdef TARGET_SENTRY_NAME
     const SentryTurretMinorSubsystem& turretWidow;
-#else
-    const SentryTurretMinorSubsystem& turretLeft;
-    const SentryTurretMinorSubsystem& turretRight;
-#endif
 
     tap::algorithms::SmoothPid& positionPid;
     tap::algorithms::SmoothPid& velocityPid;
@@ -149,8 +136,6 @@ private:
     float torqueCompensation = 0.0f;
 
     float maxVelErrorInput;
-
-    float minorMajorTorqueRatio;
 
     float feedforwardGain;
 };

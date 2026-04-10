@@ -396,9 +396,7 @@ TurretMajorWorldFrameController turretMajorWorldYawController(
     turretWidow,
     turretMajorYawPosPid,
     turretMajorYawVelPid,
-    turretMajor::MAX_VEL_ERROR_INPUT,
-    turretMajor::TURRET_MINOR_TORQUE_RATIO,
-    turretMajor::FEEDFORWARD_GAIN);
+    turretMajor::MAX_VEL_ERROR_INPUT);
 
 ChassisFrameTurretController<Axis::YAW> turretMajorChassisYawController(
     turretMajor.getMutableMotor(),
