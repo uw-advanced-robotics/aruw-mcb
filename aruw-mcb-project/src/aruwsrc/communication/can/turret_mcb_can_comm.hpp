@@ -211,7 +211,7 @@ public:
     void setImuMountingTransforms(
         const tap::algorithms::transforms::Transform& bmi088MountingTransform,
         const tap::algorithms::transforms::Transform& ism330MountingTransform);
-    void clearImuMountingTransforms();
+    void clearHasImuMountingTransforms();
     void setImuMountingTransform(
         RemoteImuType imuType,
         const tap::algorithms::transforms::Transform& mountingTransform);

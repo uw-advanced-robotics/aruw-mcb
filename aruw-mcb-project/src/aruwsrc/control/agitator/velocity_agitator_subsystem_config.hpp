@@ -61,20 +61,17 @@ struct VelocityAgitatorSubsystemConfig
     /// controlled by sending voltage commands, this term should be 0.
     float velocityPIDFeedForwardGain;
 
-    /// Enables the additional "aidenClemjam" condition: if the agitator is commanded above
-    /// aidenClemjamMinSetpoint but no projectile launch is reported by ref serial for
-    /// aidenClemjamTimeoutMs, the subsystem is considered jammed.
-    bool aidenClemjamEnabled = false;
-    /// Timeout for aidenClemjam in milliseconds.
-    uint32_t aidenClemjamTimeoutMs = 0;
+    /// Enables the additional "emptyJam" condition: if the agitator is commanded above
+    /// emptyJamMinSetpoint but no projectile launch is reported by ref serial for
+    /// emptyJamTimeoutMs, the subsystem is considered jammed.
+    bool emptyJamEnabled = false;
+    /// Timeout for emptyJam in milliseconds.
+    uint32_t emptyJamTimeoutMs = 0;
     /// Minimum commanded agitator setpoint magnitude (rad/s) to consider "attempting to fire".
-    float aidenClemjamMinSetpoint = 0.1f;
+    float emptyJamMinSetpoint = 0.1f;
     /// Barrel mechanism ID used to filter ref-reported projectile launches.
-    tap::communication::serial::RefSerialData::Rx::MechanismID aidenClemjamBarrelId =
+    tap::communication::serial::RefSerialData::Rx::MechanismID emptyJamBarrelId =
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
-    /// Fallback shot detector threshold: if shaft RPM magnitude drops by at least this amount
-    /// between refresh cycles while ref serial is down, treat it as a projectile launch.
-    float aidenClemjamProjectileLaunchRpmDropThreshold = 1000.0f;
 };
 }  // namespace aruwsrc::control::agitator
 

@@ -83,7 +83,7 @@ void VelocityAgitatorSubsystem::refresh()
         subsystemJamStatus = true;
     }
 
-    if (checkaidenClemjamCondition())
+    if (checkemptyJamCondition())
     {
         subsystemJamStatus = true;
     }
@@ -133,62 +133,25 @@ void VelocityAgitatorSubsystem::setSetpoint(float velocity)
     }
 }
 
-bool VelocityAgitatorSubsystem::checkaidenClemjamCondition()
+bool VelocityAgitatorSubsystem::checkemptyJamCondition()
 {
-    if (!config.aidenClemjamEnabled || config.aidenClemjamTimeoutMs == 0)
+    bool refSerialReceivingData = drivers->refSerial.getRefSerialReceivingData();
+
+    if (!config.emptyJamEnabled || config.emptyJamTimeoutMs == 0 || !refSerialReceivingData)
     {
         return false;
     }
 
     const uint32_t now = tap::arch::clock::getTimeMilliseconds();
-    currentShaftRpmMagnitude = std::fabs(
-        static_cast<float>(agitatorMotor.getEncoder()->getVelocity()) * AGITATOR_GEAR_RATIO_M2006 *
-        60.0f / (2.0f * M_PI));
-    refSerialReceivingData = drivers->refSerial.getRefSerialReceivingData();
 
-    if (refSerialReceivingData)
+    const auto& turretData = drivers->refSerial.getRobotData().turret;
+    if (turretData.launchMechanismID == config.emptyJamBarrelId &&
+        turretData.lastReceivedLaunchingInfoTimestamp != lastRefLaunchTimestamp)
     {
-        const auto& turretData = drivers->refSerial.getRobotData().turret;
-        if (turretData.launchMechanismID == config.aidenClemjamBarrelId &&
-            turretData.lastReceivedLaunchingInfoTimestamp != lastRefLaunchTimestamp)
-        {
-            lastRefLaunchTimestamp = turretData.lastReceivedLaunchingInfoTimestamp;
-            lastProjectileLaunchDetectedAtMs = now;
-        }
-    }
-    else
-    {
-        return false;
-    }
-    // not working on standard?
-    // else if (hasPreviousShaftRpmSample)
-    // {
-    //     const float shaftRpmDrop = previousShaftRpmMagnitude - currentShaftRpmMagnitude;
-    //     if (shaftRpmDrop >= config.aidenClemjamProjectileLaunchRpmDropThreshold)
-    //     {
-    //         lastProjectileLaunchDetectedAtMs = now;
-    //     }
-    // }
-
-    // Only evaluate timeout if we are actively attempting to rotate the agitator to fire.
-    // if (std::fabs(velocitySetpoint) < config.aidenClemjamMinSetpoint)
-    // {
-    //     lastProjectileLaunchDetectedAtMs = now;
-    //     previousShaftRpmMagnitude = currentShaftRpmMagnitude;
-    //     hasPreviousShaftRpmSample = true;
-    //     return false;
-    // }
-
-    if (lastProjectileLaunchDetectedAtMs == 0)
-    {
+        lastRefLaunchTimestamp = turretData.lastReceivedLaunchingInfoTimestamp;
         lastProjectileLaunchDetectedAtMs = now;
-        previousShaftRpmMagnitude = currentShaftRpmMagnitude;
-        hasPreviousShaftRpmSample = true;
-        return false;
     }
 
-    previousShaftRpmMagnitude = currentShaftRpmMagnitude;
-    hasPreviousShaftRpmSample = true;
-    return now - lastProjectileLaunchDetectedAtMs >= config.aidenClemjamTimeoutMs;
+    return now - lastProjectileLaunchDetectedAtMs >= config.emptyJamTimeoutMs;
 }
 }  // namespace aruwsrc::control::agitator

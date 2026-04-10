@@ -274,7 +274,7 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
 template <Axis AXIS>
 void WorldFrameTurretImuCascadePidTurretController<AXIS>::setSetpoint(WrappedFloat desiredSetpoint)
 {
-    const WrappedFloat worldFrameAngle = Angle(0);
+    WrappedFloat worldFrameAngle = Angle(0);
     if constexpr (AXIS == Axis::PITCH)
     {
         worldFrameAngle = Angle(worldToTurret.getPitch());

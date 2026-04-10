@@ -142,6 +142,7 @@ void TurretMCBCanComm::sendData()
         {
             yawRevolutions = 0;
             pitchRevolutions = 0;
+            rollRevolutions = 0;
         }
 
         // set this calibrate flag to false so the calibrate command is only sent once
@@ -150,14 +151,7 @@ void TurretMCBCanComm::sendData()
 
     if (!isConnected())
     {
-        imuData = {};
-        currProcessingImuData = {};
-        lastCompleteImuData = {};
-        prevIMUDataReceivedTime = 0;
-        yawRevolutions = 0;
-        pitchRevolutions = 0;
-        rollRevolutions = 0;
-        imuState = ImuState::IMU_NOT_CONNECTED;
+        initialize(0, 0, 0);
     }
     if (imuMountingTransformQueued)
     {
@@ -267,33 +261,24 @@ void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
     // Status frames are a heartbeat and should keep the remote IMU marked connected,
     // even when axis packets pause during calibration/transitions.
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
+    const TurretStatusMessageData* status =
+        reinterpret_cast<const TurretStatusMessageData*>(message.data);
+    limitSwitchDepressed = status->statusBitmask & 0b1;
 
-    if (message.getLength() >= sizeof(TurretStatusMessageData))
+    const uint8_t stateRaw = status->imuState;
+    if (stateRaw <= static_cast<uint8_t>(ImuState::IMU_CALIBRATED))
     {
-        const TurretStatusMessageData* status =
-            reinterpret_cast<const TurretStatusMessageData*>(message.data);
-        limitSwitchDepressed = status->statusBitmask & 0b1;
-
-        const uint8_t stateRaw = status->imuState;
-        if (stateRaw <= static_cast<uint8_t>(ImuState::IMU_CALIBRATED))
-        {
-            imuState = static_cast<ImuState>(stateRaw);
-        }
-        else
-        {
-            imuState = ImuState::IMU_NOT_CONNECTED;
-        }
-
-        const float temperature = static_cast<float>(status->temperatureCentiC) * 0.01f;
-        lastCompleteImuData.temperature = temperature;
-        currProcessingImuData.temperature = temperature;
-        imuData.temperature = temperature;
+        imuState = static_cast<ImuState>(stateRaw);
     }
     else
     {
-        // Legacy status payload: only limit switch bit.
-        limitSwitchDepressed = message.data[0] & 0b1;
+        imuState = ImuState::IMU_NOT_CONNECTED;
     }
+
+    const float temperature = static_cast<float>(status->temperatureCentiC) * 0.01f;
+    lastCompleteImuData.temperature = temperature;
+    currProcessingImuData.temperature = temperature;
+    imuData.temperature = temperature;
 }
 
 void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message&)
@@ -314,12 +299,15 @@ void TurretMCBCanComm::setImuMountingTransforms(
     const tap::algorithms::transforms::Transform& bmi088MountingTransform,
     const tap::algorithms::transforms::Transform& ism330MountingTransform)
 {
-    clearImuMountingTransforms();
+    clearHasImuMountingTransforms();
     setImuMountingTransform(RemoteImuType::BMI088, bmi088MountingTransform);
     setImuMountingTransform(RemoteImuType::ISM330, ism330MountingTransform);
 }
 
-void TurretMCBCanComm::clearImuMountingTransforms() { hasRemoteImuMountingTransform.fill(false); }
+void TurretMCBCanComm::clearHasImuMountingTransforms()
+{
+    hasRemoteImuMountingTransform.fill(false);
+}
 
 void TurretMCBCanComm::setImuMountingTransform(
     RemoteImuType imuType,

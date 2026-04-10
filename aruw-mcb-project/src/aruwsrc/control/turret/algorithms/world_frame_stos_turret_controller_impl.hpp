@@ -188,7 +188,7 @@ template <Axis AXIS>
 void WorldFrameTurretImuSTOSTurretController<AXIS>::setSetpoint(WrappedFloat desiredSetpoint)
 {
     const WrappedFloat chassisFrameAngle = this->turretMotor.getChassisFrameMeasuredAngle();
-    const WrappedFloat worldFrameAngle = Angle(0);
+    WrappedFloat worldFrameAngle = Angle(0);
     if constexpr (AXIS == Axis::PITCH)
     {
         worldFrameAngle = Angle(worldToTurret.getPitch());
