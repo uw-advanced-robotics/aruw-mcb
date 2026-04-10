@@ -103,17 +103,17 @@ public:
     static constexpr float IMU_SCALING_FACTOR =
         1 / tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
     /**
-     * @return turret yaw angle in radians, normalized between [-pi, pi]
+     * @return turret roll angle in radians, normalized between [-pi, pi]
      */
     mockable inline float getRoll() const override { return lastCompleteImuData.roll; }
 
     /**
-     * @return turret yaw angular velocity in rad/sec
+     * @return turret roll angular velocity in rad/sec
      */
     mockable inline float getGx() const override { return imuData.gyroRadPerSec.x(); }
 
     /**
-     * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
+     * @return An unwrapped (not normalized) turret roll angle, in rad. This object keeps track of
      * the number of revolutions that the attached turret IMU has taken, and the number of
      * revolutions is reset once the IMU is recalibrated or if the turret IMU comes disconnected.
      */
@@ -234,7 +234,7 @@ private:
 
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
     static constexpr float ANGLE_FIXED_POINT_PRECISION = M_TWOPI / UINT16_MAX;
-    static constexpr float CMPS2_TO_MPS2 = 0.01;
+    static constexpr float CMPS2_TO_MPS2 = 0.01f;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
 
     class TurretMcbRxHandler : public tap::can::CanRxListener
@@ -341,6 +341,9 @@ private:
 
     bool limitSwitchDepressed;
 
+    bool imuMountingTransformQueued = false;
+    bool calibrationSamplesSyncQueued = false;
+
     ImuDataReceivedCallbackFunc imuDataReceivedCallbackFunc = nullptr;
     std::array<tap::algorithms::transforms::Transform, NUM_REMOTE_IMU_TYPES>
         remoteImuMountingTransforms{
@@ -348,8 +351,6 @@ private:
             tap::algorithms::transforms::Transform::identity(),
             tap::algorithms::transforms::Transform::identity()};
     std::array<bool, NUM_REMOTE_IMU_TYPES> hasRemoteImuMountingTransform{{false, false, false}};
-    uint8_t imuMountingSyncBurstsRemaining = 0;
-    uint8_t calibrationSamplesSyncBurstsRemaining = 0;
     uint16_t remoteCalibrationSampleCount = 1500;
 
     void handleXAxisMessage(const modm::can::Message& message);

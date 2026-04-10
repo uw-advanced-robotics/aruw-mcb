@@ -35,8 +35,6 @@ namespace
 {
 constexpr float ROTATION_COMPONENT_SCALE = 1000.0f;
 constexpr float TRANSLATION_COMPONENT_SCALE = 10.0f;
-constexpr uint8_t IMU_MOUNTING_SYNC_BURST_COUNT = 3;
-constexpr uint8_t CALIBRATION_SAMPLES_SYNC_BURST_COUNT = 3;
 
 inline int16_t quantizeTransformComponent(float value, float scale)
 {
@@ -161,9 +159,14 @@ void TurretMCBCanComm::sendData()
         rollRevolutions = 0;
         imuState = ImuState::IMU_NOT_CONNECTED;
     }
-
-    sendImuMountingTransformSync();
-    sendCalibrationSamplesSync();
+    if (imuMountingTransformQueued)
+    {
+        sendImuMountingTransformSync();
+    }
+    if (calibrationSamplesSyncQueued)
+    {
+        sendCalibrationSamplesSync();
+    }
 }
 
 void TurretMCBCanComm::handleXAxisMessage(const modm::can::Message& message)
@@ -334,15 +337,9 @@ void TurretMCBCanComm::setImuMountingTransform(
     hasRemoteImuMountingTransform[imuIndex] = true;
 }
 
-void TurretMCBCanComm::queueImuMountingTransformSync()
-{
-    imuMountingSyncBurstsRemaining = IMU_MOUNTING_SYNC_BURST_COUNT;
-}
+void TurretMCBCanComm::queueImuMountingTransformSync() { imuMountingTransformQueued = true; }
 
-void TurretMCBCanComm::queueCalibrationSamplesSync()
-{
-    calibrationSamplesSyncBurstsRemaining = CALIBRATION_SAMPLES_SYNC_BURST_COUNT;
-}
+void TurretMCBCanComm::queueCalibrationSamplesSync() { calibrationSamplesSyncQueued = true; }
 
 void TurretMCBCanComm::handleImuMountingTransformRequest(const modm::can::Message&)
 {
@@ -406,12 +403,11 @@ bool TurretMCBCanComm::hasAnyImuMountingTransformsConfigured() const
 
 void TurretMCBCanComm::sendImuMountingTransformSync()
 {
-    if (imuMountingSyncBurstsRemaining == 0 || !hasAnyImuMountingTransformsConfigured())
+    if (!hasAnyImuMountingTransformsConfigured())
     {
         return;
     }
 
-    bool burstSuccess = true;
     bool sentAny = false;
     for (size_t i = 0; i < remoteImuMountingTransforms.size(); i++)
     {
@@ -430,18 +426,12 @@ void TurretMCBCanComm::sendImuMountingTransformSync()
             transform);
         const bool sentRotation =
             sendImuMountingTransformSyncMessage(imuType, TransformMessagePart::ROTATION, transform);
-        burstSuccess &= sentTranslation && sentRotation;
-    }
-
-    if (sentAny && burstSuccess)
-    {
-        imuMountingSyncBurstsRemaining--;
     }
 }
 
 void TurretMCBCanComm::sendCalibrationSamplesSync()
 {
-    if (calibrationSamplesSyncBurstsRemaining == 0 || !drivers->can.isReadyToSend(canBus))
+    if (!drivers->can.isReadyToSend(canBus))
     {
         return;
     }
@@ -451,7 +441,6 @@ void TurretMCBCanComm::sendCalibrationSamplesSync()
     auto* payload = reinterpret_cast<CalibrationSamplesMessageData*>(msg.data);
     payload->samples = remoteCalibrationSampleCount;
     drivers->can.sendMessage(canBus, msg);
-    calibrationSamplesSyncBurstsRemaining--;
 }
 
 TurretMCBCanComm::TurretMcbRxHandler::TurretMcbRxHandler(
