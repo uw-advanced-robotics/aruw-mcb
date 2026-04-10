@@ -406,12 +406,8 @@ void TurretMCBCanComm::sendImuMountingTransformSync()
         const auto imuType = static_cast<RemoteImuType>(i);
         const auto& transform = remoteImuMountingTransforms[i];
 
-        const bool sentTranslation = sendImuMountingTransformSyncMessage(
-            imuType,
-            TransformMessagePart::TRANSLATION,
-            transform);
-        const bool sentRotation =
-            sendImuMountingTransformSyncMessage(imuType, TransformMessagePart::ROTATION, transform);
+        sendImuMountingTransformSyncMessage(imuType, TransformMessagePart::TRANSLATION, transform);
+        sendImuMountingTransformSyncMessage(imuType, TransformMessagePart::ROTATION, transform);
     }
     if (sentAny)
     {

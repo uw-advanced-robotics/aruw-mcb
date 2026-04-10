@@ -42,6 +42,7 @@ private:
     float W_D;
     float ZETA;
     float SYSTEM_DELAY_SEC;
+    float TorqueToMotorOutput;
 
 public:
     struct STOSConstants
@@ -52,6 +53,7 @@ public:
         float W_D;               // Damped natural frequency of flexible system
         float ZETA;              // Damping ratio of the flexible system
         float SYSTEM_DELAY_SEC;  // Total system delay (sensing + computation + actuation)
+        float TorqueToMotorOutput;
     };
 
     OptimalSTOSController(STOSConstants constants)
@@ -60,7 +62,9 @@ public:
           B_DAMP(constants.B_DAMP),
           W_D(constants.W_D),
           ZETA(constants.ZETA),
-          SYSTEM_DELAY_SEC(constants.SYSTEM_DELAY_SEC)
+          SYSTEM_DELAY_SEC(constants.SYSTEM_DELAY_SEC),
+          TorqueToMotorOutput(constants.TorqueToMotorOutput)
+
     {
         calculateConstants();
     }
@@ -68,16 +72,16 @@ public:
     float getOptimalTorque(float posError, float vel)
     {
         // Helpful to uncomment when tuning
-        calculateConstants();
+        // calculateConstants();
 
         // Small linear interp to help with delay
         float xe = -posError - vel * SYSTEM_DELAY_SEC;
 
         // Quadrant 1: Overshot target, moving away = Max Brake
-        if (xe > 0.0f && vel >= 0.0f) return -TAU_MAX;
+        if (xe > 0.0f && vel >= 0.0f) return -TAU_MAX * TorqueToMotorOutput;
 
         // Quadrant 3: Undershot target, moving away = Max Brake
-        if (xe < 0.0f && vel <= 0.0f) return TAU_MAX;
+        if (xe < 0.0f && vel <= 0.0f) return TAU_MAX * TorqueToMotorOutput;
 
         // Quadrant 4: Past target, moving back towards it
         if (xe >= 0.0f && vel < 0.0f)
@@ -101,12 +105,12 @@ private:
         // in the little x_star region
         if (xe >= x_star_const && v <= S4_const)
         {
-            return (-a2 * TAU_MAX);
+            return (-a2 * TAU_MAX * TorqueToMotorOutput);
         }
 
         if (v <= S1_const && xe < x_star_const)
         {
-            return a1 * TAU_MAX;
+            return a1 * TAU_MAX * TorqueToMotorOutput;
         }
 
         // 1. Calculate the Dynamic S2 Curve (Boundary between +U and +a2_kick)
@@ -123,17 +127,19 @@ private:
         if (xe < S2_curve)
         {
             // Region 1 & 2: Accelerating
-            return (v < S1_const) ? (a1 * TAU_MAX) : TAU_MAX;
+            return (v < S1_const) ? (a1 * TAU_MAX * TorqueToMotorOutput)
+                                  : (TAU_MAX * TorqueToMotorOutput);
         }
         else if (xe < S3_curve)
         {
             // Region 3: The middle dip
-            return (a2 - a1) * TAU_MAX;
+            return (a2 - a1) * TAU_MAX * TorqueToMotorOutput;
         }
         else
         {
             // Region 4 & 5: Braking
-            return (v > S4_const) ? -TAU_MAX : (-a2 * TAU_MAX);
+            return (v > S4_const) ? (-TAU_MAX * TorqueToMotorOutput)
+                                  : (-a2 * TAU_MAX * TorqueToMotorOutput);
         }
     }
     void calculateConstants()

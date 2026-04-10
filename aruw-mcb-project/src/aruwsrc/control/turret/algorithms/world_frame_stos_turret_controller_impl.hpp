@@ -65,15 +65,15 @@ WorldFrameTurretImuSTOSTurretController<AXIS>::WorldFrameTurretImuSTOSTurretCont
     const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
     TurretMotor &turretMotor,
     OptimalSTOSController::STOSConstants constants,
-    float lqrT,
-    float lqrTd,
+    tap::algorithms::SmoothPid positionPid,
+    TurretFeedforwardConstants feedforwardConstants,
     const std::vector<TurretCompensatorInterface *> compensators)
     : TurretAxisControllerInterface<AXIS>(turretMotor, compensators),
       worldToTurret(worldToTurret),
       turretMCBCanComm(turretMCBCanComm),
       stosController(constants),
-      lqrT(lqrT),
-      lqrTd(lqrTd),
+      positionPid(positionPid),
+      feedforwardConstants(feedforwardConstants),
       worldFrameSetpoint(Angle(0))
 {
 }
@@ -134,23 +134,20 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
     DEBUGV = velError;
     DEBUGP = posError;
 
-    float kA = J_FF;         // Tune this to your turret's inertia
-    float kV = B_DAMP;       // Your existing velocity constant
-    float kS = FRICTION_FF;  // Your existing friction constant
-
     float frictionFF = 0.0;
     if (std::abs(targetVel) > 0.001)
     {
-        frictionFF = std::signbit(targetVel) ? -kS : kS;
+        frictionFF = std::signbit(targetVel) ? -feedforwardConstants.Ks : feedforwardConstants.Ks;
     }
 
-    float torqueFF = (targetAccel * kA) + (targetVel * kV) + frictionFF;
+    float torqueFF = (targetAccel * feedforwardConstants.Ka) +
+                     (targetVel * feedforwardConstants.Kv) + frictionFF;
 
     const float LINEAR_ZONE = DEBUG1;
 
     if (std::abs(posError) < LINEAR_ZONE)
     {
-        float feedback = (posError * lqrT) + (velError * lqrTd);
+        float feedback = positionPid.runController(posError, -velError, dt);
 
         pidOutput = torqueFF + feedback;
     }
@@ -158,9 +155,7 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
     {
         pidOutput = stosController.getOptimalTorque(posError, -velError);
     }
-    /// convert to torque @TODO: Make passed in or smth
     DEBUG3 = pidOutput;
-    pidOutput *= (16384.0f / 1.3f);
 
     if constexpr (AXIS == Axis::PITCH)
     {

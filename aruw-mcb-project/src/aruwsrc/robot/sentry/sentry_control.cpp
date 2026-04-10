@@ -362,10 +362,9 @@ struct TurretMinorWorldControllers
     WorldFrameTurretImuSTOSTurretController<Axis::YAW> yawController;
 };
 
-// // @todo surely there's a better way to construct this
 SmoothPid turretWidowWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretWidowWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-SmoothPid turretWidowWorldYawVelPid(minorPidConfigs::MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL);
+// SmoothPid turretWidowWorldYawVelPid(minorPidConfigs::MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretWidowWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 
 TurretMinorWorldControllers turretWidowWorldControllers{
@@ -382,9 +381,8 @@ TurretMinorWorldControllers turretWidowWorldControllers{
         getTurretMCBCanCommWidow(),
         turretWidow.yawMotor,
         turretWidow::turretWidowSTOSConstants,
-        5,
-        .25)
-    /// @TODO: Make the constants passed in and proper
+        turretWidowWorldYawPosPid,
+        turretWidow::turretWidowFeedforwardConstants)
 
 };
 
@@ -541,7 +539,7 @@ autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommandWidow(
      &turretWidowChassisControllers.pitchController,
      turretWidowMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
-     TORQUE_TO_DESIRED_OUT});
+     DESIRED_OUT_TO_TORQUE});
 
 autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     drivers(),
@@ -550,7 +548,7 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
      &turretMajorChassisYawController,
      turretMajorYawMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
-     TORQUE_TO_DESIRED_OUT},
+     DESIRED_OUT_TO_TORQUE},
     turretMajorYawAnalogEncoder);
 
 autotune::FreqSweepAutotuneCommand<1, Axis::YAW> freqSweepAutotuneCommand(
@@ -560,7 +558,7 @@ autotune::FreqSweepAutotuneCommand<1, Axis::YAW> freqSweepAutotuneCommand(
      &turretWidowChassisControllers.yawController,
      turretWidowMotors.yawMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
-     TORQUE_TO_DESIRED_OUT},
+     DESIRED_OUT_TO_TORQUE},
     12'000.0f,
     &getTurretMCBCanCommWidow(),
     {&turretWidowChassisControllers.pitchController,

@@ -22,9 +22,7 @@
 
 #include <cstdint>
 
-#include "tap/algorithms/filter/butterworth.hpp"
-#include "tap/algorithms/filter/discrete_filter.hpp"
-#include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 
@@ -42,13 +40,20 @@ class TurretMotor;
 
 namespace aruwsrc::control::turret::algorithms
 {
+struct TurretFeedforwardConstants
+{
+    float Ka = 0.0f;  /// Acceleration feedforward constant
+    float Kv = 0.0f;  /// Velocity feedforward constant
+    float Ks = 0.0f;  /// Static friction feedforward constant
+};
 /**
  * World frame turret yaw controller. Requires that a development board be mounted rigidly on the
  * turret and connected via the `TurretMCBCanComm` class. The development board's IMU is used to
  * determine the turret's world frame coordinates directly, making this controller better than the
  * `WorldFrameChassisImuTurretController`.
  *
- * Runs a STOS optimal controller with a LQR in the small error region.
+ * Runs a STOS optimal controller with a feedforward controller from the setpoint kalman filter and
+ * a PID controller in small error regions.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
@@ -68,8 +73,8 @@ public:
         const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &turretMotor,
         OptimalSTOSController::STOSConstants constants,
-        float lqrT,
-        float lqrTd,
+        tap::algorithms::SmoothPid positionPid,
+        TurretFeedforwardConstants feedforwardConstants,
         const std::vector<TurretCompensatorInterface *> compensators = {});
 
     void initialize() final;
@@ -104,8 +109,8 @@ private:
     const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm;
 
     OptimalSTOSController stosController;
-    float lqrT;
-    float lqrTd;
+    tap::algorithms::SmoothPid positionPid;
+    TurretFeedforwardConstants feedforwardConstants;
 
     WrappedFloat worldFrameSetpoint;
     TurretSetpointKalmanFilter setpointFilter;
@@ -115,9 +120,6 @@ private:
     float DEBUG3{0.0f};
     float DEBUGV{0.0f};
     float DEBUGP{0.0f};
-    float B_DAMP{0.0443f};
-    float J_FF{0.0073f};
-    float FRICTION_FF{0.001f};
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

@@ -29,6 +29,7 @@
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_stos_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"  // for turretID enum (could go somewhere else)
 #include "modm/container/pair.hpp"
@@ -49,7 +50,7 @@ static constexpr float MAJOR_USER_YAW_INPUT_SCALAR = 0.007f;
 static constexpr float MINOR_USER_YAW_INPUT_SCALAR = 0.008f;
 static constexpr float MINOR_USER_PITCH_INPUT_SCALAR = 0.008f;
 
-static constexpr float TORQUE_TO_DESIRED_OUT =
+static constexpr float DESIRED_OUT_TO_TORQUE =
     1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
 static constexpr float TURRET_WEIGHT_KG = 1.44730f;     // From CAD
 
@@ -227,6 +228,8 @@ inline const tap::algorithms::transforms::Transform TURRET_MCB1_ISM330_MOUNTING_
     0.0f,
     -3.1415926535f * .5f);
 
+inline constexpr float TORQUE_TO_MOTOR_OUTPUT = 1 / DESIRED_OUT_TO_TORQUE;
+
 inline constexpr aruwsrc::control::turret::algorithms::OptimalSTOSController::STOSConstants
     turretWidowSTOSConstants = {
         .J_TOTAL = 0.0073f,
@@ -234,7 +237,14 @@ inline constexpr aruwsrc::control::turret::algorithms::OptimalSTOSController::ST
         .B_DAMP = 0.001f,
         .W_D = 80.8f,
         .ZETA = 0.33,
-        .SYSTEM_DELAY_SEC = 0.012f};
+        .SYSTEM_DELAY_SEC = 0.012f,
+        .TorqueToMotorOutput = TORQUE_TO_MOTOR_OUTPUT};
+
+inline constexpr aruwsrc::control::turret::algorithms::TurretFeedforwardConstants
+    turretWidowFeedforwardConstants = {
+        .Ka = 0.0073f * TORQUE_TO_MOTOR_OUTPUT,
+        .Kv = 0.0443f * TORQUE_TO_MOTOR_OUTPUT,
+        .Ks = 0.001f * TORQUE_TO_MOTOR_OUTPUT};
 }  // namespace turretWidow
 
 namespace minorPidConfigs
@@ -266,30 +276,25 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
     .antiSaturation = true,
 };
 
-static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-    .kp = 3'750.0f,
-    .ki = 0.0f,
-    .kd = 0.010f,
-    .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
-    .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.5f,
-    .errDeadzone = 0.0f,
-};
+// static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
+//     .kp = 3'750.0f,
+//     .ki = 0.0f,
+//     .kd = 0.010f,
+//     .maxICumulative = 0.0f,
+//     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+//     .tQDerivativeKalman = 1.0f,
+//     .tRDerivativeKalman = 0.0f,
+//     .tQProportionalKalman = 1.0f,
+//     .tRProportionalKalman = 0.5f,
+//     .errDeadzone = 0.0f,
+// };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 20.0f,
+    .kp = 63'000,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 3'150.0f,
     .maxICumulative = 1.0f,
-    .maxOutput = 30.0f,
-    .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
-    .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 0.0f,
-    .errDeadzone = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_WORLD_FRAME_VEL = {
