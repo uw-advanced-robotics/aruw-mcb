@@ -105,7 +105,7 @@ static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
     KICKER_AGITATOR_CONFIG = {
         .gearRatio = 1.0f / 36.0f,
-        .agitatorMotorId = tap::motor::MOTOR3,
+        .agitatorMotorId = tap::motor::MOTOR8,
         .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
         .isAgitatorInverted = false,
         .jammingVelocityDifference = 0,
