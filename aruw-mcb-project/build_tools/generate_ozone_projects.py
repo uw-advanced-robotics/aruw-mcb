@@ -31,8 +31,7 @@ def run_ozone(env, source, robot=""):
         if sys.platform == "win32":
             os.startfile(jdebug)
         elif sys.platform == "darwin":
-            # subprocess.call(['open', '-n', '-a', 'Ozone.app', '--args', jdebug])
-            pass
+            subprocess.call(['open', '-n', '-a', 'Ozone.app', '--args', jdebug])
         else:
             subprocess.call(['xdg-open', jdebug])
 
