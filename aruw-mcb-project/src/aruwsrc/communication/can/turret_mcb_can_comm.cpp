@@ -254,8 +254,6 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
         static_cast<float>(lastCompleteImuData.rawRollVelocity) * IMU_SCALING_FACTOR,
         static_cast<float>(lastCompleteImuData.rawPitchVelocity) * IMU_SCALING_FACTOR,
         static_cast<float>(lastCompleteImuData.rawYawVelocity) * IMU_SCALING_FACTOR);
-    // imuData.accRaw = imuData.accG;
-    // imuData.gyroRaw = imuData.gyroRadPerSec;
     prevIMUDataReceivedTime = lastCompleteImuData.turretDataTimestamp;
 
     if (imuDataReceivedCallbackFunc != nullptr)
