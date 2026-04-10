@@ -120,7 +120,7 @@ public:
         return onlineEncoders == 0 ? 0 : velocity / onlineEncoders;
     };
 
-    void resetEncoderValue() override
+    void resetEncoderValue(float pos = 0) override
     {
         this->syncEncoders();
 
@@ -128,7 +128,7 @@ public:
         {
             if (encoder != nullptr)
             {
-                encoder->resetEncoderValue();
+                encoder->resetEncoderValue(pos);
             }
         }
     }
