@@ -802,7 +802,7 @@ void registerHeroSubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
+    // chassis.setDefaultCommand(&chassisAutorotateCommand);
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheelSubsystem.setDefaultCommand(&stopFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
