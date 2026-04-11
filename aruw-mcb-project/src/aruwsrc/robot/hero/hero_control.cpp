@@ -377,15 +377,12 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 
 // Turret Compensators
 algorithms::TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
-algorithms::TurretSpringForceOffset turretSpringCompensation(
-    TURRET_SPRING_CONFIG,
-    pitchMotor.isMotorInverted());
 
 // Turret controllers
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
     turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG,
-    {&turretGravityCompensation, &turretSpringCompensation});
+    {&turretGravityCompensation});
 
 algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
     turret.yawMotor,
@@ -420,7 +417,7 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         turret.pitchMotor,
         worldFramePitchTurretImuPosPid,
         worldFramePitchTurretImuVelPid,
-        {&turretGravityCompensation, &turretSpringCompensation});
+        {&turretGravityCompensation});
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
@@ -446,7 +443,7 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         turret.pitchMotor,
         worldFramePitchTurretImuPosPidCv,
         worldFramePitchTurretImuVelPidCv,
-        {&turretGravityCompensation, &turretSpringCompensation});
+        {&turretGravityCompensation});
 
 // turret commands
 // @todo: chassis MCB is mounted vertically so world frame chassis IMU controller cannot be used for
@@ -805,10 +802,10 @@ void registerHeroSubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
-    // chassis.setDefaultCommand(&chassisAutorotateCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheelSubsystem.setDefaultCommand(&stopFrictionWheels);
-    // turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     turret.setDefaultCommand(&turretDisabledCommand);
     carsonator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
