@@ -123,14 +123,9 @@ void RemoteMapState::initLMouseButton() { lMouseButton = true; }
 
 void RemoteMapState::initRMouseButton() { rMouseButton = true; }
 
-RemoteMapState DEBUG_REMOTE_MAP;
-RemoteMapState DEBUG_REMOTE_MAP_OTHER;
-
 bool RemoteMapState::stateSubsetOf(const GenericRemoteMapState &other) const
 {
     auto &rOther = static_cast<const RemoteMapState &>(other);
-    DEBUG_REMOTE_MAP = *this;
-    DEBUG_REMOTE_MAP_OTHER = rOther;
     if (rSwitch != Remote::SwitchState::UNKNOWN && rSwitch != rOther.rSwitch) return false;
     if (lSwitch != Remote::SwitchState::UNKNOWN && lSwitch != rOther.lSwitch) return false;
     if (!GenericRemoteMapState::stateSubsetOf(other)) return false;

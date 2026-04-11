@@ -117,7 +117,7 @@ public:
      * in order to determine which commands should be added to or removed from the scheduler.
      * Call when new remote information has been received.
      */
-    mockable void handleKeyStateChange(tap::communication::serial::Remote &remote, uint16_t key);
+    mockable void handleKeyStateChange(tap::control::GenericRemoteMapState &mapState);
 
     /**
      * Verifies the mapping passed in can be added to `commandsToRun`
@@ -135,12 +135,10 @@ public:
     mockable std::size_t getCommandMappingSize() const { return commandsToRun.size(); }
 
     /**
-     * @return The CommandMapping located at the specified index, or
+     * @return The CommandMapping located at the specificed index, or
      *      `nullptr` of the index is out of bounds.
      */
     mockable const CommandMapping *getCommandMappingAtIndex(std::size_t index) const;
-
-    void sumedh_fixes_things(GenericRemoteMapState& mapState);
 
 private:
     std::vector<std::unique_ptr<TriggerBinding>> triggerBindings;

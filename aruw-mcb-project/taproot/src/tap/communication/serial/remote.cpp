@@ -26,12 +26,11 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/serial/uart.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
 #include "remote_serial_constants.hpp"
-
-#include "tap/control/remote_map_state.hpp"
 
 namespace tap::communication::serial
 {
@@ -145,17 +144,10 @@ void Remote::parseBuffer()
 
     tap::control::RemoteMapState mapState;
     mapState.initKeys(remote.key);
-    if(remote.mouse.l){
-        mapState.initLMouseButton();
-    }
-    if(remote.mouse.r){
-        mapState.initRMouseButton();
-    }
-    mapState.initLSwitch(remote.leftSwitch);
-    mapState.initRSwitch(remote.rightSwitch);
+    mapState.updateState(*this);
+    drivers->commandMapper.handleKeyStateChange(mapState);
+    drivers->commandMapper.pollTriggerBindings();
 
-    // drivers->commandMapper.handleKeyStateChange(*this, remote.key);
-    drivers->commandMapper.sumedh_fixes_things(mapState);
     remote.updateCounter++;
 }
 
@@ -188,8 +180,6 @@ void Remote::reset()
     remote.key = 0;
     remote.wheel = 0;
     clearRxBuffer();
-
-    drivers->commandMapper.handleKeyStateChange(*this, 0);
 }
 
 uint32_t Remote::getUpdateCounter() const { return remote.updateCounter; }
