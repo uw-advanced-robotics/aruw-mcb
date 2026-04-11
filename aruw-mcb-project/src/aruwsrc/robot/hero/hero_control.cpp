@@ -806,7 +806,7 @@ void setDefaultHeroCommands()
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheelSubsystem.setDefaultCommand(&stopFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    turret.setDefaultCommand(&turretDisabledCommand);
+    // turret.setDefaultCommand(&turretDisabledCommand);
     carsonator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
