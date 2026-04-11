@@ -63,7 +63,6 @@ const Transform& SentryTransformAdapter::getWorldToChassis() const
 
 const Transform& SentryTransformAdapter::getVisionWorldToChassis() const
 {
-    (void)visionOdometryProvider;
     return this->transforms.getWorldToChassis();
 }
 
