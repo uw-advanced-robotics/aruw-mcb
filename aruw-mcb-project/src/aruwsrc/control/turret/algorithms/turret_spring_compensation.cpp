@@ -55,10 +55,13 @@ float TurretSpringForceOffset::calculateEffectiveMoment(float pitch) const
     if (currentLength < 1e-6) return 0.0f;
 
     const Vector pitchPosVector(pitchPoint.coordinates());
+    Vector springForceVector = springVector * (1.0f / currentLength);
 
-    const float scaleFactor = (currentLength - params.springFreeLength) / currentLength;
-
-    const Vector springForceVector = springVector * scaleFactor;
+    if (params.springFreeLength > 0.0f)
+    {
+        const float scaleFactor = currentLength - params.springFreeLength;
+        springForceVector = springForceVector * scaleFactor;
+    }
 
     const Vector torque = Vector::cross(pitchPosVector, springForceVector);
 
