@@ -20,19 +20,18 @@
 #ifndef VIRTUAL_SERVO_HPP_
 #define VIRTUAL_SERVO_HPP_
 
-#include "tap/motor/servo.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
+#include "tap/motor/servo.hpp"
+
 #include "aruwsrc/communication/mcb-lite/message_types.hpp"
 
-
-
 using namespace tap::communication::serial;
-namespace aruwsrc::communication::mcb_lite {
+namespace aruwsrc::communication::mcb_lite
+{
 class MCBLite;
 }
 namespace aruwsrc::communication::mcb_lite::motor
 {
-
 class VirtualServo : public tap::motor::Servo
 {
     friend class aruwsrc::communication::mcb_lite::MCBLite;
@@ -40,33 +39,32 @@ class VirtualServo : public tap::motor::Servo
 
 public:
     VirtualServo(
-    tap::Drivers *drivers,
-    tap::gpio::Pwm::Pin pwmPin,
-    float minimumPwm,
-    float maximumPwm,
-    float pwmRampSpeed,
-    aruwsrc::communication::mcb_lite::MCBLite* mcbLite,
-    bool isServoOne);
+        tap::Drivers* drivers,
+        tap::gpio::Pwm::Pin pwmPin,
+        float minimumPwm,
+        float maximumPwm,
+        float pwmRampSpeed,
+        aruwsrc::communication::mcb_lite::MCBLite* mcbLite);
 
     void setTargetPwm(float pwm);
 
     float getPWM() const;
 
+    tap::gpio::Pwm::Pin getPin() const;
+
     bool isRampTargetMet() const;
 
-
-private: 
-    void processServoUARTMessage( float currentPwm, bool isRampTargetMet);
+private:
+    void processServoUARTMessage(float currentPwm, bool isRampTargetMet);
 
     void updateMessages(float pwm);
-
 
     tap::gpio::Pwm::Pin pin;
     float minPwm, maxPwm, rampSpeed;
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite;
     float currentPwm = 0;
-    bool hasNewTarget = 0; 
-    bool hasNewRamp = 0;   
+    bool hasNewTarget = 0;
+    bool hasNewRamp = 0;
     bool isTargetReached = 0;
     DJISerial::SerialMessage<sizeof(ServoTargetMessage)> targetMessage;
     DJISerial::SerialMessage<sizeof(ServoRampMessage)> rampMessage;

@@ -32,7 +32,7 @@ MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPo
     : DJISerial(drivers, port),
       canRxHandler(motor::VirtualCanRxHandler(drivers)),
       motorTxHandler(motor::VirtualDJIMotorTxHandler(drivers)),
-    servoRxHandler(motor::VirtualServoRxHandler(drivers)),
+      servoRxHandler(motor::VirtualServoRxHandler(drivers)),
       imu(),
       analog(),
       digital(),
@@ -145,42 +145,29 @@ void MCBLite::sendData()
                 sizeof(pwm.pwmTimerStartMessage));
             pwm.hasNewData = false;
         }
-
-        if (servoRxHandler.servoOne != nullptr) {
-             if (servoRxHandler.servoOne->hasNewTarget) {
-                drivers->uart.write(
-                    port,
-                    reinterpret_cast<uint8_t*>(&(servoRxHandler.servoOne->targetMessage)),
-                    sizeof(servoRxHandler.servoOne->targetMessage));
-                servoRxHandler.servoOne->hasNewTarget = false;
-            } 
-            if (servoRxHandler.servoOne->hasNewRamp) {
-                 drivers->uart.write(
-                    port,
-                    reinterpret_cast<uint8_t*>(&(servoRxHandler.servoOne->rampMessage)),
-                    sizeof(servoRxHandler.servoOne->rampMessage));
-                servoRxHandler.servoOne->hasNewRamp = false;
+        for (size_t i = 0; i < motor::VirtualServoRxHandler::NUM_PINS; i++)
+        {
+            auto* servo = servoRxHandler.servos[i];
+            if (servo != nullptr)
+            {
+                if (servo->hasNewTarget)
+                {
+                    drivers->uart.write(
+                        port,
+                        reinterpret_cast<uint8_t*>(&servo->targetMessage),
+                        sizeof(servo->targetMessage));
+                    servo->hasNewTarget = false;
+                }
+                if (servo->hasNewRamp)
+                {
+                    drivers->uart.write(
+                        port,
+                        reinterpret_cast<uint8_t*>(&servo->rampMessage),
+                        sizeof(servo->rampMessage));
+                    servo->hasNewRamp = false;
+                }
             }
         }
-           
-        if (servoRxHandler.servoTwo != nullptr) {
-            if (servoRxHandler.servoTwo->hasNewTarget) {
-                drivers->uart.write(
-                    port,
-                    reinterpret_cast<uint8_t*>(&(servoRxHandler.servoTwo->targetMessage)),
-                    sizeof(servoRxHandler.servoTwo->targetMessage));
-                servoRxHandler.servoTwo->hasNewTarget = false;
-            }
-            if (servoRxHandler.servoTwo->hasNewRamp) {
-                 drivers->uart.write(
-                    port,
-                    reinterpret_cast<uint8_t*>(&(servoRxHandler.servoTwo->rampMessage)),
-                    sizeof(servoRxHandler.servoTwo->rampMessage));
-                servoRxHandler.servoTwo->hasNewRamp = false;
-            }
-        }
-
-        
     }
 }
 
@@ -292,7 +279,8 @@ void MCBLite::processAnalogSensorMessage(const ReceivedSerialMessage& completeMe
     }
 }
 
-void MCBLite::processServoFeedbackMessage(const ReceivedSerialMessage& completeMessage) {
+void MCBLite::processServoFeedbackMessage(const ReceivedSerialMessage& completeMessage)
+{
     servoRxHandler.processServoFeedbackMessage(completeMessage);
 }
 

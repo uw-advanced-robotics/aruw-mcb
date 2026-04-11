@@ -62,7 +62,6 @@ class MCBLite : public tap::communication::serial::DJISerial
     friend class aruwsrc::display::MCBLiteMenu;
     friend class VirtualCanEncoder;
     friend class VirtualVoltageCurrentSensor;
-    
 
 public:
     MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPort port);

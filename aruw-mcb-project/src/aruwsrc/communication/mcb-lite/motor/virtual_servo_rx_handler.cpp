@@ -25,26 +25,24 @@
 
 namespace aruwsrc::communication::mcb_lite::motor
 {
-VirtualServoRxHandler::VirtualServoRxHandler(tap::Drivers* drivers) : drivers(drivers), servoOne(nullptr), servoTwo(nullptr){}
+VirtualServoRxHandler::VirtualServoRxHandler(tap::Drivers* drivers) : drivers(drivers) {}
 
-void VirtualServoRxHandler::attachReceiveHandler(VirtualServo* const servo, bool isServoOne)
+void VirtualServoRxHandler::attachReceiveHandler(VirtualServo* const servo)
 {
-    if (isServoOne) {
-        servoOne = servo; // update to catch overriding servo
-    } else {
-        servoTwo = servo;
-    }
+    servos[static_cast<size_t>(servo->pin)] = servo;
 }
 
-void VirtualServoRxHandler::processServoFeedbackMessage(const DJISerial::ReceivedSerialMessage& completeMessage) {
+void VirtualServoRxHandler::processServoFeedbackMessage(
+    const DJISerial::ReceivedSerialMessage& completeMessage)
+{
     const ServoFeedbackMessage* message =
         reinterpret_cast<const ServoFeedbackMessage*>(completeMessage.data);
 
-    if (servoOne != nullptr && servoOne->pin == message->pin) {
-        servoOne->processServoUARTMessage(message->currentPwm, message->isRampTargetMet);
-    } else if (servoTwo != nullptr && servoTwo->pin == message->pin) {
-        servoTwo->processServoUARTMessage(message->currentPwm, message->isRampTargetMet);
+    if (servos[static_cast<size_t>(message->pin)] != nullptr)
+    {
+        servos[static_cast<size_t>(message->pin)]->processServoUARTMessage(
+            message->currentPwm,
+            message->isRampTargetMet);
     }
 }
-
 }  // namespace aruwsrc::communication::mcb_lite::motor

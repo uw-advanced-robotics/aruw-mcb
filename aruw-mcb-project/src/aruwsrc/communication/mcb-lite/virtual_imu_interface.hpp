@@ -20,7 +20,7 @@
 #ifndef VIRTUAL_IMU_INTERFACE_HPP_
 #define VIRTUAL_IMU_INTERFACE_HPP_
 
-#include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
@@ -31,7 +31,7 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::mcb_lite
 {
-class VirtualIMUInterface : public tap::communication::sensors::imu::ImuInterface
+class VirtualIMUInterface : public tap::communication::sensors::imu::AbstractIMU
 {
     friend class MCBLite;
 
@@ -45,16 +45,25 @@ public:
     float getPitch() const override { return pitch; }
     float getRoll() const override { return roll; }
     float getYaw() const override { return yaw; }
-    float getGx() const override { return Gx; }
-    float getGy() const override { return Gy; }
-    float getGz() const override { return Gz; }
-    float getAx() const override { return Ax; }
-    float getAy() const override { return Ay; }
-    float getAz() const override { return Az; }
-    float getTemp() const { return temperature; }
-    Mpu6500::ImuState getImuState() { return imuState; }
+
+    float getGx() const override { return imuData.gyroRadPerSec.x(); }
+    float getGy() const override { return imuData.gyroRadPerSec.y(); }
+    float getGz() const override { return imuData.gyroRadPerSec.z(); }
+    float getAx() const override { return imuData.accG.x(); }
+    float getAy() const override { return imuData.accG.y(); }
+    float getAz() const override { return imuData.accG.z(); }
+    float getTemp() const { return imuData.temperature; }
+
+    AbstractIMU::ImuState getImuState() { return imuState; }
+
     virtual inline const char* getName() const { return "Virtual MPU6500"; }
+
     void requestCalibration() { sendIMUCalibrationMessage = true; }
+
+    float getAccelerationSensitivity() const override
+    {
+        return 2 * 1.5f * tap::algorithms::ACCELERATION_GRAVITY / 32768.0f;
+    }  // copied this from turretmcb bc both are bmi i think?
 
 private:
     void processIMUMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
@@ -68,20 +77,15 @@ private:
 #else
         yaw = imuMessage->yaw;
 #endif
-        Gx = imuMessage->Gx;
-        Gy = imuMessage->Gy;
-        Gz = imuMessage->Gz;
-        Ax = imuMessage->Ax;
-        Ay = imuMessage->Ay;
-        Az = imuMessage->Az;
+        imuData.gyroRadPerSec = {imuMessage->Gx, imuMessage->Gy, imuMessage->Gz};
+        imuData.accG = {imuMessage->Ax, imuMessage->Ay, imuMessage->Az};
+        imuData.temperature = imuMessage->temperature;
         imuState = imuMessage->imuState;
-        temperature = imuMessage->temperature;
     }
 
     float pitch, roll, yaw;
-    float Gx, Gy, Gz;
-    float Ax, Ay, Az;
-    Mpu6500::ImuState imuState;
+
+    AbstractIMU::ImuState imuState;
     float temperature;
 
     DJISerial::DJISerial::SerialMessage<1> calibrateIMUMessage;

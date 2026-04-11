@@ -17,68 +17,72 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-#include "tap/motor/servo.hpp"
-#include "tap/communication/serial/dji_serial.hpp"
-#include "aruwsrc/communication/mcb-lite/message_types.hpp"
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "virtual_servo.hpp"
+
+#include "tap/communication/serial/dji_serial.hpp"
+#include "tap/motor/servo.hpp"
+
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+#include "aruwsrc/communication/mcb-lite/message_types.hpp"
 
 using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::mcb_lite::motor
 {
-
-    VirtualServo::VirtualServo(
-    tap::Drivers *drivers,
+VirtualServo::VirtualServo(
+    tap::Drivers* drivers,
     tap::gpio::Pwm::Pin pwmPin,
     float minimumPwm,
     float maximumPwm,
     float pwmRampSpeed,
-    aruwsrc::communication::mcb_lite::MCBLite* mcbLite,
-    bool isServoOne)
-    : Servo(drivers, pwmPin, maximumPwm, minimumPwm, pwmRampSpeed), pin(pwmPin), minPwm(minimumPwm), maxPwm(maximumPwm), rampSpeed(pwmRampSpeed), mcbLite(mcbLite) {
-        
-        mcbLite->servoRxHandler.attachReceiveHandler(this, isServoOne);
-
-        targetMessage.messageType = MessageTypes::SERVO_TARGET_MESSAGE;
-        rampMessage.messageType = MessageTypes::SERVO_RAMP_MESSAGE;
-        ServoRampMessage rampData;
-        rampData.pin = pin;
-        rampData.rampSpeed = pwmRampSpeed;
-        memcpy(rampMessage.data, &rampData, sizeof(ServoRampMessage));
-        rampMessage.setCRC16();
-        hasNewRamp = true;
-
-    };
-
-    void VirtualServo::setTargetPwm(float pwm)
+    aruwsrc::communication::mcb_lite::MCBLite* mcbLite)
+    : Servo(drivers, pwmPin, maximumPwm, minimumPwm, pwmRampSpeed),
+      pin(pwmPin),
+      minPwm(minimumPwm),
+      maxPwm(maximumPwm),
+      rampSpeed(pwmRampSpeed),
+      mcbLite(mcbLite)
 {
-    float targetPwm = tap::algorithms::limitVal<float>(pwm, minPwm, maxPwm);
-    updateMessages(targetPwm);
-    hasNewTarget = true;
+    mcbLite->servoRxHandler.attachReceiveHandler(this);
 
+    targetMessage.messageType = MessageTypes::SERVO_TARGET_MESSAGE;
+    rampMessage.messageType = MessageTypes::SERVO_RAMP_MESSAGE;
+    ServoRampMessage rampData;
+    rampData.pin = pin;
+    rampData.maxPwm = maxPwm;
+    rampData.minPwm = minPwm;
+    rampData.rampSpeed = pwmRampSpeed;
+    memcpy(rampMessage.data, &rampData, sizeof(ServoRampMessage));
+    rampMessage.setCRC16();
+    hasNewRamp = true;
+};
+
+void VirtualServo::setTargetPwm(float pwm)
+{
+    updateMessages(pwm);
+    hasNewTarget = true;
 }
 
-float VirtualServo::getPWM() const { return currentPwm; }  
+float VirtualServo::getPWM() const { return currentPwm; }
+
+tap::gpio::Pwm::Pin VirtualServo::getPin() const { return pin; }
 
 bool VirtualServo::isRampTargetMet() const { return isTargetReached; }
 
-
-
-    void VirtualServo::processServoUARTMessage( float currentPwm, bool isRampTargetMet) {
-        this->currentPwm = currentPwm;
-        this->isTargetReached = isRampTargetMet;
-    }
-
-    void VirtualServo::updateMessages(float pwm) {
-        ServoTargetMessage targetData;
-        targetData.pin = pin;
-        targetData.target = pwm;
-        memcpy(targetMessage.data, &targetData, sizeof(ServoTargetMessage));
-        targetMessage.setCRC16();
-    }
-
+void VirtualServo::processServoUARTMessage(float currentPwm, bool isRampTargetMet)
+{
+    this->currentPwm = currentPwm;
+    this->isTargetReached = isRampTargetMet;
 }
-  // namespace aruwsrc::communication::mcb_lite::motor
 
+void VirtualServo::updateMessages(float pwm)
+{
+    ServoTargetMessage targetData;
+    targetData.pin = pin;
+    targetData.pwm = pwm;
+    memcpy(targetMessage.data, &targetData, sizeof(ServoTargetMessage));
+    targetMessage.setCRC16();
+}
+
+}  // namespace aruwsrc::communication::mcb_lite::motor
+   // namespace aruwsrc::communication::mcb_lite::motor

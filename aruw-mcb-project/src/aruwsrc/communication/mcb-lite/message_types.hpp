@@ -44,7 +44,7 @@ enum MessageTypes : uint8_t
     CAN2_ENCODER_MESSAGE = 13,
     VOLTAGE_CURRENT_MESSAGE = 14,
     ANALOG_SENSOR_MESSAGE = 15,
-    SERVO_TARGET_MESSAGE = 16, 
+    SERVO_TARGET_MESSAGE = 16,
     SERVO_RAMP_MESSAGE = 17,
     SERVO_FEEDBACK_MESSAGE = 18
 };
@@ -182,18 +182,23 @@ struct AnalogSensorMessage
 } modm_packed;
 
 // Servo messages MCB -> Lite
-struct ServoTargetMessage {
+struct ServoTargetMessage
+{
     tap::gpio::Pwm::Pin pin;
-    float target;
+    float pwm;
 } modm_packed;
 
-struct ServoRampMessage {
+struct ServoRampMessage
+{
     tap::gpio::Pwm::Pin pin;
+    float minPwm;
+    float maxPwm;
     float rampSpeed;
 } modm_packed;
 
 // Servo Messages Lite -> MCB
-struct ServoFeedbackMessage {
+struct ServoFeedbackMessage
+{
     tap::gpio::Pwm::Pin pin;
     float currentPwm;
     bool isRampTargetMet;

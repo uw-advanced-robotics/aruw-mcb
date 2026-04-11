@@ -20,13 +20,16 @@
 #ifndef VIRTUAL_SERVO_RX_HANDLER_HPP_
 #define VIRTUAL_SERVO_RX_HANDLER_HPP_
 
-#include "tap/drivers.hpp"
-#include "tap/util_macros.hpp"
+#include "tap/communication/gpio/pwm.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 #include "tap/communication/serial/uart.hpp"
-#include "modm/architecture/interface/assert.h"
-#include "virtual_servo.hpp"
+#include "tap/drivers.hpp"
+#include "tap/util_macros.hpp"
+
 #include "aruwsrc/communication/mcb-lite/message_types.hpp"
+#include "modm/architecture/interface/assert.h"
+
+#include "virtual_servo.hpp"
 
 using namespace tap::communication::serial;
 
@@ -38,16 +41,18 @@ namespace aruwsrc::communication::mcb_lite::motor
 class VirtualServoRxHandler
 {
     friend class aruwsrc::communication::mcb_lite::MCBLite;
+
 public:
     VirtualServoRxHandler(tap::Drivers* drivers);
 
-    void attachReceiveHandler(VirtualServo* const servo, bool isServoOne);
+    void attachReceiveHandler(VirtualServo* const servo);
     void processServoFeedbackMessage(const DJISerial::ReceivedSerialMessage& completeMessage);
-    void removeServoHandler(const VirtualServo& servo);
+
 private:
     tap::Drivers* drivers;
-    VirtualServo* servoOne;
-    VirtualServo* servoTwo;
+    static constexpr size_t NUM_PINS = static_cast<size_t>(tap::gpio::Pwm::Pin::ImuHeater) + 1;
+
+    std::array<VirtualServo*, NUM_PINS> servos = {};
 };
 
 }  // namespace aruwsrc::communication::mcb_lite::motor
