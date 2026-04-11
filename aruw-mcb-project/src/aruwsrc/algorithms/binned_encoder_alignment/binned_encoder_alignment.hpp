@@ -24,7 +24,9 @@
 
 #include "modm/math/geometry.hpp"
 
-namespace algorithms::binnedAlignment
+namespace aruwsrc::algorithms
+{
+namespace binned_encoder_alignment
 {
 struct Ratio
 {
@@ -53,6 +55,7 @@ float calculatePosition(float localEncoderPosition, float globalEncoderPosition,
 
     return position;
 }
-}  // namespace algorithms::binnedAlignment
+}  // namespace binned_encoder_alignment
+}  // namespace aruwsrc::algorithms
 
 #endif  // BINNED_ENCODER_ALIGNMENT_HPP_
