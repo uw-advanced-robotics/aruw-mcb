@@ -131,10 +131,8 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
     float targetVel = setpointFilter.getEstimatedVelocity();
     float targetAccel = setpointFilter.getEstimatedAcceleration();
 
-    DEBUGV = velError;
-    DEBUGP = posError;
-
     float frictionFF = 0.0;
+    // Keep it from jittering
     if (std::abs(targetVel) > 0.001)
     {
         frictionFF = std::signbit(targetVel) ? -feedforwardConstants.Ks : feedforwardConstants.Ks;
@@ -142,8 +140,6 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
 
     float torqueFF = (targetAccel * feedforwardConstants.Ka) +
                      (targetVel * feedforwardConstants.Kv) + frictionFF;
-
-    const float LINEAR_ZONE = DEBUG1;
 
     if (std::abs(posError) < LINEAR_ZONE)
     {
@@ -155,7 +151,6 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
     {
         pidOutput = stosController.getOptimalTorque(posError, -velError);
     }
-    DEBUG3 = pidOutput;
 
     if constexpr (AXIS == Axis::PITCH)
     {
@@ -174,8 +169,6 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
                 .yaw = chassisFrame.getWrappedValue()});
     }
 
-    DEBUG2 = worldFrameAngle.minDifference(worldFrameSetpoint);
-    std::clamp(pidOutput, -16384.0f, 16384.0f);
     this->turretMotor.setMotorOutput(pidOutput);
 }
 

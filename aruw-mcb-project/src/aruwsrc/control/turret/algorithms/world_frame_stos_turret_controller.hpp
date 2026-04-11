@@ -115,11 +115,8 @@ private:
     WrappedFloat worldFrameSetpoint;
     TurretSetpointKalmanFilter setpointFilter;
 
-    float DEBUG1{0.08f};
-    float DEBUG2{0.0f};
-    float DEBUG3{0.0f};
-    float DEBUGV{0.0f};
-    float DEBUGP{0.0f};
+    // Error threshold to switch from STOS to PID w/ feedforward.
+    static constexpr float LINEAR_ZONE = 0.08f;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 
