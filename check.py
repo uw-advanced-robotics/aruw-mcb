@@ -108,8 +108,12 @@ def check_namespace():
     # Specifying robot in namespace is redundant
     # Constants sharing namespace is useful
     # Old-indicators is legacy enough to not matter
-    IGNORE_NAMESPACE = ["robot"]
-    IGNORE_FOLDERS = ["*_constants.hpp", "old-indicators"]
+    # create_rtt_error needs to use tap::errors to redefine error macro
+    # 2025engineer was a hack and will be deleted shortly anyway
+    # !! Must be manually synced with .gitlab-ci.yml !!
+    IGNORE_NAMESPACES = ["robot"]
+    IGNORE_PATHS = ["*_constants.hpp", "old-indicators", 
+                    "create_rtt_error.hpp", "2025engineer"]
     print("Checking namespace rules")
     run(
         [
