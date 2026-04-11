@@ -42,9 +42,9 @@ void CustomController::messageReceiveAndReadCallback(const ReceivedSerialMessage
         controller.pitch = wire.pitch / INT_TO_FLOAT_CONV;
         controller.roll = wire.roll / INT_TO_FLOAT_CONV;
 
+        controller.joystick_axes = wire.joystick_axes;
         controller.sensitivity = wire.sensitivity;
-        controller.buttons_and_trigger = wire.buttons_and_trigger;
-        controller.suction = (wire.suction != 0);
+        controller.buttons_trigger_suction = wire.buttons_trigger_suction;
 
         lastRead = tap::arch::clock::getTimeMilliseconds();
         connected = true;

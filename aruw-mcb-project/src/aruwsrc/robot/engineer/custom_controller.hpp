@@ -66,20 +66,32 @@ public:
 
     mockable float getRoll() { return controller.roll; }
 
-    mockable bool isTriggerPressed() { return (controller.buttons_and_trigger & 0x1); }
+    mockable float getJoystickX() { 
+        return normalizedJoystickValue(controller.joystick_axes & JOYSTICK_X_MASK);
+    }
+
+    mockable float getJoystickY() { 
+        return normalizedJoystickValue((controller.joystick_axes & JOYSTICK_Y_MASK) >> 10);
+    }
+
+    mockable bool isTriggerPressed() { return (controller.buttons_trigger_suction & TRIGGER_MASK); }
 
     mockable bool getKeyPressed(Key key)
     {
-        return ((controller.buttons_and_trigger >> (static_cast<int>(key) + KEY_OFFSET)) & 0x1);
+        return ((controller.buttons_trigger_suction >> (static_cast<int>(key) + KEY_OFFSET)) & 0x1);
     }
 
     mockable uint8_t getSensitivity() { return controller.sensitivity; }
 
-    mockable bool suctionEnabled() { return controller.suction; }
+    mockable bool suctionEnabled() { return controller.buttons_trigger_suction & SUCTION_MASK; }
 
 private:
-    static constexpr uint8_t KEY_OFFSET = 1;
+    static constexpr uint8_t KEY_OFFSET = 2;
     static constexpr uint16_t CUSTOM_CONTROLLER_MESSAGE_TYPE = 16;  // TODO set to actual value
+    static constexpr int SUCTION_MASK = 0x1;
+    static constexpr int TRIGGER_MASK = 0x10;
+    static constexpr int JOYSTICK_X_MASK = 0x3FF;
+    static constexpr int JOYSTICK_Y_MASK = JOYSTICK_X_MASK << 10;
 
     static constexpr tap::communication::serial::Uart::UartPort CUSTOM_CONTROLLER_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart6;          // TODO set to actual value
@@ -89,21 +101,26 @@ private:
 
     struct ControllerInfoWire
     {
+        uint32_t joystick_axes;
         int16_t x, y, z;
         int16_t yaw, pitch, roll;
         uint16_t sensitivity;
-        uint8_t buttons_and_trigger;
-        uint8_t suction;
+        uint8_t buttons_trigger_suction;
     } modm_packed;
 
     struct ControllerInfo
     {
+        uint32_t joystick_axes;
         float x, y, z;
         float yaw, pitch, roll;
         uint16_t sensitivity;
-        uint8_t buttons_and_trigger;
-        bool suction;
+        uint8_t buttons_trigger_suction;
     };
+
+    // normalized between [-1, 1]
+    float normalizedJoystickValue(int curVal) {
+        return (curVal - 512.0f) / 511.0f;
+    }
 
     tap::Drivers *drivers;
     ControllerInfo controller;
