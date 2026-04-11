@@ -78,8 +78,9 @@ RttLedAnimator::RttLedAnimator()
 
 void RttLedAnimator::update(
     tap::Drivers* drivers,
-    bool activelySendingTelemetry,
-    bool recentRttInput,
+    ConnectionState connectionState,
+    bool blinkingGreen,
+    bool blinkingRed,
     uint32_t now)
 {
     if (!drivers)
@@ -87,169 +88,174 @@ void RttLedAnimator::update(
         return;
     }
 
-    bool handled = false;
-
-#if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
-    const bool idle = !recentRttInput && !activelySendingTelemetry;
-    if (ozoneSequenceActive || idle)
+    // If ozone hasn't finished playing its message, stay in ozone state until it's done
+    if (ozoneSequenceActive)
     {
-        if (!ozoneSequenceActive)
-        {
-            ozoneSequenceActive = true;
-            ozoneFrameIndex = 0;
-            ozoneFramesRemaining = static_cast<uint8_t>(sizeof(ozoneFrames) - 1);
-            ozoneTimer.restart();
-        }
-
-        if (ozoneTimer.execute())
-        {
-            ozoneFrameIndex = static_cast<uint8_t>((ozoneFrameIndex + 1) % (sizeof(ozoneFrames)));
-            if (ozoneFramesRemaining > 0)
-            {
-                ozoneFramesRemaining--;
-            }
-            if (ozoneFramesRemaining == 0)
-            {
-                ozoneSequenceActive = false;
-            }
-        }
-
-        const uint8_t mask = ozoneFrames[ozoneFrameIndex];
-        for (int i = 0; i < 8; ++i)
-        {
-            const uint8_t bit = static_cast<uint8_t>(1u << (7 - i));
-            const bool on = (mask & bit) != 0;
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), !on);
-        }
-        handled = true;
+        connectionState = ConnectionState::Ozone;
     }
-#endif
 
-    if (!handled && recentRttInput)
+    switch (connectionState)
     {
-        // State 1: Recent RTT input received - bidirectional bounce animation
-        if (animationTimer.execute())
+        case ConnectionState::Ozone:
         {
-            if (animationDirectionUp)
+#if defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
+            // State 0: Connected to ozone - animation I don't understand
+            if (!ozoneSequenceActive)
             {
-                if (animationIndex >= 7)
+                ozoneSequenceActive = true;
+                ozoneFrameIndex = 0;
+                ozoneFramesRemaining = static_cast<uint8_t>(sizeof(ozoneFrames) - 1);
+                ozoneTimer.restart();
+            }
+
+            if (ozoneTimer.execute())
+            {
+                ozoneFrameIndex =
+                    static_cast<uint8_t>((ozoneFrameIndex + 1) % (sizeof(ozoneFrames)));
+                if (ozoneFramesRemaining > 0)
                 {
-                    animationDirectionUp = false;
-                    animationIndex = 6;
+                    ozoneFramesRemaining--;
+                }
+                if (ozoneFramesRemaining == 0)
+                {
+                    ozoneSequenceActive = false;
+                }
+            }
+
+            const uint8_t mask = ozoneFrames[ozoneFrameIndex];
+            for (int i = 0; i < 8; ++i)
+            {
+                const uint8_t bit = static_cast<uint8_t>(1u << (7 - i));
+                const bool on = (mask & bit) != 0;
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), !on);
+            }
+#else
+            // State 0: Not sending telemetry - slow group flash.
+            if (ledBlinkTimer.execute())
+            {
+                groupFlashOn = !groupFlashOn;
+            }
+
+            for (int i = 0; i < 8; ++i)
+            {
+                auto pin = static_cast<tap::gpio::Leds::LedPin>(i);
+                drivers->leds.set(pin, !groupFlashOn);
+            }
+
+#endif
+            break;
+        }
+        case ConnectionState::Bidirectional:
+        {
+            // State 1: Recent RTT input received - bidirectional bounce animation
+            if (animationTimer.execute())
+            {
+                if (animationDirectionUp)
+                {
+                    if (animationIndex >= 7)
+                    {
+                        animationDirectionUp = false;
+                        animationIndex = 6;
+                    }
+                    else
+                    {
+                        animationIndex++;
+                    }
                 }
                 else
                 {
-                    animationIndex++;
+                    if (animationIndex == 0)
+                    {
+                        animationDirectionUp = true;
+                        animationIndex = 1;
+                    }
+                    else
+                    {
+                        animationIndex--;
+                    }
                 }
+            }
+
+            // Clear A..H (turn off)
+            for (int i = 0; i < 8; ++i)
+            {
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), true);
+            }
+
+            // Lighting rule: at ends (0 or 7) light only one LED; otherwise light pair.
+            if (animationIndex == 0)
+            {
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), false);
+            }
+            else if (animationIndex >= 7)
+            {
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), false);
             }
             else
             {
-                if (animationIndex == 0)
-                {
-                    animationDirectionUp = true;
-                    animationIndex = 1;
-                }
-                else
-                {
-                    animationIndex--;
-                }
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
             }
+
+            break;
         }
 
-        // Clear A..H (turn off)
-        for (int i = 0; i < 8; ++i)
+        case ConnectionState::Unidrictional:
         {
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), true);
-        }
+            // State 2: Sending telemetry but no recent RTT input - unidirectional sweep A->H
+            const uint32_t sweepSteps = 7;  // steps from 0 to 7
+            const uint32_t pauseMs = sweepSteps * animationStepMs;
 
-        // Lighting rule: at ends (0 or 7) light only one LED; otherwise light pair.
-        if (animationIndex == 0)
-        {
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), false);
-        }
-        else if (animationIndex >= 7)
-        {
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), false);
-        }
-        else
-        {
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
-        }
-        handled = true;
-    }
-
-    if (!handled && activelySendingTelemetry)
-    {
-        // State 2: Sending telemetry but no recent RTT input - unidirectional sweep A->H
-        const uint32_t sweepSteps = 7;  // steps from 0 to 7
-        const uint32_t pauseMs = sweepSteps * animationStepMs;
-
-        if (unidirectionalPaused)
-        {
-            if (now >= unidirectionalPauseDeadlineMillis)
+            if (unidirectionalPaused)
             {
-                unidirectionalPaused = false;
-                animationIndex = 0;  // restart at bottom
+                if (now >= unidirectionalPauseDeadlineMillis)
+                {
+                    unidirectionalPaused = false;
+                    animationIndex = 0;  // restart at bottom
+                }
             }
-        }
 
-        if (!unidirectionalPaused)
-        {
-            if (animationTimer.execute())
+            if (!unidirectionalPaused)
             {
-                if (animationIndex < 7)
+                if (animationTimer.execute())
                 {
-                    animationIndex++;
-                }
-                if (animationIndex >= 7)
-                {
-                    unidirectionalPaused = true;
-                    unidirectionalPauseDeadlineMillis = now + pauseMs;
+                    if (animationIndex < 7)
+                    {
+                        animationIndex++;
+                    }
+                    if (animationIndex >= 7)
+                    {
+                        unidirectionalPaused = true;
+                        unidirectionalPauseDeadlineMillis = now + pauseMs;
+                    }
                 }
             }
-        }
 
-        // Clear A..H
-        for (int i = 0; i < 8; ++i)
-        {
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), true);
-        }
+            // Clear A..H
+            for (int i = 0; i < 8; ++i)
+            {
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(i), true);
+            }
 
-        if (animationIndex == 0)
-        {
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), false);
+            if (animationIndex == 0)
+            {
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(0), false);
+            }
+            else if (animationIndex >= 7)
+            {
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), false);
+            }
+            else
+            {
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
+                drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
+            }
+
+            break;
         }
-        else if (animationIndex >= 7)
-        {
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(7), false);
-        }
-        else
-        {
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex - 1), false);
-            drivers->leds.set(static_cast<tap::gpio::Leds::LedPin>(animationIndex), false);
-        }
-        handled = true;
     }
 
-#if !defined(ARUWSRC_RTT_USE_OZONE_PATTERN)
-    if (!handled)
-    {
-        // State 3: Not sending telemetry - slow group flash.
-        if (ledBlinkTimer.execute())
-        {
-            groupFlashOn = !groupFlashOn;
-        }
-
-        for (int i = 0; i < 8; ++i)
-        {
-            auto pin = static_cast<tap::gpio::Leds::LedPin>(i);
-            drivers->leds.set(pin, !groupFlashOn);
-        }
-    }
-#endif
-
-    if (now <= greenBlinkDeadlineMillis)
+    if (blinkingGreen)
     {
         if (greenBlinkTimer.execute())
         {
@@ -263,7 +269,7 @@ void RttLedAnimator::update(
         drivers->leds.set(tap::gpio::Leds::Green, false);
     }
 
-    if (now <= redBlinkDeadlineMillis)
+    if (blinkingRed)
     {
         if (redBlinkTimer.execute())
         {
@@ -276,25 +282,5 @@ void RttLedAnimator::update(
         redBlinkOn = false;
         drivers->leds.set(tap::gpio::Leds::Red, false);
     }
-}
-
-void RttLedAnimator::notifyPrintLogged(uint32_t now)
-{
-    if (now > greenBlinkDeadlineMillis)
-    {
-        greenBlinkOn = true;
-        greenBlinkTimer.restart();
-    }
-    greenBlinkDeadlineMillis = now + blinkDurationMs;
-}
-
-void RttLedAnimator::notifyErrorLogged(uint32_t now)
-{
-    if (now > redBlinkDeadlineMillis)
-    {
-        redBlinkOn = true;
-        redBlinkTimer.restart();
-    }
-    redBlinkDeadlineMillis = now + blinkDurationMs;
 }
 }  // namespace aruwsrc::communication::rtt

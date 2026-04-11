@@ -28,6 +28,8 @@
 #include "modm/math/filter/pid.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
+#include "friction_wheel_interface.hpp"
+
 namespace aruwsrc::control::launcher
 {
 #if defined(TARGET_HERO_ZERO)
@@ -36,13 +38,6 @@ static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 3;
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
 #endif
 
-struct FlywheelConfig
-{
-    tap::algorithms::SmoothPidConfig velocityPidConfig;
-    float orientation;
-    uint8_t stage = 0;
-};
-
 #if defined(TARGET_FLYWHEEL_TESTING)
 struct FlywheelRpms
 {
@@ -50,15 +45,13 @@ struct FlywheelRpms
     float rightRpm;
     float lowerRpm;
     float upperRpm;
-    float smallUpperRpm;
 };
 
 static constexpr FlywheelRpms flywheelTestingRpms{
-    .leftRpm = 0.0f,
-    .rightRpm = 0.0f,
-    .lowerRpm = 60.0f,
-    .upperRpm = 60.0f,
-    .smallUpperRpm = 60.0f};
+    .leftRpm = 6000.0f,
+    .rightRpm = 6000.0f,
+    .lowerRpm = 6000.0f,
+    .upperRpm = 6000.0f};
 #endif
 
 #if defined(ALL_SENTRIES)
@@ -66,7 +59,6 @@ static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
 #elif defined(TARGET_FLYWHEEL_TESTING)
 static constexpr tap::motor::MotorId UPPER_MOTOR_ID = tap::motor::MOTOR6;
-static constexpr tap::motor::MotorId UPPER_SMALL_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId LOWER_MOTOR_ID = tap::motor::MOTOR4;
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR3;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
@@ -83,20 +75,33 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
 #if defined(TARGET_STANDARD_VOID)
-static constexpr float LAUNCHER_PID_KP = 30.0f;
-static constexpr float LAUNCHER_PID_KI = 150.0f;
+static constexpr float LAUNCHER_PID_KP = 14.0106f;
+static constexpr float LAUNCHER_PID_KI = 31.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
-static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
+static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
 #elif defined(TARGET_SENTRY_ECLIPSE)
-static constexpr float LAUNCHER_PID_KP = 30.0f;
-static constexpr float LAUNCHER_PID_KI = 200.0f;
+static constexpr float LAUNCHER_PID_KP = 14.0106f;
+static constexpr float LAUNCHER_PID_KI = 31.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 4'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C610;
-#else
+#elif defined(TARGET_FLYWHEEL_TESTING)
 static constexpr float LAUNCHER_PID_KP = 20.0f;
 static constexpr float LAUNCHER_PID_KI = 100.0f;
+static constexpr float LAUNCHER_PID_KD = 0.0f;
+static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
+static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
+static constexpr tap::algorithms::SmoothPidConfig LEFT_VELOCITY_PID_CONFIG(
+    LAUNCHER_PID_KP,
+    LAUNCHER_PID_KI,
+    LAUNCHER_PID_KD,
+    LAUNCHER_PID_MAX_ERROR_SUM,
+    tap::motor::DjiMotor::MAX_OUTPUT_C620);
+static constexpr FlywheelConfig LEFT_WHEEL_CONFIG = {LEFT_VELOCITY_PID_CONFIG, 270.0f};
+#else
+static constexpr float LAUNCHER_PID_KP = 14.0106f;
+static constexpr float LAUNCHER_PID_KI = 31.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;

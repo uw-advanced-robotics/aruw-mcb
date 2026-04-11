@@ -47,7 +47,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_SENTRY_ECLIPSE"
+                "TARGET_SENTRY_ECLIPSE",
+                "BUILD_TARGET=\"TARGET_SENTRY_ECLIPSE\""
             ]
         },
         {
@@ -65,7 +66,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_STANDARD_VOID"
+                "TARGET_STANDARD_VOID",
+                "BUILD_TARGET=\"TARGET_STANDARD_VOID\""
             ]
         },
         {
@@ -83,7 +85,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_STANDARD_NULL"
+                "TARGET_STANDARD_NULL",
+                "BUILD_TARGET=\"TARGET_STANDARD_NULL\""
             ]
         },
         {
@@ -101,25 +104,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_DART"
-            ]
-        },
-        {
-            "name": "MCB 2025 Engineer",
-            "includePath": [
-                "${default}",
-                "aruw-mcb-project/taproot/modm/src",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext",
-                "segger-rtt/RTT",
-                "segger-rtt/Config"
-            ],
-            "compilerPath": "arm-none-eabi-g++",
-            "intelliSenseMode": "gcc-arm",
-            "defines": [
-                "TARGET_ENGI_2025"
+                "TARGET_DART",
+                "BUILD_TARGET=\"TARGET_DART\""
             ]
         },
         {
@@ -137,7 +123,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_ENGINEER"
+                "TARGET_ENGINEER",
+                "BUILD_TARGET=\"TARGET_ENGINEER\""
             ]
         },
         {
@@ -155,7 +142,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_DRONE"
+                "TARGET_DRONE",
+                "BUILD_TARGET=\"TARGET_DRONE\""
             ]
         },
         {
@@ -173,7 +161,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_TESTBED"
+                "TARGET_TESTBED",
+                "BUILD_TARGET=\"TARGET_TESTBED\""
             ]
         },
         {
@@ -191,7 +180,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_BLANK"
+                "TARGET_BLANK",
+                "BUILD_TARGET=\"TARGET_BLANK\""
             ]
         },
         {
@@ -209,7 +199,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_MOTOR_TESTER"
+                "TARGET_MOTOR_TESTER",
+                "BUILD_TARGET=\"TARGET_MOTOR_TESTER\""
             ]
         },
         {
@@ -227,7 +218,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_LAUNCHER_TARGET"
+                "TARGET_LAUNCHER_TARGET",
+                "BUILD_TARGET=\"TARGET_LAUNCHER_TARGET\""
             ]
         },
         {
@@ -243,7 +235,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_FLYWHEEL_TESTING"
+                "TARGET_FLYWHEEL_TESTING",
+                "BUILD_TARGET=\"TARGET_FLYWHEEL_TESTING\""
             ]
         },
         {
@@ -261,7 +254,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_CHARACTERIZER"
+                "TARGET_CHARACTERIZER",
+                "BUILD_TARGET=\"TARGET_CHARACTERIZER\""
             ]
         },
         {
@@ -279,7 +273,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_HERO_ZERO"
+                "TARGET_HERO_ZERO",
+                "BUILD_TARGET=\"TARGET_HERO_ZERO\""
             ]
         }
     ],

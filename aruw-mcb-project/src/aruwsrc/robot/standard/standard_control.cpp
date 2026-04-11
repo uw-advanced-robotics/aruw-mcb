@@ -21,24 +21,30 @@
 
 #ifdef ALL_STANDARDS
 
+#include <memory>
+
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
+#include "tap/control/command_composition_helper.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
+#include "tap/control/timeout_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
-#include "aruwsrc/algorithms/odometry/deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
@@ -72,7 +78,7 @@
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 
-//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
@@ -137,15 +143,15 @@ using namespace aruwsrc::standard;
  *      Drivers class to all of these objects.
  */
 driversFunc drivers = DoNotUse_getDrivers;
-
 namespace standard_control
 {
 inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
+using Compose = CommandCompositionHelper;
 
-/* define subsystems --------------------------------------------------------*/
+/* define subsystems ----------------------------c---------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
 tap::motor::DjiMotor pitchMotor(
@@ -283,8 +289,9 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         drivers(),
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
-        &getTurretMCBCanComm(),
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+        aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+        aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
 aruwsrc::control::launcher::FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
 aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor =
@@ -625,7 +632,7 @@ VisionTargetIndicator visionTargetIndicator(
 
 std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
-    &positionHudIndicators,
+    &textHudIndicators,
     &ammoIndicator,
     &circleCrosshair,
     &damageIndicator,
@@ -640,35 +647,30 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 /* define command mappings --------------------------------------------------*/
 
 // Remote related mappings
-HoldRepeatCommandMapping rightSwitchMiddle(
-    drivers(),
-    {&spinFrictionWheels},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID),
-    true);
-HoldRepeatCommandMapping rightSwitchUp(
-    drivers(),
-    {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting},
-    RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
-    true);
+Trigger rightSwitchMiddle =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
+        .onTrue(&spinFrictionWheels);
 
-HoldRepeatCommandMapping leftSwitchDown(
-    drivers(),
-    {&beybladeCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
-    true);
-HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&turretCVCommand, &chassisDriveCommand},
-    RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+Trigger rightSwitchUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(Compose::parallel<2>(
+            {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}));
 
-CycleStateCommandMapping<bool, 2, CvOnTargetGovernor> rPressed(
+Trigger leftSwitchDown =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
+        .whileTrue(&beybladeCommand);
+
+Trigger leftSwitchUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
+
+auto rPressedRms = RemoteMapState({Remote::Key::R});
+auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
     drivers(),
-    RemoteMapState({Remote::Key::R}),
+    &rPressedRms,
     true,
     &cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
-
-ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
@@ -678,73 +680,65 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
     cvOnTargetGovernor,
     &rotateAgitator);
 
-HoldRepeatCommandMapping leftMousePressedBPressed(
-    drivers(),
-    {&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched},
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
-    false);
-HoldCommandMapping rightMousePressed(
-    drivers(),
-    {&turretCVCommand},
-    RemoteMapState(RemoteMapState::MouseButton::RIGHT));
+Trigger fToggled = TriggerHelpers::button(drivers(), Remote::Key::F).toggleOnTrue(&beybladeCommand);
 
-PressCommandMapping zPressed(
-    drivers(),
-    {&turretUTurnCommandLimited},
-    RemoteMapState({Remote::Key::Z}));
+Trigger leftMousePressedBPressed =
+    (TriggerHelpers::leftMouseButton(drivers()) &&
+     TriggerHelpers::button(drivers(), Remote::Key::B))
+        .whileTrue(&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched);
+
+Trigger rightMousePressed = TriggerHelpers::rightMouseButton(drivers()).whileTrue(&turretCVCommand);
+
+Trigger zPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::Z).onTrue(&turretUTurnCommandLimited);
+
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
-PressCommandMapping bNotCtrlPressedRightSwitchDown(
-    drivers(),
-    {&imuCalibrateCommand},
-    RemoteMapState(
-        Remote::SwitchState::UNKNOWN,
-        Remote::SwitchState::DOWN,
-        {Remote::Key::B},
-        {Remote::Key::CTRL},
-        false,
-        false));
+Trigger bNotCtrlPressedRightSwitchDown =
+    (TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::RIGHT_SWITCH,
+         Remote::SwitchState::DOWN) &&
+     TriggerHelpers::button(drivers(), Remote::Key::B) &&
+     !TriggerHelpers::button(drivers(), Remote::Key::CTRL) &&
+     !TriggerHelpers::leftMouseButton(drivers()) && !TriggerHelpers::rightMouseButton(drivers()))
+        .onTrue(&imuCalibrateCommand);
+
 // The user can press b+ctrl when the remote right switch is in the down position to restart the
 // client display command. This is necessary since we don't know when the robot is connected to the
 // server and thus don't know when to start sending the initial HUD graphics.
-PressCommandMapping bCtrlPressed(
-    drivers(),
-    {&clientDisplayCommand},
-    RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+Trigger bCtrlPressed = (TriggerHelpers::button(drivers(), Remote::Key::B) &&
+                        TriggerHelpers::button(drivers(), Remote::Key::CTRL))
+                           .onTrue(&clientDisplayCommand);
 
-// The user can press q and e simultaneously to enable wiggle driving. Wiggling is cancelled
+// The user can press q to enable wiggle driving. Wiggling is cancelled
 // automatically once a different drive mode is chosen.
-ToggleCommandMapping qPressed(drivers(), {&wiggleCommand}, RemoteMapState({Remote::Key::Q}));
+Trigger qPressed = TriggerHelpers::button(drivers(), Remote::Key::Q).toggleOnTrue(&wiggleCommand);
 
-PressCommandMapping xPressed(
-    drivers(),
-    {&chassisAutorotateCommand},
-    RemoteMapState({Remote::Key::X}));
+Trigger xPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::X).onTrue(&chassisAutorotateCommand);
 
-CycleStateCommandMapping<
+auto vPressedRms = RemoteMapState({Remote::Key::V});
+auto vPressed = std::make_unique<CycleStateCommandMapping<
     MultiShotCvCommandMapping::LaunchMode,
     MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
-    MultiShotCvCommandMapping>
-    vPressed(
-        drivers(),
-        RemoteMapState({Remote::Key::V}),
-        MultiShotCvCommandMapping::LIMITED_20HZ,
-        &leftMousePressedBNotPressed,
-        &MultiShotCvCommandMapping::setShooterState,
-        RemoteMapState({Remote::Key::E}));
+    MultiShotCvCommandMapping>>(
+    drivers(),
+    &vPressedRms,
+    MultiShotCvCommandMapping::LIMITED_20HZ,
+    &leftMousePressedBNotPressed,
+    &MultiShotCvCommandMapping::setShooterState,
+    RemoteMapState({Remote::Key::E}));
 
 // cap bank
-PressCommandMapping cShiftPressed(
-    drivers(),
-    {&capBankToggleCommand},
-    RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
-HoldCommandMapping shiftPressed(
-    drivers(),
-    {&capBankSprintCommand},
-    RemoteMapState({Remote::Key::SHIFT}));
-HoldCommandMapping ctrlPressed(
-    drivers(),
-    {&capBankHalfSprintCommand},
-    RemoteMapState({Remote::Key::CTRL}));
+Trigger cShiftPressed = (TriggerHelpers::button(drivers(), Remote::Key::C) &&
+                         TriggerHelpers::button(drivers(), Remote::Key::SHIFT))
+                            .onTrue(&capBankToggleCommand);
+
+Trigger shiftPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::SHIFT).whileTrue(&capBankSprintCommand);
+
+Trigger ctrlPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::CTRL).whileTrue(&capBankHalfSprintCommand);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -805,24 +799,8 @@ void startStandardCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerStandardIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(&rightSwitchMiddle);
-    drivers->commandMapper.addMap(&rightSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&rPressed);
-    drivers->commandMapper.addMap(&fToggled);
-    drivers->commandMapper.addMap(&leftMousePressedBNotPressed);
-    drivers->commandMapper.addMap(&leftMousePressedBPressed);
-    drivers->commandMapper.addMap(&rightMousePressed);
-    drivers->commandMapper.addMap(&zPressed);
-    drivers->commandMapper.addMap(&bNotCtrlPressedRightSwitchDown);
-    drivers->commandMapper.addMap(&bCtrlPressed);
-    drivers->commandMapper.addMap(&qPressed);
-    drivers->commandMapper.addMap(&xPressed);
-    drivers->commandMapper.addMap(&vPressed);
-    drivers->commandMapper.addMap(&cShiftPressed);
-    drivers->commandMapper.addMap(&shiftPressed);
-    drivers->commandMapper.addMap(&ctrlPressed);
+    drivers->commandMapper.addMap(std::move(rPressed));
+    drivers->commandMapper.addMap(std::move(vPressed));
 }
 }  // namespace standard_control
 

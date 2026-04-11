@@ -29,7 +29,11 @@ namespace aruwsrc::engineer::wrist
 class WristMovePositionCommand : public tap::control::Command
 {
 public:
-    WristMovePositionCommand(WristSubsystem &wrist, float pitchSetpoint, float yawSetpoint);
+    WristMovePositionCommand(
+        WristSubsystem &wrist,
+        float theta1setpoint,
+        float theta2setpoint,
+        float theta3setpoint);
 
     void initialize() override;
 
@@ -43,7 +47,7 @@ public:
 
 private:
     WristSubsystem &wrist;
-    float pitchSetpoint, yawSetpoint;
+    float theta1setpoint, theta2setpoint, theta3setpoint;
 
 };  // class WristMovePositionCommand
 

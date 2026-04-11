@@ -39,9 +39,18 @@ bool EngineerControlOperatorInterface::isGantryWristControlMode()
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID;
 }
 
-float EngineerControlOperatorInterface::getCubeLiftVelocity()
+bool EngineerControlOperatorInterface::isCubeStorageControlMode()
 {
-    // Note: CubeLiftSwitchCommand will break if cubelift is manually moved to the wrong place
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID;
+    // everything is bound to mid rn, be careful
+}
+
+float EngineerControlOperatorInterface::getCubeStorageVelocity()
+{
+    if (isCubeStorageControlMode())
+    {
+        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+    }
     return 0.0f;
 }
 
