@@ -25,7 +25,7 @@
 
 #include "turret_gravity_compensation.hpp"
 #include "world_frame_stos_turret_controller.hpp"
-#include "world_frame_turret_imu_turret_controller_impl.hpp"
+#include "world_frame_turret_utils.hpp"
 
 namespace aruwsrc::control::turret::algorithms
 {
@@ -258,4 +258,4 @@ WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::convertChassisAngleT
 }
 }  // namespace aruwsrc::control::turret::algorithms
 
-#endif  // WORLD_FRAME_TURRET_IMU_TURRET_CONTROLLER_IMPL_HPP_
+#endif  // WORLD_FRAME_STOS_TURRET_CONTROLLER_IMPL_HPP_

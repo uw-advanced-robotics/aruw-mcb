@@ -29,48 +29,6 @@
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * Transforms the specified `angleToTransform`, a yaw/pitch angle (in radians) from the chassis
- * frame to the world frame.
- *
- * @note It is expected that the user wraps the value returned to be between [0, M_TWOPI)
- *      (or whatever range they require).
- *
- * @param[in] turretChassisFrameCurrAngle The current chassis relative (gimbal encoder) angle.
- * @param[in] turretWorldFrameCurrAngle The current world relative (turret IMU) angle,
- *      captured at the same time as `turretChassisFrameCurrAngle`.
- * @param[in] angleToTransform The angle to transform.
- * @return The transformed angle in the world frame.
- */
-static inline WrappedFloat transformChassisFrameToWorldFrame(
-    const WrappedFloat turretChassisFrameCurrAngle,
-    const WrappedFloat turretWorldFrameCurrAngle,
-    const WrappedFloat angleToTransform)
-{
-    return turretWorldFrameCurrAngle + (angleToTransform - turretChassisFrameCurrAngle);
-}
-
-/**
- * Transforms the specified `angleToTransform`, a yaw or pitch angle (in radians), from the world
- * frame to the chassis frame.
- *
- * @note It is expected that the user wraps the value returned to be between [0, M_TWOPI)
- *      (or whatever range they require).
- *
- * @param[in] turretChassisFrameCurrAngle The current chassis relative (gimbal encoder) angle.
- * @param[in] turretWorldFrameCurrAngle The current world relative (turret IMU) angle, captured
- *      at the same time as `turretChassisFrameCurrAngle`.
- * @param[in] angleToTransform The angle to transform.
- * @return The transformed angle in the chassis frame.
- */
-static inline WrappedFloat transformWorldFrameValueToChassisFrame(
-    const WrappedFloat turretChassisFrameCurrAngle,
-    const WrappedFloat turretWorldFrameCurrAngle,
-    const WrappedFloat angleToTransform)
-{
-    return turretChassisFrameCurrAngle + (angleToTransform - turretWorldFrameCurrAngle);
-}
-
-/**
  * Initializes a world frame cascade PID turret controller
  *
  * @param[in] controllerToInitialize The TurretControllerInterface in question being initialized.
@@ -102,51 +60,6 @@ static inline void initializeWorldFrameTurretImuController(
             turretMotor.getChassisFrameSetpoint());
 
         turretMotor.attachTurretController(controllerToInitialize);
-    }
-}
-
-/**
- * A helper function for the `run*PidYawWorldFrameController` functions below. Updates the passed in
- * `turretMotor`'s desired chassis frame setpoint and the passed in `worldFrameSetpoint`'.
- * Performs necessary limiting of the `worldFrameSetpoint` based on the `turretMotor`'s
- * min/max setpoints.
- *
- * @param[in] desiredSetpoint The new user-specified world frame turret motor angle setpoint, in
- * radians.
- * @param[in] chassisFrameMeasurement The chassis frame motor angle, in radians, measured by the
- * motor's encoder.
- * @param[in] worldFrameMeasurement The current chassis IMU angle, in radians, measured from the
- * chassis mounted IMU.
- * @param[out] worldFrameSetpoint The limited and wrapped world frame turret motor setpoint, in
- * radians. Set to `desiredSetpoint` and then wrapped/limited as necessary.
- * @param[out] turretMotor The turret subsystem whose chassis relative turret motor angle is
- * updated by this function.
- */
-static inline void updateWorldFrameSetpoint(
-    const WrappedFloat desiredSetpoint,
-    const WrappedFloat chassisFrameMeasurement,
-    const WrappedFloat worldFrameMeasurement,
-    WrappedFloat &worldFrameSetpoint,
-    TurretMotor &turretMotor)
-{
-    worldFrameSetpoint = desiredSetpoint;
-
-    // transform target angle from turret imu relative to chassis relative
-    // to keep turret/command setpoints synchronized
-
-    turretMotor.setChassisFrameSetpoint(transformWorldFrameValueToChassisFrame(
-        chassisFrameMeasurement,
-        worldFrameMeasurement,
-        worldFrameSetpoint));
-
-    if (turretMotor.getConfig().limitMotorAngles)
-    {
-        // transform angle that is limited by subsystem to world relative again to run the
-        // controller
-        worldFrameSetpoint = transformChassisFrameToWorldFrame(
-            chassisFrameMeasurement,
-            worldFrameMeasurement,
-            turretMotor.getChassisFrameSetpoint());
     }
 }
 
