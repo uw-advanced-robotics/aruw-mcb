@@ -25,6 +25,7 @@
 
 #include "turret_gravity_compensation.hpp"
 #include "world_frame_turret_imu_turret_controller.hpp"
+#include "world_frame_turret_utils.hpp"
 
 namespace aruwsrc::control::turret::algorithms
 {
