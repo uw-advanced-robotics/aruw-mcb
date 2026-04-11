@@ -22,6 +22,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 
+#include "aruwsrc/algorithms/robot_target_kinematic_state.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
@@ -138,9 +139,12 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
             telemetry->logSignal("ballistics:theta", projectedAimPosData.theta);
         }
 
-        // Check omega threshold to determine which aiming strategy to use
+        // Use enemy angular velocity to determine which aiming strategy to use
+        // TODO: this should technically be the angular velocity in the rotating target-tracking
+        // frame ("omegaTotal")
         if (fabsf(projectedAimPosData.omega) < OMEGA_THRESHOLD)
         {
+            // Jitter Aim
             lastComputedSolution = std::nullopt;
             for (int i = 0; i < 4; i++)
             {
@@ -148,21 +152,18 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                     (i % 2 == 0) ? projectedAimPosData.radius0 : projectedAimPosData.radius1;
                 float currTheta = projectedAimPosData.theta + M_PI_2 * i;
 
-                aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState
-                    targetState(
-                        {projectedAimPosData.xPos + currRadius * cos(currTheta) - turretPosition.x,
-                         projectedAimPosData.yPos + currRadius * sin(currTheta) - turretPosition.y,
-                         projectedAimPosData.zPos + projectedAimPosData.plateHeights[i] -
-                             turretPosition.z},
-                        {projectedAimPosData.xVel - chassisVel.x,
-                         projectedAimPosData.yVel - chassisVel.y,
-                         projectedAimPosData.zVel},
-                        {projectedAimPosData.xAcc,
-                         projectedAimPosData.yAcc,
-                         projectedAimPosData.zAcc},
-                        currRadius,
-                        currTheta,
-                        projectedAimPosData.omega);
+                RobotTargetKinematicState targetState(
+                    {projectedAimPosData.xPos + currRadius * cos(currTheta) - turretPosition.x,
+                     projectedAimPosData.yPos + currRadius * sin(currTheta) - turretPosition.y,
+                     projectedAimPosData.zPos + projectedAimPosData.plateHeights[i] -
+                         turretPosition.z},
+                    {projectedAimPosData.xVel - chassisVel.x,
+                     projectedAimPosData.yVel - chassisVel.y,
+                     projectedAimPosData.zVel},
+                    {projectedAimPosData.xAcc, projectedAimPosData.yAcc, projectedAimPosData.zAcc},
+                    currRadius,
+                    currTheta,
+                    projectedAimPosData.omega);
 
                 BallisticsSolution currentSolution = BallisticsSolution();
                 currentSolution.distance = targetState.position.getLength();
@@ -204,6 +205,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         }
         else
         {
+            // Shot Timing
             // Use pulse estimation for fast rotating targets
 
             // Check if we already have a valid pulse estimation solution with an open fire window
@@ -213,6 +215,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                                          currentTimeMicros <= lastComputedSolution->shotWindowEnd;
 
             // Discard pulse solution if omega has dropped below threshold
+            //   (shouldn't ever happen bc we don't consider angular acceleration when projecting
+            //   forward)
             bool omegaBelowThreshold = fabsf(projectedAimPosData.omega) < OMEGA_THRESHOLD;
 
             if (hasValidPulseSolution && !omegaBelowThreshold)
@@ -279,7 +283,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         projectedAimPosData.zVel);
 
     // Create temporary state to use helper methods
-    aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState tempState(
+    RobotTargetKinematicState tempState(
         robotPos3D,
         robotVel3D,
         {projectedAimPosData.xAcc, projectedAimPosData.yAcc, projectedAimPosData.zAcc},
@@ -327,7 +331,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     }
 
     // Aim at active plate's current position
-    // The RobotOrbitKinematicState model will handle projecting both:
+    // The RobotTargetKinematicState model will handle projecting both:
     // 1. Linear motion of robot center (constant acceleration)
     // 2. Rotational motion of the plate around the center (constant angular velocity)
     float activePlateHeight = projectedAimPosData.plateHeights[activePlateIndex];
@@ -336,7 +340,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     float activePlateTheta = projectedAimPosData.theta + activePlateIndex * M_PI_2;
 
     // Active plate's current position (robot center + rotational offset)
-    aruwsrc::communication::serial::VisionCoprocessor::RobotOrbitKinematicState activePlateState(
+    RobotTargetKinematicState activePlateState(
         {projectedAimPosData.xPos + activePlateRadius * cos(activePlateTheta) - turretPosition.x,
          projectedAimPosData.yPos + activePlateRadius * sin(activePlateTheta) - turretPosition.y,
          projectedAimPosData.zPos + activePlateHeight - turretPosition.z},
