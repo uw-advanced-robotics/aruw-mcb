@@ -107,7 +107,7 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
             drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
         });
 
-    modm::can::Message limitSwitchMsg;
+    modm::can::Message limitSwitchMsg{};
     limitSwitchMsg.identifier = TurretMCBCanComm::CanIDs::TURRET_STATUS_RX_CAN_ID;
     limitSwitchMsg.length = 4;
     limitSwitchMsg.setExtended(false);
