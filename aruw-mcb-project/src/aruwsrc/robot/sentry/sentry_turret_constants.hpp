@@ -175,7 +175,6 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 static constexpr tap::can::CanBus CAN_BUS_MOTOR = tap::can::CanBus::CAN_BUS2;
 
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
-
 }  // namespace turretMajor
 
 static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(334);

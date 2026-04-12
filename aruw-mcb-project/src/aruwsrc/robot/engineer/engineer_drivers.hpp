@@ -31,6 +31,7 @@
 #else
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
@@ -62,6 +63,7 @@ public:
               nullptr,
               &rttTelemetry),
           engineerCVCommunication(this),
+          chassisIsm(),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)
     {
@@ -81,11 +83,12 @@ public:
     engineer::EngineerControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
     communication::serial::EngineerCVCommunication engineerCVCommunication;
+    aruwsrc::communication::sensors::imu::ism330::ISM330 chassisIsm;
 
     communication::can::TurretMCBCanComm turretMCBCanCommBus1;
     communication::can::TurretMCBCanComm turretMCBCanCommBus2;
 
-    void init(const float)
+    void init(const float mainLoopFrequency)
     {
         turretMCBCanCommBus1.init();
         turretMCBCanCommBus2.init();
@@ -100,12 +103,15 @@ public:
         digital.configureInputPullMode(
             tap::gpio::Digital::T,
             tap::gpio::Digital::InputPullMode::PullUp);
+        chassisIsm.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        chassisIsm.setCalibrationSamples(4000);
     }
 
     void updateIo()
     {
         oledDisplay.updateDisplay();
         engineerCVCommunication.updateSerial();
+        chassisIsm.read();
     }
 
     void update()
@@ -114,6 +120,7 @@ public:
         turretMCBCanCommBus2.sendData();
         oledDisplay.updateMenu();
         rttTelemetry.updateTelemetryAsync();
+        chassisIsm.periodicIMUUpdate();
     }
 #endif
 };  // class aruwsrc::EngineerDrivers

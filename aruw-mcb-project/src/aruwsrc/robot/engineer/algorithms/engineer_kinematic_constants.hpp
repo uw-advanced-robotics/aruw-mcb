@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2026-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef ENGINEER_KINEMATIC_CONSTANTS_HPP_
+#define ENGINEER_KINEMATIC_CONSTANTS_HPP_
+
+#include "tap/algorithms/transforms/position.hpp"
+#include "tap/algorithms/transforms/transform.hpp"
+
+#include "point_mass.hpp"
+
+namespace aruwsrc::engineer::algorithms
+{
+static const tap::algorithms::transforms::Position CHASSIS_TO_TURRET_YAW_POS(0, 0, 0);
+static const tap::algorithms::transforms::Position TURRET_YAW_TO_TURRET_PITCH_POS(0, 0, 0);
+static const tap::algorithms::transforms::Transform TURRET_PITCH_TO_EXTENSION_ZERO(
+    0,
+    0,
+    0,
+    0,
+    0,
+    0);
+static const tap::algorithms::transforms::Transform WRIST_TO_END_EFFECTOR(0, 0, 0, 0, 0, 0);
+static const tap::algorithms::transforms::Transform EXTENSION_TO_VTM_GIMBAL(0, 0, 0, 0, 0, 0);
+static const tap::algorithms::transforms::Transform TURRET_YAW_TO_CUBE_STORE_FRAME(
+    0,
+    0,
+    0,
+    0,
+    0,
+    0);
+static const tap::algorithms::transforms::Transform TURRET_YAW_TO_REALSENSE(0, 0, 0, 0, 0, 0);
+static const tap::algorithms::transforms::Transform CUBE_STORE_FRAME_TO_CUBE_DIST(0, 0, 0, 0, 0, 0);
+static const tap::algorithms::transforms::Transform CUBE_STORE_CENTER_TO_CUBE_STORE_1(
+    0,
+    0,
+    0,
+    0,
+    0,
+    0);
+static const tap::algorithms::transforms::Transform CUBE_STORE_CENTER_TO_CUBE_STORE_2(
+    0,
+    0,
+    0,
+    0,
+    0,
+    0);
+
+static const tap::algorithms::transforms::Transform END_EFFECTOR_TO_WRIST =
+    WRIST_TO_END_EFFECTOR.getInverse();
+static const tap::algorithms::transforms::Transform VTM_GIMBAL_TO_EXTENSION =
+    EXTENSION_TO_VTM_GIMBAL.getInverse();
+static const tap::algorithms::transforms::Transform CUBE_STORE_1_TO_CUBE_STORE_CENTER =
+    CUBE_STORE_CENTER_TO_CUBE_STORE_1.getInverse();
+static const tap::algorithms::transforms::Transform CUBE_STORE_2_TO_CUBE_STORE_CENTER =
+    CUBE_STORE_CENTER_TO_CUBE_STORE_2.getInverse();
+static const tap::algorithms::transforms::Transform TURRET_YAW_TO_CUBE_DIST =
+    TURRET_YAW_TO_CUBE_STORE_FRAME.composeStatic(CUBE_STORE_FRAME_TO_CUBE_DIST);
+
+// To simplify kinematic calculations, we usually treat the wrist roll joint as if it were also
+// located in the differential. This is how far along its axis it's actually physically located
+// static constexpr float TRUE_WRIST_ROLL_OFFSET = 0;
+
+// Center of Masses
+static const PointMass MASS_BEYOND_WRIST{
+    .mass = 1,
+    .location = tap::algorithms::transforms::Position(0, 0, 0)};
+static constexpr float EXTENSION_STATIONARY_MASS = 1;
+static constexpr float EXTENSION_MIDDLE_MASS = 1;
+static constexpr float EXTENSION_END_MASS = 1;
+static const PointMass MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT{
+    .mass = EXTENSION_STATIONARY_MASS + EXTENSION_MIDDLE_MASS + EXTENSION_END_MASS,
+    .location = tap::algorithms::transforms::Position(0, 0, 0)};
+static constexpr float EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR =
+    (EXTENSION_MIDDLE_MASS / 2 + EXTENSION_END_MASS) /
+    (EXTENSION_STATIONARY_MASS + EXTENSION_MIDDLE_MASS + EXTENSION_END_MASS);
+
+}  // namespace aruwsrc::engineer::algorithms
+#endif  // ENGINEER_KINEMATIC_CONSTANTS_HPP_

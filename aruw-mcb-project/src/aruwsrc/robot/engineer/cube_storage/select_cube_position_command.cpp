@@ -23,30 +23,32 @@
 
 namespace aruwsrc::engineer::cube_storage
 {
-SelectCubePositionCommand::SelectCubePositionCommand(  // two const references
+SelectCubePositionCommand::SelectCubePositionCommand(
     CubeStorageSubsystem &cubeStorage,
-    aruwsrc::control::joint::JointSubsystem &jointSubsystem,
-    bool addCube
-    // TurretToCubeTransform &turretToCubeTransformer,
-    // TurretToSuctionTransform &turretToSuctionTransformer
-    )
+    bool addCube,
+    const tap::algorithms::transforms::Transform &cubeStore1ToCube,
+    const tap::algorithms::transforms::Transform &cubeStore2ToCube)
     : cubeStorage(cubeStorage),
-      jointSubsystem(jointSubsystem),
-      addCube(addCube)
-// turretToCubeTransformer(turretToCubeTransformer),
-// turretToSuctionTransformer(turretToSectionTransformer)
+      addCube(addCube),
+      cubeStore1ToCube(cubeStore1ToCube),
+      cubeStore2ToCube(cubeStore2ToCube)
 {
     addSubsystemRequirement(&cubeStorage);
-    addSubsystemRequirement(&jointSubsystem);
 }
 
 void SelectCubePositionCommand::initialize()
 {
     if (addCube)
     {
-        cubeStorage.getCubeToAdd();
-        cubeStorage.storeWristPos(Transform(0, 0, 0, 0, 0, 0));  // TODO: update; 3 motors on wrist
-        // use transforms systems
+        CubeStorageSubsystem::CubeOptions activeCube = cubeStorage.getCubeToAdd();
+        if (activeCube == CubeStorageSubsystem::CubeOptions::LEFT)
+        {
+            cubeStorage.storeActiveCubeStoreToCube(cubeStore1ToCube);
+        }
+        else if (activeCube == CubeStorageSubsystem::CubeOptions::RIGHT)
+        {
+            cubeStorage.storeActiveCubeStoreToCube(cubeStore2ToCube);
+        }
     }
     else
     {
