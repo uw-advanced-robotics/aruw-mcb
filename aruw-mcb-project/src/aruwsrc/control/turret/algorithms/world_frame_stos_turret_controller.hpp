@@ -17,18 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WORLD_FRAME_TURRET_IMU_TURRET_CONTROLLER_HPP_
-#define WORLD_FRAME_TURRET_IMU_TURRET_CONTROLLER_HPP_
+#ifndef WORLD_FRAME_STOS_TURRET_CONTROLLER_HPP_
+#define WORLD_FRAME_STOS_TURRET_CONTROLLER_HPP_
 
 #include <cstdint>
 
-#include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
 #include "turret_controller_interface.hpp"
+#include "turret_setpoint_kalman.hpp"
 
 using namespace tap::algorithms;
 
@@ -39,20 +40,25 @@ class TurretMotor;
 
 namespace aruwsrc::control::turret::algorithms
 {
+struct TurretFeedforwardConstants
+{
+    float Ka = 0.0f;  /// Acceleration feedforward constant
+    float Kv = 0.0f;  /// Velocity feedforward constant
+    float Ks = 0.0f;  /// Static friction feedforward constant
+};
 /**
- * World frame turret axis controller. Requires that a development board be mounted rigidly on the
+ * World frame turret yaw controller. Requires that a development board be mounted rigidly on the
  * turret and connected via the `TurretMCBCanComm` class. The development board's IMU is used to
  * determine the turret's world frame coordinates directly, making this controller better than the
  * `WorldFrameChassisImuTurretController`.
  *
- * Runs a cascade PID controller (position PID output feeds into velocity PID controller, velocity
- * PID controller is desired motor output) to control the turret axis.
+ * Runs a STOS optimal controller with a feedforward controller from the setpoint kalman filter and
+ * a PID controller in small error regions.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
 template <Axis AXIS>
-class WorldFrameTurretImuCascadePidTurretController final
-    : public TurretAxisControllerInterface<AXIS>
+class WorldFrameTurretImuSTOSTurretController final : public TurretAxisControllerInterface<AXIS>
 {
 public:
     /**
@@ -62,12 +68,13 @@ public:
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      */
-    WorldFrameTurretImuCascadePidTurretController(
+    WorldFrameTurretImuSTOSTurretController(
         const transforms::Transform &worldToTurret,
         const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &turretMotor,
-        SmoothPid &positionPid,
-        SmoothPid &velocityPid,
+        OptimalSTOSController::STOSConstants constants,
+        tap::algorithms::SmoothPid positionPid,
+        TurretFeedforwardConstants feedforwardConstants,
         const std::vector<TurretCompensatorInterface *> compensators = {});
 
     void initialize() final;
@@ -101,12 +108,17 @@ private:
     const transforms::Transform &worldToTurret;
     const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm;
 
-    SmoothPid &positionPid;
-    SmoothPid &velocityPid;
+    OptimalSTOSController stosController;
+    tap::algorithms::SmoothPid positionPid;
+    TurretFeedforwardConstants feedforwardConstants;
 
     WrappedFloat worldFrameSetpoint;
+    TurretSetpointKalmanFilter setpointFilter;
+
+    // Error threshold to switch from STOS to PID w/ feedforward.
+    static constexpr float LINEAR_ZONE = 0.08f;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 
-#endif  //  WORLD_FRAME_TURRET_IMU_TURRET_CONTROLLER_HPP_
-#include "world_frame_turret_imu_turret_controller_impl.hpp"
+#endif  //  WORLD_FRAME_STOS_TURRET_CONTROLLER_HPP_
+#include "world_frame_stos_turret_controller_impl.hpp"

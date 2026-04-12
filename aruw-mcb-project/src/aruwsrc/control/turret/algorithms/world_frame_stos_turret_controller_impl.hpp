@@ -16,15 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef WORLD_FRAME_TURRET_IMU_TURRET_CONTROLLER_IMPL_HPP_
-#define WORLD_FRAME_TURRET_IMU_TURRET_CONTROLLER_IMPL_HPP_
+#ifndef WORLD_FRAME_STOS_TURRET_CONTROLLER_IMPL_HPP_
+#define WORLD_FRAME_STOS_TURRET_CONTROLLER_IMPL_HPP_
 
 #include "../turret_subsystem.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 #include "turret_gravity_compensation.hpp"
-#include "world_frame_turret_imu_turret_controller.hpp"
+#include "world_frame_stos_turret_controller.hpp"
 #include "world_frame_turret_utils.hpp"
 
 namespace aruwsrc::control::turret::algorithms
@@ -42,19 +42,14 @@ namespace aruwsrc::control::turret::algorithms
  * @param[out] worldFrameSetpoint World frame angle setpoint that will be set to the current
  * turretMotor's setpoint.
  */
-static inline void initializeWorldFrameTurretImuController(
+static inline void initializeWorldFrameSTOSTurretController(
     const TurretControllerInterface *controllerToInitialize,
     const WrappedFloat worldFrameMeasurement,
     TurretMotor &turretMotor,
-    tap::algorithms::SmoothPid &positionPid,
-    tap::algorithms::SmoothPid &velocityPid,
     WrappedFloat &worldFrameSetpoint)
 {
     if (turretMotor.getTurretController() != controllerToInitialize)
     {
-        positionPid.reset();
-        velocityPid.reset();
-
         worldFrameSetpoint = transformChassisFrameToWorldFrame(
             turretMotor.getChassisFrameMeasuredAngle(),
             worldFrameMeasurement,
@@ -64,74 +59,41 @@ static inline void initializeWorldFrameTurretImuController(
     }
 }
 
-/**
- * Runs a world frame cascade (position -> velocity) PID controller.
- *
- * @param[in] worldFrameAngleSetpoint World frame angle setpoint, not required to be normalized, in
- * radians.
- * @param[in] worldFrameAngleMeasurement World frame angle measurement, not required to be
- * normalized, in radians.
- * @param[in] worldFrameVelocityMeasured World frame angular velocity measurement, in
- * radians/second.
- * @param[in] dt Time change since this function was last called, in ms.
- * @param[in] turretMotor TurretMotor associated with the angles being measured.
- * @param[out] positionPid Position PID controller.
- * @param[out] velocityPid Velocity PID controller.
- * @return desired PID output from running the position -> velocity cascade controller
- */
-static inline float runWorldFrameTurretImuController(
-    const WrappedFloat worldFrameAngleError,
-    const WrappedFloat chassisFrameAngleMeasurement,
-    const float worldFrameVelocityMeasured,
-    const uint32_t dt,
-    const TurretMotor &turretMotor,
-    tap::algorithms::SmoothPid &positionPid,
-    tap::algorithms::SmoothPid &velocityPid)
-{
-    const float positionControllerError = turretMotor.getValidMinError(
-        chassisFrameAngleMeasurement + worldFrameAngleError,
-        chassisFrameAngleMeasurement);
-    const float positionPidOutput =
-        positionPid.runController(positionControllerError, worldFrameVelocityMeasured, dt);
-
-    const float velocityControllerError = positionPidOutput - worldFrameVelocityMeasured;
-    const float velocityPidOutput =
-        velocityPid.runControllerDerivateError(velocityControllerError, dt);
-
-    return velocityPidOutput;
-}
-
 template <Axis AXIS>
-WorldFrameTurretImuCascadePidTurretController<AXIS>::WorldFrameTurretImuCascadePidTurretController(
+WorldFrameTurretImuSTOSTurretController<AXIS>::WorldFrameTurretImuSTOSTurretController(
     const transforms::Transform &worldToTurret,
     const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
     TurretMotor &turretMotor,
-    SmoothPid &positionPid,
-    SmoothPid &velocityPid,
+    OptimalSTOSController::STOSConstants constants,
+    tap::algorithms::SmoothPid positionPid,
+    TurretFeedforwardConstants feedforwardConstants,
     const std::vector<TurretCompensatorInterface *> compensators)
     : TurretAxisControllerInterface<AXIS>(turretMotor, compensators),
       worldToTurret(worldToTurret),
       turretMCBCanComm(turretMCBCanComm),
+      stosController(constants),
       positionPid(positionPid),
-      velocityPid(velocityPid),
+      feedforwardConstants(feedforwardConstants),
       worldFrameSetpoint(Angle(0))
 {
 }
 
 template <Axis AXIS>
-void WorldFrameTurretImuCascadePidTurretController<AXIS>::initialize()
+void WorldFrameTurretImuSTOSTurretController<AXIS>::initialize()
 {
-    initializeWorldFrameTurretImuController(
+    const WrappedFloat worldFrameMeasurement =
+        Angle(AXIS == Axis::PITCH ? worldToTurret.getPitch() : worldToTurret.getYaw());
+    initializeWorldFrameSTOSTurretController(
         this,
-        Angle(AXIS == Axis::PITCH ? worldToTurret.getPitch() : worldToTurret.getYaw()),
+        worldFrameMeasurement,
         this->turretMotor,
-        positionPid,
-        velocityPid,
         worldFrameSetpoint);
+
+    setpointFilter.initialize(worldFrameSetpoint);
 }
 
 template <Axis AXIS>
-void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
+void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
     const float dt,
     const WrappedFloat desiredSetpoint)
 {
@@ -157,14 +119,38 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
         worldFrameSetpoint,
         this->turretMotor);
 
-    float pidOutput = runWorldFrameTurretImuController(
-        worldFrameSetpoint - worldFrameAngle,
-        chassisFrame,
-        worldFrameVelocity,
-        dt,
-        this->turretMotor,
-        positionPid,
-        velocityPid);
+    float pidOutput = 0;
+
+    setpointFilter.update(worldFrameSetpoint, dt);
+
+    float velError = setpointFilter.getEstimatedVelocity() - worldFrameVelocity;
+    float posError = this->turretMotor.getValidMinError(
+        chassisFrame + (worldFrameSetpoint - worldFrameAngle),
+        chassisFrame);
+
+    float targetVel = setpointFilter.getEstimatedVelocity();
+    float targetAccel = setpointFilter.getEstimatedAcceleration();
+
+    float frictionFF = 0.0;
+    // Keep it from jittering
+    if (std::abs(targetVel) > 0.001)
+    {
+        frictionFF = std::signbit(targetVel) ? -feedforwardConstants.Ks : feedforwardConstants.Ks;
+    }
+
+    float torqueFF = (targetAccel * feedforwardConstants.Ka) +
+                     (targetVel * feedforwardConstants.Kv) + frictionFF;
+
+    if (std::abs(posError) < LINEAR_ZONE)
+    {
+        float feedback = positionPid.runController(posError, -velError, dt);
+
+        pidOutput = torqueFF + feedback;
+    }
+    else
+    {
+        pidOutput = stosController.getOptimalTorque(posError, -velError);
+    }
 
     if constexpr (AXIS == Axis::PITCH)
     {
@@ -182,12 +168,14 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
                 .pitchChassisFrame = 0.0f,
                 .yaw = chassisFrame.getWrappedValue()});
     }
+
     this->turretMotor.setMotorOutput(pidOutput);
 }
 
 template <Axis AXIS>
-void WorldFrameTurretImuCascadePidTurretController<AXIS>::setSetpoint(WrappedFloat desiredSetpoint)
+void WorldFrameTurretImuSTOSTurretController<AXIS>::setSetpoint(WrappedFloat desiredSetpoint)
 {
+    const WrappedFloat chassisFrameAngle = this->turretMotor.getChassisFrameMeasuredAngle();
     WrappedFloat worldFrameAngle = Angle(0);
     if constexpr (AXIS == Axis::PITCH)
     {
@@ -198,8 +186,6 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::setSetpoint(WrappedFlo
         worldFrameAngle = Angle(worldToTurret.getYaw());
     }
 
-    const WrappedFloat chassisFrameAngle = this->turretMotor.getChassisFrameMeasuredAngle();
-
     updateWorldFrameSetpoint(
         desiredSetpoint,
         chassisFrameAngle,
@@ -209,7 +195,7 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::setSetpoint(WrappedFlo
 }
 
 template <Axis AXIS>
-WrappedFloat WorldFrameTurretImuCascadePidTurretController<AXIS>::getMeasurement() const
+WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::getMeasurement() const
 {
     if constexpr (AXIS == Axis::PITCH)
     {
@@ -222,38 +208,34 @@ WrappedFloat WorldFrameTurretImuCascadePidTurretController<AXIS>::getMeasurement
 }
 
 template <Axis AXIS>
-bool WorldFrameTurretImuCascadePidTurretController<AXIS>::isOnline() const
+bool WorldFrameTurretImuSTOSTurretController<AXIS>::isOnline() const
 {
     return this->turretMotor.isOnline() && turretMCBCanComm.isConnected();
 }
 
 template <Axis AXIS>
-WrappedFloat WorldFrameTurretImuCascadePidTurretController<
-    AXIS>::convertControllerAngleToChassisFrame(WrappedFloat controllerFrameAngle) const
+WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::convertControllerAngleToChassisFrame(
+    WrappedFloat controllerFrameAngle) const
 {
     if constexpr (AXIS == Axis::PITCH)
     {
-        const WrappedFloat worldFramePitchAngle = Angle(worldToTurret.getPitch());
-
         return transformWorldFrameValueToChassisFrame(
             this->turretMotor.getChassisFrameMeasuredAngle(),
-            worldFramePitchAngle,
+            Angle(worldToTurret.getPitch()),
             controllerFrameAngle);
     }
     else
     {
-        const WrappedFloat worldFrameYawAngle = Angle(worldToTurret.getYaw());
-
         return transformWorldFrameValueToChassisFrame(
             this->turretMotor.getChassisFrameMeasuredAngle(),
-            worldFrameYawAngle,
+            Angle(worldToTurret.getYaw()),
             controllerFrameAngle);
     }
 }
 
 template <Axis AXIS>
-WrappedFloat WorldFrameTurretImuCascadePidTurretController<
-    AXIS>::convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const
+WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::convertChassisAngleToControllerFrame(
+    WrappedFloat chassisFrameAngle) const
 {
     if constexpr (AXIS == Axis::PITCH)
     {
@@ -276,4 +258,4 @@ WrappedFloat WorldFrameTurretImuCascadePidTurretController<
 }
 }  // namespace aruwsrc::control::turret::algorithms
 
-#endif  // WORLD_FRAME_TURRET_IMU_TURRET_CONTROLLER_IMPL_HPP_
+#endif  // WORLD_FRAME_STOS_TURRET_CONTROLLER_IMPL_HPP_
