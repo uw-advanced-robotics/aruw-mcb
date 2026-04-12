@@ -74,8 +74,10 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
     .theta1PidConfig = WRIST_THETA1_PID_CONFIG,
     .theta2PidConfig = WRIST_THETA2_PID_CONFIG,
     .theta3PidConfig = WRIST_THETA3_PID_CONFIG,
+    .theta2Min = -M_PI_2,
+    .theta2Max = M_PI_2,
     .ratio = 30.0f / 40.0f,
-    .maxMotorDesiredOutput = 5500,
+    .maxMotorDesiredOutput = static_cast<int32_t>(tap::motor::DjiMotor::MAX_OUTPUT_C610 * 0.6f),
 };
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_ROLL_PID_CONFIG{
