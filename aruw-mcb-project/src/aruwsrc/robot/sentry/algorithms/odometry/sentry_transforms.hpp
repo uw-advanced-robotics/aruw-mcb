@@ -77,9 +77,8 @@ public:
 
     inline const Transform& getWorldToVTM() const { return worldToVTM; }
 
-    inline const Transform& getWorldToTurret(int turretID) const
+    inline const Transform& getWorldToTurret(int /* turretID */) const
     {
-        (void)turretID;
         return worldToTurretWidow;
     }
 
@@ -93,9 +92,8 @@ public:
         return turretMajorToTurretWidow;
     };  // Alias for compatibility
 
-    inline const Transform& getMajorToMinor(uint8_t turretId) const
+    inline const Transform& getMajorToMinor(uint8_t /* turretId */) const
     {
-        (void)turretId;
         return turretMajorToTurretWidow;
     };
 
