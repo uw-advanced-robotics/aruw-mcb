@@ -112,6 +112,10 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
     limitSwitchMsg.length = 4;
     limitSwitchMsg.setExtended(false);
     limitSwitchMsg.data[0] = 0b1;  // limit switch depressed
+    for (size_t i = 1; i < 4; i++)
+    {
+        limitSwitchMsg.data[i] = 0;
+    }
 
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
         .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
