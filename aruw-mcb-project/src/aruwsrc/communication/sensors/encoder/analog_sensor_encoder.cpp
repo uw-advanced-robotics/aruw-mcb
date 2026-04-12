@@ -61,6 +61,18 @@ AnalogSensorEncoder::AnalogSensorEncoder(
       calibration(calibration),
       lastUpdateMicros(0)
 {
+    if (this->sensor != nullptr)
+    {
+        this->sensor->addUpdateListener(this);
+    }
+}
+
+AnalogSensorEncoder::~AnalogSensorEncoder()
+{
+    if (this->sensor != nullptr)
+    {
+        this->sensor->removeUpdateListener(this);
+    }
 }
 
 bool AnalogSensorEncoder::isOnline() const
@@ -70,17 +82,19 @@ bool AnalogSensorEncoder::isOnline() const
 
 tap::algorithms::WrappedFloat AnalogSensorEncoder::getPosition() const
 {
-    const_cast<AnalogSensorEncoder*>(this)->updateFromSensor();
+    // const_cast<AnalogSensorEncoder*>(this)->updateFromSensor();
     return WrappedEncoder::getPosition();
 }
 
 float AnalogSensorEncoder::getVelocity() const
 {
-    const_cast<AnalogSensorEncoder*>(this)->updateFromSensor();
+    // const_cast<AnalogSensorEncoder*>(this)->updateFromSensor();
     return WrappedEncoder::getVelocity();
 }
 
-void AnalogSensorEncoder::update() { updateFromSensor(); }
+// void AnalogSensorEncoder::update() { updateFromSensor(); }
+
+void AnalogSensorEncoder::onAnalogSensorUpdated() { updateFromSensor(); }
 
 void AnalogSensorEncoder::logTelemetry(
     communication::rtt::RttTelemetry& rttTelemetry,
@@ -109,6 +123,9 @@ void AnalogSensorEncoder::updateFromSensor()
     lastUpdateMicros = now;
 
     uint16_t raw = readRaw();
+
+    raw = std::clamp(raw, calibration.rawMin, calibration.rawMax);
+
     updateEncoderValue(rawToTicks(raw));
 }
 
