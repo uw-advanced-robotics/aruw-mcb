@@ -118,12 +118,7 @@ public:
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
-#ifdef TARGET_SENTRY_NAME
         TurretConfig &turretWidowConfig,
-#else
-        TurretConfig &turretLeftConfig,
-        TurretConfig &turretRightConfig,
-#endif
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms);
 
     void initialize();
@@ -148,17 +143,11 @@ public:
      */
     bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
     {
-#ifdef TARGET_SENTRY_NAME
         if (turretID != turretWidowConfig.turretSubsystem.getTurretID())
         {
             return false;
         }
         return withinAimingToleranceWidow;
-#else
-        return turretID == turretLeftConfig.turretSubsystem.getTurretID()
-                   ? withinAimingToleranceLeft
-                   : withinAimingToleranceRight;
-#endif
     }
 
 private:
@@ -180,12 +169,7 @@ private:
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor;
 
-#ifdef TARGET_SENTRY_NAME
     TurretConfig &turretWidowConfig;
-#else
-    TurretConfig &turretLeftConfig;
-    TurretConfig &turretRightConfig;
-#endif
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms;
 
     uint32_t prevTime;
@@ -219,12 +203,7 @@ private:
 
     tap::algorithms::WrappedFloat majorScanValue = Angle(0);
 
-#ifdef TARGET_SENTRY_NAME
     bool withinAimingToleranceWidow = false;
-#else
-    bool withinAimingToleranceLeft = false;
-    bool withinAimingToleranceRight = false;
-#endif
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target
