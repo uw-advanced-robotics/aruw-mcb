@@ -646,18 +646,20 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
-autotune::GravityAutotuneCommand<9> gravityAutotuneCommandLeft(
+autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommandLeft(
     drivers(),
     {&turretLeft,
+     &turretLeft.pitchMotor,
      &turretLeftChassisControllers.pitchController,
      turretLeftMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &chassis);
 
-autotune::GravityAutotuneCommand<9> gravityAutotuneCommandRight(
+autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommandRight(
     drivers(),
     {&turretRight,
+     &turretRight.pitchMotor,
      &turretRightChassisControllers.pitchController,
      turretRightMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
