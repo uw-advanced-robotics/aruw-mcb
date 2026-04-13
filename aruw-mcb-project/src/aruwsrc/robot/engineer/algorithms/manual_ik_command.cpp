@@ -25,21 +25,21 @@ using namespace tap::algorithms::transforms;
 namespace aruwsrc::engineer::algorithms
 {
 ManualIKCommand::ManualIKCommand(
-    const tap::algorithms::transforms::Transform& worldToChassis,
+    const tap::algorithms::transforms::Transform& chassisToWorld,
+    const tap::algorithms::transforms::Transform& cubeToEndEffector,
     aruwsrc::control::turret::TurretSubsystem& turret,
     aruwsrc::control::joint::JointSubsystem& extension,
     aruwsrc::engineer::wrist::WristSubsystem& wrist,
-    aruwsrc::control::joint::JointSubsystem& roll,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::YAW>& yawController,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController)
     : AbstractIKCommand(
-          worldToChassis,
+          chassisToWorld,
+          cubeToEndEffector,
           turret,
           extension,
           wrist,
-          roll,
           yawController,
           pitchController),
       chassisToEEDesired(Transform::identity())
@@ -52,7 +52,7 @@ void ManualIKCommand::initialize()
         algorithms::EngineerTransforms::getHypotheticalChassisToTurretYaw(0)
             .composeStatic(algorithms::EngineerTransforms::getHypotheticalTurretYawToTurretPitch(0))
             .composeStatic(algorithms::EngineerTransforms::getHypotheticalTurretPitchToExtension(0))
-            .composeStatic(algorithms::WRIST_ROLL_TO_END_EFFECTOR);
+            .composeStatic(algorithms::WRIST_TO_END_EFFECTOR);
 }
 
 void ManualIKCommand::execute()

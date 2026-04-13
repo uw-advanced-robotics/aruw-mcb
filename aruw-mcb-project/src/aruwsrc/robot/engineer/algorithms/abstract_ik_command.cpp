@@ -38,7 +38,6 @@ AbstractIKCommand::AbstractIKCommand(
     aruwsrc::control::turret::TurretSubsystem& turret,
     aruwsrc::control::joint::JointSubsystem& extension,
     aruwsrc::engineer::wrist::WristSubsystem& wrist,
-    aruwsrc::control::joint::JointSubsystem& roll,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::YAW>& yawController,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
@@ -48,32 +47,26 @@ AbstractIKCommand::AbstractIKCommand(
       turret(turret),
       extension(extension),
       wrist(wrist),
-      roll(roll),
       yawController(yawController),
       pitchController(pitchController)
 {
     addSubsystemRequirement(&turret);
     addSubsystemRequirement(&extension);
     addSubsystemRequirement(&wrist);
-    addSubsystemRequirement(&roll);
 }
-AbstractIKCommand::~AbstractIKCommand() = default;
-
-void AbstractIKCommand::initialize() {}
 
 void AbstractIKCommand::execute()
 {
     Transform chassisToEndEffectorDesired = chassisToBase.composeStatic(getBaseToFollowerDesired())
                                                 .composeStatic(followerToEndEffector);
 
-    Transform endEffectorToWristRoll = END_EFFECTOR_TO_WRIST_ROLL;
+    Transform endEffectorToWrist = END_EFFECTOR_TO_WRIST;
     Transform turretPitchToExtensionZero =
         EngineerTransforms::getHypotheticalTurretPitchToExtension(0);
 
     // kept as a Transform because we want to compose it easily
     Transform chassisToWristDesiredPos =
-        chassisToEndEffectorDesired.composeStatic(endEffectorToWristRoll)
-            .composeStatic(EngineerTransforms::getHypotheticalWristToWristRoll(0).getInverse());
+        chassisToEndEffectorDesired.composeStatic(endEffectorToWrist);
 
     Position turretYawToWristDesiredPos = EngineerTransforms::getHypotheticalChassisToTurretYaw(0)
                                               .getInverse()
@@ -105,26 +98,21 @@ void AbstractIKCommand::execute()
             .dot(turretPitchToWristDesiredPos - Position(0, 0, 0)) /
         (turretPitchToWristDesiredDist * turretPitchToWristDesiredDist));
 
-    Transform extensionToWristRollDesired =
+    Transform extensionToWristDesired =
         EngineerTransforms::getHypotheticalChassisToTurretYaw(turretYawDesired)
             .composeStatic(
                 EngineerTransforms::getHypotheticalTurretYawToTurretPitch(turretPitchDesired))
+            .composeStatic(
+                EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionDesired))
             .getInverse()
             .composeStatic(chassisToEndEffectorDesired)
-            .composeStatic(endEffectorToWristRoll);
-
-    // TODO: this is wrong
-    float wristTheta1Desired = extensionToWristRollDesired.getYaw();
-    float wristTheta2Desired = extensionToWristRollDesired.getPitch();
-    float wristTheta3Desired = extensionToWristRollDesired.getRoll();
+            .composeStatic(endEffectorToWrist);
 
     // Set the desired setpoints
     yawController.runController(2, Angle(turretYawDesired));
     pitchController.runController(2, Angle(turretPitchDesired));
     extension.setSetpoint(extensionDesired);
-    wrist.setSetpointYaw(wristTheta1Desired);    // TODO: update when we have new wrist
-    wrist.setSetpointPitch(wristTheta2Desired);  // TODO: update when we have new wrist
-    roll.setSetpoint(wristTheta3Desired);
+    wrist.setSetpointOrientation(extensionToWristDesired.getRotation());
 }
 
 }  // namespace aruwsrc::engineer::algorithms

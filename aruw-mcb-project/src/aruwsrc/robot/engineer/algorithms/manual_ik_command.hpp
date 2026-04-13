@@ -28,10 +28,10 @@ class ManualIKCommand : public AbstractIKCommand
 public:
     ManualIKCommand(
         const tap::algorithms::transforms::Transform& worldToChassis,
+        const tap::algorithms::transforms::Transform& cubeToEndEffector,
         aruwsrc::control::turret::TurretSubsystem& turret,
         aruwsrc::control::joint::JointSubsystem& extension,
         aruwsrc::engineer::wrist::WristSubsystem& wrist,
-        aruwsrc::control::joint::JointSubsystem& roll,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             aruwsrc::control::turret::algorithms::Axis::YAW>& yawController,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
@@ -43,9 +43,9 @@ public:
 
     void execute() override;
 
-    tap::algorithms::transforms::Transform getWorldToEEDesired() override
+    tap::algorithms::transforms::Transform getBaseToFollowerDesired() override
     {
-        return worldToChassis.composeStatic(chassisToEEDesired);
+        return chassisToEEDesired;
     }
 
 private:

@@ -42,7 +42,7 @@ namespace aruwsrc::engineer::algorithms
 {
 /**
  * Abstract class that handles inverse kinematic operations. It expects subclasses to define "base"
- * and "follower" frames, the `Transform` between which will used to solve for joint positions. For
+ * and "follower" frames. The `Transform` between which will used to solve for joint positions. For
  * example, to place the cube at a specific position/orientation in world frame, we define the base
  * frame to be the world frame, and the follower frame to be the cube frame, finally supplying the
  * desired worldToCube `Transform`.
@@ -71,14 +71,12 @@ public:
         aruwsrc::control::turret::TurretSubsystem& turret,
         aruwsrc::control::joint::JointSubsystem& extension,
         aruwsrc::engineer::wrist::WristSubsystem& wrist,
-        aruwsrc::control::joint::JointSubsystem& roll,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             aruwsrc::control::turret::algorithms::Axis::YAW>& yawController,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController);
-    virtual ~AbstractIKCommand() override;
 
-    virtual void initialize() override;
+    virtual void initialize() override {}
 
     virtual void execute() override;
 
@@ -93,7 +91,6 @@ protected:
     aruwsrc::control::turret::TurretSubsystem& turret;
     aruwsrc::control::joint::JointSubsystem& extension;
     aruwsrc::engineer::wrist::WristSubsystem& wrist;
-    aruwsrc::control::joint::JointSubsystem& roll;
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::YAW>& yawController;
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
