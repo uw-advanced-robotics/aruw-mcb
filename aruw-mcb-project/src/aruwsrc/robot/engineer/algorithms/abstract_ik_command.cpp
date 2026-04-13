@@ -1,0 +1,130 @@
+/*
+ * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "abstract_ik_command.hpp"
+
+#include "tap/algorithms/wrapped_float.hpp"
+
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/robot/engineer/algorithms/engineer_kinematic_constants.hpp"
+#include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+
+using namespace tap::algorithms;
+using namespace tap::algorithms::transforms;
+
+namespace aruwsrc::engineer::algorithms
+{
+AbstractIKCommand::AbstractIKCommand(
+    const tap::algorithms::transforms::Transform& chassisToBase,
+    const tap::algorithms::transforms::Transform& followerToEndEffector,
+    aruwsrc::control::turret::TurretSubsystem& turret,
+    aruwsrc::control::joint::JointSubsystem& extension,
+    aruwsrc::engineer::wrist::WristSubsystem& wrist,
+    aruwsrc::control::joint::JointSubsystem& roll,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::YAW>& yawController,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController)
+    : chassisToBase(chassisToBase),
+      followerToEndEffector(followerToEndEffector),
+      turret(turret),
+      extension(extension),
+      wrist(wrist),
+      roll(roll),
+      yawController(yawController),
+      pitchController(pitchController)
+{
+    addSubsystemRequirement(&turret);
+    addSubsystemRequirement(&extension);
+    addSubsystemRequirement(&wrist);
+    addSubsystemRequirement(&roll);
+}
+AbstractIKCommand::~AbstractIKCommand() = default;
+
+void AbstractIKCommand::initialize() {}
+
+void AbstractIKCommand::execute()
+{
+    Transform chassisToEndEffectorDesired = chassisToBase.composeStatic(getBaseToFollowerDesired())
+                                                .composeStatic(followerToEndEffector);
+
+    Transform endEffectorToWristRoll = END_EFFECTOR_TO_WRIST_ROLL;
+    Transform turretPitchToExtensionZero =
+        EngineerTransforms::getHypotheticalTurretPitchToExtension(0);
+
+    // kept as a Transform because we want to compose it easily
+    Transform chassisToWristDesiredPos =
+        chassisToEndEffectorDesired.composeStatic(endEffectorToWristRoll)
+            .composeStatic(EngineerTransforms::getHypotheticalWristToWristRoll(0).getInverse());
+
+    Position turretYawToWristDesiredPos = EngineerTransforms::getHypotheticalChassisToTurretYaw(0)
+                                              .getInverse()
+                                              .composeStatic(chassisToWristDesiredPos)
+                                              .getTranslation();
+
+    // We know y component of turretPitchToExtension is 0 and thus doesn't affect yaw
+    float turretYawDesired = atan2f(turretYawToWristDesiredPos.y(), turretYawToWristDesiredPos.x());
+
+    Position turretPitchToWristDesiredPos =
+        EngineerTransforms::getHypotheticalChassisToTurretYaw(turretYawDesired)
+            .composeStatic(EngineerTransforms::getHypotheticalTurretYawToTurretPitch(0))
+            .getInverse()
+            .composeStatic(chassisToWristDesiredPos)
+            .getTranslation();
+
+    float turretPitchToWristDesiredDist =
+        Vector(turretYawToWristDesiredPos - Position(0, 0, 0)).magnitude();
+    float extensionDesired =
+        sqrtf(
+            turretPitchToWristDesiredDist * turretPitchToWristDesiredDist -
+            turretPitchToExtensionZero.getZ() * turretPitchToExtensionZero.getZ()) -
+        turretPitchToExtensionZero.getZ();
+
+    Transform turretPitchToExtension =
+        EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionDesired);
+    float turretPitchDesired = -acosf(
+        (turretPitchToExtension.getTranslation() - Position(0, 0, 0))
+            .dot(turretPitchToWristDesiredPos - Position(0, 0, 0)) /
+        (turretPitchToWristDesiredDist * turretPitchToWristDesiredDist));
+
+    Transform extensionToWristRollDesired =
+        EngineerTransforms::getHypotheticalChassisToTurretYaw(turretYawDesired)
+            .composeStatic(
+                EngineerTransforms::getHypotheticalTurretYawToTurretPitch(turretPitchDesired))
+            .getInverse()
+            .composeStatic(chassisToEndEffectorDesired)
+            .composeStatic(endEffectorToWristRoll);
+
+    // TODO: this is wrong
+    float wristTheta1Desired = extensionToWristRollDesired.getYaw();
+    float wristTheta2Desired = extensionToWristRollDesired.getPitch();
+    float wristTheta3Desired = extensionToWristRollDesired.getRoll();
+
+    // Set the desired setpoints
+    yawController.runController(2, Angle(turretYawDesired));
+    pitchController.runController(2, Angle(turretPitchDesired));
+    extension.setSetpoint(extensionDesired);
+    wrist.setSetpointYaw(wristTheta1Desired);    // TODO: update when we have new wrist
+    wrist.setSetpointPitch(wristTheta2Desired);  // TODO: update when we have new wrist
+    roll.setSetpoint(wristTheta3Desired);
+}
+
+}  // namespace aruwsrc::engineer::algorithms
