@@ -57,7 +57,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 1895,
-    .minAngle = -0.34,
+    .minAngle = -0.2f,
     .maxAngle = 0.54,
     .limitMotorAngles = true,
 };
