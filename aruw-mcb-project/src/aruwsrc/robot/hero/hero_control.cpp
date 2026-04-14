@@ -18,7 +18,7 @@
  */
 
 #if defined(TARGET_HERO_NAME)
-
+#include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
@@ -337,6 +337,9 @@ AutoAimLaunchTimer autoAimLaunchTimer(
 
 aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
+
+
+
 /* define commands ----------------------------------------------------------*/
 
 ChassisImuDriveCommand chassisImuDriveCommand(
@@ -404,6 +407,18 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
     *drivers(),
     turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
+
+aruwsrc::control::autotune::GravityAutotuneCommand<9> gravityAutotuneCommand(
+    drivers(),
+    {
+        .turret = &turret,
+        .pitchController = &chassisFramePitchTurretController,
+        .isMotorInverted = pitchMotor.isMotorInverted(),
+        .turretMass = 1.0f,  // TODO: measure this
+        .torqueToDesiredOut = 1.0f,  // TODO: tune this
+
+    }
+);
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
     world_rel_turret_imu::PITCH_POS_PID_CONFIG);
@@ -802,7 +817,7 @@ void registerHeroSubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultHeroCommands()
 {
-    // chassis.setDefaultCommand(&chassisAutorotateCommand);
+    chassis.setDefaultCommand(&chassisAutorotateCommand);
     chassis.setDefaultCommand(&chassisDriveCommand);
     frictionWheelSubsystem.setDefaultCommand(&stopFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
@@ -862,6 +877,13 @@ void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
 
 #ifndef PLATFORM_HOSTED
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
+
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
+{
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
+        &hero_control::gravityAutotuneCommand};
+    return commands;
+}
 #endif
 
 #endif

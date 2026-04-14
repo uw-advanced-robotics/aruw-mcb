@@ -56,7 +56,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 0,
+    .startEncoderValue = 1895,
     .minAngle = -0.34,
     .maxAngle = 0.54,
     .limitMotorAngles = true,
@@ -64,7 +64,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 
 // Turret is perfectly balanced
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
-    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
+    TURRET_GRAVITY_CONFIG{.cgX = 12.1f, .cgZ = -15.67f, .gravityCompensatorMax = -19421.0f};
 
 static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
     .turretPitchMountX = 0.0f,
@@ -197,10 +197,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 7000.0f,
+    .kp = 40000.0f,
+    .ki = 2000.0f,
+    .kd = 6000.0f,
+    .maxICumulative = 10000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 400.0f,
