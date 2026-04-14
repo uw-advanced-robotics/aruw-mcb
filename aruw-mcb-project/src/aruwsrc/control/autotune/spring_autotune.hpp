@@ -20,12 +20,8 @@
 /**
  * @file spring_autotune.hpp
  *
- * @brief Implements spring auto-tuning for turret calibration. If there is a gravity compensator,
- * it will separate the spring force from the gravity force and calculate the spring constant. If
- * there is no gravity compensator, it will calculate the combined effect of the spring constant and
- * the center of mass location, and return a calibration result in units of mm that represents the
- * effective distance from the pivot to the center of mass given the spring force. See
- * `drawCalibrationResult` for more details on how to interpret the calibration result.
+ * @brief   Implements spring auto-tuning for turret calibration.
+ *
  */
 
 #ifndef SPRING_AUTOTUNE_HPP_
@@ -34,7 +30,7 @@
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 
-#include "turret_autotune_command.hpp"
+#include "autotune_command_interface.hpp"
 
 namespace aruwsrc::control::autotune
 {
@@ -46,10 +42,10 @@ private:
 
 public:
     /**
-     * Construct a new Spring Autotune Command object. If `gravityForce` is `nullptr`, the system
-     * will attempt to calculate both center of mass and spring constant. If gravityForce is
-     * provided, it will only calculate the spring constant by subtracting the gravity force values
-     * from the torque readings.
+     * @brief Construct a new Spring Autotune Command object. If gravityForce is nullptr,
+     * the system will attempt to calculate both center of mass and spring constant. If
+     * gravityForce is provided, it will only calculate the spring constant by subtracting the
+     * gravity force values from the torque readings.
      *
      * @param drivers Pointer to global drivers object.
      * @param config Configuration for the turret autotune.
@@ -70,7 +66,7 @@ public:
         const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce =
             nullptr,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
-        const std::array<float, NUM_TEST_POINTS> points = {},
+        const std::array<float, numTestPoints> points = {},
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         const float velocityZeroThreshold = TurretTuneCommand::DEFAULT_VELOCITY_THRESHOLD,
@@ -137,10 +133,11 @@ private:
     float averagingAngles{0.0f};
 
     /**
-     * @brief Helper function that turns the calibration result into units of mm.
+     * @brief Helper function that turns the calibration result into
+     * units of mm.
      *
      * @param calibrationNum Value from the COM calculation
-     * @return `calibrationNum` in mm
+     * @return float `COMLocation` in mm
      */
     inline float calibrationResultToMM(float calibrationNum) const
     {
@@ -172,18 +169,18 @@ private:
     }
 
     /**
-     * @brief Calculates the center of mass and spring constant with least squares simultaneously.
+     * @brief Calculates the center of mass and spring constant with least squares as one go
      *
-     * @return {cgX, cgZ, magnitude, K}
+     * @return std::array<float,4> cgX, cgZ, magnitude, and K.
      */
     std::array<float, 4> calculateCOMandSpring(
-        std::array<float, NUM_TEST_POINTS> Angles,
-        std::array<float, NUM_TEST_POINTS> Torques) const
+        std::array<float, numTestPoints> Angles,
+        std::array<float, numTestPoints> Torques) const
     {
-        Eigen::MatrixXd X(NUM_TEST_POINTS, 3);
-        Eigen::VectorXd Y(NUM_TEST_POINTS);
+        Eigen::MatrixXd X(numTestPoints, 3);
+        Eigen::VectorXd Y(numTestPoints);
 
-        for (uint32_t i = 0; i < NUM_TEST_POINTS; ++i)
+        for (uint32_t i = 0; i < numTestPoints; ++i)
         {
             X(i, 0) = std::cos(Angles[i]);  // corresponds to A (m·g·x)
             X(i, 1) = std::sin(Angles[i]);  // corresponds to B (−m·g·z)
@@ -202,19 +199,19 @@ private:
     };
 
     /**
-     * @brief Calculates the spring constant with least squares, subtracting gravity if it is able
-     * to.
+     * @brief Calculates the center of spring constant with least squares subtracting gravity if it
+     * is able too
      *
-     * @return {0, 0, 0, K}
+     * @return std::array<float,4> K, 0, 0, 0
      */
     std::array<float, 4> calculateJustSpring(
-        std::array<float, NUM_TEST_POINTS> Angles,
-        std::array<float, NUM_TEST_POINTS> Torques) const
+        std::array<float, numTestPoints> Angles,
+        std::array<float, numTestPoints> Torques) const
     {
-        Eigen::MatrixXd X(NUM_TEST_POINTS, 1);
-        Eigen::VectorXd Y(NUM_TEST_POINTS);
+        Eigen::MatrixXd X(numTestPoints, 1);
+        Eigen::VectorXd Y(numTestPoints);
 
-        for (uint32_t i = 0; i < NUM_TEST_POINTS; ++i)
+        for (uint32_t i = 0; i < numTestPoints; ++i)
         {
             // remove the gravity component from the torque readings
             const float Torque = Torques[i] - gravityForce->calculateCompensationEffort(

@@ -30,7 +30,16 @@
 #ifndef AUTOTUNE_COMMAND_INTERFACE_HPP_
 #define AUTOTUNE_COMMAND_INTERFACE_HPP_
 
+#include <Eigen/Dense>
+
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
+
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 namespace aruwsrc::control::autotune
 {

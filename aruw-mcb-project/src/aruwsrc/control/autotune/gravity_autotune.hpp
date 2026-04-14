@@ -32,7 +32,7 @@
 
 #include "modm/ui/display.hpp"
 
-#include "turret_autotune_command.hpp"
+#include "autotune_command_interface.hpp"
 
 namespace aruwsrc::control::autotune
 {
@@ -44,7 +44,7 @@ public:
         tap::Drivers *drivers,
         const TurretAutotuneCommand<numTestPoints, axis>::TurretCalibrationConfig &config,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
-        const std::array<float, NUM_TEST_POINTS> points = {},
+        const std::array<float, numTestPoints> points = {},
         const float velocityZeroThreshold =
             TurretAutotuneCommand<numTestPoints, axis>::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold =
@@ -72,10 +72,10 @@ public:
      */
     std::array<float, 3> calculate() const
     {
-        Eigen::MatrixXd X(NUM_TEST_POINTS, 2);
-        Eigen::VectorXd Y(NUM_TEST_POINTS);
+        Eigen::MatrixXd X(numTestPoints, 2);
+        Eigen::VectorXd Y(numTestPoints);
 
-        for (uint32_t i = 0; i < NUM_TEST_POINTS; ++i)
+        for (uint32_t i = 0; i < numTestPoints; ++i)
         {
             X(i, 0) = std::cos(measuredAngles[i]);  // corresponds to A (m·g·x)
             X(i, 1) = std::sin(measuredAngles[i]);  // corresponds to B (−m·g·z)
