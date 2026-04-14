@@ -21,7 +21,7 @@
 
 #include "abstract_ik_command.hpp"
 
-namespace aruwsrc::engineer::algorithms
+namespace aruwsrc::engineer::algorithms::inverse_kinematics
 {
 class ManualIKCommand : public AbstractIKCommand
 {
@@ -52,5 +52,5 @@ private:
     tap::algorithms::transforms::Transform chassisToEEDesired;
 };  // class ManualIKCommand
 
-}  // namespace aruwsrc::engineer::algorithms
+}  // namespace aruwsrc::engineer::algorithms::inverse_kinematics
 #endif  // MANUAL_IK_COMMAND_HPP_

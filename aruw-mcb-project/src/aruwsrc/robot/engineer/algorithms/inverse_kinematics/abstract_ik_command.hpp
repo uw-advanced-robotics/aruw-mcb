@@ -38,7 +38,7 @@ namespace aruwsrc::engineer::wrist
 class WristSubsystem;
 }
 
-namespace aruwsrc::engineer::algorithms
+namespace aruwsrc::engineer::algorithms::inverse_kinematics
 {
 /**
  * Abstract class that handles inverse kinematic operations. It expects subclasses to define "base"
@@ -97,5 +97,5 @@ protected:
         aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController;
 };
 
-}  // namespace aruwsrc::engineer::algorithms
+}  // namespace aruwsrc::engineer::algorithms::inverse_kinematics
 #endif  // ABSTRACT_IK_COMMAND_HPP_

@@ -18,15 +18,15 @@
  */
 #include "manual_ik_command.hpp"
 
-#include "engineer_transforms.hpp"
+#include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
 
 using namespace tap::algorithms::transforms;
 
-namespace aruwsrc::engineer::algorithms
+namespace aruwsrc::engineer::algorithms::inverse_kinematics
 {
 ManualIKCommand::ManualIKCommand(
-    const tap::algorithms::transforms::Transform& chassisToWorld,
-    const tap::algorithms::transforms::Transform& cubeToEndEffector,
+    const Transform& chassisToWorld,
+    const Transform& cubeToEndEffector,
     aruwsrc::control::turret::TurretSubsystem& turret,
     aruwsrc::control::joint::JointSubsystem& extension,
     aruwsrc::engineer::wrist::WristSubsystem& wrist,
@@ -49,10 +49,10 @@ ManualIKCommand::ManualIKCommand(
 void ManualIKCommand::initialize()
 {
     chassisToEEDesired =
-        algorithms::EngineerTransforms::getHypotheticalChassisToTurretYaw(0)
-            .composeStatic(algorithms::EngineerTransforms::getHypotheticalTurretYawToTurretPitch(0))
-            .composeStatic(algorithms::EngineerTransforms::getHypotheticalTurretPitchToExtension(0))
-            .composeStatic(algorithms::WRIST_TO_END_EFFECTOR);
+        EngineerTransforms::getHypotheticalChassisToTurretYaw(0)
+            .composeStatic(EngineerTransforms::getHypotheticalTurretYawToTurretPitch(0))
+            .composeStatic(EngineerTransforms::getHypotheticalTurretPitchToExtension(0))
+            .composeStatic(WRIST_TO_END_EFFECTOR);
 }
 
 void ManualIKCommand::execute()
@@ -60,4 +60,4 @@ void ManualIKCommand::execute()
     //
 }
 
-}  // namespace aruwsrc::engineer::algorithms
+}  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

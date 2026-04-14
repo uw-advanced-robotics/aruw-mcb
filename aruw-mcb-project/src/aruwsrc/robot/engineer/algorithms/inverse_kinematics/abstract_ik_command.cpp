@@ -30,11 +30,11 @@
 using namespace tap::algorithms;
 using namespace tap::algorithms::transforms;
 
-namespace aruwsrc::engineer::algorithms
+namespace aruwsrc::engineer::algorithms::inverse_kinematics
 {
 AbstractIKCommand::AbstractIKCommand(
-    const tap::algorithms::transforms::Transform& chassisToBase,
-    const tap::algorithms::transforms::Transform& followerToEndEffector,
+    const Transform& chassisToBase,
+    const Transform& followerToEndEffector,
     aruwsrc::control::turret::TurretSubsystem& turret,
     aruwsrc::control::joint::JointSubsystem& extension,
     aruwsrc::engineer::wrist::WristSubsystem& wrist,
@@ -115,4 +115,4 @@ void AbstractIKCommand::execute()
     wrist.setSetpointOrientation(extensionToWristDesired.getRotation());
 }
 
-}  // namespace aruwsrc::engineer::algorithms
+}  // namespace aruwsrc::engineer::algorithms::inverse_kinematics
