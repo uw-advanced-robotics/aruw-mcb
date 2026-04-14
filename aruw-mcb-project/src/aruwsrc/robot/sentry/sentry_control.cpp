@@ -158,7 +158,7 @@ tap::motor::DjiMotor turretMajorYawMotor(
     true,
     "Major Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (30.0f / 95.0f),  // pulley ratio
+    turretMajor::PULLEY_RATIO,  // pulley ratio
     turretMajor::YAW_MOTOR_CONFIG.startEncoderValue
     // &turretMajorYawAnalogEncoder
 );

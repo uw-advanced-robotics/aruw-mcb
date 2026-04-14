@@ -85,6 +85,9 @@ static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
 
 namespace turretMajor
 {
+inline constexpr float PULLEY_RATIO =
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (30.0f / 95.0f);
+
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 1060,
