@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -16,51 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef TURRET_AUTOTUNE_COMMAND_HPP_
+#define TURRET_AUTOTUNE_COMMAND_HPP_
 
-/**
- * @file gravity_autotune.hpp
- *
- * @brief   Implements gravity-based center-of-mass autotuning for turret calibration.
- *
- * Defines the GravityAutotuneCommand command, which locks the turret at specified
- * test points, measures torque/angle, and estimates the turret's center of
- * mass using least squares regression.
- */
+#include <Eigen/Dense>
 
-#ifndef AUTOTUNE_COMMAND_INTERFACE_HPP_
-#define AUTOTUNE_COMMAND_INTERFACE_HPP_
+#include "tap/algorithms/math_user_utils.hpp"
+#include "tap/drivers.hpp"
 
-#include "tap/control/command.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+
+#include "autotune_command_interface.hpp"
 
 namespace aruwsrc::control::autotune
 {
-/** @brief Non-template class to allow for getting the gravity autotune commands
- * in a weak function, as used in the gravity autotune menu.
- */
-class TurretAutotuneInterface : public tap::control::Command
-{
-public:
-    enum class CalibrationState
-    {
-        WAITING_FOR_SYSTEMS_ONLINE,
-        LOCKING_TURRET,
-        MEASURING_TORQUE,
-        NEXT_LOCATION,
-        CALIBRATION_SUCCESS,
-        CALIBRATION_FAIL,
-        DONE
-    };
-
-    virtual ~TurretAutotuneInterface() = default;
-
-    virtual CalibrationState getCalibrationState() const = 0;
-
-    virtual const char *getName() const = 0;
-
-    virtual void drawCalibrationResult(modm::GraphicDisplay &display) const = 0;
-};
-
-template <uint32_t numTestPoints, turret::algorithms::Axis axis>
+template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
 class TurretAutotuneCommand : public TurretAutotuneInterface
 {
 public:
@@ -76,7 +49,7 @@ public:
         /// The motor to use
         turret::TurretMotor *motor;
         /// A chassis relative controller used to lock the turret.
-        turret::algorithms::ChassisFrameTurretController<axis> *controller;
+        turret::algorithms::ChassisFrameTurretController<AXIS> *controller;
         /// If the pitch motor is inverted
         bool isMotorInverted;
         /// Mass of the pitching part of the turret in units of Kg
@@ -92,7 +65,7 @@ public:
         tap::Drivers *drivers,
         const TurretCalibrationConfig &config,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
-        const std::array<float, numTestPoints> points = {},
+        const std::array<float, NUM_TEST_POINTS> points = {},
         const float velocityZeroThreshold = DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold = DEFAULT_POSITION_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
@@ -125,9 +98,9 @@ public:
             const float minAngle = config.motor->getConfig().minAngle + nudge;
             const float maxAngle = config.motor->getConfig().maxAngle - nudge;
 
-            for (size_t i = 0; i < numTestPoints; ++i)
+            for (size_t i = 0; i < NUM_TEST_POINTS; ++i)
             {
-                this->points[i] = minAngle + i * (maxAngle - minAngle) / (numTestPoints - 1);
+                this->points[i] = minAngle + i * (maxAngle - minAngle) / (NUM_TEST_POINTS - 1);
             }
         }
     }
@@ -332,7 +305,7 @@ protected:
     tap::Drivers *drivers;
     TurretCalibrationConfig config;
     chassis::HolonomicChassisSubsystem *chassis;
-    std::array<float, numTestPoints> points;
+    std::array<float, NUM_TEST_POINTS> points;
 
     const float velocityZeroThreshold;
     const float positionZeroThreshold;
@@ -414,4 +387,4 @@ protected:
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 
-#endif  // AUTOTUNE_COMMAND_INTERFACE_HPP_
+#endif  // TURRET_AUTOTUNE_COMMAND_HPP_
