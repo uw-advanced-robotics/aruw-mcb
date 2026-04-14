@@ -30,7 +30,7 @@
 #include "aruwsrc/robot/hero/hero_chassis_constants.hpp"
 #elif defined(TARGET_TESTBED)
 #include "aruwsrc/robot/testbed/testbed_chassis_constants.hpp"
-#elif defined(TARGET_SENTRY_NAME)
+#elif defined(TARGET_SENTRY_ACHLYS)
 #include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #else  // by default use engineer constants (for robots that don't use them)
 #include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"

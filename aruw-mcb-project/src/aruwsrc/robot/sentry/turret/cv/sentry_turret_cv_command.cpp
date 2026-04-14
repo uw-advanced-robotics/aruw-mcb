@@ -45,32 +45,17 @@ SentryTurretCVCommand::SentryTurretCVCommand(
     aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
-#ifdef TARGET_SENTRY_NAME
     TurretConfig &turretWidowConfig,
-#else
-    TurretConfig &turretLeftConfig,
-    TurretConfig &turretRightConfig,
-#endif
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
       plateHitTracker(plateHitTracker),
       turretMajorSubsystem(turretMajorSubsystem),
       yawControllerMajor(yawControllerMajor),
-#ifdef TARGET_SENTRY_NAME
       turretWidowConfig(turretWidowConfig),
-#else
-      turretLeftConfig(turretLeftConfig),
-      turretRightConfig(turretRightConfig),
-#endif
       sentryTransforms(sentryTransforms)
 {
     this->addSubsystemRequirement(&turretMajorSubsystem);
-#ifdef TARGET_SENTRY_NAME
     this->addSubsystemRequirement(&turretWidowConfig.turretSubsystem);
-#else
-    this->addSubsystemRequirement(&turretLeftConfig.turretSubsystem);
-    this->addSubsystemRequirement(&turretRightConfig.turretSubsystem);
-#endif
 }
 
 bool SentryTurretCVCommand::isReady() { return !isFinished(); }
