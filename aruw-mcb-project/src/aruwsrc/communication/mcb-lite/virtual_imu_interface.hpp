@@ -53,8 +53,9 @@ public:
     float getAy() const override { return imuData.accG.y(); }
     float getAz() const override { return imuData.accG.z(); }
     float getTemp() const { return imuData.temperature; }
+    void periodicIMUUpdate() override {};
 
-    AbstractIMU::ImuState getImuState() { return imuState; }
+    AbstractIMU::ImuState getImuState() const { return imuState; }
 
     virtual inline const char* getName() const { return "Virtual MPU6500"; }
 

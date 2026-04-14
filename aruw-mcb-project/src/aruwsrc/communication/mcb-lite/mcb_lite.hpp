@@ -76,7 +76,7 @@ public:
 
     motor::VirtualCanRxHandler canRxHandler;
     motor::VirtualDJIMotorTxHandler motorTxHandler;
-    motor::VirtualServoRxHandler servoRxHandler;
+    // motor::VirtualServoRxHandler servoRxHandler;
     VirtualIMUInterface imu;
     VirtualAnalog analog;
     VirtualDigital digital;
