@@ -141,6 +141,10 @@ int main()
             PROFILE(drivers->profiler, drivers->turretMajorImu.periodicIMUUpdate, ());
 #endif
 
+#if defined(TARGET_ENGINEER)
+            PROFILE(drivers->profiler, drivers->mcbLite.sendData, ());
+#endif
+
 #ifdef TARGET_TESTBED
             PROFILE(drivers->profiler, drivers->lite.sendData, ());
 #endif
@@ -215,6 +219,11 @@ static void initializeIo(Drivers* drivers)
     drivers->turretMajorImu.initialize(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->turretMajorImu.setCalibrationSamples(4000);
 #endif
+
+#if defined(TARGET_ENGINEER)
+    drivers->mcbLite.initialize();
+#endif
+
 #ifdef TARGET_TESTBED
     drivers->lite.initialize();
 #endif
@@ -261,6 +270,9 @@ static void updateIo(Drivers* drivers)
     drivers->chassisMcbLite.updateSerial();
     drivers->turretMajorImu.read();
 #endif
+#if defined(TARGET_ENGINEER)
+    drivers->mcbLite.updateSerial();
+#endif
 
 #ifdef TARGET_TESTBED
     drivers->lite.updateSerial();
@@ -288,11 +300,11 @@ static void checkTurretMcbDisconnection(Drivers* drivers)
         drivers->mpu6500.getImuState() !=
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
     {
-        tap::buzzer::playNote(&drivers->pwm, 1000);
+        // tap::buzzer::playNote(&drivers->pwm, 1000);
     }
     else
     {
-        tap::buzzer::silenceBuzzer(&drivers->pwm);
+        // tap::buzzer::silenceBuzzer(&drivers->pwm);
     }
 }
 #endif

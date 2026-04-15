@@ -36,6 +36,8 @@
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+
 #endif
 
 namespace aruwsrc::engineer
@@ -62,6 +64,7 @@ public:
               nullptr,
               &rttTelemetry),
           engineerCVCommunication(this),
+          mcbLite(this, tap::communication::serial::Uart::Uart6),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)
     {
@@ -81,7 +84,7 @@ public:
     engineer::EngineerControlOperatorInterface controlOperatorInterface;
     display::OledDisplay oledDisplay;
     communication::serial::EngineerCVCommunication engineerCVCommunication;
-
+    aruwsrc::communication::mcb_lite::MCBLite mcbLite;
     communication::can::TurretMCBCanComm turretMCBCanCommBus1;
     communication::can::TurretMCBCanComm turretMCBCanCommBus2;
 #endif
