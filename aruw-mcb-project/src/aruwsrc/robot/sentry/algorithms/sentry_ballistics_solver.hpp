@@ -72,6 +72,29 @@ public:
         float timeOfFlight;
     };
 
+    struct DebugInfo
+    {
+        bool targetValid = false;
+        bool baseSolutionValid = false;
+        bool dragSolutionAttempted = false;
+        bool dragSolutionAccepted = false;
+        float launchSpeed = 0.0f;
+        float targetPositionX = 0.0f;
+        float targetPositionY = 0.0f;
+        float targetPositionZ = 0.0f;
+        float basePitchAngle = 0.0f;
+        float baseYawAngle = 0.0f;
+        float baseTimeOfFlight = 0.0f;
+        float baseDistance = 0.0f;
+        float correctedPitchAngle = 0.0f;
+        float correctedYawAngle = 0.0f;
+        float correctedTimeOfFlight = 0.0f;
+        float correctedDistance = 0.0f;
+        float pitchCorrection = 0.0f;
+        float yawCorrection = 0.0f;
+        float timeOfFlightCorrection = 0.0f;
+    };
+
     /**
      * Parameter to pass into `tap::algorithms::ballistics::findTargetProjectileIntersection`.
      This
@@ -84,7 +107,6 @@ public:
     static constexpr float PLATE_WIDTH = 0.135f;
     /// The height of a small armor plate, in m
     static constexpr float PLATE_HEIGHT = 0.125f;
-
     /**
      * @return true if the specified yaw and pitch angle errors are small enough such that if a
      * projectile were to be launched, the projectile would hit a small armor plate at
@@ -160,6 +182,7 @@ private:
 
 public:
     const uint8_t turretID;
+    DebugInfo debugInfo = {};
 };
 }  // namespace aruwsrc::sentry::algorithms
 

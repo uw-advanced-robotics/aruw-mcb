@@ -141,6 +141,7 @@ private:
     float lampreyDebugAverage2 = 0;
     float fakeLampreyEncoderDebugPos = 0;
     aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
+
 };
 }  // namespace aruwsrc::sentry
 

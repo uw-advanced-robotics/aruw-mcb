@@ -193,10 +193,27 @@ protected:
      * Timeout used to determine if we should give up on calibration.
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
-
+    
+    mutable bool turretMinorInPosWindow = false;
+    mutable bool turretMinorInVelWindow = false;
+    mutable bool pitchInPosWindow = false;
+    mutable bool yawInPosWindow = false;
     inline bool turretReachedCenterAndNotMoving(turret::TurretSubsystem *turret, bool ignorePitch)
         const
     {
+        turretMinorInPosWindow = compareFloatClose(
+            0.0f, turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0),
+            positionZeroThreshold);
+        turretMinorInVelWindow = compareFloatClose(
+            0.0f, turret->yawMotor.getChassisFrameVelocity(), velocityZeroThreshold);
+
+        pitchInPosWindow = compareFloatClose(
+            0.0f, turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(0),
+            positionZeroThreshold);
+        yawInPosWindow = compareFloatClose(
+            0.0f, turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0),
+            positionZeroThreshold);
+
         return compareFloatClose(
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),

@@ -28,6 +28,7 @@
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
+#include "aruwsrc/algorithms/spherical_projectile_aim.hpp"
 
 using namespace tap::algorithms;
 using namespace modm;
@@ -139,6 +140,17 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
                 &lastComputedSolution->yawAngle,
                 &lastComputedSolution->timeOfFlight,
                 turretSubsystem.getPitchOffset()))
+        {
+            lastComputedSolution = std::nullopt;
+        }
+        else if (!applySphereDragBallisticsCompensation(
+                     targetState,
+                     launchSpeed,
+                     &lastComputedSolution->pitchAngle,
+                     &lastComputedSolution->yawAngle,
+                     &lastComputedSolution->timeOfFlight,
+                     &lastComputedSolution->distance,
+                     turretSubsystem.getPitchOffset()))
         {
             lastComputedSolution = std::nullopt;
         }

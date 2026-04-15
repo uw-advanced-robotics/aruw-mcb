@@ -104,9 +104,18 @@ void SentryImuCalibrateCommand::initialize()
     lampreyPos = 0;
 }
 
+
+volatile bool majorInPosWindow = false;
+volatile bool majorINVelWindow = false;
 static inline bool turretMajorReachedCenterAndNotMoving(
     aruwsrc::control::turret::YawTurretSubsystem &turret)
 {
+    majorInPosWindow = compareFloatClose(
+        0.0f, turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0),
+        SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
+    majorINVelWindow = compareFloatClose(
+        0.0f, turret.getReadOnlyMotor().getChassisFrameVelocity(),
+        SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD);
     return compareFloatClose(
                0.0f,
                turret.getReadOnlyMotor().getChassisFrameVelocity(),
