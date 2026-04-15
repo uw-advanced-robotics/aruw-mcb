@@ -80,9 +80,12 @@ public:
         {
             angle = lookupTable.interpolate(angleRaw);
         }
-        if (lastUpdateTime == 0){
+        if (lastUpdateTime == 0)
+        {
             encoder = tap::algorithms::WrappedFloat(angle, 0, M_TWOPI);
-        } else {
+        }
+        else
+        {
             encoder += encoder.minDifference(angle);
         }
 
