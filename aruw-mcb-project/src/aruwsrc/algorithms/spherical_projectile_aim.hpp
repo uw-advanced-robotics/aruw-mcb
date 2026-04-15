@@ -205,7 +205,7 @@ inline std::optional<DragIntersection> simulateSphereDragIntersection(
         .horizontalPosition = 0.0f,
         .verticalPosition = 0.0f,
         .horizontalVelocity = launchSpeed * cosf(pitchAngle),
-        .verticalVelocity = launchSpeed * sinf(pitchAngle),
+        .verticalVelocity = -launchSpeed * sinf(pitchAngle),
     };
 
     if (projectileState.horizontalVelocity <= 0.0f)
@@ -417,7 +417,6 @@ inline bool applySphereDragBallisticsCompensation(
     }
 
     float compensatedPitch = *pitchAngle;
-    float compensatedYaw = *yawAngle;
     float compensatedTimeOfFlight = *timeOfFlight;
     modm::Vector3f compensatedTargetPosition = targetState.position;
 
@@ -451,11 +450,9 @@ inline bool applySphereDragBallisticsCompensation(
 
         compensatedPitch = solvedPitch;
         compensatedTimeOfFlight = solvedTimeOfFlight;
-        compensatedYaw = atan2f(compensatedTargetPosition.y, compensatedTargetPosition.x);
     }
 
     *pitchAngle = compensatedPitch;
-    *yawAngle = compensatedYaw;
     *timeOfFlight = compensatedTimeOfFlight;
     *distance = compensatedTargetPosition.getLength();
     return true;

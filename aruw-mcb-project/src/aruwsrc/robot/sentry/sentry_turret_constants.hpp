@@ -268,7 +268,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
     .kp = 120'000.0f,
     .ki = 20'000.0f,
     .kd = 3'000.0f,
-    .maxICumulative = 10'000.0f,
+    .maxICumulative = 5'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 60.0f,

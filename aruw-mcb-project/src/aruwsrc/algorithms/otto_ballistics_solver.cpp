@@ -143,17 +143,19 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         {
             lastComputedSolution = std::nullopt;
         }
-        else if (!applySphereDragBallisticsCompensation(
-                     targetState,
-                     launchSpeed,
-                     &lastComputedSolution->pitchAngle,
-                     &lastComputedSolution->yawAngle,
-                     &lastComputedSolution->timeOfFlight,
-                     &lastComputedSolution->distance,
-                     turretSubsystem.getPitchOffset()))
-        {
-            lastComputedSolution = std::nullopt;
-        }
+        // Drag-corrected refinement disabled for now while validating base sentry/standard
+        // ballistics behavior. Leave implementation in-tree for branch-local debugging.
+        // else if (!applySphereDragBallisticsCompensation(
+        //              targetState,
+        //              launchSpeed,
+        //              &lastComputedSolution->pitchAngle,
+        //              &lastComputedSolution->yawAngle,
+        //              &lastComputedSolution->timeOfFlight,
+        //              &lastComputedSolution->distance,
+        //              turretSubsystem.getPitchOffset()))
+        // {
+        //     lastComputedSolution = std::nullopt;
+        // }
     }
 
     return lastComputedSolution;

@@ -56,7 +56,31 @@ SentryBallisticsSolver::SentryBallisticsSolver(
 std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver::
     computeTurretAimAngles()
 {
-    debugInfo = {};
+    debugTargetValid = false;
+    debugBaseSolutionValid = false;
+    debugDragSolutionAttempted = false;
+    debugDragSolutionAccepted = false;
+    debugLaunchSpeed = 0.0f;
+    debugTargetPositionX = 0.0f;
+    debugTargetPositionY = 0.0f;
+    debugTargetPositionZ = 0.0f;
+    debugBasePitchAngle = 0.0f;
+    debugBaseYawAngle = 0.0f;
+    debugBaseTimeOfFlight = 0.0f;
+    debugBaseDistance = 0.0f;
+    debugCorrectedPitchAngle = 0.0f;
+    debugCorrectedYawAngle = 0.0f;
+    debugCorrectedTimeOfFlight = 0.0f;
+    debugCorrectedDistance = 0.0f;
+    debugFinalPitchAngle = 0.0f;
+    debugFinalYawAngle = 0.0f;
+    debugFinalTimeOfFlight = 0.0f;
+    debugFinalDistance = 0.0f;
+    debugBaseVerticalError = 0.0f;
+    debugCorrectedVerticalError = 0.0f;
+    debugPitchCorrection = 0.0f;
+    debugYawCorrection = 0.0f;
+    debugTimeOfFlightCorrection = 0.0f;
 
     const auto &aimData = visionCoprocessor.getLastAimData(turretID);
     // Verify that CV is actually online and that the aimData had a target
@@ -79,7 +103,7 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
         {
             launchSpeed = defaultLaunchSpeed;
         }
-        debugInfo.launchSpeed = launchSpeed;
+        debugLaunchSpeed = launchSpeed;
 
         auto &worldToTurret = transformer.getWorldToTurret(turretID);
         auto &worldToMajor = transformer.getWorldToTurretMajor();
@@ -111,10 +135,10 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
         // project the target position forward in time s.t. we are computing a ballistics solution
         // for a target "now" rather than whenever the camera saw the target
         targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
-        debugInfo.targetValid = true;
-        debugInfo.targetPositionX = targetState.position.x;
-        debugInfo.targetPositionY = targetState.position.y;
-        debugInfo.targetPositionZ = targetState.position.z;
+        debugTargetValid = true;
+        debugTargetPositionX = targetState.position.x;
+        debugTargetPositionY = targetState.position.y;
+        debugTargetPositionZ = targetState.position.z;
 
         lastComputedSolution = BallisticsSolution();
         lastComputedSolution->distance = targetState.position.getLength();
@@ -132,50 +156,86 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
         }
         else
         {
-            debugInfo.baseSolutionValid = true;
-            debugInfo.basePitchAngle = lastComputedSolution->pitchAngle;
-            debugInfo.baseYawAngle = lastComputedSolution->yawAngle;
-            debugInfo.baseTimeOfFlight = lastComputedSolution->timeOfFlight;
-            debugInfo.baseDistance = lastComputedSolution->distance;
-            debugInfo.correctedPitchAngle = debugInfo.basePitchAngle;
-            debugInfo.correctedYawAngle = debugInfo.baseYawAngle;
-            debugInfo.correctedTimeOfFlight = debugInfo.baseTimeOfFlight;
-            debugInfo.correctedDistance = debugInfo.baseDistance;
+            debugBaseSolutionValid = true;
+            debugBasePitchAngle = lastComputedSolution->pitchAngle;
+            debugBaseYawAngle = lastComputedSolution->yawAngle;
+            debugBaseTimeOfFlight = lastComputedSolution->timeOfFlight;
+            debugBaseDistance = lastComputedSolution->distance;
+            debugCorrectedPitchAngle = debugBasePitchAngle;
+            debugCorrectedYawAngle = debugBaseYawAngle;
+            debugCorrectedTimeOfFlight = debugBaseTimeOfFlight;
+            debugCorrectedDistance = debugBaseDistance;
+            debugFinalPitchAngle = debugBasePitchAngle;
+            debugFinalYawAngle = debugBaseYawAngle;
+            debugFinalTimeOfFlight = debugBaseTimeOfFlight;
+            debugFinalDistance = debugBaseDistance;
 
-            BallisticsSolution dragCorrectedSolution = lastComputedSolution.value();
-            debugInfo.dragSolutionAttempted = true;
-
-            if (aruwsrc::algorithms::applySphereDragBallisticsCompensation(
-                    targetState,
-                    launchSpeed,
-                    &dragCorrectedSolution.pitchAngle,
-                    &dragCorrectedSolution.yawAngle,
-                    &dragCorrectedSolution.timeOfFlight,
-                    &dragCorrectedSolution.distance,
-                    turretPitchOffset))
-            {
-                debugInfo.correctedPitchAngle = dragCorrectedSolution.pitchAngle;
-                debugInfo.correctedYawAngle = dragCorrectedSolution.yawAngle;
-                debugInfo.correctedTimeOfFlight = dragCorrectedSolution.timeOfFlight;
-                debugInfo.correctedDistance = dragCorrectedSolution.distance;
-                debugInfo.pitchCorrection =
-                    dragCorrectedSolution.pitchAngle - debugInfo.basePitchAngle;
-                debugInfo.yawCorrection = atan2f(
-                    sinf(dragCorrectedSolution.yawAngle - debugInfo.baseYawAngle),
-                    cosf(dragCorrectedSolution.yawAngle - debugInfo.baseYawAngle));
-                debugInfo.timeOfFlightCorrection =
-                    dragCorrectedSolution.timeOfFlight - debugInfo.baseTimeOfFlight;
-
-                if (fabsf(debugInfo.pitchCorrection) <= modm::toRadian(8.0f) &&
-                    fabsf(debugInfo.yawCorrection) <= modm::toRadian(8.0f) &&
-                    dragCorrectedSolution.timeOfFlight > 0.0f &&
-                    dragCorrectedSolution.timeOfFlight <
-                        2.0f * fmaxf(debugInfo.baseTimeOfFlight, 0.05f))
-                {
-                    lastComputedSolution = dragCorrectedSolution;
-                    debugInfo.dragSolutionAccepted = true;
-                }
-            }
+            // Drag-corrected refinement disabled for now while validating base sentry ballistics
+            // behavior. Leave implementation in-tree for branch-local debugging.
+            //
+            // BallisticsSolution dragCorrectedSolution = lastComputedSolution.value();
+            // debugDragSolutionAttempted = true;
+            //
+            // const float horizontalDistance = sqrtf(
+            //     targetState.position.x * targetState.position.x +
+            //     targetState.position.y * targetState.position.y);
+            // const auto baseIntersection =
+            //     aruwsrc::algorithms::simulateSphereDragIntersection(
+            //         horizontalDistance,
+            //         targetState.position.z,
+            //         launchSpeed,
+            //         debugBasePitchAngle,
+            //         turretPitchOffset);
+            // if (baseIntersection.has_value())
+            // {
+            //     debugBaseVerticalError = baseIntersection->verticalError;
+            //     debugCorrectedVerticalError = baseIntersection->verticalError;
+            // }
+            //
+            // if (aruwsrc::algorithms::applySphereDragBallisticsCompensation(
+            //         targetState,
+            //         launchSpeed,
+            //         &dragCorrectedSolution.pitchAngle,
+            //         &dragCorrectedSolution.yawAngle,
+            //         &dragCorrectedSolution.timeOfFlight,
+            //         &dragCorrectedSolution.distance,
+            //         turretPitchOffset))
+            // {
+            //     debugCorrectedPitchAngle = dragCorrectedSolution.pitchAngle;
+            //     debugCorrectedYawAngle = debugBaseYawAngle;
+            //     debugCorrectedTimeOfFlight = dragCorrectedSolution.timeOfFlight;
+            //     debugCorrectedDistance = dragCorrectedSolution.distance;
+            //     debugPitchCorrection =
+            //         dragCorrectedSolution.pitchAngle - debugBasePitchAngle;
+            //     debugYawCorrection = 0.0f;
+            //     debugTimeOfFlightCorrection =
+            //         dragCorrectedSolution.timeOfFlight - debugBaseTimeOfFlight;
+            //
+            //     const auto correctedIntersection =
+            //         aruwsrc::algorithms::simulateSphereDragIntersection(
+            //             horizontalDistance,
+            //             targetState.position.z,
+            //             launchSpeed,
+            //             dragCorrectedSolution.pitchAngle,
+            //             turretPitchOffset);
+            //     if (correctedIntersection.has_value())
+            //     {
+            //         debugCorrectedVerticalError = correctedIntersection->verticalError;
+            //     }
+            //
+            //     if (fabsf(debugPitchCorrection) <= modm::toRadian(8.0f) &&
+            //         dragCorrectedSolution.timeOfFlight > 0.0f &&
+            //         dragCorrectedSolution.timeOfFlight <
+            //             2.0f * fmaxf(debugBaseTimeOfFlight, 0.05f))
+            //     {
+            //         lastComputedSolution = dragCorrectedSolution;
+            //         debugDragSolutionAccepted = true;
+            //         debugFinalPitchAngle = dragCorrectedSolution.pitchAngle;
+            //         debugFinalYawAngle = debugBaseYawAngle;
+            //         debugFinalTimeOfFlight = dragCorrectedSolution.timeOfFlight;
+            //         debugFinalDistance = dragCorrectedSolution.distance;
+            //     }
+            // }
         }
     }
 

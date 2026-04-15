@@ -72,29 +72,6 @@ public:
         float timeOfFlight;
     };
 
-    struct DebugInfo
-    {
-        bool targetValid = false;
-        bool baseSolutionValid = false;
-        bool dragSolutionAttempted = false;
-        bool dragSolutionAccepted = false;
-        float launchSpeed = 0.0f;
-        float targetPositionX = 0.0f;
-        float targetPositionY = 0.0f;
-        float targetPositionZ = 0.0f;
-        float basePitchAngle = 0.0f;
-        float baseYawAngle = 0.0f;
-        float baseTimeOfFlight = 0.0f;
-        float baseDistance = 0.0f;
-        float correctedPitchAngle = 0.0f;
-        float correctedYawAngle = 0.0f;
-        float correctedTimeOfFlight = 0.0f;
-        float correctedDistance = 0.0f;
-        float pitchCorrection = 0.0f;
-        float yawCorrection = 0.0f;
-        float timeOfFlightCorrection = 0.0f;
-    };
-
     /**
      * Parameter to pass into `tap::algorithms::ballistics::findTargetProjectileIntersection`.
      This
@@ -182,7 +159,32 @@ private:
 
 public:
     const uint8_t turretID;
-    DebugInfo debugInfo = {};
+
+    bool debugTargetValid = false;
+    bool debugBaseSolutionValid = false;
+    bool debugDragSolutionAttempted = false;
+    bool debugDragSolutionAccepted = false;
+    float debugLaunchSpeed = 0.0f;
+    float debugTargetPositionX = 0.0f;
+    float debugTargetPositionY = 0.0f;
+    float debugTargetPositionZ = 0.0f;
+    float debugBasePitchAngle = 0.0f;
+    float debugBaseYawAngle = 0.0f;
+    float debugBaseTimeOfFlight = 0.0f;
+    float debugBaseDistance = 0.0f;
+    float debugCorrectedPitchAngle = 0.0f;
+    float debugCorrectedYawAngle = 0.0f;
+    float debugCorrectedTimeOfFlight = 0.0f;
+    float debugCorrectedDistance = 0.0f;
+    float debugFinalPitchAngle = 0.0f;
+    float debugFinalYawAngle = 0.0f;
+    float debugFinalTimeOfFlight = 0.0f;
+    float debugFinalDistance = 0.0f;
+    float debugBaseVerticalError = 0.0f;
+    float debugCorrectedVerticalError = 0.0f;
+    float debugPitchCorrection = 0.0f;
+    float debugYawCorrection = 0.0f;
+    float debugTimeOfFlightCorrection = 0.0f;
 };
 }  // namespace aruwsrc::sentry::algorithms
 

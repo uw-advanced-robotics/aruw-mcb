@@ -49,9 +49,12 @@ bool SentryControlOperatorInterface::isDriveMode()
     Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
 
     // Manual-drive-enabled modes from the 2026 sentry table:
-    // left mid + (right up/right mid), left down + (right mid/right down).
-    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
+    // left up + right mid, left mid + (right up/right mid), left down + (right up/right
+    // mid/right down).
+    return (leftState == Remote::SwitchState::UP && rightState == Remote::SwitchState::MID) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
            (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::MID) ||
+           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::MID) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
 }
