@@ -29,15 +29,15 @@
 
 namespace
 {
-bool writeRttLine(const std::string& line)
+bool writeRttLine(const uint8_t* line, std::size_t len)
 {
     // RTT modes: Skip drops if full, Trim sends partial, Block waits for space.
     // Telemetry uses Skip so JSON lines are either complete or not sent.
     auto written = aruwsrc::communication::rtt::seggerRttWriteWithMode(
-        reinterpret_cast<const uint8_t*>(line.data()),
-        line.size(),
+        line,
+        len,
         aruwsrc::communication::rtt::RttWriteMode::NoBlockSkip);
-    return written == line.size();
+    return written == len;
 }
 }  // namespace
 
@@ -111,12 +111,16 @@ bool RttTelemetry::updateTelemetryAsync()
                 errorMessageProcessing,
                 now);
 
-            // In Ozone mode (idle, no messages received yet), don't send telemetry
-            // heartbeat info, only prints and errors are allowed
             ozoneMode = !firstInputReceived;
-
-            logHeartbeatInfo();
-            sendQueuedMessages(ozoneMode);
+            if (ozoneMode)
+            {
+                logHeartbeatInfo();
+            }
+            else
+            {
+                logHeartbeatInfo();
+                sendQueuedMessages();
+            }
         }
 
         // Yield to allow other protothreads to run
@@ -211,132 +215,117 @@ bool RttTelemetry::ensureSpaceOrClearQueue(
     modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
     std::size_t requiredSpace,
     std::size_t available,
-    std::size_t currentSize,
-    const char* queueName)
+    std::size_t currentSize)
 {
     if (currentSize + requiredSpace > available)
     {
-        std::size_t destroyed = 0;
         while (!queue.isEmpty())
         {
             queue.removeBack();
-            ++destroyed;
         }
-        std::string err = std::string("Out of memory.") + "Av: " + std::to_string(available) +
-                          ", req: " + std::to_string(requiredSpace) +
-                          ", buf use: " + std::to_string(currentSize) +
-                          ". Del: " + std::to_string(destroyed) + ". Cleared " + queueName;
-        RAISE_ERROR(drivers, this, err.c_str());
+        RAISE_ERROR(drivers, this, "RTT Telemetry buffer full. Cleared queue.");
         return false;
     }
     return true;
 }
 
 void RttTelemetry::appendEvents(
-    std::string& out,
+    char* out_buf,
+    std::size_t& out_len,
     modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
     const char* label,
     std::size_t available)
 {
-    out += '"';
-    out.append(label);
-    out += '"';
-    out += ":[";
+    auto append = [&](char c) {
+        if (out_len < available) out_buf[out_len++] = c;
+    };
+    auto append_str = [&](const char* s) {
+        while (*s) append(*s++);
+    };
+
+    append('"');
+    append_str(label);
+    append('"');
+    append(':');
+    append('[');
+
     while (!queue.isEmpty())
     {
         const auto& msg = queue.getFront();
 
-        // Calculate space needed: quotes + escaped content + potential comma
-        std::size_t extra = 2;  // Opening and closing quotes
+        std::size_t extra = 2;
         for (size_t i = 0; i < msg.length; i++)
         {
             extra++;
-            if (msg.data[i] == '"' || msg.data[i] == '\\')
-            {
-                extra++;  // Extra char for escape
-            }
+            if (msg.data[i] == '"' || msg.data[i] == '\\') extra++;
         }
 
-        if (!ensureSpaceOrClearQueue(queue, extra + 2, available, out.size(), label))
+        if (!ensureSpaceOrClearQueue(queue, extra + 2, available, out_len))
         {
             break;
         }
 
         queue.removeFront();
 
-        out += '"';
+        append('"');
         for (size_t i = 0; i < msg.length; i++)
         {
             char c = msg.data[i];
-            if (c == '"' || c == '\\')
-            {
-                out += '\\';
-            }
-            out += c;
+            if (c == '"' || c == '\\') append('\\');
+            append(c);
         }
-        out += '"';
-        if (!queue.isEmpty())
-        {
-            out += ',';
-        }
+        append('"');
+
+        if (!queue.isEmpty()) append(',');
     }
-    out += ']';
+    append(']');
 }
 
-void RttTelemetry::sendQueuedMessages(bool ozone)
+void RttTelemetry::sendQueuedMessages()
 {
-    // Send only if there are any messages, errors, or prints to send
-    if (messageQueue.isEmpty() && errorQueue.isEmpty() && printQueue.isEmpty())
-    {
-        return;
-    }
+    if (messageQueue.isEmpty() && errorQueue.isEmpty() && printQueue.isEmpty()) return;
 
     const std::size_t available = aruwsrc::communication::rtt::seggerRttGetAvailWriteSpace();
-    // Require space for at least "{}\\n" plus one payload char before building a line.
     if (available <= rttLineOverhead)
     {
-        std::string err = std::string("Insufficient RTT space available (") +
-                          std::to_string(available) + " bytes). Cannot send queued messages.";
-        RAISE_ERROR(drivers, this, err.c_str());
+        RAISE_ERROR(drivers, this, "Insufficient RTT space available.");
         return;
     }
 
-    std::string out;
-    out.reserve(available);
-    out += '{';
+    static char out_buf[2048];
+    std::size_t out_len = 0;
+
+    // Safety cap to prevent buffer overflow
+    const std::size_t max_write = (available < sizeof(out_buf)) ? available : sizeof(out_buf);
+
+    auto append = [&](char c) {
+        if (out_len < max_write) out_buf[out_len++] = c;
+    };
+
+    append('{');
     bool first = true;
     while (!messageQueue.isEmpty())
     {
-        // Get from back to ensure we send the heartbeat
         const auto& msg = messageQueue.getBack();
         const std::size_t extra = (first ? 0 : 1) + msg.length;
 
-        if (!ensureSpaceOrClearQueue(messageQueue, extra + 2, available, out.size(), "message"))
-        {
-            break;
-        }
+        if (!ensureSpaceOrClearQueue(messageQueue, extra + 2, max_write, out_len)) break;
 
         messageQueue.removeBack();
-        if (!first)
-        {
-            out += ',';
-        }
+        if (!first) append(',');
         first = false;
-        out.append(msg.data, msg.length);
-        if (ozone)
-        {
-            // After sending timestamp, break to avoid flooding in ozone mode
-            break;
-        }
+
+        for (size_t i = 0; i < msg.length; ++i) append(msg.data[i]);
     }
-    out += ',';
-    appendEvents(out, errorQueue, "_ERROR_", available);
-    out += ',';
-    appendEvents(out, printQueue, "_PRINT_", available);
 
-    out += "}\n";
+    append(',');
+    appendEvents(out_buf, out_len, errorQueue, "_ERROR_", max_write);
+    append(',');
+    appendEvents(out_buf, out_len, printQueue, "_PRINT_", max_write);
+    append('}');
+    append('\n');
 
-    if (!writeRttLine(out))
+    if (!writeRttLine(reinterpret_cast<const uint8_t*>(out_buf), out_len))
     {
         RAISE_ERROR(drivers, this, "Failed to write RTT telemetry line.");
     }

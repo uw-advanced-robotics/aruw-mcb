@@ -194,6 +194,9 @@ Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [pro
         - "run-tests": build core code and tests for the current host platform, and execute them locally with the test runner.
         - "build-sim": build all code for the simulated environment, for the current host platform.
         - "run-sim": build all code for the simulated environment, for the current host platform, and execute the simulator locally.
+        - "ozone": builds the code and launches ozone. If no connection options are specified, Fleet Status is first queried for the appropriate IP, falling back to a local cache, finally defaulting to USB.
+            - "ip=<IP>", "--ip=<IP>": sets the IP address of the robot to connect to.
+            - "usb=1", "--usb": forces the use of USB, regardless of whether a known IP is present.
     "TARGET_<ROBOT_TYPE>" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.
         - <ROBOT_TYPE> must be one of the following:
             - STANDARD_NULL, STANDARD_VOID, DRONE, ENGINEER, SENTRY_ECLIPSE, HERO_ZERO

@@ -17,12 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Guys please dont make fun of me
 #if defined(TARGET_ENGINEER)
-
-#include "aruwsrc/util_macros.hpp"
-
-#if defined(TARGET_ENGINEER)
+#include <memory>
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
@@ -31,8 +27,10 @@
 #include "tap/control/command_scheduler.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 
+#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"  // placeholder
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
@@ -57,26 +55,26 @@
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/util_macros.hpp"
 
-// #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
+// #include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
-#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
-#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/robot/engineer/algorithms/engineer_transform_subsystem.hpp"
+#include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
 
 // check which of these r important
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -90,25 +88,25 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 
+using namespace aruwsrc::algorithms::odometry;
+using namespace aruwsrc::control::buzzer;
+using namespace aruwsrc::control::chassis;
 using namespace aruwsrc::control::client_display;
 using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::digital;
 using namespace aruwsrc::control::joint;
 using namespace aruwsrc::control::joint::homing;
 using namespace aruwsrc::control::joint::homing::trigger;
+using namespace aruwsrc::control::turret;
 using namespace aruwsrc::engineer;
-using namespace aruwsrc::engineer::wrist;
+using namespace aruwsrc::engineer::algorithms;
 using namespace aruwsrc::engineer::cube_storage;
+using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
 using namespace tap::gpio;
 
 using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
-
-using namespace aruwsrc::control::turret;
-using namespace aruwsrc::algorithms::odometry;
-using namespace aruwsrc::control::buzzer;
-using namespace aruwsrc::control::chassis;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -195,6 +193,24 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
+tap::encoder::CanEncoder parallelOmniOne(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
+
+tap::encoder::CanEncoder parallelOmniTwo(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,
+    tap::can::CanBus::CAN_BUS2,  // TODO: find correct CAN bus
+    true);                       // TODO: find correct inversion
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
+
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
      aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
@@ -244,14 +260,13 @@ LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
 //     false,
 //     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-// JointSubsystem wristRollSubsystem(drivers(), wristMotorThree, WRIST_ROLL_CONFIG);
-// tap::encoder::CanEncoder wristEncoderTheta1(
-//     drivers(),
-//     aruwsrc::engineer::WRIST_THETA1_ENCODER_ID,
-//     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-//     false,
-//     1,
-//     WRIST_HOME_THETA1);
+tap::encoder::CanEncoder wristEncoderTheta1(
+    drivers(),
+    aruwsrc::engineer::WRIST_THETA1_ENCODER_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    false,
+    1,
+    WRIST_HOME_THETA1);
 
 // tap::encoder::CanEncoder wristEncoderTheta2(
 //     drivers(),
@@ -261,22 +276,14 @@ LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
 //     1,
 //     WRIST_HOME_THETA2);
 
-// tap::encoder::CanEncoder wristEncoderTheta3(
-//     drivers(),
-//     aruwsrc::engineer::WRIST_THETA3_ENCODER_ID,
-//     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-//     false,
-//     1,
-//     WRIST_HOME_THETA3);
-
-// tap::motor::DjiMotor extensionMotor(
-//     drivers(),
-//     aruwsrc::engineer::EXTENSION_MOTOR_ID,
-//     aruwsrc::engineer::CAN_BUS_EXTENSION,
-//     true,  // inverted? test
-//     "Extension Motor",
-//     false,
-//     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+tap::motor::DjiMotor extensionMotor(
+    drivers(),
+    aruwsrc::engineer::EXTENSION_MOTOR_ID,
+    aruwsrc::engineer::CAN_BUS_EXTENSION,
+    true,  // inverted? test
+    "Extension Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
     &drivers()->digital,
@@ -287,7 +294,7 @@ LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
 
-aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
+aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
     drivers(),
     &currentSensor,
     &voltageSensor,
@@ -299,23 +306,42 @@ aruwsrc::control::chassis::XDriveChassisSubsystem xDriveChassis(
     WHEEL_RADIUS,
     WHEELBASE_RADIUS);
 
-tap::encoder::CanEncoder parallelOmniOne(
+CubeStorageSubsystem cubeStorage(
     drivers(),
-    tap::encoder::CanEncoderId::ID0,  // TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
-    true);                            // TODO: find correct inversion
+    cubeStorageMotor,
+    cubeStorageTrigger,
+    CUBE_STORAGE_CONFIG);
 
-tap::encoder::CanEncoder parallelOmniTwo(
+WristSubsystem wristSubsystem(
     drivers(),
-    tap::encoder::CanEncoderId::ID1,  // TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
-    true);                            // TODO: find correct inversion
+    wristMotorOne,
+    wristMotorTwo,
+    wristMotorThree,
+    wristEncoderTheta1,
+    wristEncoderTheta2,
+    WRIST_CONFIG);
 
-tap::encoder::CanEncoder perpendicularOmni(
+TriggerHomedJointSubsystem extensionSubsystem(
     drivers(),
-    tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
-    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
-    true);                            // TODO: find correct inversion
+    extensionMotor,
+    extensionTrigger,
+    EXTENSION_CONFIG);
+
+// update vals
+DualDigitalOutSubsystem leftSuckSubsystem(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::Y,
+    true,
+    tap::gpio::Digital::OutputPin::Z,
+    false);
+DualDigitalOutSubsystem rightSuckSubsystem(
+    drivers(),
+    drivers()->digital,
+    tap::gpio::Digital::OutputPin::Y,
+    true,
+    tap::gpio::Digital::OutputPin::Z,
+    false);
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
     &parallelOmniOne,
@@ -336,21 +362,24 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
     perpendicularCenterToWheelDistance,
     odomFrameToRobotFrame);
 
-// transforms
-aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformer transformer(
-    odometrySubsystem,
-    engTurret);
-aruwsrc::algorithms::odometry::transforms::StandardAnderHeroTransformerSubsystem transformSubsystem(
-    *drivers(),
-    transformer);
+aruwsrc::communication::mcb_lite::VirtualIMUInterface turretPitchImu;  // placeholder
 
-aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformAdapter transformAdapter(
-    transformer);
+// transforms
+EngineerTransforms transformer(
+    odometrySubsystem,
+    drivers()->chassisIsm,
+    engTurret,
+    turretPitchImu,
+    extensionSubsystem,
+    wristSubsystem,
+    cubeStorage);
+
+EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
-    &xDriveChassis,
+    &chassisSubsystem,
     &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
@@ -362,15 +391,15 @@ aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
     aruwsrc::control::turret::algorithms::Axis::YAW>
     chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
 
-BuzzerSubsystem engineerBuzzer(drivers());
+BuzzerSubsystem buzzerSubsystem(drivers());
 
 NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
-    engineerBuzzer,
+    buzzerSubsystem,
     IMU_CALIBRATE_SUCCESS_NOTES,
     IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS);
 
 NoteSequenceCommand imuCalibrateFailBuzzCommand(
-    engineerBuzzer,
+    buzzerSubsystem,
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
@@ -383,7 +412,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         &chassisFramePitchTurretController,
         true,
     }},
-    &xDriveChassis,
+    &chassisSubsystem,
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &imuCalibrateSuccessBuzzCommand,
@@ -395,44 +424,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
     drivers(),
     imuCalibrateCommand);
-
-CubeStorageSubsystem cubeStorage(
-    drivers(),
-    cubeStorageMotor,
-    cubeStorageTrigger,
-    CUBE_STORAGE_CONFIG);
-
-// WristSubsystem wristSubsystem(
-//     drivers(),
-//     wristMotorOne,
-//     wristMotorTwo,
-//     wristMotorThree,
-//     wristEncoderTheta1,
-//     wristEncoderTheta2,
-//     wristEncoderTheta3,
-//     WRIST_CONFIG);
-
-// TriggerHomedJointSubsystem extensionSubsystem(
-//     drivers(),
-//     extensionMotor,
-//     extensionTrigger,
-//     EXTENSION_CONFIG);
-
-// update vals
-DualDigitalOutSubsystem leftSuckSubsystem(
-    drivers(),
-    drivers()->digital,
-    tap::gpio::Digital::OutputPin::Y,
-    true,
-    tap::gpio::Digital::OutputPin::Z,
-    false);
-DualDigitalOutSubsystem rightSuckSubsystem(
-    drivers(),
-    drivers()->digital,
-    tap::gpio::Digital::OutputPin::Y,
-    true,
-    tap::gpio::Digital::OutputPin::Z,
-    false);
 
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());
@@ -457,7 +448,7 @@ SetpointMoveManualCommand cubeManualControl(
 aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
-    &xDriveChassis);
+    &chassisSubsystem);
 
 // WristControllerCommand wristControllerCommand(
 //     wristSubsystem,
@@ -488,10 +479,18 @@ SetpointMovePositionCommand leftCubePosition(cubeStorage, CUBE_STORAGE_LEFT_SETP
 SetpointMovePositionCommand rightCubePosition(cubeStorage, CUBE_STORAGE_RIGHT_SETPOINT);
 SetpointMovePositionCommand centerCubePosition(cubeStorage, CUBE_STORAGE_CENTER_SETPOINT);
 
-// ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem, wristRollSubsystem);
+ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem);
 
-// SelectCubePositionCommand selectCubeAddPositionCommand(cubeStorage, wristRollSubsystem, true);
-// SelectCubePositionCommand selectCubeRemovePositionCommand(cubeStorage, wristRollSubsystem, false);
+SelectCubePositionCommand selectCubeAddPositionCommand(
+    cubeStorage,
+    true,
+    transformer.getCubeStore1ToEndEffector(),
+    transformer.getCubeStore2ToEndEffector());
+SelectCubePositionCommand selectCubeRemovePositionCommand(
+    cubeStorage,
+    false,
+    transformer.getCubeStore1ToEndEffector(),
+    transformer.getCubeStore2ToEndEffector());
 CubePositionDigitalOutCommand cubeStorageSuckOnCommand(
     cubeStorage,
     leftSuckSubsystem,
@@ -522,18 +521,18 @@ CubePositionDigitalOutCommand cubeStorageSuckOffCommand(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-// tap::control::PressCommandMapping leftUp(
-//     drivers(),
-//     {&cubeStorageHome, &extensionHome},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
+auto leftUp = std::make_unique<tap::control::PressCommandMapping>(
+    drivers(),
+    std::vector<Command*>{&cubeStorageHome, &extensionHome},
+    &leftUpRms);
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    xDriveChassis.initialize();
-    // extensionSubsystem.initialize();
-    // wristRollSubsystem.initialize();
-    // wristSubsystem.initialize();
+    chassisSubsystem.initialize();
+    extensionSubsystem.initialize();
+    wristSubsystem.initialize();
     cubeStorage.initialize();
     leftSuckSubsystem.initialize();
     rightSuckSubsystem.initialize();
@@ -543,10 +542,9 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&xDriveChassis);
-    // drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
-    // drivers->commandScheduler.registerSubsystem(&wristRollSubsystem);
-    // drivers->commandScheduler.registerSubsystem(&wristSubsystem);
+    drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
+    drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
+    drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
@@ -556,10 +554,9 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
-    xDriveChassis.setDefaultCommand(&chassisDriveCommand);
-    // extensionSubsystem.setDefaultCommand(&extensionManualControl);
-    // wristSubsystem.setDefaultCommand(&wristControllerCommand);
-    // wristRollSubsystem.setDefaultCommand(&wristControllerCommand);
+    chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
+    extensionSubsystem.setDefaultCommand(&extensionManualControl);
+    wristSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
 
     // clientDisplay.setDefaultCommand(&clientDisplayCommand);
@@ -575,7 +572,7 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
     // drivers->commandMapper.addMap(&retrieveCube);
     // drivers->commandMapper.addMap(&cyclePositions);
     // drivers->commandMapper.addMap(&cPressed);
-    // drivers->commandMapper.addMap(&leftUp);
+    drivers->commandMapper.addMap(std::move(leftUp));
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }
@@ -603,5 +600,4 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
     bob=70;
 }
 }  // namespace aruwsrc::engineer
-#endif
 #endif

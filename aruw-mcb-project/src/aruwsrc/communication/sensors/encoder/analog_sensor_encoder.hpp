@@ -28,7 +28,8 @@
 
 namespace aruwsrc::communication::sensors::encoder
 {
-class AnalogSensorEncoder : public tap::encoder::WrappedEncoder
+class AnalogSensorEncoder : public tap::encoder::WrappedEncoder,
+                            public aruwsrc::communication::can::AruwAnalogSensor::UpdateListener
 {
 public:
     enum class Channel
@@ -50,6 +51,7 @@ public:
         Channel channel,
         const Calibration& calibration,
         bool isInverted = false);
+    ~AnalogSensorEncoder() override;
 
     void initialize() override {}
 
@@ -59,6 +61,7 @@ public:
     float getVelocity() const override;
 
     void update();
+    void onAnalogSensorUpdated() override;
 
     void logTelemetry(
         communication::rtt::RttTelemetry& rttTelemetry,
@@ -66,8 +69,8 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(AnalogSensorEncoder)
 
-private:
-    void updateFromSensor();
+protected:
+    virtual void updateFromSensor();
     uint16_t readRaw() const;
     uint32_t rawToTicks(uint16_t raw) const;
 
