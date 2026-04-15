@@ -47,7 +47,7 @@ public:
         tap::Drivers* drivers,
         tap::encoder::CanEncoderId CAN_ID,
         tap::can::CanBus CAN_BUS,
-        const modm::Pair<float, float> (&lookupTableConfig)[LUT_SIZE],
+        const modm::Pair<float, float> (&lookupTableConfig)[LUT_SIZE] = {},
         bool isInverted = false)
         : CanEncoder(drivers, CAN_ID, CAN_BUS, isInverted),
           lookupTable(lookupTableConfig, LUT_SIZE),
@@ -65,21 +65,26 @@ public:
 
         float angle = angleRaw;
 
-        if (lutSize > 0)
-        {
-            angle = lookupTable.interpolate(angleRaw);
-        }
-
         if (inverted)
         {
             angle = -angle;
         }
 
-        // Apply home offset and wrap cleanly back to [0, 2π)
-        angle -= encoderHomePosition.getWrappedValue();
-        if (angle < 0.0f) angle += M_TWOPI;
+        angle = -encoderHomePosition.getWrappedValue();
+        if (angle < 0.0f)
+        {
+            angle += M_TWOPI;
+        }
 
-        encoder += encoder.minDifference(angle);
+        if (lutSize > 0)
+        {
+            angle = lookupTable.interpolate(angleRaw);
+        }
+        if (lastUpdateTime == 0){
+            encoder = tap::algorithms::WrappedFloat(angle, 0, M_TWOPI);
+        } else {
+            encoder += encoder.minDifference(angle);
+        }
 
         uint32_t time = tap::arch::clock::getTimeMicroseconds();
         deltaTime = time - this->lastUpdateTime;
