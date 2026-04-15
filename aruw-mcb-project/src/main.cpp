@@ -189,6 +189,7 @@ static void initializeIo(Drivers* drivers)
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE)
     drivers->visionCoprocessor.initializeCV();
     drivers->turretMCBCanCommBus1.init();
+    drivers->customController.initialize(); // TODO remove once done testing on null
 #endif
 
 #if defined(TARGET_ENGINEER)
@@ -252,6 +253,7 @@ static void updateIo(Drivers* drivers)
 
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
     drivers->visionCoprocessor.updateSerial();
+    drivers->customController.updateSerial(); // TODO remove
 #endif
 
 #if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)

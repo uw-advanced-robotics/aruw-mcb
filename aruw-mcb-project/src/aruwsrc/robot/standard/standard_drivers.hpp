@@ -42,6 +42,7 @@
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/robot/engineer/custom_controller.hpp"
 
 #endif
 
@@ -77,7 +78,8 @@ public:
               aruwsrc::control::chassis::CAP_BANK_CAPACITANCE),
           plateHitTracker(this),
           refSerialTransmitter(this),
-          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
+          interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor),
+          customController(this)
     {
         controlOperatorInterface.setTelemetry(&rttTelemetry);
         visionCoprocessor.setTelemetry(&rttTelemetry);
@@ -104,6 +106,7 @@ public:
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
+    aruwsrc::engineer::CustomController customController;
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard
