@@ -23,14 +23,11 @@
 #include "tap/control/hold_repeat_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/remote_map_state.hpp"
-#include "tap/control/sequential_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/dji_motor.hpp"
-#include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/communication/can/aruw_analog_sensor.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
@@ -46,7 +43,6 @@
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/half_swerve_chassis_subsystem.hpp"
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
@@ -60,7 +56,6 @@
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/imu_not_calibrated_governor.hpp"
 #include "aruwsrc/control/governor/match_running_governor.hpp"
-#include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -91,6 +86,7 @@
 
 /// @TODO: test lamprey autotune's new 0 aligning -Aiden
 /// @TODO: test binned alignment - Aiden
+/// @TODO: clean up imu calibrate - Aiden
 
 using namespace tap::algorithms;
 using namespace tap::control;
@@ -98,7 +94,6 @@ using namespace tap::communication::serial;
 using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 
-using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::control::auto_aim;
@@ -128,11 +123,6 @@ namespace sentry_control
 {
 MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
-// aruwsrc::communication::can::AruwAnalogSensor turretMajorYawAnalogSensor(
-//     drivers(),
-//     turretMajor::YAW_ANALOG_SENSOR_CAN_BUS,
-//     turretMajor::YAW_ANALOG_SENSOR_CAN_ID);
-
 aruwsrc::communication::sensors::encoder::LampreyEncoder turretMajorYawLamprey(
     drivers(),
     turretMajor::YAW_ANALOG_SENSOR_CAN_ID,
@@ -147,10 +137,8 @@ tap::motor::DjiMotor turretMajorYawMotor(
     true,
     "Major Yaw Turret",
     false,
-    turretMajor::PULLEY_RATIO,  // pulley ratio
-    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue
-    // &turretMajorYawAnalogEncoder
-);
+    turretMajor::PULLEY_RATIO,
+    turretMajor::YAW_MOTOR_CONFIG.startEncoderValue);
 
 struct TurretMinorMotors
 {
@@ -193,9 +181,6 @@ inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanCommWidow()
 // the other one
 inline aruwsrc::communication::can::TurretMCBCanComm &getChassisTurretMCBCanComm()
 {
-    // return (&getTurretMCBCanCommWidow() == &drivers()->turretMCBCanCommBus1)
-    //            ? drivers()->turretMCBCanCommBus2
-    //            : drivers()->turretMCBCanCommBus1;
     return drivers()->turretMCBCanCommBus2;
 }
 
@@ -631,7 +616,7 @@ SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretWidow(
     SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
     turretWidow::turretID);
 
-// Unused, causes incosnistent fire rates due to suspected ref delay.
+// Unused, causes inconsistent fire rates due to suspected ref delay.
 // RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretWidow(
 //     drivers()->refSerial,
 //     turretWidow::barrelID);

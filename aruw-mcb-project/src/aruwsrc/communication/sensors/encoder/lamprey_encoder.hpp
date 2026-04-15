@@ -79,24 +79,16 @@ public:
         angle -= encoderHomePosition.getWrappedValue();
         if (angle < 0.0f) angle += M_TWOPI;
 
-        if (this->lastUpdateTime == 0)
-        {
-            encoder = tap::algorithms::Angle(angle);
-        }
-        else
-        {
-            encoder += encoder.minDifference(angle);
-        }
+        encoder += encoder.minDifference(angle);
 
         uint32_t time = tap::arch::clock::getTimeMicroseconds();
         deltaTime = time - this->lastUpdateTime;
         this->lastUpdateTime = time;
 
         pastPosition = position;
-        position.setUnwrappedValue(encoder.getUnwrappedValue() * gearRatio);
+        position.setUnwrappedValue(encoder.getUnwrappedValue());
 
-        // Process aux CAN data and reset timeouts
-        this->gauss = (message.data[3] << 8) | message.data[2];
+        this->gauss = 0.0f;
         this->encoderDisconnectTimeout.restart(DISCONNECT_TIME);
     }
 
