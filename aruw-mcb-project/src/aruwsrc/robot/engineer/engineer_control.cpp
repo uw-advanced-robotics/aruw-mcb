@@ -312,13 +312,13 @@ tap::encoder::CanEncoder parallelOmniOne(
     drivers(),
     tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2,
-    true);  // TODO: find correct inversion
+    false);
 
 tap::encoder::CanEncoder parallelOmniTwo(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
     tap::can::CanBus::CAN_BUS2,
-    true);  // TODO: find correct inversion
+    true); 
 
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
@@ -561,6 +561,9 @@ void initializeSubsystems()
     transformSubsystem.initialize();
     odometrySubsystem.initialize();
     // clientDicsplay.initialize();
+    parallelOmniOne.initialize();
+    parallelOmniTwo.initialize();
+    perpendicularOmni.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/

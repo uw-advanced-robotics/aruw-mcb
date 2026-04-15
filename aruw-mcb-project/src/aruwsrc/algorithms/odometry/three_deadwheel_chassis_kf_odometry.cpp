@@ -67,7 +67,7 @@ void ThreeDeadwheelChassisKFOdometry::update()
 {
     assert(parallelOneCenterToWheelDistance + parallelTwoCenterToWheelDistance > 0);
 
-    /* Process dead wheels */
+    /* Process IMUW */
     float mahonyOutput = 0.0f;
     if (!chassisYawObserver.getChassisWorldYaw(&mahonyOutput))
     {
@@ -95,7 +95,7 @@ void ThreeDeadwheelChassisKFOdometry::update()
     float perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
     float parallelOneRaw = deadwheelOdometry.getParallelMotorOneVelocity();
     float parallelTwoRaw =
-        deadwheelOdometry.getParallelMotorTwoVelocity();  // EG@TODO: remove debug code
+        deadwheelOdometry.getParallelMotorTwoVelocity(); 
 
     // Compute odometry angular velocity
     float odoOmega = (parallelTwoRaw - parallelOneRaw) /
