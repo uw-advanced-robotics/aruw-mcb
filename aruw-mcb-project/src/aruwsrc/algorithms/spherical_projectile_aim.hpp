@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <cstdint>
-#include <limits>
 #include <optional>
 
 #include "modm/math/geometry/angle.hpp"
@@ -49,23 +48,17 @@ static constexpr SphereProjectileModel ROBO_MASTER_17MM_SPHERE = {
     .dynamicViscosityPas = 1.81e-5f,
 };
 
-struct SphereDragSolverConfig
+struct SphereDragCorrectionConfig
 {
-    float timestepSeconds;
-    float maxSimulationTimeSeconds;
-    float angleToleranceRadians;
-    float heightToleranceMeters;
-    uint8_t movingTargetIterations;
-    uint8_t pitchSolverIterations;
+    float constantPitchOffsetRadians;
+    float verticalErrorPitchGain;
+    float maxAdditionalPitchCorrectionRadians;
 };
 
-static constexpr SphereDragSolverConfig DEFAULT_SPHERE_DRAG_SOLVER_CONFIG = {
-    .timestepSeconds = 0.002f,
-    .maxSimulationTimeSeconds = 2.0f,
-    .angleToleranceRadians = modm::toRadian(0.01f),
-    .heightToleranceMeters = 0.01f,
-    .movingTargetIterations = 2,
-    .pitchSolverIterations = 6,
+static constexpr SphereDragCorrectionConfig DEFAULT_SPHERE_DRAG_CORRECTION_CONFIG = {
+    .constantPitchOffsetRadians = modm::toRadian(0.2f),
+    .verticalErrorPitchGain = 0.0f,
+    .maxAdditionalPitchCorrectionRadians = 0.0f,
 };
 
 struct DragIntersection
@@ -84,8 +77,6 @@ struct SphereProjectileState
 
 static constexpr float MIN_PROJECTILE_PITCH_RADIANS = -M_PI_2;
 static constexpr float MAX_PROJECTILE_PITCH_RADIANS = M_PI_2;
-static constexpr float PITCH_SOLVER_DELTA_RADIANS = modm::toRadian(1.0f);
-static constexpr float MAX_LOCAL_PITCH_CORRECTION_RADIANS = modm::toRadian(8.0f);
 
 inline SphereProjectileState computeProjectileStateDerivative(
     const SphereProjectileState &state,
@@ -188,7 +179,7 @@ inline std::optional<DragIntersection> simulateSphereDragIntersection(
     float pitchAngle,
     float pitchAxisOffset = 0.0f,
     const SphereProjectileModel &projectileModel = ROBO_MASTER_17MM_SPHERE,
-    const SphereDragSolverConfig &solverConfig = DEFAULT_SPHERE_DRAG_SOLVER_CONFIG)
+    const SphereDragCorrectionConfig &correctionConfig = DEFAULT_SPHERE_DRAG_CORRECTION_CONFIG)
 {
     if (horizontalDistance <= 0.0f || launchSpeed <= 0.0f)
     {
@@ -215,14 +206,17 @@ inline std::optional<DragIntersection> simulateSphereDragIntersection(
 
     float previousTimeSeconds = 0.0f;
 
-    for (float timeSeconds = solverConfig.timestepSeconds;
-         timeSeconds <= solverConfig.maxSimulationTimeSeconds;
-         timeSeconds += solverConfig.timestepSeconds)
+    static constexpr float TIMESTEP_SECONDS = 0.002f;
+    static constexpr float MAX_SIMULATION_TIME_SECONDS = 2.0f;
+
+    for (float timeSeconds = TIMESTEP_SECONDS;
+         timeSeconds <= MAX_SIMULATION_TIME_SECONDS;
+         timeSeconds += TIMESTEP_SECONDS)
     {
         const SphereProjectileState previousState = projectileState;
         projectileState = rungeKuttaIntegrateProjectileState(
             projectileState,
-            solverConfig.timestepSeconds,
+            TIMESTEP_SECONDS,
             projectileModel);
 
         if (projectileState.horizontalPosition >= horizontalDistance)
@@ -240,8 +234,7 @@ inline std::optional<DragIntersection> simulateSphereDragIntersection(
                     interpolationRatio *
                         (projectileState.verticalPosition - previousState.verticalPosition) -
                     targetHeight,
-                .timeOfFlight =
-                    previousTimeSeconds + interpolationRatio * solverConfig.timestepSeconds,
+                .timeOfFlight = previousTimeSeconds + interpolationRatio * TIMESTEP_SECONDS,
             };
         }
 
@@ -256,149 +249,6 @@ inline std::optional<DragIntersection> simulateSphereDragIntersection(
     return std::nullopt;
 }
 
-inline bool solveSphereDragPitch(
-    float horizontalDistance,
-    float targetHeight,
-    float launchSpeed,
-    float initialPitchGuess,
-    float *pitchAngle,
-    float *timeOfFlight,
-    float pitchAxisOffset = 0.0f,
-    const SphereProjectileModel &projectileModel = ROBO_MASTER_17MM_SPHERE,
-    const SphereDragSolverConfig &solverConfig = DEFAULT_SPHERE_DRAG_SOLVER_CONFIG)
-{
-    if (pitchAngle == nullptr || timeOfFlight == nullptr)
-    {
-        return false;
-    }
-
-    const float minPitchSearch =
-        fmaxf(MIN_PROJECTILE_PITCH_RADIANS, initialPitchGuess - MAX_LOCAL_PITCH_CORRECTION_RADIANS);
-    const float maxPitchSearch =
-        fminf(MAX_PROJECTILE_PITCH_RADIANS, initialPitchGuess + MAX_LOCAL_PITCH_CORRECTION_RADIANS);
-
-    auto evaluatePitch = [&](float angle, DragIntersection *intersection) -> bool
-    {
-        if (angle < minPitchSearch || angle > maxPitchSearch)
-        {
-            return false;
-        }
-
-        const std::optional<DragIntersection> evaluation = simulateSphereDragIntersection(
-            horizontalDistance,
-            targetHeight,
-            launchSpeed,
-            angle,
-            pitchAxisOffset,
-            projectileModel,
-            solverConfig);
-
-        if (!evaluation.has_value())
-        {
-            return false;
-        }
-
-        *intersection = evaluation.value();
-        return true;
-    };
-
-    float bestPitch = initialPitchGuess;
-    float bestAbsoluteError = std::numeric_limits<float>::max();
-    DragIntersection bestIntersection = {};
-    bool bestIntersectionValid = false;
-
-    DragIntersection initialIntersection = {};
-    const bool initialIntersectionValid = evaluatePitch(initialPitchGuess, &initialIntersection);
-    if (initialIntersectionValid)
-    {
-        bestIntersection = initialIntersection;
-        bestPitch = initialPitchGuess;
-        bestAbsoluteError = fabsf(initialIntersection.verticalError);
-        bestIntersectionValid = true;
-    }
-
-    const float secantPitchDelta =
-        initialPitchGuess >= 0.0f ? PITCH_SOLVER_DELTA_RADIANS : -PITCH_SOLVER_DELTA_RADIANS;
-    const float secondPitch = initialPitchGuess + secantPitchDelta;
-    DragIntersection secondIntersection = {};
-    const bool secondIntersectionValid = evaluatePitch(secondPitch, &secondIntersection);
-    if (secondIntersectionValid)
-    {
-        const float secondAbsoluteError = fabsf(secondIntersection.verticalError);
-        if (!bestIntersectionValid || secondAbsoluteError < bestAbsoluteError)
-        {
-            bestPitch = secondPitch;
-            bestIntersection = secondIntersection;
-            bestAbsoluteError = secondAbsoluteError;
-            bestIntersectionValid = true;
-        }
-    }
-
-    if (initialIntersectionValid && secondIntersectionValid)
-    {
-        float previousPitch = initialPitchGuess;
-        DragIntersection previousIntersection = initialIntersection;
-        float currentPitch = secondPitch;
-        DragIntersection currentIntersection = secondIntersection;
-
-        for (uint8_t i = 0; i < solverConfig.pitchSolverIterations; i++)
-        {
-            const float errorDelta =
-                currentIntersection.verticalError - previousIntersection.verticalError;
-            if (fabsf(errorDelta) <= solverConfig.heightToleranceMeters)
-            {
-                break;
-            }
-
-            const float nextPitch =
-                currentPitch -
-                currentIntersection.verticalError * (currentPitch - previousPitch) / errorDelta;
-
-            if (nextPitch <= minPitchSearch || nextPitch >= maxPitchSearch)
-            {
-                break;
-            }
-
-            DragIntersection nextIntersection = {};
-            if (!evaluatePitch(nextPitch, &nextIntersection))
-            {
-                break;
-            }
-
-            const float nextAbsoluteError = fabsf(nextIntersection.verticalError);
-            if (nextAbsoluteError < bestAbsoluteError)
-            {
-                bestPitch = nextPitch;
-                bestIntersection = nextIntersection;
-                bestAbsoluteError = nextAbsoluteError;
-                bestIntersectionValid = true;
-            }
-
-            if (nextAbsoluteError <= solverConfig.heightToleranceMeters ||
-                fabsf(nextPitch - currentPitch) <= solverConfig.angleToleranceRadians)
-            {
-                *pitchAngle = bestPitch;
-                *timeOfFlight = bestIntersection.timeOfFlight;
-                return true;
-            }
-
-            previousPitch = currentPitch;
-            previousIntersection = currentIntersection;
-            currentPitch = nextPitch;
-            currentIntersection = nextIntersection;
-        }
-    }
-
-    if (!bestIntersectionValid || bestAbsoluteError > solverConfig.heightToleranceMeters)
-    {
-        return false;
-    }
-
-    *pitchAngle = bestPitch;
-    *timeOfFlight = bestIntersection.timeOfFlight;
-    return true;
-}
-
 inline bool applySphereDragBallisticsCompensation(
     const tap::algorithms::ballistics::SecondOrderKinematicState &targetState,
     float launchSpeed,
@@ -408,7 +258,7 @@ inline bool applySphereDragBallisticsCompensation(
     float *distance,
     float pitchAxisOffset = 0.0f,
     const SphereProjectileModel &projectileModel = ROBO_MASTER_17MM_SPHERE,
-    const SphereDragSolverConfig &solverConfig = DEFAULT_SPHERE_DRAG_SOLVER_CONFIG)
+    const SphereDragCorrectionConfig &correctionConfig = DEFAULT_SPHERE_DRAG_CORRECTION_CONFIG)
 {
     if (pitchAngle == nullptr || yawAngle == nullptr || timeOfFlight == nullptr ||
         distance == nullptr)
@@ -416,45 +266,51 @@ inline bool applySphereDragBallisticsCompensation(
         return false;
     }
 
-    float compensatedPitch = *pitchAngle;
-    float compensatedTimeOfFlight = *timeOfFlight;
-    modm::Vector3f compensatedTargetPosition = targetState.position;
-
-    for (uint8_t i = 0; i < solverConfig.movingTargetIterations; i++)
+    const modm::Vector3f compensatedTargetPosition = targetState.projectForward(*timeOfFlight);
+    const float horizontalDistance = sqrtf(
+        compensatedTargetPosition.x * compensatedTargetPosition.x +
+        compensatedTargetPosition.y * compensatedTargetPosition.y);
+    if (horizontalDistance <= 0.0f)
     {
-        compensatedTargetPosition = targetState.projectForward(compensatedTimeOfFlight);
-
-        const float horizontalDistance = sqrtf(
-            compensatedTargetPosition.x * compensatedTargetPosition.x +
-            compensatedTargetPosition.y * compensatedTargetPosition.y);
-        if (horizontalDistance <= 0.0f)
-        {
-            return false;
-        }
-
-        float solvedPitch = compensatedPitch;
-        float solvedTimeOfFlight = compensatedTimeOfFlight;
-        if (!solveSphereDragPitch(
-                horizontalDistance,
-                compensatedTargetPosition.z,
-                launchSpeed,
-                compensatedPitch,
-                &solvedPitch,
-                &solvedTimeOfFlight,
-                pitchAxisOffset,
-                projectileModel,
-                solverConfig))
-        {
-            return false;
-        }
-
-        compensatedPitch = solvedPitch;
-        compensatedTimeOfFlight = solvedTimeOfFlight;
+        return false;
     }
 
-    *pitchAngle = compensatedPitch;
-    *timeOfFlight = compensatedTimeOfFlight;
+    if (!isfinite(correctionConfig.constantPitchOffsetRadians))
+    {
+        return false;
+    }
+
+    (void)yawAngle;
     *distance = compensatedTargetPosition.getLength();
+
+    float pitchCorrection = correctionConfig.constantPitchOffsetRadians;
+
+    if (correctionConfig.verticalErrorPitchGain > 0.0f &&
+        correctionConfig.maxAdditionalPitchCorrectionRadians > 0.0f)
+    {
+        const auto baseIntersection = simulateSphereDragIntersection(
+            horizontalDistance,
+            compensatedTargetPosition.z,
+            launchSpeed,
+            *pitchAngle,
+            pitchAxisOffset,
+            projectileModel,
+            correctionConfig);
+        if (baseIntersection.has_value())
+        {
+            float additionalPitchCorrection =
+                -correctionConfig.verticalErrorPitchGain * baseIntersection->verticalError /
+                horizontalDistance;
+            additionalPitchCorrection = fmaxf(
+                -correctionConfig.maxAdditionalPitchCorrectionRadians,
+                fminf(
+                    correctionConfig.maxAdditionalPitchCorrectionRadians,
+                    additionalPitchCorrection));
+            pitchCorrection += additionalPitchCorrection;
+        }
+    }
+
+    *pitchAngle += pitchCorrection;
     return true;
 }
 }  // namespace aruwsrc::algorithms

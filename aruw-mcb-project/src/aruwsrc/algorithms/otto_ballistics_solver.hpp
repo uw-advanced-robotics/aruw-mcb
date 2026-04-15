@@ -145,6 +145,8 @@ private:
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
+    bool pitchCorrectionLatched = false;
+    float appliedPitchCorrection = 0.0f;
     std::optional<BallisticsSolution> lastComputedSolution = {};
 
 public:

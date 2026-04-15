@@ -35,6 +35,8 @@ using namespace modm;
 
 namespace aruwsrc::algorithms
 {
+static constexpr float PITCH_CORRECTION_LOW_PASS_ALPHA = 0.05f;
+
 OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
@@ -58,6 +60,8 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
     // Verify that CV is actually online and that the aimData had a target
     if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
     {
+        pitchCorrectionLatched = false;
+        appliedPitchCorrection = 0.0f;
         lastComputedSolution = std::nullopt;
         return std::nullopt;
     }
@@ -129,33 +133,58 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         // for a target "now" rather than whenever the camera saw the target
         targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
 
-        lastComputedSolution = BallisticsSolution();
-        lastComputedSolution->distance = targetState.position.getLength();
+        BallisticsSolution baseSolution{};
+        baseSolution.distance = targetState.position.getLength();
 
         if (!ballistics::findTargetProjectileIntersection(
                 targetState,
                 launchSpeed,
                 NUM_FORWARD_KINEMATIC_PROJECTIONS,
-                &lastComputedSolution->pitchAngle,
-                &lastComputedSolution->yawAngle,
-                &lastComputedSolution->timeOfFlight,
+                &baseSolution.pitchAngle,
+                &baseSolution.yawAngle,
+                &baseSolution.timeOfFlight,
                 turretSubsystem.getPitchOffset()))
         {
+            pitchCorrectionLatched = false;
+            appliedPitchCorrection = 0.0f;
             lastComputedSolution = std::nullopt;
         }
-        // Drag-corrected refinement disabled for now while validating base sentry/standard
-        // ballistics behavior. Leave implementation in-tree for branch-local debugging.
-        // else if (!applySphereDragBallisticsCompensation(
-        //              targetState,
-        //              launchSpeed,
-        //              &lastComputedSolution->pitchAngle,
-        //              &lastComputedSolution->yawAngle,
-        //              &lastComputedSolution->timeOfFlight,
-        //              &lastComputedSolution->distance,
-        //              turretSubsystem.getPitchOffset()))
-        // {
-        //     lastComputedSolution = std::nullopt;
-        // }
+        else
+        {
+            BallisticsSolution finalSolution = baseSolution;
+            BallisticsSolution dragCorrectedSolution = baseSolution;
+
+            if (applySphereDragBallisticsCompensation(
+                    targetState,
+                    launchSpeed,
+                    &dragCorrectedSolution.pitchAngle,
+                    &dragCorrectedSolution.yawAngle,
+                    &dragCorrectedSolution.timeOfFlight,
+                    &dragCorrectedSolution.distance,
+                    turretSubsystem.getPitchOffset()))
+            {
+                const float desiredPitchCorrection =
+                    dragCorrectedSolution.pitchAngle - baseSolution.pitchAngle;
+
+                if (!pitchCorrectionLatched)
+                {
+                    appliedPitchCorrection = desiredPitchCorrection;
+                    pitchCorrectionLatched = true;
+                }
+                else
+                {
+                    appliedPitchCorrection +=
+                        PITCH_CORRECTION_LOW_PASS_ALPHA *
+                        (desiredPitchCorrection - appliedPitchCorrection);
+                }
+
+                dragCorrectedSolution.pitchAngle =
+                    baseSolution.pitchAngle + appliedPitchCorrection;
+                finalSolution = dragCorrectedSolution;
+            }
+
+            lastComputedSolution = finalSolution;
+        }
     }
 
     return lastComputedSolution;

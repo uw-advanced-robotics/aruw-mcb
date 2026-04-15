@@ -486,6 +486,31 @@ SentryManualDriveCommand chassisDriveCommand(
     &(drivers()->controlOperatorInterface),
     &chassis);
 
+class HoldChassisCommand : public tap::control::Command
+{
+public:
+    explicit HoldChassisCommand(aruwsrc::control::chassis::HolonomicChassisSubsystem &chassis)
+        : chassis(chassis)
+    {
+        addSubsystemRequirement(&chassis);
+    }
+
+    void initialize() override {}
+
+    void execute() override { chassis.setZeroRPM(); }
+
+    void end(bool) override { chassis.setZeroRPM(); }
+
+    bool isFinished() const override { return false; }
+
+    const char *getName() const override { return "hold chassis"; }
+
+private:
+    aruwsrc::control::chassis::HolonomicChassisSubsystem &chassis;
+};
+
+HoldChassisCommand holdChassisCommand(chassis);
+
 NoteSequenceCommand imuNotCalibratedCommand(
     buzzer,
     IMU_NOT_CALIBRATED_NOTES,
@@ -725,7 +750,7 @@ RemoteMapState leftMidRightUpRms =
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP);
 auto leftMidRightUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&turretWidowManualCommand},
+    std::vector<Command *>{&holdChassisCommand, &majorManualCommand, &turretWidowManualCommand},
     &leftMidRightUpRms);
 
 // manual aim and shoot

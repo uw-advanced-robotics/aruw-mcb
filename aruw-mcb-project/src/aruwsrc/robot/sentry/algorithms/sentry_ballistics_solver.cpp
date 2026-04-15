@@ -33,6 +33,8 @@ using namespace modm;
 
 namespace aruwsrc::sentry::algorithms
 {
+static constexpr float PITCH_CORRECTION_LOW_PASS_ALPHA = 0.05f;
+
 SentryBallisticsSolver::SentryBallisticsSolver(
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     const odometry::SentryTransforms &transformer,
@@ -78,6 +80,10 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
     debugFinalDistance = 0.0f;
     debugBaseVerticalError = 0.0f;
     debugCorrectedVerticalError = 0.0f;
+    debugConstantPitchCorrection = 0.0f;
+    debugAdditionalPitchCorrection = 0.0f;
+    debugDesiredPitchCorrection = 0.0f;
+    debugAppliedPitchCorrection = 0.0f;
     debugPitchCorrection = 0.0f;
     debugYawCorrection = 0.0f;
     debugTimeOfFlightCorrection = 0.0f;
@@ -86,6 +92,8 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
     // Verify that CV is actually online and that the aimData had a target
     if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
     {
+        pitchCorrectionLatched = false;
+        appliedPitchCorrection = 0.0f;
         lastComputedSolution = std::nullopt;
         return std::nullopt;
     }
@@ -140,27 +148,29 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
         debugTargetPositionY = targetState.position.y;
         debugTargetPositionZ = targetState.position.z;
 
-        lastComputedSolution = BallisticsSolution();
-        lastComputedSolution->distance = targetState.position.getLength();
+        BallisticsSolution baseSolution{};
+        baseSolution.distance = targetState.position.getLength();
 
         if (!ballistics::findTargetProjectileIntersection(
                 targetState,
                 launchSpeed,
                 NUM_FORWARD_KINEMATIC_PROJECTIONS,
-                &lastComputedSolution->pitchAngle,
-                &lastComputedSolution->yawAngle,
-                &lastComputedSolution->timeOfFlight,
+                &baseSolution.pitchAngle,
+                &baseSolution.yawAngle,
+                &baseSolution.timeOfFlight,
                 turretPitchOffset))
         {
+            pitchCorrectionLatched = false;
+            appliedPitchCorrection = 0.0f;
             lastComputedSolution = std::nullopt;
         }
         else
         {
             debugBaseSolutionValid = true;
-            debugBasePitchAngle = lastComputedSolution->pitchAngle;
-            debugBaseYawAngle = lastComputedSolution->yawAngle;
-            debugBaseTimeOfFlight = lastComputedSolution->timeOfFlight;
-            debugBaseDistance = lastComputedSolution->distance;
+            debugBasePitchAngle = baseSolution.pitchAngle;
+            debugBaseYawAngle = baseSolution.yawAngle;
+            debugBaseTimeOfFlight = baseSolution.timeOfFlight;
+            debugBaseDistance = baseSolution.distance;
             debugCorrectedPitchAngle = debugBasePitchAngle;
             debugCorrectedYawAngle = debugBaseYawAngle;
             debugCorrectedTimeOfFlight = debugBaseTimeOfFlight;
@@ -170,73 +180,94 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
             debugFinalTimeOfFlight = debugBaseTimeOfFlight;
             debugFinalDistance = debugBaseDistance;
 
-            // Drag-corrected refinement disabled for now while validating base sentry ballistics
-            // behavior. Leave implementation in-tree for branch-local debugging.
-            //
-            // BallisticsSolution dragCorrectedSolution = lastComputedSolution.value();
-            // debugDragSolutionAttempted = true;
-            //
-            // const float horizontalDistance = sqrtf(
-            //     targetState.position.x * targetState.position.x +
-            //     targetState.position.y * targetState.position.y);
-            // const auto baseIntersection =
-            //     aruwsrc::algorithms::simulateSphereDragIntersection(
-            //         horizontalDistance,
-            //         targetState.position.z,
-            //         launchSpeed,
-            //         debugBasePitchAngle,
-            //         turretPitchOffset);
-            // if (baseIntersection.has_value())
-            // {
-            //     debugBaseVerticalError = baseIntersection->verticalError;
-            //     debugCorrectedVerticalError = baseIntersection->verticalError;
-            // }
-            //
-            // if (aruwsrc::algorithms::applySphereDragBallisticsCompensation(
-            //         targetState,
-            //         launchSpeed,
-            //         &dragCorrectedSolution.pitchAngle,
-            //         &dragCorrectedSolution.yawAngle,
-            //         &dragCorrectedSolution.timeOfFlight,
-            //         &dragCorrectedSolution.distance,
-            //         turretPitchOffset))
-            // {
-            //     debugCorrectedPitchAngle = dragCorrectedSolution.pitchAngle;
-            //     debugCorrectedYawAngle = debugBaseYawAngle;
-            //     debugCorrectedTimeOfFlight = dragCorrectedSolution.timeOfFlight;
-            //     debugCorrectedDistance = dragCorrectedSolution.distance;
-            //     debugPitchCorrection =
-            //         dragCorrectedSolution.pitchAngle - debugBasePitchAngle;
-            //     debugYawCorrection = 0.0f;
-            //     debugTimeOfFlightCorrection =
-            //         dragCorrectedSolution.timeOfFlight - debugBaseTimeOfFlight;
-            //
-            //     const auto correctedIntersection =
-            //         aruwsrc::algorithms::simulateSphereDragIntersection(
-            //             horizontalDistance,
-            //             targetState.position.z,
-            //             launchSpeed,
-            //             dragCorrectedSolution.pitchAngle,
-            //             turretPitchOffset);
-            //     if (correctedIntersection.has_value())
-            //     {
-            //         debugCorrectedVerticalError = correctedIntersection->verticalError;
-            //     }
-            //
-            //     if (fabsf(debugPitchCorrection) <= modm::toRadian(8.0f) &&
-            //         dragCorrectedSolution.timeOfFlight > 0.0f &&
-            //         dragCorrectedSolution.timeOfFlight <
-            //             2.0f * fmaxf(debugBaseTimeOfFlight, 0.05f))
-            //     {
-            //         lastComputedSolution = dragCorrectedSolution;
-            //         debugDragSolutionAccepted = true;
-            //         debugFinalPitchAngle = dragCorrectedSolution.pitchAngle;
-            //         debugFinalYawAngle = debugBaseYawAngle;
-            //         debugFinalTimeOfFlight = dragCorrectedSolution.timeOfFlight;
-            //         debugFinalDistance = dragCorrectedSolution.distance;
-            //     }
-            // }
+            BallisticsSolution finalSolution = baseSolution;
+            BallisticsSolution dragCorrectedSolution = baseSolution;
+            debugDragSolutionAttempted = true;
+
+            const modm::Vector3f compensatedTargetPosition =
+                targetState.projectForward(baseSolution.timeOfFlight);
+            const float horizontalDistance = sqrtf(
+                compensatedTargetPosition.x * compensatedTargetPosition.x +
+                compensatedTargetPosition.y * compensatedTargetPosition.y);
+
+            const auto baseIntersection = aruwsrc::algorithms::simulateSphereDragIntersection(
+                horizontalDistance,
+                compensatedTargetPosition.z,
+                launchSpeed,
+                baseSolution.pitchAngle,
+                turretPitchOffset);
+            if (baseIntersection.has_value())
+            {
+                debugBaseVerticalError = baseIntersection->verticalError;
+            }
+
+            if (aruwsrc::algorithms::applySphereDragBallisticsCompensation(
+                    targetState,
+                    launchSpeed,
+                    &dragCorrectedSolution.pitchAngle,
+                    &dragCorrectedSolution.yawAngle,
+                    &dragCorrectedSolution.timeOfFlight,
+                    &dragCorrectedSolution.distance,
+                    turretPitchOffset))
+            {
+                const float desiredPitchCorrection =
+                    dragCorrectedSolution.pitchAngle - debugBasePitchAngle;
+
+                if (!pitchCorrectionLatched)
+                {
+                    appliedPitchCorrection = desiredPitchCorrection;
+                    pitchCorrectionLatched = true;
+                }
+                else
+                {
+                    appliedPitchCorrection +=
+                        PITCH_CORRECTION_LOW_PASS_ALPHA *
+                        (desiredPitchCorrection - appliedPitchCorrection);
+                }
+
+                dragCorrectedSolution.pitchAngle = debugBasePitchAngle + appliedPitchCorrection;
+                debugCorrectedPitchAngle = dragCorrectedSolution.pitchAngle;
+                debugCorrectedYawAngle = debugBaseYawAngle;
+                debugCorrectedTimeOfFlight = debugBaseTimeOfFlight;
+                debugCorrectedDistance = dragCorrectedSolution.distance;
+                debugConstantPitchCorrection =
+                    aruwsrc::algorithms::DEFAULT_SPHERE_DRAG_CORRECTION_CONFIG
+                        .constantPitchOffsetRadians;
+                debugDesiredPitchCorrection = desiredPitchCorrection;
+                debugAppliedPitchCorrection = appliedPitchCorrection;
+                debugPitchCorrection = appliedPitchCorrection;
+                debugAdditionalPitchCorrection =
+                    desiredPitchCorrection - debugConstantPitchCorrection;
+                debugYawCorrection = 0.0f;
+                debugTimeOfFlightCorrection = 0.0f;
+
+                const auto correctedIntersection =
+                    aruwsrc::algorithms::simulateSphereDragIntersection(
+                        horizontalDistance,
+                        compensatedTargetPosition.z,
+                        launchSpeed,
+                        dragCorrectedSolution.pitchAngle,
+                        turretPitchOffset);
+                if (correctedIntersection.has_value())
+                {
+                    debugCorrectedVerticalError = correctedIntersection->verticalError;
+                }
+
+                finalSolution = dragCorrectedSolution;
+                debugDragSolutionAccepted = true;
+                debugFinalPitchAngle = dragCorrectedSolution.pitchAngle;
+                debugFinalYawAngle = debugBaseYawAngle;
+                debugFinalTimeOfFlight = debugBaseTimeOfFlight;
+                debugFinalDistance = dragCorrectedSolution.distance;
+            }
+
+            lastComputedSolution = finalSolution;
         }
+    }
+    else
+    {
+        debugAppliedPitchCorrection = appliedPitchCorrection;
+        debugPitchCorrection = appliedPitchCorrection;
     }
 
     return lastComputedSolution;

@@ -155,6 +155,8 @@ private:
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
+    bool pitchCorrectionLatched = false;
+    float appliedPitchCorrection = 0.0f;
     std::optional<BallisticsSolution> lastComputedSolution = {};
 
 public:
@@ -182,6 +184,10 @@ public:
     float debugFinalDistance = 0.0f;
     float debugBaseVerticalError = 0.0f;
     float debugCorrectedVerticalError = 0.0f;
+    float debugConstantPitchCorrection = 0.0f;
+    float debugAdditionalPitchCorrection = 0.0f;
+    float debugDesiredPitchCorrection = 0.0f;
+    float debugAppliedPitchCorrection = 0.0f;
     float debugPitchCorrection = 0.0f;
     float debugYawCorrection = 0.0f;
     float debugTimeOfFlightCorrection = 0.0f;

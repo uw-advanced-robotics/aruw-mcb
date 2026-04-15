@@ -150,6 +150,16 @@ public:
         return withinAimingToleranceWidow;
     }
 
+    float debugMajorYawSetpoint = 0.0f;
+    float debugMajorYawMeasurement = 0.0f;
+    float debugWidowYawSetpoint = 0.0f;
+    float debugWidowYawMeasurement = 0.0f;
+    float debugWidowPitchSetpoint = 0.0f;
+    float debugWidowPitchMeasurement = 0.0f;
+    float debugBallisticsYawAngle = 0.0f;
+    float debugBallisticsPitchAngle = 0.0f;
+    bool debugTargetFound = false;
+
 private:
     /**
      * Converts the angles contained in the ballistics solution to the frame of the turret major,

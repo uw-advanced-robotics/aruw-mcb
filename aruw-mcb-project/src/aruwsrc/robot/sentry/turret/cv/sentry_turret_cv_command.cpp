@@ -90,9 +90,17 @@ void SentryTurretCVCommand::execute()
     WrappedFloat widowYawSetpoint = turretWidowConfig.yawController.getSetpoint();
     WrappedFloat widowPitchSetpoint = turretWidowConfig.pitchController.getSetpoint();
 
+    debugMajorYawMeasurement = yawControllerMajor.getMeasurement().getWrappedValue();
+    debugWidowYawMeasurement = turretWidowConfig.yawController.getMeasurement().getWrappedValue();
+    debugWidowPitchMeasurement =
+        turretWidowConfig.pitchController.getMeasurement().getWrappedValue();
+    debugBallisticsYawAngle = 0.0f;
+    debugBallisticsPitchAngle = 0.0f;
+
     auto widowBallisticsSolution = turretWidowConfig.ballisticsSolver.computeTurretAimAngles();
 
     targetFound = (widowBallisticsSolution != std::nullopt);
+    debugTargetFound = targetFound;
 
     // Turret minor control
     // If target spotted
@@ -102,15 +110,22 @@ void SentryTurretCVCommand::execute()
 
         if (widowBallisticsSolution != std::nullopt)
         {
+            debugBallisticsYawAngle = widowBallisticsSolution->yawAngle;
+            debugBallisticsPitchAngle = widowBallisticsSolution->pitchAngle;
             computeAimSetpoints(
                 turretWidowConfig,
                 widowBallisticsSolution.value(),
                 &widowYawSetpoint,
                 &widowPitchSetpoint,
                 &withinAimingToleranceWidow);
-        }
 
-        majorSetpoint = widowYawSetpoint;
+            const auto &aimData =
+                visionCoprocessor.getLastAimData(turretWidowConfig.turretSubsystem.getTurretID());
+            const auto &worldToMajor = sentryTransforms.getWorldToTurretMajor();
+            majorSetpoint = Angle(atan2f(
+                aimData.pva.yPos - worldToMajor.getY(),
+                aimData.pva.xPos - worldToMajor.getX()));
+        }
     }
     else
     {
@@ -210,6 +225,10 @@ void SentryTurretCVCommand::execute()
         default:
             break;
     }
+
+    debugMajorYawSetpoint = majorSetpoint.getWrappedValue();
+    debugWidowYawSetpoint = widowYawSetpoint.getWrappedValue();
+    debugWidowPitchSetpoint = widowPitchSetpoint.getWrappedValue();
 
     uint32_t currTime = getTimeMilliseconds();
     float dt = (currTime - prevTime) / 1000.0f;

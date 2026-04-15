@@ -37,8 +37,9 @@ bool SentryControlOperatorInterface::isTurretControlMode()
     Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
 
     // Manual-aim-enabled modes from the 2026 sentry table:
-    // left mid + right down, left down + right up, left down + right down.
-    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN) ||
+    // left mid + (right up/right down), left down + (right up/right down).
+    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
 }
