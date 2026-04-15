@@ -213,8 +213,9 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 
 static constexpr float majorToTurretR = 0.145;
 static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
+
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
 
 inline const tap::algorithms::transforms::Transform TURRET_MCB1_BMI088_MOUNTING_TRANSFORM(
     0.0f,
