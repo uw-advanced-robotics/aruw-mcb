@@ -32,7 +32,6 @@
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/can/aruw_analog_sensor.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
-#include "aruwsrc/communication/sensors/encoder/analog_sensor_encoder.hpp"
 #include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -129,25 +128,15 @@ namespace sentry_control
 {
 MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
-aruwsrc::communication::can::AruwAnalogSensor turretMajorYawAnalogSensor(
+// aruwsrc::communication::can::AruwAnalogSensor turretMajorYawAnalogSensor(
+//     drivers(),
+//     turretMajor::YAW_ANALOG_SENSOR_CAN_BUS,
+//     turretMajor::YAW_ANALOG_SENSOR_CAN_ID);
+
+aruwsrc::communication::sensors::encoder::LampreyEncoder turretMajorYawLamprey(
     drivers(),
+    turretMajor::YAW_ANALOG_SENSOR_CAN_ID,
     turretMajor::YAW_ANALOG_SENSOR_CAN_BUS,
-    turretMajor::YAW_ANALOG_SENSOR_CAN_ID);
-
-aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Calibration
-    turretMajorYawAnalogCalibration{
-        .rawMin = turretMajor::YAW_ANALOG_RAW_MIN,
-        .rawMax = turretMajor::YAW_ANALOG_RAW_MAX,
-        .rawZero = turretMajor::YAW_ANALOG_RAW_ZERO,
-        .outputRangeRadians = turretMajor::YAW_ANALOG_OUTPUT_RANGE_RADIANS,
-    };
-
-aruwsrc::communication::sensors::encoder::LampreyEncoder turretMajorYawAnalogEncoder(
-    &turretMajorYawAnalogSensor,
-    turretMajor::YAW_ANALOG_SENSOR_CHANNEL == 0
-        ? aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Channel::AI0
-        : aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Channel::AI1,
-    turretMajorYawAnalogCalibration,
     turretMajor::LAMPREY_CALIBRATION_MAP,
     turretMajor::YAW_ANALOG_SENSOR_INVERTED);
 
@@ -520,7 +509,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     drivers()->turretMajorImu,
     getChassisTurretMCBCanComm(),
     transformer,
-    turretMajorYawAnalogEncoder,
+    turretMajorYawLamprey,
     *turretMajorYawMotor.getEncoder(),
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
@@ -549,7 +538,7 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
      turretMajorYawMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      DESIRED_OUT_TO_TORQUE},
-    turretMajorYawAnalogEncoder);
+    turretMajorYawLamprey);
 
 autotune::FreqSweepAutotuneCommand<1, Axis::YAW> freqSweepAutotuneCommand(
     drivers(),
@@ -792,11 +781,11 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
-    turretMajorYawAnalogSensor.initialize();
     buzzer.initialize();
     chassis.initialize();
     turretWidow.initialize();
     turretMajor.initialize();
+    turretMajorYawLamprey.initialize();
     // odometrySubsystem.initialize();
     cfOdometrySubsystem.initialize();
     transformerSubsystem.initialize();

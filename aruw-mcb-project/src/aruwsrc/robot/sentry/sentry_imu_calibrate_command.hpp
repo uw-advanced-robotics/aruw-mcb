@@ -131,7 +131,6 @@ private:
     static constexpr uint32_t MIN_SATURATION_LOOPS = 10;
     uint32_t loopCounter{0};
     bool lampreyAligned{false};
-    bool isLampreyShit();
     float turretMajorLampreyEncoderHighpassValue = 0;
     float turretMajorLampreyEncoderLowpassValue = 0;
     float lampreyShitAverage = 0;

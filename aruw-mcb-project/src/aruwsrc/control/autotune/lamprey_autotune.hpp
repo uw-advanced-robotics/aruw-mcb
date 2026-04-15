@@ -77,7 +77,7 @@ public:
 protected:
     void onMeasurementSample([[maybe_unused]] size_t pointIndex, uint32_t sampleCount) override
     {
-        averageLampreyTick += (encoder.getTicks() - averageLampreyTick) / sampleCount;
+        averageLampreyRaw += (encoder.getRawAngle() - averageLampreyRaw) / sampleCount;
 
         const float angleValue =
             this->config.motor->getChassisFrameMeasuredAngle().getUnwrappedValue();
@@ -87,10 +87,10 @@ protected:
     void onMeasurementComplete(size_t pointIndex) override
     {
         measuredEncoderValueMap[pointIndex] = {
-            static_cast<uint32_t>(averageLampreyTick),
+            static_cast<uint32_t>(averageLampreyRaw),
             Angle(averageAngle).getWrappedValue()};
 
-        averageLampreyTick = 0.0f;
+        averageLampreyRaw = 0.0f;
         averageAngle = 0.0f;
 
         if (pointIndex == numTestPoints - 1)
@@ -102,7 +102,7 @@ protected:
 private:
     std::array<modm::Pair<uint32_t, float>, numTestPoints> measuredEncoderValueMap{};
 
-    float averageLampreyTick{0.0f};
+    float averageLampreyRaw{0.0f};
     float averageAngle{0.0f};
 
     const aruwsrc::communication::sensors::encoder::LampreyEncoder &encoder;

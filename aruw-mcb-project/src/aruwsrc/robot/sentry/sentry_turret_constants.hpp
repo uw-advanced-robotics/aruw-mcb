@@ -25,6 +25,7 @@
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
@@ -97,7 +98,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr tap::can::CanBus YAW_ANALOG_SENSOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
-static constexpr uint16_t YAW_ANALOG_SENSOR_CAN_ID = 0x1D6;
+static constexpr tap::encoder::CanEncoderId YAW_ANALOG_SENSOR_CAN_ID = tap::encoder::CanEncoderId::ID7;
 static constexpr uint8_t YAW_ANALOG_SENSOR_CHANNEL = 1;  // 0 = AI0, 1 = AI1
 static constexpr bool YAW_ANALOG_SENSOR_INVERTED = false;
 static constexpr uint16_t YAW_ANALOG_RAW_MIN = 0;
