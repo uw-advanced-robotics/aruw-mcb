@@ -108,6 +108,8 @@ public:
             tap::gpio::Digital::InputPullMode::PullUp);
         chassisIsm.initialize(mainLoopFrequency, 0.1f, 0.0f);
         chassisIsm.setCalibrationSamples(4000);
+        mcbLite.initialize();
+        mcbLite.imu.initialize(mainLoopFrequency,0.2f, 0.0f);
     }
 
     void updateIo()
