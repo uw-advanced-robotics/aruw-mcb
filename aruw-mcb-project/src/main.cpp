@@ -193,6 +193,7 @@ static void initializeIo(Drivers* drivers)
 
 #if defined(TARGET_ENGINEER)
     drivers->turretMCBCanCommBus1.init();
+    drivers->customController.initialize();
 #endif
 
 #if defined(TARGET_HERO_ZERO) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_ECLIPSE) || \
@@ -255,7 +256,7 @@ static void updateIo(Drivers* drivers)
 
 #if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
     drivers->engineerCVCommunication.updateSerial();
-    drivers->customController.update();
+    drivers->customController.updateSerial();
 #endif
 
 #ifdef TARGET_SENTRY_ECLIPSE

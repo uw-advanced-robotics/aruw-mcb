@@ -27,10 +27,10 @@
 namespace aruwsrc::engineer
 {
 using ReceivedSerialMessage = tap::communication::serial::DJISerial::ReceivedSerialMessage;
-class CustomController
+class CustomController : public tap::communication::serial::DJISerial
 {
 public:
-    CustomController(tap::Drivers *drivers) : drivers(drivers) {}
+    CustomController(tap::Drivers *drivers);
     DISALLOW_COPY_AND_ASSIGN(CustomController)
     mockable ~CustomController() = default;
 
@@ -46,7 +46,7 @@ public:
 
     mockable void initialize();
 
-    mockable void messageReceiveAndReadCallback(const ReceivedSerialMessage &message);
+    mockable void messageReceiveCallback(const ReceivedSerialMessage &message) override;
 
     mockable void update();
 
@@ -87,7 +87,7 @@ public:
 
 private:
     static constexpr uint8_t KEY_OFFSET = 2;
-    static constexpr uint16_t CUSTOM_CONTROLLER_MESSAGE_TYPE = 16;  // TODO set to actual value
+    static constexpr uint16_t CUSTOM_CONTROLLER_MESSAGE_TYPE = 0x0302;
     static constexpr int SUCTION_MASK = 0x1;
     static constexpr int TRIGGER_MASK = 0x10;
     static constexpr int JOYSTICK_X_MASK = 0x3FF;
@@ -126,6 +126,9 @@ private:
     ControllerInfo controller;
     bool connected = false;
     uint32_t lastRead = 0;
+
+    //debug 
+    uint16_t messageType;
 };
 }  // namespace aruwsrc::engineer
 

@@ -18,16 +18,22 @@
  */
 
 #include "custom_controller.hpp"
+#include "tap/drivers.hpp"
+
 
 namespace aruwsrc::engineer
 {
+CustomController::CustomController(tap::Drivers *drivers):
+     DJISerial(drivers, CUSTOM_CONTROLLER_RX_UART_PORT) {}
+
 void CustomController::initialize()
 {
     drivers->uart.init<CUSTOM_CONTROLLER_RX_UART_PORT, CUSTOM_CONTROLLER_BAUD_RATE>();
 }
 
-void CustomController::messageReceiveAndReadCallback(const ReceivedSerialMessage& message)
+void CustomController::messageReceiveCallback(const ReceivedSerialMessage& message)
 {
+    messageType = message.messageType;
     if (message.messageType == CUSTOM_CONTROLLER_MESSAGE_TYPE)
     {
         if (message.header.dataLength < sizeof(ControllerInfoWire)) return;
