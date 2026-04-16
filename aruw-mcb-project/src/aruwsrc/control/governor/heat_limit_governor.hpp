@@ -75,12 +75,8 @@ private:
 
         switch (firingSystemMechanismID)
         {
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
-                heat = robotData.turret.heat17ID1;
-                nextCost = aruwsrc::constants::HEAT_COST_17MM;
-                break;
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
-                heat = robotData.turret.heat17ID2;
+            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM:
+                heat = robotData.turret.heat17;
                 nextCost = aruwsrc::constants::HEAT_COST_17MM;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
