@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
@@ -97,7 +98,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr tap::can::CanBus YAW_ANALOG_SENSOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
-static constexpr uint16_t YAW_ANALOG_SENSOR_CAN_ID = 0x1D6;
+static constexpr tap::encoder::CanEncoderId YAW_ANALOG_SENSOR_CAN_ID =
+    tap::encoder::CanEncoderId::ID7;
 static constexpr uint8_t YAW_ANALOG_SENSOR_CHANNEL = 1;  // 0 = AI0, 1 = AI1
 static constexpr bool YAW_ANALOG_SENSOR_INVERTED = false;
 static constexpr uint16_t YAW_ANALOG_RAW_MIN = 0;
@@ -211,8 +213,9 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 
 static constexpr float majorToTurretR = 0.145;
 static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
+
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2;
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
 
 inline const tap::algorithms::transforms::Transform TURRET_MCB1_BMI088_MOUNTING_TRANSFORM(
     0.0f,
