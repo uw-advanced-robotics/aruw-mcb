@@ -32,6 +32,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/remote_map_state.hpp"
+#include "tap/control/repeat_command.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -78,7 +79,7 @@
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 
-//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
@@ -134,6 +135,7 @@ using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::standard;
 
 // for fake sentry
@@ -479,18 +481,20 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
-autotune::GravityAutotuneCommand<9> gravityAutotuneCommand(
+autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommand(
     drivers(),
     {&turret,
+     &turret.pitchMotor,
      &chassisFramePitchTurretController,
      pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &chassis);
 
-autotune::SpringAutotuneCommand<9> springAutotuneCommand(
+autotune::SpringAutotuneCommand<9, Axis::PITCH> springAutotuneCommand(
     drivers(),
     {&turret,
+     &turret.pitchMotor,
      &chassisFramePitchTurretController,
      pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
@@ -655,12 +659,13 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 // Remote related mappings
 Trigger rightSwitchMiddle =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
-        .onTrue(&spinFrictionWheels);
+        .onTrue(&spinFrictionWheels)
+        .onFalse(&stopFrictionWheels);
 
+RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 Trigger rightSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(Compose::parallel<2>(
-            {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}));
+        .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
 
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
@@ -680,7 +685,7 @@ auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGov
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
-    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+    rotateAndUnjamAgitatorRepeat,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     &manualFireRateReselectionManager,
     cvOnTargetGovernor,

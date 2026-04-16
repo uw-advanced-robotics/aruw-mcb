@@ -26,18 +26,19 @@ VALID_BUILD_PROFILES = ["debug", "release", "fast"]
 VALID_PROFILING_TYPES = ["true", "false"]
 VALID_COMPILE_LIB_TYPES = ["mcb", "sim", "test", "none"]
 
-USAGE = 'Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>] [profiling=<true|false>] [compile_lib_only=<mcb|sim|test>]\n\
-    "<target>" is one of:\n\
-        - "build": build all code for the hardware platform.\n\
-        - "run": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.\n\
-        - "build-tests": build core code and tests for the current host platform.\n\
-        - "run-tests": build core code and tests for the current host platform, and execute them locally with the test runner.\n\
-        - "run-tests-gcov": builds core code and tests, executes them locally, and captures and prints code coverage information\n\
-        - "build-sim": build all code for the simulated environment, for the current host platform.\n\
-        - "run-sim": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
-        - "ozone": builds the code and launches ozone, defaulting to using USB for robot connection.\n\
-            - "ip=<IP>": sets the IP address of the robot to connect to.\
-    "<ROBOT_TYPE>" enables the appropriate build flags for the hardware target that the code should be built for.\n\
+USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>] [profiling=<true|false>] [compile_lib_only=<mcb|sim|test>]\n\
+    \"<target>\" is one of:\n\
+        - \"build\": build all code for the hardware platform.\n\
+        - \"run\": build all code for the hardware platform, and deploy it to the board via a connected ST-Link.\n\
+        - \"build-tests\": build core code and tests for the current host platform.\n\
+        - \"run-tests\": build core code and tests for the current host platform, and execute them locally with the test runner.\n\
+        - \"run-tests-gcov\": builds core code and tests, executes them locally, and captures and prints code coverage information\n\
+        - \"build-sim\": build all code for the simulated environment, for the current host platform.\n\
+        - \"run-sim\": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
+        - \"ozone\": builds the code and launches ozone. If no connection options are specified, Fleet Status is first queried for the appropriate IP, falling back to a local cache, finally defaulting to USB.\n\
+            - \"ip=<IP>\", \"--ip=<IP>\": sets the IP address of the robot to connect to.\
+            - \"usb=1\", \"--usb\": forces the use of USB, regardless of whether a known IP is present.\
+    \"<ROBOT_TYPE>\" enables the appropriate build flags for the hardware target that the code should be built for.\n\
         - <ROBOT_TYPE> must be one of or a unique substring from the following:\n\
             - STANDARD_NULL, STANDARD_PHOBOS, DRONE, ENGINEER, SENTRY_ECLIPSE, HERO_ZERO, DART\n\
     "compile_lib_only": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\

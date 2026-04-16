@@ -87,6 +87,8 @@ before_script:
 
     - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
 
+    - python3 ./check_namespace_rule.py -i "*_constants.hpp" old-indicators create_rtt_error.hpp 2025engineer -rn robot
+
     - ./taproot-scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot "release develop"
   only: *verification_only
   except: *verification_except
