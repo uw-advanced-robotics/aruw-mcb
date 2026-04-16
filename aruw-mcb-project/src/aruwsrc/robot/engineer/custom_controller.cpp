@@ -37,7 +37,7 @@ void CustomController::messageReceiveCallback(const ReceivedSerialMessage& messa
     if (message.messageType == CUSTOM_CONTROLLER_MESSAGE_TYPE)
     {
         if (message.header.dataLength < sizeof(ControllerInfoWire)) return;
-        ControllerInfoWire wire;
+        ControllerInfoWire wire {};
         memcpy(&wire, &message.data, sizeof(ControllerInfoWire));
 
         controller.x = wire.x / INT_TO_FLOAT_CONV;

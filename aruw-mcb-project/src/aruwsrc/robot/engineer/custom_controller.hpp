@@ -81,7 +81,7 @@ public:
         return ((controller.buttons_trigger_suction >> (static_cast<int>(key) + KEY_OFFSET)) & 0x1);
     }
 
-    mockable uint8_t getSensitivity() { return controller.sensitivity; }
+    mockable uint16_t getSensitivity() { return controller.sensitivity; }
 
     mockable bool suctionEnabled() { return controller.buttons_trigger_suction & SUCTION_MASK; }
 
@@ -94,8 +94,8 @@ private:
     static constexpr int JOYSTICK_Y_MASK = JOYSTICK_X_MASK << 10;
 
     static constexpr tap::communication::serial::Uart::UartPort CUSTOM_CONTROLLER_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart6;          // TODO set to actual value
-    static constexpr size_t CUSTOM_CONTROLLER_BAUD_RATE = 500'000;  // TODO set to actual value
+        tap::communication::serial::Uart::UartPort::Uart6;          
+    static constexpr size_t CUSTOM_CONTROLLER_BAUD_RATE = 500'000;
     static constexpr float INT_TO_FLOAT_CONV = 1000.0f;
     static const int REMOTE_DISCONNECT_TIMEOUT = 100;
 
@@ -122,7 +122,6 @@ private:
         return (curVal - 512.0f) / 511.0f;
     }
 
-    tap::Drivers *drivers;
     ControllerInfo controller;
     bool connected = false;
     uint32_t lastRead = 0;

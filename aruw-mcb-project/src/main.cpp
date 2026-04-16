@@ -254,11 +254,13 @@ static void updateIo(Drivers* drivers)
 #if defined(ALL_STANDARDS) || defined(TARGET_HERO_ZERO) || defined(TARGET_SENTRY_ECLIPSE)
     drivers->visionCoprocessor.updateSerial();
     drivers->customController.updateSerial(); // TODO remove
+    drivers->customController.update();
 #endif
 
 #if defined(TARGET_ENGINEER) || defined(TARGET_ENGI_2025)
     drivers->engineerCVCommunication.updateSerial();
     drivers->customController.updateSerial();
+    drivers->customController.update();
 #endif
 
 #ifdef TARGET_SENTRY_ECLIPSE
