@@ -42,7 +42,7 @@
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
-#include "aruwsrc/robot/engineer/custom_controller.hpp"
+#include "aruwsrc/robot/standard/custom_controller.hpp"
 
 #endif
 
@@ -106,7 +106,7 @@ public:
     RefSerialTransmitter refSerialTransmitter;
     aruwsrc::communication::inter_robot_comm::InterRobotTransmitter interRobotTransmitter;
     // aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> ism330;
-    aruwsrc::engineer::CustomController customController;
+    aruwsrc::standard::CustomController customController;
 #endif
 };  // class aruwsrc::StandardDrivers
 }  // namespace aruwsrc::standard
