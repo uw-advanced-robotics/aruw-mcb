@@ -95,7 +95,7 @@ private:
 
     static constexpr tap::communication::serial::Uart::UartPort CUSTOM_CONTROLLER_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart6;          
-    static constexpr size_t CUSTOM_CONTROLLER_BAUD_RATE = 500'000;
+    static constexpr size_t CUSTOM_CONTROLLER_BAUD_RATE = 115200;
     static constexpr float INT_TO_FLOAT_CONV = 1000.0f;
     static const int REMOTE_DISCONNECT_TIMEOUT = 100;
 
@@ -127,6 +127,8 @@ private:
     uint32_t lastRead = 0;
 
     //debug 
+    uint64_t counter = 0;
+    uint64_t counter2 = 0;
     uint16_t messageType;
 };
 }  // namespace aruwsrc::standard

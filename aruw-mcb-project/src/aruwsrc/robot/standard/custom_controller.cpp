@@ -31,8 +31,10 @@ void CustomController::initialize()
     drivers->uart.init<CUSTOM_CONTROLLER_RX_UART_PORT, CUSTOM_CONTROLLER_BAUD_RATE>();
 }
 
+// seems like this isn't actually being called???
 void CustomController::messageReceiveCallback(const ReceivedSerialMessage& message)
 {
+    counter2++;
     messageType = message.messageType;
     if (message.messageType == CUSTOM_CONTROLLER_MESSAGE_TYPE)
     {
@@ -59,9 +61,10 @@ void CustomController::messageReceiveCallback(const ReceivedSerialMessage& messa
 
 void CustomController::update()
 {
+    counter++;
     if (tap::arch::clock::getTimeMilliseconds() - lastRead > REMOTE_DISCONNECT_TIMEOUT)
     {
-        reset();
+        //reset();
         connected = false;
     }
 }
