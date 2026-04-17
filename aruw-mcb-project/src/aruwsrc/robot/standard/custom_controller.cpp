@@ -38,22 +38,9 @@ void CustomController::messageReceiveCallback(const ReceivedSerialMessage& messa
     messageType = message.messageType;
     if (message.messageType == CUSTOM_CONTROLLER_MESSAGE_TYPE)
     {
-        if (message.header.dataLength < sizeof(ControllerInfoWire)) return;
-        ControllerInfoWire wire {};
-        memcpy(&wire, &message.data, sizeof(ControllerInfoWire));
-
-        controller.x = wire.x / INT_TO_FLOAT_CONV;
-        controller.y = wire.y / INT_TO_FLOAT_CONV;
-        controller.z = wire.z / INT_TO_FLOAT_CONV;
-
-        controller.yaw = wire.yaw / INT_TO_FLOAT_CONV;
-        controller.pitch = wire.pitch / INT_TO_FLOAT_CONV;
-        controller.roll = wire.roll / INT_TO_FLOAT_CONV;
-
-        controller.joystick_axes = wire.joystick_axes;
-        controller.sensitivity = wire.sensitivity;
-        controller.buttons_trigger_suction = wire.buttons_trigger_suction;
-
+        if (message.header.dataLength < sizeof(ControllerInfo)) return;
+        ControllerInfo info;
+        memcpy(&info, &message.data, sizeof(ControllerInfo));
         lastRead = tap::arch::clock::getTimeMilliseconds();
         connected = true;
     }
