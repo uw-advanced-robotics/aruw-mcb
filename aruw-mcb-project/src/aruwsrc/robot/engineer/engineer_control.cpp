@@ -21,8 +21,6 @@
 
 #if defined(TARGET_ENGINEER)
 
-#include "aruwsrc/util_macros.hpp"
-
 #include <memory>
 
 #include "tap/communication/gpio/digital.hpp"
@@ -69,6 +67,7 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
+
 
 // #include "aruwsrc/robot/engineer/turret/constants/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
@@ -127,7 +126,7 @@ namespace aruwsrc
 {
 namespace control
 {
-inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -150,7 +149,7 @@ tap::motor::DjiMotor yawTurretMotor(
     false,
     "Yaw Turret",
     true,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (16.0f / 60.0f),
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508*(16.0f / 60.0f),
     YAW_MOTOR_CONFIG.startEncoderValue);
 
 /// @TODO: make the turretMCB a MCB lite
@@ -318,13 +317,13 @@ tap::encoder::CanEncoder parallelOmniTwo(
     drivers(),
     tap::encoder::CanEncoderId::ID1,
     tap::can::CanBus::CAN_BUS2,
-    true); 
+    true);
 
 tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID2,
     tap::can::CanBus::CAN_BUS2,
-    true);  
+    true);
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
     &parallelOmniOne,

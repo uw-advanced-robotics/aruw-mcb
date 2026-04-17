@@ -94,8 +94,7 @@ void ThreeDeadwheelChassisKFOdometry::update()
 
     float perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
     float parallelOneRaw = deadwheelOdometry.getParallelMotorOneVelocity();
-    float parallelTwoRaw =
-        deadwheelOdometry.getParallelMotorTwoVelocity(); 
+    float parallelTwoRaw = deadwheelOdometry.getParallelMotorTwoVelocity();
 
     // Compute odometry angular velocity
     float odoOmega = (parallelTwoRaw - parallelOneRaw) /
