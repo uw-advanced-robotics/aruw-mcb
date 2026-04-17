@@ -67,7 +67,7 @@ void ThreeDeadwheelChassisKFOdometry::update()
 {
     assert(parallelOneCenterToWheelDistance + parallelTwoCenterToWheelDistance > 0);
 
-    /* Process IMUW */
+    /* Process IMU */
     float mahonyOutput = 0.0f;
     if (!chassisYawObserver.getChassisWorldYaw(&mahonyOutput))
     {
