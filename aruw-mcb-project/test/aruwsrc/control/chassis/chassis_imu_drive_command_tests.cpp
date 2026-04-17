@@ -257,7 +257,7 @@ TEST_P(
 
     float xExpected = std::get<0>(GetParam());
     float yExpected = std::get<1>(GetParam());
-    tap::algorithms::rotateVector(&xExpected, &yExpected, -modm::toRadian(10));
+    tap::algorithms::rotateVector(&xExpected, &yExpected, -imuYaw);
 
     EXPECT_CALL(
         chassis,
