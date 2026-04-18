@@ -27,16 +27,16 @@
 namespace aruwsrc
 {
 using ReceivedSerialMessage = tap::communication::serial::DJISerial::ReceivedSerialMessage;
-class StandardHeroCustomController
+class StandardHeroCustomController : public tap::communication::serial::DJISerial
 {
 public:
-    StandardHeroCustomController(tap::Drivers *drivers) : drivers(drivers) {}
+    StandardHeroCustomController(tap::Drivers *drivers);
     DISALLOW_COPY_AND_ASSIGN(StandardHeroCustomController)
     mockable ~StandardHeroCustomController() = default;
 
     mockable void initialize();
 
-    mockable void messageReceiveAndReadCallback(const ReceivedSerialMessage &message);
+    mockable void messageReceiveCallback(const ReceivedSerialMessage &message) override;
 
     mockable void update();
 
@@ -62,8 +62,8 @@ private:
     static constexpr int NUM_BUTTONS = 20;
 
     static constexpr tap::communication::serial::Uart::UartPort CUSTOM_CONTROLLER_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart7;          // TODO set to actual value
-    static constexpr size_t CUSTOM_CONTROLLER_BAUD_RATE = 500'000;  // TODO set to actual value
+        tap::communication::serial::Uart::UartPort::Uart6;
+    static constexpr size_t CUSTOM_CONTROLLER_BAUD_RATE = 115200; 
     static constexpr float INT_TO_FLOAT_CONV = 1000.0f;
     static const int REMOTE_DISCONNECT_TIMEOUT = 100;
 

@@ -21,12 +21,16 @@
 
 namespace aruwsrc
 {
+
+StandardHeroCustomController::StandardHeroCustomController(tap::Drivers *drivers):
+     DJISerial(drivers, CUSTOM_CONTROLLER_RX_UART_PORT) {}
+
 void StandardHeroCustomController::initialize()
 {
     drivers->uart.init<CUSTOM_CONTROLLER_RX_UART_PORT, CUSTOM_CONTROLLER_BAUD_RATE>();
 }
 
-void StandardHeroCustomController::messageReceiveAndReadCallback(
+void StandardHeroCustomController::messageReceiveCallback(
     const ReceivedSerialMessage& message)
 {
     if (message.messageType == CUSTOM_CONTROLLER_MESSAGE_TYPE)
