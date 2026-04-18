@@ -142,7 +142,20 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
 
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
-
+inline const tap::algorithms::transforms::Transform CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    PI);
+inline const tap::algorithms::transforms::Transform CHASSIS_MCB_ISM330_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    PI);
 }  // namespace aruwsrc::control::chassis
 
 #endif  // STANDARD_CHASSIS_CONSTANTS_HPP_

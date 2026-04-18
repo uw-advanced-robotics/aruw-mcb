@@ -153,6 +153,20 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.7f,
     .beybladeRampRate = 50,
 };
+inline const tap::algorithms::transforms::Transform CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    PI);
+inline const tap::algorithms::transforms::Transform CHASSIS_MCB_ISM330_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    PI);
 }  // namespace aruwsrc::control::chassis
 
 #endif  // HERO_CHASSIS_CONSTANTS_HPP_

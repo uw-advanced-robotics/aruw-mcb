@@ -772,6 +772,9 @@ void startHeroCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
+    getTurretMCBCanComm().setImuMountingTransforms(
+        aruwsrc::control::chassis::CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM,
+        aruwsrc::control::chassis::CHASSIS_MCB_ISM330_MOUNTING_TRANSFORM);
 }
 
 /* register io mappings here ------------------------------------------------*/
