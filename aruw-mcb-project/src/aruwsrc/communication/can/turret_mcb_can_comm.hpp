@@ -20,6 +20,10 @@
 #ifndef TURRET_MCB_CAN_COMM_HPP_
 #define TURRET_MCB_CAN_COMM_HPP_
 
+#include <array>
+#include <cstddef>
+
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
@@ -46,9 +50,6 @@ namespace aruwsrc::communication::can
  * microcontroller. Reads IMU data and sends instructions to the turret microcontroller. Follows the
  * protocol described in the wiki here:
  * https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Turret-MCB-Comm-Protocol.
- *
- * @note Since we use radians in this codebase, angle values that are sent from the turret MCB in
- * degrees are converted to radians by this object.
  */
 class TurretMCBCanComm : public tap::communication::sensors::imu::AbstractIMU,
                          public tap::communication::sensors::limit_switch::LimitSwitchInterface
@@ -66,6 +67,10 @@ public:
 
     enum CanIDs
     {
+        CALIBRATION_SAMPLES_REQUEST_RX_CAN_ID = 0x1f3,
+        CALIBRATION_SAMPLES_TX_CAN_ID = 0x1f4,
+        IMU_MOUNTING_REQUEST_RX_CAN_ID = 0x1f5,
+        IMU_MOUNTING_TX_CAN_ID = 0x1f6,
         TURRET_MCB_TX_CAN_ID = 0x1f7,
         SYNC_RX_CAN_ID = 0x1f8,
         SYNC_TX_CAN_ID = 0x1f9,
@@ -75,37 +80,40 @@ public:
         Z_AXIS_RX_CAN_ID = 0x1fd,
     };
 
+    enum class RemoteImuType : uint8_t
+    {
+        BMI088 = 0,
+        ISM330 = 1,
+        MPU6500 = 2,
+    };
+    static constexpr size_t NUM_REMOTE_IMU_TYPES = 3;
+
     TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBus);
     DISALLOW_COPY_AND_ASSIGN(TurretMCBCanComm);
 
     mockable void init();
+    mockable void initialize(float sampleFrequency, float mahonyKp, float mahonyKi) override;
+    mockable void periodicIMUUpdate() override;
 
     mockable inline void attachImuDataReceivedCallback(ImuDataReceivedCallbackFunc func)
     {
         imuDataReceivedCallbackFunc = func;
     }
 
-#if defined(TARGET_SENTRY_ECLIPSE)
     static constexpr float IMU_SCALING_FACTOR =
         1 / tap::communication::sensors::imu::mpu6500::Mpu6500::LSB_PER_RAD_PER_S;
-#else
-    static constexpr float IMU_SCALING_FACTOR = 2000.0 / 32768.0;
-#endif
     /**
-     * @return turret yaw angle in radians, normalized between [-pi, pi]
+     * @return turret roll angle in radians, normalized between [-pi, pi]
      */
     mockable inline float getRoll() const override { return lastCompleteImuData.roll; }
 
     /**
-     * @return turret yaw angular velocity in rad/sec
+     * @return turret roll angular velocity in rad/sec
      */
-    mockable inline float getGx() const override
-    {
-        return static_cast<float>(lastCompleteImuData.rawRollVelocity) * IMU_SCALING_FACTOR;
-    }
+    mockable inline float getGx() const override { return imuData.gyroRadPerSec.x(); }
 
     /**
-     * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
+     * @return An unwrapped (not normalized) turret roll angle, in rad. This object keeps track of
      * the number of revolutions that the attached turret IMU has taken, and the number of
      * revolutions is reset once the IMU is recalibrated or if the turret IMU comes disconnected.
      */
@@ -122,10 +130,7 @@ public:
     /**
      * @return turret pitch angular velocity in rad/sec
      */
-    mockable inline float getGy() const override
-    {
-        return static_cast<float>(lastCompleteImuData.rawPitchVelocity) * IMU_SCALING_FACTOR;
-    }
+    mockable inline float getGy() const override { return imuData.gyroRadPerSec.y(); }
 
     /**
      * @return An unwrapped (not normalized) turret pitch angle, in rad. This object keeps track of
@@ -140,15 +145,12 @@ public:
     /**
      * @return turret yaw angle in radians, normalized between [-pi, pi]
      */
-    mockable inline float getYaw() const { return lastCompleteImuData.yaw; }
+    mockable inline float getYaw() const override { return lastCompleteImuData.yaw; }
 
     /**
      * @return turret yaw angular velocity in rad/sec
      */
-    mockable inline float getGz() const override
-    {
-        return static_cast<float>(lastCompleteImuData.rawYawVelocity) * IMU_SCALING_FACTOR;
-    }
+    mockable inline float getGz() const override { return imuData.gyroRadPerSec.z(); }
 
     /**
      * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
@@ -160,11 +162,18 @@ public:
         return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
     }
 
-    mockable inline float getAx() const override { return lastCompleteImuData.xAcceleration; }
+    mockable inline float getAx() const override { return imuData.accG.x(); }
 
-    mockable inline float getAy() const override { return lastCompleteImuData.yAcceleration; }
+    mockable inline float getAy() const override { return imuData.accG.y(); }
 
-    mockable inline float getAz() const override { return lastCompleteImuData.zAcceleration; }
+    mockable inline float getAz() const override { return imuData.accG.z(); }
+
+    mockable inline float getTemp() const { return imuData.temperature; }
+
+    mockable inline ImuState getImuState() const override
+    {
+        return isConnected() ? imuState : ImuState::IMU_NOT_CONNECTED;
+    }
 
     mockable inline uint32_t getIMUDataTimestamp() const
     {
@@ -178,18 +187,6 @@ public:
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
     }
 
-    inline ImuInterface::ImuState getImuState() const override
-    {
-        if (isConnected())
-        {
-            return imuState;
-        }
-        else
-        {
-            return ImuInterface::ImuState::IMU_NOT_CONNECTED;
-        }
-    }
-
     mockable inline void setOpenHopperCover(bool isOpen)
     {
         txCommandMsgBitmask.update(TxCommandMsgBitmask::OPEN_HOPPER, isOpen);
@@ -200,10 +197,24 @@ public:
         txCommandMsgBitmask.update(TxCommandMsgBitmask::TURN_LASER_ON, isOn);
     }
 
-    mockable inline void requestCalibration()
+    mockable inline void requestCalibration() override
     {
         txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
+        imuState = ImuState::IMU_CALIBRATING;
     }
+
+    inline void setRemoteCalibrationSampleCount(uint16_t sampleCount)
+    {
+        remoteCalibrationSampleCount = sampleCount;
+    }
+
+    void setImuMountingTransforms(
+        const tap::algorithms::transforms::Transform& bmi088MountingTransform,
+        const tap::algorithms::transforms::Transform& ism330MountingTransform);
+    void clearHasImuMountingTransforms();
+    void setImuMountingTransform(
+        RemoteImuType imuType,
+        const tap::algorithms::transforms::Transform& mountingTransform);
 
     mockable void sendData();
 
@@ -214,6 +225,7 @@ protected:
     {
         // taken from BMI088 implementation
         // this is dumb and we should update it in both places eventually
+        /// @TODO: UPDATE on this and TurretMCB
         return 2 * 1.5f * tap::algorithms::ACCELERATION_GRAVITY / 32768.0f;
     }
 
@@ -221,8 +233,8 @@ private:
     using CanCommListenerFunc = void (TurretMCBCanComm::*)(const modm::can::Message& message);
 
     static constexpr uint32_t DISCONNECT_TIMEOUT_PERIOD = 100;
-    static constexpr float ANGLE_FIXED_POINT_PRECISION = 360.0f / UINT16_MAX;
-    static constexpr float CMPS2_TO_MPS2 = 0.01;
+    static constexpr float ANGLE_FIXED_POINT_PRECISION = M_TWOPI / UINT16_MAX;
+    static constexpr float CMPS2_TO_MPS2 = 0.01f;
     static constexpr uint32_t SEND_MCB_DATA_TIMEOUT = 500;
 
     class TurretMcbRxHandler : public tap::can::CanRxListener
@@ -249,6 +261,39 @@ private:
         uint8_t seq;
     } modm_packed;
 
+    struct TurretStatusMessageData
+    {
+        uint8_t statusBitmask;
+        uint8_t imuState;
+        int16_t temperatureCentiC;
+    } modm_packed;
+
+    enum class TransformMessagePart : uint8_t
+    {
+        TRANSLATION = 0,
+        ROTATION = 1,
+    };
+
+    struct ImuMountingTransformMessageData
+    {
+        uint8_t imuType;
+        uint8_t part;
+        int16_t componentA;
+        int16_t componentB;
+        int16_t componentC;
+    } modm_packed;
+    static_assert(
+        sizeof(ImuMountingTransformMessageData) <= 8,
+        "IMU mounting transform CAN payload must fit in 8 bytes");
+
+    struct CalibrationSamplesMessageData
+    {
+        uint16_t samples;
+    } modm_packed;
+    static_assert(
+        sizeof(CalibrationSamplesMessageData) <= 8,
+        "Calibration samples payload must fit in 8 bytes");
+
     struct ImuData
     {
         float yaw;                     ///< Normalized yaw value, between [-pi, pi]
@@ -260,6 +305,7 @@ private:
         float xAcceleration;           ///< (m/s^2) X-Acceleration
         float yAcceleration;           ///< (m/s^2) Y-Acceleration
         float zAcceleration;           ///< (m/s^2) Z-Acceleration
+        float temperature;             ///< (degC)
         uint32_t turretDataTimestamp;  ///< Timestamp that the IMU data was received
         uint8_t seq;                   ///< Sequence number for synchronizing axis messages
     };
@@ -282,6 +328,8 @@ private:
     TurretMcbRxHandler turretStatusRxHandler;
 
     TurretMcbRxHandler timeSynchronizationRxHandler;
+    TurretMcbRxHandler calibrationSamplesRequestRxHandler;
+    TurretMcbRxHandler imuMountingRequestRxHandler;
 
     tap::arch::MilliTimeout imuConnectedTimeout;
 
@@ -293,7 +341,17 @@ private:
 
     bool limitSwitchDepressed;
 
+    bool imuMountingTransformQueued = false;
+    bool calibrationSamplesSyncQueued = false;
+
     ImuDataReceivedCallbackFunc imuDataReceivedCallbackFunc = nullptr;
+    std::array<tap::algorithms::transforms::Transform, NUM_REMOTE_IMU_TYPES>
+        remoteImuMountingTransforms{
+            tap::algorithms::transforms::Transform::identity(),
+            tap::algorithms::transforms::Transform::identity(),
+            tap::algorithms::transforms::Transform::identity()};
+    std::array<bool, NUM_REMOTE_IMU_TYPES> hasRemoteImuMountingTransform{{false, false, false}};
+    uint16_t remoteCalibrationSampleCount = 1500;
 
     void handleXAxisMessage(const modm::can::Message& message);
 
@@ -304,6 +362,8 @@ private:
     void handleTurretMessage(const modm::can::Message& message);
 
     void handleTimeSynchronizationRequest(const modm::can::Message& message);
+    void handleCalibrationSamplesRequest(const modm::can::Message& message);
+    void handleImuMountingTransformRequest(const modm::can::Message& message);
 
     /**
      * Updates the passed in revolutionCounter if a revolution increment or decrement has been
@@ -311,7 +371,7 @@ private:
      *
      * A revolution increment is detected if the difference between the new and old angle is < -pi,
      * and a decrement is detected if the difference is > pi. Put simply, if the angle measurement
-     * jumped unexpectly, it is assumed that a revolution has ocurred.
+     * jumped unexpectedly, it is assumed that a revolution has occurred.
      *
      * @param[in] newAngle A new angle measurement, in radians.
      * @param[in] prevAngle The old (previous) angle measurement, in radians.
@@ -333,6 +393,16 @@ private:
             revolutionCounter--;
         }
     }
+
+    void queueImuMountingTransformSync();
+    bool sendImuMountingTransformSyncMessage(
+        RemoteImuType imuType,
+        TransformMessagePart part,
+        const tap::algorithms::transforms::Transform& transform);
+    bool hasAnyImuMountingTransformsConfigured() const;
+    void sendImuMountingTransformSync();
+    void queueCalibrationSamplesSync();
+    void sendCalibrationSamplesSync();
 };
 }  // namespace aruwsrc::communication::can
 
