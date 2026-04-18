@@ -31,7 +31,6 @@ void CustomController::initialize()
     drivers->uart.init<CUSTOM_CONTROLLER_RX_UART_PORT, CUSTOM_CONTROLLER_BAUD_RATE>();
 }
 
-// seems like this isn't actually being called???
 void CustomController::messageReceiveCallback(const ReceivedSerialMessage& message)
 {
     counter2++;

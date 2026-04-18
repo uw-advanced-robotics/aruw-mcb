@@ -34,7 +34,6 @@ public:
     DISALLOW_COPY_AND_ASSIGN(CustomController)
     mockable ~CustomController() = default;
 
-    // TODO change to actual key names
     enum class Key
     {
         A,
@@ -54,11 +53,11 @@ public:
 
     mockable bool isConnected() const;
 
-    mockable float getX() { return controller.x; }
+    mockable float getX() { return controller.pos_x; }
 
-    mockable float getY() { return controller.y; }
+    mockable float getY() { return controller.pos_y; }
 
-    mockable float getZ() { return controller.z; }
+    mockable float getZ() { return controller.pos_z; }
 
     mockable float getYaw() { return controller.yaw; }
 
@@ -67,55 +66,36 @@ public:
     mockable float getRoll() { return controller.roll; }
 
     mockable float getJoystickX() { 
-        return normalizedJoystickValue(controller.joystick_axes & JOYSTICK_X_MASK);
+        return normalizedJoystickValue(controller.joy_x & JOYSTICK_MASK);
     }
 
     mockable float getJoystickY() { 
-        return normalizedJoystickValue((controller.joystick_axes & JOYSTICK_Y_MASK) >> 10);
+        return normalizedJoystickValue(controller.joy_y & JOYSTICK_MASK);
     }
-
-    mockable bool isTriggerPressed() { return (controller.buttons_trigger_suction & TRIGGER_MASK); }
 
     mockable bool getKeyPressed(Key key)
     {
-        return ((controller.buttons_trigger_suction >> (static_cast<int>(key) + KEY_OFFSET)) & 0x1);
+        return (controller.buttons >> static_cast<int>(key)) & 0x1;
     }
-
-    mockable uint16_t getSensitivity() { return controller.sensitivity; }
-
-    mockable bool suctionEnabled() { return controller.buttons_trigger_suction & SUCTION_MASK; }
 
 private:
     static constexpr uint8_t KEY_OFFSET = 2;
     static constexpr uint16_t CUSTOM_CONTROLLER_MESSAGE_TYPE = 0x0302;
     static constexpr int SUCTION_MASK = 0x1;
     static constexpr int TRIGGER_MASK = 0x10;
-    static constexpr int JOYSTICK_X_MASK = 0x3FF;
-    static constexpr int JOYSTICK_Y_MASK = JOYSTICK_X_MASK << 10;
+    static constexpr int JOYSTICK_MASK = 0x3FF;
 
     static constexpr tap::communication::serial::Uart::UartPort CUSTOM_CONTROLLER_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart6;          
-    static constexpr size_t CUSTOM_CONTROLLER_BAUD_RATE = 500'000;
-    static constexpr float INT_TO_FLOAT_CONV = 1000.0f;
+    static constexpr size_t CUSTOM_CONTROLLER_BAUD_RATE = 115200;
     static const int REMOTE_DISCONNECT_TIMEOUT = 100;
-
-    struct ControllerInfoWire
-    {
-        uint32_t joystick_axes;
-        int16_t x, y, z;
-        int16_t yaw, pitch, roll;
-        uint16_t sensitivity;
-        uint8_t buttons_trigger_suction;
-    } modm_packed;
-
     struct ControllerInfo
     {
-        uint32_t joystick_axes;
-        float x, y, z;
-        float yaw, pitch, roll;
-        uint16_t sensitivity;
-        uint8_t buttons_trigger_suction;
-    };
+        float pos_x, pos_y, pos_z;
+        float roll, pitch, yaw;
+        uint8_t buttons;
+        uint16_t joy_x, joy_y;
+    } modm_packed;
 
     // normalized between [-1, 1]
     float normalizedJoystickValue(int curVal) {
@@ -127,6 +107,8 @@ private:
     uint32_t lastRead = 0;
 
     //debug 
+    uint64_t counter = 0;
+    uint64_t counter2 = 0;
     uint16_t messageType;
 };
 }  // namespace aruwsrc::engineer
