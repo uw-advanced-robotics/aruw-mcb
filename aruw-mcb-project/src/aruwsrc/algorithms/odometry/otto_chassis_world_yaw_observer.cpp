@@ -47,8 +47,7 @@ bool OttoChassisWorldYawObserver::getChassisWorldYaw(float* output) const
     auto turretMCB = turretSubsystem.getIMU();
     assert(turretMCB != nullptr);
 
-    if (turretMCB->getImuState() == ImuInterface::ImuState::IMU_NOT_CONNECTED ||
-        !turretSubsystem.yawMotor.isOnline())
+    if (turretMCB->isOnline() || !turretSubsystem.yawMotor.isOnline())
     {
         return false;
     }

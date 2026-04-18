@@ -182,7 +182,9 @@ public:
     {
         if (isConnected())
         {
-            return imuState;
+            /// TODO: THIS IS A HACK—actual fix pending
+            return ImuInterface::ImuState::IMU_CALIBRATED;
+            // return imuState;
         }
         else
         {
