@@ -53,7 +53,7 @@ public:
     float getAy() const override { return imuData.accG.y(); }
     float getAz() const override { return imuData.accG.z(); }
     float getTemp() const { return imuData.temperature; }
-    void periodicIMUUpdate() override {};
+    void periodicIMUUpdate() override{};
 
     AbstractIMU::ImuState getImuState() const { return imuState; }
 

@@ -32,7 +32,6 @@ MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPo
     : DJISerial(drivers, port),
       canRxHandler(motor::VirtualCanRxHandler(drivers)),
       motorTxHandler(motor::VirtualDJIMotorTxHandler(drivers)),
-      //servoRxHandler(motor::VirtualServoRxHandler(drivers)),
       imu(),
       analog(),
       digital(),
@@ -70,7 +69,7 @@ void MCBLite::initialize()
             break;
     }
 }
-
+int jack = 12;
 void MCBLite::sendData()
 {
     if (drivers->uart.isWriteFinished(port))
@@ -97,6 +96,7 @@ void MCBLite::sendData()
         if (imu.sendIMUCalibrationMessage)
         {
             // 10 bytes of IMU
+
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(imu.calibrateIMUMessage)),
@@ -145,34 +145,12 @@ void MCBLite::sendData()
                 sizeof(pwm.pwmTimerStartMessage));
             pwm.hasNewData = false;
         }
-        // for (size_t i = 0; i < motor::VirtualServoRxHandler::NUM_PINS; i++)
-        // {
-        //     auto* servo = servoRxHandler.servos[i];
-        //     if (servo != nullptr)
-        //     {
-        //         if (servo->hasNewTarget)
-        //         {
-        //             drivers->uart.write(
-        //                 port,
-        //                 reinterpret_cast<uint8_t*>(&servo->targetMessage),
-        //                 sizeof(servo->targetMessage));
-        //             servo->hasNewTarget = false;
-        //         }
-        //         if (servo->hasNewRamp)
-        //         {
-        //             drivers->uart.write(
-        //                 port,
-        //                 reinterpret_cast<uint8_t*>(&servo->rampMessage),
-        //                 sizeof(servo->rampMessage));
-        //             servo->hasNewRamp = false;
-        //         }
-        //     }
-        //}
     }
 }
 
 void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
+    jack = 24;
     switch (completeMessage.messageType)
     {
         {
@@ -183,8 +161,11 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 processCanMessage(completeMessage, tap::can::CanBus::CAN_BUS2);
                 break;
             case MessageTypes::IMU_MESSAGE:
+                jack = 36;
                 memcpy(&currentIMUData, completeMessage.data, sizeof(currentIMUData));
+                jack = 48;
                 imu.processIMUMessage(completeMessage);
+                jack = 60;
                 break;
             case MessageTypes::ANALOG_PIN_READ_MESSAGE:
                 memcpy(&analogData, completeMessage.data, sizeof(analogData));
@@ -202,12 +183,6 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 break;
             case MessageTypes::VOLTAGE_CURRENT_MESSAGE:
                 processVoltageCurrentMessage(completeMessage);
-                break;
-            // case MessageTypes::SERVO_FEEDBACK_MESSAGE:
-            //     processServoFeedbackMessage(completeMessage);
-            //     break;
-            case MessageTypes::ANALOG_SENSOR_MESSAGE:
-                processAnalogSensorMessage(completeMessage);
                 break;
             default:
                 break;
@@ -268,20 +243,5 @@ void MCBLite::processVoltageCurrentMessage(const ReceivedSerialMessage& complete
         this->voltageCurrentSensor->current = message->current;
     }
 }
-
-void MCBLite::processAnalogSensorMessage(const ReceivedSerialMessage& completeMessage)
-{
-    const AnalogSensorMessage* message =
-        reinterpret_cast<const AnalogSensorMessage*>(completeMessage.data);
-    if (this->analogSensor != nullptr)
-    {
-        this->analogSensor->processAnalogSensorUARTMessage(message->ai0, message->ai1);
-    }
-}
-
-// void MCBLite::processServoFeedbackMessage(const ReceivedSerialMessage& completeMessage)
-// {
-//     servoRxHandler.processServoFeedbackMessage(completeMessage);
-// }
 
 }  // namespace aruwsrc::communication::mcb_lite

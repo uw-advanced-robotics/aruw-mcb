@@ -262,7 +262,7 @@ void VisionCoprocessor::logRefereeTelemetry()
 
     telemetry->logSignal("ref:curr_hp", rxData.currentHp);
     telemetry->logSignal("ref:max_hp", rxData.maxHp);
-    telemetry->logSignal("ref:heat_17mm", rxData.turret.heat17ID1);
+    telemetry->logSignal("ref:heat_17mm", rxData.turret.heat17);
     telemetry->logSignal("ref:heat_limit", rxData.turret.heatLimit);
     telemetry->logSignal("ref:firing_freq", rxData.turret.firingFreq);
     telemetry->logSignal("ref:remaining_projectiles_17mm", rxData.turret.bulletsRemaining17);

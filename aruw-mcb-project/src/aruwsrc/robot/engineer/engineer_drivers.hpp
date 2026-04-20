@@ -30,14 +30,13 @@
 
 #else
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
-
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 
 #endif
 
@@ -66,7 +65,7 @@ public:
               &rttTelemetry),
           engineerCVCommunication(this),
           chassisIsm(),
-          mcbLite(this, tap::communication::serial::Uart::Uart6),
+          mcbLite(this, tap::communication::serial::Uart::Uart7),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)
     {
@@ -109,7 +108,9 @@ public:
         chassisIsm.initialize(mainLoopFrequency, 0.1f, 0.0f);
         chassisIsm.setCalibrationSamples(4000);
         mcbLite.initialize();
-        mcbLite.imu.initialize(mainLoopFrequency,0.2f, 0.0f);
+
+        mcbLite.imu.initialize(mainLoopFrequency, 0.2f, 0.0f);
+        // mcbLite.imu.requestCalibration();
     }
 
     void updateIo()
@@ -117,12 +118,14 @@ public:
         oledDisplay.updateDisplay();
         engineerCVCommunication.updateSerial();
         chassisIsm.read();
+        mcbLite.updateSerial();
     }
 
     void update()
     {
         turretMCBCanCommBus1.sendData();
         turretMCBCanCommBus2.sendData();
+        mcbLite.sendData();
         oledDisplay.updateMenu();
         rttTelemetry.updateTelemetryAsync();
         chassisIsm.periodicIMUUpdate();
