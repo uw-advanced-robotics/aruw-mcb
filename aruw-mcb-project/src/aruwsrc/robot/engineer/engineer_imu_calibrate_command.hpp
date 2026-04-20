@@ -65,4 +65,4 @@ private:
 };
 }  // namespace aruwsrc::engineer
 
-#endif  // SENTRY_IMU_CALIBRATE_COMMAND_HPP_
+#endif  // ENGINEER_IMU_CALIBRATE_COMMAND_HPP_

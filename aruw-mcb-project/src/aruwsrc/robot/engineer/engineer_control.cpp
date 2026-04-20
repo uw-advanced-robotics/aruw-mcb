@@ -487,23 +487,20 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
 
 namespace aruwsrc::engineer
 {
-int bob = 10;
 void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &aruwsrc::control::remoteSafeDisconnectFunction);
 
-    bob = 20;
     aruwsrc::control::initializeSubsystems();
-    bob = 30;
+
     aruwsrc::control::registerEngineerSubsystems(drivers);
-    bob = 40;
+
     aruwsrc::control::setDefaultEngineerCommands(drivers);
-    bob = 50;
+
     aruwsrc::control::startEngineerCommands(drivers);
-    bob = 60;
+
     aruwsrc::control::registerEngineerIoMappings(drivers);
-    bob = 70;
 }
 }  // namespace aruwsrc::engineer
 #endif

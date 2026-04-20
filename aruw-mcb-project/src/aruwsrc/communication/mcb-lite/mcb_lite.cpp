@@ -69,7 +69,7 @@ void MCBLite::initialize()
             break;
     }
 }
-int jack = 12;
+
 void MCBLite::sendData()
 {
     if (drivers->uart.isWriteFinished(port))
@@ -150,7 +150,6 @@ void MCBLite::sendData()
 
 void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
-    jack = 24;
     switch (completeMessage.messageType)
     {
         {
@@ -161,11 +160,11 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 processCanMessage(completeMessage, tap::can::CanBus::CAN_BUS2);
                 break;
             case MessageTypes::IMU_MESSAGE:
-                jack = 36;
+
                 memcpy(&currentIMUData, completeMessage.data, sizeof(currentIMUData));
-                jack = 48;
+
                 imu.processIMUMessage(completeMessage);
-                jack = 60;
+
                 break;
             case MessageTypes::ANALOG_PIN_READ_MESSAGE:
                 memcpy(&analogData, completeMessage.data, sizeof(analogData));
