@@ -298,7 +298,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
         aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
         aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
 aruwsrc::control::launcher::FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
@@ -537,7 +537,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 // Unused, causes incosnistent fire rates due to suspected ref delay.
 // RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
 //     drivers()->refSerial,
-//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
@@ -552,7 +552,7 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProject
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
@@ -577,14 +577,14 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheel
     &frictionWheels,
     15.0f,
     false,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 // Cap Bank
 aruwsrc::control::cap_bank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);

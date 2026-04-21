@@ -403,6 +403,9 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         worldFramePitchTurretImuVelPidCv,
         {&turretGravityCompensation});
 
+// turret commands
+// @todo: chassis MCB is mounted vertically so world frame chassis IMU controller cannot be used for
+// this
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     drivers()->controlOperatorInterface,
