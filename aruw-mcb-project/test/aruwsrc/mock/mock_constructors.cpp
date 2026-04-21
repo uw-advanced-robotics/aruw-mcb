@@ -218,7 +218,7 @@ RefereeFeedbackFrictionWheelSubsystemMock::RefereeFeedbackFrictionWheelSubsystem
               aruwsrc::control::launcher::WHEEL_CONFIG,
               aruwsrc::control::launcher::WHEEL_CONFIG},
           aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
-          tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM)
+          tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
 {
 }
 RefereeFeedbackFrictionWheelSubsystemMock::~RefereeFeedbackFrictionWheelSubsystemMock() {}

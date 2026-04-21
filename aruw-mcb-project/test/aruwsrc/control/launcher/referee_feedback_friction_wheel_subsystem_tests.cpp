@@ -52,7 +52,7 @@ protected:
               std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
               WHEEL_CONFIGS_ARRAY,
               LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
-              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM)
+              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
     {
     }
 
@@ -93,7 +93,7 @@ TEST_F(
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;
     robotData.turret.bulletSpeed = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first + 5.0f;
     robotData.turret.launchMechanismID =
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
     robotData.turret.firingFreq = 1;
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp += 1;
@@ -121,7 +121,7 @@ TEST_F(
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;
     robotData.turret.bulletSpeed = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first + 5.0f;
     robotData.turret.launchMechanismID =
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 
     frictionWheels.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first);
 
@@ -137,13 +137,13 @@ TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rollin
         std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
         WHEEL_CONFIGS_ARRAY,
         LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;
     robotData.turret.bulletSpeed = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first;
     robotData.turret.firingFreq = 1;
     robotData.turret.launchMechanismID =
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
 
