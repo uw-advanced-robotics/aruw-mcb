@@ -266,9 +266,22 @@ TEST_P(
 
     imuYaw += modm::toRadian(10);
 
-    float xExpected = std::get<0>(GetParam());
-    float yExpected = std::get<1>(GetParam());
-    tap::algorithms::rotateVector(&xExpected, &yExpected, -imuYaw);
+    const float userX = std::get<0>(GetParam());
+    const float userY = std::get<1>(GetParam());
+    const float userR = std::get<2>(GetParam());
+    const float rotationLimitedMaxTranslationalSpeed =
+        chassis.calculateRotationTranslationalGain(userR) * MAX_SPEED;
+    float xExpected = tap::algorithms::limitVal(
+        userX,
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
+    float yExpected = tap::algorithms::limitVal(
+        userY,
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
+    const float expectedAngleFromDesiredRotation =
+        userR * ChassisImuDriveCommand::USER_INPUT_TO_ANGLE_DELTA_SCALAR - modm::toRadian(10);
+    tap::algorithms::rotateVector(&xExpected, &yExpected, expectedAngleFromDesiredRotation);
 
     EXPECT_CALL(
         chassis,
