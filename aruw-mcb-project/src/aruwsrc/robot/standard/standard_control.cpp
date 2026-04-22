@@ -50,8 +50,8 @@
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
-#include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
@@ -79,6 +79,7 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
+
 
 // #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
@@ -803,16 +804,16 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
-    #ifdef TARGET_STANDARD_VOID
+#ifdef TARGET_STANDARD_VOID
     getTurretMCBCanComm().setImuMountingTransforms(
         aruwsrc::control::chassis::CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM,
         aruwsrc::control::chassis::CHASSIS_MCB_ISM330_MOUNTING_TRANSFORM);
-    #endif
-    #ifdef TARGET_STANDARD_NULL
+#endif
+#ifdef TARGET_STANDARD_NULL
     getTurretMCBCanComm().setImuMountingTransform(
         aruwsrc::communication::can::TurretMCBCanComm::RemoteImuType::BMI088,
         aruwsrc::control::chassis::CHASSIS_MCB_BMI088_MOUNTING_TRANSFORM);
-    #endif
+#endif
     // drivers->ism330.setMountingTransform(
     //     tap::algorithms::transforms::Transform(0.02578, 0.09607, 0, 0, 0, 0));
 }
