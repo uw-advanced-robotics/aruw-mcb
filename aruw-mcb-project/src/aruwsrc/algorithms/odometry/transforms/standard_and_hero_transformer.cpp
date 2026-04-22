@@ -68,8 +68,10 @@ void StandardAndHeroTransformer::updateTransforms()
     worldToTurret.updateRotation(roll, turret.getWorldPitch(), turret.getWorldYaw());
     worldToTurret.updateAngularVelocity(0, imu->getGy(), imu->getGz());
 
-    worldToTurret.updateTranslation(worldToChassis.getTranslation());
-    chassisToTurret = worldToChassis.getInverse().composeStatic(worldToTurret);
+    /// TODO: can compose with transform components directly once tap transforms update is merged
+    worldToTurret.updateTranslation(worldToChassis.composeStatic(chassisToTurret).getTranslation());
+    chassisToTurret.updateRotation(
+        worldToChassis.getInverse().composeStatic(worldToTurret).getRotation());
 
     Transform chassisToTurretNoPitch = chassisToTurret;
     chassisToTurretNoPitch.updateRotation(Orientation(0, 0, chassisToTurret.getRotation().yaw()));
