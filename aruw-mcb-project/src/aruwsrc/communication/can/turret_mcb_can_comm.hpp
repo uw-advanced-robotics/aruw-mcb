@@ -79,7 +79,7 @@ public:
         Y_AXIS_RX_CAN_ID = 0x1fc,
         Z_AXIS_RX_CAN_ID = 0x1fd,
     };
-
+    
     enum class RemoteImuType : uint8_t
     {
         BMI088 = 0,
