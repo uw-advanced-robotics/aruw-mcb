@@ -111,7 +111,10 @@ TEST_F(
 TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_max_velocity)  // holonomic
 {
     EXPECT_NEAR(
-        powf(MIN_ROTATION_THRESHOLD / MAX_CHASSIS_WHEEL_SPEED_RPM, 2.0f),
+        tap::algorithms::limitVal(
+            powf(MIN_ROTATION_THRESHOLD / MAX_CHASSIS_WHEEL_SPEED_RPM, 2.0f),
+            0.0f,
+            1.0f),
         chassis.calculateRotationTranslationalGain(MAX_CHASSIS_WHEEL_SPEED_RPM),
         1E-3);
 }
