@@ -157,12 +157,23 @@ TEST_P(
 
     chassisImuDriveCommand.initialize();
 
+    const float userX = std::get<0>(GetParam());
+    const float userY = std::get<1>(GetParam());
+    const float userR = std::get<2>(GetParam());
+    const float rotationLimitedMaxTranslationalSpeed =
+        chassis.calculateRotationTranslationalGain(userR) * MAX_SPEED;
+    const float expectedX = tap::algorithms::limitVal(
+        userX,
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
+    const float expectedY = tap::algorithms::limitVal(
+        userY,
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
+
     EXPECT_CALL(
         chassis,
-        setDesiredOutput(
-            std::get<0>(GetParam()),
-            std::get<1>(GetParam()),
-            std::get<2>(GetParam())));
+        setDesiredOutput(FloatNear(expectedX, 1E-3), FloatNear(expectedY, 1E-3), userR));
 
     chassisImuDriveCommand.execute();
 }
