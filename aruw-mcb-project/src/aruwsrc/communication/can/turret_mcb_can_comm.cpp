@@ -151,7 +151,12 @@ void TurretMCBCanComm::sendData()
 
     if (!isConnected())
     {
-        initialize(0, 0, 0);
+        imuData = {};
+        currProcessingImuData = {};
+        yawRevolutions = 0;
+        pitchRevolutions = 0;
+        rollRevolutions = 0;
+        imuState = ImuState::IMU_NOT_CONNECTED;
     }
     if (imuMountingTransformQueued)
     {
