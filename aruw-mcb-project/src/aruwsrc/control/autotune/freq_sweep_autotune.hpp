@@ -59,7 +59,7 @@ public:
         float startFreq, endFreq;  // rev/s
         float freqIncrementRatio;  // unitless
         float magnitude;           // desiredOut
-    }
+    };
 
     FreqSweepAutotuneCommand(
         tap::Drivers *drivers,
@@ -103,7 +103,6 @@ public:
                 this->config.motor->setChassisFrameSetpoint(Angle(0));
                 freq = sweepConfig.startFreq;
                 currentPhase = 0.0f;
-                lastTimeMs = 0.0f;
                 bool allOnline = true;
                 const bool turretsOnline = this->config.motor->isOnline();
 
@@ -144,10 +143,10 @@ public:
                 this->config.motor->setMotorOutput(sweepConfig.magnitude * sin(currentPhase));
                 this->calibrationTimer.restart(this->MAX_CALIBRATION_WAITTIME_MS);
 
-                freq *= sweepConfig.freqUpdateRatio;
+                freq *= sweepConfig.freqIncrementRatio;
                 if (freq > sweepConfig.endFreq)
                     this->calibrationState =
-                        TurretAutotuneInterface::CalibrationState::NEXT_LOCATION;
+                        TurretAutotuneInterface::CalibrationState::DONE;
 
                 onMeasurementSample(this->currentPointIndex, this->currentPointIndex);
                 this->currentPointIndex++;

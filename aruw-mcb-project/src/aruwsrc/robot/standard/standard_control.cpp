@@ -82,6 +82,7 @@
 // #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
+#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -491,6 +492,22 @@ autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommand(
      TORQUE_TO_DESIRED_OUT},
     &chassis);
 
+autotune::FreqSweepAutotuneCommand<Axis::YAW> freqSweepAutotuneCommand(
+    drivers(),
+    {
+        &turret,
+        &turret.yawMotor,
+        &chassisFrameYawTurretController,
+        yawMotor.isMotorInverted(),
+        TURRET_WEIGHT_KG,
+        TORQUE_TO_DESIRED_OUT
+    },
+    {
+        1.0f, 250.0f, 1.0001f, 15000.0f
+    },
+    &getTurretMCBCanComm(),
+    {{&chassisFramePitchTurretController}},
+    &chassis);
 autotune::SpringAutotuneCommand<9, Axis::PITCH> springAutotuneCommand(
     drivers(),
     {&turret,
@@ -838,7 +855,8 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
 {
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
         &standard_control::gravityAutotuneCommand,
-        &standard_control::springAutotuneCommand};
+        &standard_control::springAutotuneCommand,
+        &standard_control::freqSweepAutotuneCommand};
     return commands;
 }
 #endif
