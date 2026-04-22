@@ -118,6 +118,7 @@ public:
         modm::delay_ms(2000);
         turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
         turretMajorImu.setCalibrationSamples(4000);
+        turretMajorImu.setNumSamples(NUM_SAMPLES);
     }
 
     void updateIo()
@@ -158,6 +159,7 @@ private:
             tap::buzzer::silenceBuzzer(&drivers->pwm);
         }
     }
+    uint8_t NUM_SAMPLES = 5;
 
 #endif
 };  // class aruwsrc::SentryDrivers
