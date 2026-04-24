@@ -530,7 +530,7 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
      DESIRED_OUT_TO_TORQUE},
     turretMajorYawLamprey);
 
-autotune::FreqSweepAutotuneCommand<1, Axis::YAW> freqSweepAutotuneCommand(
+autotune::FreqSweepAutotuneCommand<Axis::YAW> freqSweepAutotuneCommand(
     drivers(),
     {&turretWidow,
      &turretWidow.yawMotor,
@@ -538,7 +538,7 @@ autotune::FreqSweepAutotuneCommand<1, Axis::YAW> freqSweepAutotuneCommand(
      turretWidowMotors.yawMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      DESIRED_OUT_TO_TORQUE},
-    12'000.0f,
+    {.startFreq = 3.0f, .endFreq = 250.0f, .freqIncrementRatio = 1.001f, .magnitude = 12'000.0f},
     &getTurretMCBCanCommWidow(),
     {&turretWidowChassisControllers.pitchController,
      &turretMajor,
