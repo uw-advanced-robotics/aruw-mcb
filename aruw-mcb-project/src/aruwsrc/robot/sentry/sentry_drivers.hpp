@@ -116,7 +116,7 @@ public:
         mpu6500.setCalibrationSamples(4000);
         chassisMcbLite.initialize();
         modm::delay_ms(2000);
-        turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        turretMajorImu.initialize(mainLoopFrequency / NUM_SAMPLES, 0.1f, 0.0f);
         turretMajorImu.setCalibrationSamples(4000);
         turretMajorImu.setNumSamples(NUM_SAMPLES);
     }
@@ -137,7 +137,11 @@ public:
         turretMCBCanCommBus2.sendData();
         oledDisplay.updateMenu();
         chassisMcbLite.sendData();
-        turretMajorImu.periodicIMUUpdate();
+        if (turretMajorImu.isSampleReady())
+        {
+            turretMajorImu.periodicIMUUpdate();
+            turretMajorImu.setSampleReady(false);
+        }
         visionCoprocessor.sendMessage();
         rttTelemetry.updateTelemetryAsync();
         checkTurretMcbDisconnection(this);

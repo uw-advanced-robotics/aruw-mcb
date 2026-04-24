@@ -125,6 +125,8 @@ void AbstractIMU::updateImuMeasurement()
         imuData.gyroRaw = sumImuData.gyroRaw / numSamples;
         imuData.temperature = sumImuData.temperature / numSamples;
         sampleCounter = 0;
+        newSampleReady = true;
+        sumImuData = {};
     }
 }
 
