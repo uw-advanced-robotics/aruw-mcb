@@ -32,6 +32,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/remote_map_state.hpp"
+#include "tap/control/repeat_command.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -49,6 +50,7 @@
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -78,7 +80,7 @@
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 
-//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
@@ -134,6 +136,7 @@ using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::standard;
 
 // for fake sentry
@@ -479,18 +482,20 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
-autotune::GravityAutotuneCommand<9> gravityAutotuneCommand(
+autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommand(
     drivers(),
     {&turret,
+     &turret.pitchMotor,
      &chassisFramePitchTurretController,
      pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &chassis);
 
-autotune::SpringAutotuneCommand<9> springAutotuneCommand(
+autotune::SpringAutotuneCommand<9, Axis::PITCH> springAutotuneCommand(
     drivers(),
     {&turret,
+     &turret.pitchMotor,
      &chassisFramePitchTurretController,
      pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
@@ -654,12 +659,13 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 // Remote related mappings
 Trigger rightSwitchMiddle =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
-        .onTrue(&spinFrictionWheels);
+        .onTrue(&spinFrictionWheels)
+        .onFalse(&stopFrictionWheels);
 
+RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 Trigger rightSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(Compose::parallel<2>(
-            {&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}));
+        .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
 
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
@@ -679,7 +685,7 @@ auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGov
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
-    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+    rotateAndUnjamAgitatorRepeat,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     &manualFireRateReselectionManager,
     cvOnTargetGovernor,
@@ -797,6 +803,16 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
+#ifdef TARGET_STANDARD_VOID
+    getTurretMCBCanComm().setImuMountingTransforms(
+        aruwsrc::control::turret::TURRET_MCB_BMI088_MOUNTING_TRANSFORM,
+        aruwsrc::control::turret::TURRET_MCB_ISM330_MOUNTING_TRANSFORM);
+#endif
+#ifdef TARGET_STANDARD_NULL
+    getTurretMCBCanComm().setImuMountingTransform(
+        aruwsrc::communication::can::TurretMCBCanComm::RemoteImuType::BMI088,
+        aruwsrc::control::turret::TURRET_MCB_BMI088_MOUNTING_TRANSFORM);
+#endif
     // drivers->ism330.setMountingTransform(
     //     tap::algorithms::transforms::Transform(0.02578, 0.09607, 0, 0, 0, 0));
 }

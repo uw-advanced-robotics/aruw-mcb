@@ -54,13 +54,30 @@ public:
     CubeOptions getCubeToAdd();
     CubeOptions getCurrentCube();
 
+    /**
+     * sets the setpoint based on the current cube position
+     * @return true if set sucessfully, false otherwise
+     */
     bool setSetpointToCurrentCube();
 
+    /** Tell subsystem that you have added a cube
+     * @param CubeOptions which cube you are adding
+     * @return true for success, false for failure
+     */
     bool addCube();
+
+    /** Tell subsystem that you have removed a cube
+     * @return true for success, false for failure
+     */
     bool removeCube();
 
-    bool storeWristPos(Transform wristPos);
-    Transform getWristPos();
+    bool storeActiveCubeStoreToCube(Transform cubeStoreToCube);
+
+    /**
+     * @return wrist position for current cube position as a transform
+     * if no current cube will return an identity transform
+     */
+    Transform getActiveCubeStoreToCube();
 
     std::array<bool, 2> checkForCubes();
 
@@ -68,9 +85,9 @@ public:
     bool isReady();
 
 protected:
-    CubeOptions currentCube = CubeOptions::ERROR;
-    bool hasCube[2] = {false, false};
-    Transform wristPos[2] = {Transform(0, 0, 0, 0, 0, 0), Transform(0, 0, 0, 0, 0, 0)};
+    CubeOptions currentCube;
+    bool hasCube[2];
+    Transform cubeStoresToCube[2];
     // TODO: add vars for left and right pressure sensor
 };
 }  // namespace aruwsrc::engineer::cube_storage

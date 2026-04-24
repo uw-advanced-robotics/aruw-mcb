@@ -142,7 +142,6 @@ static void updateIo(Drivers* drivers)
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->mpu6500.read();
-    drivers->commandMapper.pollTriggerBindings();
     drivers->updateIo();
 }
 
