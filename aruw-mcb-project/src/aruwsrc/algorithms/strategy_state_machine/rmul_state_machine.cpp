@@ -35,7 +35,6 @@ void RMULStateMachine::updateState()
     }
 
     uint16_t health = refSerial.getRobotData().currentHp;
-    health = HEALING_THRESHOLD + ATTACKING_THRESHOLD;
 
     switch (state)
     {
@@ -52,29 +51,28 @@ void RMULStateMachine::updateState()
             break;
         case State::ATTACKING:
             // If we're low on health, go to healing
-            // if (health < HEALING_THRESHOLD || !safeToAttack())
-            // {
-            //     state = State::HEALING;
-            //     updatePath(HEALING_PATH);
-            //     pathTimeout.restart(PATH_LENGTH_MILLIS);
-            // }
-            // pathTimeout.restart(PATH_LENGTH_MILLIS);
-            // if (pathTimeout.isExpired())
-            // {
-            // Patrol
-            if (patrolTimer.isStopped())
+            if (health < HEALING_THRESHOLD || !safeToAttack())
             {
-                patrolTimer.restart(PATROL_SEGMENT_LENGTH_MILLIS);
+                state = State::HEALING;
+                updatePath(HEALING_PATH);
+                pathTimeout.restart(PATH_LENGTH_MILLIS);
             }
+            else if (pathTimeout.isExpired())
+            {
+                // Patrol
+                if (patrolTimer.isStopped())
+                {
+                    patrolTimer.restart(PATROL_SEGMENT_LENGTH_MILLIS);
+                }
 
-            if (patrolTimer.execute())
-            {
-                uint8_t newPatrolState = (patrolState + 1) % MODM_ARRAY_SIZE(PATROL_POINTS_T);
-                updatePath(std::array<const Position, 2>(
-                    {PATROL_POINTS_T[patrolState], PATROL_POINTS_T[newPatrolState]}));
-                patrolState = newPatrolState;
+                if (patrolTimer.execute())
+                {
+                    uint8_t newPatrolState = (patrolState + 1) % MODM_ARRAY_SIZE(PATROL_POINTS);
+                    updatePath(std::array<const Position, 2>(
+                        {PATROL_POINTS[patrolState], PATROL_POINTS[newPatrolState]}));
+                    patrolState = newPatrolState;
+                }
             }
-            // }
             break;
         default:
             break;
@@ -111,11 +109,10 @@ void RMULStateMachine::attachAutoNavController(ChassisAutoNavController *autoNav
 
 bool RMULStateMachine::safeToAttack()
 {
-    // bool projectilesSufficient =
-    // refSerial.getRobotData().turret.bulletsRemaining17 >= PROJECTILE_COUNT_THRESHOLD;
-    // bool visionOnline = visionCoprocessor.isCvOnline();
-    // return projectilesSufficient && visionOnline;
-    return true;
+    bool projectilesSufficient =
+        refSerial.getRobotData().turret.bulletsRemaining17 >= PROJECTILE_COUNT_THRESHOLD;
+    bool visionOnline = visionCoprocessor.isCvOnline();
+    return projectilesSufficient && visionOnline;
 }
 
 }  // namespace aruwsrc::algorithms::strategy_state_machine
