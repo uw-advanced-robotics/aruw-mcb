@@ -56,7 +56,7 @@ struct SphereDragCorrectionConfig
 };
 
 static constexpr SphereDragCorrectionConfig DEFAULT_SPHERE_DRAG_CORRECTION_CONFIG = {
-    .constantPitchOffsetRadians = modm::toRadian(0.2f),
+    .constantPitchOffsetRadians = 0.0f,
     .verticalErrorPitchGain = 0.0f,
     .maxAdditionalPitchCorrectionRadians = 0.0f,
 };

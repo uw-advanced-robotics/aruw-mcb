@@ -35,8 +35,6 @@ using namespace modm;
 
 namespace aruwsrc::algorithms
 {
-static constexpr float PITCH_CORRECTION_LOW_PASS_ALPHA = 0.05f;
-
 OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
@@ -151,39 +149,9 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         }
         else
         {
-            BallisticsSolution finalSolution = baseSolution;
-            BallisticsSolution dragCorrectedSolution = baseSolution;
-
-            if (applySphereDragBallisticsCompensation(
-                    targetState,
-                    launchSpeed,
-                    &dragCorrectedSolution.pitchAngle,
-                    &dragCorrectedSolution.yawAngle,
-                    &dragCorrectedSolution.timeOfFlight,
-                    &dragCorrectedSolution.distance,
-                    turretSubsystem.getPitchOffset()))
-            {
-                const float desiredPitchCorrection =
-                    dragCorrectedSolution.pitchAngle - baseSolution.pitchAngle;
-
-                if (!pitchCorrectionLatched)
-                {
-                    appliedPitchCorrection = desiredPitchCorrection;
-                    pitchCorrectionLatched = true;
-                }
-                else
-                {
-                    appliedPitchCorrection +=
-                        PITCH_CORRECTION_LOW_PASS_ALPHA *
-                        (desiredPitchCorrection - appliedPitchCorrection);
-                }
-
-                dragCorrectedSolution.pitchAngle =
-                    baseSolution.pitchAngle + appliedPitchCorrection;
-                finalSolution = dragCorrectedSolution;
-            }
-
-            lastComputedSolution = finalSolution;
+            pitchCorrectionLatched = false;
+            appliedPitchCorrection = 0.0f;
+            lastComputedSolution = baseSolution;
         }
     }
 

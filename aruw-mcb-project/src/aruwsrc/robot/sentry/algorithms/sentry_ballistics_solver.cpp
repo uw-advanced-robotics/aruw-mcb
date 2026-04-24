@@ -33,8 +33,6 @@ using namespace modm;
 
 namespace aruwsrc::sentry::algorithms
 {
-static constexpr float PITCH_CORRECTION_LOW_PASS_ALPHA = 0.05f;
-
 SentryBallisticsSolver::SentryBallisticsSolver(
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     const odometry::SentryTransforms &transformer,
@@ -180,94 +178,15 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
             debugFinalTimeOfFlight = debugBaseTimeOfFlight;
             debugFinalDistance = debugBaseDistance;
 
-            BallisticsSolution finalSolution = baseSolution;
-            BallisticsSolution dragCorrectedSolution = baseSolution;
-            debugDragSolutionAttempted = true;
-
-            const modm::Vector3f compensatedTargetPosition =
-                targetState.projectForward(baseSolution.timeOfFlight);
-            const float horizontalDistance = sqrtf(
-                compensatedTargetPosition.x * compensatedTargetPosition.x +
-                compensatedTargetPosition.y * compensatedTargetPosition.y);
-
-            const auto baseIntersection = aruwsrc::algorithms::simulateSphereDragIntersection(
-                horizontalDistance,
-                compensatedTargetPosition.z,
-                launchSpeed,
-                baseSolution.pitchAngle,
-                turretPitchOffset);
-            if (baseIntersection.has_value())
-            {
-                debugBaseVerticalError = baseIntersection->verticalError;
-            }
-
-            if (aruwsrc::algorithms::applySphereDragBallisticsCompensation(
-                    targetState,
-                    launchSpeed,
-                    &dragCorrectedSolution.pitchAngle,
-                    &dragCorrectedSolution.yawAngle,
-                    &dragCorrectedSolution.timeOfFlight,
-                    &dragCorrectedSolution.distance,
-                    turretPitchOffset))
-            {
-                const float desiredPitchCorrection =
-                    dragCorrectedSolution.pitchAngle - debugBasePitchAngle;
-
-                if (!pitchCorrectionLatched)
-                {
-                    appliedPitchCorrection = desiredPitchCorrection;
-                    pitchCorrectionLatched = true;
-                }
-                else
-                {
-                    appliedPitchCorrection +=
-                        PITCH_CORRECTION_LOW_PASS_ALPHA *
-                        (desiredPitchCorrection - appliedPitchCorrection);
-                }
-
-                dragCorrectedSolution.pitchAngle = debugBasePitchAngle + appliedPitchCorrection;
-                debugCorrectedPitchAngle = dragCorrectedSolution.pitchAngle;
-                debugCorrectedYawAngle = debugBaseYawAngle;
-                debugCorrectedTimeOfFlight = debugBaseTimeOfFlight;
-                debugCorrectedDistance = dragCorrectedSolution.distance;
-                debugConstantPitchCorrection =
-                    aruwsrc::algorithms::DEFAULT_SPHERE_DRAG_CORRECTION_CONFIG
-                        .constantPitchOffsetRadians;
-                debugDesiredPitchCorrection = desiredPitchCorrection;
-                debugAppliedPitchCorrection = appliedPitchCorrection;
-                debugPitchCorrection = appliedPitchCorrection;
-                debugAdditionalPitchCorrection =
-                    desiredPitchCorrection - debugConstantPitchCorrection;
-                debugYawCorrection = 0.0f;
-                debugTimeOfFlightCorrection = 0.0f;
-
-                const auto correctedIntersection =
-                    aruwsrc::algorithms::simulateSphereDragIntersection(
-                        horizontalDistance,
-                        compensatedTargetPosition.z,
-                        launchSpeed,
-                        dragCorrectedSolution.pitchAngle,
-                        turretPitchOffset);
-                if (correctedIntersection.has_value())
-                {
-                    debugCorrectedVerticalError = correctedIntersection->verticalError;
-                }
-
-                finalSolution = dragCorrectedSolution;
-                debugDragSolutionAccepted = true;
-                debugFinalPitchAngle = dragCorrectedSolution.pitchAngle;
-                debugFinalYawAngle = debugBaseYawAngle;
-                debugFinalTimeOfFlight = debugBaseTimeOfFlight;
-                debugFinalDistance = dragCorrectedSolution.distance;
-            }
-
-            lastComputedSolution = finalSolution;
+            pitchCorrectionLatched = false;
+            appliedPitchCorrection = 0.0f;
+            lastComputedSolution = baseSolution;
         }
     }
     else
     {
-        debugAppliedPitchCorrection = appliedPitchCorrection;
-        debugPitchCorrection = appliedPitchCorrection;
+        pitchCorrectionLatched = false;
+        appliedPitchCorrection = 0.0f;
     }
 
     return lastComputedSolution;
