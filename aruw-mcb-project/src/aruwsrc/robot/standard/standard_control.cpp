@@ -537,7 +537,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 // Unused, causes incosnistent fire rates due to suspected ref delay.
 // RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernor(
 //     drivers()->refSerial,
-//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+//     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
