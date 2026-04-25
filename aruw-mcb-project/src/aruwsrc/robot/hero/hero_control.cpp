@@ -32,8 +32,11 @@
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/binned_encoder_alignment/binned_encoder_alignment.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
@@ -42,6 +45,8 @@
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
+#include "aruwsrc/communication/sensors/encoder/analog_sensor_encoder.hpp"
+#include "aruwsrc/communication/sensors/encoder/lamprey_encoder.hpp"
 #include "aruwsrc/communication/serial/sentry_request_commands.hpp"
 #include "aruwsrc/communication/serial/sentry_request_subsystem.hpp"
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
@@ -71,6 +76,8 @@
 #include "aruwsrc/control/client-display/indicators/enemy_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
+#include "aruwsrc/robot/hero/hero_turret_encoders.hpp"
+#include "modm/container/pair.hpp"
 
 // #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
@@ -282,13 +289,23 @@ tap::motor::DjiMotor pitchMotor(
     1,
     PITCH_MOTOR_CONFIG.startEncoderValue);
 
-tap::encoder::CanEncoder yawEncoder(
+aruwsrc::communication::can::AruwAnalogSensor lampreyAnalog(
     drivers(),
-    tap::encoder::CanEncoderId::ID0,
-    tap::can::CanBus::CAN_BUS2,
-    false,
-    1.0f,
-    YAW_MOTOR_CONFIG.startEncoderValue);
+    tap::can::CanBus::CAN_BUS2,  // TODO: get the can bus
+    0x00                         // TODO: get the can id
+);
+
+modm::Pair<float, float> lut[2] = {
+    {0, 0},
+    {1, 1},
+};
+aruwsrc::communication::sensors::encoder::LampreyEncoder yawLampreyEncoder(
+    &lampreyAnalog,
+    aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Channel::AI0,  // TODO: what
+                                                                                  // channel?
+    aruwsrc::control::turret::yawLampreyCalibration,
+    lut,
+    false);
 
 tap::motor::DjiMotor yawMotor(
     drivers(),
@@ -299,6 +316,14 @@ tap::motor::DjiMotor yawMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(1 / 2.0f),
     0);
+
+aruwsrc::hero::HeroTurretEncoders heroTurretEncoders(
+    drivers(),
+    yawLampreyEncoder,
+    yawMotor.getInternalEncoder());
+
+Trigger yawOnlineTrigger(drivers(), []() -> bool { return heroTurretEncoders.isOnline(); });
+
 HeroTurretSubsystem turret(
     drivers(),
     &pitchMotor,
@@ -495,7 +520,7 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-imu::ImuCalibrateCommand imuCalibrateCommand(
+aruwsrc::control::imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
         &getTurretMCBCanComm(),
@@ -505,8 +530,8 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         true,
     }},
     &chassis,
-    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand,
     &odometrySubsystem,
@@ -878,7 +903,10 @@ void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
 }  // namespace aruwsrc::hero
 
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
+aruwsrc::control::imu::ImuCalibrateCommand *getImuCalibrateCommand()
+{
+    return &hero_control::imuCalibrateCommand;
+}
 
 std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
 {

@@ -23,6 +23,7 @@
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/communication/sensors/encoder/analog_sensor_encoder.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
@@ -60,6 +61,15 @@ static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
+
+static constexpr aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Calibration 
+    // TODO: get the actual calibration values for the lamprey encoder
+    yawLampreyCalibration{
+        .rawMin = 0,
+        .rawMax = 0,
+        .rawZero = 0,
+        .outputRangeRadians = 0,
+    };
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
