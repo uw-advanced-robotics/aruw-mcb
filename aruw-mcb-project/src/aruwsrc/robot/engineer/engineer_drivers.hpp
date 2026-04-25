@@ -54,20 +54,10 @@ public:
         : tap::Drivers(),
           rttTelemetry(this),
           controlOperatorInterface(this),
-          oledDisplay(
-              this,
-              nullptr,
-              &turretMCBCanCommBus1,
-              &turretMCBCanCommBus2,
-              nullptr,
-              nullptr,
-              nullptr,
-              &rttTelemetry),
+          oledDisplay(this, nullptr, nullptr, nullptr, &mcbLite, nullptr, nullptr, &rttTelemetry),
           engineerCVCommunication(this),
           chassisIsm(),
-          mcbLite(this, tap::communication::serial::Uart::Uart7),
-          turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
-          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)
+          mcbLite(this, tap::communication::serial::Uart::Uart7)
     {
         controlOperatorInterface.setTelemetry(&rttTelemetry);
     }
@@ -87,13 +77,9 @@ public:
     communication::serial::EngineerCVCommunication engineerCVCommunication;
     aruwsrc::communication::sensors::imu::ism330::ISM330 chassisIsm;
     aruwsrc::communication::mcb_lite::MCBLite mcbLite;
-    communication::can::TurretMCBCanComm turretMCBCanCommBus1;
-    communication::can::TurretMCBCanComm turretMCBCanCommBus2;
 
     void init(const float mainLoopFrequency)
     {
-        turretMCBCanCommBus1.init();
-        turretMCBCanCommBus2.init();
         engineerCVCommunication.initializeCV();
         oledDisplay.initialize();
         digital.configureInputPullMode(
@@ -110,7 +96,6 @@ public:
         mcbLite.initialize();
 
         mcbLite.imu.initialize(mainLoopFrequency, 0.2f, 0.0f);
-        // mcbLite.imu.requestCalibration();
     }
 
     void updateIo()
@@ -123,8 +108,6 @@ public:
 
     void update()
     {
-        turretMCBCanCommBus1.sendData();
-        turretMCBCanCommBus2.sendData();
         mcbLite.sendData();
         oledDisplay.updateMenu();
         rttTelemetry.updateTelemetryAsync();
