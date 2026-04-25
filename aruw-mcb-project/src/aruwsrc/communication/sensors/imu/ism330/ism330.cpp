@@ -70,6 +70,20 @@ void ISM330::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 #endif
 }
 
+AbstractIMU::ImuData addImuMeasurementData(
+    AbstractIMU::ImuData sumImuData,
+    AbstractIMU::ImuData curImuData)
+{
+    sumImuData.accG = sumImuData.accG + curImuData.accG;
+    sumImuData.accOffsetRaw = sumImuData.accOffsetRaw + curImuData.accOffsetRaw;
+    sumImuData.accRaw = sumImuData.accRaw + curImuData.accRaw;
+    sumImuData.gyroOffsetRaw = sumImuData.gyroOffsetRaw + curImuData.gyroOffsetRaw;
+    sumImuData.gyroRadPerSec = sumImuData.gyroRadPerSec + curImuData.gyroRadPerSec;
+    sumImuData.gyroRaw = sumImuData.gyroRaw + curImuData.gyroRaw;
+    sumImuData.temperature = sumImuData.temperature + curImuData.temperature;
+    return sumImuData;
+}
+
 bool ISM330::read()
 {
 #ifndef PLATFORM_HOSTED
@@ -146,11 +160,16 @@ bool ISM330::read()
 
         applyMountingTransformToRaw(curImuData);
 
-        curImuData.gyroRadPerSec = curImuData.gyroRaw - imuData.gyroOffsetRaw;
-        curImuData.accG = curImuData.accRaw - imuData.accOffsetRaw;
-        updateImuMeasurement();
+        curImuData.gyroRadPerSec = curImuData.gyroRaw - curImuData.gyroOffsetRaw;
+        curImuData.accG = curImuData.accRaw - curImuData.accOffsetRaw;
 
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
+        sampleCounter++;
+        sumImuData = addImuMeasurementData(sumImuData, curImuData);
+        if (sampleCounter >= MAX_NUM_SAMPLES)
+        {
+            updateImuMeasurement();
+        }
 
         if (imuState == ImuState::IMU_NOT_CONNECTED)
         {

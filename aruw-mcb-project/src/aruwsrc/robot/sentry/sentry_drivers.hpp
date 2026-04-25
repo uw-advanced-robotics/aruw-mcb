@@ -116,9 +116,8 @@ public:
         mpu6500.setCalibrationSamples(4000);
         chassisMcbLite.initialize();
         modm::delay_ms(2000);
-        turretMajorImu.initialize(mainLoopFrequency / NUM_SAMPLES, 0.1f, 0.0f);
+        turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
         turretMajorImu.setCalibrationSamples(4000);
-        turretMajorImu.setNumSamples(NUM_SAMPLES);
     }
 
     void updateIo()
@@ -137,11 +136,7 @@ public:
         turretMCBCanCommBus2.sendData();
         oledDisplay.updateMenu();
         chassisMcbLite.sendData();
-        if (turretMajorImu.isSampleReady())
-        {
-            turretMajorImu.periodicIMUUpdate();
-            turretMajorImu.setSampleReady(false);
-        }
+        turretMajorImu.periodicIMUUpdate();
         visionCoprocessor.sendMessage();
         rttTelemetry.updateTelemetryAsync();
         checkTurretMcbDisconnection(this);
@@ -163,7 +158,6 @@ private:
             tap::buzzer::silenceBuzzer(&drivers->pwm);
         }
     }
-    uint8_t NUM_SAMPLES = 5;
 
 #endif
 };  // class aruwsrc::SentryDrivers
