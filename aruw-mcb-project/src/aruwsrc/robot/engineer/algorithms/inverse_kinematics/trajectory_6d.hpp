@@ -21,43 +21,17 @@
 
 #include <array>
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
 #include "modm/math/geometry/quaternion.hpp"
 
 namespace aruwsrc::engineer::algorithms::inverse_kinematics
 {
-/// TODO: this shouldn't live here
-modm::Quaternion<float> quaternionFromRPY(float r, float p, float y)
-{
-    float cr = cosf(r / 2);
-    float sr = sinf(r / 2);
-    float cp = cosf(p / 2);
-    float sp = sinf(p / 2);
-    float cy = cosf(y / 2);
-    float sy = sinf(y / 2);
-
-    return modm::Quaternion<float>(
-        cr * cp * cy + sr * sp * sy,
-        sr * cp * cy - cr * sp * sy,
-        cr * sp * cy + sr * cp * sy,
-        cr * cp * sy - sr * sp * cy);
-}
-
-/// TODO: this shouldn't live here
-template <class T>
-modm::Quaternion<T> slerp(modm::Quaternion<T> q0, modm::Quaternion<T> q1, float t)
-{
-    float theta = acosf(q0.w * q1.w + q0.x * q1.x + q0.y * q1.y + q0.z * q1.z);
-
-    return q0 * (sinf((1 - t) * theta) / sinf(theta)) + q1 * (sinf(t * theta) / sinf(theta))
-}
-
 struct Waypoint
 {
-    tap::algorithms::transforms::Position position;
-    modm::Quaternion<float> rotation;
-    float time;
+    tap::algorithms::transforms::Transform pose;
+    float time;  // seconds
 };
 
 template <size_t LENGTH>
@@ -74,10 +48,13 @@ struct Trajectory6D
 
         return tap::algorithms::transforms::Transform(
             tap::algorithms::transforms::Position::interpolate(
-                waypoints[i].position,
-                waypoints[i + 1].position,
+                waypoints[i].pose.getPosition(),
+                waypoints[i + 1].pose.getPosition(),
                 t),
-            slerp(waypoints[i].rotation, waypoints[i + 1].rotation, t))
+            tap::algorithms::transforms::Orientation::fromQuaternion(tap::algorithms::slerp(
+                waypoints[i].pose.getRotation().toQuaternion(),
+                waypoints[i + 1].pose.getRotation().toQuaternion(),
+                t)));
     }
 };
 

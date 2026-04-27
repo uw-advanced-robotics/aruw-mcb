@@ -82,7 +82,7 @@ public:
 
     void end(bool) override {}
 
-    bool isFinished() const override { return false; }
+    virtual bool isFinished() const override { return false; }
 
     virtual tap::algorithms::transforms::Transform getBaseToFollowerDesired() = 0;
 

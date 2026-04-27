@@ -20,6 +20,8 @@
 #ifndef ENGINEER_SETPOINT_CONSTANTS_HPP_
 #define ENGINEER_SETPOINT_CONSTANTS_HPP_
 
+#include "algorithms/inverse_kinematics/trajectory_6d.hpp"
+
 namespace aruwsrc::engineer
 {
 // fyi, some positions/constants should be here but are in the the individual subsystem constants bc
@@ -57,5 +59,15 @@ static constexpr float extensionScoreThreeSetpoint = 1;  // TODO: find positions
 static constexpr float wristYawScoreThreeSetpoint = 1;
 static constexpr float wristPitchScoreThreeSetpoint = 1;
 static constexpr float wristRollScoreThreeSetpoint = 1;
+
+inline const algorithms::inverse_kinematics::Trajectory6D<2> TEST_TRAJECTORY{
+    {{{
+          .pose = tap::algorithms::transforms::Transform(),
+          .time = 0.0f,
+      },
+      {
+          .pose = tap::algorithms::transforms::Transform(),
+          .time = 1.0f,
+      }}}};
 }  // namespace aruwsrc::engineer
 #endif  // ENGINEER_SETPOINT_CONSTANTS_HPP_

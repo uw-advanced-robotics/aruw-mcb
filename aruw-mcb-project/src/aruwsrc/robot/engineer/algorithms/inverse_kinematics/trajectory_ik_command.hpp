@@ -19,13 +19,18 @@
 #ifndef TRAJECTORY_IK_COMMAND_HPP_
 #define TRAJECTORY_IK_COMMAND_HPP_
 
+#include "tap/architecture/clock.hpp"
+
 #include "abstract_ik_command.hpp"
+#include "trajectory_6d.hpp"
 
 namespace aruwsrc::engineer::algorithms::inverse_kinematics
 {
+template <size_t LEN>
 class TrajectoryIKCommand : public AbstractIKCommand
 {
 public:
+    template <size_t LEN>
     TrajectoryIKCommand(
         const tap::algorithms::transforms::Transform& worldToChassis,
         const tap::algorithms::transforms::Transform& cubeToEndEffector,
@@ -35,21 +40,53 @@ public:
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             aruwsrc::control::turret::algorithms::Axis::YAW>& yawController,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController);
+            aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController,
+        const Trajectory6d<LEN>& trajectory)
+        : AbstractIKCommand(
+              chassisToWorld,
+              cubeToEndEffector,
+              turret,
+              extension,
+              wrist,
+              yawController,
+              pitchController)
+    {
+    }
 
-    const char* getName() const override { return "Manual IK Command"; }
+    template <size_t LEN>
+    const char* getName() const override
+    {
+        return "Manual IK Command";
+    }
 
-    void initialize() override;
+    template <size_t LEN>
+    void initialize() override
+    {
+        startTime = tap::arch::clock::getTimeMilliseconds();
+    }
 
+    template <size_t LEN>
     void execute() override;
 
+    template <size_t LEN>
+    bool isFinished() const override
+    {
+        uint32_t now = tap::arch::clock::getTimeMilliseconds();
+        return (now - startTime) / 1000.0f > trajectory.waypoints.back().time;
+    }
+
+    template <size_t LEN>
     tap::algorithms::transforms::Transform getBaseToFollowerDesired() override
     {
-        return chassisToEEDesired;
+        uint32_t now = tap::arch::clock::getTimeMilliseconds();
+
+        return trajectory.atTime((now - startTime) / 1000.0f);
     }
 
 private:
-    tap::algorithms::transforms::Transform chassisToEEDesired;
+    const Trajectory6d<LEN>& trajectory;
+
+    uint32_t startTime;
 };  // class TrajectoryIKCommand
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics
