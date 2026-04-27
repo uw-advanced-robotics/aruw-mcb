@@ -70,7 +70,7 @@ void JointSubsystem::setSetpoint(float setpoint)
         this->setpoint.setTarget(std::clamp(setpoint, lowerBound, upperBound));
 };
 
-bool JointSubsystem::atSetpoint()
+bool JointSubsystem::atSetpoint() const
 {
     return tap::algorithms::compareFloatClose(setpoint.getTarget(), getPosition(), epsilon);
 };
