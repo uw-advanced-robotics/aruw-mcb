@@ -34,6 +34,21 @@
 
 namespace aruwsrc::control::turret
 {
+inline const tap::algorithms::transforms::Transform TURRET_MCB_BMI088_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    PI);
+inline const tap::algorithms::transforms::Transform TURRET_MCB_ISM330_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    -M_2_PI);
+
 static constexpr uint8_t NUM_TURRETS = 1;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;

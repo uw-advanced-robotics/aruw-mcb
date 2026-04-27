@@ -60,10 +60,10 @@ class Drivers : public tap::Drivers
         TurretMajorTransform(-76.7f, 116.04f, 0.0f, 0.0f, 0.0f, M_PI),
         TurretMajorTransform(-14.97f, -115.5f, 0.0f, 0.0f, 0.0f, M_PI_2)};
 
-    static inline const std::array<TurretMajorImuType::ImuType, 3> turretMajorImuTypes = {
-        TurretMajorImuType::ImuType::ISM330DHCX,
-        TurretMajorImuType::ImuType::ISM330DHCX,
-        TurretMajorImuType::ImuType::MPU6500};
+    // static inline const std::array<TurretMajorImuType::ImuType, 3> turretMajorImuTypes = {
+    //     TurretMajorImuType::ImuType::ISM330DHCX,
+    //     TurretMajorImuType::ImuType::ISM330DHCX,
+    //     TurretMajorImuType::ImuType::MPU6500};
 
 #ifdef ENV_UNIT_TESTS
 public:
@@ -95,12 +95,6 @@ public:
           turretMajorImuSecondary(
               aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
                   modm::platform::GpioD12>()),
-          turretMajorImu(
-              {&turretMajorPrimaryImu, &turretMajorImuSecondary, &mpu6500},
-              turretMajorImuTransforms,
-              turretMajorImuTypes,
-              TurretMajorImuType::Config(),
-              &rttTelemetry),
           plateHitTracker(this),
           stateMachine(refSerial, visionCoprocessor)
     {
@@ -127,7 +121,6 @@ public:
     aruwsrc::communication::can::cap_bank::CapacitorBank capacitorBank;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorPrimaryImu;
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImuSecondary;
-    TurretMajorImuType turretMajorImu;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 
@@ -139,12 +132,15 @@ public:
         oledDisplay.initialize();
         capacitorBank.initialize();
         mpu6500.setCalibrationSamples(4000);
-        turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
-        turretMajorImu.setCalibrationSamples(4000);
+        // turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        // turretMajorImu.setCalibrationSamples(4000);
         turretMajorPrimaryImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        turretMajorPrimaryImu.setMountingTransform(turretMajorImuTransforms[0]);
         turretMajorPrimaryImu.setCalibrationSamples(4000);
         turretMajorImuSecondary.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        turretMajorImuSecondary.setMountingTransform(turretMajorImuTransforms[1]);
         turretMajorImuSecondary.setCalibrationSamples(4000);
+        mpu6500.setMountingTransform(turretMajorImuTransforms[2]);
     }
 
     void updateIo()
@@ -163,7 +159,7 @@ public:
         turretMCBCanCommBus1.sendData();
         turretMCBCanCommBus2.sendData();
         oledDisplay.updateMenu();
-        turretMajorImu.periodicIMUUpdate();
+        // turretMajorImu.periodicIMUUpdate();
         turretMajorPrimaryImu.periodicIMUUpdate();
         turretMajorImuSecondary.periodicIMUUpdate();
         visionCoprocessor.sendMessage();

@@ -118,7 +118,7 @@ private:
     int PROJECTILE_COUNT_THRESHOLD = 100;  // Minimum number of projectiles to attack
 
     // Speed at which the robot moves when healing, in m/s
-    float SPEED = 1.0f;
+    float SPEED = 5.0f;
 
     const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
     const Position POINT_1 = Position(1.2, 2.1, 0);   // BOTTOM_MIDDLE
@@ -128,20 +128,9 @@ private:
         POINT_3,
         POINT_3 - Vector(3, 0.1, 0)};  // BIT BEHIND RIGHT SIDE_WALL
 
-    // const std::array<const Position, 4> ATTACKING_PATH = {RESUPPLY_ZONE, POINT_1, POINT_2,
-    // POINT_3};
+    const std::array<const Position, 4> ATTACKING_PATH = {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3};
 
-    // const std::array<const Position, 4> HEALING_PATH = {POINT_3, POINT_2, POINT_1,
-    // RESUPPLY_ZONE};
-
-    const Position POINT_T_1 = Position(0, 0, 0);
-    const Position POINT_T_2 = Position(1, 0, 0);
-
-    const Position PATROL_POINTS_T[2]{POINT_T_1, POINT_T_1 + Vector(1, 0, 0)};
-
-    const std::array<const Position, 2> ATTACKING_PATH = {POINT_T_1, POINT_T_2};
-
-    const std::array<const Position, 2> HEALING_PATH = {POINT_T_2, POINT_T_1};
+    const std::array<const Position, 4> HEALING_PATH = {POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
 
     static constexpr uint16_t PATH_LENGTH_MILLIS = 11000;
     static constexpr uint16_t PATROL_SEGMENT_LENGTH_MILLIS = 5000;

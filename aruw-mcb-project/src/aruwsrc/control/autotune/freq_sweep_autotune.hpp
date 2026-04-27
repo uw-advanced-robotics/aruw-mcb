@@ -17,6 +17,15 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file freq_sweep_autotune.hpp
+ *
+ * @brief   Implements frequency sweeping for system-identification
+ *
+ * Defines the FreqSweepAutotuneCommand command, which performs a frequency sweep
+ * and provides the data for system identification.
+ */
+
 #ifndef FREQ_SWEEP_AUTOTUNE_HPP_
 #define FREQ_SWEEP_AUTOTUNE_HPP_
 
@@ -25,32 +34,39 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "modm/ui/display.hpp"
 
-#include "autotune_command_interface.hpp"
+#include "turret_autotune_command.hpp"
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t numTestPoints, turret::algorithms::Axis axis>
-class FreqSweepAutotuneCommand : public TurretAutotuneCommand<numTestPoints, axis>
+template <turret::algorithms::Axis AXIS>
+class FreqSweepAutotuneCommand : public TurretAutotuneCommand<1, AXIS>
 {
-    using TurretTuneCommand = TurretAutotuneCommand<numTestPoints, axis>;
+    using TurretTuneCommand = TurretAutotuneCommand<1, AXIS>;
 
 public:
-    struct FreqSweepOptionalSystemsConfig
+    struct OptionalSystems
     {
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            control::turret::algorithms::Axis::PITCH> *turretMinorPitchController = nullptr;
+            control::turret::algorithms::Axis::PITCH> *otherTurretAxisController = nullptr;
         aruwsrc::control::turret::YawTurretSubsystem *turretMajorSubsystem = nullptr;
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             control::turret::algorithms::Axis::YAW> *turretMajorController = nullptr;
         tap::communication::sensors::imu::AbstractIMU *turretMajorImu = nullptr;
     };
 
+    struct SweepConfig
+    {
+        float startFreq, endFreq;  // rev/s
+        float freqIncrementRatio;  // unitless
+        float magnitude;           // desiredOut
+    };
+
     FreqSweepAutotuneCommand(
         tap::Drivers *drivers,
         const TurretTuneCommand::TurretCalibrationConfig &config,
-        const float desiredOutKick,
+        SweepConfig sweepConfig,
         aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm,
-        FreqSweepOptionalSystemsConfig optionalSystemsConfig = {},
+        OptionalSystems optionalSystems = {},
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
@@ -63,14 +79,11 @@ public:
               TurretTuneCommand::DEFAULT_POSITION_THRESHOLD,
               successChime,
               failChime),
-          desiredOutKick(desiredOutKick),
+          sweepConfig(sweepConfig),
           turretMCBCanComm(turretMCBCanComm),
-          turretMinorPitchController(optionalSystemsConfig.turretMinorPitchController),
-          turretMajorSubsystem(optionalSystemsConfig.turretMajorSubsystem),
-          turretMajorController(optionalSystemsConfig.turretMajorController),
-          turretMajorImu(optionalSystemsConfig.turretMajorImu)
+          optionalSystems(optionalSystems)
     {
-        if (turretMajorSubsystem)
+        if (optionalSystems.turretMajorSubsystem)
         {
             this->addSubsystemRequirement(config.turret);
         }
@@ -79,14 +92,17 @@ public:
 
     void execute() override
     {
+        uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+        float dt = (currTime - this->prevTime) / 1000.0f;
+        this->prevTime = currTime;
+
         switch (this->calibrationState)
         {
             case TurretAutotuneInterface::CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
             {
                 this->config.motor->setChassisFrameSetpoint(Angle(0));
-                freq = 3.0f;
+                freq = sweepConfig.startFreq;
                 currentPhase = 0.0f;
-                lastTimeMs = 0.0f;
                 bool allOnline = true;
                 const bool turretsOnline = this->config.motor->isOnline();
 
@@ -122,18 +138,13 @@ public:
 
             case TurretAutotuneInterface::CalibrationState::MEASURING_TORQUE:
             {
-                uint32_t currentTimeMs = tap::arch::clock::getTimeMilliseconds();
-                const float dt = (currentTimeMs - this->lastTimeMs) / 1000.0f;
-                this->lastTimeMs = currentTimeMs;
+                currentPhase += M_TWOPI * freq * dt;
 
-                currentPhase += 2.0f * M_PI * freq * dt;
-                if (currentPhase > 2.0f * M_PI) currentPhase -= 2.0f * M_PI;
-
-                this->config.motor->setMotorOutput(this->desiredOutKick * sin(currentPhase));
+                this->config.motor->setMotorOutput(sweepConfig.magnitude * sin(currentPhase));
                 this->calibrationTimer.restart(this->MAX_CALIBRATION_WAITTIME_MS);
 
-                freq *= 1.0001f;
-                if (freq > 250.0f)
+                freq *= sweepConfig.freqIncrementRatio;
+                if (freq > sweepConfig.endFreq)
                     this->calibrationState =
                         TurretAutotuneInterface::CalibrationState::NEXT_LOCATION;
 
@@ -141,7 +152,6 @@ public:
                 this->currentPointIndex++;
             }
             break;
-            // Stabilize yourself
             case TurretAutotuneInterface::CalibrationState::NEXT_LOCATION:
             {
                 if (this->calibrationTimer.isExpired())
@@ -150,11 +160,8 @@ public:
                 }
             }
             break;
-
             case TurretAutotuneInterface::CalibrationState::DONE:
             {
-                // Turn off in case calculation takes awhile
-                this->config.motor->setMotorOutput(0);
                 this->calibrationState =
                     TurretAutotuneInterface::CalibrationState::CALIBRATION_SUCCESS;
             }
@@ -163,26 +170,25 @@ public:
             default:
                 break;
         }
-        uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-        float dt = (currTime - this->prevTime) / 1000.0f;
 
         if (this->calibrationState != TurretAutotuneInterface::CalibrationState::MEASURING_TORQUE)
         {
             this->checkSafetyTimeout();
-            this->prevTime = currTime;
 
             this->config.controller->runController(
                 dt,
                 this->config.motor->getChassisFrameSetpoint());
         }
 
-        if (turretMajorController)
+        if (optionalSystems.turretMajorController)
         {
-            turretMajorController->runController(dt, turretMajorController->getSetpoint());
+            optionalSystems.turretMajorController->runController(
+                dt,
+                optionalSystems.turretMajorController->getSetpoint());
         }
-        if (turretMinorPitchController)
+        if (optionalSystems.otherTurretAxisController)
         {
-            turretMinorPitchController->runController(dt, Angle(0));
+            optionalSystems.otherTurretAxisController->runController(dt, Angle(0));
         }
     }
 
@@ -194,39 +200,34 @@ public:
 protected:
     void onMeasurementSample(size_t, uint32_t) override
     {
-        angleDMotor = this->config.motor->getChassisFrameVelocity();
+        motorVelocity = this->config.motor->getChassisFrameVelocity();
 
-        angleDImu = this->turretMCBCanComm->getGz();
+        imuYawVelocity = this->turretMCBCanComm->getGz();
 
-        desiredOutSetpoint = this->config.motor->getMotorOutput();
-        motorFrameAngle = this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
+        desiredOut = this->config.motor->getMotorOutput();
+        chassisFrameAngle = this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
 
-        if (turretMajorImu)
+        if (optionalSystems.turretMajorImu)
         {
-            turretMajorDImu = turretMajorImu->getGz();
+            turretMajorImuYawVelocity = optionalSystems.turretMajorImu->getGz();
         }
     }
 
     void onMeasurementComplete(size_t) override {}
 
 private:
-    const float desiredOutKick;
+    const SweepConfig sweepConfig;
     aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm;
-    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        control::turret::algorithms::Axis::PITCH> *turretMinorPitchController;
-    aruwsrc::control::turret::YawTurretSubsystem *turretMajorSubsystem;
-    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        control::turret::algorithms::Axis::YAW> *turretMajorController;
-    tap::communication::sensors::imu::AbstractIMU *turretMajorImu;
+    OptionalSystems optionalSystems;
 
-    float angleDMotor{0.0f};
-    float angleDImu{0.0f};
-    float turretMajorDImu{0.0f};
-    float desiredOutSetpoint{0.0f};
-    float motorFrameAngle{0.0f};
+    // Variables to pull data out of in Ozone
+    float motorVelocity{0.0f};
+    float imuYawVelocity{0.0f};
+    float turretMajorImuYawVelocity{0.0f};
+    float desiredOut{0.0f};
+    float chassisFrameAngle{0.0f};
     float freq{0.0f};
     float currentPhase{0.0f};
-    float lastTimeMs{0.0f};
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 

@@ -32,26 +32,26 @@
 
 #include "modm/ui/display.hpp"
 
-#include "autotune_command_interface.hpp"
+#include "turret_autotune_command.hpp"
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t numTestPoints, turret::algorithms::Axis axis>
-class GravityAutotuneCommand : public TurretAutotuneCommand<numTestPoints, axis>
+template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
+class GravityAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>
 {
 public:
     GravityAutotuneCommand(
         tap::Drivers *drivers,
-        const TurretAutotuneCommand<numTestPoints, axis>::TurretCalibrationConfig &config,
+        const TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::TurretCalibrationConfig &config,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
-        const std::array<float, numTestPoints> points = {},
+        const std::array<float, NUM_TEST_POINTS> points = {},
         const float velocityZeroThreshold =
-            TurretAutotuneCommand<numTestPoints, axis>::DEFAULT_VELOCITY_THRESHOLD,
+            TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold =
-            TurretAutotuneCommand<numTestPoints, axis>::DEFAULT_POSITION_THRESHOLD,
+            TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::DEFAULT_POSITION_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
-        : TurretAutotuneCommand<numTestPoints, axis>(
+        : TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>(
               drivers,
               config,
               chassis,
@@ -72,10 +72,10 @@ public:
      */
     std::array<float, 3> calculate() const
     {
-        Eigen::MatrixXd X(numTestPoints, 2);
-        Eigen::VectorXd Y(numTestPoints);
+        Eigen::MatrixXd X(NUM_TEST_POINTS, 2);
+        Eigen::VectorXd Y(NUM_TEST_POINTS);
 
-        for (uint32_t i = 0; i < numTestPoints; ++i)
+        for (uint32_t i = 0; i < NUM_TEST_POINTS; ++i)
         {
             X(i, 0) = std::cos(measuredAngles[i]);  // corresponds to A (m·g·x)
             X(i, 1) = std::sin(measuredAngles[i]);  // corresponds to B (−m·g·z)
@@ -142,10 +142,10 @@ private:
     }
 
     // Array of torque measurements received post averaging
-    std::array<float, numTestPoints> measuredTorques{};
+    std::array<float, NUM_TEST_POINTS> measuredTorques{};
 
     // Array of angle measurements received post averaging
-    std::array<float, numTestPoints> measuredAngles{};
+    std::array<float, NUM_TEST_POINTS> measuredAngles{};
 
     float averagingTorques{0.0f};
     float averagingAngles{0.0f};

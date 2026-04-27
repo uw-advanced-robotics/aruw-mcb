@@ -21,7 +21,15 @@
 #define TURRET_MCB_CAN_COMM_HPP_
 
 #include <array>
-#include <cstddef>
+#include <limits>
+
+#include <concepts>
+
+#ifdef PLATFORM_HOSTED
+#include <gtest/gtest_prod.h>
+#else
+#define FRIEND_TEST(a, b)
+#endif
 
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/architecture/periodic_timer.hpp"
@@ -108,11 +116,6 @@ public:
     mockable inline float getRoll() const override { return lastCompleteImuData.roll; }
 
     /**
-     * @return turret roll angular velocity in rad/sec
-     */
-    mockable inline float getGx() const override { return imuData.gyroRadPerSec.x(); }
-
-    /**
      * @return An unwrapped (not normalized) turret roll angle, in rad. This object keeps track of
      * the number of revolutions that the attached turret IMU has taken, and the number of
      * revolutions is reset once the IMU is recalibrated or if the turret IMU comes disconnected.
@@ -126,11 +129,6 @@ public:
      * @return turret pitch angle in rad, a value normalized between [-pi, pi]
      */
     mockable inline float getPitch() const override { return lastCompleteImuData.pitch; }
-
-    /**
-     * @return turret pitch angular velocity in rad/sec
-     */
-    mockable inline float getGy() const override { return imuData.gyroRadPerSec.y(); }
 
     /**
      * @return An unwrapped (not normalized) turret pitch angle, in rad. This object keeps track of
@@ -148,11 +146,6 @@ public:
     mockable inline float getYaw() const override { return lastCompleteImuData.yaw; }
 
     /**
-     * @return turret yaw angular velocity in rad/sec
-     */
-    mockable inline float getGz() const override { return imuData.gyroRadPerSec.z(); }
-
-    /**
      * @return An unwrapped (not normalized) turret yaw angle, in rad. This object keeps track of
      * the number of revolutions that the attached turret IMU has taken, and the number of
      * revolutions is reset once the IMU is recalibrated or if the turret IMU comes disconnected.
@@ -161,14 +154,6 @@ public:
     {
         return lastCompleteImuData.yaw + M_TWOPI * static_cast<float>(yawRevolutions);
     }
-
-    mockable inline float getAx() const override { return imuData.accG.x(); }
-
-    mockable inline float getAy() const override { return imuData.accG.y(); }
-
-    mockable inline float getAz() const override { return imuData.accG.z(); }
-
-    mockable inline float getTemp() const { return imuData.temperature; }
 
     mockable inline ImuState getImuState() const override
     {
@@ -200,7 +185,6 @@ public:
     mockable inline void requestCalibration() override
     {
         txCommandMsgBitmask.set(TxCommandMsgBitmask::RECALIBRATE_IMU);
-        imuState = ImuState::IMU_CALIBRATING;
     }
 
     inline void setRemoteCalibrationSampleCount(uint16_t sampleCount)
@@ -209,8 +193,8 @@ public:
     }
 
     void setImuMountingTransforms(
-        const tap::algorithms::transforms::Transform& bmi088MountingTransform,
-        const tap::algorithms::transforms::Transform& ism330MountingTransform);
+        const tap::algorithms::transforms::Transform& turretToBmi088,
+        const tap::algorithms::transforms::Transform& turretToIsm330);
     void clearHasImuMountingTransforms();
     void setImuMountingTransform(
         RemoteImuType imuType,
@@ -274,17 +258,35 @@ private:
         ROTATION = 1,
     };
 
+    typedef uint16_t RotationQuantType;
+    typedef int16_t TranslationQuantType;
+
+    static constexpr float ROTATION_COMPONENT_SCALE =
+        (std::numeric_limits<RotationQuantType>::max()) / M_TWOPI;
+
+    // Assumed max of two meters - Aiden
+    static constexpr float TRANSLATION_COMPONENT_SCALE =
+        (std::numeric_limits<TranslationQuantType>::max()) / 2.0f;
+
+    // clang-format off
+    template <typename T>
+    requires std::same_as<T, RotationQuantType> ||
+    std::same_as<T, TranslationQuantType>
     struct ImuMountingTransformMessageData
     {
         uint8_t imuType;
         uint8_t part;
-        int16_t componentA;
-        int16_t componentB;
-        int16_t componentC;
+        T componentA;
+        T componentB;
+        T componentC;
     } modm_packed;
+    // clang-format on
     static_assert(
-        sizeof(ImuMountingTransformMessageData) <= 8,
-        "IMU mounting transform CAN payload must fit in 8 bytes");
+        sizeof(ImuMountingTransformMessageData<RotationQuantType>) <= 8,
+        "IMU mounting transform CAN payload must fit in 8 bytes (Rotation)");
+    static_assert(
+        sizeof(ImuMountingTransformMessageData<TranslationQuantType>) <= 8,
+        "IMU mounting transform CAN payload must fit in 8 bytes (Translation)");
 
     struct CalibrationSamplesMessageData
     {
@@ -403,6 +405,9 @@ private:
     void sendImuMountingTransformSync();
     void queueCalibrationSamplesSync();
     void sendCalibrationSamplesSync();
+
+    FRIEND_TEST(TurretMCBCanComm, sendData_calibrate_imu_data);
+    FRIEND_TEST(TurretMCBCanComm, sendImuMountingTransforms_onRequest_sends8BytePayloads);
 };
 }  // namespace aruwsrc::communication::can
 

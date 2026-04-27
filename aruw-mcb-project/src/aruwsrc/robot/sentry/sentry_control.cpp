@@ -184,6 +184,11 @@ inline aruwsrc::communication::can::TurretMCBCanComm &getChassisTurretMCBCanComm
     return drivers()->turretMCBCanCommBus2;
 }
 
+inline tap::communication::sensors::imu::AbstractIMU &getTurretMajorImu()
+{
+    return drivers()->turretMajorImuSecondary;
+}
+
 // /* define subsystems --------------------------------------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
@@ -198,7 +203,7 @@ SentryTurretMinorSubsystem turretWidow(
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretWidow::turretID);
 
-SentryChassisWorldYawObserver chassisYawObserver(drivers()->turretMajorImu, turretMajor);
+SentryChassisWorldYawObserver chassisYawObserver(getTurretMajorImu(), turretMajor);
 
 // Turret Compensators
 TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
@@ -364,7 +369,7 @@ TurretMajorWorldFrameController turretMajorWorldYawController(
     transformer.getWorldToTurretMajor(),
     chassis,
     turretMajor.getMutableMotor(),
-    drivers()->turretMajorImu,
+    getTurretMajorImu(),
     turretWidow,
     turretMajorYawPosPid,
     turretMajorYawVelPid,
@@ -516,7 +521,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     chassis,
     chassisYawObserver,
     odometrySubsystem,
-    drivers()->turretMajorImu,
+    getTurretMajorImu(),
     getChassisTurretMCBCanComm(),
     transformer,
     turretMajorYawLamprey,
@@ -550,7 +555,7 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
      DESIRED_OUT_TO_TORQUE},
     turretMajorYawLamprey);
 
-autotune::FreqSweepAutotuneCommand<1, Axis::YAW> freqSweepAutotuneCommand(
+autotune::FreqSweepAutotuneCommand<Axis::YAW> freqSweepAutotuneCommand(
     drivers(),
     {&turretWidow,
      &turretWidow.yawMotor,
@@ -558,12 +563,12 @@ autotune::FreqSweepAutotuneCommand<1, Axis::YAW> freqSweepAutotuneCommand(
      turretWidowMotors.yawMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      DESIRED_OUT_TO_TORQUE},
-    12'000.0f,
+    {.startFreq = 3.0f, .endFreq = 250.0f, .freqIncrementRatio = 1.001f, .magnitude = 12'000.0f},
     &getTurretMCBCanCommWidow(),
     {&turretWidowChassisControllers.pitchController,
      &turretMajor,
      &turretMajorChassisYawController,
-     &drivers()->turretMajorImu});
+     &getTurretMajorImu()});
 
 SentryTurretCVCommand::TurretConfig turretWidowCVConfig(
     turretWidow,
@@ -850,10 +855,9 @@ void setDefaultSentryCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startSentryCommands(Drivers *drivers)
+void startSentryCommands(Drivers *)
 {
     // drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-    drivers->turretMajorImu.setMountingTransform(turretMajor::TURRET_MAJOR_IMU_MOUNTING_TRANSFORM);
     getTurretMCBCanCommWidow().setRemoteCalibrationSampleCount(4000);
     getChassisTurretMCBCanComm().setRemoteCalibrationSampleCount(4000);
     getTurretMCBCanCommWidow().setImuMountingTransforms(

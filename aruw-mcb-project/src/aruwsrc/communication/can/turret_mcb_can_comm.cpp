@@ -19,10 +19,9 @@
 
 #include "turret_mcb_can_comm.hpp"
 
-#include <algorithm>
 #include <cmath>
-#include <limits>
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/architecture/endianness_wrappers.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
@@ -33,15 +32,13 @@ namespace aruwsrc::communication::can
 {
 namespace
 {
-constexpr float ROTATION_COMPONENT_SCALE = 1000.0f;
-constexpr float TRANSLATION_COMPONENT_SCALE = 10.0f;
-
-inline int16_t quantizeTransformComponent(float value, float scale)
+template <typename T>
+inline T quantizeTransformComponent(float value, float scale)
 {
-    return static_cast<int16_t>(std::clamp(
-        std::lround(value * scale),
-        static_cast<long>(std::numeric_limits<int16_t>::min()),
-        static_cast<long>(std::numeric_limits<int16_t>::max())));
+    return static_cast<T>(round(tap::algorithms::limitVal<float>(
+        value * scale,
+        std::numeric_limits<T>::min(),
+        std::numeric_limits<T>::max())));
 }
 }  // namespace
 
@@ -53,6 +50,7 @@ TurretMCBCanComm::TurretMCBCanComm(tap::Drivers* drivers, tap::can::CanBus canBu
       lastCompleteImuData{},
       yawRevolutions(0),
       pitchRevolutions(0),
+      rollRevolutions(0),
       xAxisMessageHandler(
           drivers,
           X_AXIS_RX_CAN_ID,
@@ -133,8 +131,15 @@ void TurretMCBCanComm::sendData()
 {
     if (sendMcbDataTimer.execute())
     {
+        // set this calibrate flag to false after switching state
+        if (imuState == ImuState::IMU_CALIBRATING)
+        {
+            txCommandMsgBitmask.reset(TxCommandMsgBitmask::RECALIBRATE_IMU);
+        }
+
         modm::can::Message txMsg(TURRET_MCB_TX_CAN_ID, 1);
         txMsg.setExtended(false);
+        memset(txMsg.data, 0, sizeof(txMsg.data));
         txMsg.data[0] = txCommandMsgBitmask.value;
         drivers->can.sendMessage(canBus, txMsg);
 
@@ -144,14 +149,16 @@ void TurretMCBCanComm::sendData()
             pitchRevolutions = 0;
             rollRevolutions = 0;
         }
-
-        // set this calibrate flag to false so the calibrate command is only sent once
-        txCommandMsgBitmask.reset(TxCommandMsgBitmask::RECALIBRATE_IMU);
     }
 
     if (!isConnected())
     {
-        initialize(0, 0, 0);
+        imuData = {};
+        currProcessingImuData = {};
+        yawRevolutions = 0;
+        pitchRevolutions = 0;
+        rollRevolutions = 0;
+        imuState = ImuState::IMU_NOT_CONNECTED;
     }
     if (imuMountingTransformQueued)
     {
@@ -255,7 +262,7 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
         imuDataReceivedCallbackFunc();
     }
 }
-
+#include <iostream>
 void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
 {
     // Status frames are a heartbeat and should keep the remote IMU marked connected,
@@ -296,12 +303,12 @@ void TurretMCBCanComm::handleCalibrationSamplesRequest(const modm::can::Message&
 }
 
 void TurretMCBCanComm::setImuMountingTransforms(
-    const tap::algorithms::transforms::Transform& bmi088MountingTransform,
-    const tap::algorithms::transforms::Transform& ism330MountingTransform)
+    const tap::algorithms::transforms::Transform& turretToBmi088,
+    const tap::algorithms::transforms::Transform& turretToIsm330)
 {
     clearHasImuMountingTransforms();
-    setImuMountingTransform(RemoteImuType::BMI088, bmi088MountingTransform);
-    setImuMountingTransform(RemoteImuType::ISM330, ism330MountingTransform);
+    setImuMountingTransform(RemoteImuType::BMI088, turretToBmi088);
+    setImuMountingTransform(RemoteImuType::ISM330, turretToIsm330);
 }
 
 void TurretMCBCanComm::clearHasImuMountingTransforms()
@@ -345,33 +352,57 @@ bool TurretMCBCanComm::sendImuMountingTransformSyncMessage(
         return false;
     }
 
-    modm::can::Message msg(IMU_MOUNTING_TX_CAN_ID, sizeof(ImuMountingTransformMessageData));
-    msg.setExtended(false);
-    auto* payload = reinterpret_cast<ImuMountingTransformMessageData*>(msg.data);
-    payload->imuType = static_cast<uint8_t>(imuType);
-    payload->part = static_cast<uint8_t>(part);
-
     if (part == TransformMessagePart::TRANSLATION)
     {
+        modm::can::Message msg(
+            IMU_MOUNTING_TX_CAN_ID,
+            sizeof(ImuMountingTransformMessageData<TranslationQuantType>));
+        msg.setExtended(false);
+        auto* payload =
+            reinterpret_cast<ImuMountingTransformMessageData<TranslationQuantType>*>(msg.data);
+        payload->imuType = static_cast<uint8_t>(imuType);
+        payload->part = static_cast<uint8_t>(part);
+
         const auto translation = transform.getTranslation();
-        payload->componentA =
-            quantizeTransformComponent(translation.x(), TRANSLATION_COMPONENT_SCALE);
-        payload->componentB =
-            quantizeTransformComponent(translation.y(), TRANSLATION_COMPONENT_SCALE);
-        payload->componentC =
-            quantizeTransformComponent(translation.z(), TRANSLATION_COMPONENT_SCALE);
+        payload->componentA = quantizeTransformComponent<TranslationQuantType>(
+            translation.x(),
+            TRANSLATION_COMPONENT_SCALE);
+        payload->componentB = quantizeTransformComponent<TranslationQuantType>(
+            translation.y(),
+            TRANSLATION_COMPONENT_SCALE);
+        payload->componentC = quantizeTransformComponent<TranslationQuantType>(
+            translation.z(),
+            TRANSLATION_COMPONENT_SCALE);
+        drivers->can.sendMessage(canBus, msg);
     }
     else
     {
+        modm::can::Message msg(
+            IMU_MOUNTING_TX_CAN_ID,
+            sizeof(ImuMountingTransformMessageData<RotationQuantType>));
+        msg.setExtended(false);
+        auto* payload =
+            reinterpret_cast<ImuMountingTransformMessageData<RotationQuantType>*>(msg.data);
+        payload->imuType = static_cast<uint8_t>(imuType);
+        payload->part = static_cast<uint8_t>(part);
+
+        // Make positive
+        auto wrapPositive = [](float angle) { return angle < 0.0f ? angle + M_TWOPI : angle; };
+
+        const float roll = wrapPositive(transform.getRoll());
+        const float pitch = wrapPositive(transform.getPitch());
+        const float yaw = wrapPositive(transform.getYaw());
+
         payload->componentA =
-            quantizeTransformComponent(transform.getRoll(), ROTATION_COMPONENT_SCALE);
+            quantizeTransformComponent<RotationQuantType>(roll, ROTATION_COMPONENT_SCALE);
         payload->componentB =
-            quantizeTransformComponent(transform.getPitch(), ROTATION_COMPONENT_SCALE);
+            quantizeTransformComponent<RotationQuantType>(pitch, ROTATION_COMPONENT_SCALE);
         payload->componentC =
-            quantizeTransformComponent(transform.getYaw(), ROTATION_COMPONENT_SCALE);
+            quantizeTransformComponent<RotationQuantType>(yaw, ROTATION_COMPONENT_SCALE);
+
+        drivers->can.sendMessage(canBus, msg);
     }
 
-    drivers->can.sendMessage(canBus, msg);
     return true;
 }
 
