@@ -108,7 +108,7 @@ public:
     static Transform getHypotheticalTurretPitchToExtension(float extension)
     {
         return Transform(
-            TURRET_PITCH_TO_EXTENSION_ZERO.getTranslation() + Vector(extension, 0, 0),
+            TURRET_PITCH_TO_EXTENSION_ZERO_POS + Vector(extension, 0, 0),
             Orientation(0, 0, 0));
     }
 

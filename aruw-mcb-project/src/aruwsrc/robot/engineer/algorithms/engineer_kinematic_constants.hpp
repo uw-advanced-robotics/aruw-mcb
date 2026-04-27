@@ -27,40 +27,51 @@
 
 namespace aruwsrc::engineer::algorithms
 {
-static const tap::algorithms::transforms::Position CHASSIS_TO_TURRET_YAW_POS(0, 0, 0);
-static const tap::algorithms::transforms::Position TURRET_YAW_TO_TURRET_PITCH_POS(0, 0, 0);
-static const tap::algorithms::transforms::Transform TURRET_PITCH_TO_EXTENSION_ZERO(
+static const tap::algorithms::transforms::Position CHASSIS_TO_TURRET_YAW_POS(0, 0, 0.22064);
+static const tap::algorithms::transforms::Position TURRET_YAW_TO_TURRET_PITCH_POS(
+    -0.025,
+    0,
+    0.16192);
+static const tap::algorithms::transforms::Position TURRET_PITCH_TO_EXTENSION_ZERO_POS(0, 0, 0);
+static const tap::algorithms::transforms::Transform WRIST_TO_END_EFFECTOR(0.0803, 0, 0, 0, 0, 0);
+static const tap::algorithms::transforms::Transform EXTENSION_TO_VTM_GIMBAL(
     0,
     0,
     0,
     0,
     0,
-    0);
-static const tap::algorithms::transforms::Transform WRIST_TO_END_EFFECTOR(0, 0, 0, 0, 0, 0);
-static const tap::algorithms::transforms::Transform EXTENSION_TO_VTM_GIMBAL(0, 0, 0, 0, 0, 0);
+    0);  // TODO
 static const tap::algorithms::transforms::Transform TURRET_YAW_TO_CUBE_STORE_FRAME(
+    -0.03089,
     0,
+    0.19657,
     0,
-    0,
-    0,
-    0,
+    modm::toRadian(35.6),
     0);
-static const tap::algorithms::transforms::Transform TURRET_YAW_TO_REALSENSE(0, 0, 0, 0, 0, 0);
+static const tap::algorithms::transforms::Transform TURRET_YAW_TO_REALSENSE(
+    -0.10106,
+    0.0875,
+    0.28883,
+    0,
+    modm::toRadian(-25),
+    0);
 static const tap::algorithms::transforms::Transform CUBE_STORE_FRAME_TO_CUBE_DIST(0, 0, 0, 0, 0, 0);
+inline constexpr float CUBE_STORE_RADIUS = 0.27100;
+inline constexpr float CUBE_STORE_RADIUS_ANGLE = modm::toRadian(72);
 static const tap::algorithms::transforms::Transform CUBE_STORE_CENTER_TO_CUBE_STORE_1(
+    CUBE_STORE_RADIUS* cosf(CUBE_STORE_RADIUS_ANGLE),
+    CUBE_STORE_RADIUS* sinf(CUBE_STORE_RADIUS_ANGLE),
+    0.04343,
     0,
-    0,
-    0,
-    0,
-    0,
-    0);
+    modm::toRadian(-80),
+    CUBE_STORE_RADIUS_ANGLE);
 static const tap::algorithms::transforms::Transform CUBE_STORE_CENTER_TO_CUBE_STORE_2(
+    CUBE_STORE_RADIUS* cosf(-CUBE_STORE_RADIUS_ANGLE),
+    CUBE_STORE_RADIUS* sinf(-CUBE_STORE_RADIUS_ANGLE),
+    0.04343,
     0,
-    0,
-    0,
-    0,
-    0,
-    0);
+    modm::toRadian(-80),
+    -CUBE_STORE_RADIUS_ANGLE);
 
 static const tap::algorithms::transforms::Transform END_EFFECTOR_TO_WRIST =
     WRIST_TO_END_EFFECTOR.getInverse();
