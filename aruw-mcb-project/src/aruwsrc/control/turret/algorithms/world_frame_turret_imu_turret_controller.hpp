@@ -64,7 +64,7 @@ public:
      */
     WorldFrameTurretImuCascadePidTurretController(
         const transforms::Transform &worldToTurret,
-        const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
+        const tap::communication::sensors::imu::AbstractIMU &imu,
         TurretMotor &turretMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid,
@@ -99,7 +99,7 @@ public:
 
 private:
     const transforms::Transform &worldToTurret;
-    const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm;
+    const tap::communication::sensors::imu::AbstractIMU &imu;
 
     SmoothPid &positionPid;
     SmoothPid &velocityPid;

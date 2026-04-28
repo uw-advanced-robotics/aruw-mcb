@@ -104,14 +104,14 @@ static inline float runWorldFrameTurretImuController(
 template <Axis AXIS>
 WorldFrameTurretImuCascadePidTurretController<AXIS>::WorldFrameTurretImuCascadePidTurretController(
     const transforms::Transform &worldToTurret,
-    const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
+    const tap::communication::sensors::imu::AbstractIMU &imu,
     TurretMotor &turretMotor,
     SmoothPid &positionPid,
     SmoothPid &velocityPid,
     const std::vector<TurretCompensatorInterface *> compensators)
     : TurretAxisControllerInterface<AXIS>(turretMotor, compensators),
       worldToTurret(worldToTurret),
-      turretMCBCanComm(turretMCBCanComm),
+      imu(imu),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(Angle(0))
@@ -224,7 +224,7 @@ WrappedFloat WorldFrameTurretImuCascadePidTurretController<AXIS>::getMeasurement
 template <Axis AXIS>
 bool WorldFrameTurretImuCascadePidTurretController<AXIS>::isOnline() const
 {
-    return this->turretMotor.isOnline() && turretMCBCanComm.isConnected();
+    return this->turretMotor.isOnline() && imu.isOnline();
 }
 
 template <Axis AXIS>

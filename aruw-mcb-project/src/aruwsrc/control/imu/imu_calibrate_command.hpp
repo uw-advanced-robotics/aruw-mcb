@@ -94,7 +94,7 @@ public:
     struct TurretIMUCalibrationConfig
     {
         /// The turret mounted IMU to be calibrated.
-        aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm;
+        tap::communication::sensors::imu::AbstractIMU *imu;
         /// A `TurretSubsystem` that this command will control (will lock the turret).
         turret::TurretSubsystem *turret;
         /// A chassis relative yaw controller used to lock the turret.
