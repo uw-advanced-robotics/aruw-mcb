@@ -443,8 +443,8 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &turret,
     &worldFrameYawChassisImuController,
     &chassisFramePitchTurretController,
-    &worldFrameYawChassisImuController,
-    &chassisFramePitchTurretController,
+    &worldFrameYawTurretImuController,
+    &worldFramePitchTurretImuController,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
