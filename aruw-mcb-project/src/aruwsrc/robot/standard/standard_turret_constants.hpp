@@ -23,6 +23,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/turret/algorithms/second_order_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
@@ -147,6 +148,15 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     // .springFreeLength = 52.9f,
     .springFreeLength = 70.0f, // From Ozone, probably wrong
 };
+
+static constexpr algorithms::TurretSecondOrderCompensation::TurretSecondOrderCompensationParams
+    TURRET_SECOND_ORDER_COMPENSATION_CONFIG{
+        .bias = -5'396'259.89f,
+        .firstCoefficient = 2'644'523.51f,
+        .secondCoefficient = -432'895.201f,
+        .thirdCoefficient = 23'651.4706f,
+    };
+
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif

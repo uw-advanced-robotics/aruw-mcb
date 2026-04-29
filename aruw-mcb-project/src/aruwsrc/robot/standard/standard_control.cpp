@@ -82,6 +82,7 @@
 
 // #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
+#include "aruwsrc/control/autotune/second_order_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -100,6 +101,7 @@
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/second_order_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
@@ -151,7 +153,7 @@ using namespace aruwsrc::standard;
 driversFunc drivers = DoNotUse_getDrivers;
 namespace standard_control
 {
-inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -367,11 +369,15 @@ algorithms::TurretSpringForceOffset turretSpringCompensation(
     TURRET_SPRING_CONFIG,
     pitchMotor.isMotorInverted());
 
+algorithms::TurretSecondOrderCompensation turretSecondOrderCompensation(
+    TURRET_SECOND_ORDER_COMPENSATION_CONFIG,
+    pitchMotor.isMotorInverted());
+
 // Turret controllers
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
     turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG,
-    {&turretGravityCompensation});
+    {&turretGravityCompensation, &turretSecondOrderCompensation});
 
 algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
     turret.yawMotor,
@@ -501,6 +507,20 @@ autotune::SpringAutotuneCommand<9, Axis::PITCH> springAutotuneCommand(
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &turretSpringCompensation,
+    &turretGravityCompensation,
+    &chassis,
+    {},
+    &imuCalibrateSuccessBuzzCommand,
+    &imuCalibrateFailBuzzCommand);
+
+autotune::SecondOrderAutotuneCommand<9, Axis::PITCH> secondOrderAutotuneCommand(
+    drivers(),
+    {&turret,
+     &turret.pitchMotor,
+     &chassisFramePitchTurretController,
+     pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
     &turretGravityCompensation,
     &chassis,
     {},
@@ -850,7 +870,9 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
 {
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
         &standard_control::gravityAutotuneCommand,
-        &standard_control::springAutotuneCommand};
+        &standard_control::springAutotuneCommand,
+        &standard_control::secondOrderAutotuneCommand,
+    };
     return commands;
 }
 #endif
