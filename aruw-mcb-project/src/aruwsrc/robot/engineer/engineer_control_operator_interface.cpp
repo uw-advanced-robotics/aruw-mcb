@@ -61,7 +61,7 @@ float EngineerControlOperatorInterface::getGantryExtensionVelocity()
         if (isGantryWristControlMode())
         {
             return drivers->remote.getMouseX() / divideGantryExtension +
-                   drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+                   drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
         }
         else
         {
@@ -72,7 +72,7 @@ float EngineerControlOperatorInterface::getGantryExtensionVelocity()
     {
         if (isGantryWristControlMode())
         {
-            return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+            return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
         }
         return 0.0f;
     }

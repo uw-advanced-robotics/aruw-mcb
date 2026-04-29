@@ -134,7 +134,7 @@ aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor pitchTurretMotor(
     false,
     "Pitch Turret",
     false,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508,
     0,
     &turretPitchEncoder);
 
@@ -145,9 +145,10 @@ tap::motor::DjiMotor yawTurretMotor(
     false,
     "Yaw Turret",
     false,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * YAW_TURRET_GEAR_RATIO,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
+/// @TODO: make the turretMCB a MCB lite
 EngineerTurretSubsystem engTurret(
     drivers(),
     &pitchTurretMotor,
@@ -156,7 +157,7 @@ EngineerTurretSubsystem engTurret(
     YAW_MOTOR_CONFIG,
     &drivers()->mcbLite.imu);
 
-aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
+// aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
@@ -317,6 +318,8 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
     WHEEL_RADIUS,
     WHEELBASE_RADIUS);
 
+BuzzerSubsystem engineerBuzzer(drivers());
+
 CubeStorageSubsystem cubeStorage(
     drivers(),
     cubeStorageMotor,
@@ -345,14 +348,15 @@ DualDigitalOutSubsystem leftSuckSubsystem(
     tap::gpio::Digital::OutputPin::Y,
     true,
     tap::gpio::Digital::OutputPin::Z,
-    false);
+    true);
+    
 DualDigitalOutSubsystem rightSuckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
     true,
     tap::gpio::Digital::OutputPin::Z,
-    false);
+    true);
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
     &parallelOmniOne,
@@ -451,6 +455,7 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     nullptr,
     // {&drivers()->ism330});
     {&drivers()->mpu6500});
+
 
 aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
     drivers(),
@@ -580,6 +585,7 @@ void initializeSubsystems()
     leftSuckSubsystem.initialize();
     rightSuckSubsystem.initialize();
     transformSubsystem.initialize();
+    odometrySubsystem.initialize();
     // clientDicsplay.initialize();
 }
 
@@ -594,6 +600,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&engTurret);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
@@ -601,7 +608,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
     engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
+    // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
+    chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
     extensionSubsystem.setDefaultCommand(&extensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);

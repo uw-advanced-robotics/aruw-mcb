@@ -36,7 +36,7 @@ namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
 
-static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
+static constexpr float USER_YAW_INPUT_SCALAR = 0.01f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
 
 static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS1;
@@ -49,9 +49,11 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 414,
     .minAngle = 0,     ///< Doesn't matter since yaw not limited
-    .maxAngle = M_PI,  ///< Doesn't matter since yaw not limited
+    .maxAngle = M_TWOPI,  ///< Doesn't matter since yaw not limited
     .limitMotorAngles = false,
 };
+
+inline constexpr float YAW_TURRET_GEAR_RATIO = 16.0f/60.0f;
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
@@ -61,13 +63,6 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-// do we need this balancing stuff?
-
-// Turret is perfectly balanced
-static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
-    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
-
-// everything needs tuning
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
@@ -75,7 +70,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 10.0f,
+    .maxOutput = 5.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
