@@ -412,7 +412,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 20'000.0f,
     .ki = 100.0f,
-    .kd = 1'000.0f,
+    .kd = 1'500.0f,
     .maxICumulative = 5000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
@@ -421,6 +421,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 2.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
+    .antiSaturation = true,
 };
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
