@@ -87,7 +87,6 @@ private:
         CUBE_HELD,
         CUBE_STORAGE_1,
         CUBE_STORAGE_2,
-        CUBE_STORAGE_3,
         NO_RECEPTACLE,
         ALIGNED_WITH_RECEPTACLE,
         NUM_TEXT_HUD_INDICATORS
@@ -101,19 +100,16 @@ private:
         {"Cube Storage 1", Tx::GraphicColor::YELLOW, 700, 760, 60, 10};
     static constexpr TextIndicatorData cubeStorage2 =
         {"Cube Storage 2", Tx::GraphicColor::YELLOW, 700, 720, 60, 10};
-    static constexpr TextIndicatorData cubeStorage3 =
-        {"Cube Storage 3", Tx::GraphicColor::YELLOW, 700, 680, 60, 10};
     static constexpr TextIndicatorData noReceptacle =
-        {"No Receptacle", Tx::GraphicColor::ORANGE, 700, 640, 60, 10};
+        {"No Receptacle", Tx::GraphicColor::ORANGE, 700, 680, 60, 10};
     static constexpr TextIndicatorData alignedWithReceptacle =
-        {"Aligned with Receptacle", Tx::GraphicColor::GREEN, 700, 640, 60, 10};
+        {"Aligned with Receptacle", Tx::GraphicColor::GREEN, 700, 680, 60, 10};
 
     static constexpr TextIndicatorData INDICATOR_LIST[NUM_TEXT_HUD_INDICATORS] = {
         imuCalibrating,
         cubeHeld,
         cubeStorage1,
         cubeStorage2,
-        cubeStorage3,
         noReceptacle,
         alignedWithReceptacle,
     };
@@ -131,8 +127,6 @@ private:
         &cubeStoragePressureSensor1;
     const tap::communication::sensors::limit_switch::LimitSwitchInterface
         &cubeStoragePressureSensor2;
-    const tap::communication::sensors::limit_switch::LimitSwitchInterface
-        &cubeStoragePressureSensor3;
 
     // Resumeable function thing
     int index = 0;

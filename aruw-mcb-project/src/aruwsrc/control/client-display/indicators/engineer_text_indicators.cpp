@@ -41,8 +41,7 @@ EngineerTextIndicators::EngineerTextIndicators(
       imuCalibrateCommand(imuCalibrateCommand),
       wristPressureSensor(wristPressureSensor),
       cubeStoragePressureSensor1(cubeStoragePressureSensor1),
-      cubeStoragePressureSensor2(cubeStoragePressureSensor2),
-      cubeStoragePressureSensor3(cubeStoragePressureSensor3)
+      cubeStoragePressureSensor2(cubeStoragePressureSensor2)
 {
 }
 
@@ -57,7 +56,6 @@ modm::ResumableResult<void> EngineerTextIndicators::update()
     states[CUBE_HELD] = wristPressureSensor.getLimitSwitchDepressed();
     states[CUBE_STORAGE_1] = cubeStoragePressureSensor1.getLimitSwitchDepressed();
     states[CUBE_STORAGE_2] = cubeStoragePressureSensor2.getLimitSwitchDepressed();
-    states[CUBE_STORAGE_3] = cubeStoragePressureSensor3.getLimitSwitchDepressed();
 
     for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {
