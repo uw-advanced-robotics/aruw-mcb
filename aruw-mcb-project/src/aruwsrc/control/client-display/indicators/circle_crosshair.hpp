@@ -66,7 +66,7 @@ private:
     // SIZE of the circle
     static constexpr uint16_t CRICLE_SIZE = 2;
 // Thickness of the line
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
     static constexpr uint16_t LINE_THICKNESS = 10;
 #else
     static constexpr uint16_t LINE_THICKNESS = 5;

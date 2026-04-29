@@ -45,6 +45,7 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
                           the sim libraries, for example, run `scons build compile_lib_only=sim`.'"
 
 
+
 def parse_args():
     args = {
         "TARGET_ENV": "",
