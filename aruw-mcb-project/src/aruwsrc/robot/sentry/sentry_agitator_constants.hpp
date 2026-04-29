@@ -62,7 +62,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
     .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 300,
+    .jammingTime = 400,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
     .emptyJamEnabled = true,
