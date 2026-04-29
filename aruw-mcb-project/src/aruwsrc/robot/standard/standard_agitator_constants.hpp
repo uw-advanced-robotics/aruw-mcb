@@ -102,8 +102,8 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 static constexpr int AGITATOR_NUM_POCKETS = 9;          // number of balls in one rotation
-static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
-static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
+static constexpr float AGITATOR_MAX_ROF = 10.0f;        // balls per second
+static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.0f;  // how much agitator overshoots
 
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = (1.0f / 36.0f) * (2/5),
@@ -126,14 +126,14 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.1f,
 };
 
-constexpr float UNJAM_VELOCITY = 0.35 * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_VELOCITY = 1 * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
 constexpr float UNJAM_DISTANCE = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS);
 static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
     AGITATOR_UNJAM_CONFIG = {
         .targetUnjamIntegralChange = UNJAM_DISTANCE,
         .unjamSetpoint = UNJAM_VELOCITY,
         /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
-        /// seconds.Convert to ms, Add 100 ms extra tolerance.
+        /// seconds.Convert to ms, Add extra tolerance.
         .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
         .targetCycleCount = 3,
 };
