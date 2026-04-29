@@ -97,6 +97,7 @@ public:
             }
         }
 
+        /// @TODO: Unhardcode
         runPosPidController(0.002f);
     }
 
@@ -105,6 +106,7 @@ public:
         setSetpoint(getPosition() + (homingReversed ? homingSpeed : -homingSpeed));
     }
 
+    /// @TODO: remove for unused? 
     void stopDuringHoming() override { motor.setDesiredOutput(0); }
 
 protected:
