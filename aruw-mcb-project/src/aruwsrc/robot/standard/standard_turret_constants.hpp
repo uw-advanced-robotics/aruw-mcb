@@ -396,10 +396,10 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 #elif defined(TARGET_STANDARD_PHOBOS)
 // tuned
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 340'000.0f,
-    .ki = 0.0f,
-    .kd = 15'000.0f,
-    .maxICumulative = 5000.0f,
+    .kp = 40'000.0f,
+    .ki = 100.0f,
+    .kd = 4'000.0f,
+    .maxICumulative = 4000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 70.0f,
@@ -407,6 +407,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
+    .antiSaturation = true,
 };
 
 // TODO tune again after gravity + spring tuning
