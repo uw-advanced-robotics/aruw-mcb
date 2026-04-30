@@ -31,6 +31,7 @@
 #include "tap/control/sequential_command.hpp"
 
 #include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"  // placeholder
+#include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp" 
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
@@ -128,7 +129,7 @@ inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 tap::motor::DjiMotor pitchTurretMotor(
     drivers(),
     PITCH_MOTOR_ID,
-    CAN_BUS_MOTORS,
+    tap::can::CanBus::CAN_BUS1,
     true,
     "Pitch Turret",
     true,
@@ -138,7 +139,7 @@ tap::motor::DjiMotor pitchTurretMotor(
 tap::motor::DjiMotor yawTurretMotor(
     drivers(),
     YAW_MOTOR_ID,
-    CAN_BUS_MOTORS,
+    tap::can::CanBus::CAN_BUS1,
     false,
     "Yaw Turret",
     true,
@@ -156,6 +157,10 @@ EngineerTurretSubsystem engTurret(
 // aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
+
+// aruwsrc::communication::mcb_lite::motor::VirtualServo servoOne(drivers(), ); // c2
+// aruwsrc::communication::mcb_lite::motor::VirtualServo servoTwo(drivers(), ); // c3
+
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
@@ -193,23 +198,23 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-// tap::encoder::CanEncoder parallelOmniOne(
-//     drivers(),
-//     tap::encoder::CanEncoderId::ID0,  // TODO: find CAN ID
-//     tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
-//     true);                            // TODO: find correct inversion
+tap::encoder::CanEncoder parallelOmniOne(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
 
-// tap::encoder::CanEncoder parallelOmniTwo(
-//     drivers(),
-//     tap::encoder::CanEncoderId::ID1,
-//     tap::can::CanBus::CAN_BUS2,  // TODO: find correct CAN bus
-//     true);                       // TODO: find correct inversion
+tap::encoder::CanEncoder parallelOmniTwo(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    tap::can::CanBus::CAN_BUS2,  // TODO: find correct CAN bus
+    true);                       // TODO: find correct inversion
 
-// tap::encoder::CanEncoder perpendicularOmni(
-//     drivers(),
-//     tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
-//     tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
-//     true);                            // TODO: find correct inversion
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,  // TODO: find CAN ID
+    tap::can::CanBus::CAN_BUS2,       // TODO: find correct CAN bus
+    true);                            // TODO: find correct inversion
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
@@ -218,14 +223,14 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
-// tap::motor::DjiMotor cubeStorageMotor(
-//     drivers(),
-//     CUBE_STORAGE_MOTOR_ID,
-//     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-//     true,
-//     "Cube Storage Motor",
-//     false,
-//     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+tap::motor::DjiMotor cubeStorageMotor(
+    drivers(),
+    CUBE_STORAGE_MOTOR_ID,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    true,
+    "Cube Storage Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
 aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeStorageLimit(
     &(drivers()->digital),
