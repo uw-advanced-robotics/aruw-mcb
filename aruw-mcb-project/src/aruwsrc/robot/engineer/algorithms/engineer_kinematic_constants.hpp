@@ -32,7 +32,10 @@ static const tap::algorithms::transforms::Position TURRET_YAW_TO_TURRET_PITCH_PO
     -0.025,
     0,
     0.16192);
-static const tap::algorithms::transforms::Position TURRET_PITCH_TO_EXTENSION_ZERO_POS(0, 0, 0);
+static const tap::algorithms::transforms::Position TURRET_PITCH_TO_EXTENSION_ZERO_POS(
+    0.2,
+    0,
+    0.1);  // TODO
 static const tap::algorithms::transforms::Transform WRIST_TO_END_EFFECTOR(0.0803, 0, 0, 0, 0, 0);
 static const tap::algorithms::transforms::Transform EXTENSION_TO_VTM_GIMBAL(
     0,
