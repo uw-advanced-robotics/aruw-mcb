@@ -67,7 +67,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
     .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
+    .jammingTime = 400,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
 };
