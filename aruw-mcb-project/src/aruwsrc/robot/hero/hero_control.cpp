@@ -35,6 +35,7 @@
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 
 #include "aruwsrc/algorithms/binned_encoder_alignment/binned_encoder_alignment.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
@@ -76,6 +77,7 @@
 #include "aruwsrc/control/client-display/indicators/enemy_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
+#include "aruwsrc/robot/hero/binned_alignment_command.hpp"
 #include "aruwsrc/robot/hero/hero_turret_encoders.hpp"
 #include "modm/container/pair.hpp"
 
@@ -141,13 +143,13 @@ namespace hero_control
 class HeroTurretDisabledCommand : public tap::control::Command
 {
 public:
-    explicit HeroTurretDisabledCommand(TurretSubsystem *turretSubsystem)
+    explicit HeroTurretDisabledCommand(TurretSubsystem* turretSubsystem)
         : turretSubsystem(turretSubsystem)
     {
         addSubsystemRequirement(turretSubsystem);
     }
 
-    const char *getName() const override { return "hero turret disabled"; }
+    const char* getName() const override { return "hero turret disabled"; }
 
     void initialize() override { zeroTurret(); }
 
@@ -158,7 +160,7 @@ public:
     void end(bool) override { zeroTurret(); }
 
 private:
-    TurretSubsystem *turretSubsystem;
+    TurretSubsystem* turretSubsystem;
 
     void zeroTurret()
     {
@@ -167,7 +169,7 @@ private:
     }
 };
 
-inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -254,7 +256,7 @@ tap::motor::DjiMotor rightBackFrictionWheel(
     false,
     "Right Back flywheel");
 
-std::array<tap::motor::MotorInterface *, 4> wheels = {
+std::array<tap::motor::MotorInterface*, 4> wheels = {
     &leftFrontFrictionWheel,
     &rightFrontFrictionWheel,
     &leftBackFrictionWheel,
@@ -299,6 +301,13 @@ modm::Pair<float, float> lut[2] = {
     {0, 0},
     {1, 1},
 };
+
+tap::encoder::CanEncoder yawCanEncoder(
+    drivers(),
+
+
+);
+
 aruwsrc::communication::sensors::encoder::LampreyEncoder yawLampreyEncoder(
     &lampreyAnalog,
     aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Channel::AI0,  // TODO: what
@@ -314,7 +323,7 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(1 / 2.0f),
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (1 / 2.0f),
     0);
 
 aruwsrc::hero::HeroTurretEncoders heroTurretEncoders(
@@ -322,7 +331,16 @@ aruwsrc::hero::HeroTurretEncoders heroTurretEncoders(
     yawLampreyEncoder,
     yawMotor.getInternalEncoder());
 
-Trigger yawOnlineTrigger(drivers(), []() -> bool { return heroTurretEncoders.isOnline(); });
+aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
+    heroTurretEncoders,
+    0.0f  // TODO: get actual local offset
+);
+
+Trigger yawOnlineTrigger =
+    Trigger(drivers(), []() -> bool { return heroTurretEncoders.isOnline(); })
+        .onTrue(
+               &binnedAlignmentCommand 
+        );
 
 HeroTurretSubsystem turret(
     drivers(),
@@ -674,7 +692,7 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 
-std::vector<HudIndicator *> hudIndicators = {
+std::vector<HudIndicator*> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
     &ammoIndicator,
@@ -690,26 +708,26 @@ ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicato
 auto rightMidRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID);
 auto rightSwitchMiddle = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&spinFrictionWheels},
+    std::vector<Command*>{&spinFrictionWheels},
     &rightMidRms);
 
 auto rightUpRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP);
 auto rightSwitchUp = std::make_unique<HoldRepeatCommandMapping>(
     drivers(),
-    std::vector<Command *>{&spinFrictionWheels, &kicker::launchKickerHeatAndCVLimited},
+    std::vector<Command*>{&spinFrictionWheels, &kicker::launchKickerHeatAndCVLimited},
     &rightUpRms,
     false);
 
 auto leftDownRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
 auto leftSwitchDown = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&beybladeCommand},
+    std::vector<Command*>{&beybladeCommand},
     &leftDownRms);
 
 auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
 auto leftSwitchUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{
+    std::vector<Command*>{
         &chassisDriveCommand,
         // &turretCVCommand,
     },
@@ -727,7 +745,7 @@ auto leftMousePressedBNotPressedVNotPressed = std::make_unique<MultiShotCvComman
 auto leftMouseBPressedRms = RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B});
 auto leftMousePressedBPressed = std::make_unique<HoldRepeatCommandMapping>(
     drivers(),
-    std::vector<Command *>{&kicker::launchKickerNoHeatLimiting},
+    std::vector<Command*>{&kicker::launchKickerNoHeatLimiting},
     &leftMouseBPressedRms,
     false);
 
@@ -735,26 +753,26 @@ auto leftMousePressedBPressed = std::make_unique<HoldRepeatCommandMapping>(
 auto leftVRms = RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::V});
 auto leftMousePressedVPressed = std::make_unique<HoldRepeatCommandMapping>(
     drivers(),
-    std::vector<Command *>{&kicker::launchKickerNoHeatLimiting},
+    std::vector<Command*>{&kicker::launchKickerNoHeatLimiting},
     &leftVRms,
     false);
 
 auto rightMouseRms = RemoteMapState(RemoteMapState::MouseButton::RIGHT);
 auto rightMousePressed = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&turretCVCommand},
+    std::vector<Command*>{&turretCVCommand},
     &rightMouseRms);
 
 auto fRms = RemoteMapState({Remote::Key::F});
 auto fToggled = std::make_unique<ToggleCommandMapping>(
     drivers(),
-    std::vector<Command *>{&beybladeCommand},
+    std::vector<Command*>{&beybladeCommand},
     &fRms);
 
 auto zRms = RemoteMapState({Remote::Key::Z});
 auto zPressed = std::make_unique<PressCommandMapping>(
     drivers(),
-    std::vector<Command *>{&turretUTurnCommandLimited},
+    std::vector<Command*>{&turretUTurnCommandLimited},
     &zRms);
 // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
 auto bNotCtrlRightDownRms = RemoteMapState(
@@ -766,7 +784,7 @@ auto bNotCtrlRightDownRms = RemoteMapState(
     false);
 auto bNotCtrlPressedRightSwitchDown = std::make_unique<PressCommandMapping>(
     drivers(),
-    std::vector<Command *>{&imuCalibrateCommand},
+    std::vector<Command*>{&imuCalibrateCommand},
     &bNotCtrlRightDownRms);
 // The user can press b+ctrl when the remote right switch is in the down position to restart the
 // client display command. This is necessary since we don't know when the robot is connected to the
@@ -774,7 +792,7 @@ auto bNotCtrlPressedRightSwitchDown = std::make_unique<PressCommandMapping>(
 auto bCtrlRms = RemoteMapState({Remote::Key::CTRL, Remote::Key::B});
 auto bCtrlPressed = std::make_unique<PressCommandMapping>(
     drivers(),
-    std::vector<Command *>{&clientDisplayCommand},
+    std::vector<Command*>{&clientDisplayCommand},
     &bCtrlRms);
 
 auto rRms = RemoteMapState({Remote::Key::R});
@@ -789,19 +807,19 @@ auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGov
 auto cShiftRms = RemoteMapState({Remote::Key::SHIFT, Remote::Key::C});
 auto cShiftPressed = std::make_unique<PressCommandMapping>(
     drivers(),
-    std::vector<Command *>{&capBankToggleCommand},
+    std::vector<Command*>{&capBankToggleCommand},
     &cShiftRms);
 
 auto shiftRms = RemoteMapState({Remote::Key::SHIFT});
 auto shiftPressed = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&capBankSprintCommand},
+    std::vector<Command*>{&capBankSprintCommand},
     &shiftRms);
 
 auto ctrlRms = RemoteMapState({Remote::Key::CTRL});
 auto ctrlPressed = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&capBankHalfSprintCommand},
+    std::vector<Command*>{&capBankHalfSprintCommand},
     &ctrlRms);
 
 // Safe disconnect function
@@ -824,7 +842,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems(Drivers *drivers)
+void registerHeroSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheelSubsystem);
@@ -852,7 +870,7 @@ void setDefaultHeroCommands()
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(Drivers *drivers)
+void startHeroCommands(Drivers* drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->mpu6500.setMountingTransform(
@@ -867,7 +885,7 @@ void startHeroCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(Drivers *drivers)
+void registerHeroIoMappings(Drivers* drivers)
 {
     drivers->commandMapper.addMap(std::move(rightSwitchMiddle));
     drivers->commandMapper.addMap(std::move(rightSwitchUp));
@@ -890,7 +908,7 @@ void registerHeroIoMappings(Drivers *drivers)
 
 namespace aruwsrc::hero
 {
-void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::hero::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &hero_control::remoteSafeDisconnectFunction);
@@ -903,14 +921,14 @@ void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
 }  // namespace aruwsrc::hero
 
 #ifndef PLATFORM_HOSTED
-aruwsrc::control::imu::ImuCalibrateCommand *getImuCalibrateCommand()
+aruwsrc::control::imu::ImuCalibrateCommand* getImuCalibrateCommand()
 {
     return &hero_control::imuCalibrateCommand;
 }
 
-std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
 {
-    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
         &hero_control::gravityAutotuneCommand};
     return commands;
 }

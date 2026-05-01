@@ -59,6 +59,9 @@ static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
 static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS2;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
+
+static constexpr 
+
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
 
@@ -70,6 +73,9 @@ static constexpr aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::
         .rawZero = 0,
         .outputRangeRadians = 0,
     };
+
+static constexpr int32_t ENCODER_RATIO_NUM = 1;
+static constexpr int32_t ENCODER_RATIO_DEN = 2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
