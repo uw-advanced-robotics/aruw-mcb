@@ -65,7 +65,7 @@ static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_ENCODER_ID =
 static constexpr tap::can::CanBus YAW_LAMPREY_ENCODER_CAN_BUS =
     tap::can::CanBus::CAN_BUS2;  // TODO: get can bus
 
-static constexpr float YAW_LAMPREY_RATIO = 1.0f;     // TODO: need real ratio
+static constexpr float YAW_LAMPREY_RATIO = 1.0f;          // TODO: need real ratio
 static constexpr uint32_t YAW_ENCODER_HOME_POSITION = 0;  // TODO: get home position
 
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;

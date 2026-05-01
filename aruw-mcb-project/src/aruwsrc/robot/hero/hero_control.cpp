@@ -319,9 +319,7 @@ tap::encoder::CanEncoder yawCanEncoder(
     YAW_LAMPREY_RATIO,
     YAW_ENCODER_HOME_POSITION);
 
-aruwsrc::hero::HeroTurretEncoders heroTurretEncoders(
-    yawCanEncoder,
-    yawMotor.getInternalEncoder());
+aruwsrc::hero::HeroTurretEncoders heroTurretEncoders(yawCanEncoder, yawMotor.getInternalEncoder());
 
 aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
     heroTurretEncoders,

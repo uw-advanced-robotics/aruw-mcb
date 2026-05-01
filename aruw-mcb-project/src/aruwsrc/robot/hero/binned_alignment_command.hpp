@@ -33,9 +33,9 @@ public:
 
     void initialize() override;
 
-    void execute() override {};
+    void execute() override{};
 
-    void end(bool) override {};
+    void end(bool) override{};
 
     bool isFinished() const override { return true; };
 
