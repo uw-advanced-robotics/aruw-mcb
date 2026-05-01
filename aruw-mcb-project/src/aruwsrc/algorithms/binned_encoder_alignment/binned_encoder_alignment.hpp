@@ -40,6 +40,7 @@ struct Ratio
         den = d / common;
     }
 };
+// for every DEN rotations of input, output rotates NUM times
 template <uint32_t NUM, uint32_t DEN>
 float calculatePosition(float localEncoderPosition, float globalEncoderPosition, float localOffset)
 {

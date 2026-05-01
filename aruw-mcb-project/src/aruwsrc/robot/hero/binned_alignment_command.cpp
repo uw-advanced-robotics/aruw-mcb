@@ -1,5 +1,7 @@
 #include "aruwsrc/robot/hero/binned_alignment_command.hpp"
 
+#include "aruwsrc/robot/hero/hero_turret_constants.hpp"
+
 namespace aruwsrc::hero
 {
 BinnedAlignmentCommand::BinnedAlignmentCommand(HeroTurretEncoders& encoders, float localOffset)
@@ -13,11 +15,17 @@ void BinnedAlignmentCommand::initialize()
     const float localEncoderPosition = encoders.getYawMotorPosition();
     const float globalEncoderPosition = encoders.getYawLampreyPosition();
 
-    const float alignedPosition = algorithms::binned_encoder_alignment::calculatePosition<1, 2>(
-        localEncoderPosition, globalEncoderPosition, localOffset);
+    // since the lamprey isnt on the hero yet, we could jsut test with something like
+    // globalEncoderPosition = 0
+
+    const float alignedPosition = algorithms::binned_encoder_alignment::calculatePosition<
+        aruwsrc::control::turret::ENCODER_RATIO_NUM,
+        aruwsrc::control::turret::ENCODER_RATIO_DEN>(
+        localEncoderPosition,
+        globalEncoderPosition,
+        localOffset);
 
     encoders.setEncoderPosition(alignedPosition);
 }
-
 
 }  // namespace aruwsrc::hero

@@ -29,6 +29,8 @@
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
+
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
 #error "Do not include this file directly! Use turret_controller_constants.hpp instead."
@@ -60,7 +62,11 @@ static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS2
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 
-static constexpr 
+static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_ENCODER_ID = tap::encoder::CanEncoderId::ID0; // TODO: get id
+static constexpr tap::can::CanBus YAW_LAMPREY_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BUS2; // TODO: get can bus
+
+static float YAW_LAMPREY_RATIO = 1.0f; // TODO: need real ratio
+uint32_t YAW_ENCODER_HOME_POSITION = 0; // TODO: get home position
 
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
@@ -74,7 +80,7 @@ static constexpr aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::
         .outputRangeRadians = 0,
     };
 
-static constexpr int32_t ENCODER_RATIO_NUM = 1;
+static constexpr int32_t ENCODER_RATIO_NUM = 1; 
 static constexpr int32_t ENCODER_RATIO_DEN = 2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {

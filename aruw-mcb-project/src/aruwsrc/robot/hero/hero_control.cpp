@@ -302,20 +302,6 @@ modm::Pair<float, float> lut[2] = {
     {1, 1},
 };
 
-tap::encoder::CanEncoder yawCanEncoder(
-    drivers(),
-
-
-);
-
-aruwsrc::communication::sensors::encoder::LampreyEncoder yawLampreyEncoder(
-    &lampreyAnalog,
-    aruwsrc::communication::sensors::encoder::AnalogSensorEncoder::Channel::AI0,  // TODO: what
-                                                                                  // channel?
-    aruwsrc::control::turret::yawLampreyCalibration,
-    lut,
-    false);
-
 tap::motor::DjiMotor yawMotor(
     drivers(),
     YAW_MOTOR_ID,
@@ -326,9 +312,18 @@ tap::motor::DjiMotor yawMotor(
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (1 / 2.0f),
     0);
 
+tap::encoder::CanEncoder yawCanEncoder(
+    drivers(),
+    YAW_LAMPREY_ENCODER_ID,
+    YAW_LAMPREY_ENCODER_CAN_BUS,
+    false, // TODO: inverted??
+    YAW_LAMPREY_RATIO,
+    YAW_ENCODER_HOME_POSITION
+);
+
 aruwsrc::hero::HeroTurretEncoders heroTurretEncoders(
     drivers(),
-    yawLampreyEncoder,
+    yawCanEncoder,
     yawMotor.getInternalEncoder());
 
 aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
