@@ -145,7 +145,7 @@ tap::motor::DjiMotor yawTurretMotor(
     false,
     "Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * YAW_TURRET_GEAR_RATIO,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508* YAW_TURRET_GEAR_RATIO,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
 /// @TODO: make the turretMCB a MCB lite
@@ -349,7 +349,7 @@ DualDigitalOutSubsystem leftSuckSubsystem(
     true,
     tap::gpio::Digital::OutputPin::Z,
     true);
-    
+
 DualDigitalOutSubsystem rightSuckSubsystem(
     drivers(),
     drivers()->digital,
@@ -456,7 +456,6 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
     // {&drivers()->ism330});
     {&drivers()->mpu6500});
 
-
 aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
     drivers(),
     imuCalibrateCommand);
@@ -549,6 +548,10 @@ CubePositionDigitalOutCommand cubeStorageSuckOffCommand(
     rightSuckSubsystem,
     false);
 
+DigitalOutCommand endEffectorSuckOnCommand(leftSuckSubsystem, true);
+
+DigitalOutCommand endEffectorSuckOffCommand(leftSuckSubsystem, false);
+
 SequentialCommand<3> storeCubeCommand(
     &selectCubeAddPositionCommand,
     &cubeStorageSuckOnCommand,
@@ -573,6 +576,24 @@ auto leftUp = std::make_unique<tap::control::PressCommandMapping>(
     drivers(),
     std::vector<Command*>{&cubeStorageHome, &extensionHome},
     &leftUpRms);
+
+auto rightDownRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN);
+auto rightDown = std::make_unique<tap::control::HoldCommandMapping>(
+    drivers(),
+    std::vector<Command*>{&endEffectorSuckOnCommand},
+    &rightDownRms);
+
+auto rightMidRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID);
+auto rightMid = std::make_unique<tap::control::HoldCommandMapping>(
+    drivers(),
+    std::vector<Command*>{&endEffectorSuckOffCommand},
+    &rightMidRms);
+
+auto rightUpRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP);
+auto rightUp = std::make_unique<tap::control::HoldCommandMapping>(
+    drivers(),
+    std::vector<Command*>{&endEffectorSuckOffCommand},
+    &rightUpRms);
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -628,6 +649,9 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
     // drivers->commandMapper.addMap(&cyclePositions);
     // drivers->commandMapper.addMap(&cPressed);
     drivers->commandMapper.addMap(std::move(leftUp));
+    drivers->commandMapper.addMap(std::move(rightDown));
+    drivers->commandMapper.addMap(std::move(rightMid));
+    drivers->commandMapper.addMap(std::move(rightUp));
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }
