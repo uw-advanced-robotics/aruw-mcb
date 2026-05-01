@@ -39,7 +39,7 @@ public:
     {
     }
     // bool isTriggered() { return limitSwitch->getLimitSwitchDepressed(); }
-    bool isTriggered() { return true; } 
+    bool isTriggered() { return true; }
     /// @TODO: Remove
 
 private:

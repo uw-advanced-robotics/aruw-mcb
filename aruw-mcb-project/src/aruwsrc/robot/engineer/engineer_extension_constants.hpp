@@ -47,9 +47,7 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
             .lowerBound = 5.0f,
             .upperBound = 320.0f,
             .epsilon = 1.0f,
-            .encoderRatio =
-                5 * 25 /
-                M_TWOPI * 2,  // 5mm per tooth, 25 teeth, 2X cascaded extension
+            .encoderRatio = 5 * 25 / M_TWOPI * 2,  // 5mm per tooth, 25 teeth, 2X cascaded extension
             .posPidConfig = EXTENSION_PID_CONFIG,
             .maxOutput = EXTENSION_PID_CONFIG.maxOutput,
             .staticFeedforward = 600.0f,

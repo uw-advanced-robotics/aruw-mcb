@@ -48,12 +48,12 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 414,
-    .minAngle = 0,     ///< Doesn't matter since yaw not limited
+    .minAngle = 0,        ///< Doesn't matter since yaw not limited
     .maxAngle = M_TWOPI,  ///< Doesn't matter since yaw not limited
     .limitMotorAngles = false,
 };
 
-inline constexpr float YAW_TURRET_GEAR_RATIO = 16.0f/60.0f;
+inline constexpr float YAW_TURRET_GEAR_RATIO = 16.0f / 60.0f;
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
