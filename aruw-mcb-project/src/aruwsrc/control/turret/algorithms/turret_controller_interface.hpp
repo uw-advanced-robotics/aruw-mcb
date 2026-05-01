@@ -73,7 +73,7 @@ public:
      * @param[in] desiredSetpoint The controller's desired setpoint in whatever frame the controller
      * is operating. Units radians.
      */
-    virtual void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) = 0;
+    virtual void runController(const float dt, const WrappedFloat desiredSetpoint) = 0;
 
     /**
      * Calculates the total output from all attached compensators.
@@ -84,7 +84,6 @@ public:
     virtual float calculateCompensationEffort(
         TurretCompensatorInterface::TurretCompensatorState state)
     {
-        debugVar = compensators.size();
         if (compensators.empty()) return 0.0f;
 
         float total = 0.0f;
@@ -142,8 +141,6 @@ public:
      */
     virtual WrappedFloat convertChassisAngleToControllerFrame(
         WrappedFloat chassisFrameAngle) const = 0;
-
-    float debugVar = 0.0f;
 
 protected:
     TurretMotor &turretMotor;

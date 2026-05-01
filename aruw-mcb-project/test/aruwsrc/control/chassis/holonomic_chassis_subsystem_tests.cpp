@@ -185,9 +185,9 @@ TEST_P(VelocityGetterTest, getDesiredVelocity)
 
     Matrix<float, 3, 1> chassisVelocity = chassis.getDesiredVelocityChassisRelative();
 
-    EXPECT_NEAR(expectedVelocity.x, chassisVelocity[0][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
-    EXPECT_NEAR(expectedVelocity.y, chassisVelocity[1][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
-    EXPECT_NEAR(expectedVelocity.z, chassisVelocity[2][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
+    EXPECT_NEAR(expectedVelocity.x, chassisVelocity[0][0], 1E-3);
+    EXPECT_NEAR(expectedVelocity.y, chassisVelocity[1][0], 1E-3);
+    EXPECT_NEAR(expectedVelocity.z, chassisVelocity[2][0], 1E-3);
 }
 
 TEST_P(VelocityGetterTest, getVelocityWorldRelative)

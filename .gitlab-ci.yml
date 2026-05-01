@@ -87,6 +87,8 @@ before_script:
 
     - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
 
+    - python3 ./check_namespace_rule.py -i "*_constants.hpp" old-indicators create_rtt_error.hpp 2025engineer -rn robot
+
     - ./taproot-scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot "release develop"
   only: *verification_only
   except: *verification_except
@@ -115,6 +117,7 @@ before_script:
       paths:
         - aruw-mcb-project/build/hardware/scons-release/modm/
         - aruw-mcb-project/build/hardware/scons-release/src/tap/
+        - aruw-mcb-project/build/hardware/scons-release/ext/
         - aruw-mcb-project/build/hardware/scons-release/.sconsign
       policy: pull
     - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG
@@ -138,6 +141,7 @@ before_script:
         - aruw-mcb-project/build/tests/scons-fast/modm/
         - aruw-mcb-project/build/tests/scons-fast/src/tap/
         - aruw-mcb-project/build/tests/scons-fast/test/tap/
+        - aruw-mcb-project/build/tests/scons-fast/ext/
         - aruw-mcb-project/build/tests/scons-fast/.sconsign
       policy: pull
     - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG-test
@@ -153,8 +157,6 @@ before_script:
   stage: Build Libraries
   only: *default_only
   needs: []
-  variables:
-    GIT_SUBMODULE_STRATEGY: none
   script:
     - cd aruw-mcb-project
     - scons build robot=STANDARD_VOID compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
@@ -163,6 +165,7 @@ before_script:
     paths:
       - aruw-mcb-project/build/hardware/scons-release/modm/
       - aruw-mcb-project/build/hardware/scons-release/src/tap/
+      - aruw-mcb-project/build/hardware/scons-release/ext/
       - aruw-mcb-project/build/hardware/scons-release/.sconsign
     fallback_keys:
       - mcb-libs-develop
@@ -181,6 +184,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/modm/
       - aruw-mcb-project/build/tests/scons-fast/src/tap/
       - aruw-mcb-project/build/tests/scons-fast/test/tap/
+      - aruw-mcb-project/build/tests/scons-fast/ext/
       - aruw-mcb-project/build/tests/scons-fast/.sconsign
     fallback_keys:
       - mcb-test-libs-develop
@@ -264,33 +268,19 @@ before_script:
   variables:
     ROBOT: ENGINEER
 
-# 2025 Engi build
-
-"2025 Engi: MCB Build":
-  extends:
-    - .mcb_build
-  variables:
-    ROBOT: ENGI_2025
-
-"2025 Engi: Test Build":
-  extends:
-    - .test_build
-  variables:
-    ROBOT: ENGI_2025
-
 # Hero build
 
 "Hero: MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: HERO_ZERO
+    ROBOT: HERO_NEPTUNE
 
 "Hero: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: HERO_ZERO
+    ROBOT: HERO_NEPTUNE
 
 # Sentry (Beehive) build
 

@@ -59,11 +59,15 @@ public:
 #else
 public:
     control::ControlOperatorInterface controlOperatorInterface;
+#endif
     aruwsrc::communication::sensors::imu::ism330::ISM330 turretImu;
     communication::rtt::RttTelemetry rttTelemetry;
-#endif
-};
+    void init(const float) {}
 
+    void updateIo() {}
+
+    void update() { rttTelemetry.updateTelemetryAsync(); }
+};  // class aruwsrc::DroneDrivers
 }  // namespace aruwsrc::drone
 
 #endif  // DRONE_DRIVERS_HPP_

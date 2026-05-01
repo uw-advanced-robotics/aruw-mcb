@@ -54,7 +54,7 @@ public:
         updateStates();
     }
 
-    inline void updateStates() { digital.set(pin, state ^ offState); }
+    inline virtual void updateStates() { digital.set(pin, state ^ offState); }
 
     const char* getName() const override { return "Digital Out Subsystem"; }
 

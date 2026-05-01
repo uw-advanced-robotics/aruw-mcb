@@ -25,6 +25,7 @@
 #define TAPROOT_MOTOR_SPECIFIC_MENU_HPP_
 
 #include "tap/architecture/periodic_timer.hpp"
+#include "tap/errors/create_errors.hpp"
 
 #include "modm/ui/menu/abstract_menu.hpp"
 
@@ -68,6 +69,11 @@ private:
     bool currIsInverted = false;
     uint16_t currEncoderWrapped;
     int16_t currRPM = 0;
+    bool hasMotorBeenOffline = false;
+    bool motorWasOnline = false;
+
+    // helper function that gets the mutable motor and resets its changed flag
+    void resetMotorChangedFlag();
 };
 }  // namespace display
 }  // namespace tap

@@ -85,7 +85,7 @@ static const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
     0,
     0,
     0,
-    0,
+    M_PI,
     0,
     0);
 
@@ -138,9 +138,6 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 static constexpr tap::can::CanBus CAN_BUS_MOTOR = tap::can::CanBus::CAN_BUS1;
 
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
-static constexpr float TURRET_MINOR_TORQUE_RATIO = 0.0f;
-
-static constexpr float FEEDFORWARD_GAIN = 0.0f;
 }  // namespace turretMajor
 
 static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(255.7f);

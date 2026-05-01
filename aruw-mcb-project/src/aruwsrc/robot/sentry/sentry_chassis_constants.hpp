@@ -25,6 +25,7 @@
 
 namespace aruwsrc::control::chassis
 {
+static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
 // Initial position of the chassis in the field (meters)
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0.34f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 6.34f;

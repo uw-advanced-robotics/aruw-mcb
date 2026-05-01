@@ -37,16 +37,14 @@
 // static constexpr float TURRET_CG_Z = 0.0f;
 // static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 // }  // namespace aruwsrc::control::turret
-#elif defined(TARGET_HERO_ZERO)
+#elif defined(TARGET_HERO_NEPTUNE)
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"
 #elif defined(TARGET_SENTRY_ECLIPSE)
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
-#include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"
-#elif defined(TARGET_ENGI_2025)
-#include "aruwsrc/robot/engineer/turret/engineer_turret_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #else
 // necessary to satiate vision_coprocessor and tests which relies on this
 // header for number of turrets and gravity compensation values

@@ -29,6 +29,7 @@
 
 #include "tap/util_macros.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_connection_state.hpp"
 #include "aruwsrc/communication/rtt/rtt_led_animator.hpp"
 #include "modm/container/deque.hpp"
 #include "modm/processing/protothread.hpp"
@@ -104,6 +105,18 @@ public:
         queuePrintMessage(msg.c_str());
     }
 
+    ConnectionState getConnectionState() const { return connectionState; }
+
+    int getMessageQueueSize() const { return messageQueue.getSize(); }
+
+    int getPrintQueueSize() const { return printQueue.getSize(); }
+
+    int getErrorQueueSize() const { return errorQueue.getSize(); }
+
+    bool getProcessingLogMessage() const { return logMessageProcessing; }
+
+    bool getProcessingErrorMessage() const { return errorMessageProcessing; }
+
     /**
      * Segger's printf-style telemetry hook. Intentionally unused; println() is queued and framed.
      * See segger_rtt_wrapper.cpp for more details.
@@ -114,7 +127,7 @@ public:
      * Blocking function that's already called by protothread, so no need to call manually. Only
      * public for use by `modm_abort()`.
      */
-    mockable void sendQueuedMessages(bool ozone);
+    mockable void sendQueuedMessages();
 
 #if !defined(ENV_UNIT_TESTS) || !defined(PLATFORM_HOSTED)
 private:
@@ -166,6 +179,16 @@ private:
     static constexpr size_t MAX_QUEUED_MESSAGES = 100;
     static constexpr size_t MAX_MESSAGE_SIZE = 100;
     bool ozoneMode;
+
+    ConnectionState connectionState;
+
+    static constexpr uint32_t MESSAGE_DURATION = 600;
+
+    uint32_t errorMessageDeadlineMillis = 0;
+    uint32_t logMessageDeadlineMillis = 0;
+
+    bool logMessageProcessing = false;
+    bool errorMessageProcessing = false;
 
     struct QueuedMessage
     {
@@ -289,11 +312,11 @@ private:
         modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
         std::size_t requiredSpace,
         std::size_t available,
-        std::size_t currentSize,
-        const char* queueName);
+        std::size_t currentSize);
 
     void appendEvents(
-        std::string& out,
+        char* out_buf,
+        std::size_t& out_len,
         modm::BoundedDeque<QueuedMessage, MAX_QUEUED_MESSAGES>& queue,
         const char* label,
         std::size_t available);

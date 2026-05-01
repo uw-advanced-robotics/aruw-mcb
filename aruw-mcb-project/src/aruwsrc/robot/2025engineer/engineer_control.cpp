@@ -16,9 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#if defined(TARGET_ENGI_2025)
-
 #if defined(TARGET_ENGI_2025)
 
 #include "tap/communication/gpio/digital.hpp"
@@ -362,26 +359,26 @@ CubeliftSwitchCommand cubeLiftSwitchUpCommand(cubeLift, true);
 CubeliftSwitchCommand cubeLiftSwitchDownCommand(cubeLift, false);
 
 // sequences planned, but never finished and tuned
-SequentialCommand<10> storeCubeCommand(std::array<Command *, 10>{
-    {&liftUpCommand,
-     &gantryRetractCommand,
-     &wristFoldInCommand,
-     &liftDownCommand,
-     &suckOffCommand,
-     &gantryExtendCommand,
-     &liftUpCommand,
-     &gantryRetractCommand,
-     &cubeLiftSwitchDownCommand}});
-SequentialCommand<10> retrieveCubeCommand(std::array<Command *, 10>{
-    {&liftDownCommand,
-     &gantryExtendCommand,
-     &wristFoldInCommand,
-     &gantryRetractCommand,
-     &suckOnCommand,
-     &liftUpCommand,
-     &wristFoldOutCommand,
-     &liftDownCommand,
-     &cubeLiftSwitchUpCommand}});
+SequentialCommand storeCubeCommand(
+    &liftUpCommand,
+    &gantryRetractCommand,
+    &wristFoldInCommand,
+    &liftDownCommand,
+    &suckOffCommand,
+    &gantryExtendCommand,
+    &liftUpCommand,
+    &gantryRetractCommand,
+    &cubeLiftSwitchDownCommand);
+SequentialCommand retrieveCubeCommand(
+    &liftDownCommand,
+    &gantryExtendCommand,
+    &wristFoldInCommand,
+    &gantryRetractCommand,
+    &suckOnCommand,
+    &liftUpCommand,
+    &wristFoldOutCommand,
+    &liftDownCommand,
+    &cubeLiftSwitchUpCommand);
 
 // commands for pickup/scoring positions
 SetpointMovePositionCommand gantryOut(gantryExtensionSubsystem, GANTRY_EXTENSION_SCORE);
@@ -540,5 +537,4 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers *drivers)
     aruwsrc::control::registerEngineerIoMappings(drivers);
 }
 }  // namespace aruwsrc::engineer
-#endif
 #endif
