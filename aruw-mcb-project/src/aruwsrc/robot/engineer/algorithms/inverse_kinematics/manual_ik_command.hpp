@@ -19,6 +19,8 @@
 #ifndef MANUAL_IK_COMMAND_HPP_
 #define MANUAL_IK_COMMAND_HPP_
 
+#include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+
 #include "abstract_ik_command.hpp"
 
 namespace aruwsrc::engineer::algorithms::inverse_kinematics
@@ -27,8 +29,10 @@ class ManualIKCommand : public AbstractIKCommand
 {
 public:
     ManualIKCommand(
-        const tap::algorithms::transforms::Transform& worldToChassis,
+        const aruwsrc::engineer::EngineerControlOperatorInterface& controlOperatorInterface,
+        const tap::algorithms::transforms::Transform& chassisToBase,
         const tap::algorithms::transforms::Transform& cubeToEndEffector,
+        const tap::algorithms::transforms::Transform& baseToEndEffector,
         aruwsrc::control::turret::TurretSubsystem& turret,
         aruwsrc::control::joint::JointSubsystem& extension,
         aruwsrc::engineer::wrist::WristSubsystem& wrist,
@@ -41,15 +45,12 @@ public:
 
     void initialize() override;
 
-    void execute() override;
-
-    tap::algorithms::transforms::Transform getBaseToFollowerDesired() override
-    {
-        return chassisToEEDesired;
-    }
+    tap::algorithms::transforms::Transform getBaseToFollowerDesired() override;
 
 private:
-    tap::algorithms::transforms::Transform chassisToEEDesired;
+    const aruwsrc::engineer::EngineerControlOperatorInterface& controlOperatorInterface;
+    tap::algorithms::transforms::Transform baseToEndEffectorDesired;
+    const tap::algorithms::transforms::Transform& baseToEndEffector;
 };  // class ManualIKCommand
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

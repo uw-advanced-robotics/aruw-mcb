@@ -45,19 +45,20 @@ EngineerTransforms::EngineerTransforms(
       extension(extension),
       wrist(wrist),
       cubeStorage(cubeStorage),
-      worldToChassis(Transform::identity()),
+      worldToChassis(),
+      chassisToWorld(),
       chassisToTurretYaw(getHypotheticalChassisToTurretYaw(0)),
       turretYawToTurretPitch(getHypotheticalTurretYawToTurretPitch(0)),
       turretPitchToExtension(getHypotheticalTurretPitchToExtension(0)),
-      extensionToWrist(Transform::identity()),
-      cubeStoreFrameToCubeStoreCenter(Transform::identity()),
-      worldToTurretPitch(Transform::identity()),
-      worldToRealsense(Transform::identity()),
-      worldToEndEffector(Transform::identity()),
-      cubeStore1ToEndEffector(Transform::identity()),
-      cubeStore2ToEndEffector(Transform::identity()),
-      vtmGimbalToEndEffector(Transform::identity()),
-      endEffectorToCubeDist(Transform::identity()),
+      extensionToWrist(),
+      cubeStoreFrameToCubeStoreCenter(),
+      worldToTurretPitch(),
+      worldToRealsense(),
+      worldToEndEffector(),
+      cubeStore1ToEndEffector(),
+      cubeStore2ToEndEffector(),
+      vtmGimbalToEndEffector(),
+      endEffectorToCubeDist(),
       COMBeyondTurretPitch(
           {.mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass + MASS_BEYOND_WRIST.mass,
            .location = Position(0, 0, 0)}),
@@ -76,6 +77,8 @@ void EngineerTransforms::updateTransforms()
         chassisImu.getPitch(),
         chassisPose.getOrientation());
     // worldToChassis.updateAngularVelocity(0., 0., chassisImu.getGz());
+
+    chassisToWorld = worldToChassis.getInverse();
 
     chassisToTurretYaw.updateRotation(
         0,

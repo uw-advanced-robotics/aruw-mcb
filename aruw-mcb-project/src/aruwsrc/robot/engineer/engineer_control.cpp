@@ -71,6 +71,7 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transform_subsystem.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
+#include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/manual_ik_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
@@ -583,6 +584,19 @@ CubePositionDigitalOutCommand cubeStorageSuckOffCommand(
 DigitalOutCommand endEffectorSuckOnCommand(leftSuckSubsystem, true);
 
 DigitalOutCommand endEffectorSuckOffCommand(leftSuckSubsystem, false);
+
+tap::algorithms::transforms::Transform IDENTITY_TRANSFORM;
+
+inverse_kinematics::ManualIKCommand manualIKCommand(
+    drivers()->controlOperatorInterface,
+    transformer.getChassisToWorld(),
+    IDENTITY_TRANSFORM,
+    transformer.getWorldToEndEffector(),
+    engTurret,
+    extensionSubsystem,
+    wristSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController);
 
 SequentialCommand<3> storeCubeCommand(
     &selectCubeAddPositionCommand,

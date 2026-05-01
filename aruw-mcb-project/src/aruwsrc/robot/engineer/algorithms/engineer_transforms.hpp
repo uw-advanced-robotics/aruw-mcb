@@ -73,6 +73,7 @@ public:
     inline void initialize() {}
 
     inline const Transform& getWorldToChassis() const { return worldToChassis; };
+    inline const Transform& getChassisToWorld() const { return chassisToWorld; };
 
     inline uint32_t getLastComputedOdometryTime() const
     {
@@ -86,6 +87,7 @@ public:
 
     inline const Transform& getWorldToTurretPitch() const { return worldToTurretPitch; }
     inline const Transform& getWorldToRealsense() const { return worldToRealsense; }
+    inline const Transform& getWorldToEndEffector() const { return worldToEndEffector; }
     inline const Transform& getCubeStore1ToEndEffector() const { return cubeStore1ToEndEffector; }
     inline const Transform& getCubeStore2ToEndEffector() const { return cubeStore2ToEndEffector; }
     inline const Transform& getEndEffectorToCubeDist() const { return endEffectorToCubeDist; }
@@ -127,7 +129,7 @@ private:
     const aruwsrc::control::joint::JointSubsystem& cubeStorage;
 
     // Joint Transforms
-    Transform worldToChassis;
+    Transform worldToChassis, chassisToWorld;
     Transform chassisToTurretYaw;
     Transform turretYawToTurretPitch;
     Transform turretPitchToExtension;
@@ -138,7 +140,7 @@ private:
     // Compound/Requested Transforms
     Transform worldToTurretPitch;
     Transform worldToRealsense;
-    Transform worldToEndEffector;       // purely for debug
+    Transform worldToEndEffector;
     Transform cubeStore1ToEndEffector;  // TODO: should be cube not EE
     Transform cubeStore2ToEndEffector;  // TODO: should be cube not EE
     Transform vtmGimbalToEndEffector;   // TODO: should be cube not EE

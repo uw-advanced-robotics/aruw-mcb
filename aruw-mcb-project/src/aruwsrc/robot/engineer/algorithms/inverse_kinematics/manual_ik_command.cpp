@@ -25,8 +25,10 @@ using namespace tap::algorithms::transforms;
 namespace aruwsrc::engineer::algorithms::inverse_kinematics
 {
 ManualIKCommand::ManualIKCommand(
-    const Transform& chassisToWorld,
+    const aruwsrc::engineer::EngineerControlOperatorInterface& controlOperatorInterface,
+    const Transform& chassisToBase,
     const Transform& cubeToEndEffector,
+    const Transform& baseToEndEffector,
     aruwsrc::control::turret::TurretSubsystem& turret,
     aruwsrc::control::joint::JointSubsystem& extension,
     aruwsrc::engineer::wrist::WristSubsystem& wrist,
@@ -35,29 +37,40 @@ ManualIKCommand::ManualIKCommand(
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController)
     : AbstractIKCommand(
-          chassisToWorld,
+          chassisToBase,
           cubeToEndEffector,
           turret,
           extension,
           wrist,
           yawController,
           pitchController),
-      chassisToEEDesired(Transform::identity())
+      controlOperatorInterface(controlOperatorInterface),
+      baseToEndEffectorDesired(),
+      baseToEndEffector(baseToEndEffector)
 {
 }
 
-void ManualIKCommand::initialize()
-{
-    chassisToEEDesired =
-        EngineerTransforms::getHypotheticalChassisToTurretYaw(0)
-            .composeStatic(EngineerTransforms::getHypotheticalTurretYawToTurretPitch(0))
-            .composeStatic(EngineerTransforms::getHypotheticalTurretPitchToExtension(0))
-            .composeStatic(WRIST_TO_END_EFFECTOR);
-}
+void ManualIKCommand::initialize() { baseToEndEffectorDesired = baseToEndEffector; }
 
-void ManualIKCommand::execute()
+Transform ManualIKCommand::getBaseToFollowerDesired()
 {
-    //
+    Vector endEffectorPrevToEndEffectorNextTrans = Vector(
+                                                       controlOperatorInterface.getIKVelX(),
+                                                       controlOperatorInterface.getIKVelY(),
+                                                       controlOperatorInterface.getIKVelZ()) *
+                                                   0.002f;
+    Orientation endEffectorPrevToEndEffectorNextRot(
+        controlOperatorInterface.getIKVelRoll() * 0.002f,
+        controlOperatorInterface.getIKVelPitch() * 0.002f,
+        controlOperatorInterface.getIKVelYaw() * 0.002f);
+
+    // we apply translation in world frame for user control intuitiveness
+    baseToEndEffectorDesired.updateTranslation(
+        baseToEndEffectorDesired.getTranslation() + endEffectorPrevToEndEffectorNextTrans);
+    baseToEndEffectorDesired.updateRotation(
+        baseToEndEffectorDesired.getRotation().compose(endEffectorPrevToEndEffectorNextRot));
+
+    return baseToEndEffectorDesired;
 }
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics
