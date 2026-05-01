@@ -1,6 +1,6 @@
 #include "aruwsrc/robot/hero/binned_alignment_command.hpp"
 
-#include "aruwsrc/robot/hero/hero_turret_constants.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
 namespace aruwsrc::hero
 {

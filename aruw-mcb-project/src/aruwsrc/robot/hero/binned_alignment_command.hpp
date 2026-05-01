@@ -18,11 +18,9 @@ public:
 
     void end(bool) override {};
 
-    bool isFinished() const override {};
+    bool isFinished() const override { return true; };
 
     const char* getName() const override { return "Binned Alignment Command"; }
-
-
 
 private:
     HeroTurretEncoders& encoders;

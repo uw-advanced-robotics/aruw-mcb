@@ -35,7 +35,6 @@
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
-#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 
 #include "aruwsrc/algorithms/binned_encoder_alignment/binned_encoder_alignment.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
@@ -309,20 +308,18 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (1 / 2.0f),
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508*(1 / 2.0f),
     0);
 
 tap::encoder::CanEncoder yawCanEncoder(
     drivers(),
     YAW_LAMPREY_ENCODER_ID,
     YAW_LAMPREY_ENCODER_CAN_BUS,
-    false, // TODO: inverted??
+    false,  // TODO: inverted??
     YAW_LAMPREY_RATIO,
-    YAW_ENCODER_HOME_POSITION
-);
+    YAW_ENCODER_HOME_POSITION);
 
 aruwsrc::hero::HeroTurretEncoders heroTurretEncoders(
-    drivers(),
     yawCanEncoder,
     yawMotor.getInternalEncoder());
 
@@ -331,11 +328,9 @@ aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
     0.0f  // TODO: get actual local offset
 );
 
-Trigger yawOnlineTrigger =
-    Trigger(drivers(), []() -> bool { return heroTurretEncoders.isOnline(); })
-        .onTrue(
-               &binnedAlignmentCommand 
-        );
+Trigger yawOnlineTrigger = Trigger(drivers(), []() -> bool {
+                               return heroTurretEncoders.isOnline();
+                           }).onTrue(&binnedAlignmentCommand);
 
 HeroTurretSubsystem turret(
     drivers(),
