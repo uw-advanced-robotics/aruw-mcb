@@ -145,7 +145,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .turretPitchMountZ = -39.52f,
     .turretYawMountX = 76.29f,
     .turretYawMountZ = -71.91f,
-    .springConstant = -2.6f, // TODO find this
+    .springConstant = -2.6f,  // TODO find this
     .springFreeLength = 52.9f,
 };
 #else
