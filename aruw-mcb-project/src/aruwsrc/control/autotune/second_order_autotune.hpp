@@ -20,9 +20,9 @@
 #ifndef SECOND_ORDER_AUTOTUNE_HPP_
 #define SECOND_ORDER_AUTOTUNE_HPP_
 
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "modm/ui/display.hpp"
 
-#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "turret_autotune_command.hpp"
 
 namespace aruwsrc::control::autotune
@@ -34,13 +34,13 @@ public:
     SecondOrderAutotuneCommand(
         tap::Drivers* drivers,
         const TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::TurretCalibrationConfig& config,
-        const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce =
+        const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset* gravityForce =
             nullptr,
         chassis::HolonomicChassisSubsystem* chassis = nullptr,
         const std::array<float, NUM_TEST_POINTS> points = {},
         aruwsrc::control::buzzer::NoteSequenceCommand* successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand* failChime = nullptr,
-          const float velocityZeroThreshold =
+        const float velocityZeroThreshold =
             TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold =
             TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::DEFAULT_POSITION_THRESHOLD * 20)
@@ -53,7 +53,7 @@ public:
               positionZeroThreshold,
               successChime,
               failChime),
-            gravityForce(gravityForce)
+          gravityForce(gravityForce)
     {
     }
 
@@ -114,12 +114,10 @@ protected:
         const float angleValue =
             this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
 
-
-        
-        const float gravityCompensation = gravityForce != nullptr
-                                            ? gravityForce->calculateCompensationEffort(
-                                                  {.pitchWorldFrame = angleValue})
-                                            : 0.0f;
+        const float gravityCompensation =
+            gravityForce != nullptr
+                ? gravityForce->calculateCompensationEffort({.pitchWorldFrame = angleValue})
+                : 0.0f;
         motorValue -= gravityCompensation;
 
         averagingTorques += (motorValue - averagingTorques) / (sampleCount);

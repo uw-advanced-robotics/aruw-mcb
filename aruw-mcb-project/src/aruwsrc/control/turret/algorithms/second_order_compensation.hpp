@@ -46,14 +46,14 @@ public:
     };
     /**
      * Yeah turns out it's actually third order chat, desmos says so
-     * 
+     *
      * @param[in] True if the motor direction should be inverted.
      */
     TurretSecondOrderCompensation(
         const TurretSecondOrderCompensationParams& params,
         const bool isMotorInverted)
         : params(params),
-          isMotorInverted(isMotorInverted) {};
+          isMotorInverted(isMotorInverted){};
 
     /**
      * @param[in] state The state of the turret, including the pitch in world and chassis
@@ -64,11 +64,11 @@ public:
      */
     float calculateCompensationEffort(const TurretCompensatorState state) const override
     {
-        const float pitch = state.pitchChassisFrame < M_PI ? state.pitchChassisFrame + M_TWOPI : state.pitchChassisFrame;
-        const float compensationEffort = params.bias 
-                                        + params.firstCoefficient * pitch 
-                                        + params.secondCoefficient * pitch * pitch 
-                                        + params.thirdCoefficient * pitch * pitch * pitch;
+        const float pitch = state.pitchChassisFrame < M_PI ? state.pitchChassisFrame + M_TWOPI
+                                                           : state.pitchChassisFrame;
+        const float compensationEffort = params.bias + params.firstCoefficient * pitch +
+                                         params.secondCoefficient * pitch * pitch +
+                                         params.thirdCoefficient * pitch * pitch * pitch;
         return isMotorInverted ? -compensationEffort : compensationEffort;
     }
 
@@ -76,6 +76,6 @@ private:
     const TurretSecondOrderCompensationParams params;
     const bool isMotorInverted;
 };
-} // namespace aruwsrc::control::turret::algorithms
+}  // namespace aruwsrc::control::turret::algorithms
 
 #endif  // SECOND_ORDER_COMPENSATOR_HPP_

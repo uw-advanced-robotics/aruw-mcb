@@ -153,7 +153,7 @@ using namespace aruwsrc::standard;
 driversFunc drivers = DoNotUse_getDrivers;
 namespace standard_control
 {
-inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
+inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
