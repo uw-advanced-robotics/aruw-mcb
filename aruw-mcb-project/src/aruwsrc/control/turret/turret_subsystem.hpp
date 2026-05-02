@@ -58,6 +58,8 @@ public:
      *
      * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
+     * @param[in] pitchLimitFunc Optional limit function for pitch motor error wrapping.
+     * @param[in] yawLimitFunc Optional limit function for yaw motor error wrapping.
      */
     explicit TurretSubsystem(
         tap::Drivers* drivers,
@@ -65,7 +67,9 @@ public:
         tap::motor::MotorInterface* yawMotor,
         const TurretMotorConfig& pitchMotorConfig,
         const TurretMotorConfig& yawMotorConfig,
-        const tap::communication::sensors::imu::AbstractIMU* turretImu);
+        const tap::communication::sensors::imu::AbstractIMU* turretImu,
+        float (*pitchLimitFunc)(float) = nullptr,
+        float (*yawLimitFunc)(float) = nullptr);
 
     void initialize() override;
 

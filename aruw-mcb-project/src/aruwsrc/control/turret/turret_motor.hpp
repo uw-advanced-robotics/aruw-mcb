@@ -50,7 +50,10 @@ public:
      * Construct a turret motor with some particular hardware motor interface and a motor
      * configuration struct.
      */
-    TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig);
+    TurretMotor(
+        tap::motor::MotorInterface* motor,
+        const TurretMotorConfig& motorConfig,
+        float (*limitFunc)(float) = nullptr);
 
     mockable inline void initialize() { motor->initialize(); }
 
@@ -73,7 +76,7 @@ public:
      * different commands).
      */
     mockable inline void attachTurretController(
-        const algorithms::TurretControllerInterface *turretController)
+        const algorithms::TurretControllerInterface* turretController)
     {
         this->turretController = turretController;
     }
@@ -96,7 +99,7 @@ public:
 
     /// @return turret motor angle measurement relative to the chassis, in radians, wrapped between
     /// [0, 2 PI)
-    mockable inline const WrappedFloat &getChassisFrameMeasuredAngle() const
+    mockable inline const WrappedFloat& getChassisFrameMeasuredAngle() const
     {
         return chassisFrameMeasuredAngle;
     }
@@ -111,13 +114,13 @@ public:
     }
 
     /// @return turret controller controlling this motor (as specified by `attachTurretController`)
-    mockable const algorithms::TurretControllerInterface *getTurretController() const
+    mockable const algorithms::TurretControllerInterface* getTurretController() const
     {
         return turretController;
     }
 
     /// @return The turret motor config struct associated with this motor
-    mockable const TurretMotorConfig &getConfig() const { return config; }
+    mockable const TurretMotorConfig& getConfig() const { return config; }
 
     /**
      * @return Valid minimum error between the chassis relative setpoint and measurement, in
@@ -159,10 +162,10 @@ private:
     const TurretMotorConfig config;
 
     /// Low-level motor object that this object interacts with
-    tap::motor::MotorInterface *motor;
+    tap::motor::MotorInterface* motor;
 
     /// Associated turret controller interface that is being used by a command to control this motor
-    const algorithms::TurretControllerInterface *turretController = nullptr;
+    const algorithms::TurretControllerInterface* turretController = nullptr;
 
     /// Unwrapped chassis frame setpoint specified by the user and limited to `[config.minAngle,
     /// config.maxAngle]`. Units radians.
@@ -170,6 +173,7 @@ private:
 
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
     WrappedFloat chassisFrameMeasuredAngle;
+    float (*limitFunc)(float) = nullptr;
 };
 }  // namespace aruwsrc::control::turret
 

@@ -17,7 +17,10 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define SEMICOLON ;
+
 #if defined(TARGET_ENGINEER)
+#include <cmath>
 #include <memory>
 
 #include "tap/communication/gpio/digital.hpp"
@@ -145,13 +148,60 @@ tap::motor::DjiMotor yawTurretMotor(
     1,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
+tap::motor::DjiMotor extensionMotor(
+    drivers(),
+    aruwsrc::engineer::EXTENSION_MOTOR_ID,
+    aruwsrc::engineer::CAN_BUS_EXTENSION,
+    true,  // inverted? test
+    "Extension Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
+    &drivers()->digital,
+    aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
+    true);
+
+LimitSwitchTrigger extensionTrigger(&extensionLimit);
+
+TriggerHomedJointSubsystem extensionSubsystem(
+    drivers(),
+    extensionMotor,
+    extensionTrigger,
+    EXTENSION_CONFIG);
+
+float pitchAngularErrorLimit(float extension)
+{
+    // limit pitch based on engineer extension
+    // ramp limit?
+    float distanceFromLimit = extension - MIN_EXTENSION_FOR_FULL_PITCH;
+    if (extension < MIN_EXTENSION_FOR_FULL_PITCH)
+    {
+        // todo: tune the ramp
+        float factor = 1.0f;
+
+        float limit = PITCH_LIMIT_EXTENSION_RETRACTED + distanceFromLimit * factor;
+        return limit;
+    }
+
+    else
+    {
+        float limit = PITCH_LIMIT_EXTENSION_EXTENDED;
+        return limit;
+    }
+}
+
 EngineerTurretSubsystem engTurret(
     drivers(),
     &pitchTurretMotor,
     &yawTurretMotor,
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
+    &getTurretMCBCanComm(),
+    pitchAngularErrorLimit,
+    nullptr  // no dynamic limit for yaw
+
+);
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
@@ -276,22 +326,6 @@ tap::encoder::CanEncoder wristEncoderTheta2(
     1,
     WRIST_HOME_THETA2);
 
-tap::motor::DjiMotor extensionMotor(
-    drivers(),
-    aruwsrc::engineer::EXTENSION_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_EXTENSION,
-    true,  // inverted? test
-    "Extension Motor",
-    false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
-    &drivers()->digital,
-    aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
-    true);
-
-LimitSwitchTrigger extensionTrigger(&extensionLimit);
-
 /* define subsystems --------------------------------------------------------*/
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
@@ -320,12 +354,6 @@ WristSubsystem wristSubsystem(
     wristEncoderTheta1,
     wristEncoderTheta2,
     WRIST_CONFIG);
-
-TriggerHomedJointSubsystem extensionSubsystem(
-    drivers(),
-    extensionMotor,
-    extensionTrigger,
-    EXTENSION_CONFIG);
 
 // update vals
 DualDigitalOutSubsystem leftSuckSubsystem(

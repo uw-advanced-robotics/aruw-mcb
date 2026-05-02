@@ -45,6 +45,15 @@ static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 
+// turret pitch limits for different extension lengths, used in limit functions
+// need to change
+// if extension below threshold, we use the retracted limit which will limit the pitch more
+// aggressively
+static constexpr float PITCH_LIMIT_EXTENSION_RETRACTED = 0.0;
+static constexpr float PITCH_LIMIT_EXTENSION_EXTENDED = 0.0;
+// need to change probably
+static constexpr float PITCH_LIMIT_RAMP_RATE = 1.0;  // how quickly the pitch limit changes between the retracted and extended limits as the extension moves
+
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 414,

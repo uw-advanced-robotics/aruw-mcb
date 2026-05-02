@@ -29,11 +29,15 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
 {
-TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig)
+TurretMotor::TurretMotor(
+    tap::motor::MotorInterface* motor,
+    const TurretMotorConfig& motorConfig,
+    float (*limitFunc)(float))
     : config(motorConfig),
       motor(motor),
       chassisFrameSetpoint(Angle(config.startAngle)),
-      chassisFrameMeasuredAngle(Angle(config.startAngle))
+      chassisFrameMeasuredAngle(Angle(config.startAngle)),
+      limitFunc(limitFunc)
 {
     assert(config.minAngle <= config.maxAngle);
     assert(motor != nullptr);
@@ -75,11 +79,12 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
     if (config.limitMotorAngles)
     {
         int status;
-        chassisFrameSetpoint = Angle(WrappedFloat::limitValue(
-            chassisFrameSetpoint,
-            config.minAngle,
-            config.maxAngle,
-            &status));
+        chassisFrameSetpoint = Angle(
+            WrappedFloat::limitValue(
+                chassisFrameSetpoint,
+                config.minAngle,
+                config.maxAngle,
+                &status));
     }
 }
 
@@ -106,10 +111,18 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
 
         if (pos < neg)
         {
+            if (limitFunc != nullptr)
+            {
+                return limitFunc((setpoint - measurement).getWrappedValue());
+            }
             return (setpoint - measurement).getWrappedValue();
         }
         else if (pos > neg)
         {
+            if (limitFunc != nullptr)
+            {
+                return limitFunc((setpoint - measurement).getWrappedValue() - M_TWOPI);
+            }
             return (setpoint - measurement).getWrappedValue() - M_TWOPI;
         }
     }
