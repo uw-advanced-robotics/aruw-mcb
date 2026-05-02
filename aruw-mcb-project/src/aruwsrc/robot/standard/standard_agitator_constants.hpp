@@ -102,11 +102,11 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 static constexpr int AGITATOR_NUM_POCKETS = 9;          // number of balls in one rotation
-static constexpr float AGITATOR_MAX_ROF = 10.0f;        // balls per second
+static constexpr float AGITATOR_MAX_ROF = 20.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.0f;  // how much agitator overshoots
 
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = (1.0f / 36.0f) * (2/5),
+    .gearRatio = (1.0f / 36.0f) * (2.0f / 5.0f),
     .agitatorMotorId = tap::motor::MOTOR3,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -126,8 +126,8 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.1f,
 };
 
-constexpr float UNJAM_VELOCITY = 1 * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
-constexpr float UNJAM_DISTANCE = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_VELOCITY = 0.8f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_DISTANCE = 1.0f * (M_TWOPI / AGITATOR_NUM_POCKETS);
 static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
     AGITATOR_UNJAM_CONFIG = {
         .targetUnjamIntegralChange = UNJAM_DISTANCE,
