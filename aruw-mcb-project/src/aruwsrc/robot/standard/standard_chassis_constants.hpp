@@ -142,7 +142,6 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
 
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
-
 }  // namespace aruwsrc::control::chassis
 
 #endif  // STANDARD_CHASSIS_CONSTANTS_HPP_
