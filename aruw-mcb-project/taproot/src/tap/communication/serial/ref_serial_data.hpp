@@ -32,6 +32,11 @@
 
 #include "dji_serial.hpp"
 
+#define static_constexpr static constexpr
+#define _packedU8 uint8_t
+#define O _packedU8
+#define _packed_cast_8 static_cast<_packedU8>
+
 namespace tap::communication::serial
 {
 /**
@@ -76,7 +81,7 @@ public:
     {
     public:
         RobotToRobotMessageHandler() {}
-        virtual void operator()(const DJISerial::ReceivedSerialMessage &message) = 0;
+        virtual void operator()(const DJISerial::ReceivedSerialMessage& message) = 0;
     };
 
     /**
@@ -447,6 +452,12 @@ public:
             bool activeDoubleVulnerabilityEffect;          ///< True when the effect is active.
         };
 
+        struct CustomControllerData
+        {
+            static constexpr size_t MAX_CUSTOM_CONTROLLER_DATA_SIZE = 30;
+            uint8_t data[MAX_CUSTOM_CONTROLLER_DATA_SIZE];
+        };
+
         struct GameData
         {
             GameType gameType;    ///< Current type of competition the robot is taking part in.
@@ -493,6 +504,7 @@ public:
             RefereeWarningData refereeWarningData;  ///< Referee warning information, updated when
                                                     ///< a robot receives a penalty
             RobotEnergyLevel robotEnergyRemaining;  ///< The current energy level of the robot.
+            CustomControllerData customControllerData;  ///< Data from the custom controller
         };
     };
 
@@ -672,7 +684,7 @@ public:
          * @todo @deprecated
          */
         template <typename T>
-        static constexpr uint32_t getWaitTimeAfterGraphicSendMs(T *)
+        static constexpr uint32_t getWaitTimeAfterGraphicSendMs(T*)
         {
             // Must be a valid graphic message type
             static_assert(

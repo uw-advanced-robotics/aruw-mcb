@@ -36,6 +36,7 @@
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
+#include "custom_controller_data.hpp"
 
 #endif
 
@@ -65,7 +66,8 @@ public:
           engineerCVCommunication(this),
           chassisIsm(),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
-          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)
+          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
+          customControllerData(this)
     {
         controlOperatorInterface.setTelemetry(&rttTelemetry);
     }
@@ -87,6 +89,7 @@ public:
 
     communication::can::TurretMCBCanComm turretMCBCanCommBus1;
     communication::can::TurretMCBCanComm turretMCBCanCommBus2;
+    CustomControllerData customControllerData;
 
     void init(const float mainLoopFrequency)
     {
@@ -112,6 +115,7 @@ public:
         oledDisplay.updateDisplay();
         engineerCVCommunication.updateSerial();
         chassisIsm.read();
+        customControllerData.read();
     }
 
     void update()
