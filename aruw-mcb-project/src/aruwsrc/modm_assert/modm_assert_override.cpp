@@ -20,9 +20,8 @@
 
 #include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
 #include "modm/architecture/interface/assert.hpp"
-#include "modm/platform/core/heap_table.hpp"
 
-// This replaces the weak implementation in libmodm.a
+// This replaces the weak implementation
 extern "C" void modm_abandon(const modm::AssertionInfo &info)
 {
     using namespace aruwsrc::communication::rtt;
@@ -30,7 +29,7 @@ extern "C" void modm_abandon(const modm::AssertionInfo &info)
     char logBuffer[128];
     int len;
 
-    // Format the header (Note: using info.name instead of info->name)
+    // Format the header
     len = snprintf(
         logBuffer,
         sizeof(logBuffer),
@@ -64,7 +63,7 @@ extern "C" void modm_abandon(const modm::AssertionInfo &info)
     len = snprintf(
         logBuffer,
         sizeof(logBuffer),
-        "| Ctx: 0x%lx | Beh: 0x%02x !!!\r\n",
+        "| Context: 0x%lx | Behavior: 0x%02x !!!\r\n",
         (unsigned long)info.context,
         (unsigned int)info.behavior.value);
 

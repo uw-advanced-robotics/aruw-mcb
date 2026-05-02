@@ -16,24 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef ENGINEER_TRANSFORM_SUBSYSTEM_HPP_
+#define ENGINEER_TRANSFORM_SUBSYSTEM_HPP_
 
-#ifndef CHASSIS_CONSTANTS_HPP_
-#define CHASSIS_CONSTANTS_HPP_
+#include "tap/control/subsystem.hpp"
 
-#include "tap/motor/dji_motor.hpp"
+#include "engineer_transforms.hpp"
 
-#include "aruwsrc/util_macros.hpp"
+namespace aruwsrc::engineer::algorithms
+{
+class EngineerTransformSubsystem : public tap::control::Subsystem
+{
+public:
+    EngineerTransformSubsystem(tap::Drivers& drivers, EngineerTransforms& transformer)
+        : tap::control::Subsystem(&drivers),
+          transformer(transformer)
+    {
+    }
 
-#if defined(ALL_STANDARDS)
-#include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
-#elif defined(TARGET_HERO_NEPTUNE)
-#include "aruwsrc/robot/hero/hero_chassis_constants.hpp"
-#elif defined(TARGET_TESTBED)
-#include "aruwsrc/robot/testbed/testbed_chassis_constants.hpp"
-#elif defined(TARGET_SENTRY_ECLIPSE)
-#include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
-#else  // by default use engineer constants (for robots that don't use them)
-#include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"
-#endif
+    inline void initialize() override { transformer.initialize(); };
+    inline void refresh() override { transformer.updateTransforms(); };
 
-#endif  // CHASSIS_CONSTANTS_HPP_
+private:
+    EngineerTransforms& transformer;
+};
+
+}  // namespace aruwsrc::engineer::algorithms
+
+#endif  // ENGINEER_TRANSFORM_SUBSYSTEM_HPP_

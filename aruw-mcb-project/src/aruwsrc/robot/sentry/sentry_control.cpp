@@ -459,12 +459,9 @@ TurretMajorWorldFrameController turretMajorWorldYawController(  // @todo rename
     turretMajor.getMutableMotor(),
     drivers()->mpu6500,
     turretLeft,
-    turretRight,
     turretMajorYawPosPid,
     turretMajorYawVelPid,
-    turretMajor::MAX_VEL_ERROR_INPUT,
-    turretMajor::TURRET_MINOR_TORQUE_RATIO,
-    turretMajor::FEEDFORWARD_GAIN);
+    turretMajor::MAX_VEL_ERROR_INPUT);
 
 ChassisFrameTurretController<Axis::YAW> turretMajorChassisYawController(
     turretMajor.getMutableMotor(),
@@ -569,7 +566,7 @@ aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand
     autoNavController,
     true);
 
-aruwsrc::control::capbank::SentryCapBankCommand capBankSentryCommand(drivers(), capBankSubsystem);
+aruwsrc::control::cap_bank::SentryCapBankCommand capBankSentryCommand(drivers(), capBankSubsystem);
 
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
@@ -649,18 +646,20 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
-autotune::GravityAutotuneCommand<9> gravityAutotuneCommandLeft(
+autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommandLeft(
     drivers(),
     {&turretLeft,
+     &turretLeft.pitchMotor,
      &turretLeftChassisControllers.pitchController,
      turretLeftMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &chassis);
 
-autotune::GravityAutotuneCommand<9> gravityAutotuneCommandRight(
+autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommandRight(
     drivers(),
     {&turretRight,
+     &turretRight.pitchMotor,
      &turretRightChassisControllers.pitchController,
      turretRightMotors.pitchMotor.isMotorInverted(),
      TURRET_WEIGHT_KG,

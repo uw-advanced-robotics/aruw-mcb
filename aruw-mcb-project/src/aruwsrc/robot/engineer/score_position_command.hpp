@@ -29,13 +29,14 @@ using namespace aruwsrc::engineer::wrist;
 
 namespace aruwsrc::engineer
 {
+/**
+ * TODO: This class is outdated and needs to be updated. We may want to move to specifing end
+ * effector pose and letting inverse kinematics handle joint positions.
+ */
 class ScorePositionCommand : public tap::control::Command
 {
 public:
-    ScorePositionCommand(
-        aruwsrc::control::joint::JointSubsystem &extension,
-        WristSubsystem &wrist,
-        aruwsrc::control::joint::JointSubsystem &roll);
+    ScorePositionCommand(aruwsrc::control::joint::JointSubsystem &extension, WristSubsystem &wrist);
 
     void initialize() override;
 
@@ -52,7 +53,6 @@ public:
 private:
     aruwsrc::control::joint::JointSubsystem &extension;
     WristSubsystem &wrist;
-    aruwsrc::control::joint::JointSubsystem &roll;
     ScorePositions scoringPosition;
 
 };  // class ScorePositionCommand
