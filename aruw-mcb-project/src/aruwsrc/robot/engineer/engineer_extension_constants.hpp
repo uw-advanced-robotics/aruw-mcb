@@ -33,9 +33,9 @@ static constexpr tap::can::CanBus CAN_BUS_EXTENSION = tap::can::CanBus::CAN_BUS1
 static constexpr tap::motor::MotorId EXTENSION_MOTOR_ID = tap::motor::MotorId::MOTOR1;
 
 static constexpr tap::algorithms::SmoothPidConfig EXTENSION_PID_CONFIG = {
-    .kp = 700.0f,
-    .ki = 20'000.0f,
-    .kd = 25.0f,
+    .kp = 700'000.0f,
+    .ki = 20'000'000.0f,
+    .kd = 25'000.0f,
     .maxICumulative = 3000.0f,
     .maxOutput = 6000.f,
 };
@@ -44,20 +44,21 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
     EXTENSION_CONFIG{
         .super =  // JointSubsystem::Config
         {
-            .lowerBound = 5.0f,
-            .upperBound = 320.0f,
+            .lowerBound = 0.005f,
+            .upperBound = 0.320f,
             .epsilon = 1.0f,
-            .encoderRatio = 5 * 25 / M_TWOPI * 2,  // 5mm per tooth, 25 teeth, 2X cascaded extension
+            .encoderRatio =
+                0.005 * 25 / M_TWOPI * 2,  // 5mm per tooth, 25 teeth, 2X cascaded extension
             .posPidConfig = EXTENSION_PID_CONFIG,
             .maxOutput = EXTENSION_PID_CONFIG.maxOutput,
             .staticFeedforward = 600.0f,
         },
         .home = 0.0f,
-        .homingSpeed = 10.0f,
+        .homingSpeed = 0.01f,
         .homingReversed = false,
     };
 
-static constexpr float EXTENSION_MOVE_SPEED = 0.6f;
+static constexpr float EXTENSION_MOVE_SPEED = 0.0006f;
 
 static constexpr tap::gpio::Digital::InputPin EXTENSION_LIMIT_SWITCH_PIN =
     tap::gpio::Digital::InputPin::T;
