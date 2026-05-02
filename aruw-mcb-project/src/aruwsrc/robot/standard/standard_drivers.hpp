@@ -137,7 +137,7 @@ private:
             drivers->mpu6500.getImuState() !=
                 tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
         {
-            tap::buzzer::playNote(&drivers->pwm, 1000);
+            // tap::buzzer::playNote(&drivers->pwm, 1000);
         }
         else
         {

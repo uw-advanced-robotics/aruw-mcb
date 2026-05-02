@@ -23,6 +23,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/control/turret/algorithms/second_order_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
@@ -95,8 +96,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 8142,
-    .minAngle = modm::toRadian(-30),
+    .startEncoderValue = 0,
+    .minAngle = modm::toRadian(-40),
     .maxAngle = modm::toRadian(7),
     .limitMotorAngles = true,
 };
@@ -131,23 +132,31 @@ static constexpr float TORQUE_TO_DESIRED_OUT =
     1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
 static constexpr float TURRET_WEIGHT_KG = 1.646f;       // 1.646kg from CAD
 
-// TODO tune
-// Actual CAD value is 55.76, decreased for balls in hopper
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{
-        .cgX = 33.83f,
-        .cgZ = 26.68f,
-        .gravityCompensatorMax = -5000.0f,
+        .cgX = 43.64f,
+        .cgZ = 17.61f,
+        .gravityCompensatorMax = 9573.3f,
     };
 
 static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
-    .turretPitchMountX = -3.26f,
-    .turretPitchMountZ = -39.52f,
+    .turretPitchMountX = -3.4f,
+    .turretPitchMountZ = -37.7f,
     .turretYawMountX = 76.29f,
     .turretYawMountZ = -71.91f,
-    .springConstant = -2.6f,  // TODO find this
-    .springFreeLength = 52.9f,
+    .springConstant = -20.0f, // TODO find this
+    // .springFreeLength = 52.9f,
+    .springFreeLength = 70.0f, // From Ozone, probably wrong
 };
+
+static constexpr algorithms::TurretSecondOrderCompensation::TurretSecondOrderCompensationParams
+    TURRET_SECOND_ORDER_COMPENSATION_CONFIG{
+        .bias = -5'396'259.89f,
+        .firstCoefficient = 2'644'523.51f,
+        .secondCoefficient = -432'895.201f,
+        .thirdCoefficient = 23'651.4706f,
+    };
+
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
 #endif
@@ -245,11 +254,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 #elif defined(TARGET_STANDARD_PHOBOS)
 // tuned
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 10.0f,
+    .kp = 20.0f,
     .ki = 0.0f,
-    .kd = 0.3f,
+    .kd = 0.001f,
     .maxICumulative = 0.0f,
-    .maxOutput = 2000.0f,
+    .maxOutput = 12.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -259,11 +268,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1050.0f,
+    .kp = 20.0f,
     .ki = 0.0f,
-    .kd = 0.3f,
+    .kd = 0.001f,
     .maxICumulative = 0.0f,
-    .maxOutput = 2000.0f,
+    .maxOutput = 12.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -274,7 +283,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 
 // tuned
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 6000.0f,
+    .kp = 9000.0f,
     .ki = 0.0f,
     .kd = 15.0f,
     .maxICumulative = 16384.0f,
@@ -287,27 +296,29 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-// TODO tune
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 1500.0f,
+    .kp = 15.0f,
     .ki = 0.1f,
-    .kd = 0.3f,
-    .maxICumulative = 200.0f,
-    .maxOutput = 2000.0f,
+    .kd = 0.2f,
+    .maxICumulative = 0.5f,
+    .maxOutput = 10.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
+    .smoothDeadzone = false,
+    .antiSaturation = true,
 };
 
+/// @TODO: Tune
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1500.0f,
+    .kp = 15.0f,
     .ki = 0.1f,
-    .kd = 0.3f,
-    .maxICumulative = 200.0f,
-    .maxOutput = 2000.0f,
+    .kd = 0.2f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 10.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -316,9 +327,8 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
     .errorDerivativeFloor = 0.0f,
 };
 
-// TODO tune
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 60.0f,
+    .kp = 4000.0f,
     .ki = 0.0f,
     .kd = 1.0f,
     .maxICumulative = 0.0f,
@@ -338,9 +348,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 namespace world_rel_chassis_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 98'472.8047f,
-    .ki = 100'000.0f,
-    .kd = 10'423.45311f,
+    .kp = 45'000.0f,
+    .ki = 0.0f,
+    .kd = 2'600.0f,
     .maxICumulative = 3'000.0f,
     .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620),
     .tQDerivativeKalman = 10.0f,
@@ -386,10 +396,10 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 #elif defined(TARGET_STANDARD_PHOBOS)
 // tuned
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 340'000.0f,
-    .ki = 0.0f,
-    .kd = 15'000.0f,
-    .maxICumulative = 5000.0f,
+    .kp = 40'000.0f,
+    .ki = 100.0f,
+    .kd = 4'000.0f,
+    .maxICumulative = 4000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 70.0f,
@@ -397,14 +407,15 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
+    .antiSaturation = true,
 };
 
 // TODO tune again after gravity + spring tuning
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 65'000.0f,
-    .ki = 0.0f,
-    .kd = 1'200.0f,
-    .maxICumulative = 7000.0f,
+    .kp = 20'000.0f,
+    .ki = 100.0f,
+    .kd = 1'500.0f,
+    .maxICumulative = 5000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 10.0f,
@@ -412,6 +423,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .tRProportionalKalman = 2.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
+    .antiSaturation = true,
 };
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
