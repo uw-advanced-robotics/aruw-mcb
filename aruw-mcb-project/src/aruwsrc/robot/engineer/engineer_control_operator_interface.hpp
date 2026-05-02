@@ -53,11 +53,6 @@ public:
      */
     mockable float getCubeStorageVelocity();
 
-    /**
-     * @return The gantry lift velocity
-     */
-    mockable float getGantryLiftVelocity();
-
     bool getGantryKeyUp();
 
     bool getGantryKeyDown();

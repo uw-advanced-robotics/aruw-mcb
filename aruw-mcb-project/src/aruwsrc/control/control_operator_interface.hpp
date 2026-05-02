@@ -128,14 +128,14 @@ public:
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    virtual mockable float getTurretYawInput(uint8_t turretID);
+    virtual float getTurretYawInput(uint8_t turretID);
 
     /**
      * @returns the value used for turret pitch rotation, between about -1 and 1
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    virtual mockable float getTurretPitchInput(uint8_t turretID);
+    virtual float getTurretPitchInput(uint8_t turretID);
 
     /**
      * @returns the value used to scale turret yaw movement from horizontal movement.
@@ -151,7 +151,7 @@ public:
      * @returns the value used for sentiel drive speed, between
      *      [-USER_STICK_SENTRY_DRIVE_SCALAR, USER_STICK_SENTRY_DRIVE_SCALAR].
      */
-    virtual mockable float getSentrySpeedInput();
+    virtual float getSentrySpeedInput();
 
 protected:
     tap::Drivers* drivers;
