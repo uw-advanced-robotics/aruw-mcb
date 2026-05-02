@@ -60,13 +60,12 @@ void AbstractIKCommand::execute()
     Transform chassisToEndEffectorDesired = chassisToBase.composeStatic(getBaseToFollowerDesired())
                                                 .composeStatic(followerToEndEffector);
 
-    Transform endEffectorToWrist = END_EFFECTOR_TO_WRIST;
     Transform turretPitchToExtensionZero =
         EngineerTransforms::getHypotheticalTurretPitchToExtension(0);
 
     // kept as a Transform because we want to compose it easily
     Transform chassisToWristDesiredPos =
-        chassisToEndEffectorDesired.composeStatic(endEffectorToWrist);
+        chassisToEndEffectorDesired.composeStatic(END_EFFECTOR_TO_WRIST);
 
     Position turretYawToWristDesiredPos = EngineerTransforms::getHypotheticalChassisToTurretYaw(0)
                                               .getInverse()
@@ -106,7 +105,7 @@ void AbstractIKCommand::execute()
                 EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionDesired))
             .getInverse()
             .composeStatic(chassisToEndEffectorDesired)
-            .composeStatic(endEffectorToWrist);
+            .composeStatic(END_EFFECTOR_TO_WRIST);
 
     // Set the desired setpoints
     yawController.runController(2, Angle(turretYawDesired));
