@@ -32,8 +32,7 @@
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
@@ -51,6 +50,7 @@
 #include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
 #include "aruwsrc/control/digital/dual_digital_out_subsystem.hpp"
 #include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/joint/homing/homing_command.hpp"
 #include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
@@ -71,8 +71,8 @@
 #include "aruwsrc/robot/engineer/cube_storage/select_cube_position_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
@@ -84,6 +84,8 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 
+using namespace aruwsrc::communication::mcb_lite;
+using namespace aruwsrc::communication::mcb_lite::motor;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::control::buzzer;
@@ -141,7 +143,7 @@ aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor pitchTurretMotor(
 tap::motor::DjiMotor yawTurretMotor(
     drivers(),
     YAW_MOTOR_ID,
-    tap::can::CanBus::CAN_BUS1,
+    CAN_BUS_MOTORS,
     false,
     "Yaw Turret",
     false,
@@ -157,7 +159,7 @@ EngineerTurretSubsystem engTurret(
     YAW_MOTOR_CONFIG,
     &drivers()->mcbLite.imu);
 
-// aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
+aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
@@ -598,7 +600,6 @@ auto rightUp = std::make_unique<tap::control::HoldCommandMapping>(
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    engTurret.initialize();
     chassisSubsystem.initialize();
     extensionSubsystem.initialize();
     wristSubsystem.initialize();
@@ -608,8 +609,8 @@ void initializeSubsystems()
     transformSubsystem.initialize();
     odometrySubsystem.initialize();
     // clientDicsplay.initialize();
-    parallelOmniTwo.initialize();
     parallelOmniOne.initialize();
+    parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
 }
 
@@ -667,15 +668,10 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &aruwsrc::control::remoteSafeDisconnectFunction);
-
     aruwsrc::control::initializeSubsystems();
-
     aruwsrc::control::registerEngineerSubsystems(drivers);
-
     aruwsrc::control::setDefaultEngineerCommands(drivers);
-
     aruwsrc::control::startEngineerCommands(drivers);
-
     aruwsrc::control::registerEngineerIoMappings(drivers);
 }
 }  // namespace aruwsrc::engineer
