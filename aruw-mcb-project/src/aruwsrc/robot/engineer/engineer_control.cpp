@@ -149,6 +149,8 @@ tap::motor::DjiMotor yawTurretMotor(
     1,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
+    
+
 EngineerTurretSubsystem engTurret(
     drivers(),
     &pitchTurretMotor,
