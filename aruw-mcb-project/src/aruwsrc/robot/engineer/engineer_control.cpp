@@ -30,7 +30,6 @@
 #include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 
-#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"  // placeholder
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"

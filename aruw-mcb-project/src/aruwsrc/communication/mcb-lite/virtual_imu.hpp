@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VIRTUAL_IMU_INTERFACE_HPP_
-#define VIRTUAL_IMU_INTERFACE_HPP_
+#ifndef VIRTUAL_IMU_HPP_
+#define VIRTUAL_IMU_HPP_
 
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
@@ -29,12 +29,12 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::mcb_lite
 {
-class VirtualIMUInterface : public tap::communication::sensors::imu::AbstractIMU
+class VirtualIMU : public tap::communication::sensors::imu::AbstractIMU
 {
     friend class MCBLite;
 
 public:
-    VirtualIMUInterface() : calibrateIMUMessage()
+    VirtualIMU() : calibrateIMUMessage()
     {
         calibrateIMUMessage.messageType = MessageTypes::CALIBRATE_IMU_MESSAGE;
         calibrateIMUMessage.setCRC16();
