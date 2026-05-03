@@ -96,7 +96,6 @@ void MCBLite::sendData()
         if (imu.sendIMUCalibrationMessage)
         {
             // 10 bytes of IMU
-
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(imu.calibrateIMUMessage)),
@@ -160,11 +159,8 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 processCanMessage(completeMessage, tap::can::CanBus::CAN_BUS2);
                 break;
             case MessageTypes::IMU_MESSAGE:
-
                 memcpy(&currentIMUData, completeMessage.data, sizeof(currentIMUData));
-
                 imu.processIMUMessage(completeMessage);
-
                 break;
             case MessageTypes::ANALOG_PIN_READ_MESSAGE:
                 memcpy(&analogData, completeMessage.data, sizeof(analogData));

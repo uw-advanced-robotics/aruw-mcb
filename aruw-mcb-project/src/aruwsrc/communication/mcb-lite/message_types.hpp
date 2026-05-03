@@ -42,7 +42,7 @@ enum MessageTypes : uint8_t
     LED_CONTROL_MESSAGE = 11,
     CAN1_ENCODER_MESSAGE = 12,
     CAN2_ENCODER_MESSAGE = 13,
-    VOLTAGE_CURRENT_MESSAGE = 14
+    VOLTAGE_CURRENT_MESSAGE = 14,
 };
 
 // CAN Bus message Lite -> MCB
