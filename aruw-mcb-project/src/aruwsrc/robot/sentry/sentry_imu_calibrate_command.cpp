@@ -125,7 +125,7 @@ void SentryImuCalibrateCommand::execute()
 
             for (auto &config : turretsAndControllers)
             {
-                turretMCBsReady &= config.imu->isOnline();
+                turretMCBsReady &= config.turretImu->isOnline();
                 turretsOnline &= config.turret->isOnline();
             }
 
@@ -163,7 +163,7 @@ void SentryImuCalibrateCommand::execute()
 
                 for (auto &config : turretsAndControllers)
                 {
-                    config.imu->requestCalibration();
+                    config.turretImu->requestCalibration();
                 }
 
                 drivers->mpu6500.requestCalibration();

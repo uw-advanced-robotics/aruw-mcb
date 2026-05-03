@@ -52,7 +52,7 @@ ImuCalibrateCommand::ImuCalibrateCommand(
 {
     for (auto &config : turretsAndControllers)
     {
-        assert(config.imu != nullptr);
+        assert(config.turretImu != nullptr);
         assert(config.turret != nullptr);
         assert(config.yawController != nullptr);
         assert(config.pitchController != nullptr);
@@ -113,7 +113,7 @@ void ImuCalibrateCommand::execute()
 
             for (auto &config : turretsAndControllers)
             {
-                turretMCBsReady &= config.imu->isOnline();
+                turretMCBsReady &= config.turretImu->isOnline();
                 turretsOnline &= config.turret->isOnline();
             }
 
@@ -149,7 +149,7 @@ void ImuCalibrateCommand::execute()
 
                 for (auto &config : turretsAndControllers)
                 {
-                    config.imu->requestCalibration();
+                    config.turretImu->requestCalibration();
                 }
 
                 drivers->mpu6500.requestCalibration();
