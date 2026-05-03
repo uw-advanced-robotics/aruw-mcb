@@ -111,7 +111,7 @@ public:
         mcbLite.initialize();
         // mcbLite.imu.sendMountingTransform(...);
         mcbLite.imu.initialize(mainLoopFrequency,0.2f, 0.0f);
-        mcbLite.pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 50); 
+        mcbLite.pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 500); 
         mcbLite.pwm.start(tap::gpio::Pwm::Timer::TIMER8);
     }
 
