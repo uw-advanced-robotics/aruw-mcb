@@ -30,7 +30,6 @@
 #include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 
-#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"  // placeholder
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
@@ -120,20 +119,26 @@ namespace aruwsrc
 {
 namespace control
 {
-inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
-{
-    return drivers()->turretMCBCanCommBus1;
-}
+aruwsrc::communication::mcb_lite::VirtualCanEncoder turretPitchEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,
+    &drivers()->mcbLite,
+    tap::can::CanBus::CAN_BUS2,
+    false,
+    1.0f,
+    PITCH_MOTOR_CONFIG.startEncoderValue);
 
-tap::motor::DjiMotor pitchTurretMotor(
+aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor pitchTurretMotor(
     drivers(),
     PITCH_MOTOR_ID,
-    CAN_BUS_MOTORS,
-    true,
+    tap::can::CanBus::CAN_BUS1,
+    &drivers()->mcbLite,
+    false,
     "Pitch Turret",
-    true,
+    false,
     1,
-    PITCH_MOTOR_CONFIG.startEncoderValue);
+    0,
+    &turretPitchEncoder);
 
 tap::motor::DjiMotor yawTurretMotor(
     drivers(),
@@ -151,7 +156,7 @@ EngineerTurretSubsystem engTurret(
     &yawTurretMotor,
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
+    &drivers()->mcbLite.imu);
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
@@ -362,14 +367,12 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
     perpendicularCenterToWheelDistance,
     odomFrameToRobotFrame);
 
-aruwsrc::communication::mcb_lite::VirtualIMUInterface turretPitchImu;  // placeholder
-
 // transforms
 EngineerTransforms transformer(
     odometrySubsystem,
     drivers()->chassisIsm,
     engTurret,
-    turretPitchImu,
+    drivers()->mcbLite.imu,
     extensionSubsystem,
     wristSubsystem,
     cubeStorage);
@@ -403,27 +406,23 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-imu::ImuCalibrateCommand imuCalibrateCommand(
-    drivers(),
-    {{
-        &getTurretMCBCanComm(),
-        &engTurret,
-        &chassisFrameYawTurretController,
-        &chassisFramePitchTurretController,
-        true,
-    }},
-    &chassisSubsystem,
-    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-    &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand,
-    nullptr,
-    // {&drivers()->ism330});
-    {&drivers()->mpu6500});
-
-aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
-    drivers(),
-    imuCalibrateCommand);
+// imu::ImuCalibrateCommand imuCalibrateCommand(
+//     drivers(),
+//     {{
+//         &getTurretMCBCanComm(),
+//         &engTurret,
+//         &chassisFrameYawTurretController,
+//         &chassisFramePitchTurretController,
+//         true,
+//     }},
+//     &chassisSubsystem,
+//     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+//     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+//     &imuCalibrateSuccessBuzzCommand,
+//     &imuCalibrateFailBuzzCommand,
+//     nullptr,
+//     // {&drivers()->ism330});
+//     {&drivers()->mpu6500});
 
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());

@@ -20,7 +20,6 @@
 #include "engineer_transforms.hpp"
 
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
-#include "tap/communication/sensors/imu/imu_interface.hpp"
 
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
@@ -35,7 +34,7 @@ EngineerTransforms::EngineerTransforms(
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
     const tap::communication::sensors::imu::AbstractIMU& chassisImu,
     const aruwsrc::control::turret::TurretSubsystem& turret,
-    const tap::communication::sensors::imu::ImuInterface& turretPitchImu,
+    const tap::communication::sensors::imu::AbstractIMU& turretPitchImu,
     const aruwsrc::control::joint::JointSubsystem& extension,
     const aruwsrc::engineer::wrist::WristSubsystem& wrist,
     const aruwsrc::control::joint::JointSubsystem& cubeStorage)
