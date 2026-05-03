@@ -77,7 +77,7 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_ref_serial_offline)
         &frictionWheels,
         5,
         false,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = false;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(5, false));
@@ -92,7 +92,7 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_s
         &frictionWheels,
         0,
         true,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = true;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0, false));
@@ -107,7 +107,7 @@ TEST_EXECUTE(defaultLaunchSpeed_used_when_alwaysUseDefaultLaunchSpeed_true_ref_s
         &frictionWheels,
         0,
         true,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     refSerialOnline = false;
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0, false));
@@ -122,7 +122,7 @@ TEST_F(FrictionWheelSpinRefLimitedCommandTest, isFinished__always_false)
         &frictionWheels,
         0,
         true,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     EXPECT_FALSE(frictionWheelSpinRefLimitedCommand.isFinished());
 }
@@ -134,7 +134,7 @@ TEST_F(FrictionWheelSpinRefLimitedCommandTest, end__sets_launch_speed_to_0)
         &frictionWheels,
         0,
         true,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
     EXPECT_CALL(frictionWheels, setDesiredLaunchSpeed(0, false)).Times(2);
 

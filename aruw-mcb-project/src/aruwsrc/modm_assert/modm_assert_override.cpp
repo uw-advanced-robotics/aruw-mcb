@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include <cstdio>
 
 #include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
