@@ -122,7 +122,7 @@ namespace control
 {
 aruwsrc::communication::mcb_lite::VirtualCanEncoder turretPitchEncoder(
     drivers(),
-    tap::encoder::CanEncoderId::ID5,
+    tap::encoder::CanEncoderId::ID2,
     &drivers()->mcbLite,
     tap::can::CanBus::CAN_BUS2,
     false,
