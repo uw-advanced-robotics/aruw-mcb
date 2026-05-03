@@ -368,14 +368,12 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
     perpendicularCenterToWheelDistance,
     odomFrameToRobotFrame);
 
-aruwsrc::communication::mcb_lite::VirtualIMUInterface turretPitchImu;  // placeholder
-
 // transforms
 EngineerTransforms transformer(
     odometrySubsystem,
     drivers()->chassisIsm,
     engTurret,
-    turretPitchImu,
+    drivers()->mcbLite.imu,
     extensionSubsystem,
     wristSubsystem,
     cubeStorage);
