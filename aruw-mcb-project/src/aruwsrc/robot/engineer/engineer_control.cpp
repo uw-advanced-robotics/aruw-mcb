@@ -425,10 +425,6 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
 //     // {&drivers()->ism330});
 //     {&drivers()->mpu6500});
 
-aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
-    drivers(),
-    imuCalibrateCommand);
-
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
