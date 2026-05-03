@@ -21,12 +21,10 @@
 #define VIRTUAL_IMU_INTERFACE_HPP_
 
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
-#include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
 
 #include "message_types.hpp"
 
-using namespace tap::communication::sensors::imu::mpu6500;
 using namespace tap::communication::serial;
 
 namespace aruwsrc::communication::mcb_lite
@@ -46,25 +44,18 @@ public:
     float getRoll() const override { return roll; }
     float getYaw() const override { return yaw; }
 
-    float getGx() const override { return imuData.gyroRadPerSec.x(); }
-    float getGy() const override { return imuData.gyroRadPerSec.y(); }
-    float getGz() const override { return imuData.gyroRadPerSec.z(); }
-    float getAx() const override { return imuData.accG.x(); }
-    float getAy() const override { return imuData.accG.y(); }
-    float getAz() const override { return imuData.accG.z(); }
-    float getTemp() const { return imuData.temperature; }
     void periodicIMUUpdate() override{};
 
-    AbstractIMU::ImuState getImuState() const { return imuState; }
-
-    virtual inline const char* getName() const { return "Virtual MPU6500"; }
+    virtual inline const char* getName() const { return "Virtual IMU"; }
 
     void requestCalibration() { sendIMUCalibrationMessage = true; }
 
     float getAccelerationSensitivity() const override
     {
-        return 2 * 1.5f * tap::algorithms::ACCELERATION_GRAVITY / 32768.0f;
-    }  // copied this from turretmcb bc both are bmi i think?
+        // We don't know what IMU the Mcb Lite is using. Also, `periodicIMUUpdate` logic is handled
+        // on the MCB Lite, so this value has no actual use on this MCB
+        return 0.0f;
+    }
 
 private:
     void processIMUMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
@@ -72,22 +63,15 @@ private:
         IMUMessage* imuMessage = (IMUMessage*)completeMessage.data;
         pitch = imuMessage->pitch;
         roll = imuMessage->roll;
-#ifdef TARGET_SENTRY_ECLIPSE
-        // IMUs initalize yaw at 180 degrees for some reason, must be resolved as tech debt
-        yaw = fmodf(imuMessage->yaw + 180, 360);
-#else
         yaw = imuMessage->yaw;
-#endif
-        imuData.gyroRadPerSec = {imuMessage->Gx, imuMessage->Gy, imuMessage->Gz};
-        imuData.accG = {imuMessage->Ax, imuMessage->Ay, imuMessage->Az};
-        imuData.temperature = imuMessage->temperature;
-        imuState = imuMessage->imuState;
+
+        this->imuData.gyroRadPerSec = {imuMessage->Gx, imuMessage->Gy, imuMessage->Gz};
+        this->imuData.accG = {imuMessage->Ax, imuMessage->Ay, imuMessage->Az};
+        this->imuData.temperature = imuMessage->temperature;
+        this->imuState = imuMessage->imuState;
     }
 
     float pitch, roll, yaw;
-
-    AbstractIMU::ImuState imuState;
-    float temperature;
 
     DJISerial::DJISerial::SerialMessage<1> calibrateIMUMessage;
     bool sendIMUCalibrationMessage = false;
