@@ -168,7 +168,6 @@ void Holonomic4MotorChassisSubsystem::calculateOutput(
 
     desiredRotation = r;
 }
-float DEBUG_WHEEL_RPM{0.0f};
 
 void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(int i)
 {
