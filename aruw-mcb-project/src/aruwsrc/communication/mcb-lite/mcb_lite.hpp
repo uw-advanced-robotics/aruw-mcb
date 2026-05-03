@@ -72,7 +72,7 @@ public:
 
     void initialize();
 
-    constexpr static int UART_BAUDRATE = 500'000;
+    constexpr static int UART_BAUDRATE = 1'000'000;
 
     motor::VirtualCanRxHandler canRxHandler;
     motor::VirtualDJIMotorTxHandler motorTxHandler;

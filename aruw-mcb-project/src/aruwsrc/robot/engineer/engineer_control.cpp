@@ -67,6 +67,8 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 
+#include "aruwsrc/robot/engineer/servo_command.hpp"
+#include "aruwsrc/robot/engineer/servo_subsystem.hpp"
 // #include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
@@ -76,6 +78,7 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transform_subsystem.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_analog_sensor.hpp"
 
 // check which of these r important
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -158,9 +161,11 @@ EngineerTurretSubsystem engTurret(
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
-// aruwsrc::communication::mcb_lite::motor::VirtualServo servoOne(drivers(), ); // c2
-// aruwsrc::communication::mcb_lite::motor::VirtualServo servoTwo(drivers(), ); // c3
 
+ServoSubsystem servoTestSubsystem(drivers(), drivers()->mcbLite);
+ServoCommand servoTestCommand(servoTestSubsystem);
+
+aruwsrc::communication::mcb_lite::VirtualAnalogSensor analogSensor(drivers(), tap::can::CanBus::CAN_BUS2, 0x1D6);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
@@ -527,10 +532,10 @@ aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
-// auto leftUp = std::make_unique<tap::control::PressCommandMapping>(
-//     drivers(),
-//     std::vector<Command*>{&cubeStorageHome, &extensionHome},
-//     &leftUpRms);
+auto leftUp = std::make_unique<tap::control::HoldCommandMapping>(
+    drivers(),
+    std::vector<Command*>{&servoTestCommand},
+    &leftUpRms);
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -542,6 +547,7 @@ void initializeSubsystems()
     leftSuckSubsystem.initialize();
     rightSuckSubsystem.initialize();
     // clientDicsplay.initialize();
+    servoTestSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -554,12 +560,13 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    drivers->commandScheduler.registerSubsystem(&servoTestSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
-    chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
+   // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
     // extensionSubsystem.setDefaultCommand(&extensionManualControl);
     // wristSubsystem.setDefaultCommand(&wristControllerCommand);
     // cubeStorage.setDefaultCommand(&cubeManualControl);
@@ -577,7 +584,7 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
     // drivers->commandMapper.addMap(&retrieveCube);
     // drivers->commandMapper.addMap(&cyclePositions);
     // drivers->commandMapper.addMap(&cPressed);
-    // drivers->commandMapper.addMap(std::move(leftUp));
+    drivers->commandMapper.addMap(std::move(leftUp));
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
 }

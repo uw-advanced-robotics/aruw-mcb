@@ -93,7 +93,7 @@ public:
         float maximumPwm,
         float minimumPwm,
         float rampSpeed,
-        aruwsrc::communication::mcb_lite::VirtualPWM* virtualPwm)
+        aruwsrc::communication::mcb_lite::VirtualPWM& virtualPwm)
         : Servo(drivers, pwmPin, maximumPwm, minimumPwm, rampSpeed),
           virtualPwm(virtualPwm),
           pwmOutputRamp(0.0f),
@@ -117,15 +117,17 @@ public:
         pwmOutputRamp.update(rampSpeed * (currTime - prevTime));
         prevTime = currTime;
         currentPwm = pwmOutputRamp.getValue();
-        virtualPwm->write(currentPwm, pin);
+        virtualPwm.write(currentPwm, pin);
     }
 
     float getPWM() const { return currentPwm; }
 
     bool isRampTargetMet() const { return pwmOutputRamp.isTargetReached(); }
+    
+    tap::gpio::Pwm::Pin getPin() const { return pin; }
 
 private:
-    aruwsrc::communication::mcb_lite::VirtualPWM* virtualPwm;
+    aruwsrc::communication::mcb_lite::VirtualPWM& virtualPwm;
 
     tap::algorithms::Ramp pwmOutputRamp;
     uint32_t prevTime = 0;

@@ -34,6 +34,7 @@ class VirtualPWM : public tap::gpio::Pwm
     friend class MCBLite;
 
 public:
+    
     VirtualPWM()
     {
         pinDutyMessage.messageType = MessageTypes::PWM_PIN_DUTY_MESSAGE;

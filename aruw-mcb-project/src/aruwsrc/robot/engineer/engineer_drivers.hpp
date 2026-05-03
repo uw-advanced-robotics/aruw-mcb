@@ -66,7 +66,7 @@ public:
               &rttTelemetry),
           engineerCVCommunication(this),
           chassisIsm(),
-          mcbLite(this, tap::communication::serial::Uart::Uart6),
+          mcbLite(this, tap::communication::serial::Uart::Uart7),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2)
     {
@@ -110,6 +110,8 @@ public:
         chassisIsm.setCalibrationSamples(4000);
         mcbLite.initialize();
         mcbLite.imu.initialize(mainLoopFrequency,0.2f, 0.0f);
+        mcbLite.pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 50); 
+        mcbLite.pwm.start(tap::gpio::Pwm::Timer::TIMER8);
     }
 
     void updateIo()
