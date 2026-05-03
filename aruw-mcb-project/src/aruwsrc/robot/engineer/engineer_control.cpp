@@ -201,7 +201,7 @@ tap::encoder::CanEncoder parallelOmniOne(
     drivers(),
     tap::encoder::CanEncoderId::ID0,
     tap::can::CanBus::CAN_BUS2,
-    true);
+    false);
 
 tap::encoder::CanEncoder parallelOmniTwo(
     drivers(),
@@ -368,7 +368,7 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
     *drivers(),
     deadwheels,
     engTurret,
-    drivers()->mpu6500,
+    drivers()->chassisIsm,
     INITIAL_CHASSIS_POSITION_X,
     INITIAL_CHASSIS_POSITION_Y,
     INITIAL_CHASSIS_ORIENTATION,
@@ -608,6 +608,9 @@ void initializeSubsystems()
     transformSubsystem.initialize();
     odometrySubsystem.initialize();
     // clientDicsplay.initialize();
+    parallelOmniTwo.initialize();
+    parallelOmniOne.initialize();
+    perpendicularOmni.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
