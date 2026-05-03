@@ -30,10 +30,18 @@
 #include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 
+#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
+#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
+#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
+#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -41,12 +49,22 @@
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
 #include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
 #include "aruwsrc/control/digital/dual_digital_out_subsystem.hpp"
+#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
+#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/joint/homing/homing_command.hpp"
 #include "aruwsrc/control/joint/homing/trigger/limit_switch_trigger.hpp"
 #include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
+#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
+#include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/engineer/algorithms/engineer_transform_subsystem.hpp"
+#include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
@@ -54,6 +72,7 @@
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
@@ -65,28 +84,8 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
 
-// #include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
-#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
-#include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
-#include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
-#include "aruwsrc/control/imu/imu_calibrate_command.hpp"
-#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/robot/engineer/algorithms/engineer_transform_subsystem.hpp"
-#include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
-
-// check which of these r important
-#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
-#include "aruwsrc/control/buzzer/note_sequence_command.hpp"
-#include "aruwsrc/control/buzzer/note_sequences.hpp"
-#include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
-#include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
-#include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
-#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
-#include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
-#include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
-
+using namespace aruwsrc::communication::mcb_lite;
+using namespace aruwsrc::communication::mcb_lite::motor;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::chassis;
@@ -147,9 +146,10 @@ tap::motor::DjiMotor yawTurretMotor(
     false,
     "Yaw Turret",
     true,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508*(16.0f / 60.0f),
     YAW_MOTOR_CONFIG.startEncoderValue);
 
+/// @TODO: make the turretMCB a MCB lite
 EngineerTurretSubsystem engTurret(
     drivers(),
     &pitchTurretMotor,
@@ -226,7 +226,7 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
 tap::motor::DjiMotor cubeStorageMotor(
     drivers(),
     CUBE_STORAGE_MOTOR_ID,
-    CUBE_STORAGE_MOTOR_CAN_BUS,
+    aruwsrc::control::chassis::CAN_BUS_MOTORS,
     true,
     "Cube Storage Motor",
     false,
@@ -256,6 +256,7 @@ tap::motor::DjiMotor wristMotorTwo(
     "Wrist Right Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
 tap::motor::DjiMotor wristMotorThree(
     drivers(),
     aruwsrc::engineer::WRIST_THETA3_MOTOR_ID,
@@ -276,7 +277,7 @@ tap::encoder::CanEncoder wristEncoderTheta1(
 tap::encoder::CanEncoder wristEncoderTheta2(
     drivers(),
     aruwsrc::engineer::WRIST_THETA2_ENCODER_ID,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    aruwsrc::control::chassis::CAN_BUS_ARM_ENCODERS,
     false,
     1,
     WRIST_HOME_THETA2);
@@ -358,7 +359,7 @@ aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsy
     *drivers(),
     deadwheels,
     engTurret,
-    drivers()->mpu6500,
+    drivers()->chassisIsm,
     INITIAL_CHASSIS_POSITION_X,
     INITIAL_CHASSIS_POSITION_Y,
     INITIAL_CHASSIS_ORIENTATION,
@@ -501,21 +502,21 @@ CubePositionDigitalOutCommand cubeStorageSuckOffCommand(
     rightSuckSubsystem,
     false);
 
-SequentialCommand<3> storeCubeCommand(
-    &selectCubeAddPositionCommand,
-    &cubeStorageSuckOnCommand,
-    // hand down
-    // hand release cube
-    // hand up
-    &centerCubePosition);
+// SequentialCommand<3> storeCubeCommand(
+//     &selectCubeAddPositionCommand,
+//     &cubeStorageSuckOnCommand,
+//     // hand down
+//     // hand release cube
+//     // hand up
+//     &centerCubePosition);
 
-SequentialCommand<3> removeCubeCommand(
-    &selectCubeRemovePositionCommand,
-    // hand suction on
-    // hand down
-    &cubeStorageSuckOffCommand,
-    // hand up
-    &centerCubePosition);
+// SequentialCommand<3> removeCubeCommand(
+//     &selectCubeRemovePositionCommand,
+//     // hand suction on
+//     // hand down
+//     &cubeStorageSuckOffCommand,
+//     // hand up
+//     &centerCubePosition);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -535,7 +536,12 @@ void initializeSubsystems()
     cubeStorage.initialize();
     leftSuckSubsystem.initialize();
     rightSuckSubsystem.initialize();
+    transformSubsystem.initialize();
+    odometrySubsystem.initialize();
     // clientDicsplay.initialize();
+    parallelOmniOne.initialize();
+    parallelOmniTwo.initialize();
+    perpendicularOmni.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -547,6 +553,9 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&transformSubsystem);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&engTurret);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
