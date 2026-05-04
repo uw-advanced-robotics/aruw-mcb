@@ -38,9 +38,7 @@ public:
         : limitSwitch(limitSwitch)
     {
     }
-    // bool isTriggered() { return limitSwitch->getLimitSwitchDepressed(); }
-    bool isTriggered() { return true; }
-    /// @TODO: Remove
+    bool isTriggered() { return limitSwitch->getLimitSwitchDepressed(); }
 
 private:
     tap::communication::sensors::limit_switch::LimitSwitchInterface* limitSwitch;
