@@ -28,14 +28,12 @@
 #include "modm/container/queue.hpp"
 #include "motor/virtual_can_rx_handler.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
-#include "motor/virtual_servo_rx_handler.hpp"
 
 #include "message_types.hpp"
 #include "virtual_analog.hpp"
-#include "virtual_analog_sensor.hpp"
 #include "virtual_can_encoder.hpp"
 #include "virtual_digital.hpp"
-#include "virtual_imu_interface.hpp"
+#include "virtual_imu.hpp"
 #include "virtual_leds.hpp"
 #include "virtual_pwm.hpp"
 #include "virtual_voltage_current_sensor.hpp"
@@ -76,8 +74,7 @@ public:
 
     motor::VirtualCanRxHandler canRxHandler;
     motor::VirtualDJIMotorTxHandler motorTxHandler;
-    // motor::VirtualServoRxHandler servoRxHandler;
-    VirtualIMUInterface imu;
+    VirtualIMU imu;
     VirtualAnalog analog;
     VirtualDigital digital;
     VirtualLEDs leds;
@@ -94,10 +91,6 @@ private:
 
     void processVoltageCurrentMessage(const ReceivedSerialMessage& completeMessage);
 
-    void processAnalogSensorMessage(const ReceivedSerialMessage& completeMessage);
-
-    void processServoFeedbackMessage(const ReceivedSerialMessage& completeMessage);
-
     tap::communication::serial::Uart::UartPort port;
 
     IMUMessage currentIMUData;
@@ -110,7 +103,6 @@ private:
     VirtualCanEncoder* can2Encoders[8];
 
     VirtualVoltageCurrentSensor* voltageCurrentSensor;
-    VirtualAnalogSensor* analogSensor;
 
     bool initialized = false;
 };
