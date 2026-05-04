@@ -299,7 +299,7 @@ TEST_F(
 // Pitch controller tests
 
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
-TURRET_GRAVITY_CONFIG_TEST{.cgX = 0.1f, .cgZ = 0.1f, .gravityCompensatorMax = 1000.0f};
+    TURRET_GRAVITY_CONFIG_TEST{.cgX = 0.1f, .cgZ = 0.1f, .gravityCompensatorMax = 1000.0f};
 
 static int16_t computeCGOffset(float pitchAngleFromCenter)
 {
