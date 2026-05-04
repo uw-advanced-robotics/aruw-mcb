@@ -106,7 +106,7 @@ public:
         setSetpoint(getPosition() + (homingReversed ? homingSpeed : -homingSpeed));
     }
 
-    /// @TODO: remove for unused?
+    /// @TODO: remove for unused and also not safe in a world with gravity
     void stopDuringHoming() override { motor.setDesiredOutput(0); }
 
 protected:

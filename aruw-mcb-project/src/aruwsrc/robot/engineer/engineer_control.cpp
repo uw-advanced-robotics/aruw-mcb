@@ -249,7 +249,7 @@ aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor wristMotorOne(
     false,
     "Wrist Left Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006);
 
 aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor wristMotorTwo(
     drivers(),
@@ -259,7 +259,7 @@ aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor wristMotorTwo(
     false,
     "Wrist Right Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006);
 
 aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor wristMotorThree(
     drivers(),
@@ -269,7 +269,7 @@ aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor wristMotorThree(
     false,
     "Wrist Theta3 Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006);
 
 aruwsrc::communication::mcb_lite::VirtualCanEncoder wristEncoderTheta1(
     drivers(),
