@@ -45,7 +45,7 @@ static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Co
         .super =  // JointSubsystem::Config
         {
             .lowerBound = 0.005f,
-            .upperBound = 0.320f,
+            .upperBound = 0.640f,
             .epsilon = 1.0f,
             .encoderRatio =
                 0.005 * 25 / M_TWOPI * 2.0f,  // 5mm per tooth, 25 teeth, 2X cascaded extension

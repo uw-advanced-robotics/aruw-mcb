@@ -37,7 +37,7 @@ public:
     {
         JointSubsystem::Config super;
         float home = 0.0f;
-        float homingSpeed = 0.25f;
+        float homingSpeed = 0.00025f;
         bool homingReversed = false;
     };
 
@@ -103,6 +103,7 @@ public:
 
     void moveTowardLowerBound() override
     {
+        /// @TODO: add dt to make speed in real units
         setSetpoint(getPosition() + (homingReversed ? homingSpeed : -homingSpeed));
     }
 
