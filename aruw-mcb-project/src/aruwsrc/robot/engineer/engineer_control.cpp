@@ -44,6 +44,8 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/engineer_slider_indicators.hpp"
+#include "aruwsrc/control/client-display/indicators/engineer_text_indicators.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/digital/digital_out_command.hpp"
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
@@ -146,7 +148,7 @@ tap::motor::DjiMotor yawTurretMotor(
     false,
     "Yaw Turret",
     true,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508*(16.0f / 60.0f),
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (16.0f / 60.0f),
     YAW_MOTOR_CONFIG.startEncoderValue);
 
 /// @TODO: make the turretMCB a MCB lite
@@ -430,6 +432,27 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
+// EngineerSliderIndicators sliderIndicators(
+//     refSerialTransmitter,
+//     imuCalibrateCommand,
+//     wristPressureSensor,
+//     cubeStoragePressureSensor1,
+//     cubeStoragePressureSensor2);
+
+// EngineerTextIndicators textIndicators(
+//     refSerialTransmitter,
+//     imuCalibrateCommand,
+//     wristPressureSensor,
+//     cubeStoragePressureSensor1,
+//     cubeStoragePressureSensor2);
+
+std::vector<HudIndicator*> hudIndicators = {
+    // &sliderIndicators,
+    // &textIndicators
+};
+
+ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
+
 /* define commands ----------------------------------------------------------*/
 HomingCommand cubeStorageHome(cubeStorage);
 HomingCommand extensionHome(extensionSubsystem);
@@ -528,6 +551,15 @@ auto leftUp = std::make_unique<tap::control::PressCommandMapping>(
     std::vector<Command*>{&cubeStorageHome, &extensionHome},
     &leftUpRms);
 
+// The user can press b+ctrl when the remote right switch is in the down position to restart the
+// client display command. This is necessary since we don't know when the robot is connected to the
+// server and thus don't know when to start sending the initial HUD graphics.
+auto bCtrlRms = RemoteMapState({Remote::Key::CTRL, Remote::Key::B});
+auto bCtrlPressed = std::make_unique<PressCommandMapping>(
+    drivers(),
+    std::vector<Command*>{&clientDisplayCommand},
+    &bCtrlRms);
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -557,7 +589,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&engTurret);
-    // drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    drivers->commandScheduler.registerSubsystem(&clientDisplay);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -567,12 +599,14 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
     extensionSubsystem.setDefaultCommand(&extensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
-
-    // clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers* drivers)
+{
+    drivers->commandScheduler.addCommand(&clientDisplayCommand);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
@@ -584,6 +618,7 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
     drivers->commandMapper.addMap(std::move(leftUp));
     // drivers->commandMapper.addMap(&wristFoldIn);
     // drivers->commandMapper.addMap(&wristFoldOut);
+    drivers->commandMapper.addMap(std::move(bCtrlPressed));
 }
 }  // namespace control
 }  // namespace aruwsrc
