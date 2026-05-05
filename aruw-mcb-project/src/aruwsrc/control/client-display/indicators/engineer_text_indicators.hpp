@@ -54,15 +54,12 @@ public:
      */
     EngineerTextIndicators(
         tap::Drivers &drivers,
-        tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
         const tap::communication::sensors::limit_switch::LimitSwitchInterface &wristPressureSensor,
         const tap::communication::sensors::limit_switch::LimitSwitchInterface
             &cubeStoragePressureSensor1,
         const tap::communication::sensors::limit_switch::LimitSwitchInterface
             &cubeStoragePressureSensor2,
-        const tap::communication::sensors::limit_switch::LimitSwitchInterface
-            &cubeStoragePressureSensor3,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     modm::ResumableResult<void> update() override final;
@@ -120,7 +117,6 @@ private:
     bool prevStates[NUM_TEXT_HUD_INDICATORS] = {false};
 
     tap::Drivers &drivers;
-    tap::control::setpoint::SetpointSubsystem &agitatorSubsystem;
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
     const tap::communication::sensors::limit_switch::LimitSwitchInterface &wristPressureSensor;
     const tap::communication::sensors::limit_switch::LimitSwitchInterface

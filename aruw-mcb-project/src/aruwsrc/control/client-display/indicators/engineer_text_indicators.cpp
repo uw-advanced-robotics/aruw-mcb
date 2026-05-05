@@ -25,19 +25,15 @@ namespace aruwsrc::control::client_display::indicators
 {
 EngineerTextIndicators::EngineerTextIndicators(
     tap::Drivers &drivers,
-    tap::control::setpoint::SetpointSubsystem &agitatorSubsystem,
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
     const tap::communication::sensors::limit_switch::LimitSwitchInterface &wristPressureSensor,
     const tap::communication::sensors::limit_switch::LimitSwitchInterface
         &cubeStoragePressureSensor1,
     const tap::communication::sensors::limit_switch::LimitSwitchInterface
         &cubeStoragePressureSensor2,
-    const tap::communication::sensors::limit_switch::LimitSwitchInterface
-        &cubeStoragePressureSensor3,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
-      agitatorSubsystem(agitatorSubsystem),
       imuCalibrateCommand(imuCalibrateCommand),
       wristPressureSensor(wristPressureSensor),
       cubeStoragePressureSensor1(cubeStoragePressureSensor1),
