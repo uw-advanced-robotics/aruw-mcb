@@ -40,6 +40,7 @@ public:
     {
         calibrateIMUMessage.messageType = MessageTypes::CALIBRATE_IMU_MESSAGE;
         calibrateIMUMessage.setCRC16();
+        mountingTransformMessage.messageType = MessageTypes::IMU_MOUNTING_TRANSFORM_MESSAGE;
     }
 
     float getPitch() const override { return pitch; }
@@ -66,6 +67,25 @@ public:
         return 2 * 1.5f * tap::algorithms::ACCELERATION_GRAVITY / 32768.0f;
     }  // copied this from turretmcb bc both are bmi i think?
 
+    void sendMountingTransform(const tap::algorithms::transforms::Transform& transform)
+    {
+        IMUMountingTransformMessage transformMessage;
+        transformMessage.x = transform.getTranslation().x();
+        transformMessage.y = transform.getTranslation().y();
+        transformMessage.z = transform.getTranslation().z();
+        transformMessage.roll = transform.getRoll();
+        transformMessage.pitch = transform.getPitch();
+        transformMessage.yaw = transform.getYaw();
+        memcpy(mountingTransformMessage.data, &transformMessage, sizeof(IMUMountingTransformMessage));
+        mountingTransformMessage.setCRC16();
+        hasNewMountingTransform = true;
+    }
+    
+    void processMountingTransform()
+    {
+        hasNewMountingTransform = false;
+    }
+
 private:
     void processIMUMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
     {
@@ -91,6 +111,9 @@ private:
 
     DJISerial::DJISerial::SerialMessage<1> calibrateIMUMessage;
     bool sendIMUCalibrationMessage = false;
+
+    DJISerial::SerialMessage<sizeof(IMUMountingTransformMessage)> mountingTransformMessage;
+    bool hasNewMountingTransform = false;
 };
 
 }  // namespace aruwsrc::communication::mcb_lite

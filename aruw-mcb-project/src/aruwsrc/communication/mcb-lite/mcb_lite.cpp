@@ -145,6 +145,13 @@ void MCBLite::sendData()
                 sizeof(pwm.pwmTimerStartMessage));
             pwm.hasNewData = false;
         }
+        if (imu.hasNewMountingTransform)
+        {
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&imu.mountingTransformMessage),
+                sizeof(imu.mountingTransformMessage));
+        }
         // for (size_t i = 0; i < motor::VirtualServoRxHandler::NUM_PINS; i++)
         // {
         //     auto* servo = servoRxHandler.servos[i];
@@ -208,6 +215,9 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
             //     break;
             case MessageTypes::ANALOG_SENSOR_MESSAGE:
                 processAnalogSensorMessage(completeMessage);
+                break;
+            case MessageTypes::MOUNTING_TRANSFORM_CONFIRMED_MESSAGE:
+                imu.processMountingTransform();
                 break;
             default:
                 break;
