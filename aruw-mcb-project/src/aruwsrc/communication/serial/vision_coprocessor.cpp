@@ -320,7 +320,7 @@ void VisionCoprocessor::sendOdometryData()
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
 
-    auto& worldToChassis = transformer->getWorldToChassis();
+    auto& worldToChassis = transformer->getVisionWorldToChassis();
 
     // chassis odometry
     odometryData->timestamp = getTimeMicroseconds();
