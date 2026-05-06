@@ -601,6 +601,7 @@ auto rightUp = std::make_unique<tap::control::HoldCommandMapping>(
 void initializeSubsystems()
 {
     chassisSubsystem.initialize();
+    engTurret.initialize();
     extensionSubsystem.initialize();
     wristSubsystem.initialize();
     cubeStorage.initialize();
@@ -643,7 +644,9 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers* drivers) {
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
@@ -675,4 +678,15 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
     aruwsrc::control::registerEngineerIoMappings(drivers);
 }
 }  // namespace aruwsrc::engineer
+
+#ifndef PLATFORM_HOSTED
+// Define the getImueCalibrate function, so the imu calibrate menu can access the calibrate command.
+// This is necessary for the calibrate command to funciton.
+// Absolutely insane that this is how this works btw.
+aruwsrc::control::imu::ImuCalibrateCommand *getImuCalibrateCommand()
+{
+    return &aruwsrc::control::imuCalibrateCommand;
+}
+#endif
+
 #endif

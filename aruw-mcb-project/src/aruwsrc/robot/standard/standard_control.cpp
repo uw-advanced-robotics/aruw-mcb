@@ -840,6 +840,8 @@ void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
 }  // namespace aruwsrc::standard
 
 #ifndef PLATFORM_HOSTED
+// Define the getImueCalibrate function, so the imu calibrate menu can access the calibrate command.
+// This is necessary for the calibrate command to funciton.
 imu::ImuCalibrateCommand *getImuCalibrateCommand()
 {
     return &standard_control::imuCalibrateCommand;

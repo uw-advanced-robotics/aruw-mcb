@@ -878,6 +878,8 @@ void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
 }  // namespace aruwsrc::hero
 
 #ifndef PLATFORM_HOSTED
+// Define the getImueCalibrate function, so the imu calibrate menu can access the calibrate command.
+// This is necessary for the calibrate command to funciton.
 imu::ImuCalibrateCommand *getImuCalibrateCommand() { return &hero_control::imuCalibrateCommand; }
 
 std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
