@@ -25,11 +25,7 @@ using namespace tap::algorithms;
 
 ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
     const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry,
-#if defined(TARGET_SENTRY_ECLIPSE)
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
-#else
-    aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver& chassisYawObserver,
-#endif
     tap::communication::sensors::imu::ImuInterface& imu,
     const modm::Vector2f initPos,
     const float initYaw,

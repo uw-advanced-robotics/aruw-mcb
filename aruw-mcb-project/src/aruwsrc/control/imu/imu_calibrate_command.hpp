@@ -89,7 +89,7 @@ public:
     const float positionZeroThreshold;
 
     static constexpr float DEFAULT_VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4f);
-    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
+    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.03f);
 
     struct TurretIMUCalibrationConfig
     {
@@ -201,14 +201,15 @@ protected:
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
                    velocityZeroThreshold) &&
-               (turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0) <
+               (abs(turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0)) <
                 positionZeroThreshold) &&
-               (ignorePitch || (compareFloatClose(
-                                    0.0f,
-                                    turret->pitchMotor.getChassisFrameVelocity(),
-                                    velocityZeroThreshold) &&
-                                (turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(
-                                     0) < positionZeroThreshold)));
+               (ignorePitch ||
+                (compareFloatClose(
+                     0.0f,
+                     turret->pitchMotor.getChassisFrameVelocity(),
+                     velocityZeroThreshold) &&
+                 (abs(turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(0)) <
+                  positionZeroThreshold)));
     }
 };
 }  // namespace aruwsrc::control::imu

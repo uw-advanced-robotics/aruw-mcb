@@ -196,7 +196,7 @@ void ImuCalibrateCommand::execute()
     }
 
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTime;
+    float dt = (currTime - prevTime) / 1000.0f;
     prevTime = currTime;
 
     for (auto &config : turretsAndControllers)

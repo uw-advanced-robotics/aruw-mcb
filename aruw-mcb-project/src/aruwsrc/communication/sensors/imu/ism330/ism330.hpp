@@ -34,7 +34,25 @@ using namespace tap::communication::sensors::imu;
 class ISM330 : public AbstractIMU, public modm::pt::Protothread
 {
 public:
+    struct ChipSelectControl
+    {
+        void (*initialize)();
+        void (*setLow)();
+        void (*setHigh)();
+    };
+
     ISM330();
+    explicit ISM330(ChipSelectControl chipSelectControl);
+
+    template <typename ChipSelectGpio>
+    static constexpr ChipSelectControl chipSelectFromGpio()
+    {
+        return {
+            &ChipSelectGpioOps<ChipSelectGpio>::initialize,
+            &ChipSelectGpioOps<ChipSelectGpio>::setLow,
+            &ChipSelectGpioOps<ChipSelectGpio>::setHigh};
+    }
+
     DISALLOW_COPY_AND_ASSIGN(ISM330);
     virtual void initialize(float sampleFrequency, float mahonyKp, float mahonyKi);
 
@@ -54,6 +72,9 @@ public:
     void setODR(OutputDataRate odr);
 
 private:
+    // Shared SPI bus ownership across ISM330 instances on the same SPI peripheral.
+    static ISM330* spiOwner;
+
     float gyroScale;
     float accelScale;
     ImuState prevImuState = ImuState::IMU_NOT_CONNECTED;
@@ -70,8 +91,19 @@ private:
     static constexpr AccelerometerRangeConfig DEFAULT_ACCEL_RANGE = G4_CONFIG;
 
     // Pre-computed register values for non-blocking writes (protothread use)
-    static constexpr uint8_t DEFAULT_CTRL1_XL_VALUE = DEFAULT_ODR | DEFAULT_ACCEL_RANGE;
-    static constexpr uint8_t DEFAULT_CTRL2_G_VALUE = DEFAULT_ODR | DEFAULT_GYRO_RANGE;
+    static constexpr uint8_t DEFAULT_CTRL1_XL_VALUE =
+        static_cast<uint8_t>(DEFAULT_ODR) | DEFAULT_ACCEL_RANGE;
+    static constexpr uint8_t DEFAULT_CTRL2_G_VALUE =
+        static_cast<uint8_t>(DEFAULT_ODR) | DEFAULT_GYRO_RANGE;
+    ChipSelectControl chipSelectControl;
+
+    template <typename ChipSelectGpio>
+    struct ChipSelectGpioOps
+    {
+        static void initialize() { ChipSelectGpio::setOutput(true); }
+        static void setLow() { ChipSelectGpio::setOutput(false); }
+        static void setHigh() { ChipSelectGpio::setOutput(true); }
+    };
 
     // Pull CS low to read / write.
     void ismNssLow();

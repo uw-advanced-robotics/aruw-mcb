@@ -21,6 +21,7 @@
 #define VELOCITY_AGITATOR_SUBSYSTEM_CONFIG_HPP_
 
 #include "tap/communication/can/can_bus.hpp"
+#include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 namespace aruwsrc::control::agitator
@@ -59,6 +60,18 @@ struct VelocityAgitatorSubsystemConfig
     /// linear since these motors take a desired current as a command. When using a motor that is
     /// controlled by sending voltage commands, this term should be 0.
     float velocityPIDFeedForwardGain;
+
+    /// Enables the additional "emptyJam" condition: if the agitator is commanded above
+    /// emptyJamMinSetpoint but no projectile launch is reported by ref serial for
+    /// emptyJamTimeoutMs, the subsystem is considered jammed.
+    bool emptyJamEnabled = false;
+    /// Timeout for emptyJam in milliseconds.
+    uint32_t emptyJamTimeoutMs = 0;
+    /// Minimum commanded agitator setpoint magnitude (rad/s) to consider "attempting to fire".
+    float emptyJamMinSetpoint = 0.1f;
+    /// Barrel mechanism ID used to filter ref-reported projectile launches.
+    tap::communication::serial::RefSerialData::Rx::MechanismID emptyJamBarrelId =
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
 };
 }  // namespace aruwsrc::control::agitator
 
