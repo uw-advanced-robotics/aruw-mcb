@@ -40,11 +40,13 @@ TurretSubsystem::TurretSubsystem(
     const TurretMotorConfig& pitchMotorConfig,
     const TurretMotorConfig& yawMotorConfig,
     const tap::communication::sensors::imu::AbstractIMU* turretImu,
-    float (*pitchLimitFunc)(float),
-    float (*yawLimitFunc)(float))
+    float (*pitchMinLimitFunc)(float),
+    float (*pitchMaxLimitFunc)(float),
+    float (*yawMinLimitFunc)(float),
+    float (*yawMaxLimitFunc)(float))
     : tap::control::Subsystem(drivers),
-      pitchMotor(pitchMotor, pitchMotorConfig, pitchLimitFunc),
-      yawMotor(yawMotor, yawMotorConfig, yawLimitFunc),
+      pitchMotor(pitchMotor, pitchMotorConfig, pitchMinLimitFunc, pitchMaxLimitFunc),
+      yawMotor(yawMotor, yawMotorConfig, yawMinLimitFunc, yawMaxLimitFunc),
       turretImu(turretImu)
 {
     assert(drivers != nullptr);

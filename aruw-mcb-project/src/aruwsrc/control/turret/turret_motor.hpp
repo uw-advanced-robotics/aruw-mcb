@@ -49,11 +49,14 @@ public:
     /**
      * Construct a turret motor with some particular hardware motor interface and a motor
      * configuration struct.
+     * @param minLimitFunc Optional function that returns the minimum allowed angle in radians.
+     * @param maxLimitFunc Optional function that returns the maximum allowed angle in radians.
      */
     TurretMotor(
         tap::motor::MotorInterface* motor,
         const TurretMotorConfig& motorConfig,
-        float (*limitFunc)(float) = nullptr);
+        float (*minLimitFunc)(float) = nullptr,
+        float (*maxLimitFunc)(float) = nullptr);
 
     mockable inline void initialize() { motor->initialize(); }
 
@@ -173,7 +176,8 @@ private:
 
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
     WrappedFloat chassisFrameMeasuredAngle;
-    float (*limitFunc)(float) = nullptr;
+    float (*minLimitFunc)(float) = nullptr;
+    float (*maxLimitFunc)(float) = nullptr;
 };
 }  // namespace aruwsrc::control::turret
 

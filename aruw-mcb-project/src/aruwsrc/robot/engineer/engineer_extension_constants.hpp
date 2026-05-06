@@ -40,9 +40,6 @@ static constexpr tap::algorithms::SmoothPidConfig EXTENSION_PID_CONFIG = {
     .maxOutput = 0.0f,  // 2000
 };
 
-// if extension is below this value, limit the pitch more aggressively to prevent collisions
-// likely neeed to change
-static constexpr float MIN_EXTENSION_FOR_FULL_PITCH = 50.0f;  
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
     EXTENSION_CONFIG{

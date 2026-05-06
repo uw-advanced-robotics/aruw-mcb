@@ -49,12 +49,55 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 // need to change
 // if extension below threshold, we use the retracted limit which will limit the pitch more
 // aggressively
-static constexpr float PITCH_LIMIT_EXTENSION_RETRACTED = 0.0;
-static constexpr float PITCH_LIMIT_EXTENSION_EXTENDED = 0.0;
-// need to change probably
-static constexpr float PITCH_LIMIT_RAMP_RATE = 1.0;  // how quickly the pitch limit changes between the retracted and extended limits as the extension moves
+static constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = 0.0;
 
-static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+// if extended far enough, we can pitch higher because the back of extension won't hit the chassis
+static constexpr float PITCH_UPPER_LIMIT_DEFAULT = 0.0;
+
+
+// if extension above threshold, limit the pitch so the extension doesnt hit the ground
+static constexpr float PITCH_LOWER_LIMIT_EXTENSION_EXTENDED = 0.0;
+// lower limit if extension is retracted far enough 
+static constexpr float PITCH_LOWER_LIMIT_DEFAULT = 0.0;
+
+// pitch limit if extension is not at either extreme
+static constexpr float PITCH_LIMIT_NEUTRAL = 0.0;
+
+// need to change probably
+static constexpr float PITCH_LIMIT_RAMP_RATE =
+    1.0;  // how quickly the pitch limit changes between the retracted and extended limits as the
+          // extension moves
+
+// if extension is below this value, limit the pitch more aggressively to prevent back of extension
+// from hitting chassis likely neeed to change
+static constexpr float MIN_EXTENSION_FOR_FULL_PITCH_UP = 50.0f;
+
+// if extension is above this value, we can allow full pitch down since extension will hit the
+// ground
+static constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 50.0f;
+
+}  // namespace aruwsrc::control::turret
+
+
+inline float getPitchMinLimit(float extension)
+{
+    if (extension < aruwsrc::control::turret::MIN_EXTENSION_FOR_FULL_PITCH_UP)
+    {
+        return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
+    }
+    return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
+}
+
+inline float getPitchMaxLimit(float extension)
+{
+    if (extension > aruwsrc::control::turret::MAX_EXTENSION_FOR_FULL_PITCH_DOWN)
+    {
+        return aruwsrc::control::turret::PITCH_LOWER_LIMIT_EXTENSION_EXTENDED;
+    }
+    return aruwsrc::control::turret::PITCH_LOWER_LIMIT_DEFAULT;
+}
+
+static constexpr aruwsrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 414,
     .minAngle = 0,     ///< Doesn't matter since yaw not limited
@@ -62,7 +105,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .limitMotorAngles = false,
 };
 
-static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+static constexpr aruwsrc::control::turret::TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 4901,
     .minAngle = modm::toRadian(-20),
@@ -73,8 +116,11 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 // do we need this balancing stuff?
 
 // Turret is perfectly balanced
-static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
-    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
+static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::
+    TurretGravityParams TURRET_GRAVITY_CONFIG{
+        .cgX = 0.0f,
+        .cgZ = 0.0f,
+        .gravityCompensatorMax = 0.0f};
 
 // everything needs tuning
 namespace world_rel_turret_imu
@@ -214,7 +260,5 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 }  // namespace chassis_rel
-
-}  // namespace aruwsrc::control::turret
 
 #endif  // ENGINEER_TURRET_CONSTANTS_HPP_

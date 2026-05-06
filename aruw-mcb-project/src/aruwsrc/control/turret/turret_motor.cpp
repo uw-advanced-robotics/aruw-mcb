@@ -32,12 +32,14 @@ namespace aruwsrc::control::turret
 TurretMotor::TurretMotor(
     tap::motor::MotorInterface* motor,
     const TurretMotorConfig& motorConfig,
-    float (*limitFunc)(float))
+    float (*minLimitFunc)(float),
+    float (*maxLimitFunc)(float))
     : config(motorConfig),
       motor(motor),
       chassisFrameSetpoint(Angle(config.startAngle)),
       chassisFrameMeasuredAngle(Angle(config.startAngle)),
-      limitFunc(limitFunc)
+      minLimitFunc(minLimitFunc),
+      maxLimitFunc(maxLimitFunc)
 {
     assert(config.minAngle <= config.maxAngle);
     assert(motor != nullptr);
@@ -78,13 +80,12 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 
     if (config.limitMotorAngles)
     {
+        float minAngle = minLimitFunc != nullptr ? minLimitFunc(0.0f) : config.minAngle;
+        float maxAngle = maxLimitFunc != nullptr ? maxLimitFunc(0.0f) : config.maxAngle;
+
         int status;
-        chassisFrameSetpoint = Angle(
-            WrappedFloat::limitValue(
-                chassisFrameSetpoint,
-                config.minAngle,
-                config.maxAngle,
-                &status));
+        chassisFrameSetpoint =
+            Angle(WrappedFloat::limitValue(chassisFrameSetpoint, minAngle, maxAngle, &status));
     }
 }
 
@@ -98,31 +99,20 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
 {
     if (config.limitMotorAngles)
     {
-        float pos = WrappedFloat::rangeOverlap(
-            measurement,
-            setpoint,
-            Angle(config.maxAngle),
-            Angle(config.minAngle));
-        float neg = WrappedFloat::rangeOverlap(
-            setpoint,
-            measurement,
-            Angle(config.maxAngle),
-            Angle(config.minAngle));
+        float minAngle = minLimitFunc != nullptr ? minLimitFunc(0.0f) : config.minAngle;
+        float maxAngle = maxLimitFunc != nullptr ? maxLimitFunc(0.0f) : config.maxAngle;
+
+        float pos =
+            WrappedFloat::rangeOverlap(measurement, setpoint, Angle(maxAngle), Angle(minAngle));
+        float neg =
+            WrappedFloat::rangeOverlap(setpoint, measurement, Angle(maxAngle), Angle(minAngle));
 
         if (pos < neg)
         {
-            if (limitFunc != nullptr)
-            {
-                return limitFunc((setpoint - measurement).getWrappedValue());
-            }
             return (setpoint - measurement).getWrappedValue();
         }
         else if (pos > neg)
         {
-            if (limitFunc != nullptr)
-            {
-                return limitFunc((setpoint - measurement).getWrappedValue() - M_TWOPI);
-            }
             return (setpoint - measurement).getWrappedValue() - M_TWOPI;
         }
     }

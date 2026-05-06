@@ -170,25 +170,14 @@ TriggerHomedJointSubsystem extensionSubsystem(
     extensionTrigger,
     EXTENSION_CONFIG);
 
-float pitchAngularErrorLimit(float extension)
+float getLivePitchMinLimit(float)
 {
-    // limit pitch based on engineer extension
-    // ramp limit?
-    float distanceFromLimit = extension - MIN_EXTENSION_FOR_FULL_PITCH;
-    if (extension < MIN_EXTENSION_FOR_FULL_PITCH)
-    {
-        // todo: tune the ramp
-        float factor = 1.0f;
+    return getPitchMinLimit(extensionSubsystem.getPosition());
+}
 
-        float limit = PITCH_LIMIT_EXTENSION_RETRACTED + distanceFromLimit * factor;
-        return limit;
-    }
-
-    else
-    {
-        float limit = PITCH_LIMIT_EXTENSION_EXTENDED;
-        return limit;
-    }
+float getLivePitchMaxLimit(float)
+{
+    return getPitchMaxLimit(extensionSubsystem.getPosition());
 }
 
 EngineerTurretSubsystem engTurret(
@@ -198,10 +187,8 @@ EngineerTurretSubsystem engTurret(
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG,
     &getTurretMCBCanComm(),
-    pitchAngularErrorLimit,
-    nullptr  // no dynamic limit for yaw
-
-);
+    getLivePitchMinLimit,
+    getLivePitchMaxLimit);
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
