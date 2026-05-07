@@ -81,7 +81,7 @@ public:
         {
             angle += M_TWOPI;
         }
-        
+
         if (lastUpdateTime == 0)
         {
             encoder = tap::algorithms::WrappedFloat(angle, 0, M_TWOPI);

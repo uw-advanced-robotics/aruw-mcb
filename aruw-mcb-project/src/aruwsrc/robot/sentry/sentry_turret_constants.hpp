@@ -98,8 +98,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr tap::can::CanBus YAW_LAMPREY_CAN_BUS = tap::can::CanBus::CAN_BUS2;
-static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_CAN_ID =
-    tap::encoder::CanEncoderId::ID7;
+static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_CAN_ID = tap::encoder::CanEncoderId::ID7;
 static constexpr bool YAW_ANALOG_SENSOR_INVERTED = false;
 
 // static constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[] = {
