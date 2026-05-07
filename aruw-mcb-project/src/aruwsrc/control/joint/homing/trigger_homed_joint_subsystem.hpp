@@ -37,7 +37,7 @@ public:
     {
         JointSubsystem::Config super;
         float home = 0.0f;
-        float homingSpeed = 0.25f;
+        float homingSpeed = 0.00025f;
         bool homingReversed = false;
     };
 
@@ -97,14 +97,17 @@ public:
             }
         }
 
+        /// @TODO: Unhardcode
         runPosPidController(0.002f);
     }
 
     void moveTowardLowerBound() override
     {
+        /// @TODO: add dt to make speed in real units
         setSetpoint(getPosition() + (homingReversed ? homingSpeed : -homingSpeed));
     }
 
+    /// @TODO: remove for unused and also not safe in a world with gravity
     void stopDuringHoming() override { motor.setDesiredOutput(0); }
 
 protected:
