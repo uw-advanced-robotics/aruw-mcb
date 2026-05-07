@@ -113,6 +113,8 @@ public:
         mcbLite.imu.initialize(mainLoopFrequency,0.2f, 0.0f);
         mcbLite.pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 500); 
         mcbLite.pwm.start(tap::gpio::Pwm::Timer::TIMER8);
+        mcbLite.digital.configureInputPullMode(tap::gpio::Digital::InputPin::B, tap::gpio::Digital::InputPullMode::PullUp); // r threy pullup or pull down
+        mcbLite.digital.configureInputPullMode(tap::gpio::Digital::InputPin::C, tap::gpio::Digital::InputPullMode::PullUp);
     }
 
     void updateIo()

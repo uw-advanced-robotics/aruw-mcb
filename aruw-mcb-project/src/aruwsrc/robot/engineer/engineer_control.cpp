@@ -31,6 +31,7 @@
 #include "tap/control/sequential_command.hpp"
 
 #include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"  // placeholder
+#include "aruwsrc/communication/mcb-lite/virtual_digital_limit_switch.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp" 
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
@@ -230,6 +231,20 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
+aruwsrc::communication::mcb_lite::VirtualDigitalLimitSwitch cubeStorageLimitSwitch(
+    drivers()->mcbLite.digital,
+    tap::gpio::Digital::InputPin::B,
+    true);
+
+LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimitSwitch);
+
+aruwsrc::communication::mcb_lite::VirtualDigitalLimitSwitch extensionLimitSwitch(
+    drivers()->mcbLite.digital,
+    tap::gpio::Digital::InputPin::C,
+    true);
+
+aruwsrc::control::joint::homing::trigger::LimitSwitchTrigger extensionTrigger(&extensionLimitSwitch);
+
 tap::motor::DjiMotor cubeStorageMotor(
     drivers(),
     CUBE_STORAGE_MOTOR_ID,
@@ -318,11 +333,11 @@ aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
     WHEEL_RADIUS,
     WHEELBASE_RADIUS);
 
-// CubeStorageSubsystem cubeStorage(
-//     drivers(),
-//     cubeStorageMotor,
-//     cubeStorageTrigger,
-//     CUBE_STORAGE_CONFIG);
+CubeStorageSubsystem cubeStorage(
+    drivers(),
+    cubeStorageMotor,
+    cubeStorageTrigger,
+    CUBE_STORAGE_CONFIG);
 
 // WristSubsystem wristSubsystem(
 //     drivers(),
