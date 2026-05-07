@@ -30,14 +30,13 @@
 
 #else
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
-
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 
 #endif
 
@@ -110,11 +109,15 @@ public:
         chassisIsm.setCalibrationSamples(4000);
         mcbLite.initialize();
         // mcbLite.imu.sendMountingTransform(...);
-        mcbLite.imu.initialize(mainLoopFrequency,0.2f, 0.0f);
-        mcbLite.pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 500); 
+        mcbLite.imu.initialize(mainLoopFrequency, 0.2f, 0.0f);
+        mcbLite.pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 500);
         mcbLite.pwm.start(tap::gpio::Pwm::Timer::TIMER8);
-        mcbLite.digital.configureInputPullMode(tap::gpio::Digital::InputPin::B, tap::gpio::Digital::InputPullMode::PullUp); // r threy pullup or pull down
-        mcbLite.digital.configureInputPullMode(tap::gpio::Digital::InputPin::C, tap::gpio::Digital::InputPullMode::PullUp);
+        mcbLite.digital.configureInputPullMode(
+            tap::gpio::Digital::InputPin::B,
+            tap::gpio::Digital::InputPullMode::PullUp);  // r threy pullup or pull down
+        mcbLite.digital.configureInputPullMode(
+            tap::gpio::Digital::InputPin::C,
+            tap::gpio::Digital::InputPullMode::PullUp);
     }
 
     void updateIo()

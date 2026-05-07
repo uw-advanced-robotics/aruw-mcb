@@ -30,9 +30,9 @@
 #include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 
-#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"  // placeholder
+#include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_digital_limit_switch.hpp"
-#include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp" 
+#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"  // placeholder
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
@@ -60,6 +60,8 @@
 #include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
+#include "aruwsrc/robot/engineer/servo_command.hpp"
+#include "aruwsrc/robot/engineer/servo_subsystem.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
@@ -67,19 +69,16 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
-
-#include "aruwsrc/robot/engineer/servo_command.hpp"
-#include "aruwsrc/robot/engineer/servo_subsystem.hpp"
 // #include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_analog_sensor.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transform_subsystem.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_analog_sensor.hpp"
 
 // check which of these r important
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -150,8 +149,6 @@ tap::motor::DjiMotor yawTurretMotor(
     1,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
-    
-
 EngineerTurretSubsystem engTurret(
     drivers(),
     &pitchTurretMotor,
@@ -164,11 +161,13 @@ EngineerTurretSubsystem engTurret(
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
-
 ServoSubsystem servoTestSubsystem(drivers(), drivers()->mcbLite);
 ServoCommand servoTestCommand(servoTestSubsystem);
 
-aruwsrc::communication::mcb_lite::VirtualAnalogSensor analogSensor(drivers(), tap::can::CanBus::CAN_BUS2, 0x1D6);
+aruwsrc::communication::mcb_lite::VirtualAnalogSensor analogSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2,
+    0x1D6);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
@@ -243,7 +242,7 @@ aruwsrc::communication::mcb_lite::VirtualDigitalLimitSwitch extensionLimitSwitch
     tap::gpio::Digital::InputPin::C,
     true);
 
-aruwsrc::control::joint::homing::trigger::LimitSwitchTrigger extensionTrigger(&extensionLimitSwitch);
+LimitSwitchTrigger extensionTrigger(&extensionLimitSwitch);
 
 tap::motor::DjiMotor cubeStorageMotor(
     drivers(),
@@ -254,12 +253,12 @@ tap::motor::DjiMotor cubeStorageMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeStorageLimit(
-    &(drivers()->digital),
-    CUBE_STORAGE_LIMITSWITCH_PORT,
-    true);
+// aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeStorageLimit(
+//     &(drivers()->digital),
+//     CUBE_STORAGE_LIMITSWITCH_PORT,
+//     true);
 
-LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
+// LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
 
 // tap::motor::DjiMotor wristMotorOne(
 //     drivers(),
@@ -312,12 +311,12 @@ LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
 //     false,
 //     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
-    &drivers()->digital,
-    aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
-    true);
+// aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
+//     &drivers()->digital,
+//     aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
+//     true);
 
-LimitSwitchTrigger extensionTrigger(&extensionLimit);
+// LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
 
@@ -583,7 +582,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
-   // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
+    // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
     // extensionSubsystem.setDefaultCommand(&extensionManualControl);
     // wristSubsystem.setDefaultCommand(&wristControllerCommand);
     // cubeStorage.setDefaultCommand(&cubeManualControl);
@@ -610,23 +609,20 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
 
 namespace aruwsrc::engineer
 {
-    int bob = 10;
 void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &aruwsrc::control::remoteSafeDisconnectFunction);
 
-    bob=20;
     aruwsrc::control::initializeSubsystems();
-    bob=30;
+
     aruwsrc::control::registerEngineerSubsystems(drivers);
-    bob=40;
+
     aruwsrc::control::setDefaultEngineerCommands(drivers);
-    bob=50;
+
     aruwsrc::control::startEngineerCommands(drivers);
-    bob=60;
+
     aruwsrc::control::registerEngineerIoMappings(drivers);
-    bob=70;
 }
 }  // namespace aruwsrc::engineer
 #endif

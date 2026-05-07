@@ -67,15 +67,15 @@ public:
         transformMessage.roll = transform.getRoll();
         transformMessage.pitch = transform.getPitch();
         transformMessage.yaw = transform.getYaw();
-        memcpy(mountingTransformMessage.data, &transformMessage, sizeof(IMUMountingTransformMessage));
+        memcpy(
+            mountingTransformMessage.data,
+            &transformMessage,
+            sizeof(IMUMountingTransformMessage));
         mountingTransformMessage.setCRC16();
         hasNewMountingTransform = true;
     }
-    
-    void processMountingTransform()
-    {
-        hasNewMountingTransform = false;
-    }
+
+    void processMountingTransform() { hasNewMountingTransform = false; }
 
 private:
     void processIMUMessage(const DJISerial::ReceivedSerialMessage& completeMessage)

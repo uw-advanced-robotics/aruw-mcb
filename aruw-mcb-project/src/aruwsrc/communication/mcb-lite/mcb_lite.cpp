@@ -32,7 +32,7 @@ MCBLite::MCBLite(tap::Drivers* drivers, tap::communication::serial::Uart::UartPo
     : DJISerial(drivers, port),
       canRxHandler(motor::VirtualCanRxHandler(drivers)),
       motorTxHandler(motor::VirtualDJIMotorTxHandler(drivers)),
-      //servoRxHandler(motor::VirtualServoRxHandler(drivers)),
+      // servoRxHandler(motor::VirtualServoRxHandler(drivers)),
       imu(),
       analog(),
       digital(),

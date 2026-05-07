@@ -214,7 +214,7 @@ struct IMUMountingTransformMessage
 
 struct MountingTransformConfirmedMessage
 {
-    uint8_t val; 
+    uint8_t val;
 } modm_packed;
 
 }  // namespace aruwsrc::communication::mcb_lite

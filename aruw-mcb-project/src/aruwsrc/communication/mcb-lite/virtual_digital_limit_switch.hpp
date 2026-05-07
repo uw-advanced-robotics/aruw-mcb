@@ -26,7 +26,7 @@
 
 namespace aruwsrc::communication::mcb_lite
 {
-class VirtualDigitalLimitSwitch 
+class VirtualDigitalLimitSwitch
     : public tap::communication::sensors::limit_switch::LimitSwitchInterface
 {
 public:
@@ -34,7 +34,11 @@ public:
         VirtualDigital& digital,
         tap::gpio::Digital::InputPin pin,
         bool inverted = false)
-        : digital(digital), pin(pin), inverted(inverted) {}
+        : digital(digital),
+          pin(pin),
+          inverted(inverted)
+    {
+    }
 
     bool getLimitSwitchDepressed() const override
     {
