@@ -28,6 +28,7 @@ namespace aruwsrc::engineer
 {
 class ServoCommand : public tap::control::Command
 {
+    // command for quick testing purposes for mcblite
 public:
     ServoCommand(ServoSubsystem& subsystem) : subsystem(subsystem)
     {

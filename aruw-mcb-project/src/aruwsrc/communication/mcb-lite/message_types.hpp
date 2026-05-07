@@ -48,7 +48,8 @@ enum MessageTypes : uint8_t
     // SERVO_RAMP_MESSAGE = 17,
     // SERVO_FEEDBACK_MESSAGE = 18
     IMU_MOUNTING_TRANSFORM_MESSAGE = 16,
-    MOUNTING_TRANSFORM_CONFIRMED_MESSAGE = 17
+    MOUNTING_TRANSFORM_CONFIRMED_MESSAGE = 17,
+    DIGITAL_PIN_CONFIG_CONFIRMED_MESSAGE = 18
 };
 
 // CAN Bus message Lite -> MCB
@@ -213,6 +214,11 @@ struct IMUMountingTransformMessage
 } modm_packed;
 
 struct MountingTransformConfirmedMessage
+{
+    uint8_t val;
+} modm_packed;
+
+struct DigitalPinConfigConfirmedMessage
 {
     uint8_t val;
 } modm_packed;

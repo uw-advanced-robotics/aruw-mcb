@@ -104,18 +104,21 @@ void MCBLite::sendData()
             imu.sendIMUCalibrationMessage = false;
         }
 
-        if (digital.hasNewData)
+        if (digital.hasNewPinConfigData)
         {
-            // 27 bytes of digital
-            drivers->uart.write(
-                port,
-                reinterpret_cast<uint8_t*>(&(digital.outputPinMessage)),
-                sizeof(digital.outputPinMessage));
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(digital.pinModeMessage)),
                 sizeof(digital.pinModeMessage));
-            digital.hasNewData = false;
+        }
+
+        if (digital.hasNewOutputData)
+        {
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(digital.outputPinMessage)),
+                sizeof(digital.outputPinMessage));
+            digital.hasNewOutputData = false;
         }
 
         if (leds.hasNewData)
@@ -218,6 +221,9 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 break;
             case MessageTypes::MOUNTING_TRANSFORM_CONFIRMED_MESSAGE:
                 imu.processMountingTransform();
+                break;
+            case MessageTypes::DIGITAL_PIN_CONFIG_CONFIRMED_MESSAGE:
+                digital.hasNewPinConfigData = false;
                 break;
             default:
                 break;
