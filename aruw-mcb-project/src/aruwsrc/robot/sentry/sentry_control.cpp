@@ -125,9 +125,8 @@ MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
 aruwsrc::communication::sensors::encoder::LampreyEncoder turretMajorYawLamprey(
     drivers(),
-    turretMajor::YAW_ANALOG_SENSOR_CAN_ID,
-    turretMajor::YAW_ANALOG_SENSOR_CAN_BUS,
-    turretMajor::LAMPREY_CALIBRATION_MAP,
+    turretMajor::YAW_LAMPREY_CAN_ID,
+    turretMajor::YAW_LAMPREY_CAN_BUS,
     turretMajor::YAW_ANALOG_SENSOR_INVERTED);
 
 tap::motor::DjiMotor turretMajorYawMotor(
