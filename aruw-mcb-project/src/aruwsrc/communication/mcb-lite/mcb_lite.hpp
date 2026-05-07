@@ -28,7 +28,6 @@
 #include "modm/container/queue.hpp"
 #include "motor/virtual_can_rx_handler.hpp"
 #include "motor/virtual_dji_motor_tx_handler.hpp"
-#include "motor/virtual_servo_rx_handler.hpp"
 
 #include "message_types.hpp"
 #include "virtual_analog.hpp"
