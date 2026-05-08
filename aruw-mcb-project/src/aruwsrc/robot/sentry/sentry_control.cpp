@@ -156,7 +156,7 @@ TurretMinorMotors turretWidowMotors{
         false,
         "Widow Minor Yaw Turret",
         true,
-        1.0,
+        tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
         turretWidow::YAW_MOTOR_CONFIG.startEncoderValue),
 
     .pitchMotor = tap::motor::DjiMotor(
@@ -166,7 +166,7 @@ TurretMinorMotors turretWidowMotors{
         true,
         "Widow Minor Pitch Turret",
         true,
-        1.0,
+        tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
         turretWidow::PITCH_MOTOR_CONFIG.startEncoderValue),
 
     .yawMotorConfig = turretWidow::YAW_MOTOR_CONFIG,
