@@ -186,7 +186,7 @@ inline aruwsrc::communication::can::TurretMCBCanComm &getChassisTurretMCBCanComm
 
 inline tap::communication::sensors::imu::AbstractIMU &getTurretMajorImu()
 {
-    return drivers()->turretMajorImuSecondary;
+    return drivers()->turretMajorImu;
 }
 
 // /* define subsystems --------------------------------------------------------*/
@@ -504,7 +504,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
-ImuNotCalibratedGovernor imuNotCalibratedGovernor(drivers(), drivers()->mpu6500);
+ImuNotCalibratedGovernor imuNotCalibratedGovernor(drivers(), getTurretMajorImu());
 
 GovernorLimitedCommand<1> imuNotCalibratedCommandLimited(
     {&buzzer},
