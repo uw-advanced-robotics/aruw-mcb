@@ -87,6 +87,7 @@ public:
 protected:
     tap::algorithms::Ramp setpoint;
     float lowerBound, upperBound;
+    float DEBUG_position; // TODO: remove later
     tap::motor::MotorInterface &motor;
     const float epsilon, maxSetpointIncrement;
     tap::algorithms::SmoothPid posPid;
