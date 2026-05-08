@@ -28,7 +28,7 @@ MultiShotCvCommandMapping::MultiShotCvCommandMapping(
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
     governor::CvOnTargetGovernor &cvOnTargetGovernor,
     std::optional<ConstantVelocityAgitatorCommand *> command)
-    : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, &rms, false),
+    : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
       fireRateReselectionManager(fireRateReselectionManager),
       cvOnTargetGovernor(cvOnTargetGovernor),
       command(command)

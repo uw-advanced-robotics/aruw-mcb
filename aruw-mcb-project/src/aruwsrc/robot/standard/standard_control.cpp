@@ -689,14 +689,6 @@ Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
         .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
 
-auto rPressedRms = RemoteMapState({Remote::Key::R});
-auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
-    drivers(),
-    &rPressedRms,
-    true,
-    &cvOnTargetGovernor,
-    &CvOnTargetGovernor::setGovernorEnabled);
-
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
     rotateAndUnjamAgitatorRepeat,
@@ -741,18 +733,6 @@ Trigger qPressed = TriggerHelpers::button(drivers(), Remote::Key::Q).toggleOnTru
 
 Trigger xPressed =
     TriggerHelpers::button(drivers(), Remote::Key::X).onTrue(&chassisAutorotateCommand);
-
-auto vPressedRms = RemoteMapState({Remote::Key::V});
-auto vPressed = std::make_unique<CycleStateCommandMapping<
-    MultiShotCvCommandMapping::LaunchMode,
-    MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
-    MultiShotCvCommandMapping>>(
-    drivers(),
-    &vPressedRms,
-    MultiShotCvCommandMapping::LIMITED_20HZ,
-    &leftMousePressedBNotPressed,
-    &MultiShotCvCommandMapping::setShooterState,
-    RemoteMapState({Remote::Key::E}));
 
 // cap bank
 Trigger cShiftPressed = (TriggerHelpers::button(drivers(), Remote::Key::C) &&
@@ -834,8 +814,23 @@ void startStandardCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerStandardIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(std::move(rPressed));
-    drivers->commandMapper.addMap(std::move(vPressed));
+    drivers->commandMapper.addToMap<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
+        drivers,
+        RemoteMapState({Remote::Key::R}),
+        true,
+        &cvOnTargetGovernor,
+        &CvOnTargetGovernor::setGovernorEnabled);
+
+    drivers->commandMapper.addToMap<CycleStateCommandMapping<
+        MultiShotCvCommandMapping::LaunchMode,
+        MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
+        MultiShotCvCommandMapping>>(
+            drivers,
+            RemoteMapState({Remote::Key::V}),
+            MultiShotCvCommandMapping::LIMITED_20HZ,
+            &leftMousePressedBNotPressed,
+            &MultiShotCvCommandMapping::setShooterState,
+            RemoteMapState({Remote::Key::E}));
 }
 }  // namespace standard_control
 

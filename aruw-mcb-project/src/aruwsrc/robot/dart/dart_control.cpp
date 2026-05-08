@@ -91,36 +91,6 @@ DartCloseCommand servoClose(dartLauncher);
 
 RotateMagazineCommand rotateMagazine(dartReloader);
 
-auto rightUpLeftUpRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
-auto rightUpLeftUp = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&dartPullback},
-    &rightUpLeftUpRms);
-
-auto rightUpLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
-auto rightUpLeftDown = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&dartRelease},
-    &rightUpLeftDownRms);
-
-auto rightDownLeftUpRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
-auto rightDownLeftUp = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&servoOpen},
-    &rightDownLeftUpRms);
-
-auto rightDownLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
-auto rightDownLeftDown = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&servoClose},
-    &rightDownLeftDownRms);
-
-auto rightMidLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
-auto rightMidLeftDown = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&rotateMagazine},
-    &rightMidLeftDownRms);
-
 void initializeSubsystems()
 {
     dartLauncher.initialize();
@@ -142,11 +112,30 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandMapper.addMap(std::move(rightUpLeftUp));
-    drivers->commandMapper.addMap(std::move(rightUpLeftDown));
-    drivers->commandMapper.addMap(std::move(rightDownLeftUp));
-    drivers->commandMapper.addMap(std::move(rightDownLeftDown));
-    drivers->commandMapper.addMap(std::move(rightMidLeftDown));
+    drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command*>{&dartPullback},
+        RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    
+    drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command*>{&dartRelease},
+        RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+
+    drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command*>{&servoOpen},
+        RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
+
+    drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command*>{&servoClose},
+        RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN));
+
+    drivers->commandMapper.addToMap<PressCommandMapping>(
+        drivers,
+        std::vector<Command*>{&rotateMagazine},
+        RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
 }
 
 }  // namespace dart_control

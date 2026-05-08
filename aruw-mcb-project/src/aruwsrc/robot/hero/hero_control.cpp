@@ -661,124 +661,6 @@ std::vector<HudIndicator *> hudIndicators = {
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
-/* define command mappings --------------------------------------------------*/
-auto rightMidRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID);
-auto rightSwitchMiddle = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&spinFrictionWheels},
-    &rightMidRms);
-
-auto rightUpRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP);
-auto rightSwitchUp = std::make_unique<HoldRepeatCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&spinFrictionWheels, &kicker::launchKickerHeatAndCVLimited},
-    &rightUpRms,
-    false);
-
-auto leftDownRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
-auto leftSwitchDown = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&beybladeCommand},
-    &leftDownRms);
-
-auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
-auto leftSwitchUp = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command *>{
-        &chassisDriveCommand,
-        // &turretCVCommand,
-    },
-    &leftUpRms);
-
-auto leftMouseBNotPressedVNotPressedRms =
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B, Remote::Key::V});
-auto leftMousePressedBNotPressedVNotPressed = std::make_unique<MultiShotCvCommandMapping>(
-    *drivers(),
-    kicker::launchKickerHeatAndCVLimited,
-    leftMouseBNotPressedVNotPressedRms,
-    std::nullopt,
-    kicker::cvOnTargetGovernor);
-
-auto leftMouseBPressedRms = RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B});
-auto leftMousePressedBPressed = std::make_unique<HoldRepeatCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&kicker::launchKickerNoHeatLimiting},
-    &leftMouseBPressedRms,
-    false);
-
-// Same thing as leftMousePressedBPressed; used for ease of access.
-auto leftVRms = RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::V});
-auto leftMousePressedVPressed = std::make_unique<HoldRepeatCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&kicker::launchKickerNoHeatLimiting},
-    &leftVRms,
-    false);
-
-auto rightMouseRms = RemoteMapState(RemoteMapState::MouseButton::RIGHT);
-auto rightMousePressed = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&turretCVCommand},
-    &rightMouseRms);
-
-auto fRms = RemoteMapState({Remote::Key::F});
-auto fToggled = std::make_unique<ToggleCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&beybladeCommand},
-    &fRms);
-
-auto zRms = RemoteMapState({Remote::Key::Z});
-auto zPressed = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&turretUTurnCommandLimited},
-    &zRms);
-// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
-auto bNotCtrlRightDownRms = RemoteMapState(
-    Remote::SwitchState::UNKNOWN,
-    Remote::SwitchState::DOWN,
-    {Remote::Key::B},
-    {Remote::Key::CTRL},
-    false,
-    false);
-auto bNotCtrlPressedRightSwitchDown = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&imuCalibrateCommand},
-    &bNotCtrlRightDownRms);
-// The user can press b+ctrl when the remote right switch is in the down position to restart the
-// client display command. This is necessary since we don't know when the robot is connected to the
-// server and thus don't know when to start sending the initial HUD graphics.
-auto bCtrlRms = RemoteMapState({Remote::Key::CTRL, Remote::Key::B});
-auto bCtrlPressed = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&clientDisplayCommand},
-    &bCtrlRms);
-
-auto rRms = RemoteMapState({Remote::Key::R});
-auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
-    drivers(),
-    &rRms,
-    true,
-    &kicker::cvOnTargetGovernor,
-    &CvOnTargetGovernor::setGovernorEnabled);
-
-// cap bank
-auto cShiftRms = RemoteMapState({Remote::Key::SHIFT, Remote::Key::C});
-auto cShiftPressed = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&capBankToggleCommand},
-    &cShiftRms);
-
-auto shiftRms = RemoteMapState({Remote::Key::SHIFT});
-auto shiftPressed = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&capBankSprintCommand},
-    &shiftRms);
-
-auto ctrlRms = RemoteMapState({Remote::Key::CTRL});
-auto ctrlPressed = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&capBankHalfSprintCommand},
-    &ctrlRms);
-
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -844,22 +726,108 @@ void startHeroCommands(Drivers *drivers)
 /* register io mappings here ------------------------------------------------*/
 void registerHeroIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(std::move(rightSwitchMiddle));
-    drivers->commandMapper.addMap(std::move(rightSwitchUp));
-    drivers->commandMapper.addMap(std::move(leftMousePressedBNotPressedVNotPressed));
-    drivers->commandMapper.addMap(std::move(leftMousePressedBPressed));
-    drivers->commandMapper.addMap(std::move(leftMousePressedVPressed));
-    // drivers->commandMapper.addMap(std::move(rightMousePressed));
-    drivers->commandMapper.addMap(std::move(leftSwitchDown));
-    drivers->commandMapper.addMap(std::move(leftSwitchUp));
-    drivers->commandMapper.addMap(std::move(fToggled));
-    // drivers->commandMapper.addMap(std::move(zPressed));
-    drivers->commandMapper.addMap(std::move(bNotCtrlPressedRightSwitchDown));
-    drivers->commandMapper.addMap(std::move(bCtrlPressed));
-    drivers->commandMapper.addMap(std::move(rPressed));
-    drivers->commandMapper.addMap(std::move(cShiftPressed));
-    drivers->commandMapper.addMap(std::move(shiftPressed));
-    drivers->commandMapper.addMap(std::move(ctrlPressed));
+    drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command *>{&spinFrictionWheels},
+        RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
+    
+    drivers->commandMapper.addToMap<HoldRepeatCommandMapping>(
+        drivers,
+        std::vector<Command *>{&spinFrictionWheels, &kicker::launchKickerHeatAndCVLimited},
+        RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
+        false);
+    
+    drivers->commandMapper.addToMap<MultiShotCvCommandMapping>(
+        *drivers,
+        kicker::launchKickerHeatAndCVLimited,
+        RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B, Remote::Key::V}),
+        std::nullopt,
+        kicker::cvOnTargetGovernor);
+
+    drivers->commandMapper.addToMap<HoldRepeatCommandMapping>(
+        drivers,
+        std::vector<Command *>{&kicker::launchKickerNoHeatLimiting},
+        RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B}),
+        false);
+
+    // Same thing as leftMousePressedBPressed; used for ease of access.
+    drivers->commandMapper.addToMap<HoldRepeatCommandMapping>(
+        drivers,
+        std::vector<Command *>{&kicker::launchKickerNoHeatLimiting},
+        RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::V}),
+        false);
+
+    
+    /*drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command *>{&turretCVCommand},
+        RemoteMapState(RemoteMapState::MouseButton::RIGHT));*/
+
+    drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command *>{&beybladeCommand},
+        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
+
+    drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command *>{
+            &chassisDriveCommand,
+            // &turretCVCommand,
+        },
+        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+    drivers->commandMapper.addToMap<ToggleCommandMapping>(
+        drivers,
+        std::vector<Command *>{&beybladeCommand},
+        RemoteMapState({Remote::Key::F}));
+
+    /*drivers->commandMapper.addToMap<PressCommandMapping>(
+        drivers,
+        std::vector<Command *>{&turretUTurnCommandLimited},
+        RemoteMapState({Remote::Key::Z}));*/
+
+    // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
+    drivers->commandMapper.addToMap<PressCommandMapping>(
+        drivers,
+        std::vector<Command *>{&imuCalibrateCommand},
+        RemoteMapState(
+            Remote::SwitchState::UNKNOWN,
+            Remote::SwitchState::DOWN,
+            {Remote::Key::B},
+            {Remote::Key::CTRL},
+            false,
+            false));
+
+    // The user can press b+ctrl when the remote right switch is in the down position to restart the
+    // client display command. This is necessary since we don't know when the robot is connected to the
+    // server and thus don't know when to start sending the initial HUD graphics.
+    drivers->commandMapper.addToMap<PressCommandMapping>(
+        drivers,
+        std::vector<Command *>{&clientDisplayCommand},
+        RemoteMapState({Remote::Key::CTRL, Remote::Key::B}));
+
+    drivers->commandMapper.addToMap<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
+        drivers,
+        RemoteMapState({Remote::Key::R}),
+        true,
+        &kicker::cvOnTargetGovernor,
+        &CvOnTargetGovernor::setGovernorEnabled);
+
+    // cap bank
+    drivers->commandMapper.addToMap<PressCommandMapping>(
+        drivers,
+        std::vector<Command *>{&capBankToggleCommand},
+        RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
+    
+    drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command *>{&capBankSprintCommand},
+        RemoteMapState({Remote::Key::SHIFT}));
+    
+    drivers->commandMapper.addToMap<PressCommandMapping>(
+        drivers,
+        std::vector<Command *>{&capBankHalfSprintCommand},
+        RemoteMapState({Remote::Key::CTRL}));
 }
 }  // namespace hero_control
 
