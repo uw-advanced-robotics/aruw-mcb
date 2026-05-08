@@ -166,7 +166,7 @@ tap::motor::DjiMotor pitchMotor(
     true,
     "Pitch Turret",
     true,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
     PITCH_MOTOR_CONFIG.startEncoderValue);
 
 tap::motor::DjiMotor yawMotor(
@@ -176,7 +176,7 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     true,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
 StandardTurretSubsystem turret(
