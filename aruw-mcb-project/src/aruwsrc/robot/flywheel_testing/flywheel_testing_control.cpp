@@ -138,20 +138,6 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
-/* define command mappings --------------------------------------------------*/
-auto rightUpRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP);
-auto rightSwitchUp = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&spinFrictionWheels},
-    &rightUpRms);
-
-auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
-auto leftSwitchUp = std::make_unique<HoldRepeatCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&launchKicker},
-    &leftUpRms,
-    false);
-
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -178,8 +164,16 @@ void startFlywheelTestingCommands(Drivers *) {}
 /* register io mappings here ------------------------------------------------*/
 void registerFlywheelTestingIoMappings(Drivers *drivers)
 {
-    drivers->commandMapper.addMap(std::move(rightSwitchUp));
-    drivers->commandMapper.addMap(std::move(leftSwitchUp));
+    drivers->commandMapper.addToMap<HoldCommandMapping>(
+        drivers,
+        std::vector<Command *>{&spinFrictionWheels},
+        RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
+
+    drivers->commandMapper.addToMap<HoldRepeatCommandMapping>(
+        drivers,
+        std::vector<Command *>{&launchKicker},
+        RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
+        false);
 }
 }  // namespace flywheel_testing_control
 

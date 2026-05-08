@@ -825,12 +825,12 @@ void registerStandardIoMappings(Drivers *drivers)
         MultiShotCvCommandMapping::LaunchMode,
         MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
         MultiShotCvCommandMapping>>(
-            drivers,
-            RemoteMapState({Remote::Key::V}),
-            MultiShotCvCommandMapping::LIMITED_20HZ,
-            &leftMousePressedBNotPressed,
-            &MultiShotCvCommandMapping::setShooterState,
-            RemoteMapState({Remote::Key::E}));
+        drivers,
+        RemoteMapState({Remote::Key::V}),
+        MultiShotCvCommandMapping::LIMITED_20HZ,
+        &leftMousePressedBNotPressed,
+        &MultiShotCvCommandMapping::setShooterState,
+        RemoteMapState({Remote::Key::E}));
 }
 }  // namespace standard_control
 

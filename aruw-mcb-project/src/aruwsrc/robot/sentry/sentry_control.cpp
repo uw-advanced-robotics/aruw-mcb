@@ -735,7 +735,7 @@ void registerSentryIoMappings(Drivers *drivers)
         drivers,
         std::vector<Command *>{&turretWidowFrictionWheelSpinCommand},
         RemoteMapState({Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP}));
-    
+
     // manual drive & auto aim
     drivers->commandMapper.addToMap<HoldCommandMapping>(
         drivers,
@@ -755,7 +755,7 @@ void registerSentryIoMappings(Drivers *drivers)
         },
         RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP),
         false);
-        
+
     // manual drive
     drivers->commandMapper.addToMap<HoldCommandMapping>(
         drivers,
@@ -777,7 +777,10 @@ void registerSentryIoMappings(Drivers *drivers)
     // auto drive & auto aim
     drivers->commandMapper.addToMap<HoldCommandMapping>(
         drivers,
-        std::vector<Command *>{&majorManualCommand, &turretWidowManualCommand, &autoNavBeybladeCommand},
+        std::vector<Command *>{
+            &majorManualCommand,
+            &turretWidowManualCommand,
+            &autoNavBeybladeCommand},
         RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
     // manual aim
@@ -813,7 +816,7 @@ void registerSentryIoMappings(Drivers *drivers)
         drivers,
         std::vector<Command *>{&imuCalibrateCommand},
         RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
-    
+
     // restart HUD
     drivers->commandMapper.addToMap<PressCommandMapping>(
         drivers,

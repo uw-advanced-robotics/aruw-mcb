@@ -730,13 +730,13 @@ void registerHeroIoMappings(Drivers *drivers)
         drivers,
         std::vector<Command *>{&spinFrictionWheels},
         RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID));
-    
+
     drivers->commandMapper.addToMap<HoldRepeatCommandMapping>(
         drivers,
         std::vector<Command *>{&spinFrictionWheels, &kicker::launchKickerHeatAndCVLimited},
         RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP),
         false);
-    
+
     drivers->commandMapper.addToMap<MultiShotCvCommandMapping>(
         *drivers,
         kicker::launchKickerHeatAndCVLimited,
@@ -757,7 +757,6 @@ void registerHeroIoMappings(Drivers *drivers)
         RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::V}),
         false);
 
-    
     /*drivers->commandMapper.addToMap<HoldCommandMapping>(
         drivers,
         std::vector<Command *>{&turretCVCommand},
@@ -786,7 +785,8 @@ void registerHeroIoMappings(Drivers *drivers)
         std::vector<Command *>{&turretUTurnCommandLimited},
         RemoteMapState({Remote::Key::Z}));*/
 
-    // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
+    // The "right switch down" portion is to avoid accidentally recalibrating in the middle of a
+    // match.
     drivers->commandMapper.addToMap<PressCommandMapping>(
         drivers,
         std::vector<Command *>{&imuCalibrateCommand},
@@ -799,8 +799,8 @@ void registerHeroIoMappings(Drivers *drivers)
             false));
 
     // The user can press b+ctrl when the remote right switch is in the down position to restart the
-    // client display command. This is necessary since we don't know when the robot is connected to the
-    // server and thus don't know when to start sending the initial HUD graphics.
+    // client display command. This is necessary since we don't know when the robot is connected to
+    // the server and thus don't know when to start sending the initial HUD graphics.
     drivers->commandMapper.addToMap<PressCommandMapping>(
         drivers,
         std::vector<Command *>{&clientDisplayCommand},
@@ -818,12 +818,12 @@ void registerHeroIoMappings(Drivers *drivers)
         drivers,
         std::vector<Command *>{&capBankToggleCommand},
         RemoteMapState({Remote::Key::SHIFT, Remote::Key::C}));
-    
+
     drivers->commandMapper.addToMap<HoldCommandMapping>(
         drivers,
         std::vector<Command *>{&capBankSprintCommand},
         RemoteMapState({Remote::Key::SHIFT}));
-    
+
     drivers->commandMapper.addToMap<PressCommandMapping>(
         drivers,
         std::vector<Command *>{&capBankHalfSprintCommand},

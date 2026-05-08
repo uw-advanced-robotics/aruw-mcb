@@ -83,21 +83,6 @@ StickRpmCommand leftVerticalManual(
 
 RandomMovingTargetCommand randomMovingTargetCommand(&motorSubsystem2006);
 TerminalMovingTargetCommand terminalMovingTargetCommand(&motorSubsystem2006);
-// ------------------
-// command mappings
-// ------------------
-auto leftUpRms = tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
-auto leftUp = std::make_unique<tap::control::PressCommandMapping>(
-    drivers(),
-    std::vector<tap::control::Command*>{&randomMovingTargetCommand},
-    &leftUpRms);
-
-auto leftDownRms =
-    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
-auto leftDown = std::make_unique<tap::control::PressCommandMapping>(
-    drivers(),
-    std::vector<tap::control::Command*>{&terminalMovingTargetCommand},
-    &leftDownRms);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -120,8 +105,16 @@ void registerSubsystems(Drivers* drivers)
 void registerIoMappings(Drivers* drivers)
 {
     motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
-    drivers->commandMapper.addMap(std::move(leftUp));
-    drivers->commandMapper.addMap(std::move(leftDown));
+
+    drivers->commandMapper.addToMap<tap::control::PressCommandMapping>(
+        drivers,
+        std::vector<tap::control::Command*>{&randomMovingTargetCommand},
+        tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
+
+    drivers->commandMapper.addToMap<tap::control::PressCommandMapping>(
+        drivers,
+        std::vector<tap::control::Command*>{&terminalMovingTargetCommand},
+        tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
 }
 }  // namespace launcher_target_control
 

@@ -116,7 +116,7 @@ void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
         drivers,
         std::vector<Command*>{&dartPullback},
         RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
-    
+
     drivers->commandMapper.addToMap<HoldCommandMapping>(
         drivers,
         std::vector<Command*>{&dartRelease},
