@@ -19,11 +19,11 @@
 
 #include <gtest/gtest.h>
 
+#include "tap/control/remote_map_state.hpp"
 #include "tap/drivers.hpp"
 #include "tap/mock/command_mock.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
-#include "tap/control/remote_map_state.hpp"
 
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
