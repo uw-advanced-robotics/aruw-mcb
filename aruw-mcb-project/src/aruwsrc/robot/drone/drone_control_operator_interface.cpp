@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,13 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "drone_turret_subsystem.hpp"
+#include "drone_control_operator_interface.hpp"
 
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 namespace aruwsrc::drone
 {
-float DroneTurretSubsystem::getWorldYaw() const { return turretImu->getYaw(); }
-
-float DroneTurretSubsystem::getWorldPitch() const { return turretImu->getPitch(); }
-
+float DroneControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
+{
+    return -ControlOperatorInterface::getTurretPitchInput(turretID);
+}
 }  // namespace aruwsrc::drone
