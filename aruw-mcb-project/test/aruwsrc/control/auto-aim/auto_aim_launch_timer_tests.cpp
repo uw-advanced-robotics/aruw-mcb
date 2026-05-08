@@ -21,7 +21,6 @@
 
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
-#include "tap/mock/hold_repeat_command_mapping_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/algorithms/otto_ballistics_solver.hpp"

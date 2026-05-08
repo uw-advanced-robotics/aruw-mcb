@@ -51,7 +51,7 @@ protected:
           reverseRMS(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
           cmdMapping(
               &drivers,
-              &rms,
+              rms,
               TestCycleClass::STATE_1,
               &testCycleClass,
               &TestCycleClass::increment,
