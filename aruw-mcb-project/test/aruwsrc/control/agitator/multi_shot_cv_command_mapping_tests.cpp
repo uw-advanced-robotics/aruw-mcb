@@ -23,6 +23,7 @@
 #include "tap/mock/command_mock.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
+#include "tap/control/remote_map_state.hpp"
 
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
@@ -106,7 +107,7 @@ private:
 
 protected:
     NiceMock<tap::mock::CommandMock> cmd;
-    tap::control::GenericRemoteMapState defaultRms;
+    tap::control::RemoteMapState defaultRms;
     NiceMock<aruwsrc::mock::ManualFireRateReselectionManagerMock> fireRateManager;
     NiceMock<aruwsrc::mock::CvOnTargetGovernorMock> cvOnTargetGovernor;
     MultiShotCvCommandMapping multiShotCommandMapping;
