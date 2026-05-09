@@ -26,32 +26,21 @@ namespace aruwsrc::control::client_display::indicators
 EngineerTextIndicators::EngineerTextIndicators(
     tap::Drivers &drivers,
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-    const tap::communication::sensors::limit_switch::LimitSwitchInterface &wristPressureSensor,
-    const tap::communication::sensors::limit_switch::LimitSwitchInterface
-        &cubeStoragePressureSensor1,
-    const tap::communication::sensors::limit_switch::LimitSwitchInterface
-        &cubeStoragePressureSensor2,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),
-      imuCalibrateCommand(imuCalibrateCommand),
-      wristPressureSensor(wristPressureSensor),
-      cubeStoragePressureSensor1(cubeStoragePressureSensor1),
-      cubeStoragePressureSensor2(cubeStoragePressureSensor2)
+      imuCalibrateCommand(imuCalibrateCommand)
 {
 }
 
 modm::ResumableResult<void> EngineerTextIndicators::update()
 {
-    RF_BEGIN(1);
-
     memcpy(prevStates, states, sizeof(states));
 
     // Update states
     states[IMU_CALIBRATING] = drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand);
-    states[CUBE_HELD] = wristPressureSensor.getLimitSwitchDepressed();
-    states[CUBE_STORAGE_1] = cubeStoragePressureSensor1.getLimitSwitchDepressed();
-    states[CUBE_STORAGE_2] = cubeStoragePressureSensor2.getLimitSwitchDepressed();
+
+    RF_BEGIN(1);
 
     for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {

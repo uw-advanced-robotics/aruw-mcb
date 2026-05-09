@@ -46,20 +46,11 @@ public:
      * @param[in] agitatorSubsystem Agitator used when checking if the agitator is jammed.
      * @param[in] imuCalibrateCommand IMU calibrate command used to check if the IMU is being
      * calibrated.
-     * @param[in] wristPressureSensor Interface for the wrist pressure sensor.
-     * @param[in] cubeStoragePressureSensor1 Interface for the first cube storage pressure sensor.
-     * @param[in] cubeStoragePressureSensor2 Interface for the second cube storage pressure sensor.
-     * @param[in] cubeStoragePressureSensor3 Interface for the third cube storage pressure sensor.
      * @param[in] refSerialTransmitter Transmitter to send client data
      */
     EngineerTextIndicators(
         tap::Drivers &drivers,
         const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand,
-        const tap::communication::sensors::limit_switch::LimitSwitchInterface &wristPressureSensor,
-        const tap::communication::sensors::limit_switch::LimitSwitchInterface
-            &cubeStoragePressureSensor1,
-        const tap::communication::sensors::limit_switch::LimitSwitchInterface
-            &cubeStoragePressureSensor2,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     modm::ResumableResult<void> update() override final;
@@ -81,9 +72,6 @@ private:
     enum TextIndicators
     {
         IMU_CALIBRATING,
-        CUBE_HELD,
-        CUBE_STORAGE_1,
-        CUBE_STORAGE_2,
         NO_RECEPTACLE,
         ALIGNED_WITH_RECEPTACLE,
         NUM_TEXT_HUD_INDICATORS
@@ -91,22 +79,13 @@ private:
 
     static constexpr TextIndicatorData imuCalibrating =
         {"Calibrating", Tx::GraphicColor::ORANGE, 730, 840, 20, 3};
-    static constexpr TextIndicatorData cubeHeld =
-        {"Cube Held", Tx::GraphicColor::YELLOW, 730, 800, 100, 10};
-    static constexpr TextIndicatorData cubeStorage1 =
-        {"Cube Storage 1", Tx::GraphicColor::YELLOW, 700, 760, 60, 10};
-    static constexpr TextIndicatorData cubeStorage2 =
-        {"Cube Storage 2", Tx::GraphicColor::YELLOW, 700, 720, 60, 10};
     static constexpr TextIndicatorData noReceptacle =
-        {"No Receptacle", Tx::GraphicColor::ORANGE, 700, 680, 60, 10};
+        {"No Receptacle", Tx::GraphicColor::ORANGE, 700, 800, 60, 10};
     static constexpr TextIndicatorData alignedWithReceptacle =
-        {"Aligned with Receptacle", Tx::GraphicColor::GREEN, 700, 680, 60, 10};
+        {"Aligned with Receptacle", Tx::GraphicColor::GREEN, 700, 760, 60, 10};
 
     static constexpr TextIndicatorData INDICATOR_LIST[NUM_TEXT_HUD_INDICATORS] = {
         imuCalibrating,
-        cubeHeld,
-        cubeStorage1,
-        cubeStorage2,
         noReceptacle,
         alignedWithReceptacle,
     };
@@ -118,11 +97,6 @@ private:
 
     tap::Drivers &drivers;
     const aruwsrc::control::imu::ImuCalibrateCommand &imuCalibrateCommand;
-    const tap::communication::sensors::limit_switch::LimitSwitchInterface &wristPressureSensor;
-    const tap::communication::sensors::limit_switch::LimitSwitchInterface
-        &cubeStoragePressureSensor1;
-    const tap::communication::sensors::limit_switch::LimitSwitchInterface
-        &cubeStoragePressureSensor2;
 
     // Resumeable function thing
     int index = 0;
