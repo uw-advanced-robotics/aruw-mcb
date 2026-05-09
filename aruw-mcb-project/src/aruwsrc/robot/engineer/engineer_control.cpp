@@ -199,24 +199,6 @@ tap::motor::DjiMotor rightBackChassisMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-tap::encoder::CanEncoder parallelOmniOne(
-    drivers(),
-    tap::encoder::CanEncoderId::ID0,
-    tap::can::CanBus::CAN_BUS2,
-    false);
-
-tap::encoder::CanEncoder parallelOmniTwo(
-    drivers(),
-    tap::encoder::CanEncoderId::ID1,
-    tap::can::CanBus::CAN_BUS2,
-    true);
-
-tap::encoder::CanEncoder perpendicularOmni(
-    drivers(),
-    tap::encoder::CanEncoderId::ID2,
-    tap::can::CanBus::CAN_BUS2,
-    true);
-
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
      aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
@@ -358,6 +340,24 @@ DualDigitalOutSubsystem rightSuckSubsystem(
     tap::gpio::Digital::OutputPin::Y,
     true,
     tap::gpio::Digital::OutputPin::Z,
+    true);
+
+tap::encoder::CanEncoder parallelOmniOne(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    tap::can::CanBus::CAN_BUS2,
+    false);
+
+tap::encoder::CanEncoder parallelOmniTwo(
+    drivers(),
+    tap::encoder::CanEncoderId::ID1,
+    tap::can::CanBus::CAN_BUS2,
+    true);
+
+tap::encoder::CanEncoder perpendicularOmni(
+    drivers(),
+    tap::encoder::CanEncoderId::ID2,
+    tap::can::CanBus::CAN_BUS2,
     true);
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
@@ -618,7 +618,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
+    //drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
     drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
