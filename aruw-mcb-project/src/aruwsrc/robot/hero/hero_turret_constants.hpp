@@ -26,6 +26,7 @@
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
+#include "aruwsrc/robot/hero/hero_pitch_turret_motor.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
@@ -71,10 +72,17 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 760,
+    .startEncoderValue = 90,
     .minAngle = -.55f,
     .maxAngle = 1.1f,
     .limitMotorAngles = true,
+};
+
+inline constexpr aruwsrc::hero::HeroPitchLinkage::FourBarLinkageConfig PITCH_LINKAGE_CONFIG = {
+    .l1 = 0.080f, // 80mm fixed link
+    .l2 = 0.080f, // turret head
+    .l3 = 0.120f, // longer linkage
+    .l4 = 0.040f, // shorter linkage
 };
 
 // Turret is perfectly balanced
