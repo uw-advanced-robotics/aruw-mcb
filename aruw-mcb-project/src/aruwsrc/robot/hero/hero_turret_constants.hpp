@@ -79,10 +79,10 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 };
 
 inline constexpr aruwsrc::hero::HeroPitchLinkage::FourBarLinkageConfig PITCH_LINKAGE_CONFIG = {
-    .l1 = 0.080f, // 80mm fixed link
-    .l2 = 0.080f, // turret head
-    .l3 = 0.120f, // longer linkage
-    .l4 = 0.040f, // shorter linkage
+    .l1 = 0.080f,  // 80mm fixed link
+    .l2 = 0.080f,  // turret head
+    .l3 = 0.120f,  // longer linkage
+    .l4 = 0.040f,  // shorter linkage
 };
 
 // Turret is perfectly balanced
