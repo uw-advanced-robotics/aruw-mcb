@@ -87,9 +87,6 @@ public:
 
     static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
 
-    static constexpr float SCAN_TURRET_LEFT_YAW = modm::toRadian(90.0f);
-    static constexpr float SCAN_TURRET_RIGHT_YAW = modm::toRadian(-90.0f);
-
     /**
      * Pitch angle increments that the turret will change by each call
      * to refresh when the turret is scanning for a target, in radians.
@@ -121,8 +118,7 @@ public:
         aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
-        TurretConfig &turretLeftConfig,
-        TurretConfig &turretRightConfig,
+        TurretConfig &turretWidowConfig,
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms);
 
     void initialize();
@@ -147,9 +143,11 @@ public:
      */
     bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
     {
-        return turretID == turretLeftConfig.turretSubsystem.getTurretID()
-                   ? withinAimingToleranceLeft
-                   : withinAimingToleranceRight;
+        if (turretID != turretWidowConfig.turretSubsystem.getTurretID())
+        {
+            return false;
+        }
+        return withinAimingToleranceWidow;
     }
 
 private:
@@ -171,8 +169,7 @@ private:
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor;
 
-    TurretConfig &turretLeftConfig;
-    TurretConfig &turretRightConfig;
+    TurretConfig &turretWidowConfig;
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms;
 
     uint32_t prevTime;
@@ -206,8 +203,7 @@ private:
 
     tap::algorithms::WrappedFloat majorScanValue = Angle(0);
 
-    bool withinAimingToleranceLeft = false;
-    bool withinAimingToleranceRight = false;
+    bool withinAimingToleranceWidow = false;
 
     /**
      * A counter that is reset to 0 every time CV starts tracking a target

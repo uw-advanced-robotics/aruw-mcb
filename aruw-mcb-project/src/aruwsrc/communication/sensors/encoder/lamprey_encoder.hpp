@@ -20,18 +20,17 @@
 #ifndef LAMPREY_ENCODER_HPP_
 #define LAMPREY_ENCODER_HPP_
 
+#include "tap/communication/can/can.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
+
 #include "modm/container/pair.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
-#include "analog_sensor_encoder.hpp"
-
 namespace aruwsrc::communication::sensors::encoder
 {
-class LampreyEncoder : public AnalogSensorEncoder
+class LampreyEncoder : public tap::encoder::CanEncoder
 {
 public:
-    using Calibration = AnalogSensorEncoder::Calibration;
-
     /***
      * @param sensor the AruwAnalogSensor that this encoder will read from
      * @param channel the channel of the AruwAnalogSensor that this encoder will read from
@@ -45,61 +44,67 @@ public:
      */
     template <std::size_t LUT_SIZE>
     LampreyEncoder(
-        aruwsrc::communication::can::AruwAnalogSensor* sensor,
-        AnalogSensorEncoder::Channel channel,
-        const Calibration& calibration,
-        const modm::Pair<float, float> (&lookupTableConfig)[LUT_SIZE],
+        tap::Drivers* drivers,
+        tap::encoder::CanEncoderId CAN_ID,
+        tap::can::CanBus CAN_BUS,
+        const modm::Pair<float, float> (&lookupTableConfig)[LUT_SIZE] = {},
         bool isInverted = false)
-        : AnalogSensorEncoder(sensor, channel, calibration, isInverted),
-          lookupTable(lookupTableConfig, LUT_SIZE)
+        : CanEncoder(drivers, CAN_ID, CAN_BUS, isInverted),
+          lookupTable(lookupTableConfig, LUT_SIZE),
+          lutSize(LUT_SIZE)
     {
     }
 
-    uint16_t getRaw() const { return raw; }
-    uint32_t getTicks() const { return ticks; }
+    float getRawAngle() const { return angleRaw; }
 
-protected:
-    void updateFromSensor() override
+    void processMessage(const modm::can::Message& message)
     {
-        if (this->sensor == nullptr)
+        uint16_t raw = (message.data[1] << 8) | message.data[0];
+
+        angleRaw = (raw / 100.0f);
+
+        float angle = angleRaw;
+
+        if (inverted)
         {
-            return;
+            angle = -angle;
         }
 
-        uint32_t now = tap::arch::clock::getTimeMicroseconds();
-        if (now == lastUpdateMicros)
+        angle = -encoderHomePosition.getWrappedValue();
+        if (angle < 0.0f)
         {
-            return;
-        }
-        lastUpdateMicros = now;
-
-        const uint16_t rawClamped =
-            std::clamp(this->readRaw(), calibration.rawMin, calibration.rawMax);
-
-        // Get raw ticks
-        ticks = rawToTicks(rawClamped);
-
-        // Get the non-linear position in radians from your lookup table
-        const float positionRadians = lookupTable.interpolate(static_cast<float>(ticks));
-
-        // Calculate the encoder's resolution (matching the base class logic)
-        uint32_t resolution = 1;
-        if (calibration.rawMax > calibration.rawMin)
-        {
-            resolution = calibration.rawMax - calibration.rawMin + 1;
+            angle += M_TWOPI;
         }
 
-        // Convert radians back to linearized ticks
-        float fraction = positionRadians / calibration.outputRangeRadians;
-        uint32_t linearizedTicks = static_cast<uint32_t>(fraction * static_cast<float>(resolution));
+        if (lutSize > 0)
+        {
+            angle = lookupTable.interpolate(angleRaw);
+        }
+        if (lastUpdateTime == 0)
+        {
+            encoder = tap::algorithms::WrappedFloat(angle, 0, M_TWOPI);
+        }
+        else
+        {
+            encoder += encoder.minDifference(angle);
+        }
 
-        updateEncoderValue(linearizedTicks);
-    };
+        uint32_t time = tap::arch::clock::getTimeMicroseconds();
+        deltaTime = time - this->lastUpdateTime;
+        this->lastUpdateTime = time;
+
+        pastPosition = position;
+        position.setUnwrappedValue(encoder.getUnwrappedValue());
+
+        this->gauss = 0.0f;
+        this->encoderDisconnectTimeout.restart(DISCONNECT_TIME);
+    }
 
 private:
     modm::interpolation::Linear<modm::Pair<float, float>> lookupTable;
-    uint_fast16_t raw{0};
-    uint32_t ticks{0};
+
+    const size_t lutSize{0};
+    float angleRaw{0.0f};
 };
 
 }  // namespace aruwsrc::communication::sensors::encoder
