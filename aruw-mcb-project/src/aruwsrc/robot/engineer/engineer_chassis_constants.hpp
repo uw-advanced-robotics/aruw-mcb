@@ -83,8 +83,8 @@ static constexpr float VELOCITY_PID_KS = 0.0;
 
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 300.0f,
-    .ki = 1400.0f,
-    .kd = 0.1f,
+    .ki = 14.0f,
+    .kd = 0.0f,
     .maxICumulative = 2000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .errDeadzone = 1.0f,
@@ -95,8 +95,8 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
-static constexpr float AUTOROTATION_PID_KD = 57.3f;
+static constexpr float AUTOROTATION_PID_KP = 200.6f;
+static constexpr float AUTOROTATION_PID_KD = 10.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;

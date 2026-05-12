@@ -29,15 +29,39 @@ using namespace modm::literals;
 namespace aruwsrc::communication::sensors::imu::ism330
 {
 using namespace tap::communication::sensors::imu;
-ISM330::ISM330() : AbstractIMU(){};
+ISM330* ISM330::spiOwner = nullptr;
+#ifdef PLATFORM_HOSTED
+namespace
+{
+void noopChipSelectControl() {}
+}  // namespace
+#endif
+
+ISM330::ISM330()
+#ifndef PLATFORM_HOSTED
+    : ISM330(chipSelectFromGpio<Board::SpiNss>())
+#else
+    : ISM330({noopChipSelectControl, noopChipSelectControl, noopChipSelectControl})
+#endif
+{
+}
+
+ISM330::ISM330(ChipSelectControl chipSelectControl)
+    : AbstractIMU(),
+      chipSelectControl(chipSelectControl){};
 
 void ISM330::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 {
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
 #ifndef PLATFORM_HOSTED
-    Board::SpiNss::GpioOutput();
+    if (chipSelectControl.initialize != nullptr)
+    {
+        chipSelectControl.initialize();
+    }
+    ismNssHigh();
     Board::GenSpiMaster::connect<Board::SpiMiso::Miso, Board::SpiMosi::Mosi, Board::SpiSck::Sck>();
     Board::GenSpiMaster::initialize<Board::SystemClock, 5625000_Hz>();
+    Board::GenSpiMaster::setDataMode(Board::GenSpiMaster::DataMode::Mode3);
     modm::delay_ms(10);
     setODR(DEFAULT_ODR);
     setGyroRange(DEFAULT_GYRO_RANGE);
@@ -55,6 +79,9 @@ bool ISM330::read()
     while (true)
     {
         PT_WAIT_UNTIL(readTimeout.execute());
+        PT_WAIT_UNTIL((spiOwner == nullptr) || (spiOwner == this));
+        spiOwner = this;
+
         tx = CTRL1_XL | ISM330_READ_BIT;
         rx = 0;
         ismNssLow();
@@ -92,6 +119,7 @@ bool ISM330::read()
                 prevImuState = imuState;
             }
             imuState = ImuState::IMU_NOT_CONNECTED;
+            spiOwner = nullptr;
             // We don't want to update IMU received data time.
             continue;
         }
@@ -127,6 +155,7 @@ bool ISM330::read()
         {
             imuState = prevImuState;
         }
+        spiOwner = nullptr;
     }
     PT_END();
     return true;
@@ -169,14 +198,20 @@ uint8_t ISM330::spiReadRegister(uint8_t reg)
 void ISM330::ismNssLow()
 {
 #ifndef PLATFORM_HOSTED
-    Board::SpiNss::setOutput(modm::GpioOutput::Low);
+    if (chipSelectControl.setLow != nullptr)
+    {
+        chipSelectControl.setLow();
+    }
 #endif
 }
 
 void ISM330::ismNssHigh()
 {
 #ifndef PLATFORM_HOSTED
-    Board::SpiNss::setOutput(modm::GpioOutput::High);
+    if (chipSelectControl.setHigh != nullptr)
+    {
+        chipSelectControl.setHigh();
+    }
 #endif
 }
 

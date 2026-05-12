@@ -20,6 +20,7 @@
 #include "velocity_agitator_subsystem.hpp"
 
 #include <cassert>
+#include <cmath>
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/subsystem.hpp"
@@ -81,6 +82,11 @@ void VelocityAgitatorSubsystem::refresh()
     {
         subsystemJamStatus = true;
     }
+
+    if (checkemptyJamCondition())
+    {
+        subsystemJamStatus = true;
+    }
 }
 
 bool VelocityAgitatorSubsystem::calibrateHere()
@@ -125,5 +131,27 @@ void VelocityAgitatorSubsystem::setSetpoint(float velocity)
     {
         velocitySetpoint = velocity;
     }
+}
+
+bool VelocityAgitatorSubsystem::checkemptyJamCondition()
+{
+    bool refSerialReceivingData = drivers->refSerial.getRefSerialReceivingData();
+
+    if (!config.emptyJamEnabled || config.emptyJamTimeoutMs == 0 || !refSerialReceivingData)
+    {
+        return false;
+    }
+
+    const uint32_t now = tap::arch::clock::getTimeMilliseconds();
+
+    const auto& turretData = drivers->refSerial.getRobotData().turret;
+    if (turretData.launchMechanismID == config.emptyJamBarrelId &&
+        turretData.lastReceivedLaunchingInfoTimestamp != lastRefLaunchTimestamp)
+    {
+        lastRefLaunchTimestamp = turretData.lastReceivedLaunchingInfoTimestamp;
+        lastProjectileLaunchDetectedAtMs = now;
+    }
+
+    return now - lastProjectileLaunchDetectedAtMs >= config.emptyJamTimeoutMs;
 }
 }  // namespace aruwsrc::control::agitator
