@@ -300,8 +300,8 @@ tap::motor::DjiMotor yawMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(1 / 2.0f),
     0);
-// aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG, PITCH_LINKAGE_CONFIG);
-aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
+aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG, PITCH_LINKAGE_CONFIG);
+// aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
 aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
 
 HeroTurretSubsystem turret(
