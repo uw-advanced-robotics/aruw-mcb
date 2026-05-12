@@ -48,8 +48,7 @@ public:
             const float l3 = linkageConfig.l3;
             const float l4 = linkageConfig.l4;
 
-            float theta1 = -motor->getEncoder()->getPosition().getWrappedValue() +
-                           config.startAngle + M_TWOPI + M_PI;
+            float theta1 = -motor->getEncoder()->getPosition().getWrappedValue() + M_TWOPI + M_PI;
             while (theta1 > M_TWOPI)
             {
                 theta1 -= M_TWOPI;
@@ -63,8 +62,7 @@ public:
 
             const float theta5 = acos((l4 * l4 - v1 * v1 - l1 * l1) / (-2.0f * v1 * l1));
 
-            // const float pos = M_PI_2 - theta5 - theta3;
-            const float pos = theta5 + theta3 - M_PI_2;
+            const float pos = theta5 + theta3 - M_PI_2 + config.startAngle;
 
             chassisFrameMeasuredAngle.setWrappedValue(pos);
         }
