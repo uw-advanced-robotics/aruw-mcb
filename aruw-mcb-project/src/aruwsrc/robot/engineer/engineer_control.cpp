@@ -617,15 +617,6 @@ Trigger wheelUp =
     (!TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, -0.5f, false))
         .onTrue(&endEffectorSuckOffCommand);
 
-// The user can press b+ctrl when the remote right switch is in the down position to restart the
-// client display command. This is necessary since we don't know when the robot is connected to the
-// server and thus don't know when to start sending the initial HUD graphics.
-auto bCtrlRms = RemoteMapState({Remote::Key::CTRL, Remote::Key::B});
-auto bCtrlPressed = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&clientDisplayCommand},
-    &bCtrlRms);
-
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -638,7 +629,7 @@ void initializeSubsystems()
     rightSuckSubsystem.initialize();
     transformSubsystem.initialize();
     odometrySubsystem.initialize();
-    // clientDicsplay.initialize();
+    clientDisplay.initialize();
     parallelOmniOne.initialize();
     parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
@@ -678,9 +669,7 @@ void startEngineerCommands(aruwsrc::engineer::Drivers* drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {
-    drivers->commandMapper.addMap(std::move(bCtrlPressed));
-}
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}
 }  // namespace control
 }  // namespace aruwsrc
 
