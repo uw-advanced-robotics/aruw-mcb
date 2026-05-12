@@ -62,7 +62,9 @@ protected:
               &drivers,
               std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}}),
           visionCoprocessor(&drivers),
-          turretSubsystem(&drivers),
+          pitchMotorMock(nullptr),
+          yawMotorMock(nullptr),
+          turretSubsystem(&drivers, pitchMotorMock, yawMotorMock, nullptr),
           ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};
 
     void SetUp() override {}
@@ -74,6 +76,8 @@ protected:
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
+    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballistics;
 };

@@ -81,15 +81,10 @@ public:
 
     const inline tap::communication::sensors::imu::AbstractIMU* getIMU() const { return turretImu; }
 
-#ifdef ENV_UNIT_TESTS
-    testing::NiceMock<mock::TurretMotorMock> pitchMotor;
-    testing::NiceMock<mock::TurretMotorMock> yawMotor;
-#else
     /// Associated with and contains logic for controlling the turret's pitch motor
     TurretMotor& pitchMotor;
     /// Associated with and contains logic for controlling the turret's yaw motor
     TurretMotor& yawMotor;
-#endif
 
 protected:
     const tap::communication::sensors::imu::AbstractIMU* turretImu;

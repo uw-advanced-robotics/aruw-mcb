@@ -66,7 +66,8 @@ protected:
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
           voltageSensor(),
-          t(&d),
+          pitchMotorMock(nullptr),
+          yawMotorMock(nullptr),
           lfm(),
           lbm(),
           rfm(),
@@ -81,7 +82,7 @@ protected:
              MOCK_WHEEL_VELOCITY_PID_CONFIG,
              WHEEL_RADIUS,
              WHEELBASE_RADIUS),
-          bc(&d, &cs, &t.yawMotor, operatorInterface, BEYBLADE_CONFIG),
+          bc(&d, &cs, &yawMotorMock, operatorInterface, BEYBLADE_CONFIG),
           yawAngle(Angle(std::get<2>(GetParam()))),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))
@@ -91,8 +92,8 @@ protected:
     void SetUp() override
     {
         ON_CALL(cs, getDesiredRotation).WillByDefault(Return(0));
-        ON_CALL(t.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnPointee(&yawAngle));
-        ON_CALL(t.yawMotor, isOnline).WillByDefault(Return(true));
+        ON_CALL(yawMotorMock, getChassisFrameMeasuredAngle).WillByDefault(ReturnPointee(&yawAngle));
+        ON_CALL(yawMotorMock, isOnline).WillByDefault(Return(true));
         ON_CALL(operatorInterface, getChassisXInput()).WillByDefault(ReturnPointee(&x));
         ON_CALL(operatorInterface, getChassisYInput()).WillByDefault(ReturnPointee(&y));
         ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
@@ -141,7 +142,8 @@ protected:
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
     aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
-    NiceMock<TurretSubsystemMock> t;
+    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
     NiceMock<tap::mock::MotorInterfaceMock> lfm, lbm, rfm, rbm;
     NiceMock<MecanumChassisSubsystemMock> cs;
     BeybladeCommand bc;
