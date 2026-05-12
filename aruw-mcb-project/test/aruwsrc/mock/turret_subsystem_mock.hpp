@@ -37,7 +37,7 @@ public:
         tap::Drivers* drivers,
         aruwsrc::control::turret::TurretMotor& pitchMotor,
         aruwsrc::control::turret::TurretMotor& yawMotor,
-    const tap::communication::sensors::imu::AbstractIMU* turretImu);
+        const tap::communication::sensors::imu::AbstractIMU* turretImu);
     virtual ~TurretSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));

@@ -31,8 +31,8 @@
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/mecanum_chassis_subsystem_mock.hpp"
-#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
+#include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 using namespace aruwsrc::control::chassis;
@@ -282,7 +282,11 @@ TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_null
     aruwsrc::control::turret::TurretMotorConfig dummyConfig;
     NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock(nullptr, dummyConfig);
     NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock(nullptr, dummyConfig);
-    NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(&drivers, pitchMotorMock, yawMotorMock, nullptr);
+    NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(
+        &drivers,
+        pitchMotorMock,
+        yawMotorMock,
+        nullptr);
 
     ChassisImuDriveCommand chassisImuDriveCommand(
         &drivers,

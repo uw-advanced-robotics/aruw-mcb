@@ -58,14 +58,11 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(pitchMotorMock, getChassisFrameSetpoint)
-            .WillByDefault(ReturnPointee(&setpoint));
-        ON_CALL(yawMotorMock, getChassisFrameSetpoint)
-            .WillByDefault(ReturnPointee(&setpoint));
+        ON_CALL(pitchMotorMock, getChassisFrameSetpoint).WillByDefault(ReturnPointee(&setpoint));
+        ON_CALL(yawMotorMock, getChassisFrameSetpoint).WillByDefault(ReturnPointee(&setpoint));
         ON_CALL(pitchMotorMock, getChassisFrameMeasuredAngle)
             .WillByDefault(ReturnRef(currentAngle));
-        ON_CALL(yawMotorMock, getChassisFrameMeasuredAngle)
-            .WillByDefault(ReturnRef(currentAngle));
+        ON_CALL(yawMotorMock, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(currentAngle));
         ON_CALL(pitchMotorMock, getChassisFrameVelocity).WillByDefault(Return(0));
         ON_CALL(yawMotorMock, getChassisFrameVelocity).WillByDefault(Return(0));
     }
@@ -82,10 +79,7 @@ class PitchControllerTest : public ChassisFrameTurretControllerTest
 {
 protected:
     PitchControllerTest()
-        : turretController(
-              pitchMotorMock,
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0},
-              {&gravityCompensation})
+        : turretController(pitchMotorMock, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}, {&gravityCompensation})
     {
     }
 
@@ -95,9 +89,7 @@ protected:
 class YawControllerTest : public ChassisFrameTurretControllerTest
 {
 protected:
-    YawControllerTest() : turretController(yawMotorMock, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0})
-    {
-    }
+    YawControllerTest() : turretController(yawMotorMock, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}) {}
 
     ChassisFrameTurretController<Axis::YAW> turretController;
 };
@@ -172,9 +164,7 @@ TEST_F(PitchControllerTest, runPitchPidController_pid_out_negative_when_setpoint
 TEST_F(YawControllerTest, runYawPidController_pid_out_0_when_setpoints_match_p_controller)
 {
     // Validate pitch setpoint set and pid output is reasonable
-    EXPECT_CALL(
-        yawMotorMock,
-        setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, 0)));
+    EXPECT_CALL(yawMotorMock, setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, 0)));
     EXPECT_CALL(
         yawMotorMock,
         setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, M_PI_2)));
