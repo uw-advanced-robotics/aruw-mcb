@@ -31,43 +31,45 @@
 namespace aruwsrc::engineer
 {
 static constexpr tap::can::CanBus CAN_BUS_WRIST = tap::can::CanBus::CAN_BUS1;
-static constexpr tap::motor::MotorId WRIST_LEFT_MOTOR_ID = tap::motor::MotorId::MOTOR4;
-static constexpr tap::motor::MotorId WRIST_RIGHT_MOTOR_ID = tap::motor::MotorId::MOTOR5;
-static constexpr tap::motor::MotorId WRIST_THETA3_MOTOR_ID = tap::motor::MotorId::MOTOR6;
+static constexpr tap::motor::MotorId WRIST_MOTOR_1_ID = tap::motor::MotorId::MOTOR4;
+static constexpr tap::motor::MotorId WRIST_MOTOR_2_ID = tap::motor::MotorId::MOTOR2;
+static constexpr tap::motor::MotorId WRIST_THETA3_MOTOR_ID = tap::motor::MotorId::MOTOR3;
 static constexpr tap::encoder::CanEncoderId WRIST_THETA1_ENCODER_ID =
-    tap::encoder::CanEncoderId::ID0;
+    tap::encoder::CanEncoderId::ID1;  // todo: lamprey
 static constexpr tap::encoder::CanEncoderId WRIST_THETA2_ENCODER_ID =
-    tap::encoder::CanEncoderId::ID1;
-static constexpr tap::encoder::CanEncoderId WRIST_THETA3_ENCODER_ID =
-    tap::encoder::CanEncoderId::ID2;
+    tap::encoder::CanEncoderId::ID0;
 
 static constexpr uint32_t WRIST_HOME_THETA1 = 0;
-static constexpr uint32_t WRIST_HOME_THETA2 = 0;
+static constexpr uint32_t WRIST_HOME_THETA2 = 568;
 static constexpr uint32_t WRIST_HOME_THETA3 = 0;
+
+inline constexpr float WRIST_MOTOR_1_GEAR_RATIO = 10.0f / 28.0f;
+inline constexpr float WRIST_MOTOR_2_GEAR_RATIO = 10.0f / 32.0f;
+inline constexpr float WRIST_MOTOR_3_GEAR_RATIO = 12.0f / 30.0f;
 
 static constexpr float WRIST_ROLL_PID_KS = 0.0;
 static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA1_PID_CONFIG{
-    .kp = 0,
+    .kp = 4000.0f,
     .ki = 0.0f,
-    .kd = 0,
+    .kd = 500.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 3000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA2_PID_CONFIG{
-    .kp = 0,
+    .kp = 4000.0f,
     .ki = 0.0f,
-    .kd = 0,
+    .kd = 500.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 3000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA3_PID_CONFIG{
-    .kp = 0,
+    .kp = 3000.0f,
     .ki = 0.0f,
-    .kd = 0,
+    .kd = 300.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 3000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610,
 };
 
 static constexpr wrist::WristConfig WRIST_CONFIG{
@@ -76,7 +78,7 @@ static constexpr wrist::WristConfig WRIST_CONFIG{
     .theta3PidConfig = WRIST_THETA3_PID_CONFIG,
     .theta2Min = -M_PI_2,
     .theta2Max = M_PI_2,
-    .ratio = 30.0f / 40.0f,
+    .ratio = 1.0f,
     .maxMotorDesiredOutput = static_cast<int32_t>(tap::motor::DjiMotor::MAX_OUTPUT_C610 * 0.6f),
 };
 
@@ -94,9 +96,9 @@ static constexpr aruwsrc::control::joint::JointSubsystem::Config WRIST_ROLL_CONF
     .maxOutput = WRIST_ROLL_PID_CONFIG.maxOutput,
 };
 
-static constexpr float WRIST_ROLL_SCALING_FACTOR = 0.01f;
-static constexpr float WRIST_PITCH_SCALING_FACTOR = 0.01f;
-static constexpr float WRIST_YAW_SCALING_FACTOR = 0.01f;
+static constexpr float WRIST_THETA_1_SCALING_FACTOR = 0.01f;
+static constexpr float WRIST_THETA_2_SCALING_FACTOR = 0.01f;
+static constexpr float WRIST_THETA_3_SCALING_FACTOR = 0.01f;
 
 static constexpr float WRIST_ROLL_CLICK_VELOCITY = 0.5f;
 

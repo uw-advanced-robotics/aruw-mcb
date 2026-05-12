@@ -156,7 +156,7 @@ TurretMinorMotors turretWidowMotors{
         false,
         "Widow Minor Yaw Turret",
         true,
-        1.0,
+        tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
         turretWidow::YAW_MOTOR_CONFIG.startEncoderValue),
 
     .pitchMotor = tap::motor::DjiMotor(
@@ -166,7 +166,7 @@ TurretMinorMotors turretWidowMotors{
         true,
         "Widow Minor Pitch Turret",
         true,
-        1.0,
+        tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
         turretWidow::PITCH_MOTOR_CONFIG.startEncoderValue),
 
     .yawMotorConfig = turretWidow::YAW_MOTOR_CONFIG,
@@ -186,7 +186,7 @@ inline aruwsrc::communication::can::TurretMCBCanComm &getChassisTurretMCBCanComm
 
 inline tap::communication::sensors::imu::AbstractIMU &getTurretMajorImu()
 {
-    return drivers()->turretMajorImuSecondary;
+    return drivers()->turretMajorImu;
 }
 
 // /* define subsystems --------------------------------------------------------*/
@@ -303,7 +303,7 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry cfOdometrySubsystem(
     modm::Vector2f(INITIAL_CHASSIS_POSITION_X, INITIAL_CHASSIS_POSITION_Y));
 
 SentryTransforms transformer(
-    cfOdometrySubsystem,
+    odometrySubsystem,
     turretMajor,
     turretWidow,
     getTurretMCBCanCommWidow(),
@@ -313,12 +313,12 @@ SentryTransforms transformer(
     });
 
 SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
-SentryTransformAdapter transformAdapter(transformer, &cfOdometrySubsystem);
+SentryTransformAdapter transformAdapter(transformer);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
     drivers()->visionCoprocessor,
-    cfOdometrySubsystem,
+    odometrySubsystem,
     transformAdapter);
 
 aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
@@ -495,7 +495,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     turretMajorChassisYawController,
     chassis,
     chassisYawObserver,
-    cfOdometrySubsystem,
+    odometrySubsystem,
     getTurretMajorImu(),
     getChassisTurretMCBCanComm(),
     transformer,
@@ -504,7 +504,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
-ImuNotCalibratedGovernor imuNotCalibratedGovernor(drivers(), drivers()->mpu6500);
+ImuNotCalibratedGovernor imuNotCalibratedGovernor(drivers(), getTurretMajorImu());
 
 GovernorLimitedCommand<1> imuNotCalibratedCommandLimited(
     {&buzzer},
@@ -776,7 +776,7 @@ void initializeSubsystems()
     turretWidow.initialize();
     turretMajor.initialize();
     turretMajorYawLamprey.initialize();
-    // odometrySubsystem.initialize();
+    odometrySubsystem.initialize();
     cfOdometrySubsystem.initialize();
     transformerSubsystem.initialize();
     arucoResetSubsystem.initialize();
@@ -794,7 +794,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretWidow);
-    // drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
+    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&cfOdometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformerSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
