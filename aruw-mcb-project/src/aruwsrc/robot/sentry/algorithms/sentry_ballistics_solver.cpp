@@ -23,6 +23,7 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
+#include "aruwsrc/algorithms/spherical_projectile_aim.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
@@ -60,6 +61,7 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
     if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
     {
         lastComputedSolution = std::nullopt;
+        lastDragComparison = {};
         return std::nullopt;
     }
 
@@ -103,13 +105,26 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
         int64_t projectForwardTimeDt =
             static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
             static_cast<int64_t>(aimData.timestamp);
+        const float latencyCompensationSeconds = projectForwardTimeDt / 1E6f;
 
         // project the target position forward in time s.t. we are computing a ballistics solution
         // for a target "now" rather than whenever the camera saw the target
-        targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
+        targetState.position = targetState.projectForward(latencyCompensationSeconds);
 
         lastComputedSolution = BallisticsSolution();
         lastComputedSolution->distance = targetState.position.getLength();
+        lastDragComparison = {};
+        lastDragComparison.launchSpeed = launchSpeed;
+        lastDragComparison.latencyCompensationSeconds = latencyCompensationSeconds;
+        lastDragComparison.targetPositionX = targetState.position.x;
+        lastDragComparison.targetPositionY = targetState.position.y;
+        lastDragComparison.targetPositionZ = targetState.position.z;
+        lastDragComparison.targetVelocityX = targetState.velocity.x;
+        lastDragComparison.targetVelocityY = targetState.velocity.y;
+        lastDragComparison.targetVelocityZ = targetState.velocity.z;
+        lastDragComparison.targetAccelerationX = targetState.acceleration.x;
+        lastDragComparison.targetAccelerationY = targetState.acceleration.y;
+        lastDragComparison.targetAccelerationZ = targetState.acceleration.z;
 
         if (!ballistics::findTargetProjectileIntersection(
                 targetState,
@@ -121,7 +136,23 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
                 turretPitchOffset))
         {
             lastComputedSolution = std::nullopt;
+            return std::nullopt;
         }
+
+        lastDragComparison.vacuumPitchAngle = lastComputedSolution->pitchAngle;
+        lastDragComparison.vacuumYawAngle = lastComputedSolution->yawAngle;
+        lastDragComparison.vacuumTimeOfFlight = lastComputedSolution->timeOfFlight;
+
+        lastDragComparison.dragSolutionFound =
+            aruwsrc::algorithms::findTargetProjectileIntersectionWithSphereDrag(
+                targetState,
+                launchSpeed,
+                3,
+                &lastDragComparison.dragPitchAngle,
+                &lastDragComparison.dragYawAngle,
+                &lastDragComparison.dragTimeOfFlight,
+                turretPitchOffset,
+                &lastDragComparison.dragDistance);
     }
 
     return lastComputedSolution;
