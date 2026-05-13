@@ -96,15 +96,19 @@ static const aruwsrc::algorithms::PointMass MASS_BEYOND_WRIST{
     .mass = 0.471,
     .location =
         tap::algorithms::transforms::Position(0.0457, -0.01134, 0)};  // TODO may have to negate y
-static constexpr float EXTENSION_STATIONARY_MASS = 1;                 // TODO
-static constexpr float EXTENSION_MIDDLE_MASS = 1;                     // TODO
-static constexpr float EXTENSION_END_MASS = 1;                        // TODO
+static constexpr float EXTENSION_STATIONARY_MASS = 1.255;
+static constexpr float EXTENSION_MIDDLE_MASS = 0.987;
+static constexpr float EXTENSION_END_MASS = 1.231;
 static const aruwsrc::algorithms::PointMass MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT{
     .mass = EXTENSION_STATIONARY_MASS + EXTENSION_MIDDLE_MASS + EXTENSION_END_MASS,
-    .location = tap::algorithms::transforms::Position(0, 0, 0)};  // TODO
-static constexpr float EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR =
-    (EXTENSION_MIDDLE_MASS / 2 + EXTENSION_END_MASS) /
-    (EXTENSION_STATIONARY_MASS + EXTENSION_MIDDLE_MASS + EXTENSION_END_MASS);
+    .location = tap::algorithms::transforms::Position(-0.02251, 0.00453, 0.06967)};
+// location when fully extended: 0.398, 0.00453, 0.06967
+
+// inline float EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR =
+//     (EXTENSION_MIDDLE_MASS / 2 + EXTENSION_END_MASS) /
+//     (EXTENSION_STATIONARY_MASS + EXTENSION_MIDDLE_MASS + EXTENSION_END_MASS);
+inline constexpr float EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR =
+    0.2f;  // found empirically
 
 }  // namespace aruwsrc::engineer::algorithms
 #endif  // ENGINEER_KINEMATIC_CONSTANTS_HPP_

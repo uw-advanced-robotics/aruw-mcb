@@ -108,7 +108,7 @@ static constexpr aruwsrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = 
 inline constexpr float YAW_TURRET_GEAR_RATIO = 16.0f / 60.0f;
 
 inline constexpr uint32_t PITCH_TURRET_ENCODER_HOME = 884;
-inline constexpr uint32_t PITCH_TURRET_GEAR_RATIO = 1.0f / 8.0f;
+inline constexpr float PITCH_TURRET_GEAR_RATIO = 1.0f / 8.0f;
 
 static constexpr aruwsrc::control::turret::TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
@@ -252,7 +252,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 400.0f,
+    .tRDerivativeKalman = 300.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,

@@ -62,6 +62,7 @@
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_dynamic_com_gravity_compensator.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -429,9 +430,19 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-ChassisFrameTurretController<Axis::PITCH> chassisFramePitchTurretController(
-    engTurret.pitchMotor,
-    chassis_rel::PITCH_PID_CONFIG);
+inline constexpr float M3508_TORQUE_CONSTANT =
+    (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
+
+TurretDynamicCOMGravityCompensator gravityPitchCompensator(
+    {.pointMass = transformer.getCOMBeyondTurretPitch(),
+     .worldToTurretPitch = transformer.getWorldToTurretPitch(),
+     .motorTorqueConstant = M3508_TORQUE_CONSTANT * PITCH_TURRET_GEAR_RATIO});
+
+ChassisFrameTurretController<aruwsrc::control::turret::algorithms::Axis::PITCH>
+    chassisFramePitchTurretController(
+        engTurret.pitchMotor,
+        chassis_rel::PITCH_PID_CONFIG,
+        {&gravityPitchCompensator});
 
 ChassisFrameTurretController<Axis::YAW> chassisFrameYawTurretController(
     engTurret.yawMotor,
