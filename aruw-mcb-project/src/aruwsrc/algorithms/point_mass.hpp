@@ -24,7 +24,7 @@
 
 #include "point_mass.hpp"
 
-namespace aruwsrc::engineer::algorithms
+namespace aruwsrc::algorithms
 {
 struct PointMass
 {
@@ -42,5 +42,5 @@ struct PointMass
     }
 };
 
-}  // namespace aruwsrc::engineer::algorithms
+}  // namespace aruwsrc::algorithms
 #endif  // POINT_MASS_HPP_

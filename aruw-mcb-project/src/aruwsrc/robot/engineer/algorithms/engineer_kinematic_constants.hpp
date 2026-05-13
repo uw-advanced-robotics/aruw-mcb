@@ -23,7 +23,7 @@
 #include "tap/algorithms/transforms/position.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "point_mass.hpp"
+#include "aruwsrc/algorithms/point_mass.hpp"
 
 namespace aruwsrc::engineer::algorithms
 {
@@ -92,13 +92,14 @@ static const tap::algorithms::transforms::Transform TURRET_YAW_TO_CUBE_DIST =
 // static constexpr float TRUE_WRIST_ROLL_OFFSET = 0;
 
 // Center of Masses
-static const PointMass MASS_BEYOND_WRIST{
-    .mass = 1,
-    .location = tap::algorithms::transforms::Position(0, 0, 0)};  // TODO
-static constexpr float EXTENSION_STATIONARY_MASS = 1;             // TODO
-static constexpr float EXTENSION_MIDDLE_MASS = 1;                 // TODO
-static constexpr float EXTENSION_END_MASS = 1;                    // TODO
-static const PointMass MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT{
+static const aruwsrc::algorithms::PointMass MASS_BEYOND_WRIST{
+    .mass = 0.471,
+    .location =
+        tap::algorithms::transforms::Position(0.0457, -0.01134, 0)};  // TODO may have to negate y
+static constexpr float EXTENSION_STATIONARY_MASS = 1;                 // TODO
+static constexpr float EXTENSION_MIDDLE_MASS = 1;                     // TODO
+static constexpr float EXTENSION_END_MASS = 1;                        // TODO
+static const aruwsrc::algorithms::PointMass MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT{
     .mass = EXTENSION_STATIONARY_MASS + EXTENSION_MIDDLE_MASS + EXTENSION_END_MASS,
     .location = tap::algorithms::transforms::Position(0, 0, 0)};  // TODO
 static constexpr float EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR =

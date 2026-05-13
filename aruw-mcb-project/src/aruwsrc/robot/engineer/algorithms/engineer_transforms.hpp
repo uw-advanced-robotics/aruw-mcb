@@ -22,10 +22,10 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
+#include "aruwsrc/algorithms/point_mass.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
 #include "engineer_kinematic_constants.hpp"
-#include "point_mass.hpp"
 
 namespace tap::communication::sensors::imu
 {
@@ -91,8 +91,14 @@ public:
     inline const Transform& getEndEffectorToCubeDist() const { return endEffectorToCubeDist; }
     inline const Transform& getVtmGimbalToEndEffector() const { return vtmGimbalToEndEffector; }
 
-    inline const PointMass& getCOMBeyondTurretPitch() const { return COMBeyondTurretPitch; }
-    inline const PointMass& getCOMBeyondWrist() const { return COMBeyondWrist; }
+    inline const aruwsrc::algorithms::PointMass& getCOMBeyondTurretPitch() const
+    {
+        return COMBeyondTurretPitch;
+    }
+    inline const aruwsrc::algorithms::PointMass& getCOMBeyondWrist() const
+    {
+        return COMBeyondWrist;
+    }
 
     static Transform getHypotheticalChassisToTurretYaw(float yawAngle)
     {
@@ -145,8 +151,8 @@ private:
     Transform endEffectorToCubeDist;
 
     // Subtree Center of Masses
-    PointMass COMBeyondTurretPitch;
-    PointMass COMBeyondWrist;
+    aruwsrc::algorithms::PointMass COMBeyondTurretPitch;
+    aruwsrc::algorithms::PointMass COMBeyondWrist;
 };
 
 }  // namespace aruwsrc::engineer::algorithms

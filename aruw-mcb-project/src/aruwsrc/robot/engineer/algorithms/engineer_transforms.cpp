@@ -132,7 +132,7 @@ void EngineerTransforms::updateTransforms()
 
     // TODO: tap should have a single operation for this
     COMBeyondWrist.location = worldToWrist.getInverse().apply(MASS_BEYOND_WRIST.location);
-    PointMass COMBetweenTurretPitchAndWrist{
+    aruwsrc::algorithms::PointMass COMBetweenTurretPitchAndWrist{
         .mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass,
         .location = worldToTurretPitch.getInverse().apply(
             MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.location +
@@ -141,7 +141,8 @@ void EngineerTransforms::updateTransforms()
                 0,
                 0))};
 
-    COMBeyondTurretPitch = PointMass::merge(COMBetweenTurretPitchAndWrist, COMBeyondWrist);
+    COMBeyondTurretPitch =
+        aruwsrc::algorithms::PointMass::merge(COMBetweenTurretPitchAndWrist, COMBeyondWrist);
 }
 
 }  // namespace aruwsrc::engineer::algorithms
