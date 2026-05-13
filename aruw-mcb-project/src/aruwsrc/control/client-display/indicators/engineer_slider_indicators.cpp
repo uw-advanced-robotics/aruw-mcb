@@ -27,15 +27,15 @@ EngineerSliderIndicators::EngineerSliderIndicators(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const joint::JointSubsystem &extension,
     const cube_storage::CubeStorageSubsystem &cubeStorageSubsystem,
-    AruwPressureSensor &wristPressureSensor,
-    AruwPressureSensor &cubeStoragePressureSensor1,
-    AruwPressureSensor &cubeStoragePressureSensor2)
+    AruwPressureSensor &wristSensor,
+    AruwPressureSensor &cubeStorageSensor1,
+    AruwPressureSensor &cubeStorageSensor2)
     : HudIndicator(refSerialTransmitter),
       extension(extension),
       cubeStorageSubsystem(cubeStorageSubsystem),
-      wristPressureSensor(wristPressureSensor),
-      cubeStoragePressureSensor1(cubeStoragePressureSensor1),
-      cubeStoragePressureSensor2(cubeStoragePressureSensor2)
+      wristSensor(wristSensor),
+      cubeStorageSensor1(cubeStorageSensor1),
+      cubeStorageSensor2(cubeStorageSensor2)
 {
 }
 
@@ -72,22 +72,20 @@ modm::ResumableResult<void> EngineerSliderIndicators::update()
     // Update cube storage and wrist graphic colors based on whether pressure sensor states
     sliders.graphicData[static_cast<uint8_t>(GraphicType::CUBE_STORAGE_WRIST)].color =
         static_cast<uint8_t>(
-            wristPressureSensor.isOnline() && wristPressureSensor.getPressurekPascals() > 0
-                ? HAS_CUBE_COLOR
-                : NO_CUBE_COLOR);
+            wristSensor.isOnline()
+                ? (wristSensor.getPressurekPascals() > 0 ? HAS_CUBE_COLOR : NO_CUBE_COLOR)
+                : DISCONNECTED_COLOR);
 
     sliders.graphicData[static_cast<uint8_t>(GraphicType::CUBE_STORAGE_1)].color =
         static_cast<uint8_t>(
-            cubeStoragePressureSensor1.isOnline() &&
-                    cubeStoragePressureSensor1.getPressurekPascals() > 0
-                ? HAS_CUBE_COLOR
-                : NO_CUBE_COLOR);
+            cubeStorageSensor1.isOnline()
+                ? (cubeStorageSensor1.getPressurekPascals() > 0 ? HAS_CUBE_COLOR : NO_CUBE_COLOR)
+                : DISCONNECTED_COLOR);
     sliders.graphicData[static_cast<uint8_t>(GraphicType::CUBE_STORAGE_2)].color =
         static_cast<uint8_t>(
-            cubeStoragePressureSensor2.isOnline() &&
-                    cubeStoragePressureSensor2.getPressurekPascals() > 0
-                ? HAS_CUBE_COLOR
-                : NO_CUBE_COLOR);
+            cubeStorageSensor2.isOnline()
+                ? (cubeStorageSensor2.getPressurekPascals() > 0 ? HAS_CUBE_COLOR : NO_CUBE_COLOR)
+                : DISCONNECTED_COLOR);
 
     RF_BEGIN(1);
 

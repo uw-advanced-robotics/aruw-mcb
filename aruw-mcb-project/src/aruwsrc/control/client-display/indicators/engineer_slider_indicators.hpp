@@ -44,9 +44,9 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const joint::JointSubsystem &extension,
         const cube_storage::CubeStorageSubsystem &cubeStorageSubsystem,
-        AruwPressureSensor &wristPressureSensor,
-        AruwPressureSensor &cubeStoragePressureSensor1,
-        AruwPressureSensor &cubeStoragePressureSensor2);
+        AruwPressureSensor &wristSensor,
+        AruwPressureSensor &cubeStorageSensor1,
+        AruwPressureSensor &cubeStorageSensor2);
 
     void initialize() override final;
 
@@ -57,9 +57,9 @@ public:
 private:
     const joint::JointSubsystem &extension;
     const cube_storage::CubeStorageSubsystem &cubeStorageSubsystem;
-    AruwPressureSensor &wristPressureSensor;
-    AruwPressureSensor &cubeStoragePressureSensor1;
-    AruwPressureSensor &cubeStoragePressureSensor2;
+    AruwPressureSensor &wristSensor;
+    AruwPressureSensor &cubeStorageSensor1;
+    AruwPressureSensor &cubeStorageSensor2;
 
     enum class GraphicType : uint8_t
     {
@@ -105,6 +105,10 @@ private:
     static constexpr Tx::GraphicColor NO_CUBE_COLOR =
         Tx::GraphicColor::PINK;  // Color of the cube storage wrist position graphic when no cube is
                                  // present
+
+    static constexpr Tx::GraphicColor DISCONNECTED_COLOR =
+        Tx::GraphicColor::PURPLISH_RED;  // Color of the cube storage wrist position graphic when
+                                         // the pressure sensor is disconnected
 
     Tx::Graphic7Message sliders;
 
