@@ -83,7 +83,7 @@ void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orienta
 {
     float theta1 = atan2f(setpoint.matrix().data[3], -setpoint.matrix().data[6]);
     float theta2 = acosf(setpoint.matrix().data[0]);
-    float theta3 = atan2f(setpoint.matrix().data[1], -setpoint.matrix().data[2]);
+    float theta3 = atan2f(setpoint.matrix().data[1], setpoint.matrix().data[2]);
     setSetpointTheta1(theta1);
     setSetpointTheta2(theta2);
     setSetpointTheta3(theta3);
