@@ -72,9 +72,9 @@ public:
         aruwsrc::control::joint::JointSubsystem& extension,
         aruwsrc::engineer::wrist::WristSubsystem& wrist,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            aruwsrc::control::turret::algorithms::Axis::YAW>& yawController,
+            tap::algorithms::transforms::Axis::YAW>& yawController,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController);
+            tap::algorithms::transforms::Axis::PITCH>& pitchController);
 
     virtual void initialize() override {}
 
@@ -92,9 +92,9 @@ protected:
     aruwsrc::control::joint::JointSubsystem& extension;
     aruwsrc::engineer::wrist::WristSubsystem& wrist;
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        aruwsrc::control::turret::algorithms::Axis::YAW>& yawController;
+        tap::algorithms::transforms::Axis::YAW>& yawController;
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController;
+        tap::algorithms::transforms::Axis::PITCH>& pitchController;
 
 private:
     const float turretPitchToExtensionZeroX, turretPitchToExtensionZeroZ2;

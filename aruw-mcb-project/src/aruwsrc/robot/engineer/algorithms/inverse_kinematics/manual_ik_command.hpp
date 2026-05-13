@@ -37,9 +37,9 @@ public:
         aruwsrc::control::joint::JointSubsystem& extension,
         aruwsrc::engineer::wrist::WristSubsystem& wrist,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            aruwsrc::control::turret::algorithms::Axis::YAW>& yawController,
+            tap::algorithms::transforms::Axis::YAW>& yawController,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController);
+            tap::algorithms::transforms::Axis::PITCH>& pitchController);
 
     const char* getName() const override { return "Manual IK Command"; }
 
