@@ -48,7 +48,10 @@ AbstractIKCommand::AbstractIKCommand(
       extension(extension),
       wrist(wrist),
       yawController(yawController),
-      pitchController(pitchController)
+      pitchController(pitchController),
+      turretPitchToExtensionZeroX(TURRET_PITCH_TO_EXTENSION_ZERO_POS.x()),
+      turretPitchToExtensionZeroZ2(
+          TURRET_PITCH_TO_EXTENSION_ZERO_POS.z() * TURRET_PITCH_TO_EXTENSION_ZERO_POS.z())
 {
     addSubsystemRequirement(&turret);
     addSubsystemRequirement(&extension);
@@ -57,15 +60,11 @@ AbstractIKCommand::AbstractIKCommand(
 
 void AbstractIKCommand::execute()
 {
-    Transform chassisToEndEffectorDesired = chassisToBase.composeStatic(getBaseToFollowerDesired())
-                                                .composeStatic(followerToEndEffector);
-
-    Transform turretPitchToExtensionZero =
-        EngineerTransforms::getHypotheticalTurretPitchToExtension(0);
+    chassisToEndEffectorDesired = chassisToBase.composeStatic(getBaseToFollowerDesired())
+                                      .composeStatic(followerToEndEffector);
 
     // kept as a Transform because we want to compose it easily
-    Transform chassisToWristDesiredPos =
-        chassisToEndEffectorDesired.composeStatic(END_EFFECTOR_TO_WRIST);
+    chassisToWristDesiredPos = chassisToEndEffectorDesired.composeStatic(END_EFFECTOR_TO_WRIST);
 
     Position turretYawToWristDesiredPos = EngineerTransforms::getHypotheticalChassisToTurretYaw(0)
                                               .getInverse()
@@ -73,7 +72,7 @@ void AbstractIKCommand::execute()
                                               .getTranslation();
 
     // We know y component of turretPitchToExtension is 0 and thus doesn't affect yaw
-    float turretYawDesired = atan2f(turretYawToWristDesiredPos.y(), turretYawToWristDesiredPos.x());
+    turretYawDesired = atan2f(turretYawToWristDesiredPos.y(), turretYawToWristDesiredPos.x());
 
     Position turretPitchToWristDesiredPos =
         EngineerTransforms::getHypotheticalChassisToTurretYaw(turretYawDesired)
@@ -82,22 +81,19 @@ void AbstractIKCommand::execute()
             .composeStatic(chassisToWristDesiredPos)
             .getTranslation();
 
-    float turretPitchToWristDesiredDist =
-        Vector(turretYawToWristDesiredPos - Position(0, 0, 0)).magnitude();
-    float extensionDesired =
-        sqrtf(
-            turretPitchToWristDesiredDist * turretPitchToWristDesiredDist -
-            turretPitchToExtensionZero.getZ() * turretPitchToExtensionZero.getZ()) -
-        turretPitchToExtensionZero.getZ();
+    float turretPitchToWristDesiredDistSq = turretPitchToWristDesiredPos.toVector().magnitudeSq();
+    extensionDesired = sqrtf(turretPitchToWristDesiredDistSq - turretPitchToExtensionZeroZ2) -
+                       turretPitchToExtensionZeroX;
 
-    Transform turretPitchToExtension =
+    turretPitchToExtension =
         EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionDesired);
-    float turretPitchDesired = -acosf(
-        (turretPitchToExtension.getTranslation() - Position(0, 0, 0))
-            .dot(turretPitchToWristDesiredPos - Position(0, 0, 0)) /
-        (turretPitchToWristDesiredDist * turretPitchToWristDesiredDist));
+    float x1 = turretPitchToWristDesiredPos.x();
+    float y1 = turretPitchToWristDesiredPos.z();
+    float x2 = turretPitchToExtension.getX();
+    float y2 = turretPitchToExtension.getZ();
+    turretPitchDesired = atan2f(x1 * y2 - y1 * x2, x1 * x2 + y1 * y2);
 
-    Transform extensionToWristDesired =
+    extensionToWristDesired =
         EngineerTransforms::getHypotheticalChassisToTurretYaw(turretYawDesired)
             .composeStatic(
                 EngineerTransforms::getHypotheticalTurretYawToTurretPitch(turretPitchDesired))
@@ -108,8 +104,8 @@ void AbstractIKCommand::execute()
             .composeStatic(END_EFFECTOR_TO_WRIST);
 
     // Set the desired setpoints
-    yawController.runController(2, Angle(turretYawDesired));
-    pitchController.runController(2, Angle(turretPitchDesired));
+    yawController.runController(0.002f, Angle(turretYawDesired));
+    pitchController.runController(0.002f, Angle(turretPitchDesired));
     extension.setSetpoint(extensionDesired);
     wrist.setSetpointOrientation(extensionToWristDesired.getRotation());
 }

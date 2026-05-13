@@ -95,6 +95,12 @@ protected:
         aruwsrc::control::turret::algorithms::Axis::YAW>& yawController;
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::PITCH>& pitchController;
+
+private:
+    const float turretPitchToExtensionZeroX, turretPitchToExtensionZeroZ2;
+    tap::algorithms::transforms::Transform chassisToEndEffectorDesired, chassisToWristDesiredPos,
+        turretPitchToExtension, extensionToWristDesired;
+    float turretYawDesired, turretPitchDesired, extensionDesired;
 };
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics
