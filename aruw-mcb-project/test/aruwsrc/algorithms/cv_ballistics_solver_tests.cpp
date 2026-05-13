@@ -23,7 +23,7 @@
 #include "tap/drivers.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
@@ -49,7 +49,7 @@ TEST_P(WithinAimingToleranceTest, various_values)
 {
     EXPECT_EQ(
         GetParam().withinTolerance,
-        OttoBallisticsSolver::withinAimingTolerance(
+        CvBallisticsSolver::withinAimingTolerance(
             GetParam().yawAngleError,
             GetParam().pitchAngleError,
             GetParam().targetDistance));
@@ -95,7 +95,7 @@ std::vector<WithinAimingToleranceConfig> withinAimingToleranceValuesToTest = {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    OttoBallisticsSolver,
+    CvBallisticsSolver,
     WithinAimingToleranceTest,
     ValuesIn(withinAimingToleranceValuesToTest));
 
@@ -130,9 +130,9 @@ protected:
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;
 
-    OttoBallisticsSolver solver;
+    CvBallisticsSolver solver;
 
-    std::optional<OttoBallisticsSolver::BallisticsSolution> solution;
+    std::optional<CvBallisticsSolver::BallisticsSolution> solution;
 
     aruwsrc::communication::serial::VisionCoprocessor::TurretAimData aimData = {};
     uint32_t lastComputedOdomTime = 0;
@@ -248,4 +248,140 @@ TEST_F(OttoBallisticsSolverTest, comiputeTurretAimAngles_solution_found_no_valid
     solution = solver.computeTurretAimAngles();
 
     EXPECT_FALSE(solution.has_value());
+}
+
+TEST_F(OttoBallisticsSolverTest, jitter_aim_low_omega)
+{
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 2;
+    aimData.pva.yPos = 0;
+    aimData.pva.zPos = 0;
+    aimData.pva.omega = 0.5f;  // Below OMEGA_THRESHOLD (1.0)
+    aimData.pva.radius0 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
+    aimData.pva.theta = 0;
+    aimData.timestamp = 100;
+
+    clock.time = 100;
+
+    solution = solver.computeTurretAimAngles();
+
+    EXPECT_TRUE(solution.has_value());
+    EXPECT_FALSE(solution->usePulseEstimation);
+    EXPECT_EQ(0, solution->shotWindowStart);
+    EXPECT_EQ(0, solution->shotWindowEnd);
+}
+
+TEST_F(OttoBallisticsSolverTest, pulse_estimation_high_omega)
+{
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 2;
+    aimData.pva.yPos = 0;
+    aimData.pva.zPos = 0;
+    aimData.pva.omega = 2.0f;  // Above OMEGA_THRESHOLD (1.0)
+    aimData.pva.radius0 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
+    aimData.pva.theta = 0;
+    aimData.timestamp = 100;
+
+    clock.time = 100;
+
+    solution = solver.computeTurretAimAngles();
+
+    EXPECT_TRUE(solution.has_value());
+    EXPECT_TRUE(solution->usePulseEstimation);
+    EXPECT_NE(0, solution->shotWindowStart);
+    EXPECT_NE(0, solution->shotWindowEnd);
+    EXPECT_GE(solution->activePlateIndex, 0);
+    EXPECT_LE(solution->activePlateIndex, 3);
+}
+
+TEST_F(OttoBallisticsSolverTest, pulse_estimation_persists_within_window)
+{
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 2;
+    aimData.pva.yPos = 0;
+    aimData.pva.zPos = 0;
+    aimData.pva.omega = 2.0f;
+    aimData.pva.radius0 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
+    aimData.pva.theta = 0;
+    aimData.timestamp = 100;
+
+    clock.time = 100;  // Start at 100ms
+
+    solution = solver.computeTurretAimAngles();
+    EXPECT_TRUE(solution.has_value());
+    auto firstSolution = solution;
+
+    // Advance time but stay within shot window
+    clock.time = 150;         // 50ms later
+    aimData.timestamp = 101;  // New aim data
+
+    solution = solver.computeTurretAimAngles();
+    EXPECT_TRUE(solution.has_value());
+
+    // Solution should be unchanged (same shot window)
+    EXPECT_EQ(firstSolution->shotWindowStart, solution->shotWindowStart);
+    EXPECT_EQ(firstSolution->shotWindowEnd, solution->shotWindowEnd);
+    EXPECT_EQ(firstSolution->activePlateIndex, solution->activePlateIndex);
+}
+
+TEST_F(OttoBallisticsSolverTest, pulse_estimation_recalculates_after_window_expires)
+{
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 2;
+    aimData.pva.yPos = 0;
+    aimData.pva.zPos = 0;
+    aimData.pva.omega = 2.0f;
+    aimData.pva.radius0 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
+    aimData.pva.theta = 0;
+    aimData.timestamp = 100;
+
+    clock.time = 100;
+
+    solution = solver.computeTurretAimAngles();
+    EXPECT_TRUE(solution.has_value());
+    uint64_t firstWindowEnd = solution->shotWindowEnd;
+
+    // Advance time past shot window
+    clock.time = firstWindowEnd / 1000 + 100;  // 100ms after window closed
+    aimData.timestamp = 200;
+
+    solution = solver.computeTurretAimAngles();
+    EXPECT_TRUE(solution.has_value());
+
+    // Should have recalculated with new window
+    EXPECT_NE(firstWindowEnd, solution->shotWindowEnd);
+}
+
+TEST_F(OttoBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
+{
+    aimData.pva.updated = true;
+    aimData.pva.xPos = 2;
+    aimData.pva.yPos = 0;
+    aimData.pva.zPos = 0;
+    aimData.pva.omega = 2.0f;  // High omega
+    aimData.pva.radius0 = 0.2f;
+    aimData.pva.radius1 = 0.2f;
+    aimData.pva.theta = 0;
+    aimData.timestamp = 100;
+
+    clock.time = 100;
+
+    solution = solver.computeTurretAimAngles();
+    EXPECT_TRUE(solution.has_value());
+    EXPECT_TRUE(solution->usePulseEstimation);
+
+    // Omega drops below threshold
+    aimData.pva.omega = 0.5f;  // Below threshold
+    aimData.timestamp = 101;
+    clock.time = 150;
+
+    solution = solver.computeTurretAimAngles();
+    EXPECT_TRUE(solution.has_value());
+
+    // Should have switched to jitter aim
+    EXPECT_FALSE(solution->usePulseEstimation);
 }

@@ -17,12 +17,12 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef OTTO_BALLISTICS_SOLVER_MOCK_HPP_
-#define OTTO_BALLISTICS_SOLVER_MOCK_HPP_
+#ifndef CV_BALLISTICS_SOLVER_MOCK_HPP_
+#define CV_BALLISTICS_SOLVER_MOCK_HPP_
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 
 namespace aruwsrc::mock
 {
@@ -31,24 +31,25 @@ namespace
 using namespace aruwsrc::algorithms;
 }
 
-class OttoBallisticsSolverMock : public OttoBallisticsSolver
+class CvBallisticsSolverMock : public CvBallisticsSolver
 {
 public:
-    OttoBallisticsSolverMock(
+    CvBallisticsSolverMock(
         const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
-        const uint8_t turretID);
-    virtual ~OttoBallisticsSolverMock();
+        const uint8_t turretID,
+        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
+    virtual ~CvBallisticsSolverMock();
 
     MOCK_METHOD(
-        std::optional<OttoBallisticsSolver::BallisticsSolution>,
+        std::optional<CvBallisticsSolver::BallisticsSolution>,
         computeTurretAimAngles,
         (),
         (override));
-};  // class OttoBallisticsSolverMock
+};  // class CvBallisticsSolverMock
 }  // namespace aruwsrc::mock
 
-#endif  // OTTO_BALLISTICS_SOLVER_MOCK_HPP_
+#endif  // CV_BALLISTICS_SOLVER_MOCK_HPP_

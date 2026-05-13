@@ -39,7 +39,7 @@ TurretCVCommand::TurretCVCommand(
     RobotTurretSubsystem *turretSubsystem,
     algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController,
     algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController,
-    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
+    aruwsrc::algorithms::CvBallisticsSolver *ballisticsSolver,
     const float userYawInputScalar,
     const float userPitchInputScalar,
     uint8_t turretID)
@@ -74,7 +74,7 @@ void TurretCVCommand::execute()
     WrappedFloat pitchSetpoint = pitchController->getSetpoint();
     WrappedFloat yawSetpoint = yawController->getSetpoint();
 
-    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
+    std::optional<CvBallisticsSolver::BallisticsSolution> ballisticsSolution =
         ballisticsSolver->computeTurretAimAngles();
 
     if (ballisticsSolution != std::nullopt)
@@ -86,7 +86,7 @@ void TurretCVCommand::execute()
          * the setpoint returned by the ballistics solver is between [0, 2*PI), so find the
          * setpoint that is closest to the wrapped measured angle.
          */
-        withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+        withinAimingTolerance = aruwsrc::algorithms::CvBallisticsSolver::withinAimingTolerance(
             yawController->getMeasurement().minDifference(yawSetpoint),
             pitchController->getMeasurement().minDifference(pitchSetpoint),
             ballisticsSolution->distance);

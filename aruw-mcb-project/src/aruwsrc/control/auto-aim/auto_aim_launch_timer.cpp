@@ -26,7 +26,7 @@ namespace aruwsrc::control::auto_aim
 AutoAimLaunchTimer::AutoAimLaunchTimer(
     uint32_t agitatorTypicalDelayMicroseconds,
     aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
-    aruwsrc::algorithms::OttoBallisticsSolver *ballistics)
+    aruwsrc::algorithms::CvBallisticsSolver *ballistics)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),
       ballistics(ballistics)
@@ -42,17 +42,40 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::NO_TARGET;
     }
 
-    if (!aimData.timing.updated)
-    {
-        return LaunchInclination::UNGATED;
-    }
-
-    if (aimData.timing.pulseInterval == 0)
+    if (aimData.timing.updated && aimData.timing.pulseInterval == 0)
     {
         return LaunchInclination::GATED_DENY;
     }
 
     auto ballisticsSolution = ballistics->computeTurretAimAngles();
+
+    if (ballisticsSolution.has_value() && ballisticsSolution->usePulseEstimation)
+    {
+        float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
+        if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS)
+        {
+            return LaunchInclination::GATED_DENY;
+        }
+
+        uint64_t now = tap::arch::clock::getTimeMicroseconds();
+        uint64_t effectiveFireTime = now + this->agitatorTypicalDelayMicroseconds;
+
+        if (effectiveFireTime >= ballisticsSolution->shotWindowStart &&
+            effectiveFireTime <= ballisticsSolution->shotWindowEnd)
+        {
+            return LaunchInclination::GATED_ALLOW;
+        }
+        else
+        {
+            return LaunchInclination::GATED_DENY;
+        }
+    }
+
+    if (!aimData.timing.updated)
+    {
+        return LaunchInclination::UNGATED;
+    }
+
     if (!ballisticsSolution.has_value())
     {
         return LaunchInclination::GATED_DENY;
@@ -69,24 +92,22 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
 
     uint32_t nextPlateTransitTime = aimData.timestamp + aimData.timing.offset;
-    int64_t projectedHitTimeAfterFirstWindow =
-        int64_t(projectedHitTime) - int64_t(nextPlateTransitTime);
+    int64_t projectedHitTimeAfterFirstWindow = projectedHitTime;
+    projectedHitTimeAfterFirstWindow -= nextPlateTransitTime;
 
-    int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % aimData.timing.pulseInterval;
+    int64_t pulseInterval = aimData.timing.pulseInterval;
+    int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % pulseInterval;
     if (offsetInFiringWindow < 0)
     {
-        offsetInFiringWindow += aimData.timing.pulseInterval;
+        offsetInFiringWindow += pulseInterval;
     }
 
     uint32_t maxHitTimeError = aimData.timing.duration / 2;
     if (offsetInFiringWindow <= maxHitTimeError ||
-        offsetInFiringWindow >= aimData.timing.pulseInterval - maxHitTimeError)
+        offsetInFiringWindow >= pulseInterval - maxHitTimeError)
     {
         return LaunchInclination::GATED_ALLOW;
     }
-    else
-    {
-        return LaunchInclination::GATED_DENY;
-    }
+    return LaunchInclination::GATED_DENY;
 }
 }  // namespace aruwsrc::control::auto_aim

@@ -20,7 +20,7 @@
 #ifndef AUTO_AIM_LAUNCH_TIMER_HPP_
 #define AUTO_AIM_LAUNCH_TIMER_HPP_
 
-#include <aruwsrc/algorithms/otto_ballistics_solver.hpp>
+#include <aruwsrc/algorithms/cv_ballistics_solver.hpp>
 #include <aruwsrc/communication/serial/vision_coprocessor.hpp>
 
 namespace aruwsrc::control::auto_aim
@@ -52,13 +52,13 @@ public:
 private:
     uint32_t agitatorTypicalDelayMicroseconds;
     aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
-    aruwsrc::algorithms::OttoBallisticsSolver *ballistics;
+    aruwsrc::algorithms::CvBallisticsSolver *ballistics;
 
 public:
     AutoAimLaunchTimer(
         uint32_t agitatorTypicalDelayMicroseconds,
         aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
-        aruwsrc::algorithms::OttoBallisticsSolver *ballistics);
+        aruwsrc::algorithms::CvBallisticsSolver *ballistics);
 
     /**
      * Compute a firing inclination for the current time and specified turret.
