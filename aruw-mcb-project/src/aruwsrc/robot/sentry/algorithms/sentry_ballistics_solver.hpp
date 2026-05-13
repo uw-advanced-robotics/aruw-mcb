@@ -70,6 +70,16 @@ public:
         float distance;
         /// The expected time-of-flight until impact (in seconds).
         float timeOfFlight;
+        /// Start of the shot timing window (absolute timestamp in microseconds), valid when
+        /// usePulseEstimation is true.
+        uint64_t shotWindowStart;
+        /// End of the shot timing window (absolute timestamp in microseconds), valid when
+        /// usePulseEstimation is true.
+        uint64_t shotWindowEnd;
+        /// Whether pulse estimation is being used (omega above threshold).
+        bool usePulseEstimation;
+        /// The active plate index being targeted (0-3).
+        uint8_t activePlateIndex;
     };
 
     /**
@@ -80,6 +90,8 @@ public:
      */
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
+    /// Omega threshold (rad/s) below which jitter aim is used instead of pulse estimation.
+    static constexpr float OMEGA_THRESHOLD = 1.0f;
     /// The width of a small armor plate, in m
     static constexpr float PLATE_WIDTH = 0.135f;
     /// The height of a small armor plate, in m
@@ -157,6 +169,27 @@ private:
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
+
+    /**
+     * Computes a pulse-estimation solution for a fast-spinning target.
+     *
+     * Uses a two-pass approach: first estimates the time-of-flight from approximate distance,
+     * then determines which plate will be facing the turret at that time, computes an accurate
+     * ballistics solution for that plate, and finally derives a shot-timing window (absolute
+     * microsecond timestamps) such that firing within the window causes the projectile to arrive
+     * while the plate is crossing the aim line.
+     *
+     * @param[in] projectedAimPosData  Target kinematic state projected to "now".
+     * @param[in] turretPosition       World-frame position of the turret (from transforms).
+     * @param[in] chassisVel           Chassis velocity in 2D world frame.
+     * @param[in] launchSpeed          Projectile launch speed in m/s.
+     * @return Solution, or nullopt if no valid projectile intersection was found.
+     */
+    std::optional<BallisticsSolution> computePulseEstimation(
+        const communication::serial::VisionCoprocessor::PositionData &projectedAimPosData,
+        const modm::Vector3f &turretPosition,
+        const modm::Vector2f &chassisVel,
+        float launchSpeed);
 
 public:
     const uint8_t turretID;
