@@ -56,7 +56,7 @@ float WristSubsystem::getTheta1() const
 float WristSubsystem::getTheta2() const { return encoderTheta2.getPosition().getUnwrappedValue(); }
 float WristSubsystem::getTheta3() const
 {
-    return motorTheta3.getEncoder()->getPosition().getUnwrappedValue();
+    return -motorTheta3.getEncoder()->getPosition().minDifference(0);
 }
 
 void WristSubsystem::setSetpointTheta1(float setpoint)
@@ -65,7 +65,12 @@ void WristSubsystem::setSetpointTheta1(float setpoint)
 }
 void WristSubsystem::setSetpointTheta2(float setpoint)
 {
-    setpointTheta2 = std::clamp(setpoint, config.theta2Min, config.theta2Max);
+    int status;
+    setpointTheta2 = tap::algorithms::WrappedFloat::limitValue(
+        tap::algorithms::WrappedFloat(setpoint, -M_PI, M_PI),
+        config.theta2Min,
+        config.theta2Max,
+        &status);
 }
 void WristSubsystem::setSetpointTheta3(float setpoint)
 {
