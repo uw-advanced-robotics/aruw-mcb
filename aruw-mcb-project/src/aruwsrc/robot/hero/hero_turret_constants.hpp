@@ -25,6 +25,7 @@
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/robot/hero/hero_pitch_turret_motor.hpp"
 #include "modm/math/geometry/angle.hpp"
@@ -85,7 +86,6 @@ inline constexpr aruwsrc::hero::HeroPitchLinkage::FourBarLinkageConfig PITCH_LIN
     .l4 = 0.040f,  // shorter linkage
 };
 
-// Turret is perfectly balanced
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{.cgX = 12.1f, .cgZ = -15.67f, .gravityCompensatorMax = -8000.0f};
 
@@ -96,6 +96,16 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .turretYawMountZ = 0.0f,
     .springConstant = 0.0f,
     .springFreeLength = 0.0f,
+};
+
+inline constexpr algorithms::OptimalSTOSController::STOSConstants StosConstants{
+    .J_TOTAL = 0.0454f,
+    .TAU_MAX = 5.5f,
+    .B_DAMP = 0.001f,
+    .W_D = 53.4f,
+    .ZETA = 0.216,
+    .SYSTEM_DELAY_SEC = 0.014,
+    .TorqueToMotorOutput = 16384.0f / 6.0f,
 };
 
 namespace world_rel_turret_imu
@@ -115,11 +125,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 10.0f,
-    .maxOutput = 2000,
+    .kp = 10'000.0f,
+    .ki = 8'000'000.0f,
+    .kd = 4'000.0f,
+    .maxICumulative = 600.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 0.1f,
@@ -220,10 +230,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 40000.0f,
-    .ki = 2000.0f,
-    .kd = 6000.0f,
-    .maxICumulative = 10000.0f,
+    .kp = 40'000.0f,
+    .ki = 50'000.0f,
+    .kd = 2000.0f,
+    .maxICumulative = 3'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 400.0f,
