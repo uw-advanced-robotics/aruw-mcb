@@ -21,21 +21,21 @@
 #ifndef SLIDERS_INDICATOR_HPP_
 #define SLIDERS_INDICATOR_HPP_
 
+#include <cmath>
+
 #include "tap/communication/referee/state_hud_indicator.hpp"
-#include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
+#include "aruwsrc/communication/can/aruw_pressure_sensor.hpp"
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
 
-#include <cmath>
-
 namespace aruwsrc::control::client_display::indicators
 {
 using namespace aruwsrc::engineer;
-using namespace tap::communication::sensors;
+using namespace aruwsrc::communication::can;
 
 class EngineerSliderIndicators : public HudIndicator, protected modm::Resumable<2>
 {
@@ -44,9 +44,9 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const joint::JointSubsystem &extension,
         const cube_storage::CubeStorageSubsystem &cubeStorageSubsystem,
-        const limit_switch::LimitSwitchInterface &wristPressureSensor,
-        const limit_switch::LimitSwitchInterface &cubeStoragePressureSensor1,
-        const limit_switch::LimitSwitchInterface &cubeStoragePressureSensor2);
+        AruwPressureSensor &wristPressureSensor,
+        AruwPressureSensor &cubeStoragePressureSensor1,
+        AruwPressureSensor &cubeStoragePressureSensor2);
 
     void initialize() override final;
 
@@ -57,9 +57,9 @@ public:
 private:
     const joint::JointSubsystem &extension;
     const cube_storage::CubeStorageSubsystem &cubeStorageSubsystem;
-    const limit_switch::LimitSwitchInterface &wristPressureSensor;
-    const limit_switch::LimitSwitchInterface &cubeStoragePressureSensor1;
-    const limit_switch::LimitSwitchInterface &cubeStoragePressureSensor2;
+    AruwPressureSensor &wristPressureSensor;
+    AruwPressureSensor &cubeStoragePressureSensor1;
+    AruwPressureSensor &cubeStoragePressureSensor2;
 
     enum class GraphicType : uint8_t
     {
@@ -84,7 +84,8 @@ private:
     static constexpr uint16_t CUBE_STORAGE_Y = 500;
     static constexpr uint16_t CUBE_STORAGE_END_X = 300;
     static constexpr uint16_t CUBE_STORAGE_WIDTH = CUBE_STORAGE_END_X - CUBE_STORAGE_START_X;
-    static constexpr uint16_t CUBE_STORAGE_MIDDLE_X = (CUBE_STORAGE_START_X + CUBE_STORAGE_END_X) / 2;
+    static constexpr uint16_t CUBE_STORAGE_MIDDLE_X =
+        (CUBE_STORAGE_START_X + CUBE_STORAGE_END_X) / 2;
 
     static constexpr float CUBE_STORAGE_OFFSET_PERCENT_1 = 0.2f;
     static constexpr float CUBE_STORAGE_OFFSET_PERCENT_2 = -0.2f;
