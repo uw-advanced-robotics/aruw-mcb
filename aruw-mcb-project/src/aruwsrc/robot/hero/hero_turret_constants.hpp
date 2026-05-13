@@ -26,6 +26,7 @@
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
+#include "aruwsrc/robot/hero/hero_pitch_turret_motor.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
@@ -71,15 +72,22 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 760,
-    .minAngle = -.55f,
-    .maxAngle = 1.1f,
+    .startEncoderValue = 1975,
+    .minAngle = -.32f,
+    .maxAngle = 0.56f,
     .limitMotorAngles = true,
+};
+
+inline constexpr aruwsrc::hero::HeroPitchLinkage::FourBarLinkageConfig PITCH_LINKAGE_CONFIG = {
+    .l1 = 0.080f,  // 80mm fixed link
+    .l2 = 0.080f,  // turret head
+    .l3 = 0.120f,  // longer linkage
+    .l4 = 0.040f,  // shorter linkage
 };
 
 // Turret is perfectly balanced
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
-    TURRET_GRAVITY_CONFIG{.cgX = 12.1f, .cgZ = -15.67f, .gravityCompensatorMax = -1200.0f};
+    TURRET_GRAVITY_CONFIG{.cgX = 12.1f, .cgZ = -15.67f, .gravityCompensatorMax = -8000.0f};
 
 static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
     .turretPitchMountX = 0.0f,
@@ -135,11 +143,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 40.0f,
+    .kp = 20.0f,
     .ki = 0.0f,
-    .kd = 1.0f,
+    .kd = 0.5f,
     .maxICumulative = 0.0f,
-    .maxOutput = 40.0f,
+    .maxOutput = 20.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 30.0f,
     .tQProportionalKalman = 1.0f,
@@ -165,7 +173,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .kp = 8000.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 1000.0f,
     .maxICumulative = 5'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,

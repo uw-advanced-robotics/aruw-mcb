@@ -116,11 +116,11 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 300.0f;
-static constexpr float AUTOROTATION_PID_KD = 57.3f;
-static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
+static constexpr float AUTOROTATION_PID_KP = 200.0f;
+static constexpr float AUTOROTATION_PID_KD = 10.0f;
+static constexpr float AUTOROTATION_PID_MAX_P = 200.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 200.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 200.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**

@@ -150,12 +150,13 @@ tap::motor::DjiMotor yawTurretMotor(
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508* YAW_TURRET_GEAR_RATIO,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
+aruwsrc::control::turret::TurretMotor pitchEngTurretMotor(&pitchTurretMotor, PITCH_MOTOR_CONFIG);
+aruwsrc::control::turret::TurretMotor yawEngTurretMotor(&yawTurretMotor, YAW_MOTOR_CONFIG);
+
 EngineerTurretSubsystem engTurret(
     drivers(),
-    &pitchTurretMotor,
-    &yawTurretMotor,
-    PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
+    pitchEngTurretMotor,
+    yawEngTurretMotor,
     &drivers()->mcbLite.imu);
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);

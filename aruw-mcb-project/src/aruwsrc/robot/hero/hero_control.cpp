@@ -98,6 +98,7 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/hero/hero_pitch_turret_motor.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
 
 using namespace tap::communication::serial;
@@ -299,13 +300,14 @@ tap::motor::DjiMotor yawMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(1 / 2.0f),
     0);
-HeroTurretSubsystem turret(
-    drivers(),
+aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(
     &pitchMotor,
-    &yawMotor,
     PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
+    PITCH_LINKAGE_CONFIG);
+// aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
+aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
+
+HeroTurretSubsystem turret(drivers(), pitchTurretMotor, yawTurretMotor, &getTurretMCBCanComm());
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
 aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
@@ -557,10 +559,10 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     rotateWaterwheel,
     unjamWaterwheel);
 
-GovernorLimitedCommand<1> feedWaterwheelWhenBallNotReady(
+GovernorLimitedCommand<2> feedWaterwheelWhenBallNotReady(
     {&carsonator},
     rotateAndUnjamWaterwheel,
-    {&frictionWheelsOnGovernor});
+    {&frictionWheelsOnGovernor, &limitSwitchNotDepressedGovernor});
 }  // namespace waterwheel
 
 namespace kicker
