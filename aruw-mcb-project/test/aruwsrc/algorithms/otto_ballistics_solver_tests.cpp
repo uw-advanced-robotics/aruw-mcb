@@ -104,7 +104,9 @@ class OttoBallisticsSolverTest : public Test
 protected:
     OttoBallisticsSolverTest()
         : vc(&drivers),
-          turret(&drivers),
+          pitchMotorMock(&pitchMotorInterfaceMock),
+          yawMotorMock(&yawMotorInterfaceMock),
+          turret(&drivers, pitchMotorMock, yawMotorMock, nullptr),
           solver(vc, odometry, turret, launcher, 15, 0)
     {
     }
@@ -128,6 +130,10 @@ protected:
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> vc;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
+    NiceMock<tap::mock::MotorInterfaceMock> pitchMotorInterfaceMock;
+    NiceMock<tap::mock::MotorInterfaceMock> yawMotorInterfaceMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;
 
     OttoBallisticsSolver solver;

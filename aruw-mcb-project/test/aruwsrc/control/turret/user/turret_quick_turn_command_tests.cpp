@@ -30,19 +30,31 @@ using namespace aruwsrc::control::turret::user;
 using namespace testing;
 using tap::Drivers;
 
+static constexpr aruwsrc::control::turret::TurretMotorConfig DUMMY_TURRET_MOTOR_CONFIG;
+
 class TurretQuickTurnCommandTest : public Test
 {
 protected:
-    TurretQuickTurnCommandTest() : turret(&drivers), turretUturnCommand(&turret, 180) {}
+    TurretQuickTurnCommandTest()
+        : pitchMotorMock(&pitchMotorInterfaceMock),
+          yawMotorMock(&yawMotorInterfaceMock),
+          turret(&drivers, pitchMotorMock, yawMotorMock, nullptr),
+          turretUturnCommand(&turret, 180)
+    {
+    }
 
     tap::Drivers drivers;
+    NiceMock<tap::mock::MotorInterfaceMock> pitchMotorInterfaceMock;
+    NiceMock<tap::mock::MotorInterfaceMock> yawMotorInterfaceMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
     TurretSubsystemMock turret;
     TurretQuickTurnCommand turretUturnCommand;
 };
 
 TEST_F(TurretQuickTurnCommandTest, isReady_return_true_when_turret_online)
 {
-    EXPECT_CALL(turret.yawMotor, isOnline).Times(2).WillOnce(Return(false)).WillOnce(Return(true));
+    EXPECT_CALL(yawMotorMock, isOnline).Times(2).WillOnce(Return(false)).WillOnce(Return(true));
 
     EXPECT_FALSE(turretUturnCommand.isReady());
     EXPECT_TRUE(turretUturnCommand.isReady());
@@ -51,25 +63,34 @@ TEST_F(TurretQuickTurnCommandTest, isReady_return_true_when_turret_online)
 TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_setpoint_offset)
 {
     tap::Drivers drivers;
-    TurretSubsystemMock turret(&drivers);
-    TurretSubsystemMock turret2(&drivers);
-    TurretQuickTurnCommand turretUturnCommand180Deg(&turret, M_PI);
+    tap::mock::MotorInterfaceMock pitchMotorInterfaceMock;
+    tap::mock::MotorInterfaceMock yawMotorInterfaceMock;
+    aruwsrc::mock::TurretMotorMock pitchMotorMock1(
+        &pitchMotorInterfaceMock,
+        DUMMY_TURRET_MOTOR_CONFIG);
+    aruwsrc::mock::TurretMotorMock yawMotorMock1(&yawMotorInterfaceMock, DUMMY_TURRET_MOTOR_CONFIG);
+    TurretSubsystemMock turret1(&drivers, pitchMotorMock1, yawMotorMock1, nullptr);
+    aruwsrc::mock::TurretMotorMock pitchMotorMock2(
+        &pitchMotorInterfaceMock,
+        DUMMY_TURRET_MOTOR_CONFIG);
+    aruwsrc::mock::TurretMotorMock yawMotorMock2(&yawMotorInterfaceMock, DUMMY_TURRET_MOTOR_CONFIG);
+    TurretSubsystemMock turret2(&drivers, pitchMotorMock2, yawMotorMock2, nullptr);
+    TurretQuickTurnCommand turretUturnCommand180Deg(&turret1, M_PI);
     TurretQuickTurnCommand turretUturnCommand90Deg(&turret2, M_PI_2);
 
     tap::algorithms::WrappedFloat turretYawValue(0, 0, M_TWOPI);
     tap::algorithms::WrappedFloat turret2YawValue(M_PI_4, 0, M_TWOPI);
 
-    EXPECT_CALL(turret.yawMotor, attachTurretController(nullptr));
-    ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turretYawValue));
+    EXPECT_CALL(yawMotorMock1, attachTurretController(nullptr));
+    ON_CALL(yawMotorMock1, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turretYawValue));
     EXPECT_CALL(
-        turret.yawMotor,
+        yawMotorMock1,
         setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, M_PI)));
 
-    EXPECT_CALL(turret2.yawMotor, attachTurretController(nullptr));
-    ON_CALL(turret2.yawMotor, getChassisFrameMeasuredAngle)
-        .WillByDefault(ReturnRef(turret2YawValue));
+    EXPECT_CALL(yawMotorMock2, attachTurretController(nullptr));
+    ON_CALL(yawMotorMock2, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turret2YawValue));
     EXPECT_CALL(
-        turret2.yawMotor,
+        yawMotorMock2,
         setChassisFrameSetpoint(Property(&WrappedFloat::getWrappedValue, M_PI_4 + M_PI_2)));
 
     turretUturnCommand180Deg.initialize();
@@ -80,10 +101,9 @@ TEST_F(TurretQuickTurnCommandTest, successfully_registers_with_scheduler)
 {
     tap::control::CommandScheduler commandScheduler(&drivers, true);
 
-    EXPECT_CALL(turret.yawMotor, isOnline).WillOnce(Return(true));
+    EXPECT_CALL(yawMotorMock, isOnline).WillOnce(Return(true));
     tap::algorithms::WrappedFloat currentYawValue(0, 0, M_TWOPI);
-    ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
-        .WillByDefault(ReturnRef(currentYawValue));
+    ON_CALL(yawMotorMock, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(currentYawValue));
 
     commandScheduler.registerSubsystem(&turret);
     commandScheduler.addCommand(&turretUturnCommand);
