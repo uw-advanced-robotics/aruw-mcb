@@ -40,9 +40,9 @@ public:
 
     mockable float getChassisRInput() override;
 
-    mockable getTurretYawInput(uint8_t turretID) override;
+    mockable float getTurretYawInput(uint8_t turretID) override;
 
-    mockable getTurretPitchInput(uint8_t turretID) override;
+    mockable float getTurretPitchInput(uint8_t turretID) override;
 
     /**
      * @return The cube storage velocity.
@@ -108,7 +108,7 @@ public:
 
 private:
     float MAX_IK_TRANSLATION_VEL = 0.2f;  // m/s for each axis
-    float MAX_IK_ROTATION_VEL = 0.1f;     // rad/s for each of roll/pitch/yaw
+    float MAX_IK_ROTATION_VEL = M_PI_4;   // rad/s for each of roll/pitch/yaw
 };
 }  // namespace aruwsrc::engineer
 

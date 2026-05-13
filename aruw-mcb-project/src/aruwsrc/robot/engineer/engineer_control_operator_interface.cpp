@@ -115,32 +115,32 @@ float EngineerControlOperatorInterface::getIKVelX() const
 }
 float EngineerControlOperatorInterface::getIKVelY() const
 {
-    return isIKTranslationMode()
-               ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_TRANSLATION_VEL
-               : 0;
+    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) *
+                                       MAX_IK_TRANSLATION_VEL
+                                 : 0;
 }
 float EngineerControlOperatorInterface::getIKVelZ() const
 {
-    return isIKTranslationMode()
-               ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_TRANSLATION_VEL
-               : 0;
+    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) *
+                                       MAX_IK_TRANSLATION_VEL
+                                 : 0;
 }
 float EngineerControlOperatorInterface::getIKVelRoll() const
 {
     return isIKRotationMode()
-               ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_ROTATION_VEL
+               ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * MAX_IK_ROTATION_VEL
                : 0;
 }
 float EngineerControlOperatorInterface::getIKVelPitch() const
 {
     return isIKRotationMode()
-               ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_ROTATION_VEL
+               ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) * MAX_IK_ROTATION_VEL
                : 0;
 }
 float EngineerControlOperatorInterface::getIKVelYaw() const
 {
     return isIKRotationMode()
-               ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_ROTATION_VEL
+               ? drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) * MAX_IK_ROTATION_VEL
                : 0;
 }
 
