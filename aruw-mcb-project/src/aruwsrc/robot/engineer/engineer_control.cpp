@@ -627,6 +627,10 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 //      Remote::SwitchState::UP))
 //         .whileTrue(CommandCompositionHelper::parallel<2>({&cubeStorageHome, &extensionHome}));
 
+Trigger rightDown =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN)
+        .whileTrue(&manualIKCommand);
+
 Trigger wheelDown =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.5f, false)
         .onTrue(&endEffectorSuckOnCommand);
