@@ -143,6 +143,11 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
 static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
 
+static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 }  // namespace aruwsrc::control::chassis
 
 #endif  // STANDARD_CHASSIS_CONSTANTS_HPP_

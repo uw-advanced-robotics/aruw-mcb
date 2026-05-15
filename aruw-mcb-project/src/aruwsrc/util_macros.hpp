@@ -36,12 +36,12 @@
  * A helper macro that makes it easier to specify at compile time something that should be true for
  * all sentries.
  */
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ACHLYS)
 #define ALL_SENTRIES
 #endif
 
-#if defined(TARGET_HERO_ZERO) || defined(TARGET_DRONE) || defined(TARGET_SENTRY_ECLIPSE) || \
-    defined(ALL_STANDARDS)
+#if defined(TARGET_HERO_NEPTUNE) || defined(TARGET_DRONE) || defined(ALL_STANDARDS) || \
+    defined(TARGET_SENTRY_ACHLYS)
 #define ALL_TURRETED_ROBOTS
 #endif
 

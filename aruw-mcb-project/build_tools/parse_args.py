@@ -15,17 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
-from SCons.Script import *
 from build_tools import extract_robot_type
+from SCons.Script import *
 
-
-CMD_LINE_ARGS                       = 1
-TEST_BUILD_TARGET_ACCEPTED_ARGS     = ["build-tests", "run-tests", "run-tests-gcov"]
-SIM_BUILD_TARGET_ACCEPTED_ARGS      = ["build-sim", "run-sim"]
+CMD_LINE_ARGS = 1
+TEST_BUILD_TARGET_ACCEPTED_ARGS = ["build-tests", "run-tests", "run-tests-gcov"]
+SIM_BUILD_TARGET_ACCEPTED_ARGS = ["build-sim", "run-sim"]
 HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "size", "gdb", "all", "ozone"]
-VALID_BUILD_PROFILES                = ["debug", "release", "fast"]
-VALID_PROFILING_TYPES               = ["true", "false"]
-VALID_COMPILE_LIB_TYPES             = ["mcb", "sim", "test", "none"]
+VALID_BUILD_PROFILES = ["debug", "release", "fast"]
+VALID_PROFILING_TYPES = ["true", "false"]
+VALID_COMPILE_LIB_TYPES = ["mcb", "sim", "test", "none"]
 
 USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>] [profiling=<true|false>] [compile_lib_only=<mcb|sim|test>]\n\
     \"<target>\" is one of:\n\
@@ -41,9 +40,10 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
             - \"usb=1\", \"--usb\": forces the use of USB, regardless of whether a known IP is present.\
     \"<ROBOT_TYPE>\" enables the appropriate build flags for the hardware target that the code should be built for.\n\
         - <ROBOT_TYPE> must be one of or a unique substring from the following:\n\
-            - STANDARD_NULL, STANDARD_VOID, DRONE, ENGINEER, SENTRY_ECLIPSE, HERO_ZERO, DART\n\
+            - STANDARD_NULL, STANDARD_VOID, DRONE, ENGINEER, SENTRY_ACHLYS, HERO_NEPTUNE, DART\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
                           the sim libraries, for example, run `scons build compile_lib_only=sim`."
+
 
 
 def parse_args():
@@ -69,11 +69,16 @@ def parse_args():
         if build_target == "help":
             print(USAGE)
             exit(0)
-        elif lib_to_compile == "test" or build_target in TEST_BUILD_TARGET_ACCEPTED_ARGS:
+        elif (
+            lib_to_compile == "test" or build_target in TEST_BUILD_TARGET_ACCEPTED_ARGS
+        ):
             args["TARGET_ENV"] = "tests"
         elif lib_to_compile == "sim" or build_target in SIM_BUILD_TARGET_ACCEPTED_ARGS:
             args["TARGET_ENV"] = "sim"
-        elif lib_to_compile == "mcb" or build_target in HARDWARE_BUILD_TARGET_ACCEPTED_ARGS:
+        elif (
+            lib_to_compile == "mcb"
+            or build_target in HARDWARE_BUILD_TARGET_ACCEPTED_ARGS
+        ):
             args["TARGET_ENV"] = "hardware"
         else:
             raise Exception("You did not select a valid target.\n" + USAGE)

@@ -33,7 +33,7 @@
             "intelliSenseMode": "gcc-x64"
         },
         {
-            "name": "MCB Sentry Eclipse",
+            "name": "MCB Sentry Achlys",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",
@@ -43,12 +43,13 @@
                 "aruw-mcb-project/taproot/ext",
                 "segger-rtt/RTT",
                 "segger-rtt/Config"
+
             ],
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_SENTRY_ECLIPSE",
-                "BUILD_TARGET=\"TARGET_SENTRY_ECLIPSE\""
+                "TARGET_SENTRY_ACHLYS",
+                "BUILD_TARGET=\"TARGET_SENTRY_ACHLYS\""
             ]
         },
         {
@@ -259,7 +260,7 @@
             ]
         },
         {
-            "name": "MCB Hero Zero",
+            "name": "MCB Hero Neptune",
             "includePath": [
                 "${default}",
                 "aruw-mcb-project/taproot/modm/src",
@@ -273,8 +274,8 @@
             "compilerPath": "arm-none-eabi-g++",
             "intelliSenseMode": "gcc-arm",
             "defines": [
-                "TARGET_HERO_ZERO",
-                "BUILD_TARGET=\"TARGET_HERO_ZERO\""
+                "TARGET_HERO_NEPTUNE",
+                "BUILD_TARGET=\"TARGET_HERO_NEPTUNE\""
             ]
         }
     ],

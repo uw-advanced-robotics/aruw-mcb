@@ -30,7 +30,6 @@ WristSubsystem::WristSubsystem(
     tap::motor::MotorInterface& motorDifferential1,
     tap::motor::MotorInterface& motorDifferential2,
     tap::motor::MotorInterface& motorTheta3,
-    tap::encoder::EncoderInterface& encoderTheta1,
     tap::encoder::EncoderInterface& encoderTheta2,
     const WristConfig config)
     : tap::control::Subsystem(drivers),
@@ -38,7 +37,6 @@ WristSubsystem::WristSubsystem(
       motorDifferential1(motorDifferential1),
       motorDifferential2(motorDifferential2),
       motorTheta3(motorTheta3),
-      encoderTheta1(encoderTheta1),
       encoderTheta2(encoderTheta2),
       setpointTheta1(tap::algorithms::Angle(0)),
       setpointTheta2(0),
@@ -51,7 +49,10 @@ WristSubsystem::WristSubsystem(
     ts->motorDifferential2 = motorDifferential2;
 }
 
-float WristSubsystem::getTheta1() const { return encoderTheta1.getPosition().getUnwrappedValue(); }
+float WristSubsystem::getTheta1() const
+{
+    return motorDifferential1.getEncoder()->getPosition().getUnwrappedValue();
+}
 float WristSubsystem::getTheta2() const { return encoderTheta2.getPosition().getUnwrappedValue(); }
 float WristSubsystem::getTheta3() const
 {
@@ -86,7 +87,8 @@ void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orienta
 
 bool WristSubsystem::atSetpointTheta1(float epsilon) const
 {
-    return std::abs(encoderTheta1.getPosition().minDifference(setpointTheta1)) < epsilon;
+    return std::abs(motorDifferential1.getEncoder()->getPosition().minDifference(setpointTheta1)) <
+           epsilon;
 }
 
 bool WristSubsystem::atSetpointTheta2(float epsilon) const
@@ -111,7 +113,6 @@ void WristSubsystem::initialize()
     motorDifferential1.initialize();
     motorDifferential2.initialize();
     motorTheta3.initialize();
-    encoderTheta1.initialize();
     encoderTheta2.initialize();
 }
 
@@ -125,18 +126,22 @@ void WristSubsystem::refresh()
         return;
     }
 
-    float theta1Error = encoderTheta1.getPosition().minDifference(setpointTheta1);
+    float theta1Error =
+        motorDifferential1.getEncoder()->getPosition().minDifference(setpointTheta1);
     float theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
     float errorTheta3 = motorTheta3.getEncoder()->getPosition().minDifference(setpointTheta3);
 
-    float pidOutTheta1 = pidTheta1.runController(theta1Error, encoderTheta1.getVelocity(), 2.0f);
-    float pidOutTheta2 = pidTheta2.runController(theta2Error, encoderTheta2.getVelocity(), 2.0f);
+    float pidOutTheta1 = pidTheta1.runController(
+        theta1Error,
+        motorDifferential1.getEncoder()->getVelocity(),
+        0.002f);
+    float pidOutTheta2 = pidTheta2.runController(theta2Error, encoderTheta2.getVelocity(), 0.002f);
     float pidOutTheta3 =
-        pidTheta3.runController(errorTheta3, motorTheta3.getEncoder()->getVelocity(), 2.0f);
+        pidTheta3.runController(errorTheta3, motorTheta3.getEncoder()->getVelocity(), 0.002f);
 
     // differential
-    float outMotorDifferential1 = -pidOutTheta2 - pidOutTheta1;
-    float outMotorDifferential2 = -pidOutTheta1;
+    float outMotorDifferential1 = pidOutTheta1;
+    float outMotorDifferential2 = pidOutTheta2 + pidOutTheta1;
 
     motorDifferential1.setDesiredOutput(std::clamp<int32_t>(
         outMotorDifferential1,
@@ -154,15 +159,15 @@ void WristSubsystem::refresh()
 
 void WristSubsystem::refreshSafeDisconnect()
 {
-    motorDifferential2.setDesiredOutput(0);
     motorDifferential1.setDesiredOutput(0);
+    motorDifferential2.setDesiredOutput(0);
     motorTheta3.setDesiredOutput(0);
 }
 
 bool WristSubsystem::isOnline() const
 {
     return motorDifferential1.isMotorOnline() && motorDifferential2.isMotorOnline() &&
-           motorTheta3.isMotorOnline() && encoderTheta1.isOnline() && encoderTheta2.isOnline();
+           motorTheta3.isMotorOnline() && encoderTheta2.isOnline();
 }
 
 Orientation WristSubsystem::getOrientation() const

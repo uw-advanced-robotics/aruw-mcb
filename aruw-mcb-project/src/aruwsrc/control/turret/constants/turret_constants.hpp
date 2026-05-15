@@ -37,11 +37,11 @@
 // static constexpr float TURRET_CG_Z = 0.0f;
 // static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 // }  // namespace aruwsrc::control::turret
-#elif defined(TARGET_HERO_ZERO)
+#elif defined(TARGET_HERO_NEPTUNE)
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
 #include "aruwsrc/robot/drone/drone_turret_constants.hpp"
-#elif defined(TARGET_SENTRY_ECLIPSE)
+#elif defined(TARGET_SENTRY_ACHLYS)
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
 #elif defined(TARGET_ENGINEER)
 #include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"

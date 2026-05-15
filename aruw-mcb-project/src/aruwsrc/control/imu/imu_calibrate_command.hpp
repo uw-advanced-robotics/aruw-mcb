@@ -89,12 +89,12 @@ public:
     const float positionZeroThreshold;
 
     static constexpr float DEFAULT_VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4f);
-    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
+    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.03f);
 
     struct TurretIMUCalibrationConfig
     {
         /// The turret mounted IMU to be calibrated.
-        aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm;
+        tap::communication::sensors::imu::AbstractIMU *turretImu;
         /// A `TurretSubsystem` that this command will control (will lock the turret).
         turret::TurretSubsystem *turret;
         /// A chassis relative yaw controller used to lock the turret.
@@ -201,14 +201,15 @@ protected:
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
                    velocityZeroThreshold) &&
-               (turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0) <
+               (abs(turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0)) <
                 positionZeroThreshold) &&
-               (ignorePitch || (compareFloatClose(
-                                    0.0f,
-                                    turret->pitchMotor.getChassisFrameVelocity(),
-                                    velocityZeroThreshold) &&
-                                (turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(
-                                     0) < positionZeroThreshold)));
+               (ignorePitch ||
+                (compareFloatClose(
+                     0.0f,
+                     turret->pitchMotor.getChassisFrameVelocity(),
+                     velocityZeroThreshold) &&
+                 (abs(turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(0)) <
+                  positionZeroThreshold)));
     }
 };
 }  // namespace aruwsrc::control::imu
