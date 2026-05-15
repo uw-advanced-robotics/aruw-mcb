@@ -110,5 +110,10 @@ static const aruwsrc::algorithms::PointMass MASS_BETWEEN_TURRET_PITCH_AND_WRIST_
 inline constexpr float EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR =
     0.2f;  // found empirically
 
+inline const aruwsrc::algorithms::PointMass MASS_CUBE{
+    .mass = 0.6f,
+    .location =
+        tap::algorithms::transforms::Position(0.1, 0, 0)};  // center of face to center of cube
+
 }  // namespace aruwsrc::engineer::algorithms
 #endif  // ENGINEER_KINEMATIC_CONSTANTS_HPP_

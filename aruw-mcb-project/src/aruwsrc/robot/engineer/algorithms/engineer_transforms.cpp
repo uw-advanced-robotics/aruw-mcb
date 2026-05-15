@@ -28,6 +28,8 @@
 using namespace tap::algorithms::odometry;
 using namespace tap::algorithms::transforms;
 
+using aruwsrc::algorithms::PointMass;
+
 namespace aruwsrc::engineer::algorithms
 {
 EngineerTransforms::EngineerTransforms(
@@ -60,8 +62,9 @@ EngineerTransforms::EngineerTransforms(
       endEffectorToCubeDist(Transform::identity()),
       COMBeyondTurretPitch(
           {.mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass + MASS_BEYOND_WRIST.mass,
-           .location = Position(0, 0, 0)}),
-      COMBeyondWrist(MASS_BEYOND_WRIST)
+           .location = Position(0, 0, 0)}),  // overwritten each loop
+      COMBeyondWrist(MASS_BEYOND_WRIST),     // only mass is kept, location is overwritten each loop
+      COMCube(MASS_CUBE)
 {
 }
 
@@ -131,8 +134,14 @@ void EngineerTransforms::updateTransforms()
         worldToTurretPitch.composeStatic(turretPitchToExtension).composeStatic(extensionToWrist);
 
     // TODO: tap should have a single operation for this
+    COMCube.location = worldToEndEffector.getInverse().apply(MASS_CUBE.location);
+    COMBeyondWrist.mass = MASS_BEYOND_WRIST.mass;
     COMBeyondWrist.location = worldToWrist.getInverse().apply(MASS_BEYOND_WRIST.location);
-    aruwsrc::algorithms::PointMass COMBetweenTurretPitchAndWrist{
+
+    // TODO: use pressure sensor as condition
+    if (false) COMBeyondWrist = PointMass::merge(COMBeyondWrist, COMCube);
+
+    PointMass COMBetweenTurretPitchAndWrist{
         .mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass,
         .location = worldToTurretPitch.getInverse().apply(
             MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.location +
@@ -141,8 +150,7 @@ void EngineerTransforms::updateTransforms()
                 0,
                 0))};
 
-    COMBeyondTurretPitch =
-        aruwsrc::algorithms::PointMass::merge(COMBetweenTurretPitchAndWrist, COMBeyondWrist);
+    COMBeyondTurretPitch = PointMass::merge(COMBetweenTurretPitchAndWrist, COMBeyondWrist);
 }
 
 }  // namespace aruwsrc::engineer::algorithms

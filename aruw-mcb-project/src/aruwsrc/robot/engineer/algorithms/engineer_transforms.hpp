@@ -153,6 +153,7 @@ private:
     // Subtree Center of Masses
     aruwsrc::algorithms::PointMass COMBeyondTurretPitch;
     aruwsrc::algorithms::PointMass COMBeyondWrist;
+    aruwsrc::algorithms::PointMass COMCube;
 };
 
 }  // namespace aruwsrc::engineer::algorithms
