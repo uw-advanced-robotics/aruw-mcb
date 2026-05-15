@@ -37,8 +37,11 @@ using namespace testing;
 
 #define SETUP_TEST()
 
-static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
-    TURRET_GRAVITY_CONFIG_TEST{.cgX = 0.1f, .cgZ = 0.1f, .gravityCompensatorMax = 1000.0f};
+static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::
+    TurretGravityParams TURRET_GRAVITY_CONFIG_TEST{
+        .cgX = 0.1f,
+        .cgZ = 0.1f,
+        .gravityCompensatorMax = 1000.0f};
 namespace
 {
 float computeGravitationalForceOffset(const float pitchAngleRad)
