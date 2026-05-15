@@ -18,9 +18,14 @@
  */
 
 #include "wrist_subsystem.hpp"
+
+#include "tap/algorithms/math_user_utils.hpp"
+
 #define ts this
 
 using namespace tap::algorithms::transforms;
+
+using tap::algorithms::ACCELERATION_GRAVITY;
 using tap::algorithms::CMSISMat;
 
 namespace aruwsrc::engineer::wrist
@@ -34,6 +39,7 @@ WristSubsystem::WristSubsystem(
     const WristConfig config)
     : tap::control::Subsystem(drivers),
       config(config),
+      gravityCompConfig(std::nullopt),
       motorDifferential1(motorDifferential1),
       motorDifferential2(motorDifferential2),
       motorTheta3(motorTheta3),
@@ -139,9 +145,32 @@ void WristSubsystem::refresh()
     float pidOutTheta3 =
         pidTheta3.runController(errorTheta3, motorTheta3.getEncoder()->getVelocity(), 0.002f);
 
+    // gravity comp
+    Position mountingFrameToCOM =
+        gravityCompConfig->worldToMountingFrame.apply(gravityCompConfig->pointMass.location);
+    Vector mountRelativeGravityForce = gravityCompConfig->worldToMountingFrame.apply(
+        Vector(0, 0, -ACCELERATION_GRAVITY * gravityCompConfig->pointMass.mass));
+    Vector mountRelativeGravityTorque =
+        mountingFrameToCOM.toVector().cross(gravityCompConfig->worldToMountingFrame.apply(
+            Vector(0, 0, -ACCELERATION_GRAVITY * gravityCompConfig->pointMass.mass)));
+
+    float theta1 = getTheta1();
+    float theta2 = getTheta2();
+
+    float theta1GravityTorque = mountRelativeGravityTorque.x();
+    float theta2GravityTorque = mountRelativeGravityTorque.y() * cosf(theta1) +
+                                mountRelativeGravityTorque.z() * sinf(theta1);
+    float theta3GravityTorque = mountRelativeGravityTorque.x() * cosf(theta2) +
+                                mountRelativeGravityTorque.y() * sinf(theta1) * sinf(theta2) -
+                                mountRelativeGravityTorque.z() * cosf(theta1) * sinf(theta2);
+
     // differential
-    float outMotorDifferential1 = pidOutTheta1;
-    float outMotorDifferential2 = pidOutTheta2 + pidOutTheta1;
+    float motor1GravityTorque = theta1GravityTorque * gravityCompConfig->motor1TorqueConstant;
+    float motor2GravityTorque =
+        (theta1GravityTorque + theta2GravityTorque) * gravityCompConfig->motor2TorqueConstant;
+    float outMotorDifferential1 = pidOutTheta1 - motor1GravityTorque;
+    float outMotorDifferential2 = pidOutTheta1 + pidOutTheta2 - motor2GravityTorque;
+    float outMotor3 = pidOutTheta3 - theta3GravityTorque;
 
     motorDifferential1.setDesiredOutput(std::clamp<int32_t>(
         outMotorDifferential1,
@@ -152,7 +181,7 @@ void WristSubsystem::refresh()
         -config.maxMotorDesiredOutput,
         config.maxMotorDesiredOutput));
     motorTheta3.setDesiredOutput(std::clamp<int32_t>(
-        pidOutTheta3,
+        outMotor3,
         -config.maxMotorDesiredOutput,
         config.maxMotorDesiredOutput));
 }

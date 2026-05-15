@@ -433,6 +433,9 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
 inline constexpr float M3508_TORQUE_CONSTANT =
     (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
 
+inline constexpr float M2006_TORQUE_CONSTANT =
+    tap::motor::DjiMotor::MAX_OUTPUT_C610 / 1.0f;  // desOut/Nm
+
 TurretDynamicCOMGravityCompensator gravityPitchCompensator(
     {.pointMass = transformer.getCOMBeyondTurretPitch(),
      .worldToTurretPitch = transformer.getWorldToTurretPitch(),
@@ -647,6 +650,14 @@ void initializeSubsystems()
     parallelOmniOne.initialize();
     parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
+
+    wristSubsystem.attachGravityCompConfig({
+        .pointMass = transformer.getCOMBeyondWrist(),
+        .worldToMountingFrame = transformer.getWorldToExtension(),
+        .motor1TorqueConstant = M2006_TORQUE_CONSTANT * WRIST_MOTOR_1_GEAR_RATIO,
+        .motor2TorqueConstant = M2006_TORQUE_CONSTANT * WRIST_MOTOR_2_GEAR_RATIO,
+        .motor3TorqueConstant = M2006_TORQUE_CONSTANT * WRIST_MOTOR_3_GEAR_RATIO,
+    });
 }
 
 /* register subsystems here -------------------------------------------------*/
