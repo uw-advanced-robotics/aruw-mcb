@@ -22,8 +22,6 @@
 
 #include "tap/algorithms/transforms/position.hpp"
 
-#include "point_mass.hpp"
-
 namespace aruwsrc::algorithms
 {
 struct PointMass
