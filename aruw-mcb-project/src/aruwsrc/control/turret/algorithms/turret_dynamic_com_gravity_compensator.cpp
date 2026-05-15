@@ -29,15 +29,14 @@ TurretDynamicCOMGravityCompensator::TurretDynamicCOMGravityCompensator(
     const TurretGravityParams& params)
     : params(params){};
 
-Position pitchToCOM;
-Vector turretPitchRelativeGravityTorque, turretPitchRelativeGravityForce;
 float TurretDynamicCOMGravityCompensator::calculateCompensationEffort(TurretCompensatorState) const
 {
-    pitchToCOM = params.worldToTurretPitch.apply(params.pointMass.location);
-    turretPitchRelativeGravityForce = params.worldToTurretPitch.apply(
+    Position pitchToCOM = params.worldToTurretPitch.apply(params.pointMass.location);
+    Vector turretPitchRelativeGravityForce = params.worldToTurretPitch.apply(
         Vector(0, 0, -ACCELERATION_GRAVITY * params.pointMass.mass));
-    turretPitchRelativeGravityTorque = pitchToCOM.toVector().cross(params.worldToTurretPitch.apply(
-        Vector(0, 0, -ACCELERATION_GRAVITY * params.pointMass.mass)));
+    Vector turretPitchRelativeGravityTorque =
+        pitchToCOM.toVector().cross(params.worldToTurretPitch.apply(
+            Vector(0, 0, -ACCELERATION_GRAVITY * params.pointMass.mass)));
     return -turretPitchRelativeGravityTorque.y() * params.motorTorqueConstant;
 };
 
