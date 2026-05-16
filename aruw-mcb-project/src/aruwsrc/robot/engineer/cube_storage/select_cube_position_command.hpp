@@ -19,6 +19,7 @@
 #ifndef SELECT_CUBE_POSITION_COMMAND_HPP_
 #define SELECT_CUBE_POSITION_COMMAND_HPP_
 
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
@@ -33,11 +34,9 @@ class SelectCubePositionCommand : public tap::control::Command
 public:
     SelectCubePositionCommand(
         CubeStorageSubsystem &cubeStorage,
-        aruwsrc::control::joint::JointSubsystem &jointSubsystem,
-        bool addCube
-        // TurretToCubeTransform &turretToCubeTransformer,
-        // TurretToSuctionTransform &turretToSuctionTransformer
-    );
+        bool addCube,
+        const tap::algorithms::transforms::Transform &cubeStore1ToCube,
+        const tap::algorithms::transforms::Transform &cubeStore2ToCube);
 
     void initialize() override;
 
@@ -51,12 +50,10 @@ public:
 
 private:
     CubeStorageSubsystem &cubeStorage;
-    aruwsrc::control::joint::JointSubsystem &jointSubsystem;
     bool addCube;
 
-    // TurretToCubeTransform &turretToCubeTransformer;
-    // TurretToSuctionTransform &turretToSuctionTransformer;
-
+    const tap::algorithms::transforms::Transform &cubeStore1ToCube;
+    const tap::algorithms::transforms::Transform &cubeStore2ToCube;
 };  // class Select Cube Position Command
 
 }  // namespace aruwsrc::engineer::cube_storage

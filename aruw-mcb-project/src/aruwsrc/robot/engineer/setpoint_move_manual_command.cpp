@@ -38,7 +38,7 @@ void SetpointMoveManualCommand::initialize() {}
 
 void SetpointMoveManualCommand::execute()
 {
-    if (!operatorInterface->isGantryWristControlMode()) return;
+    if (!operatorInterface->isExtensionWristControlMode()) return;
 
     float setpoint = subsystem.getSetpoint();
     switch (setpointType)
@@ -47,7 +47,7 @@ void SetpointMoveManualCommand::execute()
             setpoint += operatorInterface->getCubeStorageVelocity() * moveSpeed;
             break;
         case SetpointType::EXTENSION:
-            setpoint += operatorInterface->getGantryExtensionVelocity() * moveSpeed;
+            setpoint += operatorInterface->getExtensionVelocity() * moveSpeed;
             if (operatorInterface->getGantryKeyOut())
             {
                 setpoint += moveSpeed;

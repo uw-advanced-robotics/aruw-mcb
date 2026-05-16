@@ -32,11 +32,20 @@ namespace aruwsrc::communication::can
 class AruwAnalogSensor : public tap::can::CanRxListener
 {
 public:
+    class UpdateListener
+    {
+    public:
+        virtual ~UpdateListener() = default;
+        virtual void onAnalogSensorUpdated() = 0;
+    };
+
     AruwAnalogSensor(tap::Drivers* drivers, tap::can::CanBus canBus, uint16_t canId = 0x1D6);
 
     void processMessage(const modm::can::Message& message) override;
 
     mockable void initialize();
+    mockable bool addUpdateListener(UpdateListener* listener);
+    mockable void removeUpdateListener(const UpdateListener* listener);
 
     uint16_t getAnalogInput0() const { return this->ai0; }
     uint16_t getAnalogInput1() const { return this->ai1; }
@@ -52,11 +61,14 @@ public:
     }
 
 private:
+    static constexpr uint8_t MAX_UPDATE_LISTENERS = 4;
+
     uint16_t ai0 = 0;
     uint16_t ai1 = 0;
 
     const uint16_t CAN_ID;
     tap::arch::MilliTimeout heartbeat;
+    UpdateListener* listeners[MAX_UPDATE_LISTENERS] = {nullptr};
 };
 }  // namespace aruwsrc::communication::can
 

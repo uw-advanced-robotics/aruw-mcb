@@ -32,7 +32,7 @@
 
 namespace aruwsrc::control::launcher
 {
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 3;
 #else
 static constexpr size_t LAUNCH_SPEED_AVERAGING_DEQUE_SIZE = 10;
@@ -62,12 +62,17 @@ static constexpr tap::motor::MotorId UPPER_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr tap::motor::MotorId LOWER_MOTOR_ID = tap::motor::MOTOR4;
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR3;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR1;
+#elif defined(TARGET_HERO_NEPTUNE)
+static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
 #else
 static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
 #endif
 
-#ifndef TARGET_SENTRY_ECLIPSE
+#if !defined(ALL_SENTRIES)
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #endif
 
@@ -80,7 +85,7 @@ static constexpr float LAUNCHER_PID_KI = 31.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
-#elif defined(TARGET_SENTRY_ECLIPSE)
+#elif defined(TARGET_SENTRY_ACHLYS)
 static constexpr float LAUNCHER_PID_KP = 14.0106f;
 static constexpr float LAUNCHER_PID_KI = 31.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
@@ -130,7 +135,7 @@ static constexpr tap::algorithms::SmoothPidConfig LAUNCHER_SPEED_CORRECTION_PID_
  * Lookup table that maps launch speed to flywheel speed. In between points in the lookup table,
  * linear interpolation is used.
  */
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
     {4.0f, 1900.0f},
@@ -161,7 +166,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {23.89f, 6600.0f}, {24.12f, 6700.0f}, {24.93f, 6800.0f}, {25.17f, 6900.0f}, {26.03f, 7000.0f},
     {26.28f, 7200.0f}, {26.38f, 7300.0f}, {27.15f, 7400.0f}, {27.48f, 7500.0f}, {27.50f, 7600.0f},
     {28.19f, 7800.0f}, {29.40f, 7900.0f}};
-#elif defined(TARGET_SENTRY_ECLIPSE)
+#elif defined(TARGET_SENTRY_ACHLYS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},      {11.33f, 4500.0f}, {11.34f, 4600.0f}, {12.3f, 4700.0f},  {13.39f, 4900.0f},
     {14.32f, 5000.0f}, {14.78f, 5100.0f}, {15.91f, 5350.0f}, {16.4f, 5500.0f},  {18.28f, 5600.0f},
@@ -182,13 +187,13 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 
 #if defined(ALL_STANDARDS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
-#elif defined(TARGET_HERO_ZERO)
+#elif defined(TARGET_HERO_NEPTUNE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
-#elif defined(TARGET_SENTRY_ECLIPSE)
+#elif defined(TARGET_SENTRY_ACHLYS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #endif
 
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
 static constexpr float LAUNCHER_SPEED =
     tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 1;
 #else

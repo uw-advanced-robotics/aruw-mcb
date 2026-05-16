@@ -46,11 +46,11 @@ class MultiShotCvCommandMappingTest : public Test
 protected:
     MultiShotCvCommandMappingTest()
         : drivers(),
-          yawMotor(&yawM, {}),
-          pitchMotor(&pitM, {}),
+          yawMotor(&yawM),
+          pitchMotor(&pitM),
           yawController(yawMotor, {}),
           pitchController(pitchMotor, {}),
-          turretSubsystem(&drivers),
+          turretSubsystem(&drivers, pitchMotor, yawMotor, nullptr),
           visionCoprocessor(&drivers),
           operatorInterface(&drivers),
           ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0, nullptr),

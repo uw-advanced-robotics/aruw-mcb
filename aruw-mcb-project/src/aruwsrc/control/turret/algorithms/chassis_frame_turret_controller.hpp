@@ -57,7 +57,7 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the chassis frame.
      */
-    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint);
+    void runController(const float dt, const WrappedFloat desiredSetpoint);
 
     void setSetpoint(WrappedFloat desiredSetpoint);
 

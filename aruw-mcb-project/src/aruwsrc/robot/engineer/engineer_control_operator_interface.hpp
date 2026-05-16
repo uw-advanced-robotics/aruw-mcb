@@ -32,11 +32,7 @@ namespace aruwsrc::engineer
 class EngineerControlOperatorInterface : public control::ControlOperatorInterface
 {
 public:
-    EngineerControlOperatorInterface(tap::Drivers *drivers)
-        : ControlOperatorInterface(drivers),
-          drivers(drivers)
-    {
-    }
+    EngineerControlOperatorInterface(tap::Drivers *drivers) : ControlOperatorInterface(drivers) {}
 
     virtual float getChassisXInput() override;
 
@@ -44,15 +40,14 @@ public:
 
     virtual float getChassisRInput() override;
 
+    float getTurretYawInput(uint8_t turretID) override;
+
+    float getTurretPitchInput(uint8_t turretID) override;
+
     /**
      * @return The cube storage velocity.
      */
     mockable float getCubeStorageVelocity();
-
-    /**
-     * @return The gantry lift velocity
-     */
-    mockable float getGantryLiftVelocity();
 
     bool getGantryKeyUp();
 
@@ -69,22 +64,22 @@ public:
     /**
      * @return The gantry extension velocity
      */
-    mockable float getGantryExtensionVelocity();
+    mockable float getExtensionVelocity();
 
     /**
      * @return The wrist pitch velocity
      */
-    mockable float getWristPitchVelocity();
+    mockable float getWristTheta2Velocity();
 
     /**
      * @return The wrist yaw velocity
      */
-    mockable float getWristYawVelocity();
+    mockable float getWristTheta1Velocity();
 
     /**
      * @return The wrist roll velocity
      */
-    mockable float getWristRollVelocity();
+    mockable float getWristTheta3Velocity();
 
     /**
      * @return whether or not the control switch is set to drive mode.
@@ -95,19 +90,12 @@ public:
      * @return whether or not the control switch is set to gantry (lift + horizontal extension)
      * control mode.
      */
-    bool isGantryWristControlMode();
+    bool isExtensionWristControlMode();
 
     /**
      * @return whether or not the control switch is set to cube storage control mode.
      */
     bool isCubeStorageControlMode();
-
-private:
-    tap::Drivers *drivers;
-    float divideValPitch = 375.0f;  // these are all scaling factors for driver control
-    float divideValYaw = 375.0f;
-    float divideGantryLift = 375.0f;
-    float divideGantryExtension = 375.0f;
 };
 }  // namespace aruwsrc::engineer
 

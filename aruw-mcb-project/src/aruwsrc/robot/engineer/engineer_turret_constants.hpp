@@ -36,7 +36,7 @@ namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
 
-static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
+static constexpr float USER_YAW_INPUT_SCALAR = 0.01f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
 
 static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS1;
@@ -48,34 +48,35 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 414,
-    .minAngle = 0,     ///< Doesn't matter since yaw not limited
-    .maxAngle = M_PI,  ///< Doesn't matter since yaw not limited
+    .minAngle = 0,        ///< Doesn't matter since yaw not limited
+    .maxAngle = M_TWOPI,  ///< Doesn't matter since yaw not limited
     .limitMotorAngles = false,
 };
 
+inline constexpr float YAW_TURRET_GEAR_RATIO = 16.0f / 60.0f;
+
+inline constexpr uint32_t PITCH_TURRET_ENCODER_HOME = 884;
+inline constexpr uint32_t PITCH_TURRET_GEAR_RATIO = 1.0f / 8.0f;
+
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4901,
-    .minAngle = modm::toRadian(-20),
-    .maxAngle = modm::toRadian(30),
+    .startEncoderValue = 0,  // NA since pitch motor encoder is incremental
+    .minAngle = modm::toRadian(-43),
+    .maxAngle = modm::toRadian(15),
     .limitMotorAngles = true,
 };
 
-// do we need this balancing stuff?
-
-// Turret is perfectly balanced
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
 
-// everything needs tuning
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 1250.0f,
+    .kp = 10.0f,
     .ki = 0.0f,
-    .kd = 0.4f,
+    .kd = 1.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 2000.0f,
+    .maxOutput = 5.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -85,11 +86,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1500.0f,
-    .ki = 1.0f,
-    .kd = 0.3f,
-    .maxICumulative = 10.0f,
-    .maxOutput = 2000,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 0,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 0.1f,
@@ -99,11 +100,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 60.0f,
+    .kp = 2000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * (2.0f / 3.0f),
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -113,13 +114,13 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 1400.0f,
-    .ki = 0.1f,
-    .kd = 0.4f,
+    .kp = 8.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 2000.0f,
+    .maxOutput = 15.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 30.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -127,13 +128,13 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1400.0f,
-    .ki = 5.0f,
-    .kd = 0.5f,
-    .maxICumulative = 5.0f,
-    .maxOutput = 2000.0f,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 1.0f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 30.0f,
+    .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
@@ -141,11 +142,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 400.0f,
+    .kp = 5000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
-    .maxICumulative = 5'000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA * (1.0f / 2.0f),
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -155,8 +156,6 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 };
 }  // namespace world_rel_turret_imu
 
-// why does hero have two yaw pid configs im confused
-
 namespace world_rel_chassis_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
@@ -164,7 +163,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 0.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 0.0f,
@@ -178,11 +177,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 100'000.0f,
+    .kp = 0.0f,
     .ki = 0.0f,
-    .kd = 10'000.0f,
+    .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -192,10 +191,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 100'000.0f,
-    .ki = 1000.0f,
-    .kd = 16'000.0f,
-    .maxICumulative = 7000.0f,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 400.0f,

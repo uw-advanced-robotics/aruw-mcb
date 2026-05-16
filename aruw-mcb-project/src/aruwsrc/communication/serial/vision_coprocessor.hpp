@@ -65,7 +65,7 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ACHLYS)
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
 #else
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
@@ -76,22 +76,6 @@ public:
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
-
-#if defined(TARGET_HERO_PERSEUS)
-    /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
-     *  The IMU Faces to the left of the 'R' on the Type A MCB
-     *  0 Rotation corresponds with a 0 rotation of the chassis
-     */
-    // MCB has power inlet facing forward
-    static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
-#elif defined(TARGET_SENTRY_ECLIPSE)
-    // MCB is on a diagonal
-    // @todo: ensure this is correct
-    static constexpr float MCB_ROTATION_OFFSET = 0;
-#else
-    // MCB has power inlet facing backwards
-    static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
-#endif
 
     enum class FireRate : uint8_t
     {
