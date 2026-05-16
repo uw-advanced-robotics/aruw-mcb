@@ -35,8 +35,7 @@ float TurretDynamicCOMGravityCompensator::calculateCompensationEffort(TurretComp
     Vector turretPitchRelativeGravityForce = params.worldToTurretPitch.apply(
         Vector(0, 0, -ACCELERATION_GRAVITY * params.pointMass.mass));
     Vector turretPitchRelativeGravityTorque =
-        pitchToCOM.toVector().cross(params.worldToTurretPitch.apply(
-            Vector(0, 0, -ACCELERATION_GRAVITY * params.pointMass.mass)));
+        pitchToCOM.toVector().cross(turretPitchRelativeGravityForce);
     return -turretPitchRelativeGravityTorque.y() * params.motorTorqueConstant;
 };
 

@@ -151,8 +151,7 @@ void WristSubsystem::refresh()
     Vector mountRelativeGravityForce = gravityCompConfig->worldToMountingFrame.apply(
         Vector(0, 0, -ACCELERATION_GRAVITY * gravityCompConfig->pointMass.mass));
     Vector mountRelativeGravityTorque =
-        mountingFrameToCOM.toVector().cross(gravityCompConfig->worldToMountingFrame.apply(
-            Vector(0, 0, -ACCELERATION_GRAVITY * gravityCompConfig->pointMass.mass)));
+        mountingFrameToCOM.toVector().cross(mountRelativeGravityForce);
 
     float theta1 = getTheta1();
     float theta2 = getTheta2();
