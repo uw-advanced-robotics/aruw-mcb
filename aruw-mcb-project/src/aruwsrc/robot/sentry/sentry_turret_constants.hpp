@@ -70,7 +70,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 55.0f,
 };
 
-static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
+static constexpr float TURRET_MINOR_OFFSET = 0.0f;
 
 static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .kp = 0.042f,

@@ -53,12 +53,14 @@ StandardAndHeroTransformer::StandardAndHeroTransformer(
 void StandardAndHeroTransformer::updateTransforms()
 {
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
+    modm::Vector2f chassisVelocity = chassisOdometry.getCurrentVelocity2D();
     worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
 
     // @note: here we are assuming that the chassis does not pitch or roll
     // This is fine for flat fields, but for an RMUC field with inclines
     // the state of the robot will not be properly tracked
     worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
+    worldToChassis.updateVelocity(chassisVelocity.getX(), chassisVelocity.getY(), 0.);
 
     float roll = 0.0f;
     const tap::communication::sensors::imu::AbstractIMU* imu = turret.getIMU();
@@ -69,10 +71,11 @@ void StandardAndHeroTransformer::updateTransforms()
     worldToTurret.updateAngularVelocity(0, imu->getGy(), imu->getGz());
 
     worldToTurret.updateTranslation(worldToChassis.getTranslation());
+    worldToTurret.updateVelocity(worldToChassis.getVelocity());
     chassisToTurret = worldToChassis.getInverse().composeStatic(worldToTurret);
 
     Transform chassisToTurretNoPitch = chassisToTurret;
-    chassisToTurretNoPitch.updateRotation(Orientation(0, 0, chassisToTurret.getRotation().yaw()));
+    chassisToTurretNoPitch.updateRotation(Orientation(0, 0, chassisToTurret.getYaw()));
     chassisToArducam = chassisToTurretNoPitch.composeStatic(TURRET_TO_ARDUCAM_OFFSET);
 
     worldToVTM = worldToTurret.composeStatic(VTM_OFFSET);

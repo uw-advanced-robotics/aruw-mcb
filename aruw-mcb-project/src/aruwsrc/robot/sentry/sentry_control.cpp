@@ -26,6 +26,7 @@
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
@@ -70,7 +71,6 @@
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_subsystem.hpp"
-#include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/chassis/sentry_beyblade_command.hpp"
 #include "aruwsrc/robot/sentry/chassis/sentry_manual_drive_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
@@ -413,20 +413,19 @@ VelocityAgitatorSubsystem turretWidowAgitator(
     constants::turretWidow::AGITATOR_CONFIG);
 
 // ballistics solvers
-SentryBallisticsSolver turretWidowSolver(
+aruwsrc::algorithms::CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
-    transformer,
+    transformAdapter,
     turretWidowFrictionWheels,
-    turretMajor,
     turretWidow::DEFAULT_LAUNCH_SPEED,
-    0.f,  // turret minor pitch offset
-    TURRET_MINOR_OFFSET,
-    turretWidow.getTurretID());
+    turretWidow.getTurretID(),
+    0.f  // turret minor pitch offset
+);
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerTurretWidow(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
-    &turretWidowSolver);
+    &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand(
@@ -550,7 +549,7 @@ SentryTurretCVCommand::TurretConfig turretWidowCVConfig(
     turretWidow,
     turretWidowWorldControllers.yawController,
     turretWidowWorldControllers.pitchController,
-    turretWidowSolver);
+    ballisticsSolver);
 
 SentryTurretCVCommand turretCVCommand(
     drivers()->visionCoprocessor,

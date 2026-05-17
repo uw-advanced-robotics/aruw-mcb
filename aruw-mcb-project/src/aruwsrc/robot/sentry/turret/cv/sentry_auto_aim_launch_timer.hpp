@@ -22,7 +22,6 @@
 
 #include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 
 namespace aruwsrc::sentry::turret::cv
 {
@@ -55,7 +54,7 @@ public:
     SentryAutoAimLaunchTimer(
         uint32_t agitatorTypicalDelayMicroseconds,
         aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
-        aruwsrc::sentry::algorithms::SentryBallisticsSolver *ballistics);
+        aruwsrc::algorithms::CvBallisticsSolver *ballistics);
 
     /**
      * Compute a firing inclination for the current time and specified turret.
@@ -73,7 +72,7 @@ public:
 private:
     uint32_t agitatorTypicalDelayMicroseconds;
     aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
-    aruwsrc::sentry::algorithms::SentryBallisticsSolver *ballistics;
+    aruwsrc::algorithms::CvBallisticsSolver *ballistics;
 };  // class SentryAutoAimLaunchTimer
 
 }  // namespace aruwsrc::sentry::turret::cv

@@ -27,6 +27,7 @@
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -34,7 +35,6 @@
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
-#include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
 
 namespace tap::control::odometry
@@ -76,7 +76,7 @@ public:
             control::turret::algorithms::Axis::YAW> &yawController;
         control::turret::algorithms::TurretAxisControllerInterface<
             control::turret::algorithms::Axis::PITCH> &pitchController;
-        aruwsrc::sentry::algorithms::SentryBallisticsSolver &ballisticsSolver;
+        aruwsrc::algorithms::CvBallisticsSolver &ballisticsSolver;
     };
 
     enum HitState
@@ -157,7 +157,7 @@ private:
      */
     void computeAimSetpoints(
         TurretConfig &config,
-        aruwsrc::sentry::algorithms::SentryBallisticsSolver::BallisticsSolution &solution,
+        aruwsrc::algorithms::CvBallisticsSolver::BallisticsSolution &solution,
         WrappedFloat *desiredYawSetpoint,
         WrappedFloat *desiredPitchSetpoint,
         bool *withinAimingTolerance);

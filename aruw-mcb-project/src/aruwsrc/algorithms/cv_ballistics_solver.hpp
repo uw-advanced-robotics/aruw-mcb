@@ -22,8 +22,10 @@
 
 #include <optional>
 
+#include "tap/algorithms/transforms/transform.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::communication::rtt
@@ -138,11 +140,11 @@ public:
      */
     CvBallisticsSolver(
         const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const aruwsrc::algorithms::odometry::transforms::TransformerInterface &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID,
+        float turretPitchOffset,
         aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
 
     /**
@@ -159,11 +161,11 @@ public:
 
 private:
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
-    const control::turret::RobotTurretSubsystem &turretSubsystem;
+    const aruwsrc::algorithms::odometry::transforms::TransformerInterface &transformer;
+    const tap::algorithms::transforms::Transform &worldToTurret;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
-    modm::Vector3f turretOrigin;
+    const float turretPitchOffset;
 
 public:
     const uint8_t turretID;
@@ -184,8 +186,6 @@ private:
      */
     std::optional<BallisticsSolution> computePulseEstimation(
         const communication::serial::VisionCoprocessor::PositionData &projectedAimPosData,
-        const modm::Vector3f &turretPosition,
-        const modm::Vector2f &chassisVel,
         float launchSpeed);
 };
 }  // namespace aruwsrc::algorithms

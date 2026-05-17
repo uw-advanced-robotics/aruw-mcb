@@ -147,7 +147,7 @@ namespace world_rel_turret_imu
 {
 #if defined(TARGET_STANDARD_NULL)
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 50.0f,
+    .kp = 70.0f,
     .ki = 0.0f,
     .kd = 5.0f,
     .maxICumulative = 0.0f,
@@ -176,7 +176,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 // };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 4000.0f,
+    .kp = 3200.0f,
     .ki = 0.0f,
     .kd = 15.0f,
     .maxICumulative = 0.0f,
@@ -190,10 +190,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 75.0f,
-    .ki = 1.0f,
+    .kp = 100.0f,
+    .ki = 250.0f,
     .kd = 2.5f,
-    .maxICumulative = 1.0f,
+    .maxICumulative = 2.0f,
     .maxOutput = 10.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,

@@ -298,11 +298,11 @@ aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPre
 
 CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
-    odometrySubsystem,
-    turret,
+    transformAdapter,
     frictionWheelSpeedPredictor,
     aruwsrc::control::launcher::LAUNCHER_SPEED,  // defaultLaunchSpeed
     0,                                           // turretID
+    0,                                           // turretPitchOffset
     &drivers()->rttTelemetry                     // telemetry
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
