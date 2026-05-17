@@ -292,7 +292,7 @@ void registerDroneSubsystems(Drivers *drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultDroneCommands(Drivers *)
 {
-    // buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
+    buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
     turret.setDefaultCommand(&turretUserVectorCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
 }

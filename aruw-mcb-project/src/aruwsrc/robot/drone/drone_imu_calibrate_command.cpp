@@ -57,7 +57,7 @@ void DroneImuCalibrateCommand::initialize()
     pitchPid.reset();
 
     turret.yawMotor.setChassisFrameSetpoint(Angle(turret.yawMotor.getConfig().minAngle));
-    turret.pitchMotor.setChassisFrameSetpoint(Angle(turret.pitchMotor.getConfig().maxAngle));
+    turret.pitchMotor.setChassisFrameSetpoint(Angle(turret.pitchMotor.getConfig().maxAngle - 300));
 
     calibrationTimer.stop();
     calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);

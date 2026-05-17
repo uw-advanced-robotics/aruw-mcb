@@ -86,8 +86,9 @@ static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BU
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR7;
 static constexpr uint32_t PITCH_ENCODER_CURRENT_HOME_POSITION = 6862;
 static constexpr uint32_t PITCH_ENCODER_CURRENT_STRAIGHT_DOWN_POSITION = 0;
-static constexpr uint32_t PITCH_ENCODER_CURRENT_MIN_POSITION = 6114;
-static constexpr uint32_t PITCH_ENCODER_CURRENT_MAX_POSITION = 2355;
+static constexpr uint32_t PITCH_ENCODER_CURRENT_IMU_CALIBRATION_POSITION = 6000;
+static constexpr uint32_t PITCH_ENCODER_CURRENT_MIN_POSITION = 6175;
+static constexpr uint32_t PITCH_ENCODER_CURRENT_MAX_POSITION = 2249;
 static constexpr uint32_t PITCH_ENCODER_OFFSET_SHIFT =
     (PITCH_ENCODER_CURRENT_MIN_POSITION + PITCH_ENCODER_CURRENT_MAX_POSITION) / 2;
 static constexpr uint32_t PITCH_ENCODER_HOME_POSITION =
@@ -96,6 +97,10 @@ static constexpr uint32_t PITCH_ENCODER_HOME_POSITION =
 static constexpr uint32_t PITCH_ENCODER_STRAIGHT_DOWN_POSITION =
     (PITCH_ENCODER_CURRENT_STRAIGHT_DOWN_POSITION + tap::motor::DjiMotorEncoder::ENC_RESOLUTION -
      PITCH_ENCODER_OFFSET_SHIFT) %
+    tap::motor::DjiMotorEncoder::ENC_RESOLUTION;
+static constexpr uint32_t PITCH_ENCODER_IMU_CALIBRATION_POSITION =
+    (PITCH_ENCODER_CURRENT_IMU_CALIBRATION_POSITION +
+     tap::motor::DjiMotorEncoder::ENC_RESOLUTION - PITCH_ENCODER_OFFSET_SHIFT) %
     tap::motor::DjiMotorEncoder::ENC_RESOLUTION;
 static constexpr uint32_t PITCH_ENCODER_MIN_POSITION =
     (PITCH_ENCODER_CURRENT_MIN_POSITION + tap::motor::DjiMotorEncoder::ENC_RESOLUTION -
@@ -108,12 +113,16 @@ static constexpr uint32_t PITCH_ENCODER_MAX_POSITION =
 static constexpr float PITCH_START_ANGLE =
     -static_cast<float>(PITCH_ENCODER_STRAIGHT_DOWN_POSITION) /
     tap::motor::DjiMotorEncoder::ENC_RESOLUTION * M_TWOPI;
+static constexpr float PITCH_IMU_CALIBRATION_ANGLE =
+    static_cast<float>(PITCH_ENCODER_IMU_CALIBRATION_POSITION) /
+        tap::motor::DjiMotorEncoder::ENC_RESOLUTION * M_TWOPI +
+    PITCH_START_ANGLE;
 static constexpr float PITCH_MIN_ANGLE = static_cast<float>(PITCH_ENCODER_MIN_POSITION) /
                                              tap::motor::DjiMotorEncoder::ENC_RESOLUTION * M_TWOPI +
                                          PITCH_START_ANGLE + modm::toRadian(15);
 static constexpr float PITCH_MAX_ANGLE = static_cast<float>(PITCH_ENCODER_MAX_POSITION) /
                                              tap::motor::DjiMotorEncoder::ENC_RESOLUTION * M_TWOPI +
-                                         PITCH_START_ANGLE - modm::toRadian(15);
+                                         PITCH_START_ANGLE - modm::toRadian(2);
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = YAW_START_ANGLE,
@@ -153,7 +162,7 @@ static const tap::algorithms::transforms::Transform TURRET_IMU_CALIBRATION_MOUNT
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 20.0f,
+    .kp = 15.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -229,7 +238,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 20000.0f,
     .ki = 100.0f,
     .kd = 2000.0f,
-    .maxICumulative = 2000.0f,
+    .maxICumulative = 5000.0f,
     .maxOutput = 16'000.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,

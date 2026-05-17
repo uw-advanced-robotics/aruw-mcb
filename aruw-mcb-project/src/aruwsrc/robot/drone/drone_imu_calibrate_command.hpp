@@ -74,8 +74,8 @@ private:
     static constexpr uint32_t WAIT_TIME_TURRET_RESPONSE_MS = 2000;
     static constexpr uint32_t IMU_EXTRA_WAIT_CALIBRATE_MS = 2000;
     static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 20000;
-    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(0.25f);
-    static constexpr float POSITION_LOCK_THRESHOLD = modm::toRadian(1.0f);
+    static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(2.5f);
+    static constexpr float POSITION_LOCK_THRESHOLD = modm::toRadian(5.0f);
 
     tap::Drivers &drivers;
     DroneTurretSubsystem &turret;
