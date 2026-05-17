@@ -157,8 +157,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                 float currTheta = projectedAimPosData.theta + M_PI_2 * i;
 
                 RobotTargetKinematicState targetState(
-                    {projectedAimPosData.xPos + currRadius * cos(currTheta) - turretPosition.x,
-                     projectedAimPosData.yPos + currRadius * sin(currTheta) - turretPosition.y,
+                    {projectedAimPosData.xPos - turretPosition.x,
+                     projectedAimPosData.yPos - turretPosition.y,
                      projectedAimPosData.zPos + projectedAimPosData.plateHeights[i] -
                          turretPosition.z},
                     {projectedAimPosData.xVel - chassisVel.x,
