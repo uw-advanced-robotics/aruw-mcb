@@ -33,6 +33,8 @@
 using namespace tap::algorithms;
 using namespace modm;
 
+using tap::algorithms::ballistics::SecondOrderKinematicState;
+
 namespace aruwsrc::algorithms
 {
 CvBallisticsSolver::CvBallisticsSolver(
@@ -337,28 +339,24 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     float activePlateHeight = projectedAimPosData.plateHeights[activePlateIndex];
     float activePlateRadius =
         (activePlateIndex % 2 == 0) ? projectedAimPosData.radius0 : projectedAimPosData.radius1;
-    float activePlateTheta = projectedAimPosData.theta + activePlateIndex * M_PI_2;
 
-    // Active plate's current position (robot center + rotational offset)
-    RobotTargetKinematicState activePlateState(
-        {projectedAimPosData.xPos + activePlateRadius * cos(activePlateTheta) - turretPosition.x,
-         projectedAimPosData.yPos + activePlateRadius * sin(activePlateTheta) - turretPosition.y,
+    // Robot center's current position, velocity, acceleration
+    SecondOrderKinematicState robotCenterState(
+        {projectedAimPosData.xPos - turretPosition.x,
+         projectedAimPosData.yPos - turretPosition.y,
          projectedAimPosData.zPos + activePlateHeight - turretPosition.z},
         {projectedAimPosData.xVel - chassisVel.x,
          projectedAimPosData.yVel - chassisVel.y,
          projectedAimPosData.zVel},
-        {projectedAimPosData.xAcc, projectedAimPosData.yAcc, projectedAimPosData.zAcc},
-        activePlateRadius,
-        activePlateTheta,
-        projectedAimPosData.omega);
+        {projectedAimPosData.xAcc, projectedAimPosData.yAcc, projectedAimPosData.zAcc});
 
     BallisticsSolution solution;
-    solution.distance = activePlateState.position.getLength();
+    solution.distance = robotCenterState.position.getLength();
     solution.usePulseEstimation = true;
     solution.activePlateIndex = activePlateIndex;
 
     if (!ballistics::findTargetProjectileIntersection(
-            activePlateState,
+            robotCenterState,
             launchSpeed,
             NUM_FORWARD_KINEMATIC_PROJECTIONS,
             &solution.pitchAngle,
