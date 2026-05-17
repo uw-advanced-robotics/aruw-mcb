@@ -30,7 +30,7 @@ namespace aruwsrc::engineer::cube_storage
 {
 static constexpr tap::motor::MotorId CUBE_STORAGE_MOTOR_ID = tap::motor::MOTOR7;
 
-static constexpr tap::can::CanBus CUBE_STORAGE_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::can::CanBus CUBE_STORAGE_MOTOR_CAN_BUS = tap::can::CanBus::CAN_BUS1;
 
 static constexpr tap::gpio::Digital::InputPin CUBE_STORAGE_LIMITSWITCH_PORT =
     tap::gpio::Digital::InputPin::B;

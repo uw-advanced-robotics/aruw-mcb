@@ -194,12 +194,13 @@ BuzzerSubsystem buzzer(drivers());
 
 YawTurretSubsystem turretMajor(*drivers(), turretMajorYawMotor, turretMajor::YAW_MOTOR_CONFIG);
 
+TurretMotor pitchTurretMotor(&turretWidowMotors.pitchMotor, turretWidowMotors.pitchMotorConfig);
+TurretMotor yawTurretMotor(&turretWidowMotors.yawMotor, turretWidowMotors.yawMotorConfig);
+
 SentryTurretMinorSubsystem turretWidow(
     *drivers(),
-    turretWidowMotors.pitchMotor,
-    turretWidowMotors.yawMotor,
-    turretWidowMotors.pitchMotorConfig,
-    turretWidowMotors.yawMotorConfig,
+    pitchTurretMotor,
+    yawTurretMotor,
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretWidow::turretID);
 
