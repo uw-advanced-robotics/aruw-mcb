@@ -174,6 +174,9 @@ private:
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
+    float omegaLP = 0;
+
+    static constexpr float omegaLPAlpha = 0.04f;
 
     /**
      * Computes pulse estimation solution. Uses a two-pass ballistics approach to

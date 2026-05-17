@@ -141,10 +141,12 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
             telemetry->logSignal("ballistics:theta", projectedAimPosData.theta);
         }
 
+        omegaLP = omegaLPAlpha * projectedAimPosData.omega + (1 - omegaLPAlpha) * omegaLP;
+
         // Use enemy angular velocity to determine which aiming strategy to use
         // TODO: this should technically be the angular velocity in the rotating target-tracking
         // frame ("omegaTotal")
-        if (fabsf(projectedAimPosData.omega) < OMEGA_THRESHOLD)
+        if (fabsf(omegaLP) < OMEGA_THRESHOLD)
         {
             // Jitter Aim
             lastComputedSolution = std::nullopt;
