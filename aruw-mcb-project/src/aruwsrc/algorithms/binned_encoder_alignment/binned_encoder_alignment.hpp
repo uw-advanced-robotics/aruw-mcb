@@ -40,6 +40,7 @@ struct Ratio
         den = d / common;
     }
 };
+// for every DEN rotations of input, output rotates NUM times
 template <uint32_t NUM, uint32_t DEN>
 float calculatePosition(float localEncoderPosition, float globalEncoderPosition, float localOffset)
 {
@@ -47,12 +48,16 @@ float calculatePosition(float localEncoderPosition, float globalEncoderPosition,
 
     const float r = static_cast<float>(ratio.num) / ratio.den;
 
-    const float position = localEncoderPosition * r + localOffset +
-                           std::round(
-                               (globalEncoderPosition - localEncoderPosition * r - localOffset) /
-                               (M_TWOPI / static_cast<float>(ratio.den))) *
-                               (M_TWOPI / static_cast<float>(ratio.den));
+    float position = localEncoderPosition * r + localOffset +
+                     std::round(
+                         (globalEncoderPosition - localEncoderPosition * r - localOffset) /
+                         (M_TWOPI / static_cast<float>(ratio.den))) *
+                         (M_TWOPI / static_cast<float>(ratio.den));
 
+    if (position > M_TWOPI)
+    {
+        position -= M_TWOPI;
+    }
     return position;
 }
 }  // namespace binned_encoder_alignment

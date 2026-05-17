@@ -21,12 +21,14 @@
 #define HERO_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/robot/hero/hero_pitch_turret_motor.hpp"
+#include "modm/container/pair.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
@@ -59,8 +61,28 @@ static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
 static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS2;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
+static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_ENCODER_ID =
+    tap::encoder::CanEncoderId::ID7;
+static constexpr tap::can::CanBus YAW_LAMPREY_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+
+static constexpr float YAW_LAMPREY_RATIO = 1.0f;
+static constexpr uint32_t YAW_LAMPREY_ENCODER_HOME_POSITION = 0;  // TODO: get home position
+
+static constexpr tap::encoder::CanEncoderId YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID0;
+
+static constexpr tap::can::CanBus YAW_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+
+static constexpr float YAW_ENCODER_RATIO = 1.0f;  // One for use in binned alignment
+
+static constexpr uint32_t YAW_ENCODER_HOME_POSITION = 0;  // TODO: get home position
+
+static const modm::Pair<float, float> LAMPREY_LUT[0] = {};
+
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
+
+static constexpr uint32_t ENCODER_RATIO_NUM = 1;
+static constexpr uint32_t ENCODER_RATIO_DEN = 2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
