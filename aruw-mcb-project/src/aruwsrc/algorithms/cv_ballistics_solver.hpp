@@ -95,7 +95,7 @@ public:
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
     /// Omega threshold (rad/s) below which jitter aim is used instead of pulse estimation.
-    static constexpr float OMEGA_THRESHOLD = 1.0f;
+    static constexpr float OMEGA_THRESHOLD = 5.0f;
     /// The width of a small armor plate, in m
     static constexpr float PLATE_WIDTH = 0.135f;
     /// The height of a small armor plate, in m
