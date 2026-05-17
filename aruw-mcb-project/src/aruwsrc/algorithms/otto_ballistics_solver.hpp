@@ -39,6 +39,11 @@ namespace aruwsrc::communication::serial
 class VisionCoprocessor;
 }
 
+namespace aruwsrc::communication::rtt
+{
+class RttTelemetry;
+}
+
 namespace aruwsrc::control::launcher
 {
 class LaunchSpeedPredictorInterface;
@@ -121,7 +126,8 @@ public:
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
-        const uint8_t turretID);
+        const uint8_t turretID,
+        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -141,10 +147,12 @@ private:
     const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
+    aruwsrc::communication::rtt::RttTelemetry *telemetry;
     modm::Vector3f turretOrigin;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
+    uint32_t lastSolveTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
 
 public:

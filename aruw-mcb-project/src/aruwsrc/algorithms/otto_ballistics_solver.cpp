@@ -22,7 +22,10 @@
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
+#include "tap/architecture/clock.hpp"
 
+#include "aruwsrc/algorithms/spherical_projectile_aim.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/launcher/launch_speed_predictor_interface.hpp"
@@ -34,18 +37,79 @@ using namespace modm;
 
 namespace aruwsrc::algorithms
 {
+namespace
+{
+static constexpr uint8_t DRAG_FORWARD_KINEMATIC_PROJECTIONS = 1;
+
+void logDragTelemetry(
+    aruwsrc::communication::rtt::RttTelemetry *telemetry,
+    uint8_t turretID,
+    float launchSpeed,
+    float latencyCompensationSeconds,
+    uint32_t dtMicroseconds,
+    uint32_t totalSolveMicroseconds,
+    uint32_t vacuumSolveMicroseconds,
+    uint32_t dragSolveMicroseconds,
+    const ballistics::SecondOrderKinematicState &targetState,
+    bool vacuumSolutionFound,
+    const OttoBallisticsSolver::BallisticsSolution &vacuumSolution,
+    bool dragSolutionFound,
+    const OttoBallisticsSolver::BallisticsSolution &dragSolution)
+{
+    if (telemetry == nullptr)
+    {
+        return;
+    }
+
+    telemetry->logSignal("bd:id", turretID);
+    telemetry->logSignal("bd:dt", dtMicroseconds);
+    telemetry->logSignal("bd:ust", totalSolveMicroseconds);
+    telemetry->logSignal("bd:lat", latencyCompensationSeconds);
+    telemetry->logSignal("bd:v0", launchSpeed);
+    telemetry
+        ->logSignal("bd:x", targetState.position.x, targetState.position.y, targetState.position.z);
+    telemetry
+        ->logSignal("bd:v", targetState.velocity.x, targetState.velocity.y, targetState.velocity.z);
+    telemetry->logSignal(
+        "bd:a",
+        targetState.acceleration.x,
+        targetState.acceleration.y,
+        targetState.acceleration.z);
+
+    telemetry->logSignal("bd:ok0", vacuumSolutionFound);
+    telemetry->logSignal("bd:us0", vacuumSolveMicroseconds);
+    telemetry->logSignal("bd:pt0", vacuumSolution.pitchAngle);
+    telemetry->logSignal("bd:yw0", vacuumSolution.yawAngle);
+    telemetry->logSignal("bd:tof0", vacuumSolution.timeOfFlight);
+    telemetry->logSignal("bd:d0", vacuumSolution.distance);
+
+    telemetry->logSignal("bd:ok", dragSolutionFound);
+    telemetry->logSignal("bd:us", dragSolveMicroseconds);
+    telemetry->logSignal("bd:pt", dragSolution.pitchAngle);
+    telemetry->logSignal("bd:yw", dragSolution.yawAngle);
+    telemetry->logSignal("bd:tof", dragSolution.timeOfFlight);
+    telemetry->logSignal("bd:d", dragSolution.distance);
+    telemetry->logSignal("bd:dpt", dragSolution.pitchAngle - vacuumSolution.pitchAngle);
+    telemetry->logSignal("bd:dyw", dragSolution.yawAngle - vacuumSolution.yawAngle);
+    telemetry->logSignal("bd:dtof", dragSolution.timeOfFlight - vacuumSolution.timeOfFlight);
+    telemetry->logSignal("bd:dd", dragSolution.distance - vacuumSolution.distance);
+}
+}  // namespace
+
 OttoBallisticsSolver::OttoBallisticsSolver(
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     const control::turret::RobotTurretSubsystem &turretSubsystem,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
-    const uint8_t turretID)
+    const uint8_t turretID,
+    aruwsrc::communication::rtt::RttTelemetry *telemetry)
     : visionCoprocessor(visionCoprocessor),
       odometryInterface(odometryInterface),
       turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
+      telemetry(telemetry),
       turretID(turretID)
 {
 }
@@ -64,6 +128,10 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
     if (lastAimDataTimestamp != aimData.timestamp ||
         lastOdometryTimestamp != odometryInterface.getLastComputedOdometryTime())
     {
+        const uint32_t solveStartTime = tap::arch::clock::getTimeMicroseconds();
+        const uint32_t solveDt = lastSolveTimestamp == 0 ? 0 : solveStartTime - lastSolveTimestamp;
+        lastSolveTimestamp = solveStartTime;
+
         lastAimDataTimestamp = aimData.timestamp;
         lastOdometryTimestamp = odometryInterface.getLastComputedOdometryTime();
 
@@ -121,26 +189,83 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
 
         // time in microseconds to project the target position ahead by
         int64_t projectForwardTimeDt =
-            static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
-            static_cast<int64_t>(aimData.timestamp);
+            static_cast<int64_t>(solveStartTime) - static_cast<int64_t>(aimData.timestamp);
+        const float latencyCompensationSeconds = projectForwardTimeDt / 1E6f;
 
         // project the target position forward in time s.t. we are computing a ballistics solution
         // for a target "now" rather than whenever the camera saw the target
-        targetState.position = targetState.projectForward(projectForwardTimeDt / 1E6f);
+        targetState.position = targetState.projectForward(latencyCompensationSeconds);
 
         lastComputedSolution = BallisticsSolution();
         lastComputedSolution->distance = targetState.position.getLength();
 
-        if (!ballistics::findTargetProjectileIntersection(
+        const uint32_t vacuumSolveStartTime = tap::arch::clock::getTimeMicroseconds();
+        const bool vacuumSolutionFound = ballistics::findTargetProjectileIntersection(
+            targetState,
+            launchSpeed,
+            NUM_FORWARD_KINEMATIC_PROJECTIONS,
+            &lastComputedSolution->pitchAngle,
+            &lastComputedSolution->yawAngle,
+            &lastComputedSolution->timeOfFlight,
+            turretSubsystem.getPitchOffset());
+        const uint32_t vacuumSolveMicroseconds =
+            tap::arch::clock::getTimeMicroseconds() - vacuumSolveStartTime;
+
+        if (!vacuumSolutionFound)
+        {
+            logDragTelemetry(
+                telemetry,
+                turretID,
+                launchSpeed,
+                latencyCompensationSeconds,
+                solveDt,
+                tap::arch::clock::getTimeMicroseconds() - solveStartTime,
+                vacuumSolveMicroseconds,
+                0,
+                targetState,
+                false,
+                *lastComputedSolution,
+                false,
+                *lastComputedSolution);
+            lastComputedSolution = std::nullopt;
+        }
+        else
+        {
+            const BallisticsSolution vacuumSolution = *lastComputedSolution;
+            BallisticsSolution dragSolution = vacuumSolution;
+
+            const uint32_t dragSolveStartTime = tap::arch::clock::getTimeMicroseconds();
+            const bool dragSolutionFound = findTargetProjectileIntersectionWithSphereDrag(
                 targetState,
                 launchSpeed,
-                NUM_FORWARD_KINEMATIC_PROJECTIONS,
-                &lastComputedSolution->pitchAngle,
-                &lastComputedSolution->yawAngle,
-                &lastComputedSolution->timeOfFlight,
-                turretSubsystem.getPitchOffset()))
-        {
-            lastComputedSolution = std::nullopt;
+                DRAG_FORWARD_KINEMATIC_PROJECTIONS,
+                &dragSolution.pitchAngle,
+                &dragSolution.yawAngle,
+                &dragSolution.timeOfFlight,
+                turretSubsystem.getPitchOffset(),
+                &dragSolution.distance);
+            const uint32_t dragSolveMicroseconds =
+                tap::arch::clock::getTimeMicroseconds() - dragSolveStartTime;
+
+            logDragTelemetry(
+                telemetry,
+                turretID,
+                launchSpeed,
+                latencyCompensationSeconds,
+                solveDt,
+                tap::arch::clock::getTimeMicroseconds() - solveStartTime,
+                vacuumSolveMicroseconds,
+                dragSolveMicroseconds,
+                targetState,
+                true,
+                vacuumSolution,
+                dragSolutionFound,
+                dragSolution);
+
+            if (dragSolutionFound)
+            {
+                lastComputedSolution = dragSolution;
+            }
         }
     }
 

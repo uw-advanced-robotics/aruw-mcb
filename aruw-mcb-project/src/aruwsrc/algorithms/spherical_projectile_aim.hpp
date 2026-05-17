@@ -24,9 +24,10 @@
 #include <cstdint>
 #include <optional>
 
-#include "modm/math/geometry/vector.hpp"
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
+
+#include "modm/math/geometry/vector.hpp"
 
 namespace aruwsrc::algorithms
 {
@@ -58,8 +59,7 @@ struct SphereProjectileModel
         }
 
         return 24.0f / reynoldsNumber +
-               (2.6f * (reynoldsNumber / 5.0f)) /
-                   (1.0f + powf(reynoldsNumber / 5.0f, 1.52f)) +
+               (2.6f * (reynoldsNumber / 5.0f)) / (1.0f + powf(reynoldsNumber / 5.0f, 1.52f)) +
                (0.411f * powf(reynoldsNumber / 263000.0f, -7.94f)) /
                    (1.0f + powf(reynoldsNumber / 263000.0f, -8.0f)) +
                powf(reynoldsNumber, 0.8f) / 461000.0f;
@@ -119,7 +119,9 @@ inline SphereProjectileState computeProjectileStateDerivative(
     const SphereProjectileState &state,
     float dragAccelerationScale)
 {
-    const float speed = hypotf(state.horizontalVelocity, state.verticalVelocity);
+    const float speed = sqrtf(
+        state.horizontalVelocity * state.horizontalVelocity +
+        state.verticalVelocity * state.verticalVelocity);
 
     return SphereProjectileState{
         .horizontalPosition = state.horizontalVelocity,
@@ -161,29 +163,25 @@ inline SphereProjectileState rungeKuttaIntegrateProjectileState(
 
     return SphereProjectileState{
         .horizontalPosition =
-            state.horizontalPosition +
-            timestepSeconds *
-                (k1.horizontalPosition + 2.0f * k2.horizontalPosition +
-                 2.0f * k3.horizontalPosition + k4.horizontalPosition) /
-                6.0f,
+            state.horizontalPosition + timestepSeconds *
+                                           (k1.horizontalPosition + 2.0f * k2.horizontalPosition +
+                                            2.0f * k3.horizontalPosition + k4.horizontalPosition) /
+                                           6.0f,
         .verticalPosition =
-            state.verticalPosition +
-            timestepSeconds *
-                (k1.verticalPosition + 2.0f * k2.verticalPosition +
-                 2.0f * k3.verticalPosition + k4.verticalPosition) /
-                6.0f,
+            state.verticalPosition + timestepSeconds *
+                                         (k1.verticalPosition + 2.0f * k2.verticalPosition +
+                                          2.0f * k3.verticalPosition + k4.verticalPosition) /
+                                         6.0f,
         .horizontalVelocity =
-            state.horizontalVelocity +
-            timestepSeconds *
-                (k1.horizontalVelocity + 2.0f * k2.horizontalVelocity +
-                 2.0f * k3.horizontalVelocity + k4.horizontalVelocity) /
-                6.0f,
+            state.horizontalVelocity + timestepSeconds *
+                                           (k1.horizontalVelocity + 2.0f * k2.horizontalVelocity +
+                                            2.0f * k3.horizontalVelocity + k4.horizontalVelocity) /
+                                           6.0f,
         .verticalVelocity =
-            state.verticalVelocity +
-            timestepSeconds *
-                (k1.verticalVelocity + 2.0f * k2.verticalVelocity +
-                 2.0f * k3.verticalVelocity + k4.verticalVelocity) /
-                6.0f,
+            state.verticalVelocity + timestepSeconds *
+                                         (k1.verticalVelocity + 2.0f * k2.verticalVelocity +
+                                          2.0f * k3.verticalVelocity + k4.verticalVelocity) /
+                                         6.0f,
     };
 }
 
@@ -236,11 +234,10 @@ inline std::optional<SphereDragIntersection> simulateSphereProjectileToRange(
                     : 1.0f;
 
             return SphereDragIntersection{
-                .verticalError =
-                    previousState.verticalPosition +
-                    interpolationRatio *
-                        (projectileState.verticalPosition - previousState.verticalPosition) -
-                    targetHeight,
+                .verticalError = previousState.verticalPosition +
+                                 interpolationRatio * (projectileState.verticalPosition -
+                                                       previousState.verticalPosition) -
+                                 targetHeight,
                 .timeOfFlight =
                     previousTimeSeconds + interpolationRatio * solverConfig.timestepSeconds,
             };

@@ -112,15 +112,8 @@ bool RttTelemetry::updateTelemetryAsync()
                 now);
 
             ozoneMode = !firstInputReceived;
-            if (ozoneMode)
-            {
-                logHeartbeatInfo();
-            }
-            else
-            {
-                logHeartbeatInfo();
-                sendQueuedMessages();
-            }
+            logHeartbeatInfo();
+            sendQueuedMessages();
         }
 
         // Yield to allow other protothreads to run

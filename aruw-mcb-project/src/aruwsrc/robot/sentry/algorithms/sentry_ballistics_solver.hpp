@@ -41,6 +41,11 @@ namespace aruwsrc::communication::serial
 class VisionCoprocessor;
 }
 
+namespace aruwsrc::communication::rtt
+{
+class RttTelemetry;
+}
+
 namespace aruwsrc::control::launcher
 {
 class LaunchSpeedPredictorInterface;
@@ -89,6 +94,7 @@ public:
         float vacuumPitchAngle = 0.0f;
         float vacuumYawAngle = 0.0f;
         float vacuumTimeOfFlight = 0.0f;
+        float vacuumDistance = 0.0f;
         float dragPitchAngle = 0.0f;
         float dragYawAngle = 0.0f;
         float dragTimeOfFlight = 0.0f;
@@ -154,7 +160,8 @@ public:
         float defaultLaunchSpeed,
         float turretPitchOffset,
         const float turretMinorOffsetFromMajor,
-        const uint8_t turretID);
+        const uint8_t turretID,
+        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -178,9 +185,11 @@ private:
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
     const float turretDistFromBase;
+    aruwsrc::communication::rtt::RttTelemetry *telemetry;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
+    uint32_t lastSolveTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
     DragComparison lastDragComparison = {};
 

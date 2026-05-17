@@ -421,7 +421,8 @@ SentryBallisticsSolver turretWidowSolver(
     turretWidow::DEFAULT_LAUNCH_SPEED,
     0.f,  // turret minor pitch offset
     TURRET_MINOR_OFFSET,
-    turretWidow.getTurretID());
+    turretWidow.getTurretID(),
+    &drivers()->rttTelemetry);
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerTurretWidow(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,

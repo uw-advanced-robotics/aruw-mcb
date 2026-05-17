@@ -94,10 +94,7 @@ public:
     DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)
     mockable ~ControlOperatorInterface() = default;
 
-    void setTelemetry(aruwsrc::communication::rtt::RttTelemetry* telemetry)
-    {
-        this->telemetry = telemetry;
-    }
+    void setTelemetry(aruwsrc::communication::rtt::RttTelemetry*) {}
 
     /**
      * @return The value used for chassis movement forward and backward, between
@@ -159,8 +156,6 @@ protected:
     uint32_t prevUpdateCounterX = 0;
     uint32_t prevUpdateCounterY = 0;
     uint32_t prevUpdateCounterR = 0;
-    uint32_t prevLoggedRemoteUpdateCounter = 0;
-
     tap::algorithms::LinearInterpolationPredictor chassisXInput;
     tap::algorithms::LinearInterpolationPredictor chassisYInput;
     tap::algorithms::LinearInterpolationPredictor chassisRInput;
@@ -172,8 +167,6 @@ protected:
     uint32_t prevChassisXInputCalledTime = 0;
     uint32_t prevChassisYInputCalledTime = 0;
     uint32_t prevChassisRInputCalledTime = 0;
-
-    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
 
     /**
      * Scales `value` when ctrl/shift are pressed and returns the scaled value.
