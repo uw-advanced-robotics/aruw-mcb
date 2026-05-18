@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LAUNCHER_CONSTANTS_HPP_ 
+#ifndef LAUNCHER_CONSTANTS_HPP_
 #define LAUNCHER_CONSTANTS_HPP_
 
 #include "aruwsrc/util_macros.hpp"
