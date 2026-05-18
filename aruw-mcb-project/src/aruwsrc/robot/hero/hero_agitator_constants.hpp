@@ -37,7 +37,7 @@ namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
-    .kp = 30'000.0f,
+    .kp = 20'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
