@@ -47,7 +47,7 @@ public:
         return !disconnectTimeout.isExpired() && !disconnectTimeout.isStopped();
     }
 
-    void resetEncoderValue() override { position.setUnwrappedValue(0.0f); }
+    void resetEncoderValue(float pos = 0) override { position.setUnwrappedValue(pos); }
 
     tap::algorithms::WrappedFloat getPosition() const override { return position; }
 
