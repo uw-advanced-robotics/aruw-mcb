@@ -94,7 +94,10 @@ public:
     DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)
     mockable ~ControlOperatorInterface() = default;
 
-    void setTelemetry(aruwsrc::communication::rtt::RttTelemetry*) {}
+    void setTelemetry(aruwsrc::communication::rtt::RttTelemetry* telemetry)
+    {
+        this->telemetry = telemetry;
+    }
 
     /**
      * @return The value used for chassis movement forward and backward, between
@@ -156,6 +159,7 @@ protected:
     uint32_t prevUpdateCounterX = 0;
     uint32_t prevUpdateCounterY = 0;
     uint32_t prevUpdateCounterR = 0;
+    uint32_t prevLoggedRemoteUpdateCounter = 0;
     tap::algorithms::LinearInterpolationPredictor chassisXInput;
     tap::algorithms::LinearInterpolationPredictor chassisYInput;
     tap::algorithms::LinearInterpolationPredictor chassisRInput;
@@ -172,6 +176,8 @@ protected:
      * Scales `value` when ctrl/shift are pressed and returns the scaled value.
      */
     float applyChassisSpeedScaling(float value);
+
+    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
 
     /**
      * @param[out] ramp Ramp that should have acceleration applied to. The ramp is updated some

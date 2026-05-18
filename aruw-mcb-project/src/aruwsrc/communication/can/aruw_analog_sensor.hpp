@@ -56,8 +56,13 @@ public:
         communication::rtt::RttTelemetry* rttTelemetry,
         const char* namePrefix = "sensor:analog_sensor") const
     {
-        (void)rttTelemetry;
-        (void)namePrefix;
+        if (rttTelemetry == nullptr)
+        {
+            return;
+        }
+
+        rttTelemetry->logSignal((std::string(namePrefix) + "_ai0").c_str(), this->ai0);
+        rttTelemetry->logSignal((std::string(namePrefix) + "_ai1").c_str(), this->ai1);
     }
 
 private:

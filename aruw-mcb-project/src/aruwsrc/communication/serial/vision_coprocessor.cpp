@@ -251,7 +251,25 @@ void VisionCoprocessor::logVisionTelemetry()
     telemetry->logSignal("cv:aimData:vel", aimData.pva.xVel, aimData.pva.yVel, aimData.pva.zVel);
 }
 
-void VisionCoprocessor::logRefereeTelemetry() {}
+void VisionCoprocessor::logRefereeTelemetry()
+{
+    if (!telemetry)
+    {
+        return;
+    }
+
+    auto& rxData = drivers->refSerial.getRobotData();
+
+    telemetry->logSignal("ref:curr_hp", rxData.currentHp);
+    telemetry->logSignal("ref:max_hp", rxData.maxHp);
+    telemetry->logSignal("ref:heat_17mm", rxData.turret.heat17ID1);
+    telemetry->logSignal("ref:heat_limit", rxData.turret.heatLimit);
+    telemetry->logSignal("ref:firing_freq", rxData.turret.firingFreq);
+    telemetry->logSignal("ref:remaining_projectiles_17mm", rxData.turret.bulletsRemaining17);
+    telemetry->logSignal("ref:chassis_power_buffer", rxData.chassis.powerBuffer);
+    telemetry->logSignal("ref:chassis_power_limit", rxData.chassis.powerConsumptionLimit);
+    telemetry->logSignal("ref:robot_level", rxData.robotLevel);
+}
 
 void VisionCoprocessor::sendShutdownMessage()
 {
