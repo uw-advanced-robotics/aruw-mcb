@@ -72,8 +72,7 @@ float ControlOperatorInterface::getChassisXInput()
             "remote:stick:right",
             drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
             drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL));
-        telemetry->logSignal("remote:wheel", drivers->remote.getChannel(Remote::
-Channel::WHEEL));
+        telemetry->logSignal("remote:wheel", drivers->remote.getChannel(Remote::Channel::WHEEL));
         prevLoggedRemoteUpdateCounter = updateCounter;
     }
 
@@ -84,12 +83,11 @@ Channel::WHEEL));
     }
 
     float keyInput =
-        drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(
-            Remote::Key::S);
+        drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
 
     const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        drivers->refSerial.getRefSerialReceivingData(),
+        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalX = maxChassisSpeed *
                    limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);

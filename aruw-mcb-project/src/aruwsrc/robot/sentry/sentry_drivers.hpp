@@ -170,8 +170,7 @@ public:
         rttTelemetry.updateTelemetryAsync();
         checkTurretMcbDisconnection(this);
 
-         rttTelemetry.logSignal("p_ml", tap::arch::clock::getTimeMicroseconds() -
-     loop500HzStartUs);
+        rttTelemetry.logSignal("p_ml", tap::arch::clock::getTimeMicroseconds() - loop500HzStartUs);
     }
 
 private:
