@@ -152,16 +152,15 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
 
         if (useDragCorrection)
         {
-            dragSolutionFound =
-                aruwsrc::algorithms::findTargetProjectileIntersectionWithSphereDrag(
-                    targetState,
-                    launchSpeed,
-                    DRAG_FORWARD_KINEMATIC_PROJECTIONS,
-                    &dragPitchAngle,
-                    &dragYawAngle,
-                    &dragTimeOfFlight,
-                    turretPitchOffset,
-                    &dragDistance);
+            dragSolutionFound = aruwsrc::algorithms::findTargetProjectileIntersectionWithSphereDrag(
+                targetState,
+                launchSpeed,
+                DRAG_FORWARD_KINEMATIC_PROJECTIONS,
+                &dragPitchAngle,
+                &dragYawAngle,
+                &dragTimeOfFlight,
+                turretPitchOffset,
+                &dragDistance);
         }
 
         if (dragSolutionFound)
