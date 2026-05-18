@@ -275,27 +275,29 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         projectedAimPosData.yPos - worldToTurret.getY(),
         projectedAimPosData.zPos - worldToTurret.getZ());
 
-    float horizontalDistToClosestPoint = robotPos.xy().getLength() - avgRadius;
-    float approxDistance = modm::Vector2f(horizontalDistToClosestPoint, robotPos.z).getLength();
-    float estimatedToF = approxDistance / launchSpeed;
-
-    // Create state for computing omega_total
     modm::Vector3f robotVel(
         projectedAimPosData.xVel - worldToTurret.getXVel(),
         projectedAimPosData.yVel - worldToTurret.getYVel(),
         projectedAimPosData.zVel);
 
-    // Create temporary state to use helper methods
-    RobotTargetKinematicState tempState(
-        robotPos,
-        robotVel,
-        {projectedAimPosData.xAcc, projectedAimPosData.yAcc, projectedAimPosData.zAcc},
-        avgRadius,
-        projectedAimPosData.theta,
-        projectedAimPosData.omega);
+    float horizontalDistToClosestPoint = robotPos.xy().getLength() - avgRadius;
+    float approxDistance = modm::Vector2f(horizontalDistToClosestPoint, robotPos.z).getLength();
+    float estimatedToF = approxDistance / launchSpeed;
 
-    // Compute omega_total accounting for both rotation and translation
-    float omegaTotal = tempState.computeOmegaTotal(robotPos, robotVel);
+    // Compute the angular velocity of the target wrt a rotating frame who's x axis always faces
+    // the target (e.g. the turret tracks the target robot center)
+    //
+    // $$ omega_{total} = omega_{robot} + \frac{(r \times v)_z}{|r|^2} $$
+
+    // Compute cross product (r x v)_z component
+    float crossProductZ = robotPos.x * robotVel.y - robotPos.y * robotVel.x;
+
+    // Magnitude squared of r (in x-y plane)
+    float rMagSquared = robotPos.xy().getLengthSquared();
+
+    float omegaFromTranslation = rMagSquared < 1e-6f ? 0 : crossProductZ / rMagSquared;
+
+    float omegaTotal = projectedAimPosData.omega + omegaFromTranslation;
 
     if (telemetry)
     {
@@ -320,12 +322,14 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     // Determine active plate based on omega_total and estimated ToF
     // At the time we expect the projectile to hit the robot, we want to choose the plate in a
-    // quadrant facing us. Ideally, the precise bounds of the quadrant shouldn't matter (it only
-    // affects specifically when we decide to target the next plate in between shot windows), but we
-    // could bias it towards the direction the plate arrives from if needed.
+    // quadrant facing us.
+    // Ideally, the precise bounds of the quadrant shouldn't matter (it only affects specifically
+    // when we decide to target the next plate in between shot windows), but it could be biased
+    // towards the direction the plate arrives all the way until the closing edge is a plate's width
+    // away from the aim line.
     float desiredPlateQuadrantStart = omegaTotal > 0 ? -M_PI_4 : -M_PI_4;  // TODO: bias?
     WrappedFloat aimLineToProjectedPlate0 =
-        WrappedFloat(projectedAimPosData.theta, 0, M_PI) - aimAngle + M_PI;
+        WrappedFloat(projectedAimPosData.theta, 0, M_TWOPI) - aimAngle + M_PI;
     uint8_t activePlateIndex = static_cast<uint8_t>(
         (aimLineToProjectedPlate0 - desiredPlateQuadrantStart).getWrappedValue() / M_PI_2);
 
@@ -416,6 +420,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     float fireWindowStart = timeToCloseEdge - solution.timeOfFlight;
     float fireWindowEnd = timeToFarEdge - solution.timeOfFlight;
 
+    // /*
     // Clamp to future times only (can't fire in the past)
     float startOffsetSeconds = (fireWindowStart > 0.0f) ? fireWindowStart : 0.0f;
     float endOffsetSeconds =
@@ -423,16 +428,19 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     solution.shotWindowStart = currentTimeMicros + static_cast<uint64_t>(startOffsetSeconds * 1e6f);
     solution.shotWindowEnd = currentTimeMicros + static_cast<uint64_t>(endOffsetSeconds * 1e6f);
+    // */
+    // solution.shotWindowStart = fireWindowStart;
+    // solution.shotWindowEnd = fireWindowEnd;
 
     if (telemetry)
     {
-        telemetry->logSignal("ballistics:pulse_angular_offset", angularOffset);
+        telemetry->logSignal("ballistics:pulse_angular_offset", angularOffset.getWrappedValue());
         telemetry->logSignal("ballistics:pulse_time_to_crossing", timeToPlateCenterCrossing);
-        telemetry->logSignal("ballistics:pulse_window_start_offset", startOffsetSeconds);
-        telemetry->logSignal("ballistics:pulse_window_end_offset", endOffsetSeconds);
+        // telemetry->logSignal("ballistics:pulse_window_start_offset", startOffsetSeconds);
+        // telemetry->logSignal("ballistics:pulse_window_end_offset", endOffsetSeconds);
         telemetry->logSignal(
             "ballistics:pulse_window_duration",
-            endOffsetSeconds - startOffsetSeconds);
+            solution.shotWindowEnd - solution.shotWindowStart);
     }
 
     return solution;
