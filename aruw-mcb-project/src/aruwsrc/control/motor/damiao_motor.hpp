@@ -101,12 +101,14 @@ enum DamiaoMotorId : uint16_t
 class DamiaoMotor : public tap::can::CanRxListener, public tap::motor::MotorInterface
 {
 public:
-    static constexpr float DM4310_P_MIN = -12.5f;
-    static constexpr float DM4310_P_MAX = 12.5f;
-    static constexpr float DM4310_V_MIN = -30.0f;
-    static constexpr float DM4310_V_MAX = 30.0f;
-    static constexpr float DM4310_T_MIN = -10.0f;
-    static constexpr float DM4310_T_MAX = 10.0f;
+    // DM-J4310 MIT mode limits.
+    static constexpr float DM_J4310_P_MIN = -12.5f;
+    static constexpr float DM_J4310_P_MAX = 12.5f;
+    static constexpr float DM_J4310_V_MIN = -30.0f;
+    static constexpr float DM_J4310_V_MAX = 30.0f;
+    static constexpr float DM_J4310_T_MIN = -10.0f;
+    static constexpr float DM_J4310_T_MAX = 10.0f;
+    static constexpr int32_t MAX_OUTPUT_DM_J4310_MILLI_NM = 10000;
 
     DamiaoMotor(
         tap::Drivers* drivers,

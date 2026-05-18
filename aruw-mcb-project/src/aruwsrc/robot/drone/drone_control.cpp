@@ -41,6 +41,7 @@
 #include "aruwsrc/control/governor/imu_not_calibrated_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/motor/damiao_motor.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -77,15 +78,13 @@ using Compose = CommandCompositionHelper;
 /* define subsystems --------------------------------------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
-tap::motor::DjiMotor pitchMotor(
+aruwsrc::control::motor::DamiaoMotor pitchMotor(
     drivers(),
-    PITCH_MOTOR_ID,
+    aruwsrc::control::motor::DamiaoMotorId::DAMIAO_MOTOR1,
     CAN_BUS_PITCH_MOTOR,
     true,
     "Pitch Turret",
-    true,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
-    PITCH_MOTOR_CONFIG.startEncoderValue);
+    0x011);
 
 tap::encoder::CanEncoder yawEncoder(
     drivers(),

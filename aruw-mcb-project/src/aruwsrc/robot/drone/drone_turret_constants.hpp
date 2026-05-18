@@ -39,6 +39,9 @@ static constexpr uint8_t NUM_TURRETS = 1;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
+static constexpr float DAMIAO_4310_VELOCITY_KP_RAD_PER_SEC =
+    40.0f * 60.0f / M_TWOPI;
+static constexpr float DAMIAO_4310_MAX_OUTPUT_MILLI_NM = 6000.0f;
 
 static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
@@ -190,7 +193,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 20.0f,
+    .kp = 8.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -204,11 +207,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 2000.0f,
-    .ki = 1000.0f,
+    .kp = DAMIAO_4310_VELOCITY_KP_RAD_PER_SEC,
+    .ki = 0.0f,
     .kd = 0.0f,
-    .maxICumulative = 16000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .maxICumulative = 0.0f,
+    .maxOutput = DAMIAO_4310_MAX_OUTPUT_MILLI_NM,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -235,11 +238,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 20000.0f,
-    .ki = 100.0f,
-    .kd = 2000.0f,
-    .maxICumulative = 5000.0f,
-    .maxOutput = 16'000.0f,
+    .kp = 1200.0f,
+    .ki = 0.0f,
+    .kd = DAMIAO_4310_VELOCITY_KP_RAD_PER_SEC,
+    .maxICumulative = 0.0f,
+    .maxOutput = DAMIAO_4310_MAX_OUTPUT_MILLI_NM,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,

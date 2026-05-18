@@ -54,7 +54,10 @@ void DamiaoMotor::initialize()
 void DamiaoMotor::setDesiredOutput(int32_t desiredOutput)
 {
     const int32_t signedOutput = motorInverted ? -desiredOutput : desiredOutput;
-    desiredOutputMilliNm = tap::algorithms::limitVal<int32_t>(signedOutput, -10000, 10000);
+    desiredOutputMilliNm = tap::algorithms::limitVal<int32_t>(
+        signedOutput,
+        -MAX_OUTPUT_DM_J4310_MILLI_NM,
+        MAX_OUTPUT_DM_J4310_MILLI_NM);
 
     // Retry startup handshake while offline. Control mode is configured on the motor itself;
     // the runtime 0x7FF register write was causing the bus to stall before enable/MIT frames
@@ -100,9 +103,9 @@ void DamiaoMotor::processMessage(const modm::can::Message& message)
     const uint16_t torqueInt =
         static_cast<uint16_t>(((message.data[4] & 0x0F) << 8) | message.data[5]);
 
-    const float posRad = uintToFloat(posInt, DM4310_P_MIN, DM4310_P_MAX, 16);
-    const float velRadPerSec = uintToFloat(velInt, DM4310_V_MIN, DM4310_V_MAX, 12);
-    const float torqueNm = uintToFloat(torqueInt, DM4310_T_MIN, DM4310_T_MAX, 12);
+    const float posRad = uintToFloat(posInt, DM_J4310_P_MIN, DM_J4310_P_MAX, 16);
+    const float velRadPerSec = uintToFloat(velInt, DM_J4310_V_MIN, DM_J4310_V_MAX, 12);
+    const float torqueNm = uintToFloat(torqueInt, DM_J4310_T_MIN, DM_J4310_T_MAX, 12);
 
     encoder.updateFromFeedback(posRad, velRadPerSec);
     measuredTorqueMilliNm = static_cast<int16_t>(torqueNm * 1000.0f);
@@ -150,11 +153,11 @@ bool DamiaoMotor::sendMitCommand(
     float kd,
     float torqueNm)
 {
-    const uint16_t posU = floatToUint(targetPosition, DM4310_P_MIN, DM4310_P_MAX, 16);
-    const uint16_t velU = floatToUint(targetVelocity, DM4310_V_MIN, DM4310_V_MAX, 12);
+    const uint16_t posU = floatToUint(targetPosition, DM_J4310_P_MIN, DM_J4310_P_MAX, 16);
+    const uint16_t velU = floatToUint(targetVelocity, DM_J4310_V_MIN, DM_J4310_V_MAX, 12);
     const uint16_t kpU = floatToUint(kp, 0.0f, 500.0f, 12);
     const uint16_t kdU = floatToUint(kd, 0.0f, 5.0f, 12);
-    const uint16_t torqueU = floatToUint(torqueNm, DM4310_T_MIN, DM4310_T_MAX, 12);
+    const uint16_t torqueU = floatToUint(torqueNm, DM_J4310_T_MIN, DM_J4310_T_MAX, 12);
 
     uint8_t data[8] = {
         static_cast<uint8_t>((posU >> 8) & 0xFF),
