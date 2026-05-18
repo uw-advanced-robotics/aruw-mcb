@@ -4,7 +4,6 @@
  * This file is part of aruw-mcb.
  *
  * aruw-mcb is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -75,59 +74,6 @@ public:
         float timeOfFlight;
     };
 
-    struct DebugSnapshot
-    {
-        uint32_t sequence = 0;
-        uint32_t aimDataTimestamp = 0;
-        uint32_t odometryTimestamp = 0;
-        uint32_t solveDtMicroseconds = 0;
-        uint32_t totalSolveMicroseconds = 0;
-        uint32_t vacuumSolveMicroseconds = 0;
-        uint32_t dragSolveMicroseconds = 0;
-        bool cvOnline = false;
-        bool aimDataUpdated = false;
-        bool useDragCorrection = false;
-        bool vacuumSolutionFound = false;
-        bool dragSolutionFound = false;
-        float launchSpeed = 0.0f;
-        float latencyCompensationSeconds = 0.0f;
-        float aimPositionX = 0.0f;
-        float aimPositionY = 0.0f;
-        float aimPositionZ = 0.0f;
-        float turretPositionX = 0.0f;
-        float turretPositionY = 0.0f;
-        float turretPositionZ = 0.0f;
-        float relativeTargetX = 0.0f;
-        float relativeTargetY = 0.0f;
-        float relativeTargetZ = 0.0f;
-        float projectedTargetX = 0.0f;
-        float projectedTargetY = 0.0f;
-        float projectedTargetZ = 0.0f;
-        float targetVelocityX = 0.0f;
-        float targetVelocityY = 0.0f;
-        float targetVelocityZ = 0.0f;
-        float horizontalDistance = 0.0f;
-        float reynoldsNumber = 0.0f;
-        float dragCoefficient = 0.0f;
-        float dragAccelerationScale = 0.0f;
-        float dragRate = 0.0f;
-        float dragRemainingHorizontalVelocityRatio = 0.0f;
-        float dragHorizontalVelocity = 0.0f;
-        float dragEstimatedTimeOfFlight = 0.0f;
-        float vacuumPitch = 0.0f;
-        float vacuumYaw = 0.0f;
-        float vacuumTimeOfFlight = 0.0f;
-        float vacuumDistance = 0.0f;
-        float dragPitch = 0.0f;
-        float dragYaw = 0.0f;
-        float dragTimeOfFlight = 0.0f;
-        float dragDistance = 0.0f;
-        float deltaPitch = 0.0f;
-        float deltaYaw = 0.0f;
-        float deltaTimeOfFlight = 0.0f;
-        float deltaDistance = 0.0f;
-    };
-
     /**
      * Parameter to pass into `tap::algorithms::ballistics::findTargetProjectileIntersection`. This
      * function is an iterative ballistics solver, so this represents how many iterations to
@@ -193,7 +139,7 @@ public:
      * @param[out] solution The ballistics solution computed. Will potentially update any of the
      * fields even if the solution's validSolutionFound function is false
      */
-    mockable std::optional<BallisticsSolution> computeTurretAimAngles();
+    mockable std::optional<BallisticsSolution> computeTurretAimAngles() override;
 
 private:
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
@@ -211,7 +157,6 @@ private:
 
 public:
     const uint8_t turretID;
-    DebugSnapshot debug = {};
 };
 }  // namespace aruwsrc::algorithms
 

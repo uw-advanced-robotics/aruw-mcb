@@ -77,8 +77,6 @@ public:
         float timeOfFlight;
     };
 
-    // DragComparison removed — debug struct is exposed elsewhere
-
     /**
      * Parameter to pass into `tap::algorithms::ballistics::findTargetProjectileIntersection`.
      This
@@ -154,8 +152,6 @@ public:
      */
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
-    // getLastDragComparison removed
-
 private:
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     const odometry::SentryTransforms &transformer;
@@ -169,7 +165,6 @@ private:
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
-    // lastDragComparison member removed
 
 public:
     const uint8_t turretID;

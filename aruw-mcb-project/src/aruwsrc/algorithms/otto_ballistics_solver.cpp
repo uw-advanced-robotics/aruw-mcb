@@ -65,17 +65,9 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
     computeTurretAimAngles()
 {
     const auto &aimData = visionCoprocessor.getLastAimData(turretID);
-    debug.cvOnline = visionCoprocessor.isCvOnline();
-    debug.aimDataUpdated = aimData.pva.updated;
-    debug.useDragCorrection = useDragCorrection;
-    debug.aimDataTimestamp = aimData.timestamp;
-    debug.odometryTimestamp = odometryInterface.getLastComputedOdometryTime();
-
     // Verify that CV is actually online and that the aimData had a target
-    if (!debug.cvOnline || !debug.aimDataUpdated)
+    if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
     {
-        debug.vacuumSolutionFound = false;
-        debug.dragSolutionFound = false;
         lastComputedSolution = std::nullopt;
         return std::nullopt;
     }
@@ -84,10 +76,7 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         lastOdometryTimestamp != odometryInterface.getLastComputedOdometryTime())
     {
         const uint32_t solveStartTime = tap::arch::clock::getTimeMicroseconds();
-        const uint32_t solveDt = lastSolveTimestamp == 0 ? 0 : solveStartTime - lastSolveTimestamp;
         lastSolveTimestamp = solveStartTime;
-        debug.sequence++;
-        debug.solveDtMicroseconds = solveDt;
 
         lastAimDataTimestamp = aimData.timestamp;
         lastOdometryTimestamp = odometryInterface.getLastComputedOdometryTime();
@@ -99,11 +88,6 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         {
             launchSpeed = defaultLaunchSpeed;
         }
-        debug.launchSpeed = launchSpeed;
-        debug.reynoldsNumber = ROBO_MASTER_17MM_SPHERE.reynoldsNumber(launchSpeed);
-        debug.dragCoefficient = ROBO_MASTER_17MM_SPHERE.dragCoefficient(launchSpeed);
-        debug.dragAccelerationScale = ROBO_MASTER_17MM_SPHERE.dragAccelerationScale(launchSpeed);
-        debug.dragRate = debug.dragAccelerationScale * launchSpeed;
 
         // defines the turret where the chassis is, under the assumption that the chassis origin and
         // turret origin coincide
@@ -131,15 +115,6 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         const Vector2f chassisVel = odometryInterface.getCurrentVelocity2D();
         const modm::Vector3f aimPosition(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
         const modm::Vector3f relativeTargetPosition = aimPosition - turretPosition;
-        debug.aimPositionX = aimPosition.x;
-        debug.aimPositionY = aimPosition.y;
-        debug.aimPositionZ = aimPosition.z;
-        debug.turretPositionX = turretPosition.x;
-        debug.turretPositionY = turretPosition.y;
-        debug.turretPositionZ = turretPosition.z;
-        debug.relativeTargetX = relativeTargetPosition.x;
-        debug.relativeTargetY = relativeTargetPosition.y;
-        debug.relativeTargetZ = relativeTargetPosition.z;
 
         // target state, frame whose axis is at the turret center and z is up
         // assume acceleration of the chassis is 0 since we don't measure it
@@ -161,24 +136,14 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
         int64_t projectForwardTimeDt =
             static_cast<int64_t>(solveStartTime) - static_cast<int64_t>(aimData.timestamp);
         const float latencyCompensationSeconds = projectForwardTimeDt / 1E6f;
-        debug.latencyCompensationSeconds = latencyCompensationSeconds;
 
         // project the target position forward in time s.t. we are computing a ballistics solution
         // for a target "now" rather than whenever the camera saw the target
         targetState.position = targetState.projectForward(latencyCompensationSeconds);
-        debug.projectedTargetX = targetState.position.x;
-        debug.projectedTargetY = targetState.position.y;
-        debug.projectedTargetZ = targetState.position.z;
-        debug.targetVelocityX = targetState.velocity.x;
-        debug.targetVelocityY = targetState.velocity.y;
-        debug.targetVelocityZ = targetState.velocity.z;
-        debug.horizontalDistance = hypotf(targetState.position.x, targetState.position.y) +
-                                   turretSubsystem.getPitchOffset();
 
         lastComputedSolution = BallisticsSolution();
         lastComputedSolution->distance = targetState.position.getLength();
 
-        const uint32_t vacuumSolveStartTime = tap::arch::clock::getTimeMicroseconds();
         const bool vacuumSolutionFound = ballistics::findTargetProjectileIntersection(
             targetState,
             launchSpeed,
@@ -187,52 +152,15 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
             &lastComputedSolution->yawAngle,
             &lastComputedSolution->timeOfFlight,
             turretSubsystem.getPitchOffset());
-        const uint32_t vacuumSolveMicroseconds =
-            tap::arch::clock::getTimeMicroseconds() - vacuumSolveStartTime;
-        debug.vacuumSolveMicroseconds = vacuumSolveMicroseconds;
-        debug.vacuumSolutionFound = vacuumSolutionFound;
-        debug.vacuumPitch = lastComputedSolution->pitchAngle;
-        debug.vacuumYaw = lastComputedSolution->yawAngle;
-        debug.vacuumTimeOfFlight = lastComputedSolution->timeOfFlight;
-        debug.vacuumDistance = lastComputedSolution->distance;
-        debug.dragSolutionFound = false;
-        debug.dragSolveMicroseconds = 0;
-        debug.dragPitch = lastComputedSolution->pitchAngle;
-        debug.dragYaw = lastComputedSolution->yawAngle;
-        debug.dragTimeOfFlight = lastComputedSolution->timeOfFlight;
-        debug.dragDistance = lastComputedSolution->distance;
-        debug.deltaPitch = 0.0f;
-        debug.deltaYaw = 0.0f;
-        debug.deltaTimeOfFlight = 0.0f;
-        debug.deltaDistance = 0.0f;
-        debug.dragHorizontalVelocity = launchSpeed * cosf(debug.vacuumPitch);
-        debug.dragRemainingHorizontalVelocityRatio =
-            debug.dragHorizontalVelocity > 0.0f
-                ? 1.0f - debug.dragRate * debug.horizontalDistance / debug.dragHorizontalVelocity
-                : 0.0f;
-        auto estimatedDragTimeOfFlight = estimateHorizontalDragTimeOfFlight(
-            debug.horizontalDistance,
-            debug.dragHorizontalVelocity,
-            debug.dragAccelerationScale,
-            launchSpeed);
-        debug.dragEstimatedTimeOfFlight =
-            estimatedDragTimeOfFlight.has_value() ? *estimatedDragTimeOfFlight : 0.0f;
 
         if (!vacuumSolutionFound)
         {
-            debug.totalSolveMicroseconds = tap::arch::clock::getTimeMicroseconds() - solveStartTime;
             lastComputedSolution = std::nullopt;
         }
-        else if (!useDragCorrection)
-        {
-            debug.totalSolveMicroseconds = tap::arch::clock::getTimeMicroseconds() - solveStartTime;
-        }
-        else
+        else if (useDragCorrection)
         {
             const BallisticsSolution vacuumSolution = *lastComputedSolution;
             BallisticsSolution dragSolution = vacuumSolution;
-
-            const uint32_t dragSolveStartTime = tap::arch::clock::getTimeMicroseconds();
             const bool dragSolutionFound = findTargetProjectileIntersectionWithSphereDrag(
                 targetState,
                 launchSpeed,
@@ -242,32 +170,6 @@ std::optional<OttoBallisticsSolver::BallisticsSolution> OttoBallisticsSolver::
                 &dragSolution.timeOfFlight,
                 turretSubsystem.getPitchOffset(),
                 &dragSolution.distance);
-            const uint32_t dragSolveMicroseconds =
-                tap::arch::clock::getTimeMicroseconds() - dragSolveStartTime;
-            debug.dragSolveMicroseconds = dragSolveMicroseconds;
-            debug.dragSolutionFound = dragSolutionFound;
-            debug.dragPitch = dragSolution.pitchAngle;
-            debug.dragYaw = dragSolution.yawAngle;
-            debug.dragTimeOfFlight = dragSolution.timeOfFlight;
-            debug.dragDistance = dragSolution.distance;
-            debug.deltaPitch = dragSolution.pitchAngle - vacuumSolution.pitchAngle;
-            debug.deltaYaw = dragSolution.yawAngle - vacuumSolution.yawAngle;
-            debug.deltaTimeOfFlight = dragSolution.timeOfFlight - vacuumSolution.timeOfFlight;
-            debug.deltaDistance = dragSolution.distance - vacuumSolution.distance;
-            debug.dragHorizontalVelocity = launchSpeed * cosf(dragSolution.pitchAngle);
-            debug.dragRemainingHorizontalVelocityRatio =
-                debug.dragHorizontalVelocity > 0.0f
-                    ? 1.0f -
-                          debug.dragRate * debug.horizontalDistance / debug.dragHorizontalVelocity
-                    : 0.0f;
-            estimatedDragTimeOfFlight = estimateHorizontalDragTimeOfFlight(
-                debug.horizontalDistance,
-                debug.dragHorizontalVelocity,
-                debug.dragAccelerationScale,
-                launchSpeed);
-            debug.dragEstimatedTimeOfFlight =
-                estimatedDragTimeOfFlight.has_value() ? *estimatedDragTimeOfFlight : 0.0f;
-            debug.totalSolveMicroseconds = tap::arch::clock::getTimeMicroseconds() - solveStartTime;
 
             if (dragSolutionFound)
             {
