@@ -39,13 +39,13 @@ using tap::algorithms::ballistics::SecondOrderKinematicState;
 namespace aruwsrc::algorithms
 {
 CvBallisticsSolver::CvBallisticsSolver(
-    const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-    const aruwsrc::algorithms::odometry::transforms::TransformerInterface &transformer,
-    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor,
+    const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer,
+    const control::launcher::LaunchSpeedPredictorInterface& frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID,
     float turretPitchOffset,
-    aruwsrc::communication::rtt::RttTelemetry *telemetry)
+    aruwsrc::communication::rtt::RttTelemetry* telemetry)
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
       worldToTurret(transformer.getWorldToTurret(turretID)),
@@ -59,7 +59,7 @@ CvBallisticsSolver::CvBallisticsSolver(
 
 std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computeTurretAimAngles()
 {
-    const auto &aimData = visionCoprocessor.getLastAimData(turretID);
+    const auto& aimData = visionCoprocessor.getLastAimData(turretID);
 
     if (telemetry)
     {
@@ -228,7 +228,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 }
 
 std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computePulseEstimation(
-    const communication::serial::VisionCoprocessor::PositionData &projectedAimPosData,
+    const communication::serial::VisionCoprocessor::PositionData& projectedAimPosData,
     float launchSpeed)
 {
     // Pulse Estimation:
@@ -238,39 +238,34 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     // 4. Compute accurate ballistics solution for active plate
     // 5. Calculate shot timing window accounting for plate width and omega_total
 
-    // Estimate approximate distance and ToF to robot center
+    // Estimate approximate distance and ToF to nearest point on robot perimeter
     float avgRadius = (projectedAimPosData.radius0 + projectedAimPosData.radius1) / 2.0f;
-    modm::Vector3f robotCenterPos(
-        projectedAimPosData.xPos + avgRadius * cos(projectedAimPosData.theta) -
-            worldToTurret.getX(),
-        projectedAimPosData.yPos + avgRadius * sin(projectedAimPosData.theta) -
-            worldToTurret.getY(),
-        projectedAimPosData.zPos - worldToTurret.getZ());
-
-    float approxDistance = robotCenterPos.getLength();
-    float estimatedToF = approxDistance / launchSpeed;
-
-    // Create state for computing omega_total
-    modm::Vector3f robotPos3D(
+    modm::Vector3f robotPos(
         projectedAimPosData.xPos - worldToTurret.getX(),
         projectedAimPosData.yPos - worldToTurret.getY(),
         projectedAimPosData.zPos - worldToTurret.getZ());
-    modm::Vector3f robotVel3D(
+
+    float horizontalDistToClosestPoint = robotPos.xy().getLength() - avgRadius;
+    float approxDistance = modm::Vector2f(horizontalDistToClosestPoint, robotPos.z).getLength();
+    float estimatedToF = approxDistance / launchSpeed;
+
+    // Create state for computing omega_total
+    modm::Vector3f robotVel(
         projectedAimPosData.xVel - worldToTurret.getXVel(),
         projectedAimPosData.yVel - worldToTurret.getYVel(),
         projectedAimPosData.zVel);
 
     // Create temporary state to use helper methods
     RobotTargetKinematicState tempState(
-        robotPos3D,
-        robotVel3D,
+        robotPos,
+        robotVel,
         {projectedAimPosData.xAcc, projectedAimPosData.yAcc, projectedAimPosData.zAcc},
         avgRadius,
         projectedAimPosData.theta,
         projectedAimPosData.omega);
 
     // Compute omega_total accounting for both rotation and translation
-    float omegaTotal = tempState.computeOmegaTotal(robotPos3D, robotVel3D);
+    float omegaTotal = tempState.computeOmegaTotal(robotPos, robotVel);
 
     if (telemetry)
     {
