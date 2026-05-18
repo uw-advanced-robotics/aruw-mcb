@@ -684,7 +684,10 @@ Trigger leftSwitchDown =
 
 Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
+        .whileTrue(&turretCVCommand)  // shouldn't be composed into a concurrent command as
+                                      // cvOnTargetGoverner checks if this command specifically is
+                                      // scheduled
+        .whileTrue(&chassisDriveCommand);
 
 auto rPressedRms = RemoteMapState({Remote::Key::R});
 auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
