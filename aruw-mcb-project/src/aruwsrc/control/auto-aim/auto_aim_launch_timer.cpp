@@ -53,69 +53,28 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::NO_TARGET;
     }
 
-    if (aimData.timing.updated && aimData.timing.pulseInterval == 0)
-    {
-        debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_DENY);
-        return LaunchInclination::GATED_DENY;
-    }
-
     auto ballisticsSolution = ballistics->computeTurretAimAngles();
     debugInfo.ballisticsSolutionFound = ballisticsSolution.has_value();
 
-    if (ballisticsSolution.has_value() && ballisticsSolution->usePulseEstimation)
+    if (!ballisticsSolution.has_value())
     {
-        float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
-        debugInfo.pulseEstimationUsed = true;
-        debugInfo.timeOfFlight = timeOfFlightSeconds;
-        debugInfo.shotWindowStart = ballisticsSolution->shotWindowStart;
-        debugInfo.shotWindowEnd = ballisticsSolution->shotWindowEnd;
-
-        if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS)
-        {
-            debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_DENY);
-            return LaunchInclination::GATED_DENY;
-        }
-        debugInfo.validFlightTime = true;
-
-        uint64_t now = tap::arch::clock::getTimeMicroseconds();
-        uint64_t effectiveFireTime = now + this->agitatorTypicalDelayMicroseconds;
-        debugInfo.now = now;
-        debugInfo.effectiveFireTime = effectiveFireTime;
-        debugInfo.countdownToShotWindowStart =
-            static_cast<int64_t>(ballisticsSolution->shotWindowStart) -
-            static_cast<int64_t>(effectiveFireTime);
-        debugInfo.countdownToShotWindowEnd =
-            static_cast<int64_t>(ballisticsSolution->shotWindowEnd) -
-            static_cast<int64_t>(effectiveFireTime);
-
-        debugInfo.inShotWindow = effectiveFireTime >= ballisticsSolution->shotWindowStart &&
-                                 effectiveFireTime <= ballisticsSolution->shotWindowEnd;
-        if (debugInfo.inShotWindow)
-        {
-            debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_ALLOW);
-            return LaunchInclination::GATED_ALLOW;
-        }
-        else
-        {
-            debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_DENY);
-            return LaunchInclination::GATED_DENY;
-        }
+        // changed from gated_deny, confirm it makes sense?  -chinmay
+        debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::NO_TARGET);
+        return LaunchInclination::NO_TARGET;
     }
 
-    if (!aimData.timing.updated)
+    if (!ballisticsSolution->usePulseEstimation)
     {
         debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::UNGATED);
         return LaunchInclination::UNGATED;
     }
 
-    if (!ballisticsSolution.has_value())
-    {
-        debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_DENY);
-        return LaunchInclination::GATED_DENY;
-    }
-
     float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
+    debugInfo.pulseEstimationUsed = true;
     debugInfo.timeOfFlight = timeOfFlightSeconds;
+    debugInfo.shotWindowStart = ballisticsSolution->shotWindowStart;
+    debugInfo.shotWindowEnd = ballisticsSolution->shotWindowEnd;
+
     if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS)
     {
         debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_DENY);
@@ -123,34 +82,26 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     }
     debugInfo.validFlightTime = true;
 
-    uint32_t timeOfFlightMicros = timeOfFlightSeconds * 1e6;
-    uint32_t now = tap::arch::clock::getTimeMicroseconds();
-    uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
+    uint64_t now = tap::arch::clock::getTimeMicroseconds();
+    uint64_t effectiveFireTime = now + this->agitatorTypicalDelayMicroseconds;
     debugInfo.now = now;
-    debugInfo.effectiveFireTime = projectedHitTime - timeOfFlightMicros;
+    debugInfo.effectiveFireTime = effectiveFireTime;
+    debugInfo.countdownToShotWindowStart =
+        static_cast<int64_t>(ballisticsSolution->shotWindowStart) -
+        static_cast<int64_t>(effectiveFireTime);
+    debugInfo.countdownToShotWindowEnd = static_cast<int64_t>(ballisticsSolution->shotWindowEnd) -
+                                         static_cast<int64_t>(effectiveFireTime);
 
-    uint32_t nextPlateTransitTime = aimData.timestamp + aimData.timing.offset;
-    int64_t projectedHitTimeAfterFirstWindow = projectedHitTime;
-    projectedHitTimeAfterFirstWindow -= nextPlateTransitTime;
-
-    int64_t pulseInterval = aimData.timing.pulseInterval;
-    int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % pulseInterval;
-    if (offsetInFiringWindow < 0)
+    bool inShotWindow = effectiveFireTime >= ballisticsSolution->shotWindowStart &&
+                        effectiveFireTime <= ballisticsSolution->shotWindowEnd;
+    debugInfo.inShotWindow = inShotWindow;
+    if (!inShotWindow)
     {
-        offsetInFiringWindow += pulseInterval;
+        debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_DENY);
+        return LaunchInclination::GATED_DENY;
     }
-    debugInfo.offsetInFiringWindow = offsetInFiringWindow;
 
-    uint32_t maxHitTimeError = aimData.timing.duration / 2;
-    debugInfo.maxHitTimeError = maxHitTimeError;
-    debugInfo.inShotWindow = offsetInFiringWindow <= maxHitTimeError ||
-                             offsetInFiringWindow >= pulseInterval - maxHitTimeError;
-    if (debugInfo.inShotWindow)
-    {
-        debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_ALLOW);
-        return LaunchInclination::GATED_ALLOW;
-    }
-    debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_DENY);
-    return LaunchInclination::GATED_DENY;
+    debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::GATED_ALLOW);
+    return LaunchInclination::GATED_ALLOW;
 }
 }  // namespace aruwsrc::control::auto_aim
