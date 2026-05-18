@@ -44,15 +44,19 @@ struct SphereProjectileModel
         return M_PI * radiusMeters * radiusMeters;
     }
 
-    float dragCoefficient(float speedMetersPerSecond) const
+    float reynoldsNumber(float speedMetersPerSecond) const
     {
         if (speedMetersPerSecond <= 0.0f || dynamicViscosityPas <= 0.0f)
         {
             return 0.0f;
         }
 
-        const float reynoldsNumber =
-            airDensityKgPerM3 * speedMetersPerSecond * diameterMeters / dynamicViscosityPas;
+        return airDensityKgPerM3 * speedMetersPerSecond * diameterMeters / dynamicViscosityPas;
+    }
+
+    float dragCoefficient(float speedMetersPerSecond) const
+    {
+        const float reynoldsNumber = this->reynoldsNumber(speedMetersPerSecond);
         if (reynoldsNumber <= 0.0f)
         {
             return 0.0f;
@@ -81,12 +85,10 @@ static constexpr SphereProjectileModel ROBO_MASTER_17MM_SPHERE = {
 
 struct SphereDragSolverConfig
 {
-    float timestepSeconds = 0.01f;
     float maxFlightTimeSeconds = 1.2f;
     float minPitchRadians = -M_PI * 80.0f / 180.0f;
     float maxPitchRadians = M_PI * 45.0f / 180.0f;
-    float localPitchSearchRadians = M_PI * 25.0f / 180.0f;
-    uint8_t pitchBisectionIterations = 8;
+    uint8_t correctionIterations = 2;
 };
 
 static constexpr SphereDragSolverConfig DEFAULT_SPHERE_DRAG_SOLVER_CONFIG = {};
@@ -99,159 +101,75 @@ struct SphereDragAimSolution
     float distance;
 };
 
-struct SphereProjectileState
-{
-    float horizontalPosition;
-    float verticalPosition;
-    float horizontalVelocity;
-    float verticalVelocity;
-};
-
-struct SphereDragIntersection
-{
-    float verticalError;
-    float timeOfFlight;
-};
-
 inline bool finiteAndPositive(float value) { return isfinite(value) && value > 0.0f; }
 
-inline SphereProjectileState computeProjectileStateDerivative(
-    const SphereProjectileState &state,
-    float dragAccelerationScale)
-{
-    const float speed = sqrtf(
-        state.horizontalVelocity * state.horizontalVelocity +
-        state.verticalVelocity * state.verticalVelocity);
-
-    return SphereProjectileState{
-        .horizontalPosition = state.horizontalVelocity,
-        .verticalPosition = state.verticalVelocity,
-        .horizontalVelocity = -dragAccelerationScale * speed * state.horizontalVelocity,
-        .verticalVelocity = -tap::algorithms::ACCELERATION_GRAVITY -
-                            dragAccelerationScale * speed * state.verticalVelocity,
-    };
-}
-
-inline SphereProjectileState addScaledState(
-    const SphereProjectileState &state,
-    const SphereProjectileState &delta,
-    float scale)
-{
-    return SphereProjectileState{
-        .horizontalPosition = state.horizontalPosition + delta.horizontalPosition * scale,
-        .verticalPosition = state.verticalPosition + delta.verticalPosition * scale,
-        .horizontalVelocity = state.horizontalVelocity + delta.horizontalVelocity * scale,
-        .verticalVelocity = state.verticalVelocity + delta.verticalVelocity * scale,
-    };
-}
-
-inline SphereProjectileState rungeKuttaIntegrateProjectileState(
-    const SphereProjectileState &state,
-    float timestepSeconds,
-    float dragAccelerationScale)
-{
-    const SphereProjectileState k1 = computeProjectileStateDerivative(state, dragAccelerationScale);
-    const SphereProjectileState k2 = computeProjectileStateDerivative(
-        addScaledState(state, k1, timestepSeconds * 0.5f),
-        dragAccelerationScale);
-    const SphereProjectileState k3 = computeProjectileStateDerivative(
-        addScaledState(state, k2, timestepSeconds * 0.5f),
-        dragAccelerationScale);
-    const SphereProjectileState k4 = computeProjectileStateDerivative(
-        addScaledState(state, k3, timestepSeconds),
-        dragAccelerationScale);
-
-    return SphereProjectileState{
-        .horizontalPosition =
-            state.horizontalPosition + timestepSeconds *
-                                           (k1.horizontalPosition + 2.0f * k2.horizontalPosition +
-                                            2.0f * k3.horizontalPosition + k4.horizontalPosition) /
-                                           6.0f,
-        .verticalPosition =
-            state.verticalPosition + timestepSeconds *
-                                         (k1.verticalPosition + 2.0f * k2.verticalPosition +
-                                          2.0f * k3.verticalPosition + k4.verticalPosition) /
-                                         6.0f,
-        .horizontalVelocity =
-            state.horizontalVelocity + timestepSeconds *
-                                           (k1.horizontalVelocity + 2.0f * k2.horizontalVelocity +
-                                            2.0f * k3.horizontalVelocity + k4.horizontalVelocity) /
-                                           6.0f,
-        .verticalVelocity =
-            state.verticalVelocity + timestepSeconds *
-                                         (k1.verticalVelocity + 2.0f * k2.verticalVelocity +
-                                          2.0f * k3.verticalVelocity + k4.verticalVelocity) /
-                                         6.0f,
-    };
-}
-
-inline std::optional<SphereDragIntersection> simulateSphereProjectileToRange(
+inline std::optional<float> estimateHorizontalDragTimeOfFlight(
     float horizontalDistance,
+    float horizontalVelocity,
+    float dragAccelerationScale,
+    float referenceSpeed)
+{
+    if (!finiteAndPositive(horizontalDistance) || !finiteAndPositive(horizontalVelocity))
+    {
+        return std::nullopt;
+    }
+
+    const float dragRate = dragAccelerationScale * referenceSpeed;
+    if (dragRate <= 0.0f)
+    {
+        return horizontalDistance / horizontalVelocity;
+    }
+
+    const float remainingVelocityRatio = 1.0f - dragRate * horizontalDistance / horizontalVelocity;
+    if (remainingVelocityRatio <= 0.0f)
+    {
+        return std::nullopt;
+    }
+
+    return -logf(remainingVelocityRatio) / dragRate;
+}
+
+inline std::optional<float> estimatePitchForLinearVerticalDrag(
     float targetHeight,
     float launchSpeed,
-    float pitchAngle,
-    const SphereProjectileModel &projectileModel = ROBO_MASTER_17MM_SPHERE,
-    const SphereDragSolverConfig &solverConfig = DEFAULT_SPHERE_DRAG_SOLVER_CONFIG)
+    float timeOfFlight,
+    float dragAccelerationScale,
+    float referenceSpeed)
 {
-    if (!finiteAndPositive(horizontalDistance) || !finiteAndPositive(launchSpeed) ||
-        !finiteAndPositive(solverConfig.timestepSeconds) ||
-        !finiteAndPositive(solverConfig.maxFlightTimeSeconds))
+    if (!finiteAndPositive(launchSpeed) || !finiteAndPositive(timeOfFlight))
     {
         return std::nullopt;
     }
 
-    SphereProjectileState projectileState{
-        .horizontalPosition = 0.0f,
-        .verticalPosition = 0.0f,
-        .horizontalVelocity = launchSpeed * cosf(pitchAngle),
-        .verticalVelocity = -launchSpeed * sinf(pitchAngle),
-    };
-
-    if (projectileState.horizontalVelocity <= 0.0f)
+    const float dragRate = dragAccelerationScale * referenceSpeed;
+    float initialVerticalVelocity = 0.0f;
+    if (dragRate <= 0.0f)
     {
-        return std::nullopt;
+        initialVerticalVelocity = (targetHeight + 0.5f * tap::algorithms::ACCELERATION_GRAVITY *
+                                                      timeOfFlight * timeOfFlight) /
+                                  timeOfFlight;
     }
-
-    const float dragAccelerationScale = projectileModel.dragAccelerationScale(launchSpeed);
-    float previousTimeSeconds = 0.0f;
-    for (float timeSeconds = solverConfig.timestepSeconds;
-         timeSeconds <= solverConfig.maxFlightTimeSeconds;
-         timeSeconds += solverConfig.timestepSeconds)
+    else
     {
-        const SphereProjectileState previousState = projectileState;
-        projectileState = rungeKuttaIntegrateProjectileState(
-            projectileState,
-            solverConfig.timestepSeconds,
-            dragAccelerationScale);
-
-        if (projectileState.horizontalPosition >= horizontalDistance)
-        {
-            const float horizontalDelta =
-                projectileState.horizontalPosition - previousState.horizontalPosition;
-            const float interpolationRatio =
-                horizontalDelta > 0.0f
-                    ? (horizontalDistance - previousState.horizontalPosition) / horizontalDelta
-                    : 1.0f;
-
-            return SphereDragIntersection{
-                .verticalError = previousState.verticalPosition +
-                                 interpolationRatio * (projectileState.verticalPosition -
-                                                       previousState.verticalPosition) -
-                                 targetHeight,
-                .timeOfFlight =
-                    previousTimeSeconds + interpolationRatio * solverConfig.timestepSeconds,
-            };
-        }
-
-        if (projectileState.horizontalVelocity <= 0.0f)
+        const float oneMinusExp = 1.0f - expf(-dragRate * timeOfFlight);
+        if (oneMinusExp <= 0.0f)
         {
             return std::nullopt;
         }
 
-        previousTimeSeconds = timeSeconds;
+        initialVerticalVelocity =
+            (targetHeight + tap::algorithms::ACCELERATION_GRAVITY * timeOfFlight / dragRate) *
+                dragRate / oneMinusExp -
+            tap::algorithms::ACCELERATION_GRAVITY / dragRate;
     }
 
-    return std::nullopt;
+    const float sinPitch = -initialVerticalVelocity / launchSpeed;
+    if (!isfinite(sinPitch) || sinPitch < -1.0f || sinPitch > 1.0f)
+    {
+        return std::nullopt;
+    }
+
+    return asinf(sinPitch);
 }
 
 inline std::optional<SphereDragAimSolution> solveStationaryTargetWithSphereDrag(
@@ -279,74 +197,47 @@ inline std::optional<SphereDragAimSolution> solveStationaryTargetWithSphereDrag(
         return std::nullopt;
     }
 
-    const float centerPitch = tap::algorithms::limitVal(
+    const float dragAccelerationScale = projectileModel.dragAccelerationScale(launchSpeed);
+    float pitchAngle = tap::algorithms::limitVal(
         vacuumPitch,
         solverConfig.minPitchRadians,
         solverConfig.maxPitchRadians);
-    float lowPitch = tap::algorithms::limitVal(
-        centerPitch - solverConfig.localPitchSearchRadians,
-        solverConfig.minPitchRadians,
-        solverConfig.maxPitchRadians);
-    float highPitch = tap::algorithms::limitVal(
-        centerPitch + solverConfig.localPitchSearchRadians,
-        solverConfig.minPitchRadians,
-        solverConfig.maxPitchRadians);
-
-    auto lowIntersection = simulateSphereProjectileToRange(
-        horizontalDistance,
-        targetPosition.z,
-        launchSpeed,
-        lowPitch,
-        projectileModel,
-        solverConfig);
-    auto highIntersection = simulateSphereProjectileToRange(
-        horizontalDistance,
-        targetPosition.z,
-        launchSpeed,
-        highPitch,
-        projectileModel,
-        solverConfig);
-    if (!lowIntersection.has_value() || !highIntersection.has_value() ||
-        lowIntersection->verticalError * highIntersection->verticalError > 0.0f)
+    float timeOfFlight = vacuumTimeOfFlight;
+    for (uint8_t i = 0; i < solverConfig.correctionIterations; i++)
     {
-        return std::nullopt;
-    }
-
-    SphereDragIntersection rootIntersection = highIntersection.value();
-    float lowError = lowIntersection->verticalError;
-    for (uint8_t i = 0; i < solverConfig.pitchBisectionIterations; i++)
-    {
-        const float midPitch = (lowPitch + highPitch) * 0.5f;
-        auto midIntersection = simulateSphereProjectileToRange(
+        const float horizontalVelocity = launchSpeed * cosf(pitchAngle);
+        auto dragTimeOfFlight = estimateHorizontalDragTimeOfFlight(
             horizontalDistance,
+            horizontalVelocity,
+            dragAccelerationScale,
+            launchSpeed);
+        if (!dragTimeOfFlight.has_value() || *dragTimeOfFlight <= 0.0f ||
+            *dragTimeOfFlight > solverConfig.maxFlightTimeSeconds)
+        {
+            return std::nullopt;
+        }
+
+        timeOfFlight = *dragTimeOfFlight;
+        auto estimatedPitch = estimatePitchForLinearVerticalDrag(
             targetPosition.z,
             launchSpeed,
-            midPitch,
-            projectileModel,
-            solverConfig);
-
-        if (!midIntersection.has_value())
+            timeOfFlight,
+            dragAccelerationScale,
+            launchSpeed);
+        if (!estimatedPitch.has_value())
         {
-            highPitch = midPitch;
-            continue;
+            return std::nullopt;
         }
-
-        rootIntersection = midIntersection.value();
-        if (lowError * midIntersection->verticalError <= 0.0f)
-        {
-            highPitch = midPitch;
-        }
-        else
-        {
-            lowPitch = midPitch;
-            lowError = midIntersection->verticalError;
-        }
+        pitchAngle = tap::algorithms::limitVal(
+            *estimatedPitch,
+            solverConfig.minPitchRadians,
+            solverConfig.maxPitchRadians);
     }
 
     return SphereDragAimSolution{
-        .pitchAngle = (lowPitch + highPitch) * 0.5f,
+        .pitchAngle = pitchAngle,
         .yawAngle = atan2f(targetPosition.y, targetPosition.x),
-        .timeOfFlight = rootIntersection.timeOfFlight,
+        .timeOfFlight = timeOfFlight,
         .distance = targetPosition.getLength(),
     };
 }

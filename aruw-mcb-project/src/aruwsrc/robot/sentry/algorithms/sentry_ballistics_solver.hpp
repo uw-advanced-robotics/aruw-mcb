@@ -161,7 +161,8 @@ public:
         float turretPitchOffset,
         const float turretMinorOffsetFromMajor,
         const uint8_t turretID,
-        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
+        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr,
+        bool useDragCorrection = true);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -185,11 +186,10 @@ private:
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
     const float turretDistFromBase;
-    aruwsrc::communication::rtt::RttTelemetry *telemetry;
+    const bool useDragCorrection;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
-    uint32_t lastSolveTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
     DragComparison lastDragComparison = {};
 

@@ -360,7 +360,9 @@ OttoBallisticsSolver ballisticsSolver(
     turret,
     frictionWheelSubsystem,
     LAUNCHER_SPEED,
-    0  // turretID
+    0,        // turretID
+    nullptr,  // telemetry
+    false     // useDragCorrection
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,

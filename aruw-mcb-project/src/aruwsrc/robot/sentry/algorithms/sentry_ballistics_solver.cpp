@@ -38,62 +38,6 @@ namespace aruwsrc::sentry::algorithms
 namespace
 {
 static constexpr uint8_t DRAG_FORWARD_KINEMATIC_PROJECTIONS = 1;
-
-void logDragTelemetry(
-    aruwsrc::communication::rtt::RttTelemetry *telemetry,
-    uint8_t turretID,
-    float launchSpeed,
-    uint32_t dtMicroseconds,
-    uint32_t totalSolveMicroseconds,
-    uint32_t vacuumSolveMicroseconds,
-    uint32_t dragSolveMicroseconds,
-    bool vacuumSolutionFound,
-    const SentryBallisticsSolver::DragComparison &comparison)
-{
-    if (telemetry == nullptr)
-    {
-        return;
-    }
-
-    telemetry->logSignal("bd:id", turretID);
-    telemetry->logSignal("bd:dt", dtMicroseconds);
-    telemetry->logSignal("bd:ust", totalSolveMicroseconds);
-    telemetry->logSignal("bd:lat", comparison.latencyCompensationSeconds);
-    telemetry->logSignal("bd:v0", launchSpeed);
-    telemetry->logSignal(
-        "bd:x",
-        comparison.targetPositionX,
-        comparison.targetPositionY,
-        comparison.targetPositionZ);
-    telemetry->logSignal(
-        "bd:v",
-        comparison.targetVelocityX,
-        comparison.targetVelocityY,
-        comparison.targetVelocityZ);
-    telemetry->logSignal(
-        "bd:a",
-        comparison.targetAccelerationX,
-        comparison.targetAccelerationY,
-        comparison.targetAccelerationZ);
-
-    telemetry->logSignal("bd:ok0", vacuumSolutionFound);
-    telemetry->logSignal("bd:us0", vacuumSolveMicroseconds);
-    telemetry->logSignal("bd:pt0", comparison.vacuumPitchAngle);
-    telemetry->logSignal("bd:yw0", comparison.vacuumYawAngle);
-    telemetry->logSignal("bd:tof0", comparison.vacuumTimeOfFlight);
-    telemetry->logSignal("bd:d0", comparison.vacuumDistance);
-
-    telemetry->logSignal("bd:ok", comparison.dragSolutionFound);
-    telemetry->logSignal("bd:us", dragSolveMicroseconds);
-    telemetry->logSignal("bd:pt", comparison.dragPitchAngle);
-    telemetry->logSignal("bd:yw", comparison.dragYawAngle);
-    telemetry->logSignal("bd:tof", comparison.dragTimeOfFlight);
-    telemetry->logSignal("bd:d", comparison.dragDistance);
-    telemetry->logSignal("bd:dpt", comparison.dragPitchAngle - comparison.vacuumPitchAngle);
-    telemetry->logSignal("bd:dyw", comparison.dragYawAngle - comparison.vacuumYawAngle);
-    telemetry->logSignal("bd:dtof", comparison.dragTimeOfFlight - comparison.vacuumTimeOfFlight);
-    telemetry->logSignal("bd:dd", comparison.dragDistance - comparison.vacuumDistance);
-}
 }  // namespace
 
 SentryBallisticsSolver::SentryBallisticsSolver(
@@ -105,7 +49,8 @@ SentryBallisticsSolver::SentryBallisticsSolver(
     const float turretPitchOffset,
     const float turretDistFromBase,
     const uint8_t turretID,
-    aruwsrc::communication::rtt::RttTelemetry *telemetry)
+    aruwsrc::communication::rtt::RttTelemetry *,
+    bool useDragCorrection)
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
       frictionWheels(frictionWheels),
@@ -113,7 +58,7 @@ SentryBallisticsSolver::SentryBallisticsSolver(
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretPitchOffset(turretPitchOffset),
       turretDistFromBase(turretDistFromBase),
-      telemetry(telemetry),
+      useDragCorrection(useDragCorrection),
       turretID(turretID)
 {
 }
@@ -134,8 +79,6 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
         lastOdometryTimestamp != transformer.getLastComputedOdometryTime())
     {
         const uint32_t solveStartTime = tap::arch::clock::getTimeMicroseconds();
-        const uint32_t solveDt = lastSolveTimestamp == 0 ? 0 : solveStartTime - lastSolveTimestamp;
-        lastSolveTimestamp = solveStartTime;
 
         lastAimDataTimestamp = aimData.timestamp;
         lastOdometryTimestamp = transformer.getLastComputedOdometryTime();
@@ -194,7 +137,6 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
         lastDragComparison.targetAccelerationY = targetState.acceleration.y;
         lastDragComparison.targetAccelerationZ = targetState.acceleration.z;
 
-        const uint32_t vacuumSolveStartTime = tap::arch::clock::getTimeMicroseconds();
         const bool vacuumSolutionFound = ballistics::findTargetProjectileIntersection(
             targetState,
             launchSpeed,
@@ -203,21 +145,9 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
             &lastComputedSolution->yawAngle,
             &lastComputedSolution->timeOfFlight,
             turretPitchOffset);
-        const uint32_t vacuumSolveMicroseconds =
-            tap::arch::clock::getTimeMicroseconds() - vacuumSolveStartTime;
 
         if (!vacuumSolutionFound)
         {
-            logDragTelemetry(
-                telemetry,
-                turretID,
-                launchSpeed,
-                solveDt,
-                tap::arch::clock::getTimeMicroseconds() - solveStartTime,
-                vacuumSolveMicroseconds,
-                0,
-                false,
-                lastDragComparison);
             lastComputedSolution = std::nullopt;
             return std::nullopt;
         }
@@ -226,39 +156,24 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
         lastDragComparison.vacuumYawAngle = lastComputedSolution->yawAngle;
         lastDragComparison.vacuumTimeOfFlight = lastComputedSolution->timeOfFlight;
         lastDragComparison.vacuumDistance = lastComputedSolution->distance;
+        lastDragComparison.dragPitchAngle = lastDragComparison.vacuumPitchAngle;
+        lastDragComparison.dragYawAngle = lastDragComparison.vacuumYawAngle;
+        lastDragComparison.dragTimeOfFlight = lastDragComparison.vacuumTimeOfFlight;
+        lastDragComparison.dragDistance = lastDragComparison.vacuumDistance;
 
-        const uint32_t dragSolveStartTime = tap::arch::clock::getTimeMicroseconds();
-        lastDragComparison.dragSolutionFound =
-            aruwsrc::algorithms::findTargetProjectileIntersectionWithSphereDrag(
-                targetState,
-                launchSpeed,
-                DRAG_FORWARD_KINEMATIC_PROJECTIONS,
-                &lastDragComparison.dragPitchAngle,
-                &lastDragComparison.dragYawAngle,
-                &lastDragComparison.dragTimeOfFlight,
-                turretPitchOffset,
-                &lastDragComparison.dragDistance);
-        const uint32_t dragSolveMicroseconds =
-            tap::arch::clock::getTimeMicroseconds() - dragSolveStartTime;
-
-        if (!lastDragComparison.dragSolutionFound)
+        if (useDragCorrection)
         {
-            lastDragComparison.dragPitchAngle = lastDragComparison.vacuumPitchAngle;
-            lastDragComparison.dragYawAngle = lastDragComparison.vacuumYawAngle;
-            lastDragComparison.dragTimeOfFlight = lastDragComparison.vacuumTimeOfFlight;
-            lastDragComparison.dragDistance = lastDragComparison.vacuumDistance;
+            lastDragComparison.dragSolutionFound =
+                aruwsrc::algorithms::findTargetProjectileIntersectionWithSphereDrag(
+                    targetState,
+                    launchSpeed,
+                    DRAG_FORWARD_KINEMATIC_PROJECTIONS,
+                    &lastDragComparison.dragPitchAngle,
+                    &lastDragComparison.dragYawAngle,
+                    &lastDragComparison.dragTimeOfFlight,
+                    turretPitchOffset,
+                    &lastDragComparison.dragDistance);
         }
-
-        logDragTelemetry(
-            telemetry,
-            turretID,
-            launchSpeed,
-            solveDt,
-            tap::arch::clock::getTimeMicroseconds() - solveStartTime,
-            vacuumSolveMicroseconds,
-            dragSolveMicroseconds,
-            true,
-            lastDragComparison);
 
         if (lastDragComparison.dragSolutionFound)
         {

@@ -75,6 +75,59 @@ public:
         float timeOfFlight;
     };
 
+    struct DebugSnapshot
+    {
+        uint32_t sequence = 0;
+        uint32_t aimDataTimestamp = 0;
+        uint32_t odometryTimestamp = 0;
+        uint32_t solveDtMicroseconds = 0;
+        uint32_t totalSolveMicroseconds = 0;
+        uint32_t vacuumSolveMicroseconds = 0;
+        uint32_t dragSolveMicroseconds = 0;
+        bool cvOnline = false;
+        bool aimDataUpdated = false;
+        bool useDragCorrection = false;
+        bool vacuumSolutionFound = false;
+        bool dragSolutionFound = false;
+        float launchSpeed = 0.0f;
+        float latencyCompensationSeconds = 0.0f;
+        float aimPositionX = 0.0f;
+        float aimPositionY = 0.0f;
+        float aimPositionZ = 0.0f;
+        float turretPositionX = 0.0f;
+        float turretPositionY = 0.0f;
+        float turretPositionZ = 0.0f;
+        float relativeTargetX = 0.0f;
+        float relativeTargetY = 0.0f;
+        float relativeTargetZ = 0.0f;
+        float projectedTargetX = 0.0f;
+        float projectedTargetY = 0.0f;
+        float projectedTargetZ = 0.0f;
+        float targetVelocityX = 0.0f;
+        float targetVelocityY = 0.0f;
+        float targetVelocityZ = 0.0f;
+        float horizontalDistance = 0.0f;
+        float reynoldsNumber = 0.0f;
+        float dragCoefficient = 0.0f;
+        float dragAccelerationScale = 0.0f;
+        float dragRate = 0.0f;
+        float dragRemainingHorizontalVelocityRatio = 0.0f;
+        float dragHorizontalVelocity = 0.0f;
+        float dragEstimatedTimeOfFlight = 0.0f;
+        float vacuumPitch = 0.0f;
+        float vacuumYaw = 0.0f;
+        float vacuumTimeOfFlight = 0.0f;
+        float vacuumDistance = 0.0f;
+        float dragPitch = 0.0f;
+        float dragYaw = 0.0f;
+        float dragTimeOfFlight = 0.0f;
+        float dragDistance = 0.0f;
+        float deltaPitch = 0.0f;
+        float deltaYaw = 0.0f;
+        float deltaTimeOfFlight = 0.0f;
+        float deltaDistance = 0.0f;
+    };
+
     /**
      * Parameter to pass into `tap::algorithms::ballistics::findTargetProjectileIntersection`. This
      * function is an iterative ballistics solver, so this represents how many iterations to
@@ -127,7 +180,8 @@ public:
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID,
-        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
+        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr,
+        bool useDragCorrection = true);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -147,7 +201,7 @@ private:
     const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
-    aruwsrc::communication::rtt::RttTelemetry *telemetry;
+    const bool useDragCorrection;
     modm::Vector3f turretOrigin;
 
     uint32_t lastAimDataTimestamp = 0;
@@ -157,6 +211,7 @@ private:
 
 public:
     const uint8_t turretID;
+    DebugSnapshot debug = {};
 };
 }  // namespace aruwsrc::algorithms
 
