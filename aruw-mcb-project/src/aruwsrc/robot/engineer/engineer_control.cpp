@@ -129,11 +129,10 @@ aruwsrc::communication::mcb_lite::VirtualCanEncoder turretPitchEncoder(
     1.0f,
     PITCH_TURRET_ENCODER_HOME);
 
-aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor pitchTurretMotor(
+tap::motor::DjiMotor pitchTurretMotor(
     drivers(),
     PITCH_MOTOR_ID,
     tap::can::CanBus::CAN_BUS1,
-    &drivers()->mcbLite,
     false,
     "Pitch Turret",
     false,
@@ -151,13 +150,13 @@ tap::motor::DjiMotor yawTurretMotor(
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508* YAW_TURRET_GEAR_RATIO,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
-/// @TODO: make the turretMCB a MCB lite
+aruwsrc::control::turret::TurretMotor pitchEngTurretMotor(&pitchTurretMotor, PITCH_MOTOR_CONFIG);
+aruwsrc::control::turret::TurretMotor yawEngTurretMotor(&yawTurretMotor, YAW_MOTOR_CONFIG);
+
 EngineerTurretSubsystem engTurret(
     drivers(),
-    &pitchTurretMotor,
-    &yawTurretMotor,
-    PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
+    pitchEngTurretMotor,
+    yawEngTurretMotor,
     &drivers()->mcbLite.imu);
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
@@ -243,33 +242,30 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeStorageLimit(
 LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
 
 // furthest wrist motor from end effector
-aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor wristMotorOne(
+tap::motor::DjiMotor wristMotorOne(
     drivers(),
     aruwsrc::engineer::WRIST_MOTOR_1_ID,
     aruwsrc::engineer::CAN_BUS_WRIST,
-    &drivers()->mcbLite,
     false,
     "Wrist Motor 1",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006* WRIST_MOTOR_1_GEAR_RATIO);
 
 // middle wrist motor
-aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor wristMotorTwo(
+tap::motor::DjiMotor wristMotorTwo(
     drivers(),
     aruwsrc::engineer::WRIST_MOTOR_2_ID,
     aruwsrc::engineer::CAN_BUS_WRIST,
-    &drivers()->mcbLite,
     true,
     "Wrist Motor 2",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006* WRIST_MOTOR_2_GEAR_RATIO);
 
 // closest wrist motor to end effector
-aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor wristMotorThree(
+tap::motor::DjiMotor wristMotorThree(
     drivers(),
     aruwsrc::engineer::WRIST_THETA3_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_WRIST,
-    &drivers()->mcbLite,
     false,
     "Wrist Theta3 Motor",
     false,
@@ -279,25 +275,23 @@ aruwsrc::communication::mcb_lite::VirtualCanEncoder wristEncoderTheta1(
     drivers(),
     aruwsrc::engineer::WRIST_THETA1_ENCODER_ID,
     &drivers()->mcbLite,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    aruwsrc::engineer::CAN_BUS_WRIST,
     false,
     1,
     WRIST_HOME_THETA1);
 
-aruwsrc::communication::mcb_lite::VirtualCanEncoder wristEncoderTheta2(
+tap::encoder::CanEncoder wristEncoderTheta2(
     drivers(),
     aruwsrc::engineer::WRIST_THETA2_ENCODER_ID,
-    &drivers()->mcbLite,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    aruwsrc::engineer::CAN_BUS_WRIST,
     false,
     1,
     WRIST_HOME_THETA2);
 
-aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor extensionMotor(
+tap::motor::DjiMotor extensionMotor(
     drivers(),
     aruwsrc::engineer::EXTENSION_MOTOR_ID,
     aruwsrc::engineer::CAN_BUS_EXTENSION,
-    &drivers()->mcbLite,
     true,
     "Extension Motor",
     false,
@@ -605,10 +599,10 @@ void initializeSubsystems()
     rightSuckSubsystem.initialize();
     transformSubsystem.initialize();
     odometrySubsystem.initialize();
-    // clientDicsplay.initialize();
     parallelOmniOne.initialize();
     parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
+    // clientDicsplay.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/

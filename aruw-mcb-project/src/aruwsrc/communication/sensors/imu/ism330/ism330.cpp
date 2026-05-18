@@ -70,6 +70,20 @@ void ISM330::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 #endif
 }
 
+AbstractIMU::ImuData addImuMeasurementData(
+    AbstractIMU::ImuData sumImuData,
+    AbstractIMU::ImuData curImuData)
+{
+    sumImuData.accG = sumImuData.accG + curImuData.accG;
+    sumImuData.accOffsetRaw = sumImuData.accOffsetRaw + curImuData.accOffsetRaw;
+    sumImuData.accRaw = sumImuData.accRaw + curImuData.accRaw;
+    sumImuData.gyroOffsetRaw = sumImuData.gyroOffsetRaw + curImuData.gyroOffsetRaw;
+    sumImuData.gyroRadPerSec = sumImuData.gyroRadPerSec + curImuData.gyroRadPerSec;
+    sumImuData.gyroRaw = sumImuData.gyroRaw + curImuData.gyroRaw;
+    sumImuData.temperature = sumImuData.temperature + curImuData.temperature;
+    return sumImuData;
+}
+
 bool ISM330::read()
 {
 #ifndef PLATFORM_HOSTED
@@ -109,10 +123,10 @@ bool ISM330::read()
             PT_CALL(Board::GenSpiMaster::transfer(&tx, &rx, 1));
             ismNssHigh();
             // zero out stuff
-            imuData.gyroRaw = {0, 0, 0};
-            imuData.accRaw = {0, 0, 0};
-            imuData.accG = {0, 0, 0};
-            imuData.gyroRadPerSec = {0, 0, 0};
+            curImuData.gyroRaw = {0, 0, 0};
+            curImuData.accRaw = {0, 0, 0};
+            curImuData.accG = {0, 0, 0};
+            curImuData.gyroRadPerSec = {0, 0, 0};
             // Device not connected
             if (imuState != ImuState::IMU_NOT_CONNECTED)
             {
@@ -132,7 +146,7 @@ bool ISM330::read()
         PT_CALL(Board::GenSpiMaster::transfer(txBuff, rxBuff, READ_LENGTH));
         ismNssHigh();
 
-        imuData.temperature = tempValueToCelsius(rxBuff);
+        curImuData.temperature = tempValueToCelsius(rxBuff);
         gyroX = gyroValueToRadPerSec(rxBuff + 2);
         gyroY = gyroValueToRadPerSec(rxBuff + 4);
         gyroZ = gyroValueToRadPerSec(rxBuff + 6);
@@ -141,15 +155,21 @@ bool ISM330::read()
         accY = accelValueToMeterPerSec(rxBuff + 10);
         accZ = accelValueToMeterPerSec(rxBuff + 12);
 
-        imuData.gyroRaw = {gyroX, gyroY, gyroZ};
-        imuData.accRaw = {accX, accY, accZ};
+        curImuData.gyroRaw = {gyroX, gyroY, gyroZ};
+        curImuData.accRaw = {accX, accY, accZ};
 
-        applyMountingTransformToRaw(imuData);
+        applyMountingTransformToRaw(curImuData);
 
-        imuData.gyroRadPerSec = imuData.gyroRaw - imuData.gyroOffsetRaw;
-        imuData.accG = imuData.accRaw - imuData.accOffsetRaw;
+        curImuData.gyroRadPerSec = curImuData.gyroRaw - curImuData.gyroOffsetRaw;
+        curImuData.accG = curImuData.accRaw - curImuData.accOffsetRaw;
 
         prevIMUDataReceivedTime = tap::arch::clock::getTimeMicroseconds();
+        sampleCounter++;
+        sumImuData = addImuMeasurementData(sumImuData, curImuData);
+        if (sampleCounter >= MAX_NUM_SAMPLES)
+        {
+            updateImuMeasurement();
+        }
 
         if (imuState == ImuState::IMU_NOT_CONNECTED)
         {

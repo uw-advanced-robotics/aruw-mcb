@@ -21,6 +21,7 @@
 
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/drivers.hpp"
+#include "tap/mock/dji_motor_mock.hpp"
 
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
@@ -44,27 +45,26 @@ class TurretUserWorldRelativeCommandTest : public Test
 {
 protected:
     TurretUserWorldRelativeCommandTest()
-        : turret(&drivers),
+        : pitchMotorMock(&pitchMotorDjiMock),
+          yawMotorMock(&pitchMotorDjiMock),
+          turret(&drivers, pitchMotorMock, yawMotorMock, nullptr),
           controlOperatorInterface(&drivers),
           worldToTurret(Transform::identity()),
           turretMCBCanCommBus1(&drivers, tap::can::CanBus::CAN_BUS1),
-          chassisFramePitchTurretController(turret.pitchMotor, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
-          worldFrameYawChassisImuController(
-              drivers,
-              turret.yawMotor,
-              {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          chassisFramePitchTurretController(pitchMotorMock, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
+          worldFrameYawChassisImuController(drivers, yawMotorMock, {1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           posPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           velPid({1, 0, 0, 0, 1, 1, 0, 1, 0, 0}),
           worldFramePitchTurretImuController(
               worldToTurret,
               turretMCBCanCommBus1,
-              turret.pitchMotor,
+              pitchMotorMock,
               posPid,
               velPid),
           worldFrameYawTurretImuController(
               worldToTurret,
               turretMCBCanCommBus1,
-              turret.yawMotor,
+              yawMotorMock,
               posPid,
               velPid),
           turretCmd(
@@ -86,23 +86,24 @@ protected:
 
     void SetUp() override
     {
-        ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
+        ON_CALL(yawMotorMock, getChassisFrameMeasuredAngle)
             .WillByDefault(ReturnRef(currentYawValue));
-        ON_CALL(turret.pitchMotor, getChassisFrameMeasuredAngle)
+        ON_CALL(pitchMotorMock, getChassisFrameMeasuredAngle)
             .WillByDefault(ReturnRef(currentPitchValue));
-        ON_CALL(turret.yawMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
-        ON_CALL(turret.pitchMotor, isOnline).WillByDefault(ReturnPointee(&turretOnline));
+        ON_CALL(yawMotorMock, isOnline).WillByDefault(ReturnPointee(&turretOnline));
+        ON_CALL(pitchMotorMock, isOnline).WillByDefault(ReturnPointee(&turretOnline));
         ON_CALL(turretMCBCanCommBus1, isConnected)
             .WillByDefault(ReturnPointee(&turretMcbCanCommConnected));
-        ON_CALL(turret.yawMotor, getChassisFrameSetpoint)
-            .WillByDefault(ReturnPointee(&yawSetpoint));
-        ON_CALL(turret.pitchMotor, getChassisFrameSetpoint)
+        ON_CALL(yawMotorMock, getChassisFrameSetpoint).WillByDefault(ReturnPointee(&yawSetpoint));
+        ON_CALL(pitchMotorMock, getChassisFrameSetpoint)
             .WillByDefault(ReturnPointee(&pitchSetpoint));
-        ON_CALL(turret.yawMotor, getConfig).WillByDefault(ReturnRef(config));
-        ON_CALL(turret.pitchMotor, getConfig).WillByDefault(ReturnRef(config));
     }
 
     tap::Drivers drivers;
+    NiceMock<tap::mock::MotorInterfaceMock> pitchMotorDjiMock;
+    NiceMock<tap::mock::MotorInterfaceMock> yawMotorDjiMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
     NiceMock<TurretSubsystemMock> turret;
     NiceMock<ControlOperatorInterfaceMock> controlOperatorInterface;
     Transform worldToTurret;
@@ -120,7 +121,6 @@ protected:
     WrappedFloat pitchSetpoint;
     bool turretOnline = false;
     bool turretMcbCanCommConnected = false;
-    TurretMotorConfig config = {};
 };
 
 TEST_F(TurretUserWorldRelativeCommandTest, isReady_true_if_turret_online_isFinished_opposite)
@@ -168,8 +168,8 @@ TEST_F(TurretUserWorldRelativeCommandTest, end_doesnt_set_des_out_when_no_cmds_s
 {
     turretOnline = true;
 
-    EXPECT_CALL(turret.yawMotor, setMotorOutput(0)).Times(0);
-    EXPECT_CALL(turret.pitchMotor, setMotorOutput(0)).Times(0);
+    EXPECT_CALL(yawMotorMock, setMotorOutput(0)).Times(0);
+    EXPECT_CALL(pitchMotorMock, setMotorOutput(0)).Times(0);
 
     turretCmd.end(true);
 }
@@ -180,8 +180,8 @@ TEST_F(
 {
     turretOnline = true;
 
-    EXPECT_CALL(turret.pitchMotor, setMotorOutput(0)).Times(2);
-    EXPECT_CALL(turret.yawMotor, setMotorOutput(0)).Times(2);
+    EXPECT_CALL(pitchMotorMock, setMotorOutput(0)).Times(2);
+    EXPECT_CALL(yawMotorMock, setMotorOutput(0)).Times(2);
 
     turretMcbCanCommConnected = false;
     turretCmd.initialize();
