@@ -39,8 +39,7 @@ static constexpr uint8_t NUM_TURRETS = 1;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
-static constexpr float DAMIAO_4310_VELOCITY_KP_RAD_PER_SEC =
-    40.0f * 60.0f / M_TWOPI;
+static constexpr float DAMIAO_4310_VELOCITY_KP_RAD_PER_SEC = 40.0f * 60.0f / M_TWOPI;
 static constexpr float DAMIAO_4310_MAX_OUTPUT_MILLI_NM = 6000.0f;
 
 static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS1;
@@ -102,8 +101,8 @@ static constexpr uint32_t PITCH_ENCODER_STRAIGHT_DOWN_POSITION =
      PITCH_ENCODER_OFFSET_SHIFT) %
     tap::motor::DjiMotorEncoder::ENC_RESOLUTION;
 static constexpr uint32_t PITCH_ENCODER_IMU_CALIBRATION_POSITION =
-    (PITCH_ENCODER_CURRENT_IMU_CALIBRATION_POSITION +
-     tap::motor::DjiMotorEncoder::ENC_RESOLUTION - PITCH_ENCODER_OFFSET_SHIFT) %
+    (PITCH_ENCODER_CURRENT_IMU_CALIBRATION_POSITION + tap::motor::DjiMotorEncoder::ENC_RESOLUTION -
+     PITCH_ENCODER_OFFSET_SHIFT) %
     tap::motor::DjiMotorEncoder::ENC_RESOLUTION;
 static constexpr uint32_t PITCH_ENCODER_MIN_POSITION =
     (PITCH_ENCODER_CURRENT_MIN_POSITION + tap::motor::DjiMotorEncoder::ENC_RESOLUTION -
