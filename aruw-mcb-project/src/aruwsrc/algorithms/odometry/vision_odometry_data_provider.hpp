@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -17,14 +17,24 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "aruwsrc/robot/engineer/turret/engineer_turret_subsystem.hpp"
+#ifndef VISION_ODOMETRY_DATA_PROVIDER_HPP_
+#define VISION_ODOMETRY_DATA_PROVIDER_HPP_
 
-#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "modm/math/geometry/location_2d.hpp"
 
-namespace aruwsrc::engineer
+namespace aruwsrc::algorithms::odometry
 {
-float EngineerTurretSubsystem::getWorldYaw() const { return getIMU()->getYaw(); }
+class VisionOdometryDataProvider
+{
+public:
+    virtual ~VisionOdometryDataProvider() = default;
 
-float EngineerTurretSubsystem::getWorldPitch() const { return getIMU()->getPitch(); }
+    virtual modm::Location2D<float> getVisionCurrentLocation2D() const = 0;
 
-}  // namespace aruwsrc::engineer
+    virtual modm::Vector2f getVisionCurrentVelocity2D() const = 0;
+
+    virtual float getVisionYaw() const = 0;
+};
+}  // namespace aruwsrc::algorithms::odometry
+
+#endif  // VISION_ODOMETRY_DATA_PROVIDER_HPP_

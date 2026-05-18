@@ -54,7 +54,7 @@ public:
     static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
     static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
 
-#if defined(TARGET_HERO_ZERO) && not defined(PLATFORM_HOSTED) && not defined(ENV_UNIT_TESTS)
+#if defined(TARGET_HERO_NEPTUNE) && not defined(PLATFORM_HOSTED) && not defined(ENV_UNIT_TESTS)
     static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_NORMAL = 5.0f;
     static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_LOW_DPI = 0.1f;
     /**
@@ -128,14 +128,14 @@ public:
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    mockable float getTurretYawInput(uint8_t turretID);
+    virtual float getTurretYawInput(uint8_t turretID);
 
     /**
      * @returns the value used for turret pitch rotation, between about -1 and 1
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    mockable float getTurretPitchInput(uint8_t turretID);
+    virtual float getTurretPitchInput(uint8_t turretID);
 
     /**
      * @returns the value used to scale turret yaw movement from horizontal movement.
@@ -151,7 +151,7 @@ public:
      * @returns the value used for sentiel drive speed, between
      *      [-USER_STICK_SENTRY_DRIVE_SCALAR, USER_STICK_SENTRY_DRIVE_SCALAR].
      */
-    mockable float getSentrySpeedInput();
+    virtual float getSentrySpeedInput();
 
 protected:
     tap::Drivers* drivers;

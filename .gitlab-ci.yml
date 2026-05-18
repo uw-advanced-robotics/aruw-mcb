@@ -87,6 +87,8 @@ before_script:
 
     - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
 
+    - python3 ./check_namespace_rule.py -i "*_constants.hpp" old-indicators create_rtt_error.hpp 2025engineer -rn robot
+
     - ./taproot-scripts/check_taproot_submodule.sh ./aruw-mcb-project ./taproot "release develop"
   only: *verification_only
   except: *verification_except
@@ -272,27 +274,27 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: HERO_ZERO
+    ROBOT: HERO_NEPTUNE
 
 "Hero: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: HERO_ZERO
+    ROBOT: HERO_NEPTUNE
 
-# Sentry (Beehive) build
+# Sentry (Achlys) build
 
-"Sentry: MCB Build":
+"Sentry Achlys: MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SENTRY_ECLIPSE
+    ROBOT: SENTRY_ACHLYS
 
-"Sentry: Test Build":
+"Sentry Achlys: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SENTRY_ECLIPSE
+    ROBOT: SENTRY_ACHLYS
 
 # Dart Build
 

@@ -37,11 +37,26 @@ public:
     virtual modm::Vector2f getChassisVelocity2d() const = 0;
 
     /**
+     * @return The vision-facing chassis velocity estimate. By default this matches the standard
+     * chassis velocity accessor.
+     */
+    virtual modm::Vector2f getVisionChassisVelocity2d() const { return getChassisVelocity2d(); }
+
+    /**
      * @return The last time that odometry was computed (in microseconds).
      */
     virtual uint32_t getLastComputedOdometryTime() const = 0;
 
     virtual const tap::algorithms::transforms::Transform& getWorldToChassis() const = 0;
+
+    /**
+     * @return The vision-facing world-to-chassis pose estimate. By default this matches the
+     * standard chassis pose accessor.
+     */
+    virtual const tap::algorithms::transforms::Transform& getVisionWorldToChassis() const
+    {
+        return getWorldToChassis();
+    }
 
     virtual const tap::algorithms::transforms::Transform& getWorldToTurret(
         uint8_t turretID) const = 0;

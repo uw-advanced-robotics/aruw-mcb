@@ -19,6 +19,8 @@
 
 #include "plate_hit_tracker.hpp"
 
+#include <aruwsrc/ref_system_constants.hpp>
+
 namespace aruwsrc::algorithms
 {
 PlateHitTracker::PlateHitTracker(tap::Drivers* drivers)
@@ -71,7 +73,7 @@ void PlateHitTracker::update()
         {
             lastHitData.projectileType = ProjectileType::COLLISION;
         }
-        else if (damage >= 90)
+        else if (damage >= aruwsrc::constants::DAMAGE_42MM)
         {
             lastHitData.projectileType = ProjectileType::_42_MM;
         }

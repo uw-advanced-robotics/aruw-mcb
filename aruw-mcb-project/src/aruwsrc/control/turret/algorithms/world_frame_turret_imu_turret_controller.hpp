@@ -40,13 +40,13 @@ class TurretMotor;
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * World frame turret yaw controller. Requires that a development board be mounted rigidly on the
+ * World frame turret axis controller. Requires that a development board be mounted rigidly on the
  * turret and connected via the `TurretMCBCanComm` class. The development board's IMU is used to
  * determine the turret's world frame coordinates directly, making this controller better than the
  * `WorldFrameChassisImuTurretController`.
  *
  * Runs a cascade PID controller (position PID output feeds into velocity PID controller, velocity
- * PID controller is desired motor output) to control the turret yaw.
+ * PID controller is desired motor output) to control the turret axis.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
@@ -64,7 +64,7 @@ public:
      */
     WorldFrameTurretImuCascadePidTurretController(
         const transforms::Transform &worldToTurret,
-        const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
+        const tap::communication::sensors::imu::AbstractIMU &turretImu,
         TurretMotor &turretMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid,
@@ -76,7 +76,7 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The pitch desired setpoint in the world frame.
      */
-    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
+    void runController(const float dt, const WrappedFloat desiredSetpoint) final;
 
     /// Sets the world frame pitch angle setpoint, refer to top level documentation for more
     /// details.
@@ -99,7 +99,7 @@ public:
 
 private:
     const transforms::Transform &worldToTurret;
-    const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm;
+    const tap::communication::sensors::imu::AbstractIMU &turretImu;
 
     SmoothPid &positionPid;
     SmoothPid &velocityPid;

@@ -32,7 +32,10 @@ CubeStorageSubsystem::CubeStorageSubsystem(
     TriggerInterface &trigger,
     Config config)
     : Subsystem(drivers),
-      TriggerHomedJointSubsystem(drivers, motor, trigger, config)
+      TriggerHomedJointSubsystem(drivers, motor, trigger, config),
+      currentCube(CubeOptions::ERROR),
+      hasCube{false, false},
+      cubeStoresToCube{Transform(0, 0, 0, 0, 0, 0), Transform(0, 0, 0, 0, 0, 0)}
 {
 }
 
@@ -81,10 +84,6 @@ CubeStorageSubsystem::CubeOptions CubeStorageSubsystem::getCubeToRemove()
     }
 }
 
-/**
- * sets the setpoint based on the current cube position
- * @return true if set sucessfully, false otherwise
- */
 bool CubeStorageSubsystem::setSetpointToCurrentCube()
 {
     switch (currentCube)
@@ -100,10 +99,6 @@ bool CubeStorageSubsystem::setSetpointToCurrentCube()
     }
 }
 
-/* tell subsystem that you have added a cube
- * @param CubeOptions which cube you are adding
- * @return true for success, false for failure
- */
 bool CubeStorageSubsystem::addCube()
 {
     if (currentCube != CubeOptions::ERROR)
@@ -114,10 +109,6 @@ bool CubeStorageSubsystem::addCube()
     return false;
 }
 
-/* tell subsystem that you have added a cube
- * @param CubeOptions which cube you are adding
- * @return true for success, false for failure
- */
 bool CubeStorageSubsystem::removeCube()
 {
     if (currentCube != CubeOptions::ERROR)
@@ -128,39 +119,21 @@ bool CubeStorageSubsystem::removeCube()
     return false;
 }
 
-bool CubeStorageSubsystem::storeWristPos(Transform newWristPosition)
+bool CubeStorageSubsystem::storeActiveCubeStoreToCube(Transform cubeStoreToCube)
 {
-    if (currentCube != CubeOptions::ERROR)
+    if (currentCube != CubeOptions::ERROR && !hasCube[currentCube])
     {
-        if (!hasCube[currentCube])
-        {
-            wristPos[currentCube] = newWristPosition;
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        cubeStoresToCube[currentCube] = cubeStoreToCube;
+        return true;
     }
     return false;
 }
 
-/**
- * @return wrist position for current cube position as a transform
- * if no current cube will return an empty transform
- */
-Transform CubeStorageSubsystem::getWristPos()
+Transform CubeStorageSubsystem::getActiveCubeStoreToCube()
 {
-    if (currentCube != CubeOptions::ERROR)
+    if (currentCube != CubeOptions::ERROR && hasCube[currentCube])
     {
-        if (hasCube[currentCube])
-        {
-            return wristPos[currentCube];
-        }
-        else
-        {
-            return Transform(0, 0, 0, 0, 0, 0);
-        }
+        return cubeStoresToCube[currentCube];
     }
     return Transform(0, 0, 0, 0, 0, 0);
 }

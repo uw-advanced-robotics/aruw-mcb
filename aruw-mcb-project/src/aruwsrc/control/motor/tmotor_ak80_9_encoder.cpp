@@ -61,11 +61,13 @@ void Tmotor_AK809Encoder::alignWith(EncoderInterface* other)
     this->position = other->getPosition();
 }
 
-void Tmotor_AK809Encoder::resetEncoderValue()
+void Tmotor_AK809Encoder::resetEncoderValue(float pos)
 {
-    encoderHomePosition = positionTicks + encoderHomePosition;
-    positionTicks = 0;
-    position.setUnwrappedValue(0);
+    int32_t newEncoderUnwrapped =
+        static_cast<int32_t>(pos / gearRatio / static_cast<float>(M_TWOPI) * encoderResolution);
+    encoderHomePosition += static_cast<int16_t>(positionTicks - newEncoderUnwrapped);
+    positionTicks = newEncoderUnwrapped;
+    position.setUnwrappedValue(pos);
 }
 
 bool Tmotor_AK809Encoder::isOnline() const
