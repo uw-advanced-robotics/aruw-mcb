@@ -319,13 +319,15 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         projectedAimPosData.xPos - worldToTurret.getX());
 
     // Determine active plate based on omega_total and estimated ToF
-    // This is the plate we think we can / want to hit
-    uint8_t activePlateIndex = tempState.determineActivePlate(
-        omegaTotal,
-        estimatedToF,
-        PLATE_WIDTH,
-        aimAngle,
-        projectedAimPosData.theta);
+    // At the time we expect the projectile to hit the robot, we want to choose the plate in a
+    // quadrant facing us. Ideally, the precise bounds of the quadrant shouldn't matter (it only
+    // affects specifically when we decide to target the next plate in between shot windows), but we
+    // could bias it towards the direction the plate arrives from if needed.
+    float desiredPlateQuadrantStart = omegaTotal > 0 ? -M_PI_4 : -M_PI_4;  // TODO: bias?
+    WrappedFloat aimLineToProjectedPlate0 =
+        WrappedFloat(projectedAimPosData.theta, 0, M_PI) - aimAngle + M_PI;
+    uint8_t activePlateIndex = static_cast<uint8_t>(
+        (aimLineToProjectedPlate0 - desiredPlateQuadrantStart).getWrappedValue() / M_PI_2);
 
     if (telemetry)
     {
