@@ -77,29 +77,7 @@ public:
         float timeOfFlight;
     };
 
-    struct DragComparison
-    {
-        bool dragSolutionFound = false;
-        float launchSpeed = 0.0f;
-        float latencyCompensationSeconds = 0.0f;
-        float targetPositionX = 0.0f;
-        float targetPositionY = 0.0f;
-        float targetPositionZ = 0.0f;
-        float targetVelocityX = 0.0f;
-        float targetVelocityY = 0.0f;
-        float targetVelocityZ = 0.0f;
-        float targetAccelerationX = 0.0f;
-        float targetAccelerationY = 0.0f;
-        float targetAccelerationZ = 0.0f;
-        float vacuumPitchAngle = 0.0f;
-        float vacuumYawAngle = 0.0f;
-        float vacuumTimeOfFlight = 0.0f;
-        float vacuumDistance = 0.0f;
-        float dragPitchAngle = 0.0f;
-        float dragYawAngle = 0.0f;
-        float dragTimeOfFlight = 0.0f;
-        float dragDistance = 0.0f;
-    };
+    // DragComparison removed — debug struct is exposed elsewhere
 
     /**
      * Parameter to pass into `tap::algorithms::ballistics::findTargetProjectileIntersection`.
@@ -176,7 +154,7 @@ public:
      */
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
-    const DragComparison &getLastDragComparison() const { return lastDragComparison; }
+    // getLastDragComparison removed
 
 private:
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
@@ -191,7 +169,7 @@ private:
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
-    DragComparison lastDragComparison = {};
+    // lastDragComparison member removed
 
 public:
     const uint8_t turretID;

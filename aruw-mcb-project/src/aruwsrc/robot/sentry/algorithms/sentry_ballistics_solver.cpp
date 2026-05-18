@@ -71,7 +71,6 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
     if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
     {
         lastComputedSolution = std::nullopt;
-        lastDragComparison = {};
         return std::nullopt;
     }
 
@@ -124,18 +123,6 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
 
         lastComputedSolution = BallisticsSolution();
         lastComputedSolution->distance = targetState.position.getLength();
-        lastDragComparison = {};
-        lastDragComparison.launchSpeed = launchSpeed;
-        lastDragComparison.latencyCompensationSeconds = latencyCompensationSeconds;
-        lastDragComparison.targetPositionX = targetState.position.x;
-        lastDragComparison.targetPositionY = targetState.position.y;
-        lastDragComparison.targetPositionZ = targetState.position.z;
-        lastDragComparison.targetVelocityX = targetState.velocity.x;
-        lastDragComparison.targetVelocityY = targetState.velocity.y;
-        lastDragComparison.targetVelocityZ = targetState.velocity.z;
-        lastDragComparison.targetAccelerationX = targetState.acceleration.x;
-        lastDragComparison.targetAccelerationY = targetState.acceleration.y;
-        lastDragComparison.targetAccelerationZ = targetState.acceleration.z;
 
         const bool vacuumSolutionFound = ballistics::findTargetProjectileIntersection(
             targetState,
@@ -152,35 +139,37 @@ std::optional<SentryBallisticsSolver::BallisticsSolution> SentryBallisticsSolver
             return std::nullopt;
         }
 
-        lastDragComparison.vacuumPitchAngle = lastComputedSolution->pitchAngle;
-        lastDragComparison.vacuumYawAngle = lastComputedSolution->yawAngle;
-        lastDragComparison.vacuumTimeOfFlight = lastComputedSolution->timeOfFlight;
-        lastDragComparison.vacuumDistance = lastComputedSolution->distance;
-        lastDragComparison.dragPitchAngle = lastDragComparison.vacuumPitchAngle;
-        lastDragComparison.dragYawAngle = lastDragComparison.vacuumYawAngle;
-        lastDragComparison.dragTimeOfFlight = lastDragComparison.vacuumTimeOfFlight;
-        lastDragComparison.dragDistance = lastDragComparison.vacuumDistance;
+        float vacuumPitchAngle = lastComputedSolution->pitchAngle;
+        float vacuumYawAngle = lastComputedSolution->yawAngle;
+        float vacuumTimeOfFlight = lastComputedSolution->timeOfFlight;
+        float vacuumDistance = lastComputedSolution->distance;
+
+        float dragPitchAngle = vacuumPitchAngle;
+        float dragYawAngle = vacuumYawAngle;
+        float dragTimeOfFlight = vacuumTimeOfFlight;
+        float dragDistance = vacuumDistance;
+        bool dragSolutionFound = false;
 
         if (useDragCorrection)
         {
-            lastDragComparison.dragSolutionFound =
+            dragSolutionFound =
                 aruwsrc::algorithms::findTargetProjectileIntersectionWithSphereDrag(
                     targetState,
                     launchSpeed,
                     DRAG_FORWARD_KINEMATIC_PROJECTIONS,
-                    &lastDragComparison.dragPitchAngle,
-                    &lastDragComparison.dragYawAngle,
-                    &lastDragComparison.dragTimeOfFlight,
+                    &dragPitchAngle,
+                    &dragYawAngle,
+                    &dragTimeOfFlight,
                     turretPitchOffset,
-                    &lastDragComparison.dragDistance);
+                    &dragDistance);
         }
 
-        if (lastDragComparison.dragSolutionFound)
+        if (dragSolutionFound)
         {
-            lastComputedSolution->pitchAngle = lastDragComparison.dragPitchAngle;
-            lastComputedSolution->yawAngle = lastDragComparison.dragYawAngle;
-            lastComputedSolution->timeOfFlight = lastDragComparison.dragTimeOfFlight;
-            lastComputedSolution->distance = lastDragComparison.dragDistance;
+            lastComputedSolution->pitchAngle = dragPitchAngle;
+            lastComputedSolution->yawAngle = dragYawAngle;
+            lastComputedSolution->timeOfFlight = dragTimeOfFlight;
+            lastComputedSolution->distance = dragDistance;
         }
     }
 
