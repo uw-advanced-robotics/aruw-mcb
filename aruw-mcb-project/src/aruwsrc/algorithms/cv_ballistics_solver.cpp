@@ -34,6 +34,7 @@
 using namespace tap::algorithms;
 using namespace modm;
 
+using tap::algorithms::WrappedFloat;
 using tap::algorithms::ballistics::SecondOrderKinematicState;
 
 namespace aruwsrc::algorithms
@@ -203,11 +204,12 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         //   forward)
         bool omegaBelowThreshold = fabsf(projectedAimPosData.omega) < OMEGA_THRESHOLD;
 
-        if (hasValidPulseSolution && !omegaBelowThreshold )
+        if (hasValidPulseSolution && !omegaBelowThreshold && false)
         {
             // Recompute the aim solution so pitch/yaw can track vertical motion, but keep the
             // existing pulse timing window so shot timing remains stable.
-            float activePlateHeight = projectedAimPosData.plateHeights[lastComputedSolution->activePlateIndex];
+            float activePlateHeight =
+                projectedAimPosData.plateHeights[lastComputedSolution->activePlateIndex];
 
             SecondOrderKinematicState robotCenterState(
                 {projectedAimPosData.xPos - worldToTurret.getX(),
@@ -234,7 +236,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
                 if (telemetry)
                 {
-                    uint64_t timeRemaining = lastComputedSolution->shotWindowEnd - currentTimeMicros;
+                    uint64_t timeRemaining =
+                        lastComputedSolution->shotWindowEnd - currentTimeMicros;
                     telemetry->logSignal(
                         "ballistics:pulse_window_remaining_us",
                         static_cast<float>(timeRemaining));
@@ -316,6 +319,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         projectedAimPosData.xPos - worldToTurret.getX());
 
     // Determine active plate based on omega_total and estimated ToF
+    // This is the plate we think we can / want to hit
     uint8_t activePlateIndex = tempState.determineActivePlate(
         omegaTotal,
         estimatedToF,
@@ -386,32 +390,15 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     float activePlateAngle = projectedAimPosData.theta + activePlateIndex * M_PI_2;
 
     // Angular distance from plate to aim line
-    float angularOffset = activePlateAngle - aimAngle + M_PI;
+    WrappedFloat angularOffset = WrappedFloat(activePlateAngle, -M_PI, M_PI) - aimAngle + M_PI;
 
-    // Normalize to [-π, π]
-    angularOffset = tap::algorithms::WrappedFloat(angularOffset, -M_PI, M_PI).getWrappedValue();
-
-    // Calculate time for plate center to cross aim line
-    float timeToPlateCenterCrossing;
     if (omegaTotal > 0)
     {
-        // Counterclockwise rotation
-        if (angularOffset <= 0)
-        {
-            // Plate is behind, add full rotation
-            angularOffset += 2.0f * M_PI;
-        }
+        angularOffset = WrappedFloat(-angularOffset.getWrappedValue(), -M_PI, M_PI);
     }
-    else
-    {
-        // Clockwise rotation
-        if (angularOffset >= 0)
-        {
-            // Plate is ahead, subtract full rotation
-            angularOffset -= 2.0f * M_PI;
-        }
-    }
-    timeToPlateCenterCrossing = angularOffset / omegaTotal;
+
+    // Calculate time for plate center to cross aim line
+    float timeToPlateCenterCrossing = angularOffset.getWrappedValue() / omegaTotal;
 
     // Time for close edge to reach aim line
     float halfWidthTime = (plateAngularWidth / 2.0f) / fabsf(omegaTotal);
