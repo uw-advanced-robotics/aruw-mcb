@@ -49,10 +49,36 @@ public:
     };
     static constexpr float MAX_ALLOWED_FLIGHT_TIME_SECS = 2.f;
 
+    struct DebugInfo
+    {
+        uint8_t turretId = 0;
+        uint8_t launchInclination = static_cast<uint8_t>(LaunchInclination::NO_TARGET);
+        bool aimDataUpdated = false;
+        bool timingDataUpdated = false;
+        bool ballisticsSolutionFound = false;
+        bool pulseEstimationUsed = false;
+        bool validFlightTime = false;
+        bool inShotWindow = false;
+        uint32_t aimTimestamp = 0;
+        uint32_t pulseOffset = 0;
+        uint32_t pulseInterval = 0;
+        uint32_t pulseDuration = 0;
+        float timeOfFlight = 0.0f;
+        uint64_t now = 0;
+        uint64_t effectiveFireTime = 0;
+        uint64_t shotWindowStart = 0;
+        uint64_t shotWindowEnd = 0;
+        int64_t countdownToShotWindowStart = 0;
+        int64_t countdownToShotWindowEnd = 0;
+        int64_t offsetInFiringWindow = 0;
+        uint32_t maxHitTimeError = 0;
+    };
+
 private:
     uint32_t agitatorTypicalDelayMicroseconds;
     aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
     aruwsrc::algorithms::CvBallisticsSolver *ballistics;
+    DebugInfo debugInfo;
 
 public:
     AutoAimLaunchTimer(
@@ -72,6 +98,8 @@ public:
      * @return the computed LaunchInclination for time "now"
      */
     LaunchInclination getCurrentLaunchInclination(uint8_t turretId);
+
+    const DebugInfo &getDebugInfo() const { return debugInfo; }
 
 };  // class AutoAimLaunchTimer
 

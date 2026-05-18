@@ -203,18 +203,45 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         //   forward)
         bool omegaBelowThreshold = fabsf(projectedAimPosData.omega) < OMEGA_THRESHOLD;
 
-        if (hasValidPulseSolution && !omegaBelowThreshold && false)
+        if (hasValidPulseSolution && !omegaBelowThreshold )
         {
-            // Keep existing solution - fire window is still open and omega still high
-            // Don't recalculate, this prevents constantly changing target plates
-            if (telemetry)
+            // Recompute the aim solution so pitch/yaw can track vertical motion, but keep the
+            // existing pulse timing window so shot timing remains stable.
+            float activePlateHeight = projectedAimPosData.plateHeights[lastComputedSolution->activePlateIndex];
+
+            SecondOrderKinematicState robotCenterState(
+                {projectedAimPosData.xPos - worldToTurret.getX(),
+                 projectedAimPosData.yPos - worldToTurret.getY(),
+                 projectedAimPosData.zPos + activePlateHeight - worldToTurret.getZ()},
+                {projectedAimPosData.xVel - worldToTurret.getXVel(),
+                 projectedAimPosData.yVel - worldToTurret.getYVel(),
+                 projectedAimPosData.zVel},
+                {projectedAimPosData.xAcc, projectedAimPosData.yAcc, projectedAimPosData.zAcc});
+
+            BallisticsSolution updatedSolution = *lastComputedSolution;
+            updatedSolution.distance = robotCenterState.position.getLength();
+
+            if (ballistics::findTargetProjectileIntersection(
+                    robotCenterState,
+                    launchSpeed,
+                    NUM_FORWARD_KINEMATIC_PROJECTIONS,
+                    &updatedSolution.pitchAngle,
+                    &updatedSolution.yawAngle,
+                    &updatedSolution.timeOfFlight,
+                    turretPitchOffset))
             {
-                uint64_t timeRemaining = lastComputedSolution->shotWindowEnd - currentTimeMicros;
-                telemetry->logSignal(
-                    "ballistics:pulse_window_remaining_us",
-                    static_cast<float>(timeRemaining));
+                lastComputedSolution = updatedSolution;
+
+                if (telemetry)
+                {
+                    uint64_t timeRemaining = lastComputedSolution->shotWindowEnd - currentTimeMicros;
+                    telemetry->logSignal(
+                        "ballistics:pulse_window_remaining_us",
+                        static_cast<float>(timeRemaining));
+                }
+
+                return lastComputedSolution;
             }
-            return lastComputedSolution;
         }
         else
         {
@@ -359,7 +386,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     float activePlateAngle = projectedAimPosData.theta + activePlateIndex * M_PI_2;
 
     // Angular distance from plate to aim line
-    float angularOffset = activePlateAngle - aimAngle;
+    float angularOffset = activePlateAngle - aimAngle + M_PI;
 
     // Normalize to [-π, π]
     angularOffset = tap::algorithms::WrappedFloat(angularOffset, -M_PI, M_PI).getWrappedValue();
