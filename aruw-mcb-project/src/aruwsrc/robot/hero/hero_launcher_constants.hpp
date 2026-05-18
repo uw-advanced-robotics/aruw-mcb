@@ -53,7 +53,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
 static constexpr float LAUNCHER_PID_KP = 14.5106f;
-static constexpr float LAUNCHER_PID_KI = 31.6228f;
+static constexpr float LAUNCHER_PID_KI = 32.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
 static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
 static constexpr float LAUNCHER_PID_MAX_OUTPUT = 16'000.0f;
