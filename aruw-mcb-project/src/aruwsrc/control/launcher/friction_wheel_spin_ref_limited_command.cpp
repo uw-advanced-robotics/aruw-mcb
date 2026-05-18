@@ -23,7 +23,7 @@
 
 #include "modm/architecture/interface/assert.hpp"
 
-#include "launcher_constants.hpp"
+#include "constants/launcher_constants.hpp"
 
 namespace aruwsrc::control::launcher
 {

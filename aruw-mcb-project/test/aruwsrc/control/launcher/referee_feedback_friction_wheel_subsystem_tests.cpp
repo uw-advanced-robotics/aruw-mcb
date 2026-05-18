@@ -22,7 +22,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/control/launcher/launcher_constants.hpp"
+#include "aruwsrc/control/launcher/constants/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 
 using namespace aruwsrc;

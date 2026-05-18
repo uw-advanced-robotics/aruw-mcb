@@ -29,7 +29,7 @@
 
 #include "friction_wheel_subsystem.hpp"
 #include "launch_speed_predictor_interface.hpp"
-#include "launcher_constants.hpp"
+#include "constants/launcher_constants.hpp"
 
 namespace aruwsrc::control::launcher
 {

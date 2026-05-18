@@ -41,7 +41,7 @@
 #include "modm/math/filter/pid.hpp"
 
 #include "friction_wheel_test_command.hpp"
-#include "launcher_constants.hpp"
+#include "constants/launcher_constants.hpp"
 
 namespace aruwsrc
 {
