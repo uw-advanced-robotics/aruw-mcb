@@ -145,7 +145,8 @@ public:
         const float defaultLaunchSpeed,
         const uint8_t turretID,
         float turretPitchOffset,
-        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
+        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr,
+        float shotTimingLeadSeconds = 0.0f);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -166,6 +167,7 @@ private:
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
+    const float shotTimingLeadSeconds;
 
 public:
     const uint8_t turretID;

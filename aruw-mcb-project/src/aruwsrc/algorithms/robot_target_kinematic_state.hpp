@@ -126,13 +126,12 @@ struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinem
         float timeOfFlight,
         float plateWidth,
         float aimAngle,
-        float currentTheta) const
+        float currentTheta,
+        float shotTimingLeadSeconds = 0.0f) const
     {
-        // Minimum fire window duration to be considered valid (100ms)
-        constexpr float MIN_FIRE_WINDOW_S = 0.1f;
-
         uint8_t bestPlate = 0;
-        float bestTimeDifference = 1e9f;  // Large initial value
+        float bestFireWindowDistance = 1e9f;  // Large initial value
+        float bestTimeDifference = 1e9f;
         bool foundValidPlate = false;
 
         // Check each plate (0-3) to find one with a valid fire window
@@ -141,8 +140,9 @@ struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinem
             // Calculate actual angular position of plate i
             float plateAngle = currentTheta + i * M_PI_2;
 
-            // Angular distance from plate to aim line
-            float angularOffset = plateAngle - aimAngle;
+            // Angular distance from plate to the near-side aim line. The target center lies on
+            // aimAngle; the armor plate we can hit is on the side facing the turret.
+            float angularOffset = aimAngle + M_PI - plateAngle;
 
             // Normalize to [-π, π]
             while (angularOffset > M_PI) angularOffset -= 2.0f * M_PI;
@@ -176,17 +176,26 @@ struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinem
             // We need the far edge time to determine if the fire window is still open
             float plateAngularWidth = plateWidth / radius;
             float halfWidthTime = (plateAngularWidth / 2.0f) / fabsf(omegaTotal);
+            float timeToCloseEdge = timeToCenterEdge - halfWidthTime;
             float timeToFarEdge = timeToCenterEdge + halfWidthTime;
+            float fireWindowStart = timeToCloseEdge - timeOfFlight;
             float fireWindowEnd = timeToFarEdge - timeOfFlight;
 
-            // Only consider plates whose fire window hasn't closed yet
-            // (with minimum window requirement)
-            if (fireWindowEnd >= MIN_FIRE_WINDOW_S)
+            // Only consider plates whose fire window will still be open after the expected
+            // launch delay. The launch timer applies the exact final gate.
+            if (fireWindowEnd >= shotTimingLeadSeconds)
             {
+                float fireWindowDistance =
+                    (fireWindowStart <= shotTimingLeadSeconds)
+                        ? 0.0f
+                        : fireWindowStart - shotTimingLeadSeconds;
                 float timeDifference = fabsf(timeToCenterEdge - timeOfFlight);
-                if (!foundValidPlate || timeDifference < bestTimeDifference)
+                if (!foundValidPlate || fireWindowDistance < bestFireWindowDistance ||
+                    (fireWindowDistance == bestFireWindowDistance &&
+                     timeDifference < bestTimeDifference))
                 {
                     bestPlate = i;
+                    bestFireWindowDistance = fireWindowDistance;
                     bestTimeDifference = timeDifference;
                     foundValidPlate = true;
                 }

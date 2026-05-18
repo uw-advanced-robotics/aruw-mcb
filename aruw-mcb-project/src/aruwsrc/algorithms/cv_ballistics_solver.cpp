@@ -46,13 +46,15 @@ CvBallisticsSolver::CvBallisticsSolver(
     const float defaultLaunchSpeed,
     const uint8_t turretID,
     float turretPitchOffset,
-    aruwsrc::communication::rtt::RttTelemetry* telemetry)
+    aruwsrc::communication::rtt::RttTelemetry* telemetry,
+    float shotTimingLeadSeconds)
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
       worldToTurret(transformer.getWorldToTurret(turretID)),
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretPitchOffset(turretPitchOffset),
+      shotTimingLeadSeconds(shotTimingLeadSeconds),
       turretID(turretID),
       telemetry(telemetry)
 {
@@ -325,7 +327,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         estimatedToF,
         PLATE_WIDTH,
         aimAngle,
-        projectedAimPosData.theta);
+        projectedAimPosData.theta,
+        shotTimingLeadSeconds);
 
     if (telemetry)
     {
@@ -409,10 +412,17 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     // Shot window is when we should fire
     uint64_t currentTimeMicros = tap::arch::clock::getTimeMicroseconds();
 
-    // We need to fire early enough that projectile arrives during plate crossing
-    // Fire time = (plate crossing time) - (time of flight)
-    float fireWindowStart = timeToCloseEdge - solution.timeOfFlight;
-    float fireWindowEnd = timeToFarEdge - solution.timeOfFlight;
+    // We need to fire early enough that projectile arrives during plate crossing. The shot is timed
+    // against the near-side armor plate, not the robot center, so subtract the approximate time to
+    // reach the armor surface along the center aim line.
+    float pulseTimeOfFlight = solution.timeOfFlight - activePlateRadius / launchSpeed;
+    if (pulseTimeOfFlight < 0.0f)
+    {
+        pulseTimeOfFlight = 0.0f;
+    }
+    solution.timeOfFlight = pulseTimeOfFlight;
+    float fireWindowStart = timeToCloseEdge - pulseTimeOfFlight;
+    float fireWindowEnd = timeToFarEdge - pulseTimeOfFlight;
 
     // Clamp to future times only (can't fire in the past)
     float startOffsetSeconds = (fireWindowStart > 0.0f) ? fireWindowStart : 0.0f;

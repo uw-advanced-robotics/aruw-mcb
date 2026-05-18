@@ -328,12 +328,13 @@ StandardAndHeroTransformAdapter transformAdapter(transformer);
 
 CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
-    odometrySubsystem,
-    turret,
+    transformAdapter,
     frictionWheelSubsystem,
-    15.0f,                    // defaultLaunchSpeed
-    0,                        // turretID
-    &drivers()->rttTelemetry  // telemetry
+    15.0f,  // defaultLaunchSpeed
+    0,      // turretID
+    0,      // turretPitchOffset
+    &drivers()->rttTelemetry,
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS / 1'000'000.0f
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,

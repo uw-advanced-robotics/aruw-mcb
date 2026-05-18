@@ -302,7 +302,8 @@ CvBallisticsSolver ballisticsSolver(
     aruwsrc::control::launcher::LAUNCHER_SPEED,  // defaultLaunchSpeed
     0,                                           // turretID
     0,                                           // turretPitchOffset
-    &drivers()->rttTelemetry                     // telemetry
+    &drivers()->rttTelemetry,                    // telemetry
+    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS / 1'000'000.0f
 );
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
