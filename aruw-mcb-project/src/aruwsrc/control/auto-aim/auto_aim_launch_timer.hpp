@@ -51,13 +51,13 @@ public:
 
 private:
     uint32_t agitatorTypicalDelayMicroseconds;
-    aruwsrc::serial::VisionCoprocessor *visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
     aruwsrc::algorithms::OttoBallisticsSolver *ballistics;
 
 public:
     AutoAimLaunchTimer(
         uint32_t agitatorTypicalDelayMicroseconds,
-        aruwsrc::serial::VisionCoprocessor *visionCoprocessor,
+        aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
         aruwsrc::algorithms::OttoBallisticsSolver *ballistics);
 
     /**

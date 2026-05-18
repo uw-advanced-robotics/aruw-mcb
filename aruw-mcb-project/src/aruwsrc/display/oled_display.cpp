@@ -30,15 +30,23 @@ namespace display
 {
 OledDisplay::OledDisplay(
     tap::Drivers *drivers,
-    serial::VisionCoprocessor *visionCoprocessor,
-    can::TurretMCBCanComm *turretMCBCanCommBus1,
-    can::TurretMCBCanComm *turretMCBCanCommBus2,
-    aruwsrc::virtualMCB::MCBLite *mcbLite1,
-    aruwsrc::virtualMCB::MCBLite *mcbLite2,
-    can::capbank::CapacitorBank *capacitorBank)
+    communication::serial::VisionCoprocessor *visionCoprocessor,
+    communication::can::TurretMCBCanComm *turretMCBCanCommBus1,
+    communication::can::TurretMCBCanComm *turretMCBCanCommBus2,
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
+    communication::can::cap_bank::CapacitorBank *capacitorBank,
+    aruwsrc::communication::rtt::RttTelemetry *rttTelemetry)
     : display(),
       viewStack(&display),
-      buttonHandler(drivers),
+      buttonHandler(
+          drivers,
+          tap::gpio::Analog::Pin::OledJoystick
+#ifndef SSH1106_OLED
+          ,
+          buttonConfig
+#endif
+          ),
       splashScreen(
           &viewStack,
           drivers,
@@ -47,7 +55,8 @@ OledDisplay::OledDisplay(
           turretMCBCanCommBus2,
           mcbLite1,
           mcbLite2,
-          capacitorBank),
+          capacitorBank,
+          rttTelemetry),
       drivers(drivers)
 {
 }

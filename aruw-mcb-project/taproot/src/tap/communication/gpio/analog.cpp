@@ -38,11 +38,10 @@ void Analog::init()
     AnalogInPins::setAnalogInput();
 
     // Initial ADC/Timer setup
-    Adc1::connect<AnalogInPinS::In0, AnalogInPinT::In1, AnalogInPinU::In2, AnalogInPinV::In3, AnalogInPinOledJoystick::In6>();
+    Adc1::connect<AnalogInPinS::In0, AnalogInPinU::In2, AnalogInPinV::In3, AnalogInPinOledJoystick::In6>();
     Adc1::initialize<SystemClock, 22500000_Bd>();
 
     Adc1::setPinChannel<AnalogInPinS>();
-    Adc1::setPinChannel<AnalogInPinT>();
     Adc1::setPinChannel<AnalogInPinU>();
     Adc1::setPinChannel<AnalogInPinV>();
     Adc1::setPinChannel<AnalogInPinOledJoystick>();
@@ -60,8 +59,6 @@ uint16_t Analog::read(Pin pin) const
     {
         case Pin::S:
             return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinS>());
-        case Pin::T:
-            return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinT>());
         case Pin::U:
             return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinU>());
         case Pin::V:

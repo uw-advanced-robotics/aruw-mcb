@@ -59,6 +59,7 @@ public:
         B,
         C,
         D,
+        T,
         Button,
     };
 
@@ -71,6 +72,8 @@ public:
         F,
         G,
         H,
+        Y,
+        Z,
         Laser,
     };
 

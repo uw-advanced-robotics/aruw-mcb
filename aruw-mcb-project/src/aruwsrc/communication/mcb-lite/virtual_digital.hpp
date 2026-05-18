@@ -27,7 +27,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 class VirtualDigital : public tap::gpio::Digital
 {
@@ -81,6 +81,6 @@ private:
     bool hasNewData = false;
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif  // VIRTUAL_DIGITAL_HPP_

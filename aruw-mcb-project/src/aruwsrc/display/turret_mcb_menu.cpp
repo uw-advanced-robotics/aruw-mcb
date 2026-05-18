@@ -25,7 +25,7 @@ namespace aruwsrc::display
 {
 TurretMCBMenu::TurretMCBMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    aruwsrc::can::TurretMCBCanComm *turretMCBCanComm)
+    aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
       turretMCBCanComm(turretMCBCanComm)
 {
@@ -42,12 +42,14 @@ void TurretMCBMenu::draw()
             << "Limit switch depressed: " << turretMCBCanComm->getLimitSwitchDepressed()
             << modm::endl;
     display.printf(
-        "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\nPitch (deg): %.2f\nPitch Velocity (deg/s): "
-        "%.2f\n",
+        "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\n Z Accel (deg/s^2): %.2f\n"
+        "Pitch (deg): %.2f\nPitch Velocity (deg/s): %.2f\n X Accel (m/s^2): %.2f\n",
         static_cast<double>(modm::toDegree(turretMCBCanComm->getYaw())),
-        static_cast<double>(modm::toDegree(turretMCBCanComm->getYawVelocity())),
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getGz())),
+        static_cast<double>(turretMCBCanComm->getAz()),
         static_cast<double>(modm::toDegree(turretMCBCanComm->getPitch())),
-        static_cast<double>(modm::toDegree(turretMCBCanComm->getPitchVelocity())));
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getGy())),
+        static_cast<double>(turretMCBCanComm->getAx()));
 }
 
 void TurretMCBMenu::update() {}

@@ -20,14 +20,15 @@
 
 #include "tap/communication/serial/ref_serial_data.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 void ChassisAutoNavController::initialize()
 {
     rotationDirection = (rand() - RAND_MAX / 2) < 0 ? -1 : 1;
 
-    lastSetPoint = worldToChassis.getTranslation();
+    lastSetPoint = transformer->getWorldToChassis().getTranslation();
     rotateSpeedRamp.reset(chassis.getDesiredRotation());
+    translateSpeedRamp.setValue(0);  // assumes that we start the path at a standstill
 }
 
 void ChassisAutoNavController::runController(
@@ -35,7 +36,8 @@ void ChassisAutoNavController::runController(
     const bool movementEnabled,
     const bool beybladeEnabled)
 {
-    Position currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
+    Position currentPos =
+        transformer->getWorldToChassis().getTranslation();  // works bc transformer always makes z 0
     float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
                                                // this constant with a function in the future
     Position setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
@@ -44,11 +46,23 @@ void ChassisAutoNavController::runController(
 
     Vector posError = setpoint - currentPos;
 
-    float desiredSpeed = visionCoprocessor.getAutonavSpeed();
-
-    if (posError.magnitude() > POS_ERROR_THRESHOLD)
+    if (posError.magnitude() > translationalMotionThreshold &&
+        capBankSubsystem.getAvailableEnergy() > capbankEnergyThreshold)
     {
-        moveVector = posError / lookaheadDist * chassis.mpsToRpm(desiredSpeed);
+        capBankSubsystem.changeSprintMode(
+            aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
+    }
+    else
+    {
+        capBankSubsystem.changeSprintMode(
+            aruwsrc::communication::can::cap_bank::SprintMode::NO_SPRINT);
+    }
+
+    if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
+    {
+        translateSpeedRamp.update(MAX_TRANSLATION_ACCELERATION);
+        moveVector = posError / lookaheadDist *
+                     (translateSpeedRamp.getValue() / WHEEL_RADIUS / M_TWOPI * 60);
     }
 
     // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
@@ -75,7 +89,7 @@ void ChassisAutoNavController::runController(
     float r = rotateSpeedRamp.getValue();
 
     // convert world frame translation to chassis frame
-    Vector chassisFrameMoveVector = worldToChassis.apply(moveVector);
+    Vector chassisFrameMoveVector = transformer->getWorldToChassis().apply(moveVector);
 
     // set outputs
     chassis.setDesiredOutput(chassisFrameMoveVector.x(), chassisFrameMoveVector.y(), r);
@@ -86,25 +100,20 @@ Position ChassisAutoNavController::calculateSetPoint(
     float lookaheadDistance,
     bool movementEnabled)
 {
-    if (!visionCoprocessor.isCvOnline() || !movementEnabled)
+    if (path == nullptr || !movementEnabled || path->empty())
     {
         return lastSetPoint;
     }
 
-    if (path.empty())
+    if (path->hasChanged())
     {
-        return current;
-    }
-
-    if (path.hasChanged())
-    {
-        path.clearPathChanged();
+        path->clearPathChanged();
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
     }
 
-    float distOfClosest = path.positionToClosestParameter(current);
+    float distOfClosest = path->positionToClosestParameter(current);
 
-    Position lookaheadPos = path.parametertoPosition(distOfClosest + lookaheadDistance);
+    Position lookaheadPos = path->parametertoPosition(distOfClosest + lookaheadDistance);
 
     if (!pathTransitionTimeout.isExpired())
         return aruwsrc::algorithms::quadraticBezierInterpolation(
@@ -117,4 +126,4 @@ Position ChassisAutoNavController::calculateSetPoint(
     return lookaheadPos;
 }
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

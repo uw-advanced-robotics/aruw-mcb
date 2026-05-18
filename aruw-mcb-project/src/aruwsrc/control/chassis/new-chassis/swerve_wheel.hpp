@@ -39,7 +39,7 @@ using SmoothPidConfig = tap::algorithms::SmoothPidConfig;
 
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 struct SwerveAzimuthConfig
 {
@@ -96,7 +96,7 @@ private:
         // double fmod needed to ensure output is positive bc fmod can be negative
     }
 };
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 }  // namespace aruwsrc
 
 #endif

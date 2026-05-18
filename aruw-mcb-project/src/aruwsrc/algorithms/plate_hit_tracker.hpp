@@ -1,0 +1,153 @@
+/*
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ *
+ * This file is part of aruw-mcb.
+ *
+ * aruw-mcb is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * aruw-mcb is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef PLATE_HIT_TRACKER_HPP_
+#define PLATE_HIT_TRACKER_HPP_
+
+#include <tap/algorithms/wrapped_float.hpp>
+
+#include "tap/algorithms/cmsis_mat.hpp"
+#include "tap/control/subsystem.hpp"
+#include "tap/drivers.hpp"
+
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
+#include "modm/math/matrix.hpp"
+
+using tap::algorithms::Angle;
+using tap::algorithms::CMSISMat;
+using tap::algorithms::WrappedFloat;
+
+namespace aruwsrc::algorithms
+{
+class PlateHitTracker
+{
+public:
+    enum class ProjectileType
+    {
+        _17_MM,
+        _42_MM,
+        COLLISION,
+        NONE,
+    };
+    struct PlateHitData
+    {
+        uint8_t plateID;
+        float lastDps;
+        WrappedFloat hitAngle_chassisRelative_radians;
+        WrappedFloat hitAngle_worldRelative_radians;
+        uint32_t timestamp;
+        ProjectileType projectileType;
+        PlateHitData()
+            : plateID(0),
+              lastDps(-1),
+              hitAngle_chassisRelative_radians(Angle(0)),
+              hitAngle_worldRelative_radians(Angle(0)),
+              timestamp(-1),
+              projectileType(ProjectileType::COLLISION)
+        {
+        }
+    };
+
+    struct PlateHitBinData
+    {
+        WrappedFloat radians;
+        float magnitude;
+        ProjectileType projectileType;
+        PlateHitBinData()
+            : radians(Angle(0)),
+              magnitude(0),
+              projectileType(ProjectileType::COLLISION)
+        {
+        }
+    };
+
+public:
+    /**
+     * @brief PlateHitTracker
+     * @param drivers Robot drivers
+     * @param transforms TransformerInterface for getting the robot's orientation
+     * @brief Checks refSerial for hit data and adds them to a matrix of bins
+     * each bin in 45 degrees around the robot
+     * bin 0 => 337.5 to 22.5 \n
+     * bin 1 => 22.5 to 67.5\n
+     * bin 2 => 67.5 to 112.5\n
+     * bin 3 => 112.5 to 157.5\n
+     * bin 4 => 157.5 to 202.5\n
+     * bin 5 => 202.5 to 247.5\n
+     * bin 6 => 247.5 to 292.5\n
+     * bin 7 => 292.5 to 337.5\n
+     * Final product is a list of peaks and their positions around the robot
+     */
+    PlateHitTracker(tap::Drivers *drivers);
+
+    inline PlateHitData getLastHitData() { return lastHitData; }
+
+    const std::vector<PlateHitBinData> &getPeakAnglesRadians();
+
+    void update();
+
+    inline void attachTransformer(
+        aruwsrc::algorithms::odometry::transforms::TransformerInterface *transformer)
+    {
+        this->transformer = transformer;
+    }
+
+private:
+    static constexpr uint8_t BIN_NUMBER = 8;
+    CMSISMat<BIN_NUMBER, 1> binData{};
+    static constexpr float BLUR_FACTOR = 0.5;
+    static constexpr float HIT_THRESH = 0.001;
+
+    // clang-format off
+    static constexpr float A = 0.5; 
+    static constexpr float B = (1 - A) / 2; // Derived from 2B + A = 1
+    static constexpr float BLUR_CONVOLVE_MATRIX_DATA[BIN_NUMBER*BIN_NUMBER] = {
+        A , B, 0 , 0 , 0 , 0 , 0 , B,
+        B , A , B, 0 , 0 , 0 , 0 , 0,
+        0 , B , A , B, 0 , 0 , 0 , 0,
+        0 , 0 , B , A , B, 0 , 0 , 0,
+        0 , 0 , 0 , B , A , B, 0 , 0,
+        0 , 0 , 0 , 0 , B , A , B, 0,
+        0 , 0 , 0 , 0 , 0 , B , A , B,
+        B , 0 , 0 , 0 , 0 , 0 , B , A
+    };
+    // clang-format on
+    const float DECAY_FACTOR = 0.995;
+
+    // Variables
+    tap::Drivers *drivers;
+    PlateHitData lastHitData;
+
+    aruwsrc::algorithms::odometry::transforms::TransformerInterface *transformer;
+    CMSISMat<BIN_NUMBER, 1> bins{};
+    const CMSISMat<BIN_NUMBER, BIN_NUMBER> BLUR_CONVOLVE_MATRIX;
+    std::array<ProjectileType, BIN_NUMBER> lastProjectileTypePerBin = {ProjectileType::COLLISION};
+    PlateHitTracker::PlateHitBinData *getBinData();
+
+    CMSISMat<BIN_NUMBER, 1> normaliseBins(CMSISMat<BIN_NUMBER, 1> mat);
+    CMSISMat<BIN_NUMBER, 1> blurBins(CMSISMat<BIN_NUMBER, 1> mat);
+
+    bool calculatedPeakAngles = false;
+    std::vector<PlateHitBinData> prevPeakBinData;
+    PlateHitBinData peakData[BIN_NUMBER];
+};
+
+}  // namespace aruwsrc::algorithms
+
+#endif  // PLATE_HIT_TRACKER_HPP_

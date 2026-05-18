@@ -20,6 +20,7 @@
 #ifndef VELOCITY_AGITATOR_SUBSYSTEM_HPP_
 #define VELOCITY_AGITATOR_SUBSYSTEM_HPP_
 
+#include "tap/architecture/clock.hpp"
 #include "tap/architecture/conditional_timer.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/subsystem.hpp"
@@ -43,7 +44,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::agitator
 {
 /**
  * Subsystem whose primary purpose is to encapsulate an agitator motor that operates using a
@@ -83,10 +84,6 @@ public:
         agitatorMotor.setDesiredOutput(0);
     }
 
-    void runHardwareTests() override;
-
-    void onHardwareTestStart() override;
-
     const char* getName() const override { return "velocity agitator"; }
 
     /// @return The velocity setpoint that some command has requested, in radians / second
@@ -102,7 +99,7 @@ public:
     /// @return The agitator velocity in radians / second.
     inline float getCurrentValue() const override
     {
-        return (agitatorMotor.getShaftRPM() / config.gearRatio) * (M_TWOPI / 60.0f);
+        return agitatorMotor.getEncoder()->getVelocity();
     }
 
     /**
@@ -132,6 +129,7 @@ public:
     {
         subsystemJamStatus = false;
         jamChecker.restart();
+        lastProjectileLaunchDetectedAtMs = tap::arch::clock::getTimeMilliseconds();
     }
 
     /**
@@ -167,11 +165,6 @@ private:
     /// The object that runs jam detection.
     tap::control::setpoint::SetpointContinuousJamChecker jamChecker;
 
-    /// You can calibrate the agitator, which will set the current agitator angle to zero radians.
-    /// This value is the starting measured angle offset applied to make the motor angle "0" when
-    /// `calibrateHere` is called.
-    float agitatorCalibratedZeroAngle = 0.0f;
-
     /// Stores the jam state of the subsystem
     bool subsystemJamStatus = false;
 
@@ -187,11 +180,15 @@ private:
     /// The velocity setpoint in radians / second
     float velocitySetpoint = 0;
 
-    /// Get the raw angle of the shaft from the motor, in radians
-    float getUncalibratedAgitatorAngle() const;
-
     /// Runes the velocity PID controller
     void runVelocityPidControl();
+
+    bool checkemptyJamCondition();
+
+    /// Last ref-reported projectile launch timestamp value observed for the configured barrel.
+    uint32_t lastRefLaunchTimestamp = 0;
+    /// Local time in ms when we last observed a projectile launch.
+    uint32_t lastProjectileLaunchDetectedAtMs = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
@@ -203,6 +200,6 @@ private:
 #endif
 };
 
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::agitator
 
 #endif  // VELOCITY_AGITATOR_SUBSYSTEM_HPP_

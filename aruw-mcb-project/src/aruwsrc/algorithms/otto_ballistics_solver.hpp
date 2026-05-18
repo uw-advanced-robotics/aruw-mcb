@@ -24,7 +24,7 @@
 
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class HolonomicChassisSubsystem;
 }
@@ -34,7 +34,7 @@ namespace aruwsrc::control::turret
 class RobotTurretSubsystem;
 }
 
-namespace aruwsrc::serial
+namespace aruwsrc::communication::serial
 {
 class VisionCoprocessor;
 }
@@ -78,9 +78,9 @@ public:
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
     /// The width of a small armor plate, in m
-    static constexpr float PLATE_WIDTH = 0.1f;
+    static constexpr float PLATE_WIDTH = 0.135f;
     /// The height of a small armor plate, in m
-    static constexpr float PLATE_HEIGHT = 0.1f;
+    static constexpr float PLATE_HEIGHT = 0.125f;
 
     /**
      * @return true if the specified yaw and pitch angle errors are small enough such that if a
@@ -116,7 +116,7 @@ public:
      * for, see the VisionCoprocessor for more information about this id.
      */
     OttoBallisticsSolver(
-        const aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         const control::turret::RobotTurretSubsystem &turretSubsystem,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
@@ -136,7 +136,7 @@ public:
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
-    const aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     const tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     const control::turret::RobotTurretSubsystem &turretSubsystem;
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;

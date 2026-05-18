@@ -28,12 +28,13 @@ namespace aruwsrc
 {
 namespace mock
 {
-class SwerveChassisSubsystemMock : public aruwsrc::chassis::SwerveChassisSubsystem
+class SwerveChassisSubsystemMock : public aruwsrc::control::chassis::SwerveChassisSubsystem
 {
 public:
     SwerveChassisSubsystemMock(
         tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lf,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* rf,
         testing::NiceMock<aruwsrc::mock::SwerveModuleMock>* lb,

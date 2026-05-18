@@ -24,35 +24,43 @@
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 
 namespace tap
 {
 class Drivers;
 }
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 static constexpr float VOLTAGE_RAMPDOWN_RANGE = 5.0f;
 
 static constexpr float K_I = 0.002;
 static constexpr float K_P = 0.005;
 
-class CapacitorSelectingCurrentSensor
-    : public tap::communication::sensors::current::CurrentSensorInterface
+class CapacitorSelectingSensor
+    : public tap::communication::sensors::current::CurrentSensorInterface,
+      public tap::communication::sensors::voltage::VoltageSensorInterface
 {
 public:
-    CapacitorSelectingCurrentSensor(
+    CapacitorSelectingSensor(
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        can::capbank::CapacitorBank* capacitorBank);
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
+        communication::can::cap_bank::CapacitorBank* capacitorBank);
 
     float getCurrentMa() const override;
+    float getVoltageMv() const override;
 
-    void update() override { this->currentSensor->update(); };
+    void update() override
+    {
+        this->currentSensor->update();
+        this->voltageSensor->update();
+    };
 
 private:
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor;
-    can::capbank::CapacitorBank* capacitorBank;
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor;
+    communication::can::cap_bank::CapacitorBank* capacitorBank;
 };
 
 class CapBankPowerLimiter
@@ -61,7 +69,8 @@ public:
     CapBankPowerLimiter(
         const tap::Drivers* drivers,
         tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        can::capbank::CapacitorBank* capacitorBank,
+        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
+        communication::can::cap_bank::CapacitorBank* capacitorBank,
         float startingEnergyBuffer,
         float energyBufferLimitThreshold,
         float energyBufferCritThreshold);
@@ -70,13 +79,13 @@ public:
 
 private:
     const tap::Drivers* drivers;
-    const can::capbank::CapacitorBank* capacitorBank;
-    CapacitorSelectingCurrentSensor sensor;
+    const communication::can::cap_bank::CapacitorBank* capacitorBank;
+    CapacitorSelectingSensor sensor;
 
     tap::control::chassis::PowerLimiter fallback;
 
     float currentIntegrator = 0;
 };
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // CAPACITOR_BANK_POWER_LIMITER_HPP_

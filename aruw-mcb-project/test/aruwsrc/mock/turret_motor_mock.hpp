@@ -31,7 +31,7 @@ class TurretMotorMock : public control::turret::TurretMotor
 public:
     TurretMotorMock(
         tap::motor::MotorInterface *motor,
-        const control::turret::TurretMotorConfig &motorConfig);
+        const control::turret::TurretMotorConfig &motorConfig = DEFAULT_CONFIG);
     virtual ~TurretMotorMock();
 
     MOCK_METHOD(void, initialize, (), (override));
@@ -42,17 +42,15 @@ public:
         attachTurretController,
         (const control::turret::algorithms::TurretControllerInterface *),
         (override));
-    MOCK_METHOD(void, setChassisFrameSetpoint, (float), (override));
+    MOCK_METHOD(void, setChassisFrameSetpoint, (WrappedFloat));
     MOCK_METHOD(bool, isOnline, (), (const override));
-    MOCK_METHOD(float, getChassisFrameSetpoint, (), (const override));
+    MOCK_METHOD(WrappedFloat, getChassisFrameSetpoint, (), (const override));
     MOCK_METHOD(
         const tap::algorithms::WrappedFloat &,
         getChassisFrameMeasuredAngle,
         (),
         (const override));
-    MOCK_METHOD(float, getChassisFrameUnwrappedMeasuredAngle, (), (const override));
     MOCK_METHOD(float, getChassisFrameVelocity, (), (const override));
-    MOCK_METHOD(float, getAngleFromCenter, (), (const override));
     MOCK_METHOD(
         const control::turret::algorithms::TurretControllerInterface *,
         getTurretController,
@@ -60,10 +58,14 @@ public:
         (const override));
     MOCK_METHOD(const control::turret::TurretMotorConfig &, getConfig, (), (const override));
     MOCK_METHOD(float, getValidChassisMeasurementError, (), (const override));
-    MOCK_METHOD(float, getValidMinError, (const float, const float), (const override));
+    MOCK_METHOD(
+        float,
+        getValidMinError,
+        (const WrappedFloat, const WrappedFloat),
+        (const override));
 
 private:
-    aruwsrc::control::turret::TurretMotorConfig defaultConfig;
+    static constexpr aruwsrc::control::turret::TurretMotorConfig DEFAULT_CONFIG{};
 };
 }  // namespace aruwsrc::mock
 

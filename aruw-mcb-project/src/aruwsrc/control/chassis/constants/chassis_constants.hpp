@@ -26,21 +26,14 @@
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_chassis_constants.hpp"
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_NEPTUNE)
 #include "aruwsrc/robot/hero/hero_chassis_constants.hpp"
+#elif defined(TARGET_TESTBED)
+#include "aruwsrc/robot/testbed/testbed_chassis_constants.hpp"
+#elif defined(TARGET_SENTRY_ACHLYS)
+#include "aruwsrc/robot/sentry/sentry_chassis_constants.hpp"
 #else  // by default use engineer constants (for robots that don't use them)
 #include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"
 #endif
-
-namespace aruwsrc::chassis
-{
-// hardware constants, not specific to any particular chassis
-static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
-static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
-static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
-static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
-
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
-}  // namespace aruwsrc::chassis
 
 #endif  // CHASSIS_CONSTANTS_HPP_

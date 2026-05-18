@@ -20,7 +20,9 @@
 #ifndef TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
 #define TWO_DEADWHEEL_ODOMETRY_OBSERVER_HPP_
 
-#include <aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp>
+#include "tap/communication/sensors/encoder/encoder_interface.hpp"
+
+#include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 
 namespace aruwsrc::algorithms::odometry
 {
@@ -28,25 +30,23 @@ class TwoDeadwheelOdometryObserver
 {
 public:
     TwoDeadwheelOdometryObserver(
-        aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel,
-        aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel,
+        tap::encoder::EncoderInterface* parallelWheel,
+        tap::encoder::EncoderInterface* perpendicularWheel,
         const float wheelRadius);
 
-    const float WHEEL_RADIUS;
+    const float wheelRadius;
 
-    /// Get RPM of odom wheel oriented such that it rolls on the tangent line to the chassis
-    float getParallelMotorRPM() const;
+    /// Get m/s of odom wheel oriented such that it rolls on the tangent line to the chassis
+    float getParallelMotorVelocity() const;
 
-    /// Get RPM of odom wheel oriented such that it rolls on the line perpendicular to the chassis
-    float getPerpendicularRPM() const;
-
-    inline float rpmToMetersPerSecond(float rpm) const { return rpm / 60 * M_TWOPI * WHEEL_RADIUS; }
+    /// Get m/s of odom wheel oriented such that it rolls on the line perpendicular to the chassis
+    float getPerpendicularVelocity() const;
 
 private:
     /// Parallel wheel is oriented such that it rolls on the tangent line to the chassis
-    aruwsrc::virtualMCB::VirtualDjiMotor* parallelWheel;
+    tap::encoder::EncoderInterface* parallelWheel;
     /// Perpendicular wheel is oriented such that it rolls on the line perpendicular to the chassis
-    aruwsrc::virtualMCB::VirtualDjiMotor* perpendicularWheel;
+    tap::encoder::EncoderInterface* perpendicularWheel;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

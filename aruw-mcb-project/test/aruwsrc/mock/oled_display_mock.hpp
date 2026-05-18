@@ -35,11 +35,11 @@ class OledDisplayMock : public display::OledDisplay
 public:
     explicit OledDisplayMock(
         tap::Drivers *drivers,
-        aruwsrc::serial::VisionCoprocessor *vc,
-        can::TurretMCBCanComm *turretMCBCanCommBus1,
-        can::TurretMCBCanComm *turretMCBCanCommBus2,
-        aruwsrc::virtualMCB::MCBLite *mcbLite1,
-        aruwsrc::virtualMCB::MCBLite *mcbLite2);
+        aruwsrc::communication::serial::VisionCoprocessor *vc,
+        communication::can::TurretMCBCanComm *turretMCBCanCommBus1,
+        communication::can::TurretMCBCanComm *turretMCBCanCommBus2,
+        aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
+        aruwsrc::communication::mcb_lite::MCBLite *mcbLite2);
     virtual ~OledDisplayMock();
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(bool, updateDisplay, (), (override));

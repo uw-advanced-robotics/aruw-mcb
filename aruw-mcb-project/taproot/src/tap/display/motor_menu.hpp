@@ -29,6 +29,7 @@
 #include "modm/ui/menu/abstract_menu.hpp"
 
 #include "dummy_allocator.hpp"
+#include "motor_specific_menu.hpp"
 #include "vertical_scroll_logic_handler.hpp"
 
 namespace tap
@@ -44,7 +45,10 @@ namespace display
 class MotorMenu : public modm::AbstractMenu<DummyAllocator<modm::IAbstractView> >
 {
 public:
-    MotorMenu(modm::ViewStack<DummyAllocator<modm::IAbstractView> > *stack, Drivers *drivers);
+    MotorMenu(
+        modm::ViewStack<DummyAllocator<modm::IAbstractView> > *stack,
+        Drivers *drivers,
+        int entriesToDisplay = DISPLAY_MAX_ENTRIES);
 
     virtual ~MotorMenu() = default;
 
@@ -70,6 +74,7 @@ private:
     uint8_t can2PrevDisplayedStatus;
 
     void drawMotor(tap::can::CanBus canBus, int normalizedMotorId);
+    MotorSpecificMenu motorSpecificMenu;
 };
 }  // namespace display
 }  // namespace tap

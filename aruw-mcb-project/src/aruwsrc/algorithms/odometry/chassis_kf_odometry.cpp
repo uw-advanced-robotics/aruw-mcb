@@ -19,6 +19,8 @@
 
 #include "chassis_kf_odometry.hpp"
 
+#include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
+
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::algorithms::odometry
@@ -56,9 +58,7 @@ void ChassisKFOdometry::update()
 
     // get chassis frame velocity as measured by the motor encoders
     auto chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
-    tap::control::chassis::ChassisSubsystemInterface::getVelocityWorldRelative(
-        chassisVelocity,
-        chassisYaw);
+    tap::algorithms::odometry::getVelocityWorldRelative(chassisVelocity, chassisYaw);
 
     // the measurement covariance is dynamically updated based on chassis-measured acceleration
     updateMeasurementCovariance(chassisVelocity);
@@ -77,10 +77,7 @@ void ChassisKFOdometry::update()
     y[int(OdomInput::ACC_Y)] = imu.getAy();
 
     // rotate acceleration in MCB frame to the world frame
-    tap::algorithms::rotateVector(
-        &y[int(OdomInput::ACC_X)],
-        &y[int(OdomInput::ACC_Y)],
-        serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+    tap::algorithms::rotateVector(&y[int(OdomInput::ACC_X)], &y[int(OdomInput::ACC_Y)], chassisYaw);
 #endif
 
     // perform the update, after this update a new state matrix is now available
@@ -142,6 +139,21 @@ void ChassisKFOdometry::updateMeasurementCovariance(
     kf.getMeasurementCovariance()[0] = velocityCovariance;
     kf.getMeasurementCovariance()[2 * static_cast<int>(OdomInput::NUM_INPUTS) + 2] =
         velocityCovariance;
+}
+
+void ChassisKFOdometry::overrideOdometryPosition(const float positionX, const float positionY)
+{
+    auto currKFState = kf.getStateVectorAsMatrix();
+
+    float newState[int(OdomState::NUM_STATES)] = {
+        positionX,
+        currKFState[int(OdomState::VEL_X)],
+        currKFState[int(OdomState::ACC_X)],
+        positionY,
+        currKFState[int(OdomState::VEL_Y)],
+        currKFState[int(OdomState::ACC_Y)]};
+
+    kf.init(newState);
 }
 
 }  // namespace aruwsrc::algorithms::odometry

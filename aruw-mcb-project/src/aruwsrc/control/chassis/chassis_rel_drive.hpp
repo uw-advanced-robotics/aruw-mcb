@@ -22,9 +22,9 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class HolonomicChassisSubsystem;
 
@@ -49,6 +49,6 @@ public:
         tap::Drivers *drivers,
         HolonomicChassisSubsystem *chassis);
 };
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // CHASSIS_REL_DRIVE_HPP_

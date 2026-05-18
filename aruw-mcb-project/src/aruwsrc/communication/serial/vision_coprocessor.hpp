@@ -31,8 +31,9 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/sentry_strategy_message_types.hpp"
+#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
@@ -41,9 +42,12 @@ namespace aruwsrc::control::turret
 class TurretOrientationInterface;
 }
 
-namespace aruwsrc
+namespace aruwsrc::communication::rtt
 {
-namespace serial
+class RttTelemetry;
+}  // namespace aruwsrc::communication::rtt
+
+namespace aruwsrc::communication::serial
 {
 /**
  * A class used to communicate with our vision coprocessors. Targets the "Project Otto" vision
@@ -60,12 +64,10 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_ORION) || \
-    defined(TARGET_STANDARD_CYGNUS)
-    // Hero slip ring cannot handle
-    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
-#else
+#if defined(TARGET_SENTRY_ACHLYS)
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
+#else
+    static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
 #endif
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
@@ -73,23 +75,6 @@ public:
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
-
-#if defined(TARGET_HERO_PERSEUS) || defined(TARGET_STANDARD_SPIDER) || \
-    defined(TARGET_STANDARD_ORION) || defined(TARGET_STANDARD_CYGNUS)
-    /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
-     *  The IMU Faces to the left of the 'R' on the Type A MCB
-     *  0 Rotation corresponds with a 0 rotation of the chassis
-     */
-    // MCB has power inlet facing forward
-    static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
-#elif defined(TARGET_SENTRY_HYDRA)
-    // MCB is on a diagonal
-    // @todo: ensure this is correct
-    static constexpr float MCB_ROTATION_OFFSET = 0;
-#else
-    // MCB has power inlet facing backwards
-    static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
-#endif
 
     enum class FireRate : uint8_t
     {
@@ -222,6 +207,23 @@ public:
         TurretOdometryData turretOdometry[control::turret::NUM_TURRETS];
     } modm_packed;
 
+    static constexpr uint8_t MAX_NUM_ROBOT_ORBITS = 3;
+
+    struct RobotOrbitData
+    {
+        struct RobotOrbit
+        {
+            float x;
+            float y;
+            float z;
+            float radius;
+            uint16_t robotType;
+        } modm_packed;
+
+        RobotOrbit data[MAX_NUM_ROBOT_ORBITS];  // Use the nested struct
+
+    } modm_packed;
+
     VisionCoprocessor(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(VisionCoprocessor);
     mockable ~VisionCoprocessor();
@@ -248,6 +250,11 @@ public:
      */
     mockable bool isCvOnline() const;
 
+    void setTelemetry(aruwsrc::communication::rtt::RttTelemetry* telemetry)
+    {
+        this->telemetry = telemetry;
+    }
+
     /**
      * @param[in] turretID The zero-indexed turret ID that will be used to identify which aim data
      * the will be used. In particular, the turret ID should identify different turret hardware. The
@@ -264,9 +271,15 @@ public:
 
     mockable inline aruwsrc::algorithms::AutoNavPath& getAutoNavPath() { return autoNavPath; }
 
-    mockable inline float getAutonavSpeed() const { return lastSetpointData.speed; }
+    mockable inline const ArucoResetData& getLastRealsenseArucoData() const
+    {
+        return lastRealsenseArucoData;
+    }
 
-    mockable inline const ArucoResetData& getLastArucoResetData() const { return lastArucoData; }
+    mockable inline const ArucoResetData& getLastArducamArucoData() const
+    {
+        return lastArducamArucoData;
+    }
 
     mockable inline bool getSomeTurretHasTarget() const
     {
@@ -288,8 +301,13 @@ public:
         return hasTarget;
     }
 
+    mockable inline const RobotOrbitData& getLastRobotOrbitData() const
+    {
+        return lastRobotOrbitData;
+    }
+
     mockable inline void attachTransformer(
-        aruwsrc::algorithms::transforms::TransformerInterface* transformer)
+        aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer)
     {
         this->transformer = transformer;
     }
@@ -319,10 +337,23 @@ public:
      * This signals that the message has been consumed and should not be used
      * for future resets.
      */
-    inline void invalidateArucoResetData() { this->lastArucoData.updated = false; }
+    inline void invalidateRealsenseArucoResetData()
+    {
+        this->lastRealsenseArucoData.updated = false;
+    }
+    inline void invalidateArducamArucoResetData() { this->lastArducamArucoData.updated = false; }
+
+    mockable inline void attachAutoNavController(
+        aruwsrc::control::chassis::ChassisAutoNavController* autoNavController)
+    {
+        this->autoNavController = autoNavController;
+    }
 
     // @todo private should not be here
 private:
+    void logVisionTelemetry();
+    void logRefereeTelemetry();
+
     enum TxMessageTypes
     {
         CV_MESSAGE_TYPE_ODOMETRY_DATA = 1,
@@ -340,19 +371,21 @@ private:
     enum RxMessageTypes
     {
         CV_MESSAGE_TYPE_TURRET_AIM = 2,
-        CV_MESSAGE_TYPE_ARUCO_RESET = 10,
+        CV_MESSAGE_TYPE_REALSENSE_ARUCO = 10,
         CV_MESSAGE_TYPE_AUTO_NAV_SETPOINT = 13,
         CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
+        CV_MESSAGE_TYPE_ROBOT_ORBIT = 15,
+        CV_MESSAGE_TYPE_ARDUCAM_ARUCO = 17,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
     static constexpr int16_t TIME_OFFLINE_CV_AIM_DATA_MS = 1'000;
 
     /** Time in ms between sending the robot ID message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 5'000;
+    static constexpr uint32_t TIME_BTWN_SENDING_ROBOT_ID_MSG = 2'000;
 
     /** Time in ms between sending the robot health message. */
-    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 500;
+    static constexpr uint32_t TIME_BTWN_SENDING_HEALTH_MSG = 350;
 
     /** Time in ms between sending the time sync message. */
     static constexpr uint32_t TIME_BTWN_SENDING_TIME_SYNC_DATA = 1'000;
@@ -380,7 +413,7 @@ private:
     /// The last aim data received from the xavier.
     TurretAimData lastAimData[control::turret::NUM_TURRETS] = {};
 
-    static constexpr uint8_t MAXSETPOINTS = 50;
+    static constexpr uint8_t MAXSETPOINTS = 100;
     struct AutoNavCoordinate
     {
         float x;
@@ -402,20 +435,31 @@ private:
     aruwsrc::algorithms::AutoNavPath autoNavPath;
     AutoNavSetpointMessage lastSetpointData{
         .sequenceNum = 0,
-        .speed = 0.0f,
+        .speed = 0.5f,
         .numSetpoints = 0,
         .setpoints = {}};
 
-    ArucoResetData lastArucoData{
+    ArucoResetData lastRealsenseArucoData{
         .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
     };
+
+    ArucoResetData lastArducamArucoData{
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .updated = false,
+    };
+
+    RobotOrbitData lastRobotOrbitData;
 
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
 
-    aruwsrc::algorithms::transforms::TransformerInterface* transformer;
+    aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer;
+
+    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
+
+    aruwsrc::control::chassis::ChassisAutoNavController* autoNavController = nullptr;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};
 
@@ -445,7 +489,11 @@ private:
 
     bool decodeToAutoNavSetpointData(const ReceivedSerialMessage& message);
 
-    bool decodeToArucoResetData(const ReceivedSerialMessage& message);
+    bool decodeToRealsenseArucoData(const ReceivedSerialMessage& message);
+
+    bool decodeToArducamArucoData(const ReceivedSerialMessage& message);
+
+    bool decodeToRobotOrbitData(const ReceivedSerialMessage& message);
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
@@ -463,7 +511,6 @@ public:
     void sendHealthMessage();
     void sendBulletsRemaining();
 };
-}  // namespace serial
-}  // namespace aruwsrc
+}  // namespace aruwsrc::communication::serial
 
 #endif  // VISION_COPROCESSOR_HPP_

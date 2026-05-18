@@ -29,16 +29,18 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc
 {
-namespace control::sentry
+namespace sentry
 {
 bool SentryControlOperatorInterface::isTurretControlMode()
 {
     Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
     Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
 
-    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
-           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::MID) ||
-           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN);
+    // Manual-aim-enabled modes from the 2026 sentry table:
+    // left mid + right down, left down + right up, left down + right down.
+    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN) ||
+           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
 }
 
 bool SentryControlOperatorInterface::isDriveMode()
@@ -46,7 +48,10 @@ bool SentryControlOperatorInterface::isDriveMode()
     Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
     Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
 
-    return (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
+    // Manual-drive-enabled modes from the 2026 sentry table:
+    // left mid + (right up/right mid), left down + (right mid/right down).
+    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::MID) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::MID) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
 }
@@ -94,12 +99,15 @@ float SentryControlOperatorInterface::getChassisXVelocity()
         prevUpdateCounterChassisXInput = updateCounter;
     }
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalX =
         maxChassisSpeed * limitVal(chassisXInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+
+    // Limit with sign
+    finalX = abs(finalX) > MAX_X_SPEED ? (finalX > 0 ? MAX_X_SPEED : -MAX_X_SPEED) : finalX;
 
     chassisXInputRamp.setTarget(finalX);
 
@@ -129,12 +137,15 @@ float SentryControlOperatorInterface::getChassisYVelocity()
         prevUpdateCounterChassisYInput = updateCounter;
     }
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxChassisSpeed = control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
 
     float finalY =
         maxChassisSpeed * limitVal(chassisYInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
+
+    // Limit with sign
+    finalY = abs(finalY) > MAX_Y_SPEED ? (finalY > 0 ? MAX_Y_SPEED : -MAX_Y_SPEED) : finalY;
 
     chassisYInputRamp.setTarget(finalY);
 
@@ -152,8 +163,8 @@ float SentryControlOperatorInterface::getChassisYawVelocity()
 
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevChassisYawnputCalledTime;  // @todo typo lol
-    prevChassisYawnputCalledTime = currTime;
+    uint32_t dt = currTime - prevChassisYawInputCalledTime;
+    prevChassisYawInputCalledTime = currTime;
 
     if (prevUpdateCounterChassisYawInput != updateCounter)
     {
@@ -176,7 +187,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity()
         MAX_DECELERATION_R,
         static_cast<float>(dt) / 1E3);
 
-    return chassisYawInputRamp.getValue() * 20;
+    return chassisYawInputRamp.getValue();
 }
 
 float SentryControlOperatorInterface::getTurretMajorYawVelocity()
@@ -190,14 +201,14 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
 
-    return -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+    return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL);
 }
 
 float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
 
-    return -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
+    return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
 }
 
 float SentryControlOperatorInterface::getTurretMinor2YawVelocity()
@@ -214,5 +225,5 @@ float SentryControlOperatorInterface::getTurretMinor2PitchVelocity()
     return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
 }
 
-}  // namespace control::sentry
+}  // namespace sentry
 }  // namespace aruwsrc

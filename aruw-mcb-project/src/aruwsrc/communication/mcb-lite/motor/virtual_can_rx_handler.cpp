@@ -25,7 +25,7 @@
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 VirtualCanRxHandler::VirtualCanRxHandler(tap::Drivers* drivers) : CanRxHandler(drivers) {}
 
@@ -41,4 +41,4 @@ void VirtualCanRxHandler::refresh(tap::can::CanBus canbus, modm::can::Message me
     }
 }
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor

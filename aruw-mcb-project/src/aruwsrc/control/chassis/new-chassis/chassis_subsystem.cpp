@@ -29,7 +29,7 @@ using namespace tap::algorithms;
 
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
     CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
@@ -37,10 +37,12 @@ modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
 ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
     std::vector<Wheel>* wheels,
-    tap::communication::sensors::current::CurrentSensorInterface* currentSensor)
+    tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       wheels(*wheels),
       currentSensor(currentSensor),
+      voltageSensor(voltageSensor),
       chasisSpeedRotationPID({
           AUTOROTATION_PID_KP,
           0.0f,
@@ -52,6 +54,7 @@ ChassisSubsystem::ChassisSubsystem(
       chassisPowerLimiter(
           drivers,
           currentSensor,
+          voltageSensor,
           STARTING_ENERGY_BUFFER,
           ENERGY_BUFFER_LIMIT_THRESHOLD,
           ENERGY_BUFFER_CRIT_THRESHOLD)
@@ -122,6 +125,6 @@ void ChassisSubsystem::refresh()
     }
 }
 
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 
 }  // namespace aruwsrc

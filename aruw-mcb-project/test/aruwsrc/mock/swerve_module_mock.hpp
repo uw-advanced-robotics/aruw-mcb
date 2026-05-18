@@ -35,20 +35,20 @@ constexpr float SWERVE_FORWARD_MATRIX[24]{
     0.25,      0.0,       0.25,      0.0,      0.25,     0.,        0.25,     0.0,
     0.0,       0.25,      0.,        0.25,     0.,       0.25,      0.,       0.25,
     -0.862325, -0.862325, -0.862325, 0.862325, 0.862325, -0.862325, 0.862325, 0.862325};
-class SwerveModuleMock : public aruwsrc::chassis::SwerveModule
+class SwerveModuleMock : public aruwsrc::control::chassis::SwerveModule
 {
 public:
     SwerveModuleMock(
         testing::NiceMock<tap::mock::DjiMotorMock>& driMotor,
         testing::NiceMock<tap::mock::DjiMotorMock>& aziMotor,
-        aruwsrc::chassis::SwerveModuleConfig& config);
+        aruwsrc::control::chassis::SwerveModuleConfig& config);
     virtual ~SwerveModuleMock();
 
     MOCK_METHOD(void, setDesiredState, (float, float), ());
     MOCK_METHOD(void, scaleAndSetDesiredState, (float), ());
     MOCK_METHOD(float, calculate, (float, float, float));
     MOCK_METHOD(float, getDriveVelocity, (float, float), (const));
-    MOCK_METHOD(float, getAngle, (), (const));
+    MOCK_METHOD(tap::algorithms::WrappedFloat, getAngle, (), (const));
     MOCK_METHOD(void, initialize, (), ());
     MOCK_METHOD(void, refresh, (), ());
     MOCK_METHOD(bool, allMotorsOnline, (), (const));

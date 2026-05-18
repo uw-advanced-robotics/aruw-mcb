@@ -20,7 +20,7 @@
 using namespace tap::algorithms;
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 SwerveWheel::SwerveWheel(
     Motor& driveMotor,
@@ -99,18 +99,21 @@ void SwerveWheel::refresh()
     azimuthMotor.setDesiredOutput(azimuthPid.getOutput());
 }
 
-float SwerveWheel::getDriveVelocity() const { return rpmToMps(driveMotor.getShaftRPM()); }
+float SwerveWheel::getDriveVelocity() const
+{
+    return driveMotor.getEncoder()->getVelocity() * config.diameter;
+}
 
 void SwerveWheel::setZeroRPM() { speedSetpointRPM = 0; }
 
-float SwerveWheel::getDriveRPM() const { return driveMotor.getShaftRPM(); }
+float SwerveWheel::getDriveRPM() const
+{
+    return driveMotor.getEncoder()->getVelocity() * 60.0f / M_TWOPI;
+}
 
 float SwerveWheel::getAngle() const
 {
-    return modm::toRadian(
-        azimuthMotor.encoderToDegrees(
-            azimuthMotor.getEncoderUnwrapped() - azimuthConfig.azimuthZeroOffset) *
-        azimuthConfig.azimuthMotorGearing);
+    return azimuthMotor.getEncoder()->getPosition().getUnwrappedValue();
 }
 
 void SwerveWheel::initialize()
@@ -124,12 +127,8 @@ bool SwerveWheel::allMotorsOnline() const
     return driveMotor.isMotorOnline() && azimuthMotor.isMotorOnline();
 }
 
-float SwerveWheel::getAngularVelocity() const
-{
-    return 6.0f * static_cast<float>(azimuthMotor.getShaftRPM()) *
-           (azimuthConfig.azimuthMotorGearing);
-}
+float SwerveWheel::getAngularVelocity() const { return azimuthMotor.getEncoder()->getVelocity(); }
 
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 
 }  // namespace aruwsrc

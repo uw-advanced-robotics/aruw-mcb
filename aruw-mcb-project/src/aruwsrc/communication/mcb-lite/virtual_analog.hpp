@@ -27,7 +27,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 class VirtualAnalog : public tap::gpio::Analog
 {
@@ -47,6 +47,6 @@ private:
     uint16_t pinValues[5];
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif  // VIRTUAL_ANALOG_HPP

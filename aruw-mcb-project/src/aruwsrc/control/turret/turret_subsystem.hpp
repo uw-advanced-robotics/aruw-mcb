@@ -34,21 +34,11 @@
 #include "turret_motor.hpp"
 #endif
 
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/filter/pid.hpp"
-
-namespace aruwsrc::can
-{
-class TurretMCBCanComm;
-}
-
-namespace aruwsrc::control::turret::algorithms
-{
-class TurretPitchControllerInterface;
-class TurretYawControllerInterface;
-}  // namespace aruwsrc::control::turret::algorithms
 
 namespace aruwsrc::control::turret
 {
@@ -71,11 +61,9 @@ public:
      */
     explicit TurretSubsystem(
         tap::Drivers* drivers,
-        tap::motor::MotorInterface* pitchMotor,
-        tap::motor::MotorInterface* yawMotor,
-        const TurretMotorConfig& pitchMotorConfig,
-        const TurretMotorConfig& yawMotorConfig,
-        const aruwsrc::can::TurretMCBCanComm* turretMCB);
+        TurretMotor& pitchMotor,
+        TurretMotor& yawMotor,
+        const tap::communication::sensors::imu::AbstractIMU* turretImu);
 
     void initialize() override;
 
@@ -89,24 +77,17 @@ public:
 
     const char* getName() const override { return "Turret"; }
 
-    void onHardwareTestStart() override;
-
     mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
 
-    const inline aruwsrc::can::TurretMCBCanComm* getTurretMCB() const { return turretMCB; }
+    const inline tap::communication::sensors::imu::AbstractIMU* getIMU() const { return turretImu; }
 
-#ifdef ENV_UNIT_TESTS
-    testing::NiceMock<mock::TurretMotorMock> pitchMotor;
-    testing::NiceMock<mock::TurretMotorMock> yawMotor;
-#else
     /// Associated with and contains logic for controlling the turret's pitch motor
-    TurretMotor pitchMotor;
+    TurretMotor& pitchMotor;
     /// Associated with and contains logic for controlling the turret's yaw motor
-    TurretMotor yawMotor;
-#endif
+    TurretMotor& yawMotor;
 
 protected:
-    const aruwsrc::can::TurretMCBCanComm* turretMCB;
+    const tap::communication::sensors::imu::AbstractIMU* turretImu;
 };  // class TurretSubsystem
 
 }  // namespace aruwsrc::control::turret

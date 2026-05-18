@@ -19,21 +19,11 @@
 
 #include "drone_turret_subsystem.hpp"
 
-namespace aruwsrc::control::turret
+#include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+namespace aruwsrc::drone
 {
-/**
- *  TODO: implement this
- */
-float DroneTurretSubsystem::getWorldYaw() const { return 0.0f; }
+float DroneTurretSubsystem::getWorldYaw() const { return turretImu->getYaw(); }
 
-/**
- *  TODO: implement this
- */
-float DroneTurretSubsystem::getWorldPitch() const { return 0.0f; }
+float DroneTurretSubsystem::getWorldPitch() const { return turretImu->getPitch(); }
 
-/**
- *  TODO: implement this
- */
-uint32_t DroneTurretSubsystem::getLastMeasurementTimeMicros() const { return 0; }
-
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::drone

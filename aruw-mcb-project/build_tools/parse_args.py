@@ -15,17 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
 
+from build_tools import extract_robot_type
 from SCons.Script import *
-from . import extract_robot_type
 
-
-CMD_LINE_ARGS                       = 1
-TEST_BUILD_TARGET_ACCEPTED_ARGS     = ["build-tests", "run-tests", "run-tests-gcov"]
-SIM_BUILD_TARGET_ACCEPTED_ARGS      = ["build-sim", "run-sim"]
-HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "size", "gdb", "all"]
-VALID_BUILD_PROFILES                = ["debug", "release", "fast"]
-VALID_PROFILING_TYPES               = ["true", "false"]
-VALID_COMPILE_LIB_TYPES             = ["mcb", "sim", "test", "none"]
+CMD_LINE_ARGS = 1
+TEST_BUILD_TARGET_ACCEPTED_ARGS = ["build-tests", "run-tests", "run-tests-gcov"]
+SIM_BUILD_TARGET_ACCEPTED_ARGS = ["build-sim", "run-sim"]
+HARDWARE_BUILD_TARGET_ACCEPTED_ARGS = ["build", "run", "size", "gdb", "all", "ozone"]
+VALID_BUILD_PROFILES = ["debug", "release", "fast"]
+VALID_PROFILING_TYPES = ["true", "false"]
+VALID_COMPILE_LIB_TYPES = ["mcb", "sim", "test", "none"]
 
 USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>] [profiling=<true|false>] [compile_lib_only=<mcb|sim|test>]\n\
     \"<target>\" is one of:\n\
@@ -36,11 +35,15 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
         - \"run-tests-gcov\": builds core code and tests, executes them locally, and captures and prints code coverage information\n\
         - \"build-sim\": build all code for the simulated environment, for the current host platform.\n\
         - \"run-sim\": build all code for the simulated environment, for the current host platform, and execute the simulator locally.\n\
+        - \"ozone\": builds the code and launches ozone. If no connection options are specified, Fleet Status is first queried for the appropriate IP, falling back to a local cache, finally defaulting to USB.\n\
+            - \"ip=<IP>\", \"--ip=<IP>\": sets the IP address of the robot to connect to.\
+            - \"usb=1\", \"--usb\": forces the use of USB, regardless of whether a known IP is present.\
     \"<ROBOT_TYPE>\" enables the appropriate build flags for the hardware target that the code should be built for.\n\
-        - <ROBOT_TYPE> must be one of the following:\n\
-            - STANDARD_ELSA, STANDARD_SPIDER, STANDARD_ORION, STANDARD_CYGNUS, DRONE, ENGINEER, SENTRY_HYDRA, HERO_PERSEUS, DART\n\
+        - <ROBOT_TYPE> must be one of or a unique substring from the following:\n\
+            - STANDARD_NULL, STANDARD_VOID, DRONE, ENGINEER, SENTRY_ACHLYS, HERO_NEPTUNE, DART\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
                           the sim libraries, for example, run `scons build compile_lib_only=sim`."
+
 
 
 def parse_args():
@@ -66,11 +69,16 @@ def parse_args():
         if build_target == "help":
             print(USAGE)
             exit(0)
-        elif lib_to_compile == "test" or build_target in TEST_BUILD_TARGET_ACCEPTED_ARGS:
+        elif (
+            lib_to_compile == "test" or build_target in TEST_BUILD_TARGET_ACCEPTED_ARGS
+        ):
             args["TARGET_ENV"] = "tests"
         elif lib_to_compile == "sim" or build_target in SIM_BUILD_TARGET_ACCEPTED_ARGS:
             args["TARGET_ENV"] = "sim"
-        elif lib_to_compile == "mcb" or build_target in HARDWARE_BUILD_TARGET_ACCEPTED_ARGS:
+        elif (
+            lib_to_compile == "mcb"
+            or build_target in HARDWARE_BUILD_TARGET_ACCEPTED_ARGS
+        ):
             args["TARGET_ENV"] = "hardware"
         else:
             raise Exception("You did not select a valid target.\n" + USAGE)
@@ -87,6 +95,9 @@ def parse_args():
     args["PROFILING"] = ARGUMENTS.get("profiling", "false")
     if args["PROFILING"] not in VALID_PROFILING_TYPES:
         raise Exception("You specified an invalid profiling type.\n" + USAGE)
+
+    if "test" in ARGUMENTS:
+        args["TEST"] = ARGUMENTS.get("test", None)
 
     # Extract the robot type from either the command line or robot_type.hpp
     args["ROBOT_TYPE"] = extract_robot_type.get_robot_type()

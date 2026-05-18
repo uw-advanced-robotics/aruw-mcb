@@ -32,10 +32,8 @@ namespace aruwsrc::control::turret
 TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig)
     : config(motorConfig),
       motor(motor),
-      chassisFrameSetpoint(config.startAngle),
-      chassisFrameMeasuredAngle(config.startAngle, 0, M_TWOPI),
-      chassisFrameUnwrappedMeasurement(config.startAngle),
-      lastUpdatedEncoderValue(config.startEncoderValue)
+      chassisFrameSetpoint(Angle(config.startAngle)),
+      chassisFrameMeasuredAngle(Angle(config.startAngle))
 {
     assert(config.minAngle <= config.maxAngle);
     assert(motor != nullptr);
@@ -45,57 +43,14 @@ void TurretMotor::updateMotorAngle()
 {
     if (isOnline())
     {
-        int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
+        float chassisFrameUnwrappedMeasurement =
+            motor->getEncoder()->getPosition().getUnwrappedValue() + config.startAngle;
 
-        if (startEncoderOffset == INT16_MIN)
-        {
-            int encoderDiff =
-                static_cast<int>(config.startEncoderValue) - static_cast<int>(encoderUnwrapped);
-
-            if (encoderDiff < -static_cast<int>(DjiMotor::ENC_RESOLUTION / 2))
-            {
-                // encoder offset by 1 rev in negative direction
-                startEncoderOffset = -DjiMotor::ENC_RESOLUTION;
-            }
-            else if (encoderDiff > DjiMotor::ENC_RESOLUTION / 2)
-            {
-                // offset by 1 rev in positive direction
-                startEncoderOffset = DjiMotor::ENC_RESOLUTION;
-            }
-            else
-            {
-                // no offset necessary
-                startEncoderOffset = 0;
-            }
-        }
-
-        if (lastUpdatedEncoderValue == encoderUnwrapped)
-        {
-            return;
-        }
-
-        lastUpdatedEncoderValue = encoderUnwrapped;
-
-        chassisFrameUnwrappedMeasurement =
-            static_cast<float>(
-                encoderUnwrapped - static_cast<int64_t>(config.startEncoderValue) +
-                startEncoderOffset) *
-                M_TWOPI / static_cast<float>(DjiMotor::ENC_RESOLUTION) +
-            config.startAngle;
-
-        chassisFrameMeasuredAngle.setWrappedValue(chassisFrameUnwrappedMeasurement);
+        chassisFrameMeasuredAngle.setUnwrappedValue(chassisFrameUnwrappedMeasurement);
     }
     else
     {
-        if (lastUpdatedEncoderValue == config.startEncoderValue)
-        {
-            return;
-        }
-
-        lastUpdatedEncoderValue = config.startEncoderValue;
-        startEncoderOffset = INT16_MIN;
-
-        chassisFrameMeasuredAngle.setWrappedValue(config.startAngle);
+        chassisFrameMeasuredAngle.setUnwrappedValue(config.startAngle);
     }
 }
 
@@ -113,73 +68,55 @@ void TurretMotor::setMotorOutput(float out)
     }
 }
 
-void TurretMotor::setChassisFrameSetpoint(float setpoint)
+void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 {
     chassisFrameSetpoint = setpoint;
 
     if (config.limitMotorAngles)
     {
-        chassisFrameSetpoint = limitVal(chassisFrameSetpoint, config.minAngle, config.maxAngle);
+        int status;
+        chassisFrameSetpoint = Angle(WrappedFloat::limitValue(
+            chassisFrameSetpoint,
+            config.minAngle,
+            config.maxAngle,
+            &status));
     }
 }
 
 float TurretMotor::getValidChassisMeasurementError() const
 {
-    return getValidMinError(chassisFrameSetpoint, chassisFrameUnwrappedMeasurement);
+    return getValidMinError(chassisFrameSetpoint, chassisFrameMeasuredAngle);
 }
 
-float TurretMotor::getValidChassisMeasurementErrorWrapped() const
-{
-    // equivalent to this - other
-    return WrappedFloat(chassisFrameUnwrappedMeasurement, 0, M_TWOPI)
-        .minDifference(chassisFrameSetpoint);
-}
-
-float TurretMotor::getValidMinError(const float setpoint, const float measurement) const
+float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFloat measurement)
+    const
 {
     if (config.limitMotorAngles)
     {
-        // the error is absolute
-        return setpoint - measurement;
-    }
-    else
-    {
-        // the error can be wrapped around the unit circle
-        // equivalent to this - other
-        return WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint);
-    }
-}
+        float pos = WrappedFloat::rangeOverlap(
+            measurement,
+            setpoint,
+            Angle(config.maxAngle),
+            Angle(config.minAngle));
+        float neg = WrappedFloat::rangeOverlap(
+            setpoint,
+            measurement,
+            Angle(config.maxAngle),
+            Angle(config.minAngle));
 
-float TurretMotor::getClosestNonNormalizedSetpointToMeasurement(float measurement, float setpoint)
-{
-    return WrappedFloat(WrappedFloat(measurement, 0, M_TWOPI).minDifference(setpoint), -M_PI, M_PI)
-               .getWrappedValue() +
-           measurement;
-}
-
-float TurretMotor::getSetpointWithinTurretRange(float setpoint) const
-{
-    if (setpoint < config.minAngle)
-    {
-        float newSetpoint = setpoint;
-        while (newSetpoint < config.minAngle)
+        if (pos < neg)
         {
-            newSetpoint += M_TWOPI;
+            return (setpoint - measurement).getWrappedValue();
         }
-        return newSetpoint <= config.maxAngle ? newSetpoint : setpoint;
-    }
-
-    if (setpoint > config.maxAngle)
-    {
-        float newSetpoint = setpoint;
-        while (newSetpoint > config.maxAngle)
+        else if (pos > neg)
         {
-            newSetpoint -= M_TWOPI;
+            return (setpoint - measurement).getWrappedValue() - M_TWOPI;
         }
-        return newSetpoint >= config.minAngle ? newSetpoint : setpoint;
     }
 
-    return setpoint;
+    // the error can be wrapped around the unit circle
+    // equivalent to this - other
+    return measurement.minDifference(setpoint);
 }
 
 }  // namespace aruwsrc::control::turret

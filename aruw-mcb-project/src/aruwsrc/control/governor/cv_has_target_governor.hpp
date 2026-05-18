@@ -37,7 +37,9 @@ namespace aruwsrc::control::governor
 class CvHasTargetGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
-    CvHasTargetGovernor(aruwsrc::serial::VisionCoprocessor &visionCoprocessor, uint8_t turretID)
+    CvHasTargetGovernor(
+        aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
+        uint8_t turretID)
         : visionCoprocessor(visionCoprocessor),
           turretID(turretID)
     {
@@ -52,7 +54,7 @@ public:
     bool isFinished() final { return !isReady(); }
 
 private:
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     uint8_t turretID;
 };
 }  // namespace aruwsrc::control::governor

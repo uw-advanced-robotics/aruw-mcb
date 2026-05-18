@@ -46,11 +46,11 @@ class MultiShotCvCommandMappingTest : public Test
 protected:
     MultiShotCvCommandMappingTest()
         : drivers(),
-          yawMotor(&yawM, {}),
-          pitchMotor(&pitM, {}),
+          yawMotor(&yawM),
+          pitchMotor(&pitM),
           yawController(yawMotor, {}),
           pitchController(pitchMotor, {}),
-          turretSubsystem(&drivers),
+          turretSubsystem(&drivers, pitchMotor, yawMotor, nullptr),
           visionCoprocessor(&drivers),
           operatorInterface(&drivers),
           ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
@@ -89,8 +89,12 @@ private:
     NiceMock<tap::mock::MotorInterfaceMock> pitM;
     aruwsrc::mock::TurretMotorMock yawMotor;
     aruwsrc::mock::TurretMotorMock pitchMotor;
-    aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController yawController;
-    aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController pitchController;
+    aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+        aruwsrc::control::turret::algorithms::Axis::YAW>
+        yawController;
+    aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+        aruwsrc::control::turret::algorithms::Axis::PITCH>
+        pitchController;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;

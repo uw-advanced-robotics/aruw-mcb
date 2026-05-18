@@ -32,7 +32,7 @@
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
-using namespace aruwsrc::serial;
+using namespace aruwsrc::communication::serial;
 using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::algorithms;
 using namespace tap::arch::clock;
@@ -44,18 +44,41 @@ class AutoAimLaunchTimerTest : public Test
 {
 protected:
     AutoAimLaunchTimerTest()
-        : frictionWheels(&drivers),
+        : leftFlywheel(
+              &drivers,
+              tap::motor::MOTOR1,
+              tap::can::CanBus::CAN_BUS1,
+              true,
+              "Left flywheel",
+              false),
+          rightFlywheel(
+              &drivers,
+              tap::motor::MOTOR2,
+              tap::can::CanBus::CAN_BUS1,
+              false,
+              "Right flywheel",
+              false),
+          frictionWheels(
+              &drivers,
+              std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}}),
           visionCoprocessor(&drivers),
-          turretSubsystem(&drivers),
+          pitchMotorMock(&pitchMotorInterfaceMock),
+          yawMotorMock(&yawMotorInterfaceMock),
+          turretSubsystem(&drivers, pitchMotorMock, yawMotorMock, nullptr),
           ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0){};
 
     void SetUp() override {}
 
     // Contrived deps due to unfortunate mock structure
     tap::Drivers drivers;
+    NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
+    NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
     NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
+    NiceMock<tap::mock::MotorInterfaceMock> pitchMotorInterfaceMock, yawMotorInterfaceMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballistics;
 };

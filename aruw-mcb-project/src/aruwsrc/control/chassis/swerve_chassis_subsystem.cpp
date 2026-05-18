@@ -21,20 +21,19 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 SwerveChassisSubsystem::SwerveChassisSubsystem(
     tap::Drivers* drivers,
     tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
+    tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor,
     Module* moduleLeftFront,
     Module* moduleRightFront,
     Module* moduleLeftBack,
     Module* moduleRightBack,
     const float forwardMatrixArray[24],
-    can::capbank::CapacitorBank* capacitorBank)
-    : HolonomicChassisSubsystem(drivers, currentSensor, capacitorBank),
+    communication::can::cap_bank::CapacitorBank* capacitorBank)
+    : HolonomicChassisSubsystem(drivers, currentSensor, voltageSensor, capacitorBank),
       modules{moduleLeftFront, moduleRightFront, moduleLeftBack, moduleRightBack},
       forwardMatrix(forwardMatrixArray)
 {
@@ -144,6 +143,4 @@ modm::Matrix<float, 3, 1> SwerveChassisSubsystem::getDesiredVelocityChassisRelat
     return forwardMatrix * desiredModuleVectors;
 }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

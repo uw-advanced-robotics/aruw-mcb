@@ -22,10 +22,14 @@
 
 #if defined(ALL_STANDARDS)
 #include "aruwsrc/robot/standard/standard_agitator_constants.hpp"
-#elif defined(TARGET_SENTRY_HYDRA)
+#elif defined(TARGET_SENTRY_ACHLYS)
 #include "aruwsrc/robot/sentry/sentry_agitator_constants.hpp"
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_NEPTUNE)
 #include "aruwsrc/robot/hero/hero_agitator_constants.hpp"
+#elif defined(TARGET_DRONE)
+#include "aruwsrc/robot/drone/drone_agitator_constants.hpp"
+#elif defined(TARGET_FLYWHEEL_TESTING)
+#include "aruwsrc/robot/flywheel_testing/flywheel_testing_agitator_constants.hpp"
 #endif
 
 #endif  // AGITATOR_CONSTANTS_HPP_

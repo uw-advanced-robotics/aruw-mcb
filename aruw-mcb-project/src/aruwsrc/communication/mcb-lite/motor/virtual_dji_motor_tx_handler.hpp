@@ -26,7 +26,7 @@
 
 #include "modm/architecture/interface/can_message.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 /**
  * This class is used to send motor data to motors on virtual MCBs
@@ -43,11 +43,15 @@ public:
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
         can1MessageHighSend;
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
+        can1Message6020CurrentSend;
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
         can2MessageLowSend;
     tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
         can2MessageHighSend;
+    tap::communication::serial::DJISerial::DJISerial::SerialMessage<sizeof(modm::can::Message)>
+        can2Message6020CurrentSend;
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor
 
 #endif

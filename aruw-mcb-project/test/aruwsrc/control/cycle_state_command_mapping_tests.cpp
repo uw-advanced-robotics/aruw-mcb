@@ -20,6 +20,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "tap/control/remote_map_state.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -47,17 +48,20 @@ class CycleStateCommandMappingTest : public Test
 protected:
     CycleStateCommandMappingTest()
         : rms(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN),
+          reverseRMS(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
           cmdMapping(
               &drivers,
-              rms,
+              &rms,
               TestCycleClass::STATE_1,
               &testCycleClass,
-              &TestCycleClass::increment)
+              &TestCycleClass::increment,
+              reverseRMS)
     {
     }
 
     tap::Drivers drivers;
     tap::control::RemoteMapState rms;
+    tap::control::RemoteMapState reverseRMS;
     tap::control::RemoteMapState nonMatchingRMS;
     TestCycleClass testCycleClass;
     CycleStateCommandMapping<
@@ -99,4 +103,21 @@ TEST_F(
     cmdMapping.executeCommandMapping(rms);
     cmdMapping.executeCommandMapping(rms);
     cmdMapping.executeCommandMapping(rms);
+}
+
+TEST_F(CycleStateCommandMappingTest, executeCommandMapping_reverse_state_matches)
+{
+    InSequence seq;
+    EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_3));
+    EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_2));
+    EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_1));
+    EXPECT_CALL(testCycleClass, increment(TestCycleClass::STATE_3));
+
+    cmdMapping.executeCommandMapping(reverseRMS);
+    cmdMapping.executeCommandMapping(nonMatchingRMS);
+    cmdMapping.executeCommandMapping(reverseRMS);
+    cmdMapping.executeCommandMapping(nonMatchingRMS);
+    cmdMapping.executeCommandMapping(reverseRMS);
+    cmdMapping.executeCommandMapping(nonMatchingRMS);
+    cmdMapping.executeCommandMapping(reverseRMS);
 }

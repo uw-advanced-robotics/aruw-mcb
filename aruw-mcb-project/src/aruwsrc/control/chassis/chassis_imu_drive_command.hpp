@@ -25,10 +25,10 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class HolonomicChassisSubsystem;
 
@@ -98,6 +98,6 @@ private:
     uint32_t prevTime = 0;
 };  // class ChassisImuDriveCommand
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // CHASSIS_IMU_DRIVE_COMMAND_HPP_

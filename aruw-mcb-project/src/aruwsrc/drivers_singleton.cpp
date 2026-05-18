@@ -25,7 +25,7 @@
 namespace aruwsrc::standard
 #elif defined(ALL_SENTRIES)
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_NEPTUNE)
 namespace aruwsrc::hero
 #elif defined(TARGET_DRONE)
 namespace aruwsrc::drone
@@ -35,6 +35,16 @@ namespace aruwsrc::engineer
 namespace aruwsrc::dart
 #elif defined(TARGET_TESTBED)
 namespace aruwsrc::testbed
+#elif defined(TARGET_BLANK)
+namespace aruwsrc::blank
+#elif defined(TARGET_MOTOR_TESTER)
+namespace aruwsrc::motor_tester
+#elif defined(TARGET_LAUNCHER_TARGET)
+namespace aruwsrc::launcher_target
+#elif defined(TARGET_FLYWHEEL_TESTING)
+namespace aruwsrc::flywheel_testing
+#elif defined(TARGET_CHARACTERIZER)
+namespace aruwsrc::characterizer
 #endif
 {
 /**

@@ -27,11 +27,25 @@
 #include "modm/math/filter/debounce.hpp"
 #include "modm/ui/menu/view_stack.hpp"
 
+#include "tap/communication/gpio/analog.hpp"
+
 namespace tap
 {
 class Drivers;
 namespace display
 {
+/**
+ * Struct to hold the analog values for the OLED buttons.
+ */
+struct AnalogConfig
+{
+    int ok;
+    int left;
+    int right;
+    int up;
+    int down;
+};
+
 /**
  * Class designed to convert analog button signal from the OLED
  * display into usable button states.
@@ -49,7 +63,10 @@ public:
         NONE,
     };
 
-    OledButtonHandler(tap::Drivers *drivers);
+    // Constructor for setting custom ADC button values
+    OledButtonHandler(tap::Drivers *drivers,
+        const tap::gpio::Analog::Pin pin = tap::gpio::Analog::Pin::OledJoystick,
+        const AnalogConfig analogConfig = DEFAULT_ADC_CONFIG);
 
     /**
      * Updates the status of the current button and returns the updated button.
@@ -63,11 +80,14 @@ public:
 private:
     static constexpr int BUTTON_DEBOUNCE_SAMPLES = 10;
     static constexpr int ADC_PRESSED_RANGE = 100;
-    static constexpr int OK_ADC_VAL = 0;
-    static constexpr int LEFT_ADC_VAL = 900;
-    static constexpr int RIGHT_ADC_VAL = 1700;
-    static constexpr int UP_ADC_VAL = 2500;
-    static constexpr int DOWN_ADC_VAL = 3300;
+
+    static constexpr struct AnalogConfig DEFAULT_ADC_CONFIG = {
+        .ok = 0,
+        .left = 900,
+        .right = 1700,
+        .up = 2500,
+        .down = 3300,
+    };
 
     tap::Drivers *drivers;
 
@@ -76,6 +96,9 @@ private:
     modm::filter::Debounce<int> leftButtonPressed;
     modm::filter::Debounce<int> rightButtonPressed;
     modm::filter::Debounce<int> okButtonPressed;
+
+    const tap::gpio::Analog::Pin pin;
+    const struct AnalogConfig adcConfig;
 };  // class OledButtonHandler
 }  // namespace display
 }  // namespace tap

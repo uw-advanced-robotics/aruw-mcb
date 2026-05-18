@@ -26,11 +26,11 @@
 namespace aruwsrc
 {
 // forward declaration
-namespace agitator
+namespace control::agitator
 {
 class AgitatorSubsystem;
 }
-namespace control
+namespace control::hopper_cover
 {
 /**
  * For opening and closing the hopper lid currently we use overly large
@@ -121,7 +121,7 @@ public:
     }
 };  // class StandardCloseHopperCommand
 
-}  // namespace control
+}  // namespace control::hopper_cover
 
 }  // namespace aruwsrc
 

@@ -34,12 +34,13 @@
 #include "aruwsrc/drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
-#include "tap/errors/create_errors.hpp"
+#include "aruwsrc/communication/rtt/create_rtt_error.hpp"
 
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 
+#include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 #include "aruwsrc/sim-initialization/robot_sim.hpp"
 #include "aruwsrc/util_macros.hpp"
@@ -50,20 +51,11 @@ static constexpr float MAHONY_KP = 0.1f;
 /* define timers here -------------------------------------------------------*/
 tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 
-// Place any sort of input/output initialization here. For example, place
-// serial init stuff here.
-static void initializeIo(tap::Drivers *drivers);
-
-// Anything that you would like to be called place here. It will be called
-// very frequently. Use PeriodicMilliTimers if you don't want something to be
-// called as frequently.
-static void updateIo(tap::Drivers *drivers);
-
 #if defined(ALL_STANDARDS)
 using namespace aruwsrc::standard;
 #elif defined(ALL_SENTRIES)
 using namespace aruwsrc::sentry;
-#elif defined(TARGET_HERO_PERSEUS)
+#elif defined(TARGET_HERO_NEPTUNE)
 using namespace aruwsrc::hero;
 #elif defined(TARGET_DRONE)
 using namespace aruwsrc::drone;
@@ -73,7 +65,28 @@ using namespace aruwsrc::engineer;
 using namespace aruwsrc::dart;
 #elif defined(TARGET_TESTBED)
 using namespace aruwsrc::testbed;
+#elif defined(TARGET_BLANK)
+using namespace aruwsrc::blank;
+#elif defined(TARGET_MOTOR_TESTER)
+using namespace aruwsrc::motor_tester;
+#elif defined(TARGET_LAUNCHER_TARGET)
+using namespace aruwsrc::launcher_target;
+#elif defined(TARGET_FLYWHEEL_TESTING)
+using namespace aruwsrc::flywheel_testing;
+#elif defined(TARGET_CHARACTERIZER)
+using namespace aruwsrc::characterizer;
 #endif
+
+// Place any sort of input/output initialization here. For example, place
+// serial init stuff here.
+static void initializeIo(Drivers* drivers);
+
+// Anything that you would like to be called place here. It will be called
+// very frequently. Use PeriodicMilliTimers if you don't want something to be
+// called as frequently.
+static void updateIo(Drivers* drivers);
+
+// static void initializeI2C(Drivers* drivers);
 
 int main()
 {
@@ -86,13 +99,13 @@ int main()
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
-    Drivers *drivers = DoNotUse_getDrivers();
+    Drivers* drivers = DoNotUse_getDrivers();
 
     Board::initialize();
     initializeIo(drivers);
     initSubsystemCommands(drivers);
 
-    while (1)
+    while (true)
     {
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));
@@ -102,43 +115,14 @@ int main()
             PROFILE(drivers->profiler, drivers->mpu6500.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
             PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->oledDisplay.updateMenu, ());
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus1.sendData, ());
-#endif
-
-#if defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->turretMCBCanCommBus2.sendData, ());
-            PROFILE(drivers->profiler, drivers->chassisMcbLite.sendData, ());
-            PROFILE(drivers->profiler, drivers->turretMajorMcbLite.sendData, ());
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-            PROFILE(drivers->profiler, drivers->visionCoprocessor.sendMessage, ());
-#endif
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS)
-            bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
-            if (!turretMcbConnected)
-            {
-                tap::buzzer::playNote(&drivers->pwm, 1000);
-            }
-            else
-            {
-                tap::buzzer::silenceBuzzer(&drivers->pwm);
-            }
-#endif
+            drivers->update();
         }
         modm::delay_us(10);
     }
     return 0;
 }
 
-static void initializeIo(tap::Drivers *drivers)
+static void initializeIo(Drivers* drivers)
 {
     drivers->analog.init();
     drivers->pwm.init();
@@ -149,56 +133,25 @@ static void initializeIo(tap::Drivers *drivers)
     drivers->remote.initialize();
     drivers->mpu6500.init(MAIN_LOOP_FREQUENCY, MAHONY_KP, 0.0f);
     drivers->refSerial.initialize();
-
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->visionCoprocessor.initializeCV();
-    ((Drivers *)drivers)->turretMCBCanCommBus1.init();
-#endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS) || defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->oledDisplay.initialize();
-#endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
-    ((Drivers *)drivers)->mpu6500.setCalibrationSamples(2000);
-#endif
-#if defined(TARGET_HERO_PERSEUS) || defined(ALL_STANDARDS)
-    ((Drivers *)drivers)->capacitorBank.initialize();
-#endif
-#if defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->turretMCBCanCommBus2.init();
-    // Needs to be same time period as the calibration period of the minors and mcb-lite is as this
-    // dictates command length
-    ((Drivers *)drivers)->mpu6500.setCalibrationSamples(4000);
-    ((Drivers *)drivers)->chassisMcbLite.initialize();
-    ((Drivers *)drivers)->turretMajorMcbLite.initialize();
-#endif
-#if defined(TARGET_TESTBED)
-    ((Drivers *)drivers)->mavlinkTelemetry.initialize();
-#endif
+    drivers->init(MAIN_LOOP_FREQUENCY);
 }
 
-static void updateIo(tap::Drivers *drivers)
+static void updateIo(Drivers* drivers)
 {
     drivers->canRxHandler.pollCanData();
     drivers->refSerial.updateSerial();
     drivers->remote.read();
     drivers->mpu6500.read();
-
-#if defined(ALL_STANDARDS) || defined(TARGET_HERO_PERSEUS) || defined(TARGET_SENTRY_HYDRA)
-    ((Drivers *)drivers)->oledDisplay.updateDisplay();
-#endif
-
-#ifdef ALL_STANDARDS
-    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
-#endif
-#ifdef TARGET_HERO_PERSEUS
-    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
-#endif
-#ifdef TARGET_SENTRY_HYDRA
-    ((Drivers *)drivers)->chassisMcbLite.updateSerial();
-    ((Drivers *)drivers)->turretMajorMcbLite.updateSerial();
-    ((Drivers *)drivers)->visionCoprocessor.updateSerial();
-#endif
-#if defined(TARGET_TESTBED)
-    ((Drivers *)drivers)->mavlinkTelemetry.read();
-#endif
+    drivers->updateIo();
 }
+
+// static void initializeI2C(Drivers* drivers)
+// {
+//     drivers->digital.set(tap::gpio::Digital::OutputPin::E, true);
+//     modm::delay_ms(2000);  // Wait for the SDA and SCL lines to be pulled high
+
+//     Board::I2CMaster::connect<Board::I2cScl::Scl, Board::I2CSda::Sda>(
+//         Board::I2CMaster::PullUps::External);
+//     Board::I2CMaster::initialize<Board::SystemClock, 300'000>();
+//     Board::I2CMaster::reset();
+// }

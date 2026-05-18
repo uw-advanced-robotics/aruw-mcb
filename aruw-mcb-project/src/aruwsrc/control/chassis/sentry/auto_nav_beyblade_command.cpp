@@ -29,12 +29,12 @@ using GameData = RefSerialData::Rx::GameData;
 
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::sentry
 {
 AutoNavBeybladeCommand::AutoNavBeybladeCommand(
     const tap::Drivers& drivers,
-    HolonomicChassisSubsystem& chassis,
-    aruwsrc::chassis::ChassisAutoNavController& autoNavController,
+    chassis::HolonomicChassisSubsystem& chassis,
+    aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
     bool autoNavOnlyInGame)
     : drivers(drivers),
       chassis(chassis),
@@ -50,7 +50,7 @@ void AutoNavBeybladeCommand::initialize() { autoNavController.initialize(); }
 
 void AutoNavBeybladeCommand::execute()
 {
-    const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
+    const float maxWheelSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers.refSerial.getRefSerialReceivingData(),
         drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
@@ -61,9 +61,13 @@ void AutoNavBeybladeCommand::execute()
     {
         autoNavController.runController(maxWheelSpeed, movementEnabled, beybladeEnabled);
     }
+    else
+    {
+        chassis.setDesiredOutput(0., 0., 0.);
+    }
 }
 
 void AutoNavBeybladeCommand::end(bool) { chassis.setZeroRPM(); }
-}  // namespace chassis
+}  // namespace control::chassis::sentry
 
 }  // namespace aruwsrc

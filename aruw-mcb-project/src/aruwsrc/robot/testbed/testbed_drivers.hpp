@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,9 +22,15 @@
 
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#else
 #include "aruwsrc/communication/serial/mavlink/mavlink_telemetry.hpp"
-#include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
+#endif
 
 namespace aruwsrc::testbed
 {
@@ -37,13 +43,39 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
-          mavlinkTelemetry(this, tap::communication::serial::Uart::UartPort::Uart7)
+          mavlinkTelemetry(this, tap::communication::serial::Uart::UartPort::Uart7),
+          rttTelemetry(this),
+          controlOperatorInterface(this)
+        //   lite(this, tap::communication::serial::Uart::UartPort::Uart7)
     {
+        controlOperatorInterface.setTelemetry(&rttTelemetry);
     }
 
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+#else
 public:
     aruwsrc::communication::serial::mavlink::MavlinkTelemetry mavlinkTelemetry;
+    communication::rtt::RttTelemetry rttTelemetry;
+    control::ControlOperatorInterface controlOperatorInterface;
+#endif
+    // aruwsrc::communication::mcb_lite::MCBLite lite;
+
+    void init(const float) { 
+        mavlinkTelemetry.initialize();
+    }
+        // lite.initialize(); }
+
+    void updateIo() { // lite.updateSerial();
+        mavlinkTelemetry.read(); }
+
+    void update()
+    {
+        // lite.sendData();
+        mavlinkTelemetry.sendIntervalCommand(mavlinkTelemetry.MAVLINK_MSG_ID_LOCAL_POSITION_NED, 100);
+        rttTelemetry.updateTelemetryAsync();
+    }
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 
-#endif  // STANDARD_DRIVERS_HPP_
+#endif  // TESTBED_DRIVERS_HPP_

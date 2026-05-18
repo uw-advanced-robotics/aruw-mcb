@@ -60,6 +60,9 @@ void Digital::configureInputPullMode(Digital::InputPin pin, Digital::InputPullMo
         case Digital::InputPin::D:
             DigitalInPinD::configure(mode);
             break;
+        case Digital::InputPin::T:
+            DigitalInPinT::configure(mode);
+            break;
         case Digital::InputPin::Button:
             DigitalInPinButton::configure(mode);
             break;
@@ -87,6 +90,12 @@ void Digital::set(Digital::OutputPin pin, bool isSet)
         case Digital::OutputPin::H:
             DigitalOutPinH::set(isSet);
             break;
+        case Digital::OutputPin::Y:
+            DigitalOutPinY::set(isSet);
+            break;
+        case Digital::OutputPin::Z:
+            DigitalOutPinZ::set(isSet);
+            break;
         case Digital::OutputPin::Laser:
             DigitalOutPinLaser::set(isSet);
             break;
@@ -108,6 +117,8 @@ bool Digital::read(Digital::InputPin pin) const
             return DigitalInPinC::read();
         case Digital::InputPin::D:
             return DigitalInPinD::read();
+        case Digital::InputPin::T:
+            return DigitalInPinT::read();
         case Digital::InputPin::Button:
             return DigitalInPinButton::read();
         default:

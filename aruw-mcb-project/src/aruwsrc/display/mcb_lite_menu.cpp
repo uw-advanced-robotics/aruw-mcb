@@ -27,7 +27,7 @@ namespace aruwsrc::display
 {
 MCBLiteMenu::MCBLiteMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    aruwsrc::virtualMCB::MCBLite *mcbLite)
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, MCB_LITE_MENU_ID),
       mcbLite(mcbLite)
 {
@@ -44,7 +44,7 @@ void MCBLiteMenu::draw()
         "IMU calib? %d (yaw): %.2f\n",
         mcbLite->imu.getImuState() ==
             tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED,
-        static_cast<double>(mcbLite->imu.getYaw()));
+        static_cast<double>(modm::toDegree(mcbLite->imu.getYaw())));
 
     display << "Motor positions: " << modm::endl;
     // Position of the motors, should be the first two bytes

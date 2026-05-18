@@ -32,9 +32,7 @@
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 WiggleDriveCommand::WiggleDriveCommand(
     tap::Drivers* drivers,
@@ -67,7 +65,8 @@ void WiggleDriveCommand::execute()
     // We only wiggle when the turret is online.
     if (yawMotor->isOnline())
     {
-        const float turretYawFromCenter = yawMotor->getAngleFromCenter();
+        const float turretYawFromCenter =
+            yawMotor->getChassisFrameMeasuredAngle().getWrappedValue();
         const WiggleParams& wiggleParams = getWiggleParams();
 
         if (turretYawFromCenter > wiggleParams.turnaroundAngle + turretPlateOffset)
@@ -139,6 +138,4 @@ const WiggleDriveCommand::WiggleParams& WiggleDriveCommand::getWiggleParams() co
     }
 }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
