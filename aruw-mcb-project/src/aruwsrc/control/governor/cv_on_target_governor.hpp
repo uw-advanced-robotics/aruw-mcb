@@ -32,35 +32,6 @@ namespace
 {
 using namespace aruwsrc::control::auto_aim;
 }
-
-extern volatile bool cvOnTargetDebugCvOnline;
-extern volatile bool cvOnTargetDebugCvRunning;
-extern volatile bool cvOnTargetDebugGovernorEnabled;
-extern volatile bool cvOnTargetDebugGovernorGating;
-extern volatile bool cvOnTargetDebugOnTarget;
-extern volatile bool cvOnTargetDebugGateSatisfied;
-extern volatile bool cvOnTargetDebugIsReady;
-extern volatile uint8_t cvOnTargetDebugLaunchInclination;
-extern volatile bool cvOnTargetDebugAimDataUpdated;
-extern volatile bool cvOnTargetDebugTimingDataUpdated;
-extern volatile bool cvOnTargetDebugBallisticsSolutionFound;
-extern volatile bool cvOnTargetDebugPulseEstimationUsed;
-extern volatile bool cvOnTargetDebugValidFlightTime;
-extern volatile bool cvOnTargetDebugInShotWindow;
-extern volatile uint32_t cvOnTargetDebugAimTimestamp;
-extern volatile uint32_t cvOnTargetDebugPulseOffset;
-extern volatile uint32_t cvOnTargetDebugPulseInterval;
-extern volatile uint32_t cvOnTargetDebugPulseDuration;
-extern volatile float cvOnTargetDebugTimeOfFlight;
-extern volatile uint64_t cvOnTargetDebugNow;
-extern volatile uint64_t cvOnTargetDebugEffectiveFireTime;
-extern volatile uint64_t cvOnTargetDebugShotWindowStart;
-extern volatile uint64_t cvOnTargetDebugShotWindowEnd;
-extern volatile int64_t cvOnTargetDebugCountdownToShotWindowStart;
-extern volatile int64_t cvOnTargetDebugCountdownToShotWindowEnd;
-extern volatile int64_t cvOnTargetDebugOffsetInFiringWindow;
-extern volatile uint32_t cvOnTargetDebugMaxHitTimeError;
-
 enum class CvOnTargetGovernorMode
 {
     ON_TARGET,
@@ -138,7 +109,7 @@ public:
             cvOnTargetDebugOnTarget = false;
             cvOnTargetDebugGateSatisfied = !requireActiveGating;
             cvOnTargetDebugIsReady = !requireActiveGating;
-            return cvOnTargetDebugIsReady;
+            return !requireActiveGating;
         }
 
         bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance();
@@ -224,6 +195,34 @@ private:
     const CvOnTargetGovernorMode mode;
     const bool requireActiveGating;
     bool enabled = true;
+
+    mutable bool cvOnTargetDebugCvOnline;
+    mutable bool cvOnTargetDebugCvRunning;
+    mutable bool cvOnTargetDebugGovernorEnabled;
+    mutable bool cvOnTargetDebugGovernorGating;
+    mutable bool cvOnTargetDebugOnTarget;
+    mutable bool cvOnTargetDebugGateSatisfied;
+    mutable bool cvOnTargetDebugIsReady;
+    mutable uint8_t cvOnTargetDebugLaunchInclination;
+    mutable bool cvOnTargetDebugAimDataUpdated;
+    mutable bool cvOnTargetDebugTimingDataUpdated;
+    mutable bool cvOnTargetDebugBallisticsSolutionFound;
+    mutable bool cvOnTargetDebugPulseEstimationUsed;
+    mutable bool cvOnTargetDebugValidFlightTime;
+    mutable bool cvOnTargetDebugInShotWindow;
+    mutable uint32_t cvOnTargetDebugAimTimestamp;
+    mutable uint32_t cvOnTargetDebugPulseOffset;
+    mutable uint32_t cvOnTargetDebugPulseInterval;
+    mutable uint32_t cvOnTargetDebugPulseDuration;
+    mutable float cvOnTargetDebugTimeOfFlight;
+    mutable uint64_t cvOnTargetDebugNow;
+    mutable uint64_t cvOnTargetDebugEffectiveFireTime;
+    mutable uint64_t cvOnTargetDebugShotWindowStart;
+    mutable uint64_t cvOnTargetDebugShotWindowEnd;
+    mutable int64_t cvOnTargetDebugCountdownToShotWindowStart;
+    mutable int64_t cvOnTargetDebugCountdownToShotWindowEnd;
+    mutable int64_t cvOnTargetDebugOffsetInFiringWindow;
+    mutable uint32_t cvOnTargetDebugMaxHitTimeError;
 };
 }  // namespace aruwsrc::control::governor
 
