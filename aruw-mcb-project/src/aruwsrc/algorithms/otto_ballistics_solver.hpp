@@ -139,7 +139,7 @@ public:
      * @param[out] solution The ballistics solution computed. Will potentially update any of the
      * fields even if the solution's validSolutionFound function is false
      */
-    mockable std::optional<BallisticsSolution> computeTurretAimAngles() override;
+    mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
