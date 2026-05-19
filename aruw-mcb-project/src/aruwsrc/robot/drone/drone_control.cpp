@@ -106,12 +106,13 @@ tap::motor::DjiMotor yawMotor(
     0,
     &yawEncoder);
 
+aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
+aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
+
 aruwsrc::drone::DroneTurretSubsystem turret(
     drivers(),
-    &pitchMotor,
-    &yawMotor,
-    PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
+    pitchTurretMotor,
+    yawTurretMotor,
     &drivers()->turretImu);
 
 // transforms

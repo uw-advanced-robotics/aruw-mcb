@@ -20,6 +20,7 @@
 #ifndef LAMPREY_ENCODER_HPP_
 #define LAMPREY_ENCODER_HPP_
 
+#include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 
@@ -31,7 +32,21 @@ namespace aruwsrc::communication::sensors::encoder
 class LampreyEncoder : public tap::encoder::CanEncoder
 {
 public:
-    /***
+    /**
+     * @brief 0 length array version
+     */
+    LampreyEncoder(
+        tap::Drivers* drivers,
+        tap::encoder::CanEncoderId CAN_ID,
+        tap::can::CanBus CAN_BUS,
+        const modm::Pair<float, float> (&)[0],
+        bool isInverted = false)
+        : CanEncoder(drivers, CAN_ID, CAN_BUS, isInverted),
+          lookupTable(nullptr, 0),
+          lutSize(0)
+    {
+    }
+    /**
      * @param sensor the AruwAnalogSensor that this encoder will read from
      * @param channel the channel of the AruwAnalogSensor that this encoder will read from
      * @param calibration the calibration values for this encoder
@@ -47,39 +62,52 @@ public:
         tap::Drivers* drivers,
         tap::encoder::CanEncoderId CAN_ID,
         tap::can::CanBus CAN_BUS,
-        const modm::Pair<float, float> (&lookupTableConfig)[LUT_SIZE] = {},
+        const modm::Pair<float, float> (&lookupTableConfig)[LUT_SIZE],
         bool isInverted = false)
         : CanEncoder(drivers, CAN_ID, CAN_BUS, isInverted),
           lookupTable(lookupTableConfig, LUT_SIZE),
-          lutSize(LUT_SIZE)
+          lutSize(LUT_SIZE),
+          powerOnTimeout()
     {
     }
 
     float getRawAngle() const { return angleRaw; }
 
+    bool isOnline() const override
+    {
+        return powerOnTimeout.isExpired() && CanEncoder::CanEncoder::isOnline();
+    }
+
+    void initialize() override
+    {
+        CanEncoder::CanEncoder::initialize();
+        powerOnTimeout.restart(500);
+    }
+
     void processMessage(const modm::can::Message& message)
     {
         uint16_t raw = (message.data[1] << 8) | message.data[0];
 
-        angleRaw = (raw / 100.0f);
+        angleRaw = modm::toRadian(raw / 100.0f);
 
         float angle = angleRaw;
+
+        if (lutSize > 0)
+        {
+            angle = lookupTable.interpolate(angleRaw);
+        }
 
         if (inverted)
         {
             angle = -angle;
         }
 
-        angle = -encoderHomePosition.getWrappedValue();
+        angle -= encoderHomePosition.getWrappedValue();
         if (angle < 0.0f)
         {
             angle += M_TWOPI;
         }
 
-        if (lutSize > 0)
-        {
-            angle = lookupTable.interpolate(angleRaw);
-        }
         if (lastUpdateTime == 0)
         {
             encoder = tap::algorithms::WrappedFloat(angle, 0, M_TWOPI);
@@ -105,6 +133,8 @@ private:
 
     const size_t lutSize{0};
     float angleRaw{0.0f};
+
+    tap::arch::MilliTimeout powerOnTimeout;
 };
 
 }  // namespace aruwsrc::communication::sensors::encoder
