@@ -97,13 +97,28 @@ public:
         FLAGS_BYTES = 1,
         TIMESTAMP_BYTES = 4,
         FIRERATE_BYTES = 1,
-        TARGET_DATA_BYTES = 69,  // (nice) 17 floats and 1 byte (from firerate)
+        TARGET_DATA_BYTES = 70,  // (nice) 17 floats and 2 bytes (from firerate and icon)
         SHOT_TIMING_BYTES = 12,
     };
 
     static constexpr uint8_t LEN_FIELDS[NUM_TAGS] = {
         messageWidths::TARGET_DATA_BYTES,
         messageWidths::SHOT_TIMING_BYTES};  // indices correspond to Tags
+
+    enum class PlateIcon : uint8_t
+    {
+        UNKNOWN = 0,
+        HERO_ONE = 1,
+        ENGINEER_TWO = 2,
+        STANDARD_THREE = 3,  // standard
+        STANDARD_FOUR = 4,   // standard
+        STANDARD_FIVE = 5,
+        SEVEN = 6,
+        EIGHT = 7,
+        SENTRY = 8,
+        BASE = 9,
+        OUTPOST = 10,
+    };
 
     /**
      * AutoAim data to receive from Jetson. Describes a rectangular robot with separate z offsets
@@ -137,6 +152,8 @@ public:
         float radius1;          ///< distance from center to plates 1 and 3
         float plateHeights[4];  ///< height of each plate off the robot center
         // ^ measured from the ground to the center of the plate
+
+        PlateIcon icon;
 
         bool updated;  ///< whether or not this came from the most recent message
 
