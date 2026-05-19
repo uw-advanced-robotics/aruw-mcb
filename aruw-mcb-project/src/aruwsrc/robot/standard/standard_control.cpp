@@ -527,13 +527,14 @@ ConstantFireRateAgitatorCommand rotateAgitator(
         constants::AGITATOR_NUM_POCKETS,
         constants::MIN_CONSTANT_FIRE_RATE_RPM,
         &manualFireRateReselectionManager});
+MoveIntegralCommand rotateAgitatorSingleShot(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
 UnjamSpokeAgitatorCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
 MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     *drivers(),
     agitator,
-    rotateAgitator,
+    rotateAgitatorSingleShot,
     unjamAgitator);
 
 // Unused, causes incosnistent fire rates due to suspected ref delay.
@@ -702,8 +703,8 @@ MultiShotCvCommandMapping leftMousePressedBNotPressed(
     rotateAndUnjamAgitatorWithHeatAndCVLimiting,
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     &manualFireRateReselectionManager,
-    cvOnTargetGovernor,
-    &rotateAgitator);
+    cvOnTargetGovernor);
+// &rotateAgitator);
 
 Trigger fToggled = TriggerHelpers::button(drivers(), Remote::Key::F).toggleOnTrue(&beybladeCommand);
 
