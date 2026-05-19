@@ -61,7 +61,7 @@ public:
     {
     }
 
-    mockable void setGovernorEnabled(bool enabled) { this->enabled = true; }
+    mockable void setGovernorEnabled(bool enabled) { this->enabled = enabled; }
 
     mockable bool isGoverEnabled() const { return this->enabled; }
 
