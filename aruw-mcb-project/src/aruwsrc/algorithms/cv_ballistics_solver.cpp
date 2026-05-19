@@ -32,8 +32,8 @@
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 using namespace tap::algorithms;
-using namespace modm;
 
+using tap::algorithms::Angle;
 using tap::algorithms::WrappedFloat;
 using tap::algorithms::ballistics::SecondOrderKinematicState;
 
@@ -270,6 +270,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     // Estimate approximate distance and ToF to nearest point on robot perimeter
     float avgRadius = (projectedAimPosData.radius0 + projectedAimPosData.radius1) / 2.0f;
+    float avgPlateAngularWidth = PLATE_WIDTH / avgRadius;
     modm::Vector3f robotPos(
         projectedAimPosData.xPos - worldToTurret.getX(),
         projectedAimPosData.yPos - worldToTurret.getY(),
@@ -283,6 +284,9 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     float horizontalDistToClosestPoint = robotPos.xy().getLength() - avgRadius;
     float approxDistance = modm::Vector2f(horizontalDistToClosestPoint, robotPos.z).getLength();
     float estimatedToF = approxDistance / launchSpeed;
+    // TODO: could do a center ballistics pass instead? would account for turret pitch
+
+    auto estHitTimePosData = projectedAimPosData.projectForward(estimatedToF);
 
     // Compute the angular velocity of the target wrt a rotating frame who's x axis always faces
     // the target (e.g. the turret tracks the target robot center)
@@ -297,6 +301,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     float omegaFromTranslation = rMagSquared < 1e-6f ? 0 : crossProductZ / rMagSquared;
 
+    // TODO: is translation-induced component even necessary
     float omegaTotal = projectedAimPosData.omega + omegaFromTranslation;
 
     if (telemetry)
@@ -315,10 +320,10 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         return std::nullopt;
     }
 
-    // Calculate our aim angle (from turret to robot center)
+    // Calculate our aim angle (from turret to predicted robot center)
     float aimAngle = atan2f(
-        projectedAimPosData.yPos - worldToTurret.getY(),
-        projectedAimPosData.xPos - worldToTurret.getX());
+        estHitTimePosData.yPos - worldToTurret.getY(),
+        estHitTimePosData.xPos - worldToTurret.getX());
 
     // Determine active plate based on omega_total and estimated ToF
     // At the time we expect the projectile to hit the robot, we want to choose the plate in a
@@ -327,11 +332,19 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     // when we decide to target the next plate in between shot windows), but it could be biased
     // towards the direction the plate arrives all the way until the closing edge is a plate's width
     // away from the aim line.
-    float desiredPlateQuadrantStart = omegaTotal > 0 ? -M_PI_4 : -M_PI_4;  // TODO: bias?
+    float desiredPlateQuadrantStart =
+        // omegaTotal > 0 ? avgPlateAngularWidth / 2 - M_PI_2 : -avgPlateAngularWidth / 2;
+        -M_PI_4;
     WrappedFloat aimLineToProjectedPlate0 =
-        WrappedFloat(projectedAimPosData.theta, 0, M_TWOPI) - aimAngle + M_PI;
-    uint8_t activePlateIndex = static_cast<uint8_t>(
-        (aimLineToProjectedPlate0 - desiredPlateQuadrantStart).getWrappedValue() / M_PI_2);
+        WrappedFloat(estHitTimePosData.theta, 0, M_TWOPI) - aimAngle + M_PI;
+    float desiredPlateQuadrantStartToProjectedPlate0 =
+        (Angle(-desiredPlateQuadrantStart) - aimLineToProjectedPlate0).getWrappedValue();
+    uint8_t activePlateIndex =
+        static_cast<uint8_t>(desiredPlateQuadrantStartToProjectedPlate0 / M_PI_2);
+
+    // float quadrantStartToActivePlate = fmodf(desiredPlateQuadrantStartToProjectedPlate0, M_PI_2);
+    // float projectedActivePlateToAimLine = -desiredPlateQuadrantStart -
+    // quadrantStartToActivePlate;
 
     if (telemetry)
     {
@@ -370,7 +383,9 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
             &solution.pitchAngle,
             &solution.yawAngle,
             &solution.timeOfFlight,
-            turretPitchOffset))
+            turretPitchOffset -
+                activePlateRadius))  // aim at nearest point on perimeter by pretending the turret
+                                     //   pitch axis is offset forward by the target plate radius
     {
         if (telemetry)
         {
@@ -387,24 +402,29 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         telemetry->logSignal("ballistics:pulse_distance", solution.distance);
     }
 
+    auto actualHitTimePosData = projectedAimPosData.projectForward(solution.timeOfFlight);
+
+    aimAngle = atan2f(
+        actualHitTimePosData.yPos - worldToTurret.getY(),
+        actualHitTimePosData.xPos - worldToTurret.getX());
+
     // Calculate shot timing window
     // Use the active plate's actual radius for angular width calculation
     float plateAngularWidth = PLATE_WIDTH / activePlateRadius;
 
     // Calculate when the active plate's CENTER will actually cross the aim line
     // Plate i is at angle: theta + i*π/2
-    float activePlateAngle = projectedAimPosData.theta + activePlateIndex * M_PI_2;
+    float predictedActivePlateAngle = projectedAimPosData.theta + activePlateIndex * M_PI_2;
 
-    // Angular distance from plate to aim line
-    WrappedFloat angularOffset = WrappedFloat(activePlateAngle, -M_PI, M_PI) - aimAngle + M_PI;
+    // Angle the target plate must move before reaching the aim line
+    // We also handle the case where the plate does >+1 revolution
+    // The `minDifference` is valid because if the plate selection works, then
+    // `predictedActivePlateAngle` should be close to the aim line
+    float totalActivePlateTravel = (actualHitTimePosData.theta - projectedAimPosData.theta) +
+                                   Angle(actualHitTimePosData.theta + activePlateIndex * M_PI_2)
+                                       .minDifference(aimAngle + M_PI);
 
-    if (omegaTotal > 0)
-    {
-        angularOffset = WrappedFloat(-angularOffset.getWrappedValue(), -M_PI, M_PI);
-    }
-
-    // Calculate time for plate center to cross aim line
-    float timeToPlateCenterCrossing = angularOffset.getWrappedValue() / omegaTotal;
+    float timeToPlateCenterCrossing = totalActivePlateTravel / omegaTotal;
 
     // Time for close edge to reach aim line
     float halfWidthTime = (plateAngularWidth / 2.0f) / fabsf(omegaTotal);
@@ -426,15 +446,15 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     float endOffsetSeconds =
         (fireWindowEnd > startOffsetSeconds) ? fireWindowEnd : startOffsetSeconds;
 
-    solution.shotWindowStart = currentTimeMicros + static_cast<uint64_t>(startOffsetSeconds * 1e6f);
-    solution.shotWindowEnd = currentTimeMicros + static_cast<uint64_t>(endOffsetSeconds * 1e6f);
+    solution.shotWindowStart = currentTimeMicros + static_cast<uint64_t>(fireWindowStart * 1e6f);
+    solution.shotWindowEnd = currentTimeMicros + static_cast<uint64_t>(fireWindowEnd * 1e6f);
     // */
     // solution.shotWindowStart = fireWindowStart;
     // solution.shotWindowEnd = fireWindowEnd;
 
     if (telemetry)
     {
-        telemetry->logSignal("ballistics:pulse_angular_offset", angularOffset.getWrappedValue());
+        // telemetry->logSignal("ballistics:pulse_angular_offset", angularOffset.getWrappedValue());
         telemetry->logSignal("ballistics:pulse_time_to_crossing", timeToPlateCenterCrossing);
         // telemetry->logSignal("ballistics:pulse_window_start_offset", startOffsetSeconds);
         // telemetry->logSignal("ballistics:pulse_window_end_offset", endOffsetSeconds);
