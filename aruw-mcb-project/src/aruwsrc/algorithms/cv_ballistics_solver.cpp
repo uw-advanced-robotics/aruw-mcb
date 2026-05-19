@@ -270,7 +270,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     // Estimate approximate distance and ToF to nearest point on robot perimeter
     float avgRadius = (projectedAimPosData.radius0 + projectedAimPosData.radius1) / 2.0f;
-    float avgPlateAngularWidth = PLATE_WIDTH / avgRadius;
+
     modm::Vector3f robotPos(
         projectedAimPosData.xPos - worldToTurret.getX(),
         projectedAimPosData.yPos - worldToTurret.getY(),
@@ -332,9 +332,10 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     // when we decide to target the next plate in between shot windows), but it could be biased
     // towards the direction the plate arrives all the way until the closing edge is a plate's width
     // away from the aim line.
-    float desiredPlateQuadrantStart =
-        // omegaTotal > 0 ? avgPlateAngularWidth / 2 - M_PI_2 : -avgPlateAngularWidth / 2;
-        -M_PI_4;
+    // float avgPlateAngularWidth = PLATE_WIDTH / avgRadius;
+    float desiredPlateQuadrantStart = -M_PI_4;
+    // float desiredPlateQuadrantStart =
+    //     omegaTotal > 0 ? avgPlateAngularWidth / 2 - M_PI_2 : -avgPlateAngularWidth / 2;
     WrappedFloat aimLineToProjectedPlate0 =
         WrappedFloat(estHitTimePosData.theta, 0, M_TWOPI) - aimAngle + M_PI;
     float desiredPlateQuadrantStartToProjectedPlate0 =
@@ -414,15 +415,14 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     // Calculate when the active plate's CENTER will actually cross the aim line
     // Plate i is at angle: theta + i*π/2
-    float predictedActivePlateAngle = projectedAimPosData.theta + activePlateIndex * M_PI_2;
+    float predictedActivePlateAngle = actualHitTimePosData.theta + activePlateIndex * M_PI_2;
 
     // Angle the target plate must move before reaching the aim line
     // We also handle the case where the plate does >+1 revolution
     // The `minDifference` is valid because if the plate selection works, then
     // `predictedActivePlateAngle` should be close to the aim line
     float totalActivePlateTravel = (actualHitTimePosData.theta - projectedAimPosData.theta) +
-                                   Angle(actualHitTimePosData.theta + activePlateIndex * M_PI_2)
-                                       .minDifference(aimAngle + M_PI);
+                                   Angle(predictedActivePlateAngle).minDifference(aimAngle + M_PI);
 
     float timeToPlateCenterCrossing = totalActivePlateTravel / omegaTotal;
 
@@ -440,17 +440,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     float fireWindowStart = timeToCloseEdge - solution.timeOfFlight;
     float fireWindowEnd = timeToFarEdge - solution.timeOfFlight;
 
-    // /*
-    // Clamp to future times only (can't fire in the past)
-    float startOffsetSeconds = (fireWindowStart > 0.0f) ? fireWindowStart : 0.0f;
-    float endOffsetSeconds =
-        (fireWindowEnd > startOffsetSeconds) ? fireWindowEnd : startOffsetSeconds;
-
     solution.shotWindowStart = currentTimeMicros + static_cast<uint64_t>(fireWindowStart * 1e6f);
     solution.shotWindowEnd = currentTimeMicros + static_cast<uint64_t>(fireWindowEnd * 1e6f);
-    // */
-    // solution.shotWindowStart = fireWindowStart;
-    // solution.shotWindowEnd = fireWindowEnd;
 
     if (telemetry)
     {
