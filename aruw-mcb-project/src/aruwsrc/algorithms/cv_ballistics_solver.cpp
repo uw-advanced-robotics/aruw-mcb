@@ -46,6 +46,7 @@ CvBallisticsSolver::CvBallisticsSolver(
     const float defaultLaunchSpeed,
     const uint8_t turretID,
     float turretPitchOffset,
+    float minimumShotDelay,
     aruwsrc::communication::rtt::RttTelemetry* telemetry)
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
@@ -53,6 +54,7 @@ CvBallisticsSolver::CvBallisticsSolver(
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretPitchOffset(turretPitchOffset),
+      minimumShotDelay(minimumShotDelay),
       turretID(turretID),
       telemetry(telemetry)
 {
@@ -283,7 +285,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     float horizontalDistToClosestPoint = robotPos.xy().getLength() - avgRadius;
     float approxDistance = modm::Vector2f(horizontalDistToClosestPoint, robotPos.z).getLength();
-    float estimatedToF = approxDistance / launchSpeed;
+    float estimatedToF = approxDistance / launchSpeed + minimumShotDelay;
     // TODO: could do a center ballistics pass instead? would account for turret pitch
 
     auto estHitTimePosData = projectedAimPosData.projectForward(estimatedToF);

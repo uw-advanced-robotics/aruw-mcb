@@ -136,6 +136,7 @@ public:
      * friction wheels report the launch speed is 0 (i.e. when the friction wheels are off).
      * @param[in] turretID The vision turret ID for whose ballistics trajectory we will be solving
      * for, see the VisionCoprocessor for more information about this id.
+     * @param[in] minimumShotDelay Minimum time (seconds) we can react to a fire command in.
      * @param[in] telemetry Pointer to the RTT telemetry instance for logging (can be nullptr).
      */
     CvBallisticsSolver(
@@ -145,6 +146,7 @@ public:
         const float defaultLaunchSpeed,
         const uint8_t turretID,
         float turretPitchOffset,
+        float minimumShotDelay = 0.0f,
         aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
 
     /**
@@ -166,6 +168,7 @@ private:
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
+    const float minimumShotDelay;
 
 public:
     const uint8_t turretID;
