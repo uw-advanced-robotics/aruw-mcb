@@ -194,9 +194,20 @@ protected:
      */
     tap::arch::MilliTimeout calibrationLongTimeout;
 
+
+    mutable float yawVelocityErr = 0;
+    mutable float yawErr = 0;
+    mutable float pitchVelocityErr = 0;
+    mutable float pitchErr = 0;
+
     inline bool turretReachedCenterAndNotMoving(turret::TurretSubsystem *turret, bool ignorePitch)
         const
     {
+        yawVelocityErr = turret->yawMotor.getChassisFrameVelocity();
+        yawErr = turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0);
+        pitchVelocityErr = turret->pitchMotor.getChassisFrameVelocity();
+        pitchErr = turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(0);
+
         return compareFloatClose(
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
