@@ -86,9 +86,13 @@ void JointSubsystem::refresh()
 {
     this->updateSetpoint();
     runPosPidController(2.0f);  // todo: should be 0.002 but would requires retune
-    DEBUG_position = getPosition();
 }
 
-void JointSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
+void JointSubsystem::refreshSafeDisconnect()
+{
+    DEBUG_position = getPosition();
+
+    motor.setDesiredOutput(0);
+}
 
 }  // namespace aruwsrc::control::joint

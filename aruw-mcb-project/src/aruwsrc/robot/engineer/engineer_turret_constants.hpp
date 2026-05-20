@@ -110,7 +110,7 @@ inline constexpr float YAW_TURRET_GEAR_RATIO = 16.0f / 60.0f;
 inline constexpr uint32_t PITCH_TURRET_ENCODER_HOME = 884;
 inline constexpr uint32_t PITCH_TURRET_GEAR_RATIO = 1.0f / 8.0f;
 
-static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+static constexpr aruwsrc::control::turret::TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 0,  // NA since pitch motor encoder is incremental
     .minAngle = modm::toRadian(-43),
@@ -118,7 +118,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
+static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
 
 namespace world_rel_turret_imu
