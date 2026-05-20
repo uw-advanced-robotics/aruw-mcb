@@ -195,65 +195,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         // Shot Timing
         // Use pulse estimation for fast rotating targets
 
-        // Check if we already have a valid pulse estimation solution with an open fire window
-        uint64_t currentTimeMicros = tap::arch::clock::getTimeMicroseconds();
-        bool hasValidPulseSolution = lastComputedSolution.has_value() &&
-                                     lastComputedSolution->usePulseEstimation &&
-                                     currentTimeMicros <= lastComputedSolution->shotWindowEnd;
-
-        // Discard pulse solution if omega has dropped below threshold
-        //   (shouldn't ever happen bc we don't consider angular acceleration when projecting
-        //   forward)
-        bool omegaBelowThreshold = fabsf(projectedAimPosData.omega) < OMEGA_THRESHOLD;
-
-        if (hasValidPulseSolution && !omegaBelowThreshold && false)
-        {
-            // Recompute the aim solution so pitch/yaw can track vertical motion, but keep the
-            // existing pulse timing window so shot timing remains stable.
-            float activePlateHeight =
-                projectedAimPosData.plateHeights[lastComputedSolution->activePlateIndex];
-
-            SecondOrderKinematicState robotCenterState(
-                {projectedAimPosData.xPos - worldToTurret.getX(),
-                 projectedAimPosData.yPos - worldToTurret.getY(),
-                 projectedAimPosData.zPos + activePlateHeight - worldToTurret.getZ()},
-                {projectedAimPosData.xVel - worldToTurret.getXVel(),
-                 projectedAimPosData.yVel - worldToTurret.getYVel(),
-                 projectedAimPosData.zVel},
-                {projectedAimPosData.xAcc, projectedAimPosData.yAcc, projectedAimPosData.zAcc});
-
-            BallisticsSolution updatedSolution = *lastComputedSolution;
-            updatedSolution.distance = robotCenterState.position.getLength();
-
-            if (ballistics::findTargetProjectileIntersection(
-                    robotCenterState,
-                    launchSpeed,
-                    NUM_FORWARD_KINEMATIC_PROJECTIONS,
-                    &updatedSolution.pitchAngle,
-                    &updatedSolution.yawAngle,
-                    &updatedSolution.timeOfFlight,
-                    turretPitchOffset))
-            {
-                lastComputedSolution = updatedSolution;
-
-                if (telemetry)
-                {
-                    uint64_t timeRemaining =
-                        lastComputedSolution->shotWindowEnd - currentTimeMicros;
-                    telemetry->logSignal(
-                        "ballistics:pulse_window_remaining_us",
-                        static_cast<float>(timeRemaining));
-                }
-
-                return lastComputedSolution;
-            }
-        }
-        else
-        {
-            // Either no existing solution, fire window closed, or omega dropped, so compute new
-            // solution
-            lastComputedSolution = computePulseEstimation(projectedAimPosData, launchSpeed);
-        }
+        lastComputedSolution = computePulseEstimation(projectedAimPosData, launchSpeed);
     }
 
     return lastComputedSolution;
