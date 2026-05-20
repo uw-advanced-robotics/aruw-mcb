@@ -35,12 +35,12 @@ EngineerTextIndicators::EngineerTextIndicators(
 
 modm::ResumableResult<void> EngineerTextIndicators::update()
 {
+    RF_BEGIN(1);
+
     memcpy(prevStates, states, sizeof(states));
 
     // Update states
     states[IMU_CALIBRATING] = drivers.commandScheduler.isCommandScheduled(&imuCalibrateCommand);
-
-    RF_BEGIN(1);
 
     for (index = 0; index < NUM_TEXT_HUD_INDICATORS; index++)
     {
