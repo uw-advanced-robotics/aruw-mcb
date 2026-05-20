@@ -46,7 +46,7 @@ CvBallisticsSolver::CvBallisticsSolver(
     const float defaultLaunchSpeed,
     const uint8_t turretID,
     float turretPitchOffset,
-    float minimumShotDelay,
+    float mechanicalDelayMicros,
     aruwsrc::communication::rtt::RttTelemetry* telemetry)
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
@@ -54,7 +54,7 @@ CvBallisticsSolver::CvBallisticsSolver(
       frictionWheels(frictionWheels),
       defaultLaunchSpeed(defaultLaunchSpeed),
       turretPitchOffset(turretPitchOffset),
-      minimumShotDelay(minimumShotDelay),
+      mechanicalDelayMicros(mechanicalDelayMicros),
       turretID(turretID),
       telemetry(telemetry)
 {
@@ -94,22 +94,18 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         launchSpeed = defaultLaunchSpeed;
     }
 
-    if (telemetry)
-    {
-        telemetry->logSignal("ballistics:launch_speed", launchSpeed);
-    }
-
     // time in microseconds to project the target position ahead by
-    int64_t projectForwardTimeDt = static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
-                                   static_cast<int64_t>(aimData.timestamp);
+    int64_t latencyMicros = static_cast<int64_t>(tap::arch::clock::getTimeMicroseconds()) -
+                            static_cast<int64_t>(aimData.timestamp);
 
     // project the target position forward in time s.t. we are computing a ballistics
     // solution for a target "now" rather than whenever the camera saw the target
     aruwsrc::communication::serial::VisionCoprocessor::PositionData projectedAimPosData =
-        aimData.pva.projectForward(projectForwardTimeDt / 1E6f);
+        aimData.pva.projectForward((latencyMicros + mechanicalDelayMicros) / 1E6f);
 
     if (telemetry)
     {
+        telemetry->logSignal("ballistics:launch_speed", launchSpeed);
         telemetry->logSignal(
             "ballistics:target_pos",
             projectedAimPosData.xPos,
@@ -124,12 +120,18 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         telemetry->logSignal("ballistics:theta", projectedAimPosData.theta);
     }
 
-    omegaLP = omegaLPAlpha * projectedAimPosData.omega + (1 - omegaLPAlpha) * omegaLP;
+    updateAimingState(projectedAimPosData.omega);
+
+    lastComputedSolution = (aimingState == AimingState::JITTER_AIM)
+                               ? computeJitterAim(projectedAimPosData, launchSpeed)
+                               : computePulseEstimation(projectedAimPosData, launchSpeed);
+
+    return lastComputedSolution;
 
     // Use enemy angular velocity to determine which aiming strategy to use
     // TODO: this should technically be the angular velocity in the rotating target-tracking
     // frame ("omegaTotal")
-    if (fabsf(omegaLP) < OMEGA_THRESHOLD)
+    if (fabsf(filterOmega) < OMEGA_HI_THRESHOLD)
     {
         // Jitter Aim
         lastComputedSolution = std::nullopt;
@@ -204,7 +206,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         // Discard pulse solution if omega has dropped below threshold
         //   (shouldn't ever happen bc we don't consider angular acceleration when projecting
         //   forward)
-        bool omegaBelowThreshold = fabsf(projectedAimPosData.omega) < OMEGA_THRESHOLD;
+        bool omegaBelowThreshold = fabsf(projectedAimPosData.omega) < OMEGA_HI_THRESHOLD;
 
         if (hasValidPulseSolution && !omegaBelowThreshold && false)
         {
@@ -285,10 +287,11 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     float horizontalDistToClosestPoint = robotPos.xy().getLength() - avgRadius;
     float approxDistance = modm::Vector2f(horizontalDistToClosestPoint, robotPos.z).getLength();
-    float estimatedToF = approxDistance / launchSpeed + minimumShotDelay;
-    // TODO: could do a center ballistics pass instead? would account for turret pitch
+    float estimatedToF =
+        approxDistance / launchSpeed + mechanicalDelayMicros;
+        // TODO: could do a center ballistics pass instead? would account for turret pitch
 
-    auto estHitTimePosData = projectedAimPosData.projectForward(estimatedToF);
+        auto estHitTimePosData = projectedAimPosData.projectForward(estimatedToF);
 
     // Compute the angular velocity of the target wrt a rotating frame who's x axis always faces
     // the target (e.g. the turret tracks the target robot center)
@@ -458,4 +461,159 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     return solution;
 }
+
+void CvBallisticsSolver::updateAimingState(float rawOmega)
+{
+    filterOmega = tap::algorithms::lowPassFilter(filterOmega, rawOmega, omegaLPAlpha);
+
+    // If we were jitter aiming, and they spin too fast, switch to pulse estimation.
+    if (aimingState == AimingState::JITTER_AIM && fabsf(filterOmega) >= OMEGA_HI_THRESHOLD)
+    {
+        aimingState = AimingState::PULSE_ESTIMATION;
+    }
+    // If we were pulse estimating, and they slow down, switch to jitter aim.
+    else if (
+        aimingState == AimingState::PULSE_ESTIMATION && fabsf(filterOmega) < OMEGA_HI_THRESHOLD)
+    {
+        aimingState = AimingState::JITTER_AIM;
+    }
+
+    if (telemetry)
+    {
+        telemetry->logSignal("ballistics:aiming_state", static_cast<int>(aimingState));
+        telemetry->logSignal("ballistics:filtered_omega", filterOmega);
+    }
+}
+
+std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computeJitterAim(
+    const communication::serial::VisionCoprocessor::PositionData& pos,
+    float launchSpeed)
+{
+    float turretToTargetAngle = atan2f(
+        pos.yPos - worldToTurret.getY(),
+        pos.xPos - worldToTurret.getX());
+
+    // Try to aim at the same plate as the last solution if still valid
+    if (lastComputedSolution.has_value() && !lastComputedSolution->usePulseEstimation){
+        uint8_t plateIndex = lastComputedSolution->activePlateIndex;
+        if (inValidJitterAimingRegion(plateIndex, pos, turretToTargetAngle)){
+            auto solution = solveForPlate(plateIndex, pos, launchSpeed);
+            if (solution.has_value()){
+                return solution;
+            }
+        }
+    }
+
+    // Sweep over all to find the best solution
+    std::optional<BallisticsSolution> bestSolution = std::nullopt;
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        if (!inValidJitterAimingRegion(i, pos, turretToTargetAngle)){
+            continue;
+        }
+
+        auto solution = solveForPlate(i, pos, launchSpeed);
+        if (!solution.has_value())
+            continue;
+
+        if (!bestSolution.has_value() || solution->timeOfFlight < bestSolution->timeOfFlight)
+        {
+            bestSolution = solution;
+        }
+    }
+
+    // There is a valid plate we can shoot aim, shoot at that one
+    if (bestSolution.has_value()){
+        return bestSolution;
+    }
+
+    // If we have no valid solution, try to pre-aim at where we expect the next plate to come in
+    bool rotatingRight = pos.omega > 0;
+    float leadingEdge = rotatingRight ? VALID_INCOMING_PLATE_ANGLE : -VALID_INCOMING_PLATE_ANGLE;
+    float leadingEdgeAngle= turretToTargetAngle + M_PI + leadingEdge;
+
+    std::optional<uint8_t> bestPlate = std::nullopt;
+    float bestTime = std::numeric_limits<float>::max();
+
+    // Find the plate that will reach the leading edge first
+    for (int i = 0; i < 4; i++){
+        float plateAngle = getPlateAngle(pos, i);
+        float angleToLeadingEdge = Angle(plateAngle).minDifference(leadingEdgeAngle);
+
+        if (angleToLeadingEdge * pos.omega <= 0){
+            // This plate is moving away from the leading edge, ik weird math
+            angleToLeadingEdge += std::copysignf(M_TWOPI, pos.omega);
+        }
+
+        float travelTime = angleToLeadingEdge / pos.omega;
+        if (travelTime > 0 && travelTime < bestTime){
+            bestTime = travelTime;
+            bestPlate = i;
+        }
+    }
+
+    if (!bestPlate.has_value()){
+        return std::nullopt;
+    }
+
+    // Figure out where to aim for when the plate will reach the leading edge
+    auto solution = solveForPlate(bestPlate.value(), pos.projectForward(bestTime), launchSpeed);
+
+    if (!solution.has_value()){
+        return std::nullopt;
+    }
+
+    solution->isPreAiming = true;
+    return solution;
+}
+
+bool CvBallisticsSolver::inValidJitterAimingRegion(uint8_t plateIndex, PositionData pos, float turretToTargetAngle){
+    float plateAngle = getPlateAngle(pos, plateIndex);
+    // Positive if on the left of the aim line, negative if on the right
+    float plateAngleRelativeToAimLine = Angle(plateAngle).minDifference(turretToTargetAngle + M_PI);
+
+    bool rotatingRight = pos.omega > 0;
+    float lowerBound = rotatingRight ? VALID_INCOMING_PLATE_ANGLE : -VALID_INCOMING_PLATE_ANGLE;
+    float upperBound = rotatingRight ? -VALID_OUTGOING_PLATE_ANGLE : VALID_OUTGOING_PLATE_ANGLE;
+
+    return plateAngleRelativeToAimLine >= lowerBound && plateAngleRelativeToAimLine <= upperBound; 
+}
+
+std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::solveForPlate(
+    uint8_t plateIndex,
+    const PositionData& pos,
+    float launchSpeed)
+{
+    float radius = (plateIndex % 2 == 0) ? pos.radius0 : pos.radius1;
+    float plateAngle = getPlateAngle(pos, plateIndex);
+
+    RobotTargetKinematicState targetState(
+        {pos.xPos + radius * cosf(plateAngle) - worldToTurret.getX(),
+         pos.yPos + radius * sinf(plateAngle) - worldToTurret.getY(),
+         pos.zPos + pos.plateHeights[plateIndex] - worldToTurret.getZ()},
+        {pos.xVel - worldToTurret.getXVel(), pos.yVel - worldToTurret.getYVel(), pos.zVel},
+        {pos.xAcc, pos.yAcc, pos.zAcc},
+        radius,
+        plateAngle,
+        pos.omega);
+    
+    BallisticsSolution solution{};
+    solution.distance = targetState.position.getLength();
+    solution.usePulseEstimation = false;
+    solution.activePlateIndex = plateIndex;
+    solution.shotWindowStart = 0;
+    solution.shotWindowEnd = 0;
+
+    bool foundSolution = ballistics::findTargetProjectileIntersection(
+        targetState,
+        launchSpeed,
+        NUM_FORWARD_KINEMATIC_PROJECTIONS,
+        &solution.pitchAngle,
+        &solution.yawAngle,
+        &solution.timeOfFlight,
+        turretPitchOffset);
+
+    return foundSolution ? std::optional(solution) : std::nullopt;
+}
+
 }  // namespace aruwsrc::algorithms

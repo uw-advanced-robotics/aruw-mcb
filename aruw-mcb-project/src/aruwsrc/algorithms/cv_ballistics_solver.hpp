@@ -87,6 +87,8 @@ public:
         bool usePulseEstimation;
         /// The active plate index being targeted (0-3).
         uint8_t activePlateIndex;
+        /// Whether we are pre-aiming at an incoming plate that hasn't entered validity yet
+        bool isPreAiming;
     };
 
     /**
@@ -96,8 +98,17 @@ public:
      */
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
-    /// Omega threshold (rad/s) below which jitter aim is used instead of pulse estimation.
-    static constexpr float OMEGA_THRESHOLD = 5.0f;
+    /// Omega threshold (rad/s) above which pulse estimation is used instead of jitter aim.
+    static constexpr float OMEGA_HI_THRESHOLD = 6.0f;
+    // Omega threshold (rad/s) below which we switch back to jitter aim
+    static constexpr float OMEGA_LO_THRESHOLD = 4.0f;
+
+    // TODO: make static constexpr
+    // Begin tracking far out
+    float VALID_INCOMING_PLATE_ANGLE = modm::toRadian(60.0f);
+    // Leave tracking early
+    float VALID_OUTGOING_PLATE_ANGLE = modm::toRadian(30.0f);
+
     /// The width of a small armor plate, in m
     static constexpr float PLATE_WIDTH = 0.135f;
     /// The height of a small armor plate, in m
@@ -168,18 +179,20 @@ private:
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
-    const float minimumShotDelay;
+    const float mechanicalDelayMicros;
 
 public:
     const uint8_t turretID;
 
 private:
+    using PositionData = aruwsrc::communication::serial::VisionCoprocessor::PositionData;
+
     aruwsrc::communication::rtt::RttTelemetry *telemetry;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
-    float omegaLP = 0;
+    float filterOmega = 0;
 
     static constexpr float omegaLPAlpha = 0.04f;
 
@@ -188,7 +201,32 @@ private:
      * determine shot timing window based on robot rotation.
      */
     std::optional<BallisticsSolution> computePulseEstimation(
-        const communication::serial::VisionCoprocessor::PositionData &projectedAimPosData,
+        const PositionData& projectedAimPosData,
+        float launchSpeed);
+
+    std::optional<BallisticsSolution> computeJitterAim(
+        const PositionData& projectedAimPosData,
+        float launchSpeed);
+
+    enum class AimingState
+    {
+        JITTER_AIM,
+        PULSE_ESTIMATION,
+    };
+    AimingState aimingState = AimingState::JITTER_AIM;
+
+    void updateAimingState(float omega);
+
+    bool inValidJitterAimingRegion(uint8_t plateIndex, PositionData pos, float turretToTargetAngle);
+
+    inline float getPlateAngle(const PositionData& pos, uint8_t plateIndex)
+    {
+        return pos.theta + plateIndex * M_PI_2;
+    }
+
+    std::optional<BallisticsSolution> solveForPlate(
+        uint8_t plateIndex,
+        const PositionData& pos,
         float launchSpeed);
 };
 }  // namespace aruwsrc::algorithms
