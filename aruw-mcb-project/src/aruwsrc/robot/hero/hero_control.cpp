@@ -142,13 +142,13 @@ namespace hero_control
 class HeroTurretDisabledCommand : public tap::control::Command
 {
 public:
-    explicit HeroTurretDisabledCommand(TurretSubsystem* turretSubsystem)
+    explicit HeroTurretDisabledCommand(TurretSubsystem *turretSubsystem)
         : turretSubsystem(turretSubsystem)
     {
         addSubsystemRequirement(turretSubsystem);
     }
 
-    const char* getName() const override { return "hero turret disabled"; }
+    const char *getName() const override { return "hero turret disabled"; }
 
     void initialize() override { zeroTurret(); }
 
@@ -159,7 +159,7 @@ public:
     void end(bool) override { zeroTurret(); }
 
 private:
-    TurretSubsystem* turretSubsystem;
+    TurretSubsystem *turretSubsystem;
 
     void zeroTurret()
     {
@@ -168,7 +168,7 @@ private:
     }
 };
 
-inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
+inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -255,7 +255,7 @@ tap::motor::DjiMotor rightBackFrictionWheel(
     false,
     "Right Back flywheel");
 
-std::array<tap::motor::MotorInterface*, 4> wheels = {
+std::array<tap::motor::MotorInterface *, 4> wheels = {
     &leftFrontFrictionWheel,
     &rightFrontFrictionWheel,
     &leftBackFrictionWheel,
@@ -297,7 +297,7 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508*(1 / 2.0f),
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *(1 / 2.0f),
     0);
 
 aruwsrc::communication::sensors::encoder::LampreyEncoder yawLampreyCanEncoder(
@@ -679,7 +679,7 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 
-std::vector<HudIndicator*> hudIndicators = {
+std::vector<HudIndicator *> hudIndicators = {
     &capBankIndicator,
     &positionHudIndicators,
     &ammoIndicator,
@@ -712,7 +712,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerHeroSubsystems(Drivers* drivers)
+void registerHeroSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&frictionWheelSubsystem);
@@ -740,7 +740,7 @@ void setDefaultHeroCommands()
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startHeroCommands(Drivers* drivers)
+void startHeroCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->mpu6500.setMountingTransform(
@@ -755,7 +755,7 @@ void startHeroCommands(Drivers* drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(Drivers* drivers)
+void registerHeroIoMappings(Drivers *drivers)
 {
     drivers->commandMapper.addToMap<HoldCommandMapping>(
         drivers,
@@ -864,7 +864,7 @@ void registerHeroIoMappings(Drivers* drivers)
 
 namespace aruwsrc::hero
 {
-void initSubsystemCommands(aruwsrc::hero::Drivers* drivers)
+void initSubsystemCommands(aruwsrc::hero::Drivers *drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &hero_control::remoteSafeDisconnectFunction);
@@ -877,14 +877,14 @@ void initSubsystemCommands(aruwsrc::hero::Drivers* drivers)
 }  // namespace aruwsrc::hero
 
 #ifndef PLATFORM_HOSTED
-aruwsrc::control::imu::ImuCalibrateCommand* getImuCalibrateCommand()
+aruwsrc::control::imu::ImuCalibrateCommand *getImuCalibrateCommand()
 {
     return &hero_control::imuCalibrateCommand;
 }
 
-std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
 {
-    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
         &hero_control::gravityAutotuneCommand};
     return commands;
 }
