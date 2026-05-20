@@ -363,38 +363,28 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     // Plate i is at angle: theta + i*π/2
     float predictedActivePlateAngle = actualHitTimeTargetData.theta + activePlateIndex * M_PI_2;
 
-    // Angle the target plate must move before reaching the aim line
-    // We also handle the case where the plate does >+1 revolution
-    // The `minDifference` is valid because if the plate selection works, then
-    // `predictedActivePlateAngle` should be close to the aim line
-    float totalActivePlateTravel = (actualHitTimeTargetData.theta - targetData.theta) +
-                                   Angle(predictedActivePlateAngle).minDifference(aimAngle + M_PI);
+    // Time until a shot we take will hit the plate center
+    float timeToPlateCenterShot =
+        Angle(predictedActivePlateAngle).minDifference(aimAngle + M_PI) / omegaTotal;
 
-    float timeToPlateCenterCrossing = totalActivePlateTravel / omegaTotal;
-
-    // Time for close edge to reach aim line
+    // Time it takes for half the plate to cross the aim line
     float halfWidthTime = (plateAngularWidth / 2.0f) / fabsf(omegaTotal);
-    float timeToCloseEdge = timeToPlateCenterCrossing - halfWidthTime;
-    float timeToFarEdge = timeToPlateCenterCrossing + halfWidthTime;
+
+    // Window of time we should fire in to hit shots
+    float shotWindowStart = timeToPlateCenterShot - halfWidthTime;
+    float shotWindowEnd = timeToPlateCenterShot + halfWidthTime;
 
     // Convert to absolute timestamps in microseconds
-    // Shot window is when we should fire
     uint64_t currentTimeMicros = tap::arch::clock::getTimeMicroseconds();
-
-    // We need to fire early enough that projectile arrives during plate crossing
-    // Fire time = (plate crossing time) - (time of flight)
-    float fireWindowStart = timeToCloseEdge - solution.timeOfFlight;
-    float fireWindowEnd = timeToFarEdge - solution.timeOfFlight;
-
-    solution.shotWindowStart = currentTimeMicros + static_cast<uint64_t>(fireWindowStart * 1e6f);
-    solution.shotWindowEnd = currentTimeMicros + static_cast<uint64_t>(fireWindowEnd * 1e6f);
+    solution.shotWindowStart = currentTimeMicros + static_cast<uint64_t>(shotWindowStart * 1e6f);
+    solution.shotWindowEnd = currentTimeMicros + static_cast<uint64_t>(shotWindowEnd * 1e6f);
 
     if (telemetry)
     {
-        // telemetry->logSignal("ballistics:pulse_angular_offset", angularOffset.getWrappedValue());
-        telemetry->logSignal("ballistics:pulse_time_to_crossing", timeToPlateCenterCrossing);
-        // telemetry->logSignal("ballistics:pulse_window_start_offset", startOffsetSeconds);
-        // telemetry->logSignal("ballistics:pulse_window_end_offset", endOffsetSeconds);
+        telemetry->logSignal("ballistics:pulse_angular_offset", predictedActivePlateAngle);
+        telemetry->logSignal("ballistics:pulse_time_to_crossing", timeToPlateCenterShot);
+        telemetry->logSignal("ballistics:pulse_window_start_offset", shotWindowStart);
+        telemetry->logSignal("ballistics:pulse_window_end_offset", shotWindowEnd);
         telemetry->logSignal(
             "ballistics:pulse_window_duration",
             solution.shotWindowEnd - solution.shotWindowStart);
