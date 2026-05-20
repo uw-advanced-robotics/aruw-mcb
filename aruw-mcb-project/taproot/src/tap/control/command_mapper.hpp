@@ -119,6 +119,14 @@ public:
      */
     mockable void handleKeyStateChange(tap::control::GenericRemoteMapState &mapState);
 
+    /** Wrapper for addMap with internal move semantics handling */
+    template <typename T, typename... Args>
+    void addToMap(Args &&... args)
+    {
+        std::unique_ptr<T> mapping = std::make_unique<T>(std::forward<Args>(args)...);
+        addMap(std::move(mapping));
+    }
+
     /**
      * Verifies the mapping passed in can be added to `commandsToRun`
      * and if possible adds the mapping.

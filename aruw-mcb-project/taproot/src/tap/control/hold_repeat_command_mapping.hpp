@@ -63,7 +63,7 @@ public:
     HoldRepeatCommandMapping(
         Drivers *drivers,
         const std::vector<Command *> cmds,
-        const GenericRemoteMapState *rms,
+        const GenericRemoteMapState &rms,
         bool endCommandsWhenNotHeld,
         int maxTimesToSchedule = -1)
         : CommandMapping(drivers, cmds, rms),
