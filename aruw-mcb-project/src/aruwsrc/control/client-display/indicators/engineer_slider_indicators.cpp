@@ -49,25 +49,33 @@ modm::ResumableResult<void> EngineerSliderIndicators::sendInitialGraphics()
 modm::ResumableResult<void> EngineerSliderIndicators::update()
 {
     // Update extension
-    float extensionPosition = extension.getPosition();
-    float extensionPositionPercent =
-        percentage(extensionPosition, extension.getLowerBound(), extension.getUpperBound());
-    uint16_t extensionCircleX = EXTENSION_START_X + EXTENSION_WIDTH * extensionPositionPercent;
+    float extensionPosition;
+    float extensionPositionPercent;
+    uint16_t extensionCircleX;
 
     // Update cube storage
-    float cubeStoragePosition = cubeStorageSubsystem.getPosition();
-    float cubeStoragePositionPercent = percentage(
+    float cubeStoragePosition;
+    float cubeStoragePositionPercent;
+    uint16_t cubeStorage1X;
+    uint16_t cubeStorage2X;
+
+    RF_BEGIN(1);
+    extensionPosition = extension.getPosition();
+    extensionPositionPercent =
+        percentage(extensionPosition, extension.getLowerBound(), extension.getUpperBound());
+    extensionCircleX = EXTENSION_START_X + EXTENSION_WIDTH * extensionPositionPercent;
+
+    cubeStoragePosition = cubeStorageSubsystem.getPosition();
+    cubeStoragePositionPercent = percentage(
         cubeStoragePosition,
         cubeStorageSubsystem.getLowerBound(),
         cubeStorageSubsystem.getUpperBound());
-    uint16_t cubeStorage1X =
-        CUBE_STORAGE_START_X +
-        CUBE_STORAGE_WIDTH *
-            std::fmod(cubeStoragePositionPercent + CUBE_STORAGE_OFFSET_PERCENT_1, 1.0f);
-    uint16_t cubeStorage2X =
-        CUBE_STORAGE_START_X +
-        CUBE_STORAGE_WIDTH *
-            std::fmod(cubeStoragePositionPercent + CUBE_STORAGE_OFFSET_PERCENT_2, 1.0f);
+    cubeStorage1X = CUBE_STORAGE_START_X +
+                    CUBE_STORAGE_WIDTH *
+                        std::fmod(cubeStoragePositionPercent + CUBE_STORAGE_OFFSET_PERCENT_1, 1.0f);
+    cubeStorage2X = CUBE_STORAGE_START_X +
+                    CUBE_STORAGE_WIDTH *
+                        std::fmod(cubeStoragePositionPercent + CUBE_STORAGE_OFFSET_PERCENT_2, 1.0f);
 
     // Update cube storage and wrist graphic colors based on whether pressure sensor states
     sliders.graphicData[static_cast<uint8_t>(GraphicType::CUBE_STORAGE_WRIST)].color =
@@ -86,8 +94,6 @@ modm::ResumableResult<void> EngineerSliderIndicators::update()
             cubeStorageSensor2.isOnline()
                 ? (cubeStorageSensor2.getPressurekPascals() > 0 ? HAS_CUBE_COLOR : NO_CUBE_COLOR)
                 : DISCONNECTED_COLOR);
-
-    RF_BEGIN(1);
 
     // Update circle positions
     RefSerialTransmitter::configCircle(
