@@ -37,20 +37,25 @@ WristControllerCommand::WristControllerCommand(
     addSubsystemRequirement(&wrist);
 }
 
-void WristControllerCommand::initialize() {}
+void WristControllerCommand::initialize()
+{
+    wrist.setSetpointTheta1(wrist.getTheta1());
+    wrist.setSetpointTheta2(wrist.getTheta2());
+    wrist.setSetpointTheta3(wrist.getTheta3());
+}
 
 void WristControllerCommand::execute()
 {
     // Get the desired velocities from the operator interface
     // to add/subtract from position setpoint
-    float rollVelocity = operatorInterface->getWristRollVelocity() * theta1ScalingFactor;
-    float pitchVelocity = operatorInterface->getWristPitchVelocity() * theta2ScalingFactor;
-    float yawVelocity = operatorInterface->getWristYawVelocity() * theta3ScalingFactor;
+    float theta1Velocity = operatorInterface->getWristTheta1Velocity() * theta1ScalingFactor;
+    float theta2Velocity = operatorInterface->getWristTheta2Velocity() * theta2ScalingFactor;
+    float theta3Velocity = operatorInterface->getWristTheta3Velocity() * theta3ScalingFactor;
 
     // Set the desired positions
-    wrist.setSetpointTheta3(wrist.getSetpointTheta3() + rollVelocity);   // theta3 is roll
-    wrist.setSetpointTheta2(wrist.getSetpointTheta2() + pitchVelocity);  // theta2 is pitch
-    wrist.setSetpointTheta1(wrist.getSetpointTheta1() + yawVelocity);    // theta1 is yaw
+    wrist.setSetpointTheta3(wrist.getSetpointTheta3() + theta3Velocity);  // theta3 is "roll"
+    wrist.setSetpointTheta2(wrist.getSetpointTheta2() + theta2Velocity);  // theta2 is "pitch"
+    wrist.setSetpointTheta1(wrist.getSetpointTheta1() + theta1Velocity);  // theta1 is "yaw"
 }
 
 }  // namespace aruwsrc::engineer::wrist

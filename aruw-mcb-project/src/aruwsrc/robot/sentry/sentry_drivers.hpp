@@ -36,8 +36,8 @@
 #include "aruwsrc/algorithms/strategy_state_machine/rmul_state_machine.hpp"
 #include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "aruwsrc/communication/sensors/imu/fused_imu_mekf_kf.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
@@ -47,9 +47,23 @@
 
 namespace aruwsrc::sentry
 {
+using TurretMajorImuType = aruwsrc::communication::sensors::imu::FusedImuMekfKf<3>;
+
 class Drivers : public tap::Drivers
 {
     friend class DriversSingleton;
+
+    using TurretMajorTransform = tap::algorithms::transforms::Transform;
+    static inline const std::array<TurretMajorTransform, 3> turretMajorImuTransforms = {
+        // Jetson is forward, X forward, Y left.
+        TurretMajorTransform(-76.7f, -116.14f, 0.0f, 0.0f, 0.0f, 0.0f),
+        TurretMajorTransform(-76.7f, 116.04f, 0.0f, 0.0f, 0.0f, M_PI),
+        TurretMajorTransform(-14.97f, -115.5f, 0.0f, 0.0f, 0.0f, M_PI_2)};
+
+    // static inline const std::array<TurretMajorImuType::ImuType, 3> turretMajorImuTypes = {
+    //     TurretMajorImuType::ImuType::ISM330DHCX,
+    //     TurretMajorImuType::ImuType::ISM330DHCX,
+    //     TurretMajorImuType::ImuType::MPU6500};
 
 #ifdef ENV_UNIT_TESTS
 public:
@@ -64,7 +78,7 @@ public:
               &visionCoprocessor,
               &turretMCBCanCommBus1,
               &turretMCBCanCommBus2,
-              &chassisMcbLite,
+              nullptr,
               nullptr,
               &capacitorBank,
               &rttTelemetry),
@@ -75,8 +89,12 @@ public:
               this,
               tap::can::CanBus::CAN_BUS1,
               aruwsrc::control::chassis::CAP_BANK_CAPACITANCE),
-          chassisMcbLite(this, tap::communication::serial::Uart::Uart7),
-          turretMajorImu(),
+          turretMajorPrimaryImu(
+              aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
+                  Board::SpiNss>()),
+          turretMajorImuSecondary(
+              aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
+                  modm::platform::GpioD12>()),
           plateHitTracker(this),
           stateMachine(refSerial, visionCoprocessor)
     {
@@ -101,8 +119,8 @@ public:
     aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     aruwsrc::communication::can::cap_bank::CapacitorBank capacitorBank;
-    aruwsrc::communication::mcb_lite::MCBLite chassisMcbLite;
-    aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImu;
+    aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorPrimaryImu;
+    aruwsrc::communication::sensors::imu::ism330::ISM330 turretMajorImuSecondary;
     aruwsrc::algorithms::PlateHitTracker plateHitTracker;
     aruwsrc::algorithms::strategy_state_machine::RMULStateMachine stateMachine;
 
@@ -114,35 +132,45 @@ public:
         oledDisplay.initialize();
         capacitorBank.initialize();
         mpu6500.setCalibrationSamples(4000);
-        chassisMcbLite.initialize();
-        modm::delay_ms(2000);
-        turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
-        turretMajorImu.setCalibrationSamples(4000);
+        // turretMajorImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        // turretMajorImu.setCalibrationSamples(4000);
+        turretMajorPrimaryImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        turretMajorPrimaryImu.setMountingTransform(turretMajorImuTransforms[0]);
+        turretMajorPrimaryImu.setCalibrationSamples(4000);
+        turretMajorImuSecondary.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        turretMajorImuSecondary.setMountingTransform(turretMajorImuTransforms[1]);
+        turretMajorImuSecondary.setCalibrationSamples(4000);
+        mpu6500.setMountingTransform(turretMajorImuTransforms[2]);
     }
 
     void updateIo()
     {
         oledDisplay.updateDisplay();
         visionCoprocessor.updateSerial();
-        chassisMcbLite.updateSerial();
-        turretMajorImu.read();
+        turretMajorPrimaryImu.read();
+        turretMajorImuSecondary.read();
         stateMachine.updateState();
     }
 
     void update()
     {
+        const uint32_t loop500HzStartUs = tap::arch::clock::getTimeMicroseconds();
         plateHitTracker.update();
         turretMCBCanCommBus1.sendData();
         turretMCBCanCommBus2.sendData();
         oledDisplay.updateMenu();
-        chassisMcbLite.sendData();
-        turretMajorImu.periodicIMUUpdate();
+        // turretMajorImu.periodicIMUUpdate();
+        turretMajorPrimaryImu.periodicIMUUpdate();
+        turretMajorImuSecondary.periodicIMUUpdate();
         visionCoprocessor.sendMessage();
         rttTelemetry.updateTelemetryAsync();
         checkTurretMcbDisconnection(this);
+
+        rttTelemetry.logSignal("p_ml", tap::arch::clock::getTimeMicroseconds() - loop500HzStartUs);
     }
 
 private:
+    bool wasTurretMcbConnected = true;
     inline void checkTurretMcbDisconnection(Drivers* drivers)
     {
         bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected() &&
@@ -153,10 +181,11 @@ private:
         {
             tap::buzzer::playNote(&drivers->pwm, 1000);
         }
-        else
+        else if (turretMcbConnected && !drivers->wasTurretMcbConnected)
         {
             tap::buzzer::silenceBuzzer(&drivers->pwm);
         }
+        drivers->wasTurretMcbConnected = turretMcbConnected;
     }
 
 #endif

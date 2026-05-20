@@ -105,7 +105,7 @@ int main()
     initializeIo(drivers);
     initSubsystemCommands(drivers);
 
-    while (1)
+    while (true)
     {
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));

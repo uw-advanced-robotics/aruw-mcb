@@ -16,9 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-// @todo: this sentry-specific imu calibrate command adds odometry reset functionality, which
-// should be incorporated into the regular imu calibrate command. After incorporating, this class
-// can be deleted
+/**
+ * @todo: this sentry-specific imu calibrate command adds odometry reset functionality, which
+ * should be incorporated into the regular imu calibrate command. After incorporating, this class
+ * can be deleted
+ */
 #include "sentry_imu_calibrate_command.hpp"
 
 #include "tap/drivers.hpp"
@@ -31,8 +33,6 @@ using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::sentry
 {
-// TODO: we want to be able to calibrate an arbitrary turret subsystem (one that
-// has pitch OR yaw OR both)
 SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
@@ -43,8 +43,10 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-    aruwsrc::communication::mcb_lite::MCBLite &chassisMCBLite,
+    aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
+    tap::encoder::EncoderInterface &turretMajorLampreyEncoder,
+    tap::encoder::EncoderInterface &turretMajorInternalEncoder,
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime)
     : aruwsrc::control::imu::ImuCalibrateCommand(
@@ -58,10 +60,13 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       yawObserver(yawObserver),
       odometryInterface(odometryInterface),
       turretMajorImu(turretMajorImu),
-      chassisMCBLite(chassisMCBLite),
+      chassisImuComm(chassisImuComm),
       transformer(transformer),
+      turretMajorLampreyEncoder(turretMajorLampreyEncoder),
+      turretMajorInternalEncoder(turretMajorInternalEncoder),
       successChime(successChime),
-      failChime(failChime)
+      failChime(failChime),
+      fakeLampreyEncoder(0, 0)
 {
     for (auto &config : turretsAndControllers)
     {
@@ -82,15 +87,18 @@ void SentryImuCalibrateCommand::initialize()
 
     // initialize major
     turretMajor.getMutableMotor().setChassisFrameSetpoint(
-        Angle(turretMajor.getReadOnlyMotor()
-                  .getConfig()
-                  .startAngle));  // @todo really sus interdependency with imu
-                                  // drift because assumes world controller
+        Angle(turretMajor.getReadOnlyMotor().getConfig().startAngle));
     turretMajorController.initialize();
 
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();
+    lampreyAligned = false;
+    loopCounter = 0;
+    lampreyShitAverage = 0;
+    lampreySamples = 0;
+    debugPos = 0;
+    lampreyPos = 0;
 }
 
 static inline bool turretMajorReachedCenterAndNotMoving(
@@ -100,7 +108,7 @@ static inline bool turretMajorReachedCenterAndNotMoving(
                0.0f,
                turret.getReadOnlyMotor().getChassisFrameVelocity(),
                SentryImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           (turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0) <
+           (abs(turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0)) <
             SentryImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
 }
 
@@ -116,21 +124,18 @@ void SentryImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
-            // Only start calibrating if the turret is online and if there is an IMU online to be
-            // calibrated. The onboard Mpu6500 will never be in the `IMU_NOT_CONNECTED` state unless
-            // the Mpu6500 is shorted (which has never happened). The turret MCB will only be
-            // offline if the turret MCB is unplugged.
+            // Only start calibrating if all turret MCB IMUs are online and the dedicated chassis
+            // turret-MCB IMU is online.
             bool turretMCBsReady = true;
             bool turretsOnline = true;
 
             for (auto &config : turretsAndControllers)
             {
-                turretMCBsReady &= config.turretMCBCanComm->isConnected();
+                turretMCBsReady &= config.turretImu->isOnline();
                 turretsOnline &= config.turret->isOnline();
             }
 
-            if (turretsOnline && (turretMCBsReady || (drivers->mpu6500.getImuState() !=
-                                                      Mpu6500::ImuState::IMU_NOT_CONNECTED)))
+            if (turretsOnline && turretMCBsReady && chassisImuComm.isConnected())
             {
                 calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -153,22 +158,21 @@ void SentryImuCalibrateCommand::execute()
                 turretsNotMoving &=
                     turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
             }
-
             turretsNotMoving &= turretMajorReachedCenterAndNotMoving(turretMajor);
 
             if (calibrationTimer.isExpired() && turretsNotMoving)
             {
                 // enter calibration phase
                 calibrationTimer.stop();
-
+                calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 for (auto &config : turretsAndControllers)
                 {
-                    config.turretMCBCanComm->requestCalibration();
+                    config.turretImu->requestCalibration();
                 }
 
                 drivers->mpu6500.requestCalibration();
 
-                chassisMCBLite.imu.requestCalibration();
+                chassisImuComm.requestCalibration();
                 turretMajorImu.requestCalibration();
 
                 calibrationState = CalibrationState::CALIBRATING_IMU;
@@ -177,6 +181,16 @@ void SentryImuCalibrateCommand::execute()
             break;
         }
         case CalibrationState::CALIBRATING_IMU:
+
+            debugPos = turretMajorInternalEncoder.getPosition().getUnwrappedValue();
+            lampreyPos = turretMajorLampreyEncoder.getPosition().getUnwrappedValue();
+            fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
+            lampreyShitAverage += turretMajorLampreyEncoder.getPosition().getUnwrappedValue();
+            lampreySamples++;
+            lampreyDebugAverage2 += (turretMajorLampreyEncoder.getPosition().getUnwrappedValue() -
+                                     lampreyDebugAverage2) /
+                                    lampreySamples;
+
             if (calibrationLongTimeout.isExpired())
             {
                 if (failChime) drivers->commandScheduler.addCommand(failChime);
@@ -191,10 +205,6 @@ void SentryImuCalibrateCommand::execute()
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
-
-                // reset odometry
-                yawObserver.overrideChassisYaw(0);
-                odometryInterface.reset();
             }
             break;
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
@@ -204,12 +214,30 @@ void SentryImuCalibrateCommand::execute()
                 if (successChime) drivers->commandScheduler.addCommand(successChime);
             }
             break;
+        case CalibrationState::CALIBRATION_SUCCESS:
+            lampreyShitAverage /= lampreySamples;
+            fakeLampreyEncoder.setFakePosition(lampreyShitAverage);
+            fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
+            if (!lampreyAligned)
+            {
+                turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
+                lampreyAligned = true;
+            }
+            if (lampreyAligned)
+            {
+                turretMajor.getMutableMotor().setChassisFrameSetpoint(Angle(0));
+
+                // reset odometry
+                yawObserver.overrideChassisYaw(0);
+                odometryInterface.reset();
+            }
+            break;
         default:
             break;
     }
 
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTime;
+    float dt = (currTime - prevTime) / 1000.0f;
     prevTime = currTime;
 
     for (auto &config : turretsAndControllers)
@@ -238,14 +266,13 @@ void SentryImuCalibrateCommand::execute()
 
 bool SentryImuCalibrateCommand::isFinished() const
 {
-    return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
-           calibrationState == CalibrationState::CALIBRATION_FAIL;
+    // return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
+    //        calibrationState == CalibrationState::CALIBRATION_FAIL;
+    return false;
 }
 
 void SentryImuCalibrateCommand::end(bool)
 {
-    // TODO: this being commented out causes turrets to hold position when this deschedules
-    // change if you want
     // for (auto &config : turretsAndControllers)
     // {
     //     config.turret->yawMotor.setMotorOutput(0);
