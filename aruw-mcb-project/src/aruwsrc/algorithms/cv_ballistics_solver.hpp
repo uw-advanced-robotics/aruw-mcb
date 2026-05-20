@@ -140,14 +140,14 @@ public:
      * @param[in] telemetry Pointer to the RTT telemetry instance for logging (can be nullptr).
      */
     CvBallisticsSolver(
-        const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-        const aruwsrc::algorithms::odometry::transforms::TransformerInterface &transformer,
-        const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+        const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor,
+        const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer,
+        const control::launcher::LaunchSpeedPredictorInterface& frictionWheels,
         const float defaultLaunchSpeed,
         const uint8_t turretID,
         float turretPitchOffset,
         float minimumShotDelay = 0.0f,
-        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
+        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
 
     /**
      * Uses the `Odometry2DInterface` it has a pointer to, the chassis velocity, and the last aim
@@ -162,10 +162,10 @@ public:
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
 private:
-    const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
-    const aruwsrc::algorithms::odometry::transforms::TransformerInterface &transformer;
-    const tap::algorithms::transforms::Transform &worldToTurret;
-    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels;
+    const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor;
+    const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer;
+    const tap::algorithms::transforms::Transform& worldToTurret;
+    const control::launcher::LaunchSpeedPredictorInterface& frictionWheels;
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
     const float minimumShotDelay;
@@ -174,7 +174,7 @@ public:
     const uint8_t turretID;
 
 private:
-    aruwsrc::communication::rtt::RttTelemetry *telemetry;
+    aruwsrc::communication::rtt::RttTelemetry* telemetry;
 
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
@@ -188,7 +188,14 @@ private:
      * determine shot timing window based on robot rotation.
      */
     std::optional<BallisticsSolution> computePulseEstimation(
-        const communication::serial::VisionCoprocessor::PositionData &projectedAimPosData,
+        const communication::serial::VisionCoprocessor::PositionData& targetData,
+        float launchSpeed);
+
+    /**
+     * Computes jitter aim solution, attempting to aim at the best possible plate at any moment.
+     */
+    std::optional<BallisticsSolution> computeJitterAim(
+        const communication::serial::VisionCoprocessor::PositionData& targetData,
         float launchSpeed);
 };
 }  // namespace aruwsrc::algorithms
