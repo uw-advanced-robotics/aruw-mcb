@@ -156,7 +156,7 @@ TurretMinorMotors turretWidowMotors{
         false,
         "Widow Minor Yaw Turret",
         true,
-        1.0,
+        tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
         turretWidow::YAW_MOTOR_CONFIG.startEncoderValue),
 
     .pitchMotor = tap::motor::DjiMotor(
@@ -166,7 +166,7 @@ TurretMinorMotors turretWidowMotors{
         true,
         "Widow Minor Pitch Turret",
         true,
-        1.0,
+        tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
         turretWidow::PITCH_MOTOR_CONFIG.startEncoderValue),
 
     .yawMotorConfig = turretWidow::YAW_MOTOR_CONFIG,
@@ -186,7 +186,7 @@ inline aruwsrc::communication::can::TurretMCBCanComm &getChassisTurretMCBCanComm
 
 inline tap::communication::sensors::imu::AbstractIMU &getTurretMajorImu()
 {
-    return drivers()->turretMajorImuSecondary;
+    return drivers()->turretMajorImu;
 }
 
 // /* define subsystems --------------------------------------------------------*/
@@ -194,12 +194,13 @@ BuzzerSubsystem buzzer(drivers());
 
 YawTurretSubsystem turretMajor(*drivers(), turretMajorYawMotor, turretMajor::YAW_MOTOR_CONFIG);
 
+TurretMotor pitchTurretMotor(&turretWidowMotors.pitchMotor, turretWidowMotors.pitchMotorConfig);
+TurretMotor yawTurretMotor(&turretWidowMotors.yawMotor, turretWidowMotors.yawMotorConfig);
+
 SentryTurretMinorSubsystem turretWidow(
     *drivers(),
-    turretWidowMotors.pitchMotor,
-    turretWidowMotors.yawMotor,
-    turretWidowMotors.pitchMotorConfig,
-    turretWidowMotors.yawMotorConfig,
+    pitchTurretMotor,
+    yawTurretMotor,
     &drivers()->turretMCBCanCommBus1,  // @todo: figure out how to put this in config
     turretWidow::turretID);
 
@@ -504,7 +505,7 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
-ImuNotCalibratedGovernor imuNotCalibratedGovernor(drivers(), drivers()->mpu6500);
+ImuNotCalibratedGovernor imuNotCalibratedGovernor(drivers(), getTurretMajorImu());
 
 GovernorLimitedCommand<1> imuNotCalibratedCommandLimited(
     {&buzzer},

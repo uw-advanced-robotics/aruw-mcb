@@ -27,19 +27,194 @@
 #include <cstdint>
 #include <utility>
 
-#include "tap/algorithms/transforms/dynamic_orientation.hpp"
-#include "tap/algorithms/transforms/dynamic_position.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/algorithms/transforms/vector.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 
+#include "aruwsrc/algorithms/extended_kalman_filter.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
-#include "aruwsrc/communication/sensors/imu/fused_imu_eigen_ekf.hpp"
 
 namespace aruwsrc::communication::sensors::imu
 {
+/**
+ * CMSIS-only KF extension for the fused IMU signal state.
+ *
+ * State x: [ax, ay, az, gx, gy, gz]^T
+ * Measurement z: one IMU's [ax, ay, az, gx, gy, gz]^T block.
+ */
+template <size_t N>
+class FusedImuSignalKf final : public aruwsrc::algorithms::ExtendedKalmanFilterCmsis<6, 6>
+{
+public:
+    using Base = aruwsrc::algorithms::ExtendedKalmanFilterCmsis<6, 6>;
+    static constexpr uint16_t stateSize = 6;
+
+    using StateVector = typename Base::StateVector;
+    using InputVector = typename Base::InputVector;
+    using StateMatrix = typename Base::StateMatrix;
+    using InputMatrix = typename Base::InputMatrix;
+    using ObservationMatrix = typename Base::ObservationMatrix;
+
+    enum class UpdateStatus : int
+    {
+        OK = 0,
+        InvalidImuIndex = -3,
+    };
+
+    FusedImuSignalKf(
+        const StateMatrix& q,
+        const std::array<InputMatrix, N>& rBlocks,
+        const StateMatrix& p0)
+        : Base(
+              stateTransitionFunction,
+              observationFunction,
+              stateJacobianFunction,
+              observationJacobianFunction,
+              q,
+              rBlocks[0],
+              p0),
+          measurementCovarianceBlocks(rBlocks)
+    {
+    }
+
+    UpdateStatus predict(float dt)
+    {
+        Base::predict(dt);
+        return UpdateStatus::OK;
+    }
+
+    UpdateStatus update(const InputVector& z) { return updateSingleImu(0, z); }
+
+    template <typename MatrixT>
+    static inline void zeroMatrix(MatrixT& matrix)
+    {
+        for (auto& value : matrix.data)
+        {
+            value = 0.0f;
+        }
+    }
+
+    template <typename MatrixT>
+    static inline void setMatrixElement(MatrixT& matrix, size_t row, size_t col, float value)
+    {
+        matrix.data[row * stateSize + col] = value;
+    }
+
+    template <typename VectorT>
+    static inline void setVectorElement(VectorT& vector, size_t row, float value)
+    {
+        vector.data[row] = value;
+    }
+
+    UpdateStatus updateSingleImu(uint16_t imuIndex, const InputVector& zBlock)
+    {
+        if (imuIndex >= static_cast<uint16_t>(N))
+        {
+            return UpdateStatus::InvalidImuIndex;
+        }
+
+        // Fast path specialized for this signal filter:
+        // H = I and R is diagonal, so we can run exact sequential scalar KF updates.
+        auto& x = this->getMutableStateVector();
+        auto& P = this->getMutableStateCovariance();
+        const auto& rBlock = measurementCovarianceBlocks[imuIndex];
+
+        float kVec[stateSize];
+        float rowVec[stateSize];
+
+        for (uint16_t j = 0; j < stateSize; j++)
+        {
+            const float rjj = rBlock.data[static_cast<size_t>(j) * stateSize + j];
+            const float s = P[static_cast<size_t>(j) * stateSize + j] + rjj;
+            if (s <= 1.0e-12f)
+            {
+                continue;
+            }
+
+            const float invS = 1.0f / s;
+            const float innovation = zBlock.data[j] - x[j];
+
+            for (uint16_t i = 0; i < stateSize; i++)
+            {
+                rowVec[i] = P[static_cast<size_t>(j) * stateSize + i];
+            }
+
+            for (uint16_t i = 0; i < stateSize; i++)
+            {
+                const float ki = P[static_cast<size_t>(i) * stateSize + j] * invS;
+                kVec[i] = ki;
+                x[i] += ki * innovation;
+            }
+
+            for (uint16_t i = 0; i < stateSize; i++)
+            {
+                const float ki = kVec[i];
+                for (uint16_t k = 0; k < stateSize; k++)
+                {
+                    P[static_cast<size_t>(i) * stateSize + k] -= ki * rowVec[k];
+                }
+            }
+        }
+
+        for (uint16_t r = 0; r < stateSize; r++)
+        {
+            for (uint16_t c = r + 1; c < stateSize; c++)
+            {
+                const float sym = 0.5f * (P[static_cast<size_t>(r) * stateSize + c] +
+                                          P[static_cast<size_t>(c) * stateSize + r]);
+                P[static_cast<size_t>(r) * stateSize + c] = sym;
+                P[static_cast<size_t>(c) * stateSize + r] = sym;
+            }
+
+            const size_t diagIdx = static_cast<size_t>(r) * stateSize + r;
+            if (P[diagIdx] < 1.0e-12f)
+            {
+                P[diagIdx] = 1.0e-12f;
+            }
+        }
+
+        return UpdateStatus::OK;
+    }
+
+    inline std::array<InputMatrix, N>& getMeasurementCovarianceBlocks()
+    {
+        return measurementCovarianceBlocks;
+    }
+
+private:
+    static void stateTransitionFunction(
+        const StateVector& state,
+        StateVector& predictedState,
+        float /* dt */)
+    {
+        predictedState = state;
+    }
+
+    static void observationFunction(const StateVector& state, InputVector& predictedInput)
+    {
+        predictedInput = state;
+    }
+
+    static void stateJacobianFunction(
+        const StateVector& /* state */,
+        StateMatrix& stateJacobian,
+        float /* dt */)
+    {
+        stateJacobian.constructIdentityMatrix();
+    }
+
+    static void observationJacobianFunction(
+        const StateVector& /* state */,
+        ObservationMatrix& observationJacobian)
+    {
+        observationJacobian.constructIdentityMatrix();
+    }
+
+    std::array<InputMatrix, N> measurementCovarianceBlocks{};
+};
+
 template <size_t N>
 class FusedImuMekfKf final : public tap::communication::sensors::imu::AbstractIMU
 {
@@ -77,6 +252,8 @@ public:
 
         float gyroBiasRandomWalkStdRadPerSec = 5.0e-5f;
         float accelBiasRandomWalkStdMps2 = 1.0e-3f;
+        float attitudeModelVarianceRate = 1.0e-4f;
+        float minAttitudeVariance = 2.5e-4f;
         float initialAngleStdRad = 0.2f;
         float initialGyroBiasStdRadPerSec = 0.1f;
         float initialAccelBiasStdMps2 = 0.5f;
@@ -94,6 +271,7 @@ public:
         float maxMeasurementVariance = 1.0e8f;
 
         float accelMeasurementVarianceScale = 8.0f;
+        float minAccelDirectionMeasurementVariance = 1.0e-2f;
         float accelDynamicVarianceGain = 2.0f;
         float accelDynamicVarianceMaxScale = 40.0f;
         float accelNisGate = 16.0f;
@@ -136,7 +314,7 @@ public:
         filterInitialized = false;
         pendingReinitializeAfterCalibration = true;
         resetFilterState();
-        // requestCalibration();
+        requestCalibration();
     }
 
     void setCalibrationSamples(int sampleCount)
@@ -330,7 +508,7 @@ public:
         if (signalFilterInitialized)
         {
             updateSignalProcessCovariance(samplePeriodS);
-            if (signalFilter.predict(samplePeriodS) == 0)
+            if (signalFilter.predict(samplePeriodS) == SignalFilterWrapper::UpdateStatus::OK)
             {
                 const auto& xPred = signalFilter.getStateVectorAsMatrix();
                 SignalInputVector zPredicted;
@@ -415,7 +593,7 @@ private:
     static constexpr size_t signalStateSize = 6;
     static constexpr size_t errorStateSize = 9;
     static constexpr size_t quatSize = 4;
-    using SignalFilterWrapper = aruwsrc::communication::sensors::imu::FusedImuEigenEkf<N>;
+    using SignalFilterWrapper = aruwsrc::communication::sensors::imu::FusedImuSignalKf<N>;
     using SignalStateMatrix = typename SignalFilterWrapper::StateMatrix;
     using SignalInputMatrix = typename SignalFilterWrapper::InputMatrix;
     using SignalInputVector = typename SignalFilterWrapper::InputVector;
@@ -450,18 +628,16 @@ private:
     std::array<float, 3> accelBias = {0.0f, 0.0f, 0.0f};
     // Error covariance P (9x9 row-major)
     std::array<float, errorStateSize * errorStateSize> P{};
+    std::array<float, errorStateSize * errorStateSize> scratchStateA{};
+    std::array<float, errorStateSize * errorStateSize> scratchStateB{};
+    std::array<float, errorStateSize * errorStateSize> scratchStateC{};
+    std::array<float, errorStateSize * 3> scratchObsA{};
+    std::array<float, errorStateSize * 3> scratchObsB{};
+    std::array<float, errorStateSize * 3> scratchObsC{};
 
     float rollRad = 0.0f;
     float pitchRad = 0.0f;
     float yawRad = 0.0f;
-
-    // dont hate me chinmay
-    static inline float wrapAngle(float x)
-    {
-        while (x >= M_PI) x -= M_TWOPI;
-        while (x < -M_PI) x += M_TWOPI;
-        return x;
-    }
 
     static inline typename Config::ImuNoiseDensity selectNoiseForType(ImuType t, const Config& cfg)
     {
@@ -895,7 +1071,8 @@ private:
         for (size_t d = 0; d < errorStateSize; d++)
         {
             const size_t idx = d * errorStateSize + d;
-            P[idx] = std::clamp(P[idx], minDiag, maxDiag);
+            const float diagMin = (d < 3) ? config.minAttitudeVariance : minDiag;
+            P[idx] = std::clamp(P[idx], diagMin, maxDiag);
         }
     }
 
@@ -909,6 +1086,40 @@ private:
         q = quatFromEuler(roll, pitch, 0.0f);
         quatNormalize(q);
         updateEulerFromQuaternion();
+    }
+
+    inline void applyAttitudeErrorReset(float dthx, float dthy, float dthz)
+    {
+        // First-order MEKF reset Jacobian after q <- q * delta_q:
+        // delta_theta_new ~= (I - 0.5 * skew(delta_theta_hat)) delta_theta_old.
+        const float reset01 = 0.5f * dthz;
+        const float reset02 = -0.5f * dthy;
+        const float reset10 = -0.5f * dthz;
+        const float reset12 = 0.5f * dthx;
+        const float reset20 = 0.5f * dthy;
+        const float reset21 = -0.5f * dthx;
+
+        for (size_t c = 0; c < errorStateSize; c++)
+        {
+            const float p0c = P[0 * errorStateSize + c];
+            const float p1c = P[1 * errorStateSize + c];
+            const float p2c = P[2 * errorStateSize + c];
+            P[0 * errorStateSize + c] = p0c + reset01 * p1c + reset02 * p2c;
+            P[1 * errorStateSize + c] = reset10 * p0c + p1c + reset12 * p2c;
+            P[2 * errorStateSize + c] = reset20 * p0c + reset21 * p1c + p2c;
+        }
+
+        for (size_t r = 0; r < errorStateSize; r++)
+        {
+            const float pr0 = P[r * errorStateSize + 0];
+            const float pr1 = P[r * errorStateSize + 1];
+            const float pr2 = P[r * errorStateSize + 2];
+            P[r * errorStateSize + 0] = pr0 + reset01 * pr1 + reset02 * pr2;
+            P[r * errorStateSize + 1] = reset10 * pr0 + pr1 + reset12 * pr2;
+            P[r * errorStateSize + 2] = reset20 * pr0 + reset21 * pr1 + pr2;
+        }
+
+        enforceCovarianceNumerics();
     }
 
     inline void predictWithGyro(const tap::algorithms::transforms::Vector& gyroMeas, float dt)
@@ -936,8 +1147,8 @@ private:
         const float a20 = dtwy;
         const float a21 = -dtwx;
         const float negDt = -dt;
-        std::array<float, errorStateSize * errorStateSize> tmp;
-        std::array<float, errorStateSize * errorStateSize> pNew;
+        auto& tmp = scratchStateA;
+        auto& pNew = scratchStateB;
         // tmp = Phi * P (sparse row update on first 3 rows)
         for (size_t c = 0; c < errorStateSize; c++)
         {
@@ -981,7 +1192,8 @@ private:
         const float gyroVarAvg =
             (fusedGyroVarianceDiag[0] + fusedGyroVarianceDiag[1] + fusedGyroVarianceDiag[2]) *
             (1.0f / 3.0f);
-        const float qTheta = std::clamp(gyroVarAvg * dt, 1.0e-12f, 1.0f);
+        const float qTheta =
+            std::clamp((gyroVarAvg + config.attitudeModelVarianceRate) * dt, 1.0e-12f, 1.0f);
         const float qBg = std::clamp(
             config.gyroBiasRandomWalkStdRadPerSec * config.gyroBiasRandomWalkStdRadPerSec * dt,
             1.0e-14f,
@@ -1045,12 +1257,16 @@ private:
             return false;
         }
 
+        const float invNorm = 1.0f / norm;
+        const float axUnit = ax * invNorm;
+        const float ayUnit = ay * invNorm;
+        const float azUnit = az * invNorm;
+
         const auto gBody = gravityBodyFromQuat();
-        const float gxBody = gBody[0];
-        const float gyBody = gBody[1];
-        const float gzBody = gBody[2];
-        const float h[3] = {gxBody + accelBias[0], gyBody + accelBias[1], gzBody + accelBias[2]};
-        const float r[3] = {ax - h[0], ay - h[1], az - h[2]};
+        const float gxBody = gBody[0] / g;
+        const float gyBody = gBody[1] / g;
+        const float gzBody = gBody[2] / g;
+        const float r[3] = {axUnit - gxBody, ayUnit - gyBody, azUnit - gzBody};
         const float normError = std::fabs(norm - g);
         const float innovationNorm = std::sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
         const float dynamicVarianceScale = std::clamp(
@@ -1058,35 +1274,48 @@ private:
             1.0f,
             config.accelDynamicVarianceMaxScale);
 
-        // H = [ skew(gBody) 0 I ] has non-zeros only in cols {0,1,2,6,7,8}.
+        // Direction-only gravity vector observation:
+        // z = normalize(accel), h(q) = normalize(gravityBodyFromQuat(q)).
+        // H = [skew(gBodyUnit) 0 0], so accelerometer magnitude and accel bias do not directly
+        // drive attitude. Yaw about gravity remains unobservable and is projected out below.
         // Compute PHt = P * H^T using this sparsity.
-        float PHt[errorStateSize * 3];
+        auto& PHt = scratchObsA;
         for (size_t i = 0; i < errorStateSize; i++)
         {
             const float pi0 = P[i * errorStateSize + 0];
             const float pi1 = P[i * errorStateSize + 1];
             const float pi2 = P[i * errorStateSize + 2];
-            PHt[i * 3 + 0] = -pi1 * gzBody + pi2 * gyBody + P[i * errorStateSize + 6];
-            PHt[i * 3 + 1] = pi0 * gzBody - pi2 * gxBody + P[i * errorStateSize + 7];
-            PHt[i * 3 + 2] = -pi0 * gyBody + pi1 * gxBody + P[i * errorStateSize + 8];
+            PHt[i * 3 + 0] = -pi1 * gzBody + pi2 * gyBody;
+            PHt[i * 3 + 1] = pi0 * gzBody - pi2 * gxBody;
+            PHt[i * 3 + 2] = -pi0 * gyBody + pi1 * gxBody;
         }
 
         // S = H*PHt + R (3x3)
         float S[9];
-        S[0] = -gzBody * PHt[1 * 3 + 0] + gyBody * PHt[2 * 3 + 0] + PHt[6 * 3 + 0];
-        S[1] = -gzBody * PHt[1 * 3 + 1] + gyBody * PHt[2 * 3 + 1] + PHt[6 * 3 + 1];
-        S[2] = -gzBody * PHt[1 * 3 + 2] + gyBody * PHt[2 * 3 + 2] + PHt[6 * 3 + 2];
-        S[3] = gzBody * PHt[0 * 3 + 0] - gxBody * PHt[2 * 3 + 0] + PHt[7 * 3 + 0];
-        S[4] = gzBody * PHt[0 * 3 + 1] - gxBody * PHt[2 * 3 + 1] + PHt[7 * 3 + 1];
-        S[5] = gzBody * PHt[0 * 3 + 2] - gxBody * PHt[2 * 3 + 2] + PHt[7 * 3 + 2];
-        S[6] = -gyBody * PHt[0 * 3 + 0] + gxBody * PHt[1 * 3 + 0] + PHt[8 * 3 + 0];
-        S[7] = -gyBody * PHt[0 * 3 + 1] + gxBody * PHt[1 * 3 + 1] + PHt[8 * 3 + 1];
-        S[8] = -gyBody * PHt[0 * 3 + 2] + gxBody * PHt[1 * 3 + 2] + PHt[8 * 3 + 2];
+        S[0] = -gzBody * PHt[1 * 3 + 0] + gyBody * PHt[2 * 3 + 0];
+        S[1] = -gzBody * PHt[1 * 3 + 1] + gyBody * PHt[2 * 3 + 1];
+        S[2] = -gzBody * PHt[1 * 3 + 2] + gyBody * PHt[2 * 3 + 2];
+        S[3] = gzBody * PHt[0 * 3 + 0] - gxBody * PHt[2 * 3 + 0];
+        S[4] = gzBody * PHt[0 * 3 + 1] - gxBody * PHt[2 * 3 + 1];
+        S[5] = gzBody * PHt[0 * 3 + 2] - gxBody * PHt[2 * 3 + 2];
+        S[6] = -gyBody * PHt[0 * 3 + 0] + gxBody * PHt[1 * 3 + 0];
+        S[7] = -gyBody * PHt[0 * 3 + 1] + gxBody * PHt[1 * 3 + 1];
+        S[8] = -gyBody * PHt[0 * 3 + 2] + gxBody * PHt[1 * 3 + 2];
         const float accelVarianceScale =
             config.accelMeasurementVarianceScale * dynamicVarianceScale;
-        const float r0 = std::clamp(accelVarDiag[0] * accelVarianceScale, 1.0e-8f, 1.0e5f);
-        const float r1 = std::clamp(accelVarDiag[1] * accelVarianceScale, 1.0e-8f, 1.0e5f);
-        const float r2 = std::clamp(accelVarDiag[2] * accelVarianceScale, 1.0e-8f, 1.0e5f);
+        const float accelNormSq = norm * norm;
+        const float r0 = std::clamp(
+            accelVarDiag[0] / accelNormSq * accelVarianceScale,
+            config.minAccelDirectionMeasurementVariance,
+            1.0e3f);
+        const float r1 = std::clamp(
+            accelVarDiag[1] / accelNormSq * accelVarianceScale,
+            config.minAccelDirectionMeasurementVariance,
+            1.0e3f);
+        const float r2 = std::clamp(
+            accelVarDiag[2] / accelNormSq * accelVarianceScale,
+            config.minAccelDirectionMeasurementVariance,
+            1.0e3f);
         S[0] += r0;
         S[4] += r1;
         S[8] += r2;
@@ -1107,7 +1336,7 @@ private:
         }
 
         // K = PHt * SInv (9x3)
-        float K[errorStateSize * 3];
+        auto& K = scratchObsB;
         for (size_t i = 0; i < errorStateSize; i++)
         {
             for (size_t j = 0; j < 3; j++)
@@ -1131,9 +1360,9 @@ private:
             K[3 * 3 + k] *= config.gyroBiasCorrectionGain;
             K[4 * 3 + k] *= config.gyroBiasCorrectionGain;
             K[5 * 3 + k] *= config.gyroBiasCorrectionGain;
-            K[6 * 3 + k] *= config.accelBiasCorrectionGain;
-            K[7 * 3 + k] *= config.accelBiasCorrectionGain;
-            K[8 * 3 + k] *= config.accelBiasCorrectionGain;
+            K[6 * 3 + k] = 0.0f;
+            K[7 * 3 + k] = 0.0f;
+            K[8 * 3 + k] = 0.0f;
         }
 
         // Remove unobservable yaw-like attitude correction from accelerometer update by
@@ -1200,10 +1429,10 @@ private:
         // Covariance update in Joseph form, rewritten to avoid dense 9x9 products:
         // P = P - K*PHt^T - (K*PHt^T)^T + K*S*K^T
         // where PHt = P*H^T and S = H*P*H^T + R (already computed prev)
-        std::array<float, errorStateSize * errorStateSize> pNew{};
-        std::array<float, errorStateSize * 3> KS{};
-        std::array<float, errorStateSize * errorStateSize> KPHtT{};
-        std::array<float, errorStateSize * errorStateSize> KSKT{};
+        auto& pNew = scratchStateA;
+        auto& KS = scratchObsC;
+        auto& KPHtT = scratchStateB;
+        auto& KSKT = scratchStateC;
 
         // KS = K * S
         for (size_t r = 0; r < errorStateSize; r++)
@@ -1259,6 +1488,7 @@ private:
 
         P = pNew;
         enforceCovarianceNumerics();
+        applyAttitudeErrorReset(dthx, dthy, dthz);
         return true;
     }
 
@@ -1276,17 +1506,6 @@ private:
         return imuToFusionTransforms[imuIndex].apply(imuGyro);
     }
 
-    inline std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N> getImuStates()
-        const
-    {
-        std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N> states{};
-        for (size_t i = 0; i < N; i++)
-        {
-            states[i] = imus[i]->getImuState();
-        }
-        return states;
-    }
-
     static inline bool isConnected(tap::communication::sensors::imu::ImuInterface::ImuState state)
     {
         return state != tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CONNECTED;
@@ -1297,38 +1516,6 @@ private:
         return state == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED ||
                state ==
                    tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED;
-    }
-
-    static tap::communication::sensors::imu::ImuInterface::ImuState combineImuStates(
-        const std::array<tap::communication::sensors::imu::ImuInterface::ImuState, N>& states)
-    {
-        bool anyConnected = false;
-        for (auto state : states)
-        {
-            if (state == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
-            {
-                return tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING;
-            }
-            if (state ==
-                    tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED ||
-                state == tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED)
-            {
-                anyConnected = true;
-            }
-        }
-        if (!anyConnected)
-        {
-            return tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CONNECTED;
-        }
-        for (auto state : states)
-        {
-            if (state ==
-                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED)
-            {
-                return tap::communication::sensors::imu::ImuInterface::ImuState::IMU_NOT_CALIBRATED;
-            }
-        }
-        return tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED;
     }
 
     inline void recomputeImuToFusionTransform(size_t index)
