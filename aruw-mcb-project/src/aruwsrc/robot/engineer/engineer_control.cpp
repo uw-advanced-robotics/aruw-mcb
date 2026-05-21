@@ -306,6 +306,22 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
 
 LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
+AruwPressureSensor::Calibration pressureSensorCalibration{
+    .rawMin = 0,
+    .rawMax = 4095,
+    .pressureMin = -100,
+    .pressureMax = 100
+};
+
+AruwPressureSensor wristPressureSensor(
+    nullptr, AruwPressureSensor::Channel::AI0, pressureSensorCalibration);
+
+AruwPressureSensor cubeStoragePressureSensor1(
+    nullptr, AruwPressureSensor::Channel::AI0, pressureSensorCalibration);
+
+AruwPressureSensor cubeStoragePressureSensor2(
+    nullptr, AruwPressureSensor::Channel::AI0, pressureSensorCalibration);
+
 /* define subsystems --------------------------------------------------------*/
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
@@ -465,23 +481,22 @@ aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
-// EngineerSliderIndicators sliderIndicators(
-//     refSerialTransmitter,
-//     imuCalibrateCommand,
-//     wristPressureSensor,
-//     cubeStoragePressureSensor1,
-//     cubeStoragePressureSensor2);
+EngineerSliderIndicators sliderIndicators(
+    refSerialTransmitter,
+    extensionSubsystem,
+    cubeStorage,
+    wristPressureSensor,
+    cubeStoragePressureSensor1,
+    cubeStoragePressureSensor2);
 
-// EngineerTextIndicators textIndicators(
-//     refSerialTransmitter,
-//     imuCalibrateCommand,
-//     wristPressureSensor,
-//     cubeStoragePressureSensor1,
-//     cubeStoragePressureSensor2);
+EngineerTextIndicators textIndicators(
+    *drivers(),
+    imuCalibrateCommand,
+    refSerialTransmitter);
 
 std::vector<HudIndicator*> hudIndicators = {
-    // &sliderIndicators,
-    // &textIndicators
+    &sliderIndicators,
+    &textIndicators
 };
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
