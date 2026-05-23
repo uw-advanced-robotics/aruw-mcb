@@ -61,7 +61,7 @@ public:
 
     void setEncoderPosition(float position)
     {
-        fakeLampreyEncoder.setFakePosition(position);
+        fakeLampreyEncoder.setFakePosition(position - finalHomeOffset);
         yawMotorEncoder->alignWith(&fakeLampreyEncoder);
     }
 
