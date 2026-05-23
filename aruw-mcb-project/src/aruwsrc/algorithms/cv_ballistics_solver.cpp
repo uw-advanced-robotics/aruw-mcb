@@ -133,7 +133,11 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     if (fabsf(omegaLP) < OMEGA_THRESHOLD)
     {
         // Jitter Aim
-        lastComputedSolution = computeJitterAim(targetDataNow, launchSpeed);
+
+        communication::serial::VisionCoprocessor::PositionData targetDataLaunchTime =
+            targetDataNow.projectForward(minimumShotDelay);
+
+        lastComputedSolution = computeJitterAim(targetDataLaunchTime, launchSpeed);
     }
     else
     {
@@ -289,10 +293,6 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         (Angle(-desiredPlateQuadrantStart) - aimLineToProjectedPlate0).getWrappedValue();
     uint8_t activePlateIndex =
         static_cast<uint8_t>(desiredPlateQuadrantStartToProjectedPlate0 / M_PI_2);
-
-    // float quadrantStartToActivePlate = fmodf(desiredPlateQuadrantStartToProjectedPlate0, M_PI_2);
-    // float projectedActivePlateToAimLine = -desiredPlateQuadrantStart -
-    // quadrantStartToActivePlate;
 
     if (telemetry)
     {
