@@ -43,7 +43,7 @@ static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {1, 200},
     {2, 250},
     {100, 375}};
-
+// clang-format off
 static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
     tap::algorithms::transforms::Transform(
         0.1426,
@@ -60,6 +60,7 @@ static const tap::algorithms::transforms::Transform ISM330_MCB_MOUNTING_TRANSFOR
         0,
         0,
         modm::toRadian(180 + 45));
+// clang-format on
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
