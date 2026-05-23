@@ -154,6 +154,53 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     const communication::serial::VisionCoprocessor::PositionData& targetData,
     float launchSpeed)
 {
+    // Is our last targeted plate still valid?
+    if (lastComputedSolution.has_value())
+    {
+        const uint8_t activePlate = lastComputedSolution->activePlateIndex;
+        const float lastRadius = (activePlate % 2 == 0) ? targetData.radius0 : targetData.radius1;
+        const float currTheta = targetData.theta + M_PI_2 * activePlate;
+
+        RobotTargetKinematicState ballisticsTargetState(
+            {targetData.xPos + lastRadius * cos(currTheta) - worldToTurret.getX(),
+             targetData.yPos + lastRadius * sin(currTheta) - worldToTurret.getY(),
+             targetData.zPos + targetData.plateHeights[activePlate] - worldToTurret.getZ()},
+            {targetData.xVel - worldToTurret.getXVel(),
+             targetData.yVel - worldToTurret.getYVel(),
+             targetData.zVel},
+            {targetData.xAcc, targetData.yAcc, targetData.zAcc},
+            lastRadius,
+            currTheta,
+            targetData.omega);
+
+        BallisticsSolution solution = BallisticsSolution();
+        solution.distance = ballisticsTargetState.position.getLength();
+        solution.usePulseEstimation = false;
+        solution.activePlateIndex = activePlate;
+        solution.shotWindowStart = 0;
+        solution.shotWindowEnd = 0;
+
+        if (ballistics::findTargetProjectileIntersection(  // ballistics has a solution
+                ballisticsTargetState,
+                launchSpeed,
+                NUM_FORWARD_KINEMATIC_PROJECTIONS,
+                &solution.pitchAngle,
+                &solution.yawAngle,
+                &solution.timeOfFlight,
+                turretPitchOffset) &&
+            compareFloatClose(  // plate will be facing us at time of impact
+                Angle(
+                    targetData.projectForward(solution.timeOfFlight).theta + M_PI_2 * activePlate +
+                    M_PI)
+                    .minDifference(solution.yawAngle),
+                0,
+                M_PI_4))
+        {
+            return solution;
+        }
+    }
+
+    // Our last targeted plate is invalid, so we reselect
     std::optional<CvBallisticsSolver::BallisticsSolution> solution = std::nullopt;
     for (int i = 0; i < 4; i++)
     {
