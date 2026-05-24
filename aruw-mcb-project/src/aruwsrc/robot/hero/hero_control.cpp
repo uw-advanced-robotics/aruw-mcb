@@ -320,7 +320,7 @@ aruwsrc::hero::HeroTurretEncoderSubsystem heroTurretEncoders(
     yawLampreyCanEncoder,
     yawCanEncoder,
     yawMotor.getEncoder(),
-    0.0f);
+    -modm::toRadian(110.0f));
 
 aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(heroTurretEncoders, 2.44f);
 
