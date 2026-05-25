@@ -32,6 +32,7 @@
 #include "message_types.hpp"
 #include "virtual_analog.hpp"
 #include "virtual_can_encoder.hpp"
+#include "virtual_custom_controller.hpp"
 #include "virtual_digital.hpp"
 #include "virtual_imu.hpp"
 #include "virtual_leds.hpp"
@@ -79,6 +80,7 @@ public:
     VirtualDigital digital;
     VirtualLEDs leds;
     VirtualPWM pwm;
+    VirtualCustomController customController;
 
 private:
     void processCanMessage(const ReceivedSerialMessage& completeMessage, tap::can::CanBus canbus);

@@ -179,6 +179,8 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
             case MessageTypes::VOLTAGE_CURRENT_MESSAGE:
                 processVoltageCurrentMessage(completeMessage);
                 break;
+            case MessageTypes::CUSTOM_CONTROLLER_MESSAGE:
+                customController.processCustomControllerMessage(completeMessage);
             default:
                 break;
         }
