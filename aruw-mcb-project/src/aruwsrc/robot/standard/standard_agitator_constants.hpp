@@ -115,9 +115,10 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
     .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
+    .jammingTime = 200,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+    // .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+    .velocityPIDFeedForwardGain = 0,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
@@ -135,7 +136,7 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
         /// seconds.Convert to ms, Add extra tolerance.
         .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
-        .targetCycleCount = 3,
+        .targetCycleCount = 1,
 };
 #else
 #error "Attempted to include standard_agitator_constants.hpp for nonstandard robot target."
