@@ -77,7 +77,7 @@ public:
 protected:
     void onMeasurementSample(size_t /*pointIndex*/, uint32_t sampleCount) override
     {
-        averageLampreyTick += (encoder.getTicks() - averageLampreyTick) / sampleCount;
+        averageLampreyTick += (encoder.getRawAngle() - averageLampreyTick) / sampleCount;
 
         const float angleValue =
             this->config.motor->getChassisFrameMeasuredAngle().getUnwrappedValue();
