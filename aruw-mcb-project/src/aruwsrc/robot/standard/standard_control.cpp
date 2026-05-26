@@ -40,6 +40,7 @@
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
+#include "tap/control/instant_command.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
@@ -56,6 +57,7 @@
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
+#include "aruwsrc/control/agitator/multi_shot_cv_command.hpp"
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
@@ -85,6 +87,7 @@
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
+#include "aruwsrc/control/cycle_state_mode_controller.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
@@ -696,7 +699,7 @@ auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGov
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
-    rotateAndUnjamAgitatorRepeat,
+    rotateAndUnjamAgitatorRepeat, // TODO test usage of &rotateAndUnjamAgitatorWithHeatAndCVLimiting instead of &rotateAndUnjamAgitatorRepeat to see if cause of issues is frequent command descheduling
     RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
     &manualFireRateReselectionManager,
     cvOnTargetGovernor,
@@ -750,6 +753,43 @@ auto vPressed = std::make_unique<CycleStateCommandMapping<
     &leftMousePressedBNotPressed,
     &MultiShotCvCommandMapping::setShooterState,
     RemoteMapState({Remote::Key::E}));
+
+
+// TODO test new implementations
+/*MultiShotCvCommand multiShotCvCommand(
+    *drivers(),
+    rotateAndUnjamAgitatorRepeat,
+    &manualFireRateReselectionManager,
+    cvOnTargetGovernor,
+    &rotateAgitator);
+
+Trigger leftMousePressed =
+    TriggerHelpers::leftMouseButton(drivers())
+        .whileTrue(&multiShotCvCommand);
+
+auto cycleStateController = 
+    CycleStateModeController<
+        MultiShotCvCommand::LaunchMode,
+        MultiShotCvCommand::NUM_SHOOTER_STATES,
+        MultiShotCvCommand>(
+            MultiShotCvCommand::LIMITED_20HZ,
+            &multiShotCvCommand,
+            &MultiShotCvCommand::setShooterState);
+
+InstantCommand advanceCycleShootCommand(
+    []() { cycleStateController.cycleState(); },
+    std::array<tap::control::Subsystem*, 0>{});
+
+Trigger vPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::V).onTrue(&advanceCycleShootCommand);
+
+InstantCommand decrementCycleShootCommand(
+    []() { cycleStateController.reverseCycleState(); },
+    std::array<tap::control::Subsystem*, 0>{});
+
+Trigger ePressed =
+    TriggerHelpers::button(drivers(), Remote::Key::E).onTrue(&decrementCycleShootCommand);
+*/
 
 // cap bank
 Trigger cShiftPressed = (TriggerHelpers::button(drivers(), Remote::Key::C) &&
