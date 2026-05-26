@@ -18,50 +18,62 @@
  */
 
 #include "divergence_wheel_slip_observer.hpp"
-#include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
+
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
+
 
 namespace aruwsrc::control::chassis
 {
-    DivergenceWheelSlipObserver::DivergenceWheelSlipObserver(
-        tap::Drivers* drivers,
-        const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
-        tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
-        tap::communication::sensors::imu::ImuInterface& imu
-    ) : Subsystem(drivers),
-        chassisSubsystem(chassisSubsystem),
-        chassisYawObserver(chassisYawObserver),
-        imu(imu)
-        {
+DivergenceWheelSlipObserver::DivergenceWheelSlipObserver(
+    tap::Drivers* drivers,
+    const tap::control::chassis::ChassisSubsystemInterface& chassisSubsystem,
+    tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
+    tap::communication::sensors::imu::ImuInterface& imu)
+    : Subsystem(drivers),
+      chassisSubsystem(chassisSubsystem),
+      chassisYawObserver(chassisYawObserver),
+      imu(imu)
+{
+}
 
-        }
-    
-    void DivergenceWheelSlipObserver::update()
-    {
-        if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
+void DivergenceWheelSlipObserver::update()
+{
+    if (!chassisYawObserver.getChassisWorldYaw(&chassisYaw))
     {
         return;
     }
 
     const uint32_t currentTime = tap::arch::clock::getTimeMicroseconds();
-    const float dt = (currentTime - prevTime) / 1'000'000.0f;  // Convert to seconds
-    prevTime = currentTime;
 
     // Get chassis velocities
     float chassis_x_accel, chassis_y_accel;
 
     modm::Matrix<float, 3, 1> chassisVelocity = chassisSubsystem.getActualVelocityChassisRelative();
+    if (prevTime == 0)
+    {
+        prevTime = currentTime;
+        prev_chassis_x_vel = chassisVelocity[0][0];
+        prev_chassis_y_vel = chassisVelocity[1][0];
+        return;
+    }
+    const float dt = (currentTime - prevTime) / 1'000'000.0f;  // Convert to seconds
+    prevTime = currentTime;
     tap::algorithms::odometry::getVelocityWorldRelative(chassisVelocity, chassisYaw);
 
-    chassis_x_accel = (prev_chassis_x_accel - chassisVelocity[0][0]) / dt;
-    chassis_y_accel = (prev_chassis_y_accel - chassisVelocity[1][0]) / dt;
+    chassis_x_accel = (chassisVelocity[0][0] - prev_chassis_x_vel) / dt;
+    chassis_y_accel = (chassisVelocity[1][0] - prev_chassis_y_vel) / dt;
 
     float imu_x_accel = imu.getAx();
     float imu_y_accel = imu.getAy();
 
-    slipping = tap::algorithms::compareFloatClose(chassis_x_accel, imu_x_accel, 0) 
-            && tap::algorithms::compareFloatClose(chassis_y_accel, imu_y_accel, 0);
+    delta = std::hypot(chassis_x_accel, chassis_y_accel) - std::hypot(imu_x_accel, imu_y_accel);
 
-    }
-
+    slipping =
+        !tap::algorithms::compareFloatClose(chassis_x_accel, imu_x_accel, divergenceTolerance) ||
+        !tap::algorithms::compareFloatClose(chassis_y_accel, imu_y_accel, divergenceTolerance);
+    prev_chassis_x_vel = chassisVelocity[0][0];
+    prev_chassis_y_vel = chassisVelocity[1][0];
 }
+
+}  // namespace aruwsrc::control::chassis
