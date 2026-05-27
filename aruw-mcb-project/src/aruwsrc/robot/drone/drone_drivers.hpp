@@ -22,7 +22,22 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "tap/mock/imu_terminal_serial_handler_mock.hpp"
+
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/oled_display_mock.hpp"
+#else
+#include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
+
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "aruwsrc/communication/serial/vision_coprocessor.hpp"
+#include "aruwsrc/display/oled_display.hpp"
+#include "aruwsrc/robot/drone/drone_control_operator_interface.hpp"
+#include "aruwsrc/robot/drone/drone_imu.hpp"
+#endif
 
 namespace aruwsrc::drone
 {
@@ -33,15 +48,49 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers(), rttTelemetry(this) {}
+    Drivers()
+        : tap::Drivers(),
+          controlOperatorInterface(this)
+#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
+          ,
+          turretImu(),
+          rttTelemetry(this),
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &rttTelemetry)
+#endif
+    {
+    }
 
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+    testing::NiceMock<mock::OledDisplayMock> oledDisplay;
+#else
 public:
+    DroneControlOperatorInterface controlOperatorInterface;
+#endif
+    DroneIMU turretImu;
     communication::rtt::RttTelemetry rttTelemetry;
-    void init(const float) {}
+    display::OledDisplay oledDisplay;
+    void init(const float mainLoopFrequency)
+    {
+        oledDisplay.initialize();
+        turretImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
+        turretImu.setMountingTransform(
+            aruwsrc::control::turret::TURRET_IMU_CALIBRATION_MOUNTING_TRANSFORM);
+        turretImu.setCalibrationSamples(4000);
+    }
 
-    void updateIo() {}
+    void updateIo()
+    {
+        oledDisplay.updateDisplay();
+        turretImu.read();
+    }
 
-    void update() { rttTelemetry.updateTelemetryAsync(); }
+    void update()
+    {
+        turretImu.periodicIMUUpdate();
+        oledDisplay.updateMenu();
+        rttTelemetry.updateTelemetryAsync();
+    }
 };  // class aruwsrc::DroneDrivers
 }  // namespace aruwsrc::drone
 

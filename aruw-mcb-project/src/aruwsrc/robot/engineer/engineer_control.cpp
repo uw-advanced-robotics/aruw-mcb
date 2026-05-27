@@ -154,45 +154,11 @@ tap::motor::DjiMotor yawTurretMotor(
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508* YAW_TURRET_GEAR_RATIO,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
-aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor extensionMotor(
-    drivers(),
-    aruwsrc::engineer::EXTENSION_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_EXTENSION,
-    &drivers()->mcbLite,
-    true,
-    "Extension Motor",
-    false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
-    &drivers()->digital,
-    aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
-    true);
-
-LimitSwitchTrigger extensionTrigger(&extensionLimit);
-
-TriggerHomedJointSubsystem extensionSubsystem(
-    drivers(),
-    extensionMotor,
-    extensionTrigger,
-    EXTENSION_CONFIG);
-
-float getLivePitchMinLimit(float)
-{
-    return getPitchMinLimit(extensionSubsystem.getPosition());
-}
-
-float getLivePitchMaxLimit(float)
-{
-    return getPitchMaxLimit(extensionSubsystem.getPosition());
-}
-
+/// @TODO: make the turretMCB a MCB lite
 EngineerTurretSubsystem engTurret(
     drivers(),
-    &pitchTurretMotor,
-    &yawTurretMotor,
-    PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
+    pitchEngTurretMotor,
+    yawEngTurretMotor,
     &drivers()->mcbLite.imu,
     getLivePitchMinLimit,
     getLivePitchMaxLimit);
@@ -330,8 +296,22 @@ aruwsrc::communication::mcb_lite::VirtualCanEncoder wristEncoderTheta2(
     1,
     WRIST_HOME_THETA2);
 
+aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor extensionMotor(
+    drivers(),
+    aruwsrc::engineer::EXTENSION_MOTOR_ID,
+    aruwsrc::engineer::CAN_BUS_EXTENSION,
+    &drivers()->mcbLite,
+    true,
+    "Extension Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
+    &drivers()->digital,
+    aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
+    true);
 
+LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
 

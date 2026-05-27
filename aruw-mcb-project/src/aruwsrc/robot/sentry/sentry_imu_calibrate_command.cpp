@@ -29,7 +29,6 @@
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 
 using namespace tap::algorithms;
-using namespace tap::communication::sensors::imu::mpu6500;
 
 namespace aruwsrc::sentry
 {
@@ -170,8 +169,6 @@ void SentryImuCalibrateCommand::execute()
                     config.turretImu->requestCalibration();
                 }
 
-                drivers->mpu6500.requestCalibration();
-
                 chassisImuComm.requestCalibration();
                 turretMajorImu.requestCalibration();
 
@@ -197,9 +194,11 @@ void SentryImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
-            if (drivers->mpu6500.getImuState() == Mpu6500::ImuState::IMU_CALIBRATED)
+            if (turretMajorImu.getImuState() ==
+                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED)
             {
-                // assume turret MCB takes approximately as long as the onboard IMU to calibrate,
+                // assume turret MCB takes approximately as long as the turret major IMU to
+                // calibrate,
                 // plus 1 second extra to handle sending the request and processing it
                 // TODO to handle the case where the turret MCB doesn't receive information,
                 // potentially add ACK sequence to turret MCB CAN comm class.

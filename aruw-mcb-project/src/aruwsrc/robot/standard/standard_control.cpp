@@ -166,7 +166,7 @@ tap::motor::DjiMotor pitchMotor(
     true,
     "Pitch Turret",
     true,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
     PITCH_MOTOR_CONFIG.startEncoderValue);
 
 tap::motor::DjiMotor yawMotor(
@@ -176,16 +176,13 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     true,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
-StandardTurretSubsystem turret(
-    drivers(),
-    &pitchMotor,
-    &yawMotor,
-    PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
+aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
+aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
+
+StandardTurretSubsystem turret(drivers(), pitchTurretMotor, yawTurretMotor, &getTurretMCBCanComm());
 
 aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
     drivers(),
