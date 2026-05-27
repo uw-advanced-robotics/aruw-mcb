@@ -22,6 +22,8 @@
 #include <cmath>
 #include <numeric>
 
+#include "tap/algorithms/wrapped_float.hpp"
+
 #include "modm/math/geometry.hpp"
 
 namespace aruwsrc::algorithms
@@ -54,11 +56,26 @@ float calculatePosition(float localEncoderPosition, float globalEncoderPosition,
                          (M_TWOPI / static_cast<float>(ratio.den))) *
                          (M_TWOPI / static_cast<float>(ratio.den));
 
-    if (position > M_TWOPI)
-    {
-        position -= M_TWOPI;
-    }
-    return position;
+    return tap::algorithms::Angle(position).getWrappedValue();
+}
+
+/**
+ * Calculates the rotational offset (alpha) between a local and global encoder.
+ * To note, this will likely change around on startup as you will likely have multiple
+ * valid solutions to this
+ * @param localEncoderPosition  The current reading of the pre-gearing encoder (m_pre)
+ * @param globalEncoderPosition The current reading of the post-gearing absolute encoder (m_post)
+ * @return The wrapped offset alpha in the range [0, 2π)
+ */
+template <uint32_t NUM, uint32_t DEN>
+float calculateOffset(float localEncoderPosition, float globalEncoderPosition)
+{
+    const Ratio ratio(NUM, DEN);
+    const float r = static_cast<float>(ratio.num) / ratio.den;
+
+    float alpha = globalEncoderPosition - (localEncoderPosition * r);
+
+    return tap::algorithms::Angle(alpha).getWrappedValue();
 }
 }  // namespace binned_encoder_alignment
 }  // namespace aruwsrc::algorithms
