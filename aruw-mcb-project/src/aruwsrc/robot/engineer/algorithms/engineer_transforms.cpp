@@ -21,6 +21,7 @@
 
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 
+#include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
@@ -37,7 +38,8 @@ EngineerTransforms::EngineerTransforms(
     const tap::communication::sensors::imu::AbstractIMU& turretPitchImu,
     const aruwsrc::control::joint::JointSubsystem& extension,
     const aruwsrc::engineer::wrist::WristSubsystem& wrist,
-    const aruwsrc::control::joint::JointSubsystem& cubeStorage)
+    const aruwsrc::control::joint::JointSubsystem& cubeStorage,
+    aruwsrc::communication::serial::EngineerCVCommunication& engineerCVCommunication)
     : chassisOdometry(chassisOdometry),
       chassisImu(chassisImu),
       turret(turret),
@@ -45,6 +47,7 @@ EngineerTransforms::EngineerTransforms(
       extension(extension),
       wrist(wrist),
       cubeStorage(cubeStorage),
+      engineerCVCommunication(engineerCVCommunication),
       worldToChassis(Transform::identity()),
       chassisToTurretYaw(getHypotheticalChassisToTurretYaw(0)),
       turretYawToTurretPitch(getHypotheticalTurretYawToTurretPitch(0)),
@@ -53,6 +56,7 @@ EngineerTransforms::EngineerTransforms(
       cubeStoreFrameToCubeStoreCenter(Transform::identity()),
       worldToTurretPitch(Transform::identity()),
       worldToRealsense(Transform::identity()),
+      worldToReceptacle(Transform::identity()),
       worldToEndEffector(Transform::identity()),
       cubeStore1ToEndEffector(Transform::identity()),
       cubeStore2ToEndEffector(Transform::identity()),
@@ -61,7 +65,8 @@ EngineerTransforms::EngineerTransforms(
       COMBeyondTurretPitch(
           {.mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass + MASS_BEYOND_WRIST.mass,
            .location = Position(0, 0, 0)}),
-      COMBeyondWrist(MASS_BEYOND_WRIST)
+      COMBeyondWrist(MASS_BEYOND_WRIST),
+      worldToReceptacleValid(false)
 {
 }
 
@@ -106,6 +111,14 @@ void EngineerTransforms::updateTransforms()
         turretPitchImu.getGz());
 
     worldToRealsense = worldToTurretYaw.composeStatic(TURRET_YAW_TO_REALSENSE);
+    if (engineerCVCommunication.getIsFresh())
+    {
+        // cv communication gives the receptacle pose in the camera frame
+        worldToReceptacle =
+            worldToRealsense.composeStatic(engineerCVCommunication.getCamToReceptacle());
+        worldToReceptacleValid = true;
+        engineerCVCommunication.markTargetPoseStale();
+    }
 
     Transform cubeStoreCenterToTurretYaw =
         TURRET_YAW_TO_CUBE_STORE_FRAME.composeStatic(cubeStoreFrameToCubeStoreCenter);

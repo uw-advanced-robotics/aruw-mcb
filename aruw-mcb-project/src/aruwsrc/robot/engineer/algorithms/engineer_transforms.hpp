@@ -43,6 +43,10 @@ namespace aruwsrc::engineer::wrist
 {
 class WristSubsystem;
 }
+namespace aruwsrc::communication::serial
+{
+class EngineerCVCommunication;
+}
 
 namespace aruwsrc::engineer::algorithms
 {
@@ -66,7 +70,8 @@ public:
         const tap::communication::sensors::imu::AbstractIMU& turretPitchImu,
         const aruwsrc::control::joint::JointSubsystem& extension,
         const aruwsrc::engineer::wrist::WristSubsystem& wrist,
-        const aruwsrc::control::joint::JointSubsystem& cubeStorage);
+        const aruwsrc::control::joint::JointSubsystem& cubeStorage,
+        aruwsrc::communication::serial::EngineerCVCommunication& engineerCVCommunication);
 
     void updateTransforms();
 
@@ -86,6 +91,8 @@ public:
 
     inline const Transform& getWorldToTurretPitch() const { return worldToTurretPitch; }
     inline const Transform& getWorldToRealsense() const { return worldToRealsense; }
+    inline const Transform& getWorldToReceptacle() const { return worldToReceptacle; }
+    inline bool isWorldToReceptacleValid() const { return worldToReceptacleValid; }
     inline const Transform& getCubeStore1ToEndEffector() const { return cubeStore1ToEndEffector; }
     inline const Transform& getCubeStore2ToEndEffector() const { return cubeStore2ToEndEffector; }
     inline const Transform& getEndEffectorToCubeDist() const { return endEffectorToCubeDist; }
@@ -125,6 +132,7 @@ private:
     const aruwsrc::control::joint::JointSubsystem& extension;
     const aruwsrc::engineer::wrist::WristSubsystem& wrist;
     const aruwsrc::control::joint::JointSubsystem& cubeStorage;
+    aruwsrc::communication::serial::EngineerCVCommunication& engineerCVCommunication;
 
     // Joint Transforms
     Transform worldToChassis;
@@ -138,6 +146,7 @@ private:
     // Compound/Requested Transforms
     Transform worldToTurretPitch;
     Transform worldToRealsense;
+    Transform worldToReceptacle;
     Transform worldToEndEffector;       // purely for debug
     Transform cubeStore1ToEndEffector;  // TODO: should be cube not EE
     Transform cubeStore2ToEndEffector;  // TODO: should be cube not EE
@@ -147,6 +156,7 @@ private:
     // Subtree Center of Masses
     PointMass COMBeyondTurretPitch;
     PointMass COMBeyondWrist;
+    bool worldToReceptacleValid;
 };
 
 }  // namespace aruwsrc::engineer::algorithms

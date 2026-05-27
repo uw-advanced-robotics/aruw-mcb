@@ -29,7 +29,8 @@ EngineerCVCommunication* EngineerCVCommunication::engineerCVCommunicationInstanc
 
 EngineerCVCommunication::EngineerCVCommunication(tap::Drivers* drivers)
     : DJISerial(drivers, ENGINEER_CV_RX_UART_PORT),
-      receptableToCam(Transform::identity())
+      camToReceptacle(Transform::identity()),
+      isFresh(false)
 {
 #ifndef ENV_UNIT_TESTS
     // when testing it is OK to have multiple vision coprocessor instances, so this assertion
@@ -43,15 +44,30 @@ EngineerCVCommunication::~EngineerCVCommunication() { engineerCVCommunicationIns
 
 void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
+    if (completeMessage.messageType != TARGET_POSITION_MESSAGE_TYPE ||
+        completeMessage.header.dataLength != sizeof(TargetPositionMessage))
+    {
+        return;
+    }
+
     memcpy(&(targetPositionMessage), &completeMessage.data, sizeof(TargetPositionMessage));
 
-    receptableToCam = Transform(
+    camToReceptacle = Transform(
         targetPositionMessage.xPos,
         targetPositionMessage.yPos,
         targetPositionMessage.zPos,
         targetPositionMessage.roll,
         targetPositionMessage.pitch,
         targetPositionMessage.yaw);
+    isFresh = true;
+
+    // so whenever new data comes in engineer_transforms will convert it to
+    // world frame.
+
+    // then, the auton algoritm goes like this:
+    // as it approaches the receptacle along the path,
+    // collects new pose data
+    // then when it reaches the desired distance it stops and pools together the pose data
 }
 
 void EngineerCVCommunication::initializeCV()

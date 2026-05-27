@@ -384,7 +384,8 @@ EngineerTransforms transformer(
     drivers()->mcbLite.imu,
     extensionSubsystem,
     wristSubsystem,
-    cubeStorage);
+    cubeStorage,
+    drivers()->engineerCVCommunication);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
