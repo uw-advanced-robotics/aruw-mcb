@@ -31,7 +31,7 @@ using namespace tap::algorithms::odometry;
 namespace aruwsrc::engineer
 {
 
-class EngineerImuCalibrateCommand : aruwsrc::control::imu::ImuCalibrateCommand
+class EngineerImuCalibrateCommand : public aruwsrc::control::imu::ImuCalibrateCommand
 {
 public: 
     static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4);

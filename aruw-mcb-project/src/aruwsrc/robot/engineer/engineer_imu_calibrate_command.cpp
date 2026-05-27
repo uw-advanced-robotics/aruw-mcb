@@ -76,7 +76,7 @@ EngineerImuCalibrateCommand::EngineerImuCalibrateCommand(
         addSubsystemRequirement(config.turret);
     }
 
-    addSubsystemRequirement(turret);
+    addSubsystemRequirement(&turret);
 }
 
 void EngineerImuCalibrateCommand::initialize()
@@ -84,7 +84,6 @@ void EngineerImuCalibrateCommand::initialize()
     // reset odometry
     yawObserver.overrideChassisYaw(0);
     odometryInterface.reset();
-    transformer.initialize();
 
     ImuCalibrateCommand::initialize();
 
