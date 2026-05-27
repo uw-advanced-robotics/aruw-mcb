@@ -61,7 +61,7 @@ public:
     mockable inline void initialize() { motor->initialize(); }
 
     /// Updates the measured motor angle
-    virtual void updateMotorAngle();
+    mockable void updateMotorAngle();
 
     /**
      * Set the motor's desired output when the motor is online. The output is expected to be in the
@@ -161,7 +161,7 @@ public:
 
     int16_t getMotorOutput() const { return motor->getOutputDesired(); }
 
-protected:
+private:
     const TurretMotorConfig config;
 
     /// Low-level motor object that this object interacts with
