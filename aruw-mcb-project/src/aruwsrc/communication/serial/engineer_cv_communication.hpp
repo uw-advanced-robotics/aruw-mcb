@@ -44,10 +44,10 @@ public:
 
     struct TargetPositionMessage
     {
-        float xPos;  ///< x position of the target (in m). positive forward relative to camera
-        float yPos;  ///< y position of the target (in m). positive is left relative to camera
-        float zPos;  ///< z position of the target (in m). positive is up relative to camera
-        float roll;  ///< rotation about x axis, radians
+        float xPos;   ///< x position of the target (in m). positive forward relative to camera
+        float yPos;   ///< y position of the target (in m). positive is left relative to camera
+        float zPos;   ///< z position of the target (in m). positive is up relative to camera
+        float roll;   ///< rotation about x axis, radians
         float pitch;  ///< rotation about y axis, radians
         float yaw;    ///< rotation about z axis, radians
     } modm_packed;
