@@ -29,7 +29,6 @@
 
 namespace tap::communication::sensors::imu
 {
-class ImuInterface;
 class AbstractIMU;
 }  // namespace tap::communication::sensors::imu
 namespace aruwsrc::control::turret
@@ -64,7 +63,7 @@ public:
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const tap::communication::sensors::imu::AbstractIMU& chassisImu,
         const aruwsrc::control::turret::TurretSubsystem& turret,
-        const tap::communication::sensors::imu::ImuInterface& turretPitchImu,
+        const tap::communication::sensors::imu::AbstractIMU& turretPitchImu,
         const aruwsrc::control::joint::JointSubsystem& extension,
         const aruwsrc::engineer::wrist::WristSubsystem& wrist,
         const aruwsrc::control::joint::JointSubsystem& cubeStorage);
@@ -108,7 +107,7 @@ public:
     static Transform getHypotheticalTurretPitchToExtension(float extension)
     {
         return Transform(
-            TURRET_PITCH_TO_EXTENSION_ZERO.getTranslation() + Vector(extension, 0, 0),
+            TURRET_PITCH_TO_EXTENSION_ZERO_POS + Vector(extension, 0, 0),
             Orientation(0, 0, 0));
     }
 
@@ -122,8 +121,7 @@ private:
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const tap::communication::sensors::imu::AbstractIMU& chassisImu;
     const aruwsrc::control::turret::TurretSubsystem& turret;
-    const tap::communication::sensors::imu::ImuInterface&
-        turretPitchImu;  // TODO: should be abstract imu, but blocked by mcb lite / virtual imu
+    const tap::communication::sensors::imu::AbstractIMU& turretPitchImu;
     const aruwsrc::control::joint::JointSubsystem& extension;
     const aruwsrc::engineer::wrist::WristSubsystem& wrist;
     const aruwsrc::control::joint::JointSubsystem& cubeStorage;

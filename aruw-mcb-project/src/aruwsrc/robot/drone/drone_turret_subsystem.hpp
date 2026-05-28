@@ -32,7 +32,7 @@ class TurretYawControllerInterface;
 namespace aruwsrc::drone
 {
 /**
- * Turret subsystem for the Standard.
+ * Turret subsystem for the Drone.
  */
 class DroneTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
                                    public aruwsrc::control::turret::TurretOrientationInterface
@@ -42,7 +42,7 @@ class DroneTurretSubsystem final : public aruwsrc::control::turret::TurretSubsys
     float getWorldPitch() const override;
     modm::Vector3f getTurretOffset() const override { return modm::Vector3f(0, 0, 0); };
     float getPitchOffset() const override { return 0; };
-};  // class StandardTurretSubsystem
+};  // class DroneTurretSubsystem
 
 }  // namespace aruwsrc::drone
 

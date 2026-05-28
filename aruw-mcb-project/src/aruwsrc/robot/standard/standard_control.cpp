@@ -52,7 +52,7 @@
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
-#include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
+#include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
@@ -80,7 +80,7 @@
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 
-// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/second_order_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
@@ -138,7 +138,6 @@ using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
-using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::standard;
 
 // for fake sentry
@@ -169,7 +168,7 @@ tap::motor::DjiMotor pitchMotor(
     false,
     "Pitch Turret",
     true,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
     PITCH_MOTOR_CONFIG.startEncoderValue);
 
 tap::motor::DjiMotor yawMotor(
@@ -179,16 +178,13 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     true,
-    1,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
-StandardTurretSubsystem turret(
-    drivers(),
-    &pitchMotor,
-    &yawMotor,
-    PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
-    &getTurretMCBCanComm());
+aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
+aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
+
+StandardTurretSubsystem turret(drivers(), pitchTurretMotor, yawTurretMotor, &getTurretMCBCanComm());
 
 aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
     drivers(),
@@ -488,30 +484,32 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
-autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommand(
-    drivers(),
-    {&turret,
-     &turret.pitchMotor,
-     &chassisFramePitchTurretController,
-     pitchMotor.isMotorInverted(),
-     TURRET_WEIGHT_KG,
-     TORQUE_TO_DESIRED_OUT},
-    &chassis);
+autotune::GravityAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
+    gravityAutotuneCommand(
+        drivers(),
+        {&turret,
+         &turret.pitchMotor,
+         &chassisFramePitchTurretController,
+         pitchMotor.isMotorInverted(),
+         TURRET_WEIGHT_KG,
+         TORQUE_TO_DESIRED_OUT},
+        &chassis);
 
-autotune::SpringAutotuneCommand<9, Axis::PITCH> springAutotuneCommand(
-    drivers(),
-    {&turret,
-     &turret.pitchMotor,
-     &chassisFramePitchTurretController,
-     pitchMotor.isMotorInverted(),
-     TURRET_WEIGHT_KG,
-     TORQUE_TO_DESIRED_OUT},
-    &turretSpringCompensation,
-    &turretGravityCompensation,
-    &chassis,
-    {},
-    &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand);
+autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
+    springAutotuneCommand(
+        drivers(),
+        {&turret,
+         &turret.pitchMotor,
+         &chassisFramePitchTurretController,
+         pitchMotor.isMotorInverted(),
+         TURRET_WEIGHT_KG,
+         TORQUE_TO_DESIRED_OUT},
+        &turretSpringCompensation,
+        &turretGravityCompensation,
+        &chassis,
+        {},
+        &imuCalibrateSuccessBuzzCommand,
+        &imuCalibrateFailBuzzCommand);
 
 autotune::SecondOrderAutotuneCommand<9, Axis::PITCH> secondOrderAutotuneCommand(
     drivers(),
@@ -545,7 +543,16 @@ GovernorLimitedCommand<1> turretUTurnCommandLimited(
     {&imuCalibrateDoneGovernor});
 
 // base rotate/unjam commands
-ConstantVelocityAgitatorCommand rotateAgitator(agitator, constants::AGITATOR_ROTATE_CONFIG);
+ManualFireRateReselectionManager manualFireRateReselectionManager;
+
+ConstantFireRateAgitatorCommand rotateAgitator(
+    agitator,
+    ConstantFireRateAgitatorCommand::Config{
+        constants::AGITATOR_ROTATE_CONFIG,
+        constants::MANUAL_CONSTANT_FIRE_RATE_RPS,
+        constants::AGITATOR_NUM_POCKETS,
+        constants::MIN_CONSTANT_FIRE_RATE_RPM,
+        &manualFireRateReselectionManager});
 
 UnjamSpokeAgitatorCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
@@ -562,7 +569,6 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
-ManualFireRateReselectionManager manualFireRateReselectionManager;
 FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
 
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
@@ -580,6 +586,11 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
     {&heatLimitGovernor});
+
+GovernorLimitedCommand<2> agitatorManualSpin(
+    {&agitator},
+    rotateAndUnjamAgitator,
+    {&heatLimitGovernor, &frictionWheelsOnGovernor});
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(

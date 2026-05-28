@@ -49,58 +49,52 @@ public:
     SentryTransforms(
         const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry,
         const aruwsrc::control::turret::YawTurretSubsystem& turretMajor,
-        const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretLeft,
-        const tap::communication::sensors::imu::ImuInterface& turretLeftImu,
-        const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretRight,
-        const tap::communication::sensors::imu::ImuInterface& turretRightImu,
+        const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretWidow,
+        const tap::communication::sensors::imu::ImuInterface& turretWidowImu,
         const SentryTransformConfig& config);
 
     void updateTransforms();
 
     inline void initialize()
     {
-        turretLeftYawSyncPid.reset();
-        turretLeftYawCorrection = 0;
-        turretRightYawSyncPid.reset();
-        turretRightYawCorrection = 0;
+        turretWidowYawSyncPid.reset();
+        turretWidowYawCorrection = 0;
     }
 
     inline const Transform& getWorldToChassis() const { return worldToChassis; };
     inline const Transform& getWorldToTurretMajor() const { return worldToTurretMajor; };
-    inline const Transform& getWorldToTurretLeft() const { return worldToTurretLeft; };
-    inline const Transform& getWorldToTurretRight() const { return worldToTurretRight; };
+    inline const Transform& getWorldToTurretWidow() const { return worldToTurretWidow; };
+    inline const Transform& getWorldToTurretLeft() const
+    {
+        return worldToTurretWidow;
+    };  // Alias for compatibility
+    inline const Transform& getWorldToTurretRight() const
+    {
+        return worldToTurretWidow;
+    };  // Alias for compatibility
 
     inline const Transform& getChassisToMajor() const { return chassisToTurretMajor; };
 
     inline const Transform& getWorldToVTM() const { return worldToVTM; }
 
-    // If you pass a wrong turretID, the right turret will automatically be returned.
-    inline const Transform& getWorldToTurret(int turretID) const
+    inline const Transform& getWorldToTurret(int /* turretID */) const
     {
-        if (turretID == turretLeft.getTurretID())
-        {
-            return worldToTurretLeft;
-        }
-        else
-        {
-            return worldToTurretRight;
-        }
+        return worldToTurretWidow;
     }
 
-    inline const Transform& getMajorToTurretLeft() const { return turretMajorToTurretLeft; };
-
-    inline const Transform& getMajorToTurretRight() const { return turretMajorToTurretRight; };
-
-    inline const Transform& getMajorToMinor(uint8_t turretId) const
+    inline const Transform& getMajorToTurretWidow() const { return turretMajorToTurretWidow; };
+    inline const Transform& getMajorToTurretLeft() const
     {
-        if (turretId == turretLeft.getTurretID())
-        {
-            return turretMajorToTurretLeft;
-        }
-        else
-        {
-            return turretMajorToTurretRight;
-        }
+        return turretMajorToTurretWidow;
+    };  // Alias for compatibility
+    inline const Transform& getMajorToTurretRight() const
+    {
+        return turretMajorToTurretWidow;
+    };  // Alias for compatibility
+
+    inline const Transform& getMajorToMinor(uint8_t /* turretId */) const
+    {
+        return turretMajorToTurretWidow;
     };
 
     inline uint32_t getLastComputedOdometryTime() const
@@ -122,10 +116,6 @@ public:
                 return chassisToArducam0;
             case 1:
                 return chassisToArducam1;
-            case 2:
-                return chassisToArducam2;
-            case 3:
-                return chassisToArducam3;
             default:
                 return chassisToArducam0;
         }
@@ -142,27 +132,21 @@ private:
 
     const tap::algorithms::odometry::Odometry2DInterface& chassisOdometry;
     const aruwsrc::control::turret::YawTurretSubsystem& turretMajor;
-    const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretLeft;
-    const tap::communication::sensors::imu::ImuInterface& turretLeftImu;
-    const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretRight;
-    const tap::communication::sensors::imu::ImuInterface& turretRightImu;
+    const aruwsrc::sentry::turret::SentryTurretMinorSubsystem& turretWidow;
+    const tap::communication::sensors::imu::ImuInterface& turretWidowImu;
 
     // Transforms
     Transform worldToChassis;
     Transform worldToTurretMajor;
-    Transform worldToTurretLeft;
-    tap::algorithms::SmoothPid turretLeftYawSyncPid;
-    float turretLeftYawCorrection;
-    Transform worldToTurretRight;
-    tap::algorithms::SmoothPid turretRightYawSyncPid;
-    float turretRightYawCorrection;
+    Transform worldToTurretWidow;
+    tap::algorithms::SmoothPid turretWidowYawSyncPid;
+    float turretWidowYawCorrection;
     Transform worldToVTM;
     Transform chassisToArducam0, chassisToArducam1, chassisToArducam2, chassisToArducam3;
 
     // Intermediary transforms
     Transform chassisToTurretMajor;
-    Transform turretMajorToTurretLeft;
-    Transform turretMajorToTurretRight;
+    Transform turretMajorToTurretWidow;
 
     // Arducam offsets
     const Transform MAJOR_TO_ARDUCAM1 =

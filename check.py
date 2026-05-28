@@ -115,7 +115,16 @@ def check_namespace():
     IGNORE_PATHS = ["*_constants.hpp", "old-indicators", 
                     "create_rtt_error.hpp", "2025engineer"]
     print("Checking namespace rules")
-    run(["python", "./check_namespace_rule.py","-i", *IGNORE_PATHS,"-rn", *IGNORE_NAMESPACES])
+    run(
+        [
+            "python",
+            "./check_namespace_rule.py",
+            "-i",
+            *IGNORE_FOLDERS,
+            "-rn",
+            *IGNORE_NAMESPACE,
+        ]
+    )
 
 
 # def check_taproot_submodule():
@@ -183,7 +192,7 @@ def run_lbuild():
 class BuildTarget(Enum):
     STANDARD_NULL = "STANDARD_NULL"
     STANDARD_PHOBOS = "STANDARD_PHOBOS"
-    SENTRY_ECLIPSE = "SENTRY_ECLIPSE"
+    SENTRY_ACHLYS = "SENTRY_ACHLYS"
     DART = "DART"
     ENGINEER = "ENGINEER"
     DRONE = "DRONE"

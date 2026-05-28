@@ -21,12 +21,15 @@
 
 #include <vector>
 
+#include "tap/algorithms/filter/butterworth.hpp"
+#include "tap/algorithms/filter/discrete_filter.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/timeout.hpp"
+#include "tap/communication/sensors/encoder/encoder_interface.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
+#include "aruwsrc/communication/sensors/encoder/fake_encoder.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
@@ -36,20 +39,23 @@
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
+
 namespace aruwsrc::sentry
 {
 /**
- * A command whose job is to perform a calibration of the turret and chassis IMUs. Requires that the
- * robot has a turret and a chassis subsystem. Also requires that a turret IMU is connected via the
+ * A command whose job is to perform a calibration of the turret and chassis IMUs. Requires that
+ the
+ * robot has a turret and a chassis subsystem. Also requires that a turret IMU is connected via
+ the
  * TurretMCBCanComm object.
  *
  * When this command is scheduled, it performs the following actions:
- * 1. Wait until the turret is online and either the chassis mpu6500 or turret MCB IMU is online.
+ * 1. Wait until the turrets are online and the chassis turret-MCB IMU is online.
  * 2. Command the pitch and yaw turret gimbals to move to PI/2 radians (forward and flat).
  * 3. Command the chassis to stay still.
  * 4. Pause until the chassis/turret subsystems are no longer moving.
  * 5. Send a calibration signal to the turret MCB.
- * 6. Send signal to onboard IMU to recalibrate.
+ * 6. Send calibration requests to onboard and chassis/turret IMUs.
  * 7. Wait until calibration is complete and then end the command.
  */
 class SentryImuCalibrateCommand : public aruwsrc::control::imu::ImuCalibrateCommand
@@ -65,13 +71,14 @@ public:
      *
      * @note is 0 for max precision on sentry, which chassis-rel controllers can reach.
      */
-    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
+    static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.24f);  // 10x encoder on major
 
     /**
      * @param[in] drivers A pointer to the global drivers object.
      * @param[in] turretsAndControllers A list of TurretIMUCalibrationConfig structs containing
      * turret and turret IMU information necessary for calibrating the IMU
-     * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the desired
+     * @param[in] chassis A `ChassisSubsystem` that this command will control (will set the
+     desired
      * movement to 0).
      */
 
@@ -85,8 +92,10 @@ public:
         algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         tap::communication::sensors::imu::AbstractIMU &turretMajorImu,
-        aruwsrc::communication::mcb_lite::MCBLite &chassisMCBLite,
+        aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
+        tap::encoder::EncoderInterface &turretMajorLampreyEncoder,
+        tap::encoder::EncoderInterface &turretMajorInternalEncoder,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
@@ -109,12 +118,28 @@ protected:
 
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface;
     tap::communication::sensors::imu::AbstractIMU &turretMajorImu;
-    aruwsrc::communication::mcb_lite::MCBLite &chassisMCBLite;
+    aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm;
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
+    tap::encoder::EncoderInterface &turretMajorLampreyEncoder;
+    tap::encoder::EncoderInterface &turretMajorInternalEncoder;
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
-    // const std::vector<aruwsrc::virtualMCB::MCBLite *> &mcbLite;
+private:
+    static constexpr float LAMPREY_SHIT_THRESHOLD = 0.02f;
+    static constexpr float LAMPREY_SHIT_BUMP = modm::toRadian(10.0f);
+    static constexpr uint32_t MIN_SATURATION_LOOPS = 10;
+    uint32_t loopCounter{0};
+    bool lampreyAligned{false};
+    float turretMajorLampreyEncoderHighpassValue = 0;
+    float turretMajorLampreyEncoderLowpassValue = 0;
+    float lampreyShitAverage = 0;
+    float lampreySamples = 0;
+    float debugPos = 0;
+    float lampreyPos = 0;
+    float lampreyDebugAverage2 = 0;
+    float fakeLampreyEncoderDebugPos = 0;
+    aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
 };
 }  // namespace aruwsrc::sentry
 

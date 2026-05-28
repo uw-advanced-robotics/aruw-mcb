@@ -130,6 +130,7 @@ public:
     }
 
 private:
+    bool wasTurretMcbConnected = true;
     inline void checkTurretMcbDisconnection(Drivers* drivers)
     {
         bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
@@ -139,10 +140,11 @@ private:
         {
             // tap::buzzer::playNote(&drivers->pwm, 1000);
         }
-        else
+        else if (turretMcbConnected && !drivers->wasTurretMcbConnected)
         {
             tap::buzzer::silenceBuzzer(&drivers->pwm);
         }
+        drivers->wasTurretMcbConnected = turretMcbConnected;
     }
 #endif
 };  // class aruwsrc::StandardDrivers

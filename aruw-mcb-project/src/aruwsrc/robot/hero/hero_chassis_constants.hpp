@@ -116,11 +116,11 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 300.0f;
-static constexpr float AUTOROTATION_PID_KD = 57.3f;
-static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
+static constexpr float AUTOROTATION_PID_KP = 200.0f;
+static constexpr float AUTOROTATION_PID_KD = 10.0f;
+static constexpr float AUTOROTATION_PID_MAX_P = 200.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 200.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 200.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
@@ -156,6 +156,11 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 100,
 };
 
+static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 }  // namespace aruwsrc::control::chassis
 
 #endif  // HERO_CHASSIS_CONSTANTS_HPP_

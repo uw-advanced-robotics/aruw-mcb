@@ -72,14 +72,14 @@ static constexpr tap::motor::MotorId LEFT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId RIGHT_MOTOR_ID = tap::motor::MOTOR2;
 #endif
 
-#ifndef TARGET_SENTRY_ECLIPSE
+#if !defined(ALL_SENTRIES)
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 #endif
 
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ACHLYS)
 static constexpr float LAUNCHER_PID_KP = 14.0106f;
 static constexpr float LAUNCHER_PID_KI = 31.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
@@ -146,7 +146,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 7000.0f},
     {32.0f, 7900.0f},
 };
-#elif defined(TARGET_SENTRY_ECLIPSE)
+#elif defined(TARGET_SENTRY_ACHLYS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},      {11.33f, 4500.0f}, {11.34f, 4600.0f}, {12.3f, 4700.0f},  {13.39f, 4900.0f},
     {14.32f, 5000.0f}, {14.78f, 5100.0f}, {15.91f, 5350.0f}, {16.4f, 5500.0f},  {18.28f, 5600.0f},
@@ -169,13 +169,13 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #elif defined(TARGET_HERO_NEPTUNE)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
-#elif defined(TARGET_SENTRY_ECLIPSE)
+#elif defined(TARGET_SENTRY_ACHLYS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #endif
 
 #if defined(TARGET_HERO_NEPTUNE)
 static constexpr float LAUNCHER_SPEED =
-    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 1;
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 5;
 #else
 static constexpr float LAUNCHER_SPEED =
     tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 3;

@@ -123,6 +123,9 @@ static constexpr auto& IMU_CALIBRATE_SUCCESS_NOTES = MARIO_MUSHROOM_NOTES;
 
 static constexpr uint32_t IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS = MARIO_PIPE_NOTE_LENGTH_MS;
 static constexpr auto& IMU_CALIBRATE_FAIL_NOTES = MARIO_PIPE_NOTES;
+
+static constexpr uint32_t IMU_NOT_CALIBRATED_NOTE_LENGTH_MS = 250;
+static constexpr std::array<uint8_t, 4> IMU_NOT_CALIBRATED_NOTES{{50, 44, 0, 0}};
 }  // namespace aruwsrc::control::buzzer
 
 #endif  // NOTE_SEQUENCES_HPP_
