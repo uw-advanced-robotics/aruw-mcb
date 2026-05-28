@@ -22,7 +22,10 @@ from datetime import datetime
 from SCons.Script import *
 
 FLEET_API_ENDPOINT = "https://fleet.aruw.org/fleet-api/"
-CACHE_FILE_PATH = "./build_tools/build_target_ip_cache.json"  # should be present in .gitignore
+
+# should be present in .gitignore
+CACHE_FILE_PATH = "./build_tools/build_target_ip_cache.json"
+
 
 def run_ozone(env, source, robot=""):
     def call_run_ozone(target, source, env):
@@ -53,7 +56,9 @@ def generate_ozone(env, robot=""):
         def use_ip(ip):
             nonlocal project_content
             print(f"Using IP ({ip}) connection...")
-            project_content = project_content.replace("${OZONE_CONNECTION}", f"Project.SetHostIF (\"IP\", \"{ip}\");")
+            project_content = project_content.replace(
+                "${OZONE_CONNECTION}", f'Project.SetHostIF ("IP", "{ip}");'
+            )
 
         def use_usb():
             nonlocal project_content
@@ -81,9 +86,14 @@ def generate_ozone(env, robot=""):
             latest_ips = {}
 
             for pi in fleet_status:
-                target_name = pi.get("mcbData", {}).get("buildTarget")
+                mcb_data = pi.get("mcbData", {})
+
+                if not mcb_data:
+                    continue
+
+                target_name = mcb_data.get("buildTarget")
+                date_str = mcb_data.get("lastUpdate")
                 ip = pi.get("ip")
-                date_str = pi.get("mcbData", {}).get("lastUpdate")
 
                 if not target_name or not ip or not date_str:
                     continue
@@ -93,7 +103,10 @@ def generate_ozone(env, robot=""):
                 except (ValueError, TypeError):
                     continue
 
-                if target_name not in latest_ips or timestamp > latest_ips[target_name]["timestamp"]:
+                if (
+                    target_name not in latest_ips
+                    or timestamp > latest_ips[target_name]["timestamp"]
+                ):
                     latest_ips[target_name] = {"ip": ip, "timestamp": timestamp}
 
             updated = False
@@ -104,29 +117,31 @@ def generate_ozone(env, robot=""):
 
             if updated:
                 save_ip_cache(cache)
-                
+
             return cache
 
         def fetch_robot_ip(robot_target):
             from requests import get
-            
+
             if not robot_target:
                 return None
-                
+
             fleet_status = None
             try:
-                print('Querying Fleet Status...')
+                print("Querying Fleet Status...")
                 response = get(FLEET_API_ENDPOINT, timeout=6)
                 response.raise_for_status()
                 fleet_status = response.json().get("robotPis", [])
             except Exception as e:
                 print(f"Unable to query Fleet Status: {e}")
-                
+
             if fleet_status is not None:
                 cache = update_cache_from_api(fleet_status)
                 ip = cache.get(robot_target)
                 if not ip:
-                    print(f"No Pis found in Fleet Status with matching MCB build target for '{robot_target}'")
+                    print(
+                        f"No Pis found in Fleet Status with matching MCB build target for '{robot_target}'"
+                    )
                 return ip
             else:
                 print("Attempting to use locally cached IP...")
@@ -157,8 +172,10 @@ def generate_ozone(env, robot=""):
                 print("Fetching IP failed. Falling back to USB.")
                 use_usb()
 
-        project_content = project_content.replace("${BUILD_DIR}", env['BUILDPATH'])
-        project_content = project_content.replace("${BUILD_DIR_LOWER}", env['BUILDPATH'].lower())
+        project_content = project_content.replace("${BUILD_DIR}", env["BUILDPATH"])
+        project_content = project_content.replace(
+            "${BUILD_DIR_LOWER}", env["BUILDPATH"].lower()
+        )
 
         target.append(env.File(project_file_path))
         target.append(env.File(f"{project_file_path}.user"))
@@ -178,8 +195,20 @@ def generate_ozone(env, robot=""):
 
 def generate(env, **kw):
     try:
-        AddOption('--ip', dest='ip', type='string', nargs=1, action='store', help='Specify IP address for Ozone')
-        AddOption('--usb', dest='usb', action='store_true', help='Use USB connection for Ozone')
+        AddOption(
+            "--ip",
+            dest="ip",
+            type="string",
+            nargs=1,
+            action="store",
+            help="Specify IP address for Ozone",
+        )
+        AddOption(
+            "--usb",
+            dest="usb",
+            action="store_true",
+            help="Use USB connection for Ozone",
+        )
     except Exception:
         pass
 
