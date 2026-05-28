@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SECOND_ORDER_COMPENSATOR_HPP_
-#define SECOND_ORDER_COMPENSATOR_HPP_
+#ifndef THIRD_ORDER_COMPENSATOR_HPP_
+#define THIRD_ORDER_COMPENSATOR_HPP_
 
 #include <cmath>
 #include <cstdint>
@@ -31,13 +31,13 @@
 
 namespace aruwsrc::control::turret::algorithms
 {
-class TurretSecondOrderCompensation : public TurretCompensatorInterface
+class TurretThirdOrderCompensation : public TurretCompensatorInterface
 {
 public:
     /**
-     * @brief Configuration parameters for TurretSecondOrderCompensation.
+     * @brief Configuration parameters for TurretThirdOrderCompensation.
      */
-    struct TurretSecondOrderCompensationParams
+    struct TurretThirdOrderCompensationParams
     {
         float bias;
         float firstCoefficient;
@@ -45,12 +45,12 @@ public:
         float thirdCoefficient;
     };
     /**
-     * Yeah turns out it's actually third order chat, desmos says so
+     * Third order polynomial compensator
      *
      * @param[in] True if the motor direction should be inverted.
      */
-    TurretSecondOrderCompensation(
-        const TurretSecondOrderCompensationParams& params,
+    TurretThirdOrderCompensation(
+        const TurretThirdOrderCompensationParams& params,
         const bool isMotorInverted)
         : params(params),
           isMotorInverted(isMotorInverted){};
@@ -73,9 +73,9 @@ public:
     }
 
 private:
-    const TurretSecondOrderCompensationParams params;
+    const TurretThirdOrderCompensationParams params;
     const bool isMotorInverted;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 
-#endif  // SECOND_ORDER_COMPENSATOR_HPP_
+#endif  // THIRD_ORDER_COMPENSATOR_HPP_

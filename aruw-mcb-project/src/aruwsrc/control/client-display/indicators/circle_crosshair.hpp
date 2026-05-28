@@ -51,7 +51,7 @@ private:
 #elif defined(TARGET_STANDARD_PHOBOS)
     static constexpr int16_t OFFSET_X = 25;
     static constexpr int16_t OFFSET_Y = -75;
-#elif defined(TARGET_HERO_ZERO)
+#elif defined(TARGET_HERO_NEPTUNE)
     static constexpr int16_t OFFSET_X = 2;
     static constexpr int16_t OFFSET_Y = -42;
 #else

@@ -24,7 +24,6 @@ from SCons.Script import *
 FLEET_API_ENDPOINT = "https://fleet.aruw.org/fleet-api/"
 CACHE_FILE_PATH = "./build_tools/build_target_ip_cache.json"  # should be present in .gitignore
 
-
 def run_ozone(env, source, robot=""):
     def call_run_ozone(target, source, env):
         jdebug = f"{env['BUILDPATH']}/{env['CONFIG_PROJECT_NAME']}.jdebug"

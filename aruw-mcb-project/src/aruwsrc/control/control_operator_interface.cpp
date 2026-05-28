@@ -204,23 +204,12 @@ float ControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
     switch (turretID)
     {
         case 0:
-#if defined(TARGET_STANDARD_PHOBOS)
-            // TODO: Fix the underlying Phobos pitch frame/sign mismatch instead of inverting
-            // manual input here.
-            return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
-                   static_cast<float>(limitVal<int16_t>(
-                       -drivers->remote.getMouseY(),
-                       -USER_MOUSE_PITCH_MAX,
-                       USER_MOUSE_PITCH_MAX)) *
-                       getUserMousePitchScalar();
-#else
             return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
                    static_cast<float>(limitVal<int16_t>(
                        drivers->remote.getMouseY(),
                        -USER_MOUSE_PITCH_MAX,
                        USER_MOUSE_PITCH_MAX)) *
                        getUserMousePitchScalar();
-#endif
         case 1:
             return -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) +
                    static_cast<float>(limitVal<int16_t>(

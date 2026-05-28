@@ -42,7 +42,7 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
         - <ROBOT_TYPE> must be one of or a unique substring from the following:\n\
             - STANDARD_NULL, STANDARD_PHOBOS, DRONE, ENGINEER, SENTRY_ACHLYS, HERO_NEPTUNE, DART\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
-                          the sim libraries, for example, run `scons build compile_lib_only=sim`.'"
+                          the sim libraries, for example, run `scons build compile_lib_only=sim`."
 
 
 

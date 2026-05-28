@@ -101,7 +101,7 @@
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/control/turret/algorithms/second_order_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/third_order_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
@@ -365,7 +365,7 @@ algorithms::TurretSpringForceOffset turretSpringCompensation(
     TURRET_SPRING_CONFIG,
     pitchMotor.isMotorInverted());
 
-algorithms::TurretSecondOrderCompensation turretSecondOrderCompensation(
+algorithms::TurretThirdOrderCompensation turretSecondOrderCompensation(
     TURRET_SECOND_ORDER_COMPENSATION_CONFIG,
     pitchMotor.isMotorInverted());
 

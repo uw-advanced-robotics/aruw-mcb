@@ -43,7 +43,7 @@ public:
         const float velocityZeroThreshold =
             TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold =
-            TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::DEFAULT_POSITION_THRESHOLD * 20)
+            TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::DEFAULT_POSITION_THRESHOLD)
         : TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>(
               drivers,
               config,

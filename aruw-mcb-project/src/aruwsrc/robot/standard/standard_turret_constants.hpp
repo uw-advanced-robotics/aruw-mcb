@@ -23,7 +23,7 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/turret/algorithms/second_order_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/third_order_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
@@ -41,6 +41,7 @@ static constexpr uint8_t NUM_TURRETS = 1;
 static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
 
+#if defined(TARGET_STANDARD_NULL)
 inline const tap::algorithms::transforms::Transform TURRET_MCB_BMI088_MOUNTING_TRANSFORM(
     0.0f,
     0.0f,
@@ -48,6 +49,15 @@ inline const tap::algorithms::transforms::Transform TURRET_MCB_BMI088_MOUNTING_T
     0.0f,
     0.0f,
     PI);
+#else
+inline const tap::algorithms::transforms::Transform TURRET_MCB_BMI088_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f);
+#endif
 
 inline const tap::algorithms::transforms::Transform TURRET_MCB_ISM330_MOUNTING_TRANSFORM(
     0.0f,
@@ -149,7 +159,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 70.0f,  // From Ozone, probably wrong
 };
 
-static constexpr algorithms::TurretSecondOrderCompensation::TurretSecondOrderCompensationParams
+static constexpr algorithms::TurretThirdOrderCompensation::TurretThirdOrderCompensationParams
     TURRET_SECOND_ORDER_COMPENSATION_CONFIG{
         .bias = -5'396'259.89f,
         .firstCoefficient = 2'644'523.51f,
