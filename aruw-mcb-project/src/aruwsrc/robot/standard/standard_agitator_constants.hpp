@@ -127,11 +127,11 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .jammingTime = 200,
     .jamLogicEnabled = true,
     // .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+    .velocityPIDFeedForwardGain = 0,
     .emptyJamEnabled = true,
     .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
     .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
-    .velocityPIDFeedForwardGain = 0,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {

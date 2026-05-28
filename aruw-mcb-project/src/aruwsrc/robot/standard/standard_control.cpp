@@ -511,7 +511,7 @@ autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::P
         &imuCalibrateSuccessBuzzCommand,
         &imuCalibrateFailBuzzCommand);
 
-autotune::SecondOrderAutotuneCommand<9, Axis::PITCH> secondOrderAutotuneCommand(
+autotune::SecondOrderAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH> secondOrderAutotuneCommand(
     drivers(),
     {&turret,
      &turret.pitchMotor,
