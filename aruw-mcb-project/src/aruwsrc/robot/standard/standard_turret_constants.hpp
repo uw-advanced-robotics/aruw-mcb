@@ -160,7 +160,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
 };
 
 static constexpr algorithms::TurretThirdOrderCompensation::TurretThirdOrderCompensationParams
-    TURRET_SECOND_ORDER_COMPENSATION_CONFIG{
+    TURRET_THIRD_ORDER_COMPENSATION_CONFIG{
         .bias = -5'396'259.89f,
         .firstCoefficient = 2'644'523.51f,
         .secondCoefficient = -432'895.201f,

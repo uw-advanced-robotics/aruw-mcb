@@ -365,15 +365,15 @@ algorithms::TurretSpringForceOffset turretSpringCompensation(
     TURRET_SPRING_CONFIG,
     pitchMotor.isMotorInverted());
 
-algorithms::TurretThirdOrderCompensation turretSecondOrderCompensation(
-    TURRET_SECOND_ORDER_COMPENSATION_CONFIG,
+algorithms::TurretThirdOrderCompensation turretThirdOrderCompensation(
+    TURRET_THIRD_ORDER_COMPENSATION_CONFIG,
     pitchMotor.isMotorInverted());
 
 // Turret controllers
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
     turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG,
-    {&turretGravityCompensation, &turretSecondOrderCompensation});
+    {&turretGravityCompensation, &turretThirdOrderCompensation});
 
 algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
     turret.yawMotor,
