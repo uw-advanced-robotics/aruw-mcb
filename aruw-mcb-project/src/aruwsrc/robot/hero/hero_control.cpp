@@ -312,17 +312,18 @@ tap::encoder::CanEncoder yawCanEncoder(
     YAW_ENCODER_ID,
     YAW_ENCODER_CAN_BUS,
     false,
-    YAW_ENCODER_RATIO,
-    YAW_ENCODER_HOME_POSITION);
+    YAW_ENCODER_RATIO);
 
 aruwsrc::hero::HeroTurretEncoderSubsystem heroTurretEncoders(
     drivers(),
     yawLampreyCanEncoder,
     yawCanEncoder,
     yawMotor.getEncoder(),
-    0.0f);
+    YAW_LAMPREY_ENCODER_HOME_POSITION);
 
-aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(heroTurretEncoders, 2.44f);
+aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
+    heroTurretEncoders,
+    BINNED_ALIGNMENT_OFFSET);
 
 Trigger yawOnlineTrigger = Trigger(drivers(), []() -> bool {
                                return heroTurretEncoders.isOnline();

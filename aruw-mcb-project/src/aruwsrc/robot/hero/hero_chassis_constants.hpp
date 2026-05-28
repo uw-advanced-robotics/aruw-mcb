@@ -41,24 +41,13 @@ static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
     {1, 200},
-    {2, 250}};  // TODO: TUNE!
+    {2, 250},
+    {100, 375}};
 
 static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
-    tap::algorithms::transforms::Transform(
-        0.1426,
-        0.0245,
-        0,
-        0,
-        modm::toRadian(-90),
-        modm::toRadian(-135));
+    tap::algorithms::transforms::Transform(0.1426, 0.0245, 0, 0, 0, modm::toRadian(180));
 static const tap::algorithms::transforms::Transform ISM330_MCB_MOUNTING_TRANSFORM =
-    tap::algorithms::transforms::Transform(
-        0.131,
-        0.011,
-        0,
-        modm::toRadian(90),
-        0,
-        modm::toRadian(135));
+    tap::algorithms::transforms::Transform(0.131, 0.011, 0, 0, 0, modm::toRadian(180 + 45));
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -93,8 +82,8 @@ static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPU
 /**
  * Radius of the wheels (m)
  */
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.75f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 4.0f;
 
 /// @see power_limiter.hpp for what these mean
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;

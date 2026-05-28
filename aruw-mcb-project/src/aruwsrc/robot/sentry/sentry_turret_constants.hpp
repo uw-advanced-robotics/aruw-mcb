@@ -57,9 +57,9 @@ static constexpr float TURRET_WEIGHT_KG = 1.44730f;     // From CAD
 
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{
-        .cgX = 31.81f,
-        .cgZ = -37.36f,
-        .gravityCompensatorMax = -8777.7f,
+        .cgX = 42.45f,
+        .cgZ = -71.51f,
+        .gravityCompensatorMax = -14277.7f,
     };
 static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
     .turretPitchMountX = -25.0f,
@@ -97,30 +97,25 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .limitMotorAngles = false,
 };
 
-static constexpr tap::can::CanBus YAW_ANALOG_SENSOR_CAN_BUS = tap::can::CanBus::CAN_BUS2;
-static constexpr tap::encoder::CanEncoderId YAW_ANALOG_SENSOR_CAN_ID =
-    tap::encoder::CanEncoderId::ID7;
-static constexpr uint8_t YAW_ANALOG_SENSOR_CHANNEL = 1;  // 0 = AI0, 1 = AI1
-static constexpr bool YAW_ANALOG_SENSOR_INVERTED = false;
-static constexpr uint16_t YAW_ANALOG_RAW_MIN = 0;
-static constexpr uint16_t YAW_ANALOG_RAW_MAX = 10000;
-static constexpr uint16_t YAW_ANALOG_RAW_ZERO = 4550;
-static constexpr float YAW_ANALOG_OUTPUT_RANGE_RADIANS = M_TWOPI;
+static constexpr tap::can::CanBus YAW_LAMPREY_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_CAN_ID = tap::encoder::CanEncoderId::ID7;
+static constexpr bool YAW_LAMPREY_INVERTED = false;
 
-static constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[] = {
-    {0.0f, 0.000000000f},    {70.0f, 0.053926382f},   {289.0f, 0.230385222f},
-    {541.0f, 0.414017592f},  {588.0f, 0.423332489f},  {816.0f, 0.595537759f},
-    {1073.0f, 0.772367484f}, {1311.0f, 0.951635755f}, {1557.0f, 1.131002224f},
-    {1783.0f, 1.310205198f}, {2114.0f, 1.489850019f}, {2305.0f, 1.672643039f},
-    {2515.0f, 1.854085659f}, {2747.0f, 2.033110839f}, {3058.0f, 2.209519599f},
-    {3395.0f, 2.391769859f}, {3709.0f, 2.568024849f}, {4014.0f, 2.746368619f},
-    {4322.0f, 2.924789409f}, {4680.0f, 3.106335379f}, {4859.0f, 3.285434699f},
-    {5079.0f, 3.465885859f}, {5366.0f, 3.648361659f}, {5687.0f, 3.826956249f},
-    {6114.0f, 4.006152129f}, {6507.0f, 4.185609319f}, {6886.0f, 4.364767049f},
-    {7210.0f, 4.541015839f}, {7636.0f, 4.717918139f}, {7727.0f, 4.901065089f},
-    {8012.0f, 5.081168389f}, {8282.0f, 5.262635449f}, {8581.0f, 5.442081669f},
-    {8922.0f, 5.621436339f}, {9232.0f, 5.800632689f}, {9546.0f, 5.979011279f},
-    {9839.0f, 6.159154629f}, {10000.0f, 6.283185307f}};
+inline constexpr float BINNED_ALIGNMENT_OFFSET = 3.712f;
+inline constexpr float SENTRY_YAW_ALIGNMENT_OFFSET = modm::toRadian(267.0f);
+
+// inline const modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[0] = {};
+inline constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[38] = {
+    {0.000000f, 0.000000f}, {0.075346f, 0.075346f}, {0.218188f, 0.253815f}, {0.404305f, 0.435452f},
+    {0.548394f, 0.613726f}, {0.733642f, 0.793966f}, {0.897285f, 0.974016f}, {1.051091f, 1.151980f},
+    {1.175210f, 1.331009f}, {1.362350f, 1.511143f}, {1.431943f, 1.690569f}, {1.575330f, 1.869899f},
+    {1.723736f, 2.050683f}, {1.836452f, 2.229278f}, {1.985133f, 2.408738f}, {2.129243f, 2.587978f},
+    {2.273207f, 2.767971f}, {2.402318f, 2.947488f}, {2.621315f, 3.127540f}, {2.759315f, 3.306994f},
+    {2.919486f, 3.485407f}, {3.116810f, 3.664799f}, {3.384219f, 3.845500f}, {3.654829f, 4.024267f},
+    {3.905801f, 4.204214f}, {4.128683f, 4.384434f}, {4.349133f, 4.562612f}, {4.543364f, 4.743505f},
+    {4.544728f, 4.741508f}, {4.668600f, 4.921982f}, {4.837042f, 5.102610f}, {5.039588f, 5.280833f},
+    {5.290755f, 5.460778f}, {5.568966f, 5.641462f}, {5.810764f, 5.819294f}, {6.023868f, 6.000088f},
+    {6.209723f, 6.180309f}, {6.283185f, 6.283185f}};
 
 inline const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TRANSFORM(
     0,
@@ -133,9 +128,9 @@ inline const tap::algorithms::transforms::Transform TURRET_MAJOR_IMU_MOUNTING_TR
 namespace chassisFrameController
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 98'472.8047f,
+    .kp = 58'472.8047f,
     .ki = 100'000.0f,
-    .kd = 10'423.45311f,
+    .kd = 6'423.45311f,
     .maxICumulative = 3'000.0f,
     .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620),
     .tQDerivativeKalman = 10.0f,
@@ -162,9 +157,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 4000.0f,
-    .ki = 0.0f,
-    .kd = 0.50f,
+    .kp = 2500.0f,
+    .ki = 10'000.0f,
+    .kd = 10.0f,
     .maxICumulative = 1'500.0f,
     .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620 * 1),
     .tRDerivativeKalman = 60'000.0f,  // Gain needs to be so high for the motors to actually do
@@ -269,9 +264,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_CHASSIS_FRAME =
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME = {
     .kp = 80'000.0f,
-    .ki = 10'000.0f,
+    .ki = 100'000.0f,
     .kd = 3'000.0f,
-    .maxICumulative = 4'000.0f,
+    .maxICumulative = 6'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 60.0f,
