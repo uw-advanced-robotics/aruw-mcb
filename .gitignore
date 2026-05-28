@@ -1,4 +1,4 @@
-.pyc
+*.pyc
 
 Pipfile
 aruw-mcb-project/build
