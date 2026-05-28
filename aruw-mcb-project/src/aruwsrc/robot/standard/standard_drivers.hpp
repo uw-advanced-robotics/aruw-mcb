@@ -131,6 +131,7 @@ public:
 
 private:
     bool wasTurretMcbConnected = true;
+    uint32_t sinWarble = 0;
     inline void checkTurretMcbDisconnection(Drivers* drivers)
     {
         bool turretMcbConnected = drivers->turretMCBCanCommBus1.isConnected();
@@ -138,7 +139,7 @@ private:
             drivers->mpu6500.getImuState() !=
                 tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
         {
-            // tap::buzzer::playNote(&drivers->pwm, 1000);
+            tap::buzzer::playNote(&drivers->pwm, 500 + sin(++sinWarble / 200.0f) * 250);
         }
         else if (turretMcbConnected && !drivers->wasTurretMcbConnected)
         {

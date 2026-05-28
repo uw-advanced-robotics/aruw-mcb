@@ -165,7 +165,7 @@ tap::motor::DjiMotor pitchMotor(
     drivers(),
     PITCH_MOTOR_ID,
     CAN_BUS_MOTORS,
-    false,
+    true,
     "Pitch Turret",
     true,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
@@ -194,7 +194,7 @@ tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
     aruwsrc::control::chassis::LEFT_FRONT_MOTOR_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    true,
+    aruwsrc::control::chassis::WHEELBASE_MOTOR_INVERTED,
     "Left Front Chassis Motor",
     false,
     aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO);
@@ -203,7 +203,7 @@ tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
     aruwsrc::control::chassis::LEFT_BACK_MOTOR_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    true,
+    aruwsrc::control::chassis::WHEELBASE_MOTOR_INVERTED,
     "Left Back Chassis Motor",
     false,
     aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO);
@@ -212,7 +212,7 @@ tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
     aruwsrc::control::chassis::RIGHT_FRONT_MOTOR_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    true,
+    aruwsrc::control::chassis::WHEELBASE_MOTOR_INVERTED,
     "Right Front Chassis Motor",
     false,
     aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO);
@@ -221,7 +221,7 @@ tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
     aruwsrc::control::chassis::RIGHT_BACK_MOTOR_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    true,
+    aruwsrc::control::chassis::WHEELBASE_MOTOR_INVERTED,
     "Right Back Chassis Motor",
     false,
     aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO);
@@ -365,15 +365,11 @@ algorithms::TurretSpringForceOffset turretSpringCompensation(
     TURRET_SPRING_CONFIG,
     pitchMotor.isMotorInverted());
 
-algorithms::TurretThirdOrderCompensation turretThirdOrderCompensation(
-    TURRET_THIRD_ORDER_COMPENSATION_CONFIG,
-    pitchMotor.isMotorInverted());
-
 // Turret controllers
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
     turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG,
-    {&turretGravityCompensation, &turretThirdOrderCompensation});
+    {&turretGravityCompensation, &turretSpringCompensation});
 
 algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
     turret.yawMotor,

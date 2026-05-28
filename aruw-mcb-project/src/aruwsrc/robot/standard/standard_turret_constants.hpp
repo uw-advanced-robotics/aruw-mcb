@@ -107,8 +107,8 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 0,
-    .minAngle = modm::toRadian(-40),
-    .maxAngle = modm::toRadian(7),
+    .minAngle = modm::toRadian(-7),
+    .maxAngle = modm::toRadian(40),
     .limitMotorAngles = true,
 };
 #else
@@ -146,7 +146,7 @@ static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{
         .cgX = 43.64f,
         .cgZ = 17.61f,
-        .gravityCompensatorMax = 9573.3f,
+        .gravityCompensatorMax = -9573.3f,
     };
 
 static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
@@ -154,18 +154,9 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .turretPitchMountZ = -37.7f,
     .turretYawMountX = 76.29f,
     .turretYawMountZ = -71.91f,
-    .springConstant = -20.0f,  // TODO find this
-    // .springFreeLength = 52.9f,
-    .springFreeLength = 70.0f,  // From Ozone, probably wrong
+    .springConstant = -4.5f,
+    .springFreeLength = 52.9f,
 };
-
-static constexpr algorithms::TurretThirdOrderCompensation::TurretThirdOrderCompensationParams
-    TURRET_THIRD_ORDER_COMPENSATION_CONFIG{
-        .bias = -5'396'259.89f,
-        .firstCoefficient = 2'644'523.51f,
-        .secondCoefficient = -432'895.201f,
-        .thirdCoefficient = 23'651.4706f,
-    };
 
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."

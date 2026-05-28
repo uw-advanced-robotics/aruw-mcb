@@ -57,9 +57,12 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
  * calculateRotationTranslationalGain is performed.
  */
 static constexpr float MIN_ROTATION_THRESHOLD = 80.0f;
-// #if defined(TARGET_STANDARD_PHOBOS)
-static constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
-// #endif
+#if defined(TARGET_STANDARD_NULL)
+inline constexpr float CHASSIS_GEARBOX_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+#else
+// Custom gearbox ratio
+inline constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
+#endif
 /**
  * Pin to use for current sensing
  */
@@ -70,20 +73,8 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 300.0f;
-static constexpr float VELOCITY_PID_KI = 14.0f;
-static constexpr float VELOCITY_PID_KD = 10.0f;
-static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float VELOCITY_PID_KV = 0.07f;
 static constexpr float VELOCITY_PID_KS = 1.0f;
-
-/**
- * This max output is measured in the c620 robomaster translated current.
- * Per the datasheet, the controllable current range is -16384 ~ 0 ~ 16384.
- * The corresponding speed controller output torque current range is
- * -20 ~ 0 ~ 20 A.
- */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C620;
 
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 300.0f,
@@ -109,31 +100,19 @@ static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
  * Speed at which the chassis switches from symmetrical driving to diagonal driving, for a holonomic
- * X-Drive (m/s) NOT USEFUL FOR STANDARDS
+ * X-Drive (m/s)
  */
 static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 
-/**
- * Radius of the wheels (m).
- */
-static constexpr float WHEEL_RADIUS = 0.1016;
-
 #if defined(TARGET_STANDARD_NULL)
-static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
-static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;     // 141mm -> m
-static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
-static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
+static constexpr float WHEEL_RADIUS = 0.1016;             // 6in wheel dia
+static constexpr float WHEELBASE_RADIUS = 226 / 1000.0f;  // m
+inline constexpr bool WHEELBASE_MOTOR_INVERTED = false;
 
 #elif defined(TARGET_STANDARD_PHOBOS)
-static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
-static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;     // 141mm -> m
-static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
-static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
-
-#else
-
-#error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
-
+static constexpr float WHEEL_RADIUS = 0.0762;             // 4in wheel dia
+static constexpr float WHEELBASE_RADIUS = 185 / 1000.0f;  // m
+inline constexpr bool WHEELBASE_MOTOR_INVERTED = true;
 #endif
 
 /*
