@@ -511,19 +511,20 @@ autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::P
         &imuCalibrateSuccessBuzzCommand,
         &imuCalibrateFailBuzzCommand);
 
-autotune::SecondOrderAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH> secondOrderAutotuneCommand(
-    drivers(),
-    {&turret,
-     &turret.pitchMotor,
-     &chassisFramePitchTurretController,
-     pitchMotor.isMotorInverted(),
-     TURRET_WEIGHT_KG,
-     TORQUE_TO_DESIRED_OUT},
-    &turretGravityCompensation,
-    &chassis,
-    {},
-    &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand);
+autotune::SecondOrderAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
+    secondOrderAutotuneCommand(
+        drivers(),
+        {&turret,
+         &turret.pitchMotor,
+         &chassisFramePitchTurretController,
+         pitchMotor.isMotorInverted(),
+         TURRET_WEIGHT_KG,
+         TORQUE_TO_DESIRED_OUT},
+        &turretGravityCompensation,
+        &chassis,
+        {},
+        &imuCalibrateSuccessBuzzCommand,
+        &imuCalibrateFailBuzzCommand);
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
