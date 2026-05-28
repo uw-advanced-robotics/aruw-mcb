@@ -79,7 +79,7 @@ static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 #if defined(TARGET_STANDARD_NULL)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 0,
+    .startEncoderValue = 8146,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -87,9 +87,9 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 5100,
-    .minAngle = modm::toRadian(-38),
-    .maxAngle = modm::toRadian(9),
+    .startEncoderValue = 8956,
+    .minAngle = modm::toRadian(-18),
+    .maxAngle = modm::toRadian(28),
     .limitMotorAngles = true,
 };
 
@@ -311,7 +311,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .antiSaturation = true,
 };
 
-/// @TODO: Tune
+/// @TODO: Tune or replace with stos
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
     .kp = 15.0f,
     .ki = 0.1f,
@@ -351,7 +351,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 2'600.0f,
     .maxICumulative = 3'000.0f,
-    .maxOutput = static_cast<uint16_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620),
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 10.0f,
     .tRDerivativeKalman = 1.0f,
     .tQProportionalKalman = 1.0f,
@@ -410,7 +410,6 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .antiSaturation = true,
 };
 
-// TODO tune again after gravity + spring tuning
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 20'000.0f,
     .ki = 100.0f,
