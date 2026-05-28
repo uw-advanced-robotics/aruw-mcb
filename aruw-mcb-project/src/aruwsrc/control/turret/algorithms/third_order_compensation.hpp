@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef THIRD_ORDER_COMPENSATOR_HPP_
-#define THIRD_ORDER_COMPENSATOR_HPP_
+#ifndef THIRD_ORDER_COMPENSATION_HPP_
+#define THIRD_ORDER_COMPENSATION_HPP_
 
 #include <cmath>
 #include <cstdint>
@@ -78,4 +78,4 @@ private:
 };
 }  // namespace aruwsrc::control::turret::algorithms
 
-#endif  // THIRD_ORDER_COMPENSATOR_HPP_
+#endif  // THIRD_ORDER_COMPENSATION_HPP_
