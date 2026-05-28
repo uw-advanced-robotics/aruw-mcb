@@ -82,8 +82,8 @@ static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPU
 /**
  * Radius of the wheels (m)
  */
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.5f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 7.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.75f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 4.0f;
 
 /// @see power_limiter.hpp for what these mean
 static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
