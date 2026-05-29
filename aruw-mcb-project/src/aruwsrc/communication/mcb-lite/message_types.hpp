@@ -43,6 +43,7 @@ enum MessageTypes : uint8_t
     CAN1_ENCODER_MESSAGE = 12,
     CAN2_ENCODER_MESSAGE = 13,
     VOLTAGE_CURRENT_MESSAGE = 14,
+    CUSTOM_CONTROLLER_DATA_MESSAGE = 15,
 };
 
 // CAN Bus message Lite -> MCB
@@ -168,6 +169,11 @@ struct VoltageCurrentMessage
 {
     uint16_t voltage;
     uint16_t current;
+} modm_packed;
+
+struct CustomControllerDataMessage
+{
+    uint8_t data[30];
 } modm_packed;
 
 }  // namespace aruwsrc::communication::mcb_lite

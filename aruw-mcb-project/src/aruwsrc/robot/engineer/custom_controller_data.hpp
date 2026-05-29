@@ -2,16 +2,17 @@
 #ifndef CUSTOM_CONTROLLER_DATA
 #define CUSTOM_CONTROLLER_DATA
 
-#include "tap/drivers.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
 namespace aruwsrc::engineer {
 using namespace tap::communication::serial;
+using namespace aruwsrc::communication::mcb_lite;
 
 class CustomControllerData {
 
 public:
-    CustomControllerData(tap::Drivers *drivers): drivers(drivers) {} 
+    CustomControllerData(MCBLite* mcbLite): mcbLite(mcbLite) {} 
     DISALLOW_COPY_AND_ASSIGN(CustomControllerData)
     mockable ~CustomControllerData() = default;
 
@@ -26,7 +27,7 @@ public:
 
     void read() {
         read_counter++;
-        cc_data = drivers->refSerial.getRobotData().customControllerData;
+        cc_data = mcbLite->getCustomControllerData();
         memcpy(&controller, cc_data.data, sizeof(ControllerInfo));
     }
     
@@ -58,7 +59,7 @@ public:
 private:
     static constexpr int JOYSTICK_MASK = 0x3FF;
 
-    tap::Drivers* drivers;
+    MCBLite* mcbLite;
     RefSerialData::Rx::CustomControllerData cc_data;
     int read_counter = 0;
 

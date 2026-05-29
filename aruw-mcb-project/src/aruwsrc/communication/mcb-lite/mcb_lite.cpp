@@ -179,6 +179,9 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
             case MessageTypes::VOLTAGE_CURRENT_MESSAGE:
                 processVoltageCurrentMessage(completeMessage);
                 break;
+            case MessageTypes::CUSTOM_CONTROLLER_DATA_MESSAGE:
+                processCustomControllerDataMessage(completeMessage);
+                break;
             default:
                 break;
         }
@@ -237,6 +240,18 @@ void MCBLite::processVoltageCurrentMessage(const ReceivedSerialMessage& complete
         this->voltageCurrentSensor->voltage = message->voltage;
         this->voltageCurrentSensor->current = message->current;
     }
+}
+
+void MCBLite::processCustomControllerDataMessage(const ReceivedSerialMessage& completeMessage)
+{
+    if (completeMessage.header.dataLength != sizeof(CustomControllerDataMessage))
+    {
+        return;
+    }
+
+    const CustomControllerDataMessage* message =
+        reinterpret_cast<const CustomControllerDataMessage*>(completeMessage.data);
+    memcpy(customControllerData.data, message->data, sizeof(customControllerData.data));
 }
 
 }  // namespace aruwsrc::communication::mcb_lite

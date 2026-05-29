@@ -70,6 +70,8 @@ public:
 
     void initialize();
 
+    const tap::communication::serial::RefSerialData::Rx::CustomControllerData& getCustomControllerData() const { return customControllerData; }
+
     constexpr static int UART_BAUDRATE = 1'000'000;
 
     motor::VirtualCanRxHandler canRxHandler;
@@ -91,6 +93,8 @@ private:
 
     void processVoltageCurrentMessage(const ReceivedSerialMessage& completeMessage);
 
+    void processCustomControllerDataMessage(const ReceivedSerialMessage& completeMessage);
+
     tap::communication::serial::Uart::UartPort port;
 
     IMUMessage currentIMUData;
@@ -98,6 +102,7 @@ private:
     uint8_t can2Data[64];
     AnalogInputPinMessage analogData;
     DigitalInputPinMessage digitalData;
+    tap::communication::serial::RefSerialData::Rx::CustomControllerData customControllerData;
 
     VirtualCanEncoder* can1Encoders[8];
     VirtualCanEncoder* can2Encoders[8];
