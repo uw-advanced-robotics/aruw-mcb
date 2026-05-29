@@ -314,9 +314,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 /// @TODO: Tune or replace with stos
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
     .kp = 15.0f,
-    .ki = 0.1f,
-    .kd = 0.2f,
-    .maxICumulative = 0.0f,
+    .ki = 250.0f,
+    .kd = 0.6f,
+    .maxICumulative = 1.0f,
     .maxOutput = 10.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
@@ -324,6 +324,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
+    .antiSaturation = true,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {

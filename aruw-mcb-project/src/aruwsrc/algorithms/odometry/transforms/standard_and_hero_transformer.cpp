@@ -36,7 +36,7 @@ inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
 inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
-    Transform(Position(0.012f, 0.0f, 0.402f), Orientation(0.0f, 0.0f, 0.0f));
+    Transform(Position(0.012f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
 #elif defined(TARGET_HERO_NEPTUNE)
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
