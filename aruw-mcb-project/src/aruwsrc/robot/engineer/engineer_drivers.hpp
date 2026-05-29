@@ -30,6 +30,7 @@
 
 #else
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
+#include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
@@ -54,20 +55,13 @@ public:
         : tap::Drivers(),
           rttTelemetry(this),
           controlOperatorInterface(this),
-          oledDisplay(
-              this,
-              nullptr,
-              &turretMCBCanCommBus1,
-              &turretMCBCanCommBus2,
-              nullptr,
-              nullptr,
-              nullptr,
-              &rttTelemetry),
+          oledDisplay(this, nullptr, nullptr, nullptr, &mcbLite, nullptr, nullptr, &rttTelemetry),
           engineerCVCommunication(this),
           chassisIsm(),
           turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
           turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
-          customControllerData(this)
+          customControllerData(&mcbLite),
+          mcbLite(this, tap::communication::serial::Uart::Uart7)
     {
         controlOperatorInterface.setTelemetry(&rttTelemetry);
     }
@@ -90,11 +84,10 @@ public:
     communication::can::TurretMCBCanComm turretMCBCanCommBus1;
     communication::can::TurretMCBCanComm turretMCBCanCommBus2;
     CustomControllerData customControllerData;
+    aruwsrc::communication::mcb_lite::MCBLite mcbLite;
 
     void init(const float mainLoopFrequency)
     {
-        turretMCBCanCommBus1.init();
-        turretMCBCanCommBus2.init();
         engineerCVCommunication.initializeCV();
         oledDisplay.initialize();
         digital.configureInputPullMode(
@@ -108,6 +101,9 @@ public:
             tap::gpio::Digital::InputPullMode::PullUp);
         chassisIsm.initialize(mainLoopFrequency, 0.1f, 0.0f);
         chassisIsm.setCalibrationSamples(4000);
+        mcbLite.initialize();
+
+        mcbLite.imu.initialize(mainLoopFrequency, 0.2f, 0.0f);
     }
 
     void updateIo()
@@ -116,12 +112,12 @@ public:
         engineerCVCommunication.updateSerial();
         chassisIsm.read();
         customControllerData.read();
+        mcbLite.updateSerial();
     }
 
     void update()
     {
-        turretMCBCanCommBus1.sendData();
-        turretMCBCanCommBus2.sendData();
+        mcbLite.sendData();
         oledDisplay.updateMenu();
         rttTelemetry.updateTelemetryAsync();
         chassisIsm.periodicIMUUpdate();

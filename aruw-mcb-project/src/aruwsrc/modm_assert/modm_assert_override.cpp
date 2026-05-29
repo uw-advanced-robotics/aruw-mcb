@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+#ifndef PLATFORM_HOSTED
 #include <cstdio>
 
 #include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
@@ -76,3 +76,4 @@ extern "C" void modm_abandon(const modm::AssertionInfo &info)
             RttWriteMode::BlockIfFull);
     }
 }
+#endif
