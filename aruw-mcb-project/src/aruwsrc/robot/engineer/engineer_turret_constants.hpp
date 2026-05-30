@@ -70,31 +70,31 @@ static constexpr float PITCH_LIMIT_RAMP_RATE =
 
 // if extension is below this value, limit the pitch more aggressively to prevent back of extension
 // from hitting chassis likely neeed to change
-static constexpr float MIN_EXTENSION_FOR_FULL_PITCH_UP = 50.0f;
+static constexpr float MIN_EXTENSION_FOR_FULL_PITCH_UP = 0.2;
 
-// if extension is above this value, we can allow full pitch down since extension will hit the
+// if extension is above this value, we cannot allow full pitch down since extension will hit the
 // ground
-static constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 50.0f;
+static constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
 
 }  // namespace aruwsrc::control::turret
 
 
-inline float getPitchMinLimit(float extension)
+inline float getPitchMinLimit(float extensionPosition)
 {
-    if (extension < aruwsrc::control::turret::MIN_EXTENSION_FOR_FULL_PITCH_UP)
+    if (extensionPosition > aruwsrc::control::turret::MAX_EXTENSION_FOR_FULL_PITCH_DOWN)
     {
-        return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
+        return -0.777f;
     }
-    return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
+    return -0.333f;
 }
 
-inline float getPitchMaxLimit(float extension)
+inline float getPitchMaxLimit(float extensionPosition)
 {
-    if (extension > aruwsrc::control::turret::MAX_EXTENSION_FOR_FULL_PITCH_DOWN)
+    if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_FULL_PITCH_UP)
     {
-        return aruwsrc::control::turret::PITCH_LOWER_LIMIT_EXTENSION_EXTENDED;
+        return 0.111f;
     }
-    return aruwsrc::control::turret::PITCH_LOWER_LIMIT_DEFAULT;
+    return 0.555f;
 }
 
 static constexpr aruwsrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = {

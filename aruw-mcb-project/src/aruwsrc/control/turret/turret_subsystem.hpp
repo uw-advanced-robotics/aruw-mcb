@@ -70,10 +70,10 @@ public:
         const TurretMotorConfig& pitchMotorConfig,
         const TurretMotorConfig& yawMotorConfig,
         const tap::communication::sensors::imu::AbstractIMU* turretImu,
-        float (*pitchMinLimitFunc)(float) = nullptr,
-        float (*pitchMaxLimitFunc)(float) = nullptr,
-        float (*yawMinLimitFunc)(float) = nullptr,
-        float (*yawMaxLimitFunc)(float) = nullptr);
+        float (*pitchMinLimitFunc)() = nullptr,
+        float (*pitchMaxLimitFunc)() = nullptr,
+        float (*yawMinLimitFunc)() = nullptr,
+        float (*yawMaxLimitFunc)() = nullptr);
 
     void initialize() override;
 

@@ -32,8 +32,8 @@ namespace aruwsrc::control::turret
 TurretMotor::TurretMotor(
     tap::motor::MotorInterface* motor,
     const TurretMotorConfig& motorConfig,
-    float (*minLimitFunc)(float),
-    float (*maxLimitFunc)(float))
+    float (*minLimitFunc)(),
+    float (*maxLimitFunc)())
     : config(motorConfig),
       motor(motor),
       chassisFrameSetpoint(Angle(config.startAngle)),
@@ -58,6 +58,7 @@ void TurretMotor::updateMotorAngle()
     {
         chassisFrameMeasuredAngle.setUnwrappedValue(config.startAngle);
     }
+
 }
 
 void TurretMotor::setMotorOutput(float out)
@@ -80,13 +81,14 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 
     if (config.limitMotorAngles)
     {
-        float minAngle = minLimitFunc != nullptr ? minLimitFunc(0.0f) : config.minAngle;
-        float maxAngle = maxLimitFunc != nullptr ? maxLimitFunc(0.0f) : config.maxAngle;
+        float minAngle = getMinLimit();
+        float maxAngle = getMaxLimit();
 
         int status;
         chassisFrameSetpoint =
             Angle(WrappedFloat::limitValue(chassisFrameSetpoint, minAngle, maxAngle, &status));
     }
+
 }
 
 float TurretMotor::getValidChassisMeasurementError() const
@@ -99,8 +101,8 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
 {
     if (config.limitMotorAngles)
     {
-        float minAngle = minLimitFunc != nullptr ? minLimitFunc(0.0f) : config.minAngle;
-        float maxAngle = maxLimitFunc != nullptr ? maxLimitFunc(0.0f) : config.maxAngle;
+        float minAngle = getMinLimit();
+        float maxAngle = getMaxLimit();
 
         float pos =
             WrappedFloat::rangeOverlap(measurement, setpoint, Angle(maxAngle), Angle(minAngle));

@@ -55,8 +55,8 @@ public:
     TurretMotor(
         tap::motor::MotorInterface* motor,
         const TurretMotorConfig& motorConfig,
-        float (*minLimitFunc)(float) = nullptr,
-        float (*maxLimitFunc)(float) = nullptr);
+        float (*minLimitFunc)() = nullptr,
+        float (*maxLimitFunc)() = nullptr);
 
     mockable inline void initialize() { motor->initialize(); }
 
@@ -161,6 +161,11 @@ public:
 
     int16_t getMotorOutput() const { return motor->getOutputDesired(); }
 
+    float getMinLimit() const { return minLimitFunc != nullptr ? minLimitFunc() : config.minAngle; }
+
+    float getMaxLimit() const { return maxLimitFunc != nullptr ? maxLimitFunc() : config.maxAngle; }
+
+
 private:
     const TurretMotorConfig config;
 
@@ -176,8 +181,8 @@ private:
 
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
     WrappedFloat chassisFrameMeasuredAngle;
-    float (*minLimitFunc)(float) = nullptr;
-    float (*maxLimitFunc)(float) = nullptr;
+    float (*minLimitFunc)() = nullptr;
+    float (*maxLimitFunc)() = nullptr;
 };
 }  // namespace aruwsrc::control::turret
 

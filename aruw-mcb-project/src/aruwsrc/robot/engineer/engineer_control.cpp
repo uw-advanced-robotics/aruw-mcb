@@ -175,15 +175,8 @@ TriggerHomedJointSubsystem extensionSubsystem(
     extensionTrigger,
     EXTENSION_CONFIG);
 
-float getLivePitchMinLimit(float)
-{
-    return getPitchMinLimit(extensionSubsystem.getPosition());
-}
-
-float getLivePitchMaxLimit(float)
-{
-    return getPitchMaxLimit(extensionSubsystem.getPosition());
-}
+float getLivePitchMinLimit();
+float getLivePitchMaxLimit();
 
 EngineerTurretSubsystem engTurret(
     drivers(),
@@ -194,6 +187,16 @@ EngineerTurretSubsystem engTurret(
     &drivers()->mcbLite.imu,
     getLivePitchMinLimit,
     getLivePitchMaxLimit);
+
+float getLivePitchMinLimit()
+{
+    return getPitchMinLimit(extensionSubsystem.getPosition());
+}
+
+float getLivePitchMaxLimit()
+{
+    return getPitchMaxLimit(extensionSubsystem.getPosition());
+}
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
