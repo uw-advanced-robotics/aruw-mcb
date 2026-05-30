@@ -183,6 +183,8 @@ private:
     WrappedFloat chassisFrameMeasuredAngle;
     float (*minLimitFunc)() = nullptr;
     float (*maxLimitFunc)() = nullptr;
+
+
 };
 }  // namespace aruwsrc::control::turret
 

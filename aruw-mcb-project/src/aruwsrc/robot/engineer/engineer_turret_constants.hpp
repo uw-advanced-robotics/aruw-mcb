@@ -49,16 +49,16 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 // need to change
 // if extension below threshold, we use the retracted limit which will limit the pitch more
 // aggressively
-static constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = 0.0;
+static constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.7;
 
 // if extended far enough, we can pitch higher because the back of extension won't hit the chassis
-static constexpr float PITCH_UPPER_LIMIT_DEFAULT = 0.0;
+static constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.95;
 
 
 // if extension above threshold, limit the pitch so the extension doesnt hit the ground
-static constexpr float PITCH_LOWER_LIMIT_EXTENSION_EXTENDED = 0.0;
+static constexpr float PITCH_LOWER_LIMIT_EXTENSION_EXTENDED = 0.5;
 // lower limit if extension is retracted far enough 
-static constexpr float PITCH_LOWER_LIMIT_DEFAULT = 0.0;
+static constexpr float PITCH_LOWER_LIMIT_DEFAULT = 0.65;
 
 // pitch limit if extension is not at either extreme
 static constexpr float PITCH_LIMIT_NEUTRAL = 0.0;
@@ -83,18 +83,19 @@ inline float getPitchMinLimit(float extensionPosition)
 {
     if (extensionPosition > aruwsrc::control::turret::MAX_EXTENSION_FOR_FULL_PITCH_DOWN)
     {
-        return -0.777f;
+        return aruwsrc::control::turret::PITCH_LOWER_LIMIT_EXTENSION_EXTENDED;
     }
-    return -0.333f;
+    return aruwsrc::control::turret::PITCH_LOWER_LIMIT_DEFAULT;
 }
 
 inline float getPitchMaxLimit(float extensionPosition)
 {
+    // not extended far enough, limit pitch more aggressively to prevent back of extension from hitting chassis
     if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_FULL_PITCH_UP)
     {
-        return 0.111f;
+        return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
     }
-    return 0.555f;
+    return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
 }
 
 static constexpr aruwsrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = {

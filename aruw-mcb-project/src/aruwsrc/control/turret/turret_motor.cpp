@@ -79,6 +79,7 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 {
     chassisFrameSetpoint = setpoint;
 
+
     if (config.limitMotorAngles)
     {
         float minAngle = getMinLimit();

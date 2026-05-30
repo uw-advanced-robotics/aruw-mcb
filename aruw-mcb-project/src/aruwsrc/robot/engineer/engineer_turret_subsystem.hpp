@@ -35,8 +35,10 @@ public:
     void refresh() override;
     void refreshSafeDisconnect() override;
 
+    // TODO: remove these later 
     float DEBUG_livePitchMinLimit = 0.0f;
     float DEBUG_livePitchMaxLimit = 0.0f;
+    float DEBUG_currentPitchAngle = 0.0f;
 
 private:
     void updatePitchLimitDebug();

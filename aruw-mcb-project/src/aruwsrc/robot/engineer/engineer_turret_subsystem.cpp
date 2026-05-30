@@ -32,6 +32,7 @@ void EngineerTurretSubsystem::refresh()
 void EngineerTurretSubsystem::refreshSafeDisconnect()
 {
     control::turret::RobotTurretSubsystem::refreshSafeDisconnect();
+    DEBUG_currentPitchAngle = getWorldPitch();
     updatePitchLimitDebug();
 }
 
