@@ -99,7 +99,7 @@ void SentryImuCalibrateCommand::initialize()
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();
-    lampreyAligned = false;
+    lampreyAlignedCount = 0;
 }
 
 static inline bool turretMajorReachedCenterAndNotMoving(
@@ -164,7 +164,7 @@ void SentryImuCalibrateCommand::execute()
             if (calibrationTimer.isExpired() && turretsNotMoving)
             {
                 // enter calibration phase
-                if (!lampreyAligned)
+                if (lampreyAlignedCount <= LAMPREY_REALIGN_COUNT)
                 {
                     // Preform the binned alignment
                     fakeLampreyEncoder.setFakePosition(
@@ -175,7 +175,9 @@ void SentryImuCalibrateCommand::execute()
                         homeAlignmentOffset);
 
                     turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
-                    lampreyAligned = true;
+                    lampreyAlignedCount++;
+                    calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
+                    calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
                     // exit out so we move to the new setpoint
                     return;
                 }

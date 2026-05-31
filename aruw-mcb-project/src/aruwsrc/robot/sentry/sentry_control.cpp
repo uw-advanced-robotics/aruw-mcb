@@ -24,6 +24,8 @@
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
@@ -274,6 +276,15 @@ DjiMotor rightBackMotor(
 aruwsrc::communication::can::AruwVoltageCurrentSensor voltageCurrentSensor(
     drivers(),
     tap::can::CanBus::CAN_BUS2);
+
+NoteSequenceCommand currentSensorNotConnectedCommand(
+    buzzer,
+    SUMMONING_GLORY_NOTES,
+    SUMMONING_GLORY_NOTE_LENGTH_MS);
+
+Trigger currentSensorAlarm = Trigger(drivers(), []() -> bool {
+                                 return voltageCurrentSensor.isOnline();
+                             }).whileFalse(&currentSensorNotConnectedCommand);
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     drivers(),

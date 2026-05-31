@@ -130,10 +130,13 @@ protected:
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
 private:
-    bool lampreyAligned{false};
+    uint32_t lampreyAlignedCount{0u};
     const float binnedAlignmentOffset{0.0f};
     const float homeAlignmentOffset{0.0f};
     aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
+
+    // Number of times to realign, if this is zero it will still preform one alignment
+    static constexpr uint32_t LAMPREY_REALIGN_COUNT = 1;
 };
 }  // namespace aruwsrc::sentry
 
