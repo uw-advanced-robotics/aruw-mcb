@@ -20,8 +20,10 @@
 #define SEMICOLON ;
 
 #if defined(TARGET_ENGINEER)
+#include <array>
 #include <cmath>
 #include <memory>
+#include <utility>
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
@@ -178,6 +180,13 @@ TriggerHomedJointSubsystem extensionSubsystem(
 float getLivePitchMinLimit();
 float getLivePitchMaxLimit();
 
+std::array<std::pair<float (*)(), float (*)()>, 2> engineerTurretLimitOverrides{{
+    // Index 0 limits pitch dynamically based on extension position.
+    {getLivePitchMinLimit, getLivePitchMaxLimit},
+    // Index 1 would limit yaw; engineer yaw is not limited dynamically.
+    {nullptr, nullptr},
+}};
+
 EngineerTurretSubsystem engTurret(
     drivers(),
     &pitchTurretMotor,
@@ -185,8 +194,7 @@ EngineerTurretSubsystem engTurret(
     PITCH_MOTOR_CONFIG,
     YAW_MOTOR_CONFIG,
     &drivers()->mcbLite.imu,
-    getLivePitchMinLimit,
-    getLivePitchMaxLimit);
+    engineerTurretLimitOverrides);
 
 float getLivePitchMinLimit()
 {

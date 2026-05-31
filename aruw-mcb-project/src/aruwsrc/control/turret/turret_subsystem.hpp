@@ -20,6 +20,9 @@
 #ifndef TURRET_SUBSYSTEM_HPP_
 #define TURRET_SUBSYSTEM_HPP_
 
+#include <array>
+#include <utility>
+
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/control/subsystem.hpp"
@@ -58,10 +61,8 @@ public:
      *
      * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
-     * @param[in] pitchMinLimitFunc Optional function returning minimum pitch angle (radians).
-     * @param[in] pitchMaxLimitFunc Optional function returning maximum pitch angle (radians).
-     * @param[in] yawMinLimitFunc Optional function returning minimum yaw angle (radians).
-     * @param[in] yawMaxLimitFunc Optional function returning maximum yaw angle (radians).
+     * @param[in] limitOverrides Optional dynamic angle limits in radians. Index 0 is pitch
+     * `{min, max}`, index 1 is yaw `{min, max}`.
      */
     explicit TurretSubsystem(
         tap::Drivers* drivers,
@@ -70,10 +71,7 @@ public:
         const TurretMotorConfig& pitchMotorConfig,
         const TurretMotorConfig& yawMotorConfig,
         const tap::communication::sensors::imu::AbstractIMU* turretImu,
-        float (*pitchMinLimitFunc)() = nullptr,
-        float (*pitchMaxLimitFunc)() = nullptr,
-        float (*yawMinLimitFunc)() = nullptr,
-        float (*yawMaxLimitFunc)() = nullptr);
+        const std::array<std::pair<float (*)(), float (*)()>, 2>& limitOverrides = {});
 
     void initialize() override;
 

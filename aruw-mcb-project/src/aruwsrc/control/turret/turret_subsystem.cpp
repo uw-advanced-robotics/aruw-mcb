@@ -20,6 +20,7 @@
 #include "turret_subsystem.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <cfloat>
 #include <random>
 
@@ -40,13 +41,18 @@ TurretSubsystem::TurretSubsystem(
     const TurretMotorConfig& pitchMotorConfig,
     const TurretMotorConfig& yawMotorConfig,
     const tap::communication::sensors::imu::AbstractIMU* turretImu,
-    float (*pitchMinLimitFunc)(),
-    float (*pitchMaxLimitFunc)(),
-    float (*yawMinLimitFunc)(),
-    float (*yawMaxLimitFunc)())
+    const std::array<std::pair<float (*)(), float (*)()>, 2>& limitOverrides)
     : tap::control::Subsystem(drivers),
-      pitchMotor(pitchMotor, pitchMotorConfig, pitchMinLimitFunc, pitchMaxLimitFunc),
-      yawMotor(yawMotor, yawMotorConfig, yawMinLimitFunc, yawMaxLimitFunc),
+      pitchMotor(
+          pitchMotor,
+          pitchMotorConfig,
+          limitOverrides[0].first,
+          limitOverrides[0].second),
+      yawMotor(
+          yawMotor,
+          yawMotorConfig,
+          limitOverrides[1].first,
+          limitOverrides[1].second),
       turretImu(turretImu)
 {
     assert(drivers != nullptr);
