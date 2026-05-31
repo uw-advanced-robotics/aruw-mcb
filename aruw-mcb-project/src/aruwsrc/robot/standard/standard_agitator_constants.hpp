@@ -106,7 +106,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = DjiMotor::MAX_OUTPUT_C610 / 2.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_C610 / 2.0f,  // keeping below max out to prevent overheat
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
