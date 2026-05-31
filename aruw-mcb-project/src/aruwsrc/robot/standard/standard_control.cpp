@@ -571,8 +571,8 @@ FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
     rotateAndUnjamAgitator,
-    // {&frictionWheelsOnGovernor, &fireRateLimitGovernor});
-    {&fireRateLimitGovernor});
+    {&frictionWheelsOnGovernor, &fireRateLimitGovernor});
+    // {&fireRateLimitGovernor});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
