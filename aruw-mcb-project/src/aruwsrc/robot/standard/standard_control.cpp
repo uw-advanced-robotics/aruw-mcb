@@ -568,11 +568,11 @@ FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
 FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
 
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
     rotateAndUnjamAgitator,
     {&frictionWheelsOnGovernor, &fireRateLimitGovernor});
-    // {&fireRateLimitGovernor});
+// {&fireRateLimitGovernor});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
