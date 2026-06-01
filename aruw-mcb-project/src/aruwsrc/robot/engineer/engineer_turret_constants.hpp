@@ -173,9 +173,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    // .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * (2.0f / 3.0f),
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * (2.0f / 3.0f),
     //todo: change this later
-    .maxOutput = 0,
+    // .maxOutput = 0,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
