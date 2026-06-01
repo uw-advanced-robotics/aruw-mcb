@@ -462,15 +462,15 @@ EngineerImuCalibrateCommand imuCalibrateCommand(
         true,
     }},
     &chassisSubsystem,
-    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     yawObserver,
     odometrySubsystem,
     lampreyEncoder,
     pulleyEncoder,
     *yawTurretMotor.getEncoder(),
     BINNED_ALIGNMENT_OFFSET,
-    HOME_ALIGNMENT_OFFSET,
+    YAW_ALIGNMENT_OFFSET,
+    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand
 );

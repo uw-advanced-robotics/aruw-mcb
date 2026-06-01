@@ -70,6 +70,9 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
 
+inline constexpr float BINNED_ALIGNMENT_OFFSET = 0.0f;
+inline constexpr float YAW_ALIGNMENT_OFFSET = modm::toRadian(0.0f);
+
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {

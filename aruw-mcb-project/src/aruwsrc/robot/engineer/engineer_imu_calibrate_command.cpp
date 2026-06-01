@@ -37,8 +37,6 @@ EngineerImuCalibrateCommand::EngineerImuCalibrateCommand(
     tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
     control::chassis::HolonomicChassisSubsystem *chassis,
-    float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver &yawObserver,
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
     tap::encoder::EncoderInterface &turretLampreyEncoder,
@@ -46,6 +44,8 @@ EngineerImuCalibrateCommand::EngineerImuCalibrateCommand(
     tap::encoder::EncoderInterface &turretInternalEncoder,
     const float binnedAlignmentOffset,
     const float homeAlignmentOffset,
+    float,
+    float,
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime)
     : aruwsrc::control::imu::ImuCalibrateCommand(
@@ -221,5 +221,7 @@ bool EngineerImuCalibrateCommand::isFinished() const
     return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
            calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
+
+void EngineerImuCalibrateCommand::end(bool){} 
 
 }  // namespace aruwsrc::engineer

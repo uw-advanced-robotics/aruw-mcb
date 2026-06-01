@@ -40,8 +40,6 @@ public:
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         aruwsrc::control::chassis::HolonomicChassisSubsystem *chassis,
-        float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-        float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
         aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver &yawObserver,
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
         tap::encoder::EncoderInterface &turretLampreyEncoder,
@@ -49,6 +47,8 @@ public:
         tap::encoder::EncoderInterface &turretInternalEncoder,
         const float binnedAlignmentOffset,
         const float homeAlignmentOffset,
+        float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+        float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
