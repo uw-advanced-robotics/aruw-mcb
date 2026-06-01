@@ -413,12 +413,7 @@ EngineerTransforms transformer(
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
-aruwsrc::algorithms::odometry::transforms::StandardAnderHeroTransformerSubsystem transformSubsystem(
-    *drivers(),
-    transformer);
 
-aruwsrc::algorithms::odometry::transforms::StandardAndHeroTransformAdapter transformAdapter(
-    transformer);
 // TODO: add autonavcontroller + autonav command to this when all requirements (capbank,
 // beyblade config, transform adapter are all finished)
 

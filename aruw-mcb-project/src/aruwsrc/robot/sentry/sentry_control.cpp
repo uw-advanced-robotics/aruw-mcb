@@ -721,10 +721,8 @@ RemoteMapState leftMidRightMidRms =
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID);
 auto leftMidRightMid = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&majorManualCommand, &turretWidowManualCommand, &autoNavBeybladeCommand},
+    std::vector<Command *>{&majorManualCommand, &turretWidowManualCommand, &autoNavCommand},
     &leftMidRightMidRms);
-    {&majorManualCommand, &turretLeftManualCommand, &turretRightManualCommand, &autoNavCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
 
 // manual aim
 RemoteMapState leftMidRightDownRms =
