@@ -26,6 +26,7 @@ namespace aruwsrc::engineer
 void EngineerTurretSubsystem::refresh()
 {
     control::turret::RobotTurretSubsystem::refresh();
+    DEBUG_currentPitchAngle = getWorldPitch();
     updatePitchLimitDebug();
 }
 

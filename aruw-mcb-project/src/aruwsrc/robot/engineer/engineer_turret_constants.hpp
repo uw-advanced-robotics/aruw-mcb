@@ -49,19 +49,22 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 // need to change
 // if extension below threshold, we use the retracted limit which will limit the pitch more
 // aggressively
-static constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.7;
+static constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
 
 // if extended far enough, we can pitch higher because the back of extension won't hit the chassis
-static constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.95;
+static constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
 
 
 // if extension above threshold, limit the pitch so the extension doesnt hit the ground
 static constexpr float PITCH_LOWER_LIMIT_EXTENSION_EXTENDED = 0.5;
 // lower limit if extension is retracted far enough 
-static constexpr float PITCH_LOWER_LIMIT_DEFAULT = 0.65;
+static constexpr float PITCH_LOWER_LIMIT_DEFAULT = 0.5;
 
 // pitch limit if extension is not at either extreme
 static constexpr float PITCH_LIMIT_NEUTRAL = 0.0;
+
+// Extra software room to let the turret recover if it is already slightly past a dynamic limit.
+static constexpr float PITCH_LIMIT_RECOVERY_MARGIN = 0.02f;
 
 // need to change probably
 static constexpr float PITCH_LIMIT_RAMP_RATE =
@@ -76,26 +79,39 @@ static constexpr float MIN_EXTENSION_FOR_FULL_PITCH_UP = 0.2;
 // ground
 static constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
 
+static constexpr float MAX_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
+static constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
+
 }  // namespace aruwsrc::control::turret
 
 
 inline float getPitchMinLimit(float extensionPosition)
 {
-    if (extensionPosition > aruwsrc::control::turret::MAX_EXTENSION_FOR_FULL_PITCH_DOWN)
+    // TurretMotor expects numeric min/max radians. Pitch up is negative on engineer.
+    if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_FULL_PITCH_UP)
     {
-        return aruwsrc::control::turret::PITCH_LOWER_LIMIT_EXTENSION_EXTENDED;
+        return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED -
+               aruwsrc::control::turret::PITCH_LIMIT_RECOVERY_MARGIN;
     }
-    return aruwsrc::control::turret::PITCH_LOWER_LIMIT_DEFAULT;
+    return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT -
+           aruwsrc::control::turret::PITCH_LIMIT_RECOVERY_MARGIN;
 }
 
 inline float getPitchMaxLimit(float extensionPosition)
 {
-    // not extended far enough, limit pitch more aggressively to prevent back of extension from hitting chassis
-    if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_FULL_PITCH_UP)
+    // Pitch down is positive on engineer.
+    if (extensionPosition < aruwsrc::control::turret::MAX_EXTENSION_FOR_EXTRA_PITCH_DOWN)
     {
-        return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
+        return aruwsrc::control::turret::PITCH_DOWN_LIMIT_EXTENSION_PARTIAL;
     }
-    return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
+
+    if (extensionPosition > aruwsrc::control::turret::MAX_EXTENSION_FOR_FULL_PITCH_DOWN)
+    {
+        return aruwsrc::control::turret::PITCH_LOWER_LIMIT_EXTENSION_EXTENDED +
+               aruwsrc::control::turret::PITCH_LIMIT_RECOVERY_MARGIN;
+    }
+    return aruwsrc::control::turret::PITCH_LOWER_LIMIT_DEFAULT +
+           aruwsrc::control::turret::PITCH_LIMIT_RECOVERY_MARGIN;
 }
 
 static constexpr aruwsrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = {
@@ -157,7 +173,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * (2.0f / 3.0f),
+    // .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * (2.0f / 3.0f),
+    //todo: change this later
+    .maxOutput = 0,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
