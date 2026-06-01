@@ -36,14 +36,11 @@ namespace aruwsrc::engineer
 EngineerImuCalibrateCommand::EngineerImuCalibrateCommand(
     tap::Drivers *drivers,
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-    EngineerTurretSubsystem &turret,
-    aruwsrc::control::turret::algorithms::ChassisFrameTurretController<Axis::YAW> &turretController,
     control::chassis::HolonomicChassisSubsystem *chassis,
     float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver &yawObserver,
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    tap::communication::sensors::imu::AbstractIMU &imu,
     tap::encoder::EncoderInterface &turretLampreyEncoder,
     tap::encoder::EncoderInterface &turretPulleyEncoder,
     tap::encoder::EncoderInterface &turretInternalEncoder,
@@ -54,17 +51,17 @@ EngineerImuCalibrateCommand::EngineerImuCalibrateCommand(
     : aruwsrc::control::imu::ImuCalibrateCommand(
           drivers,
           turretsAndControllers,
-          &chassis,
+          chassis,
           EngineerImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD,
-          EngineerImuCalibrateCommand::POSITION_ZERO_THRESHOLD),
-      turret(turret),
-      turretController(turretController),
+          EngineerImuCalibrateCommand::POSITION_ZERO_THRESHOLD,
+          successChime,
+          failChime,
+          &odometryInterface),
       yawObserver(yawObserver),
       odometryInterface(odometryInterface),
-      imu(imu),
-      turretMajorLampreyEncoder(turretMajorLampreyEncoder),
-      turretMajorPulleyEncoder(turretMajorPulleyEncoder),
-      turretMajorInternalEncoder(turretMajorInternalEncoder),
+      turretLampreyEncoder(turretLampreyEncoder),
+      turretPulleyEncoder(turretPulleyEncoder),
+      turretInternalEncoder(turretInternalEncoder),
       successChime(successChime),
       failChime(failChime),
       binnedAlignmentOffset(binnedAlignmentOffset),
@@ -75,22 +72,12 @@ EngineerImuCalibrateCommand::EngineerImuCalibrateCommand(
     {
         addSubsystemRequirement(config.turret);
     }
-
-    addSubsystemRequirement(&turret);
 }
 
 void EngineerImuCalibrateCommand::initialize()
 {
-    // reset odometry
-    yawObserver.overrideChassisYaw(0);
-    odometryInterface.reset();
-
+    
     ImuCalibrateCommand::initialize();
-
-    // initialize major
-    turretMajor.getMutableMotor().setChassisFrameSetpoint(
-        Angle(turretMajor.getReadOnlyMotor().getConfig().startAngle));
-    turretMajorController.initialize();
 
     calibrationLongTimeout.stop();
     calibrationTimer.stop();
@@ -98,16 +85,7 @@ void EngineerImuCalibrateCommand::initialize()
     lampreyAligned = false;
 }
 
-static inline bool turretMajorReachedCenterAndNotMoving(
-    aruwsrc::control::turret::YawTurretSubsystem &turret)
-{
-    return compareFloatClose(
-               0.0f,
-               turret.getReadOnlyMotor().getChassisFrameVelocity(),
-               EngineerImuCalibrateCommand::VELOCITY_ZERO_THRESHOLD) &&
-           (abs(turret.getReadOnlyMotor().getChassisFrameMeasuredAngle().minDifference(0)) <
-            EngineerImuCalibrateCommand::POSITION_ZERO_THRESHOLD);
-}
+
 
 void EngineerImuCalibrateCommand::execute()
 {
@@ -120,9 +98,10 @@ void EngineerImuCalibrateCommand::execute()
                 if (failChime) drivers->commandScheduler.addCommand(failChime);
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
-
-            // Only start calibrating if all turret MCB IMUs are online and the dedicated chassis
-            // turret-MCB IMU is online.
+            // Only start calibrating if the turret is online and if there is an IMU online to be
+            // calibrated. The onboard Mpu6500 will never be in the `IMU_NOT_CONNECTED` state unless
+            // the Mpu6500 is shorted (which has never happened). The turret MCB will only be
+            // offline if the turret MCB is unplugged.
             bool turretMCBsReady = true;
             bool turretsOnline = true;
 
@@ -132,7 +111,8 @@ void EngineerImuCalibrateCommand::execute()
                 turretsOnline &= config.turret->isOnline();
             }
 
-            if (turretsOnline && turretMCBsReady && chassisImuComm.isConnected())
+            if (turretsOnline && (turretMCBsReady || (drivers->mpu6500.getImuState() !=
+                                                      tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState::IMU_NOT_CONNECTED)))
             {
                 calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -155,7 +135,6 @@ void EngineerImuCalibrateCommand::execute()
                 turretsNotMoving &=
                     turretReachedCenterAndNotMoving(config.turret, !config.turretImuOnPitch);
             }
-            turretsNotMoving &= turretMajorReachedCenterAndNotMoving(turretMajor);
 
             if (calibrationTimer.isExpired() && turretsNotMoving)
             {
@@ -165,12 +144,12 @@ void EngineerImuCalibrateCommand::execute()
                     // Preform the binned alignment
                     fakeLampreyEncoder.setFakePosition(
                         aruwsrc::algorithms::binned_encoder_alignment::calculatePosition<30, 95>(
-                            turretMajorPulleyEncoder.getPosition().getWrappedValue(),
-                            turretMajorLampreyEncoder.getPosition().getWrappedValue(),
+                            turretPulleyEncoder.getPosition().getWrappedValue(),
+                            turretLampreyEncoder.getPosition().getWrappedValue(),
                             binnedAlignmentOffset) -
                         homeAlignmentOffset);
 
-                    turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
+                    turretInternalEncoder.alignWith(&fakeLampreyEncoder);
                     lampreyAligned = true;
                     // exit out so we move to the new setpoint
                     return;
@@ -182,9 +161,6 @@ void EngineerImuCalibrateCommand::execute()
                 {
                     config.turretImu->requestCalibration();
                 }
-
-                chassisImuComm.requestCalibration();
-                turretMajorImu.requestCalibration();
 
                 calibrationState = CalibrationState::CALIBRATING_IMU;
             }
@@ -198,16 +174,18 @@ void EngineerImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
-            if (turretMajorImu.getImuState() ==
-                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATED)
+            if (drivers->mpu6500.getImuState() == tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState::IMU_CALIBRATED)
             {
-                // assume turret MCB takes approximately as long as the turret major IMU to
-                // calibrate,
+                // assume turret MCB takes approximately as long as the onboard IMU to calibrate,
                 // plus 1 second extra to handle sending the request and processing it
                 // TODO to handle the case where the turret MCB doesn't receive information,
                 // potentially add ACK sequence to turret MCB CAN comm class.
                 calibrationTimer.restart(TURRET_IMU_EXTRA_WAIT_CALIBRATE_MS);
                 calibrationState = CalibrationState::WAITING_CALIBRATION_COMPLETE;
+                if (odometry2DInterface != nullptr)
+                {
+                    odometry2DInterface->reset();
+                }
             }
             break;
         case CalibrationState::WAITING_CALIBRATION_COMPLETE:
@@ -216,13 +194,6 @@ void EngineerImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_SUCCESS;
                 if (successChime) drivers->commandScheduler.addCommand(successChime);
             }
-            break;
-        case CalibrationState::CALIBRATION_SUCCESS:
-            turretMajor.getMutableMotor().setChassisFrameSetpoint(Angle(0));
-
-            // reset odometry
-            yawObserver.overrideChassisYaw(0);
-            odometryInterface.reset();
             break;
         default:
             break;
@@ -243,35 +214,12 @@ void EngineerImuCalibrateCommand::execute()
         }
         config.yawController->runController(dt, config.turret->yawMotor.getChassisFrameSetpoint());
     }
-
-    if (calibrationState == CalibrationState::LOCKING_TURRET)
-    {
-        turretMajorController.runController(
-            dt,
-            turretMajor.getReadOnlyMotor().getChassisFrameSetpoint());
-    }
-    else
-    {
-        turretMajor.getMutableMotor().setMotorOutput(0);
-    }
 }
 
 bool EngineerImuCalibrateCommand::isFinished() const
 {
-    // return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
-    //        calibrationState == CalibrationState::CALIBRATION_FAIL;
-    return false;
-}
-
-void EngineerImuCalibrateCommand::end(bool)
-{
-    // for (auto &config : turretsAndControllers)
-    // {
-    //     config.turret->yawMotor.setMotorOutput(0);
-    //     config.turret->pitchMotor.setMotorOutput(0);
-    // }
-
-    // turretMajor->yawMotor.setMotorOutput(0);
+    return calibrationState == CalibrationState::CALIBRATION_SUCCESS ||
+           calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
 
 }  // namespace aruwsrc::engineer

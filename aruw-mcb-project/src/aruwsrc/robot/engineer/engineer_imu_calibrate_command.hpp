@@ -35,22 +35,18 @@ class EngineerImuCalibrateCommand : public aruwsrc::control::imu::ImuCalibrateCo
 {
 public: 
     static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4);
-    
     static constexpr float POSITION_ZERO_THRESHOLD = modm::toRadian(0.24f); //TODO: vro
     EngineerImuCalibrateCommand(
         tap::Drivers *drivers,
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
-        EngineerTurretSubsystem &turret,
-        aruwsrc::control::turret::algorithms::ChassisFrameTurretController<Axis::YAW> &turretController,
         aruwsrc::control::chassis::HolonomicChassisSubsystem *chassis,
         float velocityZeroThreshold = ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
         float positionZeroThreshold = ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
         aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver &yawObserver,
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        tap::communication::sensors::imu::AbstractIMU &imu,
         tap::encoder::EncoderInterface &turretLampreyEncoder,
-        tap::encoder::EncoderInterface &turretMajorPulleyEncoder,
-        tap::encoder::EncoderInterface &turretMajorInternalEncoder,
+        tap::encoder::EncoderInterface &turretPulleyEncoder,
+        tap::encoder::EncoderInterface &turretInternalEncoder,
         const float binnedAlignmentOffset,
         const float homeAlignmentOffset,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
@@ -67,16 +63,13 @@ public:
     const char* getName() const override { return "engineer imu calibrate"; }
 
 protected:
-    EngineerTurretSubsystem &turret;
-    aruwsrc::control::turret::algorithms::ChassisFrameTurretController<Axis::YAW> &turretController;
 
     aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver &yawObserver;
 
     Odometry2DInterface &odometryInterface;
-    tap::communication::sensors::imu::AbstractIMU &imu;
-    tap::encoder::EncoderInterface &turretMajorLampreyEncoder;
-    tap::encoder::EncoderInterface &turretMajorPulleyEncoder;
-    tap::encoder::EncoderInterface &turretMajorInternalEncoder;
+    tap::encoder::EncoderInterface &turretLampreyEncoder;
+    tap::encoder::EncoderInterface &turretPulleyEncoder;
+    tap::encoder::EncoderInterface &turretInternalEncoder;
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
@@ -84,6 +77,7 @@ private:
     bool lampreyAligned{false};
     const float binnedAlignmentOffset{0.0f};
     const float homeAlignmentOffset{0.0f};
+    float yawObserverOffset = 0;
     aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
 };  
 

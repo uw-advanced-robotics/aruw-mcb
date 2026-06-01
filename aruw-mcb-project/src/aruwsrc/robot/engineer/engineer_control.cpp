@@ -83,7 +83,9 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/robot/engineer/engineer_imu_calibrate_command.hpp"
 #include "aruwsrc/util_macros.hpp"
+#include "aruwsrc/communication/sensors/encoder/lamprey_encoder.hpp"
 
 using namespace aruwsrc::communication::mcb_lite;
 using namespace aruwsrc::communication::mcb_lite::motor;
@@ -216,6 +218,19 @@ tap::encoder::CanEncoder perpendicularOmni(
     tap::encoder::CanEncoderId::ID2,
     tap::can::CanBus::CAN_BUS2,
     true);
+tap::encoder::CanEncoder pulleyEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID6,
+    tap::can::CanBus::CAN_BUS2,
+    true
+);
+aruwsrc::communication::sensors::encoder::LampreyEncoder lampreyEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID7,
+    tap::can::CanBus::CAN_BUS2,
+    aruwsrc::control::turret::chassis_rel::LAMPREY_CALIBRATION_MAP,
+    true
+);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
@@ -437,7 +452,7 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-imu::ImuCalibrateCommand imuCalibrateCommand(
+EngineerImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
         &drivers()->mcbLite.imu,
@@ -447,12 +462,18 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         true,
     }},
     &chassisSubsystem,
-    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    yawObserver,
+    odometrySubsystem,
+    lampreyEncoder,
+    pulleyEncoder,
+    *yawTurretMotor.getEncoder(),
+    BINNED_ALIGNMENT_OFFSET,
+    HOME_ALIGNMENT_OFFSET,
     &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand,
-    nullptr,
-    {&drivers()->chassisIsm});
+    &imuCalibrateFailBuzzCommand
+);
 
 aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
     drivers(),
