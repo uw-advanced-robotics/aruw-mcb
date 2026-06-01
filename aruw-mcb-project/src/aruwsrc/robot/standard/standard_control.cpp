@@ -489,6 +489,7 @@ autotune::GravityAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::
          pitchMotor.isMotorInverted(),
          TURRET_WEIGHT_KG,
          TORQUE_TO_DESIRED_OUT},
+        &turretSpringCompensation,
         &chassis);
 
 autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
@@ -568,11 +569,10 @@ FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
 FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
 
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
     {&agitator},
     rotateAndUnjamAgitator,
-    {&frictionWheelsOnGovernor, &fireRateLimitGovernor});
-// {&fireRateLimitGovernor});
+    {&frictionWheelsOnGovernor});
 
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
@@ -597,10 +597,10 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-    {&heatLimitGovernor, &cvOnTargetGovernor});
+    {&cvOnTargetGovernor});
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -694,7 +694,8 @@ Trigger rightSwitchMiddle =
 RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 Trigger rightSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
+        .onTrue(&spinFrictionWheels)
+        .whileTrue(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
@@ -702,7 +703,8 @@ Trigger leftSwitchDown =
 
 Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
+        .whileTrue(&chassisDriveCommand)
+        .whileTrue(&turretCVCommand);
 
 auto rPressedRms = RemoteMapState({Remote::Key::R});
 auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
