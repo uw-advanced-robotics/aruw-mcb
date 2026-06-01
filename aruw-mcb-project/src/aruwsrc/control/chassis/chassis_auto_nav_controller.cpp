@@ -138,7 +138,7 @@ bool ChassisAutoNavController::atSetpoint()
         return false;
     }
     Position goal = *path->getFinalPosition();
-    return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0.2) &&
+    return (curr - goal).magnitude() < POS_ERROR_THRESHOLD &&
            path->estimateRobotProgress(
                transformer->getWorldToChassis().getTranslation(),
                lastParameter) > path->totalDistance() - POS_ERROR_THRESHOLD;
