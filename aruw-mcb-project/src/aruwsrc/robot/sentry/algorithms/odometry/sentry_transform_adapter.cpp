@@ -27,13 +27,27 @@ using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::sentry::algorithms::odometry
 {
-SentryTransformAdapter::SentryTransformAdapter(const SentryTransforms& transforms)
-    : transforms(transforms)
+SentryTransformAdapter::SentryTransformAdapter(
+    const SentryTransforms& transforms,
+    const aruwsrc::algorithms::odometry::VisionOdometryDataProvider* visionOdometryProvider)
+    : transforms(transforms),
+      visionOdometryProvider(visionOdometryProvider)
 {
 }
 
 modm::Vector2f SentryTransformAdapter::getChassisVelocity2d() const
 {
+    return transforms.getChassisOdometry().getCurrentVelocity2D();
+}
+
+modm::Vector2f SentryTransformAdapter::getVisionChassisVelocity2d() const
+{
+    // TODO: this should be turret major velocity
+    if (visionOdometryProvider != nullptr)
+    {
+        return visionOdometryProvider->getVisionCurrentVelocity2D();
+    }
+
     return transforms.getChassisOdometry().getCurrentVelocity2D();
 }
 
@@ -46,6 +60,11 @@ uint32_t SentryTransformAdapter::getLastComputedOdometryTime() const
 const Transform& SentryTransformAdapter::getWorldToChassis() const
 {
     return this->transforms.getWorldToChassis();
+}
+
+const Transform& SentryTransformAdapter::getVisionWorldToChassis() const
+{
+    return this->transforms.getWorldToTurretMajor();
 }
 
 const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t turretID) const

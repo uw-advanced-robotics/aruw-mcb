@@ -320,7 +320,7 @@ void VisionCoprocessor::sendOdometryData()
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
 
-    auto& worldToChassis = transformer->getWorldToChassis();
+    auto& worldToChassis = transformer->getVisionWorldToChassis();
 
     // chassis odometry
     odometryData->timestamp = getTimeMicroseconds();
@@ -505,7 +505,7 @@ void VisionCoprocessor::sendBulletsRemaining()
             bulletsRemainMessage;
         bulletsRemainMessage.messageType = CV_MESSAGE_TYPES_BULLETS_REMAINING;
 
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
         const uint16_t* bulletsRemaining =
             &drivers->refSerial.getRobotData().turret.bulletsRemaining42;
 #else

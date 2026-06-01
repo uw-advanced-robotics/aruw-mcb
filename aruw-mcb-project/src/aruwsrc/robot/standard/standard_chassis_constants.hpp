@@ -74,7 +74,7 @@ static constexpr float VELOCITY_PID_KS = 1.0f;
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 300.0f,
     .ki = 14.0f,
-    .kd = 1.0f,
+    .kd = 0.10f,
     .maxICumulative = 1000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .errDeadzone = 0.5f,
@@ -140,9 +140,14 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 50,
 };
 
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.75f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 4.0f;
 
+static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 }  // namespace aruwsrc::control::chassis
 
 #endif  // STANDARD_CHASSIS_CONSTANTS_HPP_
