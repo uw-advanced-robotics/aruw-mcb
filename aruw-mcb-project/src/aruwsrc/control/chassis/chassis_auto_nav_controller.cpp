@@ -141,7 +141,7 @@ bool ChassisAutoNavController::atSetpoint()
     return tap::algorithms::compareFloatClose((curr - goal).magnitude(), 0, 0.2) &&
            path->estimateRobotProgress(
                transformer->getWorldToChassis().getTranslation(),
-               lastParameter) > 0.80f * path->totalDistance();  // tolerance = 1 cm
+               lastParameter) > path->totalDistance() - POS_ERROR_THRESHOLD;
 }
 
 }  // namespace aruwsrc::control::chassis
