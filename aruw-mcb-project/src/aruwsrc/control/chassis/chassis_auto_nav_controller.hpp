@@ -50,7 +50,7 @@ public:
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
-        aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer,
+        const tap::algorithms::transforms::Transform& worldToChassis,
         const aruwsrc::control::chassis::BeybladeConfig beybladeConfig,
         aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
         float translationalMotionThreshold,
