@@ -138,8 +138,7 @@ bool ChassisAutoNavController::atSetpoint()
         return false;
     }
     Position goal = *path->getFinalPosition();
-    return (curr - goal).magnitude() < POS_ERROR_THRESHOLD &&
-           path->estimateRobotProgress(
+    return path->estimateRobotProgress(
                transformer->getWorldToChassis().getTranslation(),
                lastParameter) > path->totalDistance() - POS_ERROR_THRESHOLD;
 }
