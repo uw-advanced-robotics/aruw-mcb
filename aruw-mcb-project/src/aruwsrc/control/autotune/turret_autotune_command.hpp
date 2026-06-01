@@ -350,7 +350,7 @@ protected:
      * Timeout that we set after initially starting the turret PID controller to allow any residual
      * movement from starting the new PID controller to be resolved.
      */
-    tap::arch::MilliTimeout calibrationTimer;
+    tap::arch::MilliTimeout calibrationTimer{WAIT_TIME_TURRET_RESPONSE_MS};
 
     /**
      * Timeout used to determine if we should give up on tuning.

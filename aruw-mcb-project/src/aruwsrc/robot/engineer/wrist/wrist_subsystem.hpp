@@ -55,7 +55,6 @@ public:
         tap::motor::MotorInterface& motorDifferential1,
         tap::motor::MotorInterface& motorDifferential2,
         tap::motor::MotorInterface& motorTheta3,
-        tap::encoder::EncoderInterface& encoderTheta1,
         tap::encoder::EncoderInterface& encoderTheta2,
         const WristConfig config);
 
@@ -104,7 +103,7 @@ public:
 private:
     const WristConfig config;
     tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;
-    tap::encoder::EncoderInterface &encoderTheta1, &encoderTheta2;
+    tap::encoder::EncoderInterface& encoderTheta2;
     tap::algorithms::WrappedFloat setpointTheta1;
     float setpointTheta2;
     tap::algorithms::WrappedFloat setpointTheta3;

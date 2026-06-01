@@ -31,7 +31,7 @@ class TurretMotorMock : public control::turret::TurretMotor
 public:
     TurretMotorMock(
         tap::motor::MotorInterface *motor,
-        const control::turret::TurretMotorConfig &motorConfig);
+        const control::turret::TurretMotorConfig &motorConfig = DEFAULT_CONFIG);
     virtual ~TurretMotorMock();
 
     MOCK_METHOD(void, initialize, (), (override));
@@ -65,7 +65,7 @@ public:
         (const override));
 
 private:
-    aruwsrc::control::turret::TurretMotorConfig defaultConfig;
+    static constexpr aruwsrc::control::turret::TurretMotorConfig DEFAULT_CONFIG{};
 };
 }  // namespace aruwsrc::mock
 

@@ -57,7 +57,7 @@ protected:
     HolonomicChassisSubsystemTest()
         : currentSensor(
               {&drivers.analog,
-               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
+               tap::gpio::Analog::Pin::S,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),

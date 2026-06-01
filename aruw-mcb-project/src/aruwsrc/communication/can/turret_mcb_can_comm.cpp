@@ -262,7 +262,7 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
         imuDataReceivedCallbackFunc();
     }
 }
-#include <iostream>
+
 void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
 {
     // Status frames are a heartbeat and should keep the remote IMU marked connected,

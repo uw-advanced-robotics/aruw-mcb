@@ -47,46 +47,30 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
 static constexpr int AGITATOR_NUM_POCKETS = 8;          // number of balls in one rotation
 static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
+static constexpr float MANUAL_CONSTANT_FIRE_RATE_RPS = 30.0f;
+static constexpr float MIN_CONSTANT_FIRE_RATE_RPM = 10.0f;
+static constexpr uint32_t AIDEN_CLEMJAM_TIMEOUT_MS = 400;
+static constexpr float AIDEN_CLEMJAM_MIN_SETPOINT = 8.0f;
+static constexpr float AIDEN_CLEMJAM_PROJECTILE_LAUNCH_RPM_DROP_THRESHOLD = 1000.0f;
 
-namespace turretLeft
-{
-static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 1.0f / 36.0f,
-    .agitatorMotorId = tap::motor::MOTOR4,
-    .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
-    .isAgitatorInverted = false,  // @todo: check
-    /**
-     * The jamming constants. Agitator is considered jammed if difference between setpoint
-     * and current angle is > `JAMMING_DISTANCE` radians for >= `JAMMING_TIME` ms;
-     *
-     * @warning: `JAMMING_DISTANCE` must be less than the smallest movement command
-     *
-     * This should be positive or else weird behavior can occur
-     */
-    .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 300,
-    .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
-};
-}  // namespace turretLeft
-
-namespace turretRight
+// Single turret minor agitator for sentry 2026
+namespace turretWidow
 {
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR4,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
-    /**
-     * The jamming constants. Agitator is considered jammed if difference between the velocity
-     * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
-     */
-    .jammingVelocityDifference = 2.0f * M_TWOPI,
-    .jammingTime = 200,
+    .jammingVelocityDifference = M_TWOPI,
+    .jammingTime = 400,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+    .emptyJamEnabled = true,
+    .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
+    .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
+    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
 };
-}  // namespace turretRight
+}  // namespace turretWidow
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
     // magic numbers are fudge factors

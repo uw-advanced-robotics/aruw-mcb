@@ -55,7 +55,7 @@ tap::arch::PeriodicMilliTimer sendMotorTimeout(1000.0f / MAIN_LOOP_FREQUENCY);
 using namespace aruwsrc::standard;
 #elif defined(ALL_SENTRIES)
 using namespace aruwsrc::sentry;
-#elif defined(TARGET_HERO_ZERO)
+#elif defined(TARGET_HERO_NEPTUNE)
 using namespace aruwsrc::hero;
 #elif defined(TARGET_DRONE)
 using namespace aruwsrc::drone;
@@ -105,7 +105,7 @@ int main()
     initializeIo(drivers);
     initSubsystemCommands(drivers);
 
-    while (1)
+    while (true)
     {
         // do this as fast as you can
         PROFILE(drivers->profiler, updateIo, (drivers));

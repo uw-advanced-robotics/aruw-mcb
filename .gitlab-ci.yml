@@ -274,27 +274,27 @@ before_script:
   extends:
     - .mcb_build
   variables:
-    ROBOT: HERO_ZERO
+    ROBOT: HERO_NEPTUNE
 
 "Hero: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: HERO_ZERO
+    ROBOT: HERO_NEPTUNE
 
-# Sentry (Beehive) build
+# Sentry (Achlys) build
 
-"Sentry: MCB Build":
+"Sentry Achlys: MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: SENTRY_ECLIPSE
+    ROBOT: SENTRY_ACHLYS
 
-"Sentry: Test Build":
+"Sentry Achlys: Test Build":
   extends:
     - .test_build
   variables:
-    ROBOT: SENTRY_ECLIPSE
+    ROBOT: SENTRY_ACHLYS
 
 # Dart Build
 
