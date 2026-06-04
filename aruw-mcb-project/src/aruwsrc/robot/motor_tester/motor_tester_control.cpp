@@ -97,7 +97,7 @@ tap::motor::DjiMotor motor6020(
     false,
     "6020 Motor",
     true,
-    (1.0f));
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020);
 
 MotorSubsystem motorSubsystem2006(drivers(), motor2006, m2006VelocityPidConfig);
 

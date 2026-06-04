@@ -81,9 +81,9 @@ public:
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
     /// The width of a small armor plate, in m
-    static constexpr float PLATE_WIDTH = 0.1f;
+    static constexpr float PLATE_WIDTH = 0.135f;
     /// The height of a small armor plate, in m
-    static constexpr float PLATE_HEIGHT = 0.1f;
+    static constexpr float PLATE_HEIGHT = 0.125f;
 
     /**
      * @return true if the specified yaw and pitch angle errors are small enough such that if a
@@ -101,9 +101,9 @@ public:
         }
 
         return (abs(yawAngleError) <
-                atan2f(SentryBallisticsSolver::PLATE_WIDTH, 2.0f * targetDistance)) &&
+                atan2f(SentryBallisticsSolver::PLATE_WIDTH / 2.0f, targetDistance)) &&
                (abs(pitchAngleError) <
-                atan2f(SentryBallisticsSolver::PLATE_HEIGHT, 2.0f * targetDistance));
+                atan2f(SentryBallisticsSolver::PLATE_HEIGHT / 2.0f, targetDistance));
     }
 
     /**
@@ -130,7 +130,6 @@ public:
         const aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
         float defaultLaunchSpeed,
         float turretPitchOffset,
-        // const aruwsrc::control::turret::TurretMotor &turretBaseMotor,
         const float turretMinorOffsetFromMajor,
         const uint8_t turretID);
 

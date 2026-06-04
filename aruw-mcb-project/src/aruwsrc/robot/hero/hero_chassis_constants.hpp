@@ -40,30 +40,14 @@ static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 4'500},
-    {60, 5'700},
-    {70, 6'400},
-    {80, 6'700},
-    {100, 7'000},
-    {120, 8'000},
-};
+    {1, 200},
+    {2, 250},
+    {100, 375}};
 
 static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
-    tap::algorithms::transforms::Transform(
-        0.1426,
-        0.0245,
-        0,
-        0,
-        modm::toRadian(-90),
-        modm::toRadian(-135));
+    tap::algorithms::transforms::Transform(0.1426, 0.0245, 0, 0, 0, modm::toRadian(180));
 static const tap::algorithms::transforms::Transform ISM330_MCB_MOUNTING_TRANSFORM =
-    tap::algorithms::transforms::Transform(
-        0.131,
-        0.011,
-        0,
-        modm::toRadian(90),
-        0,
-        modm::toRadian(135));
+    tap::algorithms::transforms::Transform(0.131, 0.011, 0, 0, 0, modm::toRadian(180 + 45));
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -100,6 +84,20 @@ static constexpr float VELOCITY_PID_KS = 525.0f;
  */
 static constexpr float VELOCITY_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_C620;
 
+// mechanical chassis constants
+/**
+ * Radius of the wheels (m)
+ */
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.75f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 4.0f;
+
+/// @see power_limiter.hpp for what these mean
+static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
+static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
+static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
+
+static constexpr float VELOCITY_PID_KV = 0.0f;
+static constexpr float VELOCITY_PID_KS = 0.0f;
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = VELOCITY_PID_KP,
     .ki = VELOCITY_PID_KI,
@@ -112,11 +110,11 @@ static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 3'000.0f;
-static constexpr float AUTOROTATION_PID_KD = 0.0f;
-static constexpr float AUTOROTATION_PID_MAX_P = 3'000.0f;
-static constexpr float AUTOROTATION_PID_MAX_D = 0.0f;
-static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5000.0f;
+static constexpr float AUTOROTATION_PID_KP = 200.0f;
+static constexpr float AUTOROTATION_PID_KD = 10.0f;
+static constexpr float AUTOROTATION_PID_MAX_P = 200.0f;
+static constexpr float AUTOROTATION_PID_MAX_D = 200.0f;
+static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 200.0f;
 static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
@@ -153,6 +151,12 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.7f,
     .beybladeRampRate = 50,
 };
+
+static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 }  // namespace aruwsrc::control::chassis
 
 #endif  // HERO_CHASSIS_CONSTANTS_HPP_

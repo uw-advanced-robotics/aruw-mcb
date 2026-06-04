@@ -121,8 +121,12 @@ static constexpr std::array<uint8_t, 895> BUMBLEBEE_NOTES = {
 static constexpr uint32_t IMU_CALIBRATE_SUCCESS_NOTE_LENGTH_MS = MARIO_MUSHROOM_NOTE_LENGTH_MS;
 static constexpr auto& IMU_CALIBRATE_SUCCESS_NOTES = MARIO_MUSHROOM_NOTES;
 
-static constexpr uint32_t IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS = MARIO_PIPE_NOTE_LENGTH_MS;
-static constexpr auto& IMU_CALIBRATE_FAIL_NOTES = MARIO_PIPE_NOTES;
+static constexpr uint32_t IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS = 40;
+static constexpr std::array<uint8_t, 16> IMU_CALIBRATE_FAIL_NOTES{
+    {56, 56, 56, 0, 56, 56, 56, 0, 56, 56, 56, 0, 56, 56, 56, 0}};
+
+static constexpr uint32_t IMU_NOT_CALIBRATED_NOTE_LENGTH_MS = 250;
+static constexpr std::array<uint8_t, 4> IMU_NOT_CALIBRATED_NOTES{{50, 44, 0, 0}};
 }  // namespace aruwsrc::control::buzzer
 
 #endif  // NOTE_SEQUENCES_HPP_

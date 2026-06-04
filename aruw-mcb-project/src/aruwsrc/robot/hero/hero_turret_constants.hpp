@@ -21,10 +21,13 @@
 #define HERO_TURRET_CONSTANTS_HPP_
 
 #include "tap/algorithms/fuzzy_pd.hpp"
+#include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
+#include "aruwsrc/robot/hero/hero_pitch_turret_motor.hpp"
+#include "modm/container/pair.hpp"
 #include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
@@ -42,8 +45,28 @@ static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
 static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
+static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_ENCODER_ID =
+    tap::encoder::CanEncoderId::ID7;
+static constexpr tap::can::CanBus YAW_LAMPREY_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+
+static constexpr float YAW_LAMPREY_RATIO = 1.0f;
+static constexpr float YAW_LAMPREY_ENCODER_HOME_POSITION = -modm::toRadian(110.0f);
+
+static constexpr tap::encoder::CanEncoderId YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID0;
+
+static constexpr tap::can::CanBus YAW_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+
+static constexpr float YAW_ENCODER_RATIO = 1.0f;  // One for use in binned alignment
+
+static constexpr float BINNED_ALIGNMENT_OFFSET = 2.44f;
+
+static const modm::Pair<float, float> LAMPREY_LUT[0] = {};
+
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
-static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
+static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR5;
+
+static constexpr uint32_t ENCODER_RATIO_NUM = 1;
+static constexpr uint32_t ENCODER_RATIO_DEN = 2;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
@@ -55,15 +78,32 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 4901,
-    .minAngle = modm::toRadian(-20),
-    .maxAngle = modm::toRadian(30),
+    .startEncoderValue = 1975,
+    .minAngle = -.32f,
+    .maxAngle = 0.56f,
     .limitMotorAngles = true,
+};
+
+inline constexpr aruwsrc::hero::HeroPitchLinkage::FourBarLinkageConfig PITCH_LINKAGE_CONFIG = {
+    .l1 = 0.080f,  // 80mm fixed link
+    .l2 = 0.080f,  // turret head
+    .l3 = 0.120f,  // longer linkage
+    .l4 = 0.040f,  // shorter linkage
 };
 
 // Turret is perfectly balanced
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
-    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
+    TURRET_GRAVITY_CONFIG{.cgX = 12.1f, .cgZ = -15.67f, .gravityCompensatorMax = -8000.0f};
+
+static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
+    .turretPitchMountX = 0.0f,
+    .turretPitchMountZ = 0.0f,
+    .turretYawMountX = 0.0f,
+    .turretYawMountZ = 0.0f,
+    .springConstant = 0.0f,
+    .springFreeLength = 0.0f,
+};
+
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
@@ -95,7 +135,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 60.0f,
+    .kp = 1500.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -109,11 +149,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 1400.0f,
-    .ki = 0.1f,
-    .kd = 0.4f,
+    .kp = 20.0f,
+    .ki = 0.0f,
+    .kd = 0.5f,
     .maxICumulative = 0.0f,
-    .maxOutput = 2000.0f,
+    .maxOutput = 20.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 30.0f,
     .tQProportionalKalman = 1.0f,
@@ -139,7 +179,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .kp = 400.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 1000.0f,
     .maxICumulative = 5'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,

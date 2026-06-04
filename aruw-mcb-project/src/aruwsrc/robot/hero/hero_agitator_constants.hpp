@@ -41,18 +41,18 @@ static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 5'000.0f,
+    .maxOutput = 10'000.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float DESIRED_LOAD_TIME_S = 0.25f;
+static constexpr float DESIRED_LOAD_TIME_S = 0.3f;
 static constexpr float KICKER_DESIRED_LOAD_TIME_S = 0.1f;
 static constexpr float KICKER_FIRE_DISTANCE = M_TWOPI * 0.5f;
 static constexpr float KICKER_FIRE_TIME_S = 0.075f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 12.0f;
 static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
-static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 5.0f;
-static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.1f;
+static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 2.0f;
+static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.3f;
 
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
     WATERWHEEL_AGITATOR_CONFIG = {

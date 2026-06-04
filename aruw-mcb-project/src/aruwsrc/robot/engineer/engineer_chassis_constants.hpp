@@ -85,19 +85,21 @@ static constexpr float VELOCITY_PID_KS = 0.0;
 static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
 
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
-    .kp = VELOCITY_PID_KP,
-    .ki = VELOCITY_PID_KI,
-    .kd = VELOCITY_PID_KD,
-    .maxICumulative = VELOCITY_PID_MAX_ERROR_SUM,
-    .maxOutput = VELOCITY_PID_MAX_OUTPUT,
+    .kp = 300.0f,
+    .ki = 14.0f,
+    .kd = 0.0f,
+    .maxICumulative = 2000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 1.0f,
+    .smoothDeadzone = true,
 };
 
 /**
  * Rotation PID: A PD controller for chassis autorotation. The PID parameters for the
  * controller are listed below.
  */
-static constexpr float AUTOROTATION_PID_KP = 5'729.6f;
-static constexpr float AUTOROTATION_PID_KD = 57.3f;
+static constexpr float AUTOROTATION_PID_KP = 200.6f;
+static constexpr float AUTOROTATION_PID_KD = 10.0f;
 static constexpr float AUTOROTATION_PID_MAX_P = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_D = 5000.0f;
 static constexpr float AUTOROTATION_PID_MAX_OUTPUT = 5500.0f;
@@ -165,12 +167,11 @@ static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
 static constexpr float CHASSIS_SPEED_DIVSOR_SPRINT = 8;
 
 // hardware constants, not specific to any particular chassis
-// static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR4;
-// static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
-// static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR2;
-// static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
-// static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
-// static constexpr tap::can::CanBus CAN_BUS_ARM_ENCODERS = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR4;
+static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
 }  // namespace aruwsrc::control::chassis
 
