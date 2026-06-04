@@ -36,23 +36,46 @@ CapBankSubsystem::CapBankSubsystem(
 
 void CapBankSubsystem::refresh()
 {
-    if (this->messageTimer.execute())
+    if (!this->messageTimer.execute())
     {
-        messageTimer.restart(20);
+        return;
+    }
+    messageTimer.restart(20);
 
-        if (!this->enabled() && !this->capacitorBank.isDisabled())
+    using Mode = communication::can::cap_bank::Mode;
+
+    // A requested safety discharge takes priority and latches until the bank reports it
+    // has finished (returned to STANDBY). While latched we keep commanding the discharge.
+    if (this->safetyDischargeRequested)
+    {
+        if (this->capacitorBank.getMode() == Mode::STANDBY)
         {
-            this->capacitorBank.setSprinting(communication::can::cap_bank::SprintMode::NO_SPRINT);
-            this->capacitorBank.stop();
-        }
-        else if (this->enabled() && !this->capacitorBank.isEnabled())
-        {
-            this->capacitorBank.start();
+            this->safetyDischargeRequested = false;
         }
         else
         {
-            this->capacitorBank.ping();
+            this->capacitorBank.setMode(Mode::SAFETY_DISCHARGE);
+            return;
         }
     }
+
+    // Otherwise publish the desired mode derived purely from the MCB's own intent. setMode()
+    // is idempotent and doubles as the bank's heartbeat, so we send it every tick.
+    Mode desired;
+    if (!this->capacitorsEnabled)
+    {
+        this->capacitorBank.setSprinting(communication::can::cap_bank::SprintMode::NO_SPRINT);
+        desired = Mode::STANDBY;
+    }
+    else if (this->capacitorBank.isSprinting())
+    {
+        desired = Mode::BOOST;
+    }
+    else
+    {
+        desired = Mode::CHARGE_ONLY;
+    }
+
+    this->capacitorBank.setMode(desired);
 }
 }  // namespace aruwsrc::control::cap_bank

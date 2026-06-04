@@ -44,25 +44,15 @@ TEST_F(CapBankTests, initalize_connects_to_can)
     capBank.initialize();
 }
 
-TEST_F(CapBankTests, start_sends_message)
+TEST_F(CapBankTests, set_mode_sends_message_with_opcode_and_mode_byte)
 {
-    EXPECT_CALL(drivers.can, sendMessage).Times(1);
+    modm::can::Message sent;
+    EXPECT_CALL(drivers.can, sendMessage).WillOnce(DoAll(SaveArg<1>(&sent), Return(true)));
 
-    capBank.start();
-}
+    capBank.setMode(Mode::BOOST);
 
-TEST_F(CapBankTests, stop_sends_message)
-{
-    EXPECT_CALL(drivers.can, sendMessage).Times(1);
-
-    capBank.stop();
-}
-
-TEST_F(CapBankTests, ping_sends_message)
-{
-    EXPECT_CALL(drivers.can, sendMessage).Times(1);
-
-    capBank.ping();
+    EXPECT_EQ(static_cast<uint8_t>(MessageType::SET_MODE), sent.data[0]);
+    EXPECT_EQ(static_cast<uint8_t>(Mode::BOOST), sent.data[1]);
 }
 
 TEST_F(CapBankTests, status_is_received)
@@ -70,14 +60,14 @@ TEST_F(CapBankTests, status_is_received)
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = State::RESET;
+    message.data[1] = Mode::STANDBY;
     memset(message.data + 2, 0, 6);
 
-    EXPECT_NE(capBank.getState(), State::RESET);
+    EXPECT_NE(capBank.getMode(), Mode::STANDBY);
 
     capBank.processMessage(message);
 
-    EXPECT_EQ(capBank.getState(), State::RESET);
+    EXPECT_EQ(capBank.getMode(), Mode::STANDBY);
 }
 
 TEST_F(CapBankTests, when_receiving_status_do_not_update_power_when_no_ref)
@@ -85,7 +75,7 @@ TEST_F(CapBankTests, when_receiving_status_do_not_update_power_when_no_ref)
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = State::RESET;
+    message.data[1] = Mode::STANDBY;
     memset(message.data + 2, 0, 6);
 
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(false));
@@ -105,7 +95,7 @@ TEST_F(CapBankTests, when_receiving_status_update_power_when_ref)
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = State::RESET;
+    message.data[1] = Mode::STANDBY;
     memset(message.data + 2, 0, 6);
 
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(true));
@@ -125,7 +115,7 @@ TEST_F(CapBankTests, capbank_goes_offline_when_heartbeat_expires)
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = State::RESET;
+    message.data[1] = Mode::STANDBY;
     memset(message.data + 2, 0, 6);
 
     capBank.processMessage(message);
@@ -141,7 +131,7 @@ TEST_F(CapBankTests, heartbeat_is_reset_when_receiving_status)
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = State::RESET;
+    message.data[1] = Mode::STANDBY;
     memset(message.data + 2, 0, 6);
 
     capBank.processMessage(message);

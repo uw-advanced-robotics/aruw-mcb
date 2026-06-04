@@ -38,7 +38,9 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
     switch (static_cast<MessageType>(message.data[0]))
     {
         case MessageType::STATUS:  // Update message
-            this->state = static_cast<State>(message.data[1]);
+            // data[1] = Mode, data[2:3] = current (mA, int16 LE), data[4:5] = voltage (mV,
+            // uint16 LE), data[6] = power limit (W), data[7] = reserved (faults).
+            this->mode = static_cast<Mode>(message.data[1]);
             this->current =
                 *reinterpret_cast<int16_t*>(const_cast<uint8_t*>(&message.data[2])) / 1000.0;
             this->voltage =
@@ -73,27 +75,12 @@ void CapacitorBank::initialize()
     this->heartbeat.restart(0);
 }
 
-void CapacitorBank::start() const
+void CapacitorBank::setMode(Mode mode) const
 {
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
-    message.data[0] = MessageType::START;
-    this->drivers->can.sendMessage(this->canBus, message);
-}
-
-void CapacitorBank::stop() const
-{
-    modm::can::Message message(CAP_BANK_CAN_ID, 8);
-    message.setExtended(false);
-    message.data[0] = MessageType::STOP;
-    this->drivers->can.sendMessage(this->canBus, message);
-}
-
-void CapacitorBank::ping() const
-{
-    modm::can::Message message(CAP_BANK_CAN_ID, 8);
-    message.setExtended(false);
-    message.data[0] = MessageType::PING;
+    message.data[0] = MessageType::SET_MODE;
+    message.data[1] = static_cast<uint8_t>(mode);
     this->drivers->can.sendMessage(this->canBus, message);
 }
 

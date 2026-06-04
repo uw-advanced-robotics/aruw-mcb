@@ -37,7 +37,7 @@ CapBankIndicator::CapBankIndicator(
 
 modm::ResumableResult<void> CapBankIndicator::sendInitialGraphics()
 {
-    this->previousState = communication::can::cap_bank::State::UNKNOWN;
+    this->previousMode = communication::can::cap_bank::Mode::UNKNOWN;
     this->previousColor = Tx::GraphicColor::BLACK;
     voltageUpdateTimer.restart(500);
 
@@ -55,7 +55,7 @@ modm::ResumableResult<void> CapBankIndicator::update()
 {
     const int BOTTOM = CAP_CENTER_Y - BOX_HEIGHT / 2;
     float voltage_squared = 0;
-    communication::can::cap_bank::State state = communication::can::cap_bank::UNKNOWN;
+    communication::can::cap_bank::Mode mode = communication::can::cap_bank::Mode::UNKNOWN;
 
     RF_BEGIN(1);
 
@@ -104,43 +104,28 @@ modm::ResumableResult<void> CapBankIndicator::update()
                                                                : Tx::GraphicColor::GREEN);
 
             // Update the background status
-            state = capBank->getState();
-            switch (state)
+            mode = capBank->getMode();
+            switch (mode)
             {
-                case communication::can::cap_bank::State::RESET:
-                    strncpy(capBankTextGraphic.msg, "RST ", 5);
+                case communication::can::cap_bank::Mode::STANDBY:
+                    strncpy(capBankTextGraphic.msg, "OFF ", 5);
                     capBankBackgroundLine.graphicData.color =
-                        static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
+                        static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
                     break;
-                case communication::can::cap_bank::State::SAFE:
-                    strncpy(capBankTextGraphic.msg, "SAFE", 5);
-                    capBankBackgroundLine.graphicData.color =
-                        static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
-                    break;
-                case communication::can::cap_bank::State::CHARGE:
+                case communication::can::cap_bank::Mode::CHARGE_ONLY:
                     strncpy(capBankTextGraphic.msg, "CHRG", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::WHITE);
                     break;
-                case communication::can::cap_bank::State::CHARGE_DISCHARGE:
-                    strncpy(capBankTextGraphic.msg, "CHDS", 5);
+                case communication::can::cap_bank::Mode::BOOST:
+                    strncpy(capBankTextGraphic.msg, "BOST", 5);
                     capBankBackgroundLine.graphicData.color =
-                        static_cast<uint8_t>(Tx::GraphicColor::WHITE);
+                        static_cast<uint8_t>(Tx::GraphicColor::GREEN);
                     break;
-                case communication::can::cap_bank::State::DISCHARGE:
-                    strncpy(capBankTextGraphic.msg, "DSCH", 5);
+                case communication::can::cap_bank::Mode::SAFETY_DISCHARGE:
+                    strncpy(capBankTextGraphic.msg, "SDIS", 5);
                     capBankBackgroundLine.graphicData.color =
-                        static_cast<uint8_t>(Tx::GraphicColor::WHITE);
-                    break;
-                case communication::can::cap_bank::State::BATTERY_OFF:
-                    strncpy(capBankTextGraphic.msg, "BOFF", 5);
-                    capBankBackgroundLine.graphicData.color =
-                        static_cast<uint8_t>(Tx::GraphicColor::CYAN);
-                    break;
-                case communication::can::cap_bank::State::DISABLED:
-                    strncpy(capBankTextGraphic.msg, "OFF ", 5);
-                    capBankBackgroundLine.graphicData.color =
-                        static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
+                        static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
                     break;
                 default:
                     strncpy(capBankTextGraphic.msg, "UNK ", 5);
@@ -152,9 +137,9 @@ modm::ResumableResult<void> CapBankIndicator::update()
             capBankTextGraphic.graphicData.endAngle = 5;  // Sets the length of the string
 
             // Send data
-            if (state != this->previousState)
+            if (mode != this->previousMode)
             {
-                this->previousState = state;
+                this->previousMode = mode;
                 RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
             }
             if (capBankBackgroundLine.graphicData.color !=

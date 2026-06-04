@@ -54,8 +54,14 @@ public:
 
     void refreshSafeDisconnect() override
     {
+        // Safe disconnect is a continuous state: the scheduler calls refreshSafeDisconnect()
+        // INSTEAD of refresh() while disconnected, so command the discharge here directly
+        // rather than deferring to refresh(). The latch flag keeps the discharge going if
+        // normal operation resumes before the bank has finished bleeding down.
         this->disableCapacitors();
-        this->capacitorBank.stop();
+        this->safetyDischargeRequested = true;
+        this->capacitorBank.setMode(
+            aruwsrc::communication::can::cap_bank::Mode::SAFETY_DISCHARGE);
     }
 
     void refresh() override;
@@ -72,6 +78,9 @@ private:
     communication::can::cap_bank::CapacitorBank& capacitorBank;
 
     bool capacitorsEnabled;
+
+    /// Set when a safety discharge is requested; cleared once the bank reports STANDBY.
+    bool safetyDischargeRequested = false;
 
     tap::arch::MilliTimeout messageTimer;
 

@@ -83,9 +83,12 @@ float CapBankPowerLimiter::getPowerLimitRatio()
     }
 
     float fallback = this->fallback.getPowerLimitRatio();
+    // Fall back to the plain limiter whenever the bank is offline or idle (STANDBY). In the
+    // new protocol STANDBY subsumes the old SAFE "online but idle" state, so isDisabled()
+    // covers both. The cap-assisted control below only runs when the bank is in an active
+    // mode (CHARGE_ONLY / BOOST / SAFETY_DISCHARGE).
     if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline() ||
-        this->capacitorBank->isDisabled() ||
-        this->capacitorBank->getState() == communication::can::cap_bank::State::SAFE)
+        this->capacitorBank->isDisabled())
     {
         return fallback;
     }

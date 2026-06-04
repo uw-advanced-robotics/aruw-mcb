@@ -102,7 +102,7 @@ private:
      */
     Tx::GraphicCharacterMessage capBankTextGraphic;
 
-    communication::can::cap_bank::State previousState;
+    communication::can::cap_bank::Mode previousMode;
 };
 }  // namespace aruwsrc::control::client_display::indicators
 

@@ -39,11 +39,7 @@ public:
 
     MOCK_METHOD(void, initialize, (), (override));
 
-    MOCK_METHOD(void, start, (), (const override));
-
-    MOCK_METHOD(void, stop, (), (const override));
-
-    MOCK_METHOD(void, ping, (), (const override));
+    MOCK_METHOD(void, setMode, (Mode mode), (const override));
 
     MOCK_METHOD(void, setPowerLimit, (uint16_t watts), (override));
 };  // class CapacitorBankMock

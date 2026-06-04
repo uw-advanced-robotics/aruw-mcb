@@ -38,23 +38,27 @@ static constexpr uint16_t CAP_BANK_CAN_ID = 0x1EC;
 
 enum MessageType
 {
-    START = 0x01,
-    STOP = 0x02,
-    STATUS = 0x04,
-    SET_CHARGE_SPEED = 0x08,
-    PING = 0x10,
+    SET_MODE = 0x01,          // MCB -> bank: data[1] holds the desired Mode (0..3)
+    STATUS = 0x04,            // bank -> MCB: telemetry, see processMessage()
+    SET_CHARGE_SPEED = 0x08,  // MCB -> bank: data[2:3] charge power upper bound (watts, u16 LE)
 };
 
-enum State
+/**
+ * Operating mode commanded to / reported by the capacitor bank.
+ *
+ * In the new protocol the bank owns all charge/discharge decision-making. The MCB only
+ * publishes a desired Mode (via setMode()) and consumes the Mode reported in STATUS.
+ *
+ * The wire values 0..3 must stay in sync with the cap bank firmware. UNKNOWN is an
+ * MCB-only sentinel meaning "no STATUS received yet"; it is never sent on the bus.
+ */
+enum Mode
 {
     UNKNOWN = -1,
-    RESET = 0,
-    SAFE = 1,
-    CHARGE = 2,
-    CHARGE_DISCHARGE = 3,
-    DISCHARGE = 4,
-    BATTERY_OFF = 5,
-    DISABLED = 6,
+    STANDBY = 0,           // off: no charging, no discharging
+    CHARGE_ONLY = 1,       // charging from the battery; does not supply the chassis
+    BOOST = 2,             // discharging into the chassis to supplement battery power
+    SAFETY_DISCHARGE = 3,  // actively bleeding stored energy (bank latches this until ~0V)
 };
 
 enum SprintMode
@@ -88,9 +92,7 @@ public:
 
     mockable void initialize();
 
-    mockable void start() const;
-    mockable void stop() const;
-    mockable void ping() const;
+    mockable void setMode(Mode mode) const;
     mockable void setPowerLimit(uint16_t watts);
 
 public:
@@ -98,23 +100,20 @@ public:
     float getCurrent() const { return this->current; };
     float getVoltage() const { return this->voltage; };
     int getPowerLimit() const { return this->powerLimit; };
-    State getState() const { return this->state; };
+    Mode getMode() const { return this->mode; };
 
     bool isEnabled() const
     {
-        return this->getState() == State::SAFE || this->getState() == State::CHARGE ||
-               this->getState() == State::CHARGE_DISCHARGE ||
-               this->getState() == State::DISCHARGE || this->getState() == State::BATTERY_OFF;
+        const Mode mode = this->getMode();
+        return mode == Mode::CHARGE_ONLY || mode == Mode::BOOST ||
+               mode == Mode::SAFETY_DISCHARGE;
     }
 
-    bool isDisabled() const
-    {
-        return this->getState() == State::RESET || this->getState() == State::DISABLED;
-    }
+    bool isDisabled() const { return this->getMode() == Mode::STANDBY; }
 
     bool isOnline() const
     {
-        return !(this->getState() == State::UNKNOWN || this->heartbeat.isExpired());
+        return !(this->getMode() == Mode::UNKNOWN || this->heartbeat.isExpired());
     }
 
     void setSprinting(SprintMode sprint) { this->sprint = sprint; };
@@ -132,7 +131,7 @@ private:
     float availableEnergy = 0;
     float current = 0;
     float voltage = 0;
-    State state = State::UNKNOWN;
+    Mode mode = Mode::UNKNOWN;
 
     SprintMode sprint = SprintMode::NO_SPRINT;
 

@@ -62,7 +62,7 @@ private:
     communication::can::cap_bank::CapacitorBank* capacitorBank;
 
     int milliVolts = 0, milliAmps = 0, powerLimit = 0, availableEnergy = 0;
-    communication::can::cap_bank::State state;
+    communication::can::cap_bank::Mode mode;
 
     bool changed;
 
