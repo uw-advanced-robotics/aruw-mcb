@@ -27,6 +27,25 @@ using namespace testing;
 
 using namespace aruwsrc::communication::can::cap_bank;
 
+namespace
+{
+class FakeCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
+{
+public:
+    float currentMa = 0;
+    float getCurrentMa() const override { return currentMa; }
+    void update() override {}
+};
+
+class FakeVoltageSensor : public tap::communication::sensors::voltage::VoltageSensorInterface
+{
+public:
+    float voltageMv = 0;
+    float getVoltageMv() const override { return voltageMv; }
+    void update() override {}
+};
+}  // namespace
+
 class CapBankTests : public Test
 {
 public:
@@ -44,70 +63,88 @@ TEST_F(CapBankTests, initalize_connects_to_can)
     capBank.initialize();
 }
 
-TEST_F(CapBankTests, set_mode_sends_message_with_opcode_and_mode_byte)
+TEST_F(CapBankTests, status_v2_is_parsed)
 {
-    modm::can::Message sent;
-    EXPECT_CALL(drivers.can, sendMessage).WillOnce(DoAll(SaveArg<1>(&sent), Return(true)));
-
-    capBank.setMode(Mode::BOOST);
-
-    EXPECT_EQ(static_cast<uint8_t>(MessageType::SET_MODE), sent.data[0]);
-    EXPECT_EQ(static_cast<uint8_t>(Mode::BOOST), sent.data[1]);
-}
-
-TEST_F(CapBankTests, status_is_received)
-{
+    // state=Regulating(2), current=1500mA (0x05DC LE), voltage=12000mV (0x2EE0 LE),
+    // energy=42%, available raw 10 -> 10 * 4 = 40 W.
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = Mode::STANDBY;
-    memset(message.data + 2, 0, 6);
-
-    EXPECT_NE(capBank.getMode(), Mode::STANDBY);
+    message.data[1] = State::REGULATING;
+    message.data[2] = 0xDC;
+    message.data[3] = 0x05;
+    message.data[4] = 0xE0;
+    message.data[5] = 0x2E;
+    message.data[6] = 42;
+    message.data[7] = 10;
 
     capBank.processMessage(message);
 
-    EXPECT_EQ(capBank.getMode(), Mode::STANDBY);
+    EXPECT_EQ(State::REGULATING, capBank.getState());
+    EXPECT_NEAR(1.5f, capBank.getCurrent(), 1e-3);
+    EXPECT_NEAR(12.0f, capBank.getVoltage(), 1e-3);
+    EXPECT_EQ(42, capBank.getEnergyPercent());
+    EXPECT_EQ(40, capBank.getAvailableSupplyPower());
 }
 
-TEST_F(CapBankTests, when_receiving_status_do_not_update_power_when_no_ref)
+TEST_F(CapBankTests, status_does_not_transmit)
 {
+    // In v2 the MCB does not reply to STATUS; processMessage only parses telemetry.
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = Mode::STANDBY;
-    memset(message.data + 2, 0, 6);
-
-    EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(false));
-
-    tap::communication::serial::RefSerial::Rx::RobotData robotData;
-    EXPECT_CALL(drivers.refSerial, getRobotData).Times(0);
-
-    robotData.chassis.powerConsumptionLimit = 100;
+    memset(message.data + 1, 0, 7);
 
     EXPECT_CALL(drivers.can, sendMessage).Times(0);
 
     capBank.processMessage(message);
 }
 
-TEST_F(CapBankTests, when_receiving_status_update_power_when_ref)
+TEST_F(CapBankTests, send_cascade_command_packs_mode_bus_and_limits)
 {
-    modm::can::Message message(CAP_BANK_CAN_ID, 8);
-    message.setExtended(false);
-    message.data[0] = MessageType::STATUS;
-    message.data[1] = Mode::STANDBY;
-    memset(message.data + 2, 0, 6);
+    FakeCurrentSensor currentSensor;
+    FakeVoltageSensor voltageSensor;
+    currentSensor.currentMa = 1000;   // 0x03E8 LE
+    voltageSensor.voltageMv = 24000;  // 0x5DC0 LE
+    capBank.setChassisSensors(&currentSensor, &voltageSensor);
 
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(true));
-
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
+    robotData.chassis.powerConsumptionLimit = 80;  // 80 W / 4 = 20
     EXPECT_CALL(drivers.refSerial, getRobotData).WillRepeatedly(ReturnRef(robotData));
 
-    robotData.chassis.powerConsumptionLimit = 100;
+    modm::can::Message sent;
+    EXPECT_CALL(drivers.can, sendMessage).WillOnce(DoAll(SaveArg<1>(&sent), Return(true)));
 
-    EXPECT_CALL(drivers.can, sendMessage);
+    capBank.sendCascadeCommand(CapCommandMode::CHARGE);
 
-    capBank.processMessage(message);
+    EXPECT_EQ(static_cast<uint8_t>(MessageType::CASCADE_COMMAND), sent.data[0]);
+    EXPECT_EQ(static_cast<uint8_t>(CapCommandMode::CHARGE), sent.data[1]);
+    EXPECT_EQ(0xE8, sent.data[2]);  // I_bus 1000 mA, low
+    EXPECT_EQ(0x03, sent.data[3]);  // I_bus high
+    EXPECT_EQ(0xC0, sent.data[4]);  // V_bus 24000 mV, low
+    EXPECT_EQ(0x5D, sent.data[5]);  // V_bus high
+    EXPECT_EQ(20, sent.data[6]);    // ref_limit 80 W / 4
+    EXPECT_EQ(20, sent.data[7]);    // P_target mirrors ref_limit (placeholder)
+}
+
+TEST_F(CapBankTests, send_cascade_command_zeros_without_sensors_or_ref)
+{
+    EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(false));
+
+    modm::can::Message sent;
+    EXPECT_CALL(drivers.can, sendMessage).WillOnce(DoAll(SaveArg<1>(&sent), Return(true)));
+
+    capBank.sendCascadeCommand(CapCommandMode::OFF);
+
+    EXPECT_EQ(static_cast<uint8_t>(MessageType::CASCADE_COMMAND), sent.data[0]);
+    EXPECT_EQ(static_cast<uint8_t>(CapCommandMode::OFF), sent.data[1]);
+    EXPECT_EQ(0, sent.data[2]);
+    EXPECT_EQ(0, sent.data[3]);
+    EXPECT_EQ(0, sent.data[4]);
+    EXPECT_EQ(0, sent.data[5]);
+    EXPECT_EQ(0, sent.data[6]);
+    EXPECT_EQ(0, sent.data[7]);
 }
 
 TEST_F(CapBankTests, capbank_goes_offline_when_heartbeat_expires)
@@ -115,8 +152,7 @@ TEST_F(CapBankTests, capbank_goes_offline_when_heartbeat_expires)
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = Mode::STANDBY;
-    memset(message.data + 2, 0, 6);
+    memset(message.data + 1, 0, 7);
 
     capBank.processMessage(message);
     EXPECT_TRUE(capBank.isOnline());
@@ -131,8 +167,7 @@ TEST_F(CapBankTests, heartbeat_is_reset_when_receiving_status)
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = Mode::STANDBY;
-    memset(message.data + 2, 0, 6);
+    memset(message.data + 1, 0, 7);
 
     capBank.processMessage(message);
     EXPECT_TRUE(capBank.isOnline());

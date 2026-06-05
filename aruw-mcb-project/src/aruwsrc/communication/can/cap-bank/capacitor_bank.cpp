@@ -28,8 +28,7 @@ CapacitorBank::CapacitorBank(
     tap::can::CanBus canBus,
     const float capacitance)
     : tap::can::CanRxListener(drivers, CAP_BANK_CAN_ID, canBus),
-      capacitance(capacitance),
-      powerLimit(0)
+      capacitance(capacitance)
 {
 }
 
@@ -37,15 +36,17 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
 {
     switch (static_cast<MessageType>(message.data[0]))
     {
-        case MessageType::STATUS:  // Update message
-            // data[1] = Mode, data[2:3] = current (mA, int16 LE), data[4:5] = voltage (mV,
-            // uint16 LE), data[6] = power limit (W), data[7] = reserved (faults).
-            this->mode = static_cast<Mode>(message.data[1]);
+        case MessageType::STATUS:  // STATUS v2 (0x05)
+            // data[1] = State, data[2:3] = cap current (i16 LE, mA), data[4:5] = cap voltage
+            // (u16 LE, mV), data[6] = energy % (0..100), data[7] = available supply power (raw,
+            // watts = raw * CASCADE_POWER_WATT_SCALE).
+            this->state = static_cast<State>(message.data[1]);
             this->current =
                 *reinterpret_cast<int16_t*>(const_cast<uint8_t*>(&message.data[2])) / 1000.0;
             this->voltage =
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[4])) / 1000.0;
-            this->powerLimit = message.data[6];
+            this->energyPercent = message.data[6] > 100 ? 100 : message.data[6];
+            this->availableSupplyPower = message.data[7] * CASCADE_POWER_WATT_SCALE;
             this->availableEnergy = tap::algorithms::limitVal(
                 1.0 / 2.0 * this->capacitance *
                     (powf(this->voltage, 2) - powf(CAPACITOR_BANK_MIN_VOLTAGE, 2)),
@@ -55,17 +56,8 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
             this->heartbeat.restart(80);
             break;
         default:
-            // Ignore unknown message IDs
+            // Ignore unknown / legacy message tags.
             break;
-    }
-
-    if (drivers->refSerial.getRefSerialReceivingData())
-    {
-        uint16_t powerLimit = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
-        if (powerLimit != this->powerLimit)
-        {
-            this->setPowerLimit(powerLimit);
-        }
     }
 }
 
@@ -75,22 +67,43 @@ void CapacitorBank::initialize()
     this->heartbeat.restart(0);
 }
 
-void CapacitorBank::setMode(Mode mode) const
+uint8_t CapacitorBank::packWatts(uint16_t watts)
 {
-    modm::can::Message message(CAP_BANK_CAN_ID, 8);
-    message.setExtended(false);
-    message.data[0] = MessageType::SET_MODE;
-    message.data[1] = static_cast<uint8_t>(mode);
-    this->drivers->can.sendMessage(this->canBus, message);
+    uint16_t raw = watts / CASCADE_POWER_WATT_SCALE;
+    return static_cast<uint8_t>(raw > 255 ? 255 : raw);
 }
 
-void CapacitorBank::setPowerLimit(uint16_t watts)
+void CapacitorBank::sendCascadeCommand(CapCommandMode mode) const
 {
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
-    message.data[0] = MessageType::SET_CHARGE_SPEED;
-    message.data[2] = watts;
-    message.data[3] = watts >> 8;  // Should always be zero or we are drawing 250+ watts.
+    message.data[0] = MessageType::CASCADE_COMMAND;
+    message.data[1] = static_cast<uint8_t>(mode);
+
+    // I_bus / V_bus: the MCB's measured chassis bus current and voltage, relayed so the cap can
+    // size its own charge/discharge power. Sign of I_bus follows the sensor (see interface notes).
+    int16_t iBus = this->chassisCurrentSensor != nullptr
+                       ? static_cast<int16_t>(this->chassisCurrentSensor->getCurrentMa())
+                       : 0;
+    uint16_t vBus = this->chassisVoltageSensor != nullptr
+                        ? static_cast<uint16_t>(this->chassisVoltageSensor->getVoltageMv())
+                        : 0;
+    message.data[2] = static_cast<uint8_t>(iBus);
+    message.data[3] = static_cast<uint8_t>(iBus >> 8);
+    message.data[4] = static_cast<uint8_t>(vBus);
+    message.data[5] = static_cast<uint8_t>(vBus >> 8);
+
+    uint16_t refWatts = 0;
+    if (this->drivers->refSerial.getRefSerialReceivingData())
+    {
+        refWatts = this->drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+    }
+    const uint8_t refPacked = packWatts(refWatts);
+    message.data[6] = refPacked;  // ref_limit (charge ceiling / discharge regen ceiling)
+    // P_target (byte 7) is derived by the cap firmware from its own current plus the relayed
+    // I_bus/V_bus, so the MCB does not run the outer loop; mirror ref_limit as a safe placeholder.
+    message.data[7] = refPacked;
+
     this->drivers->can.sendMessage(this->canBus, message);
 }
 

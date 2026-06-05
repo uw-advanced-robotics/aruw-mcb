@@ -55,35 +55,34 @@ TEST_F(CapBankSubsystemTests, constructor_sets_sprint_to_no_sprint)
     EXPECT_FALSE(capBank.isSprinting());
 }
 
-TEST_F(CapBankSubsystemTests, safe_disconnect_requests_discharge_and_disables)
+TEST_F(CapBankSubsystemTests, safe_disconnect_commands_off_and_disables)
 {
     CapBankSubsystem dut(&drivers, capBank);
     dut.enableCapacitors();
 
-    EXPECT_CALL(capBank, setMode(Mode::SAFETY_DISCHARGE));
+    EXPECT_CALL(capBank, sendCascadeCommand(CapCommandMode::OFF));
 
     dut.refreshSafeDisconnect();
 
     EXPECT_FALSE(dut.enabled());
 }
 
-TEST_F(CapBankSubsystemTests, no_cap_message_when_message_timer_does_not_increase)
+TEST_F(CapBankSubsystemTests, no_command_when_message_timer_does_not_increase)
 {
     CapBankSubsystem dut(&drivers, capBank);
 
-    EXPECT_CALL(capBank, setMode(_)).Times(0);
+    EXPECT_CALL(capBank, sendCascadeCommand(_)).Times(0);
 
     dut.refresh();
     dut.refresh();
 }
 
-TEST_F(CapBankSubsystemTests, commands_standby_when_disabled)
+TEST_F(CapBankSubsystemTests, commands_off_when_disabled)
 {
     CapBankSubsystem dut(&drivers, capBank);
     dut.disableCapacitors();
-    capBank.mode = Mode::STANDBY;
 
-    EXPECT_CALL(capBank, setMode(Mode::STANDBY)).Times(2);
+    EXPECT_CALL(capBank, sendCascadeCommand(CapCommandMode::OFF)).Times(2);
 
     clock.time = 21;
     dut.refresh();
@@ -91,49 +90,27 @@ TEST_F(CapBankSubsystemTests, commands_standby_when_disabled)
     dut.refresh();
 }
 
-TEST_F(CapBankSubsystemTests, commands_charge_only_when_enabled_and_not_sprinting)
+TEST_F(CapBankSubsystemTests, commands_charge_when_enabled_and_not_sprinting)
 {
     CapBankSubsystem dut(&drivers, capBank);
     dut.enableCapacitors();
     capBank.setSprinting(SprintMode::NO_SPRINT);
-    capBank.mode = Mode::STANDBY;
 
-    EXPECT_CALL(capBank, setMode(Mode::CHARGE_ONLY)).Times(1);
+    EXPECT_CALL(capBank, sendCascadeCommand(CapCommandMode::CHARGE)).Times(1);
 
     clock.time = 21;
     dut.refresh();
 }
 
-TEST_F(CapBankSubsystemTests, commands_boost_when_enabled_and_sprinting)
+TEST_F(CapBankSubsystemTests, commands_discharge_when_enabled_and_sprinting)
 {
     CapBankSubsystem dut(&drivers, capBank);
     dut.enableCapacitors();
     capBank.setSprinting(SprintMode::SPRINT);
-    capBank.mode = Mode::CHARGE_ONLY;
 
-    EXPECT_CALL(capBank, setMode(Mode::BOOST)).Times(1);
+    EXPECT_CALL(capBank, sendCascadeCommand(CapCommandMode::DISCHARGE)).Times(1);
 
     clock.time = 21;
-    dut.refresh();
-}
-
-TEST_F(CapBankSubsystemTests, safety_discharge_latches_until_bank_returns_to_standby)
-{
-    CapBankSubsystem dut(&drivers, capBank);
-    capBank.mode = Mode::BOOST;  // bank currently active
-
-    dut.refreshSafeDisconnect();  // requests a safety discharge (commands it once directly)
-
-    // While the bank has not yet reached STANDBY, refresh keeps commanding the discharge.
-    EXPECT_CALL(capBank, setMode(Mode::SAFETY_DISCHARGE)).Times(1);
-    clock.time = 21;
-    dut.refresh();
-    Mock::VerifyAndClearExpectations(&capBank);
-
-    // Once the bank reports STANDBY the latch clears; disabled => STANDBY is commanded.
-    capBank.mode = Mode::STANDBY;
-    EXPECT_CALL(capBank, setMode(Mode::STANDBY)).Times(1);
-    clock.time = 42;
     dut.refresh();
 }
 
@@ -141,10 +118,9 @@ TEST_F(CapBankSubsystemTests, sprint_is_reset_when_disabled)
 {
     CapBankSubsystem dut(&drivers, capBank);
     dut.disableCapacitors();
-    capBank.mode = Mode::STANDBY;
     capBank.setSprinting(SprintMode::SPRINT);
 
-    EXPECT_CALL(capBank, setMode(Mode::STANDBY)).Times(1);
+    EXPECT_CALL(capBank, sendCascadeCommand(CapCommandMode::OFF)).Times(1);
 
     clock.time = 21;
     dut.refresh();

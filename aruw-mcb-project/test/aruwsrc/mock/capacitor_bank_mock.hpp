@@ -39,9 +39,7 @@ public:
 
     MOCK_METHOD(void, initialize, (), (override));
 
-    MOCK_METHOD(void, setMode, (Mode mode), (const override));
-
-    MOCK_METHOD(void, setPowerLimit, (uint16_t watts), (override));
+    MOCK_METHOD(void, sendCascadeCommand, (CapCommandMode mode), (const override));
 };  // class CapacitorBankMock
 }  // namespace aruwsrc::mock
 

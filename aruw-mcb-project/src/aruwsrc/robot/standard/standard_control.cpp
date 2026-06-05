@@ -785,6 +785,7 @@ void initializeSubsystems()
 {
     turret.initialize();
     voltageCurrentSensor.initialize();
+    drivers()->capacitorBank.setChassisSensors(&voltageCurrentSensor, &voltageCurrentSensor);
     chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();

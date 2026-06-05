@@ -818,6 +818,7 @@ void initializeSubsystems()
 {
     chassis.initialize();
     voltageCurrentSensor.initialize();
+    drivers()->capacitorBank.setChassisSensors(&voltageCurrentSensor, &voltageCurrentSensor);
     frictionWheelSubsystem.initialize();
     odometrySubsystem.initialize();
     clientDisplay.initialize();

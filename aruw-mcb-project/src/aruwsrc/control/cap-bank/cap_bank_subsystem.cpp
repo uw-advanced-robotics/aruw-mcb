@@ -42,40 +42,25 @@ void CapBankSubsystem::refresh()
     }
     messageTimer.restart(20);
 
-    using Mode = communication::can::cap_bank::Mode;
+    using communication::can::cap_bank::CapCommandMode;
 
-    // A requested safety discharge takes priority and latches until the bank reports it
-    // has finished (returned to STANDBY). While latched we keep commanding the discharge.
-    if (this->safetyDischargeRequested)
-    {
-        if (this->capacitorBank.getMode() == Mode::STANDBY)
-        {
-            this->safetyDischargeRequested = false;
-        }
-        else
-        {
-            this->capacitorBank.setMode(Mode::SAFETY_DISCHARGE);
-            return;
-        }
-    }
-
-    // Otherwise publish the desired mode derived purely from the MCB's own intent. setMode()
-    // is idempotent and doubles as the bank's heartbeat, so we send it every tick.
-    Mode desired;
+    // The MCB only relays intent: a mode (from enable/sprint) plus, inside sendCascadeCommand(), the
+    // measured bus current/voltage and the referee power limit. The cap firmware does the control.
+    CapCommandMode mode;
     if (!this->capacitorsEnabled)
     {
         this->capacitorBank.setSprinting(communication::can::cap_bank::SprintMode::NO_SPRINT);
-        desired = Mode::STANDBY;
+        mode = CapCommandMode::OFF;
     }
     else if (this->capacitorBank.isSprinting())
     {
-        desired = Mode::BOOST;
+        mode = CapCommandMode::DISCHARGE;
     }
     else
     {
-        desired = Mode::CHARGE_ONLY;
+        mode = CapCommandMode::CHARGE;
     }
 
-    this->capacitorBank.setMode(desired);
+    this->capacitorBank.sendCascadeCommand(mode);
 }
 }  // namespace aruwsrc::control::cap_bank

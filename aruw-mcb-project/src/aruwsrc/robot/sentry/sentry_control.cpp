@@ -779,6 +779,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
+    drivers()->capacitorBank.setChassisSensors(&voltageCurrentSensor, &voltageCurrentSensor);
     buzzer.initialize();
     chassis.initialize();
     turretWidow.initialize();

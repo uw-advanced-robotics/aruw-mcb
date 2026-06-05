@@ -40,23 +40,26 @@ void CapacitorBankMenu::draw()
 
     display << "Cap Voltage: " << milliVolts << "mV" << modm::endl;
     display << "Output Current: " << milliAmps << "mA" << modm::endl;
-    display << "Max Charge Speed: " << powerLimit << "W" << modm::endl;
+    display << "Avail Power: " << powerLimit << "W" << modm::endl;
     display << "Available Energy: " << availableEnergy << "J" << modm::endl;
-    display << "Mode: ";
+    display << "State: ";
 
-    switch (this->mode)
+    switch (this->state)
     {
-        case communication::can::cap_bank::Mode::STANDBY:
-            display << "STANDBY";
+        case communication::can::cap_bank::State::RESET:
+            display << "RESET";
             break;
-        case communication::can::cap_bank::Mode::CHARGE_ONLY:
-            display << "CHARGE_ONLY";
+        case communication::can::cap_bank::State::SAFE:
+            display << "SAFE";
             break;
-        case communication::can::cap_bank::Mode::BOOST:
-            display << "BOOST";
+        case communication::can::cap_bank::State::REGULATING:
+            display << "REGULATING";
             break;
-        case communication::can::cap_bank::Mode::SAFETY_DISCHARGE:
-            display << "SAFETY_DISCHARGE";
+        case communication::can::cap_bank::State::BATTERY_OFF:
+            display << "BATTERY_OFF";
+            break;
+        case communication::can::cap_bank::State::FAILURE:
+            display << "FAILURE";
             break;
         default:
             display << "UNKNOWN";
@@ -69,13 +72,13 @@ void CapacitorBankMenu::update()
 {
     if (this->milliAmps != this->capacitorBank->getCurrent() * 1000 ||
         this->milliVolts != this->capacitorBank->getVoltage() * 1000 ||
-        this->mode != this->capacitorBank->getMode())
+        this->state != this->capacitorBank->getState())
     {
         this->milliAmps = this->capacitorBank->getCurrent() * 1000;
         this->milliVolts = this->capacitorBank->getVoltage() * 1000;
-        this->powerLimit = this->capacitorBank->getPowerLimit();
+        this->powerLimit = this->capacitorBank->getAvailableSupplyPower();
         this->availableEnergy = this->capacitorBank->getAvailableEnergy();
-        this->mode = this->capacitorBank->getMode();
+        this->state = this->capacitorBank->getState();
         this->changed = true;
     }
 }
