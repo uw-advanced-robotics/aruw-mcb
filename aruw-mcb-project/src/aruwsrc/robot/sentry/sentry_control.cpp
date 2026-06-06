@@ -42,6 +42,7 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
@@ -332,6 +333,10 @@ aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
     drivers(),
     drivers()->capacitorBank,
     voltageCurrentSensor);
+
+// Default command: keeps the cap bank enabled while the sentry is running (autonomous robot, no
+// operator toggle). Mode (CHARGE/DISCHARGE) then follows the sprint flag set by autoNavController.
+aruwsrc::control::cap_bank::SentryCapBankCommand sentryCapBankCommand(drivers(), capBankSubsystem);
 
 aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
@@ -782,6 +787,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
+    capBankSubsystem.initialize();
     buzzer.initialize();
     chassis.initialize();
     turretWidow.initialize();
@@ -814,6 +820,7 @@ void registerSentrySubsystems(Drivers *drivers)
 
     drivers->commandScheduler.registerSubsystem(&turretWidowFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretWidowAgitator);
+    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
@@ -833,6 +840,8 @@ void setDefaultSentryCommands(Drivers *)
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 
     buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
+
+    capBankSubsystem.setDefaultCommand(&sentryCapBankCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
