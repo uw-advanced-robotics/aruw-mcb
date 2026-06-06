@@ -55,7 +55,7 @@ public:
     void refreshSafeDisconnect() override
     {
         this->disableCapacitors();
-        this->capacitorBank.sendCascadeCommand(
+        this->capacitorBank.sendCapCommand(
             aruwsrc::communication::can::cap_bank::CapCommandMode::OFF);
     }
 

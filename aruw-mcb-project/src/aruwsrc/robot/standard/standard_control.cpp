@@ -604,10 +604,6 @@ aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
     drivers(),
     capBankSubsystem,
     aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(
-    drivers(),
-    capBankSubsystem,
-    aruwsrc::communication::can::cap_bank::SprintMode::HALF_SPRINT);
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -759,9 +755,6 @@ Trigger cShiftPressed = (TriggerHelpers::button(drivers(), Remote::Key::C) &&
 Trigger shiftPressed =
     TriggerHelpers::button(drivers(), Remote::Key::SHIFT).whileTrue(&capBankSprintCommand);
 
-Trigger ctrlPressed =
-    TriggerHelpers::button(drivers(), Remote::Key::CTRL).whileTrue(&capBankHalfSprintCommand);
-
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -785,7 +778,6 @@ void initializeSubsystems()
 {
     turret.initialize();
     voltageCurrentSensor.initialize();
-    drivers()->capacitorBank.setChassisSensors(&voltageCurrentSensor, &voltageCurrentSensor);
     chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();

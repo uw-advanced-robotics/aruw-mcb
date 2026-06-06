@@ -44,23 +44,33 @@ void CapBankSubsystem::refresh()
 
     using communication::can::cap_bank::CapCommandMode;
 
-    // The MCB only relays intent: a mode (from enable/sprint) plus, inside sendCascadeCommand(), the
-    // measured bus current/voltage and the referee power limit. The cap firmware does the control.
+    // MCB sends CAP_COMMAND: mode + referee ref_limit. Cap firmware does control.
     CapCommandMode mode;
     if (!this->capacitorsEnabled)
     {
         this->capacitorBank.setSprinting(communication::can::cap_bank::SprintMode::NO_SPRINT);
         mode = CapCommandMode::OFF;
     }
+    else if (!this->drivers->refSerial.getRefSerialReceivingData())
+    {
+        // No referee data → don't know the power budget. Hold caps at current
+        // voltage (no charge, no discharge) until the referee system connects.
+        mode = CapCommandMode::IDLE;
+    }
     else if (this->capacitorBank.isSprinting())
     {
         mode = CapCommandMode::DISCHARGE;
+    }
+    else if (this->capacitorBank.getEnergyPercent() >= 100)
+    {
+        // Caps fully charged — no point sending Charge; hold voltage.
+        mode = CapCommandMode::IDLE;
     }
     else
     {
         mode = CapCommandMode::CHARGE;
     }
 
-    this->capacitorBank.sendCascadeCommand(mode);
+    this->capacitorBank.sendCapCommand(mode);
 }
 }  // namespace aruwsrc::control::cap_bank

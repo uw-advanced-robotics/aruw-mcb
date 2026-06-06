@@ -93,13 +93,23 @@ public:
 
     static inline float getChassisPowerLimit(tap::Drivers* drivers)
     {
-        if (capacitorBank != nullptr && capacitorBank->isSprinting())
+        float refereeLimit = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+
+        if (capacitorBank != nullptr && capacitorBank->isSprinting() &&
+            capacitorBank->isOnline())
         {
-            return capacitorBank->getMaximumOutputCurrent() *
-                   communication::can::cap_bank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
+            // During sprint the motors may draw from BOTH the battery (up to
+            // refereeLimit) and the cap bank (up to availableSupplyPower).
+            // Total power budget = battery contribution + cap contribution.
+            // Gate on isOnline() so the ceiling drops to refereeLimit if the
+            // cap bank crashes or disconnects mid-sprint — the Taproot
+            // PowerLimiter is the safety net, but no reason to keep the
+            // ceiling high with a dead cap bank.
+            return refereeLimit +
+                   static_cast<float>(capacitorBank->getAvailableSupplyPower());
         }
 
-        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+        return refereeLimit;
     }
 
     /**

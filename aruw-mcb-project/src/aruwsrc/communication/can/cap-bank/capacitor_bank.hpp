@@ -22,40 +22,38 @@
 
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
-#include "tap/communication/sensors/current/current_sensor_interface.hpp"
-#include "tap/communication/sensors/voltage/voltage_sensor_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/drivers.hpp"
 
 #include "modm/architecture/interface/can_message.hpp"
-#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::communication::can::cap_bank
 {
 static constexpr float CAPACITOR_BANK_OUTPUT_VOLTAGE = 24.0f;
 static constexpr float CAPACITOR_BANK_EFFICIENCY = 0.9f;
-static constexpr float CAPACITOR_BANK_MIN_VOLTAGE = 8.0f;
+/// Cap-bank firmware refuses to discharge below this voltage (CAP_DISCHARGE_STOP_V in main.rs).
+/// Used by availableEnergy = 0.5·C·(V² - V_min²) so MCB UI never reports unusable energy.
+static constexpr float CAPACITOR_BANK_MIN_VOLTAGE = 10.0f;
 
 static constexpr uint16_t CAP_BANK_CAN_ID = 0x1EC;
 
 /**
- * Power fields in the cascade protocol are packed into a single u8: watts = raw * scale.
- * MUST match CASCADE_POWER_WATT_SCALE in the cap bank firmware (can_messages.rs).
+ * Referee power limit packed in CAP_COMMAND byte 6: watts = raw * scale.
+ * MUST match CAP_POWER_WATT_SCALE in the cap bank firmware (can_messages.rs).
  */
-static constexpr uint16_t CASCADE_POWER_WATT_SCALE = 4;
+static constexpr uint16_t CAP_POWER_WATT_SCALE = 4;
 
 /**
- * Cascade protocol v2 message tags (CAP_BANK_CAN_ID, 8-byte classic frames). Only these two are
- * used; legacy tags (0x01..0x20) are gone.
+ * Cap bank protocol v2 message tags (CAP_BANK_CAN_ID, 8-byte classic frames).
  */
 enum MessageType
 {
-    STATUS = 0x05,           // CAP -> MCB: state + telemetry (see processMessage)
-    CASCADE_COMMAND = 0x28,  // MCB -> CAP: mode + bus current/voltage + power limits
+    STATUS = 0x05,      // CAP -> MCB: state + telemetry (see processMessage)
+    CAP_COMMAND = 0x28,  // MCB -> CAP: mode + referee ref_limit only
 };
 
 /**
- * Mode commanded to the cap bank in CASCADE_COMMAND byte 1. Wire values 0..3 must match the
+ * Mode commanded to the cap bank in CAP_COMMAND byte 1. Wire values 0..3 must match the
  * firmware's CapCommandMode.
  */
 enum CapCommandMode
@@ -83,24 +81,8 @@ enum State
 enum SprintMode
 {
     NO_SPRINT = 0,
-    HALF_SPRINT = 1,
-    SPRINT = 2
+    SPRINT = 1,
 };
-
-static constexpr modm::Pair<float, float> CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT[] = {
-    {7.0, 2.5},
-    {9.0, 4.0},
-    {11.0, 6.0},
-    {14.0, 7.0},
-    {17.0, 10.0},
-    {20.0, 12.0},
-    {23.0, 12.0},
-    {26.0, 12.0},
-    {29.0, 12.0}};
-
-static modm::interpolation::Linear<modm::Pair<float, float>> CAP_VOLTAGE_TO_MAX_OUT_CURRENT(
-    CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT,
-    MODM_ARRAY_SIZE(CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT));
 
 class CapacitorBank : public tap::can::CanRxListener
 {
@@ -112,23 +94,10 @@ public:
     mockable void initialize();
 
     /**
-     * Sends a CASCADE_COMMAND (0x28) for the given mode. Bus current/voltage are read from the
-     * chassis sensors (see setChassisSensors); the referee power limit is read from RefSerial.
+     * Sends CAP_COMMAND (0x28): byte 1 = mode, byte 6 = referee ref_limit (watts/4).
+     * Bytes 2-5 and 7 are zero. Cap bank reads battery I/V from CAN 0x1C5 directly.
      */
-    mockable void sendCascadeCommand(CapCommandMode mode) const;
-
-    /**
-     * Provide the MCB's chassis current/voltage sensor; these readings are relayed to the cap bank
-     * (as I_bus / V_bus) in every CASCADE_COMMAND so the cap can size its own power. Pass nullptr to
-     * relay zero.
-     */
-    void setChassisSensors(
-        tap::communication::sensors::current::CurrentSensorInterface* currentSensor,
-        tap::communication::sensors::voltage::VoltageSensorInterface* voltageSensor)
-    {
-        this->chassisCurrentSensor = currentSensor;
-        this->chassisVoltageSensor = voltageSensor;
-    }
+    mockable void sendCapCommand(CapCommandMode mode) const;
 
 public:
     int getAvailableEnergy() const { return this->availableEnergy; };
@@ -160,7 +129,7 @@ public:
 #ifndef ENV_UNIT_TESTS
 private:
 #endif
-    /** Packs a watt value into the u8 cascade encoding (watts / CASCADE_POWER_WATT_SCALE). */
+    /** Packs a watt value into byte 6 encoding (watts / CAP_POWER_WATT_SCALE). */
     static uint8_t packWatts(uint16_t watts);
 
     const float capacitance;
@@ -174,9 +143,6 @@ private:
     State state = State::UNKNOWN;
 
     SprintMode sprint = SprintMode::NO_SPRINT;
-
-    tap::communication::sensors::current::CurrentSensorInterface* chassisCurrentSensor = nullptr;
-    tap::communication::sensors::voltage::VoltageSensorInterface* chassisVoltageSensor = nullptr;
 
     tap::arch::MilliTimeout heartbeat;
 };
