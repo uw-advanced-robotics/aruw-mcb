@@ -72,7 +72,7 @@ public:
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(
               this,
-              tap::can::CanBus::CAN_BUS1,
+              tap::can::CanBus::CAN_BUS2,
               aruwsrc::control::chassis::CAP_BANK_CAPACITANCE),
           plateHitTracker(this),
           refSerialTransmitter(this),

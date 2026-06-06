@@ -368,7 +368,10 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
+    drivers(),
+    drivers()->capacitorBank,
+    voltageCurrentSensor);
 
 /* define commands ----------------------------------------------------------*/
 
