@@ -48,7 +48,7 @@ float CapacitorSelectingSensor::getVoltageMv() const
     // Always return the real battery bus voltage from 0x1C5 (same reasoning
     // as getCurrentMa — the Taproot PowerLimiter must see P_battery).
     if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline()){
-          return null;
+          return 0;
     }
     return this->voltageSensor->getVoltageMv();
 }
