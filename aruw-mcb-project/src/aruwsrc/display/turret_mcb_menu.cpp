@@ -24,8 +24,8 @@
 namespace aruwsrc::display
 {
 TurretMCBMenu::TurretMCBMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm)
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+    aruwsrc::communication::can::TurretMCBCanComm* turretMCBCanComm)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
       turretMCBCanComm(turretMCBCanComm)
 {
@@ -33,13 +33,16 @@ TurretMCBMenu::TurretMCBMenu(
 
 void TurretMCBMenu::draw()
 {
-    modm::GraphicDisplay &display = getViewStack()->getDisplay();
+    modm::GraphicDisplay& display = getViewStack()->getDisplay();
     display.clear();
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
     display << "Receiving Turret IMU data: " << turretMCBCanComm->isConnected() << modm::endl
-            << "Limit switch depressed: " << turretMCBCanComm->getLimitSwitchDepressed()
+            << "Kicker limit switch depressed: "
+            << turretMCBCanComm->getKickerWheelLimitSwitch().getLimitSwitchDepressed() << modm::endl
+            << "Agitator limit switch depressed: "
+            << turretMCBCanComm->getAgitatorLoadingLimitSwitch().getLimitSwitchDepressed()
             << modm::endl;
     display.printf(
         "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\n Z Accel (deg/s^2): %.2f\n"
