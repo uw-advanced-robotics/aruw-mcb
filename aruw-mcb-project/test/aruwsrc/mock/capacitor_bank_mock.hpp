@@ -39,7 +39,7 @@ public:
 
     MOCK_METHOD(void, initialize, (), (override));
 
-    MOCK_METHOD(void, sendCascadeCommand, (CapCommandMode mode), (const override));
+    MOCK_METHOD(void, sendCapCommand, (CapCommandMode mode), (const override));
 };  // class CapacitorBankMock
 }  // namespace aruwsrc::mock
 

@@ -27,25 +27,6 @@ using namespace testing;
 
 using namespace aruwsrc::communication::can::cap_bank;
 
-namespace
-{
-class FakeCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
-{
-public:
-    float currentMa = 0;
-    float getCurrentMa() const override { return currentMa; }
-    void update() override {}
-};
-
-class FakeVoltageSensor : public tap::communication::sensors::voltage::VoltageSensorInterface
-{
-public:
-    float voltageMv = 0;
-    float getVoltageMv() const override { return voltageMv; }
-    void update() override {}
-};
-}  // namespace
-
 class CapBankTests : public Test
 {
 public:
@@ -100,14 +81,8 @@ TEST_F(CapBankTests, status_does_not_transmit)
     capBank.processMessage(message);
 }
 
-TEST_F(CapBankTests, send_cascade_command_packs_mode_bus_and_limits)
+TEST_F(CapBankTests, send_cap_command_packs_mode_and_ref_limit_only)
 {
-    FakeCurrentSensor currentSensor;
-    FakeVoltageSensor voltageSensor;
-    currentSensor.currentMa = 1000;   // 0x03E8 LE
-    voltageSensor.voltageMv = 24000;  // 0x5DC0 LE
-    capBank.setChassisSensors(&currentSensor, &voltageSensor);
-
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(true));
     tap::communication::serial::RefSerial::Rx::RobotData robotData;
     robotData.chassis.powerConsumptionLimit = 80;  // 80 W / 4 = 20
@@ -116,33 +91,29 @@ TEST_F(CapBankTests, send_cascade_command_packs_mode_bus_and_limits)
     modm::can::Message sent;
     EXPECT_CALL(drivers.can, sendMessage).WillOnce(DoAll(SaveArg<1>(&sent), Return(true)));
 
-    capBank.sendCascadeCommand(CapCommandMode::CHARGE);
+    capBank.sendCapCommand(CapCommandMode::CHARGE);
 
-    EXPECT_EQ(static_cast<uint8_t>(MessageType::CASCADE_COMMAND), sent.data[0]);
+    EXPECT_EQ(static_cast<uint8_t>(MessageType::CAP_COMMAND), sent.data[0]);
     EXPECT_EQ(static_cast<uint8_t>(CapCommandMode::CHARGE), sent.data[1]);
-    EXPECT_EQ(0xE8, sent.data[2]);  // I_bus 1000 mA, low
-    EXPECT_EQ(0x03, sent.data[3]);  // I_bus high
-    EXPECT_EQ(0xC0, sent.data[4]);  // V_bus 24000 mV, low
-    EXPECT_EQ(0x5D, sent.data[5]);  // V_bus high
-    EXPECT_EQ(20, sent.data[6]);    // ref_limit 80 W / 4
-    EXPECT_EQ(20, sent.data[7]);    // P_target mirrors ref_limit (placeholder)
+    EXPECT_EQ(0, sent.data[2]);
+    EXPECT_EQ(0, sent.data[3]);
+    EXPECT_EQ(0, sent.data[4]);
+    EXPECT_EQ(0, sent.data[5]);
+    EXPECT_EQ(20, sent.data[6]);  // ref_limit 80 W / 4
+    EXPECT_EQ(0, sent.data[7]);
 }
 
-TEST_F(CapBankTests, send_cascade_command_zeros_without_sensors_or_ref)
+TEST_F(CapBankTests, send_cap_command_zeros_ref_limit_without_ref)
 {
     EXPECT_CALL(drivers.refSerial, getRefSerialReceivingData).WillRepeatedly(Return(false));
 
     modm::can::Message sent;
     EXPECT_CALL(drivers.can, sendMessage).WillOnce(DoAll(SaveArg<1>(&sent), Return(true)));
 
-    capBank.sendCascadeCommand(CapCommandMode::OFF);
+    capBank.sendCapCommand(CapCommandMode::OFF);
 
-    EXPECT_EQ(static_cast<uint8_t>(MessageType::CASCADE_COMMAND), sent.data[0]);
+    EXPECT_EQ(static_cast<uint8_t>(MessageType::CAP_COMMAND), sent.data[0]);
     EXPECT_EQ(static_cast<uint8_t>(CapCommandMode::OFF), sent.data[1]);
-    EXPECT_EQ(0, sent.data[2]);
-    EXPECT_EQ(0, sent.data[3]);
-    EXPECT_EQ(0, sent.data[4]);
-    EXPECT_EQ(0, sent.data[5]);
     EXPECT_EQ(0, sent.data[6]);
     EXPECT_EQ(0, sent.data[7]);
 }
