@@ -270,7 +270,11 @@ void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
     const TurretStatusMessageData* status =
         reinterpret_cast<const TurretStatusMessageData*>(message.data);
-    limitSwitchDepressed = status->statusBitmask & 0b1;
+
+    bool kickerWheelLimitSwitchDepressed = status->statusBitmask & 0b1;
+    bool agitatorLoadingLimitSwitchDepressed = status->statusBitmask & 0b10;
+    kickerWheelLimitSwitch.setLimitSwitchDepressed(kickerWheelLimitSwitchDepressed);
+    agitatorLoadingLimitSwitch.setLimitSwitchDepressed(agitatorLoadingLimitSwitchDepressed);
 
     const uint8_t stateRaw = status->imuState;
     if (stateRaw <= static_cast<uint8_t>(ImuState::IMU_CALIBRATED))
