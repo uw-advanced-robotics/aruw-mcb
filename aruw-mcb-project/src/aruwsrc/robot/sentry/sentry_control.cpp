@@ -328,7 +328,10 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
+    drivers(),
+    drivers()->capacitorBank,
+    voltageCurrentSensor);
 
 aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),

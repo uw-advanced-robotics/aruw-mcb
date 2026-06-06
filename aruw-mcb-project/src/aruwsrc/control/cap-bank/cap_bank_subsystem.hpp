@@ -24,6 +24,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 
 #include "cap_bank_test_command.hpp"
@@ -42,7 +43,8 @@ class CapBankSubsystem : public tap::control::Subsystem
 public:
     CapBankSubsystem(
         tap::Drivers* drivers,
-        communication::can::cap_bank::CapacitorBank& capacitorBank);
+        communication::can::cap_bank::CapacitorBank& capacitorBank,
+        const communication::can::AruwVoltageCurrentSensor& chassisSensor);
 
     virtual ~CapBankSubsystem() {}
     const char* getName() const override { return "Capacitor Bank"; }
@@ -71,6 +73,7 @@ public:
 
 private:
     communication::can::cap_bank::CapacitorBank& capacitorBank;
+    const communication::can::AruwVoltageCurrentSensor& chassisSensor;
 
     bool capacitorsEnabled;
 

@@ -23,9 +23,11 @@ namespace aruwsrc::control::cap_bank
 {
 CapBankSubsystem::CapBankSubsystem(
     tap::Drivers* drivers,
-    communication::can::cap_bank::CapacitorBank& capacitorBank)
+    communication::can::cap_bank::CapacitorBank& capacitorBank,
+    const communication::can::AruwVoltageCurrentSensor& chassisSensor)
     : Subsystem(drivers),
       capacitorBank(capacitorBank),
+      chassisSensor(chassisSensor),
       capacitorsEnabled(false),
       capBankTestCommand(this)
 {
@@ -50,6 +52,12 @@ void CapBankSubsystem::refresh()
     {
         this->capacitorBank.setSprinting(communication::can::cap_bank::SprintMode::NO_SPRINT);
         mode = CapCommandMode::OFF;
+    }
+    else if (!this->chassisSensor.isOnline())
+    {
+        // No fresh 0x1C5 chassis sensor → cap firmware cannot trust P_battery.
+        // Hold voltage with PWM off (no charge, no discharge).
+        mode = CapCommandMode::IDLE;
     }
     else if (!this->drivers->refSerial.getRefSerialReceivingData())
     {
