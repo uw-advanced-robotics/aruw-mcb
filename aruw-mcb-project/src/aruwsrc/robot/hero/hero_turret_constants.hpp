@@ -66,7 +66,7 @@ static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_ENCODER_ID =
 static constexpr tap::can::CanBus YAW_LAMPREY_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr float YAW_LAMPREY_RATIO = 1.0f;
-static constexpr float YAW_LAMPREY_ENCODER_HOME_POSITION = -modm::toRadian(110.0f);
+static constexpr float YAW_LAMPREY_ENCODER_HOME_POSITION = -modm::toRadian(125.0f);
 
 static constexpr tap::encoder::CanEncoderId YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID0;
 
@@ -74,7 +74,7 @@ static constexpr tap::can::CanBus YAW_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BU
 
 static constexpr float YAW_ENCODER_RATIO = 1.0f;  // One for use in binned alignment
 
-static constexpr float BINNED_ALIGNMENT_OFFSET = 2.44f;
+static constexpr float BINNED_ALIGNMENT_OFFSET = 2.04f;
 
 static const modm::Pair<float, float> LAMPREY_LUT[0] = {};
 

@@ -139,34 +139,8 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace hero_control
 {
-class HeroTurretDisabledCommand : public tap::control::Command
-{
-public:
-    explicit HeroTurretDisabledCommand(TurretSubsystem* turretSubsystem)
-        : turretSubsystem(turretSubsystem)
-    {
-        addSubsystemRequirement(turretSubsystem);
-    }
-
-    const char* getName() const override { return "hero turret disabled"; }
-
-    void initialize() override { zeroTurret(); }
-
-    void execute() override { zeroTurret(); }
-
-    bool isFinished() const override { return false; }
-
-    void end(bool) override { zeroTurret(); }
-
-private:
-    TurretSubsystem* turretSubsystem;
-
-    void zeroTurret()
-    {
-        turretSubsystem->yawMotor.setMotorOutput(0);
-        turretSubsystem->pitchMotor.setMotorOutput(0);
-    }
-};
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
@@ -325,15 +299,15 @@ aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
     heroTurretEncoders,
     BINNED_ALIGNMENT_OFFSET);
 
-Trigger yawOnlineTrigger = Trigger(drivers(), []() -> bool {
-                               return heroTurretEncoders.isOnline();
-                           }).onTrue(&binnedAlignmentCommand);
+Trigger yawOnlineTrigger =
+    Trigger(drivers(), []() -> bool {
+        return heroTurretEncoders.isOnline() && !remoteSafeDisconnectFunction();
+    }).whileTrue(&binnedAlignmentCommand);
 
 aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(
     &pitchMotor,
     PITCH_MOTOR_CONFIG,
     PITCH_LINKAGE_CONFIG);
-// aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
 aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
 
 HeroTurretSubsystem turret(drivers(), pitchTurretMotor, yawTurretMotor, &getTurretMCBCanComm());
@@ -503,8 +477,6 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFramePitchTurretImuController,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
-
-HeroTurretDisabledCommand turretDisabledCommand(&turret);
 
 cv::TurretCVCommand turretCVCommand(
     &drivers()->visionCoprocessor,
@@ -809,9 +781,6 @@ auto ctrlPressed = std::make_unique<HoldCommandMapping>(
     drivers(),
     std::vector<Command*>{&capBankHalfSprintCommand},
     &ctrlRms);
-
-// Safe disconnect function
-aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()

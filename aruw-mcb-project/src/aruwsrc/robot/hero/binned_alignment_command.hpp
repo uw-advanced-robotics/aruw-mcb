@@ -31,13 +31,13 @@ class BinnedAlignmentCommand : public tap::control::Command
 public:
     BinnedAlignmentCommand(aruwsrc::hero::HeroTurretEncoderSubsystem& encoders, float localOffset);
 
-    void initialize() override;
+    void initialize() override{};
 
-    void execute() override{};
+    void execute() override;
 
     void end(bool) override{};
 
-    bool isFinished() const override { return true; };
+    bool isFinished() const override { return false; };
 
     const char* getName() const override { return "Binned Alignment Command"; }
 
