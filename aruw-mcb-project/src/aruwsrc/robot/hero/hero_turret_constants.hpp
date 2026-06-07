@@ -67,7 +67,7 @@ static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_ENCODER_ID =
 static constexpr tap::can::CanBus YAW_LAMPREY_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr float YAW_LAMPREY_RATIO = 1.0f;
-static constexpr float YAW_LAMPREY_ENCODER_HOME_POSITION = -modm::toRadian(125.0f);
+static constexpr float YAW_LAMPREY_ENCODER_HOME_POSITION = -modm::toRadian(110.0f);
 
 static constexpr tap::encoder::CanEncoderId YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID0;
 
@@ -75,7 +75,7 @@ static constexpr tap::can::CanBus YAW_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BU
 
 static constexpr float YAW_ENCODER_RATIO = 1.0f;  // One for use in binned alignment
 
-static constexpr float BINNED_ALIGNMENT_OFFSET = 2.04f;
+static constexpr float BINNED_ALIGNMENT_OFFSET = 2.44f;
 
 static const modm::Pair<float, float> LAMPREY_LUT[0] = {};
 
@@ -95,7 +95,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 5267,
+    .startEncoderValue = 1975,
     .minAngle = -.32f,
     .maxAngle = 0.56f,
     .limitMotorAngles = true,
@@ -147,11 +147,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 50.0f,
-    .ki = 0.0f,
-    .kd = 1.0f,
-    .maxICumulative = 10.0f,
-    .maxOutput = 15.0f,
+    .kp = 10'000.0f,
+    .ki = 8'000'000.0f,
+    .kd = 4'000.0f,
+    .maxICumulative = 600.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 0.1f,

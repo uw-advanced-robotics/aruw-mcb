@@ -150,9 +150,6 @@ inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
     return drivers()->turretMCBCanCommBus1;
 }
 
-// Safe disconnect function
-aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
-
 /* define subsystems --------------------------------------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
@@ -314,7 +311,7 @@ aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(
     &pitchMotor,
     PITCH_MOTOR_CONFIG,
     PITCH_LINKAGE_CONFIG);
-// aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
+
 aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
 
 HeroTurretSubsystem turret(drivers(), pitchTurretMotor, yawTurretMotor, &getTurretMCBCanComm());
