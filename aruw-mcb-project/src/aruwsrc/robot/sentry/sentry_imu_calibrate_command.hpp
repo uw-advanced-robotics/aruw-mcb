@@ -95,7 +95,10 @@ public:
         aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
         aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
         tap::encoder::EncoderInterface &turretMajorLampreyEncoder,
+        tap::encoder::EncoderInterface &turretMajorPulleyEncoder,
         tap::encoder::EncoderInterface &turretMajorInternalEncoder,
+        const float binnedAlignmentOffset,
+        const float homeAlignmentOffset,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr);
 
@@ -121,24 +124,15 @@ protected:
     aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm;
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer;
     tap::encoder::EncoderInterface &turretMajorLampreyEncoder;
+    tap::encoder::EncoderInterface &turretMajorPulleyEncoder;
     tap::encoder::EncoderInterface &turretMajorInternalEncoder;
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime;
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime;
 
 private:
-    static constexpr float LAMPREY_SHIT_THRESHOLD = 0.02f;
-    static constexpr float LAMPREY_SHIT_BUMP = modm::toRadian(10.0f);
-    static constexpr uint32_t MIN_SATURATION_LOOPS = 10;
-    uint32_t loopCounter{0};
     bool lampreyAligned{false};
-    float turretMajorLampreyEncoderHighpassValue = 0;
-    float turretMajorLampreyEncoderLowpassValue = 0;
-    float lampreyShitAverage = 0;
-    float lampreySamples = 0;
-    float debugPos = 0;
-    float lampreyPos = 0;
-    float lampreyDebugAverage2 = 0;
-    float fakeLampreyEncoderDebugPos = 0;
+    const float binnedAlignmentOffset{0.0f};
+    const float homeAlignmentOffset{0.0f};
     aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
 };
 }  // namespace aruwsrc::sentry

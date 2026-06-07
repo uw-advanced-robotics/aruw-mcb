@@ -37,15 +37,20 @@ using namespace testing;
 
 #define SETUP_TEST()
 
+static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::
+    TurretGravityParams TURRET_GRAVITY_CONFIG_TEST{
+        .cgX = 0.1f,
+        .cgZ = 0.1f,
+        .gravityCompensatorMax = 1000.0f};
 namespace
 {
 float computeGravitationalForceOffset(const float pitchAngleRad)
 {
-    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
+    TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG_TEST);
     return gravityCompensation.calculateCompensationEffort(
         {.pitchWorldFrame = pitchAngleRad, .yaw = 0.0f});
 };
-TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG);
+TurretGravitationalForceOffset gravityCompensation(TURRET_GRAVITY_CONFIG_TEST);
 }  // namespace
 
 class TurretUserControlCommandTest : public Test

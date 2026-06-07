@@ -25,6 +25,7 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/binned_encoder_alignment/binned_encoder_alignment.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 
@@ -45,7 +46,10 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     aruwsrc::communication::can::TurretMCBCanComm &chassisImuComm,
     aruwsrc::sentry::algorithms::odometry::SentryTransforms &transformer,
     tap::encoder::EncoderInterface &turretMajorLampreyEncoder,
+    tap::encoder::EncoderInterface &turretMajorPulleyEncoder,
     tap::encoder::EncoderInterface &turretMajorInternalEncoder,
+    const float binnedAlignmentOffset,
+    const float homeAlignmentOffset,
     aruwsrc::control::buzzer::NoteSequenceCommand *successChime,
     aruwsrc::control::buzzer::NoteSequenceCommand *failChime)
     : aruwsrc::control::imu::ImuCalibrateCommand(
@@ -62,9 +66,12 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
       chassisImuComm(chassisImuComm),
       transformer(transformer),
       turretMajorLampreyEncoder(turretMajorLampreyEncoder),
+      turretMajorPulleyEncoder(turretMajorPulleyEncoder),
       turretMajorInternalEncoder(turretMajorInternalEncoder),
       successChime(successChime),
       failChime(failChime),
+      binnedAlignmentOffset(binnedAlignmentOffset),
+      homeAlignmentOffset(homeAlignmentOffset),
       fakeLampreyEncoder(0, 0)
 {
     for (auto &config : turretsAndControllers)
@@ -93,11 +100,6 @@ void SentryImuCalibrateCommand::initialize()
     calibrationTimer.stop();
     prevTime = tap::arch::clock::getTimeMilliseconds();
     lampreyAligned = false;
-    loopCounter = 0;
-    lampreyShitAverage = 0;
-    lampreySamples = 0;
-    debugPos = 0;
-    lampreyPos = 0;
 }
 
 static inline bool turretMajorReachedCenterAndNotMoving(
@@ -162,6 +164,22 @@ void SentryImuCalibrateCommand::execute()
             if (calibrationTimer.isExpired() && turretsNotMoving)
             {
                 // enter calibration phase
+                if (!lampreyAligned)
+                {
+                    // Preform the binned alignment
+                    fakeLampreyEncoder.setFakePosition(
+                        aruwsrc::algorithms::binned_encoder_alignment::calculatePosition<30, 95>(
+                            turretMajorPulleyEncoder.getPosition().getWrappedValue(),
+                            turretMajorLampreyEncoder.getPosition().getWrappedValue(),
+                            binnedAlignmentOffset) -
+                        homeAlignmentOffset);
+
+                    turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
+                    lampreyAligned = true;
+                    // exit out so we move to the new setpoint
+                    return;
+                }
+
                 calibrationTimer.stop();
                 calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 for (auto &config : turretsAndControllers)
@@ -178,16 +196,6 @@ void SentryImuCalibrateCommand::execute()
             break;
         }
         case CalibrationState::CALIBRATING_IMU:
-
-            debugPos = turretMajorInternalEncoder.getPosition().getUnwrappedValue();
-            lampreyPos = turretMajorLampreyEncoder.getPosition().getUnwrappedValue();
-            fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
-            lampreyShitAverage += turretMajorLampreyEncoder.getPosition().getUnwrappedValue();
-            lampreySamples++;
-            lampreyDebugAverage2 += (turretMajorLampreyEncoder.getPosition().getUnwrappedValue() -
-                                     lampreyDebugAverage2) /
-                                    lampreySamples;
-
             if (calibrationLongTimeout.isExpired())
             {
                 if (failChime) drivers->commandScheduler.addCommand(failChime);
@@ -214,22 +222,11 @@ void SentryImuCalibrateCommand::execute()
             }
             break;
         case CalibrationState::CALIBRATION_SUCCESS:
-            lampreyShitAverage /= lampreySamples;
-            fakeLampreyEncoder.setFakePosition(lampreyShitAverage);
-            fakeLampreyEncoderDebugPos = fakeLampreyEncoder.getPosition().getUnwrappedValue();
-            if (!lampreyAligned)
-            {
-                turretMajorInternalEncoder.alignWith(&fakeLampreyEncoder);
-                lampreyAligned = true;
-            }
-            if (lampreyAligned)
-            {
-                turretMajor.getMutableMotor().setChassisFrameSetpoint(Angle(0));
+            turretMajor.getMutableMotor().setChassisFrameSetpoint(Angle(0));
 
-                // reset odometry
-                yawObserver.overrideChassisYaw(0);
-                odometryInterface.reset();
-            }
+            // reset odometry
+            yawObserver.overrideChassisYaw(0);
+            odometryInterface.reset();
             break;
         default:
             break;
