@@ -176,6 +176,9 @@ inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
     return drivers()->turretMCBCanCommBus1;
 }
 
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
 /* define subsystems --------------------------------------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
@@ -329,7 +332,7 @@ aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
     BINNED_ALIGNMENT_OFFSET);
 
 Trigger yawOnlineTrigger = Trigger(drivers(), []() -> bool {
-                               return heroTurretEncoders.isOnline();
+                               return heroTurretEncoders.isOnline() && remoteSafeDisconnectFunction();
                            }).onTrue(&binnedAlignmentCommand);
 
 aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(
@@ -751,7 +754,7 @@ auto leftSwitchUp = std::make_unique<HoldCommandMapping>(
     drivers(),
     std::vector<Command*>{
         &chassisDriveCommand,
-        // &turretCVCommand,
+        &turretCVCommand,
     },
     &leftUpRms);
 
@@ -844,8 +847,6 @@ auto ctrlPressed = std::make_unique<HoldCommandMapping>(
     std::vector<Command*>{&capBankHalfSprintCommand},
     &ctrlRms);
 
-// Safe disconnect function
-aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
