@@ -59,8 +59,7 @@ namespace aruwsrc::communication::can
  * protocol described in the wiki here:
  * https://gitlab.com/aruw/controls/aruw-mcb/-/wikis/Turret-MCB-Comm-Protocol.
  */
-class TurretMCBCanComm : public tap::communication::sensors::imu::AbstractIMU,
-                         public tap::communication::sensors::limit_switch::LimitSwitchInterface
+class TurretMCBCanComm : public tap::communication::sensors::imu::AbstractIMU
 {
 public:
     using ImuDataReceivedCallbackFunc = void (*)();
@@ -165,7 +164,11 @@ public:
         return lastCompleteImuData.turretDataTimestamp;
     }
 
-    inline bool getLimitSwitchDepressed() const final_mockable { return limitSwitchDepressed; }
+    mockable inline tap::communication::sensors::limit_switch::LimitSwitchInterface& getLimitSwitch(
+        size_t index)
+    {
+        return limitSwitches.at(index);
+    }
 
     mockable inline bool isConnected() const
     {
@@ -235,6 +238,14 @@ private:
     private:
         TurretMCBCanComm* msgHandler;
         CanCommListenerFunc funcToCall;
+    };
+
+    class LimitSwitchFromFlag
+        : public tap::communication::sensors::limit_switch::LimitSwitchInterface
+    {
+    public:
+        bool getLimitSwitchDepressed() const override { return depressed; }
+        bool depressed = false;
     };
 
     struct AxisMessageData
@@ -405,6 +416,9 @@ private:
     void sendImuMountingTransformSync();
     void queueCalibrationSamplesSync();
     void sendCalibrationSamplesSync();
+
+    static constexpr size_t NUM_LIMIT_SWITCHES = 2;
+    std::array<LimitSwitchFromFlag, NUM_LIMIT_SWITCHES> limitSwitches;
 
     FRIEND_TEST(TurretMCBCanComm, sendData_calibrate_imu_data);
     FRIEND_TEST(TurretMCBCanComm, sendImuMountingTransforms_onRequest_sends8BytePayloads);

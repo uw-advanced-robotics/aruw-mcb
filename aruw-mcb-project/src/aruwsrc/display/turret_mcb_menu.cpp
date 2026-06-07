@@ -39,7 +39,8 @@ void TurretMCBMenu::draw()
     display << getMenuName() << modm::endl;
 
     display << "Receiving Turret IMU data: " << turretMCBCanComm->isConnected() << modm::endl
-            << "Limit switch depressed: " << turretMCBCanComm->getLimitSwitchDepressed()
+            << "Lim switch [0] dep: " << turretMCBCanComm->getLimitSwitch(0).getLimitSwitchDepressed() 
+            << "\nLim switch [1] dep: " << turretMCBCanComm->getLimitSwitch(1).getLimitSwitchDepressed()
             << modm::endl;
     display.printf(
         "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\n Z Accel (deg/s^2): %.2f\n"

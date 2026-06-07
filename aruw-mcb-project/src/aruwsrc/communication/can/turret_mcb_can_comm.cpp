@@ -270,7 +270,8 @@ void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
     imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
     const TurretStatusMessageData* status =
         reinterpret_cast<const TurretStatusMessageData*>(message.data);
-    limitSwitchDepressed = status->statusBitmask & 0b1;
+    limitSwitches[0].depressed = status->statusBitmask & (1<<0);
+    limitSwitches[1].depressed = status->statusBitmask & (1 << 1);
 
     const uint8_t stateRaw = status->imuState;
     if (stateRaw <= static_cast<uint8_t>(ImuState::IMU_CALIBRATED))

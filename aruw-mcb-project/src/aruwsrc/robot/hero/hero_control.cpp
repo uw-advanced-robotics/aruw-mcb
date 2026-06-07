@@ -88,6 +88,7 @@
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/imu_calibrate_done_governor.hpp"
 #include "aruwsrc/control/governor/limit_switch_depressed_governor.hpp"
+#include "aruwsrc/control/governor/multi_limit_switches_depressed_governors.hpp"
 #include "aruwsrc/control/governor/moved_fast_recently_governor.hpp"
 #include "aruwsrc/control/governor/plate_hit_governor.hpp"
 #include "aruwsrc/control/governor/yellow_carded_governor.hpp"
@@ -297,7 +298,7 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508*(1 / 2.0f),
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (1 / 2.0f),
     0);
 
 aruwsrc::communication::sensors::encoder::LampreyEncoder yawLampreyCanEncoder(
@@ -325,9 +326,9 @@ aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
     heroTurretEncoders,
     BINNED_ALIGNMENT_OFFSET);
 
-Trigger yawOnlineTrigger = Trigger(drivers(), []() -> bool {
-                               return heroTurretEncoders.isOnline();
-                           }).onTrue(&binnedAlignmentCommand);
+Trigger yawOnlineTrigger =
+    Trigger(drivers(), []() -> bool { return heroTurretEncoders.isOnline(); })
+        .onTrue(&binnedAlignmentCommand);
 
 aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(
     &pitchMotor,
@@ -567,11 +568,21 @@ GovernorLimitedCommand<1> turretUTurnCommandLimited(
 // hero agitator commands
 
 LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(
-    getTurretMCBCanComm(),
+    getTurretMCBCanComm().getLimitSwitch(0),
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED);
 LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(
-    getTurretMCBCanComm(),
+    getTurretMCBCanComm().getLimitSwitch(0),
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
+LimitSwitchDepressedGovernor limitSwitch2DepressedGovernor(
+    getTurretMCBCanComm().getLimitSwitch(1),
+    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED);
+LimitSwitchDepressedGovernor limitSwitch2NotDepressedGovernor(
+    getTurretMCBCanComm().getLimitSwitch(1),
+    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
+MultiLimitSwitchDepressedGovernor ballNotReadyGovernor(
+    getTurretMCBCanComm().getLimitSwitch(0),
+    getTurretMCBCanComm().getLimitSwitch(1),
+    MultiLimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
 
 // rotates agitator if friction wheels are spinning fast
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheelSubsystem);
@@ -591,7 +602,8 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
 GovernorLimitedCommand<2> feedWaterwheelWhenBallNotReady(
     {&carsonator},
     rotateAndUnjamWaterwheel,
-    {&frictionWheelsOnGovernor, &limitSwitchNotDepressedGovernor});
+    {&frictionWheelsOnGovernor,
+     &ballNotReadyGovernor});
 }  // namespace waterwheel
 
 namespace kicker
