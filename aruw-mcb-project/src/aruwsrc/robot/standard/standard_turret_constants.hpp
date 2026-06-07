@@ -311,10 +311,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
     .antiSaturation = true,
 };
 
-/// @TODO: Tune or replace with stos
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 15.0f,
-    .ki = 250.0f,
+    .kp = 30.0f,
+    .ki = 100.0f,
     .kd = 0.6f,
     .maxICumulative = 1.0f,
     .maxOutput = 10.0f,
