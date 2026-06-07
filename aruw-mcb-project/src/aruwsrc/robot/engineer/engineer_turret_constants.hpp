@@ -54,64 +54,49 @@ static constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
 // if extended far enough, we can pitch higher because the back of extension won't hit the chassis
 static constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
 
-
 // if extension above threshold, limit the pitch so the extension doesnt hit the ground
 static constexpr float PITCH_LOWER_LIMIT_EXTENSION_EXTENDED = 0.5;
-// lower limit if extension is retracted far enough 
+// lower limit if extension is retracted far enough
 static constexpr float PITCH_LOWER_LIMIT_DEFAULT = 0.5;
 
-// pitch limit if extension is not at either extreme
-static constexpr float PITCH_LIMIT_NEUTRAL = 0.0;
-
-// Extra software room to let the turret recover if it is already slightly past a dynamic limit.
-static constexpr float PITCH_LIMIT_RECOVERY_MARGIN = 0.02f;
-
-// need to change probably
-static constexpr float PITCH_LIMIT_RAMP_RATE =
-    1.0;  // how quickly the pitch limit changes between the retracted and extended limits as the
-          // extension moves
-
 // if extension is below this value, limit the pitch more aggressively to prevent back of extension
-// from hitting chassis likely neeed to change
+// from hitting chassis
 static constexpr float MIN_EXTENSION_FOR_FULL_PITCH_UP = 0.2;
 
 // if extension is above this value, we cannot allow full pitch down since extension will hit the
 // ground
 static constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
 
-static constexpr float MAX_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
+// if we are not extended enough, limit pitch down so the back of extension doesnt hit the saturn
+// ring
+static constexpr float MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
 static constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
 
 }  // namespace aruwsrc::control::turret
-
 
 inline float getPitchMinLimit(float extensionPosition)
 {
     // TurretMotor expects numeric min/max radians. Pitch up is negative on engineer.
     if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_FULL_PITCH_UP)
     {
-        return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED -
-               aruwsrc::control::turret::PITCH_LIMIT_RECOVERY_MARGIN;
+        return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
     }
-    return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT -
-           aruwsrc::control::turret::PITCH_LIMIT_RECOVERY_MARGIN;
+    return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
 }
 
 inline float getPitchMaxLimit(float extensionPosition)
 {
     // Pitch down is positive on engineer.
-    if (extensionPosition < aruwsrc::control::turret::MAX_EXTENSION_FOR_EXTRA_PITCH_DOWN)
+    if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN)
     {
         return aruwsrc::control::turret::PITCH_DOWN_LIMIT_EXTENSION_PARTIAL;
     }
 
     if (extensionPosition > aruwsrc::control::turret::MAX_EXTENSION_FOR_FULL_PITCH_DOWN)
     {
-        return aruwsrc::control::turret::PITCH_LOWER_LIMIT_EXTENSION_EXTENDED +
-               aruwsrc::control::turret::PITCH_LIMIT_RECOVERY_MARGIN;
+        return aruwsrc::control::turret::PITCH_LOWER_LIMIT_EXTENSION_EXTENDED;
     }
-    return aruwsrc::control::turret::PITCH_LOWER_LIMIT_DEFAULT +
-           aruwsrc::control::turret::PITCH_LIMIT_RECOVERY_MARGIN;
+    return aruwsrc::control::turret::PITCH_LOWER_LIMIT_DEFAULT;
 }
 
 static constexpr aruwsrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = {
@@ -135,8 +120,11 @@ static constexpr aruwsrc::control::turret::TurretMotorConfig PITCH_MOTOR_CONFIG 
     .limitMotorAngles = true,
 };
 
-static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::TurretGravityParams
-    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
+static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::
+    TurretGravityParams TURRET_GRAVITY_CONFIG{
+        .cgX = 0.0f,
+        .cgZ = 0.0f,
+        .gravityCompensatorMax = 0.0f};
 
 namespace world_rel_turret_imu
 {
@@ -174,8 +162,8 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * (2.0f / 3.0f),
-    //todo: change this later
-    // .maxOutput = 0,
+    // todo: change this later
+    //  .maxOutput = 0,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,

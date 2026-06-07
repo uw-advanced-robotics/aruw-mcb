@@ -327,11 +327,10 @@ aruwsrc::communication::mcb_lite::VirtualCanEncoder wristEncoderTheta1(
     1,
     WRIST_HOME_THETA1);
 
-aruwsrc::communication::mcb_lite::VirtualCanEncoder wristEncoderTheta2(
+tap::encoder::CanEncoder wristEncoderTheta2(
     drivers(),
     aruwsrc::engineer::WRIST_THETA2_ENCODER_ID,
-    &drivers()->mcbLite,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    aruwsrc::engineer::CAN_BUS_WRIST,
     false,
     1,
     WRIST_HOME_THETA2);
