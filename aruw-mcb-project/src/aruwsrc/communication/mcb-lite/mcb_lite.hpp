@@ -34,7 +34,7 @@
 #include "virtual_analog_sensor.hpp"
 #include "virtual_can_encoder.hpp"
 #include "virtual_digital.hpp"
-#include "virtual_imu_interface.hpp"
+#include "virtual_imu.hpp"
 #include "virtual_leds.hpp"
 #include "virtual_pwm.hpp"
 #include "virtual_voltage_current_sensor.hpp"
@@ -76,7 +76,7 @@ public:
     motor::VirtualCanRxHandler canRxHandler;
     motor::VirtualDJIMotorTxHandler motorTxHandler;
     // motor::VirtualServoRxHandler servoRxHandler;
-    VirtualIMUInterface imu;
+    VirtualIMU imu;
     VirtualAnalog analog;
     VirtualDigital digital;
     VirtualLEDs leds;
