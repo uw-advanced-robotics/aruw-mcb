@@ -50,8 +50,7 @@ namespace aruwsrc::communication::can
  * @note Since we use radians in this codebase, angle values that are sent from the turret MCB in
  * degrees are converted to radians by this object.
  */
-class TurretMCBCanComm : public tap::communication::sensors::imu::AbstractIMU,
-                         public tap::communication::sensors::limit_switch::LimitSwitchInterface
+class TurretMCBCanComm : public tap::communication::sensors::imu::AbstractIMU
 {
 public:
     using ImuDataReceivedCallbackFunc = void (*)();
@@ -171,8 +170,6 @@ public:
         return lastCompleteImuData.turretDataTimestamp;
     }
 
-    inline bool getLimitSwitchDepressed() const final_mockable { return limitSwitchDepressed; }
-
     mockable inline bool isConnected() const
     {
         return !imuConnectedTimeout.isExpired() && !imuConnectedTimeout.isStopped();
@@ -208,6 +205,15 @@ public:
     mockable void sendData();
 
     inline const char* getName() const override { return "Turret MCB Imu"; }
+
+    tap::communication::sensors::limit_switch::LimitSwitchInterface& getKickerWheelLimitSwitch()
+    {
+        return kickerWheelLimitSwitch;
+    }
+    tap::communication::sensors::limit_switch::LimitSwitchInterface& getAgitatorLoadingLimitSwitch()
+    {
+        return agitatorLoadingLimitSwitch;
+    }
 
 protected:
     virtual inline float getAccelerationSensitivity() const override
@@ -264,6 +270,20 @@ private:
         uint8_t seq;                   ///< Sequence number for synchronizing axis messages
     };
 
+    class TurretMCBLimitSwitch
+        : public tap::communication::sensors::limit_switch::LimitSwitchInterface
+    {
+    public:
+        TurretMCBLimitSwitch() : limitSwitchDepressed(false) {}
+
+        virtual bool getLimitSwitchDepressed() const { return limitSwitchDepressed; }
+
+        void setLimitSwitchDepressed(bool depressed) { limitSwitchDepressed = depressed; }
+
+    private:
+        bool limitSwitchDepressed;
+    };
+
     const tap::can::CanBus canBus;
 
     tap::Drivers* drivers;
@@ -291,9 +311,20 @@ private:
 
     int imuMessageReceivedLEDBlinkCounter = 0;
 
-    bool limitSwitchDepressed;
+    bool imuMountingTransformQueued = false;
+    bool calibrationSamplesSyncQueued = false;
 
     ImuDataReceivedCallbackFunc imuDataReceivedCallbackFunc = nullptr;
+    std::array<tap::algorithms::transforms::Transform, NUM_REMOTE_IMU_TYPES>
+        remoteImuMountingTransforms{
+            tap::algorithms::transforms::Transform::identity(),
+            tap::algorithms::transforms::Transform::identity(),
+            tap::algorithms::transforms::Transform::identity()};
+    std::array<bool, NUM_REMOTE_IMU_TYPES> hasRemoteImuMountingTransform{{false, false, false}};
+    uint16_t remoteCalibrationSampleCount = 1500;
+
+    TurretMCBLimitSwitch kickerWheelLimitSwitch;
+    TurretMCBLimitSwitch agitatorLoadingLimitSwitch;
 
     void handleXAxisMessage(const modm::can::Message& message);
 

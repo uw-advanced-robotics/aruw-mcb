@@ -107,11 +107,16 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
             drivers.canRxHandler.CanRxHandler::attachReceiveHandler(listener);
         });
 
-    modm::can::Message limitSwitchMsg(
-        TurretMCBCanComm::CanIDs::TURRET_STATUS_RX_CAN_ID,
-        1,
-        {1},
-        false);
+    modm::can::Message limitSwitchMsg{};
+    limitSwitchMsg.identifier = TurretMCBCanComm::CanIDs::TURRET_STATUS_RX_CAN_ID;
+    limitSwitchMsg.length = 4;
+    limitSwitchMsg.setExtended(false);
+    limitSwitchMsg.data[0] = 0b11;  // limit switch depressed
+    for (size_t i = 1; i < 4; i++)
+    {
+        limitSwitchMsg.data[i] = 0;
+    }
+
     ON_CALL(drivers.can, getMessage(tap::can::CanBus::CAN_BUS1, _))
         .WillByDefault([&](tap::can::CanBus, modm::can::Message* message) {
             *message = limitSwitchMsg;
@@ -122,7 +127,8 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
 
     drivers.canRxHandler.CanRxHandler::pollCanData();
 
-    EXPECT_TRUE(dut.getLimitSwitchDepressed());
+    EXPECT_TRUE(dut.getKickerWheelLimitSwitch().getLimitSwitchDepressed());
+    EXPECT_TRUE(dut.getAgitatorLoadingLimitSwitch().getLimitSwitchDepressed());
 }
 
 TEST(TurretMCBCanComm, receive_turret_data)

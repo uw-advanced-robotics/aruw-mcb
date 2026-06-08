@@ -191,7 +191,31 @@ void TurretMCBCanComm::handleZAxisMessage(const modm::can::Message& message)
 
 void TurretMCBCanComm::handleTurretMessage(const modm::can::Message& message)
 {
-    limitSwitchDepressed = message.data[0] & 0b1;
+    // Status frames are a heartbeat and should keep the remote IMU marked connected,
+    // even when axis packets pause during calibration/transitions.
+    imuConnectedTimeout.restart(DISCONNECT_TIMEOUT_PERIOD);
+    const TurretStatusMessageData* status =
+        reinterpret_cast<const TurretStatusMessageData*>(message.data);
+
+    bool kickerWheelLimitSwitchDepressed = status->statusBitmask & 0b1;
+    bool agitatorLoadingLimitSwitchDepressed = status->statusBitmask & 0b10;
+    kickerWheelLimitSwitch.setLimitSwitchDepressed(kickerWheelLimitSwitchDepressed);
+    agitatorLoadingLimitSwitch.setLimitSwitchDepressed(agitatorLoadingLimitSwitchDepressed);
+
+    const uint8_t stateRaw = status->imuState;
+    if (stateRaw <= static_cast<uint8_t>(ImuState::IMU_CALIBRATED))
+    {
+        imuState = static_cast<ImuState>(stateRaw);
+    }
+    else
+    {
+        imuState = ImuState::IMU_NOT_CONNECTED;
+    }
+
+    const float temperature = static_cast<float>(status->temperatureCentiC) * 0.01f;
+    lastCompleteImuData.temperature = temperature;
+    currProcessingImuData.temperature = temperature;
+    imuData.temperature = temperature;
 }
 
 void TurretMCBCanComm::handleTimeSynchronizationRequest(const modm::can::Message&)
