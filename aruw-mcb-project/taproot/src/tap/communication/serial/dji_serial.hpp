@@ -210,6 +210,11 @@ private:
 
     bool rxCrcEnabled;
 
+    // --- CHUNK RESET CONFIGURATION ---
+    static constexpr uint32_t ERROR_RESET_THRESHOLD = 1000;  
+    uint32_t windowAttempts = 0;
+    uint32_t windowErrors = 0;
+    // ---------------------------------
     /**
      * Calculate CRC8 of given array and compare against expectedCRC8.
      *
@@ -223,11 +228,11 @@ private:
         return tap::algorithms::calculateCRC8(message, messageLength) == expectedCRC8;
     }
 
-    void updateErrorRate() {
-        if (totalMessagesAttempted == 0) return;
-        uint32_t totalErrors = crc8ErrorCount + crc16ErrorCount + lengthErrorCount;
-        currentErrorRate = (static_cast<float>(totalErrors) / totalMessagesAttempted) * 100.0f;
-    }
+    /**
+     * Records the result of a parsed message frame and handles the chunk reset logic.
+     * @param isError true if the message failed validation, false if it succeeded.
+     */
+    void recordMessageResult(bool isError);
 
 protected:
     Drivers *drivers;

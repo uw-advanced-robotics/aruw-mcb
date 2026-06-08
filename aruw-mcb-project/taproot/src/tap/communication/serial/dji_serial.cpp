@@ -78,6 +78,23 @@ void DJISerial::initialize()
     }
 }
 
+void DJISerial::recordMessageResult(bool isError)
+{
+    windowAttempts++;
+    if (isError) {
+        windowErrors++;
+    }
+
+    // Live update of the error rate for this current chunk
+    currentErrorRate = (static_cast<float>(windowErrors) / windowAttempts) * 100.0f;
+
+    // Once we hit the threshold, wipe the slate clean for the next batch
+    if (windowAttempts >= ERROR_RESET_THRESHOLD) {
+        windowAttempts = 0;
+        windowErrors = 0;
+    }
+}
+
 void DJISerial::updateSerial()
 {
     switch (djiSerialRxState)
@@ -116,7 +133,7 @@ void DJISerial::updateSerial()
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
                         crc8ErrorCount++;
-                        updateErrorRate();  // NEW: Update the variable for Ozone
+                        recordMessageResult(true); // LOG ERROR
                         RAISE_ERROR(drivers, "CRC8 failure");
                         return;
                     }
@@ -126,7 +143,7 @@ void DJISerial::updateSerial()
                 {
                     djiSerialRxState = SERIAL_HEADER_SEARCH;
                     lengthErrorCount++;
-                    updateErrorRate();  // NEW: Update the variable for Ozone
+                    recordMessageResult(true); // LOG ERROR
                     RAISE_ERROR(drivers, "received message length longer than allowed max");
                     return;
                 }
@@ -165,15 +182,15 @@ void DJISerial::updateSerial()
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
                         crc16ErrorCount++;
-                        updateErrorRate();  // NEW: Update the variable for Ozone
+                        recordMessageResult(true); // LOG ERROR
                         RAISE_ERROR(drivers, "CRC16 failure");
                         return;
                     }
                 }
 
                 validMessageCount++;
-                updateErrorRate();  // NEW: Update the variable for Ozone
-
+                recordMessageResult(false); // LOG SUCCESS
+                
                 mostRecentMessage = newMessage;
                 messageReceiveCallback(mostRecentMessage);
 
@@ -183,7 +200,7 @@ void DJISerial::updateSerial()
             {
                 frameCurrReadByte = 0;
                 lengthErrorCount++;
-                updateErrorRate();  // NEW: Update the variable for Ozone
+                recordMessageResult(true); // LOG ERROR
                 RAISE_ERROR(drivers, "Invalid message length");
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
             }
