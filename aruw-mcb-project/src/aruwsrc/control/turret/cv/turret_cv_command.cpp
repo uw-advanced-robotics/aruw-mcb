@@ -55,7 +55,7 @@ TurretCVCommand::TurretCVCommand(
 {
     assert(ballisticsSolver != nullptr);
 
-    assert(turretID == ballisticsSolver->turretID);
+    assert(turretID == ballisticsSolver->getTurretID());
     addSubsystemRequirement(turretSubsystem);
 }
 

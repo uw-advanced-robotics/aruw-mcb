@@ -60,6 +60,12 @@ class Odometry2DInterface;
 
 namespace aruwsrc::algorithms
 {
+enum class AimStrategy
+{
+    JITTER = 0,   // track the targeted plate and shoot whenever we can
+    SHOT_TIMING,  // track the center of the targeted robot and time shots as plates pass by
+};
+
 /**
  * An object that computes the world-relative pitch and yaw turret angles based on CV aim data and
  * odometry measurements.
@@ -161,6 +167,8 @@ public:
      */
     mockable std::optional<BallisticsSolution> computeTurretAimAngles();
 
+    inline uint8_t getTurretID() const { return turretID; }
+
 private:
     const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor;
     const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer;
@@ -169,11 +177,8 @@ private:
     const float defaultLaunchSpeed;
     const float turretPitchOffset;
     const float minimumShotDelay;
-
-public:
     const uint8_t turretID;
 
-private:
     aruwsrc::communication::rtt::RttTelemetry* telemetry;
 
     uint32_t lastAimDataTimestamp = 0;
