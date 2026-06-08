@@ -52,7 +52,7 @@ public:
      * when the limit switch is depressed or released.
      */
     LimitSwitchDepressedGovernor(
-        tap::communication::sensors::limit_switch::LimitSwitchInterface &limitSwitch,
+        tap::communication::sensors::limit_switch::LimitSwitchInterface& limitSwitch,
         LimitSwitchGovernorBehavior behavior)
         : limitSwitch(limitSwitch),
           behavior(behavior)
@@ -75,9 +75,77 @@ public:
     bool isFinished() final { return !isReady(); }
 
 private:
-    tap::communication::sensors::limit_switch::LimitSwitchInterface &limitSwitch;
+    tap::communication::sensors::limit_switch::LimitSwitchInterface& limitSwitch;
     LimitSwitchGovernorBehavior behavior;
 };
+
+class ChoppedHeroLimitSwitchDepressedGovernor
+    : public tap::control::governor::CommandGovernorInterface
+{
+    /**
+     * Imagine you had two limit switches.
+     *
+⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠉⠁⢘⣿⣿⣿⣿⣿⣿⣿⠁⠈⠉⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣏⣀⣠⠴⢒⣭⣶⣶⣿⣿⣿⣿⣿⣿⣷⣶⣤⣀⠀⢀⣹⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⢟⣭⣺⡾⠿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠿⢷⡌⠻⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⢟⣵⣿⣿⣿⣿⣿⣿⣷⣬⡻⣿⣿⣿⣿⡿⣫⣶⣿⣿⣿⣷⣮⣄⠈⠻⣿⣿⣿⣿
+⣿⣿⡟⣵⠋⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣌⣿⣿⢏⣼⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀⠈⠻⣿⣿
+⣿⡏⣾⡷⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢸⡏⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡀⠀⢹⣿
+⡟⣼⣿⢣⣿⣿⣿⣿⣿⠋⠀⢠⣮⢿⣿⣿⢸⡷⣿⣿⣿⡏⠁⢶⠿⢻⣿⣿⣿⣿⡇⠀⠀⢻
+⢹⣿⣿⢸⣿⣿⣿⣿⣿⣦⣀⣈⣡⣿⣿⣿⠐⣧⢹⣿⣿⣧⣀⠀⣀⣾⣿⣿⣿⣿⡇⡄⠀⠀
+⣿⣿⣿⡄⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⣼⣿⣄⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇⠃⠀⠀
+⣿⣿⣿⣷⡌⢻⣿⣿⣿⣿⣿⣿⣿⠿⢁⣾⣿⣿⣿⣦⠻⣿⣿⣿⣿⣿⣿⣿⣿⠋⢠⣿⣆⠀
+⢿⣿⣿⣿⣿⣷⣬⣛⠿⠿⢟⣋⣡⣶⣿⡿⣿⣿⣿⣿⣯⡢⠉⠛⠿⠿⠟⣋⣀⣴⣿⣿⣿⠀
+⡸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠈⠀⠈⠀⠉⠿⣿⣿⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇
+⣧⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡷⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⣼
+⣿⣧⠀⠈⠿⣿⣿⣿⣿⣿⣿⣿⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⡿⣸⣿
+⣿⣿⣧⡀⠀⠈⢻⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣿⢟⣴⣿⣿
+⣿⣿⣿⣿⣦⡀⣸⣿⣿⣿⣿⡏⠀⠀⢀⣠⣤⣤⣤⣄⡀⠀⠀⠀⣿⣿⣿⣿⢟⣵⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣮⣙⠿⣿⣿⡇⢀⣘⡻⠿⠿⠿⠿⢟⣛⣂⡄⠀⣿⠿⣛⣵⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣭⡁⡞⣿⣿⣿⣿⣿⣿⣿⣿⡿⢡⢏⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣞⡲⢬⡭⣉⢉⣉⣉⣭⠶⣫⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣝⡿⣿⣿⣿⡿⣟⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+     *
+     */
+public:
+    ChoppedHeroLimitSwitchDepressedGovernor(
+        std::vector<tap::communication::sensors::limit_switch::LimitSwitchInterface*> limitSwitches,
+        LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior behavior)
+        : limitSwitches(limitSwitches),
+          behavior(behavior)
+    {
+    }
+
+    bool isReady()
+    {
+        bool ready = false;
+
+        for (auto limitSwitch : limitSwitches)
+        {
+            switch (behavior)
+            {
+                case LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::
+                    READY_WHEN_DEPRESSED:
+                    ready |= limitSwitch->getLimitSwitchDepressed();
+                    break;
+                case LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED:
+                    ready |= !limitSwitch->getLimitSwitchDepressed();
+                    break;
+                default:
+                    ready = false;
+            }
+        }
+        return ready;
+    }
+
+    bool isFinished() { return !isReady(); }
+
+private:
+    std::vector<tap::communication::sensors::limit_switch::LimitSwitchInterface*> limitSwitches;
+    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior behavior;
+};
+
 }  // namespace aruwsrc::control::governor
 
 #endif  // LIMIT_SWITCH_DEPRESSED_GOVERNOR_HPP_
