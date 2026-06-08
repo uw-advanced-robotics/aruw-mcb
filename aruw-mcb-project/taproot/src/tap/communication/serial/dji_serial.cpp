@@ -21,13 +21,14 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "dji_serial.hpp"
+
 #include <cstring>
 
 #include "tap/communication/serial/uart.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
-#include "dji_serial.hpp"
 
 /**
  * Macro that wraps uart read for ease of readability in code.
@@ -83,39 +84,39 @@ void DJISerial::updateSerial()
     {
         case SERIAL_HEADER_SEARCH:
         {
-            // keep scanning for the head byte as long as you are here and have not yet found it.
             while (djiSerialRxState == SERIAL_HEADER_SEARCH && READ(&newMessage.header.headByte, 1))
             {
-                // we found it, store the head byte
                 if (newMessage.header.headByte == SERIAL_HEAD_BYTE)
                 {
                     djiSerialRxState = PROCESS_FRAME_HEADER;
                     frameCurrReadByte = 0;
+
+                    // Increment attempts when a valid header byte is found
+                    totalMessagesAttempted++;
                 }
             }
             break;
         }
-        case PROCESS_FRAME_HEADER:  // the frame header consists of the length, type, and CRC8
+        case PROCESS_FRAME_HEADER:
         {
             frameCurrReadByte += READ(
                 reinterpret_cast<uint8_t *>(&newMessage) + frameCurrReadByte + 1,
                 sizeof(newMessage.header) - frameCurrReadByte - 1);
 
-            // We have the complete message header in the frameHeader buffer
             if (frameCurrReadByte == sizeof(newMessage.header) - 1)
             {
                 frameCurrReadByte = 0;
 
-                // check crc8 on header
                 if (rxCrcEnabled)
                 {
-                    // don't look at crc8 or frame type when calculating crc8
                     if (!verifyCRC8(
                             reinterpret_cast<uint8_t *>(&newMessage),
                             sizeof(newMessage.header) - 1,
                             newMessage.header.CRC8))
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
+                        crc8ErrorCount++;
+                        updateErrorRate();  // NEW: Update the variable for Ozone
                         RAISE_ERROR(drivers, "CRC8 failure");
                         return;
                     }
@@ -124,16 +125,17 @@ void DJISerial::updateSerial()
                 if (newMessage.header.dataLength >= SERIAL_RX_BUFF_SIZE)
                 {
                     djiSerialRxState = SERIAL_HEADER_SEARCH;
+                    lengthErrorCount++;
+                    updateErrorRate();  // NEW: Update the variable for Ozone
                     RAISE_ERROR(drivers, "received message length longer than allowed max");
                     return;
                 }
 
-                // move on to processing message body
                 djiSerialRxState = PROCESS_FRAME_DATA;
             }
             break;
         }
-        case PROCESS_FRAME_DATA:  // READ bulk of message
+        case PROCESS_FRAME_DATA:
         {
             int bytesToRead = sizeof(newMessage.messageType) + newMessage.header.dataLength;
             if (rxCrcEnabled)
@@ -150,8 +152,6 @@ void DJISerial::updateSerial()
             {
                 if (rxCrcEnabled)
                 {
-                    // move crc16 to `CRC16` position (currently in the data section if <
-                    // SERIAL_RX_BUFF_SIZE length sent)
                     memcpy(
                         &newMessage.CRC16,
                         newMessage.data + newMessage.header.dataLength,
@@ -164,13 +164,17 @@ void DJISerial::updateSerial()
                                 newMessage.header.dataLength))
                     {
                         djiSerialRxState = SERIAL_HEADER_SEARCH;
+                        crc16ErrorCount++;
+                        updateErrorRate();  // NEW: Update the variable for Ozone
                         RAISE_ERROR(drivers, "CRC16 failure");
                         return;
                     }
                 }
 
-                mostRecentMessage = newMessage;
+                validMessageCount++;
+                updateErrorRate();  // NEW: Update the variable for Ozone
 
+                mostRecentMessage = newMessage;
                 messageReceiveCallback(mostRecentMessage);
 
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
@@ -178,6 +182,8 @@ void DJISerial::updateSerial()
             else if (frameCurrReadByte > bytesToRead)
             {
                 frameCurrReadByte = 0;
+                lengthErrorCount++;
+                updateErrorRate();  // NEW: Update the variable for Ozone
                 RAISE_ERROR(drivers, "Invalid message length");
                 djiSerialRxState = SERIAL_HEADER_SEARCH;
             }

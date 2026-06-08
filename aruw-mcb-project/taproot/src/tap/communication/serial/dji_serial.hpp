@@ -173,6 +173,14 @@ public:
      */
     virtual void messageReceiveCallback(const ReceivedSerialMessage &completeMessage) = 0;
 
+
+    uint32_t totalMessagesAttempted = 0;
+    uint32_t validMessageCount = 0;
+    uint32_t crc8ErrorCount = 0;
+    uint32_t crc16ErrorCount = 0;
+    uint32_t lengthErrorCount = 0;
+    float currentErrorRate = 0.0f; // <-- Watch this variable
+
 private:
     enum SerialRxState
     {
@@ -213,6 +221,12 @@ private:
     inline bool verifyCRC8(uint8_t *message, uint32_t messageLength, uint8_t expectedCRC8)
     {
         return tap::algorithms::calculateCRC8(message, messageLength) == expectedCRC8;
+    }
+
+    void updateErrorRate() {
+        if (totalMessagesAttempted == 0) return;
+        uint32_t totalErrors = crc8ErrorCount + crc16ErrorCount + lengthErrorCount;
+        currentErrorRate = (static_cast<float>(totalErrors) / totalMessagesAttempted) * 100.0f;
     }
 
 protected:
