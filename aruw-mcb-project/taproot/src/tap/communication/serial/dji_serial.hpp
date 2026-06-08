@@ -223,6 +223,9 @@ private:
         return tap::algorithms::calculateCRC8(message, messageLength) == expectedCRC8;
     }
 
+    float timestampErrorPeriodSec = 5.0f;
+    uint32_t timestampForError = 0;
+
     void updateErrorRate() {
         if (totalMessagesAttempted == 0) return;
         uint32_t totalErrors = crc8ErrorCount + crc16ErrorCount + lengthErrorCount;
