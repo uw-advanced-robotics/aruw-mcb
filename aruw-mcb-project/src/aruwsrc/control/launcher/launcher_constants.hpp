@@ -195,7 +195,7 @@ static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 
 #if defined(TARGET_HERO_NEPTUNE)
 static constexpr float LAUNCHER_SPEED =
-    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 1;
+    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 5;
 #else
 static constexpr float LAUNCHER_SPEED =
     tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 3;

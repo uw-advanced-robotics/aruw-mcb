@@ -128,7 +128,7 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
     limitSwitchMsg.identifier = TurretMCBCanComm::CanIDs::TURRET_STATUS_RX_CAN_ID;
     limitSwitchMsg.length = 4;
     limitSwitchMsg.setExtended(false);
-    limitSwitchMsg.data[0] = 0b1;  // limit switch depressed
+    limitSwitchMsg.data[0] = 0b11;  // limit switch depressed
     for (size_t i = 1; i < 4; i++)
     {
         limitSwitchMsg.data[i] = 0;
@@ -144,7 +144,8 @@ TEST(TurretMCBCanComm, receive_limit_switch_info)
 
     drivers.canRxHandler.CanRxHandler::pollCanData();
 
-    EXPECT_TRUE(dut.getLimitSwitchDepressed());
+    EXPECT_TRUE(dut.getKickerWheelLimitSwitch().getLimitSwitchDepressed());
+    EXPECT_TRUE(dut.getAgitatorLoadingLimitSwitch().getLimitSwitchDepressed());
 }
 
 TEST(TurretMCBCanComm, receive_turret_data)

@@ -125,10 +125,16 @@ MatchRunningGovernor matchRunningGovernor(drivers()->refSerial);
 
 aruwsrc::communication::sensors::encoder::LampreyEncoder turretMajorYawLamprey(
     drivers(),
-    turretMajor::YAW_ANALOG_SENSOR_CAN_ID,
-    turretMajor::YAW_ANALOG_SENSOR_CAN_BUS,
+    turretMajor::YAW_LAMPREY_CAN_ID,
+    turretMajor::YAW_LAMPREY_CAN_BUS,
     turretMajor::LAMPREY_CALIBRATION_MAP,
-    turretMajor::YAW_ANALOG_SENSOR_INVERTED);
+    turretMajor::YAW_LAMPREY_INVERTED);
+
+tap::encoder::CanEncoder turretMajorYawCanEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID0,
+    tap::can::CanBus::CAN_BUS2,
+    true);
 
 tap::motor::DjiMotor turretMajorYawMotor(
     drivers(),
@@ -362,9 +368,7 @@ TurretMinorWorldControllers turretWidowWorldControllers{
         turretWidow.yawMotor,
         turretWidow::turretWidowSTOSConstants,
         turretWidowWorldYawPosPid,
-        turretWidow::turretWidowFeedforwardConstants)
-
-};
+        turretWidow::turretWidowFeedforwardConstants)};
 
 TurretMajorWorldFrameController turretMajorWorldYawController(
     transformer.getWorldToTurretMajor(),
@@ -500,7 +504,10 @@ SentryImuCalibrateCommand imuCalibrateCommand(
     getChassisTurretMCBCanComm(),
     transformer,
     turretMajorYawLamprey,
+    turretMajorYawCanEncoder,
     *turretMajorYawMotor.getEncoder(),
+    turretMajor::BINNED_ALIGNMENT_OFFSET,
+    turretMajor::SENTRY_YAW_ALIGNMENT_OFFSET,
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand);
 
@@ -776,6 +783,7 @@ void initializeSubsystems()
     turretWidow.initialize();
     turretMajor.initialize();
     turretMajorYawLamprey.initialize();
+    turretMajorYawCanEncoder.initialize();
     odometrySubsystem.initialize();
     cfOdometrySubsystem.initialize();
     transformerSubsystem.initialize();
