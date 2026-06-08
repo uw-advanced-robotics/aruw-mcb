@@ -215,21 +215,16 @@ float EngineerControlOperatorInterface::getChassisRInput()
 
     if (prevUpdateCounterR != updateCounter)
     {
-        if (isDriveMode())
-        {
-            chassisRInput.update(
-                -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL),
-                currTime);
-        }
-        else
-        {
-            chassisRInput.update(0, currTime);
-        }
+        chassisRInput.update(0, currTime);
         prevUpdateCounterR = updateCounter;
     }
 
-    float keyInput =
-        drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
+    float keyInput = 0.0f;
+    if (isDriveMode())
+    {
+        keyInput =
+            drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
+    }
 
     const float maxChassisSpeed =
         aruwsrc::control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
@@ -256,6 +251,26 @@ float EngineerControlOperatorInterface::getChassisRInput()
     {
         return rInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
+}
+
+float EngineerControlOperatorInterface::getTurretYawInput(uint8_t turretID)
+{
+    if (!isDriveMode())
+    {
+        return 0.0f;
+    }
+
+    return ControlOperatorInterface::getTurretYawInput(turretID);
+}
+
+float EngineerControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
+{
+    if (!isDriveMode())
+    {
+        return 0.0f;
+    }
+
+    return ControlOperatorInterface::getTurretPitchInput(turretID);
 }
 
 }  // namespace aruwsrc::engineer

@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/gpio/analog.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "modm/math/interpolation/linear.hpp"
@@ -34,7 +35,8 @@
 namespace aruwsrc::control::chassis
 {
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;  // TODO: find initial position of chassis
+static constexpr float INITIAL_CHASSIS_POSITION_X =
+    0.0f;  /// TODO: find initial position of chassis
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;  // TODO: find initial position of chassis
 
 // Initial orientation of the chassis in the field (radians)
@@ -47,7 +49,7 @@ static constexpr float INITIAL_CHASSIS_ORIENTATION =
  * Since the engineer has no power limiting, this lookup table doesn't matter much, just set some
  * high values.
  */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 8'000}, {1, 8'000}};
+static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {{1, 200}, {2, 250}};
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -57,7 +59,7 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
  * The minimum desired wheel speed for chassis rotation when translational scaling via
  * calculateRotationTranslationalGain is performed.
  */
-static constexpr float MIN_ROTATION_THRESHOLD = 800.0f;
+static constexpr float MIN_ROTATION_THRESHOLD = 40.0f;
 
 /**
  * Pin to use for current sensing
@@ -69,10 +71,6 @@ static constexpr float STARTING_ENERGY_BUFFER = 60.0f;
 static constexpr float ENERGY_BUFFER_LIMIT_THRESHOLD = 60.0f;
 static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
-static constexpr float VELOCITY_PID_KP = 10.0f;
-static constexpr float VELOCITY_PID_KI = 0.0f;
-static constexpr float VELOCITY_PID_KD = 0.0f;
-static constexpr float VELOCITY_PID_MAX_ERROR_SUM = 0.0f;
 static constexpr float VELOCITY_PID_KV = 0.0f;
 static constexpr float VELOCITY_PID_KS = 0.0;
 
@@ -82,7 +80,6 @@ static constexpr float VELOCITY_PID_KS = 0.0;
  * The corresponding speed controller output torque current range is
  * -20 ~ 0 ~ 20 A.
  */
-static constexpr float VELOCITY_PID_MAX_OUTPUT = 16'000.0f;
 
 static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 300.0f,
@@ -119,31 +116,20 @@ static constexpr float WHEEL_RADIUS = 0.076f;
 /**
  * Radius of the deadwheels (m)
  */
-static constexpr float DEADWHEEL_RADIUS = 0.0f;  // TODO: measue radius of deadwheels.
+static constexpr float DEADWHEEL_RADIUS = 0.016f;
 /**
  * Distance from the center axis of the robot to each deadwheel (m)
  */
-static constexpr float parallelOneCenterToWheelDistance =
-    0.0f;  // TODO: measure distance from center to parallel deadwheel one.
-static constexpr float parallelTwoCenterToWheelDistance =
-    0.0f;  // TODO: measure distance from center to odomFrameToRobotFrame deadwheel two.
-static constexpr float perpendicularCenterToWheelDistance =
-    0.0f;  // TODO: measure distance from center to the perpendiculatr deadwheel.
+static constexpr float parallelOneCenterToWheelDistance = 140.975f;
+static constexpr float parallelTwoCenterToWheelDistance = 140.975f;
+static constexpr float perpendicularCenterToWheelDistance = 77.975f;
 /**
  * Relative orientation of dead wheels (rad)
  */
 static constexpr float odomFrameToRobotFrame =
     0.0f;  // TODO: measure distance from center to deadwheel one.
-/**
- * Distance from center of the two front wheels (m)
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.46f;
-/**
- * Distance from center of the front and rear wheels (m).
- */
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.46f;
 
-static constexpr float WHEELBASE_RADIUS = 0.46f;
+static constexpr float WHEELBASE_RADIUS = 0.2443f;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.

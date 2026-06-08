@@ -35,56 +35,6 @@ namespace aruwsrc::communication::mcb_lite::motor
 {
 class VirtualServo : public tap::motor::Servo
 {
-    //     friend class aruwsrc::communication::mcb_lite::MCBLite;
-    //     friend class VirtualServoRxHandler;
-
-    // public:
-    //     VirtualServo(
-    //         tap::Drivers* drivers,
-    //         tap::gpio::Pwm::Pin pwmPin,
-    //         float minimumPwm,
-    //         float maximumPwm,
-    //         float pwmRampSpeed,
-    //         aruwsrc::communication::mcb_lite::MCBLite* mcblite);
-
-    //     void setTargetPwm(float pwm);
-
-    //     float getPWM() const;
-
-    //     tap::gpio::Pwm::Pin getPin() const;
-
-    //     bool isRampTargetMet() const;
-
-    // private:
-    //     void processServoUARTMessage(float currentPwm, bool isRampTargetMet);
-
-    //     void updateMessages(float pwm);
-    //     aruwsrc::communication::mcb_lite::VirtualPWM* virtualPwm;
-    //     tap::gpio::Pwm::Pin pin;
-
-    //     float minPwm, maxPwm, rampSpeed;
-    //     // aruwsrc::communication::mcb_lite::MCBLite* mcbLite;
-    //     float currentPwm = 0;
-    //     bool hasNewTarget = 0;
-    //     bool hasNewRamp = 0;
-    //     bool isTargetReached = 0;
-    //     DJISerial::SerialMessage<sizeof(ServoTargetMessage)> targetMessage;
-    //     DJISerial::SerialMessage<sizeof(ServoRampMessage)> rampMessage;
-
-    // public:
-    // VirtualServo(
-    //         tap::Drivers* drivers,
-    //         tap::gpio::Pwm::Pin pwmPin,
-    //         float minimumPwm,
-    //         float maximumPwm,
-    //         float pwmRampSpeed,
-    //         aruwsrc::communication::mcb_lite::VirtualPWM* virtualPwm) :
-    //         Servo(drivers, pwmPin, maximumPwm, minimumPwm, pwmRampSpeed),
-    //         virtualPwm(virtualPwm),
-    //         pin(pwmPin),
-    //         minPwm(minimumPwm),
-    //         maxPwm(maximumPwm),
-    //         rampSpeed(pwmRampSpeed) {}
 public:
     VirtualServo(
         tap::Drivers* drivers,
@@ -135,11 +85,7 @@ private:
     float maxPwm, minPwm, rampSpeed;
     tap::gpio::Pwm::Pin pin;
     float currentPwm = 0;
-    // bool hasNewTarget = 0;
-    // bool hasNewRamp;
     bool isTargetReached = 0;
-    // DJISerial::SerialMessage<sizeof(ServoTargetMessage)> targetMessage;
-    // DJISerial::SerialMessage<sizeof(ServoRampMessage)> rampMessage;
 };
 }  // namespace aruwsrc::communication::mcb_lite::motor
 

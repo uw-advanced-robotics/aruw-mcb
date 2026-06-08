@@ -37,7 +37,7 @@ namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
-    .kp = 15'000.0f,
+    .kp = 30'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -58,8 +58,8 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
     WATERWHEEL_AGITATOR_CONFIG = {
         .gearRatio = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *
                      (24.0f / 152.0f),  // M3508 * (Pulley Teeth / Agitator Teeth)
-        .agitatorMotorId = tap::motor::MOTOR4,
-        .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+        .agitatorMotorId = tap::motor::MOTOR6,
+        .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
         .isAgitatorInverted = false,
         /**
          * The jamming constants. Agitator is considered jammed if difference between the velocity
@@ -105,7 +105,7 @@ static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
     KICKER_AGITATOR_CONFIG = {
         .gearRatio = 1.0f / 36.0f,
-        .agitatorMotorId = tap::motor::MOTOR3,
+        .agitatorMotorId = tap::motor::MOTOR8,
         .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
         .isAgitatorInverted = false,
         .jammingVelocityDifference = 0,

@@ -33,7 +33,7 @@
 
 #include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_digital_limit_switch.hpp"
-#include "aruwsrc/communication/mcb-lite/virtual_imu_interface.hpp"  // placeholder
+#include "aruwsrc/communication/mcb-lite/virtual_imu.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
@@ -61,8 +61,6 @@
 #include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
-#include "aruwsrc/robot/engineer/servo_command.hpp"
-#include "aruwsrc/robot/engineer/servo_subsystem.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
@@ -169,9 +167,6 @@ aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
-ServoSubsystem servoTestSubsystem(drivers(), drivers()->mcbLite);
-ServoCommand servoTestCommand(servoTestSubsystem);
-
 aruwsrc::communication::mcb_lite::VirtualAnalogSensor analogSensor(
     drivers(),
     tap::can::CanBus::CAN_BUS2,
@@ -262,13 +257,6 @@ aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor cubeStorageMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-// aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeStorageLimit(
-//     &(drivers()->digital),
-//     CUBE_STORAGE_LIMITSWITCH_PORT,
-//     true);
-
-// LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
-
 // furthest wrist motor from end effector
 tap::motor::DjiMotor wristMotorOne(
     drivers(),
@@ -324,13 +312,6 @@ tap::motor::DjiMotor extensionMotor(
     "Extension Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
-// aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
-//     &drivers()->digital,
-//     aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
-//     true);
-
-// LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
 
@@ -491,8 +472,8 @@ ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
 /* define commands ----------------------------------------------------------*/
-// HomingCommand cubeStorageHome(cubeStorage);
-// HomingCommand extensionHome(extensionSubsystem);
+HomingCommand cubeStorageHome(cubeStorage);
+HomingCommand extensionHome(extensionSubsystem);
 
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
@@ -646,7 +627,6 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
-    drivers->commandScheduler.registerSubsystem(&servoTestSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

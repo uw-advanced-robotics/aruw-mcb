@@ -40,15 +40,14 @@ public:
 
     virtual float getChassisRInput() override;
 
+    float getTurretYawInput(uint8_t turretID) override;
+
+    float getTurretPitchInput(uint8_t turretID) override;
+
     /**
      * @return The cube storage velocity.
      */
     mockable float getCubeStorageVelocity();
-
-    /**
-     * @return The gantry lift velocity
-     */
-    mockable float getGantryLiftVelocity();
 
     bool getGantryKeyUp();
 

@@ -155,29 +155,6 @@ void MCBLite::sendData()
                 reinterpret_cast<uint8_t*>(&imu.mountingTransformMessage),
                 sizeof(imu.mountingTransformMessage));
         }
-        // for (size_t i = 0; i < motor::VirtualServoRxHandler::NUM_PINS; i++)
-        // {
-        //     auto* servo = servoRxHandler.servos[i];
-        //     if (servo != nullptr)
-        //     {
-        //         if (servo->hasNewTarget)
-        //         {
-        //             drivers->uart.write(
-        //                 port,
-        //                 reinterpret_cast<uint8_t*>(&servo->targetMessage),
-        //                 sizeof(servo->targetMessage));
-        //             servo->hasNewTarget = false;
-        //         }
-        //         if (servo->hasNewRamp)
-        //         {
-        //             drivers->uart.write(
-        //                 port,
-        //                 reinterpret_cast<uint8_t*>(&servo->rampMessage),
-        //                 sizeof(servo->rampMessage));
-        //             servo->hasNewRamp = false;
-        //         }
-        //     }
-        //}
     }
 }
 
@@ -213,9 +190,6 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
             case MessageTypes::VOLTAGE_CURRENT_MESSAGE:
                 processVoltageCurrentMessage(completeMessage);
                 break;
-            // case MessageTypes::SERVO_FEEDBACK_MESSAGE:
-            //     processServoFeedbackMessage(completeMessage);
-            //     break;
             case MessageTypes::ANALOG_SENSOR_MESSAGE:
                 processAnalogSensorMessage(completeMessage);
                 break;
@@ -294,10 +268,5 @@ void MCBLite::processAnalogSensorMessage(const ReceivedSerialMessage& completeMe
         this->analogSensor->processAnalogSensorUARTMessage(message->ai0, message->ai1);
     }
 }
-
-// void MCBLite::processServoFeedbackMessage(const ReceivedSerialMessage& completeMessage)
-// {
-//     servoRxHandler.processServoFeedbackMessage(completeMessage);
-// }
 
 }  // namespace aruwsrc::communication::mcb_lite

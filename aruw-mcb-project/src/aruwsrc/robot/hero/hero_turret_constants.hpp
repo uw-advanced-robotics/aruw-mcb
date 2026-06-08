@@ -25,6 +25,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/robot/hero/hero_pitch_turret_motor.hpp"
 #include "modm/container/pair.hpp"
@@ -37,12 +38,27 @@
 
 namespace aruwsrc::control::turret
 {
+inline const tap::algorithms::transforms::Transform TURRET_MCB_BMI088_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    PI);
+inline const tap::algorithms::transforms::Transform TURRET_MCB_ISM330_MOUNTING_TRANSFORM(
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    -M_2_PI);
+
 static constexpr uint8_t NUM_TURRETS = 1;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
 
-static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS2;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 
 static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_ENCODER_ID =
@@ -71,8 +87,8 @@ static constexpr uint32_t ENCODER_RATIO_DEN = 2;
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 414,
-    .minAngle = 0,     ///< Doesn't matter since yaw not limited
-    .maxAngle = M_PI,  ///< Doesn't matter since yaw not limited
+    .minAngle = 0,         ///< Doesn't matter since yaw not limited
+    .maxAngle = 2 * M_PI,  ///< Doesn't matter since yaw not limited
     .limitMotorAngles = false,
 };
 
@@ -107,11 +123,11 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 1250.0f,
+    .kp = 50.0f,
     .ki = 0.0f,
-    .kd = 0.4f,
+    .kd = 1.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 2000.0f,
+    .maxOutput = 15.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -121,9 +137,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1500.0f,
-    .ki = 1.0f,
-    .kd = 0.3f,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
     .maxICumulative = 10.0f,
     .maxOutput = 2000,
     .tQDerivativeKalman = 1.0f,
@@ -163,9 +179,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 1400.0f,
-    .ki = 5.0f,
-    .kd = 0.5f,
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
     .maxICumulative = 5.0f,
     .maxOutput = 2000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -177,7 +193,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 400.0f,
+    .kp = 8000.0f,
     .ki = 0.0f,
     .kd = 1000.0f,
     .maxICumulative = 5'000.0f,
@@ -212,9 +228,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 100'000.0f,
+    .kp = 100000.0f,
     .ki = 0.0f,
-    .kd = 10'000.0f,
+    .kd = 10000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
@@ -226,10 +242,10 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 100'000.0f,
-    .ki = 1000.0f,
-    .kd = 16'000.0f,
-    .maxICumulative = 7000.0f,
+    .kp = 40000.0f,
+    .ki = 2000.0f,
+    .kd = 6000.0f,
+    .maxICumulative = 10000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 400.0f,
