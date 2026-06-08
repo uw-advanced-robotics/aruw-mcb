@@ -87,7 +87,7 @@ TEST_F(
     getPredictedLaunchSpeed_launch_speed_based_on_ref_system_measured_bullet_speed)
 {
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
-    
+
     const float bulletSpeed1 = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first + 5.0f;
     const float bulletSpeed2 = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].first + 5.0f;
 
@@ -109,7 +109,10 @@ TEST_F(
     robotData.turret.lastReceivedLaunchingInfoTimestamp += 1;
     frictionWheels.refresh();
 
-    EXPECT_NEAR((bulletSpeed1 + bulletSpeed2)/2.0f, frictionWheels.getPredictedLaunchSpeed(), 1E-1);
+    EXPECT_NEAR(
+        (bulletSpeed1 + bulletSpeed2) / 2.0f,
+        frictionWheels.getPredictedLaunchSpeed(),
+        1E-1);
 }
 
 TEST_F(
