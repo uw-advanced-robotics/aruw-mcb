@@ -189,6 +189,8 @@ public:
         float quatX;
         float quatY;
         float quatZ;
+        float cameraToTagMagnitude;
+        float cameraToTagAngle;
         long long timestamp;
         uint8_t turretId;
     } modm_packed;
