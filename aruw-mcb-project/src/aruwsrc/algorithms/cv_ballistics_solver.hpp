@@ -95,6 +95,17 @@ public:
         uint8_t activePlateIndex;
     };
 
+    struct Config
+    {
+        float shotTimingEntryThreshold;  // target robot angular velocity (rad/s) above which we
+                                         // switch to shot timing mode
+        float shotTimingExitThreshold;   // target robot angular velocity (rad/s) below which switch
+                                         // to jitter aim mode
+        const float defaultLaunchSpeed;
+        float turretPitchOffset;
+        float minimumShotDelay;
+    };
+
     /**
      * Parameter to pass into `tap::algorithms::ballistics::findTargetProjectileIntersection`. This
      * function is an iterative ballistics solver, so this represents how many iterations to
@@ -102,8 +113,6 @@ public:
      */
     static constexpr float NUM_FORWARD_KINEMATIC_PROJECTIONS = 3;
 
-    /// Omega threshold (rad/s) below which jitter aim is used instead of pulse estimation.
-    static constexpr float OMEGA_THRESHOLD = 5.0f;
     /// The width of a small armor plate, in m
     static constexpr float PLATE_WIDTH = 0.135f;
     /// The height of a small armor plate, in m
@@ -149,10 +158,8 @@ public:
         const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor,
         const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer,
         const control::launcher::LaunchSpeedPredictorInterface& frictionWheels,
-        const float defaultLaunchSpeed,
+        const Config config,
         const uint8_t turretID,
-        float turretPitchOffset,
-        float minimumShotDelay = 0.0f,
         aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
 
     /**
@@ -174,13 +181,11 @@ private:
     const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer;
     const tap::algorithms::transforms::Transform& worldToTurret;
     const control::launcher::LaunchSpeedPredictorInterface& frictionWheels;
-    const float defaultLaunchSpeed;
-    const float turretPitchOffset;
-    const float minimumShotDelay;
+    const Config config;
     const uint8_t turretID;
-
     aruwsrc::communication::rtt::RttTelemetry* telemetry;
 
+    AimStrategy aimStrategy;
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};

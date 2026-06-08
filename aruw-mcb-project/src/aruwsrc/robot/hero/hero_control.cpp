@@ -358,12 +358,17 @@ StandardAndHeroTransformAdapter transformAdapter(transformer);
 
 CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
-    odometrySubsystem,
-    turret,
+    transformAdapter,
     frictionWheelSubsystem,
-    LAUNCHER_SPEED,
-    0, // turretID
-    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS / 1'000'000.0f,
+    {
+        .shotTimingEntryThreshold = 6.0f,
+        .shotTimingExitThreshold = 4.0f,
+        .defaultLaunchSpeed = aruwsrc::control::launcher::LAUNCHER_SPEED,
+        .turretPitchOffset = 0,
+        .minimumShotDelay = aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS /
+                            1'000'000.0f,
+    },
+    0,  // turretID
     &drivers()->rttTelemetry);
 
 AutoAimLaunchTimer autoAimLaunchTimer(

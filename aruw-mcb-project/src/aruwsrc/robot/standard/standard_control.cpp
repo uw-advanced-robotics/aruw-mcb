@@ -289,18 +289,19 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
         aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
-aruwsrc::control::launcher::FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
-aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor =
-    frictionWheelsSubsystem;
-
 CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     transformAdapter,
-    frictionWheelSpeedPredictor,
-    aruwsrc::control::launcher::LAUNCHER_SPEED,  // defaultLaunchSpeed
-    0,                                           // turretID
-    0,                                           // turretPitchOffset
-    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS / 1'000'000.0f,
+    frictionWheelsSubsystem,
+    {
+        .shotTimingEntryThreshold = 6.0f,
+        .shotTimingExitThreshold = 4.0f,
+        .defaultLaunchSpeed = aruwsrc::control::launcher::LAUNCHER_SPEED,
+        .turretPitchOffset = 0,
+        .minimumShotDelay = aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS /
+                            1'000'000.0f,
+    },
+    0,  // turretID
     &drivers()->rttTelemetry);
 
 AutoAimLaunchTimer autoAimLaunchTimer(
@@ -543,7 +544,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 //     drivers()->refSerial,
 //     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheelsSubsystem);
 
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
     {&agitator},
@@ -586,14 +587,14 @@ GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCVWindowLimiting(
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
-    &frictionWheels,
+    &frictionWheelsSubsystem,
     15.0f,
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
-    &frictionWheels,
+    &frictionWheelsSubsystem,
     0.0f,
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
@@ -732,7 +733,7 @@ MatrixHudIndicators positionHudIndicators(
     *drivers(),
     drivers()->visionCoprocessor,
     refSerialTransmitter,
-    frictionWheels,
+    frictionWheelsSubsystem,
     turret,
     &multiShotCvCommand,
     &cvOnTargetGovernor);
@@ -797,7 +798,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&frictionWheels);
+    drivers->commandScheduler.registerSubsystem(&frictionWheelsSubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
@@ -815,7 +816,7 @@ void initializeSubsystems()
     chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();
-    frictionWheels.initialize();
+    frictionWheelsSubsystem.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
@@ -831,7 +832,7 @@ void setDefaultStandardCommands(Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    frictionWheels.setDefaultCommand(&stopFrictionWheels);
+    frictionWheelsSubsystem.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 

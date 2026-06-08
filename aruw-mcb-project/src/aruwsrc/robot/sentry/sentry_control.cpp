@@ -416,15 +416,20 @@ VelocityAgitatorSubsystem turretWidowAgitator(
     constants::AGITATOR_PID_CONFIG,
     constants::turretWidow::AGITATOR_CONFIG);
 
-// ballistics solvers
 aruwsrc::algorithms::CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     transformAdapter,
     turretWidowFrictionWheels,
-    turretWidow::DEFAULT_LAUNCH_SPEED,
+    {
+        .shotTimingEntryThreshold = 6.0f,
+        .shotTimingExitThreshold = 4.0f,
+        .defaultLaunchSpeed = turretWidow::DEFAULT_LAUNCH_SPEED,
+        .turretPitchOffset = 0,
+        .minimumShotDelay = aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS /
+                            1'000'000.0f,
+    },
     turretWidow.getTurretID(),
-    0.f,  // turret minor pitch offset
-    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS / 1'000'000.0f);
+    &drivers()->rttTelemetry);
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerTurretWidow(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,

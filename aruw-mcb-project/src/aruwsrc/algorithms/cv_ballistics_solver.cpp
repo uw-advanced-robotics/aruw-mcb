@@ -43,18 +43,14 @@ CvBallisticsSolver::CvBallisticsSolver(
     const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor,
     const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer,
     const control::launcher::LaunchSpeedPredictorInterface& frictionWheels,
-    const float defaultLaunchSpeed,
+    const Config config,
     const uint8_t turretID,
-    float turretPitchOffset,
-    float minimumShotDelay,
     aruwsrc::communication::rtt::RttTelemetry* telemetry)
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
       worldToTurret(transformer.getWorldToTurret(turretID)),
       frictionWheels(frictionWheels),
-      defaultLaunchSpeed(defaultLaunchSpeed),
-      turretPitchOffset(turretPitchOffset),
-      minimumShotDelay(minimumShotDelay),
+      config(config),
       turretID(turretID),
       telemetry(telemetry)
 {
@@ -91,7 +87,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     float launchSpeed = frictionWheels.getPredictedLaunchSpeed();
     if (compareFloatClose(launchSpeed, 0.0f, 1e-5f))
     {
-        launchSpeed = defaultLaunchSpeed;
+        launchSpeed = config.defaultLaunchSpeed;
     }
 
     if (telemetry)
@@ -130,21 +126,32 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     // Use enemy angular velocity to determine which aiming strategy to use
     // TODO: this could technically be the angular velocity in the rotating target-tracking
     // frame ("omegaTotal")
-    if (fabsf(omegaLP) < OMEGA_THRESHOLD)
+    if (fabsf(omegaLP) < config.shotTimingExitThreshold)
     {
-        // Jitter Aim
-
-        communication::serial::VisionCoprocessor::PositionData targetDataLaunchTime =
-            targetDataNow.projectForward(minimumShotDelay);
-
-        lastComputedSolution = computeJitterAim(targetDataLaunchTime, launchSpeed);
+        aimStrategy = AimStrategy::JITTER;
     }
-    else
+    else if (fabsf(omegaLP) > config.shotTimingEntryThreshold)
     {
-        // Shot Timing
         // Use pulse estimation for fast rotating targets
+        aimStrategy = AimStrategy::SHOT_TIMING;
+    }
 
-        lastComputedSolution = computePulseEstimation(targetDataNow, launchSpeed);
+    switch (aimStrategy)
+    {
+        case AimStrategy::JITTER:
+        {
+            communication::serial::VisionCoprocessor::PositionData targetDataLaunchTime =
+                targetDataNow.projectForward(config.minimumShotDelay);
+
+            lastComputedSolution = computeJitterAim(targetDataLaunchTime, launchSpeed);
+            break;
+        }
+
+        case AimStrategy::SHOT_TIMING:
+        {
+            lastComputedSolution = computePulseEstimation(targetDataNow, launchSpeed);
+            break;
+        }
     }
 
     return lastComputedSolution;
@@ -187,7 +194,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                 &solution.pitchAngle,
                 &solution.yawAngle,
                 &solution.timeOfFlight,
-                turretPitchOffset) &&
+                config.turretPitchOffset) &&
             compareFloatClose(  // plate will be facing us at time of impact
                 Angle(
                     targetData.projectForward(solution.timeOfFlight).theta + M_PI_2 * activePlate +
@@ -233,7 +240,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                 &currentSolution.pitchAngle,
                 &currentSolution.yawAngle,
                 &currentSolution.timeOfFlight,
-                turretPitchOffset) &&
+                config.turretPitchOffset) &&
             (!solution || currentSolution.timeOfFlight < solution->timeOfFlight))
         {
             solution = currentSolution;
@@ -281,7 +288,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     float horizontalDistToClosestPoint = robotPos.xy().getLength() - avgRadius;
     float approxDistance = modm::Vector2f(horizontalDistToClosestPoint, robotPos.z).getLength();
-    float estimatedToF = approxDistance / launchSpeed + minimumShotDelay;
+    float estimatedToF = approxDistance / launchSpeed + config.minimumShotDelay;
     // TODO: could do a center ballistics pass instead? would account for turret pitch
 
     auto estHitTimeTargetData = targetData.projectForward(estimatedToF);
@@ -377,7 +384,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
             &solution.pitchAngle,
             &solution.yawAngle,
             &solution.timeOfFlight,
-            turretPitchOffset -
+            config.turretPitchOffset -
                 activePlateRadius))  // aim at nearest point on perimeter by pretending the turret
                                      //   pitch axis is offset forward by the target plate radius
     {
