@@ -577,7 +577,7 @@ CvOnTargetGovernor cvOnTargetGovernor(
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOn,
-    {&cvOnTargetGovernor, &heatLimitGovernor});
+    {&heatLimitGovernor, &cvOnTargetGovernor});
 
 GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCVWindowLimiting(
     {&agitator},
@@ -676,14 +676,6 @@ Trigger leftSwitchUp =
                                       // cvOnTargetGoverner checks if this command specifically is
                                       // scheduled
         .whileTrue(&chassisDriveCommand);
-
-auto rPressedRms = RemoteMapState({Remote::Key::R});
-auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
-    drivers(),
-    &rPressedRms,
-    true,
-    &cvOnTargetGovernor,
-    &CvOnTargetGovernor::setGovernorEnabled);
 
 MultiShotCvCommandMapping leftMousePressedBNotPressed(
     *drivers(),
