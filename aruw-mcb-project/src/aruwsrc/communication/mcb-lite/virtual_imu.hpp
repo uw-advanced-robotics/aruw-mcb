@@ -98,7 +98,6 @@ private:
 
     DJISerial::SerialMessage<sizeof(IMUMountingTransformMessage)> mountingTransformMessage;
     bool hasNewMountingTransform = false;
-    
 };
 
 }  // namespace aruwsrc::communication::mcb_lite
