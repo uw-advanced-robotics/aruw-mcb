@@ -97,6 +97,16 @@ void DJISerial::recordMessageResult(bool isError)
 
 void DJISerial::updateSerial()
 {
+    if ((tap::arch::clock::getTimeMilliseconds() - timestampForError) / 1000.0f > timestampErrorPeriodSec) {
+        // Reset error counts and update error rate every second to prevent overflow and keep error rate relevant
+        crc8ErrorCount = 0;
+        crc16ErrorCount = 0;
+        lengthErrorCount = 0;
+        totalMessagesAttempted = 0;
+        currentErrorRate = 0.0f;
+        timestampForError = tap::arch::clock::getTimeMilliseconds();
+    }
+
     switch (djiSerialRxState)
     {
         case SERIAL_HEADER_SEARCH:

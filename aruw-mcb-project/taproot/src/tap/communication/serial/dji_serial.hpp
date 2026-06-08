@@ -228,11 +228,14 @@ private:
         return tap::algorithms::calculateCRC8(message, messageLength) == expectedCRC8;
     }
 
-    /**
-     * Records the result of a parsed message frame and handles the chunk reset logic.
-     * @param isError true if the message failed validation, false if it succeeded.
-     */
-    void recordMessageResult(bool isError);
+    float timestampErrorPeriodSec = 5.0f;
+    uint32_t timestampForError = 0;
+
+    void updateErrorRate() {
+        if (totalMessagesAttempted == 0) return;
+        uint32_t totalErrors = crc8ErrorCount + crc16ErrorCount + lengthErrorCount;
+        currentErrorRate = (static_cast<float>(totalErrors) / totalMessagesAttempted) * 100.0f;
+    }
 
 protected:
     Drivers *drivers;
