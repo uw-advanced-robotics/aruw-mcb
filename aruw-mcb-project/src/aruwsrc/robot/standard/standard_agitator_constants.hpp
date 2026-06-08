@@ -128,7 +128,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .jamLogicEnabled = true,
     // .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
     .velocityPIDFeedForwardGain = 0,
-    .emptyJamEnabled = true,
+    .emptyJamEnabled = false,
     .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
     .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,

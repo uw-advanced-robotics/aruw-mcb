@@ -674,7 +674,7 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 // Remote related mappings
 Trigger rightSwitchMiddle =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
-        // .onTrue(&spinFrictionWheels)
+        .onTrue(&spinFrictionWheels)
         .onFalse(&stopFrictionWheels);
 
 RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
