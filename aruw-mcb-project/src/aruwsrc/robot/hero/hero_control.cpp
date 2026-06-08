@@ -480,9 +480,9 @@ algorithms::WorldFrameTurretImuSTOSTurretController<algorithms::Axis::YAW>
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
         turret.yawMotor,
-        StosConstants,
+        STOS_CONSTANTS,
         worldFrameYawTurretImuPosPidCv,
-        {300.0f, 200.0f, 50.0f});
+        TURRET_FEEDFORWARD_CONSTANTS);
 
 algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
     worldFramePitchTurretImuControllerCv(
@@ -817,7 +817,6 @@ auto ctrlPressed = std::make_unique<HoldCommandMapping>(
     std::vector<Command*>{&capBankHalfSprintCommand},
     &ctrlRms);
 
-
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -922,7 +921,7 @@ aruwsrc::control::imu::ImuCalibrateCommand* getImuCalibrateCommand()
 
 std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
 {
-    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
         &hero_control::gravityAutotuneCommand,
         &hero_control::freqSweep};
     return commands;

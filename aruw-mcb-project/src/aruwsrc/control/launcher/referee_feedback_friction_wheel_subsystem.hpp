@@ -123,17 +123,6 @@ private:
 
     void updatePredictedLaunchSpeed()
     {
-        const float desiredLaunchSpeed = this->getDesiredLaunchSpeed();
-
-        // reset averaging if desired launch speed has changed...if we change desired launch speed
-        // from 15 to 30, we should predict the launch speed to be around 30, not 15.
-        if (!tap::algorithms::compareFloatClose(lastDesiredLaunchSpeed, desiredLaunchSpeed, 1E-5))
-        {
-            lastDesiredLaunchSpeed = desiredLaunchSpeed;
-            pastProjectileVelocitySpeedSummed = 0;
-            this->ballSpeedAveragingTracker.clear();
-        }
-
         if (this->drivers->refSerial.getRefSerialReceivingData())
         {
             const auto &turretData = this->drivers->refSerial.getRobotData().turret;

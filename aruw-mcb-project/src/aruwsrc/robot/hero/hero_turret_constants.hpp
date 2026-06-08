@@ -120,7 +120,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 0.0f,
 };
 
-inline constexpr algorithms::OptimalSTOSController::STOSConstants StosConstants{
+inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS{
     .J_TOTAL = 0.0454f,
     .TAU_MAX = 5.5f,
     .B_DAMP = 0.001f,
@@ -130,12 +130,18 @@ inline constexpr algorithms::OptimalSTOSController::STOSConstants StosConstants{
     .TorqueToMotorOutput = 16384.0f / 6.0f,
 };
 
+inline constexpr algorithms::TurretFeedforwardConstants TURRET_FEEDFORWARD_CONSTANTS{
+    .Ka = 100.0f,
+    .Kv = 150.0f,
+    .Ks = 250.0f,
+};
+
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 50.0f,
     .ki = 0.0f,
-    .kd = 1.0f,
+    .kd = 2.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 15.0f,
     .tQDerivativeKalman = 1.0f,
@@ -153,9 +159,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
     .maxICumulative = 600.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
-    .tQProportionalKalman = 0.1f,
-    .tRProportionalKalman = 0.4f,
+    .tRDerivativeKalman = 30.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 5.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
@@ -189,23 +195,24 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 5.0f,
-    .maxOutput = 2000.0f,
+    .kp = 35.0f,
+    .ki = 1000.0f,
+    .kd = 2.0f,
+    .maxICumulative = 1.0f,
+    .maxOutput = 30.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 30.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
+    .antiSaturation = true,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .kp = 8000.0f,
     .ki = 0.0f,
-    .kd = 1000.0f,
+    .kd = 0.0f,
     .maxICumulative = 5'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
