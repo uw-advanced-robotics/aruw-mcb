@@ -595,7 +595,7 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOn,
     {&heatLimitGovernor, &cvOnTargetGovernor});
@@ -689,8 +689,7 @@ Trigger leftSwitchDown =
 
 Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(&chassisDriveCommand)
-        .whileTrue(&turretCVCommand);
+        .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
 
 Trigger fToggled = TriggerHelpers::button(drivers(), Remote::Key::F).toggleOnTrue(&beybladeCommand);
 
