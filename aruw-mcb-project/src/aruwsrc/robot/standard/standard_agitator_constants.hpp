@@ -126,7 +126,6 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .jammingVelocityDifference = M_TWOPI,
     .jammingTime = 200,
     .jamLogicEnabled = true,
-    // .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
     .velocityPIDFeedForwardGain = 0,
     .emptyJamEnabled = false,
     .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
