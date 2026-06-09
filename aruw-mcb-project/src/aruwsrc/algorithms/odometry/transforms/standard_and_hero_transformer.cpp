@@ -31,7 +31,7 @@ namespace aruwsrc::algorithms::odometry::transforms
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.08, 0.1, 0.056), Orientation(0, 0, 0));
 inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
-    Transform(Position(0.0f, 0.0f, 0.402f), Orientation(0.0f, 0.0f, 0.0f));
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
 #elif defined(TARGET_STANDARD_PHOBOS)
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
@@ -41,12 +41,12 @@ inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
 inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
-    Transform(Position(0.0f, 0.0f, 0.550f), Orientation(0.0f, 0.0f, 0.0f));
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
 #elif defined(TARGET_SENTRY_ACHLYS)
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
 inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
-    Transform(Position(0.0f, 0.0f, 0.488f), Orientation(0.0f, 0.0f, 0.0f));
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
 #else
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
