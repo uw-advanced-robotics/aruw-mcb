@@ -29,15 +29,13 @@
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
-#include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/press_command_mapping.hpp"
+#include "tap/control/instant_command.hpp"
 #include "tap/control/remote_map_state.hpp"
 #include "tap/control/repeat_command.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/timeout_command.hpp"
-#include "tap/control/toggle_command_mapping.hpp"
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 #include "tap/drivers.hpp"
@@ -55,7 +53,7 @@
 #include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
-#include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
+#include "aruwsrc/control/agitator/multi_shot_cv_command.hpp"
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
@@ -85,7 +83,7 @@
 #include "aruwsrc/control/autotune/second_order_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
-#include "aruwsrc/control/cycle_state_command_mapping.hpp"
+#include "aruwsrc/control/cycle_state_mode_controller.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
@@ -324,6 +322,8 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers()->visionCoprocessor,
     odometrySubsystem,
     transformAdapter);
+
+tap::control::Subsystem dummySubsystem(drivers());
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::control::chassis::ChassisImuDriveCommand chassisImuDriveCommand(
@@ -567,9 +567,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 
 FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
-FireRateLimitGovernor fireRateLimitGovernor(manualFireRateReselectionManager);
-
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched(
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
     {&agitator},
     rotateAndUnjamAgitator,
     {&frictionWheelsOnGovernor});
@@ -581,7 +579,7 @@ HeatLimitGovernor heatLimitGovernor(
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
+    rotateAndUnjamAgitatorWhenFrictionWheelsOn,
     {&heatLimitGovernor});
 
 GovernorLimitedCommand<2> agitatorManualSpin(
@@ -597,10 +595,10 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
-GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
-    rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-    {&cvOnTargetGovernor});
+    rotateAndUnjamAgitatorWhenFrictionWheelsOn,
+    {&heatLimitGovernor, &cvOnTargetGovernor});
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -633,16 +631,6 @@ aruwsrc::control::client_display::ClientDisplaySubsystem clientDisplay(drivers()
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
 CapBankIndicator capBankIndicator(refSerialTransmitter, &drivers()->capacitorBank);
-
-extern MultiShotCvCommandMapping leftMousePressedBNotPressed;
-MatrixHudIndicators positionHudIndicators(
-    *drivers(),
-    drivers()->visionCoprocessor,
-    refSerialTransmitter,
-    frictionWheels,
-    turret,
-    &leftMousePressedBNotPressed,
-    &cvOnTargetGovernor);
 
 AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
 
@@ -683,8 +671,6 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
     clientDisplay,
     hudIndicators);
 
-/* define command mappings --------------------------------------------------*/
-
 // Remote related mappings
 Trigger rightSwitchMiddle =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
@@ -695,7 +681,7 @@ RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVL
 Trigger rightSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
         .onTrue(&spinFrictionWheels)
-        .whileTrue(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
+        .whileTrue(&rotateAndUnjamAgitatorRepeat);
 
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
@@ -703,31 +689,13 @@ Trigger leftSwitchDown =
 
 Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(&chassisDriveCommand)
-        .whileTrue(&turretCVCommand);
-
-auto rPressedRms = RemoteMapState({Remote::Key::R});
-auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
-    drivers(),
-    &rPressedRms,
-    true,
-    &cvOnTargetGovernor,
-    &CvOnTargetGovernor::setGovernorEnabled);
-
-MultiShotCvCommandMapping leftMousePressedBNotPressed(
-    *drivers(),
-    rotateAndUnjamAgitatorRepeat,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-    &manualFireRateReselectionManager,
-    cvOnTargetGovernor,
-    &rotateAgitator);
+        .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
 
 Trigger fToggled = TriggerHelpers::button(drivers(), Remote::Key::F).toggleOnTrue(&beybladeCommand);
 
-Trigger leftMousePressedBPressed =
-    (TriggerHelpers::leftMouseButton(drivers()) &&
-     TriggerHelpers::button(drivers(), Remote::Key::B))
-        .whileTrue(&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched);
+Trigger leftMousePressedBPressed = (TriggerHelpers::leftMouseButton(drivers()) &&
+                                    TriggerHelpers::button(drivers(), Remote::Key::B))
+                                       .whileTrue(&rotateAndUnjamAgitatorWhenFrictionWheelsOn);
 
 Trigger rightMousePressed = TriggerHelpers::rightMouseButton(drivers()).whileTrue(&turretCVCommand);
 
@@ -759,17 +727,61 @@ Trigger qPressed = TriggerHelpers::button(drivers(), Remote::Key::Q).toggleOnTru
 Trigger xPressed =
     TriggerHelpers::button(drivers(), Remote::Key::X).onTrue(&chassisAutorotateCommand);
 
-auto vPressedRms = RemoteMapState({Remote::Key::V});
-auto vPressed = std::make_unique<CycleStateCommandMapping<
-    MultiShotCvCommandMapping::LaunchMode,
-    MultiShotCvCommandMapping::NUM_SHOOTER_STATES,
-    MultiShotCvCommandMapping>>(
-    drivers(),
-    &vPressedRms,
-    MultiShotCvCommandMapping::LIMITED_20HZ,
-    &leftMousePressedBNotPressed,
-    &MultiShotCvCommandMapping::setShooterState,
-    RemoteMapState({Remote::Key::E}));
+MultiShotCvCommand multiShotCvCommand(
+    *drivers(),
+    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+    &manualFireRateReselectionManager,
+    cvOnTargetGovernor,
+    &rotateAgitator);
+
+MatrixHudIndicators positionHudIndicators(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    refSerialTransmitter,
+    frictionWheels,
+    turret,
+    &multiShotCvCommand,
+    &cvOnTargetGovernor);
+
+// Compose::parallel<1> so that multishot is still a weakconcurrentcommand and isReady is bypassed
+// since trigger doesn't have ownership
+Trigger leftMousePressed =
+    TriggerHelpers::leftMouseButton(drivers()).whileTrue(&multiShotCvCommand);
+//.whileTrue(Compose::parallel<2>({&turretCVCommand, &multiShotCvCommand}));
+
+auto cycleStateController = CycleStateModeController<
+    MultiShotCvCommand::LaunchMode,
+    MultiShotCvCommand::NUM_SHOOTER_STATES,
+    MultiShotCvCommand>(
+    MultiShotCvCommand::LIMITED_20HZ,
+    &multiShotCvCommand,
+    &MultiShotCvCommand::setShooterState);
+
+InstantCommand incrementCycleShootCommand(
+    []() { cycleStateController.cycleState(); },
+    std::array<tap::control::Subsystem *, 1>{
+        &dummySubsystem});  // fake requirement so gets scheduled by command scheduler
+
+Trigger vPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::V).onTrue(&incrementCycleShootCommand);
+
+InstantCommand decrementCycleShootCommand(
+    []() { cycleStateController.reverseCycleState(); },
+    std::array<tap::control::Subsystem *, 1>{&dummySubsystem});
+
+Trigger ePressed =
+    TriggerHelpers::button(drivers(), Remote::Key::E).onTrue(&decrementCycleShootCommand);
+
+auto cycleStateGovernor = CycleStateModeController<bool, 2, CvOnTargetGovernor>(
+    true,
+    &cvOnTargetGovernor,
+    &CvOnTargetGovernor::setGovernorEnabled);
+
+InstantCommand toggleGovernorMode(
+    []() { cycleStateGovernor.cycleState(); },
+    std::array<tap::control::Subsystem *, 1>{&dummySubsystem});
+
+Trigger rPressed = TriggerHelpers::button(drivers(), Remote::Key::R).onTrue(&toggleGovernorMode);
 
 // cap bank
 Trigger cShiftPressed = (TriggerHelpers::button(drivers(), Remote::Key::C) &&
@@ -798,6 +810,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
+    drivers->commandScheduler.registerSubsystem(&dummySubsystem);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -816,6 +829,7 @@ void initializeSubsystems()
     arucoResetSubsystem.initialize();
     perpendicularOmni.initialize();
     parallelOmni.initialize();
+    dummySubsystem.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -849,11 +863,7 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *drivers)
-{
-    drivers->commandMapper.addMap(std::move(rPressed));
-    drivers->commandMapper.addMap(std::move(vPressed));
-}
+void registerStandardIoMappings(Drivers *) {}
 }  // namespace standard_control
 
 namespace aruwsrc::standard

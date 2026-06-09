@@ -30,6 +30,7 @@
 #ifndef GRAVITY_AUTOTUNE_HPP_
 #define GRAVITY_AUTOTUNE_HPP_
 
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "modm/ui/display.hpp"
 
 #include "turret_autotune_command.hpp"

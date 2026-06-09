@@ -58,7 +58,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
-static constexpr int AGITATOR_NUM_POCKETS = 9;          // number of balls in one rotation
+static constexpr int AGITATOR_NUM_POCKETS = 8;          // number of balls in one rotation
 static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
 
@@ -75,7 +75,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .jammingTime = 100,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
-    .emptyJamEnabled = true,
+    .emptyJamEnabled = false,
     .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
     .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
@@ -126,9 +126,8 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .jammingVelocityDifference = M_TWOPI,
     .jammingTime = 200,
     .jamLogicEnabled = true,
-    // .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
     .velocityPIDFeedForwardGain = 0,
-    .emptyJamEnabled = true,
+    .emptyJamEnabled = false,
     .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
     .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
