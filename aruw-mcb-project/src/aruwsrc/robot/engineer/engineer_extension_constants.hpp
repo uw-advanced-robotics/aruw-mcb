@@ -40,7 +40,6 @@ static constexpr tap::algorithms::SmoothPidConfig EXTENSION_PID_CONFIG = {
     .maxOutput = 6000.f,
 };
 
-
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
     EXTENSION_CONFIG{
         .super =  // JointSubsystem::Config

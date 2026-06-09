@@ -58,7 +58,6 @@ void TurretMotor::updateMotorAngle()
     {
         chassisFrameMeasuredAngle.setUnwrappedValue(config.startAngle);
     }
-
 }
 
 void TurretMotor::setMotorOutput(float out)
@@ -79,7 +78,6 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 {
     chassisFrameSetpoint = setpoint;
 
-
     if (config.limitMotorAngles)
     {
         float minAngle = getMinLimit();
@@ -89,7 +87,6 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
         chassisFrameSetpoint =
             Angle(WrappedFloat::limitValue(chassisFrameSetpoint, minAngle, maxAngle, &status));
     }
-
 }
 
 float TurretMotor::getValidChassisMeasurementError() const

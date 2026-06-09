@@ -91,7 +91,6 @@ void DjiMotor::processMessage(const modm::can::Message& message)
 
 void DjiMotor::setDesiredOutput(int32_t desiredOutput)
 {
-    // return; //TODO: remove ts when i want to actually run motors 
     int16_t desOutputNotInverted =
         static_cast<int16_t>(tap::algorithms::limitVal<int32_t>(desiredOutput, SHRT_MIN, SHRT_MAX));
     this->desiredOutput = motorInverted ? -desOutputNotInverted : desOutputNotInverted;

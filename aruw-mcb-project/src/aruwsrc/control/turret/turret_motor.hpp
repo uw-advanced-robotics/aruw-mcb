@@ -165,7 +165,6 @@ public:
 
     float getMaxLimit() const { return maxLimitFunc != nullptr ? maxLimitFunc() : config.maxAngle; }
 
-
 private:
     const TurretMotorConfig config;
 
@@ -183,8 +182,6 @@ private:
     WrappedFloat chassisFrameMeasuredAngle;
     float (*minLimitFunc)() = nullptr;
     float (*maxLimitFunc)() = nullptr;
-
-
 };
 }  // namespace aruwsrc::control::turret
 

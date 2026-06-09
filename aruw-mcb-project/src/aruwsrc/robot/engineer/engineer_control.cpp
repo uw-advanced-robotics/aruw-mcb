@@ -17,8 +17,6 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define SEMICOLON ;
-
 #if defined(TARGET_ENGINEER)
 #include <array>
 #include <cmath>
@@ -196,15 +194,9 @@ EngineerTurretSubsystem engTurret(
     &drivers()->mcbLite.imu,
     engineerTurretLimitOverrides);
 
-float getLivePitchMinLimit()
-{
-    return getPitchMinLimit(extensionSubsystem.getPosition());
-}
+float getLivePitchMinLimit() { return getPitchMinLimit(extensionSubsystem.getPosition()); }
 
-float getLivePitchMaxLimit()
-{
-    return getPitchMaxLimit(extensionSubsystem.getPosition());
-}
+float getLivePitchMaxLimit() { return getPitchMaxLimit(extensionSubsystem.getPosition()); }
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
@@ -334,9 +326,6 @@ tap::encoder::CanEncoder wristEncoderTheta2(
     false,
     1,
     WRIST_HOME_THETA2);
-
-
-
 
 /* define subsystems --------------------------------------------------------*/
 

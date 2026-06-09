@@ -43,16 +43,8 @@ TurretSubsystem::TurretSubsystem(
     const tap::communication::sensors::imu::AbstractIMU* turretImu,
     const std::array<std::pair<float (*)(), float (*)()>, 2>& limitOverrides)
     : tap::control::Subsystem(drivers),
-      pitchMotor(
-          pitchMotor,
-          pitchMotorConfig,
-          limitOverrides[0].first,
-          limitOverrides[0].second),
-      yawMotor(
-          yawMotor,
-          yawMotorConfig,
-          limitOverrides[1].first,
-          limitOverrides[1].second),
+      pitchMotor(pitchMotor, pitchMotorConfig, limitOverrides[0].first, limitOverrides[0].second),
+      yawMotor(yawMotor, yawMotorConfig, limitOverrides[1].first, limitOverrides[1].second),
       turretImu(turretImu)
 {
     assert(drivers != nullptr);

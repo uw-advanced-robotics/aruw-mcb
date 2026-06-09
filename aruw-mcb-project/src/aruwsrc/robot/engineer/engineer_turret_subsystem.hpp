@@ -35,14 +35,7 @@ public:
     void refresh() override;
     void refreshSafeDisconnect() override;
 
-    // TODO: remove these later 
-    float DEBUG_livePitchMinLimit = 0.0f;
-    float DEBUG_livePitchMaxLimit = 0.0f;
-    float DEBUG_currentPitchAngle = 0.0f;
-
 private:
-    void updatePitchLimitDebug();
-
     float getWorldYaw() const override;
     float getWorldPitch() const override;
     modm::Vector3f getTurretOffset() const override { return modm::Vector3f(0, 0, 0); };

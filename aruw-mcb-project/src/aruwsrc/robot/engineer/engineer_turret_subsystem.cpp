@@ -23,24 +23,11 @@
 
 namespace aruwsrc::engineer
 {
-void EngineerTurretSubsystem::refresh()
-{
-    control::turret::RobotTurretSubsystem::refresh();
-    DEBUG_currentPitchAngle = getWorldPitch();
-    updatePitchLimitDebug();
-}
+void EngineerTurretSubsystem::refresh() { control::turret::RobotTurretSubsystem::refresh(); }
 
 void EngineerTurretSubsystem::refreshSafeDisconnect()
 {
     control::turret::RobotTurretSubsystem::refreshSafeDisconnect();
-    DEBUG_currentPitchAngle = getWorldPitch();
-    updatePitchLimitDebug();
-}
-
-void EngineerTurretSubsystem::updatePitchLimitDebug()
-{
-    DEBUG_livePitchMinLimit = pitchMotor.getMinLimit();
-    DEBUG_livePitchMaxLimit = pitchMotor.getMaxLimit();
 }
 
 float EngineerTurretSubsystem::getWorldYaw() const { return getIMU()->getYaw(); }
