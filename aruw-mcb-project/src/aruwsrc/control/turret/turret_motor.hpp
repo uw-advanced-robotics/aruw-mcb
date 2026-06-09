@@ -165,7 +165,7 @@ public:
 
     float getMaxLimit() const { return maxLimitFunc != nullptr ? maxLimitFunc() : config.maxAngle; }
 
-private:
+protected:
     const TurretMotorConfig config;
 
     /// Low-level motor object that this object interacts with
@@ -180,6 +180,8 @@ private:
 
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
     WrappedFloat chassisFrameMeasuredAngle;
+
+private:
     float (*minLimitFunc)() = nullptr;
     float (*maxLimitFunc)() = nullptr;
 };

@@ -20,9 +20,6 @@
 #ifndef TURRET_SUBSYSTEM_HPP_
 #define TURRET_SUBSYSTEM_HPP_
 
-#include <array>
-#include <utility>
-
 #include "tap/algorithms/linear_interpolation_predictor.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 #include "tap/control/subsystem.hpp"
@@ -61,17 +58,12 @@ public:
      *
      * @param[in] pitchMotor Pointer to pitch motor that this `TurretSubsystem` will own.
      * @param[in] yawMotor Pointer to yaw motor that this `TurretSubsystem` will own.
-     * @param[in] limitOverrides Optional dynamic angle limits in radians. Index 0 is pitch
-     * `{min, max}`, index 1 is yaw `{min, max}`.
      */
     explicit TurretSubsystem(
         tap::Drivers* drivers,
-        tap::motor::MotorInterface* pitchMotor,
-        tap::motor::MotorInterface* yawMotor,
-        const TurretMotorConfig& pitchMotorConfig,
-        const TurretMotorConfig& yawMotorConfig,
-        const tap::communication::sensors::imu::AbstractIMU* turretImu,
-        const std::array<std::pair<float (*)(), float (*)()>, 2>& limitOverrides = {});
+        TurretMotor& pitchMotor,
+        TurretMotor& yawMotor,
+        const tap::communication::sensors::imu::AbstractIMU* turretImu);
 
     void initialize() override;
 
@@ -89,15 +81,10 @@ public:
 
     const inline tap::communication::sensors::imu::AbstractIMU* getIMU() const { return turretImu; }
 
-#ifdef ENV_UNIT_TESTS
-    testing::NiceMock<mock::TurretMotorMock> pitchMotor;
-    testing::NiceMock<mock::TurretMotorMock> yawMotor;
-#else
     /// Associated with and contains logic for controlling the turret's pitch motor
-    TurretMotor pitchMotor;
+    TurretMotor& pitchMotor;
     /// Associated with and contains logic for controlling the turret's yaw motor
-    TurretMotor yawMotor;
-#endif
+    TurretMotor& yawMotor;
 
 protected:
     const tap::communication::sensors::imu::AbstractIMU* turretImu;

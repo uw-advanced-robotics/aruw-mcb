@@ -18,10 +18,8 @@
  */
 
 #if defined(TARGET_ENGINEER)
-#include <array>
 #include <cmath>
 #include <memory>
-#include <utility>
 
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
@@ -64,6 +62,7 @@
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -178,21 +177,19 @@ TriggerHomedJointSubsystem extensionSubsystem(
 float getLivePitchMinLimit();
 float getLivePitchMaxLimit();
 
-std::array<std::pair<float (*)(), float (*)()>, 2> engineerTurretLimitOverrides{{
-    // Index 0 limits pitch dynamically based on extension position.
-    {getLivePitchMinLimit, getLivePitchMaxLimit},
-    // Index 1 would limit yaw; engineer yaw is not limited dynamically.
-    {nullptr, nullptr},
-}};
+aruwsrc::control::turret::TurretMotor pitchTurretMotorWrapper(
+    &pitchTurretMotor,
+    PITCH_MOTOR_CONFIG,
+    getLivePitchMinLimit,
+    getLivePitchMaxLimit);
+
+aruwsrc::control::turret::TurretMotor yawTurretMotorWrapper(&yawTurretMotor, YAW_MOTOR_CONFIG);
 
 EngineerTurretSubsystem engTurret(
     drivers(),
-    &pitchTurretMotor,
-    &yawTurretMotor,
-    PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
-    &drivers()->mcbLite.imu,
-    engineerTurretLimitOverrides);
+    pitchTurretMotorWrapper,
+    yawTurretMotorWrapper,
+    &drivers()->mcbLite.imu);
 
 float getLivePitchMinLimit() { return getPitchMinLimit(extensionSubsystem.getPosition()); }
 
