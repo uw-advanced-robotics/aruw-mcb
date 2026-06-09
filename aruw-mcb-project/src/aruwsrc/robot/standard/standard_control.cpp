@@ -80,6 +80,7 @@
 
 //#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
+#include "aruwsrc/control/autotune/second_order_autotune.hpp"
 #include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_mode_controller.hpp"
@@ -98,6 +99,7 @@
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/third_order_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
@@ -190,37 +192,37 @@ tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
     aruwsrc::control::chassis::LEFT_FRONT_MOTOR_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    false,
+    aruwsrc::control::chassis::WHEELBASE_MOTOR_INVERTED,
     "Left Front Chassis Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO);
 
 tap::motor::DjiMotor leftBackChassisMotor(
     drivers(),
     aruwsrc::control::chassis::LEFT_BACK_MOTOR_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    false,
+    aruwsrc::control::chassis::WHEELBASE_MOTOR_INVERTED,
     "Left Back Chassis Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO);
 
 tap::motor::DjiMotor rightFrontChassisMotor(
     drivers(),
     aruwsrc::control::chassis::RIGHT_FRONT_MOTOR_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    false,
+    aruwsrc::control::chassis::WHEELBASE_MOTOR_INVERTED,
     "Right Front Chassis Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO);
 
 tap::motor::DjiMotor rightBackChassisMotor(
     drivers(),
     aruwsrc::control::chassis::RIGHT_BACK_MOTOR_ID,
     aruwsrc::control::chassis::CAN_BUS_MOTORS,
-    false,
+    aruwsrc::control::chassis::WHEELBASE_MOTOR_INVERTED,
     "Right Back Chassis Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+    aruwsrc::control::chassis::CHASSIS_GEARBOX_RATIO);
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassis(
     drivers(),
@@ -367,7 +369,7 @@ algorithms::TurretSpringForceOffset turretSpringCompensation(
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
     turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG,
-    {&turretGravityCompensation});
+    {&turretGravityCompensation, &turretSpringCompensation});
 
 algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
     turret.yawMotor,
@@ -487,6 +489,7 @@ autotune::GravityAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::
          pitchMotor.isMotorInverted(),
          TURRET_WEIGHT_KG,
          TORQUE_TO_DESIRED_OUT},
+        &turretSpringCompensation,
         &chassis);
 
 autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
@@ -499,6 +502,21 @@ autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::P
          TURRET_WEIGHT_KG,
          TORQUE_TO_DESIRED_OUT},
         &turretSpringCompensation,
+        &turretGravityCompensation,
+        &chassis,
+        {},
+        &imuCalibrateSuccessBuzzCommand,
+        &imuCalibrateFailBuzzCommand);
+
+autotune::SecondOrderAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
+    secondOrderAutotuneCommand(
+        drivers(),
+        {&turret,
+         &turret.pitchMotor,
+         &chassisFramePitchTurretController,
+         pitchMotor.isMotorInverted(),
+         TURRET_WEIGHT_KG,
+         TORQUE_TO_DESIRED_OUT},
         &turretGravityCompensation,
         &chassis,
         {},
@@ -656,7 +674,7 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 // Remote related mappings
 Trigger rightSwitchMiddle =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
-        // .onTrue(&spinFrictionWheels)
+        .onTrue(&spinFrictionWheels)
         .onFalse(&stopFrictionWheels);
 
 RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
@@ -830,7 +848,7 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
-#ifdef TARGET_STANDARD_VOID
+#ifdef TARGET_STANDARD_PHOBOS
     getTurretMCBCanComm().setImuMountingTransforms(
         aruwsrc::control::turret::TURRET_MCB_BMI088_MOUNTING_TRANSFORM,
         aruwsrc::control::turret::TURRET_MCB_ISM330_MOUNTING_TRANSFORM);
@@ -872,7 +890,9 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
 {
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
         &standard_control::gravityAutotuneCommand,
-        &standard_control::springAutotuneCommand};
+        &standard_control::springAutotuneCommand,
+        &standard_control::secondOrderAutotuneCommand,
+    };
     return commands;
 }
 #endif

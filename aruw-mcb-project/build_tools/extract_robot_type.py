@@ -21,7 +21,7 @@ from SCons.Script import *
 # TODO: Make this sync up with check.py and c_cpp_properties.json if possible
 VALID_ROBOT_TYPES = [
     "STANDARD_NULL",
-    "STANDARD_VOID",
+    "STANDARD_PHOBOS",
     "DRONE",
     "ENGINEER",
     "SENTRY_ACHLYS",
@@ -37,7 +37,7 @@ VALID_ROBOT_TYPES = [
 
 ROBOT_CLASS = {
     "STANDARD_NULL": "standard",
-    "STANDARD_VOID": "standard",
+    "STANDARD_PHOBOS": "standard",
     "DRONE": "drone",
     "ENGINEER": "engineer",
     "SENTRY_ACHLYS": "sentry",
