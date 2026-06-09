@@ -199,5 +199,5 @@ Usage: scons <target> [profile=<debug|release>] [robot=TARGET_<ROBOT_TYPE>] [pro
             - "usb=1", "--usb": forces the use of USB, regardless of whether a known IP is present.
     "TARGET_<ROBOT_TYPE>" is an optional argument that can override whatever robot type has been specified in robot_type.hpp.
         - <ROBOT_TYPE> must be one of the following:
-            - STANDARD_NULL, STANDARD_VOID, DRONE, ENGINEER, SENTRY_ACHLYS, HERO_NEPTUNE
+            - STANDARD_NULL, STANDARD_PHOBOS, DRONE, ENGINEER, SENTRY_ACHLYS, HERO_ZERO
 ```
