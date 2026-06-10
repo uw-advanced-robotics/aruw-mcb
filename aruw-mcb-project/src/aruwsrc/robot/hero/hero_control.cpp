@@ -82,6 +82,7 @@
 // #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
+#include "aruwsrc/control/cycle_state_mode_controller.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
@@ -275,7 +276,7 @@ VelocityAgitatorSubsystem kickerAgitator(
     constants::KICKER_PID_CONFIG,
     constants::KICKER_AGITATOR_CONFIG);
 
-VelocityAgitatorSubsystem carsonator(
+VelocityAgitatorSubsystem waterwheelAgitator(
     drivers(),
     constants::WATERWHEEL_PID_CONFIG,
     constants::WATERWHEEL_AGITATOR_CONFIG);
@@ -566,11 +567,13 @@ GovernorLimitedCommand<1> turretUTurnCommandLimited(
 
 // hero agitator commands
 
-LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(
-    getTurretMCBCanComm(),
-    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED);
-LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(
-    getTurretMCBCanComm(),
+LimitSwitchDepressedGovernor kickerWheelLimitSwitchNotDepressedGovernor(
+    getTurretMCBCanComm().getKickerWheelLimitSwitch(),
+    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
+
+ChoppedHeroLimitSwitchDepressedGovernor bothLimitSwitchesNotDepressedGovernor(
+    {&getTurretMCBCanComm().getKickerWheelLimitSwitch(),
+     &getTurretMCBCanComm().getAgitatorLoadingLimitSwitch()},
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
 
 // rotates agitator if friction wheels are spinning fast
@@ -578,20 +581,24 @@ FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheelSubsystem);
 
 namespace waterwheel
 {
-MoveIntegralCommand rotateWaterwheel(carsonator, constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+MoveIntegralCommand rotateWaterwheel(
+    waterwheelAgitator,
+    constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
 
-UnjamIntegralCommand unjamWaterwheel(carsonator, constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
+UnjamIntegralCommand unjamWaterwheel(
+    waterwheelAgitator,
+    constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
 
 MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     *drivers(),
-    carsonator,
+    waterwheelAgitator,
     rotateWaterwheel,
     unjamWaterwheel);
 
 GovernorLimitedCommand<2> feedWaterwheelWhenBallNotReady(
-    {&carsonator},
+    {&waterwheelAgitator},
     rotateAndUnjamWaterwheel,
-    {&frictionWheelsOnGovernor, &limitSwitchNotDepressedGovernor});
+    {&frictionWheelsOnGovernor, &bothLimitSwitchesNotDepressedGovernor});
 }  // namespace waterwheel
 
 namespace kicker
@@ -601,7 +608,7 @@ MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_R
 GovernorLimitedCommand<2> feedKickerWhenBallNotReady(
     {&kickerAgitator},
     loadKicker,
-    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
+    {&kickerWheelLimitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
 HeatLimitGovernor heatLimitGovernor(
@@ -663,7 +670,7 @@ DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTra
 
 TextHudIndicators textHudIndicators(
     *drivers(),
-    carsonator,
+    waterwheelAgitator,
     imuCalibrateCommand,
     {&beybladeCommand},
     refSerialTransmitter);
@@ -822,7 +829,7 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
     clientDisplay.initialize();
     kickerAgitator.initialize();
-    carsonator.initialize();
+    waterwheelAgitator.initialize();
     turret.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
@@ -838,7 +845,7 @@ void registerHeroSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&kickerAgitator);
-    drivers->commandScheduler.registerSubsystem(&carsonator);
+    drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
@@ -853,7 +860,7 @@ void setDefaultHeroCommands()
     frictionWheelSubsystem.setDefaultCommand(&stopFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     // turret.setDefaultCommand(&turretDisabledCommand);
-    carsonator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
+    waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
