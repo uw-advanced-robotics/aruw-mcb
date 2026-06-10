@@ -26,6 +26,7 @@
 #include "tap/control/command_composition_helper.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/command_scheduler.hpp"
+#include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 #include "tap/control/trigger.hpp"
@@ -34,6 +35,7 @@
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
@@ -77,18 +79,16 @@
 #include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
+#include "aruwsrc/robot/engineer/servo/engineer_servo_constants.hpp"
+#include "aruwsrc/robot/engineer/servo/servo_move_position_command.hpp"
+#include "aruwsrc/robot/engineer/servo/vtm_servo_subsystem.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_controller_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
-#include "aruwsrc/robot/engineer/servo/vtm_servo_subsystem.hpp"
-#include "aruwsrc/robot/engineer/servo/servo_move_position_command.hpp"
-#include "aruwsrc/robot/engineer/servo/engineer_servo_constants.hpp"
 #include "aruwsrc/util_macros.hpp"
-#include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
-#include "tap/control/hold_command_mapping.hpp"
 
 using namespace aruwsrc::communication::mcb_lite;
 using namespace aruwsrc::communication::mcb_lite::motor;
@@ -311,11 +311,20 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
 LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
 aruwsrc::communication::mcb_lite::motor::VirtualServo yawServo(
-    drivers(), YAW_PIN, YAW_MAX_PWM, YAW_MIN_PWM, RAMP_SPEED, drivers()->mcbLite.pwm);
+    drivers(),
+    YAW_PIN,
+    YAW_MAX_PWM,
+    YAW_MIN_PWM,
+    RAMP_SPEED,
+    drivers()->mcbLite.pwm);
 
 aruwsrc::communication::mcb_lite::motor::VirtualServo pitchServo(
-    drivers(), PITCH_PIN, PITCH_MAX_PWM, PITCH_MIN_PWM, RAMP_SPEED, drivers()->mcbLite.pwm);
-
+    drivers(),
+    PITCH_PIN,
+    PITCH_MAX_PWM,
+    PITCH_MIN_PWM,
+    RAMP_SPEED,
+    drivers()->mcbLite.pwm);
 
 /* define subsystems --------------------------------------------------------*/
 
