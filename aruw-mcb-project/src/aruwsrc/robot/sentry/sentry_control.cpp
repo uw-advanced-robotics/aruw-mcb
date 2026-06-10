@@ -428,8 +428,7 @@ aruwsrc::algorithms::CvBallisticsSolver ballisticsSolver(
         .minimumShotDelay = aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS /
                             1'000'000.0f,
     },
-    turretWidow.getTurretID(),
-    &drivers()->rttTelemetry);
+    turretWidow.getTurretID());
 
 SentryAutoAimLaunchTimer autoAimLaunchTimerTurretWidow(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
