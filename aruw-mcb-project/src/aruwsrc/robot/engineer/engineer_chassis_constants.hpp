@@ -147,7 +147,9 @@ static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
 
-static constexpr float MAX_3508_PRE_GEARBOX_RPM = 482.0f * (1 / (187.0f / 3591.0f));
+// 482 is maximum physicially possible post-gearbox RPM with the standard gearbox
+static constexpr float MAX_3508_PRE_GEARBOX_RPM =
+    482.0f * (1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 static constexpr float MAX_CHASSIS_WHEEL_SPEED_RPM =
     MAX_3508_PRE_GEARBOX_RPM *
     CHASSIS_GEARBOX_RATIO;  // Max theoretical M3508 wheel speed post gearbox
