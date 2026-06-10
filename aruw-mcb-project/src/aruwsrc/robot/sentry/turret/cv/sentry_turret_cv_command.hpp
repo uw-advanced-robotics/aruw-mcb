@@ -85,21 +85,13 @@ public:
         NOT_HIT,
     };
 
-    static constexpr float SCAN_TURRET_MINOR_PITCH = modm::toRadian(10.0f);
-
-    /**
-     * Pitch angle increments that the turret will change by each call
-     * to refresh when the turret is scanning for a target, in radians.
-     */
-    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.12f);  // 0.2
+    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.60f);
 
     /**
      * The number of times refresh is called without receiving valid CV data to when
      * the command will consider the target lost and start tracking.
      */
     static constexpr int AIM_LOST_NUM_COUNTS = 500;
-
-    static constexpr float SCAN_LOW_PASS_ALPHA = 0.007f;
 
     /**
      * Time to ignore aim requests while the turret is u-turning to aim at a new quadrant.
@@ -189,18 +181,30 @@ private:
 
     static constexpr uint32_t HIT_COUNT_DELAY_MILLISEC = 500;
     static constexpr float HIT_MAG_THRESH = 0.4f;
-    static constexpr float TURRET_OFFSET = modm::toRadian(10.0f);
     static constexpr float HIT_DIFF_OFFSET = modm::toRadian(20.0f);
 
-    // scan direction
+    static constexpr float SCAN_LOW_PASS_ALPHA = 0.035f;
+    static constexpr float SCAN_ENDPOINT_TOLERANCE = modm::toRadian(1.0f);
+
     static constexpr int SCAN_CLOCKWISE = -1;
     static constexpr int SCAN_COUNTER_CLOCKWISE = 1;
-    int scanDir = 1;
+    int scanDir = SCAN_COUNTER_CLOCKWISE;
+    int pitchScanDir = SCAN_CLOCKWISE;
 
-    // scan between 90 and 270 to avoid any silliness from wrapping
-    static constexpr float CW_TO_CCW_WRAP_VALUE = modm::toRadian(45.0f);
-    static constexpr float CCW_TO_CW_WRAP_VALUE = modm::toRadian(315.0f);
+    // Scan two full rotations per pass before reversing, with a small overscan to avoid wrapped
+    // endpoint ambiguity.
+    static constexpr float YAW_SCAN_HALF_RANGE = M_TWOPI + modm::toRadian(4.0f);
+    static constexpr float MAJOR_SCAN_HALF_RANGE = YAW_SCAN_HALF_RANGE;
+    static constexpr float MAJOR_SCAN_RATIO = MAJOR_SCAN_HALF_RANGE / YAW_SCAN_HALF_RANGE;
+    static constexpr float SCAN_TURRET_MINOR_UP_PITCH =
+        aruwsrc::control::turret::turretWidow::PITCH_MOTOR_CONFIG.minAngle;
+    static constexpr float SCAN_TURRET_MINOR_DOWN_PITCH = modm::toRadian(25.0f);
+    static constexpr float PITCH_SCAN_DELTA_ANGLE = modm::toRadian(0.19f);
 
+    tap::algorithms::WrappedFloat scanCenter = Angle(0);
+    float scanOffsetFromCenter = 0.0f;
+    float pitchScanValue = SCAN_TURRET_MINOR_UP_PITCH;
+    tap::algorithms::WrappedFloat minorScanValue = Angle(0);
     tap::algorithms::WrappedFloat majorScanValue = Angle(0);
 
     bool withinAimingToleranceWidow = false;
@@ -216,13 +220,23 @@ private:
     /**
      * Initializes scanning mode.
      *
-     * Sets the yaw scanner to the current setpoint of the turret major.
+     * Centers the scan on the turret major and starts the smooth yaw sweep from the current minor
+     * yaw setpoint.
      */
-    inline void enterScanMode(WrappedFloat majorYawSetpoint)
+    inline void enterScanMode(WrappedFloat majorYawSetpoint, WrappedFloat minorYawSetpoint)
     {
         lostTargetCounter = AIM_LOST_NUM_COUNTS;
         scanning = true;
+        scanCenter = majorYawSetpoint;
+        scanOffsetFromCenter = tap::algorithms::limitVal(
+            majorYawSetpoint.minDifference(minorYawSetpoint),
+            -YAW_SCAN_HALF_RANGE,
+            YAW_SCAN_HALF_RANGE);
+        minorScanValue = scanCenter + scanOffsetFromCenter;
         majorScanValue = majorYawSetpoint;
+        scanDir = (scanOffsetFromCenter >= 0.0f) ? SCAN_COUNTER_CLOCKWISE : SCAN_CLOCKWISE;
+        pitchScanValue = SCAN_TURRET_MINOR_UP_PITCH;
+        pitchScanDir = SCAN_COUNTER_CLOCKWISE;
     }
 
     inline void exitScanMode()

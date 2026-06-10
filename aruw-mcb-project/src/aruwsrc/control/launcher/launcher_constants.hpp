@@ -79,13 +79,7 @@ static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
 /** speed of ramp when you set a new desired ramp speed [rpm / ms] */
 static constexpr float FRICTION_WHEEL_RAMP_SPEED = 3.0f;
 
-#if defined(TARGET_STANDARD_VOID)
-static constexpr float LAUNCHER_PID_KP = 14.0106f;
-static constexpr float LAUNCHER_PID_KI = 31.6228f;
-static constexpr float LAUNCHER_PID_KD = 0.0f;
-static constexpr float LAUNCHER_PID_MAX_ERROR_SUM = 5'000.0f;
-static constexpr float LAUNCHER_PID_MAX_OUTPUT = tap::motor::DjiMotor::MAX_OUTPUT_820R;
-#elif defined(TARGET_SENTRY_ACHLYS)
+#if defined(TARGET_SENTRY_ACHLYS)
 static constexpr float LAUNCHER_PID_KP = 14.0106f;
 static constexpr float LAUNCHER_PID_KI = 31.6228f;
 static constexpr float LAUNCHER_PID_KD = 0.0f;
@@ -152,7 +146,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {30.0f, 7000.0f},
     {32.0f, 7900.0f},
 };
-#elif defined(TARGET_STANDARD_VOID)
+#elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},      {2.66f, 1000.0f},  {2.93f, 1100.0f},  {3.01f, 1200.0f},  {3.55f, 1300.0f},
     {3.85f, 1400.0f},  {4.00f, 1500.0f},  {4.43f, 1600.0f},  {4.77f, 1700.0f},  {4.99f, 1800.0f},
