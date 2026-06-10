@@ -22,8 +22,9 @@
 
 #include "tap/control/command.hpp"
 
-#include "vtm_servo_subsystem.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
+
+#include "vtm_servo_subsystem.hpp"
 
 namespace aruwsrc::engineer::servo
 {
@@ -33,7 +34,8 @@ public:
     ServoMovePositionCommand(
         VTMServoSubsystem& subsystem,
         const aruwsrc::engineer::algorithms::EngineerTransforms& transformer)
-        : subsystem(subsystem), transformer(transformer)
+        : subsystem(subsystem),
+          transformer(transformer)
     {
         addSubsystemRequirement(&subsystem);
     }
@@ -41,18 +43,13 @@ public:
     const char* getName() const override { return "Servo Move Position Command"; }
     bool isReady() override { return true; }
     void initialize() override {}
-    void execute() override
-    {
-        subsystem.moveToCube(transformer.getVtmGimbalToEndEffector());
-    }
+    void execute() override { subsystem.moveToCube(transformer.getVtmGimbalToEndEffector()); }
     void end(bool) override {}
     bool isFinished() const override { return false; }
-
-    
 
 private:
     VTMServoSubsystem& subsystem;
     const aruwsrc::engineer::algorithms::EngineerTransforms& transformer;
 };
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::servo
 #endif

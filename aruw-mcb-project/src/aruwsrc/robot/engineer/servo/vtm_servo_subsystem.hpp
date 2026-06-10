@@ -24,6 +24,7 @@
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
+
 #include "engineer_servo_constants.hpp"
 
 namespace aruwsrc::engineer::servo
@@ -32,14 +33,16 @@ class VTMServoSubsystem : public tap::control::Subsystem
 {
 public:
     VTMServoSubsystem(
-    tap::Drivers* drivers,
-    aruwsrc::communication::mcb_lite::motor::VirtualServo& yawServo,
-    aruwsrc::communication::mcb_lite::motor::VirtualServo& pitchServo,
-    aruwsrc::communication::mcb_lite::MCBLite& mcbLite)
-    : tap::control::Subsystem(drivers),
-      yawServo(yawServo),
-      pitchServo(pitchServo),
-      mcbLite(mcbLite) {}
+        tap::Drivers* drivers,
+        aruwsrc::communication::mcb_lite::motor::VirtualServo& yawServo,
+        aruwsrc::communication::mcb_lite::motor::VirtualServo& pitchServo,
+        aruwsrc::communication::mcb_lite::MCBLite& mcbLite)
+        : tap::control::Subsystem(drivers),
+          yawServo(yawServo),
+          pitchServo(pitchServo),
+          mcbLite(mcbLite)
+    {
+    }
 
     void refresh() override
     {
@@ -64,9 +67,12 @@ public:
         float pitch = atan2f(-z, sqrtf(x * x + y * y));
 
         // convert from angle to pwm
-        float yawPwm = YAW_MIN_PWM + (yaw -YAW_MIN_ANGLE)/(YAW_MAX_ANGLE-YAW_MIN_ANGLE) * (YAW_MAX_PWM - YAW_MIN_PWM);
-        float pitchPwm = PITCH_MIN_PWM+ (pitch - PITCH_MIN_ANGLE) /(PITCH_MAX_ANGLE - PITCH_MIN_ANGLE) * (PITCH_MAX_PWM - PITCH_MIN_PWM);
-        
+        float yawPwm = YAW_MIN_PWM + (yaw - YAW_MIN_ANGLE) / (YAW_MAX_ANGLE - YAW_MIN_ANGLE) *
+                                         (YAW_MAX_PWM - YAW_MIN_PWM);
+        float pitchPwm = PITCH_MIN_PWM + (pitch - PITCH_MIN_ANGLE) /
+                                             (PITCH_MAX_ANGLE - PITCH_MIN_ANGLE) *
+                                             (PITCH_MAX_PWM - PITCH_MIN_PWM);
+
         yawServo.setTargetPwm(yawPwm);
         pitchServo.setTargetPwm(pitchPwm);
     }
@@ -75,10 +81,7 @@ public:
     aruwsrc::communication::mcb_lite::motor::VirtualServo& pitchServo;
     aruwsrc::communication::mcb_lite::MCBLite& mcbLite;
 
-    
-
 private:
-
 };
-}  // namespace aruwsrc::engineer
+}  // namespace aruwsrc::engineer::servo
 #endif
