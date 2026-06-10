@@ -298,12 +298,13 @@ TurretMotorMock::TurretMotorMock(
     : aruwsrc::control::turret::TurretMotor(motor, motorConfig)
 {
     ON_CALL(*this, getValidMinError)
-        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement) {
-            return measurement.minDifference(setpoint);
-        });
-    ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
-        return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
-    });
+        .WillByDefault([&](const WrappedFloat setpoint, const WrappedFloat measurement)
+                       { return measurement.minDifference(setpoint); });
+    ON_CALL(*this, getValidChassisMeasurementError)
+        .WillByDefault(
+            [&]() {
+                return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
+            });
     ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(DEFAULT_CONFIG));
 }
 TurretMotorMock::~TurretMotorMock() {}
@@ -336,18 +337,16 @@ TurretCVCommandMock::~TurretCVCommandMock() {}
 
 CvBallisticsSolverMock::CvBallisticsSolverMock(
     const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-    const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-    const control::turret::RobotTurretSubsystem &turretSubsystem,
+    const aruwsrc::algorithms::odometry::transforms::TransformerInterface &transformer,
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-    const float defaultLaunchSpeed,
+    CvBallisticsSolver::Config config,
     const uint8_t turretID,
     aruwsrc::communication::rtt::RttTelemetry *telemetry)
     : aruwsrc::algorithms::CvBallisticsSolver(
           visionCoprocessor,
-          odometryInterface,
-          turretSubsystem,
+          transformer,
           frictionWheels,
-          defaultLaunchSpeed,
+          config,
           turretID,
           telemetry){};
 

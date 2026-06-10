@@ -22,13 +22,12 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 #include "tap/mock/hold_repeat_command_mapping_mock.hpp"
-#include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/mock/cv_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/referee_feedback_friction_wheel_subsystem_mock.hpp"
-#include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
@@ -62,11 +61,7 @@ protected:
               &drivers,
               std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}}),
           visionCoprocessor(&drivers),
-          pitchMotorMock(&pitchMotorInterfaceMock),
-          yawMotorMock(&yawMotorInterfaceMock),
-          turretSubsystem(&drivers, pitchMotorMock, yawMotorMock, nullptr),
-          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0, nullptr) {
-          };
+          ballistics(visionCoprocessor, transformer, frictionWheels){};
 
     void SetUp() override {}
 
@@ -74,13 +69,9 @@ protected:
     tap::Drivers drivers;
     NiceMock<tap::mock::DjiMotorMock> leftFlywheel;
     NiceMock<tap::mock::DjiMotorMock> rightFlywheel;
-    NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
     NiceMock<aruwsrc::mock::RefereeFeedbackFrictionWheelSubsystemMock> frictionWheels;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
-    NiceMock<tap::mock::MotorInterfaceMock> pitchMotorInterfaceMock, yawMotorInterfaceMock;
-    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
-    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
-    NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::CvBallisticsSolverMock> ballistics;
 };
 
@@ -284,6 +275,8 @@ TEST_P(
                 .radius0{0},
                 .radius1{0},
                 .plateHeights{0, 0, 0, 0},
+
+                .icon = VisionCoprocessor::PlateIcon::STANDARD_THREE,
 
                 .updated{params.aimData.pva.updated},
             },

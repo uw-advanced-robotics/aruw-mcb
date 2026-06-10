@@ -26,11 +26,19 @@
 #include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
-#include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
 using namespace aruwsrc::algorithms;
+
+CvBallisticsSolver::Config BALLISTICS_CONFIG{
+    .shotTimingEntryThreshold = 6.0f,
+    .shotTimingExitThreshold = 4.0f,
+    .defaultLaunchSpeed = 15,
+    .turretPitchOffset = 0,
+    .minimumShotDelay = 0.0f,
+};
 
 struct WithinAimingToleranceConfig
 {
@@ -99,15 +107,13 @@ INSTANTIATE_TEST_SUITE_P(
     WithinAimingToleranceTest,
     ValuesIn(withinAimingToleranceValuesToTest));
 
-class OttoBallisticsSolverTest : public Test
+class CvBallisticsSolverTest : public Test
 {
 protected:
-    OttoBallisticsSolverTest()
+    CvBallisticsSolverTest()
         : vc(&drivers),
-          pitchMotorMock(&pitchMotorInterfaceMock),
-          yawMotorMock(&yawMotorInterfaceMock),
-          turret(&drivers, pitchMotorMock, yawMotorMock, nullptr),
-          solver(vc, odometry, turret, launcher, 15, 0)
+          solver(vc, transformer, launcher, BALLISTICS_CONFIG, 0),
+          worldToTurret(0, 0, 0, 0, 0, 0)
     {
     }
 
@@ -117,10 +123,9 @@ protected:
 
         ON_CALL(vc, getLastAimData).WillByDefault(ReturnRef(aimData));
 
-        ON_CALL(odometry, getLastComputedOdometryTime)
+        ON_CALL(transformer, getWorldToTurret).WillByDefault(ReturnRef(worldToTurret));
+        ON_CALL(transformer, getLastComputedOdometryTime)
             .WillByDefault(ReturnPointee(&lastComputedOdomTime));
-        ON_CALL(odometry, getCurrentLocation2D).WillByDefault(ReturnPointee(&chassisLoc));
-        ON_CALL(odometry, getCurrentVelocity2D).WillByDefault(ReturnPointee(&chassisVel));
 
         ON_CALL(launcher, getPredictedLaunchSpeed).WillByDefault(ReturnPointee(&launchSpeed));
     }
@@ -128,13 +133,8 @@ protected:
     tap::Drivers drivers;
 
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> vc;
-    NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
-    NiceMock<tap::mock::MotorInterfaceMock> pitchMotorInterfaceMock;
-    NiceMock<tap::mock::MotorInterfaceMock> yawMotorInterfaceMock;
-    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
-    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
-    NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
 
     CvBallisticsSolver solver;
 
@@ -144,12 +144,11 @@ protected:
     uint32_t lastComputedOdomTime = 0;
     float launchSpeed = 15;
     bool cvOnline = true;
-    modm::Location2D<float> chassisLoc;
-    modm::Vector2f chassisVel;
+    tap::algorithms::transforms::Transform worldToTurret;
     tap::arch::clock::ClockStub clock;
 };
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_cv_offline)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_cv_offline)
 {
     cvOnline = false;
 
@@ -158,7 +157,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_cv_offline)
     EXPECT_FALSE(solution.has_value());
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aim_data_invalid)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_aim_data_invalid)
 {
     solution = solver.computeTurretAimAngles();
 
@@ -167,7 +166,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aim_data_invalid)
     EXPECT_FALSE(solution.has_value());
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
 {
     aimData.pva.xPos = 2;
 
@@ -177,7 +176,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
     EXPECT_FALSE(solution.has_value());
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
@@ -190,7 +189,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
     EXPECT_NEAR(2, solution->distance, 1e-5);
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
@@ -204,11 +203,11 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
     EXPECT_NEAR(2, solution->distance, 1e-5);
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
-    chassisLoc.setPosition(-2, 0);
+    worldToTurret.updateTranslation(-2, 0, 0);
 
     aimData.timestamp = 100;
 
@@ -221,7 +220,7 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
 }
 
 TEST_F(
-    OttoBallisticsSolverTest,
+    CvBallisticsSolverTest,
     comiputeTurretAimAngles_solution_found_no_new_time_solution_not_resolved)
 {
     aimData.pva.updated = true;
@@ -230,7 +229,7 @@ TEST_F(
 
     clock.time = 100;
 
-    EXPECT_CALL(odometry, getCurrentLocation2D).Times(1);
+    EXPECT_CALL(transformer, getWorldToTurret).Times(1);
 
     solution = solver.computeTurretAimAngles();
 
@@ -243,7 +242,7 @@ TEST_F(
     EXPECT_NEAR(2, solution->distance, 1e-5);
 }
 
-TEST_F(OttoBallisticsSolverTest, comiputeTurretAimAngles_solution_found_no_valid_solution)
+TEST_F(CvBallisticsSolverTest, comiputeTurretAimAngles_solution_found_no_valid_solution)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 100;
@@ -256,13 +255,13 @@ TEST_F(OttoBallisticsSolverTest, comiputeTurretAimAngles_solution_found_no_valid
     EXPECT_FALSE(solution.has_value());
 }
 
-TEST_F(OttoBallisticsSolverTest, jitter_aim_low_omega)
+TEST_F(CvBallisticsSolverTest, jitter_aim_low_omega)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
     aimData.pva.yPos = 0;
     aimData.pva.zPos = 0;
-    aimData.pva.omega = 0.5f;  // Below OMEGA_THRESHOLD (1.0)
+    aimData.pva.omega = BALLISTICS_CONFIG.shotTimingExitThreshold - 1;
     aimData.pva.radius0 = 0.2f;
     aimData.pva.radius1 = 0.2f;
     aimData.pva.theta = 0;
@@ -276,13 +275,13 @@ TEST_F(OttoBallisticsSolverTest, jitter_aim_low_omega)
     EXPECT_FALSE(solution->shotWindowValid);
 }
 
-TEST_F(OttoBallisticsSolverTest, pulse_estimation_high_omega)
+TEST_F(CvBallisticsSolverTest, pulse_estimation_high_omega)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
     aimData.pva.yPos = 0;
     aimData.pva.zPos = 0;
-    aimData.pva.omega = 2.0f;  // Above OMEGA_THRESHOLD (1.0)
+    aimData.pva.omega = BALLISTICS_CONFIG.shotTimingEntryThreshold + 1;
     aimData.pva.radius0 = 0.2f;
     aimData.pva.radius1 = 0.2f;
     aimData.pva.theta = 0;
@@ -300,7 +299,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_high_omega)
     EXPECT_LE(solution->activePlateIndex, 3);
 }
 
-TEST_F(OttoBallisticsSolverTest, pulse_estimation_persists_within_window)
+TEST_F(CvBallisticsSolverTest, pulse_estimation_persists_within_window)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
@@ -331,7 +330,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_persists_within_window)
     EXPECT_EQ(firstSolution->activePlateIndex, solution->activePlateIndex);
 }
 
-TEST_F(OttoBallisticsSolverTest, pulse_estimation_recalculates_after_window_expires)
+TEST_F(CvBallisticsSolverTest, pulse_estimation_recalculates_after_window_expires)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
@@ -360,13 +359,13 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_recalculates_after_window_expi
     EXPECT_NE(firstWindowEnd, solution->shotWindowEnd);
 }
 
-TEST_F(OttoBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
+TEST_F(CvBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
 {
     aimData.pva.updated = true;
     aimData.pva.xPos = 2;
     aimData.pva.yPos = 0;
     aimData.pva.zPos = 0;
-    aimData.pva.omega = 2.0f;  // High omega
+    aimData.pva.omega = BALLISTICS_CONFIG.shotTimingEntryThreshold + 1;
     aimData.pva.radius0 = 0.2f;
     aimData.pva.radius1 = 0.2f;
     aimData.pva.theta = 0;
@@ -379,7 +378,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
     EXPECT_TRUE(solution->shotWindowValid);
 
     // Omega drops below threshold
-    aimData.pva.omega = 0.5f;  // Below threshold
+    aimData.pva.omega = BALLISTICS_CONFIG.shotTimingExitThreshold - 1;
     aimData.timestamp = 101;
     clock.time = 150;
 

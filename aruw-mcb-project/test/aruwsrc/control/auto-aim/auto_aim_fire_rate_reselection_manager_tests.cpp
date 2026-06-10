@@ -21,7 +21,6 @@
 
 #include "tap/drivers.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
-#include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
@@ -29,6 +28,7 @@
 #include "aruwsrc/mock/cv_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
@@ -50,7 +50,7 @@ protected:
           pitchController(pitchMotor, {}),
           turretSubsystem(&drivers, pitchMotor, yawMotor, nullptr),
           visionCoprocessor(&drivers),
-          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0, nullptr),
+          ballisticsSolver(visionCoprocessor, transformer, launcher),
           operatorInterface(&drivers),
           turretCvCommand(
               &visionCoprocessor,
@@ -84,7 +84,7 @@ private:
         pitchController;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
-    NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
 
 protected:
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;

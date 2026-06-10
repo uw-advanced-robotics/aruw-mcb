@@ -23,6 +23,7 @@
 #include <gmock/gmock.h>
 
 #include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 
 namespace aruwsrc::mock
 {
@@ -30,17 +31,23 @@ namespace
 {
 using namespace aruwsrc::algorithms;
 }
+inline constexpr CvBallisticsSolver::Config DEFAULT_CONFIG{
+    .shotTimingEntryThreshold = 6.0f,
+    .shotTimingExitThreshold = 4.0f,
+    .defaultLaunchSpeed = 15,
+    .turretPitchOffset = 0,
+    .minimumShotDelay = 0.0f,
+};
 
 class CvBallisticsSolverMock : public CvBallisticsSolver
 {
 public:
     CvBallisticsSolverMock(
         const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-        const tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
-        const control::turret::RobotTurretSubsystem &turretSubsystem,
+        const aruwsrc::algorithms::odometry::transforms::TransformerInterface &transformer,
         const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
-        const float defaultLaunchSpeed,
-        const uint8_t turretID,
+        CvBallisticsSolver::Config config = DEFAULT_CONFIG,
+        const uint8_t turretID = 0,
         aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
     virtual ~CvBallisticsSolverMock();
 
