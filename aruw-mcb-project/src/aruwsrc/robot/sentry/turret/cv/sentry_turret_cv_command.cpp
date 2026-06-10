@@ -129,26 +129,54 @@ void SentryTurretCVCommand::execute()
             // Scan
             if (!scanning)
             {
-                enterScanMode(majorSetpoint);
+                enterScanMode(majorSetpoint, widowYawSetpoint);
             }
 
             if (curHitState == HitState::NOT_HIT)
             {
-                // scan logic: start at some default, scan 180deg clockwise, change direction
-                // scan 180 ccw, change, etc.
-                float v = majorScanValue.getWrappedValue();
-                if (v >= CCW_TO_CW_WRAP_VALUE)
-                    scanDir = SCAN_CLOCKWISE;  // decreases angle
-                else if (v <= CW_TO_CCW_WRAP_VALUE)
-                    scanDir = SCAN_COUNTER_CLOCKWISE;  // increases angle
+                scanOffsetFromCenter += YAW_SCAN_DELTA_ANGLE * scanDir;
+                if (scanOffsetFromCenter >= YAW_SCAN_HALF_RANGE)
+                {
+                    scanOffsetFromCenter = YAW_SCAN_HALF_RANGE;
+                }
+                else if (scanOffsetFromCenter <= -YAW_SCAN_HALF_RANGE)
+                {
+                    scanOffsetFromCenter = -YAW_SCAN_HALF_RANGE;
+                }
 
-                majorScanValue += YAW_SCAN_DELTA_ANGLE * scanDir;
-                majorSetpoint = majorSetpoint.minInterpolate(
-                    majorScanValue,
-                    SCAN_LOW_PASS_ALPHA);  // lowpass filter
+                pitchScanValue += PITCH_SCAN_DELTA_ANGLE * pitchScanDir;
+                if (pitchScanValue >= SCAN_TURRET_MINOR_DOWN_PITCH)
+                {
+                    pitchScanValue = SCAN_TURRET_MINOR_DOWN_PITCH;
+                    pitchScanDir = SCAN_CLOCKWISE;
+                }
+                else if (pitchScanValue <= SCAN_TURRET_MINOR_UP_PITCH)
+                {
+                    pitchScanValue = SCAN_TURRET_MINOR_UP_PITCH;
+                    pitchScanDir = SCAN_COUNTER_CLOCKWISE;
+                }
 
-                widowPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
-                widowYawSetpoint = majorSetpoint;
+                minorScanValue = scanCenter + scanOffsetFromCenter;
+                widowPitchSetpoint =
+                    widowPitchSetpoint.minInterpolate(Angle(pitchScanValue), SCAN_LOW_PASS_ALPHA);
+                widowYawSetpoint =
+                    widowYawSetpoint.minInterpolate(minorScanValue, SCAN_LOW_PASS_ALPHA);
+
+                majorScanValue = scanCenter + scanOffsetFromCenter * MAJOR_SCAN_RATIO;
+                majorSetpoint = majorSetpoint.minInterpolate(majorScanValue, SCAN_LOW_PASS_ALPHA);
+
+                const bool scanSetpointsAtEndpoint =
+                    abs(widowYawSetpoint.minDifference(minorScanValue)) < SCAN_ENDPOINT_TOLERANCE &&
+                    abs(majorSetpoint.minDifference(majorScanValue)) < SCAN_ENDPOINT_TOLERANCE;
+
+                if (scanOffsetFromCenter >= YAW_SCAN_HALF_RANGE && scanSetpointsAtEndpoint)
+                {
+                    scanDir = SCAN_CLOCKWISE;
+                }
+                else if (scanOffsetFromCenter <= -YAW_SCAN_HALF_RANGE && scanSetpointsAtEndpoint)
+                {
+                    scanDir = SCAN_COUNTER_CLOCKWISE;
+                }
             }
         }
     }
@@ -177,13 +205,10 @@ void SentryTurretCVCommand::execute()
             hitLocDiffRads =
                 abs(plateHitData.radians.getUnwrappedValue() -
                     lastPlateHitData.radians.getUnwrappedValue());
-            if (lastHitState != curHitState || hitLocDiffRads > HIT_DIFF_OFFSET)
+            if (scanning && (lastHitState != curHitState || hitLocDiffRads > HIT_DIFF_OFFSET))
             {
                 majorSetpoint = maxHit.radians;
-                if (scanning)
-                {
-                    widowYawSetpoint = majorSetpoint + TURRET_OFFSET;
-                }
+                widowYawSetpoint = maxHit.radians;
             }
             lastHitState = curHitState;
             uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
@@ -204,6 +229,11 @@ void SentryTurretCVCommand::execute()
             if (maxHit.magnitude >= HIT_MAG_THRESH)
             {
                 curHitState = HitState::HIT;
+                if (scanning)
+                {
+                    majorSetpoint = maxHit.radians;
+                    widowYawSetpoint = maxHit.radians;
+                }
             }
             break;
         }
