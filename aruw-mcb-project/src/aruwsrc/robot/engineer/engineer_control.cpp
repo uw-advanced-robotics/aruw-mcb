@@ -83,7 +83,12 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+#include "aruwsrc/robot/engineer/servo/vtm_servo_subsystem.hpp"
+#include "aruwsrc/robot/engineer/servo/servo_move_position_command.hpp"
+#include "aruwsrc/robot/engineer/servo/engineer_servo_constants.hpp"
 #include "aruwsrc/util_macros.hpp"
+#include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
+#include "tap/control/hold_command_mapping.hpp"
 
 using namespace aruwsrc::communication::mcb_lite;
 using namespace aruwsrc::communication::mcb_lite::motor;
@@ -104,6 +109,7 @@ using namespace aruwsrc::engineer::cube_storage;
 using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
 using namespace tap::gpio;
+using namespace aruwsrc::engineer::servo;
 
 using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
@@ -304,7 +310,16 @@ aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
 
 LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
+aruwsrc::communication::mcb_lite::motor::VirtualServo yawServo(
+    drivers(), YAW_PIN, YAW_MAX_PWM, YAW_MIN_PWM, RAMP_SPEED, drivers()->mcbLite.pwm);
+
+aruwsrc::communication::mcb_lite::motor::VirtualServo pitchServo(
+    drivers(), PITCH_PIN, PITCH_MAX_PWM, PITCH_MIN_PWM, RAMP_SPEED, drivers()->mcbLite.pwm);
+
+
 /* define subsystems --------------------------------------------------------*/
+
+VTMServoSubsystem vtmServoSubsystem(drivers(), yawServo, pitchServo, drivers()->mcbLite);
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
     drivers(),
@@ -463,6 +478,8 @@ ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
 /* define commands ----------------------------------------------------------*/
+ServoMovePositionCommand servoMoveCubeCommand(vtmServoSubsystem, transformer);
+
 HomingCommand cubeStorageHome(cubeStorage);
 HomingCommand extensionHome(extensionSubsystem);
 
@@ -568,6 +585,11 @@ SequentialCommand<3> removeCubeCommand(
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+RemoteMapState leftUpRms = RemoteMapState({Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP});
+auto leftUp = std::make_unique<HoldCommandMapping>(
+    drivers(),
+    std::vector<Command*>{&servoMoveCubeCommand},
+    &leftUpRms);
 
 // Disabled bc homing doesn't work yet (virtual limit switches)
 // Trigger leftDownMidRightUp =
@@ -603,6 +625,7 @@ void initializeSubsystems()
     parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
     // clientDicsplay.initialize();
+    vtmServoSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -618,6 +641,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    drivers->commandScheduler.registerSubsystem(&vtmServoSubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/

@@ -24,20 +24,22 @@
 
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
+#include "engineer_servo_constants.hpp"
 
 namespace aruwsrc::engineer::servo
 {
 class VTMServoSubsystem : public tap::control::Subsystem
 {
 public:
-    VTMServoSubsystem(tap::Drivers* drivers, aruwsrc::communication::mcb_lite::MCBLite& mcbLite, const aruwsrc::engineer::algorithms::EngineerTransforms& transforms)
-        : tap::control::Subsystem(drivers),
-          yawServo(drivers, tap::gpio::Pwm::Pin::X, 1.0f, 0.0f, 0.01f, mcbLite.pwm),
-          pitchServo(drivers, tap::gpio::Pwm::Pin::Buzzer, 1.0f, 0.0f, 0.01f, mcbLite.pwm),
-          mcbLite(mcbLite),
-          transforms(transforms)
-    {
-    }
+    VTMServoSubsystem(
+    tap::Drivers* drivers,
+    aruwsrc::communication::mcb_lite::motor::VirtualServo& yawServo,
+    aruwsrc::communication::mcb_lite::motor::VirtualServo& pitchServo,
+    aruwsrc::communication::mcb_lite::MCBLite& mcbLite)
+    : tap::control::Subsystem(drivers),
+      yawServo(yawServo),
+      pitchServo(pitchServo),
+      mcbLite(mcbLite) {}
 
     void refresh() override
     {
@@ -53,36 +55,30 @@ public:
 
     void moveToCube(const tap::algorithms::transforms::Transform& vtmGimbalToTarget)
     {
-        float yaw = vtmGimbalToTarget.getYaw();
-        float pitch = vtmGimbalToTarget.getPitch();
+        float x = vtmGimbalToTarget.getX();
+        float y = vtmGimbalToTarget.getY();
+        float z = vtmGimbalToTarget.getZ();
 
-        // uh interpolate from angle to pwm
-        float yawPwm = 0.0f;
-        float pitchPwm = 0.0f;
+        // conversion?
+        float yaw = atan2f(y, x);
+        float pitch = atan2f(-z, sqrtf(x * x + y * y));
 
+        // convert from angle to pwm
+        float yawPwm = YAW_MIN_PWM + (yaw -YAW_MIN_ANGLE)/(YAW_MAX_ANGLE-YAW_MIN_ANGLE) * (YAW_MAX_PWM - YAW_MIN_PWM);
+        float pitchPwm = PITCH_MIN_PWM+ (pitch - PITCH_MIN_ANGLE) /(PITCH_MAX_ANGLE - PITCH_MIN_ANGLE) * (PITCH_MAX_PWM - PITCH_MIN_PWM);
+        
         yawServo.setTargetPwm(yawPwm);
         pitchServo.setTargetPwm(pitchPwm);
     }
 
-    aruwsrc::communication::mcb_lite::motor::VirtualServo yawServo;
-    aruwsrc::communication::mcb_lite::motor::VirtualServo pitchServo;
+    aruwsrc::communication::mcb_lite::motor::VirtualServo& yawServo;
+    aruwsrc::communication::mcb_lite::motor::VirtualServo& pitchServo;
     aruwsrc::communication::mcb_lite::MCBLite& mcbLite;
 
-    // figure this out
-    static constexpr float YAW_MIN_PWM = 0.00f;
-    static constexpr float YAW_MAX_PWM = 0.00f;
-    static constexpr float YAW_MIN_ANGLE = -M_PI_2; // im assuming its not 360 
-    static constexpr float YAW_MAX_ANGLE = M_PI_2;
-
-    static constexpr float PITCH_MIN_PWM = 0.00f;
-    static constexpr float PITCH_MAX_PWM = 0.00f;
-    static constexpr float PITCH_MIN_ANGLE = -M_PI_2; // same here
-    static constexpr float PITCH_MAX_ANGLE = M_PI_2;
-
-    static constexpr float RAMP_SPEED = 0.01f; 
+    
 
 private:
-    const aruwsrc::engineer::algorithms::EngineerTransforms& transforms;
+
 };
 }  // namespace aruwsrc::engineer
 #endif
