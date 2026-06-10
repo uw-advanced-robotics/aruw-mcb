@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SERVO_SUBSYSTEM_HPP_
-#define SERVO_SUBSYSTEM_HPP_
+#ifndef VTM_SERVO_SUBSYSTEM_HPP_
+#define VTM_SERVO_SUBSYSTEM_HPP_
 
 #include "tap/control/subsystem.hpp"
 
