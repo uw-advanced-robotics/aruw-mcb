@@ -24,7 +24,6 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
-
 #include "modm/ui/menu/abstract_menu.hpp"
 
 namespace aruwsrc
@@ -33,8 +32,7 @@ class Drivers;
 }
 namespace aruwsrc::display
 {
-class OdometryMenu
-    : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>
+class OdometryMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView>>
 {
 public:
     OdometryMenu(

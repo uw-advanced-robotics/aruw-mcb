@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "odometry_menu.hpp"
+#include "odometry_menu.hpp"
 
 namespace aruwsrc::display
 {
@@ -42,7 +42,6 @@ void OdometryMenu::draw()
     display << "Orientation (yaw): " << odometry->getYaw() << modm::endl;
     display << "Velocity (x,y): " << vel.x << ", " << vel.y << modm::endl;
     display << "Last Computed Time: " << odometry->getLastComputedOdometryTime() << modm::endl;
-
 }
 
 void OdometryMenu::update() {}

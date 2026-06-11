@@ -173,8 +173,8 @@ void MainMenu::initialize()
             &MainMenu::addRttMenuCallback));
 
     addEntry(
-        OdometryMenu::getMenuName(), 
-            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+        OdometryMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addOdometryMenuCallback));
 
