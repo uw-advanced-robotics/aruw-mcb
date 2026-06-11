@@ -253,11 +253,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 #elif defined(TARGET_STANDARD_PHOBOS)
 // tuned
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 20.0f,
+    .kp = 16.0f,
     .ki = 0.0f,
-    .kd = 0.001f,
+    .kd = 0.1f,
     .maxICumulative = 0.0f,
-    .maxOutput = 12.0f,
+    .maxOutput = 40.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,

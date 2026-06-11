@@ -38,7 +38,7 @@ using tap::motor::DjiMotor;
 namespace aruwsrc::control::agitator::constants
 {
 /// How much extra heat must be available beyond how much it takes to fire the next shot
-static constexpr uint16_t HEAT_LIMIT_BUFFER = 25;
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 40;
 static constexpr float MANUAL_CONSTANT_FIRE_RATE_RPS = 30.0f;
 static constexpr float MIN_CONSTANT_FIRE_RATE_RPM = 10.0f;
 static constexpr uint32_t AIDEN_CLEMJAM_TIMEOUT_MS = 400;
@@ -126,7 +126,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .jammingVelocityDifference = M_TWOPI,
     .jammingTime = 200,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 0,
+    .velocityPIDFeedForwardGain = 205.0f,
     .emptyJamEnabled = false,
     .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,

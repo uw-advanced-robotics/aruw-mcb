@@ -113,8 +113,8 @@ float VelocityAgitatorSubsystem::getCurrentValueIntegral() const
 
 void VelocityAgitatorSubsystem::runVelocityPidControl()
 {
-    const uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
-    const uint32_t dt = curTime - prevTime;
+    const uint32_t curTime = tap::arch::clock::getTimeMicroseconds();
+    const float dt = (curTime - prevTime) / 1e6f;
     prevTime = curTime;
 
     const float velocityError = velocitySetpoint - getCurrentValue();
