@@ -35,7 +35,8 @@ SplashScreen::SplashScreen(
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite1,
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite2,
     communication::can::cap_bank::CapacitorBank* capacitorBank,
-    aruwsrc::communication::rtt::RttTelemetry* rttTelemetry)
+    aruwsrc::communication::rtt::RttTelemetry* rttTelemetry,
+    tap::algorithms::odometry::Odometry2DInterface* odometry)
     : modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(
           vs,
           SPLASH_SCREEN_MENU_ID),
@@ -47,6 +48,7 @@ SplashScreen::SplashScreen(
       mcbLite2(mcbLite2),
       capacitorBank(capacitorBank),
       rttTelemetry(rttTelemetry),
+      odometry(odometry),
       mainMenu(
           vs,
           drivers,
@@ -56,7 +58,8 @@ SplashScreen::SplashScreen(
           mcbLite1,
           mcbLite2,
           capacitorBank,
-          rttTelemetry)
+          rttTelemetry,
+          odometry)
 {
 }
 
@@ -95,7 +98,8 @@ void SplashScreen::shortButtonPress(modm::MenuButtons::Button button)
                 mcbLite1,
                 mcbLite2,
                 capacitorBank,
-                rttTelemetry);
+                rttTelemetry,
+                odometry);
             mm->initialize();
             getViewStack()->push(mm);
             break;

@@ -20,6 +20,7 @@
 #ifndef SPLASH_SCREEN_HPP_
 #define SPLASH_SCREEN_HPP_
 
+#include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/display/dummy_allocator.hpp"
 #include "tap/drivers.hpp"
 
@@ -51,7 +52,8 @@ public:
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
         communication::can::cap_bank::CapacitorBank *capacitorBank,
-        aruwsrc::communication::rtt::RttTelemetry *rttTelemetry);
+        aruwsrc::communication::rtt::RttTelemetry *rttTelemetry,
+        tap::algorithms::odometry::Odometry2DInterface *odometry);
 
     void draw() override;
 
@@ -75,6 +77,7 @@ private:
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite2;
     communication::can::cap_bank::CapacitorBank *capacitorBank;
     aruwsrc::communication::rtt::RttTelemetry *rttTelemetry;
+    tap::algorithms::odometry::Odometry2DInterface *odometry;
     aruwsrc::display::MainMenu mainMenu;
 };
 }  // namespace display
