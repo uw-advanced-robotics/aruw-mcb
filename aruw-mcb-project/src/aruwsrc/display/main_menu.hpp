@@ -42,6 +42,7 @@
 #include "rtt_menu.hpp"
 #include "sentry_strategy_menu.hpp"
 #include "turret_mcb_menu.hpp"
+#include "odometry_menu.hpp"
 
 namespace aruwsrc
 {
@@ -64,7 +65,8 @@ public:
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
         communication::can::cap_bank::CapacitorBank *capacitorBank,
-        aruwsrc::communication::rtt::RttTelemetry *rttTelemetry);
+        aruwsrc::communication::rtt::RttTelemetry *rttTelemetry,
+        tap::algorithms::odometry::Odometry2DInterface* odometry);
 
     virtual ~MainMenu() = default;
 
@@ -103,6 +105,8 @@ private:
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite2;
     communication::can::cap_bank::CapacitorBank *capacitorBank;
     aruwsrc::communication::rtt::RttTelemetry *rttTelemetry;
+    tap::algorithms::odometry::Odometry2DInterface* odometry;
+    OdometryMenu odometryMenu;
 
     void addImuCalibrateMenuCallback();
     void addAutotuneMenuCallback();
@@ -123,6 +127,7 @@ private:
     void addMCBLiteMenu2Callback();
     void addCapacitorBankMenuCallback();
     void addRttMenuCallback();
+    void addOdometryMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

@@ -42,7 +42,8 @@ MainMenu::MainMenu(
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite1,
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite2,
     communication::can::cap_bank::CapacitorBank* capacitorBank,
-    aruwsrc::communication::rtt::RttTelemetry* rttTelemetry)
+    aruwsrc::communication::rtt::RttTelemetry* rttTelemetry,
+    tap::algorithms::odometry::Odometry2DInterface* odometry)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
@@ -69,7 +70,9 @@ MainMenu::MainMenu(
       mcbLite1(mcbLite1),
       mcbLite2(mcbLite2),
       capacitorBank(capacitorBank),
-      rttTelemetry(rttTelemetry)
+      rttTelemetry(rttTelemetry),
+      odometry(odometry),
+      odometryMenu(stack, odometry)
 {
 }
 
@@ -168,6 +171,12 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addRttMenuCallback));
+
+    addEntry(
+        OdometryMenu::getMenuName(), 
+            modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addOdometryMenuCallback));
 
     setTitle("Main Menu");
 }
@@ -285,7 +294,11 @@ void MainMenu::addRttMenuCallback()
     RttMenu* rttm = new (&rttMenu) RttMenu(getViewStack(), rttTelemetry);
     getViewStack()->push(rttm);
 }
-
+void MainMenu::addOdometryMenuCallback()
+{
+    OdometryMenu* om = new (&odometryMenu) OdometryMenu(getViewStack(), odometry);
+    getViewStack()->push(om);
+}
 }  // namespace display
 
 }  // namespace aruwsrc
