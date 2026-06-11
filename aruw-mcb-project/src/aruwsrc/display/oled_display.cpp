@@ -36,7 +36,8 @@ OledDisplay::OledDisplay(
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
     communication::can::cap_bank::CapacitorBank *capacitorBank,
-    aruwsrc::communication::rtt::RttTelemetry *rttTelemetry)
+    aruwsrc::communication::rtt::RttTelemetry *rttTelemetry,
+    tap::algorithms::odometry::Odometry2DInterface* odometry)
     : display(),
       viewStack(&display),
       buttonHandler(
@@ -56,7 +57,8 @@ OledDisplay::OledDisplay(
           mcbLite1,
           mcbLite2,
           capacitorBank,
-          rttTelemetry),
+          rttTelemetry,
+          odometry),
       drivers(drivers)
 {
 }
