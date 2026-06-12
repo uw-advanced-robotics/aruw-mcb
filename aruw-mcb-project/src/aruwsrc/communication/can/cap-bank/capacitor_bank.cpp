@@ -37,10 +37,11 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
     switch (static_cast<MessageType>(message.data[0]))
     {
         case MessageType::STATUS:  // STATUS v2 (0x05)
-            // data[1] = State, data[2:3] = cap current (i16 LE, mA), data[4:5] = cap voltage
-            // (u16 LE, mV), data[6] = energy % (0..100), data[7] = available supply power (raw,
-            // watts = raw * CAP_POWER_WATT_SCALE).
-            this->state = static_cast<State>(message.data[1]);
+            // data[1] = State in bits 0-6, latched error flag in bit 7; data[2:3] = cap current
+            // (i16 LE, mA), data[4:5] = cap voltage (u16 LE, mV), data[6] = energy % (0..100),
+            // data[7] = available supply power (raw, watts = raw * CAP_POWER_WATT_SCALE).
+            this->state = static_cast<State>(message.data[1] & 0x7F);
+            this->errorFlag = (message.data[1] & 0x80) != 0;
             this->current =
                 *reinterpret_cast<int16_t*>(const_cast<uint8_t*>(&message.data[2])) / 1000.0;
             this->voltage =

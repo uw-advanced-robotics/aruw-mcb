@@ -65,17 +65,26 @@ enum CapCommandMode
 };
 
 /**
- * Cap bank state reported in STATUS byte 1. Wire values 0..4 must match the firmware's CanState.
+ * Cap bank state reported in STATUS byte 1, bits 0-6 (bit 7 = latched error flag).
+ * Wire values 0..4 must match the firmware's CanState (can_messages.rs).
  * UNKNOWN is an MCB-only sentinel meaning "no STATUS received yet"; it never appears on the bus.
+ *
+ * | byte 1 & 0x7F | state           | meaning                                          |
+ * |---------------|-----------------|--------------------------------------------------|
+ * | 0             | RESET           | settle window (~250 ms); clears the error flag   |
+ * | 1             | STANDBY         | armed idle: converter off, caps hold voltage     |
+ * | 2             | CHARGE          | charging within [0, +ref]                        |
+ * | 3             | BOOST           | sprint: bidirectional within [-ref, +ref]        |
+ * | 4             | SAFETY_DISCHARGE| resistive drain until empty (button or fault)    |
  */
 enum State
 {
     UNKNOWN = -1,
     RESET = 0,
-    SAFE = 1,
-    REGULATING = 2,
-    BATTERY_OFF = 3,
-    FAILURE = 4,
+    STANDBY = 1,
+    CHARGE = 2,
+    BOOST = 3,
+    SAFETY_DISCHARGE = 4,
 };
 
 enum SprintMode
@@ -109,12 +118,18 @@ public:
     int getAvailableSupplyPower() const { return this->availableSupplyPower; };
     State getState() const { return this->state; };
 
+    /**
+     * Latched fault on the cap bank (overcurrent, CAN loss, undervoltage, cap OV).
+     * Blocks Charge/Boost entry firmware-side; the driver clears it by toggling the
+     * caps off and on (C+SHIFT), which sends OFF -> cap bank passes through RESET.
+     */
+    bool hasError() const { return this->errorFlag; }
+
     bool isEnabled() const
     {
-        return this->getState() == State::SAFE || this->getState() == State::REGULATING;
+        return this->getState() == State::STANDBY || this->getState() == State::CHARGE ||
+               this->getState() == State::BOOST;
     }
-
-    bool isDisabled() const { return this->getState() == State::RESET; }
 
     bool isOnline() const
     {
@@ -141,6 +156,7 @@ private:
     float current = 0;
     float voltage = 0;
     State state = State::UNKNOWN;
+    bool errorFlag = false;  // STATUS byte 1 bit 7
 
     SprintMode sprint = SprintMode::NO_SPRINT;
 

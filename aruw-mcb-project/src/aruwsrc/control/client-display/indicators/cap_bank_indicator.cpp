@@ -38,6 +38,7 @@ CapBankIndicator::CapBankIndicator(
 modm::ResumableResult<void> CapBankIndicator::sendInitialGraphics()
 {
     this->previousState = communication::can::cap_bank::State::UNKNOWN;
+    this->previousError = false;
     this->previousColor = Tx::GraphicColor::BLACK;
     voltageUpdateTimer.restart(500);
 
@@ -112,23 +113,23 @@ modm::ResumableResult<void> CapBankIndicator::update()
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
-                case communication::can::cap_bank::State::SAFE:
-                    strncpy(capBankTextGraphic.msg, "SAFE", 5);
+                case communication::can::cap_bank::State::STANDBY:
+                    strncpy(capBankTextGraphic.msg, "STBY", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
                     break;
-                case communication::can::cap_bank::State::REGULATING:
-                    strncpy(capBankTextGraphic.msg, "REG ", 5);
+                case communication::can::cap_bank::State::CHARGE:
+                    strncpy(capBankTextGraphic.msg, "CHG ", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::GREEN);
                     break;
-                case communication::can::cap_bank::State::BATTERY_OFF:
-                    strncpy(capBankTextGraphic.msg, "BOFF", 5);
+                case communication::can::cap_bank::State::BOOST:
+                    strncpy(capBankTextGraphic.msg, "BST ", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::CYAN);
                     break;
-                case communication::can::cap_bank::State::FAILURE:
-                    strncpy(capBankTextGraphic.msg, "FAIL", 5);
+                case communication::can::cap_bank::State::SAFETY_DISCHARGE:
+                    strncpy(capBankTextGraphic.msg, "DRN ", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
                     break;
@@ -138,13 +139,22 @@ modm::ResumableResult<void> CapBankIndicator::update()
                         static_cast<uint8_t>(Tx::GraphicColor::YELLOW);
                     break;
             }
+            // Latched fault overrides the state text: the driver must toggle the
+            // caps off/on (C+SHIFT) to clear it, so make it unmissable.
+            if (capBank->hasError())
+            {
+                strncpy(capBankTextGraphic.msg, "ERR!", 5);
+                capBankBackgroundLine.graphicData.color =
+                    static_cast<uint8_t>(Tx::GraphicColor::PURPLISH_RED);
+            }
             // Update the text
             capBankTextGraphic.graphicData.endAngle = 5;  // Sets the length of the string
 
             // Send data
-            if (state != this->previousState)
+            if (state != this->previousState || capBank->hasError() != this->previousError)
             {
                 this->previousState = state;
+                this->previousError = capBank->hasError();
                 RF_CALL(refSerialTransmitter.sendGraphic(&capBankTextGraphic));
             }
             if (capBankBackgroundLine.graphicData.color !=

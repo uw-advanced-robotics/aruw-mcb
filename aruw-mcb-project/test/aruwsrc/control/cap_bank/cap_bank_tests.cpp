@@ -46,12 +46,13 @@ TEST_F(CapBankTests, initalize_connects_to_can)
 
 TEST_F(CapBankTests, status_v2_is_parsed)
 {
-    // state=Regulating(2), current=1500mA (0x05DC LE), voltage=12000mV (0x2EE0 LE),
-    // energy=42%, available raw 10 -> 10 * 4 = 40 W.
+    // state=Charge(2), current=1500mA (0x05DC LE), voltage=12000mV (0x2EE0 LE),
+    // energy=42%, available raw 10 -> 10 * 4 = 40 W. Mirrors the cap-bank firmware's
+    // can_messages.rs `status_v2` test vector.
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = State::REGULATING;
+    message.data[1] = State::CHARGE;
     message.data[2] = 0xDC;
     message.data[3] = 0x05;
     message.data[4] = 0xE0;
@@ -61,11 +62,29 @@ TEST_F(CapBankTests, status_v2_is_parsed)
 
     capBank.processMessage(message);
 
-    EXPECT_EQ(State::REGULATING, capBank.getState());
+    EXPECT_EQ(State::CHARGE, capBank.getState());
+    EXPECT_FALSE(capBank.hasError());
+    EXPECT_TRUE(capBank.isEnabled());
     EXPECT_NEAR(1.5f, capBank.getCurrent(), 1e-3);
     EXPECT_NEAR(12.0f, capBank.getVoltage(), 1e-3);
     EXPECT_EQ(42, capBank.getEnergyPercent());
     EXPECT_EQ(40, capBank.getAvailableSupplyPower());
+}
+
+TEST_F(CapBankTests, status_v2_error_flag_in_bit7)
+{
+    // 0x83 = error flag (0x80) | Boost (3). Mirrors the firmware's
+    // `status_v2_error_flag_in_bit7` test.
+    modm::can::Message message(CAP_BANK_CAN_ID, 8);
+    message.setExtended(false);
+    message.data[0] = MessageType::STATUS;
+    memset(message.data + 1, 0, 7);
+    message.data[1] = 0x83;
+
+    capBank.processMessage(message);
+
+    EXPECT_EQ(State::BOOST, capBank.getState());
+    EXPECT_TRUE(capBank.hasError());
 }
 
 TEST_F(CapBankTests, status_does_not_transmit)

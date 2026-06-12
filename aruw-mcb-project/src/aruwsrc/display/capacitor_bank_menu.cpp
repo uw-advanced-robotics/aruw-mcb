@@ -49,36 +49,40 @@ void CapacitorBankMenu::draw()
         case communication::can::cap_bank::State::RESET:
             display << "RESET";
             break;
-        case communication::can::cap_bank::State::SAFE:
-            display << "SAFE";
+        case communication::can::cap_bank::State::STANDBY:
+            display << "STANDBY";
             break;
-        case communication::can::cap_bank::State::REGULATING:
-            display << "REGULATING";
+        case communication::can::cap_bank::State::CHARGE:
+            display << "CHARGE";
             break;
-        case communication::can::cap_bank::State::BATTERY_OFF:
-            display << "BATTERY_OFF";
+        case communication::can::cap_bank::State::BOOST:
+            display << "BOOST";
             break;
-        case communication::can::cap_bank::State::FAILURE:
-            display << "FAILURE";
+        case communication::can::cap_bank::State::SAFETY_DISCHARGE:
+            display << "SAFETY_DISCHARGE";
             break;
         default:
             display << "UNKNOWN";
             break;
     }
     display << modm::endl;
+    // Latched fault: cleared by toggling caps off/on (C+SHIFT).
+    display << "Error: " << (this->error ? "YES" : "no") << modm::endl;
 }
 
 void CapacitorBankMenu::update()
 {
     if (this->milliAmps != this->capacitorBank->getCurrent() * 1000 ||
         this->milliVolts != this->capacitorBank->getVoltage() * 1000 ||
-        this->state != this->capacitorBank->getState())
+        this->state != this->capacitorBank->getState() ||
+        this->error != this->capacitorBank->hasError())
     {
         this->milliAmps = this->capacitorBank->getCurrent() * 1000;
         this->milliVolts = this->capacitorBank->getVoltage() * 1000;
         this->powerLimit = this->capacitorBank->getAvailableSupplyPower();
         this->availableEnergy = this->capacitorBank->getAvailableEnergy();
         this->state = this->capacitorBank->getState();
+        this->error = this->capacitorBank->hasError();
         this->changed = true;
     }
 }
