@@ -52,7 +52,7 @@ TEST_F(CapBankTests, status_v2_is_parsed)
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
     message.data[0] = MessageType::STATUS;
-    message.data[1] = State::CHARGE;
+    message.data[1] = State::CHARGING;
     message.data[2] = 0xDC;
     message.data[3] = 0x05;
     message.data[4] = 0xE0;
@@ -62,7 +62,7 @@ TEST_F(CapBankTests, status_v2_is_parsed)
 
     capBank.processMessage(message);
 
-    EXPECT_EQ(State::CHARGE, capBank.getState());
+    EXPECT_EQ(State::CHARGING, capBank.getState());
     EXPECT_FALSE(capBank.hasError());
     EXPECT_TRUE(capBank.isEnabled());
     EXPECT_NEAR(1.5f, capBank.getCurrent(), 1e-3);

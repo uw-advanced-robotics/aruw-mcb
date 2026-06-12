@@ -52,7 +52,7 @@ void CapacitorBankMenu::draw()
         case communication::can::cap_bank::State::STANDBY:
             display << "STANDBY";
             break;
-        case communication::can::cap_bank::State::CHARGE:
+        case communication::can::cap_bank::State::CHARGING:
             display << "CHARGE";
             break;
         case communication::can::cap_bank::State::BOOST:
