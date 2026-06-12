@@ -118,7 +118,7 @@ modm::ResumableResult<void> CapBankIndicator::update()
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::ORANGE);
                     break;
-                case communication::can::cap_bank::State::CHARGE:
+                case communication::can::cap_bank::State::CHARGING:
                     strncpy(capBankTextGraphic.msg, "CHG ", 5);
                     capBankBackgroundLine.graphicData.color =
                         static_cast<uint8_t>(Tx::GraphicColor::GREEN);
