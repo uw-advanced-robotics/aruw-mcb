@@ -60,7 +60,7 @@ MatrixHudIndicators::MatrixHudIndicators(
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
     const aruwsrc::control::launcher::FrictionWheelInterface &frictionWheelSubsystem,
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
-    const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
+    const aruwsrc::control::agitator::MultiShotCvCommand *multiShotHandler,
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor)
     : HudIndicator(refSerialTransmitter),
       drivers(drivers),

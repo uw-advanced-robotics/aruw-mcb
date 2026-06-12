@@ -30,6 +30,7 @@
 #ifndef GRAVITY_AUTOTUNE_HPP_
 #define GRAVITY_AUTOTUNE_HPP_
 
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "modm/ui/display.hpp"
 
 #include "turret_autotune_command.hpp"
@@ -42,7 +43,9 @@ class GravityAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXI
 public:
     GravityAutotuneCommand(
         tap::Drivers *drivers,
-        const TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::TurretCalibrationConfig &config,
+        const typename TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::TurretCalibrationConfig
+            &config,
+        const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce = nullptr,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
         const std::array<float, NUM_TEST_POINTS> points = {},
         const float velocityZeroThreshold =
@@ -59,7 +62,8 @@ public:
               velocityZeroThreshold,
               positionZeroThreshold,
               successChime,
-              failChime)
+              failChime),
+          springForce(springForce)
     {
     }
     const char *getName() const override { return "Gravity Autotune Command "; }
@@ -79,7 +83,17 @@ public:
         {
             X(i, 0) = std::cos(measuredAngles[i]);  // corresponds to A (m·g·x)
             X(i, 1) = std::sin(measuredAngles[i]);  // corresponds to B (−m·g·z)
-            Y(i) = measuredTorques[i];
+
+            float torque = measuredTorques[i];
+
+            // If a spring compensator is provided, remove its effect from the torque
+            if (springForce != nullptr)
+            {
+                torque += springForce->calculateCompensationEffort(
+                    {.pitchWorldFrame = measuredAngles[i]});
+            }
+
+            Y(i) = torque;
         }
         // Solve least squares: torque = A·cos(theta) + B·sin(theta)
         Eigen::Vector2d params = X.colPivHouseholderQr().solve(Y);
@@ -127,6 +141,7 @@ protected:
     }
 
 private:
+    const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce;
     /**
      * @brief Helper function that turns the calibration result into
      * units of mm.

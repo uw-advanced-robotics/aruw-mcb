@@ -174,7 +174,7 @@ private:
      */
     bool agitatorIsCalibrated = false;
 
-    /// Previous time the velocity controller was called, in milliseconds
+    /// Previous time the velocity controller was called
     uint32_t prevTime = 0;
 
     /// The velocity setpoint in radians / second
