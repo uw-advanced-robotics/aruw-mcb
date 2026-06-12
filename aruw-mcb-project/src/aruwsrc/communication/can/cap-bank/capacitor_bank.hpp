@@ -127,7 +127,7 @@ public:
 
     bool isEnabled() const
     {
-        return this->getState() == State::STANDBY || this->getState() == State::CHARGE ||
+        return this->getState() == State::STANDBY || this->getState() == State::CHARGING ||
                this->getState() == State::BOOST;
     }
 
