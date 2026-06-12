@@ -73,7 +73,7 @@ enum CapCommandMode
  * |---------------|-----------------|--------------------------------------------------|
  * | 0             | RESET           | settle window (~250 ms); clears the error flag   |
  * | 1             | STANDBY         | armed idle: converter off, caps hold voltage     |
- * | 2             | CHARGE          | charging within [0, +ref]                        |
+ * | 2             | CHARGING          | charging within [0, +ref]                        |
  * | 3             | BOOST           | sprint: bidirectional within [-ref, +ref]        |
  * | 4             | SAFETY_DISCHARGE| resistive drain until empty (button or fault)    |
  */
@@ -82,7 +82,7 @@ enum State
     UNKNOWN = -1,
     RESET = 0,
     STANDBY = 1,
-    CHARGE = 2,
+    CHARGING = 2,
     BOOST = 3,
     SAFETY_DISCHARGE = 4,
 };
