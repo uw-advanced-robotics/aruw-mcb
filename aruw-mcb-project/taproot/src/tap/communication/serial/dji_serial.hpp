@@ -237,6 +237,8 @@ private:
         currentErrorRate = (static_cast<float>(totalErrors) / totalMessagesAttempted) * 100.0f;
     }
 
+    void recordMessageResult(bool isError);
+
 protected:
     Drivers *drivers;
 };
