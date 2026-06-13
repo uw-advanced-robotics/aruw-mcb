@@ -31,6 +31,7 @@
 
 #include "message_types.hpp"
 #include "virtual_analog.hpp"
+#include "virtual_analog_sensor.hpp"
 #include "virtual_can_encoder.hpp"
 #include "virtual_digital.hpp"
 #include "virtual_imu.hpp"
@@ -91,6 +92,10 @@ private:
 
     void processVoltageCurrentMessage(const ReceivedSerialMessage& completeMessage);
 
+    void processAnalogSensorMessage(const ReceivedSerialMessage& completeMessage);
+
+    void processServoFeedbackMessage(const ReceivedSerialMessage& completeMessage);
+
     tap::communication::serial::Uart::UartPort port;
 
     IMUMessage currentIMUData;
@@ -103,6 +108,7 @@ private:
     VirtualCanEncoder* can2Encoders[8];
 
     VirtualVoltageCurrentSensor* voltageCurrentSensor;
+    VirtualAnalogSensor* analogSensor;
 
     bool initialized = false;
 };
