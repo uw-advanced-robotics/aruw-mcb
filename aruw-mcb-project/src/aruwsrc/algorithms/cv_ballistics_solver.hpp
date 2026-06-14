@@ -63,7 +63,7 @@ namespace aruwsrc::algorithms
 enum class AimStrategy
 {
     JITTER = 0,   // track the targeted plate and shoot whenever we can
-    SHOT_TIMING,  // track the center of the targeted robot and time shots as plates pass by
+    SHOT_GATING,  // track the center of the targeted robot and shoot whenever it will hit a plate
 };
 
 /**
@@ -89,7 +89,7 @@ public:
         /// End of the shot timing window (absolute timestamp in microseconds), valid when
         /// usePulseEstimation is true.
         uint64_t shotWindowEnd;
-        /// Whether pulse estimation is being used (omega above threshold).
+        /// Whether pulse estimation is being used
         bool usePulseEstimation;
         /// The active plate index being targeted (0-3).
         uint8_t activePlateIndex;
