@@ -157,6 +157,18 @@ public:
         float positionVarianceY,
         float yawVariance);
 
+    void initializeVisionPosition(
+        const modm::Vector2f& position,
+        float positionVarianceX,
+        float positionVarianceY);
+
+    void initializeVisionPose(
+        const modm::Vector2f& position,
+        float yaw,
+        float positionVarianceX,
+        float positionVarianceY,
+        float yawVariance);
+
     void overrideOdometryPosition(const float positionX, const float positionY);
 
 protected:

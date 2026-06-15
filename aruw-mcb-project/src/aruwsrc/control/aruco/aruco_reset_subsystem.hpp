@@ -22,6 +22,7 @@
 #include "tap/control/subsystem.hpp"
 
 #include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/wheel_ekf_odometry.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 
 namespace aruwsrc::control::aruco
@@ -38,7 +39,8 @@ public:
         tap::Drivers* drivers,
         VisionCoprocessor& vision,
         Odometry2DInterface& odometry,
-        TransformerInterface& transformer);
+        TransformerInterface& transformer,
+        FourWheelEKFOdometry* wheelEkfOdometry = nullptr);
 
     void initialize() override{};
 
@@ -50,12 +52,26 @@ private:
     VisionCoprocessor& vision;
     Odometry2DInterface& odometry;
     TransformerInterface& transformer;
+    FourWheelEKFOdometry* wheelEkfOdometry;
+    bool hasReceivedVisionMeasurement = false;
 
     // Higher value here means we trust AruCo measurements more
     float VISION_TRUST = 0.025f;
 
     void processRealsenseData();
     void processArducamData();
+    void fuseVisionPositionMeasurement(
+        const modm::Vector2f& measuredPosition,
+        float positionVarianceX,
+        float positionVarianceY);
+    void initializeVisionPositionMeasurement(
+        const modm::Vector2f& measuredPosition,
+        float positionVarianceX,
+        float positionVarianceY);
+    float calculateArducamPositionVariance(
+        const VisionCoprocessor::ArucoResetPacket& poseData) const;
+    float calculateArducamYawVariance(const VisionCoprocessor::ArucoResetPacket& poseData) const;
+    float calculateRealsensePositionVariance() const;
 };  // class ArucoResetSubsystem
 
 }  // namespace aruwsrc::control::aruco

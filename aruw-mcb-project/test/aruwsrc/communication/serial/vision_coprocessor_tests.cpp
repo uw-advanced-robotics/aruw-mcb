@@ -259,6 +259,37 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
     initAndRunAutoAimRxTest(aimData);
 }
 
+TEST(VisionCoprocessor, messageReceiveCallback_arducam_aruco_packet)
+{
+    tap::Drivers drivers;
+    VisionCoprocessor serial(&drivers);
+    DJISerial::ReceivedSerialMessage message;
+    message.header.headByte = 0xA5;
+    message.messageType = 17;
+
+    VisionCoprocessor::ArucoResetPacket
+        packet{1.0f, 2.0f, 3.0f, 0.4f, 0.5f, 0.6f, 0.7f, 4.2f, 0.35f, 123456789, 1};
+
+    message.header.dataLength = sizeof(packet);
+    memcpy(&message.data[0], &packet, sizeof(packet));
+
+    serial.messageReceiveCallback(message);
+
+    const VisionCoprocessor::ArucoResetData &callbackData = serial.getLastArducamArucoData();
+    EXPECT_TRUE(callbackData.updated);
+    EXPECT_EQ(packet.x, callbackData.data.x);
+    EXPECT_EQ(packet.y, callbackData.data.y);
+    EXPECT_EQ(packet.z, callbackData.data.z);
+    EXPECT_EQ(packet.quatW, callbackData.data.quatW);
+    EXPECT_EQ(packet.quatX, callbackData.data.quatX);
+    EXPECT_EQ(packet.quatY, callbackData.data.quatY);
+    EXPECT_EQ(packet.quatZ, callbackData.data.quatZ);
+    EXPECT_EQ(packet.cameraToTagMagnitude, callbackData.data.cameraToTagMagnitude);
+    EXPECT_EQ(packet.cameraToTagAngle, callbackData.data.cameraToTagAngle);
+    EXPECT_EQ(packet.timestamp, callbackData.data.timestamp);
+    EXPECT_EQ(packet.turretId, callbackData.data.turretId);
+}
+
 template <uint32_t DATA_LEN>
 static void checkHeaderAndTail(const DJISerial::SerialMessage<DATA_LEN> &msg)
 {
