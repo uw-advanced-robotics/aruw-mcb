@@ -39,9 +39,9 @@ void TurretMCBMenu::draw()
     display << getMenuName() << modm::endl;
 
     display << "Receiving Turret IMU data: " << turretMCBCanComm->isConnected() << modm::endl
-            << "Kicker limit switch depressed: "
+            << "Kicker limit switch depressed: " << modm::endl
             << turretMCBCanComm->getKickerWheelLimitSwitch().getLimitSwitchDepressed() << modm::endl
-            << "Agitator limit switch depressed: "
+            << "Agitator limit switch depressed: " << modm::endl
             << turretMCBCanComm->getAgitatorLoadingLimitSwitch().getLimitSwitchDepressed()
             << modm::endl;
     display.printf(
