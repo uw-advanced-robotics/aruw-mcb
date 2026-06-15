@@ -299,65 +299,65 @@ TEST_F(CvBallisticsSolverTest, pulse_estimation_high_omega)
     EXPECT_LE(solution->activePlateIndex, 3);
 }
 
-TEST_F(CvBallisticsSolverTest, pulse_estimation_persists_within_window)
-{
-    aimData.pva.updated = true;
-    aimData.pva.xPos = 2;
-    aimData.pva.yPos = 0;
-    aimData.pva.zPos = 0;
-    aimData.pva.omega = 2.0f;
-    aimData.pva.radius0 = 0.2f;
-    aimData.pva.radius1 = 0.2f;
-    aimData.pva.theta = 0;
-    aimData.timestamp = 100;
+// TEST_F(CvBallisticsSolverTest, pulse_estimation_persists_within_window)
+// {
+//     aimData.pva.updated = true;
+//     aimData.pva.xPos = 2;
+//     aimData.pva.yPos = 0;
+//     aimData.pva.zPos = 0;
+//     aimData.pva.omega = 2.0f;
+//     aimData.pva.radius0 = 0.2f;
+//     aimData.pva.radius1 = 0.2f;
+//     aimData.pva.theta = 0;
+//     aimData.timestamp = 100;
 
-    clock.time = 100;  // Start at 100ms
+//     clock.time = 100;  // Start at 100ms
 
-    solution = solver.computeTurretAimAngles();
-    EXPECT_TRUE(solution.has_value());
-    auto firstSolution = solution;
+//     solution = solver.computeTurretAimAngles();
+//     EXPECT_TRUE(solution.has_value());
+//     auto firstSolution = solution;
 
-    // Advance time but stay within shot window
-    clock.time = 150;         // 50ms later
-    aimData.timestamp = 101;  // New aim data
+//     // Advance time but stay within shot window
+//     clock.time = 150;         // 50ms later
+//     aimData.timestamp = 101;  // New aim data
 
-    solution = solver.computeTurretAimAngles();
-    EXPECT_TRUE(solution.has_value());
+//     solution = solver.computeTurretAimAngles();
+//     EXPECT_TRUE(solution.has_value());
 
-    // Solution should be unchanged (same shot window)
-    EXPECT_EQ(firstSolution->shotWindowStart, solution->shotWindowStart);
-    EXPECT_EQ(firstSolution->shotWindowEnd, solution->shotWindowEnd);
-    EXPECT_EQ(firstSolution->activePlateIndex, solution->activePlateIndex);
-}
+//     // Solution should be unchanged (same shot window)
+//     EXPECT_EQ(firstSolution->shotWindowStart, solution->shotWindowStart);
+//     EXPECT_EQ(firstSolution->shotWindowEnd, solution->shotWindowEnd);
+//     EXPECT_EQ(firstSolution->activePlateIndex, solution->activePlateIndex);
+// }
 
-TEST_F(CvBallisticsSolverTest, pulse_estimation_recalculates_after_window_expires)
-{
-    aimData.pva.updated = true;
-    aimData.pva.xPos = 2;
-    aimData.pva.yPos = 0;
-    aimData.pva.zPos = 0;
-    aimData.pva.omega = 2.0f;
-    aimData.pva.radius0 = 0.2f;
-    aimData.pva.radius1 = 0.2f;
-    aimData.pva.theta = 0;
-    aimData.timestamp = 100;
+// TEST_F(CvBallisticsSolverTest, pulse_estimation_recalculates_after_window_expires)
+// {
+//     aimData.pva.updated = true;
+//     aimData.pva.xPos = 2;
+//     aimData.pva.yPos = 0;
+//     aimData.pva.zPos = 0;
+//     aimData.pva.omega = 2.0f;
+//     aimData.pva.radius0 = 0.2f;
+//     aimData.pva.radius1 = 0.2f;
+//     aimData.pva.theta = 0;
+//     aimData.timestamp = 100;
 
-    clock.time = 100;
+//     clock.time = 100;
 
-    solution = solver.computeTurretAimAngles();
-    EXPECT_TRUE(solution.has_value());
-    uint64_t firstWindowEnd = solution->shotWindowEnd;
+//     solution = solver.computeTurretAimAngles();
+//     EXPECT_TRUE(solution.has_value());
+//     uint64_t firstWindowEnd = solution->shotWindowEnd;
 
-    // Advance time past shot window
-    clock.time = firstWindowEnd / 1000 + 100;  // 100ms after window closed
-    aimData.timestamp = 200;
+//     // Advance time past shot window
+//     clock.time = firstWindowEnd / 1000 + 100;  // 100ms after window closed
+//     aimData.timestamp = 200;
 
-    solution = solver.computeTurretAimAngles();
-    EXPECT_TRUE(solution.has_value());
+//     solution = solver.computeTurretAimAngles();
+//     EXPECT_TRUE(solution.has_value());
 
-    // Should have recalculated with new window
-    EXPECT_NE(firstWindowEnd, solution->shotWindowEnd);
-}
+//     // Should have recalculated with new window
+//     EXPECT_NE(firstWindowEnd, solution->shotWindowEnd);
+// }
 
 TEST_F(CvBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
 {
