@@ -88,13 +88,10 @@ TEST_F(
 {
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
 
-    const float bulletSpeed1 = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first + 5.0f;
-    const float bulletSpeed2 = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].first + 5.0f;
-
     frictionWheels.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first);
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;
-    robotData.turret.bulletSpeed = bulletSpeed1;
+    robotData.turret.bulletSpeed = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first + 5.0f;
     robotData.turret.launchMechanismID =
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
     robotData.turret.firingFreq = 1;
@@ -104,15 +101,14 @@ TEST_F(
 
     EXPECT_NEAR(robotData.turret.bulletSpeed, frictionWheels.getPredictedLaunchSpeed(), 1E-1);
 
-    robotData.turret.bulletSpeed = bulletSpeed2;
+    frictionWheels.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].first);
+
+    robotData.turret.bulletSpeed = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].first + 5.0f;
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp += 1;
     frictionWheels.refresh();
 
-    EXPECT_NEAR(
-        (bulletSpeed1 + bulletSpeed2) / 2.0f,
-        frictionWheels.getPredictedLaunchSpeed(),
-        1E-1);
+    EXPECT_NEAR(robotData.turret.bulletSpeed, frictionWheels.getPredictedLaunchSpeed(), 1E-1);
 }
 
 TEST_F(
@@ -173,4 +169,13 @@ TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rollin
     }
 
     EXPECT_EQ(robotData.turret.bulletSpeed, frictionWheelAveraged.getPredictedLaunchSpeed());
+
+    frictionWheelAveraged.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[1].first);
+
+    frictionWheelAveraged.refresh();
+    robotData.turret.lastReceivedLaunchingInfoTimestamp++;
+
+    EXPECT_EQ(
+        frictionWheelAveraged.getDesiredLaunchSpeed(),
+        frictionWheelAveraged.getPredictedLaunchSpeed());
 }
