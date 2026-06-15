@@ -169,12 +169,10 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
             currTheta,
             targetData.omega);
 
-        BallisticsSolution solution = BallisticsSolution();
+        BallisticsSolution solution;
         solution.distance = ballisticsTargetState.position.getLength();
-        solution.usePulseEstimation = false;
+        solution.shotWindowValid = false;
         solution.activePlateIndex = activePlate;
-        solution.shotWindowStart = 0;
-        solution.shotWindowEnd = 0;
 
         if (ballistics::findTargetProjectileIntersection(  // ballistics has a solution
                 ballisticsTargetState,
@@ -215,12 +213,10 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
             currTheta,
             targetData.omega);
 
-        BallisticsSolution currentSolution = BallisticsSolution();
+        BallisticsSolution currentSolution;
         currentSolution.distance = targetState.position.getLength();
-        currentSolution.usePulseEstimation = false;
+        currentSolution.shotWindowValid = false;
         currentSolution.activePlateIndex = i;
-        currentSolution.shotWindowStart = 0;
-        currentSolution.shotWindowEnd = 0;
 
         if (ballistics::findTargetProjectileIntersection(
                 targetState,
@@ -334,7 +330,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     BallisticsSolution solution;
     solution.distance = robotCenterState.position.getLength();
-    solution.usePulseEstimation = true;
+    solution.shotWindowValid = true;
     solution.activePlateIndex = activePlateIndex;
 
     if (!ballistics::findTargetProjectileIntersection(
@@ -372,14 +368,10 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     // Time it takes for half the plate to cross the aim line
     float halfWidthTime = (plateAngularWidth / 2.0f) / fabsf(omegaTotal);
 
-    // Window of time we should fire in to hit shots
-    float shotWindowStart = timeToPlateCenterShot - halfWidthTime;
-    float shotWindowEnd = timeToPlateCenterShot + halfWidthTime;
-
-    // Convert to absolute timestamps in microseconds
     uint64_t currentTimeMicros = tap::arch::clock::getTimeMicroseconds();
-    solution.shotWindowStart = currentTimeMicros + static_cast<uint64_t>(shotWindowStart * 1e6f);
-    solution.shotWindowEnd = currentTimeMicros + static_cast<uint64_t>(shotWindowEnd * 1e6f);
+    solution.shotWindowCenter =
+        currentTimeMicros + static_cast<uint64_t>(timeToPlateCenterShot * 1e6f);
+    solution.shotWindowHalfWidth = static_cast<uint64_t>(halfWidthTime * 1e6f);
 
     return solution;
 }

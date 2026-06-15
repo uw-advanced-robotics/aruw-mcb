@@ -25,8 +25,8 @@ namespace aruwsrc::control::auto_aim
 {
 AutoAimLaunchTimer::AutoAimLaunchTimer(
     uint32_t agitatorTypicalDelayMicroseconds,
-    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
-    aruwsrc::algorithms::CvBallisticsSolver *ballistics)
+    aruwsrc::communication::serial::VisionCoprocessor* visionCoprocessor,
+    aruwsrc::algorithms::CvBallisticsSolver* ballistics)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),
       ballistics(ballistics)
@@ -63,17 +63,21 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::NO_TARGET;
     }
 
-    if (!ballisticsSolution->usePulseEstimation)
+    if (!ballisticsSolution->shotWindowValid)
     {
         debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::UNGATED);
         return LaunchInclination::UNGATED;
     }
 
     float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
+    uint64_t shotWindowStart =
+        ballisticsSolution->shotWindowCenter - ballisticsSolution->shotWindowHalfWidth;
+    uint64_t shotWindowEnd =
+        ballisticsSolution->shotWindowCenter + ballisticsSolution->shotWindowHalfWidth;
     debugInfo.pulseEstimationUsed = true;
     debugInfo.timeOfFlight = timeOfFlightSeconds;
-    debugInfo.shotWindowStart = ballisticsSolution->shotWindowStart;
-    debugInfo.shotWindowEnd = ballisticsSolution->shotWindowEnd;
+    debugInfo.shotWindowStart = shotWindowStart;
+    debugInfo.shotWindowEnd = shotWindowEnd;
 
     if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS)
     {
@@ -84,16 +88,15 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
 
     uint64_t now = tap::arch::clock::getTimeMicroseconds();
     uint64_t effectiveFireTime = now + this->agitatorTypicalDelayMicroseconds;
+
     debugInfo.now = now;
     debugInfo.effectiveFireTime = effectiveFireTime;
     debugInfo.countdownToShotWindowStart =
-        static_cast<int64_t>(ballisticsSolution->shotWindowStart) -
-        static_cast<int64_t>(effectiveFireTime);
-    debugInfo.countdownToShotWindowEnd = static_cast<int64_t>(ballisticsSolution->shotWindowEnd) -
-                                         static_cast<int64_t>(effectiveFireTime);
+        static_cast<int64_t>(shotWindowStart) - static_cast<int64_t>(effectiveFireTime);
+    debugInfo.countdownToShotWindowEnd =
+        static_cast<int64_t>(shotWindowEnd) - static_cast<int64_t>(effectiveFireTime);
 
-    bool inShotWindow = effectiveFireTime >= ballisticsSolution->shotWindowStart &&
-                        effectiveFireTime <= ballisticsSolution->shotWindowEnd;
+    bool inShotWindow = effectiveFireTime >= shotWindowStart && effectiveFireTime <= shotWindowEnd;
     debugInfo.inShotWindow = inShotWindow;
     if (!inShotWindow)
     {

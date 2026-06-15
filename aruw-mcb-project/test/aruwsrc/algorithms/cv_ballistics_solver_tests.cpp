@@ -273,9 +273,7 @@ TEST_F(OttoBallisticsSolverTest, jitter_aim_low_omega)
     solution = solver.computeTurretAimAngles();
 
     EXPECT_TRUE(solution.has_value());
-    EXPECT_FALSE(solution->usePulseEstimation);
-    EXPECT_EQ(0, solution->shotWindowStart);
-    EXPECT_EQ(0, solution->shotWindowEnd);
+    EXPECT_FALSE(solution->shotWindowValid);
 }
 
 TEST_F(OttoBallisticsSolverTest, pulse_estimation_high_omega)
@@ -295,9 +293,9 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_high_omega)
     solution = solver.computeTurretAimAngles();
 
     EXPECT_TRUE(solution.has_value());
-    EXPECT_TRUE(solution->usePulseEstimation);
-    EXPECT_NE(0, solution->shotWindowStart);
-    EXPECT_NE(0, solution->shotWindowEnd);
+    EXPECT_TRUE(solution->shotWindowValid);
+    EXPECT_NE(0, solution->shotWindowCenter);
+    EXPECT_NE(0, solution->shotWindowHalfWidth);
     EXPECT_GE(solution->activePlateIndex, 0);
     EXPECT_LE(solution->activePlateIndex, 3);
 }
@@ -378,7 +376,7 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
 
     solution = solver.computeTurretAimAngles();
     EXPECT_TRUE(solution.has_value());
-    EXPECT_TRUE(solution->usePulseEstimation);
+    EXPECT_TRUE(solution->shotWindowValid);
 
     // Omega drops below threshold
     aimData.pva.omega = 0.5f;  // Below threshold
@@ -389,5 +387,5 @@ TEST_F(OttoBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
     EXPECT_TRUE(solution.has_value());
 
     // Should have switched to jitter aim
-    EXPECT_FALSE(solution->usePulseEstimation);
+    EXPECT_FALSE(solution->shotWindowValid);
 }

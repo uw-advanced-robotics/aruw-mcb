@@ -65,7 +65,8 @@ protected:
           pitchMotorMock(&pitchMotorInterfaceMock),
           yawMotorMock(&yawMotorInterfaceMock),
           turretSubsystem(&drivers, pitchMotorMock, yawMotorMock, nullptr),
-          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0, nullptr){};
+          ballistics(visionCoprocessor, odometry, turretSubsystem, frictionWheels, 0, 0, nullptr) {
+          };
 
     void SetUp() override {}
 
@@ -166,10 +167,11 @@ TEST_F(
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.05f,  // projectedHitTime = 1,050,000us
-        .shotWindowStart = 0,
-        .shotWindowEnd = 0,
-        .usePulseEstimation = false,
-        .activePlateIndex = 0};
+        .activePlateIndex = 0,
+        .shotWindowValid = false,
+        .shotWindowCenter = 0,
+        .shotWindowHalfWidth = 0,
+    };
     EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
 
     AutoAimLaunchTimer timer(0, &visionCoprocessor, &ballistics);
@@ -226,7 +228,7 @@ struct TestParams
 
     bool ballisticsSuccess = true;
     uint32_t ballisticsTimeOfFlight;
-    bool usePulseEstimation = false;
+    bool shotWindowValid = false;
     uint64_t shotWindowStart = 0;
     uint64_t shotWindowEnd = 0;
 
@@ -306,10 +308,10 @@ TEST_P(
             .yawAngle{0},
             .distance{0},
             .timeOfFlight = params.ballisticsTimeOfFlight / 1'000'000.f,
+            .activePlateIndex = 0,
+            .shotWindowValid = params.shotWindowValid,
             .shotWindowStart = params.shotWindowStart,
             .shotWindowEnd = params.shotWindowEnd,
-            .usePulseEstimation = params.usePulseEstimation,
-            .activePlateIndex = 0,
         };
     }
     else
@@ -649,9 +651,9 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_jitter_aim_returns_ungated)
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
-        .shotWindowStart = 0,
-        .shotWindowEnd = 0,
-        .usePulseEstimation = false,  // Jitter aim mode
+        .shotWindowCenter = 0,
+        .shotWindowHalfWidth = 0,
+        .shotWindowValid = false,  // Jitter aim mode
         .activePlateIndex = 0};
     EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
 
@@ -677,9 +679,9 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_within_window_allows_fire)
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
-        .shotWindowStart = 400'000,  // 400ms (before now)
-        .shotWindowEnd = 600'000,    // 600ms (after now)
-        .usePulseEstimation = true,
+        .shotWindowCenter = clock.time * 1000,
+        .shotWindowHalfWidth = 100'000,  // 100ms
+        .shotWindowValid = true,
         .activePlateIndex = 1};
     EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
 
@@ -705,10 +707,11 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_before_window_denies_fire)
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
-        .shotWindowStart = 400'000,  // 400ms (after now)
-        .shotWindowEnd = 600'000,    // 600ms (after now)
-        .usePulseEstimation = true,
-        .activePlateIndex = 1};
+        .activePlateIndex = 1,
+        .shotWindowValid = true,
+        .shotWindowCenter = clock.time * 1000,
+        .shotWindowEnd = 100'000,  // 100ms
+    };
     EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
 
     AutoAimLaunchTimer timer(0, &visionCoprocessor, &ballistics);
@@ -733,10 +736,11 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_after_window_denies_fire)
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
-        .shotWindowStart = 400'000,  // 400ms (before now)
-        .shotWindowEnd = 600'000,    // 600ms (before now)
-        .usePulseEstimation = true,
-        .activePlateIndex = 1};
+        .activePlateIndex = 1,
+        .shotWindowValid = true,
+        .shotWindowCenter = clock.time * 1000,
+        .shotWindowHalfWidth = 600'000,  // 100ms
+    };
     EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
 
     AutoAimLaunchTimer timer(0, &visionCoprocessor, &ballistics);
@@ -761,10 +765,11 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_with_agitator_delay_within_windo
         .yawAngle = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
+        .activePlateIndex = 1,
+        .shotWindowValid = true,
         .shotWindowStart = 450'000,  // Accounting for agitator delay
         .shotWindowEnd = 650'000,
-        .usePulseEstimation = true,
-        .activePlateIndex = 1};
+    };
     EXPECT_CALL(ballistics, computeTurretAimAngles).WillOnce(Return(solution));
 
     AutoAimLaunchTimer timer(50'000, &visionCoprocessor, &ballistics);  // 50ms agitator delay

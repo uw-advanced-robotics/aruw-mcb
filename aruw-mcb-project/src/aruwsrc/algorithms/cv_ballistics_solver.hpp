@@ -83,16 +83,16 @@ public:
         float distance;
         /// The expected time-of-flight until impact (in seconds).
         float timeOfFlight;
-        /// Start of the shot timing window (absolute timestamp in microseconds), valid when
-        /// usePulseEstimation is true.
-        uint64_t shotWindowStart;
-        /// End of the shot timing window (absolute timestamp in microseconds), valid when
-        /// usePulseEstimation is true.
-        uint64_t shotWindowEnd;
-        /// Whether pulse estimation is being used
-        bool usePulseEstimation;
         /// The active plate index being targeted (0-3).
         uint8_t activePlateIndex;
+        /// Whether shot gating is being used
+        bool shotWindowValid;
+        /// Center of the shot timing window (absolute timestamp in microseconds), valid when
+        /// shotWindowValid is true. Represents the time at which shooting should hit the center
+        /// of the targetted plate.
+        uint64_t shotWindowCenter;
+        /// Half of the shot window width (microseconds), valid when shotWindowValid is true.
+        uint64_t shotWindowHalfWidth;
     };
 
     struct Config
