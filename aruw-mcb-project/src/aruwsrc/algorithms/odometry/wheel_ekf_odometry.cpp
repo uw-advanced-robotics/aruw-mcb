@@ -129,12 +129,44 @@ void FourWheelEKFOdometry::update()
 
     // Get individual wheel velocities and convert to linear velocities
     float wheelSpeeds[4] = {0, 0, 0, 0};
+    bool wheelMotorOnline[4] = {false, false, false, false};
+    uint8_t numOfflineWheels = 0;
     for (int i = 0; i < 4; i++)
     {
-        float motorVel = chassisMotors[i]->getEncoder()->getVelocity();  // rad/s (after gear ratio)
-        wheelSpeeds[i] = motorVel * WHEEL_CONFIGS[i].wheelRadius;        // m/s
+        wheelMotorOnline[i] = chassisMotors[i]->isMotorOnline();
+        if (!wheelMotorOnline[i])
+        {
+            numOfflineWheels++;
+        }
+
+        float motorVel = wheelMotorOnline[i] ? chassisMotors[i]->getEncoder()->getVelocity() : 0.0f;
+        wheelSpeeds[i] = motorVel * WHEEL_CONFIGS[i].wheelRadius;  // m/s
         measurement.data[int(OdomInput::WHEEL_0) + i] = wheelSpeeds[i];
     }
+
+    if (numOfflineWheels == 0)
+    {
+        if (wheelOfflineStartTime != 0)
+        {
+            const float offlineDurationS = (currentTime - wheelOfflineStartTime) / 1e6f;
+            const uint32_t recoveryDurationUs = static_cast<uint32_t>(
+                std::min(MAX_RECOVERY_DURATION_S, offlineDurationS * RECOVERY_DURATION_SCALE) *
+                1e6f);
+            wheelRecoveryStartTime = currentTime;
+            wheelRecoveryEndTime = currentTime + recoveryDurationUs;
+        }
+        wheelOfflineStartTime = 0;
+    }
+    else if (wheelOfflineStartTime == 0)
+    {
+        wheelOfflineStartTime = currentTime;
+        wheelRecoveryStartTime = 0;
+        wheelRecoveryEndTime = 0;
+    }
+
+    const float wheelOfflineDurationS =
+        wheelOfflineStartTime == 0 ? 0.0f : (currentTime - wheelOfflineStartTime) / 1e6f;
+    const float recoveryScale = getWheelRecoveryScale(currentTime);
 
     // Get IMU acceleration data in chassis frame
     modm::Vector2f imuAccelWorld(imu.getAx(), imu.getAy());
@@ -152,7 +184,14 @@ void FourWheelEKFOdometry::update()
     measurement.data[int(OdomInput::GYRO_Z)] = imu.getGz();
     measurement.data[int(OdomInput::YAW)] = yawForRotation;
 
-    updateMeasurementCovariance(wheelSpeeds, imuAccelWorld, yawMeasurementValid, dt);
+    updateMeasurementCovariance(
+        wheelSpeeds,
+        wheelMotorOnline,
+        imuAccelWorld,
+        yawMeasurementValid,
+        dt,
+        recoveryScale);
+    updateProcessCovariance(numOfflineWheels, wheelOfflineDurationS, recoveryScale);
 
     // Perform prediction step.
     ekf.predict(dt);
@@ -302,9 +341,11 @@ void FourWheelEKFOdometry::captureControlPredictedState()
 
 void FourWheelEKFOdometry::updateMeasurementCovariance(
     const float wheelSpeeds[4],
+    const bool wheelMotorOnline[4],
     const modm::Vector2f& imuAccelWorld,
     bool yawMeasurementValid,
-    float dt)
+    float dt,
+    float recoveryScale)
 {
     auto& R = ekf.getMeasurementCovariance();
     float wheelAccelIndicator = 0.0f;
@@ -322,10 +363,21 @@ void FourWheelEKFOdometry::updateMeasurementCovariance(
     const float slipIndicator = std::max(0.0f, wheelAccelIndicator - imuAccelMagnitude);
     const float slipScale =
         1.0f + std::min(slipIndicator * WHEEL_SLIP_VARIANCE_SCALE, MAX_WHEEL_SLIP_SCALE - 1.0f);
+    uint8_t numOfflineWheels = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        numOfflineWheels += !wheelMotorOnline[i];
+    }
+
+    const float onlineWheelVarianceScale = 1.0f +
+                                           numOfflineWheels * PARTIAL_WHEEL_OFFLINE_VARIANCE_SCALE +
+                                           recoveryScale * RECOVERY_WHEEL_VARIANCE_SCALE;
 
     for (int i = 0; i < 4; i++)
     {
-        float wheelVariance = BASE_WHEEL_MEASUREMENT_VARIANCE * slipScale;
+        float wheelVariance = wheelMotorOnline[i] ? BASE_WHEEL_MEASUREMENT_VARIANCE * slipScale *
+                                                        onlineWheelVarianceScale
+                                                  : OFFLINE_WHEEL_MEASUREMENT_VARIANCE;
         int wheelIndex = int(OdomInput::WHEEL_0) + i;
         R[wheelIndex * int(OdomInput::NUM_INPUTS) + wheelIndex] = wheelVariance;
     }
@@ -334,17 +386,80 @@ void FourWheelEKFOdometry::updateMeasurementCovariance(
     int accYIndex = int(OdomInput::ACC_Y);
     int gyroIndex = int(OdomInput::GYRO_Z);
     int yawIndex = int(OdomInput::YAW);
-    R[accXIndex * int(OdomInput::NUM_INPUTS) + accXIndex] = IMU_ACCEL_MEASUREMENT_VARIANCE;
-    R[accYIndex * int(OdomInput::NUM_INPUTS) + accYIndex] = IMU_ACCEL_MEASUREMENT_VARIANCE;
+    const float accelMeasurementVariance =
+        numOfflineWheels == 0 ? IMU_ACCEL_MEASUREMENT_VARIANCE : OFFLINE_ACCEL_MEASUREMENT_VARIANCE;
+    R[accXIndex * int(OdomInput::NUM_INPUTS) + accXIndex] = accelMeasurementVariance;
+    R[accYIndex * int(OdomInput::NUM_INPUTS) + accYIndex] = accelMeasurementVariance;
     R[gyroIndex * int(OdomInput::NUM_INPUTS) + gyroIndex] = IMU_GYRO_MEASUREMENT_VARIANCE;
     R[yawIndex * int(OdomInput::NUM_INPUTS) + yawIndex] =
         yawMeasurementValid ? YAW_MEASUREMENT_VARIANCE : 1.0e6f;
 
-    for (int i = 0; i < 4; i++)
+    if (numOfflineWheels == 0)
     {
-        prevWheelSpeeds[i] = wheelSpeeds[i];
+        for (int i = 0; i < 4; i++)
+        {
+            prevWheelSpeeds[i] = wheelSpeeds[i];
+        }
+        prevWheelSpeedsValid = true;
     }
-    prevWheelSpeedsValid = true;
+    else
+    {
+        prevWheelSpeedsValid = false;
+    }
+}
+
+void FourWheelEKFOdometry::updateProcessCovariance(
+    uint8_t numOfflineWheels,
+    float wheelOfflineDurationS,
+    float recoveryScale)
+{
+    auto& Q = ekf.getProcessCovariance();
+    std::copy(std::begin(EKF_Q), std::end(EKF_Q), Q.begin());
+
+    if (numOfflineWheels == 0 && recoveryScale <= 0.0f)
+    {
+        return;
+    }
+
+    float positionScale = 1.0f;
+    float velocityScale = 1.0f;
+
+    if (numOfflineWheels > 0)
+    {
+        const float offlineFraction = static_cast<float>(numOfflineWheels) / 4.0f;
+        const float offlineGrowth =
+            1.0f + std::min(
+                       MAX_OFFLINE_PROCESS_SCALE - 1.0f,
+                       OFFLINE_GROWTH_RATE * offlineFraction * wheelOfflineDurationS);
+        positionScale += POSITION_PROCESS_OFFLINE_SCALE * offlineGrowth;
+        velocityScale += VELOCITY_PROCESS_OFFLINE_SCALE * offlineGrowth;
+    }
+
+    positionScale += recoveryScale * POSITION_PROCESS_RECOVERY_SCALE;
+    velocityScale += recoveryScale * VELOCITY_PROCESS_RECOVERY_SCALE;
+
+    Q[int(OdomState::POS_X) * int(OdomState::NUM_STATES) + int(OdomState::POS_X)] *= positionScale;
+    Q[int(OdomState::POS_Y) * int(OdomState::NUM_STATES) + int(OdomState::POS_Y)] *= positionScale;
+    Q[int(OdomState::VEL_X) * int(OdomState::NUM_STATES) + int(OdomState::VEL_X)] *= velocityScale;
+    Q[int(OdomState::VEL_Y) * int(OdomState::NUM_STATES) + int(OdomState::VEL_Y)] *= velocityScale;
+}
+
+float FourWheelEKFOdometry::getWheelRecoveryScale(uint32_t currentTime) const
+{
+    if (wheelRecoveryStartTime == 0 || currentTime >= wheelRecoveryEndTime)
+    {
+        return 0.0f;
+    }
+
+    const float recoveryDurationUs =
+        static_cast<float>(wheelRecoveryEndTime - wheelRecoveryStartTime);
+    if (recoveryDurationUs <= 1.0f)
+    {
+        return 0.0f;
+    }
+
+    const float elapsedUs = static_cast<float>(currentTime - wheelRecoveryStartTime);
+    return std::clamp(1.0f - elapsedUs / recoveryDurationUs, 0.0f, 1.0f);
 }
 
 void FourWheelEKFOdometry::fuseScalarMeasurement(

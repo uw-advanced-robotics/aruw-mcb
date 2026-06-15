@@ -220,6 +220,18 @@ private:
     static constexpr float WHEEL_SLIP_VARIANCE_SCALE = 0.02f;
     static constexpr float MAX_WHEEL_SLIP_SCALE = 5.0f;
     static constexpr float MIN_VISION_MEASUREMENT_VARIANCE = 1.0e-6f;
+    static constexpr float OFFLINE_WHEEL_MEASUREMENT_VARIANCE = 1.0e6f;
+    static constexpr float OFFLINE_ACCEL_MEASUREMENT_VARIANCE = 1.0e5f;
+    static constexpr float PARTIAL_WHEEL_OFFLINE_VARIANCE_SCALE = 8.0f;
+    static constexpr float RECOVERY_WHEEL_VARIANCE_SCALE = 4.0f;
+    static constexpr float POSITION_PROCESS_OFFLINE_SCALE = 1.5f;
+    static constexpr float VELOCITY_PROCESS_OFFLINE_SCALE = 2.5f;
+    static constexpr float POSITION_PROCESS_RECOVERY_SCALE = 1.0f;
+    static constexpr float VELOCITY_PROCESS_RECOVERY_SCALE = 1.5f;
+    static constexpr float MAX_OFFLINE_PROCESS_SCALE = 40.0f;
+    static constexpr float OFFLINE_GROWTH_RATE = 4.0f;
+    static constexpr float RECOVERY_DURATION_SCALE = 1.5f;
+    static constexpr float MAX_RECOVERY_DURATION_S = 3.0f;
 
     // Process noise covariance matrix (Q) - how much we trust the motion model.
     // State order: POS_X, POS_Y, VEL_X, VEL_Y, YAW, YAW_RATE, ACC_X, ACC_Y.
@@ -285,6 +297,9 @@ private:
 
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
+    uint32_t wheelOfflineStartTime = 0;
+    uint32_t wheelRecoveryStartTime = 0;
+    uint32_t wheelRecoveryEndTime = 0;
     float prevWheelSpeeds[4]{0, 0, 0, 0};
     bool prevWheelSpeedsValid = false;
 
@@ -294,9 +309,16 @@ private:
 
     void updateMeasurementCovariance(
         const float wheelSpeeds[4],
+        const bool wheelMotorOnline[4],
         const modm::Vector2f& imuAccelWorld,
         bool yawMeasurementValid,
-        float dt);
+        float dt,
+        float recoveryScale);
+    void updateProcessCovariance(
+        uint8_t numOfflineWheels,
+        float wheelOfflineDurationS,
+        float recoveryScale);
+    float getWheelRecoveryScale(uint32_t currentTime) const;
     void fuseScalarMeasurement(
         OdomState state,
         float measurement,
