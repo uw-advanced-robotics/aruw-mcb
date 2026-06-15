@@ -278,8 +278,6 @@ aruwsrc::communication::mcb_lite::VirtualDigitalLimitSwitch extensionLimitSwitch
     tap::gpio::Digital::InputPin::C,
     true);
 
-LimitSwitchTrigger extensionTrigger(&extensionLimitSwitch);
-
 aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor cubeStorageMotor(
     drivers(),
     CUBE_STORAGE_MOTOR_ID,
