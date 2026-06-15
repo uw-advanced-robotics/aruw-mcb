@@ -49,30 +49,28 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 // need to change
 // if extension below threshold, we use the retracted limit which will limit the pitch more
 // aggressively
-static constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
+inline constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
 
 // if extended far enough, we can pitch higher because the back of extension won't hit the chassis
-static constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
+inline constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
 
 // if extension above threshold, limit the pitch so the extension doesnt hit the ground
-static constexpr float PITCH_LOWER_LIMIT_EXTENSION_EXTENDED = 0.5;
+inline constexpr float PITCH_LOWER_LIMIT_EXTENSION_EXTENDED = 0.5;
 // lower limit if extension is retracted far enough
-static constexpr float PITCH_LOWER_LIMIT_DEFAULT = 0.5;
+inline constexpr float PITCH_LOWER_LIMIT_DEFAULT = 0.5;
 
 // if extension is below this value, limit the pitch more aggressively to prevent back of extension
 // from hitting chassis
-static constexpr float MIN_EXTENSION_FOR_FULL_PITCH_UP = 0.2;
+inline constexpr float MIN_EXTENSION_FOR_FULL_PITCH_UP = 0.2;
 
 // if extension is above this value, we cannot allow full pitch down since extension will hit the
 // ground
-static constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
+inline constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
 
 // if we are not extended enough, limit pitch down so the back of extension doesnt hit the saturn
 // ring
-static constexpr float MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
-static constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
-
-}  // namespace aruwsrc::control::turret
+inline constexpr float MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
+inline constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
 
 inline float getPitchMinLimit(float extensionPosition)
 {
@@ -162,8 +160,6 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
     .kd = 0.0f,
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * (2.0f / 3.0f),
-    // todo: change this later
-    //  .maxOutput = 0,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -264,4 +260,5 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 };
 }  // namespace chassis_rel
 
+}  // namespace aruwsrc::control::turret
 #endif  // ENGINEER_TURRET_CONSTANTS_HPP_

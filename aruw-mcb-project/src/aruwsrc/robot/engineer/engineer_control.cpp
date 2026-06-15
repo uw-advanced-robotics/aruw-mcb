@@ -178,18 +178,18 @@ TriggerHomedJointSubsystem extensionSubsystem(
 float getLivePitchMinLimit();
 float getLivePitchMaxLimit();
 
-aruwsrc::control::turret::TurretMotor pitchTurretMotorWrapper(
+aruwsrc::control::turret::TurretMotor pitchEngTurretMotor(
     &pitchTurretMotor,
     PITCH_MOTOR_CONFIG,
     getLivePitchMinLimit,
     getLivePitchMaxLimit);
 
-aruwsrc::control::turret::TurretMotor yawTurretMotorWrapper(&yawTurretMotor, YAW_MOTOR_CONFIG);
+aruwsrc::control::turret::TurretMotor yawEngTurretMotor(&yawTurretMotor, YAW_MOTOR_CONFIG);
 
 EngineerTurretSubsystem engTurret(
     drivers(),
-    pitchTurretMotorWrapper,
-    yawTurretMotorWrapper,
+    pitchEngTurretMotor,
+    yawEngTurretMotor,
     &drivers()->mcbLite.imu);
 
 float getLivePitchMinLimit() { return getPitchMinLimit(extensionSubsystem.getPosition()); }
@@ -324,7 +324,7 @@ aruwsrc::communication::mcb_lite::VirtualCanEncoder wristEncoderTheta1(
     drivers(),
     aruwsrc::engineer::WRIST_THETA1_ENCODER_ID,
     &drivers()->mcbLite,
-    aruwsrc::control::chassis::CAN_BUS_MOTORS,
+    aruwsrc::engineer::CAN_BUS_WRIST,
     false,
     1,
     WRIST_HOME_THETA1);
