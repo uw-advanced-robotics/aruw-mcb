@@ -43,6 +43,7 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
@@ -393,6 +394,15 @@ EngineerTransforms transformer(
     cubeStorage);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
+
+ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassisSubsystem,
+    transformer.getWorldToChassis(),
+    BEYBLADE_CONFIG,
+    nullptr,
+    0,
+    0);
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
