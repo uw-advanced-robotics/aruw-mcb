@@ -81,6 +81,7 @@
 #include "modm/container/pair.hpp"
 
 // #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/cycle_state_mode_controller.hpp"
@@ -102,6 +103,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -142,34 +144,8 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace hero_control
 {
-class HeroTurretDisabledCommand : public tap::control::Command
-{
-public:
-    explicit HeroTurretDisabledCommand(TurretSubsystem* turretSubsystem)
-        : turretSubsystem(turretSubsystem)
-    {
-        addSubsystemRequirement(turretSubsystem);
-    }
-
-    const char* getName() const override { return "hero turret disabled"; }
-
-    void initialize() override { zeroTurret(); }
-
-    void execute() override { zeroTurret(); }
-
-    bool isFinished() const override { return false; }
-
-    void end(bool) override { zeroTurret(); }
-
-private:
-    TurretSubsystem* turretSubsystem;
-
-    void zeroTurret()
-    {
-        turretSubsystem->yawMotor.setMotorOutput(0);
-        turretSubsystem->pitchMotor.setMotorOutput(0);
-    }
-};
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
@@ -328,15 +304,16 @@ aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
     heroTurretEncoders,
     BINNED_ALIGNMENT_OFFSET);
 
-Trigger yawOnlineTrigger = Trigger(drivers(), []() -> bool {
-                               return heroTurretEncoders.isOnline();
-                           }).onTrue(&binnedAlignmentCommand);
+Trigger yawOnlineTrigger =
+    Trigger(drivers(), []() -> bool {
+        return heroTurretEncoders.isOnline() && !remoteSafeDisconnectFunction();
+    }).whileTrue(&binnedAlignmentCommand);
 
 aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(
     &pitchMotor,
     PITCH_MOTOR_CONFIG,
     PITCH_LINKAGE_CONFIG);
-// aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
+
 aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
 
 HeroTurretSubsystem turret(drivers(), pitchTurretMotor, yawTurretMotor, &getTurretMCBCanComm());
@@ -441,17 +418,41 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
     turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
+aruwsrc::control::autotune::TurretAutotuneCommand<
+    9,
+    aruwsrc::control::turret::algorithms::Axis::PITCH>::TurretCalibrationConfig
+    turretCalibrationConfig{
+        .turret = &turret,
+        .motor = &turret.pitchMotor,
+        .controller = &chassisFramePitchTurretController,
+        .isMotorInverted = pitchMotor.isMotorInverted(),
+        .turretMass = 1.0f,          // TODO: measure this
+        .torqueToDesiredOut = 1.0f,  // TODO: tune this
+    };
 aruwsrc::control::autotune::GravityAutotuneCommand<9, algorithms::Axis::PITCH>
-    gravityAutotuneCommand(
+    gravityAutotuneCommand(drivers(), turretCalibrationConfig);
+
+aruwsrc::control::autotune::TurretAutotuneCommand<
+    1,
+    aruwsrc::control::turret::algorithms::Axis::YAW>::TurretCalibrationConfig
+    turretCalibrationConfigFreq{
+        .turret = &turret,
+        .motor = &turret.yawMotor,
+        .controller = &chassisFrameYawTurretController,
+        .isMotorInverted = yawMotor.isMotorInverted(),
+        .turretMass = 1.0f,          // TODO: measure this
+        .torqueToDesiredOut = 1.0f,  // TODO: tune this
+    };
+
+aruwsrc::control::autotune::FreqSweepAutotuneCommand<
+    aruwsrc::control::turret::algorithms::Axis::YAW>
+    freqSweep(
         drivers(),
-        {
-            .turret = &turret,
-            .motor = &turret.pitchMotor,
-            .controller = &chassisFramePitchTurretController,
-            .isMotorInverted = pitchMotor.isMotorInverted(),
-            .turretMass = 1.0f,          // TODO: measure this
-            .torqueToDesiredOut = 1.0f,  // TODO: tune this
-        });
+        turretCalibrationConfigFreq,
+        {2.0f, 250.0f, 1.0001f, 10'000.0f},
+        &getTurretMCBCanComm(),
+        {&chassisFramePitchTurretController},
+        &chassis);
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
     world_rel_turret_imu::PITCH_POS_PID_CONFIG);
@@ -476,13 +477,14 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidCv(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
+algorithms::WorldFrameTurretImuSTOSTurretController<algorithms::Axis::YAW>
     worldFrameYawTurretImuControllerCv(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
         turret.yawMotor,
+        STOS_CONSTANTS,
         worldFrameYawTurretImuPosPidCv,
-        worldFrameYawTurretImuVelPidCv);
+        TURRET_FEEDFORWARD_CONSTANTS);
 
 algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
     worldFramePitchTurretImuControllerCv(
@@ -506,8 +508,6 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFramePitchTurretImuController,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
-
-HeroTurretDisabledCommand turretDisabledCommand(&turret);
 
 cv::TurretCVCommand turretCVCommand(
     &drivers()->visionCoprocessor,
@@ -743,7 +743,7 @@ auto leftSwitchUp = std::make_unique<HoldCommandMapping>(
     drivers(),
     std::vector<Command*>{
         &chassisDriveCommand,
-        // &turretCVCommand,
+        &turretCVCommand,
     },
     &leftUpRms);
 
@@ -835,9 +835,6 @@ auto ctrlPressed = std::make_unique<HoldCommandMapping>(
     drivers(),
     std::vector<Command*>{&capBankHalfSprintCommand},
     &ctrlRms);
-
-// Safe disconnect function
-aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -946,6 +943,7 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCom
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
         &hero_control::gravityAutotuneCommand,
         &hero_control::launcherLutAutotuneCommand};
+        &hero_control::freqSweep};
     return commands;
 }
 #endif
