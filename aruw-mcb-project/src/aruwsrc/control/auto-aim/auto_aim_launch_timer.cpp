@@ -69,9 +69,20 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::UNGATED;
     }
 
+    // TODO: 25 is hardcoded shot frequency threshold to enter center targeting mode (1 shot per
+    // plate)
+    bool targetPlateCenters = ballisticsSolution->shotWindowHalfWidth * 2 < 1'000'000 / 25;
     float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
-    uint64_t shotWindowStart =
-        ballisticsSolution->shotWindowCenter - ballisticsSolution->shotWindowHalfWidth;
+
+    // If we want to shoot once per plate at the plate center, clamping the window start to the
+    // center time means we'll only try to shoot the instant we think our shot will hit the center.
+    // If the agitator was busy, it will fire as early as possible before the plate window ends,
+    // shooting as close to the center as possible.
+    // Note: If half the plate takes more time to travel across the aim line than it does for us to
+    // fire one shot, this means we might still try to hit the trailing end of the plate. Might want
+    // to explicitly account for this later.
+    uint64_t shotWindowStart = ballisticsSolution->shotWindowCenter -
+                               (targetPlateCenters ? 0 : ballisticsSolution->shotWindowHalfWidth);
     uint64_t shotWindowEnd =
         ballisticsSolution->shotWindowCenter + ballisticsSolution->shotWindowHalfWidth;
     debugInfo.pulseEstimationUsed = true;
