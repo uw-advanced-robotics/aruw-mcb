@@ -170,7 +170,16 @@ public:
 
     float getDesiredFrictionWheelSpeed() const override
     {
-        return launchSpeedToFrictionWheelRpm(desiredLaunchSpeed) - speedCorrection;
+        float individualVelocitySum = 0.0f;
+        for (uint8_t i = 0; i < NUM_WHEELS; i++)
+        {
+            if (!isWheelVelocityOverridden[i])
+            {
+                return launchSpeedToFrictionWheelRpm(desiredLaunchSpeed) - speedCorrection;
+            }
+            individualVelocitySum += individualWheelVelocities[i];
+        }
+        return individualVelocitySum / NUM_WHEELS;
     }
 
     float getCurrentCorrectionValue() const override { return speedCorrection; }
