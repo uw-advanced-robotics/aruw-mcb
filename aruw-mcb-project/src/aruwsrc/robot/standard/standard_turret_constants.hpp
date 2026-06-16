@@ -23,9 +23,10 @@
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/control/turret/algorithms/third_order_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_stos_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -251,7 +252,21 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 };
 
 #elif defined(TARGET_STANDARD_PHOBOS)
-// tuned
+inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS = {
+    .J_TOTAL = 0.0133f,
+    .TAU_MAX = 1.3f,
+    .B_DAMP = 0.001f,
+    .W_D = 74.6f,
+    .ZETA = 0.542f,
+    .SYSTEM_DELAY_SEC = 0.008f,
+    .TorqueToMotorOutput = 1.0f / TORQUE_TO_DESIRED_OUT,
+};
+
+inline constexpr algorithms::TurretFeedforwardConstants FEEDFORWARD_CONSTANTS = {
+    .Ka = 0.0133f / TORQUE_TO_DESIRED_OUT,
+    .Kv = 0.0367f / TORQUE_TO_DESIRED_OUT,
+    .Ks = 0.12f / TORQUE_TO_DESIRED_OUT};
+
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 16.0f,
     .ki = 0.0f,
@@ -267,11 +282,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 20.0f,
-    .ki = 0.0f,
-    .kd = 0.001f,
-    .maxICumulative = 0.0f,
-    .maxOutput = 12.0f,
+    .kp = 12'000.0f,
+    .ki = 500'000.0f,
+    .kd = 5'000.0f,
+    .maxICumulative = 750.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,

@@ -75,7 +75,7 @@ public:
         // calculateConstants();
 
         // Small linear interp to help with delay
-        float xe = -posError - vel * SYSTEM_DELAY_SEC;
+        float xe = -posError + vel * SYSTEM_DELAY_SEC;
 
         // Quadrant 1: Overshot target, moving away = Max Brake
         if (xe > 0.0f && vel >= 0.0f) return -TAU_MAX * TorqueToMotorOutput;
