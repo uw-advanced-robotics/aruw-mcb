@@ -373,6 +373,12 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         currentTimeMicros + static_cast<uint64_t>(timeToPlateCenterShot * 1e6f);
     solution.shotWindowHalfWidth = static_cast<uint64_t>(halfWidthTime * 1e6f);
 
+    if (telemetry)
+    {
+        telemetry->logSignal("ballistics:win_cen", solution.shotWindowCenter / 1e6f);
+        telemetry->logSignal("ballistics:win_wid", halfWidthTime);
+    }
+
     return solution;
 }
 }  // namespace aruwsrc::algorithms
