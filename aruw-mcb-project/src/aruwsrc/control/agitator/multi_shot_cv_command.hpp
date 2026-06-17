@@ -84,7 +84,6 @@ private:
     std::optional<ManualFireRateReselectionManager*> fireRateReselectionManager;
     governor::CvOnTargetGovernor& cvOnTargetGovernor;
     std::optional<ConstantVelocityAgitatorCommand*> command;
-    bool singleShotFinished = false;
     bool activeCommandEnded = false;
 #if defined(ALL_STANDARDS)
     LaunchMode launchMode = LIMITED_20HZ;

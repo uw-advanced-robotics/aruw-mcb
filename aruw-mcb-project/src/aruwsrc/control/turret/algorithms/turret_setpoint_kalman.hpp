@@ -65,7 +65,7 @@ private:
     static constexpr float EKF_Q[STATES_SQUARED] =
         {1e-15f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 10.0f};
 
-    static constexpr float EKF_R[INPUTS_SQUARED] = {1e-1f};
+    static constexpr float EKF_R[INPUTS_SQUARED] = {5e-3f};
 
     // P0 Matrix (Initial Covariance): Updated for 3x3
     static constexpr float EKF_P0[STATES_SQUARED] =

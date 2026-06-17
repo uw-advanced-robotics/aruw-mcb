@@ -17,8 +17,8 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef AUTO_NAV_BEYBLADE_COMMAND_HPP_
-#define AUTO_NAV_BEYBLADE_COMMAND_HPP_
+#ifndef AUTO_NAV_COMMAND_HPP_
+#define AUTO_NAV_COMMAND_HPP_
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/ramp.hpp"
@@ -38,21 +38,26 @@
 #include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 
-namespace aruwsrc::control::chassis::sentry
+namespace aruwsrc::control::chassis
 {
 class HolonomicChassisSubsystem;
 
 /**
  * A command that automatically rotates the chassis while maintaining turret angle
  */
-class AutoNavBeybladeCommand : public tap::control::Command
+class AutoNavCommand : public tap::control::Command
 {
 public:
-    AutoNavBeybladeCommand(
+    /**
+     * @param ends Does this command end once the path is completed?
+     */
+    AutoNavCommand(
         const tap::Drivers& drivers,
         chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::chassis::ChassisAutoNavController& autoNavController,
-        bool autoNavOnlyInGame = false);
+        bool autoNavOnlyInGame = false,
+        bool beybladeEnabled = true,
+        bool ends = false);
 
     void initialize() override;
 
@@ -60,13 +65,13 @@ public:
 
     void end(bool) override;
 
-    bool isFinished() const override { return false; }
+    bool isFinished() const override;
 
     inline void toggleBeyblade() { beybladeEnabled = !beybladeEnabled; };
 
     inline void toggleMovement() { movementEnabled = !movementEnabled; };
 
-    const char* getName() const override { return "autonav beyblade"; }
+    const char* getName() const override { return "autonav command"; }
 
 private:
     const tap::Drivers& drivers;
@@ -74,12 +79,12 @@ private:
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
 
     bool autoNavOnlyInGame;
-
-    bool beybladeEnabled = true;
+    bool beybladeEnabled;
+    bool ends;
     bool movementEnabled = true;
 
 };  // class AutoNavBeybladeCommand
 
-}  // namespace aruwsrc::control::chassis::sentry
+}  // namespace aruwsrc::control::chassis
 
 #endif  // AUTO_NAV_BEYBLADE_COMMAND_HPP_
