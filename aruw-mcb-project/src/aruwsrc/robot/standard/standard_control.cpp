@@ -56,6 +56,10 @@
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
+#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
+#include "aruwsrc/control/autotune/gravity_autotune.hpp"
+#include "aruwsrc/control/autotune/second_order_autotune.hpp"
+#include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
@@ -76,14 +80,6 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/control/turret/algorithms/turret_stos_controller.hpp"
-#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
-
-// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
-#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
-#include "aruwsrc/control/autotune/gravity_autotune.hpp"
-#include "aruwsrc/control/autotune/second_order_autotune.hpp"
-#include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_mode_controller.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -104,7 +100,9 @@
 #include "aruwsrc/control/turret/algorithms/third_order_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_stos_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -710,11 +708,10 @@ Trigger rightSwitchMiddle =
         .onTrue(&spinFrictionWheels)
         .onFalse(&stopFrictionWheels);
 
-RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 Trigger rightSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
         .onTrue(&spinFrictionWheels)
-        .whileTrue(&rotateAndUnjamAgitatorRepeat);
+        .whileTrue(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
