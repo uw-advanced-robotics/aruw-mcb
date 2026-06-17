@@ -286,7 +286,7 @@ std::array<tap::motor::MotorInterface *, 2> wheels = {&leftFrictionWheel, &right
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
     2>
-    frictionWheelsSubsystem(
+    frictionWheels(
         drivers(),
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
@@ -297,7 +297,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
 CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     transformAdapter,
-    frictionWheelsSubsystem,
+    frictionWheels,
     {
         .shotTimingEntryThreshold = 6.0f,
         .shotTimingExitThreshold = 4.0f,
@@ -592,7 +592,7 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 //     drivers()->refSerial,
 //     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheelsSubsystem);
+FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheels);
 
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
     {&agitator},
@@ -621,28 +621,28 @@ CvOnTargetGovernor cvOnTargetGovernor(
     turretCVCommand,
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED,
-    true);
+    false);
 
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOn,
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
-GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCVWindowLimiting(
-    {&agitator},
-    rotateAndUnjamAgitator,
-    {&frictionWheelsOnGovernor, &cvOnTargetGovernor, &heatLimitGovernor});
+// GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCVWindowLimiting(
+//     {&agitator},
+//     rotateAndUnjamAgitator,
+//     {&frictionWheelsOnGovernor, &cvOnTargetGovernor, &heatLimitGovernor});
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
-    &frictionWheelsSubsystem,
+    &frictionWheels,
     15.0f,
     false,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
-    &frictionWheelsSubsystem,
+    &frictionWheels,
     0.0f,
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
@@ -710,10 +710,11 @@ Trigger rightSwitchMiddle =
         .onTrue(&spinFrictionWheels)
         .onFalse(&stopFrictionWheels);
 
+RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 Trigger rightSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(&spinFrictionWheels)
-        .whileTrue(&rotateAndUnjamAgitatorWithHeatAndCVWindowLimiting);
+        .onTrue(&spinFrictionWheels)
+        .whileTrue(&rotateAndUnjamAgitatorRepeat);
 
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
@@ -725,14 +726,6 @@ Trigger leftSwitchUp =
                                       // cvOnTargetGoverner checks if this command specifically is
                                       // scheduled
         .whileTrue(&chassisDriveCommand);
-
-MultiShotCvCommandMapping leftMousePressedBNotPressed(
-    *drivers(),
-    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B}),
-    &manualFireRateReselectionManager,
-    cvOnTargetGovernor);
-// &rotateAgitator);
 
 Trigger fToggled = TriggerHelpers::button(drivers(), Remote::Key::F).toggleOnTrue(&beybladeCommand);
 
@@ -781,7 +774,7 @@ MatrixHudIndicators positionHudIndicators(
     *drivers(),
     drivers()->visionCoprocessor,
     refSerialTransmitter,
-    frictionWheelsSubsystem,
+    frictionWheels,
     turret,
     &multiShotCvCommand,
     &cvOnTargetGovernor);
@@ -846,7 +839,7 @@ void registerStandardSubsystems(Drivers *drivers)
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
-    drivers->commandScheduler.registerSubsystem(&frictionWheelsSubsystem);
+    drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&buzzer);
@@ -864,7 +857,7 @@ void initializeSubsystems()
     chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();
-    frictionWheelsSubsystem.initialize();
+    frictionWheels.initialize();
     clientDisplay.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
@@ -880,7 +873,7 @@ void setDefaultStandardCommands(Drivers *)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    frictionWheelsSubsystem.setDefaultCommand(&stopFrictionWheels);
+    frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
