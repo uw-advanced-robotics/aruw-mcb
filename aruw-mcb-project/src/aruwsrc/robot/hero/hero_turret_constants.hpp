@@ -26,6 +26,8 @@
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_stos_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/robot/hero/hero_pitch_turret_motor.hpp"
 #include "modm/container/pair.hpp"
@@ -66,7 +68,7 @@ static constexpr tap::encoder::CanEncoderId YAW_LAMPREY_ENCODER_ID =
 static constexpr tap::can::CanBus YAW_LAMPREY_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
 
 static constexpr float YAW_LAMPREY_RATIO = 1.0f;
-static constexpr uint32_t YAW_LAMPREY_ENCODER_HOME_POSITION = 0;  // TODO: get home position
+static constexpr float YAW_LAMPREY_ENCODER_HOME_POSITION = -modm::toRadian(110.0f);
 
 static constexpr tap::encoder::CanEncoderId YAW_ENCODER_ID = tap::encoder::CanEncoderId::ID0;
 
@@ -74,7 +76,7 @@ static constexpr tap::can::CanBus YAW_ENCODER_CAN_BUS = tap::can::CanBus::CAN_BU
 
 static constexpr float YAW_ENCODER_RATIO = 1.0f;  // One for use in binned alignment
 
-static constexpr uint32_t YAW_ENCODER_HOME_POSITION = 0;  // TODO: get home position
+static constexpr float BINNED_ALIGNMENT_OFFSET = 2.44f;
 
 static const modm::Pair<float, float> LAMPREY_LUT[0] = {};
 
@@ -94,7 +96,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 1975,
+    .startEncoderValue = 5267,
     .minAngle = -.32f,
     .maxAngle = 0.56f,
     .limitMotorAngles = true,
@@ -120,6 +122,22 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 0.0f,
 };
 
+inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS{
+    .J_TOTAL = 0.0454f,
+    .TAU_MAX = 5.5f,
+    .B_DAMP = 0.001f,
+    .W_D = 53.4f,
+    .ZETA = 0.216f,
+    .SYSTEM_DELAY_SEC = 0.012f,
+    .TorqueToMotorOutput = 16384.0f / 6.0f,
+};
+
+inline constexpr algorithms::TurretFeedforwardConstants TURRET_FEEDFORWARD_CONSTANTS{
+    .Ka = 100.0f,
+    .Kv = 150.0f,
+    .Ks = 250.0f,
+};
+
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
@@ -137,11 +155,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 10.0f,
-    .maxOutput = 2000,
+    .kp = 15'000.0f,
+    .ki = 8'000'000.0f,
+    .kd = 3'000.0f,
+    .maxICumulative = 600.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 0.1f,

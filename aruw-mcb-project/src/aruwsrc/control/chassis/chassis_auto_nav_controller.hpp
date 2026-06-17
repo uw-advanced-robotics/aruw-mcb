@@ -40,7 +40,7 @@ public:
     const float LOOKAHEAD_DISTANCE = 0.2f;
 
     // how long the controller takes to smoothly transition to an updated path
-    const uint32_t PATH_TRANSITION_TIME_MILLIS = 400;
+    const uint32_t PATH_TRANSITION_TIME_MILLIS = 0;
 
     // distance from setpoint under which robot is considered "on target"
     const float POS_ERROR_THRESHOLD = 0.01;
@@ -50,15 +50,16 @@ public:
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
         HolonomicChassisSubsystem& chassis,
-        aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer,
+        const tap::algorithms::transforms::Transform& worldToChassis,
         const aruwsrc::control::chassis::BeybladeConfig beybladeConfig,
-        aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem,
+        aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem,
         float translationalMotionThreshold,
         float capbankEnergyThreshold)
         : chassis(chassis),
+          lastParameter(0),
           lastSetPoint(Position(-1, -1, 0)),
           drivers(drivers),
-          transformer(transformer),
+          worldToChassis(worldToChassis),
           beybladeConfig(beybladeConfig),
           capBankSubsystem(capBankSubsystem),
           translationalMotionThreshold(translationalMotionThreshold),
@@ -79,6 +80,9 @@ public:
         float interpolationParameter,
         bool movementEnabled);
 
+    bool atSetpoint();
+
+    void pushPoint(Position newPoint);
     // Sets the maximum speed the chassis moves at, in units of Meters per Second
     inline void setDesiredSpeed(float speed) { this->translateSpeedRamp.setTarget(speed); }
 
@@ -87,10 +91,16 @@ public:
 private:
     aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
+    float lastParameter;
     Position lastSetPoint;
     tap::Drivers& drivers;
+    float errorMag;
+    Vector chassisFrameMoveVector = Vector(0, 0, 0);
+    Position setpoint = Position(0, 0, 0);
+    Vector moveVector = Vector(0, 0, 0);
+    Vector posError = Vector(0, 0, 0);
 
-    const aruwsrc::sentry::algorithms::odometry::SentryTransformAdapter* transformer;
+    const tap::algorithms::transforms::Transform& worldToChassis;
 
     aruwsrc::control::chassis::BeybladeConfig beybladeConfig;
 
@@ -98,7 +108,7 @@ private:
     float rotationDirection;
     tap::algorithms::Ramp rotateSpeedRamp, translateSpeedRamp;
 
-    aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
+    aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem;
 
     const float translationalMotionThreshold;
     const float capbankEnergyThreshold;

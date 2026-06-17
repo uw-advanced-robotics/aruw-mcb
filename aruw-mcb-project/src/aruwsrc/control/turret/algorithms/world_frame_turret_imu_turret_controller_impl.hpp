@@ -83,7 +83,7 @@ static inline float runWorldFrameTurretImuController(
     const WrappedFloat worldFrameAngleError,
     const WrappedFloat chassisFrameAngleMeasurement,
     const float worldFrameVelocityMeasured,
-    const uint32_t dt,
+    const float dt,
     const TurretMotor &turretMotor,
     tap::algorithms::SmoothPid &positionPid,
     tap::algorithms::SmoothPid &velocityPid)

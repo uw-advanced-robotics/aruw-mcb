@@ -159,7 +159,7 @@ before_script:
   needs: []
   script:
     - cd aruw-mcb-project
-    - scons build robot=STANDARD_VOID compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
+    - scons build robot=STANDARD_PHOBOS compile_lib_only=mcb $ADDITIONAL_CI_BUILD_ARGS
   cache:
     key: mcb-libs-$CI_COMMIT_REF_SLUG
     paths:
@@ -177,7 +177,7 @@ before_script:
   needs: []
   script:
     - cd aruw-mcb-project
-    - scons build robot=STANDARD_VOID compile_lib_only=test profile=fast -j${NUM_JOBS}
+    - scons build robot=STANDARD_PHOBOS compile_lib_only=test profile=fast -j${NUM_JOBS}
   cache:
     key: mcb-test-libs-$CI_COMMIT_REF_SLUG
     paths:
@@ -204,23 +204,23 @@ before_script:
   variables:
     ROBOT: STANDARD_NULL
 
-# Standard (Void) build
+# Standard (Phobos) build
 
-"Standard (Void): MCB Build":
+"Standard (Phobos): MCB Build":
   extends:
     - .mcb_build
   variables:
-    ROBOT: STANDARD_VOID
+    ROBOT: STANDARD_PHOBOS
 
 # Test build script is different from the others since we use this one to track test coverage for the repo
-"Standard (Void): Test Build":
+"Standard (Phobos): Test Build":
   stage: Tests
   needs: []
   only: *default_only
   script:
     - cd aruw-mcb-project
-    - scons run-tests-gcov profile=fast robot=STANDARD_VOID -j${NUM_JOBS}
-    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_VOID/aruw-mcb-tests.elf
+    - scons run-tests-gcov profile=fast robot=STANDARD_PHOBOS -j${NUM_JOBS}
+    - valgrind --leak-check=full --error-exitcode=1 --show-leak-kinds=all build/tests/scons-fast/TARGET_STANDARD_PHOBOS/aruw-mcb-tests.elf
     - cd .. && gcovr -g --xml > cobertura.xml
     - 'sed -i "s=<source>.</source>=<source>./aruw-mcb-project</source>=g" cobertura.xml'
     - 'sed -i "s;filename=\";filename=\"aruw-mcb-project/;g" cobertura.xml'
@@ -233,11 +233,11 @@ before_script:
         path: cobertura.xml
     expire_in: 2 weeks
   cache:
-    key: robot-STANDARD_VOID-$CI_COMMIT_REF_SLUG-tests
+    key: robot-STANDARD_PHOBOS-$CI_COMMIT_REF_SLUG-tests
     paths:
       - aruw-mcb-project/build/tests/scons-fast/
     fallback_keys:
-      - robot-STANDARD_VOID-develop-tests
+      - robot-STANDARD_PHOBOS-develop-tests
     when: 'always'
 
 # Drone build

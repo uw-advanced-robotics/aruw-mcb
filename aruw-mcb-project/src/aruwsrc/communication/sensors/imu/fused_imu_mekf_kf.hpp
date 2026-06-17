@@ -314,7 +314,6 @@ public:
         filterInitialized = false;
         pendingReinitializeAfterCalibration = true;
         resetFilterState();
-        requestCalibration();
     }
 
     void setCalibrationSamples(int sampleCount)

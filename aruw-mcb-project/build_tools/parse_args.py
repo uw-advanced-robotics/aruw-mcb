@@ -40,7 +40,7 @@ USAGE = "Usage: scons <target> robot=<ROBOT_TYPE> [profile=<debug|release|fast>]
             - \"usb=1\", \"--usb\": forces the use of USB, regardless of whether a known IP is present.\
     \"<ROBOT_TYPE>\" enables the appropriate build flags for the hardware target that the code should be built for.\n\
         - <ROBOT_TYPE> must be one of or a unique substring from the following:\n\
-            - STANDARD_NULL, STANDARD_VOID, DRONE, ENGINEER, SENTRY_ACHLYS, HERO_NEPTUNE, DART\n\
+            - STANDARD_NULL, STANDARD_PHOBOS, DRONE, ENGINEER, SENTRY_ACHLYS, HERO_NEPTUNE, DART\n\
     \"compile_lib_only\": Use if you only want to compile the library code. This must be used with `scons build`. If you want to build\n\
                           the sim libraries, for example, run `scons build compile_lib_only=sim`."
 

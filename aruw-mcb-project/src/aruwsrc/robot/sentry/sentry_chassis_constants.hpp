@@ -32,15 +32,15 @@ namespace aruwsrc::control::chassis
 {
 static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 1.0f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 1.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.75f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 4.0f;
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {1, 200},
-    {2, 250}};  // TODO: TUNE!
+    {1, 370},
+    {2, 375}};  // TODO: TUNE!
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
