@@ -31,7 +31,8 @@ BinnedAlignmentCommand::BinnedAlignmentCommand(
 {
     addSubsystemRequirement(&encoders);
 }
-void BinnedAlignmentCommand::initialize()
+
+void BinnedAlignmentCommand::execute()
 {
     const float localEncoderPosition = encoders.getYawEncoderPosition();
     const float globalEncoderPosition = encoders.getYawLampreyPosition();

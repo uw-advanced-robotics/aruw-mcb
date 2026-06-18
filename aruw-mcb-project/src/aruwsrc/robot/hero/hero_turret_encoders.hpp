@@ -78,7 +78,7 @@ private:
 
     aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
 
-    float finalHomeOffset;
+    const float finalHomeOffset;
 };
 }  // namespace aruwsrc::hero
 
