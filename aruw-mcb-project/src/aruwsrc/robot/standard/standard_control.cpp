@@ -875,7 +875,7 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
-#ifdef TARGET_STANDARD_PHOBOS
+#if defined(TARGET_STANDARD_PHOBOS) || defined(TARGET_STANDARD_DEIMOS)
     getTurretMCBCanComm().setImuMountingTransforms(
         aruwsrc::control::turret::TURRET_MCB_BMI088_MOUNTING_TRANSFORM,
         aruwsrc::control::turret::TURRET_MCB_ISM330_MOUNTING_TRANSFORM);
