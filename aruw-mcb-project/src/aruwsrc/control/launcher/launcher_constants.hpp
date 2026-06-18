@@ -132,11 +132,19 @@ static constexpr tap::algorithms::SmoothPidConfig LAUNCHER_SPEED_CORRECTION_PID_
 #if defined(TARGET_HERO_NEPTUNE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
-    {4.0f, 1900.0f},
-    {10.0f, 3850.0f},
-    {15.0f, 5750.0f},
-    {16.0f, 6500.0f},
-    {18.0f, 8500.0f},
+    {5.33961248f, 2000.0f},
+    {7.2889533f, 2500.0f},
+    {9.09577465f, 3000.0f},
+    {10.8697052f, 3500.0f},
+    {12.4806519f, 4000.0f},
+    {13.8437967f, 4500.0f},
+    {15.3708878f, 5000.0f},
+    {16.868948f, 5500.0f},
+    {18.4827785f, 6000.0f},
+    {19.7700138f, 6500.0f},
+    {20.3329659f, 7000.0f},
+    {21.3121357f, 7500.0f},
+    {23.184721f, 8000.0f},
 };
 #elif defined(TARGET_STANDARD_NULL)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
@@ -190,8 +198,7 @@ static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #endif
 
 #if defined(TARGET_HERO_NEPTUNE)
-static constexpr float LAUNCHER_SPEED =
-    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 5;
+static constexpr float LAUNCHER_SPEED = 14.5f;
 #else
 static constexpr float LAUNCHER_SPEED =
     tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 3;

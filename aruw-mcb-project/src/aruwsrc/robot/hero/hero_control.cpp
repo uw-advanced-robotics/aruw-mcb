@@ -635,7 +635,7 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
 }  // namespace kicker
 
 tap::control::WeakConcurrentCommand<2> launcherLutAutotuneFireCommand(
-    {&waterwheel::feedWaterwheelWhenBallNotReady, &kicker::launchKickerNoHeatLimiting},
+    {&waterwheel::rotateAndUnjamWaterwheel, &kicker::launchKicker},
     "Hero launcher LUT autotune fire");
 
 aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<16> launcherLutAutotuneCommand(
@@ -646,7 +646,7 @@ aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<16> launcherLutAutot
         .barrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
         .numFrictionWheels = 4,
         .startRpm = 2000.0f,
-        .endRpm = 9000.0f,
+        .endRpm = 8000.0f,
         .rpmStep = 500.0f,
         .minShotsPerStep = 3,
     });
@@ -942,7 +942,7 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCom
 {
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
         &hero_control::gravityAutotuneCommand,
-        &hero_control::launcherLutAutotuneCommand};
+        &hero_control::launcherLutAutotuneCommand,
         &hero_control::freqSweep};
     return commands;
 }
