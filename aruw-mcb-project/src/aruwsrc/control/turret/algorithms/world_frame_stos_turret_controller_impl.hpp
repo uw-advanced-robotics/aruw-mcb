@@ -128,7 +128,8 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
         chassisFrame + (worldFrameSetpoint - worldFrameAngle),
         chassisFrame);
 
-    float targetVel = setpointFilter.getEstimatedVelocity();
+    float targetVel = setpointFilter.getEstimatedVelocity() - worldFrameVelocity +
+                      this->turretMotor.getChassisFrameVelocity();
     float targetAccel = setpointFilter.getEstimatedAcceleration();
 
     float frictionFF = 0.0;
