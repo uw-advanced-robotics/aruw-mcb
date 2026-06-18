@@ -57,6 +57,10 @@
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
+#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
+#include "aruwsrc/control/autotune/gravity_autotune.hpp"
+#include "aruwsrc/control/autotune/second_order_autotune.hpp"
+#include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
@@ -77,11 +81,6 @@
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-
-//#include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
-#include "aruwsrc/control/autotune/gravity_autotune.hpp"
-#include "aruwsrc/control/autotune/second_order_autotune.hpp"
-#include "aruwsrc/control/autotune/spring_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_mode_controller.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
@@ -103,7 +102,9 @@
 #include "aruwsrc/control/turret/algorithms/third_order_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_stos_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -421,6 +422,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
+#if defined(TARGET_STANDARD_NULL)
 algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
     worldFrameYawTurretImuControllerCv(
         transformer.getWorldToTurret(),
@@ -428,6 +430,16 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
         turret.yawMotor,
         worldFrameYawTurretImuPosPidCv,
         worldFrameYawTurretImuVelPidCv);
+#else
+algorithms::WorldFrameTurretImuSTOSTurretController<algorithms::Axis::YAW>
+    worldFrameYawTurretImuControllerCv(
+        transformer.getWorldToTurret(),
+        getTurretMCBCanComm(),
+        turret.yawMotor,
+        world_rel_turret_imu::STOS_CONSTANTS,
+        worldFrameYawTurretImuPosPidCv,
+        world_rel_turret_imu::FEEDFORWARD_CONSTANTS);
+#endif
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -523,6 +535,22 @@ autotune::SecondOrderAutotuneCommand<9, aruwsrc::control::turret::algorithms::Ax
         {},
         &imuCalibrateSuccessBuzzCommand,
         &imuCalibrateFailBuzzCommand);
+
+autotune::FreqSweepAutotuneCommand<aruwsrc::control::turret::algorithms::Axis::YAW>
+    freqSweepAutotuneCommand(
+        drivers(),
+        {&turret,
+         &turret.yawMotor,
+         &chassisFrameYawTurretController,
+         yawMotor.isMotorInverted(),
+         TURRET_WEIGHT_KG,
+         TORQUE_TO_DESIRED_OUT},
+        {.startFreq = 1.5f,
+         .endFreq = 250.0f,
+         .freqIncrementRatio = 1.0001f,
+         .magnitude = 12'000.0f},
+        &getTurretMCBCanComm(),
+        {&chassisFramePitchTurretController});
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
@@ -690,11 +718,10 @@ Trigger rightSwitchMiddle =
         .onTrue(&spinFrictionWheels)
         .onFalse(&stopFrictionWheels);
 
-RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 Trigger rightSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
         .onTrue(&spinFrictionWheels)
-        .whileTrue(&rotateAndUnjamAgitatorRepeat);
+        .whileTrue(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
 
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
@@ -904,6 +931,7 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
         &standard_control::gravityAutotuneCommand,
         &standard_control::springAutotuneCommand,
+        &standard_control::freqSweepAutotuneCommand,
         &standard_control::secondOrderAutotuneCommand,
         &standard_control::launcherLutAutotuneCommand,
     };

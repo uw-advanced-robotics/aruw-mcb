@@ -237,7 +237,7 @@ inline constexpr aruwsrc::control::turret::algorithms::OptimalSTOSController::ST
         .B_DAMP = 0.001f,
         .W_D = 80.8f,
         .ZETA = 0.33,
-        .SYSTEM_DELAY_SEC = 0.012f,
+        .SYSTEM_DELAY_SEC = 0.008f,
         .TorqueToMotorOutput = TORQUE_TO_MOTOR_OUTPUT};
 
 inline constexpr aruwsrc::control::turret::algorithms::TurretFeedforwardConstants

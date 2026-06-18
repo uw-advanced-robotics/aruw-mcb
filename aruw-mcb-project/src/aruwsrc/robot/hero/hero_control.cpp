@@ -82,6 +82,7 @@
 
 // #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
 #include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
+#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/cycle_state_mode_controller.hpp"

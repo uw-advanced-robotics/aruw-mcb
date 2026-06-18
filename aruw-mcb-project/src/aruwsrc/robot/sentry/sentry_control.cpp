@@ -42,8 +42,8 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
@@ -334,9 +334,9 @@ aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers
 aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    &transformAdapter,
+    transformAdapter.getWorldToChassis(),
     aruwsrc::control::chassis::BEYBLADE_CONFIG,
-    capBankSubsystem,
+    &capBankSubsystem,
     0.15f,
     1000.0f);
 
@@ -434,7 +434,7 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerTurretWidow(
     &turretWidowSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand(
+aruwsrc::control::chassis::AutoNavCommand autoNavCommand(
     *drivers(),
     chassis,
     autoNavController,
@@ -689,7 +689,7 @@ auto rightUp = std::make_unique<HoldCommandMapping>(
 RemoteMapState leftUpRightUpRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
 auto leftUpRightUp = std::make_unique<HoldRepeatCommandMapping>(
     drivers(),
-    std::vector<Command *>{&autoNavBeybladeCommand, &turretCVCommand},
+    std::vector<Command *>{&autoNavCommand, &turretCVCommand},
     &leftUpRightUpRms,
     true);
 
@@ -704,7 +704,7 @@ RemoteMapState leftUpRightMidRms =
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID);
 auto leftUpRightMid = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&autoNavBeybladeCommand, &turretCVCommand},
+    std::vector<Command *>{&autoNavCommand, &turretCVCommand},
     &leftUpRightMidRms);
 
 // imu calibrate
@@ -735,7 +735,7 @@ RemoteMapState leftMidRightMidRms =
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID);
 auto leftMidRightMid = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&majorManualCommand, &turretWidowManualCommand, &autoNavBeybladeCommand},
+    std::vector<Command *>{&majorManualCommand, &turretWidowManualCommand, &autoNavCommand},
     &leftMidRightMidRms);
 
 // manual aim

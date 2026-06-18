@@ -134,7 +134,7 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
 
     float frictionFF = 0.0;
     // Keep it from jittering
-    if (std::abs(targetVel) > 0.001)
+    if (std::abs(targetVel) > 0.08 && posError < 0.005)
     {
         frictionFF = std::signbit(targetVel) ? -feedforwardConstants.Ks : feedforwardConstants.Ks;
     }
