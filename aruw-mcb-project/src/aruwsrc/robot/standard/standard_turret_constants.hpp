@@ -263,9 +263,9 @@ inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS
 };
 
 inline constexpr algorithms::TurretFeedforwardConstants FEEDFORWARD_CONSTANTS = {
-    .Ka = 0.0133f / TORQUE_TO_DESIRED_OUT,
-    .Kv = 0.0367f / TORQUE_TO_DESIRED_OUT,
-    .Ks = 0.12f / TORQUE_TO_DESIRED_OUT};
+    .Ka = 0.007f / TORQUE_TO_DESIRED_OUT,
+    .Kv = 0.017f / TORQUE_TO_DESIRED_OUT,
+    .Ks = 0.10f / TORQUE_TO_DESIRED_OUT};
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 16.0f,
@@ -283,9 +283,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
     .kp = 12'000.0f,
-    .ki = 500'000.0f,
+    .ki = 0.0f,
     .kd = 5'000.0f,
-    .maxICumulative = 750.0f,
+    .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,

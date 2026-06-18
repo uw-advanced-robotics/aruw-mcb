@@ -142,7 +142,7 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
     float torqueFF = (targetAccel * feedforwardConstants.Ka) +
                      (targetVel * feedforwardConstants.Kv) + frictionFF;
 
-    if (std::abs(posError) < LINEAR_ZONE)
+    if (std::abs(posError) < LINEAR_ZONE && std::abs(targetVel) < 1)
     {
         float feedback = positionPid.runController(posError, -velError, dt);
 
