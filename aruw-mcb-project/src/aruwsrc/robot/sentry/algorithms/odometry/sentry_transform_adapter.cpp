@@ -67,16 +67,14 @@ const Transform& SentryTransformAdapter::getVisionWorldToChassis() const
     return this->transforms.getWorldToTurretMajor();
 }
 
-const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t turretID) const
+const Transform& SentryTransformAdapter::getWorldToTurretYaw(uint8_t) const
 {
-    if (turretID == 0)
-    {
-        return this->transforms.getWorldToTurretLeft();
-    }
-    else
-    {
-        return this->transforms.getWorldToTurretRight();
-    }
+    return this->transforms.getWorldToTurretWidow();
+}
+
+const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t) const
+{
+    return this->transforms.getWorldToTurretWidow();
 }
 
 const Transform& SentryTransformAdapter::getWorldToVTM() const

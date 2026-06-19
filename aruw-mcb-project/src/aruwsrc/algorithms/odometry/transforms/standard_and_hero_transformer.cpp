@@ -60,6 +60,7 @@ StandardAndHeroTransformer::StandardAndHeroTransformer(
     : chassisOdometry(chassisOdometry),
       turret(turret),
       worldToChassis(Transform::identity()),
+      worldToTurretYaw(Transform::identity()),
       worldToTurret(Transform::identity()),
       chassisToTurret(Transform::identity()),  // do we care about z offset?
       worldToVTM(Transform::identity()),
@@ -84,13 +85,13 @@ void StandardAndHeroTransformer::updateTransforms()
 
     if (imu) roll = imu->getRoll();
 
-    Transform worldToYawBase = worldToChassis;
-    worldToYawBase.updateRotation(0.0f, 0.0f, turret.getWorldYaw());
+    worldToTurretYaw.updateTranslation(worldToChassis.getTranslation());
+    worldToTurretYaw.updateRotation(0.0f, 0.0f, turret.getWorldYaw());
 
     worldToTurret.updateRotation(roll, turret.getWorldPitch(), turret.getWorldYaw());
     worldToTurret.updateAngularVelocity(0, imu->getGy(), imu->getGz());
     worldToTurret.updateTranslation(
-        worldToYawBase.composeStatic(TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET).getTranslation());
+        worldToTurretYaw.composeStatic(TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET).getTranslation());
 
     worldToTurret.updateTranslation(worldToChassis.getTranslation());
     worldToTurret.updateVelocity(worldToChassis.getVelocity());

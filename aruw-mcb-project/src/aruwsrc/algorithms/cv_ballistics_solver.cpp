@@ -48,7 +48,7 @@ CvBallisticsSolver::CvBallisticsSolver(
     aruwsrc::communication::rtt::RttTelemetry* telemetry)
     : visionCoprocessor(visionCoprocessor),
       transformer(transformer),
-      worldToTurret(transformer.getWorldToTurret(turretID)),
+      worldToTurret(transformer.getWorldToTurretYaw(turretID)),
       frictionWheels(frictionWheels),
       config(config),
       turretID(turretID),

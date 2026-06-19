@@ -64,14 +64,6 @@ public:
     inline const Transform& getWorldToChassis() const { return worldToChassis; };
     inline const Transform& getWorldToTurretMajor() const { return worldToTurretMajor; };
     inline const Transform& getWorldToTurretWidow() const { return worldToTurretWidow; };
-    inline const Transform& getWorldToTurretLeft() const
-    {
-        return worldToTurretWidow;
-    };  // Alias for compatibility
-    inline const Transform& getWorldToTurretRight() const
-    {
-        return worldToTurretWidow;
-    };  // Alias for compatibility
 
     inline const Transform& getChassisToMajor() const { return chassisToTurretMajor; };
 
