@@ -66,7 +66,7 @@ namespace aruwsrc::sentry::turret::cv
  * Coordinates turret major and minors to scan/target while maintaining FOV and view of direction
  * of movement. (This is why we need both minors controlled by a single command.)
  */
-class SentryTurretCVCommand : public tap::control::Command
+class SentryTurretCVCommand : public aruwsrc::control::turret::cv::TurretCVCommandInterface
 {
 public:
     struct TurretConfig
@@ -133,14 +133,9 @@ public:
      * turret is within some tolerance of the target. This tolerance is distance based (the further
      * away the target the closer to the center of the plate the turret must be aiming)
      */
-    bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
-    {
-        if (turretID != turretWidowConfig.turretSubsystem.getTurretID())
-        {
-            return false;
-        }
-        return withinAimingToleranceWidow;
-    }
+    bool isAimingWithinLaunchingTolerance() const override { return withinAimingToleranceWidow; }
+
+    bool getTurretID() const override { return turretWidowConfig.turretSubsystem.getTurretID(); }
 
 private:
     /**
