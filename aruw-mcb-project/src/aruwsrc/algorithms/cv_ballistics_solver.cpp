@@ -188,7 +188,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                     M_PI)
                     .minDifference(solution.yawAngle),
                 0,
-                M_PI_4))
+                M_PI_4 + config.jitterAimPlateReselectionAngularAllowance))
         {
             return solution;
         }

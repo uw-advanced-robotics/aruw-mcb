@@ -97,13 +97,26 @@ public:
 
     struct Config
     {
-        float shotTimingEntryThreshold;  // target robot angular velocity (rad/s) above which we
-                                         // switch to shot timing mode
-        float shotTimingExitThreshold;   // target robot angular velocity (rad/s) below which switch
-                                         // to jitter aim mode
+        // target robot angular velocity (rad/s) above which we switch to shot timing mode
+        float shotTimingEntryThreshold;
+
+        // target robot angular velocity (rad/s) below which switch to jitter aim mode
+        float shotTimingExitThreshold;
+
+        // default launch speed used if the friction wheels aren't spinning so that our ballistics
+        // solution is still reasonable
         const float defaultLaunchSpeed;
+
+        // signed distance between the turret pitch and yaw axes, with positive meaning the pitch
+        // axis is ahead of yaw
         float turretPitchOffset;
+
+        // minimum time after which a shot command is sent that the shot will actually fire
         float minimumShotDelay;
+
+        // how far outside of the 90 degree region facing us that our currently targeted plate has to be in
+        // order for jitter aim to select a new plate (radians)
+        float jitterAimPlateReselectionAngularAllowance = 0.2f;
     };
 
     /**
