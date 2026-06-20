@@ -54,6 +54,8 @@ inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
     Transform(Position(0.0f, 0.0f, -0.0f), Orientation(0.0f, 0.0f, 0.0f));
 #endif
 
+constexpr float TURRET_MCB_IO_DELAY = 0.004f;
+
 StandardAndHeroTransformer::StandardAndHeroTransformer(
     const Odometry2DInterface& chassisOdometry,
     const RobotTurretSubsystem& turret)
@@ -85,11 +87,24 @@ void StandardAndHeroTransformer::updateTransforms()
 
     if (imu) roll = imu->getRoll();
 
-    worldToTurretYaw.updateTranslation(worldToChassis.getTranslation());
-    worldToTurretYaw.updateRotation(0.0f, 0.0f, turret.getWorldYaw());
+    Transform worldToTurretOri(
+        DynamicPosition(0, 0, 0, 0, 0, 0, 0, 0, 0),
+        DynamicOrientation(
+            roll,
+            turret.getWorldPitch(),
+            turret.getWorldYaw(),
+            0,
+            imu->getGy(),
+            imu->getGz()));
+    // turret imu data is slightly older than chassis odometry, so project turret orientation
+    // forward to match
+    worldToTurretOri = worldToTurretOri.projectForward(TURRET_MCB_IO_DELAY);
 
-    worldToTurret.updateRotation(roll, turret.getWorldPitch(), turret.getWorldYaw());
-    worldToTurret.updateAngularVelocity(0, imu->getGy(), imu->getGz());
+    worldToTurretYaw.updateTranslation(worldToChassis.getTranslation());
+    worldToTurretYaw.updateRotation(0.0f, 0.0f, worldToTurretOri.getYaw());
+
+    worldToTurret.updateRotation(worldToTurretOri.getRotation());
+    worldToTurret.updateAngularVelocity(worldToTurretOri.getAngularVel());
     worldToTurret.updateTranslation(
         worldToTurretYaw.composeStatic(TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET).getTranslation());
 
