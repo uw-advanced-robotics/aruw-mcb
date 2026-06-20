@@ -154,8 +154,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     if (lastComputedSolution.has_value())
     {
         const uint8_t activePlate = lastComputedSolution->activePlateIndex;
-        const float lastRadius = (activePlate % 2 == 0) ? targetData.radius0 : targetData.radius1;
-        const float currTheta = targetData.theta + M_PI_2 * activePlate;
+        const float radius = (activePlate % 2 == 0) ? targetData.radius0 : targetData.radius1;
+        const float theta = targetData.theta + M_PI_2 * activePlate;
 
         RobotTargetKinematicState ballisticsTargetState(
             {targetData.xPos - worldToTurret.getX(),
@@ -165,8 +165,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
              targetData.yVel - worldToTurret.getYVel(),
              targetData.zVel},
             {targetData.xAcc, targetData.yAcc, targetData.zAcc},
-            lastRadius,
-            currTheta,
+            radius,
+            theta,
             targetData.omega);
 
         BallisticsSolution solution;
@@ -198,8 +198,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     std::optional<CvBallisticsSolver::BallisticsSolution> solution = std::nullopt;
     for (int i = 0; i < 4; i++)
     {
-        float currRadius = (i % 2 == 0) ? targetData.radius0 : targetData.radius1;
-        float currTheta = targetData.theta + M_PI_2 * i;
+        float radius = (i % 2 == 0) ? targetData.radius0 : targetData.radius1;
+        float theta = targetData.theta + M_PI_2 * i;
 
         RobotTargetKinematicState targetState(
             {targetData.xPos - worldToTurret.getX(),
@@ -209,8 +209,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
              targetData.yVel - worldToTurret.getYVel(),
              targetData.zVel},
             {targetData.xAcc, targetData.yAcc, targetData.zAcc},
-            currRadius,
-            currTheta,
+            radius,
+            theta,
             targetData.omega);
 
         BallisticsSolution currentSolution;
