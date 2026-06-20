@@ -158,8 +158,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         const float currTheta = targetData.theta + M_PI_2 * activePlate;
 
         RobotTargetKinematicState ballisticsTargetState(
-            {targetData.xPos + lastRadius * cos(currTheta) - worldToTurret.getX(),
-             targetData.yPos + lastRadius * sin(currTheta) - worldToTurret.getY(),
+            {targetData.xPos - worldToTurret.getX(),
+             targetData.yPos - worldToTurret.getY(),
              targetData.zPos + targetData.plateHeights[activePlate] - worldToTurret.getZ()},
             {targetData.xVel - worldToTurret.getXVel(),
              targetData.yVel - worldToTurret.getYVel(),
@@ -202,8 +202,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         float currTheta = targetData.theta + M_PI_2 * i;
 
         RobotTargetKinematicState targetState(
-            {targetData.xPos + currRadius * cos(currTheta) - worldToTurret.getX(),
-             targetData.yPos + currRadius * sin(currTheta) - worldToTurret.getY(),
+            {targetData.xPos - worldToTurret.getX(),
+             targetData.yPos - worldToTurret.getY(),
              targetData.zPos + targetData.plateHeights[i] - worldToTurret.getZ()},
             {targetData.xVel - worldToTurret.getXVel(),
              targetData.yVel - worldToTurret.getYVel(),

@@ -26,6 +26,16 @@ namespace aruwsrc::algorithms
 {
 struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinematicState
 {
+    /**
+     * Kinematic state of a single plate on an enemy robot
+     *
+     * @param position Position of the target robot center
+     * @param velocity Velocity of the target robot center
+     * @param acceleration Acceleration of the target robot center
+     * @param radius Radius of the target robot
+     * @param theta Angular position of the robot's plate in world frame
+     * @param omega Angular velocity of the target robot
+     */
     inline RobotTargetKinematicState(
         modm::Vector3f position,
         modm::Vector3f velocity,
@@ -67,19 +77,17 @@ struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinem
     /**
      * @param[in] dt: The amount of time to project the state forward.
      *
-     * @return The future 3D position of this object using a quadratic (constant acceleration)
-     * model for the center and linear (constant angular velocity) model for angle about the
-     * center
+     * @return The future 3D position of the target plate on the robot using a quadratic (constant
+     * acceleration) model for the center and linear (constant angular velocity) model for angle
+     * about the center
      */
     inline modm::Vector3f projectForward(float dt) const override
     {
-        float rx = radius * cos(theta);
-        float ry = radius * sin(theta);
         float rxf = radius * cos(theta + omega * dt);
         float ryf = radius * sin(theta + omega * dt);
         return modm::Vector3f(
-            quadraticKinematicProjection(dt, position.x - rx, velocity.x, acceleration.x) + rxf,
-            quadraticKinematicProjection(dt, position.y - ry, velocity.y, acceleration.y) + ryf,
+            quadraticKinematicProjection(dt, position.x, velocity.x, acceleration.x) + rxf,
+            quadraticKinematicProjection(dt, position.y, velocity.y, acceleration.y) + ryf,
             quadraticKinematicProjection(dt, position.z, velocity.z, acceleration.z));
     }
     /**
