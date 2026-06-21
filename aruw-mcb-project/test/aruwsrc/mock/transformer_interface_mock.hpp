@@ -40,6 +40,11 @@ public:
         getWorldToTurret,
         (uint8_t),
         (const override));
+    MOCK_METHOD(
+        const tap::algorithms::transforms::Transform&,
+        getWorldToTurretYaw,
+        (uint8_t),
+        (const override));
     MOCK_METHOD(tap::algorithms::transforms::Transform&, getWorldToVTM, (), (const override));
     MOCK_METHOD(
         tap::algorithms::transforms::Transform&,

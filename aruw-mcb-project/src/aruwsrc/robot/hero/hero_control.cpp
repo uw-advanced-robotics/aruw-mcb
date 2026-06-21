@@ -354,7 +354,8 @@ CvBallisticsSolver ballisticsSolver(
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
-    &ballisticsSolver);
+    &ballisticsSolver,
+    0.5f);
 
 aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
 
@@ -581,6 +582,10 @@ LimitSwitchDepressedGovernor kickerWheelLimitSwitchNotDepressedGovernor(
     getTurretMCBCanComm().getKickerWheelLimitSwitch(),
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
 
+LimitSwitchDepressedGovernor kickerWheelLimitSwitchDepressedGovernor(
+    getTurretMCBCanComm().getKickerWheelLimitSwitch(),
+    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED);
+
 ChoppedHeroLimitSwitchDepressedGovernor bothLimitSwitchesNotDepressedGovernor(
     {&getTurretMCBCanComm().getKickerWheelLimitSwitch(),
      &getTurretMCBCanComm().getAgitatorLoadingLimitSwitch()},
@@ -636,10 +641,10 @@ GovernorLimitedCommand<1> launchKickerNoHeatLimiting(
     {&kickerAgitator},
     launchKicker,
     {&frictionWheelsOnGovernor});
-GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
+GovernorLimitedCommand<4> launchKickerHeatAndCVLimited(
     {&kickerAgitator},
     launchKicker,
-    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
+    {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor, &kickerWheelLimitSwitchDepressedGovernor});
 }  // namespace kicker
 
 tap::control::WeakConcurrentCommand<2> launcherLutAutotuneFireCommand(

@@ -192,7 +192,7 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 #if defined(ALL_STANDARDS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 60'000;
 #elif defined(TARGET_HERO_NEPTUNE)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 60'000;
 #elif defined(TARGET_SENTRY_ACHLYS)
 static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #endif
