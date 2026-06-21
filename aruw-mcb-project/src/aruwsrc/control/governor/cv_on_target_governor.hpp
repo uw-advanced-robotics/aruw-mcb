@@ -32,6 +32,7 @@ namespace
 {
 using namespace aruwsrc::control::auto_aim;
 }
+
 enum class CvOnTargetGovernorMode
 {
     ON_TARGET,
@@ -50,14 +51,12 @@ public:
         aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand,
         AutoAimLaunchTimer &launchTimer,
-        CvOnTargetGovernorMode mode,
-        bool requireActiveGating = false)
+        CvOnTargetGovernorMode mode)
         : drivers(drivers),
           visionCoprocessor(visionCoprocessor),
           turretCVCommand(turretCVCommand),
           launchTimer(launchTimer),
-          mode(mode),
-          requireActiveGating(requireActiveGating)
+          mode(mode)
     {
     }
 
@@ -78,12 +77,7 @@ public:
 
         bool isCvRunning = drivers->commandScheduler.isCommandScheduled(&turretCVCommand);
 
-        bool gating = isCvOnline && enabled && isCvRunning;
-        cvOnTargetDebugCvOnline = isCvOnline;
-        cvOnTargetDebugCvRunning = isCvRunning;
-        cvOnTargetDebugGovernorEnabled = enabled;
-        cvOnTargetDebugGovernorGating = gating;
-        return gating;
+        return isCvOnline && enabled && isCvRunning;
     }
 
     /**
@@ -91,68 +85,45 @@ public:
      */
     mockable bool inShotTimingMode() const
     {
-        auto launchInclination =
-            launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID());
-        updateTimingDebug(launchInclination);
-        bool ungated = launchInclination == AutoAimLaunchTimer::LaunchInclination::UNGATED;
-        return isGovernorGating() && !ungated;
+        bool gating = launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID()) ==
+                      AutoAimLaunchTimer::LaunchInclination::UNGATED;
+        return isGovernorGating() && !gating;
     }
 
     bool isReady() final_mockable
     {
-        auto launchInclination =
-            launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID());
-        updateTimingDebug(launchInclination);
-
         if (!isGovernorGating())
         {
-            cvOnTargetDebugOnTarget = false;
-            cvOnTargetDebugGateSatisfied = !requireActiveGating;
-            cvOnTargetDebugIsReady = !requireActiveGating;
-            return !requireActiveGating;
+            return true;
         }
 
         bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance();
-        cvOnTargetDebugOnTarget = isOnTarget;
         if (!isOnTarget)
         {
-            cvOnTargetDebugGateSatisfied = false;
-            cvOnTargetDebugIsReady = false;
             return false;
         }
 
-        cvOnTargetDebugIsReady = isGateSatisfied();
-        return cvOnTargetDebugIsReady;
+        return isGateSatisfied();
     }
 
     mockable bool isGateSatisfied()
     {
         auto autoLaunchInclination =
             launchTimer.getCurrentLaunchInclination(turretCVCommand.getTurretID());
-        updateTimingDebug(autoLaunchInclination);
-
-        bool gateSatisfied = false;
         switch (autoLaunchInclination)
         {
             case AutoAimLaunchTimer::LaunchInclination::NO_TARGET:
-                gateSatisfied = false;
-                break;
+                return false;
             case AutoAimLaunchTimer::LaunchInclination::UNGATED:
-                gateSatisfied = true;
-                break;
+                return true;
             case AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW:
-                gateSatisfied = true;
-                break;
+                return true;
             case AutoAimLaunchTimer::LaunchInclination::GATED_DENY:
-            {
                 bool ignoreDenyGates = mode != CvOnTargetGovernorMode::ON_TARGET_AND_GATED;
-                gateSatisfied = ignoreDenyGates;
-                break;
-            }
+                return ignoreDenyGates;
         }
 
-        cvOnTargetDebugGateSatisfied = gateSatisfied;
-        return gateSatisfied;
+        return false;
     }
 
     bool isFinished() final_mockable
@@ -163,66 +134,12 @@ public:
     }
 
 private:
-    void updateTimingDebug(AutoAimLaunchTimer::LaunchInclination launchInclination) const
-    {
-        const auto &debugInfo = launchTimer.getDebugInfo();
-        cvOnTargetDebugLaunchInclination = static_cast<uint8_t>(launchInclination);
-        cvOnTargetDebugAimDataUpdated = debugInfo.aimDataUpdated;
-        cvOnTargetDebugTimingDataUpdated = debugInfo.timingDataUpdated;
-        cvOnTargetDebugBallisticsSolutionFound = debugInfo.ballisticsSolutionFound;
-        cvOnTargetDebugPulseEstimationUsed = debugInfo.pulseEstimationUsed;
-        cvOnTargetDebugValidFlightTime = debugInfo.validFlightTime;
-        cvOnTargetDebugInShotWindow = debugInfo.inShotWindow;
-        cvOnTargetDebugAimTimestamp = debugInfo.aimTimestamp;
-        cvOnTargetDebugPulseOffset = debugInfo.pulseOffset;
-        cvOnTargetDebugPulseInterval = debugInfo.pulseInterval;
-        cvOnTargetDebugPulseDuration = debugInfo.pulseDuration;
-        cvOnTargetDebugTimeOfFlight = debugInfo.timeOfFlight;
-        cvOnTargetDebugNow = debugInfo.now;
-        cvOnTargetDebugEffectiveFireTime = debugInfo.effectiveFireTime;
-        cvOnTargetDebugShotWindowStart = debugInfo.shotWindowStart;
-        cvOnTargetDebugShotWindowEnd = debugInfo.shotWindowEnd;
-        cvOnTargetDebugCountdownToShotWindowStart = debugInfo.countdownToShotWindowStart;
-        cvOnTargetDebugCountdownToShotWindowEnd = debugInfo.countdownToShotWindowEnd;
-        cvOnTargetDebugOffsetInFiringWindow = debugInfo.offsetInFiringWindow;
-        cvOnTargetDebugMaxHitTimeError = debugInfo.maxHitTimeError;
-    }
-
     tap::Drivers *drivers;
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
     AutoAimLaunchTimer &launchTimer;
     const CvOnTargetGovernorMode mode;
-    const bool requireActiveGating;
     bool enabled = true;
-
-    mutable bool cvOnTargetDebugCvOnline;
-    mutable bool cvOnTargetDebugCvRunning;
-    mutable bool cvOnTargetDebugGovernorEnabled;
-    mutable bool cvOnTargetDebugGovernorGating;
-    mutable bool cvOnTargetDebugOnTarget;
-    mutable bool cvOnTargetDebugGateSatisfied;
-    mutable bool cvOnTargetDebugIsReady;
-    mutable uint8_t cvOnTargetDebugLaunchInclination;
-    mutable bool cvOnTargetDebugAimDataUpdated;
-    mutable bool cvOnTargetDebugTimingDataUpdated;
-    mutable bool cvOnTargetDebugBallisticsSolutionFound;
-    mutable bool cvOnTargetDebugPulseEstimationUsed;
-    mutable bool cvOnTargetDebugValidFlightTime;
-    mutable bool cvOnTargetDebugInShotWindow;
-    mutable uint32_t cvOnTargetDebugAimTimestamp;
-    mutable uint32_t cvOnTargetDebugPulseOffset;
-    mutable uint32_t cvOnTargetDebugPulseInterval;
-    mutable uint32_t cvOnTargetDebugPulseDuration;
-    mutable float cvOnTargetDebugTimeOfFlight;
-    mutable uint64_t cvOnTargetDebugNow;
-    mutable uint64_t cvOnTargetDebugEffectiveFireTime;
-    mutable uint64_t cvOnTargetDebugShotWindowStart;
-    mutable uint64_t cvOnTargetDebugShotWindowEnd;
-    mutable int64_t cvOnTargetDebugCountdownToShotWindowStart;
-    mutable int64_t cvOnTargetDebugCountdownToShotWindowEnd;
-    mutable int64_t cvOnTargetDebugOffsetInFiringWindow;
-    mutable uint32_t cvOnTargetDebugMaxHitTimeError;
 };
 }  // namespace aruwsrc::control::governor
 
