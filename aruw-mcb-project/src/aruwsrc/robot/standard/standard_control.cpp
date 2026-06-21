@@ -92,6 +92,7 @@
 #include "aruwsrc/control/governor/plate_hit_governor.hpp"
 #include "aruwsrc/control/governor/ref_system_projectile_launched_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_lut_autotune_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -612,6 +613,18 @@ GovernorLimitedCommand<2> agitatorManualSpin(
     rotateAndUnjamAgitator,
     {&heatLimitGovernor, &frictionWheelsOnGovernor});
 
+aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<24> launcherLutAutotuneCommand(
+    drivers(),
+    {
+        .frictionWheels = &frictionWheels,
+        .manualFireCommand = &agitatorManualSpin,
+        .barrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+        .numFrictionWheels = 2,
+        .startRpm = 3000.0f,
+        .endRpm = 8000.0f,
+        .rpmStep = 250.0f,
+    });
+
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(
     ((tap::Drivers *)(drivers())),
@@ -926,6 +939,7 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
         &standard_control::springAutotuneCommand,
         &standard_control::freqSweepAutotuneCommand,
         &standard_control::secondOrderAutotuneCommand,
+        &standard_control::launcherLutAutotuneCommand,
     };
     return commands;
 }

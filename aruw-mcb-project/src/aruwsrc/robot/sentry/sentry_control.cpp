@@ -58,6 +58,7 @@
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/imu_not_calibrated_governor.hpp"
 #include "aruwsrc/control/governor/match_running_governor.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_lut_autotune_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -652,6 +653,19 @@ GovernorLimitedCommand<2> turretWidowAgitatorManualSpin(
     turretWidowRotateAndUnjamAgitator,
     {&heatLimitGovernorTurretWidow, &frictionWheelsOnGovernorTurretWidow});
 
+aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<16>
+    turretWidowLauncherLutAutotuneCommand(
+        drivers(),
+        {
+            .frictionWheels = &turretWidowFrictionWheels,
+            .manualFireCommand = &turretWidowAgitatorManualSpin,
+            .barrelId = turretWidow::barrelID,
+            .numFrictionWheels = 2,
+            .startRpm = 4500.0f,
+            .endRpm = 7500.0f,
+            .rpmStep = 250.0f,
+        });
+
 /* define client display / HUD related items --------------------------------*/
 
 // This shit is currently banned by DJI, but left for a hopeful future
@@ -737,12 +751,12 @@ auto leftMidRightDown = std::make_unique<HoldCommandMapping>(
     },
     &leftMidRightDownRms);
 
-// manual drive, auto aim, cv-gated fire
+// manual aim and shoot
 RemoteMapState leftDownRightUpRms =
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP);
 auto leftDownRightUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&chassisDriveCommand, &turretCVCommand},
+    std::vector<Command *>{&turretWidowManualCommand},
     &leftDownRightUpRms);
 
 auto leftDownRightUpAg = std::make_unique<HoldRepeatCommandMapping>(
@@ -856,8 +870,7 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(std::move(rightUp));
 
     drivers->commandMapper.addMap(std::move(leftDownRightMid));  // manual drive & auto aim
-    drivers->commandMapper.addMap(
-        std::move(leftDownRightUp));  // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(std::move(leftDownRightUp));   // manual aim and shoot
     drivers->commandMapper.addMap(std::move(leftDownRightUpAg));
     drivers->commandMapper.addMap(std::move(leftDownRightDown));  // manual drive
 
@@ -894,7 +907,8 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
         &sentry_control::gravityAutotuneCommandWidow,
         &sentry_control::lampreyAutotuneCommand,
-        &sentry_control::freqSweepAutotuneCommand};
+        &sentry_control::freqSweepAutotuneCommand,
+        &sentry_control::turretWidowLauncherLutAutotuneCommand};
     return commands;
 }
 #endif
