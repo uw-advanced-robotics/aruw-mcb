@@ -26,10 +26,12 @@ namespace aruwsrc::control::auto_aim
 AutoAimLaunchTimer::AutoAimLaunchTimer(
     uint32_t agitatorTypicalDelayMicroseconds,
     aruwsrc::communication::serial::VisionCoprocessor* visionCoprocessor,
-    aruwsrc::algorithms::CvBallisticsSolver* ballistics)
+    aruwsrc::algorithms::CvBallisticsSolver* ballistics,
+    const float maxSinglePlateHitFrequency)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),
-      ballistics(ballistics)
+      ballistics(ballistics),
+      maxSinglePlateHitFrequency(maxSinglePlateHitFrequency)
 {
 }
 
@@ -58,7 +60,6 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
 
     if (!ballisticsSolution.has_value())
     {
-        // changed from gated_deny, confirm it makes sense?  -chinmay
         debugInfo.launchInclination = static_cast<uint8_t>(LaunchInclination::NO_TARGET);
         return LaunchInclination::NO_TARGET;
     }
@@ -69,10 +70,10 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
         return LaunchInclination::UNGATED;
     }
 
-    // TODO: 25 is hardcoded shot frequency threshold to enter center targeting mode (1 shot per
-    // plate)
-    bool targetPlateCenters = ballisticsSolution->shotWindowHalfWidth * 2 < 1'000'000 / 25;
-    float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
+    // If hitting the same plate multiple times requires a fire rate that's too high, switch to
+    // shooting once per plate
+    bool targetPlateCenters =
+        ballisticsSolution->shotWindowHalfWidth * 2 < 1'000'000 / maxSinglePlateHitFrequency;
 
     // If we want to shoot once per plate at the plate center, clamping the window start to the
     // center time means we'll only try to shoot the instant we think our shot will hit the center.
@@ -85,6 +86,8 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
                                (targetPlateCenters ? 0 : ballisticsSolution->shotWindowHalfWidth);
     uint64_t shotWindowEnd =
         ballisticsSolution->shotWindowCenter + ballisticsSolution->shotWindowHalfWidth;
+    float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
+
     debugInfo.pulseEstimationUsed = true;
     debugInfo.timeOfFlight = timeOfFlightSeconds;
     debugInfo.shotWindowStart = shotWindowStart;

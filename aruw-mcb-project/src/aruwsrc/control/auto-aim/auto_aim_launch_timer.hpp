@@ -74,17 +74,16 @@ public:
         uint32_t maxHitTimeError = 0;
     };
 
-private:
-    uint32_t agitatorTypicalDelayMicroseconds;
-    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
-    aruwsrc::algorithms::CvBallisticsSolver *ballistics;
-    DebugInfo debugInfo;
-
-public:
+    /**
+     * @param maxSinglePlateHitFrequency When in shot timing mode, if a firing rate higher than this
+     * is required to hit an incoming plate multiple times, we will instead target the center of the
+     * plate and shoot once
+     */
     AutoAimLaunchTimer(
         uint32_t agitatorTypicalDelayMicroseconds,
         aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
-        aruwsrc::algorithms::CvBallisticsSolver *ballistics);
+        aruwsrc::algorithms::CvBallisticsSolver *ballistics,
+        const float maxSinglePlateHitFrequency = 25);
 
     /**
      * Compute a firing inclination for the current time and specified turret.
@@ -101,6 +100,12 @@ public:
 
     const DebugInfo &getDebugInfo() const { return debugInfo; }
 
+private:
+    uint32_t agitatorTypicalDelayMicroseconds;
+    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
+    aruwsrc::algorithms::CvBallisticsSolver *ballistics;
+    const float maxSinglePlateHitFrequency;
+    DebugInfo debugInfo;
 };  // class AutoAimLaunchTimer
 
 }  // namespace aruwsrc::control::auto_aim
