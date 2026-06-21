@@ -132,11 +132,19 @@ static constexpr tap::algorithms::SmoothPidConfig LAUNCHER_SPEED_CORRECTION_PID_
 #if defined(TARGET_HERO_NEPTUNE)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
-    {4.0f, 1900.0f},
-    {10.0f, 3850.0f},
-    {15.0f, 5750.0f},
-    {16.0f, 6500.0f},
-    {18.0f, 8500.0f},
+    {5.33961248f, 2000.0f},
+    {7.2889533f, 2500.0f},
+    {9.09577465f, 3000.0f},
+    {10.8697052f, 3500.0f},
+    {12.4806519f, 4000.0f},
+    {13.8437967f, 4500.0f},
+    {15.3708878f, 5000.0f},
+    {16.868948f, 5500.0f},
+    {18.4827785f, 6000.0f},
+    {19.7700138f, 6500.0f},
+    {20.3329659f, 7000.0f},
+    {21.3121357f, 7500.0f},
+    {23.184721f, 8000.0f},
 };
 #elif defined(TARGET_STANDARD_NULL)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
@@ -148,26 +156,41 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 };
 #elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},      {2.66f, 1000.0f},  {2.93f, 1100.0f},  {3.01f, 1200.0f},  {3.55f, 1300.0f},
-    {3.85f, 1400.0f},  {4.00f, 1500.0f},  {4.43f, 1600.0f},  {4.77f, 1700.0f},  {4.99f, 1800.0f},
-    {5.22f, 1900.0f},  {5.56f, 2000.0f},  {5.82f, 2100.0f},  {5.99f, 2200.0f},  {6.412f, 2300.0f},
-    {6.75f, 2400.0f},  {7.12f, 2500.0f},  {7.36f, 2600.0f},  {7.64f, 2700.0f},  {7.88f, 2800.0f},
-    {8.18f, 2900.0f},  {8.48f, 3000.0f},  {8.59f, 3100.0f},  {8.79f, 3200.0f},  {9.11f, 3300.0f},
-    {9.43f, 3400.0f},  {9.87f, 3500.0f},  {10.20f, 3600.0f}, {10.27f, 3700.0f}, {11.73f, 3800.0f},
-    {12.08f, 4000.0f}, {12.35f, 4100.0f}, {19.86f, 5200.0f}, {20.01f, 5300.0f}, {20.05f, 5500.0f},
-    {20.62f, 5600.0f}, {21.49f, 5700.0f}, {21.74f, 5800.0f}, {21.78f, 5900.0f}, {21.93f, 6000.0f},
-    {22.48f, 6100.0f}, {22.51f, 6200.0f}, {22.86f, 6300.0f}, {22.89f, 6400.0f}, {23.49f, 6500.0f},
-    {23.89f, 6600.0f}, {24.12f, 6700.0f}, {24.93f, 6800.0f}, {25.17f, 6900.0f}, {26.03f, 7000.0f},
-    {26.28f, 7200.0f}, {26.38f, 7300.0f}, {27.15f, 7400.0f}, {27.48f, 7500.0f}, {27.50f, 7600.0f},
-    {28.19f, 7800.0f}, {29.40f, 7900.0f}};
+    {0.0f, 0.0f},
+    {8.39017773f, 3000.0f},
+    {10.4645939f, 3250.0f},
+    {10.9344473f, 3500.0f},
+    {13.401207f, 3750.0f},
+    {14.6625366f, 4000.0f},
+    {16.0350933f, 4250.0f},
+    {17.2190266f, 4500.0f},
+    {18.1780758f, 4750.0f},
+    {19.3804283f, 5000.0f},
+    {20.3881416f, 5250.0f},
+    {20.9700661f, 5500.0f},
+    {22.0063496f, 5750.0f},
+    {22.8945255f, 6000.0f},
+    {23.5541458f, 6250.0f},
+    {24.2752342f, 6500.0f},
+    {24.9456329f, 6750.0f},
+    {25.8669395f, 7250.0f},
+    {26.2437325f, 7750.0f}};
 #elif defined(TARGET_SENTRY_ACHLYS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
-    {0.0f, 0.0f},      {11.33f, 4500.0f}, {11.34f, 4600.0f}, {12.3f, 4700.0f},  {13.39f, 4900.0f},
-    {14.32f, 5000.0f}, {14.78f, 5100.0f}, {15.91f, 5350.0f}, {16.4f, 5500.0f},  {18.28f, 5600.0f},
-    {19.18f, 5700.0f}, {19.58f, 5900.0f}, {20.21f, 6100.0f}, {20.76f, 6200.0f}, {20.88f, 6600.0f},
-    {21.52f, 6700.0f}, {22.45f, 6900.0f}, {22.91f, 7000.0f}, {24.14f, 7100.0f}, {24.16f, 7200.0f},
-    {24.61f, 7300.0f},
-
+    {0.0f, 0.0f},
+    {14.92f, 4500.0f},
+    {16.22f, 4750.0f},
+    {17.39f, 5000.0f},
+    {18.93f, 5250.0f},
+    {19.47f, 5500.0f},
+    {21.07f, 5750.0f},
+    {22.19f, 6000.0f},
+    {23.31f, 6250.0f},
+    {24.39f, 6500.0f},
+    {25.17f, 6750.0f},
+    {26.06f, 7000.0f},
+    {27.10f, 7250.0f},
+    {27.67f, 7500.0f},
 };
 #else  // TARGET_DRONE, TARGET_ENGINEER
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
@@ -188,8 +211,7 @@ static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
 #endif
 
 #if defined(TARGET_HERO_NEPTUNE)
-static constexpr float LAUNCHER_SPEED =
-    tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_42MM - 5;
+static constexpr float LAUNCHER_SPEED = 14.5f;
 #else
 static constexpr float LAUNCHER_SPEED =
     tap::communication::serial::RefSerialData::Rx::MAX_LAUNCH_SPEED_17MM - 3;

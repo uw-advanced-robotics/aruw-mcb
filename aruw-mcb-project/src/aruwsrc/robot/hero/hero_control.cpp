@@ -20,6 +20,7 @@
 #if defined(TARGET_HERO_NEPTUNE)
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_mapper.hpp"
+#include "tap/control/concurrent_command.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -95,6 +96,7 @@
 #include "aruwsrc/control/governor/yellow_carded_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_lut_autotune_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -632,6 +634,23 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
 
+tap::control::WeakConcurrentCommand<2> launcherLutAutotuneFireCommand(
+    {&waterwheel::rotateAndUnjamWaterwheel, &kicker::launchKicker},
+    "Hero launcher LUT autotune fire");
+
+aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<16> launcherLutAutotuneCommand(
+    drivers(),
+    {
+        .frictionWheels = &frictionWheelSubsystem,
+        .manualFireCommand = &launcherLutAutotuneFireCommand,
+        .barrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
+        .numFrictionWheels = 4,
+        .startRpm = 2000.0f,
+        .endRpm = 8000.0f,
+        .rpmStep = 500.0f,
+        .minShotsPerStep = 3,
+    });
+
 // @todo remove
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
@@ -923,6 +942,7 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCom
 {
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
         &hero_control::gravityAutotuneCommand,
+        &hero_control::launcherLutAutotuneCommand,
         &hero_control::freqSweep};
     return commands;
 }
