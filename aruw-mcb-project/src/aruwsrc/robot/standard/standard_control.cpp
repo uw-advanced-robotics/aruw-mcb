@@ -502,7 +502,9 @@ autotune::GravityAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::
          TURRET_WEIGHT_KG,
          TORQUE_TO_DESIRED_OUT},
         &turretSpringCompensation,
-        &chassis);
+        &chassis,
+        {},
+        modm::toRadian(0.003));
 
 autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
     springAutotuneCommand(
@@ -518,7 +520,8 @@ autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::P
         &chassis,
         {},
         &imuCalibrateSuccessBuzzCommand,
-        &imuCalibrateFailBuzzCommand);
+        &imuCalibrateFailBuzzCommand,
+        modm::toRadian(0.003));
 
 autotune::SecondOrderAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
     secondOrderAutotuneCommand(

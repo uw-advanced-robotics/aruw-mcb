@@ -97,7 +97,7 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 #elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 5767,
+    .startEncoderValue = 5595,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -106,7 +106,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 8171,
-    .minAngle = modm::toRadian(-7),
+    .minAngle = modm::toRadian(-5),
     .maxAngle = modm::toRadian(40),
     .limitMotorAngles = true,
 };
@@ -122,7 +122,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
-    .startEncoderValue = 8171,
+    .startEncoderValue = 99,
     .minAngle = modm::toRadian(-7),
     .maxAngle = modm::toRadian(40),
     .limitMotorAngles = true,
@@ -160,9 +160,9 @@ static constexpr float TURRET_WEIGHT_KG = 1.646f;       // 1.646kg from CAD
 
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{
-        .cgX = 39.25f,
-        .cgZ = -26.63f,
-        .gravityCompensatorMax = -12'500.0f,
+        .cgX = 60.08f,
+        .cgZ = -36.10f,
+        .gravityCompensatorMax = -14'115.0f,
     };
 
 static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
@@ -181,9 +181,9 @@ static constexpr float TURRET_WEIGHT_KG = 1.646f;       // 1.646kg from CAD
 
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{
-        .cgX = 39.25f,
-        .cgZ = -26.63f,
-        .gravityCompensatorMax = -12'500.0f,
+        .cgX = 36.63f,
+        .cgZ = -33.35f,
+        .gravityCompensatorMax = -10'000.0f,
     };
 
 static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
@@ -191,7 +191,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .turretPitchMountZ = -37.7f,
     .turretYawMountX = 76.29f,
     .turretYawMountZ = -71.91f,
-    .springConstant = -3.69f,
+    .springConstant = -2.97f,
     .springFreeLength = 52.9f,
 };
 
@@ -335,7 +335,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 
 // tuned
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 9000.0f,
+    .kp = 6000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 16384.0f,
@@ -380,7 +380,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 4000.0f,
+    .kp = 3500.0f,
     .ki = 0.0f,
     .kd = 1.0f,
     .maxICumulative = 0.0f,
@@ -439,7 +439,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = 
 
 // tuned
 static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
-    .kp = 9000.0f,
+    .kp = 8000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 16384.0f,
@@ -484,7 +484,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG 
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 4000.0f,
+    .kp = 3000.0f,
     .ki = 0.0f,
     .kd = 1.0f,
     .maxICumulative = 0.0f,
