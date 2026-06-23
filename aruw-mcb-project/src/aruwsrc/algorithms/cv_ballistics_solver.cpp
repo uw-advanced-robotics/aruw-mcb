@@ -61,7 +61,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     const auto& aimData = visionCoprocessor.getLastAimData(turretID);
 
     // Verify that CV is actually online and that the aimData had a target
-    if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
+    if (!visionCoprocessor.isCvOnline() || !aimData.targetState.updated)
     {
         lastComputedSolution = std::nullopt;
         return std::nullopt;
@@ -90,8 +90,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     // project the target position forward in time s.t. we are computing a ballistics
     // solution for a target "now" rather than whenever the camera saw the target
-    aruwsrc::communication::serial::VisionCoprocessor::PositionData targetDataNow =
-        aimData.pva.projectForward(aimDataAge / 1E6f);
+    aruwsrc::communication::serial::VisionCoprocessor::TargetState targetDataNow =
+        aimData.targetState.projectForward(aimDataAge / 1E6f);
 
     if (telemetry)
     {
@@ -126,7 +126,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     {
         case AimStrategy::JITTER:
         {
-            communication::serial::VisionCoprocessor::PositionData targetDataLaunchTime =
+            communication::serial::VisionCoprocessor::TargetState targetDataLaunchTime =
                 targetDataNow.projectForward(config.minimumShotDelay);
 
             lastComputedSolution = computeJitterAim(targetDataLaunchTime, launchSpeed);
@@ -144,7 +144,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 }
 
 std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computeJitterAim(
-    const communication::serial::VisionCoprocessor::PositionData& targetData,
+    const communication::serial::VisionCoprocessor::TargetState& targetData,
     float launchSpeed)
 {
     // Is our last targeted plate still valid?
@@ -233,7 +233,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 }
 
 std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computePulseEstimation(
-    const communication::serial::VisionCoprocessor::PositionData& targetData,
+    const communication::serial::VisionCoprocessor::TargetState& targetData,
     float launchSpeed)
 {
     // Pulse Estimation:

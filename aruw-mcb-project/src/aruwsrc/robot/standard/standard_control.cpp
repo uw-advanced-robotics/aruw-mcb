@@ -697,6 +697,7 @@ TextHudIndicators textHudIndicators(
 
 VisionTargetIndicator visionTargetIndicator(
     drivers()->visionCoprocessor,
+    ballisticsSolver,
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 

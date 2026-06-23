@@ -189,6 +189,14 @@ public:
 
     inline uint8_t getTurretID() const { return turretID; }
 
+    /**
+     * @note Doesn't recalculate anything, use `computeTurretAimAngles` instead if that is desired.
+     */
+    inline std::optional<BallisticsSolution> getLastComputedSolution() const
+    {
+        return lastComputedSolution;
+    }
+
 private:
     const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor;
     const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer;
@@ -207,14 +215,14 @@ private:
      * Selects plate and computes time window within which shots fired will hit the selected plate.
      */
     std::optional<BallisticsSolution> computePulseEstimation(
-        const communication::serial::VisionCoprocessor::PositionData& targetData,
+        const communication::serial::VisionCoprocessor::TargetState& targetData,
         float launchSpeed);
 
     /**
      * Computes jitter aim solution, attempting to aim at the best possible plate at any moment.
      */
     std::optional<BallisticsSolution> computeJitterAim(
-        const communication::serial::VisionCoprocessor::PositionData& targetData,
+        const communication::serial::VisionCoprocessor::TargetState& targetData,
         float launchSpeed);
 };
 }  // namespace aruwsrc::algorithms

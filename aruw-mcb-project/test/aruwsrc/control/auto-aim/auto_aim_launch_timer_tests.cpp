@@ -92,7 +92,7 @@ TEST_F(
     getCurrentLaunchInclination_no_target_from_coprocessor_gives_no_target_inclination)
 {
     VisionCoprocessor::TurretAimData aimData = {};
-    aimData.pva.updated = 0;
+    aimData.targetState.updated = 0;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -105,7 +105,7 @@ TEST_F(
 TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_retrieves_data_for_specified_turret)
 {
     VisionCoprocessor::TurretAimData aimData = {};
-    aimData.pva.updated = 0;
+    aimData.targetState.updated = 0;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(1)).WillOnce(ReturnPointee(&aimData));
 
@@ -118,8 +118,7 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_retrieves_data_for_sp
 TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_valid_non_timed_target_returns_ungated)
 {
     VisionCoprocessor::TurretAimData aimData = {};
-    aimData.pva.updated = 1;
-    aimData.timing.updated = 0;
+    aimData.targetState.updated = 1;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -132,7 +131,7 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_valid_non_timed_targe
 TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_zero_interval_returns_deny)
 {
     VisionCoprocessor::TurretAimData aimData = {};
-    aimData.pva.updated = 1;
+    aimData.targetState.updated = 1;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -158,8 +157,7 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_zero_interval_returns
 TEST_F(AutoAimLaunchTimerTest, pulse_estimation_jitter_aim_returns_ungated)
 {
     VisionCoprocessor::TurretAimData aimData = {};
-    aimData.pva.updated = 1;
-    aimData.timing.updated = 0;
+    aimData.targetState.updated = 1;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -187,8 +185,7 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_within_window_allows_fire)
     clock.time = 500;  // 500ms
 
     VisionCoprocessor::TurretAimData aimData = {};
-    aimData.pva.updated = 1;
-    aimData.timing.updated = 0;
+    aimData.targetState.updated = 1;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -216,8 +213,7 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_before_window_denies_fire)
     clock.time = 300;  // 300ms
 
     VisionCoprocessor::TurretAimData aimData = {};
-    aimData.pva.updated = 1;
-    aimData.timing.updated = 0;
+    aimData.targetState.updated = 1;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -245,8 +241,7 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_after_window_denies_fire)
     clock.time = 700;  // 700ms
 
     VisionCoprocessor::TurretAimData aimData = {};
-    aimData.pva.updated = 1;
-    aimData.timing.updated = 0;
+    aimData.targetState.updated = 1;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 
@@ -274,8 +269,7 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_with_agitator_delay_within_windo
     clock.time = 400;  // 400ms
 
     VisionCoprocessor::TurretAimData aimData = {};
-    aimData.pva.updated = 1;
-    aimData.timing.updated = 0;
+    aimData.targetState.updated = 1;
 
     EXPECT_CALL(visionCoprocessor, getLastAimData(0)).WillOnce(ReturnPointee(&aimData));
 

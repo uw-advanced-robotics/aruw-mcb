@@ -26,6 +26,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "modm/processing/resumable.hpp"
@@ -48,6 +49,7 @@ public:
      */
     VisionHudIndicators(
         aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
+        const aruwsrc::algorithms::CvBallisticsSolver &ballistics,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     modm::ResumableResult<void> sendInitialGraphics() override final;
@@ -71,6 +73,7 @@ private:
     static constexpr uint32_t VISION_TARGET_FOUND_MAX_REFRESH_RATE = 250;
 
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
+    const aruwsrc::algorithms::CvBallisticsSolver &ballistics;
 
     Tx::Graphic2Message visionTargetFoundGraphics;
 

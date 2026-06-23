@@ -24,12 +24,11 @@
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "../projection_utils.hpp"
+#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "modm/processing/resumable.hpp"
-
-using namespace aruwsrc::algorithms::odometry::transforms;
 
 namespace aruwsrc::control::client_display::indicators
 {
@@ -41,6 +40,7 @@ class VisionTargetIndicator : public HudIndicator, protected modm::Resumable<2>
 public:
     VisionTargetIndicator(
         aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
+        const aruwsrc::algorithms::CvBallisticsSolver& ballistics,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const Transform &worldToTurretTransform);
 
@@ -70,6 +70,7 @@ public:
 
 private:
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
+    const aruwsrc::algorithms::CvBallisticsSolver& ballistics;
     const Transform &worldToCameraTransform;
 
     Tx::Graphic1Message visionTargetGraphic;
