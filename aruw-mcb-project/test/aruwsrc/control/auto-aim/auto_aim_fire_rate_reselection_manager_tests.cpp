@@ -49,8 +49,19 @@ protected:
           yawController(yawMotor, {}),
           pitchController(pitchMotor, {}),
           turretSubsystem(&drivers, pitchMotor, yawMotor, nullptr),
+          worldToTurretYaw(0, 0, 0, 0, 0, 0),
           visionCoprocessor(&drivers),
-          ballisticsSolver(visionCoprocessor, transformer, launcher),
+          ballisticsSolver(
+              // hack to set up default return transformer return value before
+              // ballistics constructor uses it
+              [this]() -> auto&
+              {
+                  ON_CALL(transformer, getWorldToTurretYaw)
+                      .WillByDefault(testing::ReturnRef(worldToTurretYaw));
+                  return visionCoprocessor;
+              }(),
+              transformer,
+              launcher),
           operatorInterface(&drivers),
           turretCvCommand(
               &visionCoprocessor,
@@ -85,6 +96,7 @@ private:
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
     NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
+    tap::algorithms::transforms::Transform worldToTurretYaw;
 
 protected:
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;

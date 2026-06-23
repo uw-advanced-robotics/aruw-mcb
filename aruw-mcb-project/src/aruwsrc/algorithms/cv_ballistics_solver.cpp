@@ -109,17 +109,14 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         telemetry->logSignal("ballistics:theta", targetDataNow.theta);
     }
 
-    // TODO: make nicer
-    omegaLP = omegaLPAlpha * targetDataNow.omega + (1 - omegaLPAlpha) * omegaLP;
-
     // Use enemy angular velocity to determine which aiming strategy to use
     // TODO: this could technically be the angular velocity in the rotating target-tracking
     // frame ("omegaTotal")
-    if (fabsf(omegaLP) < config.shotTimingExitThreshold)
+    if (fabsf(targetDataNow.omega) < config.shotTimingExitThreshold)
     {
         aimStrategy = AimStrategy::JITTER;
     }
-    else if (fabsf(omegaLP) > config.shotTimingEntryThreshold)
+    else if (fabsf(targetDataNow.omega) > config.shotTimingEntryThreshold)
     {
         // Use pulse estimation for fast rotating targets
         aimStrategy = AimStrategy::SHOT_GATING;

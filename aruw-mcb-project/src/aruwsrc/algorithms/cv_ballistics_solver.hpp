@@ -86,13 +86,13 @@ public:
         /// The active plate index being targeted (0-3).
         uint8_t activePlateIndex;
         /// Whether shot gating is being used
-        bool shotWindowValid;
+        bool shotWindowValid = false;
         /// Center of the shot timing window (absolute timestamp in microseconds), valid when
         /// shotWindowValid is true. Represents the time at which shooting should hit the center
         /// of the targetted plate.
-        uint64_t shotWindowCenter;
+        uint64_t shotWindowCenter = 0;
         /// Half of the shot window width (microseconds), valid when shotWindowValid is true.
-        uint64_t shotWindowHalfWidth;
+        uint64_t shotWindowHalfWidth = 0;
     };
 
     struct Config
@@ -114,8 +114,8 @@ public:
         // minimum time after which a shot command is sent that the shot will actually fire
         float minimumShotDelay;
 
-        // how far outside of the 90 degree region facing us that our currently targeted plate has to be in
-        // order for jitter aim to select a new plate (radians)
+        // how far outside of the 90 degree region facing us that our currently targeted plate has
+        // to be in order for jitter aim to select a new plate (radians)
         float jitterAimPlateReselectionAngularAllowance = 0.2f;
     };
 
@@ -202,13 +202,9 @@ private:
     uint32_t lastAimDataTimestamp = 0;
     uint32_t lastOdometryTimestamp = 0;
     std::optional<BallisticsSolution> lastComputedSolution = {};
-    float omegaLP = 0;
-
-    static constexpr float omegaLPAlpha = 0.04f;
 
     /**
-     * Computes pulse estimation solution. Uses a two-pass ballistics approach to
-     * determine shot timing window based on robot rotation.
+     * Selects plate and computes time window within which shots fired will hit the selected plate.
      */
     std::optional<BallisticsSolution> computePulseEstimation(
         const communication::serial::VisionCoprocessor::PositionData& targetData,
