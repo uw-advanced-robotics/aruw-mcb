@@ -75,11 +75,11 @@ class CvBallisticsSolver
 public:
     struct BallisticsSolution
     {
-        /// The computed straight line distance between the turret and target, in m.
+        /// The computed pitch angle in the world frame in radians.
         float pitchAngle;
         /// The computed yaw angle in the world frame in radians.
         float yawAngle;
-        /// The computed pitch angle in the world frame in radians.
+        /// The computed straight line distance between the turret and target, in m.
         float distance;
         /// The expected time-of-flight until impact (in seconds).
         float timeOfFlight;
