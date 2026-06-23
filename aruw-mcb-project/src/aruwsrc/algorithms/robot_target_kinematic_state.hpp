@@ -62,19 +62,6 @@ struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinem
     float omega{0};   // rad/s
 
     /**
-     * @param[in] dt: The amount of time to project forward.
-     * @param[in] s: The position of the object.
-     * @param[in] v: The velocity of the object.
-     * @param[in] a: The acceleration of the object.
-     *
-     * @return The future position of an object using a quadratic (constant acceleration) model.
-     */
-    inline static float quadraticKinematicProjection(float dt, float s, float v, float a)
-    {
-        return s + v * dt + 0.5f * a * dt * dt;
-    }
-
-    /**
      * @param[in] dt: The amount of time to project the state forward.
      *
      * @return The future 3D position of the target plate on the robot using a quadratic (constant
