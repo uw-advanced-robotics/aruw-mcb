@@ -138,6 +138,8 @@ TEST_F(AutoAimLaunchTimerTest, getCurrentLaunchInclination_zero_interval_returns
     std::optional<CvBallisticsSolver::BallisticsSolution> solution({
         .pitchAngle = 0,
         .yawAngle = 0,
+        .yawVel = 0,
+        .yawAcc = 0,
         .distance = 0,
         .timeOfFlight = 0,
         .activePlateIndex = 0,
@@ -164,6 +166,8 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_jitter_aim_returns_ungated)
     CvBallisticsSolver::BallisticsSolution solution{
         .pitchAngle = 0,
         .yawAngle = 0,
+        .yawVel = 0,
+        .yawAcc = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
         .activePlateIndex = 0,
@@ -192,6 +196,8 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_within_window_allows_fire)
     CvBallisticsSolver::BallisticsSolution solution{
         .pitchAngle = 0,
         .yawAngle = 0,
+        .yawVel = 0,
+        .yawAcc = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
         .activePlateIndex = 1,
@@ -220,6 +226,8 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_before_window_denies_fire)
     CvBallisticsSolver::BallisticsSolution solution{
         .pitchAngle = 0,
         .yawAngle = 0,
+        .yawVel = 0,
+        .yawAcc = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
         .activePlateIndex = 1,
@@ -248,6 +256,8 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_after_window_denies_fire)
     CvBallisticsSolver::BallisticsSolution solution{
         .pitchAngle = 0,
         .yawAngle = 0,
+        .yawVel = 0,
+        .yawAcc = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
         .activePlateIndex = 1,
@@ -276,6 +286,8 @@ TEST_F(AutoAimLaunchTimerTest, pulse_estimation_with_agitator_delay_within_windo
     CvBallisticsSolver::BallisticsSolution solution{
         .pitchAngle = 0,
         .yawAngle = 0,
+        .yawVel = 0,
+        .yawAcc = 0,
         .distance = 5.0f,
         .timeOfFlight = 0.2f,
         .activePlateIndex = 1,

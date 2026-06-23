@@ -79,6 +79,10 @@ public:
         float pitchAngle;
         /// The computed yaw angle in the world frame in radians.
         float yawAngle;
+        /// The computed yaw angular velocity in the world frame in radians.
+        float yawVel;
+        /// The computed yaw angular acceleration in the world frame in radians.
+        float yawAcc;
         /// The computed straight line distance between the turret and target, in m.
         float distance;
         /// The expected time-of-flight until impact (in seconds).

@@ -143,6 +143,71 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     return lastComputedSolution;
 }
 
+float computeYawVel(
+    const communication::serial::VisionCoprocessor::TargetState& targetData,
+    uint8_t plate)
+{
+    const float radius = (plate % 2 == 0) ? targetData.radius0 : targetData.radius1;
+    const float phi = targetData.theta + M_PI_2 * plate;
+
+    const float cosPhi = cosf(phi);
+    const float sinPhi = sinf(phi);
+
+    // position of the plate in the current frame
+    const float xp = targetData.xPos + radius * cosPhi;
+    const float yp = targetData.yPos + radius * sinPhi;
+
+    // velocity of the plate (linear translation + rotational component)
+    const float xpVel = targetData.xVel - radius * targetData.omega * sinPhi;
+    const float ypVel = targetData.yVel + radius * targetData.omega * cosPhi;
+
+    const float denominator = xp * xp + yp * yp;
+    if (denominator < 1e-6f)
+    {
+        return 0.0f;  // Avoid division by zero if target is at the origin
+    }
+
+    // Derivative of atan2(y, x) -> (x*ydot - y*xdot) / (x^2 + y^2)
+    return (xp * ypVel - yp * xpVel) / denominator;
+}
+
+float computeYawAcc(
+    const communication::serial::VisionCoprocessor::TargetState& targetData,
+    uint8_t plate)
+{
+    const float radius = (plate % 2 == 0) ? targetData.radius0 : targetData.radius1;
+    const float phi = targetData.theta + M_PI_2 * plate;
+
+    const float cosPhi = cosf(phi);
+    const float sinPhi = sinf(phi);
+
+    // Absolute position of the plate
+    const float xp = targetData.xPos + radius * cosPhi;
+    const float yp = targetData.yPos + radius * sinPhi;
+
+    // Absolute velocity of the plate
+    const float xpVel = targetData.xVel - radius * targetData.omega * sinPhi;
+    const float ypVel = targetData.yVel + radius * targetData.omega * cosPhi;
+
+    const float denominator = xp * xp + yp * yp;
+    if (denominator < 1e-6f)
+    {
+        return 0.0f;
+    }
+
+    const float yawVel = (xp * ypVel - yp * xpVel) / denominator;
+
+    // Absolute acceleration of the plate (constant angular velocity, alpha = 0)
+    const float xpAcc = targetData.xAcc - radius * targetData.omega * targetData.omega * cosPhi;
+    const float ypAcc = targetData.yAcc - radius * targetData.omega * targetData.omega * sinPhi;
+
+    // Quotient rule derivative of yaw velocity
+    const float dotN = xp * ypAcc - yp * xpAcc;
+    const float dotD = 2.0f * (xp * xpVel + yp * ypVel);
+
+    return (dotN - yawVel * dotD) / denominator;
+}
+
 std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computeJitterAim(
     const communication::serial::VisionCoprocessor::TargetState& targetData,
     float launchSpeed)
@@ -187,6 +252,11 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                 0,
                 M_PI_4 + config.jitterAimPlateReselectionAngularAllowance))
         {
+            auto projectedTargetState = targetData.projectForward(solution.timeOfFlight);
+
+            solution.yawVel = computeYawVel(projectedTargetState, activePlate);
+            solution.yawAcc = computeYawAcc(projectedTargetState, activePlate);
+
             return solution;
         }
     }
@@ -228,6 +298,11 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
             solution = currentSolution;
         }
     }
+
+    auto projectedTargetState = targetData.projectForward(solution->timeOfFlight);
+
+    solution->yawVel = computeYawVel(projectedTargetState, solution->activePlateIndex);
+    solution->yawAcc = computeYawAcc(projectedTargetState, solution->activePlateIndex);
 
     return solution;
 }
@@ -345,6 +420,9 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     }
 
     auto actualHitTimeTargetData = targetData.projectForward(solution.timeOfFlight);
+
+    solution.yawVel = computeYawVel(actualHitTimeTargetData, solution.activePlateIndex);
+    solution.yawAcc = computeYawAcc(actualHitTimeTargetData, solution.activePlateIndex);
 
     aimAngle = atan2f(
         actualHitTimeTargetData.yPos - worldToTurret.getY(),
