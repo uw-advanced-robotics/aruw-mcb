@@ -631,8 +631,7 @@ CvOnTargetGovernor cvOnTargetGovernor(
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
-    CvOnTargetGovernorMode::ON_TARGET_AND_GATED,
-    false);
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
