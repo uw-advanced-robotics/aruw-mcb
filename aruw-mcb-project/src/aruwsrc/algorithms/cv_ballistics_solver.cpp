@@ -143,69 +143,39 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     return lastComputedSolution;
 }
 
-float computeYawVel(
-    const communication::serial::VisionCoprocessor::TargetState& targetData,
-    uint8_t plate)
+inline modm::Vector3f cross(const modm::Vector3f& a, const modm::Vector3f& b)
 {
-    const float radius = (plate % 2 == 0) ? targetData.radius0 : targetData.radius1;
-    const float phi = targetData.theta + M_PI_2 * plate;
-
-    const float cosPhi = cosf(phi);
-    const float sinPhi = sinf(phi);
-
-    // position of the plate in the current frame
-    const float xp = targetData.xPos + radius * cosPhi;
-    const float yp = targetData.yPos + radius * sinPhi;
-
-    // velocity of the plate (linear translation + rotational component)
-    const float xpVel = targetData.xVel - radius * targetData.omega * sinPhi;
-    const float ypVel = targetData.yVel + radius * targetData.omega * cosPhi;
-
-    const float denominator = xp * xp + yp * yp;
-    if (denominator < 1e-6f)
-    {
-        return 0.0f;  // Avoid division by zero if target is at the origin
-    }
-
-    // Derivative of atan2(y, x) -> (x*ydot - y*xdot) / (x^2 + y^2)
-    return (xp * ypVel - yp * xpVel) / denominator;
+    return modm::Vector3f(
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]);
 }
 
-float computeYawAcc(
-    const communication::serial::VisionCoprocessor::TargetState& targetData,
-    uint8_t plate)
+void computeYawDerivatives(
+    const modm::Vector3f pos,
+    const modm::Vector3f vel,
+    const modm::Vector3f acc,
+    float* yawVel,
+    float* yawAcc)
 {
-    const float radius = (plate % 2 == 0) ? targetData.radius0 : targetData.radius1;
-    const float phi = targetData.theta + M_PI_2 * plate;
+    const modm::Vector2f pos2d = pos.xy();
+    const modm::Vector2f vel2d = vel.xy();
 
-    const float cosPhi = cosf(phi);
-    const float sinPhi = sinf(phi);
-
-    // Absolute position of the plate
-    const float xp = targetData.xPos + radius * cosPhi;
-    const float yp = targetData.yPos + radius * sinPhi;
-
-    // Absolute velocity of the plate
-    const float xpVel = targetData.xVel - radius * targetData.omega * sinPhi;
-    const float ypVel = targetData.yVel + radius * targetData.omega * cosPhi;
-
-    const float denominator = xp * xp + yp * yp;
+    const float denominator = pos2d.getLengthSquared();
     if (denominator < 1e-6f)
     {
-        return 0.0f;
+        *yawVel = 0.0f;
+        *yawAcc = 0.0f;
+        return;
     }
 
-    const float yawVel = (xp * ypVel - yp * xpVel) / denominator;
+    *yawVel = cross(pos, vel).z / denominator;
 
-    // Absolute acceleration of the plate (constant angular velocity, alpha = 0)
-    const float xpAcc = targetData.xAcc - radius * targetData.omega * targetData.omega * cosPhi;
-    const float ypAcc = targetData.yAcc - radius * targetData.omega * targetData.omega * sinPhi;
+    const float dotN = cross(pos, acc).z;
 
-    // Quotient rule derivative of yaw velocity
-    const float dotN = xp * ypAcc - yp * xpAcc;
-    const float dotD = 2.0f * (xp * xpVel + yp * ypVel);
+    const float dotD = 2.0f * (pos2d * vel2d);
 
-    return (dotN - yawVel * dotD) / denominator;
+    *yawAcc = (dotN - (*yawVel) * dotD) / denominator;
 }
 
 std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computeJitterAim(
@@ -252,10 +222,12 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                 0,
                 M_PI_4 + config.jitterAimPlateReselectionAngularAllowance))
         {
-            auto projectedTargetState = targetData.projectForward(solution.timeOfFlight);
-
-            solution.yawVel = computeYawVel(projectedTargetState, activePlate);
-            solution.yawAcc = computeYawAcc(projectedTargetState, activePlate);
+            computeYawDerivatives(
+                ballisticsTargetState.projectForward(solution.timeOfFlight),
+                ballisticsTargetState.projectVelocityForward(solution.timeOfFlight),
+                ballisticsTargetState.projectAccelerationForward(solution.timeOfFlight),
+                &solution.yawVel,
+                &solution.yawAcc);
 
             return solution;
         }
@@ -295,14 +267,16 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                 config.turretPitchOffset) &&
             (!solution || currentSolution.timeOfFlight < solution->timeOfFlight))
         {
+            computeYawDerivatives(
+                targetState.projectForward(currentSolution.timeOfFlight),
+                targetState.projectVelocityForward(currentSolution.timeOfFlight),
+                targetState.projectAccelerationForward(currentSolution.timeOfFlight),
+                &currentSolution.yawVel,
+                &currentSolution.yawAcc);
+
             solution = currentSolution;
         }
     }
-
-    auto projectedTargetState = targetData.projectForward(solution->timeOfFlight);
-
-    solution->yawVel = computeYawVel(projectedTargetState, solution->activePlateIndex);
-    solution->yawAcc = computeYawAcc(projectedTargetState, solution->activePlateIndex);
 
     return solution;
 }
@@ -421,8 +395,12 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     auto actualHitTimeTargetData = targetData.projectForward(solution.timeOfFlight);
 
-    solution.yawVel = computeYawVel(actualHitTimeTargetData, solution.activePlateIndex);
-    solution.yawAcc = computeYawAcc(actualHitTimeTargetData, solution.activePlateIndex);
+    computeYawDerivatives(
+        robotCenterState.projectForward(solution.timeOfFlight),
+        robotCenterState.projectVelocityForward(solution.timeOfFlight),
+        robotCenterState.projectAccelerationForward(solution.timeOfFlight),
+        &solution.yawVel,
+        &solution.yawAcc);
 
     aimAngle = atan2f(
         actualHitTimeTargetData.yPos - worldToTurret.getY(),
