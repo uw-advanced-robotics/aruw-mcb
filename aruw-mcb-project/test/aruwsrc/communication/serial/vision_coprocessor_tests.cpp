@@ -56,21 +56,11 @@ struct TestPositionData
     float zAcc;  ///< z acceleration of the target (in m/s^2).
 
 } modm_packed;
-
-struct TestTimingData
-{
-    uint32_t duration;       ///< duration during which the plate is at the target point
-    uint32_t pulseInterval;  ///< time between plate centers transiting the target point
-    uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
-                             ///< next shot should ideally hit
-} modm_packed;
-
 struct TestTurretAimDataMessage
 {
     uint8_t flags;
     uint32_t timestamp;  ///< timestamp in microseconds
     struct TestPositionData targetState;
-    struct TestTimingData timing;
 } modm_packed;
 
 static void initAndRunAutoAimRxTest(
