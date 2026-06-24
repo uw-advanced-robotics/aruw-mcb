@@ -173,11 +173,8 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {23.5541458f, 6250.0f},
     {24.2752342f, 6500.0f},
     {24.9456329f, 6750.0f},
-    {24.9150333f, 7000.0f},
     {25.8669395f, 7250.0f},
-    {25.7798271f, 7500.0f},
-    {26.2437325f, 7750.0f},
-    {25.6587582f, 8000.0f}};
+    {26.2437325f, 7750.0f}};
 #elif defined(TARGET_SENTRY_ACHLYS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
