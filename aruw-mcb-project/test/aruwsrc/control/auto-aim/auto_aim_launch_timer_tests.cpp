@@ -65,8 +65,7 @@ protected:
           ballistics(
               // hack to set up default return transformer return value before ballistics
               // constructor uses it
-              [this]() -> auto&
-              {
+              [this]() -> auto& {
                   ON_CALL(transformer, getWorldToTurretYaw)
                       .WillByDefault(testing::ReturnRef(worldToTurretYaw));
                   return visionCoprocessor;

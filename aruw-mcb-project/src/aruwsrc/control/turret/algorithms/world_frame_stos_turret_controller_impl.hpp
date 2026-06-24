@@ -123,7 +123,8 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
 
     float pidOutput = 0;
 
-    setpointFilter.updateWithAcceleration(worldFrameSetpoint, desiredVelocity, desiredAcceleration, dt);
+    setpointFilter
+        .updateWithAcceleration(worldFrameSetpoint, desiredVelocity, desiredAcceleration, dt);
 
     float velError = setpointFilter.getEstimatedVelocity() - worldFrameVelocity;
     float posError = this->turretMotor.getValidMinError(
