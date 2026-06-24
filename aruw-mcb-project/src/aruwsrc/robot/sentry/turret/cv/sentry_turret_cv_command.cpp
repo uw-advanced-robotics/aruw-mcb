@@ -163,7 +163,7 @@ void SentryTurretCVCommand::execute()
                     widowYawSetpoint.minInterpolate(minorScanValue, SCAN_LOW_PASS_ALPHA);
 
                 majorScanValue = scanCenter + scanOffsetFromCenter * MAJOR_SCAN_RATIO;
-                majorSetpoint = majorSetpoint.minInterpolate(majorScanValue, SCAN_LOW_PASS_ALPHA);
+                majorSetpoint = majorSetpoint.minInterpolate(majorScanValue, SCAN_LOW_PASS_ALPHA_MAJOR);
 
                 const bool scanSetpointsAtEndpoint =
                     abs(widowYawSetpoint.minDifference(minorScanValue)) < SCAN_ENDPOINT_TOLERANCE &&

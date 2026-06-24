@@ -184,6 +184,7 @@ private:
     static constexpr float HIT_DIFF_OFFSET = modm::toRadian(20.0f);
 
     static constexpr float SCAN_LOW_PASS_ALPHA = 0.035f;
+    static constexpr float SCAN_LOW_PASS_ALPHA_MAJOR = SCAN_LOW_PASS_ALPHA / 2.0f;
     static constexpr float SCAN_ENDPOINT_TOLERANCE = modm::toRadian(1.0f);
 
     static constexpr int SCAN_CLOCKWISE = -1;
