@@ -51,6 +51,63 @@ void TurretSetpointKalmanFilter::update(
     EKF::InputVector z;
     z.data[int(TrackerInput::MEASURED_POS)] = predictedPos - shortestPathError;
 
+    int velVarInd = (static_cast<int>(TrackerInput::NUM_INPUTS) + 1) *
+                    static_cast<int>(TrackerInput::MEASURED_VEL);
+    int accVarInd = (static_cast<int>(TrackerInput::NUM_INPUTS) + 1) *
+                    static_cast<int>(TrackerInput::MEASURED_ACC);
+    float velVar = EKF_R[velVarInd];
+    float accVar = EKF_R[accVarInd];
+    EKF_R[velVarInd] = 1000000;
+    EKF_R[accVarInd] = 1000000;
+
+    ekf.update(z);
+
+    EKF_R[accVarInd] = accVar;
+    EKF_R[velVarInd] = velVar;
+}
+
+void TurretSetpointKalmanFilter::updateWithVelocity(
+    const tap::algorithms::WrappedFloat& measuredPosition,
+    float measuredVel,
+    float dt)
+{
+    ekf.predict(dt);
+
+    float predictedPos = ekf.getStateVectorAsMatrix()[int(TrackerState::POS)];
+
+    float shortestPathError = measuredPosition.minDifference(predictedPos);
+
+    EKF::InputVector z;
+    z.data[int(TrackerInput::MEASURED_POS)] = predictedPos - shortestPathError;
+    z.data[int(TrackerInput::MEASURED_VEL)] = measuredVel;
+
+    int accVarInd = (static_cast<int>(TrackerInput::NUM_INPUTS) + 1) *
+                    static_cast<int>(TrackerInput::MEASURED_ACC);
+    float accVar = EKF_R[accVarInd];
+    EKF_R[accVarInd] = 1000000;
+
+    ekf.update(z);
+
+    EKF_R[accVarInd] = accVar;
+}
+
+void TurretSetpointKalmanFilter::updateWithAcceleration(
+    const tap::algorithms::WrappedFloat& measuredPosition,
+    float measuredVel,
+    float measuredAcc,
+    float dt)
+{
+    ekf.predict(dt);
+
+    float predictedPos = ekf.getStateVectorAsMatrix()[int(TrackerState::POS)];
+
+    float shortestPathError = measuredPosition.minDifference(predictedPos);
+
+    EKF::InputVector z;
+    z.data[int(TrackerInput::MEASURED_POS)] = predictedPos - shortestPathError;
+    z.data[int(TrackerInput::MEASURED_VEL)] = measuredVel;
+    z.data[int(TrackerInput::MEASURED_ACC)] = measuredAcc;
+
     ekf.update(z);
 }
 

@@ -37,7 +37,7 @@ public:
     virtual ~TurretControllerInterfaceMock();
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, runController, (const float, const WrappedFloat), (override));
+    MOCK_METHOD(void, runController, (const float, const WrappedFloat, float, float), (override));
     MOCK_METHOD(void, setSetpoint, (WrappedFloat), (override));
     MOCK_METHOD(WrappedFloat, getSetpoint, (), (const override));
     MOCK_METHOD(WrappedFloat, getMeasurement, (), (const override));

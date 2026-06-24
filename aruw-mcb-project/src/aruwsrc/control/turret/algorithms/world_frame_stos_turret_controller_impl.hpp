@@ -95,7 +95,9 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::initialize()
 template <Axis AXIS>
 void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
     const float dt,
-    const WrappedFloat desiredSetpoint)
+    const WrappedFloat desiredSetpoint,
+    float desiredVelocity,
+    float desiredAcceleration)
 {
     const WrappedFloat chassisFrame = this->turretMotor.getChassisFrameMeasuredAngle();
 
@@ -121,7 +123,7 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
 
     float pidOutput = 0;
 
-    setpointFilter.update(worldFrameSetpoint, dt);
+    setpointFilter.updateWithAcceleration(worldFrameSetpoint, desiredVelocity, desiredAcceleration, dt);
 
     float velError = setpointFilter.getEstimatedVelocity() - worldFrameVelocity;
     float posError = this->turretMotor.getValidMinError(
