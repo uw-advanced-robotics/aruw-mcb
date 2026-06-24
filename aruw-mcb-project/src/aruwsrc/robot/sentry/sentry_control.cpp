@@ -629,8 +629,7 @@ CvOnTargetGovernor cvOnTargetGovernor(
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
-    CvOnTargetGovernorMode::ON_TARGET_AND_GATED,
-    turretWidow::turretID);
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
 // Unused, causes inconsistent fire rates due to suspected ref delay.
 // RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretWidow(

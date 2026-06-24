@@ -917,7 +917,7 @@ void registerHeroIoMappings(Drivers* drivers)
     drivers->commandMapper.addMap(std::move(leftMousePressedBNotPressedVNotPressed));
     drivers->commandMapper.addMap(std::move(leftMousePressedBPressed));
     drivers->commandMapper.addMap(std::move(leftMousePressedVPressed));
-    // drivers->commandMapper.addMap(std::move(rightMousePressed));
+    drivers->commandMapper.addMap(std::move(rightMousePressed));
     drivers->commandMapper.addMap(std::move(leftSwitchDown));
     drivers->commandMapper.addMap(std::move(leftSwitchUp));
     drivers->commandMapper.addMap(std::move(fToggled));
