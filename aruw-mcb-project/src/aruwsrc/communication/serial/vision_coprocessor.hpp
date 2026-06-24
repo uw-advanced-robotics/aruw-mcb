@@ -129,7 +129,7 @@ public:
      * position, and incrementing counterclockwise.
      */
 
-    struct PositionData
+    struct TargetState
     {
         FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
 
@@ -157,10 +157,9 @@ public:
 
         bool updated;  ///< whether or not this came from the most recent message
 
-        // TODO: this shouldn't be here
-        inline PositionData projectForward(float dt) const
+        inline TargetState projectForward(float dt) const
         {
-            PositionData projected = *this;
+            TargetState projected = *this;
             projected.xPos =
                 tap::algorithms::ballistics::AbstractKinematicState::quadraticKinematicProjection(
                     dt,
@@ -184,21 +183,10 @@ public:
         }
     } modm_packed;
 
-    struct TimingData
-    {
-        uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
-        uint32_t pulseInterval;  ///< time between plate centers transiting the target point
-        uint32_t duration;       ///< duration during which the plate is at the target point
-                                 ///< next shot should ideally hit
-
-        bool updated;  ///< whether or not this came from the most recent message
-    } modm_packed;
-
     struct TurretAimData
     {
-        PositionData pva;
+        TargetState targetState;
         uint32_t timestamp;  ///< timestamp in microseconds
-        TimingData timing;
     } modm_packed;
 
     /**
@@ -342,17 +330,7 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].pva.updated;
-        }
-        return hasTarget;
-    }
-
-    mockable inline bool getSomeTurretUsingTimedShots() const
-    {
-        bool hasTarget = false;
-        for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
-        {
-            hasTarget |= lastAimData[i].pva.updated && lastAimData[i].timing.updated;
+            hasTarget |= lastAimData[i].targetState.updated;
         }
         return hasTarget;
     }

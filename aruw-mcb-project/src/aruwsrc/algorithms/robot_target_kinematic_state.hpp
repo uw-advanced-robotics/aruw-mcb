@@ -44,35 +44,16 @@ struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinem
         float theta,
         float omega)
         : tap::algorithms::ballistics::SecondOrderKinematicState(position, velocity, acceleration),
-          position(position),
-          velocity(velocity),
-          acceleration(acceleration),
           radius(radius),
           theta(theta),
           omega(omega)
     {
     }
-    modm::Vector3f position;      // m
-    modm::Vector3f velocity;      // m/s
-    modm::Vector3f acceleration;  // m/s^2
 
     // rotation about center
     float radius{0};  // m
     float theta{0};   // rad
     float omega{0};   // rad/s
-
-    /**
-     * @param[in] dt: The amount of time to project forward.
-     * @param[in] s: The position of the object.
-     * @param[in] v: The velocity of the object.
-     * @param[in] a: The acceleration of the object.
-     *
-     * @return The future position of an object using a quadratic (constant acceleration) model.
-     */
-    inline static float quadraticKinematicProjection(float dt, float s, float v, float a)
-    {
-        return s + v * dt + 0.5f * a * dt * dt;
-    }
 
     /**
      * @param[in] dt: The amount of time to project the state forward.
@@ -83,13 +64,24 @@ struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinem
      */
     inline modm::Vector3f projectForward(float dt) const override
     {
-        float rxf = radius * cos(theta + omega * dt);
-        float ryf = radius * sin(theta + omega * dt);
-        return modm::Vector3f(
-            quadraticKinematicProjection(dt, position.x, velocity.x, acceleration.x) + rxf,
-            quadraticKinematicProjection(dt, position.y, velocity.y, acceleration.y) + ryf,
-            quadraticKinematicProjection(dt, position.z, velocity.z, acceleration.z));
+        float thetaP = theta + omega * dt;
+        return tap::algorithms::ballistics::SecondOrderKinematicState::projectForward(dt) +
+               radius * modm::Vector3f(cos(thetaP), sin(thetaP), 0);
     }
+
+    inline modm::Vector3f projectVelocityForward(float dt) const override
+    {
+        float thetaP = theta + omega * dt;
+        return tap::algorithms::ballistics::SecondOrderKinematicState::projectForward(dt) +
+               (radius * omega) * modm::Vector3f(-sin(thetaP), cos(thetaP), 0);
+    };
+
+    inline modm::Vector3f projectAccelerationForward(float dt) const override
+    {
+        float thetaP = theta + omega * dt;
+        return tap::algorithms::ballistics::SecondOrderKinematicState::projectForward(dt) +
+               (radius * omega * omega) * modm::Vector3f(-cos(thetaP), -sin(thetaP), 0);
+    };
 };
 
 }  // namespace aruwsrc::algorithms

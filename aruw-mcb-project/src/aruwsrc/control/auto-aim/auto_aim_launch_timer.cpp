@@ -40,7 +40,7 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
 {
     auto aimData = this->visionCoprocessor->getLastAimData(turretId);
 
-    if (!aimData.pva.updated)
+    if (!aimData.targetState.updated)
     {
         return LaunchInclination::NO_TARGET;
     }

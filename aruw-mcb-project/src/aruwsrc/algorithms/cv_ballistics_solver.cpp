@@ -61,7 +61,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     const auto& aimData = visionCoprocessor.getLastAimData(turretID);
 
     // Verify that CV is actually online and that the aimData had a target
-    if (!visionCoprocessor.isCvOnline() || !aimData.pva.updated)
+    if (!visionCoprocessor.isCvOnline() || !aimData.targetState.updated)
     {
         lastComputedSolution = std::nullopt;
         return std::nullopt;
@@ -90,8 +90,8 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     // project the target position forward in time s.t. we are computing a ballistics
     // solution for a target "now" rather than whenever the camera saw the target
-    aruwsrc::communication::serial::VisionCoprocessor::PositionData targetDataNow =
-        aimData.pva.projectForward(aimDataAge / 1E6f);
+    aruwsrc::communication::serial::VisionCoprocessor::TargetState targetDataNow =
+        aimData.targetState.projectForward(aimDataAge / 1E6f);
 
     if (telemetry)
     {
@@ -109,17 +109,14 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         telemetry->logSignal("ballistics:theta", targetDataNow.theta);
     }
 
-    // TODO: make nicer
-    omegaLP = omegaLPAlpha * targetDataNow.omega + (1 - omegaLPAlpha) * omegaLP;
-
     // Use enemy angular velocity to determine which aiming strategy to use
     // TODO: this could technically be the angular velocity in the rotating target-tracking
     // frame ("omegaTotal")
-    if (fabsf(omegaLP) < config.shotTimingExitThreshold)
+    if (fabsf(targetDataNow.omega) < config.shotTimingExitThreshold)
     {
         aimStrategy = AimStrategy::JITTER;
     }
-    else if (fabsf(omegaLP) > config.shotTimingEntryThreshold)
+    else if (fabsf(targetDataNow.omega) > config.shotTimingEntryThreshold)
     {
         // Use pulse estimation for fast rotating targets
         aimStrategy = AimStrategy::SHOT_GATING;
@@ -129,7 +126,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     {
         case AimStrategy::JITTER:
         {
-            communication::serial::VisionCoprocessor::PositionData targetDataLaunchTime =
+            communication::serial::VisionCoprocessor::TargetState targetDataLaunchTime =
                 targetDataNow.projectForward(config.minimumShotDelay);
 
             lastComputedSolution = computeJitterAim(targetDataLaunchTime, launchSpeed);
@@ -146,8 +143,43 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     return lastComputedSolution;
 }
 
+inline modm::Vector3f cross(const modm::Vector3f& a, const modm::Vector3f& b)
+{
+    return modm::Vector3f(
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]);
+}
+
+void computeYawDerivatives(
+    const modm::Vector3f pos,
+    const modm::Vector3f vel,
+    const modm::Vector3f acc,
+    float* yawVel,
+    float* yawAcc)
+{
+    const modm::Vector2f pos2d = pos.xy();
+    const modm::Vector2f vel2d = vel.xy();
+
+    const float denominator = pos2d.getLengthSquared();
+    if (denominator < 1e-6f)
+    {
+        *yawVel = 0.0f;
+        *yawAcc = 0.0f;
+        return;
+    }
+
+    *yawVel = cross(pos, vel).z / denominator;
+
+    const float dotN = cross(pos, acc).z;
+
+    const float dotD = 2.0f * (pos2d * vel2d);
+
+    *yawAcc = (dotN - (*yawVel) * dotD) / denominator;
+}
+
 std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computeJitterAim(
-    const communication::serial::VisionCoprocessor::PositionData& targetData,
+    const communication::serial::VisionCoprocessor::TargetState& targetData,
     float launchSpeed)
 {
     // Is our last targeted plate still valid?
@@ -190,6 +222,13 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                 0,
                 M_PI_4 + config.jitterAimPlateReselectionAngularAllowance))
         {
+            computeYawDerivatives(
+                ballisticsTargetState.projectForward(solution.timeOfFlight),
+                ballisticsTargetState.projectVelocityForward(solution.timeOfFlight),
+                ballisticsTargetState.projectAccelerationForward(solution.timeOfFlight),
+                &solution.yawVel,
+                &solution.yawAcc);
+
             return solution;
         }
     }
@@ -228,6 +267,13 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
                 config.turretPitchOffset) &&
             (!solution || currentSolution.timeOfFlight < solution->timeOfFlight))
         {
+            computeYawDerivatives(
+                targetState.projectForward(currentSolution.timeOfFlight),
+                targetState.projectVelocityForward(currentSolution.timeOfFlight),
+                targetState.projectAccelerationForward(currentSolution.timeOfFlight),
+                &currentSolution.yawVel,
+                &currentSolution.yawAcc);
+
             solution = currentSolution;
         }
     }
@@ -236,7 +282,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 }
 
 std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::computePulseEstimation(
-    const communication::serial::VisionCoprocessor::PositionData& targetData,
+    const communication::serial::VisionCoprocessor::TargetState& targetData,
     float launchSpeed)
 {
     // Pulse Estimation:
@@ -348,6 +394,13 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     }
 
     auto actualHitTimeTargetData = targetData.projectForward(solution.timeOfFlight);
+
+    computeYawDerivatives(
+        robotCenterState.projectForward(solution.timeOfFlight),
+        robotCenterState.projectVelocityForward(solution.timeOfFlight),
+        robotCenterState.projectAccelerationForward(solution.timeOfFlight),
+        &solution.yawVel,
+        &solution.yawAcc);
 
     aimAngle = atan2f(
         actualHitTimeTargetData.yPos - worldToTurret.getY(),
