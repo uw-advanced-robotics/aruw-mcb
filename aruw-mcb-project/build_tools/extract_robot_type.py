@@ -22,7 +22,6 @@ from SCons.Script import *
 VALID_ROBOT_TYPES = [
     "STANDARD_NULL",
     "STANDARD_PHOBOS",
-    "STANDARD_DEIMOS",
     "DRONE",
     "ENGINEER",
     "SENTRY_ACHLYS",
@@ -39,7 +38,6 @@ VALID_ROBOT_TYPES = [
 ROBOT_CLASS = {
     "STANDARD_NULL": "standard",
     "STANDARD_PHOBOS": "standard",
-    "STANDARD_DEIMOS": "standard",
     "DRONE": "drone",
     "ENGINEER": "engineer",
     "SENTRY_ACHLYS": "sentry",

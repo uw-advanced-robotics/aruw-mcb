@@ -19,24 +19,6 @@
             "intelliSenseMode": "gcc-x64"
         },
         {
-            "name": "Test Deimos",
-            "defines": [
-                "${default}",
-                "ENV_UNIT_TESTS",
-                "PLATFORM_HOSTED",
-                "RUN_WITH_PROFILING",
-                "STANDARD_DEIMOS"
-            ],
-            "includePath": [
-                "${default}",
-                "aruw-mcb-project/taproot/sim-modm/hosted-linux/modm/src",
-                "aruw-mcb-project/taproot/test",
-                "aruw-mcb-project/test"
-            ],
-            "compilerPath": "g++",
-            "intelliSenseMode": "gcc-x64"
-        },
-        {
             "name": "Sim",
             "defines": [
                 "${default}",
@@ -87,25 +69,6 @@
             "defines": [
                 "TARGET_STANDARD_PHOBOS",
                 "BUILD_TARGET=\"TARGET_STANDARD_PHOBOS\""
-            ]
-        },
-        {
-            "name": "MCB Standard Deimos",
-            "includePath": [
-                "${default}",
-                "aruw-mcb-project/taproot/modm/src",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/core",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/device",
-                "aruw-mcb-project/taproot/modm/ext/cmsis/dsp",
-                "aruw-mcb-project/taproot/ext",
-                "segger-rtt/RTT",
-                "segger-rtt/Config"
-            ],
-            "compilerPath": "arm-none-eabi-g++",
-            "intelliSenseMode": "gcc-arm",
-            "defines": [
-                "TARGET_STANDARD_DEIMOS",
-                "BUILD_TARGET=\"TARGET_STANDARD_DEIMOS\""
             ]
         },
         {

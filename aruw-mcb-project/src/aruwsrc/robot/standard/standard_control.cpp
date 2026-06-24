@@ -499,9 +499,7 @@ autotune::GravityAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::
          TURRET_WEIGHT_KG,
          TORQUE_TO_DESIRED_OUT},
         &turretSpringCompensation,
-        &chassis,
-        {},
-        modm::toRadian(0.003));
+        &chassis);
 
 autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
     springAutotuneCommand(
@@ -517,8 +515,7 @@ autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::P
         &chassis,
         {},
         &imuCalibrateSuccessBuzzCommand,
-        &imuCalibrateFailBuzzCommand,
-        modm::toRadian(0.003));
+        &imuCalibrateFailBuzzCommand);
 
 autotune::SecondOrderAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
     secondOrderAutotuneCommand(
@@ -897,7 +894,7 @@ void startStandardCommands(Drivers *drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
-#if defined(TARGET_STANDARD_PHOBOS) || defined(TARGET_STANDARD_DEIMOS)
+#ifdef TARGET_STANDARD_PHOBOS
     getTurretMCBCanComm().setImuMountingTransforms(
         aruwsrc::control::turret::TURRET_MCB_BMI088_MOUNTING_TRANSFORM,
         aruwsrc::control::turret::TURRET_MCB_ISM330_MOUNTING_TRANSFORM);

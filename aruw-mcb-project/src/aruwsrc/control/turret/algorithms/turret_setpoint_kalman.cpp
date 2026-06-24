@@ -55,19 +55,15 @@ void TurretSetpointKalmanFilter::update(
                     static_cast<int>(TrackerInput::MEASURED_VEL);
     int accVarInd = (static_cast<int>(TrackerInput::NUM_INPUTS) + 1) *
                     static_cast<int>(TrackerInput::MEASURED_ACC);
-    auto& internal_R = ekf.getMeasurementCovariance();
-
-    float velVar = internal_R[velVarInd];
-    float accVar = internal_R[accVarInd];
-
-    // Ignore unused variances
-    internal_R[velVarInd] = 1e20f;
-    internal_R[accVarInd] = 1e20f;
+    float velVar = EKF_R[velVarInd];
+    float accVar = EKF_R[accVarInd];
+    EKF_R[velVarInd] = 1000000;
+    EKF_R[accVarInd] = 1000000;
 
     ekf.update(z);
 
-    internal_R[accVarInd] = accVar;
-    internal_R[velVarInd] = velVar;
+    EKF_R[accVarInd] = accVar;
+    EKF_R[velVarInd] = velVar;
 }
 
 void TurretSetpointKalmanFilter::updateWithVelocity(
@@ -87,14 +83,12 @@ void TurretSetpointKalmanFilter::updateWithVelocity(
 
     int accVarInd = (static_cast<int>(TrackerInput::NUM_INPUTS) + 1) *
                     static_cast<int>(TrackerInput::MEASURED_ACC);
-    auto& internal_R = ekf.getMeasurementCovariance();
-
-    float accVar = internal_R[accVarInd];
-    internal_R[accVarInd] = 1e20f;
+    float accVar = EKF_R[accVarInd];
+    EKF_R[accVarInd] = 1000000;
 
     ekf.update(z);
 
-    internal_R[accVarInd] = accVar;
+    EKF_R[accVarInd] = accVar;
 }
 
 void TurretSetpointKalmanFilter::updateWithAcceleration(

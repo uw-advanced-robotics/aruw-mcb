@@ -121,7 +121,7 @@ private:
     TurretSetpointKalmanFilter setpointFilter;
 
     // Error threshold to switch from STOS to PID w/ feedforward.
-    float LINEAR_ZONE = 0.1f;
+    static constexpr float LINEAR_ZONE = 0.08f;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

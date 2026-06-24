@@ -32,7 +32,7 @@ static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.08, 0.1, 0.056), Orientation(0, 0, 0));
 inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
     Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
-#elif defined(TARGET_STANDARD_PHOBOS) || defined(TARGET_STANDARD_DEIMOS)
+#elif defined(TARGET_STANDARD_PHOBOS)
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
 inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =

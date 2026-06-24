@@ -123,7 +123,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
 
 inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS{
     .J_TOTAL = 0.0454f,
-    .TAU_MAX = 3.0f,
+    .TAU_MAX = 5.5f,
     .B_DAMP = 0.001f,
     .W_D = 53.4f,
     .ZETA = 0.216,
