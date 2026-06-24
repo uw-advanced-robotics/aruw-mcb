@@ -74,9 +74,9 @@ private:
 
     // Q Matrix (Process Noise): Updated for 3x3.
     static constexpr float EKF_Q[STATES_SQUARED] =
-        {1e-15f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 10.0f};
+        {1e-6f, 0.0f, 0.0f, 0.0f, 1e-4f, 0.0f, 0.0f, 0.0f, 5e-4f};
 
-    float EKF_R[INPUTS_SQUARED] = {8e-3f, 0, 0, 0, 1.0f, 0, 0, 0, 100.0f};
+    static constexpr float EKF_R[INPUTS_SQUARED] = {1e-6f, 0, 0, 0, 1e-6f, 0, 0, 0, 1e-6f};
 
     // P0 Matrix (Initial Covariance): Updated for 3x3
     static constexpr float EKF_P0[STATES_SQUARED] =

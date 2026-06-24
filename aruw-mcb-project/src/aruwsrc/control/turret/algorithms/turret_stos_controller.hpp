@@ -72,7 +72,7 @@ public:
     float getOptimalTorque(float posError, float vel)
     {
         // Helpful to uncomment when tuning
-        // calculateConstants();
+        calculateConstants();
 
         // Small linear interp to help with delay
         float xe = -posError + vel * SYSTEM_DELAY_SEC;

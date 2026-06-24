@@ -48,7 +48,7 @@ private:
 #ifdef TARGET_STANDARD_NULL
     static constexpr int16_t OFFSET_X = 25;
     static constexpr int16_t OFFSET_Y = -75;
-#elif defined(TARGET_STANDARD_PHOBOS)
+#elif defined(TARGET_STANDARD_PHOBOS) || defined(TARGET_STANDARD_DEIMOS)
     static constexpr int16_t OFFSET_X = 25;
     static constexpr int16_t OFFSET_Y = -75;
 #elif defined(TARGET_HERO_NEPTUNE)
