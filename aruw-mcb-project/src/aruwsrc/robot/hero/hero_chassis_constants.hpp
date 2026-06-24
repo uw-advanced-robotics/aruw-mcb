@@ -138,8 +138,8 @@ static constexpr float GIMBAL_Y_OFFSET = 0.0f;
 static constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
-    .beybladeRotationalSpeedFractionOfMax = 0.9f,
-    .beybladeTranslationalSpeedMultiplier = 0.5f,
+    .beybladeRotationalSpeedFractionOfMax = 1.0f,
+    .beybladeTranslationalSpeedMultiplier = 0.865f,
     .beybladeRotationalSpeedMultiplierWhenTranslating = 0.8f,
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.25f,
     .beybladeRampRate = 100,
