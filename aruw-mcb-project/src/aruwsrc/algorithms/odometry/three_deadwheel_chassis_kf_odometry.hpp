@@ -105,7 +105,6 @@ protected:
     enum class XInput
     {
         VEL_X = 0,
-        ACC_X,
         NUM_INPUTS,
     };
 
@@ -120,7 +119,6 @@ protected:
     enum class YInput
     {
         VEL_Y = 0,
-        ACC_Y,
         NUM_INPUTS,
     };
 
@@ -134,7 +132,6 @@ protected:
     enum class AngInput
     {
         VEL_ANG_ODOM = 0,
-        VEL_ANG_IMU,
         NUM_INPUTS,
     };
 
