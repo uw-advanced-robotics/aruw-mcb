@@ -86,7 +86,9 @@
         "polynomials": "cpp",
         "future": "cpp"
     },
-    "C_Cpp.errorSquiggles": "Enabled",
+    // Disable built-in C/C++ linter in favor of clangd
+    "C_Cpp.errorSquiggles": "Disabled",
+    "C_Cpp.intelliSenseEngine": "disabled",
     "C_Cpp.default.includePath": [
         "aruw-mcb-project/taproot/src",
         "aruw-mcb-project/src",
@@ -100,6 +102,15 @@
         ".vscode/intellisense_config.h"
     ],
     "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
+    // clang-format on save
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "xaver.clang-format",
+    "[cpp]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "[c]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
     "[markdown]": {
         "editor.wordWrap": "off",
         "editor.quickSuggestions": {

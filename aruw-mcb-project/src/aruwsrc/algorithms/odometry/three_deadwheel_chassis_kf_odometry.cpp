@@ -113,21 +113,37 @@ void ThreeDeadwheelChassisKFOdometry::update()
     rotateVector(&Vx, &Vy, chassisYaw.getWrappedValue());
 
     // Create the measurement vector
-    float y[int(OdomInput::NUM_INPUTS)] =
-        {Vx, Ax, Vy, Ay, imuTheta.getUnwrappedValue(), odoOmega, imuOmega};
+    float x_measurement[int(OdomInputX::NUM_INPUTS)] = {Vx, Ax};
+    float y_measurement[int(OdomInputY::NUM_INPUTS)] = {Vy, Ay};
+    float ang_measurement[int(OdomInputAng::NUM_INPUTS)] = {imuTheta.getUnwrappedValue(), odoOmega, imuOmega};
 
     // Perform the Kalman filter update
-    kf.performUpdate(y);
+    kf_x.performUpdate(x_measurement);
+    kf_y.performUpdate(y_measurement);
+    kf_ang.performUpdate(ang_measurement);
+
     updateChassisStateFromKF();
 }
 
 void ThreeDeadwheelChassisKFOdometry::updateChassisStateFromKF()
 {
-    auto stateVector = kf.getStateVectorAsMatrix();
-    for (int i = 0; i < int(OdomState::NUM_STATES); i++)
+    int idx = 0;
+    auto stateVector = kf_x.getStateVectorAsMatrix();
+    for (auto& val : stateVector)
     {
-        x[i] = stateVector[i];
+        x[idx++] = val;
     }
+    auto stateVector = kf_y.getStateVectorAsMatrix();
+    for (auto& val : stateVector)
+    {
+        x[idx++] = val;
+    }
+    auto stateVector = kf_ang.getStateVectorAsMatrix();
+    for (auto& val : stateVector)
+    {
+        x[idx++] = val;
+    }
+
 
     // update odometry velocity and orientation
     velocity.x = x[int(OdomState::VEL_X)];
