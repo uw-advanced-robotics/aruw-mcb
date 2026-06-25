@@ -263,7 +263,7 @@ inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS
 };
 
 inline constexpr algorithms::TurretFeedforwardConstants FEEDFORWARD_CONSTANTS = {
-    .Ka = 0.0133f / TORQUE_TO_DESIRED_OUT,
+    .Ka = 0.0133f / TORQUE_TO_DESIRED_OUT / 2.0f,  // smaller to smooth over any jerky motion
     .Kv = 0.0367f / TORQUE_TO_DESIRED_OUT,
     .Ks = 0.12f / TORQUE_TO_DESIRED_OUT};
 
