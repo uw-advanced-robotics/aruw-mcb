@@ -316,7 +316,7 @@ TurretCVCommandMock::TurretCVCommandMock(
         aruwsrc::control::turret::algorithms::Axis::YAW> *yawController,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
         aruwsrc::control::turret::algorithms::Axis::PITCH> *pitchController,
-    aruwsrc::algorithms::CvBallisticsSolver *ballisticsSolver,
+    aruwsrc::algorithms::ballistics::CvBallisticsSolver *ballisticsSolver,
     const float userPitchInputScalar,
     const float userYawInputScalar,
     uint8_t turretID)
@@ -341,7 +341,7 @@ CvBallisticsSolverMock::CvBallisticsSolverMock(
     CvBallisticsSolver::Config config,
     const uint8_t turretID,
     aruwsrc::communication::rtt::RttTelemetry *telemetry)
-    : aruwsrc::algorithms::CvBallisticsSolver(
+    : aruwsrc::algorithms::ballistics::CvBallisticsSolver(
           visionCoprocessor,
           transformer,
           frictionWheels,

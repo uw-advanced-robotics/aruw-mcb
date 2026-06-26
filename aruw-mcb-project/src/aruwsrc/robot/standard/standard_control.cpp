@@ -39,7 +39,7 @@
 #include "tap/control/trigger_helpers.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
@@ -128,6 +128,7 @@ using namespace tap::control::governor;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::ballistics;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms::odometry::transforms;
 using namespace aruwsrc::control;

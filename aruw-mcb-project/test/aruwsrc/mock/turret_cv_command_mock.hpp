@@ -37,7 +37,7 @@ public:
             aruwsrc::control::turret::algorithms::Axis::YAW> *yawController,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             aruwsrc::control::turret::algorithms::Axis::PITCH> *pitchController,
-        aruwsrc::algorithms::CvBallisticsSolver *ballisticsSolver,
+        aruwsrc::algorithms::ballistics::CvBallisticsSolver *ballisticsSolver,
         const float userPitchInputScalar,
         const float userYawInputScalar,
         uint8_t turretID = 0);

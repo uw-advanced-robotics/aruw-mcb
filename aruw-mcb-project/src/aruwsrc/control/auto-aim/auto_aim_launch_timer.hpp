@@ -20,7 +20,7 @@
 #ifndef AUTO_AIM_LAUNCH_TIMER_HPP_
 #define AUTO_AIM_LAUNCH_TIMER_HPP_
 
-#include <aruwsrc/algorithms/cv_ballistics_solver.hpp>
+#include <aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp>
 #include <aruwsrc/communication/serial/vision_coprocessor.hpp>
 
 namespace aruwsrc::control::auto_aim
@@ -57,7 +57,7 @@ public:
     AutoAimLaunchTimer(
         uint32_t agitatorTypicalDelayMicroseconds,
         aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
-        aruwsrc::algorithms::CvBallisticsSolver *ballistics,
+        aruwsrc::algorithms::ballistics::CvBallisticsSolver *ballistics,
         const float maxSinglePlateHitFrequency = 25);
 
     /**
@@ -76,7 +76,7 @@ public:
 private:
     uint32_t agitatorTypicalDelayMicroseconds;
     aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
-    aruwsrc::algorithms::CvBallisticsSolver *ballistics;
+    aruwsrc::algorithms::ballistics::CvBallisticsSolver *ballistics;
     const float maxSinglePlateHitFrequency;
 };  // class AutoAimLaunchTimer
 

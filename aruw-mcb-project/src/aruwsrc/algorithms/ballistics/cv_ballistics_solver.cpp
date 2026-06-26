@@ -23,7 +23,6 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 
-#include "aruwsrc/algorithms/robot_target_kinematic_state.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
@@ -31,13 +30,16 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
+#include "robot_target_kinematic_state.hpp"
+
 using namespace tap::algorithms;
 
 using tap::algorithms::Angle;
 using tap::algorithms::WrappedFloat;
+using tap::algorithms::ballistics::findTargetProjectileIntersection;
 using tap::algorithms::ballistics::SecondOrderKinematicState;
 
-namespace aruwsrc::algorithms
+namespace aruwsrc::algorithms::ballistics
 {
 CvBallisticsSolver::CvBallisticsSolver(
     const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor,
@@ -206,7 +208,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         solution.shotWindowValid = false;
         solution.activePlateIndex = activePlate;
 
-        if (ballistics::findTargetProjectileIntersection(  // ballistics has a solution
+        if (findTargetProjectileIntersection(  // ballistics has a solution
                 ballisticsTargetState,
                 launchSpeed,
                 NUM_FORWARD_KINEMATIC_PROJECTIONS,
@@ -257,7 +259,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
         currentSolution.shotWindowValid = false;
         currentSolution.activePlateIndex = i;
 
-        if (ballistics::findTargetProjectileIntersection(
+        if (findTargetProjectileIntersection(
                 targetState,
                 launchSpeed,
                 NUM_FORWARD_KINEMATIC_PROJECTIONS,
@@ -379,7 +381,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     solution.shotWindowValid = true;
     solution.activePlateIndex = activePlateIndex;
 
-    if (!ballistics::findTargetProjectileIntersection(
+    if (!findTargetProjectileIntersection(
             robotCenterState,
             launchSpeed,
             NUM_FORWARD_KINEMATIC_PROJECTIONS,
@@ -434,4 +436,4 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
 
     return solution;
 }
-}  // namespace aruwsrc::algorithms
+}  // namespace aruwsrc::algorithms::ballistics

@@ -29,7 +29,7 @@ namespace aruwsrc::control::client_display::indicators
 {
 VisionHudIndicators::VisionHudIndicators(
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-    const aruwsrc::algorithms::CvBallisticsSolver &ballistics,
+    const aruwsrc::algorithms::ballistics::CvBallisticsSolver &ballistics,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),

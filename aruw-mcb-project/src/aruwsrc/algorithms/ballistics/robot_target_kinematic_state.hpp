@@ -22,7 +22,7 @@
 
 #include "tap/algorithms/ballistics.hpp"
 
-namespace aruwsrc::algorithms
+namespace aruwsrc::algorithms::ballistics
 {
 struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinematicState
 {
@@ -84,6 +84,6 @@ struct RobotTargetKinematicState : tap::algorithms::ballistics::SecondOrderKinem
     };
 };
 
-}  // namespace aruwsrc::algorithms
+}  // namespace aruwsrc::algorithms::ballistics
 
 #endif  // ROBOT_TARGET_KINEMATIC_STATE_HPP_

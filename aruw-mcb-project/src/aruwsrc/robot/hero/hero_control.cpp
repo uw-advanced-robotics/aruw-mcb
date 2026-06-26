@@ -37,8 +37,8 @@
 #include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/binned_encoder_alignment/binned_encoder_alignment.hpp"
-#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
@@ -53,6 +53,7 @@
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
@@ -76,12 +77,6 @@
 #include "aruwsrc/control/client-display/indicators/enemy_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
-#include "aruwsrc/robot/hero/binned_alignment_command.hpp"
-#include "aruwsrc/robot/hero/hero_turret_encoders.hpp"
-#include "modm/container/pair.hpp"
-
-// #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
-#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/cycle_state_mode_controller.hpp"
@@ -110,8 +105,11 @@
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/hero/binned_alignment_command.hpp"
 #include "aruwsrc/robot/hero/hero_pitch_turret_motor.hpp"
+#include "aruwsrc/robot/hero/hero_turret_encoders.hpp"
 #include "aruwsrc/robot/hero/hero_turret_subsystem.hpp"
+#include "modm/container/pair.hpp"
 
 using namespace tap::communication::serial;
 using namespace tap::control;
@@ -119,6 +117,7 @@ using namespace tap::control::governor;
 using namespace tap::control::setpoint;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::ballistics;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms::odometry::transforms;
 using namespace aruwsrc::control::chassis;

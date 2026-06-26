@@ -22,14 +22,14 @@
 
 #include <gmock/gmock.h>
 
-#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 
 namespace aruwsrc::mock
 {
 namespace
 {
-using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::ballistics;
 }
 inline constexpr CvBallisticsSolver::Config DEFAULT_CONFIG{
     .shotTimingEntryThreshold = 6.0f,

@@ -23,7 +23,7 @@
 #include "tap/drivers.hpp"
 #include "tap/mock/hold_repeat_command_mapping_mock.hpp"
 
-#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_launch_timer.hpp"
 #include "aruwsrc/mock/cv_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/referee_feedback_friction_wheel_subsystem_mock.hpp"
@@ -33,7 +33,7 @@
 using namespace testing;
 using namespace aruwsrc::communication::serial;
 using namespace aruwsrc::control::auto_aim;
-using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::ballistics;
 using namespace tap::arch::clock;
 
 // 20 minutes

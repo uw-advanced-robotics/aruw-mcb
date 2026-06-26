@@ -25,7 +25,7 @@ namespace aruwsrc::control::client_display::indicators
 {
 VisionTargetIndicator::VisionTargetIndicator(
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-    const aruwsrc::algorithms::CvBallisticsSolver &ballistics,
+    const aruwsrc::algorithms::ballistics::CvBallisticsSolver &ballistics,
     RefSerialTransmitter &refSerialTransmitter,
     const Transform &worldToCameraTransform)
     : HudIndicator(refSerialTransmitter),

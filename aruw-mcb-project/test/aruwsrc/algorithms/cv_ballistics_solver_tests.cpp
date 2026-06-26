@@ -23,14 +23,14 @@
 #include "tap/drivers.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
-#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
-using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::ballistics;
 
 CvBallisticsSolver::Config BALLISTICS_CONFIG{
     .shotTimingEntryThreshold = 6.0f,

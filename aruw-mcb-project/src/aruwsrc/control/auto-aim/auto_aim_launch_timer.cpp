@@ -26,7 +26,7 @@ namespace aruwsrc::control::auto_aim
 AutoAimLaunchTimer::AutoAimLaunchTimer(
     uint32_t agitatorTypicalDelayMicroseconds,
     aruwsrc::communication::serial::VisionCoprocessor* visionCoprocessor,
-    aruwsrc::algorithms::CvBallisticsSolver* ballistics,
+    aruwsrc::algorithms::ballistics::CvBallisticsSolver* ballistics,
     const float maxSinglePlateHitFrequency)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),

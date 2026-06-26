@@ -26,7 +26,7 @@
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
-#include "aruwsrc/algorithms/cv_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
@@ -416,7 +416,7 @@ VelocityAgitatorSubsystem turretWidowAgitator(
     constants::AGITATOR_PID_CONFIG,
     constants::turretWidow::AGITATOR_CONFIG);
 
-aruwsrc::algorithms::CvBallisticsSolver ballisticsSolver(
+aruwsrc::algorithms::ballistics::CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     transformAdapter,
     turretWidowFrictionWheels,

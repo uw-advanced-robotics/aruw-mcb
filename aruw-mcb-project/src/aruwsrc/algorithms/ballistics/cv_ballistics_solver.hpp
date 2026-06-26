@@ -58,7 +58,7 @@ namespace tap::algorithms::odometry
 class Odometry2DInterface;
 }
 
-namespace aruwsrc::algorithms
+namespace aruwsrc::algorithms::ballistics
 {
 enum class AimStrategy
 {
@@ -150,12 +150,8 @@ public:
             return false;
         }
 
-        return (abs(yawAngleError) < atan2f(
-                                         aruwsrc::algorithms::CvBallisticsSolver::PLATE_WIDTH,
-                                         2.0f * targetDistance)) &&
-               (abs(pitchAngleError) < atan2f(
-                                           aruwsrc::algorithms::CvBallisticsSolver::PLATE_HEIGHT,
-                                           2.0f * targetDistance));
+        return (abs(yawAngleError) < atan2f(PLATE_WIDTH, 2.0f * targetDistance)) &&
+               (abs(pitchAngleError) < atan2f(PLATE_HEIGHT, 2.0f * targetDistance));
     }
 
     /**
@@ -229,6 +225,6 @@ private:
         const communication::serial::VisionCoprocessor::TargetState& targetData,
         float launchSpeed);
 };
-}  // namespace aruwsrc::algorithms
+}  // namespace aruwsrc::algorithms::ballistics
 
 #endif  // CV_BALLISTICS_SOLVER_HPP_
