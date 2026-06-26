@@ -276,7 +276,7 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508*(1 / 2.0f),
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (1 / 2.0f),
     0);
 
 aruwsrc::communication::sensors::encoder::LampreyEncoder yawLampreyCanEncoder(
@@ -305,9 +305,10 @@ aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
     BINNED_ALIGNMENT_OFFSET);
 
 Trigger yawOnlineTrigger =
-    Trigger(drivers(), []() -> bool {
-        return heroTurretEncoders.isOnline() && !remoteSafeDisconnectFunction();
-    }).whileTrue(&binnedAlignmentCommand);
+    Trigger(
+        drivers(),
+        []() -> bool { return heroTurretEncoders.isOnline() && !remoteSafeDisconnectFunction(); })
+        .whileTrue(&binnedAlignmentCommand);
 
 aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(
     &pitchMotor,
@@ -392,20 +393,20 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 algorithms::TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
 
 // Turret controllers
-algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
-    turret.pitchMotor,
-    chassis_rel::PITCH_PID_CONFIG,
-    {&turretGravityCompensation});
+algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
+    chassisFramePitchTurretController(
+        turret.pitchMotor,
+        chassis_rel::PITCH_PID_CONFIG,
+        {&turretGravityCompensation});
 
-algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
-    turret.yawMotor,
-    chassis_rel::YAW_PID_CONFIG);
+algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
+    chassisFrameYawTurretController(turret.yawMotor, chassis_rel::YAW_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
+algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::YAW>
     worldFrameYawTurretImuController(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
@@ -418,10 +419,8 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
     turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
-aruwsrc::control::autotune::TurretAutotuneCommand<
-    9,
-    aruwsrc::control::turret::algorithms::Axis::PITCH>::TurretCalibrationConfig
-    turretCalibrationConfig{
+aruwsrc::control::autotune::TurretAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH>::
+    TurretCalibrationConfig turretCalibrationConfig{
         .turret = &turret,
         .motor = &turret.pitchMotor,
         .controller = &chassisFramePitchTurretController,
@@ -429,13 +428,11 @@ aruwsrc::control::autotune::TurretAutotuneCommand<
         .turretMass = 1.0f,          // TODO: measure this
         .torqueToDesiredOut = 1.0f,  // TODO: tune this
     };
-aruwsrc::control::autotune::GravityAutotuneCommand<9, algorithms::Axis::PITCH>
+aruwsrc::control::autotune::GravityAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH>
     gravityAutotuneCommand(drivers(), turretCalibrationConfig);
 
-aruwsrc::control::autotune::TurretAutotuneCommand<
-    1,
-    aruwsrc::control::turret::algorithms::Axis::YAW>::TurretCalibrationConfig
-    turretCalibrationConfigFreq{
+aruwsrc::control::autotune::TurretAutotuneCommand<1, tap::algorithms::transforms::Axis::YAW>::
+    TurretCalibrationConfig turretCalibrationConfigFreq{
         .turret = &turret,
         .motor = &turret.yawMotor,
         .controller = &chassisFrameYawTurretController,
@@ -444,8 +441,7 @@ aruwsrc::control::autotune::TurretAutotuneCommand<
         .torqueToDesiredOut = 1.0f,  // TODO: tune this
     };
 
-aruwsrc::control::autotune::FreqSweepAutotuneCommand<
-    aruwsrc::control::turret::algorithms::Axis::YAW>
+aruwsrc::control::autotune::FreqSweepAutotuneCommand<tap::algorithms::transforms::Axis::YAW>
     freqSweep(
         drivers(),
         turretCalibrationConfigFreq,
@@ -459,7 +455,7 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
+algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::PITCH>
     worldFramePitchTurretImuController(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
@@ -477,7 +473,7 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidCv(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFrameTurretImuSTOSTurretController<algorithms::Axis::YAW>
+algorithms::WorldFrameTurretImuSTOSTurretController<tap::algorithms::transforms::Axis::YAW>
     worldFrameYawTurretImuControllerCv(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
@@ -486,7 +482,7 @@ algorithms::WorldFrameTurretImuSTOSTurretController<algorithms::Axis::YAW>
         worldFrameYawTurretImuPosPidCv,
         TURRET_FEEDFORWARD_CONSTANTS);
 
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
+algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::PITCH>
     worldFramePitchTurretImuControllerCv(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),

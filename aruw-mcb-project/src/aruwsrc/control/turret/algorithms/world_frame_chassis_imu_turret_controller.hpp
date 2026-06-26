@@ -51,7 +51,7 @@ namespace aruwsrc::control::turret::algorithms
  * yaw angle.
  */
 class WorldFrameYawChassisImuTurretController final
-    : public TurretAxisControllerInterface<Axis::YAW>
+    : public TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
 {
 public:
     /**

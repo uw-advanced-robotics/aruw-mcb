@@ -26,6 +26,7 @@
 #include "modm/math/geometry/angle.hpp"
 
 using tap::algorithms::WrappedFloat;
+using tap::algorithms::Angle;
 using tap::communication::sensors::imu::ImuInterface;
 
 namespace aruwsrc::algorithms::odometry

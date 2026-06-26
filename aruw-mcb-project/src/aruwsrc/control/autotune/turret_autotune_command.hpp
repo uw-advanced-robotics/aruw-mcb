@@ -33,7 +33,7 @@
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
+template <uint32_t NUM_TEST_POINTS, tap::algorithms::transforms::Axis AXIS>
 class TurretAutotuneCommand : public TurretAutotuneInterface
 {
 public:
@@ -58,7 +58,7 @@ public:
         /// controlled motors. In units of Nm / desOut
         float torqueToDesiredOut = 1.0f;
         /// Force of gravity. Unlikely to change. m / s^2
-        const float gravity = ACCELERATION_GRAVITY;
+        const float gravity = tap::algorithms::ACCELERATION_GRAVITY;
     };
 
     TurretAutotuneCommand(
@@ -87,9 +87,10 @@ public:
         }
 
         // Fill the points array with evenly spaced points if the array is all zeros
-        bool allZero = std::all_of(this->points.begin(), this->points.end(), [](float v) {
-            return v == 0.0f;
-        });
+        bool allZero = std::all_of(
+            this->points.begin(),
+            this->points.end(),
+            [](float v) { return v == 0.0f; });
 
         if (allZero)
         {

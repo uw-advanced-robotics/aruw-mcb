@@ -38,7 +38,7 @@ SentryImuCalibrateCommand::SentryImuCalibrateCommand(
     const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
     aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        control::turret::algorithms::Axis::YAW> &turretMajorController,
+        tap::algorithms::transforms::Axis::YAW> &turretMajorController,
     control::chassis::HolonomicChassisSubsystem &chassis,
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
     tap::algorithms::odometry::Odometry2DInterface &odometryInterface,

@@ -84,7 +84,7 @@ public:
      * The setpoint is limited between the min and max config angles as specified in the
      * constructor.
      */
-    mockable void setChassisFrameSetpoint(WrappedFloat setpoint);
+    mockable void setChassisFrameSetpoint(tap::algorithms::WrappedFloat setpoint);
 
     /// @return `true` if the hardware motor is connected and powered on
     mockable inline bool isOnline() const { return motor->isMotorOnline(); }
@@ -92,11 +92,11 @@ public:
     /**
      * @return turret motor angle setpoint relative to the chassis, in radians
      */
-    mockable inline WrappedFloat getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
+    mockable inline tap::algorithms::WrappedFloat getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
 
     /// @return turret motor angle measurement relative to the chassis, in radians, wrapped between
     /// [0, 2 PI)
-    mockable inline const WrappedFloat &getChassisFrameMeasuredAngle() const
+    mockable inline const tap::algorithms::WrappedFloat &getChassisFrameMeasuredAngle() const
     {
         return chassisFrameMeasuredAngle;
     }
@@ -150,7 +150,7 @@ public:
      * @note Before calling this function, you **must** first set the chassis frame setpoint before
      * calling this function (i.e. call `setChassisFrameSetpoint`).
      */
-    mockable float getValidMinError(const WrappedFloat setpoint, const WrappedFloat measurement)
+    mockable float getValidMinError(const tap::algorithms::WrappedFloat setpoint, const tap::algorithms::WrappedFloat measurement)
         const;
 
     int16_t getMotorOutput() const { return motor->getOutputDesired(); }
@@ -166,10 +166,10 @@ protected:
 
     /// Unwrapped chassis frame setpoint specified by the user and limited to `[config.minAngle,
     /// config.maxAngle]`. Units radians.
-    WrappedFloat chassisFrameSetpoint;
+    tap::algorithms::WrappedFloat chassisFrameSetpoint;
 
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
-    WrappedFloat chassisFrameMeasuredAngle;
+    tap::algorithms::WrappedFloat chassisFrameMeasuredAngle;
 };
 }  // namespace aruwsrc::control::turret
 

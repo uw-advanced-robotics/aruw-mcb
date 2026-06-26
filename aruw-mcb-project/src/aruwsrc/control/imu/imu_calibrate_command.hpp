@@ -98,10 +98,10 @@ public:
         /// A `TurretSubsystem` that this command will control (will lock the turret).
         turret::TurretSubsystem *turret;
         /// A chassis relative yaw controller used to lock the turret.
-        turret::algorithms::ChassisFrameTurretController<turret::algorithms::Axis::YAW>
+        turret::algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
             *yawController;
         /// A chassis relative pitch controller used to lock the turret.
-        turret::algorithms::ChassisFrameTurretController<turret::algorithms::Axis::PITCH>
+        turret::algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
             *pitchController;
         /**
          * `true` if the turret IMU is mounted on the pitch axis of the

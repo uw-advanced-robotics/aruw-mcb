@@ -101,7 +101,7 @@ static inline float runWorldFrameTurretImuController(
     return velocityPidOutput;
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 WorldFrameTurretImuCascadePidTurretController<AXIS>::WorldFrameTurretImuCascadePidTurretController(
     const transforms::Transform &worldToTurret,
     const tap::communication::sensors::imu::AbstractIMU &turretImu,
@@ -118,7 +118,7 @@ WorldFrameTurretImuCascadePidTurretController<AXIS>::WorldFrameTurretImuCascadeP
 {
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 void WorldFrameTurretImuCascadePidTurretController<AXIS>::initialize()
 {
     initializeWorldFrameTurretImuController(
@@ -130,7 +130,7 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::initialize()
         worldFrameSetpoint);
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
     const float dt,
     const WrappedFloat desiredSetpoint)
@@ -166,7 +166,7 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
         positionPid,
         velocityPid);
 
-    if constexpr (AXIS == Axis::PITCH)
+    if constexpr (AXIS == tap::algorithms::transforms::Axis::PITCH)
     {
         pidOutput +=
             this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
@@ -185,7 +185,7 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
     this->turretMotor.setMotorOutput(pidOutput);
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 void WorldFrameTurretImuCascadePidTurretController<AXIS>::setSetpoint(WrappedFloat desiredSetpoint)
 {
     WrappedFloat worldFrameAngle = Angle(0);
@@ -208,7 +208,7 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::setSetpoint(WrappedFlo
         this->turretMotor);
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 WrappedFloat WorldFrameTurretImuCascadePidTurretController<AXIS>::getMeasurement() const
 {
     if constexpr (AXIS == Axis::PITCH)
@@ -221,13 +221,13 @@ WrappedFloat WorldFrameTurretImuCascadePidTurretController<AXIS>::getMeasurement
     }
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 bool WorldFrameTurretImuCascadePidTurretController<AXIS>::isOnline() const
 {
     return this->turretMotor.isOnline() && turretImu.isOnline();
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 WrappedFloat WorldFrameTurretImuCascadePidTurretController<
     AXIS>::convertControllerAngleToChassisFrame(WrappedFloat controllerFrameAngle) const
 {
@@ -251,7 +251,7 @@ WrappedFloat WorldFrameTurretImuCascadePidTurretController<
     }
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 WrappedFloat WorldFrameTurretImuCascadePidTurretController<
     AXIS>::convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const
 {

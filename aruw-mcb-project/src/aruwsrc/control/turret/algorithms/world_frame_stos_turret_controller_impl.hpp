@@ -59,7 +59,7 @@ static inline void initializeWorldFrameSTOSTurretController(
     }
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 WorldFrameTurretImuSTOSTurretController<AXIS>::WorldFrameTurretImuSTOSTurretController(
     const transforms::Transform &worldToTurret,
     const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
@@ -78,11 +78,11 @@ WorldFrameTurretImuSTOSTurretController<AXIS>::WorldFrameTurretImuSTOSTurretCont
 {
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 void WorldFrameTurretImuSTOSTurretController<AXIS>::initialize()
 {
     const WrappedFloat worldFrameMeasurement =
-        Angle(AXIS == Axis::PITCH ? worldToTurret.getPitch() : worldToTurret.getYaw());
+        Angle(AXIS == tap::algorithms::transforms::Axis::PITCH ? worldToTurret.getPitch() : worldToTurret.getYaw());
     initializeWorldFrameSTOSTurretController(
         this,
         worldFrameMeasurement,
@@ -92,7 +92,7 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::initialize()
     setpointFilter.initialize(worldFrameSetpoint);
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
     const float dt,
     const WrappedFloat desiredSetpoint)
@@ -101,7 +101,7 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
 
     WrappedFloat worldFrameAngle(Angle(0));
     float worldFrameVelocity;
-    if constexpr (AXIS == Axis::PITCH)
+    if constexpr (AXIS == tap::algorithms::transforms::Axis::PITCH)
     {
         worldFrameAngle = Angle(worldToTurret.getPitch());
         worldFrameVelocity = worldToTurret.getPitchVelocity();
@@ -153,7 +153,7 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
         pidOutput = stosController.getOptimalTorque(posError, -velError);
     }
 
-    if constexpr (AXIS == Axis::PITCH)
+    if constexpr (AXIS == tap::algorithms::transforms::Axis::PITCH)
     {
         pidOutput +=
             this->calculateCompensationEffort(TurretCompensatorInterface::TurretCompensatorState{
@@ -173,12 +173,12 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
     this->turretMotor.setMotorOutput(pidOutput);
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 void WorldFrameTurretImuSTOSTurretController<AXIS>::setSetpoint(WrappedFloat desiredSetpoint)
 {
     const WrappedFloat chassisFrameAngle = this->turretMotor.getChassisFrameMeasuredAngle();
     WrappedFloat worldFrameAngle = Angle(0);
-    if constexpr (AXIS == Axis::PITCH)
+    if constexpr (AXIS == tap::algorithms::transforms::Axis::PITCH)
     {
         worldFrameAngle = Angle(worldToTurret.getPitch());
     }
@@ -195,10 +195,10 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::setSetpoint(WrappedFloat des
         this->turretMotor);
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::getMeasurement() const
 {
-    if constexpr (AXIS == Axis::PITCH)
+    if constexpr (AXIS == tap::algorithms::transforms::Axis::PITCH)
     {
         return Angle(worldToTurret.getPitch());
     }
@@ -208,17 +208,17 @@ WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::getMeasurement() con
     }
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 bool WorldFrameTurretImuSTOSTurretController<AXIS>::isOnline() const
 {
     return this->turretMotor.isOnline() && turretMCBCanComm.isConnected();
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::convertControllerAngleToChassisFrame(
     WrappedFloat controllerFrameAngle) const
 {
-    if constexpr (AXIS == Axis::PITCH)
+    if constexpr (AXIS == tap::algorithms::transforms::Axis::PITCH)
     {
         return transformWorldFrameValueToChassisFrame(
             this->turretMotor.getChassisFrameMeasuredAngle(),
@@ -234,11 +234,11 @@ WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::convertControllerAng
     }
 }
 
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 WrappedFloat WorldFrameTurretImuSTOSTurretController<AXIS>::convertChassisAngleToControllerFrame(
     WrappedFloat chassisFrameAngle) const
 {
-    if constexpr (AXIS == Axis::PITCH)
+    if constexpr (AXIS == tap::algorithms::transforms::Axis::PITCH)
     {
         const WrappedFloat worldFramePitchAngle = Angle(worldToTurret.getPitch());
 
