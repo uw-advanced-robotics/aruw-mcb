@@ -25,6 +25,8 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 
+using tap::algorithms::Angle;
+
 namespace aruwsrc::drone
 {
 using tap::communication::sensors::imu::ImuInterface;

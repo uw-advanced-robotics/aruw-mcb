@@ -35,6 +35,8 @@ using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
+using tap::algorithms::transforms::Axis;
+
 #define SETUP_TEST()
 
 static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::
