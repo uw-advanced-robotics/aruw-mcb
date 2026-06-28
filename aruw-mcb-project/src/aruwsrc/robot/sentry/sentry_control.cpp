@@ -42,6 +42,7 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
 #include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
@@ -329,7 +330,13 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
+    drivers(),
+    drivers()->capacitorBank,
+    voltageCurrentSensor);
+
+// The sentry has no operator toggle, so its default command keeps the cap bank enabled.
+aruwsrc::control::cap_bank::SentryCapBankCommand sentryCapBankCommand(drivers(), capBankSubsystem);
 
 aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
@@ -337,8 +344,8 @@ aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     transformAdapter.getWorldToChassis(),
     aruwsrc::control::chassis::BEYBLADE_CONFIG,
     &capBankSubsystem,
-    0.15f,
-    1000.0f);
+    CAP_BANK_SPRINT_ENERGY_THRESHOLD,
+    CAP_BANK_SPRINT_TRANSLATIONAL_VELOCITY_THRESHOLD);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -793,6 +800,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
+    capBankSubsystem.initialize();
     buzzer.initialize();
     chassis.initialize();
     turretWidow.initialize();
@@ -825,6 +833,7 @@ void registerSentrySubsystems(Drivers *drivers)
 
     drivers->commandScheduler.registerSubsystem(&turretWidowFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretWidowAgitator);
+    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
@@ -844,6 +853,8 @@ void setDefaultSentryCommands(Drivers *)
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 
     buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
+
+    capBankSubsystem.setDefaultCommand(&sentryCapBankCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

@@ -53,8 +53,8 @@ public:
         const tap::algorithms::transforms::Transform& worldToChassis,
         const aruwsrc::control::chassis::BeybladeConfig beybladeConfig,
         aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem,
-        float translationalMotionThreshold,
-        float capbankEnergyThreshold)
+        float capBankEnergyThreshold,
+        float capBankTranslationalVelocityThreshold)
         : chassis(chassis),
           lastParameter(0),
           lastSetPoint(Position(-1, -1, 0)),
@@ -62,8 +62,8 @@ public:
           worldToChassis(worldToChassis),
           beybladeConfig(beybladeConfig),
           capBankSubsystem(capBankSubsystem),
-          translationalMotionThreshold(translationalMotionThreshold),
-          capbankEnergyThreshold(capbankEnergyThreshold)
+          capBankEnergyThreshold(capBankEnergyThreshold),
+          capBankTranslationalVelocityThreshold(capBankTranslationalVelocityThreshold)
 
     {
     }
@@ -74,6 +74,8 @@ public:
         const float maxWheelSpeed,
         const bool movementEnabled,
         const bool beybladeEnabled);
+
+    void stop();
 
     Position calculateSetPoint(
         Position current,
@@ -109,9 +111,8 @@ private:
     tap::algorithms::Ramp rotateSpeedRamp, translateSpeedRamp;
 
     aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem;
-
-    const float translationalMotionThreshold;
-    const float capbankEnergyThreshold;
+    const float capBankEnergyThreshold;
+    const float capBankTranslationalVelocityThreshold;
 };
 }  // namespace aruwsrc::control::chassis
 
