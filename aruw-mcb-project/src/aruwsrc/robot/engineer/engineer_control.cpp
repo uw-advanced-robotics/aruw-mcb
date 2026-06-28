@@ -316,13 +316,6 @@ tap::motor::DjiMotor extensionMotor(
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
 
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
-    &drivers()->digital,
-    aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
-    true);
-
-LimitSwitchTrigger extensionTrigger(&extensionLimit);
-
 aruwsrc::communication::mcb_lite::motor::VirtualServo yawServo(
     drivers(),
     YAW_PIN,
