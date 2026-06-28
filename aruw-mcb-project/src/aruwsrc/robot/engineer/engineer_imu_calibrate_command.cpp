@@ -76,7 +76,6 @@ EngineerImuCalibrateCommand::EngineerImuCalibrateCommand(
 
 void EngineerImuCalibrateCommand::initialize()
 {
-    
     ImuCalibrateCommand::initialize();
 
     calibrationLongTimeout.stop();
@@ -85,10 +84,12 @@ void EngineerImuCalibrateCommand::initialize()
     lampreyAligned = false;
 }
 
-
-
 void EngineerImuCalibrateCommand::execute()
 {
+    curOffset = aruwsrc::algorithms::binned_encoder_alignment::calculateOffset<30, 95>(
+        turretPulleyEncoder.getPosition().getWrappedValue(),
+        turretLampreyEncoder.getPosition().getWrappedValue());
+
     switch (calibrationState)
     {
         case CalibrationState::WAITING_FOR_SYSTEMS_ONLINE:
@@ -111,8 +112,10 @@ void EngineerImuCalibrateCommand::execute()
                 turretsOnline &= config.turret->isOnline();
             }
 
-            if (turretsOnline && (turretMCBsReady || (drivers->mpu6500.getImuState() !=
-                                                      tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState::IMU_NOT_CONNECTED)))
+            if (turretsOnline &&
+                (turretMCBsReady ||
+                 (drivers->mpu6500.getImuState() !=
+                  tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState::IMU_NOT_CONNECTED)))
             {
                 calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -149,11 +152,6 @@ void EngineerImuCalibrateCommand::execute()
                             binnedAlignmentOffset) -
                         homeAlignmentOffset);
 
-                    curOffset = aruwsrc::algorithms::binned_encoder_alignment::calculateOffset<30, 95>(
-                        turretPulleyEncoder.getPosition().getWrappedValue(),
-                         turretLampreyEncoder.getPosition().getWrappedValue()
-                    );
-
                     turretInternalEncoder.alignWith(&fakeLampreyEncoder);
                     lampreyAligned = true;
                     // exit out so we move to the new setpoint
@@ -179,7 +177,8 @@ void EngineerImuCalibrateCommand::execute()
                 calibrationState = CalibrationState::CALIBRATION_FAIL;
             }
 
-            if (drivers->mpu6500.getImuState() == tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState::IMU_CALIBRATED)
+            if (drivers->mpu6500.getImuState() ==
+                tap::communication::sensors::imu::mpu6500::Mpu6500::ImuState::IMU_CALIBRATED)
             {
                 // assume turret MCB takes approximately as long as the onboard IMU to calibrate,
                 // plus 1 second extra to handle sending the request and processing it
@@ -227,6 +226,6 @@ bool EngineerImuCalibrateCommand::isFinished() const
            calibrationState == CalibrationState::CALIBRATION_FAIL;
 }
 
-void EngineerImuCalibrateCommand::end(bool){} 
+void EngineerImuCalibrateCommand::end(bool) {}
 
 }  // namespace aruwsrc::engineer

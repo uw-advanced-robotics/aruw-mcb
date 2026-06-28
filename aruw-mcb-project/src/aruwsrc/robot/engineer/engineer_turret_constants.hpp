@@ -25,8 +25,8 @@
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
-#include "modm/math/geometry/angle.hpp"
 #include "modm/container/pair.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -208,9 +208,8 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-inline constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[38] = {
-    };
-    
+inline constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[38] = {};
+
 }  // namespace chassis_rel
 
 }  // namespace aruwsrc::control::turret

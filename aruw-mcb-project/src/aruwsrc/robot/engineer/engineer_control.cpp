@@ -39,7 +39,9 @@
 #include "aruwsrc/communication/mcb-lite/virtual_digital_limit_switch.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/encoder/lamprey_encoder.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
+#include "aruwsrc/control/autotune/lamprey_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
@@ -76,6 +78,7 @@
 #include "aruwsrc/robot/engineer/cube_storage/select_cube_position_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
@@ -87,9 +90,7 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_move_position_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
-#include "aruwsrc/robot/engineer/engineer_imu_calibrate_command.hpp"
 #include "aruwsrc/util_macros.hpp"
-#include "aruwsrc/communication/sensors/encoder/lamprey_encoder.hpp"
 
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::turret::algorithms;
@@ -229,15 +230,13 @@ tap::encoder::CanEncoder pulleyEncoder(
     drivers(),
     tap::encoder::CanEncoderId::ID6,
     tap::can::CanBus::CAN_BUS2,
-    true
-);
+    true);
 aruwsrc::communication::sensors::encoder::LampreyEncoder lampreyEncoder(
     drivers(),
     tap::encoder::CanEncoderId::ID7,
     tap::can::CanBus::CAN_BUS2,
     aruwsrc::control::turret::chassis_rel::LAMPREY_CALIBRATION_MAP,
-    true
-);
+    true);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
@@ -488,8 +487,7 @@ EngineerImuCalibrateCommand imuCalibrateCommand(
     aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand
-);
+    &imuCalibrateFailBuzzCommand);
 
 aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
     drivers(),
@@ -603,17 +601,36 @@ SequentialCommand<3> removeCubeCommand(
     // hand up
     &centerCubePosition);
 
+YawTurretSubsystem yawTurretSubsystem(
+    *drivers(),
+    yawTurretMotor,
+    aruwsrc::control::turret::YAW_MOTOR_CONFIG);
+
+ChassisFrameTurretController<Axis::YAW> turretChassisYawController(
+    yawTurretSubsystem.getMutableMotor(),
+    aruwsrc::control::turret::chassis_rel::YAW_PID_CONFIG);
+
+autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
+    drivers(),
+    {&yawTurretSubsystem,
+     &yawTurretSubsystem.getMutableMotor(),
+     &turretChassisYawController,
+     yawTurretMotor.isMotorInverted(),
+     1,
+     1},
+    lampreyEncoder);
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 Trigger leftDownMidRightUp =
-     (!TriggerHelpers::switchState(
-          drivers(),
-          Remote::Switch::LEFT_SWITCH,
-          Remote::SwitchState::UP) &&
-      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH,
-      Remote::SwitchState::UP))
-         .whileTrue(CommandCompositionHelper::parallel<3>({&cubeStorageHome, &extensionHome, &imuCalibrateCommand}));
+    (!TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::LEFT_SWITCH,
+         Remote::SwitchState::UP) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
+        .whileTrue(CommandCompositionHelper::parallel<3>(
+            {&cubeStorageHome, &extensionHome, &imuCalibrateCommand}));
 
 Trigger wheelDown =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.5f, false)
@@ -676,6 +693,13 @@ void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}
 }  // namespace control
 }  // namespace aruwsrc
+
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
+{
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
+        &aruwsrc::control::lampreyAutotuneCommand};
+    return commands;
+}
 
 namespace aruwsrc::engineer
 {
