@@ -97,7 +97,7 @@ public:
         FLAGS_BYTES = 1,
         TIMESTAMP_BYTES = 4,
         FIRERATE_BYTES = 1,
-        TARGET_DATA_BYTES = 70,  // (nice) 17 floats and 2 bytes (from firerate and icon)
+        TARGET_DATA_BYTES = 70,  // 17 floats and 2 bytes (from firerate and icon)
         SHOT_TIMING_BYTES = 12,
     };
 
