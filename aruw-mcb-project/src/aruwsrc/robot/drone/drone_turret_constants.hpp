@@ -39,6 +39,8 @@ static constexpr uint8_t NUM_TURRETS = 1;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
 static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
+static constexpr float DAMIAO_4310_VELOCITY_KP_RAD_PER_SEC = 80.0f * 60.0f / M_TWOPI;
+static constexpr float DAMIAO_4310_MAX_OUTPUT_MILLI_NM = 2000.0f;
 
 static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
@@ -84,36 +86,15 @@ static constexpr float YAW_MAX_ANGLE = static_cast<float>(YAW_ENCODER_MAX_POSITI
 
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR7;
-static constexpr uint32_t PITCH_ENCODER_CURRENT_HOME_POSITION = 6862;
-static constexpr uint32_t PITCH_ENCODER_CURRENT_STRAIGHT_DOWN_POSITION = 0;
-static constexpr uint32_t PITCH_ENCODER_CURRENT_MIN_POSITION = 6114;
-static constexpr uint32_t PITCH_ENCODER_CURRENT_MAX_POSITION = 2355;
-static constexpr uint32_t PITCH_ENCODER_OFFSET_SHIFT =
-    (PITCH_ENCODER_CURRENT_MIN_POSITION + PITCH_ENCODER_CURRENT_MAX_POSITION) / 2;
-static constexpr uint32_t PITCH_ENCODER_HOME_POSITION =
-    (PITCH_ENCODER_CURRENT_HOME_POSITION + PITCH_ENCODER_OFFSET_SHIFT) %
-    tap::motor::DjiMotorEncoder::ENC_RESOLUTION;
-static constexpr uint32_t PITCH_ENCODER_STRAIGHT_DOWN_POSITION =
-    (PITCH_ENCODER_CURRENT_STRAIGHT_DOWN_POSITION + tap::motor::DjiMotorEncoder::ENC_RESOLUTION -
-     PITCH_ENCODER_OFFSET_SHIFT) %
-    tap::motor::DjiMotorEncoder::ENC_RESOLUTION;
-static constexpr uint32_t PITCH_ENCODER_MIN_POSITION =
-    (PITCH_ENCODER_CURRENT_MIN_POSITION + tap::motor::DjiMotorEncoder::ENC_RESOLUTION -
-     PITCH_ENCODER_OFFSET_SHIFT) %
-    tap::motor::DjiMotorEncoder::ENC_RESOLUTION;
-static constexpr uint32_t PITCH_ENCODER_MAX_POSITION =
-    (PITCH_ENCODER_CURRENT_MAX_POSITION + tap::motor::DjiMotorEncoder::ENC_RESOLUTION -
-     PITCH_ENCODER_OFFSET_SHIFT) %
-    tap::motor::DjiMotorEncoder::ENC_RESOLUTION;
-static constexpr float PITCH_START_ANGLE =
-    -static_cast<float>(PITCH_ENCODER_STRAIGHT_DOWN_POSITION) /
-    tap::motor::DjiMotorEncoder::ENC_RESOLUTION * M_TWOPI;
-static constexpr float PITCH_MIN_ANGLE = static_cast<float>(PITCH_ENCODER_MIN_POSITION) /
-                                             tap::motor::DjiMotorEncoder::ENC_RESOLUTION * M_TWOPI +
-                                         PITCH_START_ANGLE + modm::toRadian(15);
-static constexpr float PITCH_MAX_ANGLE = static_cast<float>(PITCH_ENCODER_MAX_POSITION) /
-                                             tap::motor::DjiMotorEncoder::ENC_RESOLUTION * M_TWOPI +
-                                         PITCH_START_ANGLE - modm::toRadian(15);
+static constexpr float PITCH_DAMIAO_STRAIGHT_DOWN_POSITION = 1.090006569f;
+static constexpr float PITCH_DAMIAO_FIRST_LIMIT_POSITION = 5.76724005f - M_TWOPI;
+static constexpr float PITCH_DAMIAO_OPPOSITE_LIMIT_POSITION = 2.44087124f;
+static constexpr float PITCH_START_ANGLE = -PITCH_DAMIAO_STRAIGHT_DOWN_POSITION;
+static constexpr float PITCH_MIN_ANGLE =
+    PITCH_DAMIAO_FIRST_LIMIT_POSITION + PITCH_START_ANGLE + modm::toRadian(2);
+static constexpr float PITCH_MAX_ANGLE =
+    PITCH_DAMIAO_OPPOSITE_LIMIT_POSITION + PITCH_START_ANGLE - modm::toRadian(2);
+static constexpr float PITCH_IMU_CALIBRATION_ANGLE = PITCH_MIN_ANGLE;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = YAW_START_ANGLE,
@@ -125,7 +106,7 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = PITCH_START_ANGLE,
-    .startEncoderValue = PITCH_ENCODER_HOME_POSITION,
+    .startEncoderValue = 0,
     .minAngle = PITCH_MIN_ANGLE,
     .maxAngle = PITCH_MAX_ANGLE,
     .limitMotorAngles = true,
@@ -134,13 +115,13 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams  // TODO tune
     TURRET_GRAVITY_CONFIG{.cgX = 20.0f, .cgZ = 16.5f, .gravityCompensatorMax = -5200.0f};
 
-static const tap::algorithms::transforms::Transform TURRET_IMU_MOUNTING_TRANSFORM(
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    -M_PI_2);
+// static const tap::algorithms::transforms::Transform TURRET_IMU_MOUNTING_TRANSFORM(
+//     0.0f,
+//     0.0f,
+//     0.0f,
+//     0.0f,
+//     M_PI,
+//     -M_PI_2);
 
 static const tap::algorithms::transforms::Transform TURRET_IMU_CALIBRATION_MOUNTING_TRANSFORM(
     0.0f,
@@ -153,7 +134,7 @@ static const tap::algorithms::transforms::Transform TURRET_IMU_CALIBRATION_MOUNT
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
-    .kp = 20.0f,
+    .kp = 15.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
@@ -181,11 +162,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
-    .kp = 20.0f,
+    .kp = 24.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 10.0f,
+    .maxOutput = 40.0f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -195,11 +176,11 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
-    .kp = 2000.0f,
-    .ki = 1000.0f,
+    .kp = DAMIAO_4310_VELOCITY_KP_RAD_PER_SEC,
+    .ki = 2500.0f,
     .kd = 0.0f,
-    .maxICumulative = 16000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .maxICumulative = 7000.0f,
+    .maxOutput = DAMIAO_4310_MAX_OUTPUT_MILLI_NM,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -226,11 +207,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 20000.0f,
-    .ki = 100.0f,
-    .kd = 2000.0f,
-    .maxICumulative = 2000.0f,
-    .maxOutput = 16'000.0f,
+    .kp = 7000.0f,
+    .ki = 2500.0f,
+    .kd = DAMIAO_4310_VELOCITY_KP_RAD_PER_SEC,
+    .maxICumulative = 7000.0f,
+    .maxOutput = DAMIAO_4310_MAX_OUTPUT_MILLI_NM,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 20.0f,
     .tQProportionalKalman = 1.0f,
