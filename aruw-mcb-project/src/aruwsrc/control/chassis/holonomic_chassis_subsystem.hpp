@@ -93,13 +93,25 @@ public:
 
     static inline float getChassisPowerLimit(tap::Drivers* drivers)
     {
-        if (capacitorBank != nullptr && capacitorBank->isSprinting())
+        float refereeLimit = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+
+        if (capacitorBank != nullptr && capacitorBank->isSprinting() && capacitorBank->isOnline() &&
+            capacitorBank->getState() == communication::can::cap_bank::State::BOOST)
         {
-            return capacitorBank->getMaximumOutputCurrent() *
-                   communication::can::cap_bank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
+            // During sprint the motors may draw from BOTH the battery (up to
+            // refereeLimit) and the cap bank (up to availableSupplyPower).
+            // Total power budget = battery contribution + cap contribution.
+            // The ceiling rises only when the bank has ACKNOWLEDGED Boost in
+            // STATUS — a bank that is offline, faulted (error flag latches it
+            // out of Boost), draining, or still settling won't actually cover
+            // the excess, and raising the ceiling anyway would dump the
+            // overdraw on the battery and drain the referee buffer. Depleted
+            // caps need no special case: the bank stays in Boost below the
+            // 10 V floor but reports availableSupplyPower = 0.
+            return refereeLimit + static_cast<float>(capacitorBank->getAvailableSupplyPower());
         }
 
-        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+        return refereeLimit;
     }
 
     /**

@@ -45,26 +45,24 @@ void ChassisAutoNavController::runController(
     moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
 
     posError = setpoint - currentPos;
-    if (capBankSubsystem)
-    {
-        if (posError.magnitude() > translationalMotionThreshold &&
-            capBankSubsystem->getAvailableEnergy() > capbankEnergyThreshold)
-        {
-            capBankSubsystem->changeSprintMode(
-                aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
-        }
-        else
-        {
-            capBankSubsystem->changeSprintMode(
-                aruwsrc::communication::can::cap_bank::SprintMode::NO_SPRINT);
-        }
-    }
 
     if (posError.magnitude() > POS_ERROR_THRESHOLD && chassis.allMotorsOnline())
     {
         translateSpeedRamp.update(MAX_TRANSLATION_ACCELERATION);
         moveVector = posError / lookaheadDist *
                      (translateSpeedRamp.getValue() / WHEEL_RADIUS / M_TWOPI * 60);
+    }
+
+    const float translationalVelocitySetpoint =
+        moveVector.magnitude() * WHEEL_RADIUS * M_TWOPI / 60.0f;
+    if (capBankSubsystem != nullptr)
+    {
+        const auto sprintMode =
+            capBankSubsystem->getAvailableEnergy() > capBankEnergyThreshold &&
+                    translationalVelocitySetpoint > capBankTranslationalVelocityThreshold
+                ? aruwsrc::communication::can::cap_bank::SprintMode::SPRINT
+                : aruwsrc::communication::can::cap_bank::SprintMode::NO_SPRINT;
+        capBankSubsystem->changeSprintMode(sprintMode);
     }
 
     // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled
@@ -96,6 +94,15 @@ void ChassisAutoNavController::runController(
 
     // set outputs
     chassis.setDesiredOutput(chassisFrameMoveVector.x(), chassisFrameMoveVector.y(), r);
+}
+
+void ChassisAutoNavController::stop()
+{
+    if (capBankSubsystem != nullptr)
+    {
+        capBankSubsystem->changeSprintMode(
+            aruwsrc::communication::can::cap_bank::SprintMode::NO_SPRINT);
+    }
 }
 
 Position ChassisAutoNavController::calculateSetPoint(

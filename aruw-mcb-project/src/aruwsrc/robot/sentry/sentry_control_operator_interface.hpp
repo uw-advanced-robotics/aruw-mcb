@@ -43,10 +43,8 @@ public:
      */
     static constexpr float MAX_ACCELERATION_X = 4'000.0f;
     static constexpr float MAX_DECELERATION_X = 10'000.0f;
-    static constexpr float MAX_X_SPEED = 120.0f;
     static constexpr float MAX_ACCELERATION_Y = 4'000.0f;
     static constexpr float MAX_DECELERATION_Y = 10'000.0f;
-    static constexpr float MAX_Y_SPEED = 120.0f;
     static constexpr float MAX_ACCELERATION_R = 10'000.0f;
     static constexpr float MAX_DECELERATION_R = 20'000.0f;
     static constexpr float MAX_CHASSIS_YAW_SPEED = 120.0f;
