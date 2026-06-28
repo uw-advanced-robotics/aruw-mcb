@@ -78,6 +78,7 @@ private:
     const float binnedAlignmentOffset{0.0f};
     const float homeAlignmentOffset{0.0f};
     float yawObserverOffset = 0;
+    float curOffset = 0;
     aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
 };  
 

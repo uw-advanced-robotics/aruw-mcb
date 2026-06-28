@@ -149,6 +149,11 @@ void EngineerImuCalibrateCommand::execute()
                             binnedAlignmentOffset) -
                         homeAlignmentOffset);
 
+                    curOffset = aruwsrc::algorithms::binned_encoder_alignment::calculateOffset<30, 95>(
+                        turretPulleyEncoder.getPosition().getWrappedValue(),
+                         turretLampreyEncoder.getPosition().getWrappedValue()
+                    );
+
                     turretInternalEncoder.alignWith(&fakeLampreyEncoder);
                     lampreyAligned = true;
                     // exit out so we move to the new setpoint
