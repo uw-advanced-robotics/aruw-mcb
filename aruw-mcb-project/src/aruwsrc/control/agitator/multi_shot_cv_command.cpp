@@ -43,7 +43,6 @@ void MultiShotCvCommand::initialize()
 {
     initializedActiveCommand = false;
     if (command.has_value()) command.value()->initialize();
-    singleShotFinished = false;
 }
 
 void MultiShotCvCommand::execute()
@@ -106,5 +105,17 @@ void MultiShotCvCommand::end(bool interrupted)
     initializedActiveCommand = false;
 }
 
-bool MultiShotCvCommand::isFinished() const { return false; }
+bool MultiShotCvCommand::isFinished() const
+{
+    // Our expected behavior is that we fire one shot and the command ends, but since the trigger is
+    // a whileTrue(), we keep the command continue not doing anything
+    if (launchMode == SINGLE)
+    {
+        return false;
+    }
+
+    // Otherwise, see if the governor has determined that we should stop firing (e.g. due to heat or
+    // CV)
+    return launchCommand.isFinished();
+}
 }  // namespace aruwsrc::control::agitator

@@ -128,12 +128,13 @@ void WorldFrameTurretImuSTOSTurretController<AXIS>::runController(
         chassisFrame + (worldFrameSetpoint - worldFrameAngle),
         chassisFrame);
 
-    float targetVel = setpointFilter.getEstimatedVelocity();
+    float targetVel = setpointFilter.getEstimatedVelocity() - worldFrameVelocity +
+                      this->turretMotor.getChassisFrameVelocity();
     float targetAccel = setpointFilter.getEstimatedAcceleration();
 
     float frictionFF = 0.0;
     // Keep it from jittering
-    if (std::abs(targetVel) > 0.001)
+    if (std::abs(targetVel) > 0.08 && std::abs(posError) < 0.005)
     {
         frictionFF = std::signbit(targetVel) ? -feedforwardConstants.Ks : feedforwardConstants.Ks;
     }
