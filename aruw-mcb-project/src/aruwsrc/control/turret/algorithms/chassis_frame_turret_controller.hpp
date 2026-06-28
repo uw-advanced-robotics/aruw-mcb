@@ -80,7 +80,8 @@ public:
     }
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline tap::algorithms::WrappedFloat convertChassisAngleToControllerFrame(tap::algorithms::WrappedFloat chassisFrameAngle) const
+    inline tap::algorithms::WrappedFloat convertChassisAngleToControllerFrame(
+        tap::algorithms::WrappedFloat chassisFrameAngle) const
     {
         return chassisFrameAngle;
     }

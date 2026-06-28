@@ -276,7 +276,7 @@ tap::motor::DjiMotor yawMotor(
     false,
     "Yaw Turret",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 * (1 / 2.0f),
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508*(1 / 2.0f),
     0);
 
 aruwsrc::communication::sensors::encoder::LampreyEncoder yawLampreyCanEncoder(
@@ -305,10 +305,9 @@ aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
     BINNED_ALIGNMENT_OFFSET);
 
 Trigger yawOnlineTrigger =
-    Trigger(
-        drivers(),
-        []() -> bool { return heroTurretEncoders.isOnline() && !remoteSafeDisconnectFunction(); })
-        .whileTrue(&binnedAlignmentCommand);
+    Trigger(drivers(), []() -> bool {
+        return heroTurretEncoders.isOnline() && !remoteSafeDisconnectFunction();
+    }).whileTrue(&binnedAlignmentCommand);
 
 aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(
     &pitchMotor,

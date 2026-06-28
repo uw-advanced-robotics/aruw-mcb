@@ -29,10 +29,14 @@ TurretUserWorldRelativeCommand::TurretUserWorldRelativeCommand(
     tap::Drivers *drivers,
     ControlOperatorInterface &controlOperatorInterface,
     TurretSubsystem *turretSubsystem,
-    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW> *chassisImuYawController,
-    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH> *chassisImuPitchController,
-    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW> *turretImuYawController,
-    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH> *turretImuPitchController,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
+        *chassisImuYawController,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
+        *chassisImuPitchController,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
+        *turretImuYawController,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
+        *turretImuPitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)

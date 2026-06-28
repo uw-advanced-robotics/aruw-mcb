@@ -92,7 +92,10 @@ public:
     /**
      * @return turret motor angle setpoint relative to the chassis, in radians
      */
-    mockable inline tap::algorithms::WrappedFloat getChassisFrameSetpoint() const { return chassisFrameSetpoint; }
+    mockable inline tap::algorithms::WrappedFloat getChassisFrameSetpoint() const
+    {
+        return chassisFrameSetpoint;
+    }
 
     /// @return turret motor angle measurement relative to the chassis, in radians, wrapped between
     /// [0, 2 PI)
@@ -150,8 +153,9 @@ public:
      * @note Before calling this function, you **must** first set the chassis frame setpoint before
      * calling this function (i.e. call `setChassisFrameSetpoint`).
      */
-    mockable float getValidMinError(const tap::algorithms::WrappedFloat setpoint, const tap::algorithms::WrappedFloat measurement)
-        const;
+    mockable float getValidMinError(
+        const tap::algorithms::WrappedFloat setpoint,
+        const tap::algorithms::WrappedFloat measurement) const;
 
     int16_t getMotorOutput() const { return motor->getOutputDesired(); }
 
