@@ -606,15 +606,14 @@ SequentialCommand<3> removeCubeCommand(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-// Disabled bc homing doesn't work yet (virtual limit switches)
-// Trigger leftDownMidRightUp =
-//     (!TriggerHelpers::switchState(
-//          drivers(),
-//          Remote::Switch::LEFT_SWITCH,
-//          Remote::SwitchState::UP) &&
-//      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH,
-//      Remote::SwitchState::UP))
-//         .whileTrue(CommandCompositionHelper::parallel<2>({&cubeStorageHome, &extensionHome}));
+Trigger leftDownMidRightUp =
+     (!TriggerHelpers::switchState(
+          drivers(),
+          Remote::Switch::LEFT_SWITCH,
+          Remote::SwitchState::UP) &&
+      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH,
+      Remote::SwitchState::UP))
+         .whileTrue(CommandCompositionHelper::parallel<3>({&cubeStorageHome, &extensionHome, &imuCalibrateCommand}));
 
 Trigger wheelDown =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.5f, false)
