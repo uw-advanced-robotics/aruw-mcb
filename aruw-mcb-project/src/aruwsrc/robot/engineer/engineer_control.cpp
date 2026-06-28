@@ -643,6 +643,9 @@ Trigger wheelUp =
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
+    pulleyEncoder.initialize();
+    lampreyEncoder.initialize();
+
     chassisSubsystem.initialize();
     engTurret.initialize();
     extensionSubsystem.initialize();
