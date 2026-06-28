@@ -65,6 +65,7 @@
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/turret_motor.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
 #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -152,7 +153,37 @@ tap::motor::DjiMotor yawTurretMotor(
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508* YAW_TURRET_GEAR_RATIO,
     YAW_MOTOR_CONFIG.startEncoderValue);
 
-aruwsrc::control::turret::TurretMotor pitchEngTurretMotor(&pitchTurretMotor, PITCH_MOTOR_CONFIG);
+tap::motor::DjiMotor extensionMotor(
+    drivers(),
+    aruwsrc::engineer::EXTENSION_MOTOR_ID,
+    aruwsrc::engineer::CAN_BUS_EXTENSION,
+    true,
+    "Extension Motor",
+    false,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+
+aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
+    &drivers()->digital,
+    aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
+    true);
+
+LimitSwitchTrigger extensionTrigger(&extensionLimit);
+
+TriggerHomedJointSubsystem extensionSubsystem(
+    drivers(),
+    extensionMotor,
+    extensionTrigger,
+    EXTENSION_CONFIG);
+
+float getLivePitchMinLimit();
+float getLivePitchMaxLimit();
+
+aruwsrc::control::turret::TurretMotor pitchEngTurretMotor(
+    &pitchTurretMotor,
+    PITCH_MOTOR_CONFIG,
+    getLivePitchMinLimit,
+    getLivePitchMaxLimit);
+
 aruwsrc::control::turret::TurretMotor yawEngTurretMotor(&yawTurretMotor, YAW_MOTOR_CONFIG);
 
 EngineerTurretSubsystem engTurret(
@@ -160,6 +191,10 @@ EngineerTurretSubsystem engTurret(
     pitchEngTurretMotor,
     yawEngTurretMotor,
     &drivers()->mcbLite.imu);
+
+float getLivePitchMinLimit() { return getPitchMinLimit(extensionSubsystem.getPosition()); }
+
+float getLivePitchMaxLimit() { return getPitchMaxLimit(extensionSubsystem.getPosition()); }
 
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
@@ -243,8 +278,6 @@ aruwsrc::communication::mcb_lite::VirtualDigitalLimitSwitch extensionLimitSwitch
     tap::gpio::Digital::InputPin::C,
     true);
 
-LimitSwitchTrigger extensionTrigger(&extensionLimitSwitch);
-
 aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor cubeStorageMotor(
     drivers(),
     CUBE_STORAGE_MOTOR_ID,
@@ -302,15 +335,6 @@ tap::encoder::CanEncoder wristEncoderTheta2(
     1,
     WRIST_HOME_THETA2);
 
-tap::motor::DjiMotor extensionMotor(
-    drivers(),
-    aruwsrc::engineer::EXTENSION_MOTOR_ID,
-    aruwsrc::engineer::CAN_BUS_EXTENSION,
-    true,
-    "Extension Motor",
-    false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
 /* define subsystems --------------------------------------------------------*/
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
@@ -340,12 +364,6 @@ WristSubsystem wristSubsystem(
     wristMotorThree,
     wristEncoderTheta2,
     WRIST_CONFIG);
-
-TriggerHomedJointSubsystem extensionSubsystem(
-    drivers(),
-    extensionMotor,
-    extensionTrigger,
-    EXTENSION_CONFIG);
 
 // update vals
 DualDigitalOutSubsystem leftSuckSubsystem(
@@ -618,7 +636,6 @@ void initializeSubsystems()
     parallelOmniOne.initialize();
     parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
-    // clientDicsplay.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
