@@ -29,6 +29,8 @@
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
+#include "aruwsrc/control/agitator/agitator_fan_command.hpp"
+#include "aruwsrc/control/agitator/agitator_fan_subsystem.hpp"
 #include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -600,6 +602,19 @@ aruwsrc::control::launcher::
         true,
         turretWidow::barrelID);
 
+AgitatorFanSubsystem agitatorFan(
+    drivers(),
+    constants::turretWidow::AGITATOR_FAN_PWM_PIN,
+    constants::turretWidow::AGITATOR_FAN_PWM_TIMER,
+    constants::turretWidow::AGITATOR_FAN_PWM_FREQUENCY_HZ);
+
+AgitatorFanCommand agitatorFanCommand(
+    drivers(),
+    agitatorFan,
+    constants::turretWidow::AGITATOR_FAN_ON_DUTY,
+    constants::turretWidow::AGITATOR_FAN_OFF_DUTY,
+    &imuCalibrateCommand);
+
 // Agitator commands (turret widow)
 ConstantFireRateAgitatorCommand turretWidowRotateAgitator(
     turretWidowAgitator,
@@ -802,6 +817,7 @@ void initializeSubsystems()
     voltageCurrentSensor.initialize();
     capBankSubsystem.initialize();
     buzzer.initialize();
+    agitatorFan.initialize();
     chassis.initialize();
     turretWidow.initialize();
     turretMajor.initialize();
@@ -822,6 +838,7 @@ void initializeSubsystems()
 void registerSentrySubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&agitatorFan);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretWidow);
@@ -838,7 +855,7 @@ void registerSentrySubsystems(Drivers *drivers)
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
     drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
-    drivers->stateMachine.attachAutoNavController(&autoNavController);
+    // drivers->stateMachine.attachAutoNavController(&autoNavController);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -853,6 +870,7 @@ void setDefaultSentryCommands(Drivers *)
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 
     buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
+    agitatorFan.setDefaultCommand(&agitatorFanCommand);
 
     capBankSubsystem.setDefaultCommand(&sentryCapBankCommand);
 }
