@@ -23,7 +23,6 @@
 #include <optional>
 
 #include "tap/control/command.hpp"
-#include "tap/control/finite_repeat_command.hpp"
 #include "tap/control/repeat_command.hpp"
 
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"

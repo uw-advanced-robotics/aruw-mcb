@@ -31,7 +31,6 @@
 #include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/instant_command.hpp"
 #include "tap/control/remote_map_state.hpp"
-#include "tap/control/repeat_command.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -716,7 +715,9 @@ Trigger leftSwitchDown =
 
 Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
+        .whileTrue(Compose::parallel<2>({{
+            std::make_pair(&turretCVCommand, false),
+            std::make_pair(&chassisDriveCommand, false)}}));
 
 Trigger fToggled = TriggerHelpers::button(drivers(), Remote::Key::F).toggleOnTrue(&beybladeCommand);
 
@@ -770,11 +771,8 @@ MatrixHudIndicators positionHudIndicators(
     &multiShotCvCommand,
     &cvOnTargetGovernor);
 
-// Compose::parallel<1> so that multishot is still a weakconcurrentcommand and isReady is bypassed
-// since trigger doesn't have ownership
 Trigger leftMousePressed =
     TriggerHelpers::leftMouseButton(drivers()).whileTrue(&multiShotCvCommand);
-//.whileTrue(Compose::parallel<2>({&turretCVCommand, &multiShotCvCommand}));
 
 auto cycleStateController = CycleStateModeController<
     MultiShotCvCommand::LaunchMode,

@@ -49,6 +49,7 @@ public:
     {
         if (ended)
         {
+            if (!command->isReady()) return;
             command->end(false);
             command->initialize();
             ended = false;

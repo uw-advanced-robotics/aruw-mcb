@@ -34,7 +34,6 @@
 
 #include "command.hpp"
 #include "command_scheduler.hpp"
-#include "repeat_command.hpp"
 #include "subsystem.hpp"
 
 namespace tap
