@@ -34,12 +34,16 @@
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
+#include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_analog_sensor.hpp"
+#include "aruwsrc/communication/mcb-lite/virtual_digital_limit_switch.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
@@ -87,8 +91,6 @@
 #include "aruwsrc/util_macros.hpp"
 #include "aruwsrc/communication/sensors/encoder/lamprey_encoder.hpp"
 
-using namespace aruwsrc::communication::mcb_lite;
-using namespace aruwsrc::communication::mcb_lite::motor;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::control::buzzer;
@@ -165,6 +167,11 @@ aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
+aruwsrc::communication::mcb_lite::VirtualAnalogSensor analogSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2,
+    0x1D6);
+
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
     aruwsrc::control::chassis::LEFT_FRONT_MOTOR_ID,
@@ -239,6 +246,20 @@ tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
      aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA});
 
+aruwsrc::communication::mcb_lite::VirtualDigitalLimitSwitch cubeStorageLimitSwitch(
+    drivers()->mcbLite.digital,
+    tap::gpio::Digital::InputPin::B,
+    true);
+
+LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimitSwitch);
+
+aruwsrc::communication::mcb_lite::VirtualDigitalLimitSwitch extensionLimitSwitch(
+    drivers()->mcbLite.digital,
+    tap::gpio::Digital::InputPin::C,
+    true);
+
+LimitSwitchTrigger extensionTrigger(&extensionLimitSwitch);
+
 aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor cubeStorageMotor(
     drivers(),
     CUBE_STORAGE_MOTOR_ID,
@@ -248,13 +269,6 @@ aruwsrc::communication::mcb_lite::motor::VirtualDjiMotor cubeStorageMotor(
     "Cube Storage Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak cubeStorageLimit(
-    &(drivers()->digital),
-    CUBE_STORAGE_LIMITSWITCH_PORT,
-    true);
-
-LimitSwitchTrigger cubeStorageTrigger(&cubeStorageLimit);
 
 // furthest wrist motor from end effector
 tap::motor::DjiMotor wristMotorOne(
@@ -311,13 +325,6 @@ tap::motor::DjiMotor extensionMotor(
     "Extension Motor",
     false,
     tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
-
-aruwsrc::communication::sensors::beam_break::DigitalBeamBreak extensionLimit(
-    &drivers()->digital,
-    aruwsrc::engineer::EXTENSION_LIMIT_SWITCH_PIN,
-    true);
-
-LimitSwitchTrigger extensionTrigger(&extensionLimit);
 
 /* define subsystems --------------------------------------------------------*/
 
@@ -402,6 +409,15 @@ EngineerTransforms transformer(
     cubeStorage);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
+
+ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassisSubsystem,
+    transformer.getWorldToChassis(),
+    BEYBLADE_CONFIG,
+    nullptr,
+    0,
+    0);
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
@@ -668,10 +684,15 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &aruwsrc::control::remoteSafeDisconnectFunction);
+
     aruwsrc::control::initializeSubsystems();
+
     aruwsrc::control::registerEngineerSubsystems(drivers);
+
     aruwsrc::control::setDefaultEngineerCommands(drivers);
+
     aruwsrc::control::startEngineerCommands(drivers);
+
     aruwsrc::control::registerEngineerIoMappings(drivers);
 }
 }  // namespace aruwsrc::engineer

@@ -34,7 +34,8 @@
 
 namespace aruwsrc::control::chassis
 {
-static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
+static constexpr float CAP_BANK_CAPACITANCE = 6.66f;
+static constexpr int CAP_BANK_MAX_AVAILABLE_POWER = 50;  // watts
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
@@ -57,7 +58,12 @@ static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEE
  * calculateRotationTranslationalGain is performed.
  */
 static constexpr float MIN_ROTATION_THRESHOLD = 80.0f;
-
+#if defined(TARGET_STANDARD_NULL)
+inline constexpr float CHASSIS_GEARBOX_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+#else
+// Custom gearbox ratio
+inline constexpr float CHASSIS_GEARBOX_RATIO = (17.0f / 268.0f);
+#endif
 /**
  * Pin to use for current sensing
  */
@@ -70,18 +76,6 @@ static constexpr float ENERGY_BUFFER_CRIT_THRESHOLD = 10.0f;
 
 static constexpr float VELOCITY_PID_KV = 0.07f;
 static constexpr float VELOCITY_PID_KS = 1.0f;
-
-static constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
-    .kp = 300.0f,
-    .ki = 14.0f,
-    .kd = 0.10f,
-    .maxICumulative = 1000.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
-    .errDeadzone = 0.5f,
-    .smoothDeadzone = true,
-    .antiSaturation = true,
-};
-
 /**
  * Rotation PD: A PD controller for chassis autorotation, which causes the chassis to follow the
  * turret's pointing direction
@@ -95,30 +89,41 @@ static constexpr float AUTOROTATION_MIN_SMOOTHING_ALPHA = 0.001f;
 
 /**
  * Speed at which the chassis switches from symmetrical driving to diagonal driving, for a holonomic
- * X-Drive (m/s) NOT USEFUL FOR STANDARDS
+ * X-Drive (m/s)
  */
 static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
 
-/**
- * Radius of the wheels (m).
- */
-static constexpr float WHEEL_RADIUS = 0.1016;
-
 #if defined(TARGET_STANDARD_NULL)
-static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
-static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;     // 141mm -> m
-static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
-static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
+static constexpr float WHEEL_RADIUS = 0.1016;             // 6in wheel dia
+static constexpr float WHEELBASE_RADIUS = 226 / 1000.0f;  // m
+inline constexpr bool WHEELBASE_MOTOR_INVERTED = false;
 
-#elif defined(TARGET_STANDARD_VOID)
-static constexpr float DEADWHEEL_RADIUS = 41.275 / 1000.0f;  // 41.275mm -> m
-static constexpr float WHEELBASE_RADIUS = 141 / 1000.0f;     // 141mm -> m
-static constexpr float PARALLEL_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = M_PI_2;
-static constexpr float PERPENDICULAR_WHEEL_CHASSIS_FORWARD_RELATIVE_ANGLE_RADIANS = -3 * M_PI_2;
+inline constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 300.0f,
+    .ki = 14.0f,
+    .kd = 0.1f,
+    .maxICumulative = 1000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 0.5f,
+    .smoothDeadzone = true,
+    .antiSaturation = true,
+};
 
-#else
+#elif defined(TARGET_STANDARD_PHOBOS)
+static constexpr float WHEEL_RADIUS = 0.0762;             // 4in wheel dia
+static constexpr float WHEELBASE_RADIUS = 185 / 1000.0f;  // m
+inline constexpr bool WHEELBASE_MOTOR_INVERTED = true;
 
-#error "Attempted to include standard_chassis_constants.hpp for nonstandard robot target."
+inline constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 300.0f,
+    .ki = 14.0f,
+    .kd = 0.1f,
+    .maxICumulative = 2000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 0.5f,
+    .smoothDeadzone = true,
+    .antiSaturation = true,
+};
 
 #endif
 
@@ -130,7 +135,6 @@ static constexpr float GIMBAL_X_OFFSET = 0.0f;
  * @see `GIMBAL_X_OFFSET`.
  */
 static constexpr float GIMBAL_Y_OFFSET = 0.0f;
-static constexpr float CHASSIS_GEARBOX_RATIO = (187.0f / 3591.0f);
 
 static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRotationalSpeedFractionOfMax = 0.9f,
@@ -140,8 +144,8 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 50,
 };
 
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.75f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 4.0f;
 
 static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;

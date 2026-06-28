@@ -30,17 +30,18 @@
 
 namespace aruwsrc::control::chassis
 {
-static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
+static constexpr float CAP_BANK_CAPACITANCE = 6.66f;
+static constexpr int CAP_BANK_MAX_AVAILABLE_POWER = 100;  // watts
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X = 1.0f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 1.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {1, 200},
-    {2, 250}};  // TODO: TUNE!
+    {1, 370},
+    {2, 375}};  // TODO: TUNE!
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
     CHASSIS_POWER_TO_MAX_SPEED_LUT,
@@ -112,9 +113,9 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 100,
 };
 
-static constexpr float TRANSLATIONAL_MOTION_THRESHOLD = 0.25f;
-
-static constexpr float CAPBANK_ENERGY_THRESHOLD = 500.0f;
+// The cap bank only sprints above both of these thresholds; otherwise it recharges.
+static constexpr float CAP_BANK_SPRINT_TRANSLATIONAL_VELOCITY_THRESHOLD = 0.25f;  // m/s
+static constexpr float CAP_BANK_SPRINT_ENERGY_THRESHOLD = 50.0f;                  // J
 
 static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR4;
 static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;

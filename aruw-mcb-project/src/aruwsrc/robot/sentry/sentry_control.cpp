@@ -42,8 +42,9 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
-#include "aruwsrc/control/chassis/sentry/auto_nav_beyblade_command.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
@@ -56,6 +57,7 @@
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/imu_not_calibrated_governor.hpp"
 #include "aruwsrc/control/governor/match_running_governor.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_lut_autotune_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -328,16 +330,22 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
+    drivers(),
+    drivers()->capacitorBank,
+    voltageCurrentSensor);
+
+// The sentry has no operator toggle, so its default command keeps the cap bank enabled.
+aruwsrc::control::cap_bank::SentryCapBankCommand sentryCapBankCommand(drivers(), capBankSubsystem);
 
 aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
     chassis,
-    &transformAdapter,
+    transformAdapter.getWorldToChassis(),
     aruwsrc::control::chassis::BEYBLADE_CONFIG,
-    capBankSubsystem,
-    0.15f,
-    1000.0f);
+    &capBankSubsystem,
+    CAP_BANK_SPRINT_ENERGY_THRESHOLD,
+    CAP_BANK_SPRINT_TRANSLATIONAL_VELOCITY_THRESHOLD);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
@@ -433,7 +441,7 @@ SentryAutoAimLaunchTimer autoAimLaunchTimerTurretWidow(
     &turretWidowSolver);
 
 /* define commands ----------------------------------------------------------*/
-aruwsrc::control::chassis::sentry::AutoNavBeybladeCommand autoNavBeybladeCommand(
+aruwsrc::control::chassis::AutoNavCommand autoNavCommand(
     *drivers(),
     chassis,
     autoNavController,
@@ -650,6 +658,19 @@ GovernorLimitedCommand<2> turretWidowAgitatorManualSpin(
     turretWidowRotateAndUnjamAgitator,
     {&heatLimitGovernorTurretWidow, &frictionWheelsOnGovernorTurretWidow});
 
+aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<16>
+    turretWidowLauncherLutAutotuneCommand(
+        drivers(),
+        {
+            .frictionWheels = &turretWidowFrictionWheels,
+            .manualFireCommand = &turretWidowAgitatorManualSpin,
+            .barrelId = turretWidow::barrelID,
+            .numFrictionWheels = 2,
+            .startRpm = 4500.0f,
+            .endRpm = 7500.0f,
+            .rpmStep = 250.0f,
+        });
+
 /* define client display / HUD related items --------------------------------*/
 
 // This shit is currently banned by DJI, but left for a hopeful future
@@ -675,7 +696,7 @@ auto rightUp = std::make_unique<HoldCommandMapping>(
 RemoteMapState leftUpRightUpRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
 auto leftUpRightUp = std::make_unique<HoldRepeatCommandMapping>(
     drivers(),
-    std::vector<Command *>{&autoNavBeybladeCommand, &turretCVCommand},
+    std::vector<Command *>{&autoNavCommand, &turretCVCommand},
     &leftUpRightUpRms,
     true);
 
@@ -690,7 +711,7 @@ RemoteMapState leftUpRightMidRms =
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID);
 auto leftUpRightMid = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&autoNavBeybladeCommand, &turretCVCommand},
+    std::vector<Command *>{&autoNavCommand, &turretCVCommand},
     &leftUpRightMidRms);
 
 // imu calibrate
@@ -721,7 +742,7 @@ RemoteMapState leftMidRightMidRms =
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID);
 auto leftMidRightMid = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&majorManualCommand, &turretWidowManualCommand, &autoNavBeybladeCommand},
+    std::vector<Command *>{&majorManualCommand, &turretWidowManualCommand, &autoNavCommand},
     &leftMidRightMidRms);
 
 // manual aim
@@ -735,12 +756,12 @@ auto leftMidRightDown = std::make_unique<HoldCommandMapping>(
     },
     &leftMidRightDownRms);
 
-// manual drive, auto aim, cv-gated fire
+// manual aim and shoot
 RemoteMapState leftDownRightUpRms =
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP);
 auto leftDownRightUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&chassisDriveCommand, &turretCVCommand},
+    std::vector<Command *>{&turretWidowManualCommand},
     &leftDownRightUpRms);
 
 auto leftDownRightUpAg = std::make_unique<HoldRepeatCommandMapping>(
@@ -779,6 +800,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
+    capBankSubsystem.initialize();
     buzzer.initialize();
     chassis.initialize();
     turretWidow.initialize();
@@ -811,6 +833,7 @@ void registerSentrySubsystems(Drivers *drivers)
 
     drivers->commandScheduler.registerSubsystem(&turretWidowFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretWidowAgitator);
+    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
@@ -830,6 +853,8 @@ void setDefaultSentryCommands(Drivers *)
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 
     buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
+
+    capBankSubsystem.setDefaultCommand(&sentryCapBankCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -854,8 +879,7 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(std::move(rightUp));
 
     drivers->commandMapper.addMap(std::move(leftDownRightMid));  // manual drive & auto aim
-    drivers->commandMapper.addMap(
-        std::move(leftDownRightUp));  // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(std::move(leftDownRightUp));   // manual aim and shoot
     drivers->commandMapper.addMap(std::move(leftDownRightUpAg));
     drivers->commandMapper.addMap(std::move(leftDownRightDown));  // manual drive
 
@@ -892,7 +916,8 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
         &sentry_control::gravityAutotuneCommandWidow,
         &sentry_control::lampreyAutotuneCommand,
-        &sentry_control::freqSweepAutotuneCommand};
+        &sentry_control::freqSweepAutotuneCommand,
+        &sentry_control::turretWidowLauncherLutAutotuneCommand};
     return commands;
 }
 #endif

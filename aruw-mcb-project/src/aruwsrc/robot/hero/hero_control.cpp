@@ -20,6 +20,7 @@
 #if defined(TARGET_HERO_NEPTUNE)
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_mapper.hpp"
+#include "tap/control/concurrent_command.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/hold_command_mapping.hpp"
@@ -80,8 +81,10 @@
 #include "modm/container/pair.hpp"
 
 // #include "aruwsrc/control/client-display/indicators/vision_assistance_indicator.hpp"
+#include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
+#include "aruwsrc/control/cycle_state_mode_controller.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
@@ -93,12 +96,14 @@
 #include "aruwsrc/control/governor/yellow_carded_governor.hpp"
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_lut_autotune_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_stos_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
@@ -139,34 +144,8 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace hero_control
 {
-class HeroTurretDisabledCommand : public tap::control::Command
-{
-public:
-    explicit HeroTurretDisabledCommand(TurretSubsystem* turretSubsystem)
-        : turretSubsystem(turretSubsystem)
-    {
-        addSubsystemRequirement(turretSubsystem);
-    }
-
-    const char* getName() const override { return "hero turret disabled"; }
-
-    void initialize() override { zeroTurret(); }
-
-    void execute() override { zeroTurret(); }
-
-    bool isFinished() const override { return false; }
-
-    void end(bool) override { zeroTurret(); }
-
-private:
-    TurretSubsystem* turretSubsystem;
-
-    void zeroTurret()
-    {
-        turretSubsystem->yawMotor.setMotorOutput(0);
-        turretSubsystem->pitchMotor.setMotorOutput(0);
-    }
-};
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
@@ -275,7 +254,7 @@ VelocityAgitatorSubsystem kickerAgitator(
     constants::KICKER_PID_CONFIG,
     constants::KICKER_AGITATOR_CONFIG);
 
-VelocityAgitatorSubsystem carsonator(
+VelocityAgitatorSubsystem waterwheelAgitator(
     drivers(),
     constants::WATERWHEEL_PID_CONFIG,
     constants::WATERWHEEL_AGITATOR_CONFIG);
@@ -312,27 +291,29 @@ tap::encoder::CanEncoder yawCanEncoder(
     YAW_ENCODER_ID,
     YAW_ENCODER_CAN_BUS,
     false,
-    YAW_ENCODER_RATIO,
-    YAW_ENCODER_HOME_POSITION);
+    YAW_ENCODER_RATIO);
 
 aruwsrc::hero::HeroTurretEncoderSubsystem heroTurretEncoders(
     drivers(),
     yawLampreyCanEncoder,
     yawCanEncoder,
     yawMotor.getEncoder(),
-    -modm::toRadian(110.0f));
+    YAW_LAMPREY_ENCODER_HOME_POSITION);
 
-aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(heroTurretEncoders, 2.44f);
+aruwsrc::hero::BinnedAlignmentCommand binnedAlignmentCommand(
+    heroTurretEncoders,
+    BINNED_ALIGNMENT_OFFSET);
 
-Trigger yawOnlineTrigger = Trigger(drivers(), []() -> bool {
-                               return heroTurretEncoders.isOnline();
-                           }).onTrue(&binnedAlignmentCommand);
+Trigger yawOnlineTrigger =
+    Trigger(drivers(), []() -> bool {
+        return heroTurretEncoders.isOnline() && !remoteSafeDisconnectFunction();
+    }).whileTrue(&binnedAlignmentCommand);
 
 aruwsrc::hero::HeroPitchLinkage pitchTurretMotor(
     &pitchMotor,
     PITCH_MOTOR_CONFIG,
     PITCH_LINKAGE_CONFIG);
-// aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
+
 aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
 
 HeroTurretSubsystem turret(drivers(), pitchTurretMotor, yawTurretMotor, &getTurretMCBCanComm());
@@ -367,7 +348,10 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
+    drivers(),
+    drivers()->capacitorBank,
+    voltageCurrentSensor);
 
 /* define commands ----------------------------------------------------------*/
 
@@ -437,17 +421,41 @@ algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuContr
     turret.yawMotor,
     world_rel_chassis_imu::YAW_PID_CONFIG);
 
+aruwsrc::control::autotune::TurretAutotuneCommand<
+    9,
+    aruwsrc::control::turret::algorithms::Axis::PITCH>::TurretCalibrationConfig
+    turretCalibrationConfig{
+        .turret = &turret,
+        .motor = &turret.pitchMotor,
+        .controller = &chassisFramePitchTurretController,
+        .isMotorInverted = pitchMotor.isMotorInverted(),
+        .turretMass = 1.0f,          // TODO: measure this
+        .torqueToDesiredOut = 1.0f,  // TODO: tune this
+    };
 aruwsrc::control::autotune::GravityAutotuneCommand<9, algorithms::Axis::PITCH>
-    gravityAutotuneCommand(
+    gravityAutotuneCommand(drivers(), turretCalibrationConfig);
+
+aruwsrc::control::autotune::TurretAutotuneCommand<
+    1,
+    aruwsrc::control::turret::algorithms::Axis::YAW>::TurretCalibrationConfig
+    turretCalibrationConfigFreq{
+        .turret = &turret,
+        .motor = &turret.yawMotor,
+        .controller = &chassisFrameYawTurretController,
+        .isMotorInverted = yawMotor.isMotorInverted(),
+        .turretMass = 1.0f,          // TODO: measure this
+        .torqueToDesiredOut = 1.0f,  // TODO: tune this
+    };
+
+aruwsrc::control::autotune::FreqSweepAutotuneCommand<
+    aruwsrc::control::turret::algorithms::Axis::YAW>
+    freqSweep(
         drivers(),
-        {
-            .turret = &turret,
-            .motor = &turret.pitchMotor,
-            .controller = &chassisFramePitchTurretController,
-            .isMotorInverted = pitchMotor.isMotorInverted(),
-            .turretMass = 1.0f,          // TODO: measure this
-            .torqueToDesiredOut = 1.0f,  // TODO: tune this
-        });
+        turretCalibrationConfigFreq,
+        {2.0f, 250.0f, 1.0001f, 10'000.0f},
+        &getTurretMCBCanComm(),
+        {&chassisFramePitchTurretController},
+        &chassis);
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
     world_rel_turret_imu::PITCH_POS_PID_CONFIG);
@@ -472,13 +480,14 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPidCv(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
+algorithms::WorldFrameTurretImuSTOSTurretController<algorithms::Axis::YAW>
     worldFrameYawTurretImuControllerCv(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
         turret.yawMotor,
+        STOS_CONSTANTS,
         worldFrameYawTurretImuPosPidCv,
-        worldFrameYawTurretImuVelPidCv);
+        TURRET_FEEDFORWARD_CONSTANTS);
 
 algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
     worldFramePitchTurretImuControllerCv(
@@ -502,8 +511,6 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &worldFramePitchTurretImuController,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
-
-HeroTurretDisabledCommand turretDisabledCommand(&turret);
 
 cv::TurretCVCommand turretCVCommand(
     &drivers()->visionCoprocessor,
@@ -565,11 +572,13 @@ GovernorLimitedCommand<1> turretUTurnCommandLimited(
 
 // hero agitator commands
 
-LimitSwitchDepressedGovernor limitSwitchDepressedGovernor(
-    getTurretMCBCanComm(),
-    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_DEPRESSED);
-LimitSwitchDepressedGovernor limitSwitchNotDepressedGovernor(
-    getTurretMCBCanComm(),
+LimitSwitchDepressedGovernor kickerWheelLimitSwitchNotDepressedGovernor(
+    getTurretMCBCanComm().getKickerWheelLimitSwitch(),
+    LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
+
+ChoppedHeroLimitSwitchDepressedGovernor bothLimitSwitchesNotDepressedGovernor(
+    {&getTurretMCBCanComm().getKickerWheelLimitSwitch(),
+     &getTurretMCBCanComm().getAgitatorLoadingLimitSwitch()},
     LimitSwitchDepressedGovernor::LimitSwitchGovernorBehavior::READY_WHEN_RELEASED);
 
 // rotates agitator if friction wheels are spinning fast
@@ -577,20 +586,24 @@ FrictionWheelsOnGovernor frictionWheelsOnGovernor(frictionWheelSubsystem);
 
 namespace waterwheel
 {
-MoveIntegralCommand rotateWaterwheel(carsonator, constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
+MoveIntegralCommand rotateWaterwheel(
+    waterwheelAgitator,
+    constants::WATERWHEEL_AGITATOR_ROTATE_CONFIG);
 
-UnjamIntegralCommand unjamWaterwheel(carsonator, constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
+UnjamIntegralCommand unjamWaterwheel(
+    waterwheelAgitator,
+    constants::WATERWHEEL_AGITATOR_UNJAM_CONFIG);
 
 MoveUnjamIntegralComprisedCommand rotateAndUnjamWaterwheel(
     *drivers(),
-    carsonator,
+    waterwheelAgitator,
     rotateWaterwheel,
     unjamWaterwheel);
 
 GovernorLimitedCommand<2> feedWaterwheelWhenBallNotReady(
-    {&carsonator},
+    {&waterwheelAgitator},
     rotateAndUnjamWaterwheel,
-    {&frictionWheelsOnGovernor, &limitSwitchNotDepressedGovernor});
+    {&frictionWheelsOnGovernor, &bothLimitSwitchesNotDepressedGovernor});
 }  // namespace waterwheel
 
 namespace kicker
@@ -600,7 +613,7 @@ MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_R
 GovernorLimitedCommand<2> feedKickerWhenBallNotReady(
     {&kickerAgitator},
     loadKicker,
-    {&limitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
+    {&kickerWheelLimitSwitchNotDepressedGovernor, &frictionWheelsOnGovernor});
 
 // rotates kickerAgitator when aiming at target and within heat limit
 HeatLimitGovernor heatLimitGovernor(
@@ -624,6 +637,23 @@ GovernorLimitedCommand<3> launchKickerHeatAndCVLimited(
     {&heatLimitGovernor, &frictionWheelsOnGovernor, &cvOnTargetGovernor});
 }  // namespace kicker
 
+tap::control::WeakConcurrentCommand<2> launcherLutAutotuneFireCommand(
+    {&waterwheel::rotateAndUnjamWaterwheel, &kicker::launchKicker},
+    "Hero launcher LUT autotune fire");
+
+aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<16> launcherLutAutotuneCommand(
+    drivers(),
+    {
+        .frictionWheels = &frictionWheelSubsystem,
+        .manualFireCommand = &launcherLutAutotuneFireCommand,
+        .barrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
+        .numFrictionWheels = 4,
+        .startRpm = 2000.0f,
+        .endRpm = 8000.0f,
+        .rpmStep = 500.0f,
+        .minShotsPerStep = 3,
+    });
+
 // @todo remove
 aruwsrc::communication::serial::SentryResponseHandler sentryResponseHandler(*drivers());
 
@@ -633,10 +663,6 @@ aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
     drivers(),
     capBankSubsystem,
     aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(
-    drivers(),
-    capBankSubsystem,
-    aruwsrc::communication::can::cap_bank::SprintMode::HALF_SPRINT);
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -662,7 +688,7 @@ DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTra
 
 TextHudIndicators textHudIndicators(
     *drivers(),
-    carsonator,
+    waterwheelAgitator,
     imuCalibrateCommand,
     {&beybladeCommand},
     refSerialTransmitter);
@@ -716,7 +742,7 @@ auto leftSwitchUp = std::make_unique<HoldCommandMapping>(
     drivers(),
     std::vector<Command*>{
         &chassisDriveCommand,
-        // &turretCVCommand,
+        &turretCVCommand,
     },
     &leftUpRms);
 
@@ -803,15 +829,6 @@ auto shiftPressed = std::make_unique<HoldCommandMapping>(
     std::vector<Command*>{&capBankSprintCommand},
     &shiftRms);
 
-auto ctrlRms = RemoteMapState({Remote::Key::CTRL});
-auto ctrlPressed = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&capBankHalfSprintCommand},
-    &ctrlRms);
-
-// Safe disconnect function
-aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
-
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -821,7 +838,7 @@ void initializeSubsystems()
     odometrySubsystem.initialize();
     clientDisplay.initialize();
     kickerAgitator.initialize();
-    carsonator.initialize();
+    waterwheelAgitator.initialize();
     turret.initialize();
     buzzer.initialize();
     transformSubsystem.initialize();
@@ -837,7 +854,7 @@ void registerHeroSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&kickerAgitator);
-    drivers->commandScheduler.registerSubsystem(&carsonator);
+    drivers->commandScheduler.registerSubsystem(&waterwheelAgitator);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
@@ -852,7 +869,7 @@ void setDefaultHeroCommands()
     frictionWheelSubsystem.setDefaultCommand(&stopFrictionWheels);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     // turret.setDefaultCommand(&turretDisabledCommand);
-    carsonator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
+    waterwheelAgitator.setDefaultCommand(&waterwheel::feedWaterwheelWhenBallNotReady);
     kickerAgitator.setDefaultCommand(&kicker::feedKickerWhenBallNotReady);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
@@ -880,7 +897,7 @@ void registerHeroIoMappings(Drivers* drivers)
     drivers->commandMapper.addMap(std::move(leftMousePressedBNotPressedVNotPressed));
     drivers->commandMapper.addMap(std::move(leftMousePressedBPressed));
     drivers->commandMapper.addMap(std::move(leftMousePressedVPressed));
-    // drivers->commandMapper.addMap(std::move(rightMousePressed));
+    drivers->commandMapper.addMap(std::move(rightMousePressed));
     drivers->commandMapper.addMap(std::move(leftSwitchDown));
     drivers->commandMapper.addMap(std::move(leftSwitchUp));
     drivers->commandMapper.addMap(std::move(fToggled));
@@ -890,7 +907,6 @@ void registerHeroIoMappings(Drivers* drivers)
     drivers->commandMapper.addMap(std::move(rPressed));
     drivers->commandMapper.addMap(std::move(cShiftPressed));
     drivers->commandMapper.addMap(std::move(shiftPressed));
-    drivers->commandMapper.addMap(std::move(ctrlPressed));
 }
 }  // namespace hero_control
 
@@ -917,7 +933,9 @@ aruwsrc::control::imu::ImuCalibrateCommand* getImuCalibrateCommand()
 std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
 {
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
-        &hero_control::gravityAutotuneCommand};
+        &hero_control::gravityAutotuneCommand,
+        &hero_control::launcherLutAutotuneCommand,
+        &hero_control::freqSweep};
     return commands;
 }
 #endif
