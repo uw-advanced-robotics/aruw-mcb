@@ -34,22 +34,25 @@ CapacitorSelectingSensor::CapacitorSelectingSensor(
 
 float CapacitorSelectingSensor::getCurrentMa() const
 {
-    if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline())
-    {
-        return currentSensor->getCurrentMa();
-    }
+    // Always return the real battery bus current from 0x1C5 so the Taproot
+    // PowerLimiter tracks the same signal the referee monitors (P_battery).
+    // Previously this returned cap rail current when the cap bank was online,
+    // which caused the limiter to track P_cap instead of P_battery — a
+    // different quantity that fights the cap bank's own power regulation.
 
-    return this->capacitorBank->getCurrent() * 1000;
+    return currentSensor->getCurrentMa();
 }
 
 float CapacitorSelectingSensor::getVoltageMv() const
 {
+    // Return the real battery bus voltage from 0x1C5 (same reasoning
+    // as getCurrentMa — the Taproot PowerLimiter must see P_battery)
+    // if capbank is online; otherwise, return 0.
     if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline())
     {
-        return this->voltageSensor->getVoltageMv();
+        return 0;
     }
-
-    return aruwsrc::communication::can::cap_bank::CAPACITOR_BANK_OUTPUT_VOLTAGE * 1000;
+    return this->voltageSensor->getVoltageMv();
 }
 
 CapBankPowerLimiter::CapBankPowerLimiter(
@@ -82,41 +85,21 @@ float CapBankPowerLimiter::getPowerLimitRatio()
         return 0;
     }
 
-    float fallback = this->fallback.getPowerLimitRatio();
-    if (this->capacitorBank == nullptr || !this->capacitorBank->isOnline() ||
-        this->capacitorBank->isDisabled() ||
-        this->capacitorBank->getState() == communication::can::cap_bank::State::SAFE)
-    {
-        return fallback;
-    }
-
-    float setpoint = communication::can::cap_bank::CAPACITOR_BANK_EFFICIENCY *
-                     drivers->refSerial.getRobotData().chassis.powerConsumptionLimit /
-                     communication::can::cap_bank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
-
-    if (this->capacitorBank->isSprinting())
-    {
-        setpoint = this->capacitorBank->getMaximumOutputCurrent();
-    }
-
-    float measured = this->capacitorBank->getCurrent();
-
-    float error = setpoint - measured;
-
-    this->currentIntegrator += K_I * error;
-
-    float lowVoltageRamp = std::clamp(
-        (this->capacitorBank->getVoltage() -
-         communication::can::cap_bank::CAPACITOR_BANK_MIN_VOLTAGE) /
-            VOLTAGE_RAMPDOWN_RANGE,
-        0.0f,
-        1.0f);
-
-    this->currentIntegrator = std::clamp(this->currentIntegrator, -100.0f, lowVoltageRamp);
-
-    float controlFractionOutput = std::clamp(this->currentIntegrator + (error * K_P), 0.0f, 1.0f);
-
-    return controlFractionOutput * lowVoltageRamp;
+    // Delegate to the Taproot PowerLimiter, which monitors real battery draw
+    // from the 0x1C5 sensor and tracks the referee's energy buffer (Z).
+    //
+    // The cap bank firmware handles power regulation internally — it keeps
+    // P_battery under the ref limit via its own inner PID. At steady state,
+    // P_battery < P_limit, so the fallback returns 1.0 (no throttle).
+    // During transients (sprint start, cap bank ramp-up) P_battery may
+    // briefly exceed P_limit; the fallback sees the buffer drain and
+    // throttles motors to prevent a referee penalty — exactly the safety
+    // net we need, without fighting the cap bank's controller.
+    //
+    // The previous cap-current PI loop was removed because it tracked cap
+    // rail current (P_cap) instead of battery draw (P_battery), causing it
+    // to fight the cap bank's inner PID at steady state.
+    return this->fallback.getPowerLimitRatio();
 }
 
 }  // namespace aruwsrc::control::chassis

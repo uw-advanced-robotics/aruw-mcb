@@ -37,7 +37,11 @@ void SentryCapBankCommand::initialize() { capBankSubsystem.enableCapacitors(); }
 
 void SentryCapBankCommand::execute() {}
 
-void SentryCapBankCommand::end(bool) { capBankSubsystem.disableCapacitors(); }
+void SentryCapBankCommand::end(bool)
+{
+    capBankSubsystem.changeSprintMode(communication::can::cap_bank::SprintMode::NO_SPRINT);
+    capBankSubsystem.disableCapacitors();
+}
 
 bool SentryCapBankCommand::isFinished() const { return false; }
 

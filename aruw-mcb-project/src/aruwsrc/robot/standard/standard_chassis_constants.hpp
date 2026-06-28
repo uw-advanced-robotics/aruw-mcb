@@ -34,7 +34,8 @@
 
 namespace aruwsrc::control::chassis
 {
-static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
+static constexpr float CAP_BANK_CAPACITANCE = 6.66f;
+static constexpr int CAP_BANK_MAX_AVAILABLE_POWER = 50;  // watts
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */

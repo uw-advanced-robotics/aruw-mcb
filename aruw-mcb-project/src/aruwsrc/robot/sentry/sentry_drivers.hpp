@@ -87,8 +87,9 @@ public:
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(
               this,
-              tap::can::CanBus::CAN_BUS1,
-              aruwsrc::control::chassis::CAP_BANK_CAPACITANCE),
+              tap::can::CanBus::CAN_BUS2,
+              aruwsrc::control::chassis::CAP_BANK_CAPACITANCE,
+              aruwsrc::control::chassis::CAP_BANK_MAX_AVAILABLE_POWER),
           turretMajorPrimaryImu(
               aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
                   Board::SpiNss>()),

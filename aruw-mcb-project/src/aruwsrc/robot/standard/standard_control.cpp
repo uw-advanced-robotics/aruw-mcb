@@ -317,7 +317,10 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
+    drivers(),
+    drivers()->capacitorBank,
+    voltageCurrentSensor);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
@@ -661,10 +664,6 @@ aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
     drivers(),
     capBankSubsystem,
     aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(
-    drivers(),
-    capBankSubsystem,
-    aruwsrc::communication::can::cap_bank::SprintMode::HALF_SPRINT);
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -830,9 +829,6 @@ Trigger cShiftPressed = (TriggerHelpers::button(drivers(), Remote::Key::C) &&
 
 Trigger shiftPressed =
     TriggerHelpers::button(drivers(), Remote::Key::SHIFT).whileTrue(&capBankSprintCommand);
-
-Trigger ctrlPressed =
-    TriggerHelpers::button(drivers(), Remote::Key::CTRL).whileTrue(&capBankHalfSprintCommand);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
