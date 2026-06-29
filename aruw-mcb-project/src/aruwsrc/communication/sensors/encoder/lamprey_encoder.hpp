@@ -80,7 +80,7 @@ public:
 
     void initialize() override
     {
-        CanEncoder::CanEncoder::initialize();
+        CanEncoder::initialize();
         powerOnTimeout.restart(500);
     }
 
