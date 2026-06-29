@@ -181,15 +181,15 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .kp = 35000.0f,
+    .ki = 50000.0f,
+    .kd = 4000.0f,
+    .maxICumulative = 1500.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.5f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 300.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.015f,
 };
