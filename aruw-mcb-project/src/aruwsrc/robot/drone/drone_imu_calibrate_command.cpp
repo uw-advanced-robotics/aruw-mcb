@@ -25,6 +25,8 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
+
 using tap::algorithms::Angle;
 
 namespace aruwsrc::drone
@@ -59,7 +61,6 @@ void DroneImuCalibrateCommand::initialize()
     pitchPid.reset();
 
     turret.yawMotor.setChassisFrameSetpoint(Angle(turret.yawMotor.getConfig().minAngle));
-    turret.pitchMotor.setChassisFrameSetpoint(Angle(turret.pitchMotor.getConfig().maxAngle));
 
     calibrationTimer.stop();
     calibrationLongTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
@@ -156,14 +157,13 @@ bool DroneImuCalibrateCommand::isFinished() const
 void DroneImuCalibrateCommand::runTurretLock(float dt)
 {
     turret.yawMotor.setChassisFrameSetpoint(Angle(turret.yawMotor.getConfig().minAngle));
-    turret.pitchMotor.setChassisFrameSetpoint(Angle(turret.pitchMotor.getConfig().maxAngle));
 
     const float yawOutput = yawPid.runController(
         turret.yawMotor.getValidChassisMeasurementError(),
         turret.yawMotor.getChassisFrameVelocity(),
         dt);
     const float pitchOutput = pitchPid.runController(
-        turret.pitchMotor.getValidChassisMeasurementError(),
+        getPitchCalibrationError(),
         turret.pitchMotor.getChassisFrameVelocity(),
         dt);
 
@@ -177,6 +177,12 @@ bool DroneImuCalibrateCommand::systemsOnline() const
            drivers.mpu6500.isOnline();
 }
 
+float DroneImuCalibrateCommand::getPitchCalibrationError() const
+{
+    return turret.pitchMotor.getChassisFrameMeasuredAngle().minDifference(
+        Angle(aruwsrc::control::turret::PITCH_IMU_CALIBRATION_ANGLE));
+}
+
 bool DroneImuCalibrateCommand::turretLockedAtCalibrationPosition() const
 {
     return tap::algorithms::compareFloatClose(
@@ -187,7 +193,7 @@ bool DroneImuCalibrateCommand::turretLockedAtCalibrationPosition() const
                0.0f,
                turret.pitchMotor.getChassisFrameVelocity(),
                VELOCITY_ZERO_THRESHOLD) &&
-           fabsf(turret.pitchMotor.getValidChassisMeasurementError()) < POSITION_LOCK_THRESHOLD;
+           fabsf(getPitchCalibrationError()) < POSITION_LOCK_THRESHOLD;
 }
 
 bool DroneImuCalibrateCommand::imusCalibrated() const

@@ -34,7 +34,8 @@
 
 namespace aruwsrc::control::chassis
 {
-static constexpr float CAP_BANK_CAPACITANCE = 4.358f;
+static constexpr float CAP_BANK_CAPACITANCE = 6.66f;
+static constexpr int CAP_BANK_MAX_AVAILABLE_POWER = 50;  // watts
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
  */
@@ -111,6 +112,22 @@ inline constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
 #elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr float WHEEL_RADIUS = 0.0762;             // 4in wheel dia
 static constexpr float WHEELBASE_RADIUS = 185 / 1000.0f;  // m
+inline constexpr bool WHEELBASE_MOTOR_INVERTED = true;
+
+inline constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {
+    .kp = 300.0f,
+    .ki = 14.0f,
+    .kd = 0.1f,
+    .maxICumulative = 2000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 0.5f,
+    .smoothDeadzone = true,
+    .antiSaturation = true,
+};
+
+#elif defined(TARGET_STANDARD_DEIMOS)
+static constexpr float WHEEL_RADIUS = 0.0762;      // 4in wheel dia
+static constexpr float WHEELBASE_RADIUS = 0.185f;  // m
 inline constexpr bool WHEELBASE_MOTOR_INVERTED = true;
 
 inline constexpr tap::algorithms::SmoothPidConfig WHEEL_VELOCITY_PID_CONFIG = {

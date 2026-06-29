@@ -85,8 +85,9 @@ BeybladeCommandMock::~BeybladeCommandMock() {}
 CapacitorBankMock::CapacitorBankMock(
     tap::Drivers* drivers,
     tap::can::CanBus canBus,
-    const float capacitance)
-    : CapacitorBank(drivers, canBus, capacitance)
+    const float capacitance,
+    const int maxAvailablePower)
+    : CapacitorBank(drivers, canBus, capacitance, maxAvailablePower)
 {
 }
 CapacitorBankMock::~CapacitorBankMock() {}

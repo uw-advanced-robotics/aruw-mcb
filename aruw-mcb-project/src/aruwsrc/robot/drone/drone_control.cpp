@@ -41,6 +41,7 @@
 #include "aruwsrc/control/governor/imu_not_calibrated_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
+#include "aruwsrc/control/motor/damiao_motor.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -77,15 +78,13 @@ using Compose = CommandCompositionHelper;
 /* define subsystems --------------------------------------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
-tap::motor::DjiMotor pitchMotor(
+aruwsrc::control::motor::DamiaoMotor pitchMotor(
     drivers(),
-    PITCH_MOTOR_ID,
+    aruwsrc::control::motor::DamiaoMotorId::DAMIAO_MOTOR1,
     CAN_BUS_PITCH_MOTOR,
     true,
     "Pitch Turret",
-    true,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020,
-    PITCH_MOTOR_CONFIG.startEncoderValue);
+    0x011);
 
 tap::encoder::CanEncoder yawEncoder(
     drivers(),
@@ -264,9 +263,9 @@ Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
         .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
 
-Trigger thumbwheelUp =
-    TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
-        .onTrue(&droneImuCalibrateCommand);
+// Trigger thumbwheelUp =
+//     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
+//         .onTrue(&droneImuCalibrateCommand);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -292,15 +291,15 @@ void registerDroneSubsystems(Drivers* drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultDroneCommands(Drivers*)
 {
-    // buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
+    buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
     turret.setDefaultCommand(&turretUserVectorCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands(Drivers* drivers)
+void startDroneCommands(Drivers *)
 {
-    drivers->commandScheduler.addCommand(&droneImuCalibrateCommand);
+    // drivers->commandScheduler.addCommand(&droneImuCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/

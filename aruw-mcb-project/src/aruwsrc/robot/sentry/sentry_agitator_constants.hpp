@@ -21,6 +21,7 @@
 #define SENTRY_AGITATOR_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/gpio/pwm.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
@@ -56,6 +57,12 @@ static constexpr float AIDEN_CLEMJAM_PROJECTILE_LAUNCH_RPM_DROP_THRESHOLD = 1000
 // Single turret minor agitator for sentry 2026
 namespace turretWidow
 {
+static constexpr tap::gpio::Pwm::Pin AGITATOR_FAN_PWM_PIN = tap::gpio::Pwm::Pin::X;
+static constexpr tap::gpio::Pwm::Timer AGITATOR_FAN_PWM_TIMER = tap::gpio::Pwm::Timer::TIMER8;
+static constexpr uint32_t AGITATOR_FAN_PWM_FREQUENCY_HZ = 25'000;
+static constexpr float AGITATOR_FAN_ON_DUTY = 1.0f;
+static constexpr float AGITATOR_FAN_OFF_DUTY = 0.0f;
+
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
     .gearRatio = 1.0f / 36.0f,
     .agitatorMotorId = tap::motor::MOTOR4,

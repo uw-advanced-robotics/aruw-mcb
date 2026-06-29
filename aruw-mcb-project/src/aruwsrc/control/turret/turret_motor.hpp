@@ -49,8 +49,14 @@ public:
     /**
      * Construct a turret motor with some particular hardware motor interface and a motor
      * configuration struct.
+     * @param minLimitFunc Optional function that returns the minimum allowed angle in radians.
+     * @param maxLimitFunc Optional function that returns the maximum allowed angle in radians.
      */
-    TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig);
+    TurretMotor(
+        tap::motor::MotorInterface* motor,
+        const TurretMotorConfig& motorConfig,
+        float (*minLimitFunc)() = nullptr,
+        float (*maxLimitFunc)() = nullptr);
 
     mockable inline void initialize() { motor->initialize(); }
 
@@ -73,7 +79,7 @@ public:
      * different commands).
      */
     mockable inline void attachTurretController(
-        const algorithms::TurretControllerInterface *turretController)
+        const algorithms::TurretControllerInterface* turretController)
     {
         this->turretController = turretController;
     }
@@ -99,7 +105,7 @@ public:
 
     /// @return turret motor angle measurement relative to the chassis, in radians, wrapped between
     /// [0, 2 PI)
-    mockable inline const tap::algorithms::WrappedFloat &getChassisFrameMeasuredAngle() const
+    mockable inline const tap::algorithms::WrappedFloat& getChassisFrameMeasuredAngle() const
     {
         return chassisFrameMeasuredAngle;
     }
@@ -114,13 +120,13 @@ public:
     }
 
     /// @return turret controller controlling this motor (as specified by `attachTurretController`)
-    mockable const algorithms::TurretControllerInterface *getTurretController() const
+    mockable const algorithms::TurretControllerInterface* getTurretController() const
     {
         return turretController;
     }
 
     /// @return The turret motor config struct associated with this motor
-    mockable const TurretMotorConfig &getConfig() const { return config; }
+    mockable const TurretMotorConfig& getConfig() const { return config; }
 
     /**
      * @return Valid minimum error between the chassis relative setpoint and measurement, in
@@ -159,14 +165,18 @@ public:
 
     int16_t getMotorOutput() const { return motor->getOutputDesired(); }
 
+    float getMinLimit() const { return minLimitFunc != nullptr ? minLimitFunc() : config.minAngle; }
+
+    float getMaxLimit() const { return maxLimitFunc != nullptr ? maxLimitFunc() : config.maxAngle; }
+
 protected:
     const TurretMotorConfig config;
 
     /// Low-level motor object that this object interacts with
-    tap::motor::MotorInterface *motor;
+    tap::motor::MotorInterface* motor;
 
     /// Associated turret controller interface that is being used by a command to control this motor
-    const algorithms::TurretControllerInterface *turretController = nullptr;
+    const algorithms::TurretControllerInterface* turretController = nullptr;
 
     /// Unwrapped chassis frame setpoint specified by the user and limited to `[config.minAngle,
     /// config.maxAngle]`. Units radians.
@@ -174,6 +184,10 @@ protected:
 
     /// Wrapped chassis frame measured angle between [0, 2*PI). Units radians.
     tap::algorithms::WrappedFloat chassisFrameMeasuredAngle;
+
+private:
+    float (*minLimitFunc)() = nullptr;
+    float (*maxLimitFunc)() = nullptr;
 };
 }  // namespace aruwsrc::control::turret
 

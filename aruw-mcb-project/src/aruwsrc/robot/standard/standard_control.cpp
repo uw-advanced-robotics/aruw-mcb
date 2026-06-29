@@ -317,7 +317,10 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &drivers()->visionCoprocessor,
     &ballisticsSolver);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
+    drivers(),
+    drivers()->capacitorBank,
+    voltageCurrentSensor);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
@@ -502,7 +505,9 @@ autotune::GravityAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH> gr
      TURRET_WEIGHT_KG,
      TORQUE_TO_DESIRED_OUT},
     &turretSpringCompensation,
-    &chassis);
+    &chassis,
+        {},
+        modm::toRadian(0.003));
 
 autotune::SpringAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH> springAutotuneCommand(
     drivers(),
@@ -517,7 +522,8 @@ autotune::SpringAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH> spr
     &chassis,
     {},
     &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand);
+    &imuCalibrateFailBuzzCommand,
+        modm::toRadian(0.003));
 
 autotune::SecondOrderAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH>
     secondOrderAutotuneCommand(
@@ -655,10 +661,6 @@ aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
     drivers(),
     capBankSubsystem,
     aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(
-    drivers(),
-    capBankSubsystem,
-    aruwsrc::communication::can::cap_bank::SprintMode::HALF_SPRINT);
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -825,9 +827,6 @@ Trigger cShiftPressed = (TriggerHelpers::button(drivers(), Remote::Key::C) &&
 Trigger shiftPressed =
     TriggerHelpers::button(drivers(), Remote::Key::SHIFT).whileTrue(&capBankSprintCommand);
 
-Trigger ctrlPressed =
-    TriggerHelpers::button(drivers(), Remote::Key::CTRL).whileTrue(&capBankHalfSprintCommand);
-
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -882,7 +881,7 @@ void startStandardCommands(Drivers* drivers)
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
-#ifdef TARGET_STANDARD_PHOBOS
+#if defined(TARGET_STANDARD_PHOBOS) || defined(TARGET_STANDARD_DEIMOS)
     getTurretMCBCanComm().setImuMountingTransforms(
         aruwsrc::control::turret::TURRET_MCB_BMI088_MOUNTING_TRANSFORM,
         aruwsrc::control::turret::TURRET_MCB_ISM330_MOUNTING_TRANSFORM);
