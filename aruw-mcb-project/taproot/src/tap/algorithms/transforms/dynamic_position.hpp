@@ -97,8 +97,8 @@ public:
 
     DynamicPosition projectForward(float dt) const
     {
-        if (compareFloatClose(velocity.magnitudeSq(), 0, 1e-4) &&
-            compareFloatClose(acceleration.magnitudeSq(), 0, 1e-4))
+        if (compareFloatClose(velocity.magnitudeSq(), 0, 1e-5) &&
+            compareFloatClose(acceleration.magnitudeSq(), 0, 1e-5))
         {
             return DynamicPosition(this->position, this->velocity, this->acceleration);
         }
