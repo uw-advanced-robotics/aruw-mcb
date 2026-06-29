@@ -20,6 +20,9 @@
 #ifndef THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 #define THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 
+#include <algorithm>
+#include <iterator>
+
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
@@ -92,15 +95,15 @@ public:
     void update();
 
     void overrideOdometryPosition(const float positionX, const float positionY);
+    void overrideOdometryOrientation(float yaw);
 
 protected:
     enum class OdomStateX
     {
         POS_X = 0,
         VEL_X,
-        ACC_X,
         NUM_STATES,
-    }
+    };
 
     enum class XInput
     {
@@ -112,9 +115,8 @@ protected:
     {
         POS_Y = 0,
         VEL_Y,
-        ACC_Y,
         NUM_STATES,
-    }
+    };
 
     enum class YInput
     {
@@ -127,7 +129,7 @@ protected:
         POS_ANG = 0,
         VEL_ANG,
         NUM_STATES,
-    }
+    };
 
     enum class AngInput
     {
@@ -135,9 +137,10 @@ protected:
         NUM_INPUTS,
     };
 
-    tap::algorithms::KalmanFilter<int(OdomStateX::NUM_STATES), int(XInput::NUM_INPUTS)> kf_x;
-    tap::algorithms::KalmanFilter<int(OdomStateY::NUM_STATES), int(YInput::NUM_INPUTS)> kf_y;
-    tap::algorithms::KalmanFilter<int(OdomStateAng::NUM_STATES), int(AngInput::NUM_INPUTS)> kf_ang;
+    using KF = tap::algorithms::KalmanFilter<int(OdomStateX::NUM_STATES), int(XInput::NUM_INPUTS)>;
+    KF kf_x;
+    KF kf_y;
+    KF kf_ang;
 
 private:
     static constexpr int X_STATES_SQUARED =
@@ -163,80 +166,55 @@ private:
     /// Assumed time difference between calls to `update`, in seconds
     static constexpr float DT = 0.002f;
 
+    static constexpr float DT2 = DT * DT;
+    static constexpr float DT3 = DT2 * DT;
+
     // clang-format off
-    static constexpr float LINEAR_A[X_STATES_SQUARED] = {
-        1, DT, 0.5 * DT * DT,
-        0, 1 , DT           ,
-        0, 0 , 1            ,
-    };
-    static constexpr float ANGULAR_A[ANG_STATES_SQUARED] = {
-        1, DT,
+    static constexpr float KF_A[X_STATES_SQUARED] = {
+        1, DT, 
         0, 1 ,
     };
 
-    static constexpr float LINEAR_C[X_STATES_SQUARED] = {
-        0, 1, 0,
-        0, 0, 1,
-        0, 0, 0,
-    }
-    static constexpr float ANGULAR_C[X_STATES_SQUARED] = {
-        0, 1, 0,
-        0, 0, 1,
-        0, 0, 1,
-    }
+    static constexpr float KF_C[ANG_INPUTS_MULT_STATES] = {
+        0, 1,
+    };
 
     static constexpr float X_KF_R[X_INPUTS_SQUARED] = {
-        7.49565672e-05, 0,
-        0, 7.35872941e-04,
-    }
+        1.67233E-07,
+    };
     static constexpr float Y_KF_R[Y_INPUTS_SQUARED] = {
-        7.81982345e-05, 0,
-        0, 5.69132363e-04,
-    }
+        7.96353E-07,
+    };
     static constexpr float ANG_KF_R[ANG_INPUTS_SQUARED] = {
-        5.69132363e-04, 0, 0,
-        0, 5.69132363e-04, 0,
-        0, 0, 5.69132363e-04,
-    }
+        2.00098E-05,
+    };
     /// @TODO: TUNE
+
+    static constexpr float JSD_X = 0.000871226;
+    static constexpr float JSD_Y = 0.0001227612;
+    static constexpr float JSD_THETA = 9.02143;
 
     static constexpr float X_KF_Q[X_STATES_SQUARED] = {
-        9.0120570108e-06f,  5.4281168875e-04f,  5.6797949319e-02f,  
-         5.4281168875e-04f,  1.9396555203e-01f,  1.8282498819e+01f, 
-         5.6797949319e-02f,  1.8282498819e+01f,  1.7345126240e+03f,
-    }
-
-    static constexpr float Y_KF_Q[X_STATES_SQUARED] = {
-        4.7600903828e-06f,  4.9474361167e-04f,  4.6590765854e-02f,
-        4.9474361167e-04f,  1.5265492535e-01f,  1.4482580576e+01f,
-        4.6590765854e-02f,  1.4482580576e+01f,  1.3770822857e+03f,
-    }
+        JSD_X * DT3 / 3.0f, JSD_X * DT2 / 2.0f,
+        JSD_X * DT2 / 2.0f, JSD_X * DT,
+    };
+    static constexpr float Y_KF_Q[Y_STATES_SQUARED] = {
+        JSD_Y * DT3 / 3.0f, JSD_Y * DT2 / 2.0f,
+        JSD_Y * DT2 / 2.0f, JSD_Y * DT,
+    };
     static constexpr float ANG_KF_Q[ANG_STATES_SQUARED] = {
-        2.276528e-15f, 2.276528e-12f,
-        2.276528e-12f, 2.276528e-09f,
-    }
+        JSD_THETA * DT3 / 3.0f, JSD_THETA * DT2 / 2.0f,
+        JSD_THETA * DT2 / 2.0f, JSD_THETA * DT,
+    };
     /// @TODO: TUNE
-    
-    static constexpr float KF_P0[STATES_SQUARED] = {
-        1E-2, 0   , 0   , 0   , 0   , 0   , 0   , 0   ,
-        0   , 1E-6, 0   , 0   , 0   , 0   , 0   , 0   ,
-        0   , 0   , 1E+3, 0   , 0   , 0   , 0   , 0   ,
-        0   , 0   , 0   , 1E-2, 0   , 0   , 0   , 0   ,
-        0   , 0   , 0   , 0   , 1E-2, 0   , 0   , 0   ,
-        0   , 0   , 0   , 0   , 0   , 1E-2, 0   , 0   ,
-        0   , 0   , 0   , 0   , 0   , 0   , 1E-2, 0   ,
-        0   , 0   , 0   , 0   , 0   , 0   , 0   , 1E-2,
-    }; 
 
     static constexpr float X_KF_P0[X_STATES_SQUARED] = {
-        1E-2, 0   , 0   , 
-        0   , 1E-6, 0   , 
-        0   , 0   , 1E+3,
+        1E-2, 0   ,
+        0   , 1E-6,
     };
     static constexpr float Y_KF_P0[Y_STATES_SQUARED] = {
-        1E-2, 0   , 0   ,
-        0   , 1E-2, 0   ,
-        0   , 0   , 1E-2,
+        1E-2, 0   , 
+        0   , 1E-2,
     };
     static constexpr float ANG_KF_P0[ANG_STATES_SQUARED] = {
         1E-2, 0   ,
@@ -251,16 +229,30 @@ private:
     const modm::Vector2f initPos;
     const float initYaw;
 
+    float perpendicularRaw;
+    float parallelOneRaw;
+    float parallelTwoRaw;
+    float odoOmega;
+    float correctedParallelOne;
+    float correctedParallelTwo;
+    float correctedPerpendicular;
+    float Vx;
+    float Vy;
+    float integrated_parallel;
+    float integrated_perpendicular;
+
     /// Chassis location in the world frame
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
+    float angular_velocity;
     // Chassis yaw orientation in world frame (radians)
     tap::algorithms::Angle chassisYaw;
 
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
 
+    tap::algorithms::Angle wrappedTheta = tap::algorithms::Angle(0.0f);
     tap::algorithms::Angle lastWrappedTheta = tap::algorithms::Angle(0.0f);
     tap::algorithms::Angle imuTheta = tap::algorithms::Angle(0.0f);
 
@@ -270,7 +262,7 @@ private:
     const float odomFrameToRobotFrame;
     void updateChassisStateFromKF();
 
-    float x[int(OdomState::NUM_STATES)];
+    float x[int(OdomStateX::NUM_STATES)];
 };
 }  // namespace aruwsrc::algorithms::odometry
 

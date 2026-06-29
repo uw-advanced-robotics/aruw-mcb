@@ -50,6 +50,10 @@ private:
     const tap::encoder::EncoderInterface* parallelWheelTwo;
     /// Perpendicular wheel is oriented such that it rolls on the line perpendicular to the chassis
     const tap::encoder::EncoderInterface* perpendicularWheel;
+
+    mutable float rawParallelOne;
+    mutable float rawParallelTwo;
+    mutable float rawPerpendicular;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

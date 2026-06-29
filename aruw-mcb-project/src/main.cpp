@@ -99,7 +99,7 @@ int main()
      *      robot loop we must access the singleton drivers to update
      *      IO states and run the scheduler.
      */
-    Drivers* drivers = DoNotUse_getDrivers();
+      Drivers* drivers = DoNotUse_getDrivers();
 
     Board::initialize();
     initializeIo(drivers);

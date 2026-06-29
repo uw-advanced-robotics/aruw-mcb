@@ -222,7 +222,7 @@ tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID2,
     tap::can::CanBus::CAN_BUS2,
-    true);
+    false);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
@@ -624,13 +624,13 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
     drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
-    drivers->commandScheduler.registerSubsystem(&engTurret);
+    // drivers->commandScheduler.registerSubsystem(&engTurret);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
@@ -639,9 +639,9 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
-    engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    // engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
     // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
-    chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
+    // chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
     extensionSubsystem.setDefaultCommand(&extensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);

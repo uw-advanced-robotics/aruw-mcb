@@ -79,7 +79,6 @@ void DJISerial::initialize()
 
 void DJISerial::updateSerial()
 {
-    round1++;
     switch (djiSerialRxState)
     {
         case SERIAL_HEADER_SEARCH:
@@ -121,8 +120,6 @@ void DJISerial::updateSerial()
                         return;
                     }
                 }
-
-                round2++;
 
                 if (newMessage.header.dataLength >= SERIAL_RX_BUFF_SIZE)
                 {
@@ -172,7 +169,6 @@ void DJISerial::updateSerial()
                     }
                 }
 
-                round3++;
                 mostRecentMessage = newMessage;
 
                 messageReceiveCallback(mostRecentMessage);
