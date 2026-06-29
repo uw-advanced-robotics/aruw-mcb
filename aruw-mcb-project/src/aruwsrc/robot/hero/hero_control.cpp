@@ -356,7 +356,10 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     &ballisticsSolver,
     0.5f);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
+    drivers(),
+    drivers()->capacitorBank,
+    voltageCurrentSensor);
 
 /* define commands ----------------------------------------------------------*/
 
@@ -675,10 +678,6 @@ aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
     drivers(),
     capBankSubsystem,
     aruwsrc::communication::can::cap_bank::SprintMode::SPRINT);
-aruwsrc::control::cap_bank::CapBankSprintCommand capBankHalfSprintCommand(
-    drivers(),
-    capBankSubsystem,
-    aruwsrc::communication::can::cap_bank::SprintMode::HALF_SPRINT);
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -846,12 +845,6 @@ auto shiftPressed = std::make_unique<HoldCommandMapping>(
     std::vector<Command*>{&capBankSprintCommand},
     &shiftRms);
 
-auto ctrlRms = RemoteMapState({Remote::Key::CTRL});
-auto ctrlPressed = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&capBankHalfSprintCommand},
-    &ctrlRms);
-
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -930,7 +923,6 @@ void registerHeroIoMappings(Drivers* drivers)
     drivers->commandMapper.addMap(std::move(rPressed));
     drivers->commandMapper.addMap(std::move(cShiftPressed));
     drivers->commandMapper.addMap(std::move(shiftPressed));
-    drivers->commandMapper.addMap(std::move(ctrlPressed));
 }
 }  // namespace hero_control
 

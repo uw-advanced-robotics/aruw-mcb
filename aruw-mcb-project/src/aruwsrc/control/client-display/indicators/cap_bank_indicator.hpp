@@ -103,6 +103,8 @@ private:
     Tx::GraphicCharacterMessage capBankTextGraphic;
 
     communication::can::cap_bank::State previousState;
+    /** Last drawn error-flag value; a flag change redraws the text even if state didn't move. */
+    bool previousError = false;
 };
 }  // namespace aruwsrc::control::client_display::indicators
 

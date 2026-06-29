@@ -106,9 +106,6 @@ float SentryControlOperatorInterface::getChassisXVelocity()
     float finalX =
         maxChassisSpeed * limitVal(chassisXInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
 
-    // Limit with sign
-    finalX = abs(finalX) > MAX_X_SPEED ? (finalX > 0 ? MAX_X_SPEED : -MAX_X_SPEED) : finalX;
-
     chassisXInputRamp.setTarget(finalX);
 
     applyAccelerationToRamp(
@@ -143,9 +140,6 @@ float SentryControlOperatorInterface::getChassisYVelocity()
 
     float finalY =
         maxChassisSpeed * limitVal(chassisYInput.getInterpolatedValue(currTime), -1.0f, 1.0f);
-
-    // Limit with sign
-    finalY = abs(finalY) > MAX_Y_SPEED ? (finalY > 0 ? MAX_Y_SPEED : -MAX_Y_SPEED) : finalY;
 
     chassisYInputRamp.setTarget(finalY);
 
