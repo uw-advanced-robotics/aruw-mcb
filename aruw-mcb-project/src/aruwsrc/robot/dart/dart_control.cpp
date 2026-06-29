@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "aruwsrc/control/joint/homing/homeable_subsystem_interface.hpp"
 #if defined(TARGET_DART)
 #include <memory>
 
@@ -24,6 +25,7 @@
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/remote_map_state.hpp"
+#include "tap/control/sequential_command.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
@@ -150,43 +152,35 @@ SequentialCommand<3> releaseDartAndReload(&servoOpen, &dartGrab, &rotateMagazine
 
 SequentialCommand<2> homeAll(&pullMotorHome, &yawHomeCommand);
 
-// Left Up + Right Up -> Servo Open
-HoldCommandMapping openServoMapping(
+// Left Up + Right Down -> Servo Open
+RemoteMapState openServoRemoteMapState =
+    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN);
+auto openServoMapping = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&servoOpen},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP));
+    std::vector<Command*>{&servoOpen},
+    &openServoRemoteMapState);
 
-// Left Up + Right Down -> Servo Close
-HoldCommandMapping closeServoMapping(
+// Left down + Right Down -> Servo Close
+RemoteMapState closeServoRemoteMapState =
+    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN);
+auto closeServoMapping = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&servoClose},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN));
-// HoldCommandMapping rightSwitchUp(
-//     drivers(),
-//     {&dartPullback},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP));
-
-// HoldCommandMapping rightSwitchDown(
-//     drivers(),
-//     {&dartRelease},
-//     RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN));
-
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&servoOpen},
-//     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+    std::vector<Command*>{&servoClose},
+    &closeServoRemoteMapState);
 
 // Left Mid + Right Up -> Home Pullback
-HoldCommandMapping homePullbackMapping(
+auto homePullbackRemoteMapState = RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP);
+auto homePullbackCommand = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&pullMotorHome},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+    std::vector<Command*>{&pullMotorHome},
+    &homePullbackRemoteMapState);
 
 // Left Mid + Right Down -> Pullback Dart
-HoldCommandMapping pullbackMapping(
+auto pullbackRemoteMapState = RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN);
+auto pullbackCommand = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&dartPullback},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
+    std::vector<Command*>{&dartPullback},
+    &pullbackRemoteMapState);
 
 auto rightMidLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
 auto rightMidLeftDown = std::make_unique<PressCommandMapping>(
@@ -195,10 +189,11 @@ auto rightMidLeftDown = std::make_unique<PressCommandMapping>(
     &rightMidLeftDownRms);
 
 // Left Down + Right Up -> Home Yaw
-HoldCommandMapping homeYawMapping(
+auto homeYawRemoteMapState = RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP);
+auto homeYawCommand = std::make_unique<HoldCommandMapping>(
     drivers(),
-    {&yawHomeCommand},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP));
+    std::vector<Command*>{&yawHomeCommand},
+    &homeYawRemoteMapState);
 
 void initializeSubsystems()
 {
@@ -230,14 +225,14 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandMapper.addMap(&openServoMapping);
-    drivers->commandMapper.addMap(&closeServoMapping);
-    drivers->commandMapper.addMap(&homePullbackMapping);
-    drivers->commandMapper.addMap(&pullbackMapping);
+    drivers->commandMapper.addMap(std::move(openServoMapping));
+    drivers->commandMapper.addMap(std::move(closeServoMapping));
+    // drivers->commandMapper.addMap(std::move(homePullbackCommand));
+    // drivers->commandMapper.addMap(std::move(pullbackCommand));
     //  TODO: uncomment when dart squad reassembles this, currently not attached and dont wanna risk
     //  robot damage
-    // drivers->commandMapper.addMap(&rightMidLeftDown);
-    drivers->commandMapper.addMap(&homeYawMapping);
+    // drivers->commandMapper.addMap(std::move(rightMidLeftDown));
+    drivers->commandMapper.addMap(std::move(homeYawCommand));
 }
 
 }  // namespace dart_control
