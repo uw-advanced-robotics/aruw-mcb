@@ -20,8 +20,7 @@
 #ifndef DRONE_TURRET_SUBSYSTEM_HPP_
 #define DRONE_TURRET_SUBSYSTEM_HPP_
 
-#include "aruwsrc/control/turret/turret_orientation_interface.hpp"
-#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
 namespace aruwsrc::control::turret::algorithms
 {
@@ -34,10 +33,9 @@ namespace aruwsrc::drone
 /**
  * Turret subsystem for the Drone.
  */
-class DroneTurretSubsystem final : public aruwsrc::control::turret::TurretSubsystem,
-                                   public aruwsrc::control::turret::TurretOrientationInterface
+class DroneTurretSubsystem final : public aruwsrc::control::turret::RobotTurretSubsystem
 {
-    using TurretSubsystem::TurretSubsystem;
+    using RobotTurretSubsystem::RobotTurretSubsystem;
     float getWorldYaw() const override;
     float getWorldPitch() const override;
     modm::Vector3f getTurretOffset() const override { return modm::Vector3f(0, 0, 0); };

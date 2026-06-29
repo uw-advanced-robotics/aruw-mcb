@@ -25,6 +25,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -115,6 +116,16 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams  // TODO tune
     TURRET_GRAVITY_CONFIG{.cgX = 20.0f, .cgZ = 16.5f, .gravityCompensatorMax = -5200.0f};
 
+// TODO
+static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_SPRING_CONFIG{
+    .turretPitchMountX = 0.0f,
+    .turretPitchMountZ = 0.0f,
+    .turretYawMountX = 0.0f,
+    .turretYawMountZ = 0.0f,
+    .springConstant = 0.0f,
+    .springFreeLength = 0.0f,
+};
+
 // static const tap::algorithms::transforms::Transform TURRET_IMU_MOUNTING_TRANSFORM(
 //     0.0f,
 //     0.0f,
@@ -188,6 +199,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = YAW_POS_PID_CONFIG;
+static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = PITCH_POS_PID_CONFIG;
 }  // namespace world_rel_turret_imu
 
 namespace chassis_rel

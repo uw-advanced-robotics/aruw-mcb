@@ -29,6 +29,7 @@
 
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/oled_display_mock.hpp"
+#include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 #else
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
@@ -50,28 +51,46 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
-          controlOperatorInterface(this)
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
-          ,
-          turretImu(),
+          controlOperatorInterface(this),
+          visionCoprocessor(this),
           rttTelemetry(this),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &rttTelemetry)
-#endif
+          turretImu(),
+          oledDisplay(
+              this,
+              &visionCoprocessor,
+              nullptr,
+              nullptr,
+              nullptr,
+              nullptr,
+              nullptr,
+              &rttTelemetry)
+#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
+    {
+        controlOperatorInterface.setTelemetry(&rttTelemetry);
+        visionCoprocessor.setTelemetry(&rttTelemetry);
+    }
+#else
     {
     }
+#endif
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+    testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
 #else
 public:
     DroneControlOperatorInterface controlOperatorInterface;
+    communication::serial::VisionCoprocessor visionCoprocessor;
 #endif
-    DroneIMU turretImu;
     communication::rtt::RttTelemetry rttTelemetry;
+    DroneIMU turretImu;
     display::OledDisplay oledDisplay;
     void init(const float mainLoopFrequency)
     {
+#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
+        visionCoprocessor.initializeCV();
+#endif
         oledDisplay.initialize();
         turretImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
         turretImu.setMountingTransform(
@@ -83,12 +102,18 @@ public:
     {
         oledDisplay.updateDisplay();
         turretImu.read();
+#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
+        visionCoprocessor.updateSerial();
+#endif
     }
 
     void update()
     {
         turretImu.periodicIMUUpdate();
         oledDisplay.updateMenu();
+#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
+        visionCoprocessor.sendMessage();
+#endif
         rttTelemetry.updateTelemetryAsync();
     }
 };  // class aruwsrc::DroneDrivers
