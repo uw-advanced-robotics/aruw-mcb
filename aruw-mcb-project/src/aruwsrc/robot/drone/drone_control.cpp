@@ -297,7 +297,7 @@ void setDefaultDroneCommands(Drivers*)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands(Drivers *)
+void startDroneCommands(Drivers*)
 {
     // drivers->commandScheduler.addCommand(&droneImuCalibrateCommand);
 }

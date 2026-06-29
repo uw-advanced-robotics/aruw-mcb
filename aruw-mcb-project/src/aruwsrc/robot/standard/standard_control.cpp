@@ -506,8 +506,8 @@ autotune::GravityAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH> gr
      TORQUE_TO_DESIRED_OUT},
     &turretSpringCompensation,
     &chassis,
-        {},
-        modm::toRadian(0.003));
+    {},
+    modm::toRadian(0.003));
 
 autotune::SpringAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH> springAutotuneCommand(
     drivers(),
@@ -523,7 +523,7 @@ autotune::SpringAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH> spr
     {},
     &imuCalibrateSuccessBuzzCommand,
     &imuCalibrateFailBuzzCommand,
-        modm::toRadian(0.003));
+    modm::toRadian(0.003));
 
 autotune::SecondOrderAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH>
     secondOrderAutotuneCommand(
