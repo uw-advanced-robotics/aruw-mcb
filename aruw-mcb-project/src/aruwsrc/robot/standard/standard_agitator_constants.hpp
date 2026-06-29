@@ -38,7 +38,12 @@ using tap::motor::DjiMotor;
 namespace aruwsrc::control::agitator::constants
 {
 /// How much extra heat must be available beyond how much it takes to fire the next shot
-static constexpr uint16_t HEAT_LIMIT_BUFFER = 25;
+static constexpr uint16_t HEAT_LIMIT_BUFFER = 40;
+static constexpr float MANUAL_CONSTANT_FIRE_RATE_RPS = 30.0f;
+static constexpr float MIN_CONSTANT_FIRE_RATE_RPM = 10.0f;
+static constexpr uint32_t AIDEN_CLEMJAM_TIMEOUT_MS = 400;
+static constexpr float AIDEN_CLEMJAM_MIN_SETPOINT = 8.0f;
+static constexpr float AIDEN_CLEMJAM_PROJECTILE_LAUNCH_RPM_DROP_THRESHOLD = 400.0f;
 
 #if defined(TARGET_STANDARD_NULL)
 
@@ -58,7 +63,7 @@ static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
 static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
 
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 1.0f / 36.0f,
+    .gearRatio = 1.0f / 36.0f * (5.0f / 2.0f),
     .agitatorMotorId = tap::motor::MOTOR3,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -70,6 +75,10 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .jammingTime = 100,
     .jamLogicEnabled = true,
     .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+    .emptyJamEnabled = false,
+    .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
+    .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
+    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
@@ -89,7 +98,7 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
         .targetCycleCount = 3,
 };
-#elif defined(TARGET_STANDARD_VOID)
+#elif defined(TARGET_STANDARD_PHOBOS)
 // position PID terms
 // PID terms for standard
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
@@ -97,16 +106,16 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = DjiMotor::MAX_OUTPUT_C610,
+    .maxOutput = DjiMotor::MAX_OUTPUT_C610 / 2.0f,  // keeping below max out to prevent overheat
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
-static constexpr int AGITATOR_NUM_POCKETS = 8;          // number of balls in one rotation
-static constexpr float AGITATOR_MAX_ROF = 30.0f;        // balls per second
-static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.37f;  // how much agitator overshoots
+static constexpr int AGITATOR_NUM_POCKETS = 9;         // number of balls in one rotation
+static constexpr float AGITATOR_MAX_ROF = 20.0f;       // balls per second
+static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.0f;  // how much agitator overshoots
 
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
-    .gearRatio = 1.0f / 36.0f,
+    .gearRatio = (1.0f / 36.0f) * (2.0f / 5.0f),
     .agitatorMotorId = tap::motor::MOTOR3,
     .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
     .isAgitatorInverted = false,
@@ -115,9 +124,13 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
      * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
      */
     .jammingVelocityDifference = M_TWOPI,
-    .jammingTime = 100,
+    .jammingTime = 200,
     .jamLogicEnabled = true,
-    .velocityPIDFeedForwardGain = 500.0f / M_TWOPI,
+    .velocityPIDFeedForwardGain = 205.0f,
+    .emptyJamEnabled = false,
+    .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
+    .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
+    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
@@ -126,16 +139,68 @@ static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_RO
     .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.1f,
 };
 
-constexpr float UNJAM_VELOCITY = 0.35 * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
-constexpr float UNJAM_DISTANCE = 0.6f * (M_TWOPI / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_VELOCITY = 0.8f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_DISTANCE = 1.0f * (M_TWOPI / AGITATOR_NUM_POCKETS);
 static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
     AGITATOR_UNJAM_CONFIG = {
         .targetUnjamIntegralChange = UNJAM_DISTANCE,
         .unjamSetpoint = UNJAM_VELOCITY,
         /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
-        /// seconds.Convert to ms, Add 100 ms extra tolerance.
+        /// seconds.Convert to ms, Add extra tolerance.
         .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
-        .targetCycleCount = 3,
+        .targetCycleCount = 1,
+};
+#elif defined(TARGET_STANDARD_DEIMOS)
+// position PID terms
+// PID terms for standard
+static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
+    .kp = 5'000.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = DjiMotor::MAX_OUTPUT_C610 / 2.0f,  // keeping below max out to prevent overheat
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+static constexpr int AGITATOR_NUM_POCKETS = 9;         // number of balls in one rotation
+static constexpr float AGITATOR_MAX_ROF = 20.0f;       // balls per second
+static constexpr float OVERSHOOT_FUDGE_FACTOR = 0.0f;  // how much agitator overshoots
+
+static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGITATOR_CONFIG = {
+    .gearRatio = (1.0f / 36.0f) * (2.0f / 5.0f),
+    .agitatorMotorId = tap::motor::MOTOR3,
+    .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+    .isAgitatorInverted = false,
+    /**
+     * The jamming constants. Agitator is considered jammed if difference between the velocity
+     * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
+     */
+    .jammingVelocityDifference = M_TWOPI,
+    .jammingTime = 200,
+    .jamLogicEnabled = true,
+    .velocityPIDFeedForwardGain = 205.0f,
+    .emptyJamEnabled = false,
+    .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
+    .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
+    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+};
+
+static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
+    .targetIntegralChange = M_TWOPI / AGITATOR_NUM_POCKETS - OVERSHOOT_FUDGE_FACTOR,
+    .desiredSetpoint = AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS),
+    .integralSetpointTolerance = (M_TWOPI / AGITATOR_NUM_POCKETS) * 0.1f,
+};
+
+constexpr float UNJAM_VELOCITY = 0.8f * AGITATOR_MAX_ROF * (M_TWOPI / AGITATOR_NUM_POCKETS);
+constexpr float UNJAM_DISTANCE = 1.0f * (M_TWOPI / AGITATOR_NUM_POCKETS);
+static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
+    AGITATOR_UNJAM_CONFIG = {
+        .targetUnjamIntegralChange = UNJAM_DISTANCE,
+        .unjamSetpoint = UNJAM_VELOCITY,
+        /// Unjamming should take unjamDisplacement (radians) / unjamVelocity (radians / second)
+        /// seconds.Convert to ms, Add extra tolerance.
+        .maxWaitTime = static_cast<uint32_t>(1000.0f * UNJAM_DISTANCE / UNJAM_VELOCITY) + 200,
+        .targetCycleCount = 1,
 };
 #else
 #error "Attempted to include standard_agitator_constants.hpp for nonstandard robot target."

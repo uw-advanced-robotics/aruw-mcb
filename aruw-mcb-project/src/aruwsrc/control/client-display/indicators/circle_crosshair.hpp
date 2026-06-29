@@ -48,12 +48,12 @@ private:
 #ifdef TARGET_STANDARD_NULL
     static constexpr int16_t OFFSET_X = 25;
     static constexpr int16_t OFFSET_Y = -75;
-#elif defined(TARGET_STANDARD_VOID)
-    static constexpr int16_t OFFSET_X = -5;
-    static constexpr int16_t OFFSET_Y = -50;
-#elif defined(TARGET_HERO_ZERO)
-    static constexpr int16_t OFFSET_X = 2;
-    static constexpr int16_t OFFSET_Y = -42;
+#elif defined(TARGET_STANDARD_PHOBOS) || defined(TARGET_STANDARD_DEIMOS)
+    static constexpr int16_t OFFSET_X = 25;
+    static constexpr int16_t OFFSET_Y = -75;
+#elif defined(TARGET_HERO_NEPTUNE)
+    static constexpr int16_t OFFSET_X = -40;
+    static constexpr int16_t OFFSET_Y = 119;
 #else
     static constexpr int16_t OFFSET_X = 0;
     static constexpr int16_t OFFSET_Y = 0;
@@ -66,7 +66,7 @@ private:
     // SIZE of the circle
     static constexpr uint16_t CRICLE_SIZE = 2;
 // Thickness of the line
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
     static constexpr uint16_t LINE_THICKNESS = 10;
 #else
     static constexpr uint16_t LINE_THICKNESS = 5;

@@ -27,7 +27,6 @@
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/drivers.hpp"
-#include "tap/motor/m3508_constants.hpp"
 #include "tap/util_macros.hpp"
 
 #include "aruwsrc/util_macros.hpp"
@@ -48,7 +47,7 @@ namespace aruwsrc::control::chassis
 /**
  * Abstract subsystem for a holonomic chassis
  *
- * The chassis is in a right handed coordinate system with the x coordinate pointing torwards the
+ * The chassis is in a right handed coordinate system with the x coordinate pointing towards the
  * front of the chassis. As such, when looking down at the robot from above, the positive y
  * coordinate is to the left of the robot, and positive z is up. Also, the chassis rotation is
  * positive when rotating counterclockwise around the z axis.
@@ -94,13 +93,25 @@ public:
 
     static inline float getChassisPowerLimit(tap::Drivers* drivers)
     {
-        if (capacitorBank != nullptr && capacitorBank->isSprinting())
+        float refereeLimit = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+
+        if (capacitorBank != nullptr && capacitorBank->isSprinting() && capacitorBank->isOnline() &&
+            capacitorBank->getState() == communication::can::cap_bank::State::BOOST)
         {
-            return capacitorBank->getMaximumOutputCurrent() *
-                   communication::can::cap_bank::CAPACITOR_BANK_OUTPUT_VOLTAGE;
+            // During sprint the motors may draw from BOTH the battery (up to
+            // refereeLimit) and the cap bank (up to availableSupplyPower).
+            // Total power budget = battery contribution + cap contribution.
+            // The ceiling rises only when the bank has ACKNOWLEDGED Boost in
+            // STATUS — a bank that is offline, faulted (error flag latches it
+            // out of Boost), draining, or still settling won't actually cover
+            // the excess, and raising the ceiling anyway would dump the
+            // overdraw on the battery and drain the referee buffer. Depleted
+            // caps need no special case: the bank stays in Boost below the
+            // 10 V floor but reports availableSupplyPower = 0.
+            return refereeLimit + static_cast<float>(capacitorBank->getAvailableSupplyPower());
         }
 
-        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+        return refereeLimit;
     }
 
     /**
@@ -171,15 +182,13 @@ public:
     virtual void limitChassisPower() = 0;
 
     /**
-     * Converts the velocity matrix from raw RPM to wheel velocity in m/s.
+     * Converts the velocity matrix from raw RPM to wheel velocity in rad/s.
      */
     inline modm::Matrix<float, 4, 1> convertRawRPM(const modm::Matrix<float, 4, 1>& mat) const
     {
-        static constexpr float ratio = 2.0f * M_PI * CHASSIS_GEARBOX_RATIO / 60.0f;
+        static constexpr float ratio = 2.0f * M_PI / 60.0f;
         return mat * ratio;
     }
-
-    virtual float mpsToRpm(float mps) const = 0;
 
 };  // class HolonomicChassisSubsystem
 

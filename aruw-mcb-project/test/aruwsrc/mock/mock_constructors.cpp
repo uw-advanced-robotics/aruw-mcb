@@ -85,8 +85,9 @@ BeybladeCommandMock::~BeybladeCommandMock() {}
 CapacitorBankMock::CapacitorBankMock(
     tap::Drivers *drivers,
     tap::can::CanBus canBus,
-    const float capacitance)
-    : CapacitorBank(drivers, canBus, capacitance)
+    const float capacitance,
+    const int maxAvailablePower)
+    : CapacitorBank(drivers, canBus, capacitance, maxAvailablePower)
 {
 }
 CapacitorBankMock::~CapacitorBankMock() {}
@@ -266,14 +267,22 @@ SentryRequestSubsystemMock::SentryRequestSubsystemMock(tap::Drivers *drivers)
 }
 SentryRequestSubsystemMock::~SentryRequestSubsystemMock() {}
 
-TurretSubsystemMock::TurretSubsystemMock(tap::Drivers *drivers)
-    : TurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
+TurretSubsystemMock::TurretSubsystemMock(
+    tap::Drivers *drivers,
+    aruwsrc::control::turret::TurretMotor &pitchMotor,
+    aruwsrc::control::turret::TurretMotor &yawMotor,
+    const tap::communication::sensors::imu::AbstractIMU *turretImu)
+    : TurretSubsystem(drivers, pitchMotor, yawMotor, turretImu)
 {
 }
 TurretSubsystemMock::~TurretSubsystemMock() {}
 
-RobotTurretSubsystemMock::RobotTurretSubsystemMock(tap::Drivers *drivers)
-    : RobotTurretSubsystem(drivers, &m, &m, MOTOR_CONFIG, MOTOR_CONFIG, nullptr)
+RobotTurretSubsystemMock::RobotTurretSubsystemMock(
+    tap::Drivers *drivers,
+    aruwsrc::control::turret::TurretMotor &pitchMotor,
+    aruwsrc::control::turret::TurretMotor &yawMotor,
+    const tap::communication::sensors::imu::AbstractIMU *turretImu)
+    : RobotTurretSubsystem(drivers, pitchMotor, yawMotor, turretImu)
 {
 }
 RobotTurretSubsystemMock::~RobotTurretSubsystemMock() {}
@@ -296,7 +305,7 @@ TurretMotorMock::TurretMotorMock(
     ON_CALL(*this, getValidChassisMeasurementError).WillByDefault([&]() {
         return getValidMinError(getChassisFrameSetpoint(), getChassisFrameMeasuredAngle());
     });
-    ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(defaultConfig));
+    ON_CALL(*this, getConfig).WillByDefault(testing::ReturnRef(DEFAULT_CONFIG));
 }
 TurretMotorMock::~TurretMotorMock() {}
 

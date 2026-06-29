@@ -37,36 +37,36 @@ namespace aruwsrc::control::agitator::constants
 {
 // Hero's waterwheel constants
 static constexpr tap::algorithms::SmoothPidConfig WATERWHEEL_PID_CONFIG = {
-    .kp = 15'000.0f,
+    .kp = 30'000.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = 5'000.0f,
+    .maxOutput = 12'000.0f,
     .errorDerivativeFloor = 0.0f,
 };
 
-static constexpr float DESIRED_LOAD_TIME_S = 0.25f;
+static constexpr float DESIRED_LOAD_TIME_S = 1.0f / 2.0f;
 static constexpr float KICKER_DESIRED_LOAD_TIME_S = 0.1f;
 static constexpr float KICKER_FIRE_DISTANCE = M_TWOPI * 0.5f;
 static constexpr float KICKER_FIRE_TIME_S = 0.075f;
 static constexpr float WATERWHEEL_NUM_BALL_POCKETS = 12.0f;
 static constexpr float WATERWHEEL_TARGET_DISPLACEMENT = M_TWOPI / WATERWHEEL_NUM_BALL_POCKETS;
-static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 5.0f;
-static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.1f;
+static constexpr float WATERWHEEL_TARGET_UNJAM_DISPLACEMENT = WATERWHEEL_TARGET_DISPLACEMENT / 1.5f;
+static constexpr float WATERWHEEL_TARGET_UNJAM_TIME_S = 0.065f;
 
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
     WATERWHEEL_AGITATOR_CONFIG = {
         .gearRatio = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508 *
                      (24.0f / 152.0f),  // M3508 * (Pulley Teeth / Agitator Teeth)
-        .agitatorMotorId = tap::motor::MOTOR4,
-        .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
+        .agitatorMotorId = tap::motor::MOTOR6,
+        .agitatorCanBusId = tap::can::CanBus::CAN_BUS2,
         .isAgitatorInverted = false,
         /**
          * The jamming constants. Agitator is considered jammed if difference between the velocity
          * setpoint and actual velocity is > jammingVelocityDifference for > jammingTime.
          */
-        .jammingVelocityDifference = 0.75f * (WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S),
-        .jammingTime = 500,
+        .jammingVelocityDifference = 0.80f * (WATERWHEEL_TARGET_DISPLACEMENT / DESIRED_LOAD_TIME_S),
+        .jammingTime = 300,
         .jamLogicEnabled = true,
         .velocityPIDFeedForwardGain = 0.0f,
 };
@@ -105,7 +105,7 @@ static constexpr tap::algorithms::SmoothPidConfig KICKER_PID_CONFIG = {
 static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig
     KICKER_AGITATOR_CONFIG = {
         .gearRatio = 1.0f / 36.0f,
-        .agitatorMotorId = tap::motor::MOTOR3,
+        .agitatorMotorId = tap::motor::MOTOR8,
         .agitatorCanBusId = tap::can::CanBus::CAN_BUS1,
         .isAgitatorInverted = false,
         .jammingVelocityDifference = 0,

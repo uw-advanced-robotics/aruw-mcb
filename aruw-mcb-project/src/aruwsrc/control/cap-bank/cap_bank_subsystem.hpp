@@ -24,6 +24,7 @@
 #include "tap/control/subsystem.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 
 #include "cap_bank_test_command.hpp"
@@ -42,7 +43,8 @@ class CapBankSubsystem : public tap::control::Subsystem
 public:
     CapBankSubsystem(
         tap::Drivers* drivers,
-        communication::can::cap_bank::CapacitorBank& capacitorBank);
+        communication::can::cap_bank::CapacitorBank& capacitorBank,
+        const communication::can::AruwVoltageCurrentSensor& chassisSensor);
 
     virtual ~CapBankSubsystem() {}
     const char* getName() const override { return "Capacitor Bank"; }
@@ -55,7 +57,8 @@ public:
     void refreshSafeDisconnect() override
     {
         this->disableCapacitors();
-        this->capacitorBank.stop();
+        this->capacitorBank.sendCapCommand(
+            aruwsrc::communication::can::cap_bank::CapCommandMode::OFF);
     }
 
     void refresh() override;
@@ -64,12 +67,13 @@ public:
     void disableCapacitors() { this->capacitorsEnabled = false; }
     void toggleCapacitors() { this->capacitorsEnabled = !this->capacitorsEnabled; }
 
-    int getAvailableEnergy() { return this->capacitorBank.getAvailableEnergy(); }
+    int getAvailableEnergy() const { return this->capacitorBank.getAvailableEnergy(); }
 
     bool enabled() const { return this->capacitorsEnabled; }
 
 private:
     communication::can::cap_bank::CapacitorBank& capacitorBank;
+    const communication::can::AruwVoltageCurrentSensor& chassisSensor;
 
     bool capacitorsEnabled;
 

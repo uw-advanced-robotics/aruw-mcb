@@ -24,8 +24,8 @@
 namespace aruwsrc::display
 {
 TurretMCBMenu::TurretMCBMenu(
-    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm)
+    modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> >* vs,
+    aruwsrc::communication::can::TurretMCBCanComm* turretMCBCanComm)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
       turretMCBCanComm(turretMCBCanComm)
 {
@@ -33,23 +33,26 @@ TurretMCBMenu::TurretMCBMenu(
 
 void TurretMCBMenu::draw()
 {
-    modm::GraphicDisplay &display = getViewStack()->getDisplay();
+    modm::GraphicDisplay& display = getViewStack()->getDisplay();
     display.clear();
     display.setCursor(0, 2);
     display << getMenuName() << modm::endl;
 
     display << "Receiving Turret IMU data: " << turretMCBCanComm->isConnected() << modm::endl
-            << "Limit switch depressed: " << turretMCBCanComm->getLimitSwitchDepressed()
+            << "Kicker limit switch depressed: " << modm::endl
+            << turretMCBCanComm->getKickerWheelLimitSwitch().getLimitSwitchDepressed() << modm::endl
+            << "Agitator limit switch depressed: " << modm::endl
+            << turretMCBCanComm->getAgitatorLoadingLimitSwitch().getLimitSwitchDepressed()
             << modm::endl;
     display.printf(
-        "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\n Yaw Accel (deg/s^2): %.2f\n"
-        "Pitch (deg): %.2f\nPitch Velocity (deg/s): %.2f\n Pitch Accel (deg/s^2): %.2f\n",
-        static_cast<double>(turretMCBCanComm->getYaw()),
-        static_cast<double>(turretMCBCanComm->getGz()),
+        "Yaw (deg): %.2f\nYaw Velocity (deg/s): %.2f\n Z Accel (deg/s^2): %.2f\n"
+        "Pitch (deg): %.2f\nPitch Velocity (deg/s): %.2f\n X Accel (m/s^2): %.2f\n",
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getYaw())),
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getGz())),
         static_cast<double>(turretMCBCanComm->getAz()),
-        static_cast<double>(turretMCBCanComm->getPitch()),
-        static_cast<double>(turretMCBCanComm->getGy()),
-        static_cast<double>(turretMCBCanComm->getAy()));
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getPitch())),
+        static_cast<double>(modm::toDegree(turretMCBCanComm->getGy())),
+        static_cast<double>(turretMCBCanComm->getAx()));
 }
 
 void TurretMCBMenu::update() {}

@@ -17,12 +17,13 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 #if defined(TARGET_DART)
+#include <memory>
 
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/press_command_mapping.hpp"
-#include "tap/control/sequential_command.hpp"
+#include "tap/control/remote_map_state.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
@@ -187,10 +188,11 @@ HoldCommandMapping pullbackMapping(
     {&dartPullback},
     RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN));
 
-PressCommandMapping rightMidLeftDown(
+auto rightMidLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
+auto rightMidLeftDown = std::make_unique<PressCommandMapping>(
     drivers(),
-    {&rotateMagazine},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
+    std::vector<Command*>{&rotateMagazine},
+    &rightMidLeftDownRms);
 
 // Left Down + Right Up -> Home Yaw
 HoldCommandMapping homeYawMapping(
