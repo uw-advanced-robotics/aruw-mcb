@@ -76,6 +76,8 @@ void TurretCVCommand::execute()
 {
     WrappedFloat pitchSetpoint = pitchController->getSetpoint();
     WrappedFloat yawSetpoint = yawController->getSetpoint();
+    float yawVelocity = 0;
+    float yawAcceleration = 0;
 
     std::optional<CvBallisticsSolver::BallisticsSolution> ballisticsSolution =
         ballisticsSolver->computeTurretAimAngles();
@@ -84,6 +86,8 @@ void TurretCVCommand::execute()
     {
         pitchSetpoint = Angle(ballisticsSolution->pitchAngle);
         yawSetpoint = Angle(ballisticsSolution->yawAngle);
+        yawVelocity = ballisticsSolution->yawVel;
+        yawAcceleration = ballisticsSolution->yawAcc;
 
         /**
          * the setpoint returned by the ballistics solver is between [0, 2*PI), so find the
@@ -115,7 +119,7 @@ void TurretCVCommand::execute()
 
     // updates the turret yaw setpoint based on either CV or user input, runs the PID controller,
     // and sets the turret subsystem's desired yaw output
-    yawController->runController(dt, yawSetpoint);
+    yawController->runController(dt, yawSetpoint, yawVelocity, yawAcceleration);
 }
 
 bool TurretCVCommand::isFinished() const
