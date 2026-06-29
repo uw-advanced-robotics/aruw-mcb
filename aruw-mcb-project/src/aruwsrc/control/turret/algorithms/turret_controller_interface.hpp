@@ -74,7 +74,9 @@ public:
      */
     virtual void runController(
         const float dt,
-        const tap::algorithms::WrappedFloat desiredSetpoint) = 0;
+        const tap::algorithms::WrappedFloat desiredSetpoint,
+        float desiredVelocity = 0,
+        float desiredAcceleration = 0) = 0;
 
     /**
      * Calculates the total output from all attached compensators.

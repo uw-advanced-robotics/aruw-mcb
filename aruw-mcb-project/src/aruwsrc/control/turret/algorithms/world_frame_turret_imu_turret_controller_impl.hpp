@@ -133,7 +133,9 @@ void WorldFrameTurretImuCascadePidTurretController<AXIS>::initialize()
 template <tap::algorithms::transforms::Axis AXIS>
 void WorldFrameTurretImuCascadePidTurretController<AXIS>::runController(
     const float dt,
-    const WrappedFloat desiredSetpoint)
+    const WrappedFloat desiredSetpoint,
+    float,
+    float)
 {
     const WrappedFloat chassisFrame = this->turretMotor.getChassisFrameMeasuredAngle();
 

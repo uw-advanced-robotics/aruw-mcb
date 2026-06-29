@@ -40,7 +40,7 @@ public:
     MOCK_METHOD(
         void,
         runController,
-        (const float, const tap::algorithms::WrappedFloat),
+        (const float, const tap::algorithms::WrappedFloat, float, float),
         (override));
     MOCK_METHOD(void, setSetpoint, (tap::algorithms::WrappedFloat), (override));
     MOCK_METHOD(tap::algorithms::WrappedFloat, getSetpoint, (), (const override));
