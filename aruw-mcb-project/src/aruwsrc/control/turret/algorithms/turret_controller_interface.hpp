@@ -73,11 +73,7 @@ public:
      * @param[in] desiredSetpoint The controller's desired setpoint in whatever frame the controller
      * is operating. Units radians.
      */
-    virtual void runController(
-        const float dt,
-        const WrappedFloat desiredSetpoint,
-        float desiredVelocity = 0,
-        float desiredAcceleration = 0) = 0;
+    virtual void runController(const float dt, const WrappedFloat desiredSetpoint) = 0;
 
     /**
      * Calculates the total output from all attached compensators.

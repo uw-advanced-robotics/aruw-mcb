@@ -76,11 +76,7 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The pitch desired setpoint in the world frame.
      */
-    void runController(
-        const float dt,
-        const WrappedFloat desiredSetpoint,
-        float desiredVelocity = 0,
-        float desiredAcceleration = 0) final;
+    void runController(const float dt, const WrappedFloat desiredSetpoint) final;
 
     /// Sets the world frame pitch angle setpoint, refer to top level documentation for more
     /// details.

@@ -65,9 +65,7 @@ void TurretMajorWorldFrameController::initialize()
 ///       code difficult to trace, follow, and maintain
 void TurretMajorWorldFrameController::runController(
     const float dt,
-    const WrappedFloat desiredSetpoint,
-    float,
-    float)
+    const WrappedFloat desiredSetpoint)
 {
     worldFrameSetpoint = desiredSetpoint;
 

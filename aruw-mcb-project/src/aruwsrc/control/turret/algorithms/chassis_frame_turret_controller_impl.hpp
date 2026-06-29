@@ -54,9 +54,7 @@ void ChassisFrameTurretController<AXIS>::initialize()
 template <Axis AXIS>
 void ChassisFrameTurretController<AXIS>::runController(
     const float dt,
-    const WrappedFloat desiredSetpoint,
-    float,
-    float)
+    const WrappedFloat desiredSetpoint)
 {
     // limit the yaw min and max angles
     this->turretMotor.setChassisFrameSetpoint(desiredSetpoint);

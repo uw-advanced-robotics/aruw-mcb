@@ -137,9 +137,7 @@ void WorldFrameYawChassisImuTurretController::initialize()
 
 void WorldFrameYawChassisImuTurretController::runController(
     const float dt,
-    const WrappedFloat desiredSetpoint,
-    float,
-    float)
+    const WrappedFloat desiredSetpoint)
 {
     const WrappedFloat chassisFrameImuYawAngle = getMpu6500Yaw();
 
