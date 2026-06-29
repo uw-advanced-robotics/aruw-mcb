@@ -601,24 +601,16 @@ SequentialCommand<3> removeCubeCommand(
     // hand up
     &centerCubePosition);
 
-YawTurretSubsystem yawTurretSubsystem(
-    *drivers(),
-    yawTurretMotor,
-    aruwsrc::control::turret::YAW_MOTOR_CONFIG);
-
-ChassisFrameTurretController<Axis::YAW> turretChassisYawController(
-    yawTurretSubsystem.getMutableMotor(),
-    aruwsrc::control::turret::chassis_rel::YAW_PID_CONFIG);
-
 autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     drivers(),
-    {&yawTurretSubsystem,
-     &yawTurretSubsystem.getMutableMotor(),
-     &turretChassisYawController,
+    {&engTurret,
+     &yawEngTurretMotor,
+     &chassisFrameYawTurretController,
      yawTurretMotor.isMotorInverted(),
      1,
      1},
-    lampreyEncoder);
+    lampreyEncoder,
+    &chassisSubsystem);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());

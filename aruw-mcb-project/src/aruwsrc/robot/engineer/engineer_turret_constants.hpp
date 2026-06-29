@@ -208,7 +208,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-inline constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[38] = {};
+constexpr modm::Pair<float, float> MAP[0] = {};
 
 }  // namespace chassis_rel
 
