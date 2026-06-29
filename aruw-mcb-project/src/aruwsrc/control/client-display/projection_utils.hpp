@@ -54,7 +54,7 @@ struct ProjectedResult
 };
 
 // This in theory is the offset between the realsense and the VTM
-#if defined(TARGET_STANDARD_PHOBOS)
+#if defined(TARGET_STANDARD_PHOBOS) || defined(TARGET_STANDARD_DEIMOS)
 static Transform VTM_OFFSET = Transform(Position(0, 0.04, 0.09), Orientation(0, 0, 0));
 #elif defined(TARGET_HERO_NEPTUNE)
 static Transform VTM_OFFSET = Transform(Position(0, 0.01, 0.0), Orientation(0, 0, 0));
