@@ -44,6 +44,20 @@ static constexpr tap::algorithms::SmoothPidConfig DART_RELOADER_PID_CONFIG = {
     .errDeadzone = 0.0f,
 };
 static constexpr float DART_MAGAZINE_TOLERANCE = 0.0125f;
+
+// six positions on magazine
+static constexpr float DART_MAGAZINE_ROTATE_INCREMENT = 1.0f / 6.0f;
+// TODO: find
+static constexpr float DART_MAGAZINE_RELOAD_POSITION = 0.0f;
+static constexpr float DART_MAGAZINE_FREE_POSITION =
+    DART_MAGAZINE_RELOAD_POSITION + DART_MAGAZINE_ROTATE_INCREMENT;
+
+// there are only three free positions
+static constexpr float VALID_FREE_MAGAZINE_POSITIONS[] = {
+    DART_MAGAZINE_FREE_POSITION,
+    DART_MAGAZINE_FREE_POSITION + DART_MAGAZINE_ROTATE_INCREMENT,
+    DART_MAGAZINE_FREE_POSITION + DART_MAGAZINE_ROTATE_INCREMENT * 2};
+
 //  * @param[in] pwmPin The pin to attach the Servo class with.
 //  * @param[in] maximumPwm The maximum allowable PWM output. This is limited between 0 and 1.
 //  * @param[in] minimumPwm The minimum allowable PWM output. This is limited between 0 and 1.

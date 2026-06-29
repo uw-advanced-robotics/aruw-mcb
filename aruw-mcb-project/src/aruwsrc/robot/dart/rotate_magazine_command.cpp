@@ -18,7 +18,10 @@
  */
 #include "rotate_magazine_command.hpp"
 
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/control/command.hpp"
+
+#include "dart_constants.hpp"
 namespace aruwsrc::dart
 {
 RotateMagazineCommand::RotateMagazineCommand(DartReloaderSubsystem& subsystem)
@@ -29,7 +32,25 @@ RotateMagazineCommand::RotateMagazineCommand(DartReloaderSubsystem& subsystem)
 
 void RotateMagazineCommand::initialize()
 {
-    subsystem.setSetpoint(subsystem.getSetpoint() + 1.0f);  // moves setpoint 1 rotation forward
+    float index = floor(
+        (subsystem.getPosition() - DART_MAGAZINE_RELOAD_POSITION) / DART_MAGAZINE_ROTATE_INCREMENT);
+    // if index is not near its int version, then we must be in some unknown position
+    // in this case, we go to the nearest "free" position
+    if (!tap::algorithms::compareFloatClose(
+            ((subsystem.getPosition() - DART_MAGAZINE_RELOAD_POSITION) /
+             DART_MAGAZINE_ROTATE_INCREMENT),
+            index,
+            0.01f))
+    {
+        // TODO: tune how close we need to be to the nearest position
+        // TODO: chekc if we actually need to go to the nearest free or if we can just go to
+        // the initial free
+        subsystem.setSetpoint(DART_MAGAZINE_FREE_POSITION);
+    }
+    else
+    {  // otherwise, we just increment one index
+        subsystem.setSetpoint(subsystem.getSetpoint() + DART_MAGAZINE_ROTATE_INCREMENT);
+    }
 }
 void RotateMagazineCommand::execute() {}
 void RotateMagazineCommand::end(bool) {}
