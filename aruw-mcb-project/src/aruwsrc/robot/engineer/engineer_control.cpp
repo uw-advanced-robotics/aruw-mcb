@@ -609,11 +609,13 @@ SequentialCommand<3> removeCubeCommand(
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
-RemoteMapState leftUpRms = RemoteMapState({Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP});
-auto leftUp = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&servoMoveCubeCommand},
-    &leftUpRms);
+// RemoteMapState leftUpRms = RemoteMapState({Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP});
+// auto leftUp = std::make_unique<HoldCommandMapping>(
+//     drivers(),
+//     std::vector<Command*>{&servoMoveCubeCommand},
+//     &leftUpRms);
+
+Trigger leftUp = TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP).onTrue(&vtmServoCommand);
 
 // Disabled bc homing doesn't work yet (virtual limit switches)
 // Trigger leftDownMidRightUp =
