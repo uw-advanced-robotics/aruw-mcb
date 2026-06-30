@@ -121,7 +121,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     else if (fabsf(targetDataNow.omega) > config.shotTimingEntryThreshold)
     {
         // Use pulse estimation for fast rotating targets
-        aimStrategy = AimStrategy::SHOT_GATING;
+        aimStrategy = AimStrategy::SHOT_TIMING;
     }
 
     switch (aimStrategy)
@@ -135,7 +135,7 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
             break;
         }
 
-        case AimStrategy::SHOT_GATING:
+        case AimStrategy::SHOT_TIMING:
         {
             lastComputedSolution = computePulseEstimation(targetDataNow, launchSpeed);
             break;

@@ -63,7 +63,7 @@ namespace aruwsrc::algorithms::ballistics
 enum class AimStrategy
 {
     JITTER = 0,   // track the targeted plate and shoot whenever we can
-    SHOT_GATING,  // track the center of the targeted robot and shoot whenever it will hit a plate
+    SHOT_TIMING,  // track the center of the targeted robot and time shots as plates pass by
 };
 
 /**
