@@ -150,8 +150,8 @@ public:
             return false;
         }
 
-        return (abs(yawAngleError) < atan2f(PLATE_WIDTH, 2.0f * targetDistance)) &&
-               (abs(pitchAngleError) < atan2f(PLATE_HEIGHT, 2.0f * targetDistance));
+        return (abs(yawAngleError) < atan2f(PLATE_WIDTH / 2.0f, targetDistance)) &&
+               (abs(pitchAngleError) < atan2f(PLATE_HEIGHT / 2.0f, targetDistance));
     }
 
     /**
