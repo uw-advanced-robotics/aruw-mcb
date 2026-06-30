@@ -627,9 +627,16 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 //      Remote::SwitchState::UP))
 //         .whileTrue(CommandCompositionHelper::parallel<2>({&cubeStorageHome, &extensionHome}));
 
+// joint control mode
+Trigger rightMid =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
+        .whileTrue(&chassisAutorotateCommand);
+
+// IK mode
 Trigger rightDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN)
-        .whileTrue(&manualIKCommand);
+        .whileTrue(&manualIKCommand)
+        .whileTrue(&chassisDriveCommand);
 
 Trigger wheelDown =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.5f, false)
@@ -675,8 +682,6 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
     engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
-    chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
     extensionSubsystem.setDefaultCommand(&extensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
