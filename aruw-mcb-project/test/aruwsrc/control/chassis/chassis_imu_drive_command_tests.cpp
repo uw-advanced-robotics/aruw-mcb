@@ -300,7 +300,7 @@ TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_null
 
     chassisImuDriveCommand.initialize();
 
-    WrappedFloat chassisFrameMeasuredAngle = Angle(M_PI_4);
+    tap::algorithms::WrappedFloat chassisFrameMeasuredAngle = tap::algorithms::Angle(M_PI_4);
     ON_CALL(yawMotorMock, getChassisFrameMeasuredAngle)
         .WillByDefault(ReturnRef(chassisFrameMeasuredAngle));
     ON_CALL(yawMotorMock, isOnline).WillByDefault(Return(true));

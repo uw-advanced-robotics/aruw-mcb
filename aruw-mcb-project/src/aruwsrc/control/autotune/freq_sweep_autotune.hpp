@@ -38,7 +38,7 @@
 
 namespace aruwsrc::control::autotune
 {
-template <turret::algorithms::Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 class FreqSweepAutotuneCommand : public TurretAutotuneCommand<1, AXIS>
 {
     using TurretTuneCommand = TurretAutotuneCommand<1, AXIS>;
@@ -47,10 +47,10 @@ public:
     struct OptionalSystems
     {
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            control::turret::algorithms::Axis::PITCH> *otherTurretAxisController = nullptr;
+            tap::algorithms::transforms::Axis::PITCH> *otherTurretAxisController = nullptr;
         aruwsrc::control::turret::YawTurretSubsystem *turretMajorSubsystem = nullptr;
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            control::turret::algorithms::Axis::YAW> *turretMajorController = nullptr;
+            tap::algorithms::transforms::Axis::YAW> *turretMajorController = nullptr;
         tap::communication::sensors::imu::AbstractIMU *turretMajorImu = nullptr;
     };
 

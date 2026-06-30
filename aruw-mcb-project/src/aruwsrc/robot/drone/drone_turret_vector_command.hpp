@@ -35,22 +35,22 @@ class DroneTurretVectorCommand final : public tap::control::Command
 {
 public:
     DroneTurretVectorCommand(
-        aruwsrc::control::ControlOperatorInterface &controlOperatorInterface,
-        DroneTurretSubsystem &turret,
-        const DroneIMU &turretImu,
-        tap::algorithms::SmoothPid &yawPositionPid,
-        tap::algorithms::SmoothPid &yawVelocityPid,
-        tap::algorithms::SmoothPid &pitchPositionPid,
-        tap::algorithms::SmoothPid &pitchVelocityPid,
+        aruwsrc::control::ControlOperatorInterface& controlOperatorInterface,
+        DroneTurretSubsystem& turret,
+        const DroneIMU& turretImu,
+        tap::algorithms::SmoothPid& yawPositionPid,
+        tap::algorithms::SmoothPid& yawVelocityPid,
+        tap::algorithms::SmoothPid& pitchPositionPid,
+        tap::algorithms::SmoothPid& pitchVelocityPid,
         aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-            aruwsrc::control::turret::algorithms::Axis::YAW> &chassisFrameYawController,
+            tap::algorithms::transforms::Axis::YAW>& chassisFrameYawController,
         aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-            aruwsrc::control::turret::algorithms::Axis::PITCH> &chassisFramePitchController,
+            tap::algorithms::transforms::Axis::PITCH>& chassisFramePitchController,
         float userYawInputScalar,
         float userPitchInputScalar,
         uint8_t turretID = 0);
 
-    const char *getName() const override { return "Drone turret vector control"; }
+    const char* getName() const override { return "Drone turret vector control"; }
 
     bool isReady() override;
 
@@ -74,33 +74,33 @@ private:
     Vector normalizeOrFallback(Vector vector, Vector fallback) const;
     float clampControllerError(
         float error,
-        const aruwsrc::control::turret::TurretMotor &turretMotor) const;
+        const aruwsrc::control::turret::TurretMotor& turretMotor) const;
     float limitUserInputAtMotorLimits(
         float input,
-        const aruwsrc::control::turret::TurretMotor &turretMotor) const;
+        const aruwsrc::control::turret::TurretMotor& turretMotor) const;
     void runWorldFrameControl(float yawInput, float pitchInput, float dt);
     void runChassisFrameFallback(float yawInput, float pitchInput, float dt);
     void resetChassisFrameFallback();
     bool stopAtMotorLimits(
-        float &motorOutput,
-        const aruwsrc::control::turret::TurretMotor &turretMotor) const;
+        float& motorOutput,
+        const aruwsrc::control::turret::TurretMotor& turretMotor) const;
 
     static constexpr float AXIS_SOLVE_DAMPING = 0.05f;
     static constexpr float MAX_CONTROLLER_ERROR = 0.35f;
     static constexpr float MIN_YAW_AXIS_AUTHORITY = 0.15f;
     static constexpr float LIMIT_INPUT_BUFFER = 0.02f;
 
-    aruwsrc::control::ControlOperatorInterface &controlOperatorInterface;
-    DroneTurretSubsystem &turret;
-    const DroneIMU &turretImu;
-    tap::algorithms::SmoothPid &yawPositionPid;
-    tap::algorithms::SmoothPid &yawVelocityPid;
-    tap::algorithms::SmoothPid &pitchPositionPid;
-    tap::algorithms::SmoothPid &pitchVelocityPid;
+    aruwsrc::control::ControlOperatorInterface& controlOperatorInterface;
+    DroneTurretSubsystem& turret;
+    const DroneIMU& turretImu;
+    tap::algorithms::SmoothPid& yawPositionPid;
+    tap::algorithms::SmoothPid& yawVelocityPid;
+    tap::algorithms::SmoothPid& pitchPositionPid;
+    tap::algorithms::SmoothPid& pitchVelocityPid;
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::YAW> &chassisFrameYawController;
+        tap::algorithms::transforms::Axis::YAW>& chassisFrameYawController;
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::PITCH> &chassisFramePitchController;
+        tap::algorithms::transforms::Axis::PITCH>& chassisFramePitchController;
     float userYawInputScalar;
     float userPitchInputScalar;
     uint8_t turretID;

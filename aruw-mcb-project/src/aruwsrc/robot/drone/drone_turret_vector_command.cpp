@@ -30,17 +30,17 @@ namespace aruwsrc::drone
 using tap::communication::sensors::imu::ImuInterface;
 
 DroneTurretVectorCommand::DroneTurretVectorCommand(
-    aruwsrc::control::ControlOperatorInterface &controlOperatorInterface,
-    DroneTurretSubsystem &turret,
-    const DroneIMU &turretImu,
-    tap::algorithms::SmoothPid &yawPositionPid,
-    tap::algorithms::SmoothPid &yawVelocityPid,
-    tap::algorithms::SmoothPid &pitchPositionPid,
-    tap::algorithms::SmoothPid &pitchVelocityPid,
+    aruwsrc::control::ControlOperatorInterface& controlOperatorInterface,
+    DroneTurretSubsystem& turret,
+    const DroneIMU& turretImu,
+    tap::algorithms::SmoothPid& yawPositionPid,
+    tap::algorithms::SmoothPid& yawVelocityPid,
+    tap::algorithms::SmoothPid& pitchPositionPid,
+    tap::algorithms::SmoothPid& pitchVelocityPid,
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::YAW> &chassisFrameYawController,
+        tap::algorithms::transforms::Axis::YAW>& chassisFrameYawController,
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::PITCH> &chassisFramePitchController,
+        tap::algorithms::transforms::Axis::PITCH>& chassisFramePitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)
@@ -305,7 +305,7 @@ DroneTurretVectorCommand::Vector DroneTurretVectorCommand::normalizeOrFallback(
 
 float DroneTurretVectorCommand::clampControllerError(
     float error,
-    const aruwsrc::control::turret::TurretMotor &turretMotor) const
+    const aruwsrc::control::turret::TurretMotor& turretMotor) const
 {
     error = tap::algorithms::limitVal(error, -MAX_CONTROLLER_ERROR, MAX_CONTROLLER_ERROR);
 
@@ -323,7 +323,7 @@ float DroneTurretVectorCommand::clampControllerError(
 
 float DroneTurretVectorCommand::limitUserInputAtMotorLimits(
     float input,
-    const aruwsrc::control::turret::TurretMotor &turretMotor) const
+    const aruwsrc::control::turret::TurretMotor& turretMotor) const
 {
     if (!turretMotor.getConfig().limitMotorAngles)
     {
@@ -341,8 +341,8 @@ float DroneTurretVectorCommand::limitUserInputAtMotorLimits(
 }
 
 bool DroneTurretVectorCommand::stopAtMotorLimits(
-    float &motorOutput,
-    const aruwsrc::control::turret::TurretMotor &turretMotor) const
+    float& motorOutput,
+    const aruwsrc::control::turret::TurretMotor& turretMotor) const
 {
     if (!turretMotor.getConfig().limitMotorAngles)
     {

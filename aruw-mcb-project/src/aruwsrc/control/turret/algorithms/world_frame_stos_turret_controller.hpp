@@ -58,7 +58,7 @@ struct TurretFeedforwardConstants
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 class WorldFrameTurretImuSTOSTurretController final : public TurretAxisControllerInterface<AXIS>
 {
 public:

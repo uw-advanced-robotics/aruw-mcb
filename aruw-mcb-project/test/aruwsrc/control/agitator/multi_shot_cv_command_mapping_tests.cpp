@@ -100,10 +100,10 @@ private:
     aruwsrc::mock::TurretMotorMock yawMotor;
     aruwsrc::mock::TurretMotorMock pitchMotor;
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::YAW>
+        tap::algorithms::transforms::Axis::YAW>
         yawController;
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::PITCH>
+        tap::algorithms::transforms::Axis::PITCH>
         pitchController;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;

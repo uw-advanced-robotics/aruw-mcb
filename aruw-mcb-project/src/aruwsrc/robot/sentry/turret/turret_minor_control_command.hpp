@@ -53,19 +53,19 @@ public:
      * @param[in] userPitchInputScalar See userYawInputScalar.
      */
     TurretMinorSentryControlCommand(
-        tap::Drivers *drivers,
-        aruwsrc::sentry::SentryControlOperatorInterface &controlOperatorInterface,
-        SentryTurretMinorSubsystem &turretMinorSubsystem,
+        tap::Drivers* drivers,
+        aruwsrc::sentry::SentryControlOperatorInterface& controlOperatorInterface,
+        SentryTurretMinorSubsystem& turretMinorSubsystem,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            aruwsrc::control::turret::algorithms::Axis::YAW> &yawController,
+            tap::algorithms::transforms::Axis::YAW>& yawController,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            aruwsrc::control::turret::algorithms::Axis::PITCH> &pitchController,
+            tap::algorithms::transforms::Axis::PITCH>& pitchController,
         float userYawInputScalar,
         float userPitchInputScalar);
 
     bool isReady() override;
 
-    const char *getName() const override { return "User turret minor control"; }
+    const char* getName() const override { return "User turret minor control"; }
 
     void initialize() override;
 
@@ -76,17 +76,17 @@ public:
     void end(bool) override;
 
 private:
-    tap::Drivers *drivers;
-    aruwsrc::sentry::SentryControlOperatorInterface &controlOperatorInterface;
+    tap::Drivers* drivers;
+    aruwsrc::sentry::SentryControlOperatorInterface& controlOperatorInterface;
 
-    SentryTurretMinorSubsystem &turretMinorSubsystem;
+    SentryTurretMinorSubsystem& turretMinorSubsystem;
 
     uint32_t prevTime = 0;
 
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        aruwsrc::control::turret::algorithms::Axis::YAW> &yawController;
+        tap::algorithms::transforms::Axis::YAW>& yawController;
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        aruwsrc::control::turret::algorithms::Axis::PITCH> &pitchController;
+        tap::algorithms::transforms::Axis::PITCH>& pitchController;
 
     const float userYawInputScalar;
     const float userPitchInputScalar;

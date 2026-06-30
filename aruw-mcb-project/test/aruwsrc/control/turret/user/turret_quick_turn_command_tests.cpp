@@ -27,6 +27,7 @@
 using namespace aruwsrc::mock;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::control::turret::user;
+using namespace tap::algorithms;
 using namespace testing;
 using tap::Drivers;
 
@@ -78,8 +79,8 @@ TEST(TurretQuickTurnCommand, initialize_sets_turret_setpoint_based_on_specified_
     TurretQuickTurnCommand turretUturnCommand180Deg(&turret1, M_PI);
     TurretQuickTurnCommand turretUturnCommand90Deg(&turret2, M_PI_2);
 
-    tap::algorithms::WrappedFloat turretYawValue(0, 0, M_TWOPI);
-    tap::algorithms::WrappedFloat turret2YawValue(M_PI_4, 0, M_TWOPI);
+    WrappedFloat turretYawValue(0, 0, M_TWOPI);
+    WrappedFloat turret2YawValue(M_PI_4, 0, M_TWOPI);
 
     EXPECT_CALL(yawMotorMock1, attachTurretController(nullptr));
     ON_CALL(yawMotorMock1, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(turretYawValue));
@@ -102,7 +103,7 @@ TEST_F(TurretQuickTurnCommandTest, successfully_registers_with_scheduler)
     tap::control::CommandScheduler commandScheduler(&drivers, true);
 
     EXPECT_CALL(yawMotorMock, isOnline).WillOnce(Return(true));
-    tap::algorithms::WrappedFloat currentYawValue(0, 0, M_TWOPI);
+    WrappedFloat currentYawValue(0, 0, M_TWOPI);
     ON_CALL(yawMotorMock, getChassisFrameMeasuredAngle).WillByDefault(ReturnRef(currentYawValue));
 
     commandScheduler.registerSubsystem(&turret);

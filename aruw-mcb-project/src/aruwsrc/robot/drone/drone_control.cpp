@@ -132,7 +132,7 @@ tap::motor::DjiMotor rightFrictionWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::MotorInterface *, 2> wheels = {&leftFrictionWheel, &rightFrictionWheel};
+std::array<tap::motor::MotorInterface*, 2> wheels = {&leftFrictionWheel, &rightFrictionWheel};
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
@@ -142,7 +142,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
         aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
         aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
@@ -155,11 +155,10 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YA
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawFallbackController(
-    turret.yawMotor,
-    chassis_rel::YAW_PID_CONFIG);
+algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
+    chassisFrameYawFallbackController(turret.yawMotor, chassis_rel::YAW_PID_CONFIG);
 
-algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH>
+algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
     chassisFramePitchFallbackController(turret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
 
 tap::algorithms::SmoothPid imuCalibrateYawPid(chassis_rel::YAW_PID_CONFIG);
@@ -231,7 +230,7 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProject
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
@@ -245,14 +244,14 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheel
     &frictionWheels,
     30.0f,
     false,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
 
 // Remote related mappings
 Trigger leftSwitchMiddle =
@@ -281,7 +280,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerDroneSubsystems(Drivers *drivers)
+void registerDroneSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&turret);
@@ -290,7 +289,7 @@ void registerDroneSubsystems(Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultDroneCommands(Drivers *)
+void setDefaultDroneCommands(Drivers*)
 {
     buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
     turret.setDefaultCommand(&turretUserVectorCommand);
@@ -298,18 +297,18 @@ void setDefaultDroneCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands(Drivers *)
+void startDroneCommands(Drivers*)
 {
     // drivers->commandScheduler.addCommand(&droneImuCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerDroneIoMappings(Drivers *) {}
+void registerDroneIoMappings(Drivers*) {}
 }  // namespace drone_control
 
 namespace aruwsrc::drone
 {
-void initSubsystemCommands(aruwsrc::drone::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::drone::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &drone_control::remoteSafeDisconnectFunction);

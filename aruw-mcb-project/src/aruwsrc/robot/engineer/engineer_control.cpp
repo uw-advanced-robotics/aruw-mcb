@@ -257,7 +257,7 @@ tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID2,
     tap::can::CanBus::CAN_BUS2,
-    true);
+    false);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
