@@ -35,18 +35,15 @@ ThreeDeadwheelOdometryObserver::ThreeDeadwheelOdometryObserver(
 
 float ThreeDeadwheelOdometryObserver::getParallelMotorOneVelocity() const
 {
-    rawParallelOne = parallelWheelOne->getVelocity();
-    return rawParallelOne * wheelRadius;
+    return parallelWheelOne->getVelocity() * wheelRadius;
 }
 float ThreeDeadwheelOdometryObserver::getParallelMotorTwoVelocity() const
 {
-    rawParallelTwo = parallelWheelTwo->getVelocity();
-    return rawParallelTwo * wheelRadius;
+    return parallelWheelTwo->getVelocity() * wheelRadius;
 }
 float ThreeDeadwheelOdometryObserver::getPerpendicularVelocity() const
 {
-    rawPerpendicular = perpendicularWheel->getVelocity();
-    return rawPerpendicular * wheelRadius;
+    return perpendicularWheel->getVelocity() * wheelRadius;
 }
 
 }  // namespace aruwsrc::algorithms::odometry

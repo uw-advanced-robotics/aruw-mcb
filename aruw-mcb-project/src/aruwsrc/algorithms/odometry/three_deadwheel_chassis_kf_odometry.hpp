@@ -20,9 +20,6 @@
 #ifndef THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 #define THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 
-#include <algorithm>
-#include <iterator>
-
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
