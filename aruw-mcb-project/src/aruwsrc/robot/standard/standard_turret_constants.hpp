@@ -201,8 +201,8 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 52.9f,
 };
 
-inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 5.0f;  // rad/s
-inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 4.0f;   // rad/s
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 4.0f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 3.0f;   // rad/s
 
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
@@ -417,7 +417,7 @@ inline constexpr algorithms::TurretFeedforwardConstants FEEDFORWARD_CONSTANTS = 
     .Ka = 0.0133f / TORQUE_TO_DESIRED_OUT / 2.0f,  // smaller to smooth over any jerky motion
     .Kv = 0.0367f / TORQUE_TO_DESIRED_OUT /
           2.0f,  // smaller because I guessed and checked and it worked
-    .Ks = 0.9521f / TORQUE_TO_DESIRED_OUT};
+    .Ks = 500.0f};
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 16.0f,
@@ -612,7 +612,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .kp = 20'000.0f,
     .ki = 500'000.0f,
     .kd = 3'000.0f,
-    .maxICumulative = 2'000.0f,
+    .maxICumulative = 16'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 10.0f,
