@@ -43,12 +43,12 @@ class CvBallisticsSolverMock : public CvBallisticsSolver
 {
 public:
     CvBallisticsSolverMock(
-        const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-        const aruwsrc::algorithms::odometry::transforms::TransformerInterface &transformer,
-        const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+        const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor,
+        const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer,
+        const control::launcher::LaunchSpeedPredictorInterface& frictionWheels,
         CvBallisticsSolver::Config config = DEFAULT_CONFIG,
         const uint8_t turretID = 0,
-        aruwsrc::communication::rtt::RttTelemetry *telemetry = nullptr);
+        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
     virtual ~CvBallisticsSolverMock();
 
     MOCK_METHOD(
