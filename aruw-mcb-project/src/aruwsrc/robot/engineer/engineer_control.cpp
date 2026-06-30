@@ -109,6 +109,7 @@ using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
 using namespace tap::gpio;
 
+using tap::algorithms::transforms::Axis;
 using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
 
@@ -441,11 +442,10 @@ TurretDynamicCOMGravityCompensator gravityPitchCompensator(
      .worldToTurretPitch = transformer.getWorldToTurretPitch(),
      .motorTorqueConstant = M3508_TORQUE_CONSTANT * PITCH_TURRET_GEAR_RATIO});
 
-ChassisFrameTurretController<aruwsrc::control::turret::algorithms::Axis::PITCH>
-    chassisFramePitchTurretController(
-        engTurret.pitchMotor,
-        chassis_rel::PITCH_PID_CONFIG,
-        {&gravityPitchCompensator});
+ChassisFrameTurretController<Axis::PITCH> chassisFramePitchTurretController(
+    engTurret.pitchMotor,
+    chassis_rel::PITCH_PID_CONFIG,
+    {&gravityPitchCompensator});
 
 ChassisFrameTurretController<Axis::YAW> chassisFrameYawTurretController(
     engTurret.yawMotor,
