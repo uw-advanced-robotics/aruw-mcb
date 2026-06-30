@@ -20,6 +20,8 @@
 #ifndef ENGINEER_CHASSIS_CONSTANTS_HPP_
 #define ENGINEER_CHASSIS_CONSTANTS_HPP_
 
+#include <array>
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/position.hpp"
 #include "tap/communication/gpio/analog.hpp"
@@ -155,47 +157,53 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
 /**
  * Engineer auto nav path
  */
-static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_START_POSITION =
-    tap::algorithms::transforms::Position(0.5f, 0.5f, 0);  // TODO: find actual start position
+using AutoNavPoint = tap::algorithms::transforms::Position;
+static const AutoNavPoint ENGINEER_AUTO_NAV_START_POSITION =
+    AutoNavPoint(0.5f, 0.5f, 0);  // TODO: find actual start position
 static const float ENGINEER_AUTO_NAV_MARGIN =
     0.05f;  // Addition margin between target above robot width
 static const float ENGINEER_AUTO_NAV_POINT_OFFSET_X = ROBOT_RADIUS + ENGINEER_AUTO_NAV_MARGIN;
 
-static const tap::algorithms::transforms::Position FIRST_CUBE_PICKUP =
-    tap::algorithms::transforms::Position(
-        0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
-        3.555f,
-        0);  // First cube pickup
+static const AutoNavPoint FIRST_CUBE_PICKUP = AutoNavPoint(
+    0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+    3.555f,
+    0);  // First cube pickup
 
-static const tap::algorithms::transforms::Position FIRST_CUBE_DROPOFF =
-    tap::algorithms::transforms::Position(
-        3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
-        0.540f,
-        0);  // First cube dropoff
+static const AutoNavPoint FIRST_CUBE_DROPOFF = AutoNavPoint(
+    3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+    0.540f,
+    0);  // First cube dropoff
 
-static const tap::algorithms::transforms::Position SECOND_CUBE_PICKUP =
-    tap::algorithms::transforms::Position(
-        0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
-        3.825f,
-        0);  // Second cube pickup
+static const AutoNavPoint SECOND_CUBE_PICKUP = AutoNavPoint(
+    0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+    3.825f,
+    0);  // Second cube pickup
 
-static const tap::algorithms::transforms::Position SECOND_CUBE_DROPOFF =
-    tap::algorithms::transforms::Position(
-        3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
-        1.620f,
-        0);  // Second cube dropoff
+static const AutoNavPoint SECOND_CUBE_DROPOFF = AutoNavPoint(
+    3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+    1.620f,
+    0);  // Second cube dropoff
 
-static const tap::algorithms::transforms::Position THIRD_CUBE_PICKUP =
-    tap::algorithms::transforms::Position(
-        0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
-        4.095f,
-        0);  // Third cube pickup
+static const AutoNavPoint THIRD_CUBE_PICKUP = AutoNavPoint(
+    0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+    4.095f,
+    0);  // Third cube pickup
 
-static const tap::algorithms::transforms::Position THIRD_CUBE_DROPOFF =
-    tap::algorithms::transforms::Position(
-        3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
-        2.700f,
-        0);  // Third cube dropoff
+static const AutoNavPoint THIRD_CUBE_DROPOFF = AutoNavPoint(
+    3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+    2.700f,
+    0);  // Third cube dropoff'
+
+static const std::array<AutoNavPoint, 7> ENGINEER_AUTO_NAV_PATH = {
+    ENGINEER_AUTO_NAV_START_POSITION,
+    FIRST_CUBE_PICKUP,
+    FIRST_CUBE_DROPOFF,
+    SECOND_CUBE_PICKUP,
+    SECOND_CUBE_DROPOFF,
+    THIRD_CUBE_PICKUP,
+    THIRD_CUBE_DROPOFF};
+
+static const float AUTONAV_DESIRED_SPEED = 1.0f;  // m/s
 
 static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
 static constexpr float CHASSIS_SPEED_DIVSOR_SPRINT = 8;

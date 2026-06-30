@@ -17,6 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "aruwsrc/control/chassis/fixed_path_auto_nav_command.hpp"
 #if defined(TARGET_ENGINEER)
 #include <memory>
 
@@ -75,6 +76,7 @@
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/select_cube_position_command.hpp"
+#include "aruwsrc/robot/engineer/engineer_chassis_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
@@ -428,6 +430,15 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &chassisSubsystem,
     &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
+
+aruwsrc::control::chassis::FixedPathAutoNavCommand chassisFixedPathAutoNavCommand(
+    *drivers(),
+    chassisSubsystem,
+    autoNavController,
+    ENGINEER_AUTO_NAV_PATH,
+    AUTONAV_DESIRED_SPEED,
+    false,
+    false);
 
 ChassisFrameTurretController<Axis::PITCH> chassisFramePitchTurretController(
     engTurret.pitchMotor,
