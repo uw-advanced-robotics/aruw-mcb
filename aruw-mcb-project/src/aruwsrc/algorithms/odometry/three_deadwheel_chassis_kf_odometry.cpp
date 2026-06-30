@@ -101,7 +101,8 @@ void ThreeDeadwheelChassisKFOdometry::update()
     // Correct deadwheel velocities for rotational component
     float correctedParallelOne = parallelOneRaw + (odoOmega * parallelOneCenterToWheelDistance);
     float correctedParallelTwo = parallelTwoRaw - (odoOmega * parallelTwoCenterToWheelDistance);
-    float correctedPerpendicular = perpendicularRaw + (odoOmega * perpendicularCenterToWheelDistance);
+    float correctedPerpendicular =
+        perpendicularRaw + (odoOmega * perpendicularCenterToWheelDistance);
 
     // Average two parallel wheels to get velocity in odometry frame
     float Vx = (correctedParallelOne + correctedParallelTwo) / 2;
