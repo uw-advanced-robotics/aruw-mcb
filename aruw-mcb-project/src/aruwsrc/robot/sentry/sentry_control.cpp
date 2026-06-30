@@ -430,8 +430,8 @@ aruwsrc::algorithms::ballistics::CvBallisticsSolver ballisticsSolver(
     transformAdapter,
     turretWidowFrictionWheels,
     {
-        .shotTimingEntryThreshold = 6.0f,
-        .shotTimingExitThreshold = 4.0f,
+        .shotTimingEntryThreshold = SHOT_TIMING_ENTRY_THRESHOLD,
+        .shotTimingExitThreshold = SHOT_TIMING_EXIT_THRESHOLD,
         .defaultLaunchSpeed = turretWidow::DEFAULT_LAUNCH_SPEED,
         .turretPitchOffset = 0,
         .minimumShotDelay = aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS /

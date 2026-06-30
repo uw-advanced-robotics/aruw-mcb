@@ -137,6 +137,9 @@ inline constexpr algorithms::TurretFeedforwardConstants TURRET_FEEDFORWARD_CONST
     .Ks = 250.0f,
 };
 
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 3.5f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 3.0f;   // rad/s
+
 namespace world_rel_turret_imu
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {

@@ -299,8 +299,8 @@ CvBallisticsSolver ballisticsSolver(
     transformAdapter,
     frictionWheels,
     {
-        .shotTimingEntryThreshold = 6.0f,
-        .shotTimingExitThreshold = 4.0f,
+        .shotTimingEntryThreshold = SHOT_TIMING_ENTRY_THRESHOLD,
+        .shotTimingExitThreshold = SHOT_TIMING_EXIT_THRESHOLD,
         .defaultLaunchSpeed = aruwsrc::control::launcher::LAUNCHER_SPEED,
         .turretPitchOffset = 0,
         .minimumShotDelay = aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS /

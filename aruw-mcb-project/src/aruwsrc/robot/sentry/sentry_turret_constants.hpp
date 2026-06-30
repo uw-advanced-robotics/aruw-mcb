@@ -84,6 +84,9 @@ static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .errDeadzone = 0.0f,
 };
 
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 5.0f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 4.0f;  // rad/s
+
 namespace turretMajor
 {
 inline constexpr float PULLEY_RATIO =

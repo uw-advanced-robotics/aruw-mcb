@@ -153,6 +153,9 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 0.0f,
 };
 
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 4.0f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 3.0f;   // rad/s
+
 #elif defined(TARGET_STANDARD_PHOBOS)
 static constexpr float TORQUE_TO_DESIRED_OUT =
     1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
@@ -174,6 +177,9 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 52.9f,
 };
 
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 5.0f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 4.0f;   // rad/s
+
 #elif defined(TARGET_STANDARD_DEIMOS)
 static constexpr float TORQUE_TO_DESIRED_OUT =
     1.3f / tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA;  // 1.3Nm max torque
@@ -194,6 +200,9 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springConstant = -2.97f,
     .springFreeLength = 52.9f,
 };
+
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 5.0f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 4.0f;   // rad/s
 
 #else
 #error "Attempted to include standard_turret_constants.hpp for nonstandard target."
