@@ -29,6 +29,8 @@
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
+#include "aruwsrc/control/agitator/agitator_fan_command.hpp"
+#include "aruwsrc/control/agitator/agitator_fan_subsystem.hpp"
 #include "aruwsrc/control/agitator/constant_fire_rate_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -42,6 +44,7 @@
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
 #include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
@@ -56,6 +59,7 @@
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
 #include "aruwsrc/control/governor/imu_not_calibrated_governor.hpp"
 #include "aruwsrc/control/governor/match_running_governor.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_lut_autotune_command.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_spin_ref_limited_command.hpp"
 #include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
@@ -220,17 +224,17 @@ TurretSpringForceOffset turretSpringCompensation(
 
 struct TurretMinorChassisControllers
 {
-    ChassisFrameTurretController<Axis::PITCH> pitchController;
-    ChassisFrameTurretController<Axis::YAW> yawController;
+    ChassisFrameTurretController<transforms::Axis::PITCH> pitchController;
+    ChassisFrameTurretController<transforms::Axis::YAW> yawController;
 };
 
 // @todo make controllers part of subsystem
 TurretMinorChassisControllers turretWidowChassisControllers{
-    .pitchController = ChassisFrameTurretController<Axis::PITCH>(
+    .pitchController = ChassisFrameTurretController<transforms::Axis::PITCH>(
         turretWidow.pitchMotor,
         minorPidConfigs::PITCH_PID_CONFIG_CHASSIS_FRAME,
         {&turretGravityCompensation, &turretSpringCompensation}),
-    .yawController = ChassisFrameTurretController<Axis::YAW>(
+    .yawController = ChassisFrameTurretController<transforms::Axis::YAW>(
         turretWidow.yawMotor,
         minorPidConfigs::YAW_PID_CONFIG_CHASSIS_FRAME),
 };
@@ -328,7 +332,13 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     odometrySubsystem,
     transformAdapter);
 
-aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(drivers(), drivers()->capacitorBank);
+aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
+    drivers(),
+    drivers()->capacitorBank,
+    voltageCurrentSensor);
+
+// The sentry has no operator toggle, so its default command keeps the cap bank enabled.
+aruwsrc::control::cap_bank::SentryCapBankCommand sentryCapBankCommand(drivers(), capBankSubsystem);
 
 aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     *drivers(),
@@ -336,16 +346,16 @@ aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
     transformAdapter.getWorldToChassis(),
     aruwsrc::control::chassis::BEYBLADE_CONFIG,
     &capBankSubsystem,
-    0.15f,
-    1000.0f);
+    CAP_BANK_SPRINT_ENERGY_THRESHOLD,
+    CAP_BANK_SPRINT_TRANSLATIONAL_VELOCITY_THRESHOLD);
 
 SmoothPid turretMajorYawPosPid(turretMajor::worldFrameCascadeController::YAW_POS_PID_CONFIG);
 SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL_PID_CONFIG);
 
 struct TurretMinorWorldControllers
 {
-    WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> pitchController;
-    WorldFrameTurretImuSTOSTurretController<Axis::YAW> yawController;
+    WorldFrameTurretImuCascadePidTurretController<transforms::Axis::PITCH> pitchController;
+    WorldFrameTurretImuSTOSTurretController<transforms::Axis::YAW> yawController;
 };
 
 SmoothPid turretWidowWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
@@ -354,7 +364,7 @@ SmoothPid turretWidowWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FR
 SmoothPid turretWidowWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 
 TurretMinorWorldControllers turretWidowWorldControllers{
-    .pitchController = WorldFrameTurretImuCascadePidTurretController<Axis::PITCH>(
+    .pitchController = WorldFrameTurretImuCascadePidTurretController<transforms::Axis::PITCH>(
         transformer.getWorldToTurretWidow(),
         getTurretMCBCanCommWidow(),
         turretWidow.pitchMotor,
@@ -362,7 +372,7 @@ TurretMinorWorldControllers turretWidowWorldControllers{
         turretWidowWorldPitchVelPid,
         {&turretGravityCompensation, &turretSpringCompensation}),
 
-    .yawController = WorldFrameTurretImuSTOSTurretController<Axis::YAW>(
+    .yawController = WorldFrameTurretImuSTOSTurretController<transforms::Axis::YAW>(
         transformer.getWorldToTurretWidow(),
         getTurretMCBCanCommWidow(),
         turretWidow.yawMotor,
@@ -380,7 +390,7 @@ TurretMajorWorldFrameController turretMajorWorldYawController(
     turretMajorYawVelPid,
     turretMajor::MAX_VEL_ERROR_INPUT);
 
-ChassisFrameTurretController<Axis::YAW> turretMajorChassisYawController(
+ChassisFrameTurretController<transforms::Axis::YAW> turretMajorChassisYawController(
     turretMajor.getMutableMotor(),
     turretMajor::chassisFrameController::YAW_PID_CONFIG);
 
@@ -519,7 +529,7 @@ GovernorLimitedCommand<1> imuNotCalibratedCommandLimited(
     imuNotCalibratedCommand,
     {&imuNotCalibratedGovernor});
 
-autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommandWidow(
+autotune::GravityAutotuneCommand<9, transforms::Axis::PITCH> gravityAutotuneCommandWidow(
     drivers(),
     {&turretWidow,
      &turretWidow.pitchMotor,
@@ -528,7 +538,7 @@ autotune::GravityAutotuneCommand<9, Axis::PITCH> gravityAutotuneCommandWidow(
      TURRET_WEIGHT_KG,
      DESIRED_OUT_TO_TORQUE});
 
-autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
+autotune::LampreyAutotuneCommand<36, transforms::Axis::YAW> lampreyAutotuneCommand(
     drivers(),
     {&turretMajor,
      &turretMajor.getMutableMotor(),
@@ -538,7 +548,7 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
      DESIRED_OUT_TO_TORQUE},
     turretMajorYawLamprey);
 
-autotune::FreqSweepAutotuneCommand<Axis::YAW> freqSweepAutotuneCommand(
+autotune::FreqSweepAutotuneCommand<transforms::Axis::YAW> freqSweepAutotuneCommand(
     drivers(),
     {&turretWidow,
      &turretWidow.yawMotor,
@@ -591,6 +601,19 @@ aruwsrc::control::launcher::
         0.0f,
         true,
         turretWidow::barrelID);
+
+AgitatorFanSubsystem agitatorFan(
+    drivers(),
+    constants::turretWidow::AGITATOR_FAN_PWM_PIN,
+    constants::turretWidow::AGITATOR_FAN_PWM_TIMER,
+    constants::turretWidow::AGITATOR_FAN_PWM_FREQUENCY_HZ);
+
+AgitatorFanCommand agitatorFanCommand(
+    drivers(),
+    agitatorFan,
+    constants::turretWidow::AGITATOR_FAN_ON_DUTY,
+    constants::turretWidow::AGITATOR_FAN_OFF_DUTY,
+    &imuCalibrateCommand);
 
 // Agitator commands (turret widow)
 ConstantFireRateAgitatorCommand turretWidowRotateAgitator(
@@ -649,6 +672,19 @@ GovernorLimitedCommand<2> turretWidowAgitatorManualSpin(
     {&turretWidowAgitator},
     turretWidowRotateAndUnjamAgitator,
     {&heatLimitGovernorTurretWidow, &frictionWheelsOnGovernorTurretWidow});
+
+aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<16>
+    turretWidowLauncherLutAutotuneCommand(
+        drivers(),
+        {
+            .frictionWheels = &turretWidowFrictionWheels,
+            .manualFireCommand = &turretWidowAgitatorManualSpin,
+            .barrelId = turretWidow::barrelID,
+            .numFrictionWheels = 2,
+            .startRpm = 4500.0f,
+            .endRpm = 7500.0f,
+            .rpmStep = 250.0f,
+        });
 
 /* define client display / HUD related items --------------------------------*/
 
@@ -735,12 +771,12 @@ auto leftMidRightDown = std::make_unique<HoldCommandMapping>(
     },
     &leftMidRightDownRms);
 
-// manual drive, auto aim, cv-gated fire
+// manual aim and shoot
 RemoteMapState leftDownRightUpRms =
     RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP);
 auto leftDownRightUp = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&chassisDriveCommand, &turretCVCommand},
+    std::vector<Command *>{&turretWidowManualCommand},
     &leftDownRightUpRms);
 
 auto leftDownRightUpAg = std::make_unique<HoldRepeatCommandMapping>(
@@ -779,7 +815,9 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void initializeSubsystems()
 {
     voltageCurrentSensor.initialize();
+    capBankSubsystem.initialize();
     buzzer.initialize();
+    agitatorFan.initialize();
     chassis.initialize();
     turretWidow.initialize();
     turretMajor.initialize();
@@ -800,6 +838,7 @@ void initializeSubsystems()
 void registerSentrySubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&buzzer);
+    drivers->commandScheduler.registerSubsystem(&agitatorFan);
     drivers->commandScheduler.registerSubsystem(&turretMajor);
     drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turretWidow);
@@ -811,11 +850,12 @@ void registerSentrySubsystems(Drivers *drivers)
 
     drivers->commandScheduler.registerSubsystem(&turretWidowFrictionWheels);
     drivers->commandScheduler.registerSubsystem(&turretWidowAgitator);
+    drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
 
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
     drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
-    drivers->stateMachine.attachAutoNavController(&autoNavController);
+    // drivers->stateMachine.attachAutoNavController(&autoNavController);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -830,6 +870,9 @@ void setDefaultSentryCommands(Drivers *)
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 
     buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
+    agitatorFan.setDefaultCommand(&agitatorFanCommand);
+
+    capBankSubsystem.setDefaultCommand(&sentryCapBankCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
@@ -854,8 +897,7 @@ void registerSentryIoMappings(Drivers *drivers)
     drivers->commandMapper.addMap(std::move(rightUp));
 
     drivers->commandMapper.addMap(std::move(leftDownRightMid));  // manual drive & auto aim
-    drivers->commandMapper.addMap(
-        std::move(leftDownRightUp));  // manual drive, auto aim, gated-fire
+    drivers->commandMapper.addMap(std::move(leftDownRightUp));   // manual aim and shoot
     drivers->commandMapper.addMap(std::move(leftDownRightUpAg));
     drivers->commandMapper.addMap(std::move(leftDownRightDown));  // manual drive
 
@@ -892,7 +934,8 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
         &sentry_control::gravityAutotuneCommandWidow,
         &sentry_control::lampreyAutotuneCommand,
-        &sentry_control::freqSweepAutotuneCommand};
+        &sentry_control::freqSweepAutotuneCommand,
+        &sentry_control::turretWidowLauncherLutAutotuneCommand};
     return commands;
 }
 #endif

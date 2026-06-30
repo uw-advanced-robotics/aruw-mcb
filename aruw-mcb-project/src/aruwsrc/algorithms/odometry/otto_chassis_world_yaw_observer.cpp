@@ -25,6 +25,7 @@
 #include "aruwsrc/util_macros.hpp"
 #include "modm/math/geometry/angle.hpp"
 
+using tap::algorithms::Angle;
 using tap::algorithms::WrappedFloat;
 using tap::communication::sensors::imu::ImuInterface;
 

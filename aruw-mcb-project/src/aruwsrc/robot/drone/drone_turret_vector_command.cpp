@@ -30,17 +30,17 @@ namespace aruwsrc::drone
 using tap::communication::sensors::imu::ImuInterface;
 
 DroneTurretVectorCommand::DroneTurretVectorCommand(
-    aruwsrc::control::ControlOperatorInterface &controlOperatorInterface,
-    DroneTurretSubsystem &turret,
-    const DroneIMU &turretImu,
-    tap::algorithms::SmoothPid &yawPositionPid,
-    tap::algorithms::SmoothPid &yawVelocityPid,
-    tap::algorithms::SmoothPid &pitchPositionPid,
-    tap::algorithms::SmoothPid &pitchVelocityPid,
+    aruwsrc::control::ControlOperatorInterface& controlOperatorInterface,
+    DroneTurretSubsystem& turret,
+    const DroneIMU& turretImu,
+    tap::algorithms::SmoothPid& yawPositionPid,
+    tap::algorithms::SmoothPid& yawVelocityPid,
+    tap::algorithms::SmoothPid& pitchPositionPid,
+    tap::algorithms::SmoothPid& pitchVelocityPid,
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::YAW> &chassisFrameYawController,
+        tap::algorithms::transforms::Axis::YAW>& chassisFrameYawController,
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::PITCH> &chassisFramePitchController,
+        tap::algorithms::transforms::Axis::PITCH>& chassisFramePitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)
@@ -114,30 +114,32 @@ void DroneTurretVectorCommand::runWorldFrameControl(float yawInput, float pitchI
     lastPitchInputAxisWorldFrame = getTurretPitchAxisWorldFrame();
     lastYawAxisWorldFrame =
         getTurretYawAxisWorldFrame(currentForwardWorldFrame, lastPitchInputAxisWorldFrame);
-    const Vector yawControlAxis =
-        lastYawAxisWorldFrame -
-        currentForwardWorldFrame * lastYawAxisWorldFrame.dot(currentForwardWorldFrame);
+    // World-centric yaw control is disabled for now while the drone turret IMU frame is being
+    // debugged. Keep pitch world-relative, and let yaw hold chassis-frame position.
+    // const Vector yawControlAxis =
+    //     lastYawAxisWorldFrame -
+    //     currentForwardWorldFrame * lastYawAxisWorldFrame.dot(currentForwardWorldFrame);
     const Vector pitchControlAxis =
         lastPitchInputAxisWorldFrame -
         currentForwardWorldFrame * lastPitchInputAxisWorldFrame.dot(currentForwardWorldFrame);
-    const float yawAxisMagnitudeSquared = yawControlAxis.dot(yawControlAxis);
+    // const float yawAxisMagnitudeSquared = yawControlAxis.dot(yawControlAxis);
     const float pitchAxisMagnitudeSquared = pitchControlAxis.dot(pitchControlAxis);
-    const bool yawHasPointingAuthority = yawAxisMagnitudeSquared >= MIN_YAW_AXIS_AUTHORITY;
+    // const bool yawHasPointingAuthority = yawAxisMagnitudeSquared >= MIN_YAW_AXIS_AUTHORITY;
     const float limitedYawInput = limitUserInputAtMotorLimits(yawInput, turret.yawMotor);
     const float limitedPitchInput = limitUserInputAtMotorLimits(pitchInput, turret.pitchMotor);
 
-    if (yawHasPointingAuthority)
-    {
-        desiredForwardWorldFrame =
-            rotateVector(desiredForwardWorldFrame, lastYawAxisWorldFrame, limitedYawInput);
-    }
+    // if (yawHasPointingAuthority)
+    // {
+    //     desiredForwardWorldFrame =
+    //         rotateVector(desiredForwardWorldFrame, lastYawAxisWorldFrame, limitedYawInput);
+    // }
     desiredForwardWorldFrame =
         rotateVector(desiredForwardWorldFrame, lastPitchInputAxisWorldFrame, limitedPitchInput);
     desiredForwardWorldFrame =
         normalizeOrFallback(desiredForwardWorldFrame, currentForwardWorldFrame);
 
     const Vector rotationError = currentForwardWorldFrame.cross(desiredForwardWorldFrame);
-    const float yawAxisError = yawControlAxis.dot(rotationError);
+    // const float yawAxisError = yawControlAxis.dot(rotationError);
     const float pitchAxisError = pitchControlAxis.dot(rotationError);
     // Coupled two-axis solve. This is mathematically neat, but it made the drone turret limit-cycle
     // in practice, so the active controller below uses decoupled per-axis projection for now.
@@ -146,15 +148,15 @@ void DroneTurretVectorCommand::runWorldFrameControl(float yawInput, float pitchI
     //                                    (pitchAxisMagnitudeSquared + AXIS_SOLVE_DAMPING) -
     //                                axisCoupling * axisCoupling;
 
-    const float yawError =
-        yawHasPointingAuthority
-            ? clampControllerError(
-                  yawAxisError / (yawAxisMagnitudeSquared + AXIS_SOLVE_DAMPING),
-                  // ((pitchAxisMagnitudeSquared + AXIS_SOLVE_DAMPING) * yawAxisError -
-                  //  axisCoupling * pitchAxisError) /
-                  //     solveDeterminant,
-                  turret.yawMotor)
-            : 0.0f;
+    // const float yawError =
+    //     yawHasPointingAuthority
+    //         ? clampControllerError(
+    //               yawAxisError / (yawAxisMagnitudeSquared + AXIS_SOLVE_DAMPING),
+    //               // ((pitchAxisMagnitudeSquared + AXIS_SOLVE_DAMPING) * yawAxisError -
+    //               //  axisCoupling * pitchAxisError) /
+    //               //     solveDeterminant,
+    //               turret.yawMotor)
+    //         : 0.0f;
     const float pitchError = clampControllerError(
         pitchAxisError / (pitchAxisMagnitudeSquared + AXIS_SOLVE_DAMPING),
         // ((yawAxisMagnitudeSquared + AXIS_SOLVE_DAMPING) * pitchAxisError -
@@ -162,43 +164,24 @@ void DroneTurretVectorCommand::runWorldFrameControl(float yawInput, float pitchI
         //     solveDeterminant,
         turret.pitchMotor);
 
-    const float yawVelocity = turret.yawMotor.getChassisFrameVelocity();
     const float pitchVelocity = turret.pitchMotor.getChassisFrameVelocity();
 
-    float yawOutput = 0.0f;
-    if (yawHasPointingAuthority)
+    yawPositionPid.reset();
+    yawVelocityPid.reset();
+    chassisFrameYawController.runController(
+        dt,
+        chassisFrameYawController.getSetpoint() + limitedYawInput);
+    float chassisYawOutput = turret.yawMotor.getMotorOutput();
+    if (stopAtMotorLimits(chassisYawOutput, turret.yawMotor))
     {
-        const float yawVelocitySetpoint = yawPositionPid.runController(yawError, yawVelocity, dt);
-        yawOutput =
-            yawVelocityPid.runControllerDerivateError(yawVelocitySetpoint - yawVelocity, dt);
+        chassisFrameYawController.setSetpoint(turret.yawMotor.getChassisFrameMeasuredAngle());
+        turret.yawMotor.setMotorOutput(chassisYawOutput);
     }
-    else
-    {
-        yawPositionPid.reset();
-        yawVelocityPid.reset();
-        chassisFrameYawController.runController(
-            dt,
-            chassisFrameYawController.getSetpoint() + limitedYawInput);
-        float chassisYawOutput = turret.yawMotor.getMotorOutput();
-        if (stopAtMotorLimits(chassisYawOutput, turret.yawMotor))
-        {
-            chassisFrameYawController.setSetpoint(turret.yawMotor.getChassisFrameMeasuredAngle());
-            turret.yawMotor.setMotorOutput(chassisYawOutput);
-        }
-    }
+
     const float pitchVelocitySetpoint =
         pitchPositionPid.runController(pitchError, pitchVelocity, dt);
     float pitchOutput =
         pitchVelocityPid.runControllerDerivateError(pitchVelocitySetpoint - pitchVelocity, dt);
-    if (yawHasPointingAuthority)
-    {
-        if (stopAtMotorLimits(yawOutput, turret.yawMotor))
-        {
-            yawPositionPid.reset();
-            yawVelocityPid.reset();
-        }
-        turret.yawMotor.setMotorOutput(yawOutput);
-    }
     if (stopAtMotorLimits(pitchOutput, turret.pitchMotor))
     {
         pitchPositionPid.reset();
@@ -322,7 +305,7 @@ DroneTurretVectorCommand::Vector DroneTurretVectorCommand::normalizeOrFallback(
 
 float DroneTurretVectorCommand::clampControllerError(
     float error,
-    const aruwsrc::control::turret::TurretMotor &turretMotor) const
+    const aruwsrc::control::turret::TurretMotor& turretMotor) const
 {
     error = tap::algorithms::limitVal(error, -MAX_CONTROLLER_ERROR, MAX_CONTROLLER_ERROR);
 
@@ -340,7 +323,7 @@ float DroneTurretVectorCommand::clampControllerError(
 
 float DroneTurretVectorCommand::limitUserInputAtMotorLimits(
     float input,
-    const aruwsrc::control::turret::TurretMotor &turretMotor) const
+    const aruwsrc::control::turret::TurretMotor& turretMotor) const
 {
     if (!turretMotor.getConfig().limitMotorAngles)
     {
@@ -358,8 +341,8 @@ float DroneTurretVectorCommand::limitUserInputAtMotorLimits(
 }
 
 bool DroneTurretVectorCommand::stopAtMotorLimits(
-    float &motorOutput,
-    const aruwsrc::control::turret::TurretMotor &turretMotor) const
+    float& motorOutput,
+    const aruwsrc::control::turret::TurretMotor& turretMotor) const
 {
     if (!turretMotor.getConfig().limitMotorAngles)
     {

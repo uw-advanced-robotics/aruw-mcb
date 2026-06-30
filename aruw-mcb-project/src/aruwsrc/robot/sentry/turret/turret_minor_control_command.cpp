@@ -30,9 +30,9 @@ TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     SentryControlOperatorInterface &controlOperatorInterface,
     SentryTurretMinorSubsystem &turretMinorSubsystem,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        control::turret::algorithms::Axis::YAW> &yawController,
+        tap::algorithms::transforms::Axis::YAW> &yawController,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        control::turret::algorithms::Axis::PITCH> &pitchController,
+        tap::algorithms::transforms::Axis::PITCH> &pitchController,
     float userYawInputScalar,
     float userPitchInputScalar)
     : drivers(drivers),

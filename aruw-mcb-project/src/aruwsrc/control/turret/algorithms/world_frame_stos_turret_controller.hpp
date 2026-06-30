@@ -30,6 +30,7 @@
 
 #include "turret_controller_interface.hpp"
 #include "turret_setpoint_kalman.hpp"
+#include "turret_stos_controller.hpp"
 
 using namespace tap::algorithms;
 
@@ -57,7 +58,7 @@ struct TurretFeedforwardConstants
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 class WorldFrameTurretImuSTOSTurretController final : public TurretAxisControllerInterface<AXIS>
 {
 public:
