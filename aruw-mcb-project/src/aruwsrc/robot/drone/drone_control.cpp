@@ -355,9 +355,8 @@ Trigger leftSwitchMiddle =
 
 Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}));
-
-Trigger rightMousePressed = TriggerHelpers::rightMouseButton(drivers()).whileTrue(&turretCVCommand);
+        .whileTrue(&turretCVCommand);
+        //.whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}));
 
 Trigger thumbwheelUp =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
