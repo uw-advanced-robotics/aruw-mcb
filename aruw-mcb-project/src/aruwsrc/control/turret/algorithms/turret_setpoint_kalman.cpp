@@ -51,69 +51,6 @@ void TurretSetpointKalmanFilter::update(
     EKF::InputVector z;
     z.data[int(TrackerInput::MEASURED_POS)] = predictedPos - shortestPathError;
 
-    int velVarInd = (static_cast<int>(TrackerInput::NUM_INPUTS) + 1) *
-                    static_cast<int>(TrackerInput::MEASURED_VEL);
-    int accVarInd = (static_cast<int>(TrackerInput::NUM_INPUTS) + 1) *
-                    static_cast<int>(TrackerInput::MEASURED_ACC);
-    auto& internal_R = ekf.getMeasurementCovariance();
-
-    float velVar = internal_R[velVarInd];
-    float accVar = internal_R[accVarInd];
-
-    // Ignore unused variances
-    internal_R[velVarInd] = 1e20f;
-    internal_R[accVarInd] = 1e20f;
-
-    ekf.update(z);
-
-    internal_R[accVarInd] = accVar;
-    internal_R[velVarInd] = velVar;
-}
-
-void TurretSetpointKalmanFilter::updateWithVelocity(
-    const tap::algorithms::WrappedFloat& measuredPosition,
-    float measuredVel,
-    float dt)
-{
-    ekf.predict(dt);
-
-    float predictedPos = ekf.getStateVectorAsMatrix()[int(TrackerState::POS)];
-
-    float shortestPathError = measuredPosition.minDifference(predictedPos);
-
-    EKF::InputVector z;
-    z.data[int(TrackerInput::MEASURED_POS)] = predictedPos - shortestPathError;
-    z.data[int(TrackerInput::MEASURED_VEL)] = measuredVel;
-
-    int accVarInd = (static_cast<int>(TrackerInput::NUM_INPUTS) + 1) *
-                    static_cast<int>(TrackerInput::MEASURED_ACC);
-    auto& internal_R = ekf.getMeasurementCovariance();
-
-    float accVar = internal_R[accVarInd];
-    internal_R[accVarInd] = 1e20f;
-
-    ekf.update(z);
-
-    internal_R[accVarInd] = accVar;
-}
-
-void TurretSetpointKalmanFilter::updateWithAcceleration(
-    const tap::algorithms::WrappedFloat& measuredPosition,
-    float measuredVel,
-    float measuredAcc,
-    float dt)
-{
-    ekf.predict(dt);
-
-    float predictedPos = ekf.getStateVectorAsMatrix()[int(TrackerState::POS)];
-
-    float shortestPathError = measuredPosition.minDifference(predictedPos);
-
-    EKF::InputVector z;
-    z.data[int(TrackerInput::MEASURED_POS)] = predictedPos - shortestPathError;
-    z.data[int(TrackerInput::MEASURED_VEL)] = measuredVel;
-    z.data[int(TrackerInput::MEASURED_ACC)] = measuredAcc;
-
     ekf.update(z);
 }
 

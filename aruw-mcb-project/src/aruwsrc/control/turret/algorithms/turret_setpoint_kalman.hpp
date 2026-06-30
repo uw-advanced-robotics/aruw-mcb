@@ -32,15 +32,6 @@ public:
 
     void initialize(tap::algorithms::WrappedFloat initialPosition);
     void update(const tap::algorithms::WrappedFloat& measuredPosition, float dt);
-    void updateWithVelocity(
-        const tap::algorithms::WrappedFloat& measuredPosition,
-        float measuredVel,
-        float dt);
-    void updateWithAcceleration(
-        const tap::algorithms::WrappedFloat& measuredPosition,
-        float measuredVel,
-        float measuredAcc,
-        float dt);
 
     float getEstimatedPosition() const;
     float getEstimatedVelocity() const;
@@ -58,8 +49,6 @@ protected:
     enum class TrackerInput
     {
         MEASURED_POS = 0,
-        MEASURED_VEL,
-        MEASURED_ACC,
         NUM_INPUTS
     };
     using EKF = aruwsrc::algorithms::
@@ -74,9 +63,9 @@ private:
 
     // Q Matrix (Process Noise): Updated for 3x3.
     static constexpr float EKF_Q[STATES_SQUARED] =
-        {1e-6f, 0.0f, 0.0f, 0.0f, 1e-4f, 0.0f, 0.0f, 0.0f, 5e-4f};
+        {1e-15f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 10.0f};
 
-    static constexpr float EKF_R[INPUTS_SQUARED] = {1e-6f, 0, 0, 0, 1e-6f, 0, 0, 0, 1e-6f};
+    static constexpr float EKF_R[INPUTS_SQUARED] = {8e-3f};
 
     // P0 Matrix (Initial Covariance): Updated for 3x3
     static constexpr float EKF_P0[STATES_SQUARED] =
