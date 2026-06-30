@@ -229,18 +229,6 @@ private:
     const modm::Vector2f initPos;
     const float initYaw;
 
-    float perpendicularRaw;
-    float parallelOneRaw;
-    float parallelTwoRaw;
-    float odoOmega;
-    float correctedParallelOne;
-    float correctedParallelTwo;
-    float correctedPerpendicular;
-    float Vx;
-    float Vy;
-    float integrated_parallel;
-    float integrated_perpendicular;
-
     /// Chassis location in the world frame
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame

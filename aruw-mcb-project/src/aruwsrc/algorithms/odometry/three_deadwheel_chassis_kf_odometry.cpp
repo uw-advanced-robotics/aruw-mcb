@@ -66,14 +66,14 @@ void ThreeDeadwheelChassisKFOdometry::update()
     assert(parallelOneCenterToWheelDistance + parallelTwoCenterToWheelDistance > 0);
 
     /* Process IMU */
-    float mahonyOutput = 0.0f;
+    /*float mahonyOutput = 0.0f;
     if (!chassisYawObserver.getChassisWorldYaw(&mahonyOutput))
     {
         mahonyOutput = 0.0f;
         return;
     }
 
-    wrappedTheta = Angle(mahonyOutput);
+    float wrappedTheta = Angle(mahonyOutput);
     WrappedFloat deltaTheta = wrappedTheta - lastWrappedTheta;
     lastWrappedTheta = wrappedTheta;
 
@@ -86,29 +86,26 @@ void ThreeDeadwheelChassisKFOdometry::update()
     float imuOmega = imu.getGz();
 
     // Rotate acceleration to the world frame
-    rotateVector(&Ax, &Ay, chassisYaw.getWrappedValue());
+    rotateVector(&Ax, &Ay, chassisYaw.getWrappedValue());*/
 
     /* Process dead wheels */
 
-    perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
-    parallelOneRaw = deadwheelOdometry.getParallelMotorOneVelocity();
-    parallelTwoRaw = deadwheelOdometry.getParallelMotorTwoVelocity();
-
-    integrated_parallel += (parallelOneRaw + parallelTwoRaw) / 2 * DT;
-    integrated_perpendicular += perpendicularRaw * DT;
+    float perpendicularRaw = deadwheelOdometry.getPerpendicularVelocity();
+    float parallelOneRaw = deadwheelOdometry.getParallelMotorOneVelocity();
+    float parallelTwoRaw = deadwheelOdometry.getParallelMotorTwoVelocity();
 
     // Compute odometry angular velocity
-    odoOmega = (parallelTwoRaw - parallelOneRaw) /
-               (parallelOneCenterToWheelDistance + parallelTwoCenterToWheelDistance);
+    float odoOmega = (parallelTwoRaw - parallelOneRaw) /
+                     (parallelOneCenterToWheelDistance + parallelTwoCenterToWheelDistance);
 
     // Correct deadwheel velocities for rotational component
-    correctedParallelOne = parallelOneRaw + (odoOmega * parallelOneCenterToWheelDistance);
-    correctedParallelTwo = parallelTwoRaw - (odoOmega * parallelTwoCenterToWheelDistance);
-    correctedPerpendicular = perpendicularRaw + (odoOmega * perpendicularCenterToWheelDistance);
+    float correctedParallelOne = parallelOneRaw + (odoOmega * parallelOneCenterToWheelDistance);
+    float correctedParallelTwo = parallelTwoRaw - (odoOmega * parallelTwoCenterToWheelDistance);
+    float correctedPerpendicular = perpendicularRaw + (odoOmega * perpendicularCenterToWheelDistance);
 
     // Average two parallel wheels to get velocity in odometry frame
-    Vx = (correctedParallelOne + correctedParallelTwo) / 2;
-    Vy = correctedPerpendicular;
+    float Vx = (correctedParallelOne + correctedParallelTwo) / 2;
+    float Vy = correctedPerpendicular;
 
     // Rotate velocity from odometry frame to robot frame
     rotateVector(&Vx, &Vy, odomFrameToRobotFrame);
