@@ -336,12 +336,12 @@ TurretCVCommandMock::TurretCVCommandMock(
 TurretCVCommandMock::~TurretCVCommandMock() {}
 
 CvBallisticsSolverMock::CvBallisticsSolverMock(
-    const aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-    const aruwsrc::algorithms::odometry::transforms::TransformerInterface &transformer,
-    const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
+    const aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor,
+    const aruwsrc::algorithms::odometry::transforms::TransformerInterface& transformer,
+    const control::launcher::LaunchSpeedPredictorInterface& frictionWheels,
     CvBallisticsSolver::Config config,
     const uint8_t turretID,
-    aruwsrc::communication::rtt::RttTelemetry *telemetry)
+    aruwsrc::communication::rtt::RttTelemetry* telemetry)
     : aruwsrc::algorithms::ballistics::CvBallisticsSolver(
           visionCoprocessor,
           transformer,
