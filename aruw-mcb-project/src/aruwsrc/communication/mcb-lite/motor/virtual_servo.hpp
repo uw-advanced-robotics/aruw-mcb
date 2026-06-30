@@ -61,7 +61,7 @@ public:
         pwmOutputRamp.setTarget(tap::algorithms::limitVal<float>(pwm, minPwm, maxPwm));
         prevTime = tap::arch::clock::getTimeMilliseconds();
     }
-
+int bob = 0;
     void updateSendPwmRamp()
     {
         uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
@@ -69,6 +69,7 @@ public:
         prevTime = currTime;
         currentPwm = pwmOutputRamp.getValue();
         virtualPwm.write(currentPwm, pin);
+        bob+=15;
     }
 
     float getPWM() const { return currentPwm; }

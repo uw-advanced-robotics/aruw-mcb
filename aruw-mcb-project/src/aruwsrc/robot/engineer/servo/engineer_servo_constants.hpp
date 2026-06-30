@@ -26,17 +26,17 @@
 
 namespace aruwsrc::engineer::servo
 {
-// figure this out (which is acc yaw & pitch; what the max & min angles r etc.)
-static constexpr tap::gpio::Pwm::Pin YAW_PIN = tap::gpio::Pwm::Pin::X;
-static constexpr tap::gpio::Pwm::Pin PITCH_PIN = tap::gpio::Pwm::Pin::Buzzer;
 
-static constexpr float YAW_MIN_PWM = 0.0f;
-static constexpr float YAW_MAX_PWM = 1.0f;
+static constexpr tap::gpio::Pwm::Pin YAW_PIN = tap::gpio::Pwm::Pin::Buzzer;
+static constexpr tap::gpio::Pwm::Pin PITCH_PIN = tap::gpio::Pwm::Pin::X;
+
+static constexpr float YAW_MIN_PWM = 0.25f;
+static constexpr float YAW_MAX_PWM = 1.25f;
 static constexpr float YAW_MIN_ANGLE = -M_PI_2;  // im assuming its not 360
 static constexpr float YAW_MAX_ANGLE = M_PI_2;
 
-static constexpr float PITCH_MIN_PWM = 0.0f;
-static constexpr float PITCH_MAX_PWM = 1.0f;
+static constexpr float PITCH_MIN_PWM = 0.25f;
+static constexpr float PITCH_MAX_PWM = 1.25f;
 static constexpr float PITCH_MIN_ANGLE = -M_PI_2;  // same here
 static constexpr float PITCH_MAX_ANGLE = M_PI_2;
 

@@ -96,7 +96,7 @@ public:
         mcbLite.initialize();
         // mcbLite.imu.sendMountingTransform(...);
         mcbLite.imu.initialize(mainLoopFrequency, 0.2f, 0.0f);
-        mcbLite.pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 500);
+        mcbLite.pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 500); // should be 50?
         mcbLite.pwm.start(tap::gpio::Pwm::Timer::TIMER8);
         mcbLite.digital.configureInputPullMode(
             tap::gpio::Digital::InputPin::B,

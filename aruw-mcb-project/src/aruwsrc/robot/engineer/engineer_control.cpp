@@ -31,6 +31,7 @@
 #include "tap/control/sequential_command.hpp"
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
+#include "tap/control/instant_command.hpp"
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
@@ -615,7 +616,14 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 //     std::vector<Command*>{&servoMoveCubeCommand},
 //     &leftUpRms);
 
-Trigger leftUp = TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP).onTrue(&vtmServoCommand);
+InstantCommand resetServoSubsystem(
+    []() { vtmServoSubsystem.refreshSafeDisconnect(); },
+    std::array<tap::control::Subsystem *, 1>{
+        &vtmServoSubsystem});
+
+Trigger leftUp = 
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(&servoMoveCubeCommand).onFalse(&resetServoSubsystem);
 
 // Disabled bc homing doesn't work yet (virtual limit switches)
 // Trigger leftDownMidRightUp =
@@ -638,18 +646,18 @@ Trigger wheelUp =
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
-    chassisSubsystem.initialize();
-    engTurret.initialize();
-    extensionSubsystem.initialize();
-    wristSubsystem.initialize();
-    cubeStorage.initialize();
-    leftSuckSubsystem.initialize();
-    rightSuckSubsystem.initialize();
-    transformSubsystem.initialize();
-    odometrySubsystem.initialize();
-    parallelOmniOne.initialize();
-    parallelOmniTwo.initialize();
-    perpendicularOmni.initialize();
+    // chassisSubsystem.initialize();
+    // engTurret.initialize();
+    // extensionSubsystem.initialize();
+    // wristSubsystem.initialize();
+    // cubeStorage.initialize();
+    // leftSuckSubsystem.initialize();
+    // rightSuckSubsystem.initialize();
+    // transformSubsystem.initialize();
+    // odometrySubsystem.initialize();
+    // parallelOmniOne.initialize();
+    // parallelOmniTwo.initialize();
+    // perpendicularOmni.initialize();
     // clientDicsplay.initialize();
     vtmServoSubsystem.initialize();
 }
@@ -687,7 +695,9 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers) {
+    // drivers->commandMapper.addMap(std::move(leftUp));
+}
 }  // namespace control
 }  // namespace aruwsrc
 

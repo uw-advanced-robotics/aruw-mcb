@@ -42,8 +42,8 @@ public:
 
     const char* getName() const override { return "Servo Move Position Command"; }
     bool isReady() override { return true; }
-    void initialize() override {}
-    void execute() override { subsystem.moveToCube(transformer.getVtmGimbalToEndEffector()); }
+    void initialize() override { }
+    void execute() override {subsystem.moveToCube(transformer.getVtmGimbalToEndEffector());}
     void end(bool) override {}
     bool isFinished() const override { return false; }
 
