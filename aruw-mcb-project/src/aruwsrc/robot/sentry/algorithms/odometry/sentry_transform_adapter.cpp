@@ -67,12 +67,12 @@ const Transform& SentryTransformAdapter::getVisionWorldToChassis() const
     return this->transforms.getWorldToTurretMajor();
 }
 
-const Transform& SentryTransformAdapter::getWorldToTurretYaw(uint8_t) const
+const Transform& SentryTransformAdapter::getWorldToTurretYaw(uint8_t /* turretId */) const
 {
     return this->transforms.getWorldToTurretWidow();
 }
 
-const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t) const
+const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t /* turretId */) const
 {
     return this->transforms.getWorldToTurretWidow();
 }

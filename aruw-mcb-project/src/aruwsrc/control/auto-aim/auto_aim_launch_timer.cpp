@@ -59,8 +59,9 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
 
     // If hitting the same plate multiple times requires a fire rate that's too high, switch to
     // shooting once per plate
+    inline constexpr float HALF_SECOND = 500'000;
     bool targetPlateCenters =
-        ballisticsSolution->shotWindowHalfWidth * maxSinglePlateHitFrequency < 500'000;
+        ballisticsSolution->shotWindowHalfWidth * maxSinglePlateHitFrequency < HALF_SECOND;
 
     // If we want to shoot once per plate at the plate center, clamping the window start to the
     // center time means we'll only try to shoot the instant we think our shot will hit the center.

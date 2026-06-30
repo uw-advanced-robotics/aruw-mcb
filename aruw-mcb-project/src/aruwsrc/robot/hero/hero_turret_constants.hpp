@@ -138,7 +138,7 @@ inline constexpr algorithms::TurretFeedforwardConstants TURRET_FEEDFORWARD_CONST
 };
 
 inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 3.5f;  // rad/s
-inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 3.0f;   // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 2.5f;   // rad/s
 
 namespace world_rel_turret_imu
 {
