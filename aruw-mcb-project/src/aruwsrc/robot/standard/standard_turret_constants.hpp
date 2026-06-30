@@ -301,8 +301,8 @@ inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS
 };
 
 inline constexpr algorithms::TurretFeedforwardConstants FEEDFORWARD_CONSTANTS = {
-    .Ka = 0.0133f / TORQUE_TO_DESIRED_OUT / 2.0f,  // smaller to smooth over any jerky motion
-    .Kv = 0.0367f / TORQUE_TO_DESIRED_OUT,
+    .Ka = 0.0133f / TORQUE_TO_DESIRED_OUT / 2.0f,  // reduce jerky movement
+    .Kv = 175.0f,                                  // idk, tuned by hand
     .Ks = 0.12f / TORQUE_TO_DESIRED_OUT};
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
@@ -320,9 +320,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 12'000.0f,
+    .kp = 40'000.0f,
     .ki = 500'000.0f,
-    .kd = 5'000.0f,
+    .kd = 6'000.0f,
     .maxICumulative = 750.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
@@ -405,9 +405,10 @@ inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS
 };
 
 inline constexpr algorithms::TurretFeedforwardConstants FEEDFORWARD_CONSTANTS = {
-    .Ka = 0.0133f / TORQUE_TO_DESIRED_OUT,
-    .Kv = 0.0367f / TORQUE_TO_DESIRED_OUT,
-    .Ks = 0.12f / TORQUE_TO_DESIRED_OUT};
+    .Ka = 0.0133f / TORQUE_TO_DESIRED_OUT / 2.0f,  // smaller to smooth over any jerky motion
+    .Kv = 0.0367f / TORQUE_TO_DESIRED_OUT /
+          2.0f,  // smaller because I guessed and checked and it worked
+    .Ks = 0.9521f / TORQUE_TO_DESIRED_OUT};
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .kp = 16.0f,
@@ -424,9 +425,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 12'000.0f,
+    .kp = 60'000.0f,
     .ki = 500'000.0f,
-    .kd = 5'000.0f,
+    .kd = 3'500.0f,
     .maxICumulative = 750.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
