@@ -37,7 +37,7 @@ public:
             tap::algorithms::transforms::Axis::YAW>* yawController,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             tap::algorithms::transforms::Axis::PITCH>* pitchController,
-        aruwsrc::algorithms::OttoBallisticsSolver* ballisticsSolver,
+        aruwsrc::algorithms::ballistics::CvBallisticsSolver* ballisticsSolver,
         const float userPitchInputScalar,
         const float userYawInputScalar,
         uint8_t turretID = 0);

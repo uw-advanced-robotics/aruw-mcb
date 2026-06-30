@@ -31,7 +31,6 @@
 #include "tap/control/governor/governor_with_fallback_command.hpp"
 #include "tap/control/instant_command.hpp"
 #include "tap/control/remote_map_state.hpp"
-#include "tap/control/repeat_command.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -40,13 +39,13 @@
 #include "tap/control/trigger_helpers.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/otto_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
 #include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/low_battery_buzzer_command.hpp"
@@ -129,6 +128,7 @@ using namespace tap::control::governor;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::ballistics;
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::algorithms::odometry::transforms;
 using namespace aruwsrc::control;
@@ -139,9 +139,6 @@ using namespace aruwsrc::control::client_display::indicators;
 using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::standard;
-
-// for fake sentry
-// using namespace aruwsrc::sentry::chassis;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -263,10 +260,7 @@ aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
 
 // transforms
 StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(
-    *drivers(),
-    transformer,
-    &drivers()->rttTelemetry);
+StandardAnderHeroTransformerSubsystem transformSubsystem(*drivers(), transformer);
 
 StandardAndHeroTransformAdapter transformAdapter(transformer);
 
@@ -292,7 +286,7 @@ std::array<tap::motor::MotorInterface*, 2> wheels = {&leftFrictionWheel, &rightF
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
     2>
-    frictionWheelsSubsystem(
+    frictionWheels(
         drivers(),
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
@@ -300,18 +294,21 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
         aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
-aruwsrc::control::launcher::FrictionWheelInterface& frictionWheels = frictionWheelsSubsystem;
-aruwsrc::control::launcher::LaunchSpeedPredictorInterface& frictionWheelSpeedPredictor =
-    frictionWheelsSubsystem;
-
-OttoBallisticsSolver ballisticsSolver(
+CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
-    odometrySubsystem,
-    turret,
-    frictionWheelSpeedPredictor,
-    aruwsrc::control::launcher::LAUNCHER_SPEED,  // defaultLaunchSpeed
-    0                                            // turretID
-);
+    transformAdapter,
+    frictionWheels,
+    {
+        .shotTimingEntryThreshold = SHOT_TIMING_ENTRY_THRESHOLD,
+        .shotTimingExitThreshold = SHOT_TIMING_EXIT_THRESHOLD,
+        .defaultLaunchSpeed = aruwsrc::control::launcher::LAUNCHER_SPEED,
+        .turretPitchOffset = 0,
+        .minimumShotDelay = aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS /
+                            1'000'000.0f,
+    },
+    0,  // turretID
+    &drivers()->rttTelemetry);
+
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
@@ -580,13 +577,14 @@ ConstantFireRateAgitatorCommand rotateAgitator(
         constants::AGITATOR_NUM_POCKETS,
         constants::MIN_CONSTANT_FIRE_RATE_RPM,
         &manualFireRateReselectionManager});
+MoveIntegralCommand rotateAgitatorSingleShot(agitator, constants::AGITATOR_ROTATE_CONFIG);
 
 UnjamSpokeAgitatorCommand unjamAgitator(agitator, constants::AGITATOR_UNJAM_CONFIG);
 
 MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     *drivers(),
     agitator,
-    rotateAgitator,
+    rotateAgitatorSingleShot,
     unjamAgitator);
 
 // Unused, causes incosnistent fire rates due to suspected ref delay.
@@ -641,6 +639,11 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     rotateAndUnjamAgitatorWhenFrictionWheelsOn,
     {&heatLimitGovernor, &cvOnTargetGovernor});
 
+// GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCVWindowLimiting(
+//     {&agitator},
+//     rotateAndUnjamAgitator,
+//     {&frictionWheelsOnGovernor, &cvOnTargetGovernor, &heatLimitGovernor});
+
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
     &frictionWheels,
@@ -691,6 +694,7 @@ TextHudIndicators textHudIndicators(
 
 VisionTargetIndicator visionTargetIndicator(
     drivers()->visionCoprocessor,
+    ballisticsSolver,
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 
@@ -725,7 +729,10 @@ Trigger leftSwitchDown =
 
 Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(Compose::parallel<2>({{&turretCVCommand, &chassisDriveCommand}}));
+        .whileTrue(&turretCVCommand)  // shouldn't be composed into a concurrent command as
+                                      // cvOnTargetGoverner checks if this command specifically is
+                                      // scheduled
+        .whileTrue(&chassisDriveCommand);
 
 Trigger fToggled = TriggerHelpers::button(drivers(), Remote::Key::F).toggleOnTrue(&beybladeCommand);
 

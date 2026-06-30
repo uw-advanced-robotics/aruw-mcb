@@ -70,7 +70,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 55.0f,
 };
 
-static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
+static constexpr float TURRET_MINOR_OFFSET = 0.0f;
 
 static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .kp = 0.042f,
@@ -83,6 +83,9 @@ static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
+
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 5.0f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 4.0f;   // rad/s
 
 namespace turretMajor
 {

@@ -60,7 +60,7 @@ VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     // Initialize all aim state to be invalid/unknown
     for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
     {
-        this->lastAimData[i].pva.updated = 0;
+        this->lastAimData[i].targetState.updated = 0;
         this->lastAimData[i].timestamp = 0;
     }
 }
@@ -189,8 +189,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     for (int j = 0; j < control::turret::NUM_TURRETS; j++)
     {
         uint8_t flags = message.data[currIndex];
-        lastAimData[j].pva.updated = 0;
-        lastAimData[j].timing.updated = 0;
+        lastAimData[j].targetState.updated = 0;
 
         currIndex += messageWidths::FLAGS_BYTES;
         memcpy(&lastAimData[j].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);
@@ -202,12 +201,11 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
                 switch (i)
                 {
                     case 0:
-                        memcpy(&lastAimData[j].pva, &message.data[currIndex], LEN_FIELDS[i]);
-                        lastAimData[j].pva.updated = 1;
-                        break;
-                    case 1:
-                        memcpy(&lastAimData[j].timing, &message.data[currIndex], LEN_FIELDS[i]);
-                        lastAimData[j].timing.updated = 1;
+                        memcpy(
+                            &lastAimData[j].targetState,
+                            &message.data[currIndex],
+                            LEN_FIELDS[i]);
+                        lastAimData[j].targetState.updated = 1;
                         break;
                 }
                 currIndex += (int)LEN_FIELDS[i];
@@ -243,12 +241,19 @@ void VisionCoprocessor::logVisionTelemetry()
 
     telemetry->logSignal("online:cv", isCvOnline());
     telemetry->logSignal("cv:hasTarget", getSomeTurretHasTarget());
-    telemetry->logSignal("cv:timing_shots", getSomeTurretUsingTimedShots());
 
-    telemetry->logSignal("cv:aimData:updated", aimData.pva.updated);
+    telemetry->logSignal("cv:aimData:updated", aimData.targetState.updated);
     telemetry->logSignal("cv:aimData:time", aimData.timestamp);
-    telemetry->logSignal("cv:aimData:pos", aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
-    telemetry->logSignal("cv:aimData:vel", aimData.pva.xVel, aimData.pva.yVel, aimData.pva.zVel);
+    telemetry->logSignal(
+        "cv:aimData:pos",
+        aimData.targetState.xPos,
+        aimData.targetState.yPos,
+        aimData.targetState.zPos);
+    telemetry->logSignal(
+        "cv:aimData:vel",
+        aimData.targetState.xVel,
+        aimData.targetState.yVel,
+        aimData.targetState.zVel);
 }
 
 void VisionCoprocessor::logRefereeTelemetry()
