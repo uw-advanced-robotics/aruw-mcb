@@ -75,8 +75,8 @@ void EngineerTransforms::updateTransforms()
     float extPos = extension.getPosition();
 
     // update joint transforms
-    // worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
-    worldToChassis.updateTranslation(0, 0, 0);
+    worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
+
     // use odometry yaw because it likely filters more information than imu alone, but only for yaw
     worldToChassis.updateRotation(
         chassisImu.getRoll(),
