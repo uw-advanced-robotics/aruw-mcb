@@ -639,9 +639,9 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
-    // engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
     // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
-    // chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
+    chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
     extensionSubsystem.setDefaultCommand(&extensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
