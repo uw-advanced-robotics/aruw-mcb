@@ -294,10 +294,6 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
         aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
-aruwsrc::control::launcher::FrictionWheelInterface& frictionWheels = frictionWheelsSubsystem;
-aruwsrc::control::launcher::LaunchSpeedPredictorInterface& frictionWheelSpeedPredictor =
-    frictionWheelsSubsystem;
-
 CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
     transformAdapter,
