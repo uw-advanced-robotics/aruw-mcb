@@ -206,14 +206,14 @@ float ControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
         case 0:
             return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) +
                    static_cast<float>(limitVal<int16_t>(
-                       drivers->remote.getMouseY(),
+                       -drivers->remote.getMouseY(),
                        -USER_MOUSE_PITCH_MAX,
                        USER_MOUSE_PITCH_MAX)) *
                        getUserMousePitchScalar();
         case 1:
             return -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) +
                    static_cast<float>(limitVal<int16_t>(
-                       drivers->remote.getMouseY(),
+                       -drivers->remote.getMouseY(),
                        -USER_MOUSE_PITCH_MAX,
                        USER_MOUSE_PITCH_MAX)) *
                        getUserMousePitchScalar();
