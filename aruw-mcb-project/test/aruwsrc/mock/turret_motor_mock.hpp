@@ -42,9 +42,9 @@ public:
         attachTurretController,
         (const control::turret::algorithms::TurretControllerInterface *),
         (override));
-    MOCK_METHOD(void, setChassisFrameSetpoint, (WrappedFloat));
+    MOCK_METHOD(void, setChassisFrameSetpoint, (tap::algorithms::WrappedFloat));
     MOCK_METHOD(bool, isOnline, (), (const override));
-    MOCK_METHOD(WrappedFloat, getChassisFrameSetpoint, (), (const override));
+    MOCK_METHOD(tap::algorithms::WrappedFloat, getChassisFrameSetpoint, (), (const override));
     MOCK_METHOD(
         const tap::algorithms::WrappedFloat &,
         getChassisFrameMeasuredAngle,
@@ -61,7 +61,7 @@ public:
     MOCK_METHOD(
         float,
         getValidMinError,
-        (const WrappedFloat, const WrappedFloat),
+        (const tap::algorithms::WrappedFloat, const tap::algorithms::WrappedFloat),
         (const override));
 
 private:

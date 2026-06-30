@@ -27,6 +27,8 @@
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
+using tap::algorithms::Angle;
+
 namespace aruwsrc::drone
 {
 using tap::communication::sensors::imu::ImuInterface;

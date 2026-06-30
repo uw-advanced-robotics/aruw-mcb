@@ -38,7 +38,7 @@
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
+template <uint32_t NUM_TEST_POINTS, tap::algorithms::transforms::Axis AXIS>
 class SpringAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>
 {
 private:
@@ -64,15 +64,15 @@ public:
      * @param failChime Chime to play on failed autotune.
      */
     SpringAutotuneCommand(
-        tap::Drivers *drivers,
-        const TurretTuneCommand::TurretCalibrationConfig &config,
-        const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce,
-        const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce =
+        tap::Drivers* drivers,
+        const TurretTuneCommand::TurretCalibrationConfig& config,
+        const aruwsrc::control::turret::algorithms::TurretSpringForceOffset* springForce,
+        const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset* gravityForce =
             nullptr,
-        chassis::HolonomicChassisSubsystem *chassis = nullptr,
+        chassis::HolonomicChassisSubsystem* chassis = nullptr,
         const std::array<float, NUM_TEST_POINTS> points = {},
-        aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr,
-        aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
+        aruwsrc::control::buzzer::NoteSequenceCommand* failChime = nullptr,
+        aruwsrc::control::buzzer::NoteSequenceCommand* successChime = nullptr,
         const float velocityZeroThreshold = TurretTuneCommand::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold = TurretTuneCommand::DEFAULT_POSITION_THRESHOLD)
         : TurretTuneCommand(
@@ -88,9 +88,9 @@ public:
           gravityForce(gravityForce)
     {
     }
-    const char *getName() const override { return "Spring Gravity Autotune Command "; }
+    const char* getName() const override { return "Spring Gravity Autotune Command "; }
 
-    void drawCalibrationResult(modm::GraphicDisplay &display) const override
+    void drawCalibrationResult(modm::GraphicDisplay& display) const override
     {
         if (gravityForce)
         {
@@ -124,8 +124,8 @@ protected:
     }
 
 private:
-    const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce;
-    const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce;
+    const aruwsrc::control::turret::algorithms::TurretSpringForceOffset* springForce;
+    const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset* gravityForce;
 
     // Array of torque measurements received post averaging
     std::array<float, NUM_TEST_POINTS> measuredTorques{};
@@ -149,7 +149,7 @@ private:
                this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
     }
 
-    void drawCalibrationResultSpringGrav(modm::GraphicDisplay &display) const
+    void drawCalibrationResultSpringGrav(modm::GraphicDisplay& display) const
     {
         const std::array<float, 4> result = calculateCOMandSpring(measuredAngles, measuredTorques);
         const float X = result[0];
@@ -164,7 +164,7 @@ private:
         display.printf("Spring Constant K: %.2f", static_cast<double>(K));
     }
 
-    void drawCalibrationResultJustSpring(modm::GraphicDisplay &display) const
+    void drawCalibrationResultJustSpring(modm::GraphicDisplay& display) const
     {
         const std::array<float, 4> result = calculateJustSpring(measuredAngles, measuredTorques);
         const float K = result[3];

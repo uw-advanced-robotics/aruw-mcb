@@ -152,7 +152,7 @@ using namespace aruwsrc::standard;
 driversFunc drivers = DoNotUse_getDrivers;
 namespace standard_control
 {
-inline aruwsrc::communication::can::TurretMCBCanComm &getTurretMCBCanComm()
+inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
@@ -287,7 +287,7 @@ tap::motor::DjiMotor rightFrictionWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::MotorInterface *, 2> wheels = {&leftFrictionWheel, &rightFrictionWheel};
+std::array<tap::motor::MotorInterface*, 2> wheels = {&leftFrictionWheel, &rightFrictionWheel};
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
@@ -300,8 +300,8 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
         aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
-aruwsrc::control::launcher::FrictionWheelInterface &frictionWheels = frictionWheelsSubsystem;
-aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor =
+aruwsrc::control::launcher::FrictionWheelInterface& frictionWheels = frictionWheelsSubsystem;
+aruwsrc::control::launcher::LaunchSpeedPredictorInterface& frictionWheelSpeedPredictor =
     frictionWheelsSubsystem;
 
 OttoBallisticsSolver ballisticsSolver(
@@ -371,14 +371,14 @@ algorithms::TurretSpringForceOffset turretSpringCompensation(
     pitchMotor.isMotorInverted());
 
 // Turret controllers
-algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH> chassisFramePitchTurretController(
-    turret.pitchMotor,
-    chassis_rel::PITCH_PID_CONFIG,
-    {&turretGravityCompensation, &turretSpringCompensation});
+algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
+    chassisFramePitchTurretController(
+        turret.pitchMotor,
+        chassis_rel::PITCH_PID_CONFIG,
+        {&turretGravityCompensation, &turretSpringCompensation});
 
-algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawTurretController(
-    turret.yawMotor,
-    chassis_rel::YAW_PID_CONFIG);
+algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
+    chassisFrameYawTurretController(turret.yawMotor, chassis_rel::YAW_PID_CONFIG);
 
 algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
     *drivers(),
@@ -392,7 +392,7 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
+algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::PITCH>
     worldFramePitchTurretImuController(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
@@ -401,7 +401,7 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
         worldFramePitchTurretImuVelPid,
         {&turretGravityCompensation, &turretSpringCompensation});
 
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
+algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::PITCH>
     worldFramePitchTurretImuControllerCv(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
@@ -413,7 +413,7 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITC
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
+algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::YAW>
     worldFrameYawTurretImuController(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
@@ -426,7 +426,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
 #if defined(TARGET_STANDARD_NULL)
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
+algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::YAW>
     worldFrameYawTurretImuControllerCv(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
@@ -434,7 +434,7 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
         worldFrameYawTurretImuPosPidCv,
         worldFrameYawTurretImuVelPidCv);
 #else
-algorithms::WorldFrameTurretImuSTOSTurretController<algorithms::Axis::YAW>
+algorithms::WorldFrameTurretImuSTOSTurretController<tap::algorithms::transforms::Axis::YAW>
     worldFrameYawTurretImuControllerCv(
         transformer.getWorldToTurret(),
         getTurretMCBCanComm(),
@@ -496,38 +496,36 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
 
 IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(drivers(), imuCalibrateCommand);
 
-autotune::GravityAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
-    gravityAutotuneCommand(
-        drivers(),
-        {&turret,
-         &turret.pitchMotor,
-         &chassisFramePitchTurretController,
-         pitchMotor.isMotorInverted(),
-         TURRET_WEIGHT_KG,
-         TORQUE_TO_DESIRED_OUT},
-        &turretSpringCompensation,
-        &chassis,
-        {},
-        modm::toRadian(0.003));
+autotune::GravityAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH> gravityAutotuneCommand(
+    drivers(),
+    {&turret,
+     &turret.pitchMotor,
+     &chassisFramePitchTurretController,
+     pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &turretSpringCompensation,
+    &chassis,
+    {},
+    modm::toRadian(0.003));
 
-autotune::SpringAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
-    springAutotuneCommand(
-        drivers(),
-        {&turret,
-         &turret.pitchMotor,
-         &chassisFramePitchTurretController,
-         pitchMotor.isMotorInverted(),
-         TURRET_WEIGHT_KG,
-         TORQUE_TO_DESIRED_OUT},
-        &turretSpringCompensation,
-        &turretGravityCompensation,
-        &chassis,
-        {},
-        &imuCalibrateSuccessBuzzCommand,
-        &imuCalibrateFailBuzzCommand,
-        modm::toRadian(0.003));
+autotune::SpringAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH> springAutotuneCommand(
+    drivers(),
+    {&turret,
+     &turret.pitchMotor,
+     &chassisFramePitchTurretController,
+     pitchMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    &turretSpringCompensation,
+    &turretGravityCompensation,
+    &chassis,
+    {},
+    &imuCalibrateSuccessBuzzCommand,
+    &imuCalibrateFailBuzzCommand,
+    modm::toRadian(0.003));
 
-autotune::SecondOrderAutotuneCommand<9, aruwsrc::control::turret::algorithms::Axis::PITCH>
+autotune::SecondOrderAutotuneCommand<9, tap::algorithms::transforms::Axis::PITCH>
     secondOrderAutotuneCommand(
         drivers(),
         {&turret,
@@ -542,21 +540,17 @@ autotune::SecondOrderAutotuneCommand<9, aruwsrc::control::turret::algorithms::Ax
         &imuCalibrateSuccessBuzzCommand,
         &imuCalibrateFailBuzzCommand);
 
-autotune::FreqSweepAutotuneCommand<aruwsrc::control::turret::algorithms::Axis::YAW>
-    freqSweepAutotuneCommand(
-        drivers(),
-        {&turret,
-         &turret.yawMotor,
-         &chassisFrameYawTurretController,
-         yawMotor.isMotorInverted(),
-         TURRET_WEIGHT_KG,
-         TORQUE_TO_DESIRED_OUT},
-        {.startFreq = 1.5f,
-         .endFreq = 250.0f,
-         .freqIncrementRatio = 1.0001f,
-         .magnitude = 12'000.0f},
-        &getTurretMCBCanComm(),
-        {&chassisFramePitchTurretController});
+autotune::FreqSweepAutotuneCommand<tap::algorithms::transforms::Axis::YAW> freqSweepAutotuneCommand(
+    drivers(),
+    {&turret,
+     &turret.yawMotor,
+     &chassisFrameYawTurretController,
+     yawMotor.isMotorInverted(),
+     TURRET_WEIGHT_KG,
+     TORQUE_TO_DESIRED_OUT},
+    {.startFreq = 1.5f, .endFreq = 250.0f, .freqIncrementRatio = 1.0001f, .magnitude = 12'000.0f},
+    &getTurretMCBCanComm(),
+    {&chassisFramePitchTurretController});
 
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
@@ -636,7 +630,7 @@ aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<24> launcherLutAutot
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(
-    ((tap::Drivers *)(drivers())),
+    ((tap::Drivers*)(drivers())),
     drivers()->visionCoprocessor,
     turretCVCommand,
     autoAimLaunchTimer,
@@ -700,7 +694,7 @@ VisionTargetIndicator visionTargetIndicator(
     refSerialTransmitter,
     transformAdapter.getWorldToVTM());
 
-std::vector<HudIndicator *> hudIndicators = {
+std::vector<HudIndicator*> hudIndicators = {
     &capBankIndicator,
     &textHudIndicators,
     &ammoIndicator,
@@ -801,7 +795,7 @@ auto cycleStateController = CycleStateModeController<
 
 InstantCommand incrementCycleShootCommand(
     []() { cycleStateController.cycleState(); },
-    std::array<tap::control::Subsystem *, 1>{
+    std::array<tap::control::Subsystem*, 1>{
         &dummySubsystem});  // fake requirement so gets scheduled by command scheduler
 
 Trigger vPressed =
@@ -809,7 +803,7 @@ Trigger vPressed =
 
 InstantCommand decrementCycleShootCommand(
     []() { cycleStateController.reverseCycleState(); },
-    std::array<tap::control::Subsystem *, 1>{&dummySubsystem});
+    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
 
 Trigger ePressed =
     TriggerHelpers::button(drivers(), Remote::Key::E).onTrue(&decrementCycleShootCommand);
@@ -821,7 +815,7 @@ auto cycleStateGovernor = CycleStateModeController<bool, 2, CvOnTargetGovernor>(
 
 InstantCommand toggleGovernorMode(
     []() { cycleStateGovernor.cycleState(); },
-    std::array<tap::control::Subsystem *, 1>{&dummySubsystem});
+    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
 
 Trigger rPressed = TriggerHelpers::button(drivers(), Remote::Key::R).onTrue(&toggleGovernorMode);
 
@@ -837,7 +831,7 @@ Trigger shiftPressed =
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 /* register subsystems here -------------------------------------------------*/
-void registerStandardSubsystems(Drivers *drivers)
+void registerStandardSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&chassis);
@@ -872,7 +866,7 @@ void initializeSubsystems()
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultStandardCommands(Drivers *)
+void setDefaultStandardCommands(Drivers*)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
@@ -881,7 +875,7 @@ void setDefaultStandardCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startStandardCommands(Drivers *drivers)
+void startStandardCommands(Drivers* drivers)
 {
     // drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
@@ -902,12 +896,12 @@ void startStandardCommands(Drivers *drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers *) {}
+void registerStandardIoMappings(Drivers*) {}
 }  // namespace standard_control
 
 namespace aruwsrc::standard
 {
-void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::standard::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &standard_control::remoteSafeDisconnectFunction);
@@ -920,14 +914,14 @@ void initSubsystemCommands(aruwsrc::standard::Drivers *drivers)
 }  // namespace aruwsrc::standard
 
 #ifndef PLATFORM_HOSTED
-imu::ImuCalibrateCommand *getImuCalibrateCommand()
+imu::ImuCalibrateCommand* getImuCalibrateCommand()
 {
     return &standard_control::imuCalibrateCommand;
 }
 
-std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCommands()
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
 {
-    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> commands = {
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
         &standard_control::gravityAutotuneCommand,
         &standard_control::springAutotuneCommand,
         &standard_control::freqSweepAutotuneCommand,

@@ -27,7 +27,7 @@
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
+template <uint32_t NUM_TEST_POINTS, tap::algorithms::transforms::Axis AXIS>
 class SecondOrderAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>
 {
 public:

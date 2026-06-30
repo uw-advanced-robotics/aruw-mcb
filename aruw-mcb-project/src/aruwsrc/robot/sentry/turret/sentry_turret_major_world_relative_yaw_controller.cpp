@@ -32,7 +32,7 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     SmoothPid& positionPid,
     SmoothPid& velocityPid,
     float maxVelErrorInput)
-    : TurretAxisControllerInterface<control::turret::algorithms::Axis::YAW>(yawMotor),
+    : TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>(yawMotor),
       worldToMajor(worldToMajor),
       chassis(chassis),
       yawMotor(yawMotor),

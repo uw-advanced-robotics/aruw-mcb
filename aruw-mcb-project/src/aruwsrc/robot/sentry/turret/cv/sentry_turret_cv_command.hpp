@@ -71,12 +71,12 @@ class SentryTurretCVCommand : public tap::control::Command
 public:
     struct TurretConfig
     {
-        SentryTurretMinorSubsystem &turretSubsystem;
+        SentryTurretMinorSubsystem& turretSubsystem;
         control::turret::algorithms::TurretAxisControllerInterface<
-            control::turret::algorithms::Axis::YAW> &yawController;
+            tap::algorithms::transforms::Axis::YAW>& yawController;
         control::turret::algorithms::TurretAxisControllerInterface<
-            control::turret::algorithms::Axis::PITCH> &pitchController;
-        aruwsrc::sentry::algorithms::SentryBallisticsSolver &ballisticsSolver;
+            tap::algorithms::transforms::Axis::PITCH>& pitchController;
+        aruwsrc::sentry::algorithms::SentryBallisticsSolver& ballisticsSolver;
     };
 
     enum HitState
@@ -105,13 +105,13 @@ public:
      * # TODO: docstring
      */
     SentryTurretCVCommand(
-        communication::serial::VisionCoprocessor &visionCoprocessor,
-        aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
-        aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
+        communication::serial::VisionCoprocessor& visionCoprocessor,
+        aruwsrc::algorithms::PlateHitTracker& plateHitTracker,
+        aruwsrc::control::turret::YawTurretSubsystem& turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
-        TurretConfig &turretWidowConfig,
-        aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms);
+            tap::algorithms::transforms::Axis::YAW>& yawControllerMajor,
+        TurretConfig& turretWidowConfig,
+        aruwsrc::sentry::algorithms::odometry::SentryTransforms& sentryTransforms);
 
     void initialize();
 
@@ -123,7 +123,7 @@ public:
 
     void end(bool);
 
-    const char *getName() const { return "sentry turret CV command"; }
+    const char* getName() const { return "sentry turret CV command"; }
 
     ///  Request a new vision target, so it can change which robot it is targeting
     void requestNewTarget();
@@ -148,21 +148,21 @@ private:
      * since chassis-frame controllers are used
      */
     void computeAimSetpoints(
-        TurretConfig &config,
-        aruwsrc::sentry::algorithms::SentryBallisticsSolver::BallisticsSolution &solution,
-        WrappedFloat *desiredYawSetpoint,
-        WrappedFloat *desiredPitchSetpoint,
-        bool *withinAimingTolerance);
+        TurretConfig& config,
+        aruwsrc::sentry::algorithms::SentryBallisticsSolver::BallisticsSolution& solution,
+        WrappedFloat* desiredYawSetpoint,
+        WrappedFloat* desiredPitchSetpoint,
+        bool* withinAimingTolerance);
 
-    communication::serial::VisionCoprocessor &visionCoprocessor;
-    aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
+    communication::serial::VisionCoprocessor& visionCoprocessor;
+    aruwsrc::algorithms::PlateHitTracker& plateHitTracker;
 
-    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
+    aruwsrc::control::turret::YawTurretSubsystem& turretMajorSubsystem;
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor;
+        tap::algorithms::transforms::Axis::YAW>& yawControllerMajor;
 
-    TurretConfig &turretWidowConfig;
-    aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms;
+    TurretConfig& turretWidowConfig;
+    aruwsrc::sentry::algorithms::odometry::SentryTransforms& sentryTransforms;
 
     uint32_t prevTime;
 

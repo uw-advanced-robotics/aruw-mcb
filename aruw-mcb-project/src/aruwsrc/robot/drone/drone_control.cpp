@@ -132,7 +132,7 @@ tap::motor::DjiMotor rightFrictionWheel(
     aruwsrc::control::launcher::CAN_BUS_MOTORS,
     false,
     "Right flywheel");
-std::array<tap::motor::MotorInterface *, 2> wheels = {&leftFrictionWheel, &rightFrictionWheel};
+std::array<tap::motor::MotorInterface*, 2> wheels = {&leftFrictionWheel, &rightFrictionWheel};
 
 aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
     aruwsrc::control::launcher::LAUNCH_SPEED_AVERAGING_DEQUE_SIZE,
@@ -155,11 +155,10 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YA
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawFallbackController(
-    turret.yawMotor,
-    chassis_rel::YAW_PID_CONFIG);
+algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
+    chassisFrameYawFallbackController(turret.yawMotor, chassis_rel::YAW_PID_CONFIG);
 
-algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH>
+algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
     chassisFramePitchFallbackController(turret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
 
 tap::algorithms::SmoothPid imuCalibrateYawPid(chassis_rel::YAW_PID_CONFIG);
@@ -281,7 +280,7 @@ void initializeSubsystems()
 }
 
 /* register subsystems here -------------------------------------------------*/
-void registerDroneSubsystems(Drivers *drivers)
+void registerDroneSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&turret);
@@ -290,7 +289,7 @@ void registerDroneSubsystems(Drivers *drivers)
 }
 
 /* set any default commands to subsystems here ------------------------------*/
-void setDefaultDroneCommands(Drivers *)
+void setDefaultDroneCommands(Drivers*)
 {
     buzzer.setDefaultCommand(&imuNotCalibratedCommandLimited);
     turret.setDefaultCommand(&turretUserVectorCommand);
@@ -298,18 +297,18 @@ void setDefaultDroneCommands(Drivers *)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startDroneCommands(Drivers *)
+void startDroneCommands(Drivers*)
 {
     // drivers->commandScheduler.addCommand(&droneImuCalibrateCommand);
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerDroneIoMappings(Drivers *) {}
+void registerDroneIoMappings(Drivers*) {}
 }  // namespace drone_control
 
 namespace aruwsrc::drone
 {
-void initSubsystemCommands(aruwsrc::drone::Drivers *drivers)
+void initSubsystemCommands(aruwsrc::drone::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &drone_control::remoteSafeDisconnectFunction);
