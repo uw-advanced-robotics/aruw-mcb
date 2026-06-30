@@ -35,6 +35,7 @@
 #include "virtual_can_encoder.hpp"
 #include "virtual_digital.hpp"
 #include "virtual_imu.hpp"
+#include "virtual_lamprey_encoder.hpp"
 #include "virtual_leds.hpp"
 #include "virtual_pwm.hpp"
 #include "virtual_voltage_current_sensor.hpp"
@@ -60,6 +61,7 @@ class MCBLite : public tap::communication::serial::DJISerial
 {
     friend class aruwsrc::display::MCBLiteMenu;
     friend class VirtualCanEncoder;
+    friend class VirtualLampreyEncoder;
     friend class VirtualVoltageCurrentSensor;
 
 public:
