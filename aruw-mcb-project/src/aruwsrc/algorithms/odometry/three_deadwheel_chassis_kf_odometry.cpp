@@ -33,7 +33,9 @@ ThreeDeadwheelChassisKFOdometry::ThreeDeadwheelChassisKFOdometry(
     const float parallelTwoCenterToWheelDistance,
     const float perpendicularCenterToWheelDistance,
     const float odomFrameToRobotFrame)
-    : kf(KF_A, KF_C, KF_Q, KF_R, KF_P0),
+    : kf_x(KF_A, KF_C, X_KF_Q, X_KF_R, X_KF_P0),
+      kf_y(KF_A, KF_C, Y_KF_Q, Y_KF_R, Y_KF_P0),
+      kf_ang(KF_A, KF_C, ANG_KF_Q, ANG_KF_R, ANG_KF_P0),
       deadwheelOdometry(deadwheelOdometry),
       chassisYawObserver(chassisYawObserver),
       imu(imu),
@@ -54,9 +56,9 @@ void ThreeDeadwheelChassisKFOdometry::reset()
     imuTheta = 0.0f;
     lastWrappedTheta = 0.0f;
 
-    float initialX[int(OdomState::NUM_STATES)] =
-        {initPos.x, 0.0f, 0.0f, initPos.y, 0.0f, 0.0f, initYaw, 0.0f};
-    kf.init(initialX);
+    kf_x.init({initPos.x, 0.0f});
+    kf_y.init({initPos.y, 0.0f});
+    kf_ang.init({initYaw, 0.0f});
 }
 
 void ThreeDeadwheelChassisKFOdometry::update()
@@ -64,14 +66,14 @@ void ThreeDeadwheelChassisKFOdometry::update()
     assert(parallelOneCenterToWheelDistance + parallelTwoCenterToWheelDistance > 0);
 
     /* Process IMU */
-    float mahonyOutput = 0.0f;
+    /*float mahonyOutput = 0.0f;
     if (!chassisYawObserver.getChassisWorldYaw(&mahonyOutput))
     {
         mahonyOutput = 0.0f;
         return;
     }
 
-    Angle wrappedTheta = Angle(mahonyOutput);
+    float wrappedTheta = Angle(mahonyOutput);
     WrappedFloat deltaTheta = wrappedTheta - lastWrappedTheta;
     lastWrappedTheta = wrappedTheta;
 
@@ -84,7 +86,7 @@ void ThreeDeadwheelChassisKFOdometry::update()
     float imuOmega = imu.getGz();
 
     // Rotate acceleration to the world frame
-    rotateVector(&Ax, &Ay, chassisYaw.getWrappedValue());
+    rotateVector(&Ax, &Ay, chassisYaw.getWrappedValue());*/
 
     /* Process dead wheels */
 
@@ -100,7 +102,7 @@ void ThreeDeadwheelChassisKFOdometry::update()
     float correctedParallelOne = parallelOneRaw + (odoOmega * parallelOneCenterToWheelDistance);
     float correctedParallelTwo = parallelTwoRaw - (odoOmega * parallelTwoCenterToWheelDistance);
     float correctedPerpendicular =
-        perpendicularRaw - (odoOmega * perpendicularCenterToWheelDistance);
+        perpendicularRaw + (odoOmega * perpendicularCenterToWheelDistance);
 
     // Average two parallel wheels to get velocity in odometry frame
     float Vx = (correctedParallelOne + correctedParallelTwo) / 2;
@@ -113,29 +115,32 @@ void ThreeDeadwheelChassisKFOdometry::update()
     rotateVector(&Vx, &Vy, chassisYaw.getWrappedValue());
 
     // Create the measurement vector
-    float y[int(OdomInput::NUM_INPUTS)] =
-        {Vx, Ax, Vy, Ay, imuTheta.getUnwrappedValue(), odoOmega, imuOmega};
+    float x_measurement[int(XInput::NUM_INPUTS)] = {Vx};
+    float y_measurement[int(YInput::NUM_INPUTS)] = {Vy};
+    float ang_measurement[int(AngInput::NUM_INPUTS)] = {odoOmega};
 
     // Perform the Kalman filter update
-    kf.performUpdate(y);
+    kf_x.performUpdate(x_measurement);
+    kf_y.performUpdate(y_measurement);
+    kf_ang.performUpdate(ang_measurement);
+
     updateChassisStateFromKF();
 }
 
 void ThreeDeadwheelChassisKFOdometry::updateChassisStateFromKF()
 {
-    auto stateVector = kf.getStateVectorAsMatrix();
-    for (int i = 0; i < int(OdomState::NUM_STATES); i++)
-    {
-        x[i] = stateVector[i];
-    }
+    auto xState = kf_x.getStateVectorAsMatrix();
+    auto yState = kf_y.getStateVectorAsMatrix();
+    auto angState = kf_ang.getStateVectorAsMatrix();
 
-    // update odometry velocity and orientation
-    velocity.x = x[int(OdomState::VEL_X)];
-    velocity.y = x[int(OdomState::VEL_Y)];
+    velocity.x = xState[int(OdomStateX::VEL_X)];
+    velocity.y = yState[int(OdomStateY::VEL_Y)];
+    angular_velocity = angState[int(OdomStateAng::VEL_ANG)];
 
-    chassisYaw = x[int(OdomState::POS_ANG)];
-    location.setOrientation(x[int(OdomState::POS_ANG)]);
-    location.setPosition(x[int(OdomState::POS_X)], x[int(OdomState::POS_Y)]);
+    float posAng = angState[int(OdomStateAng::POS_ANG)];
+    chassisYaw = tap::algorithms::Angle(posAng);
+    location.setOrientation(posAng);
+    location.setPosition(xState[int(OdomStateX::POS_X)], yState[int(OdomStateY::POS_Y)]);
 
     prevTime = tap::arch::clock::getTimeMicroseconds();
 }
@@ -144,17 +149,27 @@ void ThreeDeadwheelChassisKFOdometry::overrideOdometryPosition(
     const float positionX,
     const float positionY)
 {
-    auto currKFState = kf.getStateVectorAsMatrix();
-
-    float newState[int(OdomState::NUM_STATES)] = {
+    auto x_currKFState = kf_x.getStateVectorAsMatrix();
+    float x_newState[int(OdomStateX::NUM_STATES)] = {
         positionX,
-        currKFState[int(OdomState::VEL_X)],
-        currKFState[int(OdomState::ACC_X)],
-        positionY,
-        currKFState[int(OdomState::VEL_Y)],
-        currKFState[int(OdomState::ACC_Y)]};
+        x_currKFState[int(OdomStateX::VEL_X)]};
+    kf_x.init(x_newState);
 
-    kf.init(newState);
+    auto y_currKFState = kf_y.getStateVectorAsMatrix();
+    float y_newState[int(OdomStateY::NUM_STATES)] = {
+        positionY,
+        y_currKFState[int(OdomStateY::VEL_Y)]};
+    kf_y.init(y_newState);
+}
+
+void ThreeDeadwheelChassisKFOdometry::overrideOdometryOrientation(float deltaYaw)
+{
+    auto currKFState = this->kf_ang.getStateVectorAsMatrix();
+
+    float newState[int(OdomStateAng::NUM_STATES)] = {
+        currKFState[int(OdomStateAng::POS_ANG)] + deltaYaw,
+        currKFState[int(OdomStateAng::VEL_ANG)]};
+    kf_ang.init(newState);
 }
 
 }  // namespace aruwsrc::algorithms::odometry
