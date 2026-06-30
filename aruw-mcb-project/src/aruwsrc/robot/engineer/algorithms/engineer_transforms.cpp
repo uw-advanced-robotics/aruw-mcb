@@ -47,19 +47,20 @@ EngineerTransforms::EngineerTransforms(
       extension(extension),
       wrist(wrist),
       cubeStorage(cubeStorage),
-      worldToChassis(Transform::identity()),
+      worldToChassis(),
+      chassisToWorld(),
       chassisToTurretYaw(getHypotheticalChassisToTurretYaw(0)),
       turretYawToTurretPitch(getHypotheticalTurretYawToTurretPitch(0)),
       turretPitchToExtension(getHypotheticalTurretPitchToExtension(0)),
-      extensionToWrist(Transform::identity()),
-      cubeStoreFrameToCubeStoreCenter(Transform::identity()),
-      worldToTurretPitch(Transform::identity()),
-      worldToRealsense(Transform::identity()),
-      worldToEndEffector(Transform::identity()),
-      cubeStore1ToEndEffector(Transform::identity()),
-      cubeStore2ToEndEffector(Transform::identity()),
-      vtmGimbalToEndEffector(Transform::identity()),
-      endEffectorToCubeDist(Transform::identity()),
+      extensionToWrist(),
+      cubeStoreFrameToCubeStoreCenter(),
+      worldToTurretPitch(),
+      worldToRealsense(),
+      worldToEndEffector(),
+      cubeStore1ToEndEffector(),
+      cubeStore2ToEndEffector(),
+      vtmGimbalToEndEffector(),
+      endEffectorToCubeDist(),
       COMBeyondTurretPitch(
           {.mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass + MASS_BEYOND_WRIST.mass,
            .location = Position(0, 0, 0)}),  // overwritten each loop
@@ -70,9 +71,15 @@ EngineerTransforms::EngineerTransforms(
 
 void EngineerTransforms::updateTransforms()
 {
-    // update joint transforms
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
-    worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
+    float tpRoll = turretPitchImu.getRoll();
+    float tpPitch = turretPitchImu.getPitch();
+    float tpYaw = turretPitchImu.getYaw();
+    float extPos = extension.getPosition();
+
+    // update joint transforms
+    // worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
+    worldToChassis.updateTranslation(0, 0, 0);
     // use odometry yaw because it likely filters more information than imu alone, but only for yaw
     worldToChassis.updateRotation(
         chassisImu.getRoll(),
@@ -80,30 +87,32 @@ void EngineerTransforms::updateTransforms()
         chassisPose.getOrientation());
     // worldToChassis.updateAngularVelocity(0., 0., chassisImu.getGz());
 
+    chassisToWorld = worldToChassis.getInverse();
+
     chassisToTurretYaw.updateRotation(
         0,
         0,
         turret.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
-    turretYawToTurretPitch.updateRotation(0, turretPitchImu.getPitch(), 0);
-    turretPitchToExtension = getHypotheticalTurretPitchToExtension(extension.getPosition());
+    turretYawToTurretPitch.updateRotation(0, tpPitch, 0);
+    turretPitchToExtension = getHypotheticalTurretPitchToExtension(extPos);
     extensionToWrist.updateRotation(wrist.getOrientation());
 
     cubeStoreFrameToCubeStoreCenter.updateRotation(0, 0, cubeStorage.getPosition());
 
-    // update requested transforms
+    Transform turretYawToExtension = turretYawToTurretPitch.composeStatic(turretPitchToExtension);
+    Transform extensionToEndEffector = extensionToWrist.composeStatic(WRIST_TO_END_EFFECTOR);
+    Transform turretYawToEndEffector = turretYawToExtension.composeStatic(extensionToEndEffector);
 
+    // update requested transforms
     Transform worldToTurretYaw = worldToChassis.composeStatic(chassisToTurretYaw);
     worldToExtension = worldToTurretYaw.composeStatic(turretYawToExtension);
     worldToTurretYaw.updateRotation(
-        turretPitchImu.getRoll(),  // could be either inherited or use turret imu, either works
+        tpRoll,  // could be either inherited or use turret imu, either works
         worldToTurretYaw.getPitch(),
-        turretPitchImu.getYaw());
+        tpYaw);
 
     worldToTurretPitch = worldToTurretYaw.composeStatic(turretYawToTurretPitch);
-    worldToTurretPitch.updateRotation(
-        turretPitchImu.getRoll(),
-        turretPitchImu.getPitch(),
-        turretPitchImu.getYaw());
+    worldToTurretPitch.updateRotation(tpRoll, tpPitch, tpYaw);
     worldToTurretPitch.updateAngularVelocity(
         turretPitchImu.getGx(),
         turretPitchImu.getGy(),
@@ -113,15 +122,13 @@ void EngineerTransforms::updateTransforms()
 
     Transform cubeStoreCenterToTurretYaw =
         TURRET_YAW_TO_CUBE_STORE_FRAME.composeStatic(cubeStoreFrameToCubeStoreCenter);
-    Transform extensionToEndEffector = extensionToWrist.composeStatic(WRIST_TO_END_EFFECTOR);
-    Transform turretYawToEndEffector = turretYawToTurretPitch.composeStatic(turretPitchToExtension)
-                                           .composeStatic(extensionToEndEffector);
+    Transform cubeStoreCenterToEndEffector =
+        cubeStoreCenterToTurretYaw.composeStatic(turretYawToEndEffector);
+
     cubeStore1ToEndEffector =
-        CUBE_STORE_1_TO_CUBE_STORE_CENTER.composeStatic(cubeStoreCenterToTurretYaw)
-            .composeStatic(turretYawToEndEffector);
+        CUBE_STORE_1_TO_CUBE_STORE_CENTER.composeStatic(cubeStoreCenterToEndEffector);
     cubeStore2ToEndEffector =
-        CUBE_STORE_2_TO_CUBE_STORE_CENTER.composeStatic(cubeStoreCenterToTurretYaw)
-            .composeStatic(turretYawToEndEffector);
+        CUBE_STORE_2_TO_CUBE_STORE_CENTER.composeStatic(cubeStoreCenterToEndEffector);
 
     vtmGimbalToEndEffector = VTM_GIMBAL_TO_EXTENSION.composeStatic(extensionToEndEffector);
     endEffectorToCubeDist =
@@ -130,9 +137,8 @@ void EngineerTransforms::updateTransforms()
     worldToEndEffector = worldToTurretYaw.composeStatic(turretYawToEndEffector);
 
     // COMs
-    // TODO: optimize redundancies
-    Transform worldToWrist =
-        worldToTurretPitch.composeStatic(turretPitchToExtension).composeStatic(extensionToWrist);
+    Transform turretYawToWrist = turretYawToExtension.composeStatic(extensionToWrist);
+    Transform worldToWrist = worldToTurretYaw.composeStatic(turretYawToWrist);
 
     // TODO: tap should have a single operation for this
     COMCube.location = worldToEndEffector.getInverse().apply(MASS_CUBE.location);
@@ -146,10 +152,7 @@ void EngineerTransforms::updateTransforms()
         .mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass,
         .location = worldToTurretPitch.getInverse().apply(
             MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.location +
-            Vector(
-                extension.getPosition() * EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR,
-                0,
-                0))};
+            Vector(extPos * EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR, 0, 0))};
 
     COMBeyondTurretPitch = PointMass::merge(COMBetweenTurretPitchAndWrist, COMBeyondWrist);
 }

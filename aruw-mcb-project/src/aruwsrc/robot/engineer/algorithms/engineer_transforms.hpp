@@ -73,6 +73,7 @@ public:
     inline void initialize() {}
 
     inline const Transform& getWorldToChassis() const { return worldToChassis; };
+    inline const Transform& getChassisToWorld() const { return chassisToWorld; };
 
     inline uint32_t getLastComputedOdometryTime() const
     {
@@ -135,7 +136,7 @@ private:
     const aruwsrc::control::joint::JointSubsystem& cubeStorage;
 
     // Joint Transforms
-    Transform worldToChassis;
+    Transform worldToChassis, chassisToWorld;
     Transform chassisToTurretYaw;
     Transform turretYawToTurretPitch;
     Transform turretPitchToExtension;
