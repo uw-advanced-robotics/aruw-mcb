@@ -85,7 +85,7 @@ static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
 };
 
 inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 5.0f;  // rad/s
-inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 4.0f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 4.0f;   // rad/s
 
 namespace turretMajor
 {
