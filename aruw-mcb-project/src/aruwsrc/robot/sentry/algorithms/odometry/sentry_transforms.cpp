@@ -24,6 +24,7 @@ using namespace tap::algorithms::transforms;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::sentry::turret;
 
+using tap::algorithms::Angle;
 using tap::communication::sensors::imu::ImuInterface;
 
 namespace aruwsrc::sentry::algorithms::odometry

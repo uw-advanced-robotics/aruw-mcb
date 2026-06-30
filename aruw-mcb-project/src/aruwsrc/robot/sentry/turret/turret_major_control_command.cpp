@@ -26,11 +26,11 @@
 namespace aruwsrc::sentry::turret
 {
 TurretMajorSentryControlCommand::TurretMajorSentryControlCommand(
-    tap::Drivers *drivers,
-    SentryControlOperatorInterface &controlOperatorInterface,
-    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
+    tap::Drivers* drivers,
+    SentryControlOperatorInterface& controlOperatorInterface,
+    aruwsrc::control::turret::YawTurretSubsystem& turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        aruwsrc::control::turret::algorithms::Axis::YAW> &yawController,
+        tap::algorithms::transforms::Axis::YAW>& yawController,
     float userYawInputScalar)
     : drivers(drivers),
       controlOperatorInterface(controlOperatorInterface),
