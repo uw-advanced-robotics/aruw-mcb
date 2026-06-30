@@ -60,14 +60,6 @@ void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage
         targetPositionMessage.pitch,
         targetPositionMessage.yaw);
     isFresh = true;
-
-    // so whenever new data comes in engineer_transforms will convert it to
-    // world frame.
-
-    // then, the auton algoritm goes like this:
-    // as it approaches the receptacle along the path,
-    // collects new pose data
-    // then when it reaches the desired distance it stops and pools together the pose data
 }
 
 void EngineerCVCommunication::initializeCV()
