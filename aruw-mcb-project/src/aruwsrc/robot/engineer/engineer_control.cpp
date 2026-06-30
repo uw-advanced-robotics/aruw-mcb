@@ -624,13 +624,13 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
+    drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
     drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
-    // drivers->commandScheduler.registerSubsystem(&engTurret);
+    drivers->commandScheduler.registerSubsystem(&engTurret);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
