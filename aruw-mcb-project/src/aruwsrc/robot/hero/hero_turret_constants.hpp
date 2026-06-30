@@ -123,7 +123,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
 
 inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS{
     .J_TOTAL = 0.0454f,
-    .TAU_MAX = 5.5f,
+    .TAU_MAX = 3.0f,
     .B_DAMP = 0.001f,
     .W_D = 53.4f,
     .ZETA = 0.216,
@@ -136,6 +136,9 @@ inline constexpr algorithms::TurretFeedforwardConstants TURRET_FEEDFORWARD_CONST
     .Kv = 150.0f,
     .Ks = 250.0f,
 };
+
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 3.5f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 2.5f;   // rad/s
 
 namespace world_rel_turret_imu
 {

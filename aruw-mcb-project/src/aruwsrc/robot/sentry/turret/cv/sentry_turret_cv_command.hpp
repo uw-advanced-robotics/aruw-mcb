@@ -27,6 +27,7 @@
 #include "tap/control/command.hpp"
 #include "tap/control/subsystem.hpp"
 
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -34,7 +35,6 @@
 #include "aruwsrc/control/turret/cv/turret_cv_command_interface.hpp"
 #include "aruwsrc/control/turret/yaw_turret_subsystem.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
-#include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
 
 namespace tap::control::odometry
@@ -66,7 +66,7 @@ namespace aruwsrc::sentry::turret::cv
  * Coordinates turret major and minors to scan/target while maintaining FOV and view of direction
  * of movement. (This is why we need both minors controlled by a single command.)
  */
-class SentryTurretCVCommand : public tap::control::Command
+class SentryTurretCVCommand : public aruwsrc::control::turret::cv::TurretCVCommandInterface
 {
 public:
     struct TurretConfig
@@ -76,7 +76,7 @@ public:
             tap::algorithms::transforms::Axis::YAW>& yawController;
         control::turret::algorithms::TurretAxisControllerInterface<
             tap::algorithms::transforms::Axis::PITCH>& pitchController;
-        aruwsrc::sentry::algorithms::SentryBallisticsSolver& ballisticsSolver;
+        aruwsrc::algorithms::ballistics::CvBallisticsSolver& ballisticsSolver;
     };
 
     enum HitState
@@ -133,14 +133,9 @@ public:
      * turret is within some tolerance of the target. This tolerance is distance based (the further
      * away the target the closer to the center of the plate the turret must be aiming)
      */
-    bool isAimingWithinLaunchingTolerance(uint8_t turretID) const
-    {
-        if (turretID != turretWidowConfig.turretSubsystem.getTurretID())
-        {
-            return false;
-        }
-        return withinAimingToleranceWidow;
-    }
+    bool isAimingWithinLaunchingTolerance() const override { return withinAimingToleranceWidow; }
+
+    bool getTurretID() const override { return turretWidowConfig.turretSubsystem.getTurretID(); }
 
 private:
     /**
@@ -149,7 +144,7 @@ private:
      */
     void computeAimSetpoints(
         TurretConfig& config,
-        aruwsrc::sentry::algorithms::SentryBallisticsSolver::BallisticsSolution& solution,
+        aruwsrc::algorithms::ballistics::CvBallisticsSolver::BallisticsSolution& solution,
         WrappedFloat* desiredYawSetpoint,
         WrappedFloat* desiredPitchSetpoint,
         bool* withinAimingTolerance);
