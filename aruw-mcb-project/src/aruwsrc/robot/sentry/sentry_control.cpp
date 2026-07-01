@@ -644,7 +644,8 @@ FireRateLimitGovernor fireRateLimitGovernorTurretWidow(
 HeatLimitGovernor heatLimitGovernorTurretWidow(
     *drivers(),
     turretWidow::barrelID,
-    constants::HEAT_LIMIT_BUFFER);
+    constants::HEAT_LIMIT_BUFFER,
+    1e7f);
 
 // rotates agitator when aiming at target and within heat limit
 CvOnTargetGovernor cvOnTargetGovernor(
