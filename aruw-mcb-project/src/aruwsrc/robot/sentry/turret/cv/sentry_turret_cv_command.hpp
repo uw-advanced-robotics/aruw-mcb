@@ -192,8 +192,8 @@ private:
     static constexpr float MAJOR_SCAN_RATIO = MAJOR_SCAN_HALF_RANGE / YAW_SCAN_HALF_RANGE;
     static constexpr float SCAN_TURRET_MINOR_UP_PITCH =
         aruwsrc::control::turret::turretWidow::PITCH_MOTOR_CONFIG.minAngle;
-    static constexpr float SCAN_TURRET_MINOR_DOWN_PITCH = modm::toRadian(25.0f);
-    static constexpr float PITCH_SCAN_DELTA_ANGLE = modm::toRadian(0.19f);
+    static constexpr float SCAN_TURRET_MINOR_DOWN_PITCH = modm::toRadian(20.0f);
+    static constexpr float PITCH_SCAN_DELTA_ANGLE = modm::toRadian(0.095f);
 
     tap::algorithms::WrappedFloat scanCenter = Angle(0);
     float scanOffsetFromCenter = 0.0f;
