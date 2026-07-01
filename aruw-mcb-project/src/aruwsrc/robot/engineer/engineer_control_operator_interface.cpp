@@ -115,8 +115,7 @@ float EngineerControlOperatorInterface::getChassisXInput()
         if (isDriveMode())
         {
             chassisXInput.update(
-                //drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL),
-                engineerDrivers->customControllerData.getX(),
+                drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL),
                 currTime);
         }
         else
@@ -171,8 +170,7 @@ float EngineerControlOperatorInterface::getChassisYInput()
         if (isDriveMode())
         {
             chassisYInput.update(
-                //-drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
-                -engineerDrivers->customControllerData.getY(),
+                -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
                 currTime);
         }
         else
