@@ -20,12 +20,17 @@
 #ifndef ENGINEER_TURRET_CONSTANTS_HPP_
 #define ENGINEER_TURRET_CONSTANTS_HPP_
 
+#include <algorithm>
+#include <cmath>
+
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
+#include "aruwsrc/robot/engineer/algorithms/engineer_kinematic_constants.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "modm/platform/gpio/base.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -51,7 +56,11 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 // aggressively
 inline constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
 
-// if extended far enough, we can pitch higher because the back of extension won't hit the chassis
+// limit the pitch upper range so we dont go over the extension limit
+inline constexpr float PITCH_UPPER_LIMIT_EXTENSION_EXTENDED = 0.0f;
+
+// if extended far enough, we can pitch higher because the back of extension won't hit the
+// chassis
 inline constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
 
 // if extension above threshold, limit the pitch so the extension doesnt hit the ground
@@ -72,6 +81,14 @@ inline constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
 inline constexpr float MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
 inline constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
 
+// max height the end of the extension is allowed to be
+inline constexpr float MAX_HEIGHT = 1.1f;
+inline float GROUND_TO_PITCH = aruwsrc::engineer::algorithms::CHASSIS_TO_TURRET_YAW_POS.z() +
+                               aruwsrc::engineer::algorithms::TURRET_YAW_TO_TURRET_PITCH_POS.z();
+// start limiting pitch upper range when the extension is beyond this value because before
+// this point it's impossible to go over the height limit
+inline constexpr float EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT = 0.1f;
+
 inline float getPitchMinLimit(float extensionPosition)
 {
     // TurretMotor expects numeric min/max radians. Pitch up is negative on engineer.
@@ -79,6 +96,20 @@ inline float getPitchMinLimit(float extensionPosition)
     {
         return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
     }
+
+    if (extensionPosition > EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT)
+    {  // calculate the max possible upward pitch possible based on solving the triangle with
+        // the hypotenuse as the extension length
+
+        float hyptotenuse = extensionPosition;
+
+        // maximzing opposite side to theta to heigh limit
+        float maxOpp = MAX_HEIGHT - GROUND_TO_PITCH;
+
+        float sinTheta = maxOpp / hyptotenuse;
+        return std::asin(sinTheta);
+    }
+
     return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
 }
 
