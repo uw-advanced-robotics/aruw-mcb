@@ -186,10 +186,16 @@ private:
     int scanDir = SCAN_COUNTER_CLOCKWISE;
     int pitchScanDir = SCAN_CLOCKWISE;
 
-    // Scan two full rotations per pass before reversing, with a small overscan to avoid wrapped
-    // endpoint ambiguity.
-    static constexpr float YAW_SCAN_HALF_RANGE = M_TWOPI + modm::toRadian(4.0f);
-    static constexpr float MAJOR_SCAN_HALF_RANGE = YAW_SCAN_HALF_RANGE;
+    // Scan slightly past 360 deg endpoint-to-endpoint. The major only carries what the Achlys minor
+    // cannot cover inside its yaw limits.
+    static constexpr float YAW_SCAN_HALF_RANGE = M_PI + modm::toRadian(4.0f);
+    static constexpr float MINOR_SCAN_HALF_RANGE =
+        (aruwsrc::control::turret::turretWidow::YAW_MOTOR_CONFIG.maxAngle -
+         aruwsrc::control::turret::turretWidow::YAW_MOTOR_CONFIG.minAngle) /
+        2.0f;
+    static constexpr float MAJOR_SCAN_LIMIT_MARGIN = SCAN_ENDPOINT_TOLERANCE;
+    static constexpr float MAJOR_SCAN_HALF_RANGE =
+        YAW_SCAN_HALF_RANGE - MINOR_SCAN_HALF_RANGE + MAJOR_SCAN_LIMIT_MARGIN;
     static constexpr float MAJOR_SCAN_RATIO = MAJOR_SCAN_HALF_RANGE / YAW_SCAN_HALF_RANGE;
     static constexpr float SCAN_TURRET_MINOR_UP_PITCH =
         aruwsrc::control::turret::turretWidow::PITCH_MOTOR_CONFIG.minAngle;
