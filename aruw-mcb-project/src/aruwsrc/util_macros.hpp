@@ -28,7 +28,8 @@
  * Define a helper macro that makes it easier to specify at compile time something that should be
  * true for all standards.
  */
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_PHOBOS)
+#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_PHOBOS) || \
+    defined(TARGET_STANDARD_DEIMOS)
 #define ALL_STANDARDS
 #endif
 

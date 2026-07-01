@@ -29,11 +29,17 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::control::turret
 {
-TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig)
+TurretMotor::TurretMotor(
+    tap::motor::MotorInterface* motor,
+    const TurretMotorConfig& motorConfig,
+    float (*minLimitFunc)(),
+    float (*maxLimitFunc)())
     : config(motorConfig),
       motor(motor),
       chassisFrameSetpoint(Angle(config.startAngle)),
-      chassisFrameMeasuredAngle(Angle(config.startAngle))
+      chassisFrameMeasuredAngle(Angle(config.startAngle)),
+      minLimitFunc(minLimitFunc),
+      maxLimitFunc(maxLimitFunc)
 {
     assert(config.minAngle <= config.maxAngle);
     assert(motor != nullptr);
@@ -74,12 +80,12 @@ void TurretMotor::setChassisFrameSetpoint(WrappedFloat setpoint)
 
     if (config.limitMotorAngles)
     {
+        float minAngle = getMinLimit();
+        float maxAngle = getMaxLimit();
+
         int status;
-        chassisFrameSetpoint = Angle(WrappedFloat::limitValue(
-            chassisFrameSetpoint,
-            config.minAngle,
-            config.maxAngle,
-            &status));
+        chassisFrameSetpoint =
+            Angle(WrappedFloat::limitValue(chassisFrameSetpoint, minAngle, maxAngle, &status));
     }
 }
 
@@ -93,16 +99,13 @@ float TurretMotor::getValidMinError(const WrappedFloat setpoint, const WrappedFl
 {
     if (config.limitMotorAngles)
     {
-        float pos = WrappedFloat::rangeOverlap(
-            measurement,
-            setpoint,
-            Angle(config.maxAngle),
-            Angle(config.minAngle));
-        float neg = WrappedFloat::rangeOverlap(
-            setpoint,
-            measurement,
-            Angle(config.maxAngle),
-            Angle(config.minAngle));
+        float minAngle = getMinLimit();
+        float maxAngle = getMaxLimit();
+
+        float pos =
+            WrappedFloat::rangeOverlap(measurement, setpoint, Angle(maxAngle), Angle(minAngle));
+        float neg =
+            WrappedFloat::rangeOverlap(setpoint, measurement, Angle(maxAngle), Angle(minAngle));
 
         if (pos < neg)
         {

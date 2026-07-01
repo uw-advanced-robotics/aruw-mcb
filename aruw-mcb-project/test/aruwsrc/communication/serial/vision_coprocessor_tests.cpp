@@ -56,21 +56,11 @@ struct TestPositionData
     float zAcc;  ///< z acceleration of the target (in m/s^2).
 
 } modm_packed;
-
-struct TestTimingData
-{
-    uint32_t duration;       ///< duration during which the plate is at the target point
-    uint32_t pulseInterval;  ///< time between plate centers transiting the target point
-    uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
-                             ///< next shot should ideally hit
-} modm_packed;
-
 struct TestTurretAimDataMessage
 {
     uint8_t flags;
     uint32_t timestamp;  ///< timestamp in microseconds
-    struct TestPositionData pva;
-    struct TestTimingData timing;
+    struct TestPositionData targetState;
 } modm_packed;
 
 static void initAndRunAutoAimRxTest(
@@ -105,18 +95,18 @@ static void initAndRunAutoAimRxTest(
     for (size_t i = 0; i < expectedAimData.size(); i++)
     {
         const VisionCoprocessor::TurretAimData &callbackData = serial.getLastAimData(i);
-        EXPECT_EQ(expectedAimData[i].pva.xPos, callbackData.pva.xPos);
-        EXPECT_EQ(expectedAimData[i].pva.yPos, callbackData.pva.yPos);
-        EXPECT_EQ(expectedAimData[i].pva.zPos, callbackData.pva.zPos);
-        EXPECT_EQ(expectedAimData[i].pva.xVel, callbackData.pva.xVel);
-        EXPECT_EQ(expectedAimData[i].pva.yVel, callbackData.pva.yVel);
-        EXPECT_EQ(expectedAimData[i].pva.zVel, callbackData.pva.zVel);
-        EXPECT_EQ(expectedAimData[i].pva.xAcc, callbackData.pva.xAcc);
-        EXPECT_EQ(expectedAimData[i].pva.yAcc, callbackData.pva.yAcc);
-        EXPECT_EQ(expectedAimData[i].pva.zAcc, callbackData.pva.zAcc);
-        EXPECT_EQ(expectedAimData[i].flags & 0x1, callbackData.pva.updated);
+        EXPECT_EQ(expectedAimData[i].targetState.xPos, callbackData.targetState.xPos);
+        EXPECT_EQ(expectedAimData[i].targetState.yPos, callbackData.targetState.yPos);
+        EXPECT_EQ(expectedAimData[i].targetState.zPos, callbackData.targetState.zPos);
+        EXPECT_EQ(expectedAimData[i].targetState.xVel, callbackData.targetState.xVel);
+        EXPECT_EQ(expectedAimData[i].targetState.yVel, callbackData.targetState.yVel);
+        EXPECT_EQ(expectedAimData[i].targetState.zVel, callbackData.targetState.zVel);
+        EXPECT_EQ(expectedAimData[i].targetState.xAcc, callbackData.targetState.xAcc);
+        EXPECT_EQ(expectedAimData[i].targetState.yAcc, callbackData.targetState.yAcc);
+        EXPECT_EQ(expectedAimData[i].targetState.zAcc, callbackData.targetState.zAcc);
+        EXPECT_EQ(expectedAimData[i].flags & 0x1, callbackData.targetState.updated);
         EXPECT_EQ(expectedAimData[i].timestamp, callbackData.timestamp);
-        EXPECT_EQ(expectedAimData[i].pva.firerate, callbackData.pva.firerate);
+        EXPECT_EQ(expectedAimData[i].targetState.firerate, callbackData.targetState.firerate);
     }
 }
 
@@ -138,7 +128,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
     std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
         .flags = 0x1,
         .timestamp = 1234,
-        .pva =
+        .targetState =
             {.firerate = VisionCoprocessor::FireRate::ZERO,
              .xPos = 1,
              .yPos = 2,
@@ -149,7 +139,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_positive)
              .xAcc = 7,
              .yAcc = 8,
              .zAcc = 9},
-        .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
+    }};
     initAndRunAutoAimRxTest(aimData);
 }
 
@@ -158,7 +148,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
     std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
         .flags = 0x1,
         .timestamp = 1234,
-        .pva =
+        .targetState =
             {.firerate = VisionCoprocessor::FireRate::ZERO,
              .xPos = -1,
              .yPos = -2,
@@ -169,7 +159,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_negative)
              .xAcc = -7,
              .yAcc = -8,
              .zAcc = -9},
-        .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
+    }};
     initAndRunAutoAimRxTest(aimData);
 }
 
@@ -178,7 +168,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
     std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
         .flags = 0x1,
         .timestamp = 1234,
-        .pva =
+        .targetState =
             {.firerate = VisionCoprocessor::FireRate::ZERO,
              .xPos = -0.45,
              .yPos = -0.35,
@@ -189,7 +179,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_decimal)
              .xAcc = 0.15,
              .yAcc = 0.25,
              .zAcc = 0.35},
-        .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
+    }};
     initAndRunAutoAimRxTest(aimData);
 }
 
@@ -198,7 +188,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
     std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
         .flags = 0x1,
         .timestamp = 1234,
-        .pva =
+        .targetState =
             {
                 .firerate = VisionCoprocessor::FireRate::ZERO,
                 .xPos = 123456789.0f,
@@ -211,11 +201,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_auto_aim_messages_large)
                 .yAcc = 123456789.0f,
                 .zAcc = 123456789.0f,
             },
-        .timing = {
-            .duration = 0,
-            .pulseInterval = 0,
-            .offset = 0,
-        }}};
+    }};
 
     initAndRunAutoAimRxTest(aimData);
 }
@@ -225,7 +211,7 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
     std::array<TestTurretAimDataMessage, NUM_TURRETS> aimData = {TestTurretAimDataMessage{
         .flags = 0x1,
         .timestamp = 1234,
-        .pva =
+        .targetState =
             {.firerate = VisionCoprocessor::FireRate::ZERO,
              .xPos = -10,
              .yPos = -0.32,
@@ -236,23 +222,23 @@ TEST(VisionCoprocessor, messageReceiveCallback_multiple_turrets_correct)
              .xAcc = 76,
              .yAcc = 42,
              .zAcc = -14.2},
-        .timing = {.duration = 0, .pulseInterval = 0, .offset = 0}}};
+    }};
 
     // if there are > 1 turret, fill in aim data
     for (size_t i = 1; i < aimData.size(); i++)
     {
         aimData[i] = aimData[i - 1];
-        aimData[i].pva.firerate =
-            (VisionCoprocessor::FireRate)((uint8_t)aimData[i].pva.firerate + 1);
-        aimData[i].pva.xPos++;
-        aimData[i].pva.yPos++;
-        aimData[i].pva.zPos++;
-        aimData[i].pva.xVel++;
-        aimData[i].pva.yVel++;
-        aimData[i].pva.zVel++;
-        aimData[i].pva.xAcc++;
-        aimData[i].pva.yAcc++;
-        aimData[i].pva.zAcc++;
+        aimData[i].targetState.firerate =
+            (VisionCoprocessor::FireRate)((uint8_t)aimData[i].targetState.firerate + 1);
+        aimData[i].targetState.xPos++;
+        aimData[i].targetState.yPos++;
+        aimData[i].targetState.zPos++;
+        aimData[i].targetState.xVel++;
+        aimData[i].targetState.yVel++;
+        aimData[i].targetState.zVel++;
+        aimData[i].targetState.xAcc++;
+        aimData[i].targetState.yAcc++;
+        aimData[i].targetState.zAcc++;
         aimData[i].timestamp++;
     }
 
@@ -497,6 +483,53 @@ TEST(VisionCoprocessor, sendRobotTypeData_timer_expired_robot_type_sent)
     clock.time = 10'000;
 
     serial.sendRobotTypeData();
+}
+
+TEST(VisionCoprocessor, sendHealthMessage_overrides_own_robot_hp_from_current_hp)
+{
+    ClockStub clock;
+
+    tap::Drivers drivers;
+    VisionCoprocessor serial(&drivers);
+
+    static constexpr int HEADER_LEN = 7;
+    static constexpr int DATA_LEN = sizeof(RefSerialData::Rx::RobotHpData::RobotHp) * 2;
+    static constexpr int CRC16_LEN = 2;
+    static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
+
+    RefSerialData::Rx::RobotData robotData = {};
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+
+    robotData.robotId = RefSerialData::RobotId::BLUE_SENTINEL;
+    robotData.currentHp = 777;
+    robotData.allRobotHp.red.hero1 = 101;
+    robotData.allRobotHp.blue.hero1 = 201;
+    robotData.allRobotHp.blue.sentry7 = 333;
+
+    EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
+        .Times(1)
+        .WillOnce([&](tap::communication::serial::Uart::UartPort,
+                      const uint8_t *data,
+                      std::size_t length) {
+            DJISerial::SerialMessage<DATA_LEN> msg;
+            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+
+            checkHeaderAndTail<DATA_LEN>(msg);
+            EXPECT_EQ(12, msg.messageType);
+
+            RefSerialData::Rx::RobotHpData sentHpData = {};
+            memcpy(&sentHpData, msg.data, sizeof(sentHpData));
+
+            EXPECT_EQ(robotData.allRobotHp.red.hero1, sentHpData.red.hero1);
+            EXPECT_EQ(robotData.allRobotHp.blue.hero1, sentHpData.blue.hero1);
+            EXPECT_EQ(robotData.currentHp, sentHpData.blue.sentry7);
+
+            return length;
+        });
+
+    clock.time = 10'000;
+
+    serial.sendHealthMessage();
 }
 
 TEST(VisionCoprocessor, sendShutdownMessage_sends_blank_msg_with_correct_id)

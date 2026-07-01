@@ -70,7 +70,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 55.0f,
 };
 
-static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
+static constexpr float TURRET_MINOR_OFFSET = 0.0f;
 
 static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .kp = 0.042f,
@@ -83,6 +83,9 @@ static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
+
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 5.0f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 4.0f;   // rad/s
 
 namespace turretMajor
 {
@@ -210,7 +213,7 @@ static constexpr float majorToTurretR = 0.145;
 static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
 
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
 
 inline const tap::algorithms::transforms::Transform TURRET_MCB1_BMI088_MOUNTING_TRANSFORM(
     0.0f,
@@ -237,7 +240,7 @@ inline constexpr aruwsrc::control::turret::algorithms::OptimalSTOSController::ST
         .B_DAMP = 0.001f,
         .W_D = 80.8f,
         .ZETA = 0.33,
-        .SYSTEM_DELAY_SEC = 0.012f,
+        .SYSTEM_DELAY_SEC = 0.008f,
         .TorqueToMotorOutput = TORQUE_TO_MOTOR_OUTPUT};
 
 inline constexpr aruwsrc::control::turret::algorithms::TurretFeedforwardConstants

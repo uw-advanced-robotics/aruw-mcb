@@ -87,8 +87,9 @@ public:
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(
               this,
-              tap::can::CanBus::CAN_BUS1,
-              aruwsrc::control::chassis::CAP_BANK_CAPACITANCE),
+              tap::can::CanBus::CAN_BUS2,
+              aruwsrc::control::chassis::CAP_BANK_CAPACITANCE,
+              aruwsrc::control::chassis::CAP_BANK_MAX_AVAILABLE_POWER),
           turretMajorPrimaryImu(
               aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
                   Board::SpiNss>()),
@@ -104,7 +105,6 @@ public:
           plateHitTracker(this),
           stateMachine(refSerial, visionCoprocessor)
     {
-        controlOperatorInterface.setTelemetry(&rttTelemetry);
         visionCoprocessor.setTelemetry(&rttTelemetry);
     }
 
@@ -167,10 +167,15 @@ public:
         turretMajorPrimaryImu.periodicIMUUpdate();
         turretMajorImuSecondary.periodicIMUUpdate();
         visionCoprocessor.sendMessage();
-        rttTelemetry.updateTelemetryAsync();
+        rttTelemetry.logSignal("ce", capacitorBank.getAvailableEnergy());
+        rttTelemetry.logSignal("cs", static_cast<int>(capacitorBank.getState()));
+        rttTelemetry.logSignal("tmi", static_cast<int>(turretMajorImu.getImuState()));
+        rttTelemetry.logSignal("cmi", static_cast<int>(turretMCBCanCommBus2.getImuState()));
+        rttTelemetry.logSignal("wmi", static_cast<int>(turretMCBCanCommBus1.getImuState()));
         checkTurretMcbDisconnection(this);
 
         rttTelemetry.logSignal("p_ml", tap::arch::clock::getTimeMicroseconds() - loop500HzStartUs);
+        rttTelemetry.updateTelemetryAsync();
     }
 
 private:

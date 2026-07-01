@@ -33,6 +33,8 @@ using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
+using tap::algorithms::transforms::Axis;
+
 static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::
     TurretGravityParams TURRET_GRAVITY_CONFIG_TEST{
         .cgX = 0.1f,

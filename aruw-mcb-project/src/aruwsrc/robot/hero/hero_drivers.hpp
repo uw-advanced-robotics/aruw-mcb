@@ -70,13 +70,13 @@ public:
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
           capacitorBank(
               this,
-              tap::can::CanBus::CAN_BUS1,
-              aruwsrc::control::chassis::CAP_BANK_CAPACITANCE),
+              tap::can::CanBus::CAN_BUS2,
+              aruwsrc::control::chassis::CAP_BANK_CAPACITANCE,
+              aruwsrc::control::chassis::CAP_BANK_MAX_AVAILABLE_POWER),
           plateHitTracker(this),
           refSerialTransmitter(this),
           interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
     {
-        controlOperatorInterface.setTelemetry(&rttTelemetry);
         visionCoprocessor.setTelemetry(&rttTelemetry);
     }
 
@@ -119,11 +119,13 @@ public:
 
     void update()
     {
-        rttTelemetry.updateTelemetryAsync();
         plateHitTracker.update();
         turretMCBCanCommBus1.sendData();
         oledDisplay.updateMenu();
         visionCoprocessor.sendMessage();
+        rttTelemetry.logSignal("ce", capacitorBank.getAvailableEnergy());
+        rttTelemetry.logSignal("cs", static_cast<int>(capacitorBank.getState()));
+        rttTelemetry.updateTelemetryAsync();
         checkTurretMcbDisconnection(this);
     }
 

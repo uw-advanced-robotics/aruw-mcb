@@ -21,6 +21,7 @@
 #define ENGINEER_CHASSIS_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/transforms/position.hpp"
 #include "tap/communication/gpio/analog.hpp"
 #include "tap/motor/dji_motor.hpp"
 
@@ -116,13 +117,13 @@ static constexpr float WHEEL_RADIUS = 0.076f;
 /**
  * Radius of the deadwheels (m)
  */
-static constexpr float DEADWHEEL_RADIUS = 0.016f;
+static constexpr float DEADWHEEL_RADIUS = 0.01455f;
 /**
  * Distance from the center axis of the robot to each deadwheel (m)
  */
-static constexpr float parallelOneCenterToWheelDistance = 140.975f;
-static constexpr float parallelTwoCenterToWheelDistance = 140.975f;
-static constexpr float perpendicularCenterToWheelDistance = 77.975f;
+static constexpr float parallelOneCenterToWheelDistance = 0.0777f;
+static constexpr float parallelTwoCenterToWheelDistance = 0.0824f;
+static constexpr float perpendicularCenterToWheelDistance = 0.1459f;
 /**
  * Relative orientation of dead wheels (rad)
  */
@@ -130,6 +131,8 @@ static constexpr float odomFrameToRobotFrame =
     0.0f;  // TODO: measure distance from center to deadwheel one.
 
 static constexpr float WHEELBASE_RADIUS = 0.2443f;
+
+static constexpr float ROBOT_RADIUS = 1.0f;  // TODO: measure actual value, this one is arbitrary
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
@@ -148,6 +151,51 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
     .beybladeRampRate = 100,
 };
+
+/**
+ * Engineer auto nav path
+ */
+static const tap::algorithms::transforms::Position ENGINEER_AUTO_NAV_START_POSITION =
+    tap::algorithms::transforms::Position(0.5f, 0.5f, 0);  // TODO: find actual start position
+static const float ENGINEER_AUTO_NAV_MARGIN =
+    0.05f;  // Addition margin between target above robot width
+static const float ENGINEER_AUTO_NAV_POINT_OFFSET_X = ROBOT_RADIUS + ENGINEER_AUTO_NAV_MARGIN;
+
+static const tap::algorithms::transforms::Position FIRST_CUBE_PICKUP =
+    tap::algorithms::transforms::Position(
+        0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+        3.555f,
+        0);  // First cube pickup
+
+static const tap::algorithms::transforms::Position FIRST_CUBE_DROPOFF =
+    tap::algorithms::transforms::Position(
+        3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+        0.540f,
+        0);  // First cube dropoff
+
+static const tap::algorithms::transforms::Position SECOND_CUBE_PICKUP =
+    tap::algorithms::transforms::Position(
+        0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+        3.825f,
+        0);  // Second cube pickup
+
+static const tap::algorithms::transforms::Position SECOND_CUBE_DROPOFF =
+    tap::algorithms::transforms::Position(
+        3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+        1.620f,
+        0);  // Second cube dropoff
+
+static const tap::algorithms::transforms::Position THIRD_CUBE_PICKUP =
+    tap::algorithms::transforms::Position(
+        0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+        4.095f,
+        0);  // Third cube pickup
+
+static const tap::algorithms::transforms::Position THIRD_CUBE_DROPOFF =
+    tap::algorithms::transforms::Position(
+        3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+        2.700f,
+        0);  // Third cube dropoff
 
 static constexpr float CHASSIS_SPEED_DIVSOR_NORMAL = 3.5;
 static constexpr float CHASSIS_SPEED_DIVSOR_SPRINT = 8;

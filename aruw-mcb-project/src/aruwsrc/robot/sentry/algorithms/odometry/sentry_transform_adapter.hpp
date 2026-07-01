@@ -44,6 +44,8 @@ public:
     const tap::algorithms::transforms::Transform& getWorldToChassis() const;
     const tap::algorithms::transforms::Transform& getVisionWorldToChassis() const;
 
+    const tap::algorithms::transforms::Transform& getWorldToTurretYaw(uint8_t turretID) const;
+
     const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t turretID) const;
 
     const tap::algorithms::transforms::Transform& getWorldToVTM() const;

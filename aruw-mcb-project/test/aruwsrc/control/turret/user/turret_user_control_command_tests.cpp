@@ -35,6 +35,8 @@ using namespace aruwsrc::control::turret::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
+using tap::algorithms::transforms::Axis;
+
 #define SETUP_TEST()
 
 static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::
@@ -129,10 +131,10 @@ TEST_F(TurretUserControlCommandTest, end_sets_motor_out_to_0)
 
 TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
 {
-    WrappedFloat yawActual = Angle(M_PI_2);
-    WrappedFloat pitchActual = Angle(M_PI_2);
-    WrappedFloat yawSetpoint = Angle(M_PI_2);
-    WrappedFloat pitchSetpoint = Angle(M_PI_2);
+    WrappedFloat yawActual = tap::algorithms::Angle(M_PI_2);
+    WrappedFloat pitchActual = tap::algorithms::Angle(M_PI_2);
+    WrappedFloat yawSetpoint = tap::algorithms::Angle(M_PI_2);
+    WrappedFloat pitchSetpoint = tap::algorithms::Angle(M_PI_2);
 
     ON_CALL(controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(0));
     ON_CALL(controlOperatorInterface, getTurretYawInput).WillByDefault(Return(0));
@@ -161,10 +163,10 @@ TEST_F(TurretUserControlCommandTest, execute_output_0_when_error_0)
 
 TEST_F(TurretUserControlCommandTest, execute_output_nonzero_when_error_nonzero)
 {
-    WrappedFloat pitchSetpoint = Angle(M_PI_2);
-    WrappedFloat yawSetpoint = Angle(M_PI_2);
-    WrappedFloat yawActual = Angle(M_PI_2);
-    WrappedFloat pitchActual = Angle(M_PI_2);
+    WrappedFloat pitchSetpoint = tap::algorithms::Angle(M_PI_2);
+    WrappedFloat yawSetpoint = tap::algorithms::Angle(M_PI_2);
+    WrappedFloat yawActual = tap::algorithms::Angle(M_PI_2);
+    WrappedFloat pitchActual = tap::algorithms::Angle(M_PI_2);
     ON_CALL(controlOperatorInterface, getTurretPitchInput).WillByDefault(Return(1));
     ON_CALL(controlOperatorInterface, getTurretYawInput).WillByDefault(Return(-1));
     ON_CALL(pitchMotorMock, getChassisFrameSetpoint).WillByDefault(ReturnPointee(&pitchSetpoint));

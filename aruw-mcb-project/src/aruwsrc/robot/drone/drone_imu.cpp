@@ -65,6 +65,7 @@ void DroneIMU::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 void DroneIMU::periodicIMUUpdate()
 {
     const ImuState stateBeforeUpdate = imuState;
+    updateImuMeasurement();
 
     if (imuState == ImuState::IMU_CALIBRATING)
     {

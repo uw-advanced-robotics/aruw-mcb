@@ -33,11 +33,11 @@ static constexpr tap::can::CanBus CAN_BUS_EXTENSION = tap::can::CanBus::CAN_BUS1
 static constexpr tap::motor::MotorId EXTENSION_MOTOR_ID = tap::motor::MotorId::MOTOR1;
 
 static constexpr tap::algorithms::SmoothPidConfig EXTENSION_PID_CONFIG = {
-    .kp = 700'000.0f,
-    .ki = 20'000'000.0f,
+    .kp = 1'000'000.0f,
+    .ki = 15'000'000.0f,
     .kd = 25'000.0f,
     .maxICumulative = 3000.0f,
-    .maxOutput = 6000.f,
+    .maxOutput = 6000.0f,
 };
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
