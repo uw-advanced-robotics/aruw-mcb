@@ -118,7 +118,7 @@ aruwsrc::drone::DroneTurretSubsystem turret(
     yawTurretMotor,
     &drivers()->turretImu);
 
-DroneTransformer transformer(turret, turret.getIMU());
+DroneTransformer transformer(drivers(), turret, turret.getIMU());
 DroneTransformerSubsystem transformSubsystem(*drivers(), transformer);
 DroneTransformAdapter transformAdapter(transformer);
 

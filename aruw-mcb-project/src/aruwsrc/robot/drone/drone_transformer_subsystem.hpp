@@ -37,6 +37,8 @@ public:
 
     inline void initialize() override {}
     inline void refresh() override { transformer.updateTransforms(); }
+    // should update transforms even when remote is not connected
+    inline void refreshSafeDisconnect() override { transformer.updateTransforms(); }
     const char* getName() const override { return "Drone transformer subsystem"; }
 
 private:

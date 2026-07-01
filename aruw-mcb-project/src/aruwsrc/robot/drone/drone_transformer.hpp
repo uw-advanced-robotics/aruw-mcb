@@ -25,6 +25,8 @@
 
 #include "aruwsrc/control/turret/turret_orientation_interface.hpp"
 
+#include "drone_drivers.hpp"
+
 namespace aruwsrc::drone
 {
 class DroneTransformer
@@ -35,6 +37,7 @@ class DroneTransformer
 
 public:
     explicit DroneTransformer(
+        aruwsrc::drone::Drivers* drivers,
         const aruwsrc::control::turret::TurretOrientationInterface& turretOrientation,
         const tap::communication::sensors::imu::AbstractIMU* turretImu = nullptr);
 
@@ -47,6 +50,7 @@ public:
     inline const Transform& getChassisToArducam() const { return chassisToArducam; }
 
 private:
+    aruwsrc::drone::Drivers* drivers;
     const aruwsrc::control::turret::TurretOrientationInterface& turretOrientation;
     const tap::communication::sensors::imu::AbstractIMU* turretImu;
 
