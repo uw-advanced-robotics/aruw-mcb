@@ -95,22 +95,6 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     aruwsrc::communication::serial::VisionCoprocessor::TargetState targetDataNow =
         aimData.targetState.projectForward(aimDataAge / 1E6f);
 
-    if (telemetry)
-    {
-        telemetry->logSignal(
-            "ballistics:target_pos",
-            targetDataNow.xPos,
-            targetDataNow.yPos,
-            targetDataNow.zPos);
-        telemetry->logSignal(
-            "ballistics:target_vel",
-            targetDataNow.xVel,
-            targetDataNow.yVel,
-            targetDataNow.zVel);
-        telemetry->logSignal("ballistics:omega", targetDataNow.omega);
-        telemetry->logSignal("ballistics:theta", targetDataNow.theta);
-    }
-
     // Use enemy angular velocity to determine which aiming strategy to use
     // TODO: this could technically be the angular velocity in the rotating target-tracking
     // frame ("omegaTotal")
@@ -122,6 +106,14 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     {
         // Use pulse estimation for fast rotating targets
         aimStrategy = AimStrategy::SHOT_TIMING;
+    }
+
+    if (telemetry)
+    {
+        telemetry->logSignal("vt", targetDataNow.xPos, targetDataNow.yPos, targetDataNow.zPos);
+        telemetry->logSignal("vth", targetDataNow.theta);
+        telemetry->logSignal("vom", targetDataNow.omega);
+        telemetry->logSignal("vm", static_cast<uint8_t>(aimStrategy));
     }
 
     switch (aimStrategy)
@@ -427,12 +419,6 @@ std::optional<CvBallisticsSolver::BallisticsSolution> CvBallisticsSolver::comput
     solution.shotWindowCenter =
         currentTimeMicros + static_cast<uint64_t>(timeToPlateCenterShot * 1e6f);
     solution.shotWindowHalfWidth = static_cast<uint64_t>(halfWidthTime * 1e6f);
-
-    if (telemetry)
-    {
-        telemetry->logSignal("ballistics:win_cen", solution.shotWindowCenter / 1e6f);
-        telemetry->logSignal("ballistics:win_wid", halfWidthTime);
-    }
 
     return solution;
 }
