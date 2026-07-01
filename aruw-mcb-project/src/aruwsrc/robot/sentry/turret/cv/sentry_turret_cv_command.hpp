@@ -85,7 +85,7 @@ public:
         NOT_HIT,
     };
 
-    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.60f);
+    static constexpr float YAW_SCAN_DELTA_ANGLE = modm::toRadian(0.30f);
 
     /**
      * The number of times refresh is called without receiving valid CV data to when
