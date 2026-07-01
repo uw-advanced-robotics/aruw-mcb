@@ -385,7 +385,6 @@ public:
 
     // @todo private should not be here
 private:
-    void logVisionTelemetry();
     void logRefereeTelemetry();
 
     enum TxMessageTypes

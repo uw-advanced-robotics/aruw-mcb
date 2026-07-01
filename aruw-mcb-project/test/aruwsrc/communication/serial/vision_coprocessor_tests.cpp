@@ -454,6 +454,53 @@ TEST(VisionCoprocessor, sendRobotTypeData_timer_expired_robot_type_sent)
     serial.sendRobotTypeData();
 }
 
+TEST(VisionCoprocessor, sendHealthMessage_overrides_own_robot_hp_from_current_hp)
+{
+    ClockStub clock;
+
+    tap::Drivers drivers;
+    VisionCoprocessor serial(&drivers);
+
+    static constexpr int HEADER_LEN = 7;
+    static constexpr int DATA_LEN = sizeof(RefSerialData::Rx::RobotHpData::RobotHp) * 2;
+    static constexpr int CRC16_LEN = 2;
+    static constexpr int MSG_LEN = HEADER_LEN + DATA_LEN + CRC16_LEN;
+
+    RefSerialData::Rx::RobotData robotData = {};
+    ON_CALL(drivers.refSerial, getRobotData).WillByDefault(ReturnRef(robotData));
+
+    robotData.robotId = RefSerialData::RobotId::BLUE_SENTINEL;
+    robotData.currentHp = 777;
+    robotData.allRobotHp.red.hero1 = 101;
+    robotData.allRobotHp.blue.hero1 = 201;
+    robotData.allRobotHp.blue.sentry7 = 333;
+
+    EXPECT_CALL(drivers.uart, write(_, _, MSG_LEN))
+        .Times(1)
+        .WillOnce([&](tap::communication::serial::Uart::UartPort,
+                      const uint8_t *data,
+                      std::size_t length) {
+            DJISerial::SerialMessage<DATA_LEN> msg;
+            memcpy(reinterpret_cast<uint8_t *>(&msg), data, MSG_LEN);
+
+            checkHeaderAndTail<DATA_LEN>(msg);
+            EXPECT_EQ(12, msg.messageType);
+
+            RefSerialData::Rx::RobotHpData sentHpData = {};
+            memcpy(&sentHpData, msg.data, sizeof(sentHpData));
+
+            EXPECT_EQ(robotData.allRobotHp.red.hero1, sentHpData.red.hero1);
+            EXPECT_EQ(robotData.allRobotHp.blue.hero1, sentHpData.blue.hero1);
+            EXPECT_EQ(robotData.currentHp, sentHpData.blue.sentry7);
+
+            return length;
+        });
+
+    clock.time = 10'000;
+
+    serial.sendHealthMessage();
+}
+
 TEST(VisionCoprocessor, sendShutdownMessage_sends_blank_msg_with_correct_id)
 {
     ClockStub clock;

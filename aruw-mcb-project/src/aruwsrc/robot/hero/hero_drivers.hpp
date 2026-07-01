@@ -77,7 +77,6 @@ public:
           refSerialTransmitter(this),
           interRobotTransmitter(&this->refSerial, &refSerialTransmitter, &this->visionCoprocessor)
     {
-        controlOperatorInterface.setTelemetry(&rttTelemetry);
         visionCoprocessor.setTelemetry(&rttTelemetry);
     }
 
@@ -120,11 +119,13 @@ public:
 
     void update()
     {
-        rttTelemetry.updateTelemetryAsync();
         plateHitTracker.update();
         turretMCBCanCommBus1.sendData();
         oledDisplay.updateMenu();
         visionCoprocessor.sendMessage();
+        rttTelemetry.logSignal("ce", capacitorBank.getAvailableEnergy());
+        rttTelemetry.logSignal("cs", static_cast<int>(capacitorBank.getState()));
+        rttTelemetry.updateTelemetryAsync();
         checkTurretMcbDisconnection(this);
     }
 

@@ -322,7 +322,7 @@ SentryTransforms transformer(
         .imuSyncConfig = IMU_SYNC_PID_CONFIG,
     });
 
-SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
+SentryTransformSubystem transformerSubsystem(*drivers(), transformer, &drivers()->rttTelemetry);
 SentryTransformAdapter transformAdapter(transformer);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
@@ -437,7 +437,8 @@ aruwsrc::algorithms::ballistics::CvBallisticsSolver ballisticsSolver(
         .minimumShotDelay = aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS /
                             1'000'000.0f,
     },
-    turretWidow.getTurretID());
+    turretWidow.getTurretID(),
+    &drivers()->rttTelemetry);
 
 AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,

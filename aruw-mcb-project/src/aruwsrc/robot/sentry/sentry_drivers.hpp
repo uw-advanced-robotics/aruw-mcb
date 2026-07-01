@@ -105,7 +105,6 @@ public:
           plateHitTracker(this),
           stateMachine(refSerial, visionCoprocessor)
     {
-        controlOperatorInterface.setTelemetry(&rttTelemetry);
         visionCoprocessor.setTelemetry(&rttTelemetry);
     }
 
@@ -168,10 +167,15 @@ public:
         turretMajorPrimaryImu.periodicIMUUpdate();
         turretMajorImuSecondary.periodicIMUUpdate();
         visionCoprocessor.sendMessage();
-        rttTelemetry.updateTelemetryAsync();
+        rttTelemetry.logSignal("ce", capacitorBank.getAvailableEnergy());
+        rttTelemetry.logSignal("cs", static_cast<int>(capacitorBank.getState()));
+        rttTelemetry.logSignal("tmi", static_cast<int>(turretMajorImu.getImuState()));
+        rttTelemetry.logSignal("cmi", static_cast<int>(turretMCBCanCommBus2.getImuState()));
+        rttTelemetry.logSignal("wmi", static_cast<int>(turretMCBCanCommBus1.getImuState()));
         checkTurretMcbDisconnection(this);
 
         rttTelemetry.logSignal("p_ml", tap::arch::clock::getTimeMicroseconds() - loop500HzStartUs);
+        rttTelemetry.updateTelemetryAsync();
     }
 
 private:

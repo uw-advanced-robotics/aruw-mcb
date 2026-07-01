@@ -59,7 +59,6 @@ public:
           chassisIsm(),
           mcbLite(this, tap::communication::serial::Uart::Uart7)
     {
-        controlOperatorInterface.setTelemetry(&rttTelemetry);
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
