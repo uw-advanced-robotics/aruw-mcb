@@ -201,7 +201,8 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_VEL_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = YAW_POS_PID_CONFIG;
-static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG = PITCH_POS_PID_CONFIG;
+static constexpr tap::algorithms::SmoothPidConfig PITCH_POS_PID_AUTO_AIM_CONFIG =
+    PITCH_POS_PID_CONFIG;
 }  // namespace world_rel_turret_imu
 
 namespace chassis_rel

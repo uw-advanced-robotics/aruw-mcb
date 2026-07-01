@@ -71,10 +71,18 @@ public:
 #endif
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
+#if defined(TARGET_DRONE)
+        tap::communication::serial::Uart::UartPort::Uart1;
+#else
         tap::communication::serial::Uart::UartPort::Uart2;
+#endif
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
+#if defined(TARGET_DRONE)
+        tap::communication::serial::Uart::UartPort::Uart1;
+#else
         tap::communication::serial::Uart::UartPort::Uart3;
+#endif
 
     enum class FireRate : uint8_t
     {
@@ -475,6 +483,8 @@ private:
         TIME_BTWN_SENDING_BULLETS_REMAINING_MSG};
 
     uint32_t lastSentRefereeWarningTime = 0;
+
+    int num_messages_sent = 0;
 
     /**
      * Interprets a raw `SerialMessage`'s `data` field to extract yaw, pitch, and other aim

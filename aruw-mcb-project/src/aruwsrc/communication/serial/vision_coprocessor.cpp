@@ -219,6 +219,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
 
 void VisionCoprocessor::sendMessage()
 {
+    num_messages_sent += 1;
     sendOdometryData();
     sendRobotTypeData();
     sendHealthMessage();

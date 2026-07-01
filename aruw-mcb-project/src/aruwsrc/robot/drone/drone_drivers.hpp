@@ -52,9 +52,9 @@ public:
     Drivers()
         : tap::Drivers(),
           controlOperatorInterface(this),
-          visionCoprocessor(this),
-          rttTelemetry(this),
           turretImu(),
+          rttTelemetry(this),
+          visionCoprocessor(this),
           oledDisplay(
               this,
               &visionCoprocessor,
@@ -81,16 +81,14 @@ public:
 #else
 public:
     DroneControlOperatorInterface controlOperatorInterface;
-    communication::serial::VisionCoprocessor visionCoprocessor;
 #endif
-    communication::rtt::RttTelemetry rttTelemetry;
     DroneIMU turretImu;
+    communication::rtt::RttTelemetry rttTelemetry;
+    aruwsrc::communication::serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
     void init(const float mainLoopFrequency)
     {
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
         visionCoprocessor.initializeCV();
-#endif
         oledDisplay.initialize();
         turretImu.initialize(mainLoopFrequency, 0.1f, 0.0f);
         turretImu.setMountingTransform(
@@ -101,19 +99,15 @@ public:
     void updateIo()
     {
         oledDisplay.updateDisplay();
-        turretImu.read();
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
         visionCoprocessor.updateSerial();
-#endif
+        turretImu.read();
     }
 
     void update()
     {
         turretImu.periodicIMUUpdate();
         oledDisplay.updateMenu();
-#if !defined(PLATFORM_HOSTED) || !defined(ENV_UNIT_TESTS)
         visionCoprocessor.sendMessage();
-#endif
         rttTelemetry.updateTelemetryAsync();
     }
 };  // class aruwsrc::DroneDrivers

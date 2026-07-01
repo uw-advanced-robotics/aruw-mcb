@@ -21,16 +21,11 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_composition_helper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/repeat_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 
-#include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
-#include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
-#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transform_adapter.hpp"
-#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer.hpp"
-#include "aruwsrc/algorithms/odometry/transforms/standard_and_hero_transformer_subsystem.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
 #include "aruwsrc/control/agitator/constant_velocity_agitator_command.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/manual_fire_rate_reselection_manager.hpp"
@@ -48,15 +43,13 @@
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
-#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
-#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
-#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
-#include "aruwsrc/robot/drone/drone_body_chassis_subsystem.hpp"
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 #include "aruwsrc/robot/drone/drone_imu_calibrate_command.hpp"
+#include "aruwsrc/robot/drone/drone_transform_adapter.hpp"
+#include "aruwsrc/robot/drone/drone_transformer.hpp"
+#include "aruwsrc/robot/drone/drone_transformer_subsystem.hpp"
 #include "aruwsrc/robot/drone/drone_turret_subsystem.hpp"
 #include "aruwsrc/robot/drone/drone_turret_vector_command.hpp"
 
@@ -65,10 +58,7 @@ using namespace aruwsrc::control;
 using namespace aruwsrc::control::turret;
 using namespace tap::control;
 using namespace aruwsrc::control::agitator;
-using namespace aruwsrc::control::auto_aim;
 using namespace aruwsrc::control::buzzer;
-using namespace aruwsrc::algorithms::odometry;
-using namespace aruwsrc::algorithms::odometry::transforms;
 using namespace tap::control::setpoint;
 using namespace tap::control::governor;
 using namespace tap::algorithms;
@@ -89,8 +79,6 @@ using Compose = CommandCompositionHelper;
 
 /* define subsystems --------------------------------------------------------*/
 BuzzerSubsystem buzzer(drivers());
-
-DroneBodyChassisSubsystem chassis(drivers());
 
 tap::motor::DjiMotor pitchMotor(
     drivers(),
@@ -130,20 +118,9 @@ aruwsrc::drone::DroneTurretSubsystem turret(
     yawTurretMotor,
     &drivers()->turretImu);
 
-aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(turret);
-aruwsrc::algorithms::odometry::ChassisCFOdometry odometrySubsystem(
-    drivers(),
-    chassis,
-    yawObserver,
-    drivers()->mpu6500,
-    modm::Vector2f(0.0f, 0.0f));
-
-StandardAndHeroTransformer transformer(odometrySubsystem, turret);
-StandardAnderHeroTransformerSubsystem transformSubsystem(
-    *drivers(),
-    transformer,
-    &drivers()->rttTelemetry);
-StandardAndHeroTransformAdapter transformAdapter(transformer);
+DroneTransformer transformer(turret, turret.getIMU());
+DroneTransformerSubsystem transformSubsystem(*drivers(), transformer);
+DroneTransformAdapter transformAdapter(transformer);
 
 // transforms
 VelocityAgitatorSubsystem agitator(
@@ -185,12 +162,6 @@ tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
-
-tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
-    world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
-
-tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
-    world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
 
 algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawFallbackController(
     turret.yawMotor,
@@ -270,67 +241,12 @@ HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
     constants::HEAT_LIMIT_BUFFER);
-
-aruwsrc::control::launcher::LaunchSpeedPredictorInterface &frictionWheelSpeedPredictor =
-    frictionWheels;
-
-aruwsrc::algorithms::OttoBallisticsSolver ballisticsSolver(
-    drivers()->visionCoprocessor,
-    odometrySubsystem,
-    turret,
-    frictionWheelSpeedPredictor,
-    aruwsrc::control::launcher::LAUNCHER_SPEED,
-    0);
-
-AutoAimLaunchTimer autoAimLaunchTimer(
-    aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
-    &drivers()->visionCoprocessor,
-    &ballisticsSolver);
-
-algorithms::TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
-
-algorithms::TurretSpringForceOffset turretSpringCompensation(
-    TURRET_SPRING_CONFIG,
-    pitchMotor.isMotorInverted());
-
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::YAW>
-    worldFrameYawTurretImuControllerCv(
-        transformer.getWorldToTurret(),
-        drivers()->turretImu,
-        turret.yawMotor,
-        worldFrameYawTurretImuPosPidCv,
-        worldFrameYawTurretImuVelPid);
-
-algorithms::WorldFrameTurretImuCascadePidTurretController<algorithms::Axis::PITCH>
-    worldFramePitchTurretImuControllerCv(
-        transformer.getWorldToTurret(),
-        drivers()->turretImu,
-        turret.pitchMotor,
-        worldFramePitchTurretImuPosPidCv,
-        worldFramePitchTurretImuVelPid,
-        {&turretGravityCompensation, &turretSpringCompensation});
-
-cv::TurretCVCommand turretCVCommand(
-    &drivers()->visionCoprocessor,
-    &drivers()->controlOperatorInterface,
-    &turret,
-    &worldFrameYawTurretImuControllerCv,
-    &worldFramePitchTurretImuControllerCv,
-    &ballisticsSolver,
-    USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
-
-CvOnTargetGovernor cvOnTargetGovernor(
-    static_cast<tap::Drivers *>(drivers()),
-    drivers()->visionCoprocessor,
-    turretCVCommand,
-    autoAimLaunchTimer,
-    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
-
-GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
+GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched,
-    {&heatLimitGovernor, &cvOnTargetGovernor});
+    {&heatLimitGovernor});
+
+RepeatCommand rotateAndUnjamAgitatorRepeat(&rotateAndUnjamAgitatorWithHeatLimiting);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
     drivers(),
@@ -346,7 +262,6 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
 
-
 // Remote related mappings
 Trigger leftSwitchMiddle =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::MID)
@@ -355,8 +270,7 @@ Trigger leftSwitchMiddle =
 
 Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(&turretCVCommand);
-        //.whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorWithHeatAndCVLimiting}));
+        .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
 
 Trigger thumbwheelUp =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
@@ -369,23 +283,19 @@ aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(driv
 void initializeSubsystems()
 {
     buzzer.initialize();
-    chassis.initialize();
     turret.initialize();
-    odometrySubsystem.initialize();
-    transformSubsystem.initialize();
     agitator.initialize();
     frictionWheels.initialize();
+    transformSubsystem.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
 void registerDroneSubsystems(Drivers *drivers)
 {
     drivers->commandScheduler.registerSubsystem(&buzzer);
-    drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
-    drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
 }
 
@@ -401,7 +311,6 @@ void setDefaultDroneCommands(Drivers *)
 void startDroneCommands(Drivers *drivers)
 {
     drivers->commandScheduler.addCommand(&droneImuCalibrateCommand);
-    drivers->visionCoprocessor.attachTransformer(&transformAdapter);
 }
 
 /* register io mappings here ------------------------------------------------*/
@@ -419,6 +328,7 @@ void initSubsystemCommands(aruwsrc::drone::Drivers *drivers)
     drone_control::setDefaultDroneCommands(drivers);
     drone_control::startDroneCommands(drivers);
     drone_control::registerDroneIoMappings(drivers);
+    drivers->visionCoprocessor.attachTransformer(&drone_control::transformAdapter);
 }
 }  // namespace aruwsrc::drone
 
