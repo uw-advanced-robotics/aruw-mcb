@@ -95,8 +95,7 @@ public:
 
     /**
      * Received-timestamp (ms) of the CV packet that produced the current worldToReceptacle, or
-     * 0 if none has ever been received. This single field doubles as the validity flag
-     * (>= 0 means valid) and the pose-age source: it is copied straight from
+     * -1 if none has ever been received. it is copied straight from
      * EngineerCVCommunication::getLastReceivedTimeMs() whenever worldToReceptacle is rebuilt.
      */
     inline int64_t getWorldToReceptacleReceivedTimeMs() const
