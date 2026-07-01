@@ -180,12 +180,12 @@ float ArucoResetSubsystem::calculateArducamPositionVariance(
 {
     static constexpr float MIN_POSITION_VARIANCE = 1.0e-6f;
     static constexpr float DISTANCE_VARIANCE_SCALE = 0.004f;
-    static constexpr float ANGLE_VARIANCE_SCALE = 0.01f;
+    // static constexpr float ANGLE_VARIANCE_SCALE = 0.000001f;
 
     const float distance = std::max(0.0f, poseData.cameraToTagMagnitude);
     const float angle = std::abs(poseData.cameraToTagAngle);
     const float standardDeviation =
-        DISTANCE_VARIANCE_SCALE * distance + ANGLE_VARIANCE_SCALE * distance * angle;
+        DISTANCE_VARIANCE_SCALE * distance; /*+ ANGLE_VARIANCE_SCALE * distance * angle;*/
 
     return std::max(MIN_POSITION_VARIANCE, standardDeviation * standardDeviation);
 }
