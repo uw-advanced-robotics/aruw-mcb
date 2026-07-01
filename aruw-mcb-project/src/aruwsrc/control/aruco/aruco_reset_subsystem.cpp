@@ -119,7 +119,8 @@ void ArucoResetSubsystem::processArducamData()
         visionMeasurement.source = FourWheelEKFOdometry::VisionMeasurementSource::APRIL_TAG;
         visionMeasurement.yaw = worldToChassis.getYaw();
         visionMeasurement.yawVariance = yawVariance;
-        wheelEkfOdometry->fuseVisionPose(visionMeasurement);
+        // wheelEkfOdometry->fuseVisionPose(visionMeasurement);
+        wheelEkfOdometry->fuseVisionPosition(visionMeasurement)
         return;
     }
 
