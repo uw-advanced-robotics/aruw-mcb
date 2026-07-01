@@ -20,7 +20,6 @@
 #ifndef ENGINEER_TURRET_CONSTANTS_HPP_
 #define ENGINEER_TURRET_CONSTANTS_HPP_
 
-#include <algorithm>
 #include <cmath>
 
 #include "tap/algorithms/fuzzy_pd.hpp"
@@ -28,8 +27,8 @@
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
-#include "aruwsrc/robot/engineer/algorithms/engineer_kinematic_constants.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "modm/math/interpolation/linear.hpp"
 #include "modm/platform/gpio/base.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
@@ -81,13 +80,26 @@ inline constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
 inline constexpr float MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
 inline constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
 
-// max height the end of the extension is allowed to be
-inline constexpr float MAX_HEIGHT = 1.1f;
-inline float GROUND_TO_PITCH = aruwsrc::engineer::algorithms::CHASSIS_TO_TURRET_YAW_POS.z() +
-                               aruwsrc::engineer::algorithms::TURRET_YAW_TO_TURRET_PITCH_POS.z();
 // start limiting pitch upper range when the extension is beyond this value because before
 // this point it's impossible to go over the height limit
-inline constexpr float EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT = 0.1f;
+inline constexpr float EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT = 0.4f;
+
+/**
+ * Lookup table that maps extension position to pitch upper limit. In between points in the lookup
+ * table, linear interpolation is used.
+ */
+inline constexpr modm::Pair<float, float> PITCH_UPPER_LIMIT_EXTENSION_TABLE[] = {
+    {EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT, PITCH_UPPER_LIMIT_DEFAULT},
+    {0.47f, -0.67f},
+    {0.53f, -0.63f},
+    {0.63f, -0.57f},
+    {0.73f, -0.52f},
+};
+
+static modm::interpolation::Linear<modm::Pair<float, float>>
+    PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR(
+        PITCH_UPPER_LIMIT_EXTENSION_TABLE,
+        MODM_ARRAY_SIZE(PITCH_UPPER_LIMIT_EXTENSION_TABLE));
 
 inline float getPitchMinLimit(float extensionPosition)
 {
@@ -98,16 +110,8 @@ inline float getPitchMinLimit(float extensionPosition)
     }
 
     if (extensionPosition > EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT)
-    {  // calculate the max possible upward pitch possible based on solving the triangle with
-        // the hypotenuse as the extension length
-
-        float hyptotenuse = extensionPosition;
-
-        // maximzing opposite side to theta to heigh limit
-        float maxOpp = MAX_HEIGHT - GROUND_TO_PITCH;
-
-        float sinTheta = maxOpp / hyptotenuse;
-        return std::asin(sinTheta);
+    {
+        return PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR.interpolate(extensionPosition);
     }
 
     return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
