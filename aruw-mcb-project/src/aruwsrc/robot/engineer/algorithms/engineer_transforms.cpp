@@ -66,7 +66,7 @@ EngineerTransforms::EngineerTransforms(
           {.mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass + MASS_BEYOND_WRIST.mass,
            .location = Position(0, 0, 0)}),
       COMBeyondWrist(MASS_BEYOND_WRIST),
-      worldToReceptacleValid(false)
+      worldToReceptacleReceivedTimeMs(-1)
 {
 }
 
@@ -116,7 +116,8 @@ void EngineerTransforms::updateTransforms()
         // cv communication gives the receptacle pose in the camera frame
         worldToReceptacle =
             worldToRealsense.composeStatic(engineerCVCommunication.getCamToReceptacle());
-        worldToReceptacleValid = true;
+        // Stamp this pose with the packet's received-time; doubles as the validity flag.
+        worldToReceptacleReceivedTimeMs = engineerCVCommunication.getLastReceivedTimeMs();
         engineerCVCommunication.markTargetPoseStale();
     }
 

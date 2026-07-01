@@ -71,6 +71,8 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transform_subsystem.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
+#include "aruwsrc/robot/engineer/auto/engineer_auton_constants.hpp"
+#include "aruwsrc/robot/engineer/auto/move_to_receptacle_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
@@ -103,6 +105,7 @@ using namespace aruwsrc::control::joint::homing::trigger;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::engineer::algorithms;
+using namespace aruwsrc::engineer::auton;
 using namespace aruwsrc::engineer::cube_storage;
 using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
@@ -414,12 +417,13 @@ EngineerTransforms transformer(
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
+// Shared path-following controller used by the engineer's autonomous behaviors.
 ChassisAutoNavController autoNavController(
     *drivers(),
     chassisSubsystem,
     transformer.getWorldToChassis(),
     BEYBLADE_CONFIG,
-    nullptr,
+    nullptr,  // engineer has no cap bank
     0,
     0);
 
@@ -459,6 +463,19 @@ WorldFrameTurretImuCascadePidTurretController<Axis::YAW> worldFrameYawTurretImuC
     engTurret.yawMotor,
     worldFrameYawTurretImuPosPid,
     worldFrameYawTurretImuVelPid);
+
+// Autonomous "drive up to a receptacle and look at it" behavior. Takes the move-target P
+// (a point a standoff short of the receptacle); drives there via the shared autoNavController
+// while holding the turret/camera on the receptacles and aggregating CV pose estimates.
+// Retarget with setTarget(...). See engineer_cv_mcb_doc.md.
+MoveToReceptacleCommand moveToReceptacleCommand(
+    *drivers(),
+    chassisSubsystem,
+    autoNavController,
+    engTurret,
+    worldFrameYawTurretImuController,
+    transformer,
+    auton::EASY_RECEPTACLE_CONFIG);
 
 BuzzerSubsystem buzzerSubsystem(drivers());
 
@@ -658,8 +675,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
     engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
-    chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
+    chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
+    // chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
     extensionSubsystem.setDefaultCommand(&extensionManualControl);
     wristSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
@@ -668,10 +685,24 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers* drivers)
+{
+    // Run IMU calibration on boot. This zeroes the chassis/turret IMUs and resets odometry
+    // so the world frame origin is the robot's pose at calibration. The robot MUST be held
+    // still until the success buzz plays; until calibration completes, world-frame headings
+    // and odometry (and therefore the autonomous move-to-receptacle behavior) are invalid.
+    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
+}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
+{
+    // Both remote switches UP → start the move-to-receptacle behavior (fires once per
+    // rising edge). For competition: additionally gate on GameStage::INITIALIZATION.
+    (TriggerHelpers::switchState(drivers, Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP) &&
+     TriggerHelpers::switchState(drivers, Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
+        .onTrue(&moveToReceptacleCommand);
+}
 }  // namespace control
 }  // namespace aruwsrc
 

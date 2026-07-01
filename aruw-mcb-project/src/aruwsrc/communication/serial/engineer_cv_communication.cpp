@@ -19,6 +19,7 @@
 
 #include "engineer_cv_communication.hpp"
 
+#include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
 using namespace tap::communication::serial;
@@ -60,6 +61,7 @@ void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage
         targetPositionMessage.pitch,
         targetPositionMessage.yaw);
     isFresh = true;
+    lastReceivedTimeMs = tap::arch::clock::getTimeMilliseconds();
 }
 
 void EngineerCVCommunication::initializeCV()
