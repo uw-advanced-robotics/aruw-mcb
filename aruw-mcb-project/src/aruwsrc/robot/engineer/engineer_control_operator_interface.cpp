@@ -23,12 +23,17 @@
 
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 
 using namespace tap::algorithms;
 using namespace aruwsrc::control::chassis;
 
 namespace aruwsrc::engineer
 {
+EngineerControlOperatorInterface::EngineerControlOperatorInterface(tap::Drivers *drivers):
+    ControlOperatorInterface(drivers),
+    engineerDrivers(static_cast<aruwsrc::engineer::Drivers*>(drivers)) {}
+
 bool EngineerControlOperatorInterface::isDriveMode()
 {
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN;
@@ -110,7 +115,8 @@ float EngineerControlOperatorInterface::getChassisXInput()
         if (isDriveMode())
         {
             chassisXInput.update(
-                drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL),
+                //drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL),
+                engineerDrivers->customControllerData.getX(),
                 currTime);
         }
         else
@@ -165,7 +171,8 @@ float EngineerControlOperatorInterface::getChassisYInput()
         if (isDriveMode())
         {
             chassisYInput.update(
-                -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
+                //-drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
+                -engineerDrivers->customControllerData.getY(),
                 currTime);
         }
         else

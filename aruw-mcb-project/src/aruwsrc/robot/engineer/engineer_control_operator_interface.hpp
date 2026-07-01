@@ -27,12 +27,16 @@
 
 #include "aruwsrc/control/control_operator_interface.hpp"
 
+namespace aruwsrc::engineer {
+    class Drivers;
+}
+
 namespace aruwsrc::engineer
 {
 class EngineerControlOperatorInterface : public control::ControlOperatorInterface
 {
 public:
-    EngineerControlOperatorInterface(tap::Drivers *drivers) : ControlOperatorInterface(drivers) {}
+    EngineerControlOperatorInterface(tap::Drivers *drivers);
 
     virtual float getChassisXInput() override;
 
@@ -96,6 +100,9 @@ public:
      * @return whether or not the control switch is set to cube storage control mode.
      */
     bool isCubeStorageControlMode();
+
+private:
+    aruwsrc::engineer::Drivers* engineerDrivers;
 };
 }  // namespace aruwsrc::engineer
 
