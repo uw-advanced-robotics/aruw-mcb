@@ -120,7 +120,7 @@ void ArucoResetSubsystem::processArducamData()
         visionMeasurement.yaw = worldToChassis.getYaw();
         visionMeasurement.yawVariance = yawVariance;
         // wheelEkfOdometry->fuseVisionPose(visionMeasurement);
-        wheelEkfOdometry->fuseVisionPosition(visionMeasurement)
+        wheelEkfOdometry->fuseVisionPosition(visionMeasurement);
         return;
     }
 
