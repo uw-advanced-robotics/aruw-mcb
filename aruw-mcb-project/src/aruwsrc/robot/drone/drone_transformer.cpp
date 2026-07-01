@@ -28,8 +28,7 @@ using tap::algorithms::transforms::Orientation;
 using tap::algorithms::transforms::Position;
 using tap::algorithms::transforms::Transform;
 
-// TODO(drone): Replace with measured camera extrinsics for the drone platform.
-static Transform TURRET_TO_ARDUCAM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+static Transform TURRET_TO_ARDUCAM_OFFSET = Transform(Position(0.048907, 0.0011831, 0.17776), Orientation(0, 0, 0));
 
 DroneTransformer::DroneTransformer(
     const aruwsrc::control::turret::TurretOrientationInterface& turretOrientation,

@@ -219,7 +219,6 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
 
 void VisionCoprocessor::sendMessage()
 {
-    num_messages_sent += 1;
     sendOdometryData();
     sendRobotTypeData();
     sendHealthMessage();
@@ -348,7 +347,6 @@ void VisionCoprocessor::sendOdometryData()
     }
 
     // @debug write into a class-variable for debugging, don't actually send to vision
-
     odometryMessage.setCRC16();
     drivers->uart.write(
         VISION_COPROCESSOR_TX_UART_PORT,
