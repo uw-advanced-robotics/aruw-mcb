@@ -75,13 +75,13 @@ tap::motor::DjiMotor reloaderMotor(
     false,
     "Reloader Motor",
     false,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006 / 6.25);
+    1.0);
 
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 DartLauncherSubsystem dartLauncher(drivers(), pullMotors);
 
-DartReloaderSubsystem dartReloader(drivers(), reloaderMotor);
+DartReloaderSubsystem reloader(drivers(), reloaderMotor);
 
 DartReleaseCommand dartRelease(dartLauncher, MANUAL_RELEASE_DESIRED_OUTPUT);
 DartPullbackCommand dartPullback(dartLauncher, MANUAL_PULLBACK_DESIRED_OUTPUT);
@@ -89,7 +89,7 @@ DartPullbackCommand dartPullback(dartLauncher, MANUAL_PULLBACK_DESIRED_OUTPUT);
 DartOpenCommand servoOpen(dartLauncher);
 DartCloseCommand servoClose(dartLauncher);
 
-RotateMagazineCommand rotateMagazine(dartReloader);
+RotateMagazineCommand rotateMagazine(reloader);
 
 auto rightUpLeftUpRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
 auto rightUpLeftUp = std::make_unique<HoldCommandMapping>(
@@ -115,7 +115,7 @@ auto rightDownLeftDown = std::make_unique<HoldCommandMapping>(
     std::vector<Command*>{&servoClose},
     &rightDownLeftDownRms);
 
-auto rightMidLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
+auto rightMidLeftDownRms = RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID);
 auto rightMidLeftDown = std::make_unique<PressCommandMapping>(
     drivers(),
     std::vector<Command*>{&rotateMagazine},
@@ -124,13 +124,13 @@ auto rightMidLeftDown = std::make_unique<PressCommandMapping>(
 void initializeSubsystems()
 {
     dartLauncher.initialize();
-    dartReloader.initialize();
+    reloader.initialize();
 }
 
 void registerDartSubsystems(aruwsrc::dart::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&dartLauncher);
-    drivers->commandScheduler.registerSubsystem(&dartReloader);
+    drivers->commandScheduler.registerSubsystem(&reloader);
     drivers->digital.configureInputPullMode(
         tap::gpio::Digital::B,
         tap::gpio::Digital::InputPullMode::PullUp);
@@ -142,10 +142,10 @@ void startDartCommands(aruwsrc::dart::Drivers*) {}
 
 void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
 {
-    drivers->commandMapper.addMap(std::move(rightUpLeftUp));
-    drivers->commandMapper.addMap(std::move(rightUpLeftDown));
-    drivers->commandMapper.addMap(std::move(rightDownLeftUp));
-    drivers->commandMapper.addMap(std::move(rightDownLeftDown));
+    // drivers->commandMapper.addMap(std::move(rightUpLeftUp));
+    // drivers->commandMapper.addMap(std::move(rightUpLeftDown));
+    // drivers->commandMapper.addMap(std::move(rightDownLeftUp));
+    // drivers->commandMapper.addMap(std::move(rightDownLeftDown));
     drivers->commandMapper.addMap(std::move(rightMidLeftDown));
 }
 

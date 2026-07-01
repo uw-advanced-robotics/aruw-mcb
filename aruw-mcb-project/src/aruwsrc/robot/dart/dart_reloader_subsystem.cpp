@@ -44,6 +44,7 @@ bool DartReloaderSubsystem::atSetpoint()
     float error = motor.getEncoder()->getPosition().getUnwrappedValue() - setpoint;
     return tap::algorithms::compareFloatClose(error, 0.0f, DART_MAGAZINE_TOLERANCE);
 }
+
 void DartReloaderSubsystem::refresh()
 {
     float currentPosition = motor.getEncoder()->getPosition().getUnwrappedValue();
@@ -54,6 +55,9 @@ void DartReloaderSubsystem::refresh()
     position = currentPosition;
 }
 
-void DartReloaderSubsystem::refreshSafeDisconnect() { motor.setDesiredOutput(0); }
+void DartReloaderSubsystem::refreshSafeDisconnect()
+{
+    motor.setDesiredOutput(0);
+}
 
 }  // namespace aruwsrc::dart
