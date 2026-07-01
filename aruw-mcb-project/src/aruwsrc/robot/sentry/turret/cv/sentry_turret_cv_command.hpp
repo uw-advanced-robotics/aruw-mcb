@@ -179,6 +179,7 @@ private:
     static constexpr float HIT_DIFF_OFFSET = modm::toRadian(20.0f);
 
     static constexpr float SCAN_LOW_PASS_ALPHA = 0.035f;
+    static constexpr float MAJOR_SCAN_LOW_PASS_ALPHA = SCAN_LOW_PASS_ALPHA * 0.25f;
     static constexpr float SCAN_ENDPOINT_TOLERANCE = modm::toRadian(1.0f);
 
     static constexpr int SCAN_CLOCKWISE = -1;
@@ -186,16 +187,8 @@ private:
     int scanDir = SCAN_COUNTER_CLOCKWISE;
     int pitchScanDir = SCAN_CLOCKWISE;
 
-    // Scan slightly past 360 deg endpoint-to-endpoint. The major only carries what the Achlys minor
-    // cannot cover inside its yaw limits.
     static constexpr float YAW_SCAN_HALF_RANGE = M_PI + modm::toRadian(4.0f);
-    static constexpr float MINOR_SCAN_HALF_RANGE =
-        (aruwsrc::control::turret::turretWidow::YAW_MOTOR_CONFIG.maxAngle -
-         aruwsrc::control::turret::turretWidow::YAW_MOTOR_CONFIG.minAngle) /
-        2.0f;
-    static constexpr float MAJOR_SCAN_LIMIT_MARGIN = SCAN_ENDPOINT_TOLERANCE;
-    static constexpr float MAJOR_SCAN_HALF_RANGE =
-        YAW_SCAN_HALF_RANGE - MINOR_SCAN_HALF_RANGE + MAJOR_SCAN_LIMIT_MARGIN;
+    static constexpr float MAJOR_SCAN_HALF_RANGE = modm::toRadian(50.0f);
     static constexpr float MAJOR_SCAN_RATIO = MAJOR_SCAN_HALF_RANGE / YAW_SCAN_HALF_RANGE;
     static constexpr float SCAN_TURRET_MINOR_UP_PITCH =
         aruwsrc::control::turret::turretWidow::PITCH_MOTOR_CONFIG.minAngle;
