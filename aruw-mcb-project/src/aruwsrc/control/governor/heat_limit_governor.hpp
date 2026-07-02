@@ -114,8 +114,9 @@ private:
     uint32_t previousPredictedHeatUpdateMs = 0;
     uint32_t lastPendingPredictedShotTimeMs = 0;
     uint8_t pendingPredictedShots = 0;
-    u_int16_t currentHeat =0;
+    u_int16_t currentHeat = 0;
     static constexpr uint32_t PENDING_PREDICTED_SHOT_TIMEOUT_MS = 250;
+    static constexpr uint32_t HEAT_COOLING_PERIOD_MS = 100;
 
     bool enoughHeatToLaunchProjectile()
     {
@@ -208,15 +209,17 @@ private:
             return;
         }
 
-        const float dt = static_cast<float>(now - previousPredictedHeatUpdateMs) / 1000.0f;
-        previousPredictedHeatUpdateMs = now;
-        if (dt > 0.0f)
+        const uint32_t elapsedCoolingMs = now - previousPredictedHeatUpdateMs;
+        const uint32_t coolingTicks = elapsedCoolingMs / HEAT_COOLING_PERIOD_MS;
+        if (coolingTicks > 0)
         {
-            predictedHeat -= static_cast<float>(coolingRate) * dt;
+            predictedHeat -=
+                static_cast<float>(coolingTicks) * (static_cast<float>(coolingRate) / 10.0f);
             if (predictedHeat < 0.0f)
             {
                 predictedHeat = 0.0f;
             }
+            previousPredictedHeatUpdateMs += coolingTicks * HEAT_COOLING_PERIOD_MS;
         }
 
         if (refHeat > predictedHeat)
@@ -241,7 +244,6 @@ private:
 
         while (currentAgitatorPosition >= nextPredictedShotAgitatorPosition)
         {
-            
             pendingPredictedShots++;
             lastPendingPredictedShotTimeMs = now;
             nextPredictedShotAgitatorPosition += agitatorShotAngle;
