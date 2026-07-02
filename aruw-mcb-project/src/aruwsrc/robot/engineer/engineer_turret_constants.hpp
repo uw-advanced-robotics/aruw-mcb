@@ -20,12 +20,15 @@
 #ifndef ENGINEER_TURRET_CONSTANTS_HPP_
 #define ENGINEER_TURRET_CONSTANTS_HPP_
 
+#include <cmath>
+
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -51,7 +54,8 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 // aggressively
 inline constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
 
-// if extended far enough, we can pitch higher because the back of extension won't hit the chassis
+// if extended far enough, we can pitch higher because the back of extension won't hit the
+// chassis
 inline constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
 
 // if extension above threshold, limit the pitch so the extension doesnt hit the ground
@@ -72,6 +76,27 @@ inline constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
 inline constexpr float MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
 inline constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
 
+// start limiting pitch upper range when the extension is beyond this value because before
+// this point it's impossible to go over the height limit
+inline constexpr float EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT = 0.4f;
+
+/**
+ * Lookup table that maps extension position to pitch upper limit. In between points in the lookup
+ * table, linear interpolation is used.
+ */
+inline constexpr modm::Pair<float, float> PITCH_UPPER_LIMIT_EXTENSION_TABLE[] = {
+    {EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT, PITCH_UPPER_LIMIT_DEFAULT},
+    {0.47f, -0.67f},
+    {0.53f, -0.63f},
+    {0.63f, -0.57f},
+    {0.73f, -0.52f},
+};
+
+static modm::interpolation::Linear<modm::Pair<float, float>>
+    PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR(
+        PITCH_UPPER_LIMIT_EXTENSION_TABLE,
+        MODM_ARRAY_SIZE(PITCH_UPPER_LIMIT_EXTENSION_TABLE));
+
 inline float getPitchMinLimit(float extensionPosition)
 {
     // TurretMotor expects numeric min/max radians. Pitch up is negative on engineer.
@@ -79,6 +104,12 @@ inline float getPitchMinLimit(float extensionPosition)
     {
         return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
     }
+
+    if (extensionPosition > EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT)
+    {
+        return PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR.interpolate(extensionPosition);
+    }
+
     return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
 }
 
