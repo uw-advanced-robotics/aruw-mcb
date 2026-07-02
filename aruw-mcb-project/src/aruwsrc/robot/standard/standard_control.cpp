@@ -661,6 +661,13 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheel
     true,
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
 
+MultiShotCvCommand multiShotCvCommand(
+    *drivers(),
+    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
+    &manualFireRateReselectionManager,
+    cvOnTargetGovernor,
+    &rotateAgitator);
+
 // Cap Bank
 aruwsrc::control::cap_bank::CapBankToggleCommand capBankToggleCommand(drivers(), capBankSubsystem);
 aruwsrc::control::cap_bank::CapBankSprintCommand capBankSprintCommand(
@@ -674,6 +681,15 @@ aruwsrc::control::client_display::ClientDisplaySubsystem clientDisplay(drivers()
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
 CapBankIndicator capBankIndicator(refSerialTransmitter, &drivers()->capacitorBank);
+
+MatrixHudIndicators positionHudIndicators(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    refSerialTransmitter,
+    frictionWheels,
+    turret,
+    &multiShotCvCommand,
+    &cvOnTargetGovernor);
 
 AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
 
@@ -703,7 +719,7 @@ VisionTargetIndicator visionTargetIndicator(
 
 std::vector<HudIndicator*> hudIndicators = {
     &capBankIndicator,
-    &textHudIndicators,
+    &positionHudIndicators,
     &ammoIndicator,
     &circleCrosshair,
     // &damageIndicator,
@@ -772,22 +788,6 @@ Trigger qPressed = TriggerHelpers::button(drivers(), Remote::Key::Q).toggleOnTru
 
 Trigger xPressed =
     TriggerHelpers::button(drivers(), Remote::Key::X).onTrue(&chassisAutorotateCommand);
-
-MultiShotCvCommand multiShotCvCommand(
-    *drivers(),
-    rotateAndUnjamAgitatorWithHeatAndCVLimiting,
-    &manualFireRateReselectionManager,
-    cvOnTargetGovernor,
-    &rotateAgitator);
-
-MatrixHudIndicators positionHudIndicators(
-    *drivers(),
-    drivers()->visionCoprocessor,
-    refSerialTransmitter,
-    frictionWheels,
-    turret,
-    &multiShotCvCommand,
-    &cvOnTargetGovernor);
 
 // Compose::parallel<1> so that multishot is still a weakconcurrentcommand and isReady is bypassed
 // since trigger doesn't have ownership
@@ -887,7 +887,7 @@ void setDefaultStandardCommands(Drivers*)
 /* add any starting commands to the scheduler here --------------------------*/
 void startStandardCommands(Drivers* drivers)
 {
-    // drivers->commandScheduler.addCommand(&clientDisplayCommand);
+    drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
