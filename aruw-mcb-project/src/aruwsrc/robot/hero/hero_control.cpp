@@ -356,7 +356,7 @@ AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
     &ballisticsSolver,
-    0.5f);
+    25.0f);
 
 aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
     drivers(),
