@@ -54,9 +54,6 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 // aggressively
 inline constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
 
-// limit the pitch upper range so we dont go over the extension limit
-inline constexpr float PITCH_UPPER_LIMIT_EXTENSION_EXTENDED = 0.0f;
-
 // if extended far enough, we can pitch higher because the back of extension won't hit the
 // chassis
 inline constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
