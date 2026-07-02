@@ -112,6 +112,11 @@ void ArucoResetSubsystem::processArducamData()
 
     if (wheelEkfOdometry != nullptr)
     {
+        if (poseData.cameraToTagMagnitude > MAX_APRILTAG_DISTANCE)
+        {
+            return;
+        }
+
         FourWheelEKFOdometry::VisionPoseMeasurement visionMeasurement{};
         visionMeasurement.position = measuredPosition;
         visionMeasurement.positionVarianceX = positionVariance;
@@ -119,7 +124,7 @@ void ArucoResetSubsystem::processArducamData()
         visionMeasurement.source = FourWheelEKFOdometry::VisionMeasurementSource::APRIL_TAG;
         visionMeasurement.yaw = worldToChassis.getYaw();
         visionMeasurement.yawVariance = yawVariance;
-        // wheelEkfOdometry->fuseVisionPose(visionMeasurement);
+
         wheelEkfOdometry->fuseVisionPosition(visionMeasurement);
         return;
     }
@@ -178,16 +183,18 @@ void ArucoResetSubsystem::initializeVisionPositionMeasurement(
 float ArucoResetSubsystem::calculateArducamPositionVariance(
     const VisionCoprocessor::ArucoResetPacket& poseData) const
 {
-    static constexpr float MIN_POSITION_VARIANCE = 1.0e-6f;
-    static constexpr float DISTANCE_VARIANCE_SCALE = 0.004f;
-    // static constexpr float ANGLE_VARIANCE_SCALE = 0.000001f;
-
     const float distance = std::max(0.0f, poseData.cameraToTagMagnitude);
     const float angle = std::abs(poseData.cameraToTagAngle);
-    const float standardDeviation =
-        DISTANCE_VARIANCE_SCALE * distance; /*+ ANGLE_VARIANCE_SCALE * distance * angle;*/
 
-    return std::max(MIN_POSITION_VARIANCE, standardDeviation * standardDeviation);
+    const float standardDeviation = std::clamp(
+        (HIGHER_APRILTAG_POSITION_STD - LOWER_APRILTAG_POSITION_STD) /
+                (MAX_APRILTAG_DISTANCE - LOWER_APRILTAG_DISTANCE) *
+                (distance - LOWER_APRILTAG_DISTANCE) +
+            LOWER_APRILTAG_POSITION_STD,
+        LOWER_APRILTAG_POSITION_STD,
+        HIGHER_APRILTAG_POSITION_STD);
+
+    return standardDeviation * standardDeviation;
 }
 
 float ArucoResetSubsystem::calculateArducamYawVariance(

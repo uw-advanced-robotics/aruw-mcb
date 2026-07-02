@@ -58,6 +58,12 @@ private:
     // Higher value here means we trust AruCo measurements more
     float VISION_TRUST = 0.025f;
 
+    static constexpr float LOWER_APRILTAG_POSITION_STD = 0.05f;
+    static constexpr float HIGHER_APRILTAG_POSITION_STD = 0.15f;
+    static constexpr float LOWER_APRILTAG_DISTANCE = 1.0f;
+    static constexpr float MAX_APRILTAG_DISTANCE = 4.0f;
+    // static constexpr float ANGLE_VARIANCE_SCALE = 0.000001f;
+
     void processRealsenseData();
     void processArducamData();
     void fuseVisionPositionMeasurement(
