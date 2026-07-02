@@ -675,6 +675,15 @@ tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers())
 
 CapBankIndicator capBankIndicator(refSerialTransmitter, &drivers()->capacitorBank);
 
+MatrixHudIndicators positionHudIndicators(
+    *drivers(),
+    drivers()->visionCoprocessor,
+    refSerialTransmitter,
+    frictionWheels,
+    turret,
+    &multiShotCvCommand,
+    &cvOnTargetGovernor);
+
 AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
 
 CircleCrosshair circleCrosshair(refSerialTransmitter);
@@ -778,15 +787,6 @@ MultiShotCvCommand multiShotCvCommand(
     &manualFireRateReselectionManager,
     cvOnTargetGovernor,
     &rotateAgitator);
-
-MatrixHudIndicators positionHudIndicators(
-    *drivers(),
-    drivers()->visionCoprocessor,
-    refSerialTransmitter,
-    frictionWheels,
-    turret,
-    &multiShotCvCommand,
-    &cvOnTargetGovernor);
 
 // Compose::parallel<1> so that multishot is still a weakconcurrentcommand and isReady is bypassed
 // since trigger doesn't have ownership
