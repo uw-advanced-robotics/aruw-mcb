@@ -703,7 +703,7 @@ VisionTargetIndicator visionTargetIndicator(
 
 std::vector<HudIndicator*> hudIndicators = {
     &capBankIndicator,
-    &textHudIndicators,
+    &positionHudIndicators,
     &ammoIndicator,
     &circleCrosshair,
     &damageIndicator,
