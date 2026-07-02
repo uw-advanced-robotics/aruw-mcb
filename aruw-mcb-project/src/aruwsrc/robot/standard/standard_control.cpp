@@ -706,7 +706,7 @@ std::vector<HudIndicator*> hudIndicators = {
     &textHudIndicators,
     &ammoIndicator,
     &circleCrosshair,
-    &damageIndicator,
+    // &damageIndicator,
     &textHudIndicators,
     &visionTargetIndicator};
 
