@@ -40,7 +40,10 @@ public:
     const float LOOKAHEAD_DISTANCE = 0.2f;
 
     // how long the controller takes to smoothly transition to an updated path
-    const uint32_t PATH_TRANSITION_TIME_MILLIS = 0;
+    const static uint32_t PATH_TRANSITION_TIME_MILLIS = 300;
+    static_assert(
+        PATH_TRANSITION_TIME_MILLIS > 0,
+        "PATH_TRANSITION_TIME_MILLIS must be greater than 0");
 
     // distance from setpoint under which robot is considered "on target"
     const float POS_ERROR_THRESHOLD = 0.01;
@@ -113,6 +116,14 @@ private:
     aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem;
     const float capBankEnergyThreshold;
     const float capBankTranslationalVelocityThreshold;
+    float foo = 0;
+    float bar;
+    bool baz;
+    Position currentPos;
+    float lookaheadDist;
+    float robotParam;
+    Position lookaheadPos;
+    bool continueMoving = true;
 };
 }  // namespace aruwsrc::control::chassis
 

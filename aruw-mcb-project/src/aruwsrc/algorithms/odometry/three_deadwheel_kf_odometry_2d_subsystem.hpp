@@ -20,6 +20,8 @@
 #ifndef THREE_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 #define THREE_DEADWHEEL_KF_ODOMETRY_2D_SUBSYSTEM_HPP_
 
+#include <array>
+
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/odometry/odometry_2d_tracker.hpp"
@@ -71,16 +73,12 @@ public:
      */
     ThreeDeadwheelKFOdometry2DSubsystem(
         tap::Drivers &drivers,
-        const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver &deadwheels,
+        std::array<aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver*, 3> deadwheels,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,
         float initialYPos,
-        float initialYaw,
-        const float parallelOneCenterToWheelDistance,
-        const float parallelTwoCenterToWheelDistance,
-        const float perpendicularCenterToWheelDistance,
-        const float odomFrameToRobotFrame);
+        float initialYaw);
 
     void refresh() override;
 

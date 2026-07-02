@@ -22,6 +22,8 @@
 
 #include <array>
 
+#include <numbers>
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/position.hpp"
 #include "tap/communication/gpio/analog.hpp"
@@ -38,13 +40,23 @@
 namespace aruwsrc::control::chassis
 {
 // Initial position of the chassis in the field (meters)
-static constexpr float INITIAL_CHASSIS_POSITION_X =
-    0.0f;  /// TODO: find initial position of chassis
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;  // TODO: find initial position of chassis
+/*static constexpr float INITIAL_CHASSIS_POSITION_X =
+    0.9294f;  /// TODO: find initial position of chassis
+static constexpr float INITIAL_CHASSIS_POSITION_Y =
+    4.095f;  // TODO: find initial position of chassis
 
 // Initial orientation of the chassis in the field (radians)
 static constexpr float INITIAL_CHASSIS_ORIENTATION =
-    0.0f;  // TODO: find initial orientation of chassis
+    std::numbers::pi;  // TODO: find initial orientation of chassis*/
+
+static constexpr float INITIAL_CHASSIS_POSITION_X =
+    0.0f;  /// TODO: find initial position of chassis
+static constexpr float INITIAL_CHASSIS_POSITION_Y =
+    0.0f;  // TODO: find initial position of chassis
+
+// Initial orientation of the chassis in the field (radians)
+static constexpr float INITIAL_CHASSIS_ORIENTATION =
+    0.0;  // TODO: find initial orientation of chassis
 
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -119,13 +131,13 @@ static constexpr float WHEEL_RADIUS = 0.076f;
 /**
  * Radius of the deadwheels (m)
  */
-static constexpr float DEADWHEEL_RADIUS = 0.01455f;
+static constexpr float DEADWHEEL_RADIUS = 0.0152f;
 /**
  * Distance from the center axis of the robot to each deadwheel (m)
  */
-static constexpr float parallelOneCenterToWheelDistance = 0.0777f;
-static constexpr float parallelTwoCenterToWheelDistance = 0.0824f;
-static constexpr float perpendicularCenterToWheelDistance = 0.1459f;
+static constexpr float parallelOneCenterToWheelDistance = 0.0850f;
+static constexpr float parallelTwoCenterToWheelDistance = 0.0850f;
+static constexpr float perpendicularCenterToWheelDistance = 0.1464f;
 /**
  * Relative orientation of dead wheels (rad)
  */
@@ -134,7 +146,7 @@ static constexpr float odomFrameToRobotFrame =
 
 static constexpr float WHEELBASE_RADIUS = 0.2443f;
 
-static constexpr float ROBOT_RADIUS = 1.0f;  // TODO: measure actual value, this one is arbitrary
+static constexpr float ROBOT_RADIUS = 0.2794f;
 
 /**
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y.
@@ -158,8 +170,10 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
  * Engineer auto nav path
  */
 using AutoNavPoint = tap::algorithms::transforms::Position;
-static const AutoNavPoint ENGINEER_AUTO_NAV_START_POSITION =
-    AutoNavPoint(0.5f, 0.5f, 0);  // TODO: find actual start position
+static const AutoNavPoint ENGINEER_AUTO_NAV_START_POSITION = AutoNavPoint(
+    INITIAL_CHASSIS_POSITION_X,
+    INITIAL_CHASSIS_POSITION_Y,
+    INITIAL_CHASSIS_ORIENTATION);  // TODO: find actual start position
 static const float ENGINEER_AUTO_NAV_MARGIN =
     0.05f;  // Addition margin between target above robot width
 static const float ENGINEER_AUTO_NAV_POINT_OFFSET_X = ROBOT_RADIUS + ENGINEER_AUTO_NAV_MARGIN;
@@ -169,37 +183,36 @@ static const AutoNavPoint FIRST_CUBE_PICKUP = AutoNavPoint(
     3.555f,
     0);  // First cube pickup
 
-static const AutoNavPoint FIRST_CUBE_DROPOFF = AutoNavPoint(
-    3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
-    0.540f,
-    0);  // First cube dropoff
-
 static const AutoNavPoint SECOND_CUBE_PICKUP = AutoNavPoint(
     0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
     3.825f,
     0);  // Second cube pickup
-
-static const AutoNavPoint SECOND_CUBE_DROPOFF = AutoNavPoint(
-    3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
-    1.620f,
-    0);  // Second cube dropoff
 
 static const AutoNavPoint THIRD_CUBE_PICKUP = AutoNavPoint(
     0.600f + ENGINEER_AUTO_NAV_POINT_OFFSET_X,
     4.095f,
     0);  // Third cube pickup
 
+static const AutoNavPoint FIRST_CUBE_DROPOFF = AutoNavPoint(
+    3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+    0.540f,
+    0);  // First cube dropoff
+
+static const AutoNavPoint SECOND_CUBE_DROPOFF = AutoNavPoint(
+    3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
+    1.620f,
+    0);  // Second cube dropoff
+
 static const AutoNavPoint THIRD_CUBE_DROPOFF = AutoNavPoint(
     3.870f - ENGINEER_AUTO_NAV_POINT_OFFSET_X,
     2.700f,
-    0);  // Third cube dropoff'
+    0);  // Third cube dropoff
 
 static const std::array<AutoNavPoint, 7> ENGINEER_AUTO_NAV_PATH = {
-    ENGINEER_AUTO_NAV_START_POSITION,
-    FIRST_CUBE_PICKUP,
+    /*FIRST_CUBE_PICKUP,
     FIRST_CUBE_DROPOFF,
     SECOND_CUBE_PICKUP,
-    SECOND_CUBE_DROPOFF,
+    SECOND_CUBE_DROPOFF,*/
     THIRD_CUBE_PICKUP,
     THIRD_CUBE_DROPOFF};
 

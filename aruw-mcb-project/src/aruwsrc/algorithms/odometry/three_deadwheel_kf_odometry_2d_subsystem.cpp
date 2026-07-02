@@ -25,27 +25,19 @@ namespace aruwsrc::algorithms::odometry
 {
 ThreeDeadwheelKFOdometry2DSubsystem::ThreeDeadwheelKFOdometry2DSubsystem(
     tap::Drivers &drivers,
-    const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver &deadwheels,
+    std::array<aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver*, 3> deadwheels,
     tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
     tap::communication::sensors::imu::ImuInterface &imu,
     float initialXPos,
     float initialYPos,
-    float initialYaw,
-    const float parallelOneCenterToWheelDistance,
-    const float parallelTwoCenterToWheelDistance,
-    const float perpendicularCenterToWheelDistance,
-    const float odomFrameToRobotFrame)
+    float initialYaw)
     : Subsystem(&drivers),
       ThreeDeadwheelChassisKFOdometry(
           deadwheels,
           yawObserver,
           imu,
           modm::Vector2f(initialXPos, initialYPos),
-          initialYaw,
-          parallelOneCenterToWheelDistance,
-          parallelTwoCenterToWheelDistance,
-          perpendicularCenterToWheelDistance,
-          odomFrameToRobotFrame)
+          initialYaw)
 {
 }
 

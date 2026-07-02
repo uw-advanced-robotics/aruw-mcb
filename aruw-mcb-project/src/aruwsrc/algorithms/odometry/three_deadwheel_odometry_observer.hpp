@@ -30,26 +30,30 @@ class ThreeDeadwheelOdometryObserver
 {
 public:
     ThreeDeadwheelOdometryObserver(
-        const tap::encoder::EncoderInterface* parallelWheelOne,
-        const tap::encoder::EncoderInterface* parallelWheelTwo,
-        const tap::encoder::EncoderInterface* perpendicularWheel,
-        const float wheelRadius);
-
-    const float wheelRadius;
+        const tap::encoder::EncoderInterface& encoder,
+        float wheelRadius,
+        float x,
+        float y,
+        float theta);
 
     /// Get m/s of odom wheel oriented such that it rolls on the tangent line to the chassis
-    float getParallelMotorOneVelocity() const;
-    float getParallelMotorTwoVelocity() const;
-
-    /// Get m/s of odom wheel oriented such that it rolls on the line perpendicular to the chassis
-    float getPerpendicularVelocity() const;
+    float getVelocity() const;
+    float getWheelRadius() const;
+    float getX() const;
+    float getY() const;
+    float getWheelTheta() const;
 
 private:
     /// Parallel wheel is oriented such that it rolls on the tangent line to the chassis
-    const tap::encoder::EncoderInterface* parallelWheelOne;
-    const tap::encoder::EncoderInterface* parallelWheelTwo;
-    /// Perpendicular wheel is oriented such that it rolls on the line perpendicular to the chassis
-    const tap::encoder::EncoderInterface* perpendicularWheel;
+    const tap::encoder::EncoderInterface* encoder;
+
+    // Physical deadwheel params
+    float wheelRadius;
+    float x;
+    float y;
+    float theta;
+
+    mutable float raw;
 };
 
 }  // namespace aruwsrc::algorithms::odometry

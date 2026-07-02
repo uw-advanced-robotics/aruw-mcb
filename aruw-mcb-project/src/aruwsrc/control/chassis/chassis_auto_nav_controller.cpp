@@ -37,9 +37,10 @@ void ChassisAutoNavController::runController(
     const bool movementEnabled,
     const bool beybladeEnabled)
 {
-    Position currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
-    float lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
-                                               // this constant with a function in the future
+    foo++;
+    currentPos = worldToChassis.getTranslation();  // works bc transformer always makes z 0
+    lookaheadDist = LOOKAHEAD_DISTANCE;  // redeclared here bc it might be useful to replace
+                                         // this constant with a function in the future
     setpoint = calculateSetPoint(currentPos, lookaheadDist, movementEnabled);
 
     moveVector = Vector(0, 0, 0);  // in chassis wheel rpm units
@@ -121,11 +122,11 @@ Position ChassisAutoNavController::calculateSetPoint(
         pathTransitionTimeout.restart(PATH_TRANSITION_TIME_MILLIS);
     }
 
-    float robotParam = path->estimateRobotProgress(current, lastParameter);
+    robotParam = path->estimateRobotProgress(current, lastParameter);
 
     lastParameter = robotParam;
 
-    Position lookaheadPos = path->parametertoPosition(robotParam + lookaheadDistance);
+    lookaheadPos = path->parametertoPosition(robotParam + lookaheadDistance);
 
     if (!pathTransitionTimeout.isExpired())
         return aruwsrc::algorithms::quadraticBezierInterpolation(

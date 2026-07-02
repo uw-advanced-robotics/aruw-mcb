@@ -384,24 +384,35 @@ DualDigitalOutSubsystem rightSuckSubsystem(
     tap::gpio::Digital::OutputPin::Z,
     true);
 
-aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
-    &parallelOmniOne,
-    &parallelOmniTwo,
-    &perpendicularOmni,
-    DEADWHEEL_RADIUS);
+aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver parallelOneObserver(
+    parallelOmniOne,
+    0.015248f,
+    0.000000f, 
+    0.077700f,
+    0.004206f);
+
+aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver parallelTwoObserver(
+    parallelOmniTwo,
+    0.015306f,
+    0.000000f,
+    -0.081000f,
+    -0.047386f);
+
+aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver perpendicularObserver(
+    perpendicularOmni,
+    0.015084f, 
+    -0.144200f, 
+    0.000000f,  
+    1.607466f);
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelKFOdometry2DSubsystem odometrySubsystem(
     *drivers(),
-    deadwheels,
+    {&parallelOneObserver, &parallelTwoObserver, &perpendicularObserver},
     yawObserver,
     drivers()->chassisIsm,
     INITIAL_CHASSIS_POSITION_X,
     INITIAL_CHASSIS_POSITION_Y,
-    INITIAL_CHASSIS_ORIENTATION,
-    parallelOneCenterToWheelDistance,
-    parallelTwoCenterToWheelDistance,
-    perpendicularCenterToWheelDistance,
-    odomFrameToRobotFrame);
+    INITIAL_CHASSIS_ORIENTATION);
 
 // transforms
 EngineerTransforms transformer(
@@ -632,6 +643,11 @@ Trigger wheelUp =
     (!TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, -0.5f, false))
         .onTrue(&endEffectorSuckOffCommand);
 
+Trigger autoNavTrigger =
+    (TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
+        .onTrue(&chassisFixedPathAutoNavCommand);
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
@@ -653,9 +669,9 @@ void initializeSubsystems()
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
-    drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wristSubsystem);
-    drivers->commandScheduler.registerSubsystem(&cubeStorage);
+    // drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
+    //  drivers->commandScheduler.registerSubsystem(&wristSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&cubeStorage);
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&engTurret);

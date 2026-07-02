@@ -22,28 +22,42 @@
 namespace aruwsrc::algorithms::odometry
 {
 ThreeDeadwheelOdometryObserver::ThreeDeadwheelOdometryObserver(
-    const tap::encoder::EncoderInterface* parallelWheelOne,
-    const tap::encoder::EncoderInterface* parallelWheelTwo,
-    const tap::encoder::EncoderInterface* perpendicularWheel,
-    const float wheelRadius)
-    : wheelRadius(wheelRadius),
-      parallelWheelOne(parallelWheelOne),
-      parallelWheelTwo(parallelWheelTwo),
-      perpendicularWheel(perpendicularWheel)
+    const tap::encoder::EncoderInterface& encoder,
+    float wheelRadius,
+    float x,
+    float y,
+    float theta)
+    : encoder(&encoder),
+      wheelRadius(wheelRadius),
+      x(x),
+      y(y),
+            theta(theta)
 {
 }
 
-float ThreeDeadwheelOdometryObserver::getParallelMotorOneVelocity() const
+float ThreeDeadwheelOdometryObserver::getVelocity() const
 {
-    return parallelWheelOne->getVelocity() * wheelRadius;
-}
-float ThreeDeadwheelOdometryObserver::getParallelMotorTwoVelocity() const
-{
-    return parallelWheelTwo->getVelocity() * wheelRadius;
-}
-float ThreeDeadwheelOdometryObserver::getPerpendicularVelocity() const
-{
-    return perpendicularWheel->getVelocity() * wheelRadius;
+    raw = encoder->getVelocity() * wheelRadius;
+    return raw;
 }
 
+float ThreeDeadwheelOdometryObserver::getWheelRadius() const
+{
+    return wheelRadius;
+}
+
+float ThreeDeadwheelOdometryObserver::getX() const
+{
+    return x;
+}
+
+float ThreeDeadwheelOdometryObserver::getY() const
+{
+    return y;
+}
+
+float ThreeDeadwheelOdometryObserver::getWheelTheta() const
+{
+    return theta;
+}
 }  // namespace aruwsrc::algorithms::odometry

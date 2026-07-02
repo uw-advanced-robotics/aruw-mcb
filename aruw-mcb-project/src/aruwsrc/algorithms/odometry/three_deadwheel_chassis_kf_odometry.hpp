@@ -20,6 +20,9 @@
 #ifndef THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 #define THREE_DEADWHEEL_CHASSIS_KF_ODOMETRY_HPP_
 
+#include <array>
+
+#include "tap/algorithms/cmsis_mat.hpp"
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/algorithms/odometry/chassis_displacement_observer_interface.hpp"
 #include "tap/algorithms/odometry/chassis_world_yaw_observer_interface.hpp"
@@ -32,8 +35,6 @@
 #include "modm/math/geometry/location_2d.hpp"
 #include "modm/math/interpolation/linear.hpp"
 
-#include "two_deadwheel_odometry_observer.hpp"
-
 namespace aruwsrc::algorithms::odometry
 {
 /**
@@ -44,6 +45,7 @@ namespace aruwsrc::algorithms::odometry
  */
 class ThreeDeadwheelChassisKFOdometry : public tap::algorithms::odometry::Odometry2DInterface
 {
+    using Deadwheel = ThreeDeadwheelOdometryObserver;
 public:
     /**
      * Constructor.
@@ -64,15 +66,13 @@ public:
      * should not move, and vice versa
      */
     ThreeDeadwheelChassisKFOdometry(
-        const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry,
+        std::array<Deadwheel*, 3> deadwheels,
         tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver,
         tap::communication::sensors::imu::ImuInterface& imu,
         const modm::Vector2f initPos,
-        const float initYaw,
-        const float parallelOneCenterToWheelDistance,
-        const float parallelTwoCenterToWheelDistance,
-        const float perpendicularCenterToWheelDistance,
-        const float odomFrameToRobotFrame);
+        const float initYaw);
+
+    ThreeDeadwheelChassisKFOdometry() = default;
 
     inline modm::Location2D<float> getCurrentLocation2D() const final { return location; }
 
@@ -220,7 +220,8 @@ private:
     /// @TODO: TUNE
     // clang-format on
 
-    const aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver& deadwheelOdometry;
+    std::array<Deadwheel*, 3> deadwheels;
+    tap::algorithms::CMSISMat<3, 3> AI;
     tap::algorithms::odometry::ChassisWorldYawObserverInterface& chassisYawObserver;
     tap::communication::sensors::imu::ImuInterface& imu;
     const modm::Vector2f initPos;
@@ -241,10 +242,6 @@ private:
     tap::algorithms::Angle lastWrappedTheta = tap::algorithms::Angle(0.0f);
     tap::algorithms::Angle imuTheta = tap::algorithms::Angle(0.0f);
 
-    const float parallelOneCenterToWheelDistance;
-    const float parallelTwoCenterToWheelDistance;
-    const float perpendicularCenterToWheelDistance;
-    const float odomFrameToRobotFrame;
     void updateChassisStateFromKF();
 
     float x[int(OdomStateX::NUM_STATES)];
