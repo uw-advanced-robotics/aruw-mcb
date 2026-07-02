@@ -29,7 +29,6 @@
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
 #include "modm/math/interpolation/linear.hpp"
-#include "modm/platform/gpio/base.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
