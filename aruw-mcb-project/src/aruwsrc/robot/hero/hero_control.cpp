@@ -724,7 +724,7 @@ std::vector<HudIndicator*> hudIndicators = {
     &ammoIndicator,
     &enemyIndicator,
     &circleCrosshair,
-    &damageIndicator,
+    // &damageIndicator,
     &textHudIndicators,
     &visionTargetIndicator};
 
