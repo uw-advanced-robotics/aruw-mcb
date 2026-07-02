@@ -93,7 +93,6 @@ void StandardAndHeroTransformer::updateTransforms()
     worldToTurret.updateTranslation(
         worldToTurretYaw.composeStatic(TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET).getTranslation());
 
-    worldToTurret.updateTranslation(worldToChassis.getTranslation());
     worldToTurret.updateVelocity(worldToChassis.getVelocity());
     chassisToTurret = worldToChassis.getInverse().composeStatic(worldToTurret);
 
