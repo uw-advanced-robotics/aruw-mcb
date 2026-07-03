@@ -17,21 +17,26 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dart_close_command.hpp"
+#include "dart_setpoint_command.hpp"
+
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
+
+#include "dart_constants.hpp"
+#include "dart_servo.hpp"
 
 namespace aruwsrc::dart
 {
-DartCloseCommand::DartCloseCommand(DartServo &dartLauncher) : dartLauncher(dartLauncher)
+DartSetpointCommand::DartSetpointCommand(
+    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem,
+    float setpoint)
+    : pullMotorSubsystem(pullMotorSubsystem),
+      setpoint(setpoint)
 {
-    addSubsystemRequirement(&dartLauncher);
+    addSubsystemRequirement(&pullMotorSubsystem);
 }
 
-void DartCloseCommand::initialize() { dartLauncher.setClose(); }
+void DartSetpointCommand::initialize() { pullMotorSubsystem.setSetpoint(setpoint); }
 
-void DartCloseCommand::execute() { dartLauncher.getServo().updateSendPwmRamp(); }
-
-void DartCloseCommand::end(bool) {}
-
-bool DartCloseCommand::isFinished() const { return false; }
+bool DartSetpointCommand::isFinished() const { return pullMotorSubsystem.atSetpoint(); }
 
 }  // namespace aruwsrc::dart

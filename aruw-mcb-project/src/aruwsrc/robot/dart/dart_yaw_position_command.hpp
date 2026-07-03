@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -16,36 +16,43 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef DART_YAW_POSITION_COMMAND_HPP_
+#define DART_YAW_POSITION_COMMAND_HPP_
 
-#ifndef DART_RELEASE_COMMAND_HPP_
-#define DART_RELEASE_COMMAND_HPP_
-
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
+#include "aruwsrc/robot/dart/dart_constants.hpp"
 
-#include "dart_servo.hpp"
-
+using namespace aruwsrc::control::joint::homing;
+using tap::communication::serial::Remote;
 namespace aruwsrc::dart
 {
-class DartReleaseCommand : public tap::control::Command
+class DartYawPositionCommand : public tap::control::Command
 {
 public:
-    DartReleaseCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher);
+    DartYawPositionCommand(
+        tap::Drivers *drivers,
+        TriggerHomedJointSubsystem *subsystem,
+        float setpointDegrees);
 
     void initialize() override;
 
-    void execute() override {}
+    void execute() override;
 
-    void end(bool) override {}
+    void end(bool interrupted) override;
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "DART RELEASE"; }
+    const char *getName() const override { return "DART_YAW_POSITION"; }
 
 private:
-    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher;
-};  // class DartReleaseCommand
+    tap::Drivers *drivers;
+    TriggerHomedJointSubsystem *subsystem;
+    float setpointDegrees;
+};  // class CLASS_NAME
 
 }  // namespace aruwsrc::dart
-#endif  // DART_RELEASE_COMMAND_HPP_
+#endif  // DART_YAW_POSITION_COMMAND_HPP_
