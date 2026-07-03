@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2025-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -16,36 +16,42 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef DART_RELEASE_COMMAND_HPP_
-#define DART_RELEASE_COMMAND_HPP_
+#ifndef DART_YAW_VELOCITY_COMMAND_HPP_
+#define DART_YAW_VELOCITY_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
-#include "dart_servo.hpp"
+#include "dart_control_operator_interface.hpp"
+
+using namespace aruwsrc::control::joint::homing;
+using tap::communication::serial::Remote;
 
 namespace aruwsrc::dart
 {
-class DartReleaseCommand : public tap::control::Command
+class DartYawVelocityCommand : public tap::control::Command
 {
 public:
-    DartReleaseCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher);
+    DartYawVelocityCommand(
+        TriggerHomedJointSubsystem& subsystem,
+        aruwsrc::dart::DartControlOperatorInterface* controlOperatorInterface);
 
     void initialize() override;
 
-    void execute() override {}
+    void execute() override;
 
-    void end(bool) override {}
+    void end(bool) override;
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "DART RELEASE"; }
+    const char* getName() const override { return "DART_YAW_VELOCITY"; }
 
 private:
-    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher;
-};  // class DartReleaseCommand
+    TriggerHomedJointSubsystem& subsystem;
+    aruwsrc::dart::DartControlOperatorInterface* controlOperatorInterface;
+};  // class CLASS_NAME
 
 }  // namespace aruwsrc::dart
-#endif  // DART_RELEASE_COMMAND_HPP_
+#endif  // DART_YAW_PID_COMMAND_HPP_

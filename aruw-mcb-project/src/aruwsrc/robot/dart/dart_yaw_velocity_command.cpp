@@ -17,35 +17,35 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef DART_RELEASE_COMMAND_HPP_
-#define DART_RELEASE_COMMAND_HPP_
+#include "dart_yaw_velocity_command.hpp"
 
 #include "tap/control/command.hpp"
+#include "tap/drivers.hpp"
 
 #include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
-
-#include "dart_servo.hpp"
+#include "aruwsrc/robot/dart/dart_constants.hpp"
 
 namespace aruwsrc::dart
 {
-class DartReleaseCommand : public tap::control::Command
+DartYawVelocityCommand::DartYawVelocityCommand(
+    TriggerHomedJointSubsystem& subsystem,
+    aruwsrc::dart::DartControlOperatorInterface* controlOperatorInterface)
+    : subsystem(subsystem),
+      controlOperatorInterface(controlOperatorInterface)
 {
-public:
-    DartReleaseCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher);
+    addSubsystemRequirement(&subsystem);
+}
 
-    void initialize() override;
+void DartYawVelocityCommand::initialize() {}
 
-    void execute() override {}
+void DartYawVelocityCommand::execute()
+{
+    subsystem.setSetpoint(
+        subsystem.getSetpoint() +
+        controlOperatorInterface->getYawVelocity() * aruwsrc::dart::YAW_INPUT_SENSITIVITY);
+}
 
-    void end(bool) override {}
+bool DartYawVelocityCommand::isFinished() const { return false; }
 
-    bool isFinished() const override;
-
-    const char* getName() const override { return "DART RELEASE"; }
-
-private:
-    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher;
-};  // class DartReleaseCommand
-
+void DartYawVelocityCommand::end(bool) {}
 }  // namespace aruwsrc::dart
-#endif  // DART_RELEASE_COMMAND_HPP_

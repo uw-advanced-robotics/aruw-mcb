@@ -16,22 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#include "dart_close_command.hpp"
+#include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 
 namespace aruwsrc::dart
 {
-DartCloseCommand::DartCloseCommand(DartServo &dartLauncher) : dartLauncher(dartLauncher)
+float DartControlOperatorInterface::getPullbackVelocity()
 {
-    addSubsystemRequirement(&dartLauncher);
+    return drivers->remote.getChannel(tap::communication::serial::Remote::Channel::RIGHT_VERTICAL);
 }
 
-void DartCloseCommand::initialize() { dartLauncher.setClose(); }
-
-void DartCloseCommand::execute() { dartLauncher.getServo().updateSendPwmRamp(); }
-
-void DartCloseCommand::end(bool) {}
-
-bool DartCloseCommand::isFinished() const { return false; }
-
+float DartControlOperatorInterface::getYawVelocity()
+{
+    return drivers->remote.getChannel(tap::communication::serial::Remote::Channel::LEFT_HORIZONTAL);
+}
 }  // namespace aruwsrc::dart
