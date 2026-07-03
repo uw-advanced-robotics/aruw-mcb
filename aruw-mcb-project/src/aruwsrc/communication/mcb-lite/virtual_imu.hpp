@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2023-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,6 +22,8 @@
 
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 #include "tap/communication/serial/dji_serial.hpp"
+
+#include "aruwsrc/communication/sensors/imu/notch_filter.hpp"
 
 #include "message_types.hpp"
 
@@ -77,6 +79,25 @@ public:
 
     void processMountingTransform() { hasNewMountingTransform = false; }
 
+    /**
+     * Enables and configures a notch filter applied to gyro and accel data as it's
+     * received from the MCB Lite, to attenuate a known narrowband vibration frequency
+     * (e.g. from a pump or other rotating component).
+     *
+     * @param[in] notchFrequencyHz Center frequency to attenuate, in Hz.
+     * @param[in] sampleFrequencyHz Rate at which IMU messages arrive, in Hz.
+     * @param[in] qFactor Quality factor controlling notch width (higher = narrower).
+     */
+    void setNotchFilter(float notchFrequencyHz, float sampleFrequencyHz, float qFactor = 0.707f)
+    {
+        for (auto& f : gyroNotchFilter) f.configure(notchFrequencyHz, sampleFrequencyHz, qFactor);
+        for (auto& f : accelNotchFilter) f.configure(notchFrequencyHz, sampleFrequencyHz, qFactor);
+        notchFilterEnabled = true;
+    }
+
+    /// Disables the notch filter, if enabled. Raw (unfiltered) samples are used again.
+    void disableNotchFilter() { notchFilterEnabled = false; }
+
 private:
     void processIMUMessage(const DJISerial::ReceivedSerialMessage& completeMessage)
     {
@@ -87,6 +108,19 @@ private:
 
         this->imuData.gyroRadPerSec = {imuMessage->Gx, imuMessage->Gy, imuMessage->Gz};
         this->imuData.accG = {imuMessage->Ax, imuMessage->Ay, imuMessage->Az};
+
+        if (notchFilterEnabled)
+        {
+            this->imuData.gyroRadPerSec = {
+                gyroNotchFilter[0].filter(this->imuData.gyroRadPerSec.x()),
+                gyroNotchFilter[1].filter(this->imuData.gyroRadPerSec.y()),
+                gyroNotchFilter[2].filter(this->imuData.gyroRadPerSec.z())};
+            this->imuData.accG = {
+                accelNotchFilter[0].filter(this->imuData.accG.x()),
+                accelNotchFilter[1].filter(this->imuData.accG.y()),
+                accelNotchFilter[2].filter(this->imuData.accG.z())};
+        }
+
         this->imuData.temperature = imuMessage->temperature;
         this->imuState = imuMessage->imuState;
     }
@@ -98,6 +132,10 @@ private:
 
     DJISerial::SerialMessage<sizeof(IMUMountingTransformMessage)> mountingTransformMessage;
     bool hasNewMountingTransform = false;
+
+    bool notchFilterEnabled = false;
+    aruwsrc::communication::sensors::imu::ism330::NotchFilter gyroNotchFilter[3];
+    aruwsrc::communication::sensors::imu::ism330::NotchFilter accelNotchFilter[3];
 };
 
 }  // namespace aruwsrc::communication::mcb_lite

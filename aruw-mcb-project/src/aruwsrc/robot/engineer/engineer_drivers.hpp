@@ -95,6 +95,7 @@ public:
         mcbLite.initialize();
         // mcbLite.imu.sendMountingTransform(...);
         mcbLite.imu.initialize(mainLoopFrequency, 0.2f, 0.0f);
+        mcbLite.imu.setNotchFilter(85.0f, 500, 15.0f);  // e.g. 85 Hz pump tone
         mcbLite.pwm.setTimerFrequency(tap::gpio::Pwm::Timer::TIMER8, 500);
         mcbLite.pwm.start(tap::gpio::Pwm::Timer::TIMER8);
         mcbLite.digital.configureInputPullMode(
