@@ -37,8 +37,8 @@ namespace aruwsrc::control::turret
 {
 static constexpr uint8_t NUM_TURRETS = 1;
 
-static constexpr float USER_YAW_INPUT_SCALAR = 0.02f;
-static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
+static constexpr float USER_YAW_INPUT_SCALAR = -0.01f;
+static constexpr float USER_PITCH_INPUT_SCALAR = -0.01f;
 static constexpr float DAMIAO_4310_VELOCITY_KP_RAD_PER_SEC = 80.0f * 60.0f / M_TWOPI;
 static constexpr float DAMIAO_4310_MAX_OUTPUT_MILLI_NM = 2000.0f;
 
@@ -86,15 +86,15 @@ static constexpr float YAW_MAX_ANGLE = static_cast<float>(YAW_ENCODER_MAX_POSITI
 
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR7;
-static constexpr float PITCH_DAMIAO_STRAIGHT_DOWN_POSITION = 1.090006569f;
-static constexpr float PITCH_DAMIAO_FIRST_LIMIT_POSITION = 5.76724005f - M_TWOPI;
-static constexpr float PITCH_DAMIAO_OPPOSITE_LIMIT_POSITION = 2.44087124f;
-static constexpr float PITCH_START_ANGLE = -PITCH_DAMIAO_STRAIGHT_DOWN_POSITION;
+static constexpr float PITCH_DAMIAO_STRAIGHT_DOWN_POSITION = -0.975624084f;
+static constexpr float PITCH_DAMIAO_FIRST_LIMIT_POSITION = -2.63199043f;
+static constexpr float PITCH_DAMIAO_OPPOSITE_LIMIT_POSITION = 0.349622726f;
+static constexpr float PITCH_START_ANGLE = PITCH_DAMIAO_STRAIGHT_DOWN_POSITION;
 static constexpr float PITCH_MIN_ANGLE =
     PITCH_DAMIAO_FIRST_LIMIT_POSITION + PITCH_START_ANGLE + modm::toRadian(2);
 static constexpr float PITCH_MAX_ANGLE =
     PITCH_DAMIAO_OPPOSITE_LIMIT_POSITION + PITCH_START_ANGLE - modm::toRadian(2);
-static constexpr float PITCH_IMU_CALIBRATION_ANGLE = PITCH_MIN_ANGLE;
+static constexpr float PITCH_IMU_CALIBRATION_ANGLE = -2.45574856;
 
 static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = YAW_START_ANGLE,
@@ -105,10 +105,10 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 };
 
 static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
-    .startAngle = PITCH_START_ANGLE,
+    .startAngle = 0,
     .startEncoderValue = 0,
-    .minAngle = PITCH_MIN_ANGLE,
-    .maxAngle = PITCH_MAX_ANGLE,
+    .minAngle = PITCH_DAMIAO_FIRST_LIMIT_POSITION,
+    .maxAngle = PITCH_DAMIAO_STRAIGHT_DOWN_POSITION,
     .limitMotorAngles = true,
 };
 
@@ -127,8 +127,8 @@ static const tap::algorithms::transforms::Transform TURRET_IMU_CALIBRATION_MOUNT
     0.0f,
     0.0f,
     0.0f,
-    0.0f,
     M_PI,
+    0.0f,
     -M_PI_2);
 
 namespace world_rel_turret_imu
