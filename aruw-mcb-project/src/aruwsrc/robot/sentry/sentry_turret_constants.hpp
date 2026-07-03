@@ -279,24 +279,24 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
     .antiSaturation = true,
 };
 
-// static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-//     .kp = 3'750.0f,
-//     .ki = 0.0f,
-//     .kd = 0.010f,
-//     .maxICumulative = 0.0f,
-//     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
-//     .tQDerivativeKalman = 1.0f,
-//     .tRDerivativeKalman = 0.0f,
-//     .tQProportionalKalman = 1.0f,
-//     .tRProportionalKalman = 0.5f,
-//     .errDeadzone = 0.0f,
-// };
+static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
+    .kp = 3'750.0f,
+    .ki = 0.0f,
+    .kd = 0.010f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.5f,
+    .errDeadzone = 0.0f,
+};
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 63'000,
-    .ki = 0.0f,
-    .kd = 3'150.0f,
-    .maxICumulative = 1.0f,
+    .kp = 25.0f,
+    .ki = 750.0f,
+    .kd = 0.75f,
+    .maxICumulative = 0.5f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
 };
 

@@ -425,7 +425,7 @@ tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
     world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-#if defined(TARGET_STANDARD_NULL)
+// #if defined(TARGET_STANDARD_NULL)
 algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::YAW>
     worldFrameYawTurretImuControllerCv(
         transformer.getWorldToTurret(),
@@ -433,16 +433,16 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::trans
         turret.yawMotor,
         worldFrameYawTurretImuPosPidCv,
         worldFrameYawTurretImuVelPidCv);
-#else
-algorithms::WorldFrameTurretImuSTOSTurretController<tap::algorithms::transforms::Axis::YAW>
-    worldFrameYawTurretImuControllerCv(
-        transformer.getWorldToTurret(),
-        getTurretMCBCanComm(),
-        turret.yawMotor,
-        world_rel_turret_imu::STOS_CONSTANTS,
-        worldFrameYawTurretImuPosPidCv,
-        world_rel_turret_imu::FEEDFORWARD_CONSTANTS);
-#endif
+// #else
+// algorithms::WorldFrameTurretImuSTOSTurretController<tap::algorithms::transforms::Axis::YAW>
+//     worldFrameYawTurretImuControllerCv(
+//         transformer.getWorldToTurret(),
+//         getTurretMCBCanComm(),
+//         turret.yawMotor,
+//         world_rel_turret_imu::STOS_CONSTANTS,
+//         worldFrameYawTurretImuPosPidCv,
+//         world_rel_turret_imu::FEEDFORWARD_CONSTANTS);
+// #endif
 
 // turret commands
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(

@@ -156,11 +156,23 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
+// static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
+//     .kp = 10'000.0f,
+//     .ki = 8'000'000.0f,
+//     .kd = 4'000.0f,
+//     .maxICumulative = 600.0f,
+//     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+//     .tQDerivativeKalman = 1.0f,
+//     .tRDerivativeKalman = 30.0f,
+//     .tQProportionalKalman = 1.0f,
+//     .tRProportionalKalman = 5.0f,
+//     .errDeadzone = 0.0f,
+//     .errorDerivativeFloor = 0.0f,
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 10'000.0f,
-    .ki = 8'000'000.0f,
-    .kd = 4'000.0f,
-    .maxICumulative = 600.0f,
+    .kp = 30.0f,
+    .ki = 500.0f,
+    .kd = 1.0f,
+    .maxICumulative = 0.5f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 30.0f,

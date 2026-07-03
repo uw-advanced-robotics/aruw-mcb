@@ -355,12 +355,12 @@ SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL
 struct TurretMinorWorldControllers
 {
     WorldFrameTurretImuCascadePidTurretController<transforms::Axis::PITCH> pitchController;
-    WorldFrameTurretImuSTOSTurretController<transforms::Axis::YAW> yawController;
+    WorldFrameTurretImuCascadePidTurretController<transforms::Axis::YAW> yawController;
 };
 
 SmoothPid turretWidowWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretWidowWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-// SmoothPid turretWidowWorldYawVelPid(minorPidConfigs::MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretWidowWorldYawVelPid(minorPidConfigs::MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretWidowWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 
 TurretMinorWorldControllers turretWidowWorldControllers{
@@ -372,13 +372,12 @@ TurretMinorWorldControllers turretWidowWorldControllers{
         turretWidowWorldPitchVelPid,
         {&turretGravityCompensation, &turretSpringCompensation}),
 
-    .yawController = WorldFrameTurretImuSTOSTurretController<transforms::Axis::YAW>(
+    .yawController = WorldFrameTurretImuCascadePidTurretController<transforms::Axis::YAW>(
         transformer.getWorldToTurretWidow(),
         getTurretMCBCanCommWidow(),
         turretWidow.yawMotor,
-        turretWidow::turretWidowSTOSConstants,
         turretWidowWorldYawPosPid,
-        turretWidow::turretWidowFeedforwardConstants)};
+        turretWidowWorldYawVelPid)};
 
 TurretMajorWorldFrameController turretMajorWorldYawController(
     transformer.getWorldToTurretMajor(),
