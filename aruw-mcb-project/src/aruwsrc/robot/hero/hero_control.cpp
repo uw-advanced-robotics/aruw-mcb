@@ -378,7 +378,8 @@ ChassisAutorotateCommand chassisAutorotateCommand(
     &drivers()->controlOperatorInterface,
     &chassis,
     &turret.yawMotor,
-    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90);
+    ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_90,
+    M_PI_4);
 
 BeybladeCommand beybladeCommand(
     drivers(),
