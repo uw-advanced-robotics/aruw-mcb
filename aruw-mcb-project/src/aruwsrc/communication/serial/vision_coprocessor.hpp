@@ -383,6 +383,21 @@ public:
         this->autoNavController = autoNavController;
     }
 
+    mockable inline uint32_t getAutoNavSequenceNum() const
+    {
+        return lastSetpointData.sequenceNum;
+    }
+
+    mockable inline bool getLastAutoNavSetpoint(float &x, float &y) const
+    {
+        if (lastSetpointData.numSetpoints == 0) {
+            return false;
+        }
+        x = lastSetpointData.setpoints[0].x;
+        y = lastSetpointData.setpoints[0].y;
+        return true;
+    }
+
     // @todo private should not be here
 private:
     void logRefereeTelemetry();

@@ -54,7 +54,11 @@ void CVMenu::draw()
     }
 }
 
-void CVMenu::update() {}
+void CVMenu::update() { 
+#if defined(TARGET_SENTRY_ACHLYS)
+    pollAutoNavStatus();
+#endif 
+}
 
 void CVMenu::shortButtonPress(modm::MenuButtons::Button button)
 {
@@ -90,4 +94,36 @@ void CVMenu::drawCVOnline(modm::IOStream &stream)
     stream << "CV Online: " << visionCoprocessor->isCvOnline();
 }
 
+#if defined(TARGET_SENTRY_ACHLYS)
+void CVMenu::pollAutoNavStatus()
+{
+    uint32_t seq = visionCoprocessor->getAutoNavSequenceNum();
+    if (!autoNavEverSeen || seq != prevAutoNavSeqNum)
+    {
+        prevAutoNavSeqNum = seq;
+        lastAutoNavChangeTime = tap::arch::clock::getTimeMilliseconds();
+        autoNavEverSeen = true;
+    }
+}
+
+void CVMenu::drawAutoNavStatus(modm::IOStream &stream)
+{
+    bool online = autoNavEverSeen &&
+        (tap::arch::clock::getTimeMilliseconds() - lastAutoNavChangeTime) < 1000;
+    stream << "AutoNav Received: " << (online ? 1 : 0);
+}
+
+void CVMenu::drawAutoNavSetpoint(modm::IOStream &stream)
+{
+    float x, y;
+    if (visionCoprocessor->getLastAutoNavSetpoint(x, y))
+    {
+        stream << "Setpoint: " << x << ", " << y;
+    }
+    else
+    {
+        stream << "Setpoint: none";
+    }
+}
+#endif
 }  // namespace aruwsrc::display

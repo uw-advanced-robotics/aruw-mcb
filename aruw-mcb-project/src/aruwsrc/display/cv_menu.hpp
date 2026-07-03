@@ -86,11 +86,27 @@ private:
     void drawCVOnline(modm::IOStream &stream);
     void pass() {}
 
-    static constexpr std::tuple<PrintCVMenuLineFn, UpdateCVStateFn> CV_MENU_UPDATE_FNS[] = {
+#if defined(TARGET_SENTRY_ACHLYS)
+    void pollAutoNavStatus();
+    void drawAutoNavStatus(modm::IOStream &stream);
+    void drawAutoNavSetpoint(modm::IOStream &stream);
+#endif
+
+static constexpr std::tuple<PrintCVMenuLineFn, UpdateCVStateFn> CV_MENU_UPDATE_FNS[] = {
         {&CVMenu::drawShutdownCV, &CVMenu::shutdownCV},
         {&CVMenu::drawRebootCV, &CVMenu::rebootCV},
         {&CVMenu::drawCVOnline, &CVMenu::pass},
+#if defined(TARGET_SENTRY_ACHLYS)
+        {&CVMenu::drawAutoNavStatus, &CVMenu::pass},
+        {&CVMenu::drawAutoNavSetpoint, &CVMenu::pass},
+#endif
     };
+
+    #if defined(TARGET_SENTRY_ACHLYS)
+        uint32_t prevAutoNavSeqNum = 0;
+        uint32_t lastAutoNavChangeTime = 0;
+        bool autoNavEverSeen = false;
+    #endif
 };
 }  // namespace aruwsrc::display
 
