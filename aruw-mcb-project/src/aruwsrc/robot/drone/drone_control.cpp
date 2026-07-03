@@ -43,8 +43,14 @@
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
+#include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
+#include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/drone/drone_ballistics_solver.hpp"
 #include "aruwsrc/robot/drone/drone_drivers.hpp"
 #include "aruwsrc/robot/drone/drone_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/drone/drone_transform_adapter.hpp"
@@ -64,6 +70,8 @@ using namespace tap::control::governor;
 using namespace tap::algorithms;
 
 using namespace aruwsrc::control::governor;
+using namespace aruwsrc::control::turret::cv;
+using namespace aruwsrc::control::turret::algorithms;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -170,6 +178,50 @@ algorithms::ChassisFrameTurretController<algorithms::Axis::YAW> chassisFrameYawF
 algorithms::ChassisFrameTurretController<algorithms::Axis::PITCH>
     chassisFramePitchFallbackController(turret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
 
+TurretGravitationalForceOffset turretGravityCompensation(TURRET_GRAVITY_CONFIG);
+TurretSpringForceOffset turretSpringCompensation(
+    TURRET_SPRING_CONFIG,
+    pitchMotor.isMotorInverted());
+
+tap::algorithms::SmoothPid worldFrameYawTurretImuPosPidCv(
+    world_rel_turret_imu::YAW_POS_PID_AUTO_AIM_CONFIG);
+tap::algorithms::SmoothPid worldFrameYawTurretImuVelPidCv(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
+tap::algorithms::SmoothPid worldFramePitchTurretImuPosPidCv(
+    world_rel_turret_imu::PITCH_POS_PID_AUTO_AIM_CONFIG);
+
+WorldFrameTurretImuCascadePidTurretController<Axis::YAW> worldFrameYawTurretImuControllerCv(
+    transformer.getWorldToTurret(),
+    drivers()->turretImu,
+    turret.yawMotor,
+    worldFrameYawTurretImuPosPidCv,
+    worldFrameYawTurretImuVelPidCv);
+
+WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> worldFramePitchTurretImuControllerCv(
+    transformer.getWorldToTurret(),
+    drivers()->turretImu,
+    turret.pitchMotor,
+    worldFramePitchTurretImuPosPidCv,
+    worldFramePitchTurretImuVelPid,
+    {&turretGravityCompensation, &turretSpringCompensation});
+
+DroneBallisticsSolver ballisticsSolver(
+    drivers()->visionCoprocessor,
+    transformAdapter,
+    turret,
+    frictionWheels,
+    aruwsrc::control::launcher::LAUNCHER_SPEED,
+    0);
+
+TurretCVCommand turretCVCommand(
+    &drivers()->visionCoprocessor,
+    &drivers()->controlOperatorInterface,
+    &turret,
+    &worldFrameYawTurretImuControllerCv,
+    &worldFramePitchTurretImuControllerCv,
+    &ballisticsSolver,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR);
+
 tap::algorithms::SmoothPid imuCalibrateYawPid(chassis_rel::YAW_PID_CONFIG);
 
 tap::algorithms::SmoothPid imuCalibratePitchPid(chassis_rel::PITCH_PID_CONFIG);
@@ -275,6 +327,9 @@ Trigger leftSwitchUp =
 Trigger thumbwheelUp =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
         .onTrue(&droneImuCalibrateCommand);
+
+Trigger rightMousePressed =
+    TriggerHelpers::rightMouseButton(drivers()).whileTrue(&turretCVCommand);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());

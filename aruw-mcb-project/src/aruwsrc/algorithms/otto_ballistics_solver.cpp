@@ -41,12 +41,12 @@ OttoBallisticsSolver::OttoBallisticsSolver(
     const control::launcher::LaunchSpeedPredictorInterface &frictionWheels,
     const float defaultLaunchSpeed,
     const uint8_t turretID)
-    : visionCoprocessor(visionCoprocessor),
+    : BallisticsSolverInterface(turretID),
+      visionCoprocessor(visionCoprocessor),
       odometryInterface(odometryInterface),
       turretSubsystem(turretSubsystem),
       frictionWheels(frictionWheels),
-      defaultLaunchSpeed(defaultLaunchSpeed),
-      turretID(turretID)
+      defaultLaunchSpeed(defaultLaunchSpeed)
 {
 }
 

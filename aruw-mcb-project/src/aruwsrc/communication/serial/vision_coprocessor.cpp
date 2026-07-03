@@ -188,7 +188,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     int currIndex = 0;
     for (int j = 0; j < control::turret::NUM_TURRETS; j++)
     {
-        uint8_t flags = message.data[currIndex];
+        uint8_t flags = message.data[currIndex]; 
         lastAimData[j].pva.updated = 0;
         lastAimData[j].timing.updated = 0;
 
