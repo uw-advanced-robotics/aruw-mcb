@@ -134,6 +134,10 @@ public:
         tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr,
         const std::vector<tap::communication::sensors::imu::ImuInterface *> &externalIMUs = {});
 
+    bool turretMCBsReady;
+    bool turretsOnline;
+    bool mpu6500Online;
+
     const char *getName() const override { return "Calibrate IMU"; }
 
     bool isReady() override;

@@ -467,7 +467,29 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-EngineerImuCalibrateCommand imuCalibrateCommand(
+// EngineerImuCalibrateCommand imuCalibrateCommand(
+//     drivers(),
+//     {{
+//         &drivers()->mcbLite.imu,
+//         &engTurret,
+//         &chassisFrameYawTurretController,
+//         &chassisFramePitchTurretController,
+//         true,
+//     }},
+//     &chassisSubsystem,
+//     yawObserver,
+//     odometrySubsystem,
+//     lampreyEncoder,
+//     pulleyEncoder,
+//     *yawTurretMotor.getEncoder(),
+//     BINNED_ALIGNMENT_OFFSET,
+//     YAW_ALIGNMENT_OFFSET,
+//     aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+//     aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+//     &imuCalibrateSuccessBuzzCommand,
+//     &imuCalibrateFailBuzzCommand);
+
+imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
         &drivers()->mcbLite.imu,
@@ -477,17 +499,12 @@ EngineerImuCalibrateCommand imuCalibrateCommand(
         true,
     }},
     &chassisSubsystem,
-    yawObserver,
-    odometrySubsystem,
-    lampreyEncoder,
-    pulleyEncoder,
-    *yawTurretMotor.getEncoder(),
-    BINNED_ALIGNMENT_OFFSET,
-    YAW_ALIGNMENT_OFFSET,
-    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand);
+    &imuCalibrateFailBuzzCommand,
+    &odometrySubsystem,
+    {&drivers()->chassisIsm});
 
 aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
     drivers(),
@@ -657,8 +674,8 @@ void initializeSubsystems()
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
-    drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
-    drivers->commandScheduler.registerSubsystem(&wristSubsystem);
+    //  drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
+    //  drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
@@ -714,4 +731,15 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
     aruwsrc::control::registerEngineerIoMappings(drivers);
 }
 }  // namespace aruwsrc::engineer
+
+#ifndef PLATFORM_HOSTED
+// Define the getImueCalibrate function, so the imu calibrate menu can access the calibrate command.
+// This is necessary for the calibrate command to funciton.
+// Absolutely insane that this is how this works btw.
+aruwsrc::control::imu::ImuCalibrateCommand* getImuCalibrateCommand()
+{
+    return &aruwsrc::control::imuCalibrateCommand;
+}
 #endif
+
+#endif  // defined(TARGET_ENGINEER)
