@@ -329,7 +329,8 @@ aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
     drivers()->visionCoprocessor,
     odometrySubsystem,
-    transformAdapter);
+    transformAdapter,
+    &odometrySubsystem);
 
 aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
     drivers(),

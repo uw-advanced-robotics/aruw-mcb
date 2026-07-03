@@ -233,6 +233,8 @@ public:
         float quatX;
         float quatY;
         float quatZ;
+        float cameraToTagMagnitude;
+        float cameraToTagAngle;
         long long timestamp;
         uint8_t turretId;
     } modm_packed;
@@ -473,12 +475,12 @@ private:
         .setpoints = {}};
 
     ArucoResetData lastRealsenseArucoData{
-        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
     };
 
     ArucoResetData lastArducamArucoData{
-        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
     };
 
@@ -525,6 +527,8 @@ private:
     bool decodeToRealsenseArucoData(const ReceivedSerialMessage& message);
 
     bool decodeToArducamArucoData(const ReceivedSerialMessage& message);
+
+    bool decodeToArucoResetData(const ReceivedSerialMessage& message, ArucoResetData& resetData);
 
     bool decodeToRobotOrbitData(const ReceivedSerialMessage& message);
 
