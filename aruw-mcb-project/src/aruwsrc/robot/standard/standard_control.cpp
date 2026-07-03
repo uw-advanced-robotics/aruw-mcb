@@ -606,7 +606,13 @@ GovernorLimitedCommand<1> rotateAndUnjamAgitatorWhenFrictionWheelsOn(
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
     tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
-    constants::HEAT_LIMIT_BUFFER);
+    constants::HEAT_LIMIT_BUFFER,
+    130.0f,
+    3.0f,
+    &agitator,
+    &frictionWheels,
+    M_TWOPI / constants::AGITATOR_NUM_POCKETS,
+    200.0f);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOn,
