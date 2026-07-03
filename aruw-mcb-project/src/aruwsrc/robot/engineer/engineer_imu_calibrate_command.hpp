@@ -79,6 +79,9 @@ private:
     float yawObserverOffset = 0;
     float curOffset = 0;
     aruwsrc::communication::sensors::encoder::FakeEncoder fakeLampreyEncoder;
+    bool turretMCBsReady;
+    bool turretsOnline;
+    bool MPUOnline;
 };
 
 }  // namespace aruwsrc::engineer

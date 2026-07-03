@@ -467,29 +467,7 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-// EngineerImuCalibrateCommand imuCalibrateCommand(
-//     drivers(),
-//     {{
-//         &drivers()->mcbLite.imu,
-//         &engTurret,
-//         &chassisFrameYawTurretController,
-//         &chassisFramePitchTurretController,
-//         true,
-//     }},
-//     &chassisSubsystem,
-//     yawObserver,
-//     odometrySubsystem,
-//     lampreyEncoder,
-//     pulleyEncoder,
-//     *yawTurretMotor.getEncoder(),
-//     BINNED_ALIGNMENT_OFFSET,
-//     YAW_ALIGNMENT_OFFSET,
-//     aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-//     aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-//     &imuCalibrateSuccessBuzzCommand,
-//     &imuCalibrateFailBuzzCommand);
-
-imu::ImuCalibrateCommand imuCalibrateCommand(
+EngineerImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
         &drivers()->mcbLite.imu,
@@ -499,12 +477,34 @@ imu::ImuCalibrateCommand imuCalibrateCommand(
         true,
     }},
     &chassisSubsystem,
-    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+    yawObserver,
+    odometrySubsystem,
+    lampreyEncoder,
+    pulleyEncoder,
+    *yawTurretMotor.getEncoder(),
+    BINNED_ALIGNMENT_OFFSET,
+    YAW_ALIGNMENT_OFFSET,
+    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
     &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand,
-    &odometrySubsystem,
-    {&drivers()->chassisIsm});
+    &imuCalibrateFailBuzzCommand);
+
+// imu::ImuCalibrateCommand imuCalibrateCommand(
+//     drivers(),
+//     {{
+//         &drivers()->mcbLite.imu,
+//         &engTurret,
+//         &chassisFrameYawTurretController,
+//         &chassisFramePitchTurretController,
+//         true,
+//     }},
+//     &chassisSubsystem,
+//     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
+//     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
+//     &imuCalibrateSuccessBuzzCommand,
+//     &imuCalibrateFailBuzzCommand,
+//     &odometrySubsystem,
+//     {&drivers()->chassisIsm});
 
 aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
     drivers(),
@@ -673,7 +673,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
+    // drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
     //  drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     //  drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
