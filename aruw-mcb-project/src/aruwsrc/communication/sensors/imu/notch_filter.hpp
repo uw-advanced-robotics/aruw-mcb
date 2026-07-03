@@ -22,12 +22,15 @@
 
 #include <cmath>
 
-namespace aruwsrc::communication::sensors::imu::ism330
+namespace aruwsrc::communication::sensors::imu
 {
 /**
  * A second-order IIR notch (band-stop) filter used to attenuate a narrow band of
  * frequencies from a sampled signal — for example, mechanical vibration noise
  * injected into IMU readings by a flywheel, chassis motor, or fan at a known frequency.
+ *
+ * Sensor-agnostic: works on any single float-valued sample stream (gyro axis,
+ * accel axis, etc.) from any IMU driver, direct or virtual.
  *
  * Implements the biquad notch design from the RBJ Audio EQ Cookbook.
  */
@@ -103,6 +106,6 @@ private:
     float x1 = 0.0f, x2 = 0.0f, y1 = 0.0f, y2 = 0.0f;
 };
 
-}  // namespace aruwsrc::communication::sensors::imu::ism330
+}  // namespace aruwsrc::communication::sensors::imu
 
 #endif  // NOTCH_FILTER_HPP_

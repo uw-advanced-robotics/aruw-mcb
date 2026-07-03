@@ -134,8 +134,8 @@ private:
     bool hasNewMountingTransform = false;
 
     bool notchFilterEnabled = false;
-    aruwsrc::communication::sensors::imu::ism330::NotchFilter gyroNotchFilter[3];
-    aruwsrc::communication::sensors::imu::ism330::NotchFilter accelNotchFilter[3];
+    aruwsrc::communication::sensors::imu::NotchFilter gyroNotchFilter[3];
+    aruwsrc::communication::sensors::imu::NotchFilter accelNotchFilter[3];
 };
 
 }  // namespace aruwsrc::communication::mcb_lite
