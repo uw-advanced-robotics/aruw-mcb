@@ -208,17 +208,25 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
 
 bool VisionCoprocessor::decodeToRealsenseArucoData(const ReceivedSerialMessage& message)
 {
-    // copy packet into data field
-    memcpy(&(lastRealsenseArucoData.data), &message.data, sizeof(ArucoResetPacket));
-    lastRealsenseArucoData.updated = true;
-    return true;
+    return decodeToArucoResetData(message, lastRealsenseArucoData);
 }
 
 bool VisionCoprocessor::decodeToArducamArucoData(const ReceivedSerialMessage& message)
 {
-    // copy packet into data field
-    memcpy(&(lastArducamArucoData.data), &message.data, sizeof(ArucoResetPacket));
-    lastArducamArucoData.updated = true;
+    return decodeToArucoResetData(message, lastArducamArucoData);
+}
+
+bool VisionCoprocessor::decodeToArucoResetData(
+    const ReceivedSerialMessage& message,
+    ArucoResetData& resetData)
+{
+    if (message.header.dataLength < sizeof(ArucoResetPacket))
+    {
+        return false;
+    }
+
+    memcpy(&resetData.data, &message.data, sizeof(ArucoResetPacket));
+    resetData.updated = true;
     if (telemetry)
     {
         telemetry->logSignal("atid", lastArducamArucoData.data.turretId);
