@@ -32,13 +32,11 @@ namespace aruwsrc::engineer::servo
 class VTMServoSubsystem : public tap::control::Subsystem
 {
 public:
-    VTMServoSubsystem(
+     VTMServoSubsystem(
         tap::Drivers* drivers,
-        aruwsrc::communication::mcb_lite::motor::VirtualServo& yawServo,
         aruwsrc::communication::mcb_lite::motor::VirtualServo& pitchServo,
         aruwsrc::communication::mcb_lite::MCBLite& mcbLite)
         : tap::control::Subsystem(drivers),
-          yawServo(yawServo),
           pitchServo(pitchServo),
           mcbLite(mcbLite)
     {
@@ -46,13 +44,11 @@ public:
 
     void refresh() override
     {
-        yawServo.updateSendPwmRamp();
         pitchServo.updateSendPwmRamp();
     }
 
     void refreshSafeDisconnect() override
     {
-        mcbLite.pwm.write(0.0f, yawServo.getPin());
         mcbLite.pwm.write(0.0f, pitchServo.getPin());
     }
     
@@ -63,28 +59,20 @@ public:
         // float z = vtmGimbalToTarget.getZ();
 
         // // conversion?
-        // float yaw = atan2f(y, x);
         // float pitch = atan2f(-z, sqrtf(x * x + y * y));
 
         // // convert from angle to pwm
-        // float yawPwm = YAW_MIN_PWM + (yaw - YAW_MIN_ANGLE) / (YAW_MAX_ANGLE - YAW_MIN_ANGLE) *
-        //                                  (YAW_MAX_PWM - YAW_MIN_PWM);
         // float pitchPwm = PITCH_MIN_PWM + (pitch - PITCH_MIN_ANGLE) /
         //                                      (PITCH_MAX_ANGLE - PITCH_MIN_ANGLE) *
         //                                      (PITCH_MAX_PWM - PITCH_MIN_PWM);
 
         pitchServo.setTargetPwm(pitchPwm);
-        yawServo.setTargetPwm(yawPwm);
     }
 
-    aruwsrc::communication::mcb_lite::motor::VirtualServo& yawServo;
     aruwsrc::communication::mcb_lite::motor::VirtualServo& pitchServo;
     aruwsrc::communication::mcb_lite::MCBLite& mcbLite;
 
     float pitchPwm = 0.0f;
-    float yawPwm = 0.0f;
-
-private:
 
 };
 }  // namespace aruwsrc::engineer::servo

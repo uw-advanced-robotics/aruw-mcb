@@ -391,14 +391,6 @@ aruwsrc::communication::can::AruwPressureSensor mainSuctionPressureSensor(
 //         .pressureMin = -100,
 //         .pressureMax = 0});
 
-aruwsrc::communication::mcb_lite::motor::VirtualServo yawServo(
-    drivers(),
-    YAW_PIN,
-    YAW_MAX_PWM,
-    YAW_MIN_PWM,
-    RAMP_SPEED,
-    drivers()->mcbLite.pwm);
-
 aruwsrc::communication::mcb_lite::motor::VirtualServo pitchServo(
     drivers(),
     PITCH_PIN,
@@ -409,7 +401,7 @@ aruwsrc::communication::mcb_lite::motor::VirtualServo pitchServo(
 
 /* define subsystems --------------------------------------------------------*/
 
-VTMServoSubsystem vtmServoSubsystem(drivers(), yawServo, pitchServo, drivers()->mcbLite);
+VTMServoSubsystem vtmServoSubsystem(drivers(), pitchServo, drivers()->mcbLite);
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
     drivers(),
