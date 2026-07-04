@@ -178,6 +178,7 @@ private:
     static constexpr float HIT_MAG_THRESH = 0.4f;
     static constexpr float HIT_DIFF_OFFSET = modm::toRadian(20.0f);
 
+    static constexpr float MAJOR_AIM_LOW_PASS_ALPHA = 0.01f;
     static constexpr float SCAN_LOW_PASS_ALPHA = 0.035f;
     static constexpr float SCAN_ENDPOINT_TOLERANCE = modm::toRadian(1.0f);
 
