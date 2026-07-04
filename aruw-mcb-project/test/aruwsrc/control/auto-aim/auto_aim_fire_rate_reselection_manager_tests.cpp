@@ -21,14 +21,14 @@
 
 #include "tap/drivers.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
-#include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/cv_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
-#include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
@@ -49,8 +49,18 @@ protected:
           yawController(yawMotor, {}),
           pitchController(pitchMotor, {}),
           turretSubsystem(&drivers, pitchMotor, yawMotor, nullptr),
+          worldToTurretYaw(0, 0, 0, 0, 0, 0),
           visionCoprocessor(&drivers),
-          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
+          ballisticsSolver(
+              // hack to set up default return transformer return value before
+              // ballistics constructor uses it
+              [this]() -> auto& {
+                  ON_CALL(transformer, getWorldToTurretYaw)
+                      .WillByDefault(testing::ReturnRef(worldToTurretYaw));
+                  return visionCoprocessor;
+              }(),
+              transformer,
+              launcher),
           operatorInterface(&drivers),
           turretCvCommand(
               &visionCoprocessor,
@@ -67,7 +77,7 @@ protected:
 
     void SetUp() override
     {
-        aimData.pva.updated = true;
+        aimData.targetState.updated = true;
         ON_CALL(visionCoprocessor, getLastAimData(0)).WillByDefault(ReturnRef(aimData));
     }
 
@@ -77,20 +87,21 @@ private:
     aruwsrc::mock::TurretMotorMock yawMotor;
     aruwsrc::mock::TurretMotorMock pitchMotor;
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::YAW>
+        tap::algorithms::transforms::Axis::YAW>
         yawController;
     aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
-        aruwsrc::control::turret::algorithms::Axis::PITCH>
+        tap::algorithms::transforms::Axis::PITCH>
         pitchController;
     NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turretSubsystem;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
-    NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
+    tap::algorithms::transforms::Transform worldToTurretYaw;
 
 protected:
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
 
 private:
-    NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballisticsSolver;
+    NiceMock<aruwsrc::mock::CvBallisticsSolverMock> ballisticsSolver;
 
 protected:
     tap::Drivers drivers;
@@ -126,9 +137,9 @@ TEST_F(AutoAimFireRateManagerTest, getFireRateReadinessState_not_ready_zero_fire
     ON_CALL(visionCoprocessor, isCvOnline).WillByDefault(Return(true));
 
 #ifdef USE_VISION_COPROCESSOR_SENT_FIRE_RATE
-    aimData.pva.firerate = VisionCoprocessor::FireRate::ZERO;
+    aimData.targetState.firerate = VisionCoprocessor::FireRate::ZERO;
 #else
-    aimData.pva.updated = false;
+    aimData.targetState.updated = false;
 #endif
 
     EXPECT_EQ(FireRateReadinessState::NOT_READY, fireRateManager.getFireRateReadinessState());
@@ -140,15 +151,15 @@ TEST_F(AutoAimFireRateManagerTest, getFireRateReadinessState_ready_nonzero_firer
         .WillByDefault(Return(true));
     ON_CALL(visionCoprocessor, isCvOnline).WillByDefault(Return(true));
 
-    aimData.pva.firerate = VisionCoprocessor::FireRate::LOW;
+    aimData.targetState.firerate = VisionCoprocessor::FireRate::LOW;
     EXPECT_EQ(
         FireRateReadinessState::READY_USE_RATE_LIMITING,
         fireRateManager.getFireRateReadinessState());
-    aimData.pva.firerate = VisionCoprocessor::FireRate::MEDIUM;
+    aimData.targetState.firerate = VisionCoprocessor::FireRate::MEDIUM;
     EXPECT_EQ(
         FireRateReadinessState::READY_USE_RATE_LIMITING,
         fireRateManager.getFireRateReadinessState());
-    aimData.pva.firerate = VisionCoprocessor::FireRate::HIGH;
+    aimData.targetState.firerate = VisionCoprocessor::FireRate::HIGH;
     EXPECT_EQ(
         FireRateReadinessState::READY_USE_RATE_LIMITING,
         fireRateManager.getFireRateReadinessState());
@@ -161,10 +172,10 @@ class AutoAimFireRateManagerTestParameterized : public AutoAimFireRateManagerTes
 {
     void SetUp() override
     {
-        aimData.pva.firerate = std::get<1>(GetParam());
-        aimData.pva.xPos = std::get<2>(GetParam());
-        aimData.pva.yPos = 0;
-        aimData.pva.zPos = 0;
+        aimData.targetState.firerate = std::get<1>(GetParam());
+        aimData.targetState.xPos = std::get<2>(GetParam());
+        aimData.targetState.yPos = 0;
+        aimData.targetState.zPos = 0;
         AutoAimFireRateManagerTest::SetUp();
     }
 };

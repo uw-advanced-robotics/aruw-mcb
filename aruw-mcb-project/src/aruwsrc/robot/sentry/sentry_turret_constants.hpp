@@ -70,7 +70,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
     .springFreeLength = 55.0f,
 };
 
-static constexpr float TURRET_MINOR_OFFSET = 0.14222f;
+static constexpr float TURRET_MINOR_OFFSET = 0.0f;
 
 static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .kp = 0.042f,
@@ -83,6 +83,9 @@ static constexpr SmoothPidConfig IMU_SYNC_PID_CONFIG = {
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
 };
+
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 5.0f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 4.0f;   // rad/s
 
 namespace turretMajor
 {
@@ -210,7 +213,7 @@ static constexpr float majorToTurretR = 0.145;
 static constexpr float DEFAULT_LAUNCH_SPEED = 25.0f;
 
 static constexpr tap::communication::serial::RefSerial::Rx::MechanismID barrelID =
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
 
 inline const tap::algorithms::transforms::Transform TURRET_MCB1_BMI088_MOUNTING_TRANSFORM(
     0.0f,
@@ -276,24 +279,24 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG_CHASSIS_FRAME
     .antiSaturation = true,
 };
 
-// static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
-//     .kp = 3'750.0f,
-//     .ki = 0.0f,
-//     .kd = 0.010f,
-//     .maxICumulative = 0.0f,
-//     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
-//     .tQDerivativeKalman = 1.0f,
-//     .tRDerivativeKalman = 0.0f,
-//     .tQProportionalKalman = 1.0f,
-//     .tRProportionalKalman = 0.5f,
-//     .errDeadzone = 0.0f,
-// };
+static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL = {
+    .kp = 3'750.0f,
+    .ki = 0.0f,
+    .kd = 0.010f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 0.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.5f,
+    .errDeadzone = 0.0f,
+};
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 63'000,
-    .ki = 0.0f,
-    .kd = 3'150.0f,
-    .maxICumulative = 1.0f,
+    .kp = 25.0f,
+    .ki = 750.0f,
+    .kd = 0.75f,
+    .maxICumulative = 0.5f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
 };
 

@@ -37,20 +37,24 @@ public:
     virtual ~TurretControllerInterfaceMock();
 
     MOCK_METHOD(void, initialize, (), (override));
-    MOCK_METHOD(void, runController, (const float, const WrappedFloat), (override));
-    MOCK_METHOD(void, setSetpoint, (WrappedFloat), (override));
-    MOCK_METHOD(WrappedFloat, getSetpoint, (), (const override));
-    MOCK_METHOD(WrappedFloat, getMeasurement, (), (const override));
+    MOCK_METHOD(
+        void,
+        runController,
+        (const float, const tap::algorithms::WrappedFloat),
+        (override));
+    MOCK_METHOD(void, setSetpoint, (tap::algorithms::WrappedFloat), (override));
+    MOCK_METHOD(tap::algorithms::WrappedFloat, getSetpoint, (), (const override));
+    MOCK_METHOD(tap::algorithms::WrappedFloat, getMeasurement, (), (const override));
     MOCK_METHOD(bool, isOnline, (), (const override));
     MOCK_METHOD(
-        WrappedFloat,
+        tap::algorithms::WrappedFloat,
         convertControllerAngleToChassisFrame,
-        (WrappedFloat),
+        (tap::algorithms::WrappedFloat),
         (const override));
     MOCK_METHOD(
-        WrappedFloat,
+        tap::algorithms::WrappedFloat,
         convertChassisAngleToControllerFrame,
-        (WrappedFloat),
+        (tap::algorithms::WrappedFloat),
         (const override));
 
 protected:

@@ -33,9 +33,9 @@ static const tap::algorithms::transforms::Position TURRET_YAW_TO_TURRET_PITCH_PO
     0,
     0.16192);
 static const tap::algorithms::transforms::Position TURRET_PITCH_TO_EXTENSION_ZERO_POS(
-    0.23,
+    0.237,
     0,
-    0.1);  // TODO
+    0.099);
 static const tap::algorithms::transforms::Transform WRIST_TO_END_EFFECTOR(0.0803, 0, 0, 0, 0, 0);
 static const tap::algorithms::transforms::Transform EXTENSION_TO_VTM_GIMBAL(
     0,
@@ -93,11 +93,11 @@ static const tap::algorithms::transforms::Transform TURRET_YAW_TO_CUBE_DIST =
 
 // Center of Masses
 static const PointMass MASS_BEYOND_WRIST{
-    .mass = 1,
-    .location = tap::algorithms::transforms::Position(0, 0, 0)};  // TODO
-static constexpr float EXTENSION_STATIONARY_MASS = 1;             // TODO
-static constexpr float EXTENSION_MIDDLE_MASS = 1;                 // TODO
-static constexpr float EXTENSION_END_MASS = 1;                    // TODO
+    .mass = 0.471,
+    .location = tap::algorithms::transforms::Position(0.0457, -0.01134, 0)};  // TODO
+static constexpr float EXTENSION_STATIONARY_MASS = 1;                         // TODO
+static constexpr float EXTENSION_MIDDLE_MASS = 1;                             // TODO
+static constexpr float EXTENSION_END_MASS = 1;                                // TODO
 static const PointMass MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT{
     .mass = EXTENSION_STATIONARY_MASS + EXTENSION_MIDDLE_MASS + EXTENSION_END_MASS,
     .location = tap::algorithms::transforms::Position(0, 0, 0)};  // TODO

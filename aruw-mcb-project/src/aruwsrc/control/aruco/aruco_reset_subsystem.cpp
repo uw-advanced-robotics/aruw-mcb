@@ -19,6 +19,9 @@
 
 #include "aruco_reset_subsystem.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 #include "tap/algorithms/math_user_utils.hpp"
 
 using namespace tap::algorithms;
@@ -29,11 +32,13 @@ ArucoResetSubsystem::ArucoResetSubsystem(
     tap::Drivers* drivers,
     VisionCoprocessor& vision,
     Odometry2DInterface& odometry,
-    TransformerInterface& transformer)
+    TransformerInterface& transformer,
+    FourWheelEKFOdometry* wheelEkfOdometry)
     : tap::control::Subsystem(drivers),
       vision(vision),
       odometry(odometry),
-      transformer(transformer)
+      transformer(transformer),
+      wheelEkfOdometry(wheelEkfOdometry)
 {
 }
 
@@ -58,8 +63,10 @@ void ArucoResetSubsystem::processRealsenseData()
                                   transformer.getWorldToTurret(resetData.data.turretId).getY() +
                                   transformer.getWorldToChassis().getY();
 
-    // Set the new position in the odometry subsystem
-    odometry.overrideOdometryPosition(arucoChassisXEstimate, arucoChassisYEstimate);
+    fuseVisionPositionMeasurement(
+        modm::Vector2f(arucoChassisXEstimate, arucoChassisYEstimate),
+        calculateRealsensePositionVariance(),
+        calculateRealsensePositionVariance());
 }
 
 void ArucoResetSubsystem::processArducamData()
@@ -80,17 +87,134 @@ void ArucoResetSubsystem::processArducamData()
 
     Transform worldToChassis = worldToCamera.compose(cameraToChassis);
 
-    float newX = worldToChassis.getX();
-    float newY = worldToChassis.getY();
+    const modm::Vector2f measuredPosition(worldToChassis.getX(), worldToChassis.getY());
+    const float positionVariance = calculateArducamPositionVariance(poseData);
+    const float yawVariance = calculateArducamYawVariance(poseData);
 
-    float prevX = odometry.getCurrentLocation2D().getX();
-    float prevY = odometry.getCurrentLocation2D().getY();
+    if (!hasReceivedVisionMeasurement)
+    {
+        if (wheelEkfOdometry != nullptr)
+        {
+            wheelEkfOdometry->initializeVisionPose(
+                measuredPosition,
+                worldToChassis.getYaw(),
+                positionVariance,
+                positionVariance,
+                yawVariance);
+        }
+        else
+        {
+            odometry.overrideOdometryPosition(measuredPosition.x, measuredPosition.y);
+        }
+        hasReceivedVisionMeasurement = true;
+        return;
+    }
 
-    // Apply a low-pass between the aruco measurement and our current odometry position
-    newX = lowPassFilter(prevX, newX, VISION_TRUST);
-    newY = lowPassFilter(prevY, newY, VISION_TRUST);
+    if (wheelEkfOdometry != nullptr)
+    {
+        if (poseData.cameraToTagMagnitude > MAX_APRILTAG_DISTANCE)
+        {
+            return;
+        }
 
+        FourWheelEKFOdometry::VisionPoseMeasurement visionMeasurement{};
+        visionMeasurement.position = measuredPosition;
+        visionMeasurement.positionVarianceX = positionVariance;
+        visionMeasurement.positionVarianceY = positionVariance;
+        visionMeasurement.source = FourWheelEKFOdometry::VisionMeasurementSource::APRIL_TAG;
+        visionMeasurement.yaw = worldToChassis.getYaw();
+        visionMeasurement.yawVariance = yawVariance;
+
+        wheelEkfOdometry->fuseVisionPosition(visionMeasurement);
+        return;
+    }
+
+    fuseVisionPositionMeasurement(measuredPosition, positionVariance, positionVariance);
+}
+
+void ArucoResetSubsystem::fuseVisionPositionMeasurement(
+    const modm::Vector2f& measuredPosition,
+    float positionVarianceX,
+    float positionVarianceY)
+{
+    if (!hasReceivedVisionMeasurement)
+    {
+        initializeVisionPositionMeasurement(measuredPosition, positionVarianceX, positionVarianceY);
+        hasReceivedVisionMeasurement = true;
+        return;
+    }
+
+    if (wheelEkfOdometry != nullptr)
+    {
+        FourWheelEKFOdometry::VisionPositionMeasurement visionMeasurement{
+            measuredPosition,
+            positionVarianceX,
+            positionVarianceY,
+            FourWheelEKFOdometry::VisionMeasurementSource::GENERIC,
+        };
+        wheelEkfOdometry->fuseVisionPosition(visionMeasurement);
+        return;
+    }
+
+    float newX =
+        lowPassFilter(odometry.getCurrentLocation2D().getX(), measuredPosition.x, VISION_TRUST);
+    float newY =
+        lowPassFilter(odometry.getCurrentLocation2D().getY(), measuredPosition.y, VISION_TRUST);
     odometry.overrideOdometryPosition(newX, newY);
+}
+
+void ArucoResetSubsystem::initializeVisionPositionMeasurement(
+    const modm::Vector2f& measuredPosition,
+    float positionVarianceX,
+    float positionVarianceY)
+{
+    if (wheelEkfOdometry != nullptr)
+    {
+        wheelEkfOdometry->initializeVisionPosition(
+            measuredPosition,
+            positionVarianceX,
+            positionVarianceY);
+        return;
+    }
+
+    odometry.overrideOdometryPosition(measuredPosition.x, measuredPosition.y);
+}
+
+float ArucoResetSubsystem::calculateArducamPositionVariance(
+    const VisionCoprocessor::ArucoResetPacket& poseData) const
+{
+    const float distance = std::max(0.0f, poseData.cameraToTagMagnitude);
+
+    const float standardDeviation = std::clamp(
+        (HIGHER_APRILTAG_POSITION_STD - LOWER_APRILTAG_POSITION_STD) /
+                (MAX_APRILTAG_DISTANCE - LOWER_APRILTAG_DISTANCE) *
+                (distance - LOWER_APRILTAG_DISTANCE) +
+            LOWER_APRILTAG_POSITION_STD,
+        LOWER_APRILTAG_POSITION_STD,
+        HIGHER_APRILTAG_POSITION_STD);
+
+    return standardDeviation * standardDeviation;
+}
+
+float ArucoResetSubsystem::calculateArducamYawVariance(
+    const VisionCoprocessor::ArucoResetPacket& poseData) const
+{
+    static constexpr float MIN_YAW_VARIANCE = 1.0e-6f;
+    static constexpr float DISTANCE_YAW_VARIANCE_SCALE = 0.002f;
+    static constexpr float ANGLE_YAW_VARIANCE_SCALE = 0.008f;
+
+    const float distance = std::max(0.0f, poseData.cameraToTagMagnitude);
+    const float angle = std::abs(poseData.cameraToTagAngle);
+    const float standardDeviation =
+        DISTANCE_YAW_VARIANCE_SCALE * distance + ANGLE_YAW_VARIANCE_SCALE * angle;
+
+    return std::max(MIN_YAW_VARIANCE, standardDeviation * standardDeviation);
+}
+
+float ArucoResetSubsystem::calculateRealsensePositionVariance() const
+{
+    static constexpr float REALSENSE_POSITION_VARIANCE = 1.0e-4f;
+    return REALSENSE_POSITION_VARIANCE;
 }
 
 }  // namespace aruwsrc::control::aruco

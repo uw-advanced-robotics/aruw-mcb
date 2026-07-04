@@ -117,13 +117,13 @@ static constexpr float WHEEL_RADIUS = 0.076f;
 /**
  * Radius of the deadwheels (m)
  */
-static constexpr float DEADWHEEL_RADIUS = 0.016f;
+static constexpr float DEADWHEEL_RADIUS = 0.01455f;
 /**
  * Distance from the center axis of the robot to each deadwheel (m)
  */
-static constexpr float parallelOneCenterToWheelDistance = 140.975f;
-static constexpr float parallelTwoCenterToWheelDistance = 140.975f;
-static constexpr float perpendicularCenterToWheelDistance = 77.975f;
+static constexpr float parallelOneCenterToWheelDistance = 0.0777f;
+static constexpr float parallelTwoCenterToWheelDistance = 0.0824f;
+static constexpr float perpendicularCenterToWheelDistance = 0.1459f;
 /**
  * Relative orientation of dead wheels (rad)
  */

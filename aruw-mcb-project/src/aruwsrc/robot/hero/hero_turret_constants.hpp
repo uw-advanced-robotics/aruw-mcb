@@ -123,7 +123,7 @@ static constexpr algorithms::TurretSpringForceOffset::TurretSpringParams TURRET_
 
 inline constexpr algorithms::OptimalSTOSController::STOSConstants STOS_CONSTANTS{
     .J_TOTAL = 0.0454f,
-    .TAU_MAX = 5.5f,
+    .TAU_MAX = 3.0f,
     .B_DAMP = 0.001f,
     .W_D = 53.4f,
     .ZETA = 0.216,
@@ -136,6 +136,9 @@ inline constexpr algorithms::TurretFeedforwardConstants TURRET_FEEDFORWARD_CONST
     .Kv = 150.0f,
     .Ks = 250.0f,
 };
+
+inline constexpr float SHOT_TIMING_ENTRY_THRESHOLD = 3.5f;  // rad/s
+inline constexpr float SHOT_TIMING_EXIT_THRESHOLD = 2.5f;   // rad/s
 
 namespace world_rel_turret_imu
 {
@@ -153,11 +156,23 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
+// static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
+//     .kp = 10'000.0f,
+//     .ki = 8'000'000.0f,
+//     .kd = 4'000.0f,
+//     .maxICumulative = 600.0f,
+//     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+//     .tQDerivativeKalman = 1.0f,
+//     .tRDerivativeKalman = 30.0f,
+//     .tQProportionalKalman = 1.0f,
+//     .tRProportionalKalman = 5.0f,
+//     .errDeadzone = 0.0f,
+//     .errorDerivativeFloor = 0.0f,
 static constexpr tap::algorithms::SmoothPidConfig YAW_POS_PID_AUTO_AIM_CONFIG = {
-    .kp = 10'000.0f,
-    .ki = 8'000'000.0f,
-    .kd = 4'000.0f,
-    .maxICumulative = 600.0f,
+    .kp = 30.0f,
+    .ki = 500.0f,
+    .kd = 1.0f,
+    .maxICumulative = 0.5f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 30.0f,

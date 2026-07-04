@@ -39,6 +39,7 @@ using namespace tap::algorithms;
 using namespace aruwsrc::mock;
 using namespace testing;
 
+using tap::algorithms::transforms::Axis;
 using tap::algorithms::transforms::Transform;
 
 class TurretUserWorldRelativeCommandTest : public Test

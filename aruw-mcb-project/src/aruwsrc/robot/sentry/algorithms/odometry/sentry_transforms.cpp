@@ -24,6 +24,7 @@ using namespace tap::algorithms::transforms;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::sentry::turret;
 
+using tap::algorithms::Angle;
 using tap::communication::sensors::imu::ImuInterface;
 
 namespace aruwsrc::sentry::algorithms::odometry
@@ -58,7 +59,9 @@ void SentryTransforms::updateTransforms()
 {
     // pose of chassis in world frame
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
+    modm::Vector2f chassisVelocity = chassisOdometry.getCurrentVelocity2D();
     worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
+    worldToChassis.updateVelocity(chassisVelocity.getX(), chassisVelocity.getY(), 0.);
     worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
 
     // Chassis to Turret Major
@@ -83,6 +86,7 @@ void SentryTransforms::updateTransforms()
         turretWidowImu.getPitch(),
         turretWidowImu.getYaw() + turretWidowYawCorrection);
     worldToTurretWidow.updateAngularVelocity(0, turretWidowImu.getGy(), turretWidowImu.getGz());
+    worldToTurretWidow.updateVelocity(worldToChassis.getVelocity());
 
     // Chassis to Arducam
     chassisToArducam0 = chassisToTurretMajor.composeStatic(MAJOR_TO_ARDUCAM1);

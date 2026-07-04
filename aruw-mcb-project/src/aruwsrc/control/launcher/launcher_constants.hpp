@@ -175,6 +175,27 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
     {24.9456329f, 6750.0f},
     {25.8669395f, 7250.0f},
     {26.2437325f, 7750.0f}};
+#elif defined(TARGET_STANDARD_DEIMOS)
+static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
+    {0.0f, 0.0f},
+    {8.63229179f, 3000.0f},
+    {9.29183388f, 3250.0f},
+    {10.1979885f, 3500.0f},
+    {11.5533829f, 3750.0f},
+    {12.8953457f, 4000.0f},
+    {14.3107147f, 4250.0f},
+    {15.8050079f, 4500.0f},
+    {17.1734295f, 4750.0f},
+    {18.7139435f, 5000.0f},
+    {19.8477917f, 5250.0f},
+    {21.1402473f, 5500.0f},
+    {21.9588203f, 5750.0f},
+    {23.3366833f, 6000.0f},
+    {24.2783489f, 6250.0f},
+    {25.1159821f, 6500.0f},
+    {26.0982609f, 6750.0f},
+    {27.7579689f, 7250.0f},
+    {28.4143028f, 7500.0f}};
 #elif defined(TARGET_SENTRY_ACHLYS)
 static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[] = {
     {0.0f, 0.0f},
@@ -203,11 +224,11 @@ static constexpr modm::Pair<float, float> LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT
 #endif
 
 #if defined(ALL_STANDARDS)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 60'000;
 #elif defined(TARGET_HERO_NEPTUNE)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 120'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 80'000;
 #elif defined(TARGET_SENTRY_ACHLYS)
-static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 90'000;
+static constexpr uint32_t AGITATOR_TYPICAL_DELAY_MICROSECONDS = 70'000;
 #endif
 
 #if defined(TARGET_HERO_NEPTUNE)

@@ -78,12 +78,14 @@ CapBankPowerLimiter::CapBankPowerLimiter(
 
 float CapBankPowerLimiter::getPowerLimitRatio()
 {
-    if (drivers->refSerial.getRefSerialReceivingData() &&
-        (drivers->refSerial.getRobotData().currentHp == 0 ||
-         (drivers->refSerial.getRobotData().robotPower.value & 0b010) == 0))
-    {
-        return 0;
-    }
+    // commenting out for comp
+    // why did this exist?
+    // if (drivers->refSerial.getRefSerialReceivingData() &&
+    //     (drivers->refSerial.getRobotData().currentHp == 0 ||
+    //      (drivers->refSerial.getRobotData().robotPower.value & 0b010) == 0))
+    // {
+    //     return 0;
+    // }
 
     // Delegate to the Taproot PowerLimiter, which monitors real battery draw
     // from the 0x1C5 sensor and tracks the referee's energy buffer (Z).

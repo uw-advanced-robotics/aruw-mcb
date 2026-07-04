@@ -57,7 +57,7 @@ namespace aruwsrc::sentry::turret
  */
 class TurretMajorWorldFrameController final
     : public aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-          control::turret::algorithms::Axis::YAW>
+          tap::algorithms::transforms::Axis::YAW>
 {
 public:
     /**
