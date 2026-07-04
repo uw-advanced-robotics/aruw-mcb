@@ -708,7 +708,7 @@ SequentialCommand depositCommand(&populateDepositTrajectory, &depositIKCommand);
 //         .whileTrue(CommandCompositionHelper::parallel<2>({&cubeStorageHome,
 //         &extensionHome}));
 
-Trigger rightUp =
+Trigger leftUpRightUp =
     (TriggerHelpers::switchState(
          drivers(),
          Remote::Switch::RIGHT_SWITCH,
