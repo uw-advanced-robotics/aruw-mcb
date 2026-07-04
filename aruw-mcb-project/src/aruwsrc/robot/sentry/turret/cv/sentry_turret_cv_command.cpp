@@ -110,7 +110,7 @@ void SentryTurretCVCommand::execute()
                 &withinAimingToleranceWidow);
         }
 
-        majorSetpoint = widowYawSetpoint;
+        majorSetpoint = majorSetpoint.minInterpolate(widowYawSetpoint, MAJOR_AIM_LOW_PASS_ALPHA);
     }
     else
     {
