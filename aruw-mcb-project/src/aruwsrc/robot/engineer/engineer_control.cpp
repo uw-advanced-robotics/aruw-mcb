@@ -696,7 +696,8 @@ SequentialCommand depositCommand(&populateDepositTrajectory, &depositIKCommand);
 //         &extensionHome}));
 
 Trigger rightUp =
-    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
+    (TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP) && 
+        TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP))
         .onTrue(&depositCommand);
 
 // joint control mode
