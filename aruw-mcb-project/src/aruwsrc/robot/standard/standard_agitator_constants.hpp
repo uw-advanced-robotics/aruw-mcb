@@ -78,7 +78,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .emptyJamEnabled = false,
     .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
-    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
@@ -106,7 +106,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = DjiMotor::MAX_OUTPUT_C610 / 2.0f,  // keeping below max out to prevent overheat
+    .maxOutput = DjiMotor::MAX_OUTPUT_C610 / 3.0f,  // keeping below max out to prevent overheat
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
@@ -130,7 +130,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .emptyJamEnabled = false,
     .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
-    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {
@@ -158,7 +158,7 @@ static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = DjiMotor::MAX_OUTPUT_C610 / 2.0f,  // keeping below max out to prevent overheat
+    .maxOutput = DjiMotor::MAX_OUTPUT_C610 / 3.0f,  // keeping below max out to prevent overheat
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
@@ -182,7 +182,7 @@ static constexpr aruwsrc::control::agitator::VelocityAgitatorSubsystemConfig AGI
     .emptyJamEnabled = false,
     .emptyJamTimeoutMs = AIDEN_CLEMJAM_TIMEOUT_MS,
     .emptyJamMinSetpoint = AIDEN_CLEMJAM_MIN_SETPOINT,
-    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    .emptyJamBarrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
 };
 
 static constexpr tap::control::setpoint::MoveIntegralCommand::Config AGITATOR_ROTATE_CONFIG = {

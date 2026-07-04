@@ -21,6 +21,7 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_composition_helper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/instant_command.hpp"
 #include "tap/control/repeat_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/trigger.hpp"
@@ -142,7 +143,7 @@ aruwsrc::control::launcher::RefereeFeedbackFrictionWheelSubsystem<
         wheels,
         aruwsrc::control::launcher::WHEEL_CONFIG,
         aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
         aruwsrc::control::launcher::LAUNCHER_SPEED_CORRECTION_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
@@ -230,7 +231,7 @@ GovernorLimitedCommand<2> rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProject
 // rotates agitator with heat limiting applied
 HeatLimitGovernor heatLimitGovernor(
     *drivers(),
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1,
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM,
     constants::HEAT_LIMIT_BUFFER);
 GovernorLimitedCommand<1> rotateAndUnjamAgitatorWithHeatLimiting(
     {&agitator},
@@ -244,14 +245,14 @@ aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheel
     &frictionWheels,
     30.0f,
     false,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
 
 aruwsrc::control::launcher::FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
     drivers(),
     &frictionWheels,
     0.0f,
     true,
-    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+    tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
 
 // Remote related mappings
 Trigger leftSwitchMiddle =
@@ -263,9 +264,17 @@ Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
         .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
 
-// Trigger thumbwheelUp =
-//     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
-//         .onTrue(&droneImuCalibrateCommand);
+Trigger thumbwheelUp =
+    TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
+        .onTrue(&droneImuCalibrateCommand);
+
+InstantCommand toggleControlMode(
+    []() { turretUserVectorCommand.toggleControlMode(); },
+    std::array<tap::control::Subsystem*, 1>{&turret});
+
+Trigger thumbwheelDown =
+    TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, -0.95f, false)
+        .onTrue(&toggleControlMode);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());

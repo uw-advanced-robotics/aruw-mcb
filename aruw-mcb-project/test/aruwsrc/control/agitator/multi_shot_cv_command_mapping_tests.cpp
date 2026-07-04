@@ -23,17 +23,17 @@
 #include "tap/mock/command_mock.hpp"
 #include "tap/mock/hold_repeat_command_mapping_mock.hpp"
 #include "tap/mock/motor_interface_mock.hpp"
-#include "tap/mock/odometry_2d_interface_mock.hpp"
 
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/cv_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/cv_on_target_governor_mock.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
 #include "aruwsrc/mock/manual_fire_rate_reselection_manager_mock.hpp"
-#include "aruwsrc/mock/otto_ballistics_solver_mock.hpp"
 #include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/turret_cv_command_mock.hpp"
 #include "aruwsrc/mock/turret_motor_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
@@ -53,7 +53,17 @@ protected:
           turretSubsystem(&drivers, pitchMotor, yawMotor, nullptr),
           visionCoprocessor(&drivers),
           operatorInterface(&drivers),
-          ballisticsSolver(visionCoprocessor, odometry, turretSubsystem, launcher, 0, 0),
+          worldToTurretYaw(0, 0, 0, 0, 0, 0),
+          ballisticsSolver(
+              // hack to set up default return transformer return value before
+              // ballistics constructor uses it
+              [this]() -> auto& {
+                  ON_CALL(transformer, getWorldToTurretYaw)
+                      .WillByDefault(testing::ReturnRef(worldToTurretYaw));
+                  return visionCoprocessor;
+              }(),
+              transformer,
+              launcher),
           turretCvCommand(
               &visionCoprocessor,
               &operatorInterface,
@@ -99,8 +109,9 @@ private:
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> visionCoprocessor;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
-    NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
-    NiceMock<aruwsrc::mock::OttoBallisticsSolverMock> ballisticsSolver;
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
+    tap::algorithms::transforms::Transform worldToTurretYaw;
+    NiceMock<aruwsrc::mock::CvBallisticsSolverMock> ballisticsSolver;
     NiceMock<aruwsrc::mock::TurretCVCommandMock> turretCvCommand;
 
     aruwsrc::control::governor::AutoAimLaunchTimer launchTimer;

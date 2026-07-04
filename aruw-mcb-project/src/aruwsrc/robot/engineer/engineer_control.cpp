@@ -26,6 +26,7 @@
 #include "tap/control/command_composition_helper.hpp"
 #include "tap/control/command_mapper.hpp"
 #include "tap/control/command_scheduler.hpp"
+#include "tap/control/instant_command.hpp"
 #include "tap/control/remote_map_state.hpp"
 #include "tap/control/sequential_command.hpp"
 #include "tap/control/trigger.hpp"
@@ -71,6 +72,8 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transform_subsystem.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
+#include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/manual_ik_command.hpp"
+#include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/trajectory_ik_command.hpp"
 #include "aruwsrc/robot/engineer/auto/engineer_auton_constants.hpp"
 #include "aruwsrc/robot/engineer/auto/move_to_receptacle_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
@@ -111,6 +114,7 @@ using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
 using namespace tap::gpio;
 
+using tap::algorithms::transforms::Transform;
 using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
 
@@ -260,7 +264,7 @@ tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID2,
     tap::can::CanBus::CAN_BUS2,
-    true);
+    false);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
@@ -434,35 +438,35 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-ChassisFrameTurretController<Axis::PITCH> chassisFramePitchTurretController(
-    engTurret.pitchMotor,
-    chassis_rel::PITCH_PID_CONFIG);
+ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
+    chassisFramePitchTurretController(engTurret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
 
-ChassisFrameTurretController<Axis::YAW> chassisFrameYawTurretController(
-    engTurret.yawMotor,
-    chassis_rel::YAW_PID_CONFIG);
+ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
+    chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
 
 tap::algorithms::SmoothPid worldFramePitchTurretImuPosPid(
     world_rel_turret_imu::PITCH_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFramePitchTurretImuVelPid(
     world_rel_turret_imu::PITCH_VEL_PID_CONFIG);
 
-WorldFrameTurretImuCascadePidTurretController<Axis::PITCH> worldFramePitchTurretImuController(
-    transformer.getWorldToTurretPitch(),
-    drivers()->mcbLite.imu,
-    engTurret.pitchMotor,
-    worldFramePitchTurretImuPosPid,
-    worldFramePitchTurretImuVelPid);
+WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::PITCH>
+    worldFramePitchTurretImuController(
+        transformer.getWorldToTurretPitch(),
+        drivers()->mcbLite.imu,
+        engTurret.pitchMotor,
+        worldFramePitchTurretImuPosPid,
+        worldFramePitchTurretImuVelPid);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);
 
-WorldFrameTurretImuCascadePidTurretController<Axis::YAW> worldFrameYawTurretImuController(
-    transformer.getWorldToTurretPitch(),  // Pitch includes yaw
-    drivers()->mcbLite.imu,
-    engTurret.yawMotor,
-    worldFrameYawTurretImuPosPid,
-    worldFrameYawTurretImuVelPid);
+WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis::YAW>
+    worldFrameYawTurretImuController(
+        transformer.getWorldToTurretPitch(),  // Pitch includes yaw
+        drivers()->mcbLite.imu,
+        engTurret.yawMotor,
+        worldFrameYawTurretImuPosPid,
+        worldFrameYawTurretImuVelPid);
 
 // Autonomous "drive up to a receptacle and look at it" behavior. Takes the move-target P
 // (a point a standoff short of the receptacle); drives there via the shared autoNavController
@@ -524,8 +528,8 @@ user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     &engTurret,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
-    &worldFrameYawTurretImuController,
-    &worldFramePitchTurretImuController,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController,
     USER_YAW_INPUT_SCALAR,
     USER_PITCH_INPUT_SCALAR);
 
@@ -602,6 +606,19 @@ DigitalOutCommand endEffectorSuckOnCommand(leftSuckSubsystem, true);
 
 DigitalOutCommand endEffectorSuckOffCommand(leftSuckSubsystem, false);
 
+Transform IDENTITY_TRANSFORM;
+
+inverse_kinematics::ManualIKCommand manualIKCommand(
+    drivers()->controlOperatorInterface,
+    transformer.getChassisToWorld(),
+    IDENTITY_TRANSFORM,
+    transformer.getWorldToEndEffector(),
+    engTurret,
+    extensionSubsystem,
+    wristSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController);
+
 SequentialCommand<3> storeCubeCommand(
     &selectCubeAddPositionCommand,
     &cubeStorageSuckOnCommand,
@@ -630,6 +647,20 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 //      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH,
 //      Remote::SwitchState::UP))
 //         .whileTrue(CommandCompositionHelper::parallel<2>({&cubeStorageHome, &extensionHome}));
+
+// joint control mode
+Trigger rightMid =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
+        .whileTrue(&turretUserWorldRelativeCommand)
+        .whileTrue(&extensionManualControl)
+        .whileTrue(&wristControllerCommand)
+        .whileTrue(&chassisDriveCommand);
+
+// IK mode
+Trigger rightDown =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN)
+        .whileTrue(&manualIKCommand)
+        .whileTrue(&chassisDriveCommand);
 
 Trigger wheelDown =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.5f, false)
@@ -675,10 +706,6 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
     engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
-    chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
-    // chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
-    extensionSubsystem.setDefaultCommand(&extensionManualControl);
-    wristSubsystem.setDefaultCommand(&wristControllerCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
 
     // clientDisplay.setDefaultCommand(&clientDisplayCommand);

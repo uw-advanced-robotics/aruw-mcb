@@ -20,12 +20,15 @@
 #ifndef ENGINEER_TURRET_CONSTANTS_HPP_
 #define ENGINEER_TURRET_CONSTANTS_HPP_
 
+#include <cmath>
+
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -51,7 +54,8 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 // aggressively
 inline constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
 
-// if extended far enough, we can pitch higher because the back of extension won't hit the chassis
+// if extended far enough, we can pitch higher because the back of extension won't hit the
+// chassis
 inline constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
 
 // if extension above threshold, limit the pitch so the extension doesnt hit the ground
@@ -72,6 +76,27 @@ inline constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
 inline constexpr float MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
 inline constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
 
+// start limiting pitch upper range when the extension is beyond this value because before
+// this point it's impossible to go over the height limit
+inline constexpr float EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT = 0.4f;
+
+/**
+ * Lookup table that maps extension position to pitch upper limit. In between points in the lookup
+ * table, linear interpolation is used.
+ */
+inline constexpr modm::Pair<float, float> PITCH_UPPER_LIMIT_EXTENSION_TABLE[] = {
+    {EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT, PITCH_UPPER_LIMIT_DEFAULT},
+    {0.47f, -0.67f},
+    {0.53f, -0.63f},
+    {0.63f, -0.57f},
+    {0.73f, -0.52f},
+};
+
+static modm::interpolation::Linear<modm::Pair<float, float>>
+    PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR(
+        PITCH_UPPER_LIMIT_EXTENSION_TABLE,
+        MODM_ARRAY_SIZE(PITCH_UPPER_LIMIT_EXTENSION_TABLE));
+
 inline float getPitchMinLimit(float extensionPosition)
 {
     // TurretMotor expects numeric min/max radians. Pitch up is negative on engineer.
@@ -79,6 +104,12 @@ inline float getPitchMinLimit(float extensionPosition)
     {
         return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
     }
+
+    if (extensionPosition > EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT)
+    {
+        return PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR.interpolate(extensionPosition);
+    }
+
     return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
 }
 
@@ -108,7 +139,7 @@ static constexpr aruwsrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = 
 inline constexpr float YAW_TURRET_GEAR_RATIO = 16.0f / 60.0f;
 
 inline constexpr uint32_t PITCH_TURRET_ENCODER_HOME = 884;
-inline constexpr uint32_t PITCH_TURRET_GEAR_RATIO = 1.0f / 8.0f;
+inline constexpr float PITCH_TURRET_GEAR_RATIO = 1.0f / 8.0f;
 
 static constexpr aruwsrc::control::turret::TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
@@ -232,11 +263,11 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 0.0f,
+    .kp = 60000.0f,
     .ki = 0.0f,
-    .kd = 0.0f,
+    .kd = 8000.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.5f,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 0.0f,
     .tQProportionalKalman = 1.0f,
@@ -246,13 +277,13 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .kp = 35000.0f,
+    .ki = 50000.0f,
+    .kd = 4000.0f,
+    .maxICumulative = 1500.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.5f,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 400.0f,
+    .tRDerivativeKalman = 300.0f,
     .tQProportionalKalman = 1.0f,
     .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,

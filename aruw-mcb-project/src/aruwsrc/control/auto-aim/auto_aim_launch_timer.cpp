@@ -25,11 +25,13 @@ namespace aruwsrc::control::auto_aim
 {
 AutoAimLaunchTimer::AutoAimLaunchTimer(
     uint32_t agitatorTypicalDelayMicroseconds,
-    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
-    aruwsrc::algorithms::OttoBallisticsSolver *ballistics)
+    aruwsrc::communication::serial::VisionCoprocessor* visionCoprocessor,
+    aruwsrc::algorithms::ballistics::CvBallisticsSolver* ballistics,
+    const float maxSinglePlateHitFrequency)
     : agitatorTypicalDelayMicroseconds(agitatorTypicalDelayMicroseconds),
       visionCoprocessor(visionCoprocessor),
-      ballistics(ballistics)
+      ballistics(ballistics),
+      maxSinglePlateHitFrequency(maxSinglePlateHitFrequency)
 {
 }
 
@@ -37,56 +39,57 @@ AutoAimLaunchTimer::LaunchInclination AutoAimLaunchTimer::getCurrentLaunchInclin
     uint8_t turretId)
 {
     auto aimData = this->visionCoprocessor->getLastAimData(turretId);
-    if (!aimData.pva.updated)
+
+    if (!aimData.targetState.updated)
     {
         return LaunchInclination::NO_TARGET;
     }
 
-    if (!aimData.timing.updated)
+    auto ballisticsSolution = ballistics->computeTurretAimAngles();
+
+    if (!ballisticsSolution.has_value())
+    {
+        return LaunchInclination::NO_TARGET;
+    }
+
+    if (!ballisticsSolution->shotWindowValid)
     {
         return LaunchInclination::UNGATED;
     }
 
-    if (aimData.timing.pulseInterval == 0)
-    {
-        return LaunchInclination::GATED_DENY;
-    }
+    // If hitting the same plate multiple times requires a fire rate that's too high, switch to
+    // shooting once per plate
+    // targetPlateCenters = (max shots fired in half the window < 1/2 sec)
+    bool targetPlateCenters =
+        ballisticsSolution->shotWindowHalfWidth * maxSinglePlateHitFrequency < 500'000.0f;
 
-    auto ballisticsSolution = ballistics->computeTurretAimAngles();
-    if (!ballisticsSolution.has_value())
-    {
-        return LaunchInclination::GATED_DENY;
-    }
-
+    // If we want to shoot once per plate at the plate center, clamping the window start to the
+    // center time means we'll only try to shoot the instant we think our shot will hit the center.
+    // If the agitator was busy, it will fire as early as possible before the plate window ends,
+    // shooting as close to the center as possible.
+    // Note: If half the plate takes more time to travel across the aim line than it does for us to
+    // fire one shot, this means we might still try to hit the trailing end of the plate. This would
+    // only occur if the true shot rate exceeds the one used in the above entry condition
+    uint64_t shotWindowStart = ballisticsSolution->shotWindowCenter -
+                               (targetPlateCenters ? 0 : ballisticsSolution->shotWindowHalfWidth);
+    uint64_t shotWindowEnd =
+        ballisticsSolution->shotWindowCenter + ballisticsSolution->shotWindowHalfWidth;
     float timeOfFlightSeconds = ballisticsSolution->timeOfFlight;
+
     if (timeOfFlightSeconds <= 0 || timeOfFlightSeconds > MAX_ALLOWED_FLIGHT_TIME_SECS)
     {
         return LaunchInclination::GATED_DENY;
     }
 
-    uint32_t timeOfFlightMicros = timeOfFlightSeconds * 1e6;
-    uint32_t now = tap::arch::clock::getTimeMicroseconds();
-    uint32_t projectedHitTime = now + this->agitatorTypicalDelayMicroseconds + timeOfFlightMicros;
+    uint64_t now = tap::arch::clock::getTimeMicroseconds();
+    uint64_t effectiveFireTime = now + this->agitatorTypicalDelayMicroseconds;
 
-    uint32_t nextPlateTransitTime = aimData.timestamp + aimData.timing.offset;
-    int64_t projectedHitTimeAfterFirstWindow =
-        int64_t(projectedHitTime) - int64_t(nextPlateTransitTime);
-
-    int64_t offsetInFiringWindow = projectedHitTimeAfterFirstWindow % aimData.timing.pulseInterval;
-    if (offsetInFiringWindow < 0)
-    {
-        offsetInFiringWindow += aimData.timing.pulseInterval;
-    }
-
-    uint32_t maxHitTimeError = aimData.timing.duration / 2;
-    if (offsetInFiringWindow <= maxHitTimeError ||
-        offsetInFiringWindow >= aimData.timing.pulseInterval - maxHitTimeError)
-    {
-        return LaunchInclination::GATED_ALLOW;
-    }
-    else
+    bool inShotWindow = effectiveFireTime >= shotWindowStart && effectiveFireTime <= shotWindowEnd;
+    if (!inShotWindow)
     {
         return LaunchInclination::GATED_DENY;
     }
+
+    return LaunchInclination::GATED_ALLOW;
 }
 }  // namespace aruwsrc::control::auto_aim
