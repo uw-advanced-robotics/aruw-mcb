@@ -460,6 +460,8 @@ EngineerTransforms transformer(
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
+tap::control::Subsystem dummySubsystem(drivers());
+
 ChassisAutoNavController autoNavController(
     *drivers(),
     chassisSubsystem,
@@ -660,6 +662,30 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     lampreyEncoder,
     &chassisSubsystem);
 
+inverse_kinematics::Trajectory6D<2> pickupTrajectory{
+    {{{.pose = Transform(), .time = 0},{.pose = Transform(0.45, 0, 0.3, 0, M_PI_2, 0), .time = 1}}}
+};
+
+InstantCommand populatePickupTrajectory(
+    []() {
+        pickupTrajectory.waypoints[0].pose = transformer.getChassisToEndEffector();
+    },
+    std::array<tap::control::Subsystem*, 1>{&dummySubsystem}
+);
+
+inverse_kinematics::TrajectoryIKCommand<2> pickupIKCommand(
+    IDENTITY_TRANSFORM,
+    IDENTITY_TRANSFORM,
+    engTurret,
+    extensionSubsystem,
+    wristSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController,
+    pickupTrajectory
+);
+
+SequentialCommand pickupCommand(&populatePickupTrajectory, &pickupIKCommand);
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -693,7 +719,7 @@ Trigger wheelUp =
     (!TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, -0.5f, false))
         .onTrue(&endEffectorSuckOffCommand);
 
-Trigger pickupSetpoint = TriggerHelpers::button(drivers(), Remote::Key::F).onTrue(&extensionOut);
+Trigger pickupSetpoint = TriggerHelpers::button(drivers(), Remote::Key::F).onTrue(&pickupCommand);
 
 Trigger suctionToggle = 
     TriggerHelpers::button(drivers(), Remote::Key::G)
