@@ -45,14 +45,13 @@ ManualIKCommand::ManualIKCommand(
           yawController,
           pitchController),
       controlOperatorInterface(controlOperatorInterface),
-      baseToEndEffectorDesired(),
       baseToEndEffector(baseToEndEffector)
 {
 }
 
-void ManualIKCommand::initialize() { baseToEndEffectorDesired = baseToEndEffector; }
+void ManualIKCommand::initialize() { baseToFollowerDesired = baseToEndEffector; }
 
-Transform ManualIKCommand::getBaseToFollowerDesired()
+void ManualIKCommand::updateBaseToFollowerDesired()
 {
     Vector endEffectorPrevToEndEffectorNextTrans = Vector(
                                                        controlOperatorInterface.getIKVelX(),
@@ -65,12 +64,10 @@ Transform ManualIKCommand::getBaseToFollowerDesired()
         controlOperatorInterface.getIKVelYaw() * 0.002f);
 
     // we apply translation in world frame for user control intuitiveness
-    baseToEndEffectorDesired.updateTranslation(
-        baseToEndEffectorDesired.getTranslation() + endEffectorPrevToEndEffectorNextTrans);
-    baseToEndEffectorDesired.updateRotation(
-        baseToEndEffectorDesired.getRotation().compose(endEffectorPrevToEndEffectorNextRot));
-
-    return baseToEndEffectorDesired;
+    baseToFollowerDesired.updateTranslation(
+        baseToFollowerDesired.getTranslation() + endEffectorPrevToEndEffectorNextTrans);
+    baseToFollowerDesired.updateRotation(
+        baseToFollowerDesired.getRotation().compose(endEffectorPrevToEndEffectorNextRot));
 }
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

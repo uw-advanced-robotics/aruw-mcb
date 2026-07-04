@@ -73,9 +73,11 @@ public:
      * */
     void setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint);
 
-    inline float getSetpointTheta1() { return setpointTheta1.getWrappedValue(); }
-    inline float getSetpointTheta2() { return setpointTheta2; }
-    inline float getSetpointTheta3() { return setpointTheta3.getWrappedValue(); }
+    inline float getSetpointTheta1() const { return setpointTheta1.getWrappedValue(); }
+    inline float getSetpointTheta2() const { return setpointTheta2; }
+    inline float getSetpointTheta3() const { return setpointTheta3.getWrappedValue(); }
+
+    tap::algorithms::transforms::Orientation getSetpointOrientation() const;
 
     virtual void initialize() override;
 

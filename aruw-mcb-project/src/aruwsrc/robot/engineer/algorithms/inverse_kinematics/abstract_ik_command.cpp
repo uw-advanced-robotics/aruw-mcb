@@ -60,8 +60,9 @@ AbstractIKCommand::AbstractIKCommand(
 
 void AbstractIKCommand::execute()
 {
-    chassisToEndEffectorDesired = chassisToBase.composeStatic(getBaseToFollowerDesired())
-                                      .composeStatic(followerToEndEffector);
+    updateBaseToFollowerDesired();
+    chassisToEndEffectorDesired =
+        chassisToBase.composeStatic(baseToFollowerDesired).composeStatic(followerToEndEffector);
 
     // kept as a Transform because we want to compose it easily
     chassisToWristDesiredPos = chassisToEndEffectorDesired.composeStatic(END_EFFECTOR_TO_WRIST);
@@ -108,6 +109,18 @@ void AbstractIKCommand::execute()
     pitchController.runController(0.002f, Angle(turretPitchDesired));
     extension.setSetpoint(extensionDesired);
     wrist.setSetpointOrientation(extensionToWristDesired.getRotation());
+
+    baseToFollowerDesired =
+        chassisToBase.getInverse()
+            .composeStatic(EngineerTransforms::getHypotheticalChassisToTurretYaw(
+                yawController.getSetpoint().getWrappedValue()))
+            .composeStatic(EngineerTransforms::getHypotheticalTurretYawToTurretPitch(
+                pitchController.getSetpoint().getWrappedValue()))
+            .composeStatic(
+                EngineerTransforms::getHypotheticalTurretPitchToExtension(extension.getSetpoint()))
+            .composeStatic(Transform(Position(), wrist.getSetpointOrientation()))
+            .composeStatic(WRIST_TO_END_EFFECTOR)
+            .composeStatic(followerToEndEffector.getInverse());
 }
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

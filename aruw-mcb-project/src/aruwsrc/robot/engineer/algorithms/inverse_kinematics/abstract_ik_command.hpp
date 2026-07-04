@@ -84,9 +84,10 @@ public:
 
     virtual bool isFinished() const override { return false; }
 
-    virtual tap::algorithms::transforms::Transform getBaseToFollowerDesired() = 0;
+    virtual void updateBaseToFollowerDesired() = 0;
 
 protected:
+    tap::algorithms::transforms::Transform baseToFollowerDesired;
     const tap::algorithms::transforms::Transform &chassisToBase, followerToEndEffector;
     aruwsrc::control::turret::TurretSubsystem& turret;
     aruwsrc::control::joint::JointSubsystem& extension;
