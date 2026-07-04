@@ -25,8 +25,6 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/communication/sensors/imu/imu_interface.hpp"
 
-#include "aruwsrc/control/turret/constants/turret_constants.hpp"
-
 using tap::algorithms::Angle;
 
 namespace aruwsrc::drone
@@ -180,7 +178,7 @@ bool DroneImuCalibrateCommand::systemsOnline() const
 float DroneImuCalibrateCommand::getPitchCalibrationError() const
 {
     return turret.pitchMotor.getChassisFrameMeasuredAngle().minDifference(
-        Angle(aruwsrc::control::turret::PITCH_IMU_CALIBRATION_ANGLE));
+        Angle(imuCalibrateTarget));
 }
 
 bool DroneImuCalibrateCommand::turretLockedAtCalibrationPosition() const

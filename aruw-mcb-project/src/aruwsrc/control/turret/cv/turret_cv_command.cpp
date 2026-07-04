@@ -29,7 +29,8 @@
 
 using namespace tap::arch::clock;
 using namespace tap::algorithms;
-using namespace aruwsrc::algorithms;
+
+using aruwsrc::algorithms::ballistics::CvBallisticsSolver;
 
 namespace aruwsrc::control::turret::cv
 {
@@ -41,7 +42,7 @@ TurretCVCommand::TurretCVCommand(
         *yawController,
     algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
         *pitchController,
-    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
+    CvBallisticsSolver *ballisticsSolver,
     const float userYawInputScalar,
     const float userPitchInputScalar,
     uint8_t turretID)
@@ -57,7 +58,7 @@ TurretCVCommand::TurretCVCommand(
 {
     assert(ballisticsSolver != nullptr);
 
-    assert(turretID == ballisticsSolver->turretID);
+    assert(turretID == ballisticsSolver->getTurretID());
     addSubsystemRequirement(turretSubsystem);
 }
 
@@ -76,7 +77,7 @@ void TurretCVCommand::execute()
     WrappedFloat pitchSetpoint = pitchController->getSetpoint();
     WrappedFloat yawSetpoint = yawController->getSetpoint();
 
-    std::optional<OttoBallisticsSolver::BallisticsSolution> ballisticsSolution =
+    std::optional<CvBallisticsSolver::BallisticsSolution> ballisticsSolution =
         ballisticsSolver->computeTurretAimAngles();
 
     if (ballisticsSolution != std::nullopt)
@@ -88,7 +89,7 @@ void TurretCVCommand::execute()
          * the setpoint returned by the ballistics solver is between [0, 2*PI), so find the
          * setpoint that is closest to the wrapped measured angle.
          */
-        withinAimingTolerance = aruwsrc::algorithms::OttoBallisticsSolver::withinAimingTolerance(
+        withinAimingTolerance = CvBallisticsSolver::withinAimingTolerance(
             yawController->getMeasurement().minDifference(yawSetpoint),
             pitchController->getMeasurement().minDifference(pitchSetpoint),
             ballisticsSolution->distance);

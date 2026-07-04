@@ -89,7 +89,8 @@ void DroneTurretVectorCommand::execute()
     const float pitchInput =
         userPitchInputScalar * controlOperatorInterface.getTurretPitchInput(turretID);
 
-    if (!turretImu.isOnline() || turretImu.getImuState() != ImuInterface::ImuState::IMU_CALIBRATED)
+    if (!turretImu.isOnline() ||
+        turretImu.getImuState() != ImuInterface::ImuState::IMU_CALIBRATED || useFallback)
     {
         runChassisFrameFallback(yawInput, pitchInput, dt);
         return;
