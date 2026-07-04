@@ -665,15 +665,12 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     &chassisSubsystem);
 
 inverse_kinematics::Trajectory6D<2> pickupTrajectory{
-    {{{.pose = Transform(), .time = 0},{.pose = Transform(0.45, 0, 0.3, 0, M_PI_2, 0), .time = 1}}}
-};
+    {{{.pose = Transform(), .time = 0},
+      {.pose = Transform(0.45, 0, 0.3, 0, M_PI_2, 0), .time = 1}}}};
 
 InstantCommand populatePickupTrajectory(
-    []() {
-        pickupTrajectory.waypoints[0].pose = transformer.getChassisToEndEffector();
-    },
-    std::array<tap::control::Subsystem*, 1>{&dummySubsystem}
-);
+    []() { pickupTrajectory.waypoints[0].pose = transformer.getChassisToEndEffector(); },
+    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
 
 inverse_kinematics::TrajectoryIKCommand<2> pickupIKCommand(
     IDENTITY_TRANSFORM,
@@ -683,8 +680,7 @@ inverse_kinematics::TrajectoryIKCommand<2> pickupIKCommand(
     wristSubsystem,
     chassisFrameYawTurretController,
     chassisFramePitchTurretController,
-    pickupTrajectory
-);
+    pickupTrajectory);
 
 SequentialCommand pickupCommand(&populatePickupTrajectory, &pickupIKCommand);
 PumpIndicator pumpIndicator(refSerialTransmitter, mainSuckSubsystem);
@@ -697,8 +693,6 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
-
-tap::control::Subsystem dummySubsystem(drivers());
 
 inverse_kinematics::Trajectory6D<2> depositTrajectory{
     {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
@@ -741,11 +735,13 @@ Trigger leftUpRightUp =
      TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP))
         .onTrue(&depositCommand);
 
-Trigger leftDownMidRightUp =
-    (!TriggerHelpers::switchState(
+Trigger depositCube = TriggerHelpers::button(drivers(), Remote::Key::V).onTrue(&depositCommand);
+
+Trigger leftDownRightUp =
+    (TriggerHelpers::switchState(
          drivers(),
          Remote::Switch::LEFT_SWITCH,
-         Remote::SwitchState::UP) &&
+         Remote::SwitchState::DOWN) &&
      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
         .onTrue(&binnedAlignmentCommand);
 
@@ -773,15 +769,13 @@ Trigger wheelUp =
 
 Trigger pickupSetpoint = TriggerHelpers::button(drivers(), Remote::Key::F).onTrue(&pickupCommand);
 
-Trigger suctionToggle = 
-    TriggerHelpers::button(drivers(), Remote::Key::G)
-        .onTrue(&endEffectorSuckToggleCommand);
+Trigger suctionToggle =
+    TriggerHelpers::button(drivers(), Remote::Key::G).onTrue(&endEffectorSuckToggleCommand);
 
-InstantCommand homeRoll([]() { wristSubsystem.homeTheta3(0.0); },
-    std::array<tap::control::Subsystem*, 1>{&wristSubsystem}); 
-Trigger homeRollButton =
-    TriggerHelpers::button(drivers(), Remote::Key::C)
-        .onTrue(&homeRoll);
+InstantCommand homeRoll(
+    []() { wristSubsystem.homeTheta3(0.0); },
+    std::array<tap::control::Subsystem*, 1>{&wristSubsystem});
+Trigger homeRollButton = TriggerHelpers::button(drivers(), Remote::Key::C).onTrue(&homeRoll);
 
 /*Trigger cvAlign =
     TriggerHelpers::button(drivers(), )*/

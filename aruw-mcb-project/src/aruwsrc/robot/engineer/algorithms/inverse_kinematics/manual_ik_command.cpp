@@ -65,10 +65,9 @@ Transform ManualIKCommand::getBaseToFollowerDesired()
         controlOperatorInterface.getIKVelYaw() * 0.002f);
 
     // we apply translation in world frame for user control intuitiveness
-    baseToEndEffectorDesired = 
-        baseToEndEffectorDesired.composeStatic(
-            Transform(endEffectorPrevToEndEffectorNextTrans.toPosition(),
-            endEffectorPrevToEndEffectorNextRot));
+    baseToEndEffectorDesired = baseToEndEffectorDesired.composeStatic(Transform(
+        endEffectorPrevToEndEffectorNextTrans.toPosition(),
+        endEffectorPrevToEndEffectorNextRot));
     return baseToEndEffectorDesired;
 }
 

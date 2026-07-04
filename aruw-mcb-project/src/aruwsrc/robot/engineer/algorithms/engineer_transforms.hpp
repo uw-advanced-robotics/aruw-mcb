@@ -93,9 +93,7 @@ public:
     inline const Transform& getWorldToTurretPitch() const { return worldToTurretPitch; }
     inline const Transform& getWorldToRealsense() const { return worldToRealsense; }
     inline const Transform& getWorldToEndEffector() const { return worldToEndEffector; }
-<<<<<<< HEAD
     inline const Transform& getChassisToEndEffector() const { return chassisToEndEffector; }
-=======
     inline const Transform& getWorldToReceptacle() const { return worldToReceptacle; }
 
     /**
@@ -108,7 +106,6 @@ public:
         return worldToReceptacleReceivedTimeMs;
     }
     inline bool isWorldToReceptacleValid() const { return worldToReceptacleReceivedTimeMs != -1; }
->>>>>>> 1b274196c97489239cf49861615992f934c0f0fe
     inline const Transform& getCubeStore1ToEndEffector() const { return cubeStore1ToEndEffector; }
     inline const Transform& getCubeStore2ToEndEffector() const { return cubeStore2ToEndEffector; }
     inline const Transform& getEndEffectorToCubeDist() const { return endEffectorToCubeDist; }

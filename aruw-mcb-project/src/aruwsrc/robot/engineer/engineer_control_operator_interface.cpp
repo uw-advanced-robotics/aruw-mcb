@@ -29,7 +29,6 @@ using namespace aruwsrc::control::chassis;
 
 namespace aruwsrc::engineer
 {
-
 float deadZone(float input, float deadZone)
 {
     if (fabs(input) < fabs(deadZone)) return 0.0;
@@ -143,10 +142,10 @@ bool EngineerControlOperatorInterface::isIKRotationModeKBM() const
 
 float EngineerControlOperatorInterface::getIKVelX() const
 {
-    float kbm = isIKTranslationModeKBM()
-                    ? (drivers->remote.getMouseL() - drivers->remote.getMouseR()) *
-                          MAX_IK_TRANSLATION_VEL
-                    : 0;
+    float kbm =
+        isIKTranslationModeKBM()
+            ? (drivers->remote.getMouseL() - drivers->remote.getMouseR()) * MAX_IK_TRANSLATION_VEL
+            : 0;
 
     float remote =
         isIKTranslationModeRemote()
@@ -184,10 +183,10 @@ float EngineerControlOperatorInterface::getIKVelZ() const
 
 float EngineerControlOperatorInterface::getIKVelRoll() const
 {
-    float kbm = isIKRotationModeKBM()
-                    ? (drivers->remote.getMouseL() - drivers->remote.getMouseR()) *
-                          MAX_IK_ROTATION_VEL
-                    : 0;
+    float kbm =
+        isIKRotationModeKBM()
+            ? (drivers->remote.getMouseL() - drivers->remote.getMouseR()) * MAX_IK_ROTATION_VEL
+            : 0;
 
     float remote =
         isIKRotationModeRemote()
