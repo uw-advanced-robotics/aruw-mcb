@@ -87,9 +87,10 @@ public:
         }
 
         // Fill the points array with evenly spaced points if the array is all zeros
-        bool allZero = std::all_of(this->points.begin(), this->points.end(), [](float v) {
-            return v == 0.0f;
-        });
+        bool allZero = std::all_of(
+            this->points.begin(),
+            this->points.end(),
+            [](float v) { return v == 0.0f; });
 
         if (allZero)
         {
@@ -133,7 +134,7 @@ public:
         currentPointIndex = 0;
 
         config.controller->initialize();
-        config.motor->setChassisFrameSetpoint(Angle(points[currentPointIndex]));
+        config.motor->setChassisFrameSetpoint(tap::algorithms::Angle(points[currentPointIndex]));
 
         calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
         calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -252,7 +253,8 @@ public:
 
             case TurretAutotuneInterface::CalibrationState::NEXT_LOCATION:
             {
-                config.motor->setChassisFrameSetpoint(Angle(points[currentPointIndex]));
+                config.motor->setChassisFrameSetpoint(
+                    tap::algorithms::Angle(points[currentPointIndex]));
 
                 calibrationFailTimeout.restart(MAX_CALIBRATION_WAITTIME_MS);
                 calibrationTimer.restart(WAIT_TIME_TURRET_RESPONSE_MS);
@@ -317,7 +319,7 @@ protected:
 
     inline bool turretReachedPointAndNotMoving(const WrappedFloat setpoint) const
     {
-        return compareFloatClose(
+        return tap::algorithms::compareFloatClose(
                    0.0f,
                    config.motor->getChassisFrameVelocity(),
                    velocityZeroThreshold) &&

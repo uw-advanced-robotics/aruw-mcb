@@ -655,20 +655,6 @@ Trigger rightDown =
         .whileTrue(&manualIKCommand)
         .whileTrue(&chassisDriveCommand);
 
-// joint control mode
-Trigger rightMid =
-    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
-        .whileTrue(&turretUserWorldRelativeCommand)
-        .whileTrue(&extensionManualControl)
-        .whileTrue(&wristControllerCommand)
-        .whileTrue(&chassisDriveCommand);
-
-// IK mode
-Trigger rightDown =
-    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::DOWN)
-        .whileTrue(&manualIKCommand)
-        .whileTrue(&chassisDriveCommand);
-
 Trigger wheelDown =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.5f, false)
         .onTrue(&endEffectorSuckOnCommand);
