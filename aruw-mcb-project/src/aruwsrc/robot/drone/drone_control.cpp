@@ -21,6 +21,7 @@
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/control/command_composition_helper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
+#include "tap/control/instant_command.hpp"
 #include "tap/control/repeat_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/trigger.hpp"
@@ -263,9 +264,17 @@ Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
         .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
 
-// Trigger thumbwheelUp =
-//     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
-//         .onTrue(&droneImuCalibrateCommand);
+Trigger thumbwheelUp =
+    TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
+        .onTrue(&droneImuCalibrateCommand);
+
+InstantCommand toggleControlMode(
+    []() { turretUserVectorCommand.toggleControlMode(); },
+    std::array<tap::control::Subsystem*, 1>{&turret});
+
+Trigger thumbwheelDown =
+    TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, -0.95f, false)
+        .onTrue(&toggleControlMode);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());

@@ -29,6 +29,25 @@ using namespace aruwsrc::control::chassis;
 
 namespace aruwsrc::engineer
 {
+
+float getNormalizedMouseX(const tap::Drivers *drivers)
+{
+    return static_cast<float>(limitVal<int16_t>(
+               drivers->remote.getMouseX(),
+               -control::ControlOperatorInterface::USER_MOUSE_YAW_MAX,
+               control::ControlOperatorInterface::USER_MOUSE_YAW_MAX)) /
+           static_cast<float>(control::ControlOperatorInterface::USER_MOUSE_YAW_MAX);
+}
+
+float getNormalizedMouseY(const tap::Drivers *drivers)
+{
+    return static_cast<float>(limitVal<int16_t>(
+               drivers->remote.getMouseY(),
+               -control::ControlOperatorInterface::USER_MOUSE_PITCH_MAX,
+               control::ControlOperatorInterface::USER_MOUSE_PITCH_MAX)) /
+           static_cast<float>(control::ControlOperatorInterface::USER_MOUSE_PITCH_MAX);
+}
+
 bool EngineerControlOperatorInterface::isDriveMode()
 {
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN;
@@ -96,6 +115,67 @@ float EngineerControlOperatorInterface::getWristTheta3Velocity()
     return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
 }
 
+bool EngineerControlOperatorInterface::isIKTranslationMode() const
+{
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN;
+}
+bool EngineerControlOperatorInterface::isIKRotationMode() const
+{
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP &&
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN;
+}
+
+float EngineerControlOperatorInterface::getIKVelX() const
+{
+    if (drivers->remote.getMouseL()) {
+        return MAX_IK_TRANSLATION_VEL;
+    } else if (drivers->remote.getMouseR()) {
+        return -MAX_IK_TRANSLATION_VEL;
+    }
+    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_TRANSLATION_VEL : 0;
+}
+
+float EngineerControlOperatorInterface::getIKVelY() const
+{
+    float velY = getNormalizedMouseX(drivers);
+    if (fabs(velY) > INPUT_THRESHOLD) return velY;
+    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * MAX_IK_TRANSLATION_VEL : 0;
+}
+
+float EngineerControlOperatorInterface::getIKVelZ() const
+{
+    float velZ = getNormalizedMouseY(drivers);
+    if (fabs(velZ) > INPUT_THRESHOLD) return velZ;
+    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) * MAX_IK_TRANSLATION_VEL : 0;
+}
+
+float EngineerControlOperatorInterface::getIKVelRoll() const
+{
+    if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
+        return getNormalizedMouseY(drivers);
+    }
+    return isIKRotationMode() ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * MAX_IK_ROTATION_VEL : 0;
+}
+
+float EngineerControlOperatorInterface::getIKVelPitch() const
+{
+    if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
+        return getNormalizedMouseX(drivers);
+    }
+    return isIKRotationMode() ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) * MAX_IK_ROTATION_VEL : 0;
+}
+
+float EngineerControlOperatorInterface::getIKVelYaw() const
+{
+    if (drivers->remote.getMouseL()) {
+        return MAX_IK_ROTATION_VEL;
+    } else if (drivers->remote.getMouseR()) {
+        return -MAX_IK_ROTATION_VEL;
+    }
+    return isIKRotationMode() ? drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) * MAX_IK_ROTATION_VEL : 0;
+}
+
 // this is basically the same thing as getChassisXInput in the basic control operator interface, but
 // uh... we wanted sprint to work so hopefully the two don't get too out of sync
 float EngineerControlOperatorInterface::getChassisXInput()
@@ -141,7 +221,7 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
     float xInput = chassisXInputRamp.getValue();
 
-    if (drivers->remote.keyPressed(Remote::Key::R))
+    if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
         return xInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
@@ -196,7 +276,7 @@ float EngineerControlOperatorInterface::getChassisYInput()
         static_cast<float>(dt) / 1E3F);
 
     float yInput = chassisYInputRamp.getValue();
-    if (drivers->remote.keyPressed(Remote::Key::R))
+    if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
         return yInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }

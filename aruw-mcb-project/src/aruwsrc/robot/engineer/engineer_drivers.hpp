@@ -92,6 +92,8 @@ public:
             tap::gpio::Digital::InputPullMode::PullUp);
         chassisIsm.initialize(mainLoopFrequency, 0.1f, 0.0f);
         chassisIsm.setCalibrationSamples(4000);
+        chassisIsm.setMountingTransform(
+            tap::algorithms::transforms::Transform(0, 0, 0, M_PI, 0, M_PI_2));
         mcbLite.initialize();
         // mcbLite.imu.sendMountingTransform(...);
         mcbLite.imu.initialize(mainLoopFrequency, 0.2f, 0.0f);
