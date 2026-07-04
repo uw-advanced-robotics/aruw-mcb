@@ -30,6 +30,11 @@ using namespace aruwsrc::control::chassis;
 namespace aruwsrc::engineer
 {
 
+float deadZone(float input, float deadZone)
+{
+    if (fabs(input) < fabs(deadZone)) return 0 return input;
+}
+
 float getNormalizedMouseX(const tap::Drivers *drivers)
 {
     return static_cast<float>(limitVal<int16_t>(
@@ -115,65 +120,104 @@ float EngineerControlOperatorInterface::getWristTheta3Velocity()
     return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
 }
 
-bool EngineerControlOperatorInterface::isIKTranslationMode() const
+bool EngineerControlOperatorInterface::isIKTranslationModeRemote() const
 {
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN;
 }
-bool EngineerControlOperatorInterface::isIKRotationMode() const
+bool EngineerControlOperatorInterface::isIKRotationModeRemote() const
 {
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP &&
            drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN;
 }
 
+bool EngineerControlOperatorInterface::isIKTranslationModeKBM() const
+{
+    return !drivers->remote.keyPressed(Remote::Key::SHIFT);
+}
+bool EngineerControlOperatorInterface::isIKRotationModeKBM() const
+{
+    return drivers->remote.keyPressed(Remote::Key::SHIFT);
+}
+
 float EngineerControlOperatorInterface::getIKVelX() const
 {
-    if (drivers->remote.getMouseL()) {
-        return MAX_IK_TRANSLATION_VEL;
-    } else if (drivers->remote.getMouseR()) {
-        return -MAX_IK_TRANSLATION_VEL;
-    }
-    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_TRANSLATION_VEL : 0;
+    float kbm = isIKTranslationModeKBM()
+                    ? (drivers->remote.getMouseL() - drivers->remote.getMouseR()) *
+                          MAX_IK_TRANSLATION_VEL * 0.5f
+                    : 0;
+
+    float remote =
+        isIKTranslationModeRemote()
+            ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_TRANSLATION_VEL
+            : 0;
+
+    return kbm + remote;
 }
 
 float EngineerControlOperatorInterface::getIKVelY() const
 {
-    float velY = getNormalizedMouseX(drivers);
-    if (fabs(velY) > INPUT_THRESHOLD) return velY;
-    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * MAX_IK_TRANSLATION_VEL : 0;
+    float kbm =
+        isIKTranslationModeKBM() ? deadZone(getNormalizedMouseX(drivers), INPUT_THRESHOLD) : 0;
+
+    float remote =
+        isIKTranslationModeRemote()
+            ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * MAX_IK_TRANSLATION_VEL
+            : 0;
+
+    return kbm + remote;
 }
 
 float EngineerControlOperatorInterface::getIKVelZ() const
 {
-    float velZ = getNormalizedMouseY(drivers);
-    if (fabs(velZ) > INPUT_THRESHOLD) return velZ;
-    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) * MAX_IK_TRANSLATION_VEL : 0;
+    float kbm =
+        isIKTranslationModeKBM() ? deadZone(getNormalizedMouseY(drivers), INPUT_THRESHOLD) : 0;
+
+    float remote =
+        isIKTranslationModeRemote()
+            ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) * MAX_IK_TRANSLATION_VEL
+            : 0;
+
+    return kbm + remote;
 }
 
 float EngineerControlOperatorInterface::getIKVelRoll() const
 {
-    if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
-        return getNormalizedMouseY(drivers);
-    }
-    return isIKRotationMode() ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * MAX_IK_ROTATION_VEL : 0;
+    float kbm = isIKRotationModeKBM()
+                    ? (drivers->remote.getMouseL() - drivers->remote.getMouseR()) *
+                          MAX_IK_ROTATION_VEL * 0.5f
+                    : 0;
+
+    float remote =
+        isIKRotationModeRemote()
+            ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * MAX_IK_ROTATION_VEL
+            : 0;
+
+    return kbm + remote;
 }
 
 float EngineerControlOperatorInterface::getIKVelPitch() const
 {
-    if (drivers->remote.keyPressed(Remote::Key::SHIFT)) {
-        return getNormalizedMouseX(drivers);
-    }
-    return isIKRotationMode() ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) * MAX_IK_ROTATION_VEL : 0;
+    float kbm = isIKRotationModeKBM() ? deadZone(getNormalizedMouseY(drivers), INPUT_THRESHOLD) : 0;
+
+    float remote =
+        isIKRotationModeRemote()
+            ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) * MAX_IK_ROTATION_VEL
+            : 0;
+
+    return kbm + remote;
 }
 
 float EngineerControlOperatorInterface::getIKVelYaw() const
 {
-    if (drivers->remote.getMouseL()) {
-        return MAX_IK_ROTATION_VEL;
-    } else if (drivers->remote.getMouseR()) {
-        return -MAX_IK_ROTATION_VEL;
-    }
-    return isIKRotationMode() ? drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) * MAX_IK_ROTATION_VEL : 0;
+    float kbm = isIKRotationModeKBM() ? deadZone(getNormalizedMouseX(drivers), INPUT_THRESHOLD) : 0;
+
+    float remote =
+        isIKRotationModeRemote()
+            ? drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) * MAX_IK_ROTATION_VEL
+            : 0;
+
+    return kbm + remote;
 }
 
 // this is basically the same thing as getChassisXInput in the basic control operator interface, but

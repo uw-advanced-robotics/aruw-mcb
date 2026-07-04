@@ -49,8 +49,10 @@ public:
      */
     mockable float getCubeStorageVelocity();
 
-    mockable bool isIKTranslationMode() const;
-    mockable bool isIKRotationMode() const;
+    mockable bool isIKTranslationModeRemote() const;
+    mockable bool isIKRotationModeRemote() const;
+    mockable bool isIKTranslationModeKBM() const;
+    mockable bool isIKRotationModeKBM() const;
     mockable float getIKVelX() const;
     mockable float getIKVelY() const;
     mockable float getIKVelZ() const;
