@@ -34,6 +34,7 @@
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/can/aruw_pressure_sensor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_analog_sensor.hpp"
@@ -204,11 +205,6 @@ aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
 
-aruwsrc::communication::mcb_lite::VirtualAnalogSensor analogSensor(
-    drivers(),
-    tap::can::CanBus::CAN_BUS2,
-    0x1D6);
-
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
     aruwsrc::control::chassis::LEFT_FRONT_MOTOR_ID,
@@ -339,6 +335,43 @@ tap::encoder::CanEncoder wristEncoderTheta2(
     1,
     WRIST_HOME_THETA2);
 
+aruwsrc::communication::can::AruwAnalogSensor mainSuctionAnalogSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2,
+    0x1D6);
+
+aruwsrc::communication::can::AruwPressureSensor mainSuctionPressureSensor(
+    &mainSuctionAnalogSensor,
+    aruwsrc::communication::can::AruwPressureSensor::Channel::AI1,
+    aruwsrc::communication::can::AruwPressureSensor::Calibration{
+        .rawMin = 500,
+        .rawMax = 565,
+        .pressureMin = -100,
+        .pressureMax = 0});
+
+// aruwsrc::communication::mcb_lite::VirtualAnalogSensor cubeStoreAnalogSensor(
+//     drivers(),
+//     tap::can::CanBus::CAN_BUS2,
+//     0x1D6);
+
+// aruwsrc::communication::can::AruwPressureSensor leftSuctionPressureSensor(
+//     &cubeStoreAnalogSensor,
+//     aruwsrc::communication::can::AruwPressureSensor::Channel::AI0,
+//     aruwsrc::communication::can::AruwPressureSensor::Calibration{
+//         .rawMin = 500,
+//         .rawMax = 565,
+//         .pressureMin = -100,
+//         .pressureMax = 0});
+
+// aruwsrc::communication::can::AruwPressureSensor rightSuctionPressureSensor(
+//     &cubeStoreAnalogSensor,
+//     aruwsrc::communication::can::AruwPressureSensor::Channel::AI1,
+//     aruwsrc::communication::can::AruwPressureSensor::Calibration{
+//         .rawMin = 500,
+//         .rawMax = 565,
+//         .pressureMin = -100,
+//         .pressureMax = 0});
+
 /* define subsystems --------------------------------------------------------*/
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
@@ -370,20 +403,16 @@ WristSubsystem wristSubsystem(
     WRIST_CONFIG);
 
 // update vals
-DualDigitalOutSubsystem leftSuckSubsystem(
+DigitalOutSubsystem mainSuckSubsystem(
     drivers(),
     drivers()->digital,
-    tap::gpio::Digital::OutputPin::Y,
-    true,
     tap::gpio::Digital::OutputPin::Z,
     true);
 
-DualDigitalOutSubsystem rightSuckSubsystem(
+DigitalOutSubsystem cubeStoreSuckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true,
-    tap::gpio::Digital::OutputPin::Z,
     true);
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
@@ -575,18 +604,18 @@ SelectCubePositionCommand selectCubeRemovePositionCommand(
     transformer.getCubeStore2ToEndEffector());
 CubePositionDigitalOutCommand cubeStorageSuckOnCommand(
     cubeStorage,
-    leftSuckSubsystem,
-    rightSuckSubsystem,
+    mainSuckSubsystem,
+    cubeStoreSuckSubsystem,
     true);
 CubePositionDigitalOutCommand cubeStorageSuckOffCommand(
     cubeStorage,
-    leftSuckSubsystem,
-    rightSuckSubsystem,
+    mainSuckSubsystem,
+    cubeStoreSuckSubsystem,
     false);
 
-DigitalOutCommand endEffectorSuckOnCommand(leftSuckSubsystem, true);
+DigitalOutCommand endEffectorSuckOnCommand(mainSuckSubsystem, true);
 
-DigitalOutCommand endEffectorSuckOffCommand(leftSuckSubsystem, false);
+DigitalOutCommand endEffectorSuckOffCommand(mainSuckSubsystem, false);
 
 Transform IDENTITY_TRANSFORM;
 
@@ -660,13 +689,14 @@ void initializeSubsystems()
     extensionSubsystem.initialize();
     wristSubsystem.initialize();
     cubeStorage.initialize();
-    leftSuckSubsystem.initialize();
-    rightSuckSubsystem.initialize();
+    mainSuckSubsystem.initialize();
+    cubeStoreSuckSubsystem.initialize();
     transformSubsystem.initialize();
     odometrySubsystem.initialize();
     parallelOmniOne.initialize();
     parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
+    mainSuctionAnalogSensor.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -676,8 +706,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
-    drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
-    drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&mainSuckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&cubeStoreSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&engTurret);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
