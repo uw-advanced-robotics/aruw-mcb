@@ -43,6 +43,10 @@ namespace aruwsrc::engineer::wrist
 {
 class WristSubsystem;
 }
+namespace aruwsrc::communication::serial
+{
+class EngineerCVCommunication;
+}
 
 namespace aruwsrc::engineer::algorithms
 {
@@ -66,7 +70,8 @@ public:
         const tap::communication::sensors::imu::AbstractIMU& turretPitchImu,
         const aruwsrc::control::joint::JointSubsystem& extension,
         const aruwsrc::engineer::wrist::WristSubsystem& wrist,
-        const aruwsrc::control::joint::JointSubsystem& cubeStorage);
+        const aruwsrc::control::joint::JointSubsystem& cubeStorage,
+        aruwsrc::communication::serial::EngineerCVCommunication& engineerCVCommunication);
 
     void updateTransforms();
 
@@ -88,7 +93,22 @@ public:
     inline const Transform& getWorldToTurretPitch() const { return worldToTurretPitch; }
     inline const Transform& getWorldToRealsense() const { return worldToRealsense; }
     inline const Transform& getWorldToEndEffector() const { return worldToEndEffector; }
+<<<<<<< HEAD
     inline const Transform& getChassisToEndEffector() const { return chassisToEndEffector; }
+=======
+    inline const Transform& getWorldToReceptacle() const { return worldToReceptacle; }
+
+    /**
+     * Received-timestamp (ms) of the CV packet that produced the current worldToReceptacle, or
+     * -1 if none has ever been received. it is copied straight from
+     * EngineerCVCommunication::getLastReceivedTimeMs() whenever worldToReceptacle is rebuilt.
+     */
+    inline int64_t getWorldToReceptacleReceivedTimeMs() const
+    {
+        return worldToReceptacleReceivedTimeMs;
+    }
+    inline bool isWorldToReceptacleValid() const { return worldToReceptacleReceivedTimeMs != -1; }
+>>>>>>> 1b274196c97489239cf49861615992f934c0f0fe
     inline const Transform& getCubeStore1ToEndEffector() const { return cubeStore1ToEndEffector; }
     inline const Transform& getCubeStore2ToEndEffector() const { return cubeStore2ToEndEffector; }
     inline const Transform& getEndEffectorToCubeDist() const { return endEffectorToCubeDist; }
@@ -128,6 +148,7 @@ private:
     const aruwsrc::control::joint::JointSubsystem& extension;
     const aruwsrc::engineer::wrist::WristSubsystem& wrist;
     const aruwsrc::control::joint::JointSubsystem& cubeStorage;
+    aruwsrc::communication::serial::EngineerCVCommunication& engineerCVCommunication;
 
     // Joint Transforms
     Transform worldToChassis, chassisToWorld;
@@ -141,6 +162,7 @@ private:
     // Compound/Requested Transforms
     Transform worldToTurretPitch;
     Transform worldToRealsense;
+    Transform worldToReceptacle;
     Transform worldToEndEffector;
     Transform chassisToEndEffector;
     Transform cubeStore1ToEndEffector;  // TODO: should be cube not EE
@@ -151,6 +173,7 @@ private:
     // Subtree Center of Masses
     PointMass COMBeyondTurretPitch;
     PointMass COMBeyondWrist;
+    int64_t worldToReceptacleReceivedTimeMs;  // -1 = never received
 };
 
 }  // namespace aruwsrc::engineer::algorithms

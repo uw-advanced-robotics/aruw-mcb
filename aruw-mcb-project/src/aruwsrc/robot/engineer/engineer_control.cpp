@@ -53,6 +53,7 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/pump_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/digital/digital_out_command.hpp"
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
@@ -456,7 +457,8 @@ EngineerTransforms transformer(
     drivers()->mcbLite.imu,
     extensionSubsystem,
     wristSubsystem,
-    cubeStorage);
+    cubeStorage,
+    drivers()->engineerCVCommunication);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
@@ -685,9 +687,59 @@ inverse_kinematics::TrajectoryIKCommand<2> pickupIKCommand(
 );
 
 SequentialCommand pickupCommand(&populatePickupTrajectory, &pickupIKCommand);
+PumpIndicator pumpIndicator(refSerialTransmitter, mainSuckSubsystem);
+std::vector<HudIndicator*> hudIndicators = {&pumpIndicator};
+
+aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    clientDisplay,
+    hudIndicators);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
+tap::control::Subsystem dummySubsystem(drivers());
+
+inverse_kinematics::Trajectory6D<2> depositTrajectory{
+    {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
+
+InstantCommand populateDepositTrajectory(
+    []() {
+        depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
+
+        if (transformer.isWorldToReceptacleValid() &&
+            transformer.getWorldToReceptacleReceivedTimeMs() >
+                tap::arch::clock::getTimeMilliseconds() - 2'000)
+        {
+            depositTrajectory.waypoints[1].pose =
+                transformer.getWorldToReceptacle().composeStatic(Transform(-0.25, 0, 0, 0, 0, 0));
+        }
+        else
+        {
+            depositTrajectory.waypoints[1].pose = transformer.getWorldToEndEffector();
+        }
+    },
+    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
+
+inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
+    transformer.getChassisToWorld(),
+    IDENTITY_TRANSFORM,
+    engTurret,
+    extensionSubsystem,
+    wristSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController,
+    depositTrajectory);
+
+SequentialCommand depositCommand(&populateDepositTrajectory, &depositIKCommand);
+
+Trigger leftUpRightUp =
+    (TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::RIGHT_SWITCH,
+         Remote::SwitchState::UP) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP))
+        .onTrue(&depositCommand);
 
 Trigger leftDownMidRightUp =
     (!TriggerHelpers::switchState(
@@ -731,12 +783,15 @@ Trigger homeRollButton =
     TriggerHelpers::button(drivers(), Remote::Key::C)
         .onTrue(&homeRoll);
 
+/*Trigger cvAlign =
+    TriggerHelpers::button(drivers(), )*/
+
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
     pulleyEncoder.initialize();
     lampreyEncoder.initialize();
-
+    clientDisplay.initialize();
     chassisSubsystem.initialize();
     engTurret.initialize();
     extensionSubsystem.initialize();
@@ -765,6 +820,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
+
+    drivers->commandScheduler.registerSubsystem(&dummySubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -773,11 +830,14 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
     engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
 
-    // clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers* drivers)
+{
+    drivers->commandScheduler.addCommand(&clientDisplayCommand);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}

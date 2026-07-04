@@ -31,9 +31,20 @@ namespace communication::serial
 class EngineerCVCommunication : public tap::communication::serial::DJISerial
 {
 public:
+    // should be receiving on same port as vision coprocessor
+    // no need to transmit
     static constexpr tap::communication::serial::Uart::UartPort ENGINEER_CV_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart8;
+        tap::communication::serial::Uart::UartPort::Uart3;
     static constexpr size_t ENGINEER_CV_UART_BAUD_RATE = 57'600;
+    static constexpr uint16_t TARGET_POSITION_MESSAGE_TYPE = 0xFA;
+
+    /**
+     * Total latency between the camera capturing an image and the resulting pose packet
+     * arriving at the MCB, in milliseconds. The image was taken roughly this long before the
+     * packet's received-timestamp (YOLO detection ~300 ms + transmission ~80 ms + margin).
+     * Consumers subtract this from the received-timestamp to get the true capture time.
+     */
+    static constexpr uint32_t ENG_CV_CAPTURE_DELAY_MS = 1000;
 
     EngineerCVCommunication(tap::Drivers* drivers);
     DISALLOW_COPY_AND_ASSIGN(EngineerCVCommunication);
@@ -41,12 +52,12 @@ public:
 
     struct TargetPositionMessage
     {
-        float xPos;  ///< x position of the target (in cm).
-        float yPos;  ///< y position of the target (in cm).
-        float zPos;  ///< z position of the target (in cm).
-        float roll;
-        float pitch;
-        float yaw;
+        float xPos;   ///< x position of the target (in m). positive forward relative to camera
+        float yPos;   ///< y position of the target (in m). positive is left relative to camera
+        float zPos;   ///< z position of the target (in m). positive is up relative to camera
+        float roll;   ///< rotation about x axis, radians
+        float pitch;  ///< rotation about y axis, radians
+        float yaw;    ///< rotation about z axis, radians
     } modm_packed;
 
     /**
@@ -60,16 +71,29 @@ public:
      */
     mockable void initializeCV();
 
-    inline const tap::algorithms::transforms::Transform& getReceptableToCam() const
+    inline const tap::algorithms::transforms::Transform& getCamToReceptacle() const
     {
-        return receptableToCam;
+        return camToReceptacle;
     }
+
+    inline bool getIsFresh() const { return isFresh; }
+
+    inline void markTargetPoseStale() { isFresh = false; }
+
+    /**
+     * Timestamp (ms, tap::arch::clock) at which the most recent packet was received. This is
+     * NOT when the image was taken — see ENG_CV_CAPTURE_DELAY_MS. EngineerTransforms copies this
+     * onto each worldToReceptacle it builds so downstream code can reason about pose age.
+     */
+    inline int64_t getLastReceivedTimeMs() const { return lastReceivedTimeMs; }
 
     // @todo private should not be here
 private:
     static EngineerCVCommunication* engineerCVCommunicationInstance;
     TargetPositionMessage targetPositionMessage;
-    tap::algorithms::transforms::Transform receptableToCam;
+    tap::algorithms::transforms::Transform camToReceptacle;
+    bool isFresh;
+    int64_t lastReceivedTimeMs = -1;  // -1 = no packet received yet
 };
 }  // namespace communication::serial
 }  // namespace aruwsrc
