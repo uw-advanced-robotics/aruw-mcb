@@ -485,15 +485,10 @@ void FourWheelEKFOdometry::observationFunction(
     float sin_yaw = std::sin(yaw);
     float vel_x_chassis = cos_yaw * vel_x_world + sin_yaw * vel_y_world;
     float vel_y_chassis = -sin_yaw * vel_x_world + cos_yaw * vel_y_world;
-    const float rotationRadius = aruwsrc::control::chassis::WHEELBASE_RADIUS;
-    h_x.data[int(OdomInput::WHEEL_0)] =
-        (vel_x_chassis - vel_y_chassis) / M_SQRT2;
-    h_x.data[int(OdomInput::WHEEL_1)] =
-        (-vel_x_chassis - vel_y_chassis) / M_SQRT2;
-    h_x.data[int(OdomInput::WHEEL_2)] =
-        (vel_x_chassis + vel_y_chassis) / M_SQRT2;
-    h_x.data[int(OdomInput::WHEEL_3)] =
-        (-vel_x_chassis + vel_y_chassis) / M_SQRT2;
+    h_x.data[int(OdomInput::WHEEL_0)] = (vel_x_chassis - vel_y_chassis) / M_SQRT2;
+    h_x.data[int(OdomInput::WHEEL_1)] = (-vel_x_chassis - vel_y_chassis) / M_SQRT2;
+    h_x.data[int(OdomInput::WHEEL_2)] = (vel_x_chassis + vel_y_chassis) / M_SQRT2;
+    h_x.data[int(OdomInput::WHEEL_3)] = (-vel_x_chassis + vel_y_chassis) / M_SQRT2;
 
     float acc_x = x.data[int(OdomState::ACC_X)];
     float acc_y = x.data[int(OdomState::ACC_Y)];
@@ -568,7 +563,6 @@ void FourWheelEKFOdometry::observationJacobianFunction(
     float d_vx_chassis_d_yaw = -sin_yaw * vel_x_world + cos_yaw * vel_y_world;
     float d_vy_chassis_d_yaw = -cos_yaw * vel_x_world - sin_yaw * vel_y_world;
 
-    const float rotationRadius = aruwsrc::control::chassis::WHEELBASE_RADIUS;
     const float d_wheel0_d_vx = d_vx_chassis_d_vx - d_vy_chassis_d_vx;
     const float d_wheel0_d_vy = d_vx_chassis_d_vy - d_vy_chassis_d_vy;
     const float d_wheel0_d_yaw = d_vx_chassis_d_yaw - d_vy_chassis_d_yaw;
@@ -588,7 +582,6 @@ void FourWheelEKFOdometry::observationJacobianFunction(
     const int vxIndex = int(OdomState::VEL_X);
     const int vyIndex = int(OdomState::VEL_Y);
     const int yawIndex = int(OdomState::YAW);
-    const int yawRateIndex = int(OdomState::YAW_RATE);
 
     H.data[int(OdomInput::WHEEL_0) * int(OdomState::NUM_STATES) + vxIndex] =
         d_wheel0_d_vx / M_SQRT2;
