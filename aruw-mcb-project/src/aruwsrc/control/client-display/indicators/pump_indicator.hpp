@@ -48,8 +48,8 @@ private:
 
     static constexpr uint16_t PUMP_INDICATOR_RADIUS = 20;
 
-    static constexpr uint16_t Y_POS = 865;
-    static constexpr uint16_t X_POS = 123;
+    static constexpr uint16_t Y_POS = 778;
+    static constexpr uint16_t X_POS = 79;
 };
 
 }  // namespace aruwsrc::control::client_display::indicators

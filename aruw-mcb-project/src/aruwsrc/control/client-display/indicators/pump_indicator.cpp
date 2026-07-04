@@ -43,19 +43,11 @@ modm::ResumableResult<void> PumpIndicator::update()
 
     if (subsystem.getState())
     {
-        pumpGraphic.graphicData.operation =
-            prevOperation == Tx::GRAPHIC_DELETE ? Tx::GRAPHIC_ADD : Tx::GRAPHIC_MODIFY;
+        pumpGraphic.graphicData.operation = Tx::GRAPHIC_ADD;
     }
     else
     {
         pumpGraphic.graphicData.operation = Tx::GRAPHIC_DELETE;
-    }
-
-    // Don't resend if it's already deleted and staying deleted
-    if (prevOperation == Tx::GRAPHIC_DELETE &&
-        pumpGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
-    {
-        RF_RETURN();
     }
 
     RefSerialTransmitter::configCircle(
