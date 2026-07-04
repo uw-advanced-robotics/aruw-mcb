@@ -87,10 +87,9 @@ public:
         }
 
         // Fill the points array with evenly spaced points if the array is all zeros
-        bool allZero = std::all_of(
-            this->points.begin(),
-            this->points.end(),
-            [](float v) { return v == 0.0f; });
+        bool allZero = std::all_of(this->points.begin(), this->points.end(), [](float v) {
+            return v == 0.0f;
+        });
 
         if (allZero)
         {
