@@ -25,36 +25,32 @@ using namespace tap::communication::serial;
 
 namespace aruwsrc::control::client_display::indicators
 {
+
 PumpIndicator::PumpIndicator(
-    aruwsrc::control::digital::DigitalOutSubsystem,
-    tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
+    aruwsrc::algorithms::PlateHitTracker& plateHitTracker,
+    tap::communication::serial::RefSerialTransmitter& refSerialTransmitter,
+    aruwsrc::control::digital::DigitalOutSubsystem& subsystem)
     : HudIndicator(refSerialTransmitter),
-      turretSubsystem(turretSubsystem)
+      plateHitTracker(plateHitTracker),
+      subsystem(subsystem)
 {
 }
 
 modm::ResumableResult<void> PumpIndicator::update()
 {
+    uint32_t prevOperation = -1;
     RF_BEGIN(1);
 
-    // Don't update the message if you're deleting it and it's already deleted
-    if (prevOperation == Tx::GRAPHIC_DELETE &&
-        damageGraphic.graphicData.operation == Tx::GRAPHIC_DELETE)
-    {
-        RF_RETURN();
-    }
-
-    RefSerialTransmitter::configLine(
-        DAMAGE_INDICATOR_THICKNESS,
-        X_POS + x,
-        Y_POS + y,
-        X_POS + x,
-        Y_POS + LINE_LENGTH + y,
-        &damageGraphic.graphicData);
-
-    RF_CALL(refSerialTransmitter.sendGraphic(&damageGraphic));
+    if ()
+        RefSerialTransmitter::configCircle(
+            PUMP_INDICATOR_THICKNESS,
+            X_POS,
+            Y_POS,
+            PUMP_INDICATOR_THICKNESS,
+            &damageGraphic.graphicData);
 
     RF_END();
+    prevOperation = damageGraphic.graphicData.operation;
 }
 
 }  // namespace aruwsrc::control::client_display::indicators

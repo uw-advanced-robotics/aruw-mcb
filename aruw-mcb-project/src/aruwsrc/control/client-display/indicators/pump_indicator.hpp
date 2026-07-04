@@ -27,6 +27,7 @@
 #include "aruwsrc/algorithms/plate_hit_tracker.hpp"
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 #include "modm/processing/resumable.hpp"
+#include "aruwsrc/control/digital/DigitalOutSubsystem"
 
 #include "hud_indicator.hpp"
 
@@ -37,7 +38,6 @@ class PumpIndicator : public HudIndicator, protected modm::Resumable<2>
 public:
     PumpIndicator(
         aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
-        const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     void initialize() override final;
@@ -46,29 +46,13 @@ public:
 
 private:
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker;
-    const aruwsrc::control::turret::RobotTurretSubsystem &turretSubsystem;
-
-    static constexpr uint16_t PUMP_INDICATOR_DIAMETER = 20;
+    aruwsrc::control::digital::DigitalOutSubsystem& subsystem;
 
 
-    static constexpr uint16_t X_POS = SCREEN_WIDTH / 2;
-    static constexpr uint16_t Y_POS = SCREEN_HEIGHT / 2;
+    static constexpr uint16_t PUMP_INDICATOR_RADIUS = 20;
 
-    static constexpr float INDICATOR_OFFSET_RADIANS = modm::toRadian(90);
-
-    Tx::Graphic1Message damageGraphic;
-
-    static constexpr float CENTER_THRESHOLD = modm::toRadian(40);
-
-    tap::arch::MilliTimeout decayTimeout;
-    static constexpr uint32_t DECAY_TIMEOUT_MILLIS = 5000;
-
-    float x, y;
-    float hitAngleRadian = 0;
-
-    aruwsrc::algorithms::PlateHitTracker::PlateHitBinData peakAngleBin;
-
-    uint32_t prevTimestamp;
+    static constexpr uint16_t Y_POS = 865;
+    static constexpr uint16_t X_POS = 123;
 };
 
 }  // namespace aruwsrc::control::client_display::indicators
