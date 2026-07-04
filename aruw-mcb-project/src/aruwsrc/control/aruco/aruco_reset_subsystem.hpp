@@ -56,7 +56,7 @@ private:
     bool hasReceivedVisionMeasurement = false;
 
     // Higher value here means we trust AruCo measurements more
-    float VISION_TRUST = 1f;
+    float VISION_TRUST = 1.0f;
 
     static constexpr float LOWER_APRILTAG_POSITION_STD = 0.05f;
     static constexpr float HIGHER_APRILTAG_POSITION_STD = 0.15f;
