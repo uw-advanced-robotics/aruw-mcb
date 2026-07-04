@@ -52,14 +52,17 @@ void AutoNavCommand::initialize() { autoNavController.initialize(); }
 
 void AutoNavCommand::execute()
 {
+    const bool hpRecoveryHoldoffActive = isHpRecoveryHoldoffActive();
+
     const float maxWheelSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
         drivers.refSerial.getRefSerialReceivingData(),
         drivers.refSerial.getRobotData().chassis.powerConsumptionLimit);
 
     const GameData gameData = drivers.refSerial.getGameData();
 
-    if (!autoNavOnlyInGame ||
-        (gameData.gameType == GameType::UNKNOWN || (gameData.gameStage == GameStage::IN_GAME)))
+    if ((!autoNavOnlyInGame ||
+         (gameData.gameType == GameType::UNKNOWN || (gameData.gameStage == GameStage::IN_GAME))) &&
+        !hpRecoveryHoldoffActive)
     {
         autoNavController.runController(maxWheelSpeed, movementEnabled, beybladeEnabled);
     }
@@ -67,6 +70,22 @@ void AutoNavCommand::execute()
     {
         chassis.setDesiredOutput(0., 0., 0.);
     }
+}
+
+bool AutoNavCommand::isHpRecoveryHoldoffActive()
+{
+    if (!drivers.refSerial.getRefSerialReceivingData())
+    {
+        return false;
+    }
+
+    if (drivers.refSerial.getRobotData().currentHp == 0)
+    {
+        hpRecoveryHoldoff.restart(HP_RECOVERY_HOLDOFF_MILLISEC);
+        return true;
+    }
+
+    return !hpRecoveryHoldoff.isExpired();
 }
 
 void AutoNavCommand::end(bool) { chassis.setZeroRPM(); }

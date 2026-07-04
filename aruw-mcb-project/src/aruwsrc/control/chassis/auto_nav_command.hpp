@@ -24,6 +24,7 @@
 #include "tap/algorithms/ramp.hpp"
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/architecture/clock.hpp"
+#include "tap/architecture/timeout.hpp"
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/communication/serial/remote.hpp"
@@ -74,14 +75,19 @@ public:
     const char* getName() const override { return "autonav command"; }
 
 private:
+    bool isHpRecoveryHoldoffActive();
+
     const tap::Drivers& drivers;
     chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::control::chassis::ChassisAutoNavController& autoNavController;
+
+    static constexpr uint32_t HP_RECOVERY_HOLDOFF_MILLISEC = 5'000;
 
     bool autoNavOnlyInGame;
     bool beybladeEnabled;
     bool ends;
     bool movementEnabled = true;
+    tap::arch::MilliTimeout hpRecoveryHoldoff;
 
 };  // class AutoNavBeybladeCommand
 
