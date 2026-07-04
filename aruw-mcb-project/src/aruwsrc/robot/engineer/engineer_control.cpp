@@ -624,9 +624,9 @@ Transform IDENTITY_TRANSFORM;
 
 inverse_kinematics::ManualIKCommand manualIKCommand(
     drivers()->controlOperatorInterface,
-    transformer.getChassisToWorld(),
     IDENTITY_TRANSFORM,
-    transformer.getWorldToEndEffector(),
+    IDENTITY_TRANSFORM,
+    transformer.getChassisToEndEffector(),
     engTurret,
     extensionSubsystem,
     wristSubsystem,

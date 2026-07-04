@@ -88,6 +88,7 @@ public:
     inline const Transform& getWorldToTurretPitch() const { return worldToTurretPitch; }
     inline const Transform& getWorldToRealsense() const { return worldToRealsense; }
     inline const Transform& getWorldToEndEffector() const { return worldToEndEffector; }
+    inline const Transform& getChassisToEndEffector() const { return chassisToEndEffector; }
     inline const Transform& getCubeStore1ToEndEffector() const { return cubeStore1ToEndEffector; }
     inline const Transform& getCubeStore2ToEndEffector() const { return cubeStore2ToEndEffector; }
     inline const Transform& getEndEffectorToCubeDist() const { return endEffectorToCubeDist; }
@@ -141,6 +142,7 @@ private:
     Transform worldToTurretPitch;
     Transform worldToRealsense;
     Transform worldToEndEffector;
+    Transform chassisToEndEffector;
     Transform cubeStore1ToEndEffector;  // TODO: should be cube not EE
     Transform cubeStore2ToEndEffector;  // TODO: should be cube not EE
     Transform vtmGimbalToEndEffector;   // TODO: should be cube not EE

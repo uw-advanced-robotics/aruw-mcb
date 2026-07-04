@@ -32,7 +32,8 @@ namespace aruwsrc::engineer
 
 float deadZone(float input, float deadZone)
 {
-    if (fabs(input) < fabs(deadZone)) return 0 return input;
+    if (fabs(input) < fabs(deadZone)) return 0.0;
+    return input;
 }
 
 float getNormalizedMouseX(const tap::Drivers *drivers)
@@ -144,7 +145,7 @@ float EngineerControlOperatorInterface::getIKVelX() const
 {
     float kbm = isIKTranslationModeKBM()
                     ? (drivers->remote.getMouseL() - drivers->remote.getMouseR()) *
-                          MAX_IK_TRANSLATION_VEL * 0.5f
+                          MAX_IK_TRANSLATION_VEL
                     : 0;
 
     float remote =
@@ -158,7 +159,7 @@ float EngineerControlOperatorInterface::getIKVelX() const
 float EngineerControlOperatorInterface::getIKVelY() const
 {
     float kbm =
-        isIKTranslationModeKBM() ? deadZone(getNormalizedMouseX(drivers), INPUT_THRESHOLD) : 0;
+        isIKTranslationModeKBM() ? -deadZone(getNormalizedMouseX(drivers), INPUT_THRESHOLD) : 0;
 
     float remote =
         isIKTranslationModeRemote()
@@ -185,7 +186,7 @@ float EngineerControlOperatorInterface::getIKVelRoll() const
 {
     float kbm = isIKRotationModeKBM()
                     ? (drivers->remote.getMouseL() - drivers->remote.getMouseR()) *
-                          MAX_IK_ROTATION_VEL * 0.5f
+                          MAX_IK_ROTATION_VEL
                     : 0;
 
     float remote =

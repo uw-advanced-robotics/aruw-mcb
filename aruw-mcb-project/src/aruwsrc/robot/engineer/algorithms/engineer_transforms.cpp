@@ -55,6 +55,7 @@ EngineerTransforms::EngineerTransforms(
       worldToTurretPitch(),
       worldToRealsense(),
       worldToEndEffector(),
+      chassisToEndEffector(),
       cubeStore1ToEndEffector(),
       cubeStore2ToEndEffector(),
       vtmGimbalToEndEffector(),
@@ -143,6 +144,7 @@ void EngineerTransforms::updateTransforms()
         turretYawToEndEffector.getInverse().composeStatic(TURRET_YAW_TO_CUBE_DIST);
 
     worldToEndEffector = worldToTurretYaw.composeStatic(turretYawToEndEffector);
+    chassisToEndEffector = chassisToTurretYaw.composeStatic(turretYawToEndEffector);
 
     // COMs
     Transform turretYawToWrist = turretYawToExtension.composeStatic(extensionToWrist);

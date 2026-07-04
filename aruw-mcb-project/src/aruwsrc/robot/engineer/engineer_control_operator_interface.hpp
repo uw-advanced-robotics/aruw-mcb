@@ -110,7 +110,7 @@ public:
 
 private:
     float MAX_IK_TRANSLATION_VEL = 0.2f;  // m/s for each axis
-    float MAX_IK_ROTATION_VEL = M_PI_4;   // rad/s for each of roll/pitch/yaw
+    float MAX_IK_ROTATION_VEL = M_PI_2;   // rad/s for each of roll/pitch/yaw
     float INPUT_THRESHOLD = 0.01;
 };
 }  // namespace aruwsrc::engineer
