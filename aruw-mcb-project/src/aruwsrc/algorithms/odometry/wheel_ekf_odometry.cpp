@@ -487,13 +487,13 @@ void FourWheelEKFOdometry::observationFunction(
     float vel_y_chassis = -sin_yaw * vel_x_world + cos_yaw * vel_y_world;
     const float rotationRadius = aruwsrc::control::chassis::WHEELBASE_RADIUS;
     h_x.data[int(OdomInput::WHEEL_0)] =
-        (vel_x_chassis - vel_y_chassis) / M_SQRT2 - rotationRadius * yaw_rate;
+        (vel_x_chassis - vel_y_chassis) / M_SQRT2;
     h_x.data[int(OdomInput::WHEEL_1)] =
-        (-vel_x_chassis - vel_y_chassis) / M_SQRT2 - rotationRadius * yaw_rate;
+        (-vel_x_chassis - vel_y_chassis) / M_SQRT2;
     h_x.data[int(OdomInput::WHEEL_2)] =
-        (vel_x_chassis + vel_y_chassis) / M_SQRT2 - rotationRadius * yaw_rate;
+        (vel_x_chassis + vel_y_chassis) / M_SQRT2;
     h_x.data[int(OdomInput::WHEEL_3)] =
-        (-vel_x_chassis + vel_y_chassis) / M_SQRT2 - rotationRadius * yaw_rate;
+        (-vel_x_chassis + vel_y_chassis) / M_SQRT2;
 
     float acc_x = x.data[int(OdomState::ACC_X)];
     float acc_y = x.data[int(OdomState::ACC_Y)];
@@ -596,7 +596,6 @@ void FourWheelEKFOdometry::observationJacobianFunction(
         d_wheel0_d_vy / M_SQRT2;
     H.data[int(OdomInput::WHEEL_0) * int(OdomState::NUM_STATES) + yawIndex] =
         d_wheel0_d_yaw / M_SQRT2;
-    H.data[int(OdomInput::WHEEL_0) * int(OdomState::NUM_STATES) + yawRateIndex] = -rotationRadius;
 
     H.data[int(OdomInput::WHEEL_1) * int(OdomState::NUM_STATES) + vxIndex] =
         d_wheel1_d_vx / M_SQRT2;
@@ -604,7 +603,6 @@ void FourWheelEKFOdometry::observationJacobianFunction(
         d_wheel1_d_vy / M_SQRT2;
     H.data[int(OdomInput::WHEEL_1) * int(OdomState::NUM_STATES) + yawIndex] =
         d_wheel1_d_yaw / M_SQRT2;
-    H.data[int(OdomInput::WHEEL_1) * int(OdomState::NUM_STATES) + yawRateIndex] = -rotationRadius;
 
     H.data[int(OdomInput::WHEEL_2) * int(OdomState::NUM_STATES) + vxIndex] =
         d_wheel2_d_vx / M_SQRT2;
@@ -612,7 +610,6 @@ void FourWheelEKFOdometry::observationJacobianFunction(
         d_wheel2_d_vy / M_SQRT2;
     H.data[int(OdomInput::WHEEL_2) * int(OdomState::NUM_STATES) + yawIndex] =
         d_wheel2_d_yaw / M_SQRT2;
-    H.data[int(OdomInput::WHEEL_2) * int(OdomState::NUM_STATES) + yawRateIndex] = -rotationRadius;
 
     H.data[int(OdomInput::WHEEL_3) * int(OdomState::NUM_STATES) + vxIndex] =
         d_wheel3_d_vx / M_SQRT2;
@@ -620,7 +617,6 @@ void FourWheelEKFOdometry::observationJacobianFunction(
         d_wheel3_d_vy / M_SQRT2;
     H.data[int(OdomInput::WHEEL_3) * int(OdomState::NUM_STATES) + yawIndex] =
         d_wheel3_d_yaw / M_SQRT2;
-    H.data[int(OdomInput::WHEEL_3) * int(OdomState::NUM_STATES) + yawRateIndex] = -rotationRadius;
 
     H.data[int(OdomInput::ACC_X) * int(OdomState::NUM_STATES) + int(OdomState::ACC_X)] = 1.0f;
     H.data[int(OdomInput::ACC_Y) * int(OdomState::NUM_STATES) + int(OdomState::ACC_Y)] = 1.0f;
