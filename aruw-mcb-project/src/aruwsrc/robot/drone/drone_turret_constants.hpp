@@ -78,11 +78,11 @@ static constexpr float YAW_START_ANGLE = -static_cast<float>(YAW_ENCODER_CENTER_
 static constexpr float YAW_MIN_ANGLE = static_cast<float>(YAW_ENCODER_MIN_POSITION) /
                                            tap::encoder::CanEncoder::ENCODER_RESOLUTION * M_TWOPI *
                                            YAW_ENCODER_TO_TURRET_RATIO +
-                                       YAW_START_ANGLE + modm::toRadian(15);
+                                       YAW_START_ANGLE + modm::toRadian(5);
 static constexpr float YAW_MAX_ANGLE = static_cast<float>(YAW_ENCODER_MAX_POSITION) /
                                            tap::encoder::CanEncoder::ENCODER_RESOLUTION * M_TWOPI *
                                            YAW_ENCODER_TO_TURRET_RATIO +
-                                       YAW_START_ANGLE - modm::toRadian(15);
+                                       YAW_START_ANGLE - modm::toRadian(5);
 
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR7;

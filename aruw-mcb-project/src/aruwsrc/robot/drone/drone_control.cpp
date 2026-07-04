@@ -264,6 +264,21 @@ Trigger leftSwitchUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
         .whileTrue(Compose::parallel<2>({&spinFrictionWheels, &rotateAndUnjamAgitatorRepeat}));
 
+Trigger leftMousePressedBPressed =
+    (TriggerHelpers::leftMouseButton(drivers()) &&
+     TriggerHelpers::button(drivers(), Remote::Key::B))
+        .whileTrue(&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched);
+
+Trigger leftMousePressedVPressed =
+    (TriggerHelpers::leftMouseButton(drivers()) &&
+     TriggerHelpers::button(drivers(), Remote::Key::V))
+        .whileTrue(&rotateAndUnjamAgitatorWhenFrictionWheelsOnUntilProjectileLaunched);
+
+Trigger leftMousePressed = (TriggerHelpers::leftMouseButton(drivers()) &&
+                            !TriggerHelpers::button(drivers(), Remote::Key::B) &&
+                            !TriggerHelpers::button(drivers(), Remote::Key::V))
+                               .whileTrue(&rotateAndUnjamAgitatorWithHeatLimiting);
+
 Trigger thumbwheelUp =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.95f, false)
         .onTrue(&droneImuCalibrateCommand);
@@ -275,6 +290,18 @@ InstantCommand toggleControlMode(
 Trigger thumbwheelDown =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, -0.95f, false)
         .onTrue(&toggleControlMode);
+
+Trigger qPressed = TriggerHelpers::button(drivers(), Remote::Key::Q).onTrue(&toggleControlMode);
+
+Trigger bNotCtrlPressedRightSwitchDown =
+    (TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::RIGHT_SWITCH,
+         Remote::SwitchState::DOWN) &&
+     TriggerHelpers::button(drivers(), Remote::Key::B) &&
+     !TriggerHelpers::button(drivers(), Remote::Key::CTRL) &&
+     !TriggerHelpers::leftMouseButton(drivers()) && !TriggerHelpers::rightMouseButton(drivers()))
+        .onTrue(&droneImuCalibrateCommand);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
