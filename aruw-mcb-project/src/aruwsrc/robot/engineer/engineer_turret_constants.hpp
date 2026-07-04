@@ -157,7 +157,7 @@ static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceO
         .gravityCompensatorMax = 0.0f};
 
 inline constexpr float BINNED_ALIGNMENT_OFFSET = 0.32575804f;
-inline constexpr float YAW_ALIGNMENT_OFFSET = 2.6;
+inline constexpr float YAW_ALIGNMENT_OFFSET = 2.6f;
 
 namespace world_rel_turret_imu
 {
