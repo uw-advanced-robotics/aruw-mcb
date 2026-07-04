@@ -27,22 +27,22 @@
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t NUM_TEST_POINTS, turret::algorithms::Axis AXIS>
+template <uint32_t NUM_TEST_POINTS, tap::algorithms::transforms::Axis AXIS>
 class LampreyAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>
 {
     using TurretTuneCommand = TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>;
 
 public:
     LampreyAutotuneCommand(
-        tap::Drivers *drivers,
-        const TurretTuneCommand::TurretCalibrationConfig &config,
-        const aruwsrc::communication::sensors::encoder::LampreyEncoder &encoder,
-        chassis::HolonomicChassisSubsystem *chassis = nullptr,
+        tap::Drivers* drivers,
+        const TurretTuneCommand::TurretCalibrationConfig& config,
+        const aruwsrc::communication::sensors::encoder::LampreyEncoder& encoder,
+        chassis::HolonomicChassisSubsystem* chassis = nullptr,
         const std::array<float, NUM_TEST_POINTS> points = {},
         const float velocityZeroThreshold = TurretTuneCommand::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold = TurretTuneCommand::DEFAULT_POSITION_THRESHOLD,
-        aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
-        aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
+        aruwsrc::control::buzzer::NoteSequenceCommand* successChime = nullptr,
+        aruwsrc::control::buzzer::NoteSequenceCommand* failChime = nullptr)
         : TurretTuneCommand(
               drivers,
               config,
@@ -55,9 +55,9 @@ public:
           encoder(encoder)
     {
     }
-    const char *getName() const override { return "Lamprey Autotune Command "; }
+    const char* getName() const override { return "Lamprey Autotune Command "; }
 
-    void drawCalibrationResult(modm::GraphicDisplay &display) const override
+    void drawCalibrationResult(modm::GraphicDisplay& display) const override
     {
         display.printf("If using ozone, checkout the lampreyOzoneBuffer!\n");
         display.printf("Lamprey Map (Tick : Angle):\n");
@@ -108,7 +108,7 @@ private:
     float averageLampreyTick{0.0f};
     float averageAngle{0.0f};
 
-    const aruwsrc::communication::sensors::encoder::LampreyEncoder &encoder;
+    const aruwsrc::communication::sensors::encoder::LampreyEncoder& encoder;
 
     void alignArray()
     {
@@ -118,7 +118,7 @@ private:
         std::sort(
             measuredEncoderValueMap.begin(),
             measuredEncoderValueMap.end(),
-            [](const auto &a, const auto &b) { return a.first < b.first; });
+            [](const auto& a, const auto& b) { return a.first < b.first; });
 
         float start_angle = measuredEncoderValueMap[0].second;
         float lamprey_start_angle = measuredEncoderValueMap[0].first;
@@ -142,7 +142,7 @@ private:
     void makeOzoneArray()
     {
         static volatile char lampreyOzoneBuffer[2048];
-        char *ptr = const_cast<char *>(lampreyOzoneBuffer);
+        char* ptr = const_cast<char*>(lampreyOzoneBuffer);
 
         size_t offset = 0;
         ptr[0] = '\0';  // Reset buffer

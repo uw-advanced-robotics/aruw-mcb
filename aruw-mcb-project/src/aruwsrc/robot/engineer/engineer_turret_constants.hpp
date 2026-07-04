@@ -20,6 +20,8 @@
 #ifndef ENGINEER_TURRET_CONSTANTS_HPP_
 #define ENGINEER_TURRET_CONSTANTS_HPP_
 
+#include <cmath>
+
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
@@ -27,6 +29,7 @@
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "modm/container/pair.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -46,7 +49,87 @@ static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
 static constexpr tap::can::CanBus CAN_BUS_PITCH_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 
-static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
+// turret pitch limits for different extension lengths, used in limit functions
+// need to change
+// if extension below threshold, we use the retracted limit which will limit the pitch more
+// aggressively
+inline constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
+
+// if extended far enough, we can pitch higher because the back of extension won't hit the
+// chassis
+inline constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
+
+// if extension above threshold, limit the pitch so the extension doesnt hit the ground
+inline constexpr float PITCH_LOWER_LIMIT_EXTENSION_EXTENDED = 0.5;
+// lower limit if extension is retracted far enough
+inline constexpr float PITCH_LOWER_LIMIT_DEFAULT = 0.5;
+
+// if extension is below this value, limit the pitch more aggressively to prevent back of extension
+// from hitting chassis
+inline constexpr float MIN_EXTENSION_FOR_FULL_PITCH_UP = 0.2;
+
+// if extension is above this value, we cannot allow full pitch down since extension will hit the
+// ground
+inline constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
+
+// if we are not extended enough, limit pitch down so the back of extension doesnt hit the saturn
+// ring
+inline constexpr float MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
+inline constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
+
+// start limiting pitch upper range when the extension is beyond this value because before
+// this point it's impossible to go over the height limit
+inline constexpr float EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT = 0.4f;
+
+/**
+ * Lookup table that maps extension position to pitch upper limit. In between points in the lookup
+ * table, linear interpolation is used.
+ */
+inline constexpr modm::Pair<float, float> PITCH_UPPER_LIMIT_EXTENSION_TABLE[] = {
+    {EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT, PITCH_UPPER_LIMIT_DEFAULT},
+    {0.47f, -0.67f},
+    {0.53f, -0.63f},
+    {0.63f, -0.57f},
+    {0.73f, -0.52f},
+};
+
+static modm::interpolation::Linear<modm::Pair<float, float>>
+    PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR(
+        PITCH_UPPER_LIMIT_EXTENSION_TABLE,
+        MODM_ARRAY_SIZE(PITCH_UPPER_LIMIT_EXTENSION_TABLE));
+
+inline float getPitchMinLimit(float extensionPosition)
+{
+    // TurretMotor expects numeric min/max radians. Pitch up is negative on engineer.
+    if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_FULL_PITCH_UP)
+    {
+        return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
+    }
+
+    if (extensionPosition > EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT)
+    {
+        return PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR.interpolate(extensionPosition);
+    }
+
+    return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
+}
+
+inline float getPitchMaxLimit(float extensionPosition)
+{
+    // Pitch down is positive on engineer.
+    if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN)
+    {
+        return aruwsrc::control::turret::PITCH_DOWN_LIMIT_EXTENSION_PARTIAL;
+    }
+
+    if (extensionPosition > aruwsrc::control::turret::MAX_EXTENSION_FOR_FULL_PITCH_DOWN)
+    {
+        return aruwsrc::control::turret::PITCH_LOWER_LIMIT_EXTENSION_EXTENDED;
+    }
+    return aruwsrc::control::turret::PITCH_LOWER_LIMIT_DEFAULT;
+}
+
+static constexpr aruwsrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 414,
     .minAngle = 0,        ///< Doesn't matter since yaw not limited
@@ -57,9 +140,9 @@ static constexpr TurretMotorConfig YAW_MOTOR_CONFIG = {
 inline constexpr float YAW_TURRET_GEAR_RATIO = 16.0f / 60.0f;
 
 inline constexpr uint32_t PITCH_TURRET_ENCODER_HOME = 884;
-inline constexpr uint32_t PITCH_TURRET_GEAR_RATIO = 1.0f / 8.0f;
+inline constexpr float PITCH_TURRET_GEAR_RATIO = 1.0f / 8.0f;
 
-static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
+static constexpr aruwsrc::control::turret::TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = 0,
     .startEncoderValue = 0,  // NA since pitch motor encoder is incremental
     .minAngle = modm::toRadian(-43),
@@ -67,8 +150,11 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .limitMotorAngles = true,
 };
 
-static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
-    TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
+static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::
+    TurretGravityParams TURRET_GRAVITY_CONFIG{
+        .cgX = 0.0f,
+        .cgZ = 0.0f,
+        .gravityCompensatorMax = 0.0f};
 
 inline constexpr float BINNED_ALIGNMENT_OFFSET = 0.32575804f;
 inline constexpr float YAW_ALIGNMENT_OFFSET = 2.6;
@@ -182,10 +268,10 @@ namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 35000.0f,
-    .ki = 0.0f,
+    .ki = 50000.0f,
     .kd = 4000.0f,
     .maxICumulative = 300.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.5f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 300.0f,
     .tQProportionalKalman = 1.0f,
@@ -199,7 +285,7 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .ki = 30000.0f,
     .kd = 4000.0f,
     .maxICumulative = 1500.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.5f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 300.0f,
     .tQProportionalKalman = 1.0f,
@@ -223,5 +309,4 @@ constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[38] = {
 }  // namespace chassis_rel
 
 }  // namespace aruwsrc::control::turret
-
 #endif  // ENGINEER_TURRET_CONSTANTS_HPP_

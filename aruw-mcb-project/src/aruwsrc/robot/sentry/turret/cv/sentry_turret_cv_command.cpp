@@ -40,13 +40,13 @@ using namespace aruwsrc::algorithms;
 namespace aruwsrc::sentry::turret::cv
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
-    communication::serial::VisionCoprocessor &visionCoprocessor,
-    aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
-    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
+    communication::serial::VisionCoprocessor& visionCoprocessor,
+    aruwsrc::algorithms::PlateHitTracker& plateHitTracker,
+    aruwsrc::control::turret::YawTurretSubsystem& turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
-    TurretConfig &turretWidowConfig,
-    aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms)
+        tap::algorithms::transforms::Axis::YAW>& yawControllerMajor,
+    TurretConfig& turretWidowConfig,
+    aruwsrc::sentry::algorithms::odometry::SentryTransforms& sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
       plateHitTracker(plateHitTracker),
       turretMajorSubsystem(turretMajorSubsystem),
@@ -67,11 +67,11 @@ void SentryTurretCVCommand::initialize()
 }
 
 void SentryTurretCVCommand::computeAimSetpoints(
-    TurretConfig &config,
-    aruwsrc::sentry::algorithms::SentryBallisticsSolver::BallisticsSolution &solution,
-    WrappedFloat *desiredYawSetpoint,
-    WrappedFloat *desiredPitchSetpoint,
-    bool *withinAimingTolerance)
+    TurretConfig& config,
+    aruwsrc::algorithms::ballistics::CvBallisticsSolver::BallisticsSolution& solution,
+    WrappedFloat* desiredYawSetpoint,
+    WrappedFloat* desiredPitchSetpoint,
+    bool* withinAimingTolerance)
 {
     // Get world-relative setpoints
     *desiredYawSetpoint = Angle(solution.yawAngle);
@@ -181,7 +181,7 @@ void SentryTurretCVCommand::execute()
         }
     }
 
-    const std::vector<PlateHitTracker::PlateHitBinData> &hitData =
+    const std::vector<PlateHitTracker::PlateHitBinData>& hitData =
         plateHitTracker.getPeakAnglesRadians();
     PlateHitTracker::PlateHitBinData maxHit;
     if (!hitData.empty())

@@ -58,6 +58,9 @@ public:
         return getWorldToChassis();
     }
 
+    virtual const tap::algorithms::transforms::Transform& getWorldToTurretYaw(
+        uint8_t turretID) const = 0;
+
     virtual const tap::algorithms::transforms::Transform& getWorldToTurret(
         uint8_t turretID) const = 0;
 

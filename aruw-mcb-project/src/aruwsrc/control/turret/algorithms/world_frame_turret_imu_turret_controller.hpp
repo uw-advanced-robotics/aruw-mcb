@@ -50,7 +50,7 @@ namespace aruwsrc::control::turret::algorithms
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 class WorldFrameTurretImuCascadePidTurretController final
     : public TurretAxisControllerInterface<AXIS>
 {

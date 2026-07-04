@@ -27,6 +27,7 @@
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
+#include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/robot/drone/drone_turret_subsystem.hpp"
 #include "modm/math/geometry/angle.hpp"
 
@@ -77,6 +78,8 @@ private:
     static constexpr uint32_t MAX_CALIBRATION_WAITTIME_MS = 20000;
     static constexpr float VELOCITY_ZERO_THRESHOLD = modm::toRadian(2.5f);
     static constexpr float POSITION_LOCK_THRESHOLD = modm::toRadian(5.0f);
+
+    float imuCalibrateTarget = aruwsrc::control::turret::PITCH_IMU_CALIBRATION_ANGLE;
 
     tap::Drivers &drivers;
     DroneTurretSubsystem &turret;

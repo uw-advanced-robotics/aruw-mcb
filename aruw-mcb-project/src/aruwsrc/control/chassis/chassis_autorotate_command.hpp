@@ -65,7 +65,8 @@ public:
         aruwsrc::control::ControlOperatorInterface* operatorInterface,
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
-        ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE);
+        ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE,
+        const float angleOffset = 0.0f);
 
     void initialize() override;
 
@@ -99,6 +100,12 @@ protected:
      * chassis or one of the chassis's points that is symmetrical to the front.
      */
     ChassisSymmetry chassisSymmetry;
+
+    /**
+     * Turret angular offset from the plate center the chassis will autorotate to. Zero means
+     * it will align with a plate.
+     */
+    const float angleOffset;
 
     /**
      * `true` if the chassis is currently actually autorotating, `false` otherwise

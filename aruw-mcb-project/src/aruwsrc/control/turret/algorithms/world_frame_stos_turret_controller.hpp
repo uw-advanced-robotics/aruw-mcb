@@ -58,7 +58,7 @@ struct TurretFeedforwardConstants
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-template <Axis AXIS>
+template <tap::algorithms::transforms::Axis AXIS>
 class WorldFrameTurretImuSTOSTurretController final : public TurretAxisControllerInterface<AXIS>
 {
 public:
@@ -117,7 +117,7 @@ private:
     TurretSetpointKalmanFilter setpointFilter;
 
     // Error threshold to switch from STOS to PID w/ feedforward.
-    static constexpr float LINEAR_ZONE = 0.08f;
+    static constexpr float LINEAR_ZONE = 0.1f;
 };
 }  // namespace aruwsrc::control::turret::algorithms
 

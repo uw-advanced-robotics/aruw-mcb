@@ -87,7 +87,7 @@ public:
         const std::vector<TurretIMUCalibrationConfig> &turretsAndControllers,
         aruwsrc::control::turret::YawTurretSubsystem &turretMajor,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            control::turret::algorithms::Axis::YAW> &turretMajorController,
+            tap::algorithms::transforms::Axis::YAW> &turretMajorController,
         aruwsrc::control::chassis::HolonomicChassisSubsystem &chassis,
         algorithms::odometry::SentryChassisWorldYawObserver &yawObserver,
         tap::algorithms::odometry::Odometry2DInterface &odometryInterface,
@@ -115,7 +115,7 @@ public:
 protected:
     aruwsrc::control::turret::YawTurretSubsystem &turretMajor;
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        control::turret::algorithms::Axis::YAW> &turretMajorController;
+        tap::algorithms::transforms::Axis::YAW> &turretMajorController;
 
     algorithms::odometry::SentryChassisWorldYawObserver &yawObserver;
 
