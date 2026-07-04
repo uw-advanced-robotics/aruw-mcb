@@ -34,6 +34,7 @@
 
 #include "aruwsrc/algorithms/odometry/otto_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/algorithms/odometry/three_deadwheel_kf_odometry_2d_subsystem.hpp"
+#include "aruwsrc/communication/can/aruw_pressure_sensor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_dji_motor.hpp"
 #include "aruwsrc/communication/mcb-lite/motor/virtual_servo.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_analog_sensor.hpp"
@@ -74,8 +75,6 @@
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
 #include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/manual_ik_command.hpp"
 #include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/trajectory_ik_command.hpp"
-#include "aruwsrc/robot/engineer/auto/engineer_auton_constants.hpp"
-#include "aruwsrc/robot/engineer/auto/move_to_receptacle_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
@@ -108,7 +107,6 @@ using namespace aruwsrc::control::joint::homing::trigger;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::engineer;
 using namespace aruwsrc::engineer::algorithms;
-using namespace aruwsrc::engineer::auton;
 using namespace aruwsrc::engineer::cube_storage;
 using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
@@ -206,11 +204,6 @@ float getLivePitchMaxLimit() { return getPitchMaxLimit(extensionSubsystem.getPos
 aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver yawObserver(engTurret);
 
 aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
-
-aruwsrc::communication::mcb_lite::VirtualAnalogSensor analogSensor(
-    drivers(),
-    tap::can::CanBus::CAN_BUS2,
-    0x1D6);
 
 tap::motor::DjiMotor leftFrontChassisMotor(
     drivers(),
@@ -342,6 +335,43 @@ tap::encoder::CanEncoder wristEncoderTheta2(
     1,
     WRIST_HOME_THETA2);
 
+aruwsrc::communication::can::AruwAnalogSensor mainSuctionAnalogSensor(
+    drivers(),
+    tap::can::CanBus::CAN_BUS2,
+    0x1D6);
+
+aruwsrc::communication::can::AruwPressureSensor mainSuctionPressureSensor(
+    &mainSuctionAnalogSensor,
+    aruwsrc::communication::can::AruwPressureSensor::Channel::AI1,
+    aruwsrc::communication::can::AruwPressureSensor::Calibration{
+        .rawMin = 500,
+        .rawMax = 565,
+        .pressureMin = -100,
+        .pressureMax = 0});
+
+// aruwsrc::communication::mcb_lite::VirtualAnalogSensor cubeStoreAnalogSensor(
+//     drivers(),
+//     tap::can::CanBus::CAN_BUS2,
+//     0x1D6);
+
+// aruwsrc::communication::can::AruwPressureSensor leftSuctionPressureSensor(
+//     &cubeStoreAnalogSensor,
+//     aruwsrc::communication::can::AruwPressureSensor::Channel::AI0,
+//     aruwsrc::communication::can::AruwPressureSensor::Calibration{
+//         .rawMin = 500,
+//         .rawMax = 565,
+//         .pressureMin = -100,
+//         .pressureMax = 0});
+
+// aruwsrc::communication::can::AruwPressureSensor rightSuctionPressureSensor(
+//     &cubeStoreAnalogSensor,
+//     aruwsrc::communication::can::AruwPressureSensor::Channel::AI1,
+//     aruwsrc::communication::can::AruwPressureSensor::Calibration{
+//         .rawMin = 500,
+//         .rawMax = 565,
+//         .pressureMin = -100,
+//         .pressureMax = 0});
+
 /* define subsystems --------------------------------------------------------*/
 
 aruwsrc::control::chassis::XDriveChassisSubsystem chassisSubsystem(
@@ -373,20 +403,16 @@ WristSubsystem wristSubsystem(
     WRIST_CONFIG);
 
 // update vals
-DualDigitalOutSubsystem leftSuckSubsystem(
+DigitalOutSubsystem mainSuckSubsystem(
     drivers(),
     drivers()->digital,
-    tap::gpio::Digital::OutputPin::Y,
-    true,
     tap::gpio::Digital::OutputPin::Z,
     true);
 
-DualDigitalOutSubsystem rightSuckSubsystem(
+DigitalOutSubsystem cubeStoreSuckSubsystem(
     drivers(),
     drivers()->digital,
     tap::gpio::Digital::OutputPin::Y,
-    true,
-    tap::gpio::Digital::OutputPin::Z,
     true);
 
 aruwsrc::algorithms::odometry::ThreeDeadwheelOdometryObserver deadwheels(
@@ -416,18 +442,16 @@ EngineerTransforms transformer(
     drivers()->mcbLite.imu,
     extensionSubsystem,
     wristSubsystem,
-    cubeStorage,
-    drivers()->engineerCVCommunication);
+    cubeStorage);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
-// Shared path-following controller used by the engineer's autonomous behaviors.
 ChassisAutoNavController autoNavController(
     *drivers(),
     chassisSubsystem,
     transformer.getWorldToChassis(),
     BEYBLADE_CONFIG,
-    nullptr,  // engineer has no cap bank
+    nullptr,
     0,
     0);
 
@@ -467,19 +491,6 @@ WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis:
         engTurret.yawMotor,
         worldFrameYawTurretImuPosPid,
         worldFrameYawTurretImuVelPid);
-
-// Autonomous "drive up to a receptacle and look at it" behavior. Takes the move-target P
-// (a point a standoff short of the receptacle); drives there via the shared autoNavController
-// while holding the turret/camera on the receptacles and aggregating CV pose estimates.
-// Retarget with setTarget(...). See engineer_cv_mcb_doc.md.
-MoveToReceptacleCommand moveToReceptacleCommand(
-    *drivers(),
-    chassisSubsystem,
-    autoNavController,
-    engTurret,
-    worldFrameYawTurretImuController,
-    transformer,
-    auton::EASY_RECEPTACLE_CONFIG);
 
 BuzzerSubsystem buzzerSubsystem(drivers());
 
@@ -593,18 +604,18 @@ SelectCubePositionCommand selectCubeRemovePositionCommand(
     transformer.getCubeStore2ToEndEffector());
 CubePositionDigitalOutCommand cubeStorageSuckOnCommand(
     cubeStorage,
-    leftSuckSubsystem,
-    rightSuckSubsystem,
+    mainSuckSubsystem,
+    cubeStoreSuckSubsystem,
     true);
 CubePositionDigitalOutCommand cubeStorageSuckOffCommand(
     cubeStorage,
-    leftSuckSubsystem,
-    rightSuckSubsystem,
+    mainSuckSubsystem,
+    cubeStoreSuckSubsystem,
     false);
 
-DigitalOutCommand endEffectorSuckOnCommand(leftSuckSubsystem, true);
+DigitalOutCommand endEffectorSuckOnCommand(mainSuckSubsystem, true);
 
-DigitalOutCommand endEffectorSuckOffCommand(leftSuckSubsystem, false);
+DigitalOutCommand endEffectorSuckOffCommand(mainSuckSubsystem, false);
 
 Transform IDENTITY_TRANSFORM;
 
@@ -678,13 +689,14 @@ void initializeSubsystems()
     extensionSubsystem.initialize();
     wristSubsystem.initialize();
     cubeStorage.initialize();
-    leftSuckSubsystem.initialize();
-    rightSuckSubsystem.initialize();
+    mainSuckSubsystem.initialize();
+    cubeStoreSuckSubsystem.initialize();
     transformSubsystem.initialize();
     odometrySubsystem.initialize();
     parallelOmniOne.initialize();
     parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
+    mainSuctionAnalogSensor.initialize();
 }
 
 /* register subsystems here -------------------------------------------------*/
@@ -694,8 +706,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
-    drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
-    drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&mainSuckSubsystem);
+    drivers->commandScheduler.registerSubsystem(&cubeStoreSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&engTurret);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -712,24 +724,10 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers* drivers)
-{
-    // Run IMU calibration on boot. This zeroes the chassis/turret IMUs and resets odometry
-    // so the world frame origin is the robot's pose at calibration. The robot MUST be held
-    // still until the success buzz plays; until calibration completes, world-frame headings
-    // and odometry (and therefore the autonomous move-to-receptacle behavior) are invalid.
-    drivers->commandScheduler.addCommand(&imuCalibrateCommand);
-}
+void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerEngineerIoMappings(aruwsrc::engineer::Drivers* drivers)
-{
-    // Both remote switches UP → start the move-to-receptacle behavior (fires once per
-    // rising edge). For competition: additionally gate on GameStage::INITIALIZATION.
-    (TriggerHelpers::switchState(drivers, Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP) &&
-     TriggerHelpers::switchState(drivers, Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
-        .onTrue(&moveToReceptacleCommand);
-}
+void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}
 }  // namespace control
 }  // namespace aruwsrc
 
