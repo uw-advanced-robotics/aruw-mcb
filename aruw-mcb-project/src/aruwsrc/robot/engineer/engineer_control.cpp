@@ -678,8 +678,7 @@ inverse_kinematics::Trajectory6D<2> depositTrajectory{
     {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
 
 InstantCommand populateDepositTrajectory(
-    []()
-    {
+    []() {
         depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
 
         if (transformer.isWorldToReceptacleValid() &&
