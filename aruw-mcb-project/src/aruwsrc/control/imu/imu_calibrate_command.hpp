@@ -134,10 +134,6 @@ public:
         tap::algorithms::odometry::Odometry2DInterface *odometry2DInterface = nullptr,
         const std::vector<tap::communication::sensors::imu::ImuInterface *> &externalIMUs = {});
 
-    bool turretMCBsReady;
-    bool turretsOnline;
-    bool mpu6500Online;
-
     const char *getName() const override { return "Calibrate IMU"; }
 
     bool isReady() override;
@@ -201,11 +197,6 @@ protected:
     inline bool turretReachedCenterAndNotMoving(turret::TurretSubsystem *turret, bool ignorePitch)
         const
     {
-        YAW_VEL = turret->yawMotor.getChassisFrameVelocity();
-        YAW_POS = abs(turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0));
-        PITCH_VEL = turret->pitchMotor.getChassisFrameVelocity();
-        PITCH_POS = turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(0);
-
         return compareFloatClose(
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
@@ -220,11 +211,6 @@ protected:
                  (abs(turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(0)) <
                   positionZeroThreshold)));
     }
-
-    volatile mutable float YAW_VEL;
-    volatile mutable float YAW_POS;
-    volatile mutable float PITCH_VEL;
-    volatile mutable float PITCH_POS;
 };
 }  // namespace aruwsrc::control::imu
 

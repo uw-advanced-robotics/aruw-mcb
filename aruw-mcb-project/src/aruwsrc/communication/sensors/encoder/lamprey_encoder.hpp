@@ -80,13 +80,13 @@ public:
 
     void initialize() override
     {
-        CanEncoder::initialize();
+        CanEncoder::CanEncoder::initialize();
         powerOnTimeout.restart(500);
     }
 
     void processMessage(const modm::can::Message& message)
     {
-        raw = (message.data[1] << 8) | message.data[0];
+        uint16_t raw = (message.data[1] << 8) | message.data[0];
 
         angleRaw = modm::toRadian(raw / 100.0f);
 
@@ -133,7 +133,6 @@ private:
 
     const size_t lutSize{0};
     float angleRaw{0.0f};
-    uint16_t raw{0};
 
     tap::arch::MilliTimeout powerOnTimeout;
 };

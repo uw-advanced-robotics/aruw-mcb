@@ -605,10 +605,6 @@ Trigger leftDownMidRightUp =
          Remote::SwitchState::UP) &&
      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
         .onTrue(&binnedAlignmentCommand);
-/*.onTrue(&endEffectorSuckOnCommand)
-.whileTrue(CommandCompositionHelper::parallel<2>(
-    {&cubeStorageHome, &extensionHome}))
-.onFalse(&endEffectorSuckOffCommand);*/
 
 Trigger wheelDown =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.5f, false)
@@ -644,7 +640,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
     drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
-    //  drivers->commandScheduler.registerSubsystem(&wristSubsystem);
+    drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
     drivers->commandScheduler.registerSubsystem(&rightSuckSubsystem);
