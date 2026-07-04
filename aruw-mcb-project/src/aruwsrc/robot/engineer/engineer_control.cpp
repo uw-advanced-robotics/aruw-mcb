@@ -53,6 +53,7 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/pump_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/digital/digital_out_command.hpp"
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
@@ -96,9 +97,6 @@
 #include "aruwsrc/robot/engineer/wrist/wrist_setpoints_command.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 #include "aruwsrc/util_macros.hpp"
-#include "aruwsrc/control/client-display/client_display_command.hpp"
-#include "aruwsrc/control/client-display/client_display_subsystem.hpp"
-#include "aruwsrc/control/client-display/indicators/pump_indicator.hpp"
 
 using namespace aruwsrc::algorithms::odometry;
 using namespace aruwsrc::control::turret::algorithms;
@@ -664,8 +662,7 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     &chassisSubsystem);
 
 PumpIndicator pumpIndicator(refSerialTransmitter, mainSuckSubsystem);
-std::vector<HudIndicator*> hudIndicators = {
-    &pumpIndicator};
+std::vector<HudIndicator*> hudIndicators = {&pumpIndicator};
 
 aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
     *drivers(),
@@ -681,7 +678,8 @@ inverse_kinematics::Trajectory6D<2> depositTrajectory{
     {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
 
 InstantCommand populateDepositTrajectory(
-    []() {
+    []()
+    {
         depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
 
         if (transformer.isWorldToReceptacleValid() &&
@@ -796,7 +794,8 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers* drivers) {
+void startEngineerCommands(aruwsrc::engineer::Drivers* drivers)
+{
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
 }
 
