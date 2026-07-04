@@ -72,7 +72,7 @@ public:
 
     virtual float getVelocity() const;
 
-    bool atSetpoint();
+    bool atSetpoint() const;
 
     bool isOnline() const;
 
