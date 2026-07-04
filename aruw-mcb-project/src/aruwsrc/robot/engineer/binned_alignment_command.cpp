@@ -29,7 +29,7 @@ using namespace tap::algorithms;
 
 namespace aruwsrc::engineer
 {
-static constexpr uint32_t MAX_ALIGNMENT_WAITTIME_MS = 5000;  // TODO: tune
+static constexpr uint32_t MAX_ALIGNMENT_WAITTIME_MS = 5000;
 
 BinnedAlignmentCommand::BinnedAlignmentCommand(
     control::turret::TurretSubsystem &turret,
