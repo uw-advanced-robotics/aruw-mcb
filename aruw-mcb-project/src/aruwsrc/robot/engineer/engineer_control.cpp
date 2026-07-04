@@ -669,10 +669,13 @@ inverse_kinematics::Trajectory6D<2> depositTrajectory{
     {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
 
 InstantCommand populateDepositTrajectory(
-    []() {
+    []()
+    {
         depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
 
-        if (transformer.isWorldToReceptacleValid())
+        if (transformer.isWorldToReceptacleValid() &&
+            transformer.getWorldToReceptacleReceivedTimeMs() >
+                tap::arch::clock::getTimeMilliseconds() - 2'000)
         {
             depositTrajectory.waypoints[1].pose =
                 transformer.getWorldToReceptacle().composeStatic(Transform(-0.25, 0, 0, 0, 0, 0));
