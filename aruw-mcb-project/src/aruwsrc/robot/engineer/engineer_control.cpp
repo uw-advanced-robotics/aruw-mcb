@@ -53,6 +53,7 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/pump_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/digital/digital_out_command.hpp"
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
@@ -660,6 +661,14 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     lampreyEncoder,
     &chassisSubsystem);
 
+PumpIndicator pumpIndicator(refSerialTransmitter, mainSuckSubsystem);
+std::vector<HudIndicator*> hudIndicators = {&pumpIndicator};
+
+aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    clientDisplay,
+    hudIndicators);
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -741,7 +750,7 @@ void initializeSubsystems()
 {
     pulleyEncoder.initialize();
     lampreyEncoder.initialize();
-
+    clientDisplay.initialize();
     chassisSubsystem.initialize();
     engTurret.initialize();
     extensionSubsystem.initialize();
@@ -780,11 +789,14 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
     engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
 
-    // clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers* drivers)
+{
+    drivers->commandScheduler.addCommand(&clientDisplayCommand);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}
