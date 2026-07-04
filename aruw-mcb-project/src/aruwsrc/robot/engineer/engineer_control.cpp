@@ -656,8 +656,7 @@ inverse_kinematics::Trajectory6D<2> depositTrajectory{
     {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
 
 InstantCommand populateDepositTrajectory(
-    []()
-    {
+    []() {
         depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
 
         if (transformer.isWorldToReceptacleValid())
@@ -696,8 +695,11 @@ SequentialCommand depositCommand(&populateDepositTrajectory, &depositIKCommand);
 //         &extensionHome}));
 
 Trigger rightUp =
-    (TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP) && 
-        TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP))
+    (TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::RIGHT_SWITCH,
+         Remote::SwitchState::UP) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP))
         .onTrue(&depositCommand);
 
 // joint control mode
