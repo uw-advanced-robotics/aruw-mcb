@@ -20,6 +20,7 @@
 #ifndef ENGINEER_DRIVERS_HPP_
 #define ENGINEER_DRIVERS_HPP_
 
+#include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 #include "tap/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -92,6 +93,7 @@ public:
             tap::gpio::Digital::InputPullMode::PullUp);
         chassisIsm.initialize(mainLoopFrequency, 0.1f, 0.0f);
         chassisIsm.setCalibrationSamples(4000);
+        mpu6500.setCalibrationSamples(4000);
         chassisIsm.setMountingTransform(
             tap::algorithms::transforms::Transform(0, 0, 0, M_PI, 0, M_PI_2));
         mcbLite.initialize();
