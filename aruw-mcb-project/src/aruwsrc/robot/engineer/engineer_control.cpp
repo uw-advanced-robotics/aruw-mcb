@@ -459,7 +459,8 @@ EngineerTransforms transformer(
     drivers()->mcbLite.imu,
     extensionSubsystem,
     wristSubsystem,
-    cubeStorage);
+    cubeStorage,
+    drivers()->engineerCVCommunication);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
@@ -674,6 +675,49 @@ aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+tap::control::Subsystem dummySubsystem(drivers());
+
+inverse_kinematics::Trajectory6D<2> depositTrajectory{
+    {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
+
+InstantCommand populateDepositTrajectory(
+    []() {
+        depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
+
+        if (transformer.isWorldToReceptacleValid() &&
+            transformer.getWorldToReceptacleReceivedTimeMs() >
+                tap::arch::clock::getTimeMilliseconds() - 2'000)
+        {
+            depositTrajectory.waypoints[1].pose =
+                transformer.getWorldToReceptacle().composeStatic(Transform(-0.25, 0, 0, 0, 0, 0));
+        }
+        else
+        {
+            depositTrajectory.waypoints[1].pose = transformer.getWorldToEndEffector();
+        }
+    },
+    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
+
+inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
+    transformer.getChassisToWorld(),
+    IDENTITY_TRANSFORM,
+    engTurret,
+    extensionSubsystem,
+    wristSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController,
+    depositTrajectory);
+
+SequentialCommand depositCommand(&populateDepositTrajectory, &depositIKCommand);
+
+Trigger leftUpRightUp =
+    (TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::RIGHT_SWITCH,
+         Remote::SwitchState::UP) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP))
+        .onTrue(&depositCommand);
+
 Trigger leftDownMidRightUp =
     (!TriggerHelpers::switchState(
          drivers(),
@@ -737,7 +781,9 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&engTurret);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
-    drivers->commandScheduler.registerSubsystem(&clientDisplay);
+    // drivers->commandScheduler.registerSubsystem(&clientDisplay);
+
+    drivers->commandScheduler.registerSubsystem(&dummySubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
