@@ -697,17 +697,6 @@ inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
 
 SequentialCommand depositCommand(&populateDepositTrajectory, &depositIKCommand);
 
-// Disabled bc homing doesn't work yet (virtual limit switches)
-// Trigger leftDownMidRightUp =
-//     (!TriggerHelpers::switchState(
-//          drivers(),
-//          Remote::Switch::LEFT_SWITCH,
-//          Remote::SwitchState::UP) &&
-//      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH,
-//      Remote::SwitchState::UP))
-//         .whileTrue(CommandCompositionHelper::parallel<2>({&cubeStorageHome,
-//         &extensionHome}));
-
 Trigger leftUpRightUp =
     (TriggerHelpers::switchState(
          drivers(),
