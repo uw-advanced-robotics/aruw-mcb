@@ -442,7 +442,8 @@ EngineerTransforms transformer(
     drivers()->mcbLite.imu,
     extensionSubsystem,
     wristSubsystem,
-    cubeStorage);
+    cubeStorage,
+    drivers()->engineerCVCommunication);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
@@ -649,6 +650,40 @@ SequentialCommand<3> removeCubeCommand(
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+tap::control::Subsystem dummySubsystem(drivers());
+
+inverse_kinematics::Trajectory6D<2> depositTrajectory{
+    {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
+
+InstantCommand populateDepositTrajectory(
+    []()
+    {
+        depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
+
+        if (transformer.isWorldToReceptacleValid())
+        {
+            depositTrajectory.waypoints[1].pose =
+                transformer.getWorldToReceptacle().composeStatic(Transform(-0.25, 0, 0, 0, 0, 0));
+        }
+        else
+        {
+            depositTrajectory.waypoints[1].pose = transformer.getWorldToEndEffector();
+        }
+    },
+    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
+
+inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
+    transformer.getChassisToWorld(),
+    IDENTITY_TRANSFORM,
+    engTurret,
+    extensionSubsystem,
+    wristSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController,
+    depositTrajectory);
+
+SequentialCommand depositCommand(&populateDepositTrajectory, &depositIKCommand);
+
 // Disabled bc homing doesn't work yet (virtual limit switches)
 // Trigger leftDownMidRightUp =
 //     (!TriggerHelpers::switchState(
@@ -657,7 +692,12 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 //          Remote::SwitchState::UP) &&
 //      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH,
 //      Remote::SwitchState::UP))
-//         .whileTrue(CommandCompositionHelper::parallel<2>({&cubeStorageHome, &extensionHome}));
+//         .whileTrue(CommandCompositionHelper::parallel<2>({&cubeStorageHome,
+//         &extensionHome}));
+
+Trigger rightUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
+        .onTrue(&depositCommand);
 
 // joint control mode
 Trigger rightMid =
@@ -712,6 +752,8 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
     // drivers->commandScheduler.registerSubsystem(&clientDisplay);
+
+    drivers->commandScheduler.registerSubsystem(&dummySubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
