@@ -236,7 +236,7 @@ aruwsrc::communication::sensors::encoder::LampreyEncoder lampreyEncoder(
     tap::encoder::CanEncoderId::ID7,
     tap::can::CanBus::CAN_BUS2,
     aruwsrc::control::turret::chassis_rel::LAMPREY_CALIBRATION_MAP,
-    true);
+    false);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
     {&drivers()->analog,
@@ -476,27 +476,6 @@ BinnedAlignmentCommand binnedAlignmentCommand(
     BINNED_ALIGNMENT_OFFSET,
     YAW_ALIGNMENT_OFFSET);
 
-// imu::ImuCalibrateCommand imuCalibrateCommand(
-//     drivers(),
-//     {{
-//         &drivers()->mcbLite.imu,
-//         &engTurret,
-//         &chassisFrameYawTurretController,
-//         &chassisFramePitchTurretController,
-//         true,
-//     }},
-//     &chassisSubsystem,
-//     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-//     imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-//     &imuCalibrateSuccessBuzzCommand,
-//     &imuCalibrateFailBuzzCommand,
-//     &odometrySubsystem,
-//     {&drivers()->chassisIsm});
-
-// aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
-//     drivers(),
-//     imuCalibrateCommand);
-
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
@@ -645,7 +624,7 @@ void initializeSubsystems()
     pulleyEncoder.initialize();
     lampreyEncoder.initialize();
 
-    // chassisSubsystem.initialize();
+    chassisSubsystem.initialize();
     engTurret.initialize();
     extensionSubsystem.initialize();
     wristSubsystem.initialize();
@@ -664,7 +643,7 @@ void initializeSubsystems()
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
-    //  drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
+    drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     //  drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
     drivers->commandScheduler.registerSubsystem(&leftSuckSubsystem);
@@ -678,7 +657,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
-    // engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
     // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
     chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
     extensionSubsystem.setDefaultCommand(&extensionManualControl);

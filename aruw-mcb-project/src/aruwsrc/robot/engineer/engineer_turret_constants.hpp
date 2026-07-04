@@ -70,8 +70,8 @@ static constexpr TurretMotorConfig PITCH_MOTOR_CONFIG = {
 static constexpr algorithms::TurretGravitationalForceOffset::TurretGravityParams
     TURRET_GRAVITY_CONFIG{.cgX = 0.0f, .cgZ = 0.0f, .gravityCompensatorMax = 0.0f};
 
-inline constexpr float BINNED_ALIGNMENT_OFFSET = modm::toRadian(0.0f);
-inline constexpr float YAW_ALIGNMENT_OFFSET = modm::toRadian(0.0f);
+inline constexpr float BINNED_ALIGNMENT_OFFSET = 0.32575804f;
+inline constexpr float YAW_ALIGNMENT_OFFSET = 2.6;
 
 namespace world_rel_turret_imu
 {
@@ -182,7 +182,7 @@ namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
     .kp = 35000.0f,
-    .ki = 50000.0f,
+    .ki = 0.0f,
     .kd = 4000.0f,
     .maxICumulative = 300.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620 * 0.5f,
@@ -208,7 +208,17 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errorDerivativeFloor = 0.0f,
 };
 
-inline constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[0] = {};
+constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[38] = {
+    {0.000000f, 0.000000f}, {0.084791f, 0.084791f}, {0.144849f, 0.251115f}, {0.276070f, 0.446122f},
+    {0.376597f, 0.625451f}, {0.420193f, 0.809689f}, {0.589557f, 0.983208f}, {0.595284f, 0.978966f},
+    {0.764403f, 1.160585f}, {1.011761f, 1.340518f}, {1.222203f, 1.503940f}, {1.440547f, 1.698713f},
+    {1.570195f, 1.868359f}, {1.719543f, 2.045803f}, {1.831457f, 2.234717f}, {2.007574f, 2.407335f},
+    {2.206204f, 2.587151f}, {2.439671f, 2.762712f}, {2.728215f, 2.943489f}, {2.913296f, 3.119026f},
+    {3.051125f, 3.298797f}, {3.180731f, 3.479441f}, {3.372349f, 3.675647f}, {3.605322f, 3.841017f},
+    {3.871725f, 4.021602f}, {4.130415f, 4.213467f}, {4.367655f, 4.394318f}, {4.531702f, 4.569046f},
+    {4.721763f, 4.738405f}, {4.863721f, 4.922260f}, {4.992419f, 5.104944f}, {5.151745f, 5.280353f},
+    {5.186485f, 5.477458f}, {5.470463f, 5.649949f}, {5.589169f, 5.830747f}, {5.831504f, 6.008702f},
+    {6.010724f, 6.185890f}, {6.283185f, 6.283185f}};
 
 }  // namespace chassis_rel
 

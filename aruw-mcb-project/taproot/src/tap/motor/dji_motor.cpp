@@ -59,8 +59,9 @@ DjiMotor::DjiMotor(
       motorInverted(isInverted),
       currentControl(currentControl),
       internalEncoder(isInverted, gearRatio, encoderHomePosition),
-      encoder(externalEncoder != nullptr ? externalEncoder 
-                                         : const_cast<Encoder*>(&this->getInternalEncoder()))
+      encoder(
+          externalEncoder != nullptr ? externalEncoder
+                                     : const_cast<Encoder*>(&this->getInternalEncoder()))
 {
     motorDisconnectTimeout.stop();
 }
@@ -81,7 +82,7 @@ void DjiMotor::processMessage(const modm::can::Message& message)
     torque = static_cast<int16_t>(message.data[4] << 8 | message.data[5]);  // torque
     torque = motorInverted ? -torque : torque;
     temperature = static_cast<int8_t>(message.data[6]);  // temperature
-    
+
     if (motorDisconnectTimeout.isExpired()) offlineFlag = true;
     // restart disconnect timer, since you just received a message from the motor
     motorDisconnectTimeout.restart(MOTOR_DISCONNECT_TIME);
@@ -91,6 +92,7 @@ void DjiMotor::processMessage(const modm::can::Message& message)
 
 void DjiMotor::setDesiredOutput(int32_t desiredOutput)
 {
+    return;
     int16_t desOutputNotInverted =
         static_cast<int16_t>(tap::algorithms::limitVal<int32_t>(desiredOutput, SHRT_MIN, SHRT_MAX));
     this->desiredOutput = motorInverted ? -desOutputNotInverted : desOutputNotInverted;

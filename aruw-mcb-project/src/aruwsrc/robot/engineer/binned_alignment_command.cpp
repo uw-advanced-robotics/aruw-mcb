@@ -41,10 +41,6 @@ void BinnedAlignmentCommand::initialize()
 
 void BinnedAlignmentCommand::execute()
 {
-    curOffset = aruwsrc::algorithms::binned_encoder_alignment::calculateOffset<30, 95>(
-        turretPulleyEncoder.getPosition().getWrappedValue(),
-        turretLampreyEncoder.getPosition().getWrappedValue());
-
     if (calibrationLongTimeout.isExpired())
     {
         alignmentFailed = true;
@@ -56,8 +52,12 @@ void BinnedAlignmentCommand::execute()
         return;
     }
 
+    curOffset = aruwsrc::algorithms::binned_encoder_alignment::calculateOffset<4, 15>(
+        turretPulleyEncoder.getPosition().getWrappedValue(),
+        turretLampreyEncoder.getPosition().getWrappedValue());
+
     fakeLampreyEncoder.setFakePosition(
-        aruwsrc::algorithms::binned_encoder_alignment::calculatePosition<30, 95>(
+        aruwsrc::algorithms::binned_encoder_alignment::calculatePosition<4, 15>(
             turretPulleyEncoder.getPosition().getWrappedValue(),
             turretLampreyEncoder.getPosition().getWrappedValue(),
             binnedAlignmentOffset) -
