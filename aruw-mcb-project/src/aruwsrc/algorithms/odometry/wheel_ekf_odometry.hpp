@@ -209,7 +209,7 @@ private:
         9.66511e-03f;                                              // Base wheel speed variance
     static constexpr float IMU_ACCEL_MEASUREMENT_VARIANCE = 1.2f;  // Accel noise variance
     static constexpr float IMU_GYRO_MEASUREMENT_VARIANCE = 0.2f;   // Gyro noise variance
-    static constexpr float YAW_MEASUREMENT_VARIANCE = 0.05f;       // Yaw observer variance
+    static constexpr float YAW_MEASUREMENT_VARIANCE = 1e-6f;       // Yaw observer variance
     static constexpr float WHEEL_SLIP_VARIANCE_SCALE = 0.02f;
     static constexpr float MAX_WHEEL_SLIP_SCALE = 5.0f;
     static constexpr float MIN_VISION_MEASUREMENT_VARIANCE = 1.0e-6f;

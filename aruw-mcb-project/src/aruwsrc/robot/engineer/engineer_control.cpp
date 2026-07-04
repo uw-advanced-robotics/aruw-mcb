@@ -41,7 +41,9 @@
 #include "aruwsrc/communication/mcb-lite/virtual_digital_limit_switch.hpp"
 #include "aruwsrc/communication/sensors/beam_break/beam_break.hpp"
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
+#include "aruwsrc/communication/sensors/encoder/lamprey_encoder.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
+#include "aruwsrc/control/autotune/lamprey_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
@@ -75,6 +77,7 @@
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
 #include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/manual_ik_command.hpp"
 #include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/trajectory_ik_command.hpp"
+#include "aruwsrc/robot/engineer/binned_alignment_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
@@ -257,6 +260,17 @@ tap::encoder::CanEncoder perpendicularOmni(
     drivers(),
     tap::encoder::CanEncoderId::ID2,
     tap::can::CanBus::CAN_BUS2,
+    false);
+tap::encoder::CanEncoder pulleyEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID6,
+    tap::can::CanBus::CAN_BUS2,
+    true);
+aruwsrc::communication::sensors::encoder::LampreyEncoder lampreyEncoder(
+    drivers(),
+    tap::encoder::CanEncoderId::ID7,
+    tap::can::CanBus::CAN_BUS2,
+    aruwsrc::control::turret::chassis_rel::LAMPREY_CALIBRATION_MAP,
     false);
 
 tap::communication::sensors::current::AnalogCurrentSensor currentSensor(
@@ -504,26 +518,14 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-imu::ImuCalibrateCommand imuCalibrateCommand(
-    drivers(),
-    {{
-        &drivers()->mcbLite.imu,
-        &engTurret,
-        &chassisFrameYawTurretController,
-        &chassisFramePitchTurretController,
-        true,
-    }},
-    &chassisSubsystem,
+BinnedAlignmentCommand binnedAlignmentCommand(
+    engTurret,
+    lampreyEncoder,
+    pulleyEncoder,
+    *yawTurretMotor.getEncoder(),
     imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-    &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand,
-    nullptr,
-    {&drivers()->chassisIsm});
-
-aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
-    drivers(),
-    imuCalibrateCommand);
+    BINNED_ALIGNMENT_OFFSET,
+    YAW_ALIGNMENT_OFFSET);
 
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());
@@ -647,18 +649,27 @@ SequentialCommand<3> removeCubeCommand(
     // hand up
     &centerCubePosition);
 
+autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
+    drivers(),
+    {&engTurret,
+     &yawEngTurretMotor,
+     &chassisFrameYawTurretController,
+     yawTurretMotor.isMotorInverted(),
+     1,
+     1},
+    lampreyEncoder,
+    &chassisSubsystem);
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-// Disabled bc homing doesn't work yet (virtual limit switches)
-// Trigger leftDownMidRightUp =
-//     (!TriggerHelpers::switchState(
-//          drivers(),
-//          Remote::Switch::LEFT_SWITCH,
-//          Remote::SwitchState::UP) &&
-//      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH,
-//      Remote::SwitchState::UP))
-//         .whileTrue(CommandCompositionHelper::parallel<2>({&cubeStorageHome, &extensionHome}));
+Trigger leftDownMidRightUp =
+    (!TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::LEFT_SWITCH,
+         Remote::SwitchState::UP) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
+        .onTrue(&binnedAlignmentCommand);
 
 // joint control mode
 Trigger rightMid =
@@ -697,6 +708,9 @@ Trigger homeRollButton =
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {
+    pulleyEncoder.initialize();
+    lampreyEncoder.initialize();
+
     chassisSubsystem.initialize();
     engTurret.initialize();
     extensionSubsystem.initialize();
@@ -743,6 +757,13 @@ void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}
 }  // namespace control
 }  // namespace aruwsrc
+
+std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
+{
+    static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
+        &aruwsrc::control::lampreyAutotuneCommand};
+    return commands;
+}
 
 namespace aruwsrc::engineer
 {
