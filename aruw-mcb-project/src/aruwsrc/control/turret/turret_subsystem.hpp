@@ -77,7 +77,12 @@ public:
 
     const char* getName() const override { return "Turret"; }
 
-    mockable inline bool isOnline() const { return pitchMotor.isOnline() && yawMotor.isOnline(); }
+    mockable inline bool isOnline() const
+    {
+        PENIS_PITCH_ONLINE = pitchMotor.isOnline();
+        PENIS_YAW_ONLINE = yawMotor.isOnline();
+        return pitchMotor.isOnline() && yawMotor.isOnline();
+    }
 
     const inline tap::communication::sensors::imu::AbstractIMU* getIMU() const { return turretImu; }
 
@@ -88,6 +93,9 @@ public:
 
 protected:
     const tap::communication::sensors::imu::AbstractIMU* turretImu;
+
+    volatile mutable bool PENIS_PITCH_ONLINE;
+    volatile mutable bool PENIS_YAW_ONLINE;
 };  // class TurretSubsystem
 
 }  // namespace aruwsrc::control::turret

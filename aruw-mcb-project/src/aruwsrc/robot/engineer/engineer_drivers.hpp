@@ -30,8 +30,6 @@
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 
 #else
-#include "tap/communication/sensors/imu/imu_terminal_serial_handler.cpp"
-
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/mcb-lite/mcb_lite.hpp"
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
@@ -60,7 +58,6 @@ public:
           oledDisplay(this, nullptr, nullptr, nullptr, &mcbLite, nullptr, nullptr, &rttTelemetry),
           engineerCVCommunication(this),
           chassisIsm(),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500),
           mcbLite(this, tap::communication::serial::Uart::Uart7)
     {
         controlOperatorInterface.setTelemetry(&rttTelemetry);
@@ -80,7 +77,6 @@ public:
     display::OledDisplay oledDisplay;
     communication::serial::EngineerCVCommunication engineerCVCommunication;
     aruwsrc::communication::sensors::imu::ism330::ISM330 chassisIsm;
-    tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     aruwsrc::communication::mcb_lite::MCBLite mcbLite;
 
     void init(const float mainLoopFrequency)

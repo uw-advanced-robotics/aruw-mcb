@@ -72,13 +72,13 @@
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transform_subsystem.hpp"
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
+#include "aruwsrc/robot/engineer/binned_alignment_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/select_cube_position_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
-#include "aruwsrc/robot/engineer/engineer_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
@@ -467,27 +467,14 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-EngineerImuCalibrateCommand imuCalibrateCommand(
-    drivers(),
-    {{
-        &drivers()->mcbLite.imu,
-        &engTurret,
-        &chassisFrameYawTurretController,
-        &chassisFramePitchTurretController,
-        true,
-    }},
-    &chassisSubsystem,
-    yawObserver,
-    odometrySubsystem,
+BinnedAlignmentCommand binnedAlignmentCommand(
+    engTurret,
     lampreyEncoder,
     pulleyEncoder,
     *yawTurretMotor.getEncoder(),
+    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
     BINNED_ALIGNMENT_OFFSET,
-    YAW_ALIGNMENT_OFFSET,
-    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    aruwsrc::control::imu::ImuCalibrateCommand::DEFAULT_POSITION_ZERO_THRESHOLD,
-    &imuCalibrateSuccessBuzzCommand,
-    &imuCalibrateFailBuzzCommand);
+    YAW_ALIGNMENT_OFFSET);
 
 // imu::ImuCalibrateCommand imuCalibrateCommand(
 //     drivers(),
@@ -506,9 +493,9 @@ EngineerImuCalibrateCommand imuCalibrateCommand(
 //     &odometrySubsystem,
 //     {&drivers()->chassisIsm});
 
-aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
-    drivers(),
-    imuCalibrateCommand);
+// aruwsrc::control::governor::IMUCalibrateDoneGovernor imuCalibrateDoneGovernor(
+//     drivers(),
+//     imuCalibrateCommand);
 
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());
@@ -638,8 +625,11 @@ Trigger leftDownMidRightUp =
          Remote::Switch::LEFT_SWITCH,
          Remote::SwitchState::UP) &&
      TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
-        .whileTrue(CommandCompositionHelper::parallel<3>(
-            {&cubeStorageHome, &extensionHome, &imuCalibrateCommand}));
+        .onTrue(&binnedAlignmentCommand);
+/*.onTrue(&endEffectorSuckOnCommand)
+.whileTrue(CommandCompositionHelper::parallel<2>(
+    {&cubeStorageHome, &extensionHome}))
+.onFalse(&endEffectorSuckOffCommand);*/
 
 Trigger wheelDown =
     TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, 0.5f, false)
@@ -655,7 +645,7 @@ void initializeSubsystems()
     pulleyEncoder.initialize();
     lampreyEncoder.initialize();
 
-    chassisSubsystem.initialize();
+    // chassisSubsystem.initialize();
     engTurret.initialize();
     extensionSubsystem.initialize();
     wristSubsystem.initialize();
@@ -673,7 +663,7 @@ void initializeSubsystems()
 /* register subsystems here -------------------------------------------------*/
 void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 {
-    // drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
+    drivers->commandScheduler.registerSubsystem(&chassisSubsystem);
     //  drivers->commandScheduler.registerSubsystem(&extensionSubsystem);
     //  drivers->commandScheduler.registerSubsystem(&wristSubsystem);
     drivers->commandScheduler.registerSubsystem(&cubeStorage);
@@ -688,7 +678,7 @@ void registerEngineerSubsystems(aruwsrc::engineer::Drivers* drivers)
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
 {
-    engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    // engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
     // chassisSubsystem.setDefaultCommand(&chassisDriveCommand);
     chassisSubsystem.setDefaultCommand(&chassisAutorotateCommand);
     extensionSubsystem.setDefaultCommand(&extensionManualControl);
@@ -731,15 +721,5 @@ void initSubsystemCommands(aruwsrc::engineer::Drivers* drivers)
     aruwsrc::control::registerEngineerIoMappings(drivers);
 }
 }  // namespace aruwsrc::engineer
-
-#ifndef PLATFORM_HOSTED
-// Define the getImueCalibrate function, so the imu calibrate menu can access the calibrate command.
-// This is necessary for the calibrate command to funciton.
-// Absolutely insane that this is how this works btw.
-aruwsrc::control::imu::ImuCalibrateCommand* getImuCalibrateCommand()
-{
-    return &aruwsrc::control::imuCalibrateCommand;
-}
-#endif
 
 #endif  // defined(TARGET_ENGINEER)
