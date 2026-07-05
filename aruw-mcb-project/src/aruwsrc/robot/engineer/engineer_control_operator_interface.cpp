@@ -86,12 +86,12 @@ float EngineerControlOperatorInterface::getExtensionVelocity()
 
 bool EngineerControlOperatorInterface::getGantryKeyIn()
 {
-    return drivers->remote.keyPressed(Remote::Key::B);
+    return drivers->remote.keyPressed(Remote::Key::G);
 }
 
 bool EngineerControlOperatorInterface::getGantryKeyOut()
 {
-    return drivers->remote.keyPressed(Remote::Key::G);
+    return drivers->remote.keyPressed(Remote::Key::B);
 }
 
 bool EngineerControlOperatorInterface::getShiftKey()
@@ -343,12 +343,8 @@ float EngineerControlOperatorInterface::getChassisRInput()
         prevUpdateCounterR = updateCounter;
     }
 
-    float keyInput = 0.0f;
-    if (isDriveMode())
-    {
-        keyInput =
-            drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
-    }
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::E) - drivers->remote.keyPressed(Remote::Key::Q);
 
     const float maxChassisSpeed =
         aruwsrc::control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
@@ -367,7 +363,7 @@ float EngineerControlOperatorInterface::getChassisRInput()
         static_cast<float>(dt) / 1E3);
 
     float rInput = chassisRInputRamp.getValue();
-    if (drivers->remote.keyPressed(Remote::Key::R))
+    if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
         return rInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
@@ -384,7 +380,7 @@ float EngineerControlOperatorInterface::getTurretYawInput(uint8_t turretID)
         return 0.0f;
     }
 
-    return ControlOperatorInterface::getTurretYawInput(turretID);
+    return -ControlOperatorInterface::getTurretYawInput(turretID);
 }
 
 float EngineerControlOperatorInterface::getTurretPitchInput(uint8_t turretID)

@@ -80,8 +80,8 @@ void ChassisRelDrive::onExecute(
         &chassisYDesiredWheelspeed);
 
     chassis->setDesiredOutput(
-        chassisXDesiredWheelspeed,
-        chassisYDesiredWheelspeed,
-        chassisRotationDesiredWheelspeed);
+        -chassisXDesiredWheelspeed,
+        -chassisYDesiredWheelspeed,
+        -chassisRotationDesiredWheelspeed);
 }
 }  // namespace aruwsrc::control::chassis
