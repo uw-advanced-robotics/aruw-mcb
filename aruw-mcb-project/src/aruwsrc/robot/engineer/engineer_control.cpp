@@ -701,9 +701,7 @@ InstantCommand populateDepositTrajectory(
     []() {
         depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
 
-        if (transformer.isWorldToReceptacleValid() &&
-            transformer.getWorldToReceptacleReceivedTimeMs() >
-                tap::arch::clock::getTimeMilliseconds() - 2'000)
+        if (transformer.isWorldToReceptacleValid())
         {
             depositTrajectory.waypoints[1].pose =
                 transformer.getWorldToReceptacle().composeStatic(Transform(-0.25, 0, 0, 0, 0, 0));
@@ -767,7 +765,19 @@ Trigger wheelUp =
     (!TriggerHelpers::channelGreaterThan(drivers(), Remote::Channel::WHEEL, -0.5f, false))
         .onTrue(&endEffectorSuckOffCommand);
 
-Trigger pickupSetpoint = TriggerHelpers::button(drivers(), Remote::Key::F).onTrue(&pickupCommand);
+InstantCommand pickupPose(
+    []()
+    {
+        chassisFrameYawTurretController.setSetpoint(tap::algorithms::Angle(0));
+        chassisFramePitchTurretController.setSetpoint(tap::algorithms::Angle(0));
+        extensionSubsystem.setSetpoint(0.3);
+        wristSubsystem.setSetpointTheta1(0);
+        wristSubsystem.setSetpointTheta2(M_PI_2);
+        wristSubsystem.setSetpointTheta3(0);
+    },
+    std::array<tap::control::Subsystem*, 3>{&engTurret, &extensionSubsystem, &wristSubsystem});
+
+Trigger pickupSetpoint = TriggerHelpers::button(drivers(), Remote::Key::F).onTrue(&pickupPose);
 
 Trigger suctionToggle =
     TriggerHelpers::button(drivers(), Remote::Key::G).onTrue(&endEffectorSuckToggleCommand);
