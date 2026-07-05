@@ -91,7 +91,7 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  * Radius of the wheels (m)
  */
 static constexpr float FUDGE_FACTOR = 0.999141881817f;
-static constexpr float WHEEL_RADIUS = 0.0762f * FUDGE_FACTOR;
+static constexpr float WHEEL_RADIUS = 0.0762f ; /* * FUDGE_FACTOR;*/
 
 static constexpr float WHEELBASE_RADIUS = 0.23864f;
 
