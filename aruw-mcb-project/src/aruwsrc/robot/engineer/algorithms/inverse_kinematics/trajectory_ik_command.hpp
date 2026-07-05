@@ -63,11 +63,11 @@ public:
         return (now - startTime) / 1000.0f > trajectory.waypoints.back().time;
     }
 
-    tap::algorithms::transforms::Transform getBaseToFollowerDesired() override
+    void updateBaseToFollowerDesired() override
     {
         uint32_t now = tap::arch::clock::getTimeMilliseconds();
 
-        return trajectory.atTime((now - startTime) / 1000.0f);
+        baseToFollowerDesired = trajectory.atTime((now - startTime) / 1000.0f);
     }
 
 private:

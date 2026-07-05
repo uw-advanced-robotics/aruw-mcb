@@ -51,7 +51,14 @@ AbstractIKCommand::AbstractIKCommand(
       pitchController(pitchController),
       turretPitchToExtensionZeroX(TURRET_PITCH_TO_EXTENSION_ZERO_POS.x()),
       turretPitchToExtensionZeroZ2(
-          TURRET_PITCH_TO_EXTENSION_ZERO_POS.z() * TURRET_PITCH_TO_EXTENSION_ZERO_POS.z())
+          TURRET_PITCH_TO_EXTENSION_ZERO_POS.z() * TURRET_PITCH_TO_EXTENSION_ZERO_POS.z()),
+      chassisToBaseInverse(this->chassisToBase.getInverse()),
+      followerToEndEffectorInverse(this->followerToEndEffector.getInverse()),
+      chassisToTurretYawZeroInverse(
+          EngineerTransforms::getHypotheticalChassisToTurretYaw(0).getInverse()),
+      chassisToTurretYawScratch(EngineerTransforms::getHypotheticalChassisToTurretYaw(0)),
+      turretYawToTurretPitchScratch(EngineerTransforms::getHypotheticalTurretYawToTurretPitch(0)),
+      wristSetpointTransform(Position(), Orientation())
 {
     addSubsystemRequirement(&turret);
     addSubsystemRequirement(&extension);
@@ -60,54 +67,65 @@ AbstractIKCommand::AbstractIKCommand(
 
 void AbstractIKCommand::execute()
 {
-    chassisToEndEffectorDesired = chassisToBase.composeStatic(getBaseToFollowerDesired())
-                                      .composeStatic(followerToEndEffector);
+    chassisToBaseInverse = chassisToBase.getInverse();
+    updateBaseToFollowerDesired();
+    chassisToEndEffectorDesired =
+        chassisToBase.composeStatic(baseToFollowerDesired).composeStatic(followerToEndEffector);
 
-    // kept as a Transform because we want to compose it easily
     chassisToWristDesiredPos = chassisToEndEffectorDesired.composeStatic(END_EFFECTOR_TO_WRIST);
-
-    Position turretYawToWristDesiredPos = EngineerTransforms::getHypotheticalChassisToTurretYaw(0)
-                                              .getInverse()
-                                              .composeStatic(chassisToWristDesiredPos)
-                                              .getTranslation();
-
-    // We know y component of turretPitchToExtension is 0 and thus doesn't affect yaw
+    Position turretYawToWristDesiredPos =
+        chassisToTurretYawZeroInverse.composeStatic(chassisToWristDesiredPos).getTranslation();
     turretYawDesired = atan2f(turretYawToWristDesiredPos.y(), turretYawToWristDesiredPos.x());
 
-    Position turretPitchToWristDesiredPos =
-        EngineerTransforms::getHypotheticalChassisToTurretYaw(turretYawDesired)
-            .composeStatic(EngineerTransforms::getHypotheticalTurretYawToTurretPitch(0))
-            .getInverse()
-            .composeStatic(chassisToWristDesiredPos)
-            .getTranslation();
+    chassisToTurretYawScratch.updateRotation(0, 0, turretYawDesired);
+    turretYawToTurretPitchScratch.updateRotation(0, 0, 0);
+    Position turretPitchToWristDesiredPos = chassisToTurretYawScratch
+                                                .composeStatic(turretYawToTurretPitchScratch)
+                                                .getInverse()
+                                                .composeStatic(chassisToWristDesiredPos)
+                                                .getTranslation();
 
     float turretPitchToWristDesiredDistSq = turretPitchToWristDesiredPos.toVector().magnitudeSq();
-    extensionDesired = sqrtf(turretPitchToWristDesiredDistSq - turretPitchToExtensionZeroZ2) -
+    extensionDesired = sqrtf(fabs(turretPitchToWristDesiredDistSq - turretPitchToExtensionZeroZ2)) -
                        turretPitchToExtensionZeroX;
 
-    turretPitchToExtension =
-        EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionDesired);
+    turretPitchToExtension.updateTranslation(
+        TURRET_PITCH_TO_EXTENSION_ZERO_POS + Vector(extensionDesired, 0, 0));
     float x1 = turretPitchToWristDesiredPos.x();
     float y1 = turretPitchToWristDesiredPos.z();
     float x2 = turretPitchToExtension.getX();
     float y2 = turretPitchToExtension.getZ();
     turretPitchDesired = atan2f(x1 * y2 - y1 * x2, x1 * x2 + y1 * y2);
 
-    extensionToWristDesired =
-        EngineerTransforms::getHypotheticalChassisToTurretYaw(turretYawDesired)
-            .composeStatic(
-                EngineerTransforms::getHypotheticalTurretYawToTurretPitch(turretPitchDesired))
-            .composeStatic(
-                EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionDesired))
-            .getInverse()
-            .composeStatic(chassisToEndEffectorDesired)
-            .composeStatic(END_EFFECTOR_TO_WRIST);
+    turretYawToTurretPitchScratch.updateRotation(0, turretPitchDesired, 0);
+    extensionToWristDesired = chassisToTurretYawScratch
+                                  .composeStatic(turretYawToTurretPitchScratch)
+                                  .composeStatic(turretPitchToExtension)
+                                  .getInverse()
+                                  .composeStatic(chassisToEndEffectorDesired)
+                                  .composeStatic(END_EFFECTOR_TO_WRIST);
 
     // Set the desired setpoints
     yawController.runController(0.002f, Angle(turretYawDesired));
     pitchController.runController(0.002f, Angle(turretPitchDesired));
     extension.setSetpoint(extensionDesired);
     wrist.setSetpointOrientation(extensionToWristDesired.getRotation());
+
+    chassisToTurretYawScratch.updateRotation(0, 0, yawController.getSetpoint().getWrappedValue());
+    turretYawToTurretPitchScratch.updateRotation(
+        0,
+        pitchController.getSetpoint().getWrappedValue(),
+        0);
+    turretPitchToExtension.updateTranslation(
+        TURRET_PITCH_TO_EXTENSION_ZERO_POS + Vector(extension.getSetpoint(), 0, 0));
+    wristSetpointTransform.updateRotation(wrist.getSetpointOrientation());
+    baseToFollowerDesired = chassisToBaseInverse
+                                .composeStatic(chassisToTurretYawScratch)
+                                .composeStatic(turretYawToTurretPitchScratch)
+                                .composeStatic(turretPitchToExtension)
+                                .composeStatic(wristSetpointTransform)
+                                .composeStatic(WRIST_TO_END_EFFECTOR)
+                                .composeStatic(followerToEndEffectorInverse);
 }
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

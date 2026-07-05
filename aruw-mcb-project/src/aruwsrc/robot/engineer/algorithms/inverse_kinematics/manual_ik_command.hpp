@@ -45,11 +45,10 @@ public:
 
     void initialize() override;
 
-    tap::algorithms::transforms::Transform getBaseToFollowerDesired() override;
+    void updateBaseToFollowerDesired() override;
 
 private:
     const aruwsrc::engineer::EngineerControlOperatorInterface& controlOperatorInterface;
-    tap::algorithms::transforms::Transform baseToEndEffectorDesired;
     const tap::algorithms::transforms::Transform& baseToEndEffector;
 };  // class ManualIKCommand
 

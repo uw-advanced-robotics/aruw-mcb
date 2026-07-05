@@ -84,9 +84,10 @@ public:
 
     virtual bool isFinished() const override { return false; }
 
-    virtual tap::algorithms::transforms::Transform getBaseToFollowerDesired() = 0;
+    virtual void updateBaseToFollowerDesired() = 0;
 
 protected:
+    tap::algorithms::transforms::Transform baseToFollowerDesired;
     const tap::algorithms::transforms::Transform &chassisToBase, followerToEndEffector;
     aruwsrc::control::turret::TurretSubsystem& turret;
     aruwsrc::control::joint::JointSubsystem& extension;
@@ -98,8 +99,12 @@ protected:
 
 private:
     const float turretPitchToExtensionZeroX, turretPitchToExtensionZeroZ2;
+    tap::algorithms::transforms::Transform chassisToBaseInverse;
+    const tap::algorithms::transforms::Transform followerToEndEffectorInverse;
+    const tap::algorithms::transforms::Transform chassisToTurretYawZeroInverse;
     tap::algorithms::transforms::Transform chassisToEndEffectorDesired, chassisToWristDesiredPos,
-        turretPitchToExtension, extensionToWristDesired;
+        turretPitchToExtension, extensionToWristDesired, chassisToTurretYawScratch,
+        turretYawToTurretPitchScratch, wristSetpointTransform;
     float turretYawDesired, turretPitchDesired, extensionDesired;
 };
 

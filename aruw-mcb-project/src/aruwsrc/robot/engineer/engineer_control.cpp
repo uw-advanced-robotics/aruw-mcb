@@ -787,9 +787,6 @@ InstantCommand homeRoll(
     std::array<tap::control::Subsystem*, 1>{&wristSubsystem});
 Trigger homeRollButton = TriggerHelpers::button(drivers(), Remote::Key::C).onTrue(&homeRoll);
 
-/*Trigger cvAlign =
-    TriggerHelpers::button(drivers(), )*/
-
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
 {

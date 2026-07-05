@@ -180,6 +180,14 @@ Orientation WristSubsystem::getOrientation() const
     return getHypotheticalOrientation(getTheta1(), getTheta2(), getTheta3());
 }
 
+Orientation WristSubsystem::getSetpointOrientation() const
+{
+    return getHypotheticalOrientation(
+        getSetpointTheta1(),
+        getSetpointTheta2(),
+        getSetpointTheta3());
+}
+
 Orientation WristSubsystem::getHypotheticalOrientation(float theta1, float theta2, float theta3)
 {
     float s1 = sinf(theta1), c1 = cosf(theta1);
