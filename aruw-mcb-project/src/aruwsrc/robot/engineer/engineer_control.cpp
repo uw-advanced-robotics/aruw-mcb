@@ -480,8 +480,16 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
+aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset turretGravityCompensation(
+    TURRET_GRAVITY_CONFIG);
+std::vector<aruwsrc::control::turret::algorithms::TurretCompensatorInterface *>
+    pitchTurretCompensators = {&turretGravityCompensation};
+
 ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
-    chassisFramePitchTurretController(engTurret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
+    chassisFramePitchTurretController(
+        engTurret.pitchMotor,
+        chassis_rel::PITCH_PID_CONFIG,
+        pitchTurretCompensators);
 
 ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
     chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
@@ -497,7 +505,8 @@ WorldFrameTurretImuCascadePidTurretController<tap::algorithms::transforms::Axis:
         drivers()->mcbLite.imu,
         engTurret.pitchMotor,
         worldFramePitchTurretImuPosPid,
-        worldFramePitchTurretImuVelPid);
+        worldFramePitchTurretImuVelPid,
+        pitchTurretCompensators);
 
 tap::algorithms::SmoothPid worldFrameYawTurretImuPosPid(world_rel_turret_imu::YAW_POS_PID_CONFIG);
 tap::algorithms::SmoothPid worldFrameYawTurretImuVelPid(world_rel_turret_imu::YAW_VEL_PID_CONFIG);

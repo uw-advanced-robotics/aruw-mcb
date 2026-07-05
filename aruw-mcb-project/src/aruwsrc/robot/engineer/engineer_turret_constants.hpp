@@ -152,9 +152,9 @@ static constexpr aruwsrc::control::turret::TurretMotorConfig PITCH_MOTOR_CONFIG 
 
 static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset::
     TurretGravityParams TURRET_GRAVITY_CONFIG{
-        .cgX = 0.0f,
+        .cgX = 70.0f,
         .cgZ = 0.0f,
-        .gravityCompensatorMax = 0.0f};
+        .gravityCompensatorMax = -2500.0f};
 
 inline constexpr float BINNED_ALIGNMENT_OFFSET = 0.32575804f;
 inline constexpr float YAW_ALIGNMENT_OFFSET = 2.6f;
