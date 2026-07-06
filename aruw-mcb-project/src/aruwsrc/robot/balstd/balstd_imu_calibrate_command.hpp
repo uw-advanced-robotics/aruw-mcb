@@ -187,13 +187,13 @@ protected:
         aruwsrc::control::turret::TurretSubsystem *turret,
         bool ignorePitch) const
     {
-        return compareFloatClose(
+        return tap::algorithms::compareFloatClose(
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
                    velocityZeroThreshold) &&
                (turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0) <
                 positionZeroThreshold) &&
-               (ignorePitch || (compareFloatClose(
+               (ignorePitch || (tap::algorithms::compareFloatClose(
                                     0.0f,
                                     turret->pitchMotor.getChassisFrameVelocity(),
                                     velocityZeroThreshold) &&
