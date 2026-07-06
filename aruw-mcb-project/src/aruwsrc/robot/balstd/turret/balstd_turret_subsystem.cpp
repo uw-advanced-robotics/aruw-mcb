@@ -21,10 +21,10 @@
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::balstd::turret
 {
 float BalstdTurretSubsystem::getWorldYaw() const { return getIMU()->getYaw(); }
 
 float BalstdTurretSubsystem::getWorldPitch() const { return getIMU()->getPitch(); }
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::balstd::turret

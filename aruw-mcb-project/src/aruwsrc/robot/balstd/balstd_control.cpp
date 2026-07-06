@@ -184,7 +184,7 @@ tap::motor::DjiMotor yawMotor(
 aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
 aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
 
-aruwsrc::control::turret::BalstdTurretSubsystem turret(
+aruwsrc::balstd::turret::BalstdTurretSubsystem turret(
     drivers(),
     pitchTurretMotor,
     yawTurretMotor,

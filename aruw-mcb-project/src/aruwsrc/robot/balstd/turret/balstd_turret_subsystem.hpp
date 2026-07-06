@@ -22,12 +22,12 @@
 
 #include "aruwsrc/control/turret/robot_turret_subsystem.hpp"
 
-namespace aruwsrc::control::turret
+namespace aruwsrc::balstd::turret
 {
 /**
  * Turret subsystem for the Balancing Standard.
  */
-class BalstdTurretSubsystem final : public RobotTurretSubsystem
+class BalstdTurretSubsystem final : public aruwsrc::control::turret::RobotTurretSubsystem
 {
     using RobotTurretSubsystem::RobotTurretSubsystem;
     float getWorldYaw() const override;
@@ -36,6 +36,6 @@ class BalstdTurretSubsystem final : public RobotTurretSubsystem
     float getPitchOffset() const override { return 0; };
 };  // class BalstdTurretSubsystem
 
-}  // namespace aruwsrc::control::turret
+}  // namespace aruwsrc::balstd::turret
 
 #endif  // BALSTD_TURRET_SUBSYSTEM_HPP_
