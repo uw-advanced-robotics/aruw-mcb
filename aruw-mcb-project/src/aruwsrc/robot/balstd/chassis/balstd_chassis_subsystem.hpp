@@ -19,8 +19,8 @@
 #ifndef BALSTD_CHASSIS_SUBSYSTEM_HPP_
 #define BALSTD_CHASSIS_SUBSYSTEM_HPP_
 
-#include "tap/algorithms/butterworth.hpp"
-#include "tap/algorithms/discrete_filter.hpp"
+#include "tap/algorithms/filter/butterworth.hpp"
+#include "tap/algorithms/filter/discrete_filter.hpp"
 #include "tap/algorithms/kalman_filter.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 

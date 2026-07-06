@@ -82,7 +82,7 @@ enum OutputDataRate : uint8_t
     ODR_BITMASK = 0b00001111
 };
 
-static constexpr uint32_t READ_LENGTH = 14;
+#define READ_LENGTH 14
 
 static constexpr float TEMPERATURE_OFFSET = 25.0f;
 static constexpr float TEMPERATURE_SENSITIVITY = 256.0f;

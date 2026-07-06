@@ -90,13 +90,15 @@ public:
     struct TurretIMUCalibrationConfig
     {
         /// The turret mounted IMU to be calibrated.
-        aruwsrc::can::TurretMCBCanComm *turretMCBCanComm;
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm;
         /// A `TurretSubsystem` that this command will control (will lock the turret).
         aruwsrc::control::turret::TurretSubsystem *turret;
         /// A chassis relative yaw controller used to lock the turret.
-        aruwsrc::control::turret::algorithms::ChassisFrameYawTurretController *yawController;
+        aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+            tap::algorithms::transforms::Axis::YAW> *yawController;
         /// A chassis relative pitch controller used to lock the turret.
-        aruwsrc::control::turret::algorithms::ChassisFramePitchTurretController *pitchController;
+        aruwsrc::control::turret::algorithms::ChassisFrameTurretController<
+            tap::algorithms::transforms::Axis::PITCH> *pitchController;
         /**
          * `true` if the turret IMU is mounted on the pitch axis of the
          * turret. In this case the pitch controller doesn't have to reach the horizontal setpoint

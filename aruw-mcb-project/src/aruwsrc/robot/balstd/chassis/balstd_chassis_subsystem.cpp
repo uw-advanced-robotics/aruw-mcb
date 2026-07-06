@@ -110,8 +110,8 @@ void BalstdChassisSubsystem::updateState()
         currState.pitchVel,
         currState.yawVel);
 
-    currState.accel = currState.orientation.getOrientation().getInverse().apply(
-        tap::algorithms::transforms::Vector(
+    currState.accel =
+        currState.orientation.getRotation().applyForward(tap::algorithms::transforms::Vector(
             chassisImu.getAx(),
             chassisImu.getAy(),
             chassisImu.getAz() - tap::communication::sensors::imu::GRAVITY_MPS2));

@@ -28,6 +28,8 @@
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -56,7 +58,6 @@
 #endif
 
 using namespace aruwsrc::algorithms;
-using namespace aruwsrc::algorithms::transforms;
 using namespace aruwsrc::balstd;
 using namespace aruwsrc::balstd::chassis;
 using namespace aruwsrc::balstd::chassis::controllers;
@@ -65,10 +66,13 @@ using namespace aruwsrc::control;
 using namespace aruwsrc::control::buzzer;
 using namespace aruwsrc::control::motor;
 using namespace aruwsrc::control::turret;
+using namespace aruwsrc::control::turret::algorithms;
 
 using namespace tap::control::setpoint;
 using namespace tap::control;
 using namespace tap::communication::serial;
+
+using tap::algorithms::transforms::Axis;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -80,9 +84,9 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace balstd_control
 {
-inline aruwsrc::can::TurretMCBCanComm& getTurretMCBCanComm()
+inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
-    return drivers()->turretMCBCanCommBus1;
+    return drivers()->turretMCBCanCommBus;
 }
 
 /* define subsystems --------------------------------------------------------*/
@@ -177,19 +181,20 @@ tap::motor::DjiMotor yawMotor(
     "Yaw Turret",
     true);
 
+aruwsrc::control::turret::TurretMotor pitchTurretMotor(&pitchMotor, PITCH_MOTOR_CONFIG);
+aruwsrc::control::turret::TurretMotor yawTurretMotor(&yawMotor, YAW_MOTOR_CONFIG);
+
 aruwsrc::control::turret::BalstdTurretSubsystem turret(
     drivers(),
-    &pitchMotor,
-    &yawMotor,
-    PITCH_MOTOR_CONFIG,
-    YAW_MOTOR_CONFIG,
+    pitchTurretMotor,
+    yawTurretMotor,
     &getTurretMCBCanComm());
 
-algorithms::ChassisFramePitchTurretController chassisFramePitchTurretController(
+ChassisFrameTurretController<Axis::PITCH> chassisFramePitchTurretController(
     turret.pitchMotor,
     chassis_rel::PITCH_PID_CONFIG);
 
-algorithms::ChassisFrameYawTurretController chassisFrameYawTurretController(
+ChassisFrameTurretController<Axis::YAW> chassisFrameYawTurretController(
     turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
@@ -229,28 +234,37 @@ HomeLegCommand homeLegs(chassis);
 // Remote related mappings
 
 // imu calibrate
-HoldCommandMapping leftUpRightMid(
-    drivers(),
-    {&imuCalibrateCommand},
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID));
+Trigger leftUpRightMid =
+    (TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID))
+        .onTrue(&imuCalibrateCommand);
 
 // home legs
-HoldCommandMapping leftDownRightMid(
-    drivers(),
-    {&homeLegs},
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::MID));
+Trigger leftDownRightMid =
+    (TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::LEFT_SWITCH,
+         Remote::SwitchState::DOWN) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID))
+        .whileTrue(&homeLegs);
 
 // manual
-HoldCommandMapping leftMidRightMid(
-    drivers(),
-    {&disarmCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::MID));
+Trigger leftMidRightMid =
+    (TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::LEFT_SWITCH,
+         Remote::SwitchState::MID) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID))
+        .onTrue(&disarmCommand);
 
 // balancing
-HoldCommandMapping leftMidRightUp(
-    drivers(),
-    {&getUpCommand},
-    RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP));
+Trigger leftMidRightUp =
+    (TriggerHelpers::switchState(
+         drivers(),
+         Remote::Switch::LEFT_SWITCH,
+         Remote::SwitchState::MID) &&
+     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
+        .onTrue(&getUpCommand);
 
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -295,13 +309,7 @@ void startStandardCommands(Drivers* drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerStandardIoMappings(Drivers* drivers)
-{
-    drivers->commandMapper.addMap(&leftUpRightMid);    // imu calibrate
-    drivers->commandMapper.addMap(&leftDownRightMid);  // home legs
-    drivers->commandMapper.addMap(&leftMidRightMid);   // disarm (manual controller)
-    drivers->commandMapper.addMap(&leftMidRightUp);    // get up (balance controller)
-}
+void registerStandardIoMappings(Drivers*) {}
 }  // namespace balstd_control
 
 namespace aruwsrc::balstd

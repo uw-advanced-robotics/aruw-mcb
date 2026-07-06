@@ -32,9 +32,8 @@
 #else
 #include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 
-#include "aruwsrc/communication/can/capacitor_bank.hpp"
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
-#include "aruwsrc/communication/sensors/imu/ism330.hpp"
+#include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/display/oled_display.hpp"
 
@@ -57,14 +56,16 @@ public:
           oledDisplay(
               this,
               &visionCoprocessor,
-              &turretMCBCanCommBus1,
-              &turretMCBCanCommBus2,
+              &turretMCBCanCommBus,
+              nullptr,
+              nullptr,
+              nullptr,
               nullptr,
               nullptr),
-          turretMCBCanCommBus1(this, tap::can::CanBus::CAN_BUS1),
-          turretMCBCanCommBus2(this, tap::can::CanBus::CAN_BUS2),
+          turretMCBCanCommBus(this, tap::can::CanBus::CAN_BUS1),
           mpu6500TerminalSerialHandler(this, &this->mpu6500),
-          chassisIsm330(this)
+          chassisIsm330(aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
+                        modm::platform::GpioD12>())
 
     {
     }
@@ -73,19 +74,61 @@ public:
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
     testing::NiceMock<mock::OledDisplayMock> oledDisplay;
-    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus1;
+    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
     testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
     testing::NiceMock<tap::mock::Mpu6500Mock> chassisIsm330;
 #else
 public:
     aruwsrc::balstd::BalstdControlOperatorInterface controlOperatorInterface;
-    serial::VisionCoprocessor visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor visionCoprocessor;
     display::OledDisplay oledDisplay;
-    can::TurretMCBCanComm turretMCBCanCommBus1;
-    can::TurretMCBCanComm turretMCBCanCommBus2;
+    aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus;
     tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
-    aruwsrc::communication::sensors::imu::ism330::ISM330<Board::I2CMaster> chassisIsm330;
+    aruwsrc::communication::sensors::imu::ism330::ISM330 chassisIsm330;
+
+    void init(const float mainLoopFrequency)
+    {
+        visionCoprocessor.initializeCV();
+        turretMCBCanCommBus.init();
+        oledDisplay.initialize();
+        mpu6500.setCalibrationSamples(4000);
+        chassisIsm330.initialize(mainLoopFrequency, 0.1f, 0);
+    }
+
+    void updateIo()
+    {
+        oledDisplay.updateDisplay();
+        visionCoprocessor.updateSerial();
+        chassisIsm330.read();
+    }
+
+    void update()
+    {
+        turretMCBCanCommBus.sendData();
+        oledDisplay.updateMenu();
+        visionCoprocessor.sendMessage();
+        chassisIsm330.periodicIMUUpdate();
+        checkTurretMcbDisconnection(this);
+    }
+
+private:
+    bool wasTurretMcbConnected = true;
+    inline void checkTurretMcbDisconnection(Drivers* drivers)
+    {
+        bool turretMcbConnected = drivers->turretMCBCanCommBus.isConnected();
+        if (!turretMcbConnected &&
+            drivers->mpu6500.getImuState() !=
+                tap::communication::sensors::imu::ImuInterface::ImuState::IMU_CALIBRATING)
+        {
+            tap::buzzer::playNote(&drivers->pwm, 1000);
+        }
+        else if (turretMcbConnected && !drivers->wasTurretMcbConnected)
+        {
+            tap::buzzer::silenceBuzzer(&drivers->pwm);
+        }
+        drivers->wasTurretMcbConnected = turretMcbConnected;
+    }
 #endif
 };  // class aruwsrc::BalstdDrivers
 }  // namespace aruwsrc::balstd

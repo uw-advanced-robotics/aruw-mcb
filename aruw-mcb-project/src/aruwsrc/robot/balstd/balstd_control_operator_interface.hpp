@@ -20,7 +20,7 @@
 #ifndef BALSTD_CONTROL_OPERATOR_INTERFACE_HPP_
 #define BALSTD_CONTROL_OPERATOR_INTERFACE_HPP_
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 namespace aruwsrc::balstd
 {
@@ -61,10 +61,8 @@ public:
     template <Input I>
     inline float getInput()
     {
-        constexpr Channel channel = INPUTS[static_cast<size_t>(I)].channel;
-        constexpr Mode mode = INPUTS[static_cast<size_t>(I)].mode;
-        constexpr float max = INPUTS[static_cast<size_t>(I)].max;
-        return getModeRestrictedInput(channel, mode, max);
+        constexpr size_t i = static_cast<size_t>(I);
+        return getModeRestrictedInput(INPUTS[i].channel, INPUTS[i].mode, INPUTS[i].max);
     }
 
     inline void setMode(Mode newMode)

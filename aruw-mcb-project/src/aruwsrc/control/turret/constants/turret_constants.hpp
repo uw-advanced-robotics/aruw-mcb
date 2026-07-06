@@ -37,6 +37,8 @@
 // static constexpr float TURRET_CG_Z = 0.0f;
 // static constexpr float GRAVITY_COMPENSATION_SCALAR = 0.0f;
 // }  // namespace aruwsrc::control::turret
+#elif defined(TARGET_BALSTD)
+#include "aruwsrc/robot/balstd/turret/balstd_turret_constants.hpp"
 #elif defined(TARGET_HERO_NEPTUNE)
 #include "aruwsrc/robot/hero/hero_turret_constants.hpp"
 #elif defined(TARGET_DRONE)
