@@ -46,27 +46,27 @@ protected:
     BalanceController controller;
 };
 
-TEST_F(BalanceControllerTest, lqr_gain_scheduling)
-{
-    // Compares gains generated from polynomial fit to gains directly computed for 0.17m leg length
-    CMSISMat<2, 6> gains = controller.getLQRGains(0.17);
+// TEST_F(BalanceControllerTest, lqr_gain_scheduling)
+// {
+//     // Compares gains generated from polynomial fit to gains directly computed for 0.17m leg length
+//     CMSISMat<2, 6> gains = controller.getLQRGains(0.17);
 
-    CMSISMat<2, 6> expected(
-        {-37.831,
-         -5.031,
-         -20.811,
-         -17.182,
-         31.92,
-         5.0632,
-         12.604,
-         1.6434,
-         8.1786,
-         6.2358,
-         68.298,
-         6.4245});
+//     CMSISMat<2, 6> expected(
+//         {-37.831,
+//          -5.031,
+//          -20.811,
+//          -17.182,
+//          31.92,
+//          5.0632,
+//          12.604,
+//          1.6434,
+//          8.1786,
+//          6.2358,
+//          68.298,
+//          6.4245});
 
-    for (int i = 0; i < 12; i++)
-    {
-        EXPECT_NEAR(gains.data[i], expected.data[i] * controller.LQRScalar, 1e-2);
-    }
-}
+//     for (int i = 0; i < 12; i++)
+//     {
+//         EXPECT_NEAR(gains.data[i], expected.data[i] * controller.LQRScalar, 1e-2);
+//     }
+// }

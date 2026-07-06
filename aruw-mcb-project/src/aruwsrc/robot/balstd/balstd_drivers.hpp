@@ -23,19 +23,13 @@
 #include "tap/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
-#include "tap/mock/imu_terminal_serial_handler_mock.hpp"
-
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
-#include "aruwsrc/mock/oled_display_mock.hpp"
 #include "aruwsrc/mock/turret_mcb_can_comm_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 #else
-#include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
-
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/communication/sensors/imu/ism330/ism330.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/display/oled_display.hpp"
 
 #include "balstd_control_operator_interface.hpp"
 #endif
@@ -53,52 +47,38 @@ public:
         : tap::Drivers(),
           controlOperatorInterface(this),
           visionCoprocessor(this),
-          oledDisplay(
-              this,
-              &visionCoprocessor,
-              &turretMCBCanCommBus,
-              nullptr,
-              nullptr,
-              nullptr,
-              nullptr,
-              nullptr),
           turretMCBCanCommBus(this, tap::can::CanBus::CAN_BUS1),
-          mpu6500TerminalSerialHandler(this, &this->mpu6500),
+#ifdef ENV_UNIT_TESTS
+          chassisIsm330(this)
+#else
           chassisIsm330(aruwsrc::communication::sensors::imu::ism330::ISM330::chipSelectFromGpio<
                         modm::platform::GpioD12>())
-
+#endif
     {
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
     testing::NiceMock<mock::VisionCoprocessorMock> visionCoprocessor;
-    testing::NiceMock<mock::OledDisplayMock> oledDisplay;
     testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus;
-    testing::NiceMock<mock::TurretMCBCanCommMock> turretMCBCanCommBus2;
-    testing::NiceMock<tap::mock::ImuTerminalSerialHandlerMock> mpu6500TerminalSerialHandler;
     testing::NiceMock<tap::mock::Mpu6500Mock> chassisIsm330;
 #else
 public:
     aruwsrc::balstd::BalstdControlOperatorInterface controlOperatorInterface;
     aruwsrc::communication::serial::VisionCoprocessor visionCoprocessor;
-    display::OledDisplay oledDisplay;
     aruwsrc::communication::can::TurretMCBCanComm turretMCBCanCommBus;
-    tap::communication::sensors::imu::ImuTerminalSerialHandler mpu6500TerminalSerialHandler;
     aruwsrc::communication::sensors::imu::ism330::ISM330 chassisIsm330;
 
     void init(const float mainLoopFrequency)
     {
         visionCoprocessor.initializeCV();
         turretMCBCanCommBus.init();
-        oledDisplay.initialize();
         mpu6500.setCalibrationSamples(4000);
         chassisIsm330.initialize(mainLoopFrequency, 0.1f, 0);
     }
 
     void updateIo()
     {
-        oledDisplay.updateDisplay();
         visionCoprocessor.updateSerial();
         chassisIsm330.read();
     }
@@ -106,7 +86,6 @@ public:
     void update()
     {
         turretMCBCanCommBus.sendData();
-        oledDisplay.updateMenu();
         visionCoprocessor.sendMessage();
         chassisIsm330.periodicIMUUpdate();
         checkTurretMcbDisconnection(this);
