@@ -21,9 +21,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 SwerveModule::SwerveModule(Motor& driveMotor, Motor& azimuthMotor, SwerveModuleConfig& config)
     : wheel(config.WHEEL_DIAMETER_M, config.driveMotorGearing, config.gearboxRatio),
@@ -161,5 +159,4 @@ void SwerveModule::limitPower(float frac)
     // (1 - angularBiasLUTInterpolator.interpolate(rotationSetpoint - getAngle())));
 }
 
-}  // namespace chassis
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

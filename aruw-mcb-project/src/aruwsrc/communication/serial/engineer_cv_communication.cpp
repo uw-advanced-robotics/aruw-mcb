@@ -19,17 +19,19 @@
 
 #include "engineer_cv_communication.hpp"
 
+#include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
 using namespace tap::communication::serial;
-using namespace aruwsrc::serial;
+using namespace aruwsrc::communication::serial;
 using namespace tap::algorithms::transforms;
 
 EngineerCVCommunication* EngineerCVCommunication::engineerCVCommunicationInstance = nullptr;
 
 EngineerCVCommunication::EngineerCVCommunication(tap::Drivers* drivers)
     : DJISerial(drivers, ENGINEER_CV_RX_UART_PORT),
-      receptableToCam(Transform::identity())
+      camToReceptacle(Transform::identity()),
+      isFresh(false)
 {
 #ifndef ENV_UNIT_TESTS
     // when testing it is OK to have multiple vision coprocessor instances, so this assertion
@@ -43,15 +45,23 @@ EngineerCVCommunication::~EngineerCVCommunication() { engineerCVCommunicationIns
 
 void EngineerCVCommunication::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
+    if (completeMessage.messageType != TARGET_POSITION_MESSAGE_TYPE ||
+        completeMessage.header.dataLength != sizeof(TargetPositionMessage))
+    {
+        return;
+    }
+
     memcpy(&(targetPositionMessage), &completeMessage.data, sizeof(TargetPositionMessage));
 
-    receptableToCam = Transform(
+    camToReceptacle = Transform(
         targetPositionMessage.xPos,
         targetPositionMessage.yPos,
         targetPositionMessage.zPos,
         targetPositionMessage.roll,
         targetPositionMessage.pitch,
         targetPositionMessage.yaw);
+    isFresh = true;
+    lastReceivedTimeMs = tap::arch::clock::getTimeMilliseconds();
 }
 
 void EngineerCVCommunication::initializeCV()

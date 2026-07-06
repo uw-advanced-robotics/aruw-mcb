@@ -29,7 +29,7 @@ namespace aruwsrc::balstd
 #elif defined(ALL_SENTRIES)
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_ZERO)
+#elif defined(TARGET_HERO_NEPTUNE)
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
 namespace aruwsrc::hero
 #elif defined(TARGET_DRONE)
@@ -49,6 +49,12 @@ namespace aruwsrc::blank
 #elif defined(TARGET_MOTOR_TESTER)
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 namespace aruwsrc::motor_tester
+#elif defined(TARGET_LAUNCHER_TARGET)
+#include "aruwsrc/robot/launcher_target/launcher_target_drivers.hpp"
+namespace aruwsrc::launcher_target
+#elif defined(TARGET_FLYWHEEL_TESTING)
+#include "aruwsrc/robot/flywheel_testing/flywheel_testing_drivers.hpp"
+namespace aruwsrc::flywheel_testing
 #elif defined(TARGET_CHARACTERIZER)
 #include "aruwsrc/robot/characterizer/characterizer_drivers.hpp"
 namespace aruwsrc::characterizer

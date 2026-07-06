@@ -24,7 +24,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 ReticleIndicator::ReticleIndicator(
     tap::Drivers &drivers,
@@ -128,4 +128,4 @@ void ReticleIndicator::initialize()
         &reticleMsg[NUM_RETICLE_COORDINATES / MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]
              .graphicData[NUM_RETICLE_COORDINATES % MODM_ARRAY_SIZE(reticleMsg[0].graphicData)]);
 }
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

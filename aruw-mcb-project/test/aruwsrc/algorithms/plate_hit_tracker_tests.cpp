@@ -17,6 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <aruwsrc/ref_system_constants.hpp>
 #include <gtest/gtest.h>
 
 #include "tap/algorithms/transforms/transform.hpp"
@@ -188,7 +189,7 @@ TEST(PlateHitTracker, detects_42)
     EXPECT_CALL(transformer, getWorldToChassis).Times(2).WillRepeatedly(ReturnRef(transform));
 
     hitTracker.update();
-    data.receivedDps = 99;
+    data.receivedDps = data.receivedDps + aruwsrc::constants::DAMAGE_42MM;
     data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
     hitTracker.update();
 
@@ -276,7 +277,7 @@ TEST(PlateHitTracker, peak_projectile_type_is_42)
     EXPECT_CALL(transformer, getWorldToChassis).Times(2).WillRepeatedly(ReturnRef(transform));
 
     hitTracker.update();
-    data.receivedDps = 100;
+    data.receivedDps = data.receivedDps + aruwsrc::constants::DAMAGE_42MM;
     data.damageType = tap::communication::serial::RefSerialData::Rx::DamageType::ARMOR_DAMAGE;
     hitTracker.update();
 

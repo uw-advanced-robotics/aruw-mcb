@@ -21,7 +21,7 @@
 
 using namespace tap::algorithms;
 
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 
 HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     tap::Drivers* drivers,
@@ -31,7 +31,7 @@ HalfSwerveChassisSubsystem::HalfSwerveChassisSubsystem(
     Module* moduleTwo,
     float wheelbaseRadius,
     const float forwardMatrixArray[12],
-    can::capbank::CapacitorBank* capacitorBank)
+    communication::can::cap_bank::CapacitorBank* capacitorBank)
     : HolonomicChassisSubsystem(drivers, currentSensor, voltageSensor, capacitorBank),
       modules{moduleOne, moduleTwo},
       wheelbaseRadius(wheelbaseRadius),

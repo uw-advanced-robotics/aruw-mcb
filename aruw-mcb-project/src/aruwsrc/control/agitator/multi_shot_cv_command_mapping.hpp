@@ -79,7 +79,7 @@ public:
     MultiShotCvCommandMapping(
         tap::Drivers &drivers,
         tap::control::Command &launchCommand,
-        const tap::control::RemoteMapState &rms,
+        const tap::control::GenericRemoteMapState &rms,
         std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
         governor::CvOnTargetGovernor &cvOnTargetGovernor,
         std::optional<ConstantVelocityAgitatorCommand *> command = std::nullopt);
@@ -94,7 +94,7 @@ public:
 
     LaunchMode getLaunchMode() const { return launchMode; }
 
-    void executeCommandMapping(const tap::control::RemoteMapState &currState);
+    void executeCommandMapping(const tap::control::GenericRemoteMapState &currState);
 
 private:
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager;

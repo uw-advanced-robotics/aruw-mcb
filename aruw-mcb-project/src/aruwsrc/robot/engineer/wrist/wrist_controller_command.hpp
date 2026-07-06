@@ -22,15 +22,13 @@
 
 #include "tap/control/command.hpp"
 
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
-#include "aruwsrc/robot/engineer/gantry/gantry_extension_subsystem.hpp"
-#include "aruwsrc/robot/engineer/gantry/gantry_lift_subsystem.hpp"
-#include "aruwsrc/robot/engineer/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 namespace aruwsrc::engineer::wrist
 {
-using namespace aruwsrc::control::engineer;
+using namespace aruwsrc::engineer;
 /**
  * A command that moves the engineer wrist based on the control operator interface.
  */
@@ -38,12 +36,11 @@ class WristControllerCommand : public tap::control::Command
 {
 public:
     WristControllerCommand(
-        JointSubsystem &roll,
         WristSubsystem &wrist,
         EngineerControlOperatorInterface *operatorInterface,
-        float rollScalingFactor,
-        float pitchScalingFactor,
-        float yawScalingFactor);
+        float theta1ScalingFactor,
+        float theta2ScalingFactor,
+        float theta3ScalingFactor);
 
     void initialize() override;
 
@@ -59,13 +56,12 @@ public:
     virtual bool isFinished() const override { return false; }
 
 private:
-    JointSubsystem &roll;
     WristSubsystem &wrist;
 
     EngineerControlOperatorInterface *operatorInterface;
-    const float rollScalingFactor;
-    const float pitchScalingFactor;
-    const float yawScalingFactor;
+    const float theta1ScalingFactor;
+    const float theta2ScalingFactor;
+    const float theta3ScalingFactor;
 };
 
 }  // namespace aruwsrc::engineer::wrist

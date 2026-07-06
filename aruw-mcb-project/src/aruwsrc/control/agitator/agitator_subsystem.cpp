@@ -36,9 +36,7 @@
 
 using namespace tap::motor;
 
-namespace aruwsrc
-{
-namespace agitator
+namespace aruwsrc::control::agitator
 {
 AgitatorSubsystem::AgitatorSubsystem(
     tap::Drivers* drivers,
@@ -134,6 +132,4 @@ float AgitatorSubsystem::getJamSetpointTolerance() const
     return jamChecker.getJamSetpointTolerance();
 }
 
-}  // namespace agitator
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::agitator

@@ -23,7 +23,7 @@
 #include "tap/communication/serial/ref_serial_data.hpp"
 #include "tap/control/command.hpp"
 
-#include "friction_wheel_subsystem.hpp"
+#include "friction_wheel_interface.hpp"
 
 namespace aruwsrc
 {
@@ -57,7 +57,7 @@ public:
      */
     FrictionWheelSpinRefLimitedCommand(
         tap::Drivers *drivers,
-        FrictionWheelSubsystem *frictionWheels,
+        FrictionWheelInterface *frictionWheels,
         float defaultLaunchSpeed,
         bool alwaysUseDefaultLaunchSpeed,
         tap::communication::serial::RefSerialData::Rx::MechanismID barrel);
@@ -75,7 +75,7 @@ public:
 private:
     tap::Drivers *drivers;
 
-    FrictionWheelSubsystem *frictionWheels;
+    FrictionWheelInterface *frictionWheels;
 
     const float defaultLaunchSpeed;
 

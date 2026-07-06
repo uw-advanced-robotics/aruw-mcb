@@ -26,7 +26,7 @@
 
 #include "modm/architecture/interface/can_message.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 /**
  * This class is used to send motor data to motors on virtual MCBs
@@ -52,6 +52,6 @@ public:
         can2Message6020CurrentSend;
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor
 
 #endif

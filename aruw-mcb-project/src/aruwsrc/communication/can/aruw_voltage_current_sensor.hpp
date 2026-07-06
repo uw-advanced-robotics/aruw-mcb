@@ -28,7 +28,7 @@
 
 #include "modm/architecture/interface/can_message.hpp"
 
-namespace aruwsrc::can
+namespace aruwsrc::communication::can
 {
 static constexpr uint16_t CHASSIS_SENSOR_CAN_ID = 0x1C5;
 
@@ -57,6 +57,6 @@ private:
 
     tap::arch::MilliTimeout heartbeat;
 };
-}  // namespace aruwsrc::can
+}  // namespace aruwsrc::communication::can
 
 #endif  // ARUW_VOLTAGE_CURRENT_SENSOR_HPP_

@@ -22,7 +22,7 @@ namespace aruwsrc::display
 {
 SentryStrategyMenu::SentryStrategyMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView>> *vs,
-    aruwsrc::serial::VisionCoprocessor *visionCoprocessor)
+    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor)
     : modm::ChoiceMenu<tap::display::DummyAllocator<modm::IAbstractView>>(
           vs,
           SENTRY_STRATEGY_MENU_ID,

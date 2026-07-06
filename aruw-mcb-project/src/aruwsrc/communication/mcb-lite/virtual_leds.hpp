@@ -27,7 +27,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 class VirtualLEDs : public tap::gpio::Leds
 {
@@ -58,5 +58,5 @@ private:
     bool hasNewData = false;
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 #endif  // VIRTUAL_LEDS_HPP_
