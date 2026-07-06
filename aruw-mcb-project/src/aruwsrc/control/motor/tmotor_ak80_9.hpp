@@ -235,22 +235,14 @@ private:
     static const uint32_t MOTOR_DISCONNECT_TIME = 100;
 
     const char* motorName;
-
     tap::Drivers* drivers;
-
     uint32_t motorIdentifier;
-
     tap::can::CanBus motorCanBus;
-
     int32_t desiredOutput;
-
     int8_t temperature;
-
     int16_t currentDraw;
-
-    uint8_t fault;
-
     float torque;
+    uint8_t fault;
 
     /**
      * If `false` the positive rotation direction of the shaft is counter-clockwise when
