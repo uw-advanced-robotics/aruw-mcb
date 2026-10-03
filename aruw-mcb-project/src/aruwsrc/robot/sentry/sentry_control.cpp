@@ -47,6 +47,8 @@
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/control/cap-bank/sentry_cap_bank_command.hpp"
 #include "aruwsrc/control/chassis/auto_nav_command.hpp"
+#include "aruwsrc/control/chassis/external_velocity_command.hpp"
+#include "aruwsrc/robot/sentry/turret/turret_major_chassis_hold_command.hpp"
 #include "aruwsrc/control/chassis/constants/chassis_constants.hpp"
 #include "aruwsrc/control/chassis/swerve_module.hpp"
 #include "aruwsrc/control/chassis/swerve_module_config.hpp"
@@ -452,6 +454,20 @@ aruwsrc::control::chassis::AutoNavCommand autoNavCommand(
     autoNavController,
     true);
 
+// Odin characterization: chassis velocity closed on mocap by an off-board script
+aruwsrc::control::chassis::ExternalVelocityCommand externalVelocityCommand(
+    chassis,
+    drivers()->visionCoprocessor,
+    WHEEL_RADIUS,
+    WHEELBASE_RADIUS);
+
+// Odin characterization: Odin rides on turret major, so hold turret major at a fixed
+// (encoder-referenced) chassis yaw to keep Odin rigid with the chassis mocap body.
+TurretMajorChassisHoldCommand turretMajorChassisHoldCommand(
+    turretMajor,
+    turretMajorChassisYawController,
+    turretMajor::YAW_MOTOR_CONFIG.startAngle);
+
 TurretMajorSentryControlCommand majorManualCommand(
     drivers(),
     drivers()->controlOperatorInterface,
@@ -724,12 +740,13 @@ auto leftUpRightUpAg = std::make_unique<HoldRepeatCommandMapping>(
     &leftUpRightUpRms,
     false);
 
-// auto nav + auto aim
+// Odin characterization: external (mocap-closed) chassis velocity. Replaces auto nav + auto aim
+// on this branch. Flip out of this switch state to stop the robot.
 RemoteMapState leftUpRightMidRms =
     RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::MID);
 auto leftUpRightMid = std::make_unique<HoldCommandMapping>(
     drivers(),
-    std::vector<Command *>{&autoNavCommand, &turretCVCommand},
+    std::vector<Command *>{&externalVelocityCommand, &turretMajorChassisHoldCommand},
     &leftUpRightMidRms);
 
 // imu calibrate

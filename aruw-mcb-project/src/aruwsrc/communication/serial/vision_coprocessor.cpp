@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/drivers.hpp"
@@ -163,6 +164,11 @@ void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& comp
             decodeToRobotOrbitData(completeMessage);
             return;
         }
+        case CV_MESSAGE_TYPE_CHASSIS_VELOCITY:
+        {
+            decodeToChassisVelocityCommand(completeMessage);
+            return;
+        }
         default:
             return;
     }
@@ -244,6 +250,25 @@ bool VisionCoprocessor::decodeToRobotOrbitData(const ReceivedSerialMessage& mess
 
     memset(&lastRobotOrbitData, 0, sizeof(RobotOrbitData));
     memcpy(&lastRobotOrbitData, &message.data, dataLength);
+    return true;
+}
+
+bool VisionCoprocessor::decodeToChassisVelocityCommand(const ReceivedSerialMessage& message)
+{
+    if (message.header.dataLength != sizeof(ChassisVelocityCommand))
+    {
+        return false;
+    }
+
+    ChassisVelocityCommand command;
+    memcpy(&command, &message.data, sizeof(ChassisVelocityCommand));
+    if (!std::isfinite(command.vx) || !std::isfinite(command.vy) || !std::isfinite(command.wz))
+    {
+        return false;
+    }
+
+    lastChassisVelocityCommand = command;
+    lastChassisVelocityCommandTimeMs = tap::arch::clock::getTimeMilliseconds();
     return true;
 }
 

@@ -342,6 +342,30 @@ public:
         return lastRobotOrbitData;
     }
 
+    /**
+     * Chassis-relative velocity command sent directly by the coprocessor. Used by closed-loop
+     * external controllers (e.g. mocap-in-the-loop sensor characterization) that must not
+     * depend on the MCB's own odometry.
+     */
+    struct ChassisVelocityCommand
+    {
+        uint32_t sequenceNum;
+        float vx;  ///< forward velocity, chassis frame (m/s)
+        float vy;  ///< leftward velocity, chassis frame (m/s)
+        float wz;  ///< counterclockwise yaw rate (rad/s)
+    } modm_packed;
+
+    mockable inline const ChassisVelocityCommand& getLastChassisVelocityCommand() const
+    {
+        return lastChassisVelocityCommand;
+    }
+
+    /// @return time (ms, MCB clock) that the last chassis velocity command was received, 0 if never
+    mockable inline uint32_t getLastChassisVelocityCommandTimeMs() const
+    {
+        return lastChassisVelocityCommandTimeMs;
+    }
+
     mockable inline void attachTransformer(
         aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer)
     {
@@ -411,6 +435,7 @@ private:
         CV_MESSAGE_TYPES_BULLETS_REMAINING = 14,
         CV_MESSAGE_TYPE_ROBOT_ORBIT = 15,
         CV_MESSAGE_TYPE_ARDUCAM_ARUCO = 17,
+        CV_MESSAGE_TYPE_CHASSIS_VELOCITY = 20,
     };
 
     /// Time in ms since last CV aim data was received before deciding CV is offline.
@@ -486,6 +511,13 @@ private:
 
     RobotOrbitData lastRobotOrbitData;
 
+    ChassisVelocityCommand lastChassisVelocityCommand{
+        .sequenceNum = 0,
+        .vx = 0.0f,
+        .vy = 0.0f,
+        .wz = 0.0f};
+    uint32_t lastChassisVelocityCommandTimeMs = 0;
+
     // CV online variables.
     /// Timer for determining if serial is offline.
     tap::arch::MilliTimeout cvOfflineTimeout;
@@ -531,6 +563,8 @@ private:
     bool decodeToArucoResetData(const ReceivedSerialMessage& message, ArucoResetData& resetData);
 
     bool decodeToRobotOrbitData(const ReceivedSerialMessage& message);
+
+    bool decodeToChassisVelocityCommand(const ReceivedSerialMessage& message);
 
     // Current motion strategy for sentry
     bool sentryMotionStrategy[static_cast<uint8_t>(
