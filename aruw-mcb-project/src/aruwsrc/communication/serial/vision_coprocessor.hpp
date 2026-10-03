@@ -48,6 +48,41 @@ namespace aruwsrc::communication::rtt
 class RttTelemetry;
 }  // namespace aruwsrc::communication::rtt
 
+/**
+ * Coprocessor link debugging (Odin characterization branch). Add `odinLinkDebug` to an Ozone
+ * watch window with live refresh. Jetson -> MCB arrives on USART3 (RX pin PD9), MCB -> Jetson
+ * leaves on USART2 (TX pin PD5), both at VISION_COPROCESSOR_BAUD_RATE.
+ */
+struct OdinLinkDebug
+{
+    // MCB -> Jetson
+    volatile uint32_t txLoops;  ///< sendMessage() calls: climbs at ~500 Hz if the MCB loop runs
+
+    // Jetson -> MCB, raw bytes on USART3 (sampled right before the parser drains the buffer)
+    volatile uint32_t rxBufferNonEmptySamples;  ///< climbs whenever any byte has arrived
+    volatile uint32_t rxBufferMax;              ///< most bytes ever waiting at once
+    /// sticky OR of USART3 status errors: 0x08 overrun, 0x04 noise, 0x02 framing (wrong baud
+    /// or noise on the line), 0x01 parity
+    volatile uint32_t rxErrorFlags;
+
+    // Jetson -> MCB, parsed: complete DJI frames whose CRCs check out
+    volatile uint32_t rxFrames;      ///< any message type
+    volatile uint32_t rxLastType;    ///< e.g. 2 auto-aim, 13 auto-nav, 20 chassis velocity
+    volatile uint32_t rxLastTimeMs;  ///< MCB clock
+
+    // Jetson -> MCB, CV_MESSAGE_TYPE_CHASSIS_VELOCITY (20) from project otto's odin mode
+    volatile uint32_t rxChassisVelocity;          ///< accepted
+    volatile uint32_t rxChassisVelocityRejected;  ///< wrong length or non-finite values
+    volatile uint32_t lastSequence;
+    volatile float lastVx;
+    volatile float lastVy;
+    volatile float lastWz;
+
+    volatile bool cvOnline;  ///< any valid frame within the last second
+};
+
+extern OdinLinkDebug odinLinkDebug;
+
 namespace aruwsrc::communication::serial
 {
 /**
@@ -289,6 +324,11 @@ public:
      * Cycles through and sends the messages that must be sent to the xavier.
      */
     mockable void sendMessage();
+
+    /**
+     * Updates the raw-RX fields of `odinLinkDebug`. Call right before updateSerial().
+     */
+    void sampleLinkDebug();
 
     /**
      * @return `true` iff CV is online (i.e.: `true` if we have received a CV message within the

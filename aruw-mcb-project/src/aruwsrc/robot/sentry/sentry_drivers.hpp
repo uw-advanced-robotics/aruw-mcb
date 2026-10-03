@@ -150,6 +150,7 @@ public:
     void updateIo()
     {
         oledDisplay.updateDisplay();
+        visionCoprocessor.sampleLinkDebug();  // odinLinkDebug: watch in Ozone
         visionCoprocessor.updateSerial();
         turretMajorPrimaryImu.read();
         turretMajorImuSecondary.read();

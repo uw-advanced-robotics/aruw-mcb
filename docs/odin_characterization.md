@@ -23,6 +23,32 @@ so turret major is held fixed relative to the chassis at the same time.
 3. Remote: **left UP / right MID** enables external velocity control. Any other switch state
    returns to the normal commands; flip out of it to stop the robot.
 
+## Debugging the Jetson link in Ozone
+
+Add the global **`odinLinkDebug`** to a watch window and set its refresh to live (e.g. 10 Hz).
+Jetson → MCB arrives on **USART3** (RX pin PD9); MCB → Jetson leaves on **USART2** (TX pin PD5);
+both run at 1 Mbaud on the sentry.
+
+| field | meaning | healthy |
+|---|---|---|
+| `txLoops` | `sendMessage()` calls (MCB → Jetson loop) | climbs ~500/s |
+| `rxBufferNonEmptySamples` | times raw bytes were waiting on USART3 | climbs while otto runs |
+| `rxBufferMax` | most bytes waiting at once | > 0 |
+| `rxErrorFlags` | sticky USART3 errors: `0x08` overrun, `0x04` noise, `0x02` framing, `0x01` parity | 0 |
+| `rxFrames` | complete frames with good CRCs (any type) | climbs ~100/s with odin mode |
+| `rxLastType` / `rxLastTimeMs` | last frame's type (2 auto-aim, 13 auto-nav, 20 chassis velocity) and MCB time | 20 / recent |
+| `rxChassisVelocity` / `...Rejected` | accepted / rejected type-20 messages | climbs / 0 |
+| `lastSequence`, `lastVx`, `lastVy`, `lastWz` | last accepted velocity command | follows the script |
+| `cvOnline` | a valid frame within the last second | true |
+
+Reading the result:
+* `rxBufferNonEmptySamples` stays 0: no bytes reach PD9, so check the wire from the Jetson TX
+  to PD9 and the ground.
+* bytes arrive but `rxFrames` stays 0, and `rxErrorFlags` has `0x02`: there's a baud mismatch or
+  noise. Without errors, the bytes aren't valid frames (wrong sender).
+* `rxFrames` climbs: the Jetson → MCB direction works. If the Jetson still hears nothing, the
+  problem is the other wire, PD5 → Jetson RX.
+
 ## Debugging
 
 * **Chassis doesn't move but otto's status line shows ACTIVE commands:** check the switch state.

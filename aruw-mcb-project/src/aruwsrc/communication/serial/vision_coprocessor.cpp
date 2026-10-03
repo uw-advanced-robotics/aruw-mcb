@@ -30,10 +30,16 @@
 #include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/util_macros.hpp"
 
+#ifndef PLATFORM_HOSTED
+#include "modm/platform.hpp"
+#endif
+
 using namespace tap::arch;
 using namespace tap::communication::serial;
 using namespace aruwsrc::communication::serial;
 using tap::arch::clock::getTimeMicroseconds;
+
+OdinLinkDebug odinLinkDebug = {};
 
 VisionCoprocessor* VisionCoprocessor::visionCoprocessorInstance = nullptr;
 
@@ -136,6 +142,10 @@ void VisionCoprocessor::initializeCV()
 void VisionCoprocessor::messageReceiveCallback(const ReceivedSerialMessage& completeMessage)
 {
     cvOfflineTimeout.restart(TIME_OFFLINE_CV_AIM_DATA_MS);
+
+    odinLinkDebug.rxFrames = odinLinkDebug.rxFrames + 1;
+    odinLinkDebug.rxLastType = completeMessage.messageType;
+    odinLinkDebug.rxLastTimeMs = tap::arch::clock::getTimeMilliseconds();
 
     switch (completeMessage.messageType)
     {
@@ -257,6 +267,7 @@ bool VisionCoprocessor::decodeToChassisVelocityCommand(const ReceivedSerialMessa
 {
     if (message.header.dataLength != sizeof(ChassisVelocityCommand))
     {
+        odinLinkDebug.rxChassisVelocityRejected = odinLinkDebug.rxChassisVelocityRejected + 1;
         return false;
     }
 
@@ -264,11 +275,18 @@ bool VisionCoprocessor::decodeToChassisVelocityCommand(const ReceivedSerialMessa
     memcpy(&command, &message.data, sizeof(ChassisVelocityCommand));
     if (!std::isfinite(command.vx) || !std::isfinite(command.vy) || !std::isfinite(command.wz))
     {
+        odinLinkDebug.rxChassisVelocityRejected = odinLinkDebug.rxChassisVelocityRejected + 1;
         return false;
     }
 
     lastChassisVelocityCommand = command;
     lastChassisVelocityCommandTimeMs = tap::arch::clock::getTimeMilliseconds();
+
+    odinLinkDebug.rxChassisVelocity = odinLinkDebug.rxChassisVelocity + 1;
+    odinLinkDebug.lastSequence = command.sequenceNum;
+    odinLinkDebug.lastVx = command.vx;
+    odinLinkDebug.lastVy = command.vy;
+    odinLinkDebug.lastWz = command.wz;
     return true;
 }
 
@@ -304,8 +322,32 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     return true;
 }
 
+void VisionCoprocessor::sampleLinkDebug()
+{
+#ifndef PLATFORM_HOSTED
+    static_assert(
+        VISION_COPROCESSOR_RX_UART_PORT == Uart::UartPort::Uart3,
+        "odinLinkDebug samples USART3: update it if the RX port changes");
+    const std::size_t waiting = modm::platform::Usart3::receiveBufferSize();
+    if (waiting > 0)
+    {
+        odinLinkDebug.rxBufferNonEmptySamples = odinLinkDebug.rxBufferNonEmptySamples + 1;
+        if (waiting > odinLinkDebug.rxBufferMax)
+        {
+            odinLinkDebug.rxBufferMax = waiting;
+        }
+    }
+    odinLinkDebug.rxErrorFlags =
+        odinLinkDebug.rxErrorFlags | (modm::platform::UsartHal3::getInterruptFlags().value &
+                                      (USART_SR_ORE | USART_SR_NE | USART_SR_FE | USART_SR_PE));
+#endif
+}
+
 void VisionCoprocessor::sendMessage()
 {
+    odinLinkDebug.txLoops = odinLinkDebug.txLoops + 1;
+    odinLinkDebug.cvOnline = isCvOnline();
+
     sendOdometryData();
     sendRobotTypeData();
     sendHealthMessage();
