@@ -49,25 +49,25 @@ inline constexpr float WRIST_MOTOR_3_GEAR_RATIO = 12.0f / 30.0f;
 
 static constexpr float WRIST_ROLL_PID_KS = 0.0;
 static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA1_PID_CONFIG{
-    .kp = 4000.0f,
+    .kp = 30000.0f,
     .ki = 0.0f,
-    .kd = 500.0f,
+    .kd = 1500.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610 / 2.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA2_PID_CONFIG{
-    .kp = 4000.0f,
+    .kp = 8000.0f,
     .ki = 0.0f,
-    .kd = 500.0f,
+    .kd = 800.0f,
     .maxICumulative = 0.0f,
-    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610 / 2.0f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig WRIST_THETA3_PID_CONFIG{
-    .kp = 3000.0f,
+    .kp = 50000.0f,
     .ki = 0.0f,
-    .kd = 300.0f,
+    .kd = 2000.0f,
     .maxICumulative = 0.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C610,
 };

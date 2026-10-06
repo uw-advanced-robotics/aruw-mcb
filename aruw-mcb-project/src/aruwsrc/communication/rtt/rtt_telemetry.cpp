@@ -112,15 +112,15 @@ bool RttTelemetry::updateTelemetryAsync()
                 now);
 
             ozoneMode = !firstInputReceived;
-            if (ozoneMode)
-            {
-                logHeartbeatInfo();
-            }
-            else
-            {
-                logHeartbeatInfo();
-                sendQueuedMessages();
-            }
+            // if (ozoneMode)
+            // {
+            // logHeartbeatInfo();
+            // }
+            // else
+            // {
+            logHeartbeatInfo();
+            sendQueuedMessages();
+            // }
         }
 
         // Yield to allow other protothreads to run
@@ -335,14 +335,14 @@ void RttTelemetry::logHeartbeatInfo()
 {
     const char* robotName = ROBOT_NAME;
 
-    static uint32_t lastLoopTime = 0;
+    // static uint32_t lastLoopTime = 0;
     uint32_t currentTime = tap::arch::clock::getTimeMicroseconds();
-    uint32_t dt = currentTime - lastLoopTime;
-    lastLoopTime = currentTime;
+    // uint32_t dt = currentTime - lastLoopTime;
+    // lastLoopTime = currentTime;
 
     // Convert currentTime to seconds
     float time = currentTime / 1000000.0f;
-    logSignal("dt_us", dt);
+    // logSignal("dt_us", dt);
     logSignal("robot", robotName);
     logSignal("time", time);
 }

@@ -96,6 +96,54 @@ float EngineerControlOperatorInterface::getWristTheta3Velocity()
     return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
 }
 
+bool EngineerControlOperatorInterface::isIKTranslationMode() const
+{
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN;
+}
+bool EngineerControlOperatorInterface::isIKRotationMode() const
+{
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP &&
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN;
+}
+
+float EngineerControlOperatorInterface::getIKVelX() const
+{
+    return isIKTranslationMode()
+               ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_TRANSLATION_VEL
+               : 0;
+}
+float EngineerControlOperatorInterface::getIKVelY() const
+{
+    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) *
+                                       MAX_IK_TRANSLATION_VEL
+                                 : 0;
+}
+float EngineerControlOperatorInterface::getIKVelZ() const
+{
+    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) *
+                                       MAX_IK_TRANSLATION_VEL
+                                 : 0;
+}
+float EngineerControlOperatorInterface::getIKVelRoll() const
+{
+    return isIKRotationMode()
+               ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * MAX_IK_ROTATION_VEL
+               : 0;
+}
+float EngineerControlOperatorInterface::getIKVelPitch() const
+{
+    return isIKRotationMode()
+               ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) * MAX_IK_ROTATION_VEL
+               : 0;
+}
+float EngineerControlOperatorInterface::getIKVelYaw() const
+{
+    return isIKRotationMode()
+               ? drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) * MAX_IK_ROTATION_VEL
+               : 0;
+}
+
 // this is basically the same thing as getChassisXInput in the basic control operator interface, but
 // uh... we wanted sprint to work so hopefully the two don't get too out of sync
 float EngineerControlOperatorInterface::getChassisXInput()

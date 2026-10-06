@@ -26,6 +26,7 @@
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/motor/dji_motor.hpp"
 
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/algorithms/odometry/chassis_cf_odometry.hpp"
 #include "aruwsrc/algorithms/odometry/wheel_ekf_odometry_2d_subsystem.hpp"
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
@@ -54,6 +55,7 @@
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/image_indicator.hpp"
+#include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fire_rate_limit_governor.hpp"
 #include "aruwsrc/control/governor/friction_wheels_on_governor.hpp"
 #include "aruwsrc/control/governor/heat_limit_governor.hpp"
@@ -74,14 +76,11 @@
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_chassis_world_yaw_observer.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"
 #include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_subsystem.hpp"
-#include "aruwsrc/robot/sentry/algorithms/sentry_ballistics_solver.hpp"
 #include "aruwsrc/robot/sentry/chassis/sentry_beyblade_command.hpp"
 #include "aruwsrc/robot/sentry/chassis/sentry_manual_drive_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 #include "aruwsrc/robot/sentry/sentry_imu_calibrate_command.hpp"
 #include "aruwsrc/robot/sentry/sentry_turret_constants.hpp"
-#include "aruwsrc/robot/sentry/turret/cv/sentry_auto_aim_launch_timer.hpp"
-#include "aruwsrc/robot/sentry/turret/cv/sentry_minor_cv_on_target_governor.hpp"
 #include "aruwsrc/robot/sentry/turret/cv/sentry_turret_cv_command.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_major_world_relative_yaw_controller.hpp"
 #include "aruwsrc/robot/sentry/turret/sentry_turret_minor_subsystem.hpp"
@@ -323,14 +322,15 @@ SentryTransforms transformer(
         .imuSyncConfig = IMU_SYNC_PID_CONFIG,
     });
 
-SentryTransformSubystem transformerSubsystem(*drivers(), transformer);
+SentryTransformSubystem transformerSubsystem(*drivers(), transformer, &drivers()->rttTelemetry);
 SentryTransformAdapter transformAdapter(transformer);
 
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
     drivers()->visionCoprocessor,
     odometrySubsystem,
-    transformAdapter);
+    transformAdapter,
+    &odometrySubsystem);
 
 aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
     drivers(),
@@ -355,12 +355,12 @@ SmoothPid turretMajorYawVelPid(turretMajor::worldFrameCascadeController::YAW_VEL
 struct TurretMinorWorldControllers
 {
     WorldFrameTurretImuCascadePidTurretController<transforms::Axis::PITCH> pitchController;
-    WorldFrameTurretImuSTOSTurretController<transforms::Axis::YAW> yawController;
+    WorldFrameTurretImuCascadePidTurretController<transforms::Axis::YAW> yawController;
 };
 
 SmoothPid turretWidowWorldPitchVelPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretWidowWorldPitchPosPid(minorPidConfigs::PITCH_PID_CONFIG_WORLD_FRAME_POS);
-// SmoothPid turretWidowWorldYawVelPid(minorPidConfigs::MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL);
+SmoothPid turretWidowWorldYawVelPid(minorPidConfigs::MINOR_YAW_PID_CONFIG_WORLD_FRAME_VEL);
 SmoothPid turretWidowWorldYawPosPid(minorPidConfigs::YAW_PID_CONFIG_WORLD_FRAME_POS);
 
 TurretMinorWorldControllers turretWidowWorldControllers{
@@ -372,13 +372,12 @@ TurretMinorWorldControllers turretWidowWorldControllers{
         turretWidowWorldPitchVelPid,
         {&turretGravityCompensation, &turretSpringCompensation}),
 
-    .yawController = WorldFrameTurretImuSTOSTurretController<transforms::Axis::YAW>(
+    .yawController = WorldFrameTurretImuCascadePidTurretController<transforms::Axis::YAW>(
         transformer.getWorldToTurretWidow(),
         getTurretMCBCanCommWidow(),
         turretWidow.yawMotor,
-        turretWidow::turretWidowSTOSConstants,
         turretWidowWorldYawPosPid,
-        turretWidow::turretWidowFeedforwardConstants)};
+        turretWidowWorldYawVelPid)};
 
 TurretMajorWorldFrameController turretMajorWorldYawController(
     transformer.getWorldToTurretMajor(),
@@ -426,21 +425,25 @@ VelocityAgitatorSubsystem turretWidowAgitator(
     constants::AGITATOR_PID_CONFIG,
     constants::turretWidow::AGITATOR_CONFIG);
 
-// ballistics solvers
-SentryBallisticsSolver turretWidowSolver(
+aruwsrc::algorithms::ballistics::CvBallisticsSolver ballisticsSolver(
     drivers()->visionCoprocessor,
-    transformer,
+    transformAdapter,
     turretWidowFrictionWheels,
-    turretMajor,
-    turretWidow::DEFAULT_LAUNCH_SPEED,
-    0.f,  // turret minor pitch offset
-    TURRET_MINOR_OFFSET,
-    turretWidow.getTurretID());
+    {
+        .shotTimingEntryThreshold = SHOT_TIMING_ENTRY_THRESHOLD,
+        .shotTimingExitThreshold = SHOT_TIMING_EXIT_THRESHOLD,
+        .defaultLaunchSpeed = turretWidow::DEFAULT_LAUNCH_SPEED,
+        .turretPitchOffset = 0,
+        .minimumShotDelay = aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS /
+                            1'000'000.0f,
+    },
+    turretWidow.getTurretID(),
+    &drivers()->rttTelemetry);
 
-SentryAutoAimLaunchTimer autoAimLaunchTimerTurretWidow(
+AutoAimLaunchTimer autoAimLaunchTimer(
     aruwsrc::control::launcher::AGITATOR_TYPICAL_DELAY_MICROSECONDS,
     &drivers()->visionCoprocessor,
-    &turretWidowSolver);
+    &ballisticsSolver);
 
 /* define commands ----------------------------------------------------------*/
 aruwsrc::control::chassis::AutoNavCommand autoNavCommand(
@@ -567,7 +570,7 @@ SentryTurretCVCommand::TurretConfig turretWidowCVConfig(
     turretWidow,
     turretWidowWorldControllers.yawController,
     turretWidowWorldControllers.pitchController,
-    turretWidowSolver);
+    ballisticsSolver);
 
 SentryTurretCVCommand turretCVCommand(
     drivers()->visionCoprocessor,
@@ -641,16 +644,16 @@ FireRateLimitGovernor fireRateLimitGovernorTurretWidow(
 HeatLimitGovernor heatLimitGovernorTurretWidow(
     *drivers(),
     turretWidow::barrelID,
-    constants::HEAT_LIMIT_BUFFER);
+    constants::HEAT_LIMIT_BUFFER,
+    1e7f);
 
 // rotates agitator when aiming at target and within heat limit
-SentryMinorCvOnTargetGovernor cvOnTargetGovernorTurretWidow(
+CvOnTargetGovernor cvOnTargetGovernor(
     drivers(),
     drivers()->visionCoprocessor,
     turretCVCommand,
-    autoAimLaunchTimerTurretWidow,
-    SentryCvOnTargetGovernorMode::ON_TARGET_AND_GATED,
-    turretWidow::turretID);
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
 // Unused, causes inconsistent fire rates due to suspected ref delay.
 // RefSystemProjectileLaunchedGovernor refSystemProjectileLaunchedGovernorTurretWidow(
@@ -665,7 +668,7 @@ GovernorLimitedCommand<5> turretWidowRotateAndUnjamAgitatorWithHeatAndCVLimiting
     {&fireRateLimitGovernorTurretWidow,
      &heatLimitGovernorTurretWidow,
      &frictionWheelsOnGovernorTurretWidow,
-     &cvOnTargetGovernorTurretWidow,
+     &cvOnTargetGovernor,
      &matchRunningGovernor});
 
 GovernorLimitedCommand<2> turretWidowAgitatorManualSpin(

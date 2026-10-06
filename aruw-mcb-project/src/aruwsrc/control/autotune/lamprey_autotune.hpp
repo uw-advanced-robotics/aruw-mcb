@@ -89,8 +89,8 @@ protected:
     void onMeasurementComplete(size_t pointIndex) override
     {
         measuredEncoderValueMap[pointIndex] = {
-            Angle(averageLampreyTick).getWrappedValue(),
-            Angle(averageAngle).getWrappedValue()};
+            tap::algorithms::Angle(averageLampreyTick).getWrappedValue(),
+            tap::algorithms::Angle(averageAngle).getWrappedValue()};
 
         averageLampreyTick = 0.0f;
         averageAngle = 0.0f;

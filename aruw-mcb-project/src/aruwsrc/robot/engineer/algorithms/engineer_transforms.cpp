@@ -82,8 +82,10 @@ void EngineerTransforms::updateTransforms()
     worldToChassis.updateTranslation(0, 0, 0);
     // use odometry yaw because it likely filters more information than imu alone, but only for yaw
     worldToChassis.updateRotation(
-        chassisImu.getRoll(),
-        chassisImu.getPitch(),
+        // chassisImu.getRoll(),
+        // chassisImu.getPitch(),
+        0,
+        0,
         chassisPose.getOrientation());
     // worldToChassis.updateAngularVelocity(0., 0., chassisImu.getGz());
 
@@ -114,9 +116,11 @@ void EngineerTransforms::updateTransforms()
     worldToTurretPitch = worldToTurretYaw.composeStatic(turretYawToTurretPitch);
     worldToTurretPitch.updateRotation(tpRoll, tpPitch, tpYaw);
     worldToTurretPitch.updateAngularVelocity(
-        turretPitchImu.getGx(),
-        turretPitchImu.getGy(),
-        turretPitchImu.getGz());
+        0,
+        turret.pitchMotor.getChassisFrameVelocity(),
+        turret.yawMotor
+            .getChassisFrameVelocity());  // should be added to chassis angular velocity, but can't
+                                          // use imu rn so need to expose it in odometry
 
     worldToRealsense = worldToTurretYaw.composeStatic(TURRET_YAW_TO_REALSENSE);
 

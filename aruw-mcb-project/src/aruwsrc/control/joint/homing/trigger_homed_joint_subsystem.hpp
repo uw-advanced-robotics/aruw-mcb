@@ -42,9 +42,9 @@ public:
     };
 
     TriggerHomedJointSubsystem(
-        tap::Drivers *drivers,
-        tap::motor::MotorInterface &motor,
-        trigger::TriggerInterface &trigger,
+        tap::Drivers* drivers,
+        tap::motor::MotorInterface& motor,
+        trigger::TriggerInterface& trigger,
         Config config)
         : Subsystem(drivers),
           HomeableSubsystemInterface(drivers, trigger),
@@ -54,6 +54,10 @@ public:
           homingSpeed(config.homingSpeed),
           homingReversed(config.homingReversed)
     {
+        // for somereason these werent getting set?
+        // setting them in here fixed the subsystems not folloing bounds
+        lowerBound = config.super.lowerBound;
+        upperBound = config.super.upperBound;
     }
 
     virtual inline void resetEncoderValue() { motor.getEncoder()->resetEncoderValue(); }
@@ -89,7 +93,7 @@ public:
             {
                 calibrationState = CalibrationState::CALIBRATION_COMPLETE;
                 resetEncoderValue();
-                setSetpoint(home);
+                setSetpoint(getPosition());
             }
             else
             {
@@ -111,7 +115,8 @@ public:
     void stopDuringHoming() override { motor.setDesiredOutput(0); }
 
 protected:
-    tap::motor::MotorInterface &motor;
+    float debug_lowerBound, debug_upperBound;
+    tap::motor::MotorInterface& motor;
 
     float home;
     float homingSpeed;

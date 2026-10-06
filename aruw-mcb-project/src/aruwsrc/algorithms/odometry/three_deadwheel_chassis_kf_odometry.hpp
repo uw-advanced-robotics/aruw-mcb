@@ -92,100 +92,131 @@ public:
     void update();
 
     void overrideOdometryPosition(const float positionX, const float positionY);
+    void overrideOdometryOrientation(float yaw);
 
 protected:
-    enum class OdomState
+    enum class OdomStateX
     {
         POS_X = 0,
         VEL_X,
-        ACC_X,
-        POS_Y,
+        NUM_STATES,
+    };
+
+    enum class XInput
+    {
+        VEL_X = 0,
+        NUM_INPUTS,
+    };
+
+    enum class OdomStateY
+    {
+        POS_Y = 0,
         VEL_Y,
-        ACC_Y,
-        POS_ANG,
+        NUM_STATES,
+    };
+
+    enum class YInput
+    {
+        VEL_Y = 0,
+        NUM_INPUTS,
+    };
+
+    enum class OdomStateAng
+    {
+        POS_ANG = 0,
         VEL_ANG,
         NUM_STATES,
     };
 
-    enum class OdomInput
+    enum class AngInput
     {
-        VEL_X = 0,
-        ACC_X,
-        VEL_Y,
-        ACC_Y,
-        POS_ANG,
-        VEL_ANG_ODOM,
-        VEL_ANG_IMU,
+        VEL_ANG_ODOM = 0,
         NUM_INPUTS,
     };
 
-    tap::algorithms::KalmanFilter<int(OdomState::NUM_STATES), int(OdomInput::NUM_INPUTS)> kf;
+    using KF = tap::algorithms::KalmanFilter<int(OdomStateX::NUM_STATES), int(XInput::NUM_INPUTS)>;
+    KF kf_x;
+    KF kf_y;
+    KF kf_ang;
 
 private:
-    static constexpr int STATES_SQUARED =
-        static_cast<int>(OdomState::NUM_STATES) * static_cast<int>(OdomState::NUM_STATES);
-    static constexpr int INPUTS_SQUARED =
-        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomInput::NUM_INPUTS);
-    static constexpr int INPUTS_MULT_STATES =
-        static_cast<int>(OdomInput::NUM_INPUTS) * static_cast<int>(OdomState::NUM_STATES);
+    static constexpr int X_STATES_SQUARED =
+        static_cast<int>(OdomStateX::NUM_STATES) * static_cast<int>(OdomStateX::NUM_STATES);
+    static constexpr int Y_STATES_SQUARED =
+        static_cast<int>(OdomStateY::NUM_STATES) * static_cast<int>(OdomStateY::NUM_STATES);
+    static constexpr int ANG_STATES_SQUARED =
+        static_cast<int>(OdomStateAng::NUM_STATES) * static_cast<int>(OdomStateAng::NUM_STATES);
+    static constexpr int X_INPUTS_SQUARED =
+        static_cast<int>(XInput::NUM_INPUTS) * static_cast<int>(XInput::NUM_INPUTS);
+    static constexpr int Y_INPUTS_SQUARED =
+        static_cast<int>(YInput::NUM_INPUTS) * static_cast<int>(YInput::NUM_INPUTS);
+    static constexpr int ANG_INPUTS_SQUARED =
+        static_cast<int>(AngInput::NUM_INPUTS) * static_cast<int>(AngInput::NUM_INPUTS);
+    static constexpr int X_INPUTS_MULT_STATES =
+        static_cast<int>(XInput::NUM_INPUTS) * static_cast<int>(OdomStateX::NUM_STATES);
+    static constexpr int Y_INPUTS_MULT_STATES =
+        static_cast<int>(YInput::NUM_INPUTS) * static_cast<int>(OdomStateY::NUM_STATES);
+    static constexpr int ANG_INPUTS_MULT_STATES =
+        static_cast<int>(AngInput::NUM_INPUTS) * static_cast<int>(OdomStateAng::NUM_STATES);
+    static_assert(X_STATES_SQUARED == Y_STATES_SQUARED);
 
     /// Assumed time difference between calls to `update`, in seconds
     static constexpr float DT = 0.002f;
 
+    static constexpr float DT2 = DT * DT;
+    static constexpr float DT3 = DT2 * DT;
+
     // clang-format off
-    static constexpr float KF_A[STATES_SQUARED] = {
-        1, DT, 0.5 * DT * DT, 0, 0 , 0            , 0, 0 ,
-        0, 1 , DT           , 0, 0 , 0            , 0, 0 ,
-        0, 0 , 1            , 0, 0 , 0            , 0, 0 ,
-        0, 0 , 0            , 1, DT, 0.5 * DT * DT, 0, 0 ,
-        0, 0 , 0            , 0, 1 , DT           , 0, 0 ,
-        0, 0 , 0            , 0, 0 , 1            , 0, 0 ,
-        0, 0 , 0            , 0, 0 , 0            , 1, DT,
-        0, 0 , 0            , 0, 0 , 0            , 0, 1 ,
-    };
-    static constexpr float KF_C[INPUTS_MULT_STATES] = {
-        0, 1, 0, 0, 0, 0, 0, 0,
-        0, 0, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 0,
-        0, 0, 0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 1,
-        0, 0, 0, 0, 0, 0, 0, 1,
+    static constexpr float KF_A[X_STATES_SQUARED] = {
+        1, DT, 
+        0, 1 ,
     };
 
-    static constexpr float KF_R[INPUTS_SQUARED] = {
-        7.49565672e-05, 0, 0, 0, 0, 0, 0,
-        0, 7.35872941e-04, 0, 0, 0, 0, 0,
-        0, 0, 7.81982345e-05, 0, 0, 0, 0,
-        0, 0, 0, 5.69132363e-04, 0, 0, 0,
-        0, 0, 0, 0, 5.69132363e-04, 0, 0,
-        0, 0, 0, 0, 0, 5.69132363e-04, 0,
-        0, 0, 0, 0, 0, 0, 5.69132363e-04,
-    }; 
+    static constexpr float KF_C[ANG_INPUTS_MULT_STATES] = {
+        0, 1,
+    };
+
+    static constexpr float X_KF_R[X_INPUTS_SQUARED] = {
+        1.67233E-07,
+    };
+    static constexpr float Y_KF_R[Y_INPUTS_SQUARED] = {
+        7.96353E-07,
+    };
+    static constexpr float ANG_KF_R[ANG_INPUTS_SQUARED] = {
+        2.00098E-05,
+    };
     /// @TODO: TUNE
 
-    static constexpr float KF_Q[STATES_SQUARED] = {
-         9.0120570108e-06f,  5.4281168875e-04f,  5.6797949319e-02f,  4.3864560552e-07f, -7.6362940038e-05f, -7.9139054404e-03f, 0            , 0            ,
-         5.4281168875e-04f,  1.9396555203e-01f,  1.8282498819e+01f, -8.3483362129e-05f, -1.8580184164e-02f, -1.7427705884e+00f, 0            , 0            ,
-         5.6797949319e-02f,  1.8282498819e+01f,  1.7345126240e+03f, -7.4990656881e-03f, -1.7895295666e+00f, -1.6939745776e+02f, 0            , 0            ,
-         4.3864560552e-07f, -8.3483362129e-05f, -7.4990656881e-03f,  4.7600903828e-06f,  4.9474361167e-04f,  4.6590765854e-02f, 0            , 0            ,
-        -7.6362940038e-05f, -1.8580184164e-02f, -1.7895295666e+00f,  4.9474361167e-04f,  1.5265492535e-01f,  1.4482580576e+01f, 0            , 0            ,
-        -7.9139054404e-03f, -1.7427705884e+00f, -1.6939745776e+02f,  4.6590765854e-02f,  1.4482580576e+01f,  1.3770822857e+03f, 0            , 0            ,
-         0                ,  0                ,  0                ,  0                ,  0                ,  0                , 2.276528e-15f, 2.276528e-12f,
-         0                ,  0                ,  0                ,  0                ,  0                ,  0                , 2.276528e-12f, 2.276528e-09f,
-    }; 
+    static constexpr float JSD_X = 0.000871226;
+    static constexpr float JSD_Y = 0.0001227612;
+    static constexpr float JSD_THETA = 9.02143;
+
+    static constexpr float X_KF_Q[X_STATES_SQUARED] = {
+        JSD_X * DT3 / 3.0f, JSD_X * DT2 / 2.0f,
+        JSD_X * DT2 / 2.0f, JSD_X * DT,
+    };
+    static constexpr float Y_KF_Q[Y_STATES_SQUARED] = {
+        JSD_Y * DT3 / 3.0f, JSD_Y * DT2 / 2.0f,
+        JSD_Y * DT2 / 2.0f, JSD_Y * DT,
+    };
+    static constexpr float ANG_KF_Q[ANG_STATES_SQUARED] = {
+        JSD_THETA * DT3 / 3.0f, JSD_THETA * DT2 / 2.0f,
+        JSD_THETA * DT2 / 2.0f, JSD_THETA * DT,
+    };
     /// @TODO: TUNE
-    
-    static constexpr float KF_P0[STATES_SQUARED] = {
-        1E-2, 0   , 0   , 0   , 0   , 0   , 0   , 0   ,
-        0   , 1E-6, 0   , 0   , 0   , 0   , 0   , 0   ,
-        0   , 0   , 1E+3, 0   , 0   , 0   , 0   , 0   ,
-        0   , 0   , 0   , 1E-2, 0   , 0   , 0   , 0   ,
-        0   , 0   , 0   , 0   , 1E-2, 0   , 0   , 0   ,
-        0   , 0   , 0   , 0   , 0   , 1E-2, 0   , 0   ,
-        0   , 0   , 0   , 0   , 0   , 0   , 1E-2, 0   ,
-        0   , 0   , 0   , 0   , 0   , 0   , 0   , 1E-2,
-    }; 
+
+    static constexpr float X_KF_P0[X_STATES_SQUARED] = {
+        1E-2, 0   ,
+        0   , 1E-6,
+    };
+    static constexpr float Y_KF_P0[Y_STATES_SQUARED] = {
+        1E-2, 0   , 
+        0   , 1E-2,
+    };
+    static constexpr float ANG_KF_P0[ANG_STATES_SQUARED] = {
+        1E-2, 0   ,
+        0   , 1E-2,
+    };
     /// @TODO: TUNE
     // clang-format on
 
@@ -199,12 +230,14 @@ private:
     modm::Location2D<float> location;
     /// Chassis velocity in the world frame
     modm::Vector2f velocity;
+    float angular_velocity;
     // Chassis yaw orientation in world frame (radians)
     tap::algorithms::Angle chassisYaw;
 
     /// Previous time `update` was called, in microseconds
     uint32_t prevTime = 0;
 
+    tap::algorithms::Angle wrappedTheta = tap::algorithms::Angle(0.0f);
     tap::algorithms::Angle lastWrappedTheta = tap::algorithms::Angle(0.0f);
     tap::algorithms::Angle imuTheta = tap::algorithms::Angle(0.0f);
 
@@ -214,7 +247,7 @@ private:
     const float odomFrameToRobotFrame;
     void updateChassisStateFromKF();
 
-    float x[int(OdomState::NUM_STATES)];
+    float x[int(OdomStateX::NUM_STATES)];
 };
 }  // namespace aruwsrc::algorithms::odometry
 

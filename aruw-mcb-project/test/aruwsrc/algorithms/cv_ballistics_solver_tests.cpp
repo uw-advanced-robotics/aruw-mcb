@@ -23,14 +23,22 @@
 #include "tap/drivers.hpp"
 #include "tap/mock/odometry_2d_interface_mock.hpp"
 
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/mock/launch_speed_predictor_interface_mock.hpp"
-#include "aruwsrc/mock/robot_turret_subsystem_mock.hpp"
+#include "aruwsrc/mock/transformer_interface_mock.hpp"
 #include "aruwsrc/mock/vision_coprocessor_mock.hpp"
 
 using namespace testing;
-using namespace aruwsrc::algorithms;
+using namespace aruwsrc::algorithms::ballistics;
+
+CvBallisticsSolver::Config BALLISTICS_CONFIG{
+    .shotTimingEntryThreshold = 6.0f,
+    .shotTimingExitThreshold = 4.0f,
+    .defaultLaunchSpeed = 15,
+    .turretPitchOffset = 0,
+    .minimumShotDelay = 0.0f,
+};
 
 struct WithinAimingToleranceConfig
 {
@@ -49,7 +57,7 @@ TEST_P(WithinAimingToleranceTest, various_values)
 {
     EXPECT_EQ(
         GetParam().withinTolerance,
-        OttoBallisticsSolver::withinAimingTolerance(
+        CvBallisticsSolver::withinAimingTolerance(
             GetParam().yawAngleError,
             GetParam().pitchAngleError,
             GetParam().targetDistance));
@@ -95,19 +103,28 @@ std::vector<WithinAimingToleranceConfig> withinAimingToleranceValuesToTest = {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    OttoBallisticsSolver,
+    CvBallisticsSolver,
     WithinAimingToleranceTest,
     ValuesIn(withinAimingToleranceValuesToTest));
 
-class OttoBallisticsSolverTest : public Test
+class CvBallisticsSolverTest : public Test
 {
 protected:
-    OttoBallisticsSolverTest()
+    CvBallisticsSolverTest()
         : vc(&drivers),
-          pitchMotorMock(&pitchMotorInterfaceMock),
-          yawMotorMock(&yawMotorInterfaceMock),
-          turret(&drivers, pitchMotorMock, yawMotorMock, nullptr),
-          solver(vc, odometry, turret, launcher, 15, 0)
+          worldToTurretYaw(0, 0, 0, 0, 0, 0),
+          solver(
+              // hack to set up default return transformer return value before ballistics
+              // constructor uses it
+              [this]() -> auto& {
+                  ON_CALL(transformer, getWorldToTurretYaw)
+                      .WillByDefault(testing::ReturnRef(worldToTurretYaw));
+                  return vc;
+              }(),
+              transformer,
+              launcher,
+              BALLISTICS_CONFIG,
+              0)
     {
     }
 
@@ -117,10 +134,8 @@ protected:
 
         ON_CALL(vc, getLastAimData).WillByDefault(ReturnRef(aimData));
 
-        ON_CALL(odometry, getLastComputedOdometryTime)
+        ON_CALL(transformer, getLastComputedOdometryTime)
             .WillByDefault(ReturnPointee(&lastComputedOdomTime));
-        ON_CALL(odometry, getCurrentLocation2D).WillByDefault(ReturnPointee(&chassisLoc));
-        ON_CALL(odometry, getCurrentVelocity2D).WillByDefault(ReturnPointee(&chassisVel));
 
         ON_CALL(launcher, getPredictedLaunchSpeed).WillByDefault(ReturnPointee(&launchSpeed));
     }
@@ -128,28 +143,22 @@ protected:
     tap::Drivers drivers;
 
     NiceMock<aruwsrc::mock::VisionCoprocessorMock> vc;
-    NiceMock<tap::mock::Odometry2DInterfaceMock> odometry;
     NiceMock<aruwsrc::mock::LaunchSpeedPredictorInterfaceMock> launcher;
-    NiceMock<tap::mock::MotorInterfaceMock> pitchMotorInterfaceMock;
-    NiceMock<tap::mock::MotorInterfaceMock> yawMotorInterfaceMock;
-    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
-    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
-    NiceMock<aruwsrc::mock::RobotTurretSubsystemMock> turret;
+    tap::algorithms::transforms::Transform worldToTurretYaw;
+    NiceMock<aruwsrc::mock::TransformerInterfaceMock> transformer;
 
-    OttoBallisticsSolver solver;
+    CvBallisticsSolver solver;
 
-    std::optional<OttoBallisticsSolver::BallisticsSolution> solution;
+    std::optional<CvBallisticsSolver::BallisticsSolution> solution;
 
     aruwsrc::communication::serial::VisionCoprocessor::TurretAimData aimData = {};
     uint32_t lastComputedOdomTime = 0;
     float launchSpeed = 15;
     bool cvOnline = true;
-    modm::Location2D<float> chassisLoc;
-    modm::Vector2f chassisVel;
     tap::arch::clock::ClockStub clock;
 };
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_cv_offline)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_cv_offline)
 {
     cvOnline = false;
 
@@ -158,18 +167,18 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_cv_offline)
     EXPECT_FALSE(solution.has_value());
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aim_data_invalid)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_aim_data_invalid)
 {
     solution = solver.computeTurretAimAngles();
 
-    aimData.pva.updated = false;
+    aimData.targetState.updated = false;
 
     EXPECT_FALSE(solution.has_value());
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
 {
-    aimData.pva.xPos = 2;
+    aimData.targetState.xPos = 2;
 
     solution = solver.computeTurretAimAngles();
 
@@ -177,10 +186,10 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_timestamps_not_new)
     EXPECT_FALSE(solution.has_value());
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
 {
-    aimData.pva.updated = true;
-    aimData.pva.xPos = 2;
+    aimData.targetState.updated = true;
+    aimData.targetState.xPos = 2;
 
     lastComputedOdomTime = 100;
 
@@ -190,10 +199,10 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_odom_timestamp_new)
     EXPECT_NEAR(2, solution->distance, 1e-5);
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
 {
-    aimData.pva.updated = true;
-    aimData.pva.xPos = 2;
+    aimData.targetState.updated = true;
+    aimData.targetState.xPos = 2;
     aimData.timestamp = 100;
 
     clock.time = 100;
@@ -204,11 +213,11 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_aimData_timestamp_new)
     EXPECT_NEAR(2, solution->distance, 1e-5);
 }
 
-TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
 {
-    aimData.pva.updated = true;
-    aimData.pva.xPos = 2;
-    chassisLoc.setPosition(-2, 0);
+    aimData.targetState.updated = true;
+    aimData.targetState.xPos = 2;
+    worldToTurretYaw.updateTranslation(-2, 0, 0);
 
     aimData.timestamp = 100;
 
@@ -221,16 +230,14 @@ TEST_F(OttoBallisticsSolverTest, computeTurretAimAngles_nonzero_robot_position)
 }
 
 TEST_F(
-    OttoBallisticsSolverTest,
-    comiputeTurretAimAngles_solution_found_no_new_time_solution_not_resolved)
+    CvBallisticsSolverTest,
+    computeTurretAimAngles_solution_found_no_new_time_solution_not_resolved)
 {
-    aimData.pva.updated = true;
-    aimData.pva.xPos = 2;
+    aimData.targetState.updated = true;
+    aimData.targetState.xPos = 2;
     aimData.timestamp = 100;
 
     clock.time = 100;
-
-    EXPECT_CALL(odometry, getCurrentLocation2D).Times(1);
 
     solution = solver.computeTurretAimAngles();
 
@@ -243,10 +250,10 @@ TEST_F(
     EXPECT_NEAR(2, solution->distance, 1e-5);
 }
 
-TEST_F(OttoBallisticsSolverTest, comiputeTurretAimAngles_solution_found_no_valid_solution)
+TEST_F(CvBallisticsSolverTest, computeTurretAimAngles_solution_found_no_valid_solution)
 {
-    aimData.pva.updated = true;
-    aimData.pva.xPos = 100;
+    aimData.targetState.updated = true;
+    aimData.targetState.xPos = 100;
     aimData.timestamp = 100;
 
     clock.time = 100;
@@ -254,4 +261,78 @@ TEST_F(OttoBallisticsSolverTest, comiputeTurretAimAngles_solution_found_no_valid
     solution = solver.computeTurretAimAngles();
 
     EXPECT_FALSE(solution.has_value());
+}
+
+TEST_F(CvBallisticsSolverTest, jitter_aim_low_omega)
+{
+    aimData.targetState.updated = true;
+    aimData.targetState.xPos = 2;
+    aimData.targetState.yPos = 0;
+    aimData.targetState.zPos = 0;
+    aimData.targetState.omega = BALLISTICS_CONFIG.shotTimingExitThreshold - 1;
+    aimData.targetState.radius0 = 0.2f;
+    aimData.targetState.radius1 = 0.2f;
+    aimData.targetState.theta = 0;
+    aimData.timestamp = 100;
+
+    clock.time = 100;
+
+    solution = solver.computeTurretAimAngles();
+
+    EXPECT_TRUE(solution.has_value());
+    EXPECT_FALSE(solution->shotWindowValid);
+}
+
+TEST_F(CvBallisticsSolverTest, pulse_estimation_high_omega)
+{
+    aimData.targetState.updated = true;
+    aimData.targetState.xPos = 2;
+    aimData.targetState.yPos = 0;
+    aimData.targetState.zPos = 0;
+    aimData.targetState.omega = BALLISTICS_CONFIG.shotTimingEntryThreshold + 1;
+    aimData.targetState.radius0 = 0.2f;
+    aimData.targetState.radius1 = 0.2f;
+    aimData.targetState.theta = 0;
+    aimData.timestamp = 100;
+
+    clock.time = 100;
+
+    solution = solver.computeTurretAimAngles();
+
+    EXPECT_TRUE(solution.has_value());
+    EXPECT_TRUE(solution->shotWindowValid);
+    EXPECT_NE(0, solution->shotWindowCenter);
+    EXPECT_NE(0, solution->shotWindowHalfWidth);
+    EXPECT_GE(solution->activePlateIndex, 0);
+    EXPECT_LE(solution->activePlateIndex, 3);
+}
+
+TEST_F(CvBallisticsSolverTest, pulse_estimation_discards_when_omega_drops)
+{
+    aimData.targetState.updated = true;
+    aimData.targetState.xPos = 2;
+    aimData.targetState.yPos = 0;
+    aimData.targetState.zPos = 0;
+    aimData.targetState.omega = BALLISTICS_CONFIG.shotTimingEntryThreshold + 1;
+    aimData.targetState.radius0 = 0.2f;
+    aimData.targetState.radius1 = 0.2f;
+    aimData.targetState.theta = 0;
+    aimData.timestamp = 100;
+
+    clock.time = 100;
+
+    solution = solver.computeTurretAimAngles();
+    EXPECT_TRUE(solution.has_value());
+    EXPECT_TRUE(solution->shotWindowValid);
+
+    // Omega drops below threshold
+    aimData.targetState.omega = BALLISTICS_CONFIG.shotTimingExitThreshold - 1;
+    aimData.timestamp = 101;
+    clock.time = 150;
+
+    solution = solver.computeTurretAimAngles();
+    EXPECT_TRUE(solution.has_value());
+
+    // Should have switched to jitter aim
+    EXPECT_FALSE(solution->shotWindowValid);
 }

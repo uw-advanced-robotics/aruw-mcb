@@ -62,6 +62,8 @@ public:
 
     void end(bool interrupted) override;
 
+    void toggleControlMode() { useFallback = !useFallback; }
+
 private:
     using Vector = tap::algorithms::transforms::Vector;
 
@@ -110,6 +112,7 @@ private:
     Vector lastYawAxisWorldFrame = Vector(0.0f, 0.0f, 1.0f);
     bool usingChassisFrameFallback = false;
     uint32_t prevTime = 0;
+    bool useFallback = false;
 };
 }  // namespace aruwsrc::drone
 

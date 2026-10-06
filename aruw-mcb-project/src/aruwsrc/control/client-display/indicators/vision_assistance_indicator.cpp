@@ -217,7 +217,8 @@ void VisionAssistanceIndicator::drawPlateTargetBox()
     auto aimData = visionCoprocessor.getLastAimData(0);
 
     // Get position
-    Position enemyPlatePosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
+    Position enemyPlatePosition =
+        Position(aimData.targetState.xPos, aimData.targetState.yPos, aimData.targetState.zPos);
 
     Position cameraFrameOrbit = worldToCameraTransform.apply(enemyPlatePosition);
 

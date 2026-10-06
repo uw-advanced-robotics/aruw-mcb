@@ -129,10 +129,18 @@ void FourWheelEKFOdometry::update()
 
     // Get individual wheel velocities and convert to linear velocities
     float wheelSpeeds[4] = {0, 0, 0, 0};
+    bool wheelMotorOnline[4] = {false, false, false, false};
+    uint8_t numOfflineWheels = 0;
     for (int i = 0; i < 4; i++)
     {
-        float motorVel = chassisMotors[i]->getEncoder()->getVelocity();  // rad/s (after gear ratio)
-        wheelSpeeds[i] = motorVel * WHEEL_CONFIGS[i].wheelRadius;        // m/s
+        wheelMotorOnline[i] = chassisMotors[i]->isMotorOnline();
+        if (!wheelMotorOnline[i])
+        {
+            numOfflineWheels++;
+        }
+
+        float motorVel = wheelMotorOnline[i] ? chassisMotors[i]->getEncoder()->getVelocity() : 0.0f;
+        wheelSpeeds[i] = motorVel * WHEEL_CONFIGS[i].wheelRadius;  // m/s
         measurement.data[int(OdomInput::WHEEL_0) + i] = wheelSpeeds[i];
     }
 
@@ -152,7 +160,12 @@ void FourWheelEKFOdometry::update()
     measurement.data[int(OdomInput::GYRO_Z)] = imu.getGz();
     measurement.data[int(OdomInput::YAW)] = yawForRotation;
 
-    updateMeasurementCovariance(wheelSpeeds, imuAccelWorld, yawMeasurementValid, dt);
+    updateMeasurementCovariance(
+        wheelSpeeds,
+        wheelMotorOnline,
+        imuAccelWorld,
+        yawMeasurementValid,
+        dt);
 
     // Perform prediction step.
     ekf.predict(dt);
@@ -215,22 +228,50 @@ void FourWheelEKFOdometry::fuseLidarPosition(
     fuseVisionPosition(measurement);
 }
 
-void FourWheelEKFOdometry::fuseAprilTagPose(
+void FourWheelEKFOdometry::initializeVisionPosition(
+    const modm::Vector2f& position,
+    float positionVarianceX,
+    float positionVarianceY)
+{
+    auto& xState = ekf.getMutableStateVector();
+    auto& covariance = ekf.getMutableStateCovariance();
+
+    xState[int(OdomState::POS_X)] = position.x;
+    xState[int(OdomState::POS_Y)] = position.y;
+
+    covariance[int(OdomState::POS_X) * int(OdomState::NUM_STATES) + int(OdomState::POS_X)] =
+        std::max(positionVarianceX, MIN_VISION_MEASUREMENT_VARIANCE);
+    covariance[int(OdomState::POS_Y) * int(OdomState::NUM_STATES) + int(OdomState::POS_Y)] =
+        std::max(positionVarianceY, MIN_VISION_MEASUREMENT_VARIANCE);
+
+    updateChassisStateFromEKF();
+    captureControlPredictedState();
+}
+
+void FourWheelEKFOdometry::initializeVisionPose(
     const modm::Vector2f& position,
     float yaw,
     float positionVarianceX,
     float positionVarianceY,
     float yawVariance)
 {
-    VisionPoseMeasurement measurement{};
-    measurement.position = position;
-    measurement.positionVarianceX = positionVarianceX;
-    measurement.positionVarianceY = positionVarianceY;
-    measurement.source = VisionMeasurementSource::APRIL_TAG;
-    measurement.yaw = yaw;
-    measurement.yawVariance = yawVariance;
-    measurement.hasYaw = true;
-    fuseVisionPose(measurement);
+    initializeVisionPosition(position, positionVarianceX, positionVarianceY);
+
+    auto& xState = ekf.getMutableStateVector();
+    auto& covariance = ekf.getMutableStateCovariance();
+
+    float fusedYaw = yaw;
+    if (yawOffsetInitialized)
+    {
+        fusedYaw = modm::Angle::normalize(fusedYaw - yawOffset);
+    }
+
+    xState[int(OdomState::YAW)] = fusedYaw;
+    covariance[int(OdomState::YAW) * int(OdomState::NUM_STATES) + int(OdomState::YAW)] =
+        std::max(yawVariance, MIN_VISION_MEASUREMENT_VARIANCE);
+
+    updateChassisStateFromEKF();
+    captureControlPredictedState();
 }
 
 void FourWheelEKFOdometry::updateChassisStateFromEKF()
@@ -256,6 +297,7 @@ void FourWheelEKFOdometry::captureControlPredictedState()
 
 void FourWheelEKFOdometry::updateMeasurementCovariance(
     const float wheelSpeeds[4],
+    const bool wheelMotorOnline[4],
     const modm::Vector2f& imuAccelWorld,
     bool yawMeasurementValid,
     float dt)
@@ -276,10 +318,20 @@ void FourWheelEKFOdometry::updateMeasurementCovariance(
     const float slipIndicator = std::max(0.0f, wheelAccelIndicator - imuAccelMagnitude);
     const float slipScale =
         1.0f + std::min(slipIndicator * WHEEL_SLIP_VARIANCE_SCALE, MAX_WHEEL_SLIP_SCALE - 1.0f);
+    uint8_t numOfflineWheels = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        numOfflineWheels += !wheelMotorOnline[i];
+    }
+
+    const float onlineWheelVarianceScale =
+        1.0f + numOfflineWheels * PARTIAL_WHEEL_OFFLINE_VARIANCE_SCALE;
 
     for (int i = 0; i < 4; i++)
     {
-        float wheelVariance = BASE_WHEEL_MEASUREMENT_VARIANCE * slipScale;
+        float wheelVariance = wheelMotorOnline[i] ? BASE_WHEEL_MEASUREMENT_VARIANCE * slipScale *
+                                                        onlineWheelVarianceScale
+                                                  : OFFLINE_WHEEL_MEASUREMENT_VARIANCE;
         int wheelIndex = int(OdomInput::WHEEL_0) + i;
         R[wheelIndex * int(OdomInput::NUM_INPUTS) + wheelIndex] = wheelVariance;
     }
@@ -288,17 +340,26 @@ void FourWheelEKFOdometry::updateMeasurementCovariance(
     int accYIndex = int(OdomInput::ACC_Y);
     int gyroIndex = int(OdomInput::GYRO_Z);
     int yawIndex = int(OdomInput::YAW);
-    R[accXIndex * int(OdomInput::NUM_INPUTS) + accXIndex] = IMU_ACCEL_MEASUREMENT_VARIANCE;
-    R[accYIndex * int(OdomInput::NUM_INPUTS) + accYIndex] = IMU_ACCEL_MEASUREMENT_VARIANCE;
+    const float accelMeasurementVariance =
+        numOfflineWheels == 0 ? IMU_ACCEL_MEASUREMENT_VARIANCE : OFFLINE_ACCEL_MEASUREMENT_VARIANCE;
+    R[accXIndex * int(OdomInput::NUM_INPUTS) + accXIndex] = accelMeasurementVariance;
+    R[accYIndex * int(OdomInput::NUM_INPUTS) + accYIndex] = accelMeasurementVariance;
     R[gyroIndex * int(OdomInput::NUM_INPUTS) + gyroIndex] = IMU_GYRO_MEASUREMENT_VARIANCE;
     R[yawIndex * int(OdomInput::NUM_INPUTS) + yawIndex] =
         yawMeasurementValid ? YAW_MEASUREMENT_VARIANCE : 1.0e6f;
 
-    for (int i = 0; i < 4; i++)
+    if (numOfflineWheels == 0)
     {
-        prevWheelSpeeds[i] = wheelSpeeds[i];
+        for (int i = 0; i < 4; i++)
+        {
+            prevWheelSpeeds[i] = wheelSpeeds[i];
+        }
+        prevWheelSpeedsValid = true;
     }
-    prevWheelSpeedsValid = true;
+    else
+    {
+        prevWheelSpeedsValid = false;
+    }
 }
 
 void FourWheelEKFOdometry::fuseScalarMeasurement(

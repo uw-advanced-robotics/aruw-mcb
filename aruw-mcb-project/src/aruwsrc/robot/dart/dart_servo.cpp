@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dart_launcher_subsystem.hpp"
+#include "dart_servo.hpp"
 
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 
@@ -27,38 +27,25 @@ using namespace aruwsrc::control::turret;
 
 namespace aruwsrc::dart
 {
-DartLauncherSubsystem::DartLauncherSubsystem(
-    tap::Drivers* drivers,
-    tap::motor::MotorInterface& pullMotors)
+DartServo::DartServo(tap::Drivers* drivers)
     : Subsystem(drivers),
-      pullMotors(pullMotors),
       servo(drivers, SERVO_PORT, SERVO_MAX, SERVO_MIN, SERVO_SPEED)
 {
     servo.setTargetPwm(SERVO_MAX);
 };
 
-void DartLauncherSubsystem::initialize()
-{
-    drivers->pwm.setTimerFrequency(tap::gpio::Pwm::TIMER8, 500);
-    pullMotors.initialize();
-}
+void DartServo::initialize() { drivers->pwm.setTimerFrequency(tap::gpio::Pwm::TIMER8, 500); }
 
-void DartLauncherSubsystem::moveMotor(int32_t power) { pullMotors.setDesiredOutput(power); }
+void DartServo::refresh() { servo.updateSendPwmRamp(); }
 
-bool DartLauncherSubsystem::isBeamBroken() { return beamBroken; }
+void DartServo::refreshSafeDisconnect() { servo.setTargetPwm(0.0f); }
 
-bool DartLauncherSubsystem::isLimitSwitched() { return drivers->digital.read(LIMITSWITCH_PORT); }
+void DartServo::setOpen() { servo.setTargetPwm(servo.getMaxPWM()); }
 
-void DartLauncherSubsystem::refresh() { beamBroken = !drivers->digital.read(BEAMBREAK_PORT); }
+void DartServo::setClose() { servo.setTargetPwm(servo.getMinPWM()); }
 
-void DartLauncherSubsystem::refreshSafeDisconnect() { pullMotors.setDesiredOutput(0); }
+float DartServo::getOpenPWM() { return servo.getMaxPWM(); }
 
-void DartLauncherSubsystem::setOpen() { servo.setTargetPwm(servo.getMaxPWM()); }
-
-void DartLauncherSubsystem::setClose() { servo.setTargetPwm(servo.getMinPWM()); }
-
-float DartLauncherSubsystem::getOpenPWM() { return servo.getMaxPWM(); }
-
-float DartLauncherSubsystem::getClosePWM() { return servo.getMinPWM(); }
+float DartServo::getClosePWM() { return servo.getMinPWM(); }
 
 }  // namespace aruwsrc::dart

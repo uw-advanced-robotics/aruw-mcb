@@ -72,7 +72,7 @@ public:
     inline float getFireRateRps() final
     {
 #ifdef USE_VISION_COPROCESSOR_SENT_FIRE_RATE
-        auto fireRate = visionCoprocessor.getLastAimData(turretID).pva.firerate;
+        auto fireRate = visionCoprocessor.getLastAimData(turretID).targetState.firerate;
         switch (fireRate)
         {
             case aruwsrc::communication::serial::VisionCoprocessor::FireRate::ZERO:
@@ -88,7 +88,7 @@ public:
                 return 0.0f;
         }
 #else
-        const auto &aimData = visionCoprocessor.getLastAimData(turretID).pva;
+        const auto &aimData = visionCoprocessor.getLastAimData(turretID).targetState;
         if (!aimData.updated)
         {
             return 0.0f;
@@ -130,7 +130,7 @@ public:
             return control::agitator::FireRateReadinessState::NOT_READY;
         }
 
-        if (visionCoprocessor.getLastAimData(turretID).pva.firerate ==
+        if (visionCoprocessor.getLastAimData(turretID).targetState.firerate ==
             aruwsrc::communication::serial::VisionCoprocessor::FireRate::ZERO)
         {
             return control::agitator::FireRateReadinessState::NOT_READY;

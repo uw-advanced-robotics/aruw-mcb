@@ -20,12 +20,16 @@
 #ifndef ENGINEER_TURRET_CONSTANTS_HPP_
 #define ENGINEER_TURRET_CONSTANTS_HPP_
 
+#include <cmath>
+
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/turret_motor_config.hpp"
+#include "modm/container/pair.hpp"
 #include "modm/math/geometry/angle.hpp"
+#include "modm/math/interpolation/linear.hpp"
 
 // Do not include this file directly: use turret_constants.hpp instead.
 #ifndef TURRET_CONSTANTS_HPP_
@@ -51,7 +55,8 @@ static constexpr tap::motor::MotorId PITCH_MOTOR_ID = tap::motor::MOTOR6;
 // aggressively
 inline constexpr float PITCH_UPPER_LIMIT_EXTENSION_RETRACTED = -0.6f;
 
-// if extended far enough, we can pitch higher because the back of extension won't hit the chassis
+// if extended far enough, we can pitch higher because the back of extension won't hit the
+// chassis
 inline constexpr float PITCH_UPPER_LIMIT_DEFAULT = -0.85f;
 
 // if extension above threshold, limit the pitch so the extension doesnt hit the ground
@@ -72,6 +77,27 @@ inline constexpr float MAX_EXTENSION_FOR_FULL_PITCH_DOWN = 0.42f;
 inline constexpr float MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN = 0.3f;
 inline constexpr float PITCH_DOWN_LIMIT_EXTENSION_PARTIAL = 0.12f;
 
+// start limiting pitch upper range when the extension is beyond this value because before
+// this point it's impossible to go over the height limit
+inline constexpr float EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT = 0.4f;
+
+/**
+ * Lookup table that maps extension position to pitch upper limit. In between points in the lookup
+ * table, linear interpolation is used.
+ */
+inline constexpr modm::Pair<float, float> PITCH_UPPER_LIMIT_EXTENSION_TABLE[] = {
+    {EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT, PITCH_UPPER_LIMIT_DEFAULT},
+    {0.47f, -0.67f},
+    {0.53f, -0.63f},
+    {0.63f, -0.57f},
+    {0.73f, -0.52f},
+};
+
+static modm::interpolation::Linear<modm::Pair<float, float>>
+    PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR(
+        PITCH_UPPER_LIMIT_EXTENSION_TABLE,
+        MODM_ARRAY_SIZE(PITCH_UPPER_LIMIT_EXTENSION_TABLE));
+
 inline float getPitchMinLimit(float extensionPosition)
 {
     // TurretMotor expects numeric min/max radians. Pitch up is negative on engineer.
@@ -79,6 +105,12 @@ inline float getPitchMinLimit(float extensionPosition)
     {
         return aruwsrc::control::turret::PITCH_UPPER_LIMIT_EXTENSION_RETRACTED;
     }
+
+    if (extensionPosition > EXTENSION_THRESHOLD_FOR_PITCH_UPPER_LIMIT)
+    {
+        return PITCH_UPPER_LIMIT_EXTENSION_INTERPOLATOR.interpolate(extensionPosition);
+    }
+
     return aruwsrc::control::turret::PITCH_UPPER_LIMIT_DEFAULT;
 }
 
@@ -123,6 +155,9 @@ static constexpr aruwsrc::control::turret::algorithms::TurretGravitationalForceO
         .cgX = 0.0f,
         .cgZ = 0.0f,
         .gravityCompensatorMax = 0.0f};
+
+inline constexpr float BINNED_ALIGNMENT_OFFSET = 0.32575804f;
+inline constexpr float YAW_ALIGNMENT_OFFSET = 2.6f;
 
 namespace world_rel_turret_imu
 {
@@ -232,24 +267,24 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
+    .kp = 35000.0f,
+    .ki = 50000.0f,
+    .kd = 4000.0f,
+    .maxICumulative = 300.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
     .tQDerivativeKalman = 1.0f,
-    .tRDerivativeKalman = 0.0f,
+    .tRDerivativeKalman = 300.0f,
     .tQProportionalKalman = 1.0f,
-    .tRProportionalKalman = 1.0f,
+    .tRProportionalKalman = 0.0f,
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.015f,
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 0.0f,
-    .ki = 0.0f,
-    .kd = 0.0f,
-    .maxICumulative = 0.0f,
+    .kp = 100000.0f,
+    .ki = 30000.0f,
+    .kd = 4000.0f,
+    .maxICumulative = 1500.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
     .tRDerivativeKalman = 300.0f,
@@ -258,6 +293,19 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
     .errDeadzone = 0.0f,
     .errorDerivativeFloor = 0.0f,
 };
+
+constexpr modm::Pair<float, float> LAMPREY_CALIBRATION_MAP[38] = {
+    {0.000000f, 0.000000f}, {0.084791f, 0.084791f}, {0.144849f, 0.251115f}, {0.276070f, 0.446122f},
+    {0.376597f, 0.625451f}, {0.420193f, 0.809689f}, {0.589557f, 0.983208f}, {0.595284f, 0.978966f},
+    {0.764403f, 1.160585f}, {1.011761f, 1.340518f}, {1.222203f, 1.503940f}, {1.440547f, 1.698713f},
+    {1.570195f, 1.868359f}, {1.719543f, 2.045803f}, {1.831457f, 2.234717f}, {2.007574f, 2.407335f},
+    {2.206204f, 2.587151f}, {2.439671f, 2.762712f}, {2.728215f, 2.943489f}, {2.913296f, 3.119026f},
+    {3.051125f, 3.298797f}, {3.180731f, 3.479441f}, {3.372349f, 3.675647f}, {3.605322f, 3.841017f},
+    {3.871725f, 4.021602f}, {4.130415f, 4.213467f}, {4.367655f, 4.394318f}, {4.531702f, 4.569046f},
+    {4.721763f, 4.738405f}, {4.863721f, 4.922260f}, {4.992419f, 5.104944f}, {5.151745f, 5.280353f},
+    {5.186485f, 5.477458f}, {5.470463f, 5.649949f}, {5.589169f, 5.830747f}, {5.831504f, 6.008702f},
+    {6.010724f, 6.185890f}, {6.283185f, 6.283185f}};
+
 }  // namespace chassis_rel
 
 }  // namespace aruwsrc::control::turret

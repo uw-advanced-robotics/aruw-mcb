@@ -34,20 +34,29 @@ class EngineerControlOperatorInterface : public control::ControlOperatorInterfac
 public:
     EngineerControlOperatorInterface(tap::Drivers *drivers) : ControlOperatorInterface(drivers) {}
 
-    virtual float getChassisXInput() override;
+    mockable float getChassisXInput() override;
 
-    virtual float getChassisYInput() override;
+    mockable float getChassisYInput() override;
 
-    virtual float getChassisRInput() override;
+    mockable float getChassisRInput() override;
 
-    float getTurretYawInput(uint8_t turretID) override;
+    mockable float getTurretYawInput(uint8_t turretID) override;
 
-    float getTurretPitchInput(uint8_t turretID) override;
+    mockable float getTurretPitchInput(uint8_t turretID) override;
 
     /**
      * @return The cube storage velocity.
      */
     mockable float getCubeStorageVelocity();
+
+    mockable bool isIKTranslationMode() const;
+    mockable bool isIKRotationMode() const;
+    mockable float getIKVelX() const;
+    mockable float getIKVelY() const;
+    mockable float getIKVelZ() const;
+    mockable float getIKVelRoll() const;
+    mockable float getIKVelPitch() const;
+    mockable float getIKVelYaw() const;
 
     bool getGantryKeyUp();
 
@@ -96,6 +105,10 @@ public:
      * @return whether or not the control switch is set to cube storage control mode.
      */
     bool isCubeStorageControlMode();
+
+private:
+    float MAX_IK_TRANSLATION_VEL = 0.2f;  // m/s for each axis
+    float MAX_IK_ROTATION_VEL = M_PI_4;   // rad/s for each of roll/pitch/yaw
 };
 }  // namespace aruwsrc::engineer
 

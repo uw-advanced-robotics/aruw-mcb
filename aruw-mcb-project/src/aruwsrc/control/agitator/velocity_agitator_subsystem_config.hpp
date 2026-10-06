@@ -71,7 +71,7 @@ struct VelocityAgitatorSubsystemConfig
     float emptyJamMinSetpoint = 0.1f;
     /// Barrel mechanism ID used to filter ref-reported projectile launches.
     tap::communication::serial::RefSerialData::Rx::MechanismID emptyJamBarrelId =
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
 };
 }  // namespace aruwsrc::control::agitator
 

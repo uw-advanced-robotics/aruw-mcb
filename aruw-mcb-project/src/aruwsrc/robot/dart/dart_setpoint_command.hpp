@@ -16,34 +16,38 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef DART_PULLBACK_COMMAND_HPP_
-#define DART_PULLBACK_COMMAND_HPP_
+#ifndef DART_SETPOINT_COMMAND_HPP_
+#define DART_SETPOINT_COMMAND_HPP_
 
 #include "tap/control/command.hpp"
 
-#include "dart_launcher_subsystem.hpp"
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
 
+#include "dart_servo.hpp"
+using namespace aruwsrc::dart;
 namespace aruwsrc::dart
 {
-class DartPullbackCommand : public tap::control::Command
+// pulls dart to pullback position using PID control
+
+class DartSetpointCommand : public tap::control::Command
 {
 public:
-    DartPullbackCommand(DartLauncherSubsystem &dartLauncher, int32_t desiredOuput);
-
+    DartSetpointCommand(
+        aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem,
+        float setpoint);
     void initialize() override;
+    void execute() override {}
 
-    void execute() override;
-
-    void end(bool interrupted) override;
+    void end(bool) override {}
 
     bool isFinished() const override;
 
-    const char *getName() const override { return "DART PULLBACK"; }
+    const char* getName() const override { return "DART SETPOINT"; }
 
 private:
-    DartLauncherSubsystem &dartLauncher;
-    int32_t desiredOutput;
-};  // class DartPullbackCommand
+    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& pullMotorSubsystem;
+    float setpoint;
+};  // class DartSetpointCommand
 
 }  // namespace aruwsrc::dart
-#endif  // DART_PULLBACK_COMMAND_HPP_
+#endif  // DART_SETPOINT_COMMAND_HPP_

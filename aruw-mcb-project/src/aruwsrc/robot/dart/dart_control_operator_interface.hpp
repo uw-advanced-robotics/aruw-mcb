@@ -16,24 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef DART_CONTROL_OPERATOR_INTERFACE_HPP_
+#define DART_CONTROL_OPERATOR_INTERFACE_HPP_
 
-#include "dart_pullback_command.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 namespace aruwsrc::dart
 {
-DartPullbackCommand::DartPullbackCommand(DartLauncherSubsystem &dartLauncher, int32_t desiredOutput)
-    : dartLauncher(dartLauncher),
-      desiredOutput(desiredOutput)
+class DartControlOperatorInterface : public control::ControlOperatorInterface
 {
-    addSubsystemRequirement(&dartLauncher);
-}
+public:
+    DartControlOperatorInterface(tap::Drivers* drivers)
+        : ControlOperatorInterface(drivers),
+          drivers(drivers)
+    {
+    }
 
-void DartPullbackCommand::initialize() {}
+    float getPullbackVelocity();
 
-void DartPullbackCommand::execute() { dartLauncher.moveMotor(desiredOutput); }
+    float getYawVelocity();
 
-void DartPullbackCommand::end(bool) { dartLauncher.moveMotor(0); }
-
-bool DartPullbackCommand::isFinished() const { return dartLauncher.isBeamBroken(); }
-
+private:
+    tap::Drivers* drivers;
+};
 }  // namespace aruwsrc::dart
+
+#endif  // DART_CONTROL_OPERATOR_INTERFACE_HPP_
