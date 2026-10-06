@@ -26,6 +26,7 @@ namespace aruwsrc::control::motor
 DamiaoMotor::DamiaoMotor(
     tap::Drivers* drivers,
     DamiaoMotorId motorId,
+    DamiaoControlMode controlMode,
     tap::can::CanBus motorCanBus,
     bool isInverted,
     const char* name,
@@ -33,6 +34,7 @@ DamiaoMotor::DamiaoMotor(
     : CanRxListener(drivers, feedbackCanId, motorCanBus),
       drivers(drivers),
       motorIdentifier(static_cast<uint16_t>(motorId)),
+      controlMode(static_cast<uint16_t>(controlMode)),
       motorCanBus(motorCanBus),
       motorInverted(isInverted),
       encoder(isInverted)

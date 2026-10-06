@@ -91,6 +91,13 @@ enum DamiaoMotorId : uint16_t
     DAMIAO_MOTOR8 = 0x008,
 };
 
+enum DamiaoControlMode : uint16_t
+{
+    DAMIAO_CONTROL_MODE_MIT = 0x000,
+    DAMIAO_CONTROL_MODE_POSITION_SPEED = 0x001,
+    DAMIAO_CONTROL_MODE_VELOCITY = 0x002,
+};
+
 /**
  * DaMiao CAN motor driver implementing MIT-mode torque control.
  *
@@ -113,6 +120,7 @@ public:
     DamiaoMotor(
         tap::Drivers* drivers,
         DamiaoMotorId motorId,
+        DamiaoControlMode controlMode,
         tap::can::CanBus motorCanBus,
         bool isInverted,
         const char* name,
@@ -164,6 +172,7 @@ private:
 
     tap::Drivers* drivers;
     uint16_t motorIdentifier;
+    uint16_t controlMode;
     tap::can::CanBus motorCanBus;
     bool motorInverted;
 
