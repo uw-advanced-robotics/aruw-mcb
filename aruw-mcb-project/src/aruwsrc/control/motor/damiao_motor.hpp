@@ -117,14 +117,33 @@ public:
     static constexpr float DM_J4310_T_MAX = 10.0f;
     static constexpr int32_t MAX_OUTPUT_DM_J4310_MILLI_NM = 10000;
 
+    // DM-J4310 position mode limits
+    // TODO: figure out sensible limits
+
+    // DM-J4310 velocity mode limits
+    // TODO: figure out sensible limits - maybe look in specs to find max physical limit?
+    static constexpr float DM_J4310_VEL_MIN = -30.0f;
+    static constexpr float DM_J4310_VEL_MAX = 30.0f;
+
+    /**
+     * Constructor for a Damiao motor.
+     *
+     * @param drivers The drivers singleton.
+     * @param motorId The motor ID.
+     * @param motorCanBus The motor CAN bus.
+     * @param isInverted Whether the motor is inverted.
+     * @param name The name of the motor.
+     * @param feedbackCanId The CAN ID of the feedback frame.
+     * @param controlMode The control mode of the motor, defaults to MIT mode (torque control).
+     */
     DamiaoMotor(
         tap::Drivers* drivers,
         DamiaoMotorId motorId,
-        DamiaoControlMode controlMode,
         tap::can::CanBus motorCanBus,
         bool isInverted,
         const char* name,
-        uint16_t feedbackCanId = 0x000);
+        uint16_t feedbackCanId = 0x000,
+        DamiaoControlMode controlMode = DamiaoControlMode::DAMIAO_CONTROL_MODE_MIT);
 
     ~DamiaoMotor();
 
@@ -167,6 +186,13 @@ private:
         float kp,
         float kd,
         float torqueNm);
+
+    // sends a position-speed command to the motor, with a target position and maximum
+    // velocity used during the motion
+    bool sendPositionCommand(float targetPosition, float velocityMax);
+
+    // sends a velocity command, target velocity in rad/s
+    bool sendVelocityCommand(float targetVelocity);
 
     bool sendRawFrame(const uint8_t* data, uint8_t dataLen, uint16_t frameId) const;
 

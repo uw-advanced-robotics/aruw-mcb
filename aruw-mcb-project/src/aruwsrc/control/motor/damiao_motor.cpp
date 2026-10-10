@@ -19,6 +19,8 @@
 
 #include "damiao_motor.hpp"
 
+#include <cstdint>
+
 #include "tap/algorithms/math_user_utils.hpp"
 
 namespace aruwsrc::control::motor
@@ -26,11 +28,11 @@ namespace aruwsrc::control::motor
 DamiaoMotor::DamiaoMotor(
     tap::Drivers* drivers,
     DamiaoMotorId motorId,
-    DamiaoControlMode controlMode,
     tap::can::CanBus motorCanBus,
     bool isInverted,
     const char* name,
-    uint16_t feedbackCanId)
+    uint16_t feedbackCanId,
+    DamiaoControlMode controlMode)
     : CanRxListener(drivers, feedbackCanId, motorCanBus),
       drivers(drivers),
       motorIdentifier(static_cast<uint16_t>(motorId)),
@@ -173,6 +175,11 @@ bool DamiaoMotor::sendMitCommand(
     };
 
     return sendRawFrame(data, 8, motorIdentifier);
+}
+
+bool DamiaoMotor::sendVelocityCommand(float targetVelocity)
+{
+    const uint32_t velU = floatToUint(targetVelocity, DM_J4310_V_MIN, DM_J4310_V_MAX, 12);
 }
 
 bool DamiaoMotor::sendRawFrame(const uint8_t* data, uint8_t dataLen, uint16_t frameId) const
