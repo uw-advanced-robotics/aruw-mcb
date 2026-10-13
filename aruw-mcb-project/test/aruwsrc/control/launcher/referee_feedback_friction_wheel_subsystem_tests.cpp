@@ -22,6 +22,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/launcher/launcher_constants.hpp"
 #include "aruwsrc/control/launcher/referee_feedback_friction_wheel_subsystem.hpp"
 
 using namespace aruwsrc;
@@ -48,10 +49,10 @@ protected:
               false),
           frictionWheels(
               &drivers,
-              std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
+              std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
               WHEEL_CONFIGS_ARRAY,
-              nullptr,
-              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1)
+              LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+              tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM)
     {
     }
 
@@ -92,7 +93,7 @@ TEST_F(
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;
     robotData.turret.bulletSpeed = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first + 5.0f;
     robotData.turret.launchMechanismID =
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
     robotData.turret.firingFreq = 1;
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp += 1;
@@ -120,7 +121,7 @@ TEST_F(
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;
     robotData.turret.bulletSpeed = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first + 5.0f;
     robotData.turret.launchMechanismID =
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
 
     frictionWheels.setDesiredLaunchSpeed(LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first);
 
@@ -133,16 +134,16 @@ TEST_F(RefereeFeedbackFrictionWheelSubsystemTest, getPredictedLaunchSpeed_rollin
 {
     RefereeFeedbackFrictionWheelSubsystem<10, 2> frictionWheelAveraged(
         &drivers,
-        std::array<NiceMock<tap::mock::DjiMotorMock>*, 2>{{&leftFlywheel, &rightFlywheel}},
+        std::array<tap::motor::MotorInterface*, 2>{{&leftFlywheel, &rightFlywheel}},
         WHEEL_CONFIGS_ARRAY,
-        nullptr,
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1);
+        LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT,
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM);
 
     robotData.turret.lastReceivedLaunchingInfoTimestamp = 0;
     robotData.turret.bulletSpeed = LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT[0].first;
     robotData.turret.firingFreq = 1;
     robotData.turret.launchMechanismID =
-        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1;
+        tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
 
     ON_CALL(drivers.refSerial, getRefSerialReceivingData).WillByDefault(Return(true));
 

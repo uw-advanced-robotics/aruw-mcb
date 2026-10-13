@@ -26,11 +26,11 @@
 namespace aruwsrc::sentry::turret
 {
 TurretMajorSentryControlCommand::TurretMajorSentryControlCommand(
-    tap::Drivers *drivers,
-    SentryControlOperatorInterface &controlOperatorInterface,
-    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
+    tap::Drivers* drivers,
+    SentryControlOperatorInterface& controlOperatorInterface,
+    aruwsrc::control::turret::YawTurretSubsystem& turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        aruwsrc::control::turret::algorithms::Axis::YAW> &yawController,
+        tap::algorithms::transforms::Axis::YAW>& yawController,
     float userYawInputScalar)
     : drivers(drivers),
       controlOperatorInterface(controlOperatorInterface),
@@ -53,7 +53,7 @@ void TurretMajorSentryControlCommand::initialize()
 void TurretMajorSentryControlCommand::execute()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTime;
+    float dt = (currTime - prevTime) / 1000.0f;
     prevTime = currTime;
 
     const WrappedFloat yawSetpoint =

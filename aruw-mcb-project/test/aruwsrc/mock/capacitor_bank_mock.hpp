@@ -34,18 +34,16 @@ using namespace aruwsrc::communication::can::cap_bank;
 class CapacitorBankMock : public CapacitorBank
 {
 public:
-    CapacitorBankMock(tap::Drivers* drivers, tap::can::CanBus canBus, const float capacitance);
+    CapacitorBankMock(
+        tap::Drivers* drivers,
+        tap::can::CanBus canBus,
+        const float capacitance,
+        const int maxAvailablePower);
     virtual ~CapacitorBankMock();
 
     MOCK_METHOD(void, initialize, (), (override));
 
-    MOCK_METHOD(void, start, (), (const override));
-
-    MOCK_METHOD(void, stop, (), (const override));
-
-    MOCK_METHOD(void, ping, (), (const override));
-
-    MOCK_METHOD(void, setPowerLimit, (uint16_t watts), (override));
+    MOCK_METHOD(void, sendCapCommand, (CapCommandMode mode), (const override));
 };  // class CapacitorBankMock
 }  // namespace aruwsrc::mock
 

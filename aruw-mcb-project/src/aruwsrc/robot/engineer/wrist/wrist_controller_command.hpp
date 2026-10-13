@@ -36,12 +36,11 @@ class WristControllerCommand : public tap::control::Command
 {
 public:
     WristControllerCommand(
-        aruwsrc::control::joint::JointSubsystem &roll,
         WristSubsystem &wrist,
         EngineerControlOperatorInterface *operatorInterface,
-        float rollScalingFactor,
-        float pitchScalingFactor,
-        float yawScalingFactor);
+        float theta1ScalingFactor,
+        float theta2ScalingFactor,
+        float theta3ScalingFactor);
 
     void initialize() override;
 
@@ -57,13 +56,12 @@ public:
     virtual bool isFinished() const override { return false; }
 
 private:
-    aruwsrc::control::joint::JointSubsystem &roll;
     WristSubsystem &wrist;
 
     EngineerControlOperatorInterface *operatorInterface;
-    const float rollScalingFactor;
-    const float pitchScalingFactor;
-    const float yawScalingFactor;
+    const float theta1ScalingFactor;
+    const float theta2ScalingFactor;
+    const float theta3ScalingFactor;
 };
 
 }  // namespace aruwsrc::engineer::wrist

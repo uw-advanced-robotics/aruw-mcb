@@ -58,7 +58,7 @@ protected:
     HolonomicChassisSubsystemTest()
         : currentSensor(
               {&drivers.analog,
-               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
+               tap::gpio::Analog::Pin::S,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
@@ -185,9 +185,9 @@ TEST_P(VelocityGetterTest, getDesiredVelocity)
 
     Matrix<float, 3, 1> chassisVelocity = chassis.getDesiredVelocityChassisRelative();
 
-    EXPECT_NEAR(expectedVelocity.x, chassisVelocity[0][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
-    EXPECT_NEAR(expectedVelocity.y, chassisVelocity[1][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
-    EXPECT_NEAR(expectedVelocity.z, chassisVelocity[2][0] / CHASSIS_GEARBOX_RATIO, 1E-3);
+    EXPECT_NEAR(expectedVelocity.x, chassisVelocity[0][0], 1E-3);
+    EXPECT_NEAR(expectedVelocity.y, chassisVelocity[1][0], 1E-3);
+    EXPECT_NEAR(expectedVelocity.z, chassisVelocity[2][0], 1E-3);
 }
 
 TEST_P(VelocityGetterTest, getVelocityWorldRelative)

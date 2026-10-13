@@ -23,6 +23,7 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
+#include "aruwsrc/control/agitator/multi_shot_cv_command.hpp"
 #include "aruwsrc/control/agitator/multi_shot_cv_command_mapping.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
@@ -77,7 +78,7 @@ public:
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter,
         const aruwsrc::control::launcher::FrictionWheelInterface &frictionWheelSubsystem,
         const aruwsrc::control::turret::TurretSubsystem &turretSubsystem,
-        const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler,
+        const aruwsrc::control::agitator::MultiShotCvCommand *multiShotHandler,
         const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor);
 
     modm::ResumableResult<void> sendInitialGraphics() override final;
@@ -185,7 +186,7 @@ private:
 
     const aruwsrc::control::turret::TurretSubsystem &turretSubsystem;
 
-    const aruwsrc::control::agitator::MultiShotCvCommandMapping *multiShotHandler;
+    const aruwsrc::control::agitator::MultiShotCvCommand *multiShotHandler;
 
     const aruwsrc::control::governor::CvOnTargetGovernor *cvOnTargetGovernor;
 

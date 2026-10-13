@@ -72,11 +72,7 @@ public:
     TwoDeadwheelKFOdometry2DSubsystem(
         tap::Drivers &drivers,
         const aruwsrc::algorithms::odometry::TwoDeadwheelOdometryObserver &deadwheels,
-#if defined(TARGET_SENTRY_ECLIPSE)
         tap::algorithms::odometry::ChassisWorldYawObserverInterface &yawObserver,
-#else
-        const aruwsrc::control::turret::TurretSubsystem &yawObserver,
-#endif
         tap::communication::sensors::imu::ImuInterface &imu,
         float initialXPos,
         float initialYPos,
@@ -89,13 +85,6 @@ public:
     void overrideOdometryPosition(const float positionX, const float positionY);
 
     void overrideOdometryOrientation(const float deltaYaw);
-
-private:
-#if defined(TARGET_SENTRY_ECLIPSE)
-    tap::algorithms::odometry::ChassisWorldYawObserverInterface &chassisYawObserver;
-#else
-    aruwsrc::algorithms::odometry::OttoChassisWorldYawObserver chassisYawObserver;
-#endif
 };
 
 }  // namespace aruwsrc::algorithms::odometry

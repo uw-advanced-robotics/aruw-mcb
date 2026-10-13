@@ -26,7 +26,7 @@ namespace aruwsrc::standard
 #elif defined(ALL_SENTRIES)
 #include "aruwsrc/robot/sentry/sentry_drivers.hpp"
 namespace aruwsrc::sentry
-#elif defined(TARGET_HERO_ZERO)
+#elif defined(TARGET_HERO_NEPTUNE)
 #include "aruwsrc/robot/hero/hero_drivers.hpp"
 namespace aruwsrc::hero
 #elif defined(TARGET_DRONE)
@@ -34,9 +34,6 @@ namespace aruwsrc::hero
 namespace aruwsrc::drone
 #elif defined(TARGET_ENGINEER)
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
-namespace aruwsrc::engineer
-#elif defined(TARGET_ENGI_2025)
-#include "aruwsrc/robot/2025engineer/engineer_drivers.hpp"
 namespace aruwsrc::engineer
 #elif defined(TARGET_DART)
 namespace aruwsrc::dart

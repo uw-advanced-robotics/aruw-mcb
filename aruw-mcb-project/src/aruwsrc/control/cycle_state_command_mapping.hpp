@@ -67,7 +67,7 @@ public:
      */
     CycleStateCommandMapping(
         tap::Drivers *drivers,
-        const tap::control::RemoteMapState &rms,
+        const tap::control::RemoteMapState *rms,
         T initialState,
         C *stateChangeObject,
         StateChangedFn stateChangedFn,
@@ -85,10 +85,10 @@ public:
      */
     ~CycleStateCommandMapping() override = default;
 
-    void executeCommandMapping(const tap::control::RemoteMapState &currState) override
+    void executeCommandMapping(const tap::control::GenericRemoteMapState &currState) override
     {
         if (mappingSubset(currState) &&
-            !(mapState.getNegKeysUsed() && negKeysSubset(mapState, currState)))
+            !(mapState->getNegKeysUsed() && negKeysSubset(*mapState, currState)))
         {
             // mapping pressed, state needs updating first time pressed
             if (!pressed)

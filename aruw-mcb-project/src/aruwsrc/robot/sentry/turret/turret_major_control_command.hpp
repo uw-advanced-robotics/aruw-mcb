@@ -57,16 +57,16 @@ public:
      * by. Basically mouse sensitivity.
      */
     TurretMajorSentryControlCommand(
-        tap::Drivers *drivers,
-        SentryControlOperatorInterface &controlOperatorInterface,
-        aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
+        tap::Drivers* drivers,
+        SentryControlOperatorInterface& controlOperatorInterface,
+        aruwsrc::control::turret::YawTurretSubsystem& turretMajorSubsystem,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-            aruwsrc::control::turret::algorithms::Axis::YAW> &yawController,
+            tap::algorithms::transforms::Axis::YAW>& yawController,
         float userYawInputScalar);
 
     bool isReady() override;
 
-    const char *getName() const override { return "User turret major control"; }
+    const char* getName() const override { return "User turret major control"; }
 
     void initialize() override;
 
@@ -77,15 +77,15 @@ public:
     void end(bool) override;
 
 private:
-    tap::Drivers *drivers;
-    SentryControlOperatorInterface &controlOperatorInterface;
-    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem;
+    tap::Drivers* drivers;
+    SentryControlOperatorInterface& controlOperatorInterface;
+    aruwsrc::control::turret::YawTurretSubsystem& turretMajorSubsystem;
 
     WrappedFloat lastYawSetPoint;
     uint32_t prevTime = 0;
 
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        aruwsrc::control::turret::algorithms::Axis::YAW> &yawController;
+        tap::algorithms::transforms::Axis::YAW>& yawController;
 
     const float userYawInputScalar;
 };

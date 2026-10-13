@@ -37,6 +37,7 @@
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
+#include "limit_switch_menu.hpp"
 #include "mcb_lite_menu.hpp"
 #include "rtt_menu.hpp"
 #include "sentry_strategy_menu.hpp"
@@ -79,6 +80,7 @@ private:
 
     ImuCalibrateMenu imuCalibrateMenu;
     AutotuneMenu autotuneMenu;
+    LimitSwitchMenu limitSwitchMenu;
     CVMenu cvMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
@@ -104,6 +106,7 @@ private:
 
     void addImuCalibrateMenuCallback();
     void addAutotuneMenuCallback();
+    void addLimitSwitchMenuCallback();
     void addCVMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();

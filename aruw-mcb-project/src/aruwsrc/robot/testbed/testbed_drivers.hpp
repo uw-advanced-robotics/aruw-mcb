@@ -46,7 +46,6 @@ public:
           controlOperatorInterface(this),
           lite(this, tap::communication::serial::Uart::UartPort::Uart7)
     {
-        controlOperatorInterface.setTelemetry(&rttTelemetry);
     }
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
@@ -58,7 +57,15 @@ public:
 #endif
     aruwsrc::communication::mcb_lite::MCBLite lite;
 
-public:
+    void init(const float) { lite.initialize(); }
+
+    void updateIo() { lite.updateSerial(); }
+
+    void update()
+    {
+        lite.sendData();
+        rttTelemetry.updateTelemetryAsync();
+    }
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 

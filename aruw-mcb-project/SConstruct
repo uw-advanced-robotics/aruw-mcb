@@ -45,8 +45,6 @@ env.AppendUnique(
     CPPPATH=[
         abspath(r"src"),
         abspath(r"test"),
-        abspath(r"../segger-rtt/RTT"),
-        abspath(r"../segger-rtt/Config"),
     ]
 )
 
@@ -56,6 +54,11 @@ sources = []
 # Ensure that modm is first, since Taproot depends on modm
 # Append include path to environment so both src/test environments have access to them
 env.SConscript(dirs=[TAPROOT_PATH], exports=["env", "args", "sources"])
+env.SConscript(dirs=["./ext"], exports=["env"])
+
+# Setup SCons to use directory based caching, not global
+from SCons.SConsign import File
+File(None)
 
 # We include the tests as library to improve build times for CI.
 if args["TARGET_ENV"] == "tests":

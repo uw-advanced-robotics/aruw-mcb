@@ -33,8 +33,10 @@ TurretUserControlCommand::TurretUserControlCommand(
     tap::Drivers *drivers,
     ControlOperatorInterface &controlOperatorInterface,
     TurretSubsystem *turretSubsystem,
-    algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *yawController,
-    algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH> *pitchController,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
+        *yawController,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
+        *pitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)
@@ -62,7 +64,7 @@ void TurretUserControlCommand::initialize()
 void TurretUserControlCommand::execute()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTime;
+    float dt = (currTime - prevTime) / 1000.0f;
     prevTime = currTime;
 
     const WrappedFloat pitchSetpoint =

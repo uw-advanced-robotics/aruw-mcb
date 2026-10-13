@@ -75,11 +75,13 @@ public:
         tap::Drivers *drivers,
         ControlOperatorInterface &controlOperatorInterface,
         TurretSubsystem *turretSubsystem,
-        algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *chassisImuYawController,
-        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH>
+        algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
+            *chassisImuYawController,
+        algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
             *chassisImuPitchController,
-        algorithms::TurretAxisControllerInterface<algorithms::Axis::YAW> *turretImuYawController,
-        algorithms::TurretAxisControllerInterface<algorithms::Axis::PITCH>
+        algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
+            *turretImuYawController,
+        algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
             *turretImuPitchController,
         float userYawInputScalar,
         float userPitchInputScalar,

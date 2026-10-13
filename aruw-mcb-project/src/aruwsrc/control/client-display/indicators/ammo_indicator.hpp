@@ -55,7 +55,7 @@ public:
 
 private:
 // X position of the text
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
     static constexpr uint16_t TEXT_X = 611;
     static constexpr uint16_t NUMBER_X = 1018;
 #else
@@ -67,7 +67,7 @@ private:
     // WIDTH of the text
     static constexpr uint16_t WIDTH = 4;
 // SIZE of the text
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
     static constexpr uint16_t SIZE = 80;
 #else
     static constexpr uint16_t SIZE = 40;

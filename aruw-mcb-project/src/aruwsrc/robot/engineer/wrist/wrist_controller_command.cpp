@@ -22,38 +22,40 @@
 namespace aruwsrc::engineer::wrist
 {
 WristControllerCommand::WristControllerCommand(
-    aruwsrc::control::joint::JointSubsystem &roll,
     WristSubsystem &wrist,
     EngineerControlOperatorInterface *operatorInterface,
-    float rollScalingFactor,
-    float pitchScalingFactor,
-    float yawScalingFactor)
+    float theta1ScalingFactor,
+    float theta2ScalingFactor,
+    float theta3ScalingFactor)
     : tap::control::Command(),
-      roll(roll),
       wrist(wrist),
       operatorInterface(operatorInterface),
-      rollScalingFactor(rollScalingFactor),
-      pitchScalingFactor(pitchScalingFactor),
-      yawScalingFactor(yawScalingFactor)
+      theta1ScalingFactor(theta1ScalingFactor),
+      theta2ScalingFactor(theta2ScalingFactor),
+      theta3ScalingFactor(theta3ScalingFactor)
 {
-    addSubsystemRequirement(&roll);
     addSubsystemRequirement(&wrist);
 }
 
-void WristControllerCommand::initialize() {}
+void WristControllerCommand::initialize()
+{
+    wrist.setSetpointTheta1(wrist.getTheta1());
+    wrist.setSetpointTheta2(wrist.getTheta2());
+    wrist.setSetpointTheta3(wrist.getTheta3());
+}
 
 void WristControllerCommand::execute()
 {
     // Get the desired velocities from the operator interface
     // to add/subtract from position setpoint
-    float rollVelocity = operatorInterface->getWristRollVelocity() * rollScalingFactor;
-    float pitchVelocity = operatorInterface->getWristPitchVelocity() * pitchScalingFactor;
-    float yawVelocity = operatorInterface->getWristYawVelocity() * yawScalingFactor;
+    float theta1Velocity = operatorInterface->getWristTheta1Velocity() * theta1ScalingFactor;
+    float theta2Velocity = operatorInterface->getWristTheta2Velocity() * theta2ScalingFactor;
+    float theta3Velocity = operatorInterface->getWristTheta3Velocity() * theta3ScalingFactor;
 
     // Set the desired positions
-    roll.setSetpoint(roll.getSetpoint() + rollVelocity);
-    wrist.setSetpointPitch(wrist.getSetpointPitch() + pitchVelocity);
-    wrist.setSetpointYaw(wrist.getSetpointYaw() + yawVelocity);
+    wrist.setSetpointTheta3(wrist.getSetpointTheta3() + theta3Velocity);  // theta3 is "roll"
+    wrist.setSetpointTheta2(wrist.getSetpointTheta2() + theta2Velocity);  // theta2 is "pitch"
+    wrist.setSetpointTheta1(wrist.getSetpointTheta1() + theta1Velocity);  // theta1 is "yaw"
 }
 
 }  // namespace aruwsrc::engineer::wrist
