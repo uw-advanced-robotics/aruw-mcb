@@ -191,14 +191,14 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return xInput / CHASSIS_SPEED_DIVSOR_SPRINT;
+        chassisXApplied = xInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return xInput / CHASSIS_SPEED_DIVSOR_NORMAL;
+        chassisXApplied = xInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 
-    return 0;
+    return chassisXApplied;
 }
 
 float EngineerControlOperatorInterface::getChassisYInput()
@@ -246,12 +246,13 @@ float EngineerControlOperatorInterface::getChassisYInput()
     float yInput = chassisYInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::R))
     {
-        return yInput / CHASSIS_SPEED_DIVSOR_SPRINT;
+        chassisYApplied = yInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return yInput / CHASSIS_SPEED_DIVSOR_NORMAL;
+        chassisYApplied = yInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
+    return chassisYApplied;
 }
 
 float EngineerControlOperatorInterface::getChassisRInput()

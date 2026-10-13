@@ -142,12 +142,12 @@ void WristSubsystem::refresh()
     float theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
     float errorTheta3 = motorTheta3.getEncoder()->getPosition().minDifference(setpointTheta3);
 
-    float pidOutTheta1 = pidTheta1.runController(
+    pidOutTheta1 = pidTheta1.runController(
         theta1Error,
         motorDifferential1.getEncoder()->getVelocity(),
         0.002f);
-    float pidOutTheta2 = pidTheta2.runController(theta2Error, encoderTheta2.getVelocity(), 0.002f);
-    float pidOutTheta3 =
+    pidOutTheta2 = pidTheta2.runController(theta2Error, encoderTheta2.getVelocity(), 0.002f);
+    pidOutTheta3 =
         pidTheta3.runController(errorTheta3, motorTheta3.getEncoder()->getVelocity(), 0.002f);
 
     // gravity comp
@@ -158,23 +158,30 @@ void WristSubsystem::refresh()
     Vector mountRelativeGravityTorque =
         mountingFrameToCOM.toVector().cross(mountRelativeGravityForce);
 
-    float theta1 = getTheta1();
-    float theta2 = getTheta2();
+    theta1 = getTheta1();
+    theta2 = getTheta2();
+    theta3 = getTheta3();
 
-    float theta1GravityTorque = mountRelativeGravityTorque.x();
-    float theta2GravityTorque = mountRelativeGravityTorque.y() * cosf(theta1) +
-                                mountRelativeGravityTorque.z() * sinf(theta1);
-    float theta3GravityTorque = mountRelativeGravityTorque.x() * cosf(theta2) +
-                                mountRelativeGravityTorque.y() * sinf(theta1) * sinf(theta2) -
-                                mountRelativeGravityTorque.z() * cosf(theta1) * sinf(theta2);
+    Vector axisTheta1(1, 0, 0);
+    Vector axisTheta2(0, cosf(theta1), sinf(theta1));
+    Vector axisTheta3(cosf(theta2), sinf(theta1) * sinf(theta2), -cosf(theta1) * sinf(theta2));
+
+    float theta1GravityTorque = mountRelativeGravityTorque.dot(axisTheta1);
+    float theta2GravityTorque = mountRelativeGravityTorque.dot(axisTheta2);
+    float theta3GravityTorque = mountRelativeGravityTorque.dot(axisTheta3);
 
     // differential
-    float motor1GravityTorque = theta1GravityTorque * gravityCompConfig->motor1TorqueConstant;
-    float motor2GravityTorque =
+    motor1GravityTorque = theta1GravityTorque * gravityCompConfig->motor1TorqueConstant;
+    motor2GravityTorque =
         (theta1GravityTorque + theta2GravityTorque) * gravityCompConfig->motor2TorqueConstant;
+    motor3GravityTorque = theta3GravityTorque * gravityCompConfig->motor3TorqueConstant;
+
+    // TODO scale gravity torques by gravityCompScales for each axis
+    // (and replace gravityTorques in outMotor calculations)
+
     float outMotorDifferential1 = pidOutTheta1 - motor1GravityTorque;
     float outMotorDifferential2 = pidOutTheta1 + pidOutTheta2 - motor2GravityTorque;
-    float outMotor3 = pidOutTheta3 - theta3GravityTorque;
+    float outMotor3 = pidOutTheta3 - motor3GravityTorque;
 
     motorDifferential1.setDesiredOutput(std::clamp<int32_t>(
         outMotorDifferential1,

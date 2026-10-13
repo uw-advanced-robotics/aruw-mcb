@@ -533,7 +533,6 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
@@ -570,12 +569,95 @@ aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     &drivers()->controlOperatorInterface,
     &chassisSubsystem);
 
-WristControllerCommand wristControllerCommand(
+WristControllerCommand wristControllerCommand(wristSubsystem, &drivers()->controlOperatorInterface);
+
+inline constexpr float WRIST_GRAVITY_TEST_ANGLE = modm::toRadian(30.0f);
+
+uint8_t commandCounter = 0;
+WristControllerCommand wristTheta1NegativeGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
-    WRIST_THETA_1_SCALING_FACTOR,
-    WRIST_THETA_2_SCALING_FACTOR,
-    WRIST_THETA_3_SCALING_FACTOR);
+    std::pair<uint8_t, float>{0, -WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter);
+WristControllerCommand wristTheta1ZeroGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{0, 0},
+    &commandCounter);
+WristControllerCommand wristTheta1PositiveGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{0, WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter);
+
+WristControllerCommand wristTheta2NegativeGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{1, -WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter);
+WristControllerCommand wristTheta2ZeroGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{1, 0},
+    &commandCounter);
+WristControllerCommand wristTheta2PositiveGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{1, WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter);
+
+WristControllerCommand wristTheta3NegativeGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{2, -WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter);
+WristControllerCommand wristTheta3ZeroGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{2, 0},
+    &commandCounter);
+WristControllerCommand wristTheta3PositiveGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{2, WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter);
+
+InstantCommand holdExtensionAtCurrentPosition(
+    []() { 
+        commandCounter = 0;
+        extensionSubsystem.setSetpoint(extensionSubsystem.getPosition()); 
+    },
+    std::array<tap::control::Subsystem*, 1>{&extensionSubsystem});
+
+SetpointMoveManualCommand holdExtensionDuringThetaTest(
+    extensionSubsystem,
+    &drivers()->controlOperatorInterface,
+    0.0f,
+    SetpointType::EXTENSION);
+
+// TODO indicator variable for which command is currently running
+SequentialCommand<12> wristGravityCompensationSetpointSequence(
+    &wristTheta1NegativeGravityTestCommand,
+    &wristTheta1ZeroGravityTestCommand,
+    &wristTheta1PositiveGravityTestCommand,
+    &wristTheta1ZeroGravityTestCommand,
+    &wristTheta2NegativeGravityTestCommand,
+    &wristTheta2ZeroGravityTestCommand,
+    &wristTheta2PositiveGravityTestCommand,
+    &wristTheta2ZeroGravityTestCommand,
+    &wristTheta3NegativeGravityTestCommand,
+    &wristTheta3ZeroGravityTestCommand,
+    &wristTheta3PositiveGravityTestCommand,
+    &wristTheta3ZeroGravityTestCommand);
+
+ConcurrentDeadlineCommand<1> wristGravityCompensationTestWithExtensionHold(
+    std::array<Command*, 1>{&holdExtensionDuringThetaTest},
+    "Wrist gravity compensation test",
+    &wristGravityCompensationSetpointSequence);
+
+SequentialCommand<2> wristGravityCompensationTestSequence(
+    &holdExtensionAtCurrentPosition,
+    &wristGravityCompensationTestWithExtensionHold);
 
 // wrist fold in commands are not fully tuned yet
 WristSetpointsCommand wristFoldInCommand(
@@ -691,6 +773,11 @@ inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
     chassisFrameYawTurretController,
     chassisFramePitchTurretController,
     depositTrajectory);
+
+
+Trigger rightUp = 
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(&wristGravityCompensationTestSequence);
 
 // joint control mode
 Trigger rightMid =

@@ -125,6 +125,11 @@ private:
     float setpointTheta2;
     tap::algorithms::WrappedFloat setpointTheta3;
     tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
+
+    // variables for gravity comp characterization
+    float theta1, theta2, theta3;
+    float motor1GravityTorque, motor2GravityTorque, motor3GravityTorque;
+    float pidOutTheta1, pidOutTheta2, pidOutTheta3;
 };
 }  // namespace aruwsrc::engineer::wrist
 
