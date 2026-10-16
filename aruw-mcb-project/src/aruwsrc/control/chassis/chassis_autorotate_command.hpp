@@ -23,10 +23,10 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class HolonomicChassisSubsystem;
 
@@ -65,7 +65,8 @@ public:
         aruwsrc::control::ControlOperatorInterface* operatorInterface,
         HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
-        ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE);
+        ChassisSymmetry chassisSymmetry = ChassisSymmetry::SYMMETRICAL_NONE,
+        const float angleOffset = 0.0f);
 
     void initialize() override;
 
@@ -101,6 +102,12 @@ protected:
     ChassisSymmetry chassisSymmetry;
 
     /**
+     * Turret angular offset from the plate center the chassis will autorotate to. Zero means
+     * it will align with a plate.
+     */
+    const float angleOffset;
+
+    /**
      * `true` if the chassis is currently actually autorotating, `false` otherwise
      * (in which case on rotation may happen). Autorotation may not happen if the
      * user requests a user input that moves the turret from the front of the chassis
@@ -124,6 +131,6 @@ protected:
     void updateAutorotateState();
 };  // class ChassisAutorotateCommand
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // CHASSIS_AUTOROTATE_COMMAND_HPP_

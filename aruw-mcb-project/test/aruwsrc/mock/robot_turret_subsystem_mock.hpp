@@ -33,7 +33,11 @@ namespace mock
 class RobotTurretSubsystemMock : public aruwsrc::control::turret::RobotTurretSubsystem
 {
 public:
-    RobotTurretSubsystemMock(tap::Drivers *drivers);
+    RobotTurretSubsystemMock(
+        tap::Drivers *drivers,
+        aruwsrc::control::turret::TurretMotor &pitchMotor,
+        aruwsrc::control::turret::TurretMotor &yawMotor,
+        const tap::communication::sensors::imu::AbstractIMU *turretImu);
     virtual ~RobotTurretSubsystemMock();
 
     MOCK_METHOD(void, initialize, (), (override));
@@ -44,9 +48,7 @@ public:
     MOCK_METHOD(float, getPitchOffset, (), (const override));
     MOCK_METHOD(float, getWorldYaw, (), (const override));
     MOCK_METHOD(float, getWorldPitch, (), (const override));
-    MOCK_METHOD(uint32_t, getLastMeasurementTimeMicros, (), (const override));
 
-private:
     static constexpr aruwsrc::control::turret::TurretMotorConfig MOTOR_CONFIG = {
         .startAngle = M_PI_2,
         .startEncoderValue = 0,

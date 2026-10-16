@@ -23,7 +23,7 @@
 
 #include "tap/algorithms/fuzzy_pd.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
-#include "tap/communication/sensors/imu/imu_interface.hpp"
+#include "tap/communication/sensors/imu/abstract_imu.hpp"
 
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_controller_interface.hpp"
@@ -56,7 +56,8 @@ namespace aruwsrc::sentry::turret
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
 class TurretMajorWorldFrameController final
-    : public aruwsrc::control::turret::algorithms::TurretYawControllerInterface
+    : public aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+          tap::algorithms::transforms::Axis::YAW>
 {
 public:
     /**
@@ -67,6 +68,7 @@ public:
      * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] turretLeft The left turret minor.
      * @param[in] turretRight The right turret minor.
+     * @param[in] turretWidow The turret minor 2026.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      * @param[in] maxVelErrorInput Cap on the max error passed into velocity controller.
@@ -75,16 +77,13 @@ public:
      */
     TurretMajorWorldFrameController(
         const tap::algorithms::transforms::Transform& worldToMajor,
-        const aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
+        const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
-        tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
-        const SentryTurretMinorSubsystem& turretLeft,
-        const SentryTurretMinorSubsystem& turretRight,
+        tap::communication::sensors::imu::AbstractIMU& turretMajorIMU,
+        const SentryTurretMinorSubsystem& turretWidow,
         tap::algorithms::SmoothPid& positionPid,
         tap::algorithms::SmoothPid& velocityPid,
-        float maxVelErrorInput,
-        float minorMajorTorqueRatio,
-        float feedforwardGain);
+        float maxVelErrorInput);
 
     void initialize() final;
 
@@ -92,7 +91,7 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
      */
-    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
+    void runController(const float dt, const WrappedFloat desiredSetpoint) final;
 
     /// Sets the world frame yaw angle setpoint, refer to top level documentation for more details.
     void setSetpoint(WrappedFloat desiredSetpoint) final;
@@ -106,30 +105,28 @@ public:
 
     bool isOnline() const final;
 
-    // @todo see todo in interface class
-    WrappedFloat convertControllerAngleToChassisFrame(WrappedFloat controllerFrameAngle) const final
+    WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat /* controllerFrameAngle */) const final
     {
-        controllerFrameAngle = controllerFrameAngle;  // to make pipeline not complain
         return Angle(0.0);
     };
 
-    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final
+    WrappedFloat convertChassisAngleToControllerFrame(
+        WrappedFloat /* chassisFrameAngle */) const final
     {
-        chassisFrameAngle = chassisFrameAngle;  // to make pipelien not complain
         return Angle(0.0);
     };
 
 private:
     const tap::algorithms::transforms::Transform& worldToMajor;
 
-    const aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
+    const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
 
     aruwsrc::control::turret::TurretMotor& yawMotor;
 
-    tap::communication::sensors::imu::ImuInterface& turretMajorIMU;
+    tap::communication::sensors::imu::AbstractIMU& turretMajorIMU;
 
-    const SentryTurretMinorSubsystem& turretLeft;
-    const SentryTurretMinorSubsystem& turretRight;
+    const SentryTurretMinorSubsystem& turretWidow;
 
     tap::algorithms::SmoothPid& positionPid;
     tap::algorithms::SmoothPid& velocityPid;
@@ -139,8 +136,6 @@ private:
     float torqueCompensation = 0.0f;
 
     float maxVelErrorInput;
-
-    float minorMajorTorqueRatio;
 
     float feedforwardGain;
 };

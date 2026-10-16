@@ -20,6 +20,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "tap/control/remote_map_state.hpp"
 #include "tap/drivers.hpp"
 
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
@@ -50,7 +51,7 @@ protected:
           reverseRMS(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP),
           cmdMapping(
               &drivers,
-              rms,
+              &rms,
               TestCycleClass::STATE_1,
               &testCycleClass,
               &TestCycleClass::increment,

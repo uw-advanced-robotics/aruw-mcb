@@ -25,7 +25,7 @@
 
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 class MecanumWheel : public Wheel
 {
@@ -67,7 +67,7 @@ private:
     /// product of matrices 1 and 2 in equation on Swerve! Notion
     const CMSISMat<2, 2> PRODUCT_MAT = MAT1 * MAT2;
 };  // class MecanumWheel
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 }  // namespace aruwsrc
 
 #endif  // MECANUM_WHEEL_HPP_

@@ -26,13 +26,14 @@
 #include "tap/communication/referee/state_hud_indicator.hpp"
 #include "tap/communication/serial/ref_serial_data.hpp"
 
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "aruwsrc/control/client-display/indicators/hud_indicator.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "reticle_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Draws two squares next to the reticle when vision has a target acquired and otherwise hides the
@@ -47,7 +48,8 @@ public:
      * @param[in] visionCoprocessor visionCoprocessor instance.
      */
     VisionHudIndicators(
-        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
+        const aruwsrc::algorithms::ballistics::CvBallisticsSolver &ballistics,
         tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
 
     modm::ResumableResult<void> sendInitialGraphics() override final;
@@ -70,7 +72,8 @@ private:
     /** The maximum refresh rate of the vision target found squares. */
     static constexpr uint32_t VISION_TARGET_FOUND_MAX_REFRESH_RATE = 250;
 
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
+    const aruwsrc::algorithms::ballistics::CvBallisticsSolver &ballistics;
 
     Tx::Graphic2Message visionTargetFoundGraphics;
 
@@ -85,6 +88,6 @@ private:
      */
     void initializeVisionHudIndicator(Tx::GraphicData *graphicData, int xBoxLocation);
 };
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // VISION_HUD_INDICATORS_HPP_

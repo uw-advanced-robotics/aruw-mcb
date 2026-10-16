@@ -27,7 +27,7 @@
 
 using namespace tap::motor;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite::motor
 {
 /**
  * This class builds off of DjiMotor, but changes motor communication to talk to a virtual MCB
@@ -55,6 +55,6 @@ private:
     MCBLite* mcbLite;
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite::motor
 
 #endif

@@ -25,9 +25,7 @@
 
 using namespace tap::algorithms;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 MecanumChassisSubsystem::MecanumChassisSubsystem(
     tap::Drivers* drivers,
@@ -38,7 +36,9 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
     Motor& rightFrontMotor,
     Motor& rightBackMotor,
     tap::algorithms::SmoothPidConfig wheelVelocityPidConfig,
-    can::capbank::CapacitorBank* capacitorBank)
+    float wheelRadius,
+    float effectiveWheelbase,
+    communication::can::cap_bank::CapacitorBank* capacitorBank)
     : Holonomic4MotorChassisSubsystem(
           drivers,
           currentSensor,
@@ -58,13 +58,11 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(
     wheelVelToChassisVelMat[Y][RF] = -1;
     wheelVelToChassisVelMat[Y][LB] = 1;
     wheelVelToChassisVelMat[Y][RB] = 1;
-    wheelVelToChassisVelMat[R][LF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RF] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][LB] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat[R][RB] = -1.0 / WHEELBASE_HYPOTENUSE;
-    wheelVelToChassisVelMat *= (WHEEL_RADIUS / 4);
+    wheelVelToChassisVelMat[R][LF] = -1.0 / effectiveWheelbase;
+    wheelVelToChassisVelMat[R][RF] = -1.0 / effectiveWheelbase;
+    wheelVelToChassisVelMat[R][LB] = -1.0 / effectiveWheelbase;
+    wheelVelToChassisVelMat[R][RB] = -1.0 / effectiveWheelbase;
+    wheelVelToChassisVelMat *= (wheelRadius / 4);
 }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

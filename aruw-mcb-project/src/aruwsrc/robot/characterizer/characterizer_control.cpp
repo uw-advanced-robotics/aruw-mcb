@@ -24,6 +24,7 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/characterizer/characterizer_drivers.hpp"
 #include "aruwsrc/robot/characterizer/output_sweep_command.hpp"
@@ -96,12 +97,16 @@ tap::control::HoldCommandMapping leftSwitchDown(
         tap::communication::serial::Remote::Switch::LEFT_SWITCH,
         tap::communication::serial::Remote::SwitchState::DOWN));
 
-// inits
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+// inits
 void initializeSubsystems() { motorSubsystem.initialize(); }
 
 void registerSubsystems(Drivers* drivers)
 {
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &characterizer_control::remoteSafeDisconnectFunction);
     drivers->commandScheduler.registerSubsystem(&motorSubsystem);
 }
 

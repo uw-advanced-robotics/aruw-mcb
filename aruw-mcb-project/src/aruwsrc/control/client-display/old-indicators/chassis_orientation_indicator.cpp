@@ -25,7 +25,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 ChassisOrientationIndicator::ChassisOrientationIndicator(
     tap::Drivers &drivers,
@@ -146,4 +146,4 @@ void ChassisOrientationIndicator::initialize()
         CHASSIS_CENTER_Y + CHASSIS_BARREL_LENGTH,
         &chassisOrientationGraphics.graphicData[1]);
 }
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

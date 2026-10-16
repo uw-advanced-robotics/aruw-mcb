@@ -22,6 +22,7 @@
 // TODO: import buzzer subsystem
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
+#include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/blank/blank_drivers.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
@@ -51,12 +52,21 @@ void initializeSubsystems()
     
     buzzer.setDefaultCommand(&hesAPirateCommand);
 }
+// Safe disconnect function
+aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
+
+void initializeSubsystems() {}
 
 }  // namespace blank_control
 
 namespace aruwsrc::blank
 {
-void initSubsystemCommands(aruwsrc::blank::Drivers *) { blank_control::initializeSubsystems(); }
+void initSubsystemCommands(aruwsrc::blank::Drivers* drivers)
+{
+    drivers->commandScheduler.setSafeDisconnectFunction(
+        &blank_control::remoteSafeDisconnectFunction);
+    blank_control::initializeSubsystems();
+}
 
 }  // namespace aruwsrc::blank
 

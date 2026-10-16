@@ -25,7 +25,7 @@
 #include "tap/communication/sensors/current/current_sensor_interface.hpp"
 #include "tap/communication/sensors/voltage/voltage_sensor_interface.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 class MCBLite;
 
@@ -47,6 +47,6 @@ public:
 private:
     uint16_t voltage, current;
 };
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif  // VIRTUAL_CURRENT_SENSOR_HPP_
