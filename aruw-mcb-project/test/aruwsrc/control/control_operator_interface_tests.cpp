@@ -196,6 +196,7 @@ TEST_P(TurretTest, getTurretPitchInput_returns_user_input)
     float remoteInput = std::get<0>(params);
     int16_t mouseInput = std::get<1>(params);
     float expectedValue = std::get<2>(params);
+    expectedValue = 2.0f * (-remoteInput) - expectedValue;
 
     EXPECT_CALL(drivers.remote, getMouseY).WillOnce(Return(-mouseInput));
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::RIGHT_VERTICAL))
@@ -211,6 +212,7 @@ TEST_P(TurretTest, getTurretPitchInput_turret2_returns_user_input)
     float remoteInput = std::get<0>(params);
     int16_t mouseInput = std::get<1>(params);
     float expectedValue = std::get<2>(params);
+    expectedValue = 2.0f * (-remoteInput) - expectedValue;
 
     EXPECT_CALL(drivers.remote, getMouseY).WillOnce(Return(-mouseInput));
     EXPECT_CALL(drivers.remote, getChannel(Remote::Channel::LEFT_VERTICAL))

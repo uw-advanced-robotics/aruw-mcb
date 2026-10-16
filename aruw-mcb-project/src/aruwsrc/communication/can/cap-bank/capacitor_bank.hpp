@@ -20,96 +20,125 @@
 #ifndef CAPACITOR_BANK_HPP_
 #define CAPACITOR_BANK_HPP_
 
+#include <algorithm>
+
 #include "tap/architecture/timeout.hpp"
 #include "tap/communication/can/can_rx_listener.hpp"
 #include "tap/control/chassis/power_limiter.hpp"
 #include "tap/drivers.hpp"
 
 #include "modm/architecture/interface/can_message.hpp"
-#include "modm/math/interpolation/linear.hpp"
 
 namespace aruwsrc::communication::can::cap_bank
 {
 static constexpr float CAPACITOR_BANK_OUTPUT_VOLTAGE = 24.0f;
 static constexpr float CAPACITOR_BANK_EFFICIENCY = 0.9f;
-static constexpr float CAPACITOR_BANK_MIN_VOLTAGE = 8.0f;
+/// Cap-bank firmware refuses to discharge below this voltage (CAP_DISCHARGE_STOP_V in main.rs).
+/// Used by availableEnergy = 0.5·C·(V² - V_min²) so MCB UI never reports unusable energy.
+static constexpr float CAPACITOR_BANK_MIN_VOLTAGE = 10.0f;
 
 static constexpr uint16_t CAP_BANK_CAN_ID = 0x1EC;
 
+/**
+ * Referee power limit packed in CAP_COMMAND byte 6: watts = raw * scale.
+ * MUST match CAP_POWER_WATT_SCALE in the cap bank firmware (can_messages.rs).
+ */
+static constexpr uint16_t CAP_POWER_WATT_SCALE = 4;
+
+/**
+ * Cap bank protocol v2 message tags (CAP_BANK_CAN_ID, 8-byte classic frames).
+ */
 enum MessageType
 {
-    START = 0x01,
-    STOP = 0x02,
-    STATUS = 0x04,
-    SET_CHARGE_SPEED = 0x08,
-    PING = 0x10,
+    STATUS = 0x05,       // CAP -> MCB: state + telemetry (see processMessage)
+    CAP_COMMAND = 0x28,  // MCB -> CAP: mode + referee ref_limit only
 };
 
+/**
+ * Mode commanded to the cap bank in CAP_COMMAND byte 1. Wire values 0..3 must match the
+ * firmware's CapCommandMode.
+ */
+enum CapCommandMode
+{
+    OFF = 0,
+    IDLE = 1,
+    CHARGE = 2,
+    DISCHARGE = 3,
+};
+
+/**
+ * Cap bank state reported in STATUS byte 1, bits 0-6 (bit 7 = latched error flag).
+ * Wire values 0..4 must match the firmware's CanState (can_messages.rs).
+ * UNKNOWN is an MCB-only sentinel meaning "no STATUS received yet"; it never appears on the bus.
+ *
+ * | byte 1 & 0x7F | state           | meaning                                          |
+ * |---------------|-----------------|--------------------------------------------------|
+ * | 0             | RESET           | settle window (~250 ms); clears the error flag   |
+ * | 1             | STANDBY         | armed idle: converter off, caps hold voltage     |
+ * | 2             | CHARGING          | charging within [0, +ref]                        |
+ * | 3             | BOOST           | sprint: bidirectional within [-ref, +ref]        |
+ * | 4             | SAFETY_DISCHARGE| resistive drain until empty (button or fault)    |
+ */
 enum State
 {
     UNKNOWN = -1,
     RESET = 0,
-    SAFE = 1,
-    CHARGE = 2,
-    CHARGE_DISCHARGE = 3,
-    DISCHARGE = 4,
-    BATTERY_OFF = 5,
-    DISABLED = 6,
+    STANDBY = 1,
+    CHARGING = 2,
+    BOOST = 3,
+    SAFETY_DISCHARGE = 4,
 };
 
 enum SprintMode
 {
     NO_SPRINT = 0,
-    HALF_SPRINT = 1,
-    SPRINT = 2
+    SPRINT = 1,
 };
-
-static constexpr modm::Pair<float, float> CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT[] = {
-    {7.0, 2.5},
-    {9.0, 4.0},
-    {11.0, 6.0},
-    {14.0, 7.0},
-    {17.0, 10.0},
-    {20.0, 12.0},
-    {23.0, 12.0},
-    {26.0, 12.0},
-    {29.0, 12.0}};
-
-static modm::interpolation::Linear<modm::Pair<float, float>> CAP_VOLTAGE_TO_MAX_OUT_CURRENT(
-    CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT,
-    MODM_ARRAY_SIZE(CAP_VOLTAGE_TO_MAX_OUT_CURRENT_LUT));
 
 class CapacitorBank : public tap::can::CanRxListener
 {
 public:
-    CapacitorBank(tap::Drivers* drivers, tap::can::CanBus canBus, const float capacitance);
+    CapacitorBank(
+        tap::Drivers* drivers,
+        tap::can::CanBus canBus,
+        const float capacitance,
+        const int maxAvailablePower);
 
     void processMessage(const modm::can::Message& message) override;
 
     mockable void initialize();
 
-    mockable void start() const;
-    mockable void stop() const;
-    mockable void ping() const;
-    mockable void setPowerLimit(uint16_t watts);
+    /**
+     * Sends CAP_COMMAND (0x28): byte 1 = mode, byte 6 = referee ref_limit (watts/4).
+     * Bytes 2-5 and 7 are zero. Cap bank reads battery I/V from CAN 0x1C5 directly.
+     */
+    mockable void sendCapCommand(CapCommandMode mode) const;
 
 public:
     int getAvailableEnergy() const { return this->availableEnergy; };
     float getCurrent() const { return this->current; };
     float getVoltage() const { return this->voltage; };
-    int getPowerLimit() const { return this->powerLimit; };
+    /** Usable state-of-charge, 0..100 %, as reported by the cap bank. */
+    uint8_t getEnergyPercent() const { return this->energyPercent; };
+    /** Instantaneous supply-power headroom the cap reports, capped at maxAvailablePower, in watts.
+     */
+    int getAvailableSupplyPower() const
+    {
+        return std::min(this->availableSupplyPower, this->maxAvailablePower);
+    };
     State getState() const { return this->state; };
+
+    /**
+     * Latched fault on the cap bank (overcurrent, CAN loss, undervoltage, cap OV).
+     * Blocks Charge/Boost entry firmware-side; the driver clears it by toggling the
+     * caps off and on (C+SHIFT), which sends OFF -> cap bank passes through RESET.
+     */
+    bool hasError() const { return this->errorFlag; }
 
     bool isEnabled() const
     {
-        return this->getState() == State::SAFE || this->getState() == State::CHARGE ||
-               this->getState() == State::CHARGE_DISCHARGE ||
-               this->getState() == State::DISCHARGE || this->getState() == State::BATTERY_OFF;
-    }
-
-    bool isDisabled() const
-    {
-        return this->getState() == State::RESET || this->getState() == State::DISABLED;
+        return this->getState() == State::STANDBY || this->getState() == State::CHARGING ||
+               this->getState() == State::BOOST;
     }
 
     bool isOnline() const
@@ -125,14 +154,20 @@ public:
 #ifndef ENV_UNIT_TESTS
 private:
 #endif
-    const float capacitance;
+    /** Packs a watt value into byte 6 encoding (watts / CAP_POWER_WATT_SCALE). */
+    static uint8_t packWatts(uint16_t watts);
 
-    uint16_t powerLimit = 0;
+    const float capacitance;
+    const int maxAvailablePower;  // watts; ceiling on reported available supply power
+
+    int availableSupplyPower = 0;  // watts, from STATUS byte 7
+    uint8_t energyPercent = 0;     // 0..100 %, from STATUS byte 6
 
     float availableEnergy = 0;
     float current = 0;
     float voltage = 0;
     State state = State::UNKNOWN;
+    bool errorFlag = false;  // STATUS byte 1 bit 7
 
     SprintMode sprint = SprintMode::NO_SPRINT;
 

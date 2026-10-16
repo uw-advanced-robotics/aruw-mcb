@@ -80,7 +80,7 @@ public:
 
     void alignWith(EncoderInterface* other) override;
 
-    void resetEncoderValue() override;
+    void resetEncoderValue(float pos = 0) override;
 
     bool isOnline() const override;
 

@@ -37,13 +37,23 @@ public:
     Drivers()
         : tap::Drivers(),
           rttTelemetry(this),
-          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)
     {
     }
 
 public:
     communication::rtt::RttTelemetry rttTelemetry;
     display::OledDisplay oledDisplay;
+
+    void init(const float) { oledDisplay.initialize(); }
+
+    void updateIo() { oledDisplay.updateDisplay(); }
+
+    void update()
+    {
+        oledDisplay.updateMenu();
+        rttTelemetry.updateTelemetryAsync();
+    }
 };  // class aruwsrc::MotortesterDrivers
 }  // namespace aruwsrc::motor_tester
 

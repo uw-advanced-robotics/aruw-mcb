@@ -20,7 +20,7 @@
 #ifndef AUTO_AIM_LAUNCH_TIMER_HPP_
 #define AUTO_AIM_LAUNCH_TIMER_HPP_
 
-#include <aruwsrc/algorithms/otto_ballistics_solver.hpp>
+#include <aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp>
 #include <aruwsrc/communication/serial/vision_coprocessor.hpp>
 
 namespace aruwsrc::control::auto_aim
@@ -49,16 +49,16 @@ public:
     };
     static constexpr float MAX_ALLOWED_FLIGHT_TIME_SECS = 2.f;
 
-private:
-    uint32_t agitatorTypicalDelayMicroseconds;
-    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
-    aruwsrc::algorithms::OttoBallisticsSolver *ballistics;
-
-public:
+    /**
+     * @param maxSinglePlateHitFrequency When in shot timing mode, if a firing rate higher than this
+     * is required to hit an incoming plate multiple times, we will instead target the center of the
+     * plate and shoot once
+     */
     AutoAimLaunchTimer(
         uint32_t agitatorTypicalDelayMicroseconds,
         aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor,
-        aruwsrc::algorithms::OttoBallisticsSolver *ballistics);
+        aruwsrc::algorithms::ballistics::CvBallisticsSolver *ballistics,
+        const float maxSinglePlateHitFrequency = 25);
 
     /**
      * Compute a firing inclination for the current time and specified turret.
@@ -73,6 +73,11 @@ public:
      */
     LaunchInclination getCurrentLaunchInclination(uint8_t turretId);
 
+private:
+    uint32_t agitatorTypicalDelayMicroseconds;
+    aruwsrc::communication::serial::VisionCoprocessor *visionCoprocessor;
+    aruwsrc::algorithms::ballistics::CvBallisticsSolver *ballistics;
+    const float maxSinglePlateHitFrequency;
 };  // class AutoAimLaunchTimer
 
 }  // namespace aruwsrc::control::auto_aim

@@ -23,9 +23,11 @@ namespace aruwsrc::control::cap_bank
 {
 CapBankSubsystem::CapBankSubsystem(
     tap::Drivers* drivers,
-    communication::can::cap_bank::CapacitorBank& capacitorBank)
+    communication::can::cap_bank::CapacitorBank& capacitorBank,
+    const communication::can::AruwVoltageCurrentSensor& chassisSensor)
     : Subsystem(drivers),
       capacitorBank(capacitorBank),
+      chassisSensor(chassisSensor),
       capacitorsEnabled(false),
       capBankTestCommand(this)
 {
@@ -36,23 +38,47 @@ CapBankSubsystem::CapBankSubsystem(
 
 void CapBankSubsystem::refresh()
 {
-    if (this->messageTimer.execute())
+    if (!this->messageTimer.execute())
     {
-        messageTimer.restart(20);
-
-        if (!this->enabled() && !this->capacitorBank.isDisabled())
-        {
-            this->capacitorBank.setSprinting(communication::can::cap_bank::SprintMode::NO_SPRINT);
-            this->capacitorBank.stop();
-        }
-        else if (this->enabled() && !this->capacitorBank.isEnabled())
-        {
-            this->capacitorBank.start();
-        }
-        else
-        {
-            this->capacitorBank.ping();
-        }
+        return;
     }
+    messageTimer.restart(20);
+
+    using communication::can::cap_bank::CapCommandMode;
+
+    // MCB sends CAP_COMMAND: mode + referee ref_limit. Cap firmware does control.
+    CapCommandMode mode;
+    if (!this->capacitorsEnabled)
+    {
+        this->capacitorBank.setSprinting(communication::can::cap_bank::SprintMode::NO_SPRINT);
+        mode = CapCommandMode::OFF;
+    }
+    else if (!this->chassisSensor.isOnline())
+    {
+        // No fresh 0x1C5 chassis sensor → cap firmware cannot trust P_battery.
+        // Hold voltage with PWM off (no charge, no discharge).
+        mode = CapCommandMode::IDLE;
+    }
+    else if (!this->drivers->refSerial.getRefSerialReceivingData())
+    {
+        // No referee data → don't know the power budget. Hold caps at current
+        // voltage (no charge, no discharge) until the referee system connects.
+        mode = CapCommandMode::IDLE;
+    }
+    else if (this->capacitorBank.isSprinting())
+    {
+        mode = CapCommandMode::DISCHARGE;
+    }
+    else if (this->capacitorBank.getEnergyPercent() >= 100)
+    {
+        // Caps fully charged — no point sending Charge; hold voltage.
+        mode = CapCommandMode::IDLE;
+    }
+    else
+    {
+        mode = CapCommandMode::CHARGE;
+    }
+
+    this->capacitorBank.sendCapCommand(mode);
 }
 }  // namespace aruwsrc::control::cap_bank

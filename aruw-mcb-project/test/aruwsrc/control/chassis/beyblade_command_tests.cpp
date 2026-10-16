@@ -61,12 +61,13 @@ protected:
         : operatorInterface(&d),
           currentSensor(
               {&d.analog,
-               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
+               tap::gpio::Analog::Pin::S,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
           voltageSensor(),
-          t(&d),
+          pitchMotorMock(&pitchMotorInterfaceMock),
+          yawMotorMock(&yawMotorInterfaceMock),
           lfm(),
           lbm(),
           rfm(),
@@ -81,7 +82,7 @@ protected:
              MOCK_WHEEL_VELOCITY_PID_CONFIG,
              WHEEL_RADIUS,
              WHEELBASE_RADIUS),
-          bc(&d, &cs, &t.yawMotor, operatorInterface, BEYBLADE_CONFIG),
+          bc(&d, &cs, &yawMotorMock, operatorInterface, BEYBLADE_CONFIG),
           yawAngle(Angle(std::get<2>(GetParam()))),
           x(std::get<0>(GetParam())),
           y(std::get<1>(GetParam()))
@@ -91,8 +92,8 @@ protected:
     void SetUp() override
     {
         ON_CALL(cs, getDesiredRotation).WillByDefault(Return(0));
-        ON_CALL(t.yawMotor, getChassisFrameMeasuredAngle).WillByDefault(ReturnPointee(&yawAngle));
-        ON_CALL(t.yawMotor, isOnline).WillByDefault(Return(true));
+        ON_CALL(yawMotorMock, getChassisFrameMeasuredAngle).WillByDefault(ReturnPointee(&yawAngle));
+        ON_CALL(yawMotorMock, isOnline).WillByDefault(Return(true));
         ON_CALL(operatorInterface, getChassisXInput()).WillByDefault(ReturnPointee(&x));
         ON_CALL(operatorInterface, getChassisYInput()).WillByDefault(ReturnPointee(&y));
         ON_CALL(d.refSerial, getRefSerialReceivingData).WillByDefault(Return(false));
@@ -115,11 +116,35 @@ protected:
                 FloatNear(rotation, 1E-3)));
     }
 
+    float getExpectedMaxR() const
+    {
+        float expectedLimit = MAX_R;
+
+        float scaledX = x * BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier;
+        float scaledY = y * BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier;
+
+        float maxWheelSpeed = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second;
+        float translationalSpeedThreshold =
+            BEYBLADE_CONFIG.translationalSpeedThresholdMultiplierForRotationSpeedDecrease *
+            BEYBLADE_CONFIG.beybladeTranslationalSpeedMultiplier * maxWheelSpeed;
+
+        // If translating fast, the rotation ceiling is throttled
+        if (fabsf(scaledX) > translationalSpeedThreshold ||
+            fabsf(scaledY) > translationalSpeedThreshold)
+        {
+            expectedLimit *= BEYBLADE_CONFIG.beybladeRotationalSpeedMultiplierWhenTranslating;
+        }
+
+        return expectedLimit;
+    }
+
     tap::Drivers d;
     NiceMock<aruwsrc::mock::ControlOperatorInterfaceMock> operatorInterface;
     tap::communication::sensors::current::AnalogCurrentSensor currentSensor;
     aruwsrc::communication::sensors::voltage::FakeVoltageSensor voltageSensor;
-    NiceMock<TurretSubsystemMock> t;
+    NiceMock<tap::mock::MotorInterfaceMock> pitchMotorInterfaceMock, yawMotorInterfaceMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock;
+    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock;
     NiceMock<tap::mock::MotorInterfaceMock> lfm, lbm, rfm, rbm;
     NiceMock<MecanumChassisSubsystemMock> cs;
     BeybladeCommand bc;
@@ -130,15 +155,17 @@ protected:
 
 TEST_P(BeybladeCommandTest, single_execute)
 {
-    setupDesiredOutputExpectations(std::min(MAX_R, BEYBLADE_CONFIG.beybladeRampRate));
+    setupDesiredOutputExpectations(std::min(getExpectedMaxR(), BEYBLADE_CONFIG.beybladeRampRate));
     bc.execute();
 }
 
 TEST_P(BeybladeCommandTest, multiple_execute)
 {
+    testing::InSequence seq;
     for (int i = 1; i < 10; i++)
     {
-        setupDesiredOutputExpectations(std::min(MAX_R, i * BEYBLADE_CONFIG.beybladeRampRate));
+        setupDesiredOutputExpectations(
+            std::min(getExpectedMaxR(), i * BEYBLADE_CONFIG.beybladeRampRate));
     }
 
     for (int i = 1; i < 10; i++)

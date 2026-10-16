@@ -21,7 +21,7 @@
 
 #include "aruwsrc/communication/can/cap-bank/capacitor_bank.hpp"
 
-namespace aruwsrc::control::capbank
+namespace aruwsrc::control::cap_bank
 {
 SentryCapBankCommand::SentryCapBankCommand(
     tap::Drivers* drivers,
@@ -37,8 +37,12 @@ void SentryCapBankCommand::initialize() { capBankSubsystem.enableCapacitors(); }
 
 void SentryCapBankCommand::execute() {}
 
-void SentryCapBankCommand::end(bool) { capBankSubsystem.disableCapacitors(); }
+void SentryCapBankCommand::end(bool)
+{
+    capBankSubsystem.changeSprintMode(communication::can::cap_bank::SprintMode::NO_SPRINT);
+    capBankSubsystem.disableCapacitors();
+}
 
 bool SentryCapBankCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::control::capbank
+}  // namespace aruwsrc::control::cap_bank

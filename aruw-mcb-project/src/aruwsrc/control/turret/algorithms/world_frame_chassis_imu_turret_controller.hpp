@@ -51,7 +51,7 @@ namespace aruwsrc::control::turret::algorithms
  * yaw angle.
  */
 class WorldFrameYawChassisImuTurretController final
-    : public TurretAxisControllerInterface<Axis::YAW>
+    : public TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
 {
 public:
     /**
@@ -71,7 +71,7 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
      */
-    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
+    void runController(const float dt, const WrappedFloat desiredSetpoint) final;
 
     /// @return World frame yaw angle setpoint, refer to top level documentation for more details.
     void setSetpoint(WrappedFloat desiredSetpoint) final;

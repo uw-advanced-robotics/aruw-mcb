@@ -43,13 +43,13 @@ public:
     void configureInputPullMode(InputPin pin, InputPullMode mode)
     {
         pinMode[pin] = mode;
-        updateMessages();
+        updatePinConfigMessages();
     }
 
     void set(OutputPin pin, bool isSet)
     {
         outputPinValue[pin] = isSet;
-        updateMessages();
+        updateOutputMessages();
     }
 
     bool read(InputPin pin) const { return inputPinValue[pin]; }
@@ -60,15 +60,20 @@ private:
         memcpy(inputPinValue, completeMessage.data, sizeof(inputPinValue));
     }
 
-    void updateMessages()
+    void updateOutputMessages()
     {
         memcpy(outputPinMessage.data, outputPinValue, sizeof(DigitalOutputPinMessage));
         outputPinMessage.setCRC16();
 
+        hasNewOutputData = true;
+    }
+
+    void updatePinConfigMessages()
+    {
         memcpy(pinModeMessage.data, pinMode, sizeof(DigitalPinModeMessage));
         pinModeMessage.setCRC16();
 
-        hasNewData = true;
+        hasNewPinConfigData = true;
     }
 
     bool inputPinValue[4];
@@ -78,7 +83,8 @@ private:
     DJISerial::DJISerial::SerialMessage<sizeof(DigitalOutputPinMessage)> outputPinMessage;
     DJISerial::DJISerial::SerialMessage<sizeof(DigitalPinModeMessage)> pinModeMessage;
 
-    bool hasNewData = false;
+    bool hasNewOutputData = false;
+    bool hasNewPinConfigData = false;
 };
 
 }  // namespace aruwsrc::communication::mcb_lite

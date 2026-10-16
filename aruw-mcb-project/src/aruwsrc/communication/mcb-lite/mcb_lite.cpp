@@ -103,18 +103,21 @@ void MCBLite::sendData()
             imu.sendIMUCalibrationMessage = false;
         }
 
-        if (digital.hasNewData)
+        if (digital.hasNewPinConfigData)
         {
-            // 27 bytes of digital
-            drivers->uart.write(
-                port,
-                reinterpret_cast<uint8_t*>(&(digital.outputPinMessage)),
-                sizeof(digital.outputPinMessage));
             drivers->uart.write(
                 port,
                 reinterpret_cast<uint8_t*>(&(digital.pinModeMessage)),
                 sizeof(digital.pinModeMessage));
-            digital.hasNewData = false;
+        }
+
+        if (digital.hasNewOutputData)
+        {
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&(digital.outputPinMessage)),
+                sizeof(digital.outputPinMessage));
+            digital.hasNewOutputData = false;
         }
 
         if (leds.hasNewData)
@@ -143,6 +146,13 @@ void MCBLite::sendData()
                 reinterpret_cast<uint8_t*>(&(pwm.pwmTimerStartMessage)),
                 sizeof(pwm.pwmTimerStartMessage));
             pwm.hasNewData = false;
+        }
+        if (imu.hasNewMountingTransform)
+        {
+            drivers->uart.write(
+                port,
+                reinterpret_cast<uint8_t*>(&imu.mountingTransformMessage),
+                sizeof(imu.mountingTransformMessage));
         }
     }
 }
@@ -178,6 +188,15 @@ void MCBLite::messageReceiveCallback(const ReceivedSerialMessage& completeMessag
                 break;
             case MessageTypes::VOLTAGE_CURRENT_MESSAGE:
                 processVoltageCurrentMessage(completeMessage);
+                break;
+            case MessageTypes::ANALOG_SENSOR_MESSAGE:
+                processAnalogSensorMessage(completeMessage);
+                break;
+            case MessageTypes::MOUNTING_TRANSFORM_CONFIRMED_MESSAGE:
+                imu.processMountingTransform();
+                break;
+            case MessageTypes::DIGITAL_PIN_CONFIG_CONFIRMED_MESSAGE:
+                digital.hasNewPinConfigData = false;
                 break;
             default:
                 break;
@@ -236,6 +255,16 @@ void MCBLite::processVoltageCurrentMessage(const ReceivedSerialMessage& complete
     {
         this->voltageCurrentSensor->voltage = message->voltage;
         this->voltageCurrentSensor->current = message->current;
+    }
+}
+
+void MCBLite::processAnalogSensorMessage(const ReceivedSerialMessage& completeMessage)
+{
+    const AnalogSensorMessage* message =
+        reinterpret_cast<const AnalogSensorMessage*>(completeMessage.data);
+    if (this->analogSensor != nullptr)
+    {
+        this->analogSensor->processAnalogSensorUARTMessage(message->ai0, message->ai1);
     }
 }
 

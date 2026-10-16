@@ -77,10 +77,7 @@ void ChassisKFOdometry::update()
     y[int(OdomInput::ACC_Y)] = imu.getAy();
 
     // rotate acceleration in MCB frame to the world frame
-    tap::algorithms::rotateVector(
-        &y[int(OdomInput::ACC_X)],
-        &y[int(OdomInput::ACC_Y)],
-        communication::serial::VisionCoprocessor::MCB_ROTATION_OFFSET + chassisYaw);
+    tap::algorithms::rotateVector(&y[int(OdomInput::ACC_X)], &y[int(OdomInput::ACC_Y)], chassisYaw);
 #endif
 
     // perform the update, after this update a new state matrix is now available

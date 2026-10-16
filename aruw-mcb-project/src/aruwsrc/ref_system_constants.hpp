@@ -27,6 +27,10 @@ namespace aruwsrc::constants
 static constexpr uint16_t HEAT_COST_42MM = 100;
 static constexpr uint16_t HEAT_COST_17MM = 10;
 
+static constexpr uint16_t DAMAGE_42MM = 200;
+static constexpr uint16_t DAMAGE_17MM = 20;
+static constexpr uint16_t DAMAGE_COLLISION = 2;
+
 }  // namespace aruwsrc::constants
 
 #endif  // REF_SYSTEM_CONSTANTS_HPP_

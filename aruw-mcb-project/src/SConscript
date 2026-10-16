@@ -36,6 +36,12 @@ IGNORED_FILES_WHILE_TESTING = [
 ignored_files = []
 ignored_dirs = []
 
+# this list could be generated dynamically by opening each source file and looking for the
+#   appropriate #include, but these files are very rare and so that's probably overkill.
+BUILD_INFO_USERS = [
+    join("aruwsrc", "display", "about_menu.cpp"),
+    join("aruwsrc", "communication", "rtt", "rtt_telemetry.cpp")
+]
 
 def get_output(command):
     return (subprocess.check_output(command).decode("UTF-8")).strip()
@@ -75,11 +81,12 @@ env_cpy = env.Clone()
 env_cpy.AppendUnique(CCFLAGS=["-D " + args["ROBOT_TYPE"]])
 
 # Create a specific build env for the about menu, so that the whole codebase doesn't need a recompile.
-env_cpy_about_menu = env_cpy.Clone()
-env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
-env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
-env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_DATE=" + get_date])
-env_cpy_about_menu.AppendUnique(CCFLAGS=["-D BUILD_BRANCH_NAME=" + get_branch_name])
+env_cpy_build_info = env_cpy.Clone()
+env_cpy_build_info.AppendUnique(CCFLAGS=["-D BUILD_USERNAME=" + get_user_name])
+env_cpy_build_info.AppendUnique(CCFLAGS=["-D BUILD_SHA=" + get_sha])
+env_cpy_build_info.AppendUnique(CCFLAGS=["-D BUILD_DATE=" + get_date])
+env_cpy_build_info.AppendUnique(CCFLAGS=["-D BUILD_BRANCH_NAME=" + get_branch_name])
+env_cpy_build_info.AppendUnique(CCFLAGS=["-D BUILD_TARGET=\\\"" + args["ROBOT_TYPE"] + "\\\""])
 
 
 if args["COMPILE_SRC"]:
@@ -106,19 +113,9 @@ for source in rawSrcs:
         if not source.endswith(f"{robot_class}_sim.cpp"):
             continue
 
-    if source == join("aruwsrc", "display", "about_menu.cpp"):
-        sources.append(env_cpy_about_menu.Object(source))
+    if source in BUILD_INFO_USERS:
+        sources.append(env_cpy_build_info.Object(source))
     else:
         sources.append(env_cpy.Object(source))
-
-if args["COMPILE_SRC"]:
-    rtt_sources = [
-        abspath(join("..", "..", "segger-rtt", "RTT", "SEGGER_RTT.c")),
-        abspath(join("..", "..", "segger-rtt", "RTT", "SEGGER_RTT_printf.c")),
-    ]
-    # Add segger-rtt C sources directly; centralized sconsign is configured
-    # in the top-level SConstruct so that SCons will not write per-directory
-    # .sconsign files into the segger-rtt submodule.
-    sources.extend(env_cpy.Object(source) for source in rtt_sources)
 
 Return("sources")

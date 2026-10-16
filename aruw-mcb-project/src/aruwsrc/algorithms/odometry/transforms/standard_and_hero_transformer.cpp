@@ -30,11 +30,28 @@ namespace aruwsrc::algorithms::odometry::transforms
 #if defined(TARGET_STANDARD_NULL)
 static Transform TURRET_TO_ARDUCAM_OFFSET =
     Transform(Position(0.08, 0.1, 0.056), Orientation(0, 0, 0));
-#elif defined(TARGET_STANDARD_VOID)
+inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
+#elif defined(TARGET_STANDARD_PHOBOS) || defined(TARGET_STANDARD_DEIMOS)
 static Transform TURRET_TO_ARDUCAM_OFFSET =
-    Transform(Position(0.08, 0.1, 0.056), Orientation(0, 0, 0));
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
+inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
+    Transform(Position(0.012f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
+#elif defined(TARGET_HERO_NEPTUNE)
+static Transform TURRET_TO_ARDUCAM_OFFSET =
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
+inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
+#elif defined(TARGET_SENTRY_ACHLYS)
+static Transform TURRET_TO_ARDUCAM_OFFSET =
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
+inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
 #else
-static Transform TURRET_TO_ARDUCAM_OFFSET = Transform(Position(0, 0, 0), Orientation(0, 0, 0));
+static Transform TURRET_TO_ARDUCAM_OFFSET =
+    Transform(Position(0.0f, 0.0f, 0.0f), Orientation(0.0f, 0.0f, 0.0f));
+inline Transform TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET =
+    Transform(Position(0.0f, 0.0f, -0.0f), Orientation(0.0f, 0.0f, 0.0f));
 #endif
 
 StandardAndHeroTransformer::StandardAndHeroTransformer(
@@ -43,6 +60,7 @@ StandardAndHeroTransformer::StandardAndHeroTransformer(
     : chassisOdometry(chassisOdometry),
       turret(turret),
       worldToChassis(Transform::identity()),
+      worldToTurretYaw(Transform::identity()),
       worldToTurret(Transform::identity()),
       chassisToTurret(Transform::identity()),  // do we care about z offset?
       worldToVTM(Transform::identity()),
@@ -53,26 +71,33 @@ StandardAndHeroTransformer::StandardAndHeroTransformer(
 void StandardAndHeroTransformer::updateTransforms()
 {
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
+    modm::Vector2f chassisVelocity = chassisOdometry.getCurrentVelocity2D();
     worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
 
     // @note: here we are assuming that the chassis does not pitch or roll
     // This is fine for flat fields, but for an RMUC field with inclines
     // the state of the robot will not be properly tracked
     worldToChassis.updateRotation(0., 0., chassisPose.getOrientation());
+    worldToChassis.updateVelocity(chassisVelocity.getX(), chassisVelocity.getY(), 0.);
 
     float roll = 0.0f;
     const tap::communication::sensors::imu::AbstractIMU* imu = turret.getIMU();
 
     if (imu) roll = imu->getRoll();
 
+    worldToTurretYaw.updateTranslation(worldToChassis.getTranslation());
+    worldToTurretYaw.updateRotation(0.0f, 0.0f, turret.getWorldYaw());
+
     worldToTurret.updateRotation(roll, turret.getWorldPitch(), turret.getWorldYaw());
     worldToTurret.updateAngularVelocity(0, imu->getGy(), imu->getGz());
+    worldToTurret.updateTranslation(
+        worldToTurretYaw.composeStatic(TURRET_YAW_BASE_TO_PITCH_AXIS_OFFSET).getTranslation());
 
-    worldToTurret.updateTranslation(worldToChassis.getTranslation());
+    worldToTurret.updateVelocity(worldToChassis.getVelocity());
     chassisToTurret = worldToChassis.getInverse().composeStatic(worldToTurret);
 
     Transform chassisToTurretNoPitch = chassisToTurret;
-    chassisToTurretNoPitch.updateRotation(Orientation(0, 0, chassisToTurret.getRotation().yaw()));
+    chassisToTurretNoPitch.updateRotation(Orientation(0, 0, chassisToTurret.getYaw()));
     chassisToArducam = chassisToTurretNoPitch.composeStatic(TURRET_TO_ARDUCAM_OFFSET);
 
     worldToVTM = worldToTurret.composeStatic(VTM_OFFSET);

@@ -25,7 +25,7 @@
 
 #include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 
-namespace aruwsrc::control::capbank
+namespace aruwsrc::control::cap_bank
 {
 class SentryCapBankCommand : public tap::control::Command
 {
@@ -49,6 +49,6 @@ private:
     aruwsrc::control::cap_bank::CapBankSubsystem& capBankSubsystem;
 };  // class SentryCapBankCommand
 
-}  // namespace aruwsrc::control::capbank
+}  // namespace aruwsrc::control::cap_bank
 
 #endif  // SENTRY_CAPBANK_COMMAND_HPP_

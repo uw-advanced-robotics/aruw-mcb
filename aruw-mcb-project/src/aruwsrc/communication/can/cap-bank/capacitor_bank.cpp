@@ -26,10 +26,11 @@ namespace aruwsrc::communication::can::cap_bank
 CapacitorBank::CapacitorBank(
     tap::Drivers* drivers,
     tap::can::CanBus canBus,
-    const float capacitance)
+    const float capacitance,
+    const int maxAvailablePower)
     : tap::can::CanRxListener(drivers, CAP_BANK_CAN_ID, canBus),
       capacitance(capacitance),
-      powerLimit(0)
+      maxAvailablePower(maxAvailablePower)
 {
 }
 
@@ -37,13 +38,18 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
 {
     switch (static_cast<MessageType>(message.data[0]))
     {
-        case MessageType::STATUS:  // Update message
-            this->state = static_cast<State>(message.data[1]);
+        case MessageType::STATUS:  // STATUS v2 (0x05)
+            // data[1] = State in bits 0-6, latched error flag in bit 7; data[2:3] = cap current
+            // (i16 LE, mA), data[4:5] = cap voltage (u16 LE, mV), data[6] = energy % (0..100),
+            // data[7] = available supply power (raw, watts = raw * CAP_POWER_WATT_SCALE).
+            this->state = static_cast<State>(message.data[1] & 0x7F);
+            this->errorFlag = (message.data[1] & 0x80) != 0;
             this->current =
                 *reinterpret_cast<int16_t*>(const_cast<uint8_t*>(&message.data[2])) / 1000.0;
             this->voltage =
                 *reinterpret_cast<uint16_t*>(const_cast<uint8_t*>(&message.data[4])) / 1000.0;
-            this->powerLimit = message.data[6];
+            this->energyPercent = message.data[6] > 100 ? 100 : message.data[6];
+            this->availableSupplyPower = message.data[7] * CAP_POWER_WATT_SCALE;
             this->availableEnergy = tap::algorithms::limitVal(
                 1.0 / 2.0 * this->capacitance *
                     (powf(this->voltage, 2) - powf(CAPACITOR_BANK_MIN_VOLTAGE, 2)),
@@ -53,17 +59,8 @@ void CapacitorBank::processMessage(const modm::can::Message& message)
             this->heartbeat.restart(80);
             break;
         default:
-            // Ignore unknown message IDs
+            // Ignore unknown / legacy message tags.
             break;
-    }
-
-    if (drivers->refSerial.getRefSerialReceivingData())
-    {
-        uint16_t powerLimit = drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
-        if (powerLimit != this->powerLimit)
-        {
-            this->setPowerLimit(powerLimit);
-        }
     }
 }
 
@@ -73,53 +70,44 @@ void CapacitorBank::initialize()
     this->heartbeat.restart(0);
 }
 
-void CapacitorBank::start() const
+uint8_t CapacitorBank::packWatts(uint16_t watts)
+{
+    uint16_t raw = watts / CAP_POWER_WATT_SCALE;
+    return static_cast<uint8_t>(raw > 255 ? 255 : raw);
+}
+
+void CapacitorBank::sendCapCommand(CapCommandMode mode) const
 {
     modm::can::Message message(CAP_BANK_CAN_ID, 8);
     message.setExtended(false);
-    message.data[0] = MessageType::START;
+    message.data[0] = static_cast<uint8_t>(MessageType::CAP_COMMAND);
+    message.data[1] = static_cast<uint8_t>(mode);
+    // Bytes 2-5: reserved (battery I/V from CAN 0x1C5 on the cap bank).
+    message.data[2] = 0;
+    message.data[3] = 0;
+    message.data[4] = 0;
+    message.data[5] = 0;
+
+    uint16_t refWatts = 0;
+    if (this->drivers->refSerial.getRefSerialReceivingData())
+    {
+        refWatts = this->drivers->refSerial.getRobotData().chassis.powerConsumptionLimit;
+    }
+    message.data[6] = packWatts(refWatts);
+    message.data[7] = 0;
+
     this->drivers->can.sendMessage(this->canBus, message);
 }
 
-void CapacitorBank::stop() const
-{
-    modm::can::Message message(CAP_BANK_CAN_ID, 8);
-    message.setExtended(false);
-    message.data[0] = MessageType::STOP;
-    this->drivers->can.sendMessage(this->canBus, message);
-}
-
-void CapacitorBank::ping() const
-{
-    modm::can::Message message(CAP_BANK_CAN_ID, 8);
-    message.setExtended(false);
-    message.data[0] = MessageType::PING;
-    this->drivers->can.sendMessage(this->canBus, message);
-}
-
-void CapacitorBank::setPowerLimit(uint16_t watts)
-{
-    modm::can::Message message(CAP_BANK_CAN_ID, 8);
-    message.setExtended(false);
-    message.data[0] = MessageType::SET_CHARGE_SPEED;
-    message.data[2] = watts;
-    message.data[3] = watts >> 8;  // Should always be zero or we are drawing 250+ watts.
-    this->drivers->can.sendMessage(this->canBus, message);
-}
-
-const float HALF_SPRINT_POWER_BOOST = 0.5f;
 float CapacitorBank::getMaximumOutputCurrent() const
 {
-    if (this->sprint == SprintMode::HALF_SPRINT)
-    {
-        return drivers->refSerial.getRobotData().chassis.powerConsumptionLimit /
-               CAPACITOR_BANK_OUTPUT_VOLTAGE * (1.0f + HALF_SPRINT_POWER_BOOST);
-    }
-
-    float capacitorVoltage = this->getVoltage();
-    float maxOutput = CAP_VOLTAGE_TO_MAX_OUT_CURRENT.interpolate(capacitorVoltage);
-
-    return maxOutput;
+    // Single source of truth: cap-bank firmware's live "available supply power" report
+    // (STATUS_V2 byte 7, watts). Convert to amps at nominal chassis voltage for the
+    // legacy amps-domain callers (CapBankPowerLimiter, holonomic_chassis_subsystem).
+    // The static voltage→current LUT this used to consult is gone — the firmware knows
+    // its own SOC, fault state, and regen ceiling, so it computes a better answer.
+    // Read through the capped getter so maxAvailablePower limits the power limiter too.
+    return static_cast<float>(this->getAvailableSupplyPower()) / CAPACITOR_BANK_OUTPUT_VOLTAGE;
 }
 
 }  // namespace aruwsrc::communication::can::cap_bank
