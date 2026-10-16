@@ -21,7 +21,6 @@
 #define SENTRY_TRANSFORM_ADAPTER_HPP_
 
 #include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
-#include "aruwsrc/algorithms/odometry/vision_odometry_data_provider.hpp"
 
 #include "sentry_transforms.hpp"
 
@@ -31,20 +30,13 @@ class SentryTransformAdapter
     : public aruwsrc::algorithms::odometry::transforms::TransformerInterface
 {
 public:
-    SentryTransformAdapter(
-        const SentryTransforms& transforms,
-        const aruwsrc::algorithms::odometry::VisionOdometryDataProvider* visionOdometryProvider =
-            nullptr);
+    SentryTransformAdapter(const SentryTransforms& transforms);
 
     modm::Vector2f getChassisVelocity2d() const;
-    modm::Vector2f getVisionChassisVelocity2d() const;
 
     uint32_t getLastComputedOdometryTime() const;
 
     const tap::algorithms::transforms::Transform& getWorldToChassis() const;
-    const tap::algorithms::transforms::Transform& getVisionWorldToChassis() const;
-
-    const tap::algorithms::transforms::Transform& getWorldToTurretYaw(uint8_t turretID) const;
 
     const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t turretID) const;
 
@@ -54,7 +46,6 @@ public:
 
 private:
     const SentryTransforms& transforms;
-    const aruwsrc::algorithms::odometry::VisionOdometryDataProvider* visionOdometryProvider;
 };
 
 }  // namespace aruwsrc::sentry::algorithms::odometry

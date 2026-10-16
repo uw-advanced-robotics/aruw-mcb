@@ -28,7 +28,7 @@ namespace aruwsrc::engineer
 {
 enum SetpointType
 {
-    CUBE_STORAGE,
+    CUBE_LIFT,
     EXTENSION
 };
 class SetpointMoveManualCommand : public tap::control::Command
@@ -38,7 +38,7 @@ public:
         aruwsrc::control::joint::JointSubsystem &subsystem,
         aruwsrc::engineer::EngineerControlOperatorInterface *operatorInterface,
         float moveSpeed,
-        SetpointType setpointType = CUBE_STORAGE);
+        SetpointType setpointType = CUBE_LIFT);
 
     void initialize() override;
 

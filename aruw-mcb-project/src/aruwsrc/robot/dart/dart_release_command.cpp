@@ -19,22 +19,26 @@
 
 #include "dart_release_command.hpp"
 
-#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
-
-#include "dart_constants.hpp"
-#include "dart_servo.hpp"
+#include "dart_launcher_subsystem.hpp"
 
 namespace aruwsrc::dart
 {
-DartReleaseCommand::DartReleaseCommand(
-    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher)
-    : dartLauncher(dartLauncher)
+DartReleaseCommand::DartReleaseCommand(DartLauncherSubsystem &dartLauncher, int32_t desiredOutput)
+    : dartLauncher(dartLauncher),
+      desiredOutput(desiredOutput)
 {
     addSubsystemRequirement(&dartLauncher);
 }
 
-void DartReleaseCommand::initialize() { dartLauncher.setSetpoint(RELEASE_POSITION); }
+void DartReleaseCommand::initialize() { dartLauncher.moveMotor(desiredOutput); }
 
-bool DartReleaseCommand::isFinished() const { return dartLauncher.atSetpoint(); }
+void DartReleaseCommand::end(bool) { dartLauncher.moveMotor(0); }
+
+bool DartReleaseCommand::isFinished() const
+{
+    // return dartLauncher.isLimitSwitched();
+    // TODO: uncomment when limit switch is added
+    return false;
+}
 
 }  // namespace aruwsrc::dart

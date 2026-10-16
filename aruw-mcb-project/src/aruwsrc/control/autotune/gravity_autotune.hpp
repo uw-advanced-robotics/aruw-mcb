@@ -30,31 +30,29 @@
 #ifndef GRAVITY_AUTOTUNE_HPP_
 #define GRAVITY_AUTOTUNE_HPP_
 
-#include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 #include "modm/ui/display.hpp"
 
-#include "turret_autotune_command.hpp"
+#include "autotune_command_interface.hpp"
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t NUM_TEST_POINTS, tap::algorithms::transforms::Axis AXIS>
-class GravityAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>
+template <uint32_t numTestPoints>
+class GravityAutotuneCommand : public TurretAutotuneCommand<std::array<float, 3>, numTestPoints>
 {
 public:
     GravityAutotuneCommand(
         tap::Drivers *drivers,
-        const typename TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::TurretCalibrationConfig
+        const TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::TurretCalibrationConfig
             &config,
-        const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce = nullptr,
         chassis::HolonomicChassisSubsystem *chassis = nullptr,
-        const std::array<float, NUM_TEST_POINTS> points = {},
+        const std::array<float, numTestPoints> points = {},
         const float velocityZeroThreshold =
-            TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::DEFAULT_VELOCITY_THRESHOLD,
+            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_VELOCITY_THRESHOLD,
         const float positionZeroThreshold =
-            TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>::DEFAULT_POSITION_THRESHOLD,
+            TurretAutotuneCommand<std::array<float, 3>, numTestPoints>::DEFAULT_POSITION_THRESHOLD,
         aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
         aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr)
-        : TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>(
+        : TurretAutotuneCommand<std::array<float, 3>, numTestPoints>(
               drivers,
               config,
               chassis,
@@ -62,11 +60,10 @@ public:
               velocityZeroThreshold,
               positionZeroThreshold,
               successChime,
-              failChime),
-          springForce(springForce)
+              failChime)
     {
     }
-    const char *getName() const override { return "Gravity Autotune Command "; }
+    const char *getName() const override { return "Gravity Autotune Command"; }
 
     /**
      * @brief Calculates the center of mass with least squares
@@ -74,26 +71,18 @@ public:
      * @return std::array<float,3> cgX, cgZ, and magnitude of the center of mass
      * with cgX, and cgZ in units of mm and magnitude in units of desOut.
      */
-    std::array<float, 3> calculate() const
+    std::array<float, 3> calculate(
+        std::array<float, numTestPoints> Angles,
+        std::array<float, numTestPoints> Torques) const override
     {
-        Eigen::MatrixXd X(NUM_TEST_POINTS, 2);
-        Eigen::VectorXd Y(NUM_TEST_POINTS);
+        Eigen::MatrixXd X(numTestPoints, 2);
+        Eigen::VectorXd Y(numTestPoints);
 
-        for (uint32_t i = 0; i < NUM_TEST_POINTS; ++i)
+        for (uint32_t i = 0; i < numTestPoints; ++i)
         {
-            X(i, 0) = std::cos(measuredAngles[i]);  // corresponds to A (m·g·x)
-            X(i, 1) = std::sin(measuredAngles[i]);  // corresponds to B (−m·g·z)
-
-            float torque = measuredTorques[i];
-
-            // If a spring compensator is provided, remove its effect from the torque
-            if (springForce != nullptr)
-            {
-                torque += springForce->calculateCompensationEffort(
-                    {.pitchWorldFrame = measuredAngles[i]});
-            }
-
-            Y(i) = torque;
+            X(i, 0) = std::cos(Angles[i]);  // corresponds to A (m·g·x)
+            X(i, 1) = std::sin(Angles[i]);  // corresponds to B (−m·g·z)
+            Y(i) = Torques[i];
         }
         // Solve least squares: torque = A·cos(theta) + B·sin(theta)
         Eigen::Vector2d params = X.colPivHouseholderQr().solve(Y);
@@ -107,7 +96,7 @@ public:
 
     void drawCalibrationResult(modm::GraphicDisplay &display) const
     {
-        const std::array<float, 3> result = calculate();
+        const std::array<float, 3> result = this->getCalibrationResult();
         const float X = result[0];
         const float Z = result[1];
         const float scalar = result[2];
@@ -119,29 +108,7 @@ public:
         display.printf("Gravity Compensation\n Scalar: %.1f\n", static_cast<double>(scalar));
     }
 
-protected:
-    void onMeasurementSample([[maybe_unused]] size_t pointIndex, uint32_t sampleCount) override
-    {
-        // Add to the running average of the motors value and angle measurements
-        const float motorValue = static_cast<float>(this->config.motor->getMotorOutput());
-        averagingTorques += (motorValue - averagingTorques) / (sampleCount);
-
-        const float angleValue =
-            this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
-        averagingAngles += (angleValue - averagingAngles) / sampleCount;
-    }
-
-    void onMeasurementComplete(size_t pointIndex) override
-    {
-        measuredTorques[pointIndex] = averagingTorques;
-        measuredAngles[pointIndex] = averagingAngles;
-
-        averagingTorques = 0.0f;
-        averagingAngles = 0.0f;
-    }
-
 private:
-    const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce;
     /**
      * @brief Helper function that turns the calibration result into
      * units of mm.
@@ -155,15 +122,6 @@ private:
         return calibrationNum * 1000 * this->getCalibrationConfig().torqueToDesiredOut /
                this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
     }
-
-    // Array of torque measurements received post averaging
-    std::array<float, NUM_TEST_POINTS> measuredTorques{};
-
-    // Array of angle measurements received post averaging
-    std::array<float, NUM_TEST_POINTS> measuredAngles{};
-
-    float averagingTorques{0.0f};
-    float averagingAngles{0.0f};
 
 };  // class autotune
 }  // namespace aruwsrc::control::autotune

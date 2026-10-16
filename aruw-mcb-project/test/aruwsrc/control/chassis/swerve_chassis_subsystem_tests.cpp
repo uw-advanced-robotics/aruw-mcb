@@ -58,7 +58,7 @@ protected:
     SwerveChassisSubsystemTest()
         : currentSensor(
               {&drivers.analog,
-               tap::gpio::Analog::Pin::S,
+               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),

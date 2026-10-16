@@ -34,16 +34,20 @@ using namespace tap::algorithms;
 namespace aruwsrc::control::turret
 {
 TurretSubsystem::TurretSubsystem(
-    tap::Drivers* drivers,
-    TurretMotor& pitchMotor,
-    TurretMotor& yawMotor,
-    const tap::communication::sensors::imu::AbstractIMU* turretImu)
+    tap::Drivers *drivers,
+    MotorInterface *pitchMotor,
+    MotorInterface *yawMotor,
+    const TurretMotorConfig &pitchMotorConfig,
+    const TurretMotorConfig &yawMotorConfig,
+    const tap::communication::sensors::imu::AbstractIMU *turretImu)
     : tap::control::Subsystem(drivers),
-      pitchMotor(pitchMotor),
-      yawMotor(yawMotor),
+      pitchMotor(pitchMotor, pitchMotorConfig),
+      yawMotor(yawMotor, yawMotorConfig),
       turretImu(turretImu)
 {
     assert(drivers != nullptr);
+    assert(pitchMotor != nullptr);
+    assert(yawMotor != nullptr);
 }
 
 void TurretSubsystem::initialize()

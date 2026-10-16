@@ -24,19 +24,18 @@ namespace aruwsrc::control::agitator
 MultiShotCvCommandMapping::MultiShotCvCommandMapping(
     tap::Drivers &drivers,
     tap::control::Command &launchCommand,
-    const tap::control::GenericRemoteMapState &rms,
+    const tap::control::RemoteMapState &rms,
     std::optional<ManualFireRateReselectionManager *> fireRateReselectionManager,
     governor::CvOnTargetGovernor &cvOnTargetGovernor,
     std::optional<ConstantVelocityAgitatorCommand *> command)
-    : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, &rms, false),
+    : tap::control::HoldRepeatCommandMapping(&drivers, {&launchCommand}, rms, false),
       fireRateReselectionManager(fireRateReselectionManager),
       cvOnTargetGovernor(cvOnTargetGovernor),
       command(command)
 {
 }
 
-void MultiShotCvCommandMapping::executeCommandMapping(
-    const tap::control::GenericRemoteMapState &currState)
+void MultiShotCvCommandMapping::executeCommandMapping(const tap::control::RemoteMapState &currState)
 {
     int timesToReschedule = 0;
 

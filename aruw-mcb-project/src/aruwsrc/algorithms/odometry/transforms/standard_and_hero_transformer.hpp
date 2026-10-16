@@ -56,8 +56,6 @@ public:
     // the state of the robot will not be properly tracked
     inline const Transform& getWorldToChassis() const { return worldToChassis; }
 
-    inline const Transform& getWorldToTurretYaw() const { return worldToTurretYaw; }
-
     inline const Transform& getWorldToTurret() const { return worldToTurret; }
 
     inline const Transform& getChassisToTurret() const { return chassisToTurret; }
@@ -77,7 +75,6 @@ private:
     const aruwsrc::control::turret::RobotTurretSubsystem& turret;
 
     Transform worldToChassis;
-    Transform worldToTurretYaw;
     Transform worldToTurret;
     Transform chassisToTurret;
     Transform worldToVTM;

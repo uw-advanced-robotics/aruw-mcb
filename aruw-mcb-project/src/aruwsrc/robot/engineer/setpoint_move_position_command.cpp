@@ -36,8 +36,5 @@ void SetpointMovePositionCommand::execute() {}
 
 void SetpointMovePositionCommand::end(bool) {}
 
-bool SetpointMovePositionCommand::isFinished() const
-{
-    return subsystem.atSetpoint() || !subsystem.isReady();
-}
+bool SetpointMovePositionCommand::isFinished() const { return subsystem.atSetpoint(); }
 }  // namespace aruwsrc::engineer

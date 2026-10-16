@@ -63,8 +63,6 @@ private:
 
     int milliVolts = 0, milliAmps = 0, powerLimit = 0, availableEnergy = 0;
     communication::can::cap_bank::State state;
-    /** Latched fault flag from STATUS bit 7. */
-    bool error = false;
 
     bool changed;
 

@@ -40,22 +40,25 @@ using namespace aruwsrc::algorithms;
 namespace aruwsrc::sentry::turret::cv
 {
 SentryTurretCVCommand::SentryTurretCVCommand(
-    communication::serial::VisionCoprocessor& visionCoprocessor,
-    aruwsrc::algorithms::PlateHitTracker& plateHitTracker,
-    aruwsrc::control::turret::YawTurretSubsystem& turretMajorSubsystem,
+    communication::serial::VisionCoprocessor &visionCoprocessor,
+    aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
+    aruwsrc::control::turret::YawTurretSubsystem &turretMajorSubsystem,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        tap::algorithms::transforms::Axis::YAW>& yawControllerMajor,
-    TurretConfig& turretWidowConfig,
-    aruwsrc::sentry::algorithms::odometry::SentryTransforms& sentryTransforms)
+        aruwsrc::control::turret::algorithms::Axis::YAW> &yawControllerMajor,
+    TurretConfig &turretLeftConfig,
+    TurretConfig &turretRightConfig,
+    aruwsrc::sentry::algorithms::odometry::SentryTransforms &sentryTransforms)
     : visionCoprocessor(visionCoprocessor),
       plateHitTracker(plateHitTracker),
       turretMajorSubsystem(turretMajorSubsystem),
       yawControllerMajor(yawControllerMajor),
-      turretWidowConfig(turretWidowConfig),
+      turretLeftConfig(turretLeftConfig),
+      turretRightConfig(turretRightConfig),
       sentryTransforms(sentryTransforms)
 {
     this->addSubsystemRequirement(&turretMajorSubsystem);
-    this->addSubsystemRequirement(&turretWidowConfig.turretSubsystem);
+    this->addSubsystemRequirement(&turretLeftConfig.turretSubsystem);
+    this->addSubsystemRequirement(&turretRightConfig.turretSubsystem);
 }
 
 bool SentryTurretCVCommand::isReady() { return !isFinished(); }
@@ -67,17 +70,17 @@ void SentryTurretCVCommand::initialize()
 }
 
 void SentryTurretCVCommand::computeAimSetpoints(
-    TurretConfig& config,
-    aruwsrc::algorithms::ballistics::CvBallisticsSolver::BallisticsSolution& solution,
-    WrappedFloat* desiredYawSetpoint,
-    WrappedFloat* desiredPitchSetpoint,
-    bool* withinAimingTolerance)
+    TurretConfig &config,
+    aruwsrc::sentry::algorithms::SentryBallisticsSolver::BallisticsSolution &solution,
+    WrappedFloat *desiredYawSetpoint,
+    WrappedFloat *desiredPitchSetpoint,
+    bool *withinAimingTolerance)
 {
     // Get world-relative setpoints
     *desiredYawSetpoint = Angle(solution.yawAngle);
     *desiredPitchSetpoint = Angle(solution.pitchAngle);
 
-    *withinAimingTolerance = config.ballisticsSolver.withinAimingTolerance(
+    *withinAimingTolerance = turretLeftConfig.ballisticsSolver.withinAimingTolerance(
         config.yawController.getMeasurement().minDifference(*desiredYawSetpoint),
         config.pitchController.getMeasurement().minDifference(*desiredPitchSetpoint),
         solution.distance);
@@ -87,12 +90,17 @@ void SentryTurretCVCommand::execute()
 {
     // setpoints are in chassis frame
     WrappedFloat majorSetpoint = yawControllerMajor.getSetpoint();
-    WrappedFloat widowYawSetpoint = turretWidowConfig.yawController.getSetpoint();
-    WrappedFloat widowPitchSetpoint = turretWidowConfig.pitchController.getSetpoint();
+    WrappedFloat leftYawSetpoint = turretLeftConfig.yawController.getSetpoint();
+    WrappedFloat rightYawSetpoint = turretRightConfig.yawController.getSetpoint();
+    WrappedFloat leftPitchSetpoint = turretLeftConfig.pitchController.getSetpoint();
+    WrappedFloat rightPitchSetpoint = turretRightConfig.pitchController.getSetpoint();
 
-    auto widowBallisticsSolution = turretWidowConfig.ballisticsSolver.computeTurretAimAngles();
+    auto leftBallisticsSolution = turretLeftConfig.ballisticsSolver.computeTurretAimAngles();
+    auto rightBallisticsSolution = turretRightConfig.ballisticsSolver.computeTurretAimAngles();
 
-    targetFound = (widowBallisticsSolution != std::nullopt);
+    // @todo: does not allow for independent turret aiming
+    targetFound =
+        (leftBallisticsSolution != std::nullopt && rightBallisticsSolution != std::nullopt);
 
     // Turret minor control
     // If target spotted
@@ -100,21 +108,39 @@ void SentryTurretCVCommand::execute()
     {
         exitScanMode();
 
-        if (widowBallisticsSolution != std::nullopt)
+        if (leftBallisticsSolution != std::nullopt)
         {
             computeAimSetpoints(
-                turretWidowConfig,
-                widowBallisticsSolution.value(),
-                &widowYawSetpoint,
-                &widowPitchSetpoint,
-                &withinAimingToleranceWidow);
+                turretLeftConfig,
+                leftBallisticsSolution.value(),
+                &leftYawSetpoint,
+                &leftPitchSetpoint,
+                &withinAimingToleranceLeft);
         }
 
-        majorSetpoint = majorSetpoint.minInterpolate(widowYawSetpoint, MAJOR_AIM_LOW_PASS_ALPHA);
+        if (rightBallisticsSolution != std::nullopt)
+        {
+            computeAimSetpoints(
+                turretRightConfig,
+                rightBallisticsSolution.value(),
+                &rightYawSetpoint,
+                &rightPitchSetpoint,
+                &withinAimingToleranceRight);
+        }
+
+        // major averaging
+        WrappedFloat majorDirection = leftYawSetpoint.minInterpolate(rightYawSetpoint, 0.5);
+
+        // utilize major's 180˚ symmetry
+        // majorSetpoint = fabs(majorSetpoint.minDifference(majorDirection)) < M_PI_2
+        //                     ? majorDirection
+        //                     : majorDirection + M_PI;
+        majorSetpoint = majorDirection;
     }
     else
     {
-        withinAimingToleranceWidow = false;
+        withinAimingToleranceLeft = false;
+        withinAimingToleranceRight = false;
 
         // See how recently we lost target
         if (lostTargetCounter < AIM_LOST_NUM_COUNTS)
@@ -129,59 +155,34 @@ void SentryTurretCVCommand::execute()
             // Scan
             if (!scanning)
             {
-                enterScanMode(majorSetpoint, widowYawSetpoint);
+                enterScanMode(majorSetpoint);
             }
 
             if (curHitState == HitState::NOT_HIT)
             {
-                scanOffsetFromCenter += YAW_SCAN_DELTA_ANGLE * scanDir;
-                if (scanOffsetFromCenter >= YAW_SCAN_HALF_RANGE)
-                {
-                    scanOffsetFromCenter = YAW_SCAN_HALF_RANGE;
-                }
-                else if (scanOffsetFromCenter <= -YAW_SCAN_HALF_RANGE)
-                {
-                    scanOffsetFromCenter = -YAW_SCAN_HALF_RANGE;
-                }
+                // scan logic: start at some default, scan 180deg clockwise, change direction
+                // scan 180 ccw, change, etc.
+                float v = majorScanValue.getWrappedValue();
+                if (v >= CCW_TO_CW_WRAP_VALUE)
+                    scanDir = SCAN_CLOCKWISE;  // decreases angle
+                else if (v <= CW_TO_CCW_WRAP_VALUE)
+                    scanDir = SCAN_COUNTER_CLOCKWISE;  // increases angle
 
-                pitchScanValue += PITCH_SCAN_DELTA_ANGLE * pitchScanDir;
-                if (pitchScanValue >= SCAN_TURRET_MINOR_DOWN_PITCH)
-                {
-                    pitchScanValue = SCAN_TURRET_MINOR_DOWN_PITCH;
-                    pitchScanDir = SCAN_CLOCKWISE;
-                }
-                else if (pitchScanValue <= SCAN_TURRET_MINOR_UP_PITCH)
-                {
-                    pitchScanValue = SCAN_TURRET_MINOR_UP_PITCH;
-                    pitchScanDir = SCAN_COUNTER_CLOCKWISE;
-                }
+                majorScanValue += YAW_SCAN_DELTA_ANGLE * scanDir;
+                majorSetpoint = majorSetpoint.minInterpolate(
+                    majorScanValue,
+                    SCAN_LOW_PASS_ALPHA);  // lowpass filter
 
-                minorScanValue = scanCenter + scanOffsetFromCenter;
-                widowPitchSetpoint =
-                    widowPitchSetpoint.minInterpolate(Angle(pitchScanValue), SCAN_LOW_PASS_ALPHA);
-                widowYawSetpoint =
-                    widowYawSetpoint.minInterpolate(minorScanValue, SCAN_LOW_PASS_ALPHA);
+                leftPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
+                rightPitchSetpoint = Angle(SCAN_TURRET_MINOR_PITCH);
 
-                majorScanValue = scanCenter + scanOffsetFromCenter * MAJOR_SCAN_RATIO;
-                majorSetpoint = majorSetpoint.minInterpolate(majorScanValue, SCAN_LOW_PASS_ALPHA);
-
-                const bool scanSetpointsAtEndpoint =
-                    abs(widowYawSetpoint.minDifference(minorScanValue)) < SCAN_ENDPOINT_TOLERANCE &&
-                    abs(majorSetpoint.minDifference(majorScanValue)) < SCAN_ENDPOINT_TOLERANCE;
-
-                if (scanOffsetFromCenter >= YAW_SCAN_HALF_RANGE && scanSetpointsAtEndpoint)
-                {
-                    scanDir = SCAN_CLOCKWISE;
-                }
-                else if (scanOffsetFromCenter <= -YAW_SCAN_HALF_RANGE && scanSetpointsAtEndpoint)
-                {
-                    scanDir = SCAN_COUNTER_CLOCKWISE;
-                }
+                leftYawSetpoint = majorSetpoint + SCAN_TURRET_LEFT_YAW;
+                rightYawSetpoint = majorSetpoint + SCAN_TURRET_RIGHT_YAW;
             }
         }
     }
 
-    const std::vector<PlateHitTracker::PlateHitBinData>& hitData =
+    const std::vector<PlateHitTracker::PlateHitBinData> &hitData =
         plateHitTracker.getPeakAnglesRadians();
     PlateHitTracker::PlateHitBinData maxHit;
     if (!hitData.empty())
@@ -205,10 +206,14 @@ void SentryTurretCVCommand::execute()
             hitLocDiffRads =
                 abs(plateHitData.radians.getUnwrappedValue() -
                     lastPlateHitData.radians.getUnwrappedValue());
-            if (scanning && (lastHitState != curHitState || hitLocDiffRads > HIT_DIFF_OFFSET))
+            if (lastHitState != curHitState || hitLocDiffRads > HIT_DIFF_OFFSET)
             {
                 majorSetpoint = maxHit.radians;
-                widowYawSetpoint = maxHit.radians;
+                if (scanning)
+                {
+                    leftYawSetpoint = majorSetpoint + TURRET_OFFSET;
+                    rightYawSetpoint = majorSetpoint - TURRET_OFFSET;
+                }
             }
             lastHitState = curHitState;
             uint32_t curTime = tap::arch::clock::getTimeMilliseconds();
@@ -229,11 +234,6 @@ void SentryTurretCVCommand::execute()
             if (maxHit.magnitude >= HIT_MAG_THRESH)
             {
                 curHitState = HitState::HIT;
-                if (scanning)
-                {
-                    majorSetpoint = maxHit.radians;
-                    widowYawSetpoint = maxHit.radians;
-                }
             }
             break;
         }
@@ -242,27 +242,38 @@ void SentryTurretCVCommand::execute()
     }
 
     uint32_t currTime = getTimeMilliseconds();
-    float dt = (currTime - prevTime) / 1000.0f;
+    uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
     yawControllerMajor.runController(dt, majorSetpoint);
-    turretWidowConfig.pitchController.runController(dt, widowPitchSetpoint);
-    turretWidowConfig.yawController.runController(dt, widowYawSetpoint);
+
+    turretLeftConfig.pitchController.runController(dt, leftPitchSetpoint);
+    turretRightConfig.pitchController.runController(dt, rightPitchSetpoint);
+
+    turretLeftConfig.yawController.runController(dt, leftYawSetpoint);
+    turretRightConfig.yawController.runController(dt, rightYawSetpoint);
 }
 
 bool SentryTurretCVCommand::isFinished() const
 {
-    return !turretWidowConfig.pitchController.isOnline() ||
-           !turretWidowConfig.yawController.isOnline();
+    return !turretLeftConfig.pitchController.isOnline() ||
+           !turretLeftConfig.yawController.isOnline() ||
+           !turretRightConfig.pitchController.isOnline() ||
+           !turretRightConfig.yawController.isOnline();
 }
 
 void SentryTurretCVCommand::end(bool)
 {
     turretMajorSubsystem.getMutableMotor().setMotorOutput(0);
 
-    turretWidowConfig.turretSubsystem.pitchMotor.setMotorOutput(0);
-    turretWidowConfig.turretSubsystem.yawMotor.setMotorOutput(0);
-    withinAimingToleranceWidow = false;
+    turretLeftConfig.turretSubsystem.pitchMotor.setMotorOutput(0);
+    turretRightConfig.turretSubsystem.pitchMotor.setMotorOutput(0);
+
+    turretLeftConfig.turretSubsystem.yawMotor.setMotorOutput(0);
+    turretRightConfig.turretSubsystem.yawMotor.setMotorOutput(0);
+
+    withinAimingToleranceLeft = false;
+    withinAimingToleranceRight = false;
     exitScanMode();
 }
 

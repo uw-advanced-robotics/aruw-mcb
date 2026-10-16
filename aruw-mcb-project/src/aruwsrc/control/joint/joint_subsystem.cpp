@@ -70,18 +70,15 @@ void JointSubsystem::setSetpoint(float setpoint)
         this->setpoint.setTarget(std::clamp(setpoint, lowerBound, upperBound));
 };
 
-bool JointSubsystem::atSetpoint() const
+bool JointSubsystem::atSetpoint()
 {
     return tap::algorithms::compareFloatClose(setpoint.getTarget(), getPosition(), epsilon);
 };
 
-bool JointSubsystem::isOnline() const { return motor.isMotorOnline(); }
-
 void JointSubsystem::runPosPidController(float dt)
 {
-    debug_position = getPosition();
-    error = setpoint.getValue() - getPosition();
-    motorDesiredOutput = posPid.runController(error, getVelocity(), dt) + staticFeedforward;
+    float error = setpoint.getValue() - getPosition();
+    float motorDesiredOutput = posPid.runController(error, getVelocity(), dt) + staticFeedforward;
     motor.setDesiredOutput(std::clamp(motorDesiredOutput, -maxOutput, maxOutput));
 }
 

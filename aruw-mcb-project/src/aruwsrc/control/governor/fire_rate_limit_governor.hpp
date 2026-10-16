@@ -44,11 +44,8 @@ public:
      * and a projectile rate of fire readiness state that this governor uses to determine if a
      * projectile should be launched.
      */
-    FireRateLimitGovernor(
-        agitator::FireRateReselectionManagerInterface &fireRateReselectionManager,
-        bool periodicLimitingEnabled = true)
-        : fireRateReselectionManager(fireRateReselectionManager),
-          periodicLimitingEnabled(periodicLimitingEnabled)
+    FireRateLimitGovernor(agitator::FireRateReselectionManagerInterface &fireRateReselectionManager)
+        : fireRateReselectionManager(fireRateReselectionManager)
     {
     }
 
@@ -65,7 +62,7 @@ public:
             case agitator::FireRateReadinessState::READY_IGNORE_RATE_LIMITING:
                 return true;
             case agitator::FireRateReadinessState::READY_USE_RATE_LIMITING:
-                return periodicLimitingEnabled ? fireRateTimer.isReadyToLaunchProjectile() : true;
+                return fireRateTimer.isReadyToLaunchProjectile();
             case agitator::FireRateReadinessState::NOT_READY:
                 return false;
             default:
@@ -83,7 +80,6 @@ public:
 private:
     agitator::FireRateReselectionManagerInterface &fireRateReselectionManager;
     control::agitator::FireRateTimer fireRateTimer;
-    bool periodicLimitingEnabled;
 };
 }  // namespace aruwsrc::control::governor
 

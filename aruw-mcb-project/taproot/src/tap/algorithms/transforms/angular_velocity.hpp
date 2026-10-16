@@ -26,59 +26,49 @@
 
 #include "tap/algorithms/cmsis_mat.hpp"
 
-#include "axis.hpp"
-#include "vector.hpp"
-
 namespace tap::algorithms::transforms
 {
 class AngularVelocity
 {
 public:
-    inline AngularVelocity() : pseudoVector() {}
-
     inline AngularVelocity(const float rollVel, const float pitchVel, const float yawVel)
-        : pseudoVector(rollVel, pitchVel, yawVel)
+        : matrix_(skewMatFromAngVel(rollVel, pitchVel, yawVel))
     {
     }
 
     /* rvalue reference */
-    inline AngularVelocity(Vector&& vec) : pseudoVector(std::move(vec)) {}
+    inline AngularVelocity(AngularVelocity&& other) : matrix_(std::move(other.matrix_)) {}
 
     /* Costly; use rvalue reference whenever possible */
-    inline AngularVelocity(const Vector& vec) : pseudoVector(vec) {}
-
-    /* rvalue reference */
-    inline AngularVelocity(CMSISMat<3, 1>&& vec) : pseudoVector(std::move(vec)) {}
+    inline AngularVelocity(AngularVelocity& other) : matrix_(CMSISMat(other.matrix_)) {}
 
     /* Costly; use rvalue reference whenever possible */
-    inline AngularVelocity(const CMSISMat<3, 1>& vec) : pseudoVector(vec) {}
+    inline AngularVelocity(const CMSISMat<3, 3>& matrix) : matrix_(matrix) {}
 
-    /* rvalue reference */
-    inline AngularVelocity(CMSISMat<3, 3>&& mat)
-        : pseudoVector(-mat[1 * 3 + 2], mat[0 * 3 + 2], -mat[0 * 3 + 1])
-    {
-    }
-
-    /* Costly; use rvalue reference whenever possible */
-    inline AngularVelocity(const CMSISMat<3, 3>& mat)
-        : pseudoVector(-mat[1 * 3 + 2], mat[0 * 3 + 2], -mat[0 * 3 + 1])
-    {
-    }
-
-    inline float getRollVelocity() const { return (*this)[Axis::ROLL]; }
-    inline float getPitchVelocity() const { return (*this)[Axis::PITCH]; }
-    inline float getYawVelocity() const { return (*this)[Axis::YAW]; }
-    const float& operator[](Axis a) const { return pseudoVector[a]; }
-    inline const Vector& toVector() const { return pseudoVector; }
+    inline AngularVelocity(CMSISMat<3, 3>&& matrix) : matrix_(std::move(matrix)) {}
 
     /**
-     * Generates a 3x3 skew matrix usable in kinematic calculations.
+     * @brief Get the roll velocity
      */
-    inline CMSISMat<3, 3> toSkewMatrix() const
+    inline float getRollVelocity() const { return -matrix_.data[1 * 3 + 2]; }
+
+    /**
+     * @brief Get the pitch velocity
+     */
+    inline float getPitchVelocity() const { return matrix_.data[0 * 3 + 2]; }
+
+    /**
+     * @brief Get the yaw velocity
+     */
+    inline float getYawVelocity() const { return -matrix_.data[0 * 3 + 1]; }
+
+    const inline CMSISMat<3, 3>& matrix() const { return matrix_; }
+
+    /**
+     * Generates a 3x3 skew matrix from euler angle velocities (in radians/sec)
+     */
+    inline static CMSISMat<3, 3> skewMatFromAngVel(const float wx, const float wy, const float wz)
     {
-        float wx = getRollVelocity();
-        float wy = getPitchVelocity();
-        float wz = getYawVelocity();
         return tap::algorithms::CMSISMat<3, 3>({0, -wz, wy, wz, 0, -wx, -wy, wx, 0});
     }
 
@@ -86,7 +76,7 @@ public:
     friend class DynamicOrientation;
 
 private:
-    Vector pseudoVector;
+    CMSISMat<3, 3> matrix_;
 };  // class AngularVelocity
 }  // namespace tap::algorithms::transforms
 

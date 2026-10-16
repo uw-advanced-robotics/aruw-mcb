@@ -34,8 +34,6 @@ namespace tap::algorithms::transforms
 class DynamicPosition
 {
 public:
-    inline DynamicPosition() : position({0, 0, 0}), velocity({0, 0, 0}), acceleration({0, 0, 0}) {}
-
     inline DynamicPosition(
         const float x,
         const float y,
@@ -46,9 +44,9 @@ public:
         const float ax,
         const float ay,
         const float az)
-        : position(x, y, z),
-          velocity(vx, vy, vz),
-          acceleration(ax, ay, az)
+        : position({x, y, z}),
+          velocity({vx, vy, vz}),
+          acceleration({ax, ay, az})
     {
     }
 
@@ -73,21 +71,20 @@ public:
     {
     }
 
-    inline DynamicPosition(Position&& position, Vector&& velocity, Vector&& acceleration)
-        : position(std::move(position)),
-          velocity(std::move(velocity)),
-          acceleration(std::move(acceleration))
+    DynamicPosition operator+(const DynamicPosition& other) const
     {
+        return DynamicPosition(
+            this->position + other.position,
+            this->velocity + other.velocity,
+            this->acceleration + other.acceleration);
     }
 
-    inline DynamicPosition(
-        const Position& position,
-        const Vector& velocity,
-        const Vector& acceleration)
-        : position(position),
-          velocity(velocity),
-          acceleration(acceleration)
+    DynamicPosition operator-(const DynamicPosition& other) const
     {
+        return DynamicPosition(
+            this->position - other.position,
+            this->velocity - other.velocity,
+            this->acceleration - other.acceleration);
     }
 
     DynamicPosition operator-() const
@@ -95,43 +92,38 @@ public:
         return DynamicPosition(-this->position, -this->velocity, -this->acceleration);
     }
 
-    DynamicPosition projectForward(float dt) const
-    {
-        if (compareFloatClose(velocity.magnitudeSq(), 0, 1e-5) &&
-            compareFloatClose(acceleration.magnitudeSq(), 0, 1e-5))
-        {
-            return DynamicPosition(this->position, this->velocity, this->acceleration);
-        }
+    inline Position getPosition() const { return Position(position); }
 
-        CMSISMat<3, 1> newPos = this->position.coordinates_ + dt * this->velocity.coordinates_ +
-                                0.5f * dt * dt * this->acceleration.coordinates_;
-        CMSISMat<3, 1> newVel = this->velocity.coordinates_ + dt * this->acceleration.coordinates_;
+    inline Vector getVelocity() const { return Vector(velocity); }
 
-        return DynamicPosition(newPos, newVel, this->acceleration);
-    }
+    inline Vector getAcceleration() const { return Vector(acceleration); }
 
-    inline const Position& getPosition() const { return position; }
-    inline const Vector& getVelocity() const { return velocity; }
-    inline const Vector& getAcceleration() const { return acceleration; }
+    inline float x() const { return position.data[0]; }
 
-    inline float x() const { return position.x(); }
-    inline float y() const { return position.y(); }
-    inline float z() const { return position.z(); }
+    inline float y() const { return position.data[1]; }
 
-    inline float vx() const { return velocity.x(); }
-    inline float vy() const { return velocity.y(); }
-    inline float vz() const { return velocity.z(); }
+    inline float z() const { return position.data[2]; }
 
-    inline float ax() const { return acceleration.x(); }
-    inline float ay() const { return acceleration.y(); }
-    inline float az() const { return acceleration.z(); }
+    inline float vx() const { return velocity.data[0]; }
+
+    inline float vy() const { return velocity.data[1]; }
+
+    inline float vz() const { return velocity.data[2]; }
+
+    inline float ax() const { return acceleration.data[0]; }
+
+    inline float ay() const { return acceleration.data[1]; }
+
+    inline float az() const { return acceleration.data[2]; }
 
     friend class Transform;
 
 private:
-    Position position;
-    Vector velocity;
-    Vector acceleration;
+    CMSISMat<3, 1> position;
+
+    CMSISMat<3, 1> velocity;
+
+    CMSISMat<3, 1> acceleration;
 
 };  // class DynamicPosition
 }  // namespace tap::algorithms::transforms

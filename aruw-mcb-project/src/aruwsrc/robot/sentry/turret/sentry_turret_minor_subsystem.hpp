@@ -30,8 +30,10 @@ class SentryTurretMinorSubsystem final : public aruwsrc::control::turret::Turret
 public:
     SentryTurretMinorSubsystem(
         tap::Drivers& drivers,
-        aruwsrc::control::turret::TurretMotor& pitchMotor,
-        aruwsrc::control::turret::TurretMotor& yawMotor,
+        tap::motor::MotorInterface& pitchMotor,
+        tap::motor::MotorInterface& yawMotor,
+        const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
+        const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
         const tap::communication::sensors::imu::AbstractIMU* turretIMU,
         uint8_t turretID);
 

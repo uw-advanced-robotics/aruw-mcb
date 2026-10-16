@@ -57,7 +57,7 @@ namespace aruwsrc::sentry::turret
  */
 class TurretMajorWorldFrameController final
     : public aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-          tap::algorithms::transforms::Axis::YAW>
+          control::turret::algorithms::Axis::YAW>
 {
 public:
     /**
@@ -68,7 +68,6 @@ public:
      * @param[in] yawMotor A `TurretMotor` object accessible for children objects to use.
      * @param[in] turretLeft The left turret minor.
      * @param[in] turretRight The right turret minor.
-     * @param[in] turretWidow The turret minor 2026.
      * @param[in] positionPid Position PID controller.
      * @param[in] velocityPid Velocity PID controller.
      * @param[in] maxVelErrorInput Cap on the max error passed into velocity controller.
@@ -80,10 +79,13 @@ public:
         const aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis,
         aruwsrc::control::turret::TurretMotor& yawMotor,
         tap::communication::sensors::imu::AbstractIMU& turretMajorIMU,
-        const SentryTurretMinorSubsystem& turretWidow,
+        const SentryTurretMinorSubsystem& turretLeft,
+        const SentryTurretMinorSubsystem& turretRight,
         tap::algorithms::SmoothPid& positionPid,
         tap::algorithms::SmoothPid& velocityPid,
-        float maxVelErrorInput);
+        float maxVelErrorInput,
+        float minorMajorTorqueRatio,
+        float feedforwardGain);
 
     void initialize() final;
 
@@ -91,7 +93,7 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the world frame.
      */
-    void runController(const float dt, const WrappedFloat desiredSetpoint) final;
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
 
     /// Sets the world frame yaw angle setpoint, refer to top level documentation for more details.
     void setSetpoint(WrappedFloat desiredSetpoint) final;
@@ -105,15 +107,16 @@ public:
 
     bool isOnline() const final;
 
-    WrappedFloat convertControllerAngleToChassisFrame(
-        WrappedFloat /* controllerFrameAngle */) const final
+    // @todo see todo in interface class
+    WrappedFloat convertControllerAngleToChassisFrame(WrappedFloat controllerFrameAngle) const final
     {
+        controllerFrameAngle = controllerFrameAngle;  // to make pipeline not complain
         return Angle(0.0);
     };
 
-    WrappedFloat convertChassisAngleToControllerFrame(
-        WrappedFloat /* chassisFrameAngle */) const final
+    WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const final
     {
+        chassisFrameAngle = chassisFrameAngle;  // to make pipelien not complain
         return Angle(0.0);
     };
 
@@ -126,7 +129,8 @@ private:
 
     tap::communication::sensors::imu::AbstractIMU& turretMajorIMU;
 
-    const SentryTurretMinorSubsystem& turretWidow;
+    const SentryTurretMinorSubsystem& turretLeft;
+    const SentryTurretMinorSubsystem& turretRight;
 
     tap::algorithms::SmoothPid& positionPid;
     tap::algorithms::SmoothPid& velocityPid;
@@ -136,6 +140,8 @@ private:
     float torqueCompensation = 0.0f;
 
     float maxVelErrorInput;
+
+    float minorMajorTorqueRatio;
 
     float feedforwardGain;
 };

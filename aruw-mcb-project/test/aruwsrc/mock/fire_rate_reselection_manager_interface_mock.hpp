@@ -30,7 +30,6 @@ class FireRateReselectionManagerInterfaceMock
     : public control::agitator::FireRateReselectionManagerInterface
 {
 public:
-    MOCK_METHOD(float, getFireRateRps, (), (override));
     MOCK_METHOD(uint32_t, getFireRatePeriod, (), (override));
     MOCK_METHOD(
         control::agitator::FireRateReadinessState,

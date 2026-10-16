@@ -21,7 +21,7 @@
 
 namespace aruwsrc::dart
 {
-DartCloseCommand::DartCloseCommand(DartServo &dartLauncher) : dartLauncher(dartLauncher)
+DartCloseCommand::DartCloseCommand(DartLauncherSubsystem &dartLauncher) : dartLauncher(dartLauncher)
 {
     addSubsystemRequirement(&dartLauncher);
 }

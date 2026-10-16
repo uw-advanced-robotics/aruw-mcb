@@ -28,10 +28,8 @@
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
 #include "aruwsrc/control/chassis/mecanum_chassis_subsystem.hpp"
-#include "aruwsrc/control/turret/turret_motor_config.hpp"
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #include "aruwsrc/mock/mecanum_chassis_subsystem_mock.hpp"
-#include "aruwsrc/mock/turret_motor_mock.hpp"
 #include "aruwsrc/mock/turret_subsystem_mock.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
@@ -56,7 +54,7 @@ protected:
         : drivers(),
           currentSensor(
               {&drivers.analog,
-               tap::gpio::Analog::Pin::S,
+               aruwsrc::control::chassis::CURRENT_SENSOR_PIN,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_MV_PER_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_ZERO_MA,
                aruwsrc::communication::sensors::current::ACS712_CURRENT_SENSOR_LOW_PASS_ALPHA}),
@@ -279,31 +277,21 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(ChassisImuDriveCommandTest, execute__turret_relative_when_turret_not_nullptr)
 {
-    aruwsrc::control::turret::TurretMotorConfig dummyConfig;
-    NiceMock<tap::mock::MotorInterfaceMock> pitchMotorInterfaceMock;
-    NiceMock<tap::mock::MotorInterfaceMock> yawMotorInterfaceMock;
-    NiceMock<aruwsrc::mock::TurretMotorMock> pitchMotorMock(&pitchMotorInterfaceMock, dummyConfig);
-    NiceMock<aruwsrc::mock::TurretMotorMock> yawMotorMock(&yawMotorInterfaceMock, dummyConfig);
-    NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(
-        &drivers,
-        pitchMotorMock,
-        yawMotorMock,
-        nullptr);
-
+    NiceMock<aruwsrc::mock::TurretSubsystemMock> turret(&drivers);
     ChassisImuDriveCommand chassisImuDriveCommand(
         &drivers,
         &(controlOperatorInterface),
         &chassis,
-        &yawMotorMock);
+        &turret.yawMotor);
 
     setupUserInput(MAX_SPEED, 0, 0);
 
     chassisImuDriveCommand.initialize();
 
-    tap::algorithms::WrappedFloat chassisFrameMeasuredAngle = tap::algorithms::Angle(M_PI_4);
-    ON_CALL(yawMotorMock, getChassisFrameMeasuredAngle)
+    WrappedFloat chassisFrameMeasuredAngle = Angle(M_PI_4);
+    ON_CALL(turret.yawMotor, getChassisFrameMeasuredAngle)
         .WillByDefault(ReturnRef(chassisFrameMeasuredAngle));
-    ON_CALL(yawMotorMock, isOnline).WillByDefault(Return(true));
+    ON_CALL(turret.yawMotor, isOnline).WillByDefault(Return(true));
 
     float xExpected = MAX_SPEED;
     float yExpected = 0.0f;

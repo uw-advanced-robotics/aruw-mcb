@@ -44,7 +44,7 @@ void AutotuneSpecificMenu::draw()
 
     if (autotuneCommand == nullptr)
     {
-        display << "No calibrate command";
+        display << "No gravity calibrate command";
     }
     else
     {

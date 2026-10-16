@@ -23,12 +23,15 @@ namespace aruwsrc::engineer
 {
 ScorePositionCommand::ScorePositionCommand(
     aruwsrc::control::joint::JointSubsystem& extension,
-    WristSubsystem& wrist)
+    WristSubsystem& wrist,
+    aruwsrc::control::joint::JointSubsystem& roll)
     : extension(extension),
-      wrist(wrist)
+      wrist(wrist),
+      roll(roll)
 {
     addSubsystemRequirement(&extension);
     addSubsystemRequirement(&wrist);
+    addSubsystemRequirement(&roll);
 };
 
 void ScorePositionCommand::cyclePositions(ScorePositions scorePos) { scoringPosition = scorePos; }
@@ -63,9 +66,9 @@ void ScorePositionCommand::initialize()
     }
 
     extension.setSetpoint(extensionSetpoint);
-    wrist.setSetpointTheta1(wristYawSetpoint);    // theta1 is azimuth/yaw
-    wrist.setSetpointTheta2(wristPitchSetpoint);  // theta2 is pitch
-    wrist.setSetpointTheta3(wristRollSetpoint);
+    wrist.setSetpointYaw(wristYawSetpoint);
+    wrist.setSetpointPitch(wristPitchSetpoint);
+    roll.setSetpoint(wristRollSetpoint);
 }
 
 void ScorePositionCommand::execute() {}
@@ -74,6 +77,6 @@ void ScorePositionCommand::end(bool) {}
 
 bool ScorePositionCommand::isFinished() const
 {
-    return extension.atSetpoint() && wrist.atSetpoint();
+    return extension.atSetpoint() && wrist.atSetpoint() && roll.atSetpoint();
 }
 }  // namespace aruwsrc::engineer

@@ -25,11 +25,9 @@ using namespace tap::algorithms::transforms;
 
 TurretSpringForceOffset::TurretSpringForceOffset(
     const TurretSpringParams& params,
-    const bool isMotorInverted,
-    const bool isConstantForce)
+    const bool isMotorInverted)
     : params(params),
       isMotorInverted(isMotorInverted),
-      isConstantForce(isConstantForce),
       pitchPointPosition(params.turretPitchMountX, 0.0f, params.turretPitchMountZ),
       yawPointPosition(params.turretYawMountX, 0.0f, params.turretYawMountZ){};
 
@@ -57,14 +55,10 @@ float TurretSpringForceOffset::calculateEffectiveMoment(float pitch) const
     if (currentLength < 1e-6) return 0.0f;
 
     const Vector pitchPosVector(pitchPoint.coordinates());
-    Vector springForceVector = springVector * (1.0f / currentLength);
 
-    const float scaleFactor = currentLength - params.springFreeLength;
+    const float scaleFactor = (currentLength - params.springFreeLength) / currentLength;
 
-    if (!isConstantForce)
-    {
-        springForceVector = springForceVector * scaleFactor;
-    }
+    const Vector springForceVector = springVector * scaleFactor;
 
     const Vector torque = Vector::cross(pitchPosVector, springForceVector);
 

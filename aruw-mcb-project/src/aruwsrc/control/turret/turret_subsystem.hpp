@@ -61,8 +61,10 @@ public:
      */
     explicit TurretSubsystem(
         tap::Drivers* drivers,
-        TurretMotor& pitchMotor,
-        TurretMotor& yawMotor,
+        tap::motor::MotorInterface* pitchMotor,
+        tap::motor::MotorInterface* yawMotor,
+        const TurretMotorConfig& pitchMotorConfig,
+        const TurretMotorConfig& yawMotorConfig,
         const tap::communication::sensors::imu::AbstractIMU* turretImu);
 
     void initialize() override;
@@ -81,10 +83,15 @@ public:
 
     const inline tap::communication::sensors::imu::AbstractIMU* getIMU() const { return turretImu; }
 
+#ifdef ENV_UNIT_TESTS
+    testing::NiceMock<mock::TurretMotorMock> pitchMotor;
+    testing::NiceMock<mock::TurretMotorMock> yawMotor;
+#else
     /// Associated with and contains logic for controlling the turret's pitch motor
-    TurretMotor& pitchMotor;
+    TurretMotor pitchMotor;
     /// Associated with and contains logic for controlling the turret's yaw motor
-    TurretMotor& yawMotor;
+    TurretMotor yawMotor;
+#endif
 
 protected:
     const tap::communication::sensors::imu::AbstractIMU* turretImu;

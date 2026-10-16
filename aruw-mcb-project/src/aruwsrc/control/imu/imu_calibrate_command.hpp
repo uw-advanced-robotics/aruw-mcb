@@ -89,19 +89,19 @@ public:
     const float positionZeroThreshold;
 
     static constexpr float DEFAULT_VELOCITY_ZERO_THRESHOLD = modm::toRadian(1e-4f);
-    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.03f);
+    static constexpr float DEFAULT_POSITION_ZERO_THRESHOLD = modm::toRadian(0.02f);
 
     struct TurretIMUCalibrationConfig
     {
         /// The turret mounted IMU to be calibrated.
-        tap::communication::sensors::imu::AbstractIMU *turretImu;
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCBCanComm;
         /// A `TurretSubsystem` that this command will control (will lock the turret).
         turret::TurretSubsystem *turret;
         /// A chassis relative yaw controller used to lock the turret.
-        turret::algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
+        turret::algorithms::ChassisFrameTurretController<turret::algorithms::Axis::YAW>
             *yawController;
         /// A chassis relative pitch controller used to lock the turret.
-        turret::algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
+        turret::algorithms::ChassisFrameTurretController<turret::algorithms::Axis::PITCH>
             *pitchController;
         /**
          * `true` if the turret IMU is mounted on the pitch axis of the
@@ -201,15 +201,14 @@ protected:
                    0.0f,
                    turret->yawMotor.getChassisFrameVelocity(),
                    velocityZeroThreshold) &&
-               (abs(turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0)) <
+               (turret->yawMotor.getChassisFrameMeasuredAngle().minDifference(0) <
                 positionZeroThreshold) &&
-               (ignorePitch ||
-                (compareFloatClose(
-                     0.0f,
-                     turret->pitchMotor.getChassisFrameVelocity(),
-                     velocityZeroThreshold) &&
-                 (abs(turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(0)) <
-                  positionZeroThreshold)));
+               (ignorePitch || (compareFloatClose(
+                                    0.0f,
+                                    turret->pitchMotor.getChassisFrameVelocity(),
+                                    velocityZeroThreshold) &&
+                                (turret->pitchMotor.getChassisFrameMeasuredAngle().minDifference(
+                                     0) < positionZeroThreshold)));
     }
 };
 }  // namespace aruwsrc::control::imu

@@ -37,8 +37,6 @@ public:
     uint32_t getLastComputedOdometryTime() const;
     const tap::algorithms::transforms::Transform& getWorldToChassis() const;
 
-    const tap::algorithms::transforms::Transform& getWorldToTurretYaw(uint8_t) const;
-
     const tap::algorithms::transforms::Transform& getWorldToTurret(uint8_t) const;
 
     const tap::algorithms::transforms::Transform& getWorldToVTM() const;

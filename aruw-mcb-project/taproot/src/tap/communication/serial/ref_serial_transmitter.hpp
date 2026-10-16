@@ -223,8 +223,7 @@ public:
      */
     mockable modm::ResumableResult<void> deleteGraphicLayer(
         Tx::DeleteGraphicOperation graphicOperation,
-        uint8_t graphicLayer,
-        bool doubleSend = false);
+        uint8_t graphicLayer);
 
     /**
      * This function and the ones below all configure the message header and sends the specified
@@ -241,28 +240,23 @@ public:
     mockable modm::ResumableResult<void> sendGraphic(
         Tx::Graphic1Message* graphicMsg,
         bool configMsgHeader = true,
-        bool sendMsg = true,
-        bool doubleSend = true);
+        bool sendMsg = true);
     mockable modm::ResumableResult<void> sendGraphic(
         Tx::Graphic2Message* graphicMsg,
         bool configMsgHeader = true,
-        bool sendMsg = true,
-        bool doubleSend = true);
+        bool sendMsg = true);
     mockable modm::ResumableResult<void> sendGraphic(
         Tx::Graphic5Message* graphicMsg,
         bool configMsgHeader = true,
-        bool sendMsg = true,
-        bool doubleSend = true);
+        bool sendMsg = true);
     mockable modm::ResumableResult<void> sendGraphic(
         Tx::Graphic7Message* graphicMsg,
         bool configMsgHeader = true,
-        bool sendMsg = true,
-        bool doubleSend = true);
+        bool sendMsg = true);
     mockable modm::ResumableResult<void> sendGraphic(
         Tx::GraphicCharacterMessage* graphicMsg,
         bool configMsgHeader = true,
-        bool sendMsg = true,
-        bool doubleSend = true);
+        bool sendMsg = true);
     ///@}
 
     mockable modm::ResumableResult<void> sendRobotToRobotMsg(
@@ -286,8 +280,7 @@ private:
         bool sendMsg,
         RobotId robotId,
         tap::Drivers* drivers,
-        uint8_t extraDataLength,
-        bool doubleSend);
+        uint8_t extraDataLength);
 };
 }  // namespace tap::communication::serial
 

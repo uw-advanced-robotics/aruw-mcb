@@ -30,35 +30,36 @@ namespace aruwsrc::engineer
 {
 static constexpr tap::can::CanBus CAN_BUS_EXTENSION = tap::can::CanBus::CAN_BUS1;
 
-static constexpr tap::motor::MotorId EXTENSION_MOTOR_ID = tap::motor::MotorId::MOTOR1;
+static constexpr tap::motor::MotorId EXTENSION_MOTOR_ID = tap::motor::MotorId::MOTOR3;
 
 static constexpr tap::algorithms::SmoothPidConfig EXTENSION_PID_CONFIG = {
-    .kp = 1'000'000.0f,
-    .ki = 15'000'000.0f,
-    .kd = 25'000.0f,
-    .maxICumulative = 3000.0f,
-    .maxOutput = 6000.0f,
+    .kp = 0.0f,  // 300
+    .ki = 0.0f,
+    .kd = 0.0f,  // 40
+    .maxICumulative = 0.0f,
+    .maxOutput = 0.0f,  // 2000
 };
 
 static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
     EXTENSION_CONFIG{
         .super =  // JointSubsystem::Config
         {
-            .lowerBound = 0.005f,
-            .upperBound = 0.640f,
+            .lowerBound = 5.0f,
+            .upperBound = 300.0f,
             .epsilon = 1.0f,
             .encoderRatio =
-                0.005 * 25 / M_TWOPI * 2.0f,  // 5mm per tooth, 25 teeth, 2X cascaded extension
+                5 * 14 /
+                M_TWOPI,  // 5mm per tooth, 14 teeth was old constants, probably change this
             .posPidConfig = EXTENSION_PID_CONFIG,
             .maxOutput = EXTENSION_PID_CONFIG.maxOutput,
-            .staticFeedforward = 600.0f,
+            .staticFeedforward = 0.0f,
         },
         .home = 0.0f,
-        .homingSpeed = 0.01f,
+        .homingSpeed = 10.0f,
         .homingReversed = false,
     };
 
-static constexpr float EXTENSION_MOVE_SPEED = 0.0006f;
+static constexpr float EXTENSION_MOVE_SPEED = 0.6f;
 
 static constexpr tap::gpio::Digital::InputPin EXTENSION_LIMIT_SWITCH_PIN =
     tap::gpio::Digital::InputPin::T;

@@ -21,7 +21,6 @@
 #define FIRE_RATE_RESELECTION_MANAGER_INTERFACE_HPP_
 
 #include <cmath>
-#include <cstdint>
 
 namespace aruwsrc::control::agitator
 {
@@ -43,9 +42,6 @@ class FireRateReselectionManagerInterface
 public:
     /// Max fire rate in rounds/second
     static constexpr float MAX_FIRERATE_RPS = 1000.0f;
-
-    /// @return requested fire rate in rounds/second
-    virtual float getFireRateRps() = 0;
 
     /// @return the fire rate period (time distance between launching projectiles)
     virtual uint32_t getFireRatePeriod() = 0;

@@ -40,17 +40,17 @@ class TurretMotor;
 namespace aruwsrc::control::turret::algorithms
 {
 /**
- * World frame turret axis controller. Requires that a development board be mounted rigidly on the
+ * World frame turret yaw controller. Requires that a development board be mounted rigidly on the
  * turret and connected via the `TurretMCBCanComm` class. The development board's IMU is used to
  * determine the turret's world frame coordinates directly, making this controller better than the
  * `WorldFrameChassisImuTurretController`.
  *
  * Runs a cascade PID controller (position PID output feeds into velocity PID controller, velocity
- * PID controller is desired motor output) to control the turret axis.
+ * PID controller is desired motor output) to control the turret yaw.
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-template <tap::algorithms::transforms::Axis AXIS>
+template <Axis AXIS>
 class WorldFrameTurretImuCascadePidTurretController final
     : public TurretAxisControllerInterface<AXIS>
 {
@@ -64,7 +64,7 @@ public:
      */
     WorldFrameTurretImuCascadePidTurretController(
         const transforms::Transform &worldToTurret,
-        const tap::communication::sensors::imu::AbstractIMU &turretImu,
+        const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm,
         TurretMotor &turretMotor,
         SmoothPid &positionPid,
         SmoothPid &velocityPid,
@@ -76,7 +76,7 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The pitch desired setpoint in the world frame.
      */
-    void runController(const float dt, const WrappedFloat desiredSetpoint) final;
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) final;
 
     /// Sets the world frame pitch angle setpoint, refer to top level documentation for more
     /// details.
@@ -99,7 +99,7 @@ public:
 
 private:
     const transforms::Transform &worldToTurret;
-    const tap::communication::sensors::imu::AbstractIMU &turretImu;
+    const aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm;
 
     SmoothPid &positionPid;
     SmoothPid &velocityPid;

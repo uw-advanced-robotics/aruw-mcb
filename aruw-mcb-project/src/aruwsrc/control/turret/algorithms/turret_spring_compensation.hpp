@@ -93,10 +93,7 @@ public:
     /**
      * @param[in] True if the motor direction should be inverted.
      */
-    TurretSpringForceOffset(
-        const TurretSpringParams& params,
-        const bool isMotorInverted,
-        bool isConstantForce = false);
+    TurretSpringForceOffset(const TurretSpringParams& params, const bool isMotorInverted);
 
     /**
      * @param[in] state The state of the turret, including the pitch in world and chassis frame.
@@ -121,7 +118,6 @@ public:
 private:
     const TurretSpringParams params;
     const bool isMotorInverted;
-    const bool isConstantForce;
     tap::algorithms::transforms::Position pitchPointPosition;
     tap::algorithms::transforms::Position yawPointPosition;
 };

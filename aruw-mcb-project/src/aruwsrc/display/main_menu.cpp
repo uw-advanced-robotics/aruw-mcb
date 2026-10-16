@@ -41,15 +41,13 @@ MainMenu::MainMenu(
     communication::can::TurretMCBCanComm* turretMCBCanCommBus2,
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite1,
     aruwsrc::communication::mcb_lite::MCBLite* mcbLite2,
-    communication::can::cap_bank::CapacitorBank* capacitorBank,
-    aruwsrc::communication::rtt::RttTelemetry* rttTelemetry)
+    communication::can::cap_bank::CapacitorBank* capacitorBank)
     : modm::StandardMenu<tap::display::DummyAllocator<modm::IAbstractView>>(stack, MAIN_MENU_ID),
       drivers(drivers),
       imuCalibrateMenu(stack, drivers),
       autotuneMenu(stack, drivers, ENTRIES),
-      limitSwitchMenu(stack, drivers),
       cvMenu(stack, drivers, visionCoprocessor),
-      errorMenu(stack, drivers, ENTRIES),
+      errorMenu(stack),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers, ENTRIES),
       commandSchedulerMenu(stack, drivers, ENTRIES),
@@ -62,14 +60,12 @@ MainMenu::MainMenu(
       aboutMenu(stack),
       sentryStrategyMenu(stack, visionCoprocessor),
       capBankMenu(stack, capacitorBank),
-      rttMenu(stack, rttTelemetry),
       visionCoprocessor(visionCoprocessor),
       turretMCBCanCommBus1(turretMCBCanCommBus1),
       turretMCBCanCommBus2(turretMCBCanCommBus2),
       mcbLite1(mcbLite1),
       mcbLite2(mcbLite2),
-      capacitorBank(capacitorBank),
-      rttTelemetry(rttTelemetry)
+      capacitorBank(capacitorBank)
 {
 }
 
@@ -85,29 +81,29 @@ void MainMenu::initialize()
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addAutotuneMenuCallback));
-    addEntry(
-        ErrorMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-            this,
-            &MainMenu::addErrorMenuCallback));
+    // addEntry(
+    //     ErrorMenu::getMenuName(),
+    //     modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView> >(
+    //         this,
+    //         &MainMenu::addErrorMenuCallback));
     if (this->visionCoprocessor != nullptr)
         addEntry(
             CVMenu::getMenuName(),
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addCVMenuCallback));
+#ifdef TARGET_SENTRY_ECLIPSE
+    addEntry(
+        SentryStrategyMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addSentryStrategyMenuCallback));
+#endif
     addEntry(
         MotorMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
             this,
             &MainMenu::addMotorMenuCallback));
-#if defined(TARGET_ENGINEER) || defined(TARGET_DART)
-    addEntry(
-        LimitSwitchMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-            this,
-            &MainMenu::addLimitSwitchMenuCallback));
-#endif
     addEntry(
         RefSerialMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
@@ -163,11 +159,6 @@ void MainMenu::initialize()
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addCapacitorBankMenuCallback));
-    addEntry(
-        RttMenu::getMenuName(),
-        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
-            this,
-            &MainMenu::addRttMenuCallback));
 
     setTitle("Main Menu");
 }
@@ -184,12 +175,6 @@ void MainMenu::addAutotuneMenuCallback()
     getViewStack()->push(atm);
 }
 
-void MainMenu::addLimitSwitchMenuCallback()
-{
-    LimitSwitchMenu* lsm = new (&limitSwitchMenu) LimitSwitchMenu(getViewStack(), drivers);
-    getViewStack()->push(lsm);
-}
-
 void MainMenu::addCVMenuCallback()
 {
     CVMenu* cvm = new (&cvMenu) CVMenu(getViewStack(), drivers, visionCoprocessor);
@@ -199,7 +184,7 @@ void MainMenu::addCVMenuCallback()
 void MainMenu::addErrorMenuCallback()
 {
     // em actually points to errorMenu
-    ErrorMenu* em = new (&errorMenu) ErrorMenu(getViewStack(), drivers, ENTRIES);
+    ErrorMenu* em = new (&errorMenu) ErrorMenu(getViewStack());
     getViewStack()->push(em);
 }
 
@@ -213,6 +198,11 @@ void MainMenu::addMotorMenuCallback()
 {
     MotorMenu* mm = new (&motorMenu) MotorMenu(getViewStack(), drivers, ENTRIES);
     getViewStack()->push(mm);
+}
+
+void MainMenu::addPropertyTableCallback()
+{
+    // TODO, see issue #221
 }
 
 void MainMenu::addCommandSchedulerCallback()
@@ -278,12 +268,6 @@ void MainMenu::addCapacitorBankMenuCallback()
 {
     CapacitorBankMenu* cbm = new (&capBankMenu) CapacitorBankMenu(getViewStack(), capacitorBank);
     getViewStack()->push(cbm);
-}
-
-void MainMenu::addRttMenuCallback()
-{
-    RttMenu* rttm = new (&rttMenu) RttMenu(getViewStack(), rttTelemetry);
-    getViewStack()->push(rttm);
 }
 
 }  // namespace display

@@ -80,10 +80,12 @@ public:
     {
         if (timeout.execute())
         {
+            uint32_t now = T::TimeFunc();
+
             do
             {
-                timeout.incrementExpireTime(period);
-            } while (timeout.isExpired());
+                timeout.expireTime += period;
+            } while (timeout.expireTime <= now);
 
             timeout.isRunning = true;
             timeout.isExecuted = false;

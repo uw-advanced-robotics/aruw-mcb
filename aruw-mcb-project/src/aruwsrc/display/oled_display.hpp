@@ -52,8 +52,7 @@ public:
         communication::can::TurretMCBCanComm *turretMCBCanCommBus2,
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
-        communication::can::cap_bank::CapacitorBank *capacitorBank,
-        aruwsrc::communication::rtt::RttTelemetry *rttTelemetry);
+        communication::can::cap_bank::CapacitorBank *capacitorBank = nullptr);
     DISALLOW_COPY_AND_ASSIGN(OledDisplay)
     mockable ~OledDisplay() = default;
 

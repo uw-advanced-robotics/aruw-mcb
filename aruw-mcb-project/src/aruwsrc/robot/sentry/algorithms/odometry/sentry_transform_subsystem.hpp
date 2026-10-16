@@ -48,11 +48,12 @@ public:
         if (telemetry != nullptr)
         {
             const Transform& worldToChassis = transformer.getWorldToChassis();
+            telemetry->logSignal("state:chassis:pos", worldToChassis.getX(), worldToChassis.getY());
             telemetry->logSignal(
-                "o",
-                worldToChassis.getX(),
-                worldToChassis.getY(),
-                worldToChassis.getYaw());
+                "state:chassis:vel",
+                worldToChassis.getXVel(),
+                worldToChassis.getYVel());
+            telemetry->logSignal("state:chassis:yaw", worldToChassis.getYaw());
         }
     };
 

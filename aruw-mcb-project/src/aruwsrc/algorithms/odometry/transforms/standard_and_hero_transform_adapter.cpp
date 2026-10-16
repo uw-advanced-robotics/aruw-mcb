@@ -47,10 +47,6 @@ const Transform& StandardAndHeroTransformAdapter::getWorldToChassis() const
 {
     return transforms.getWorldToChassis();
 }
-const Transform& StandardAndHeroTransformAdapter::getWorldToTurretYaw(uint8_t) const
-{
-    return transforms.getWorldToTurretYaw();
-}
 const Transform& StandardAndHeroTransformAdapter::getWorldToTurret(uint8_t) const
 {
     return transforms.getWorldToTurret();

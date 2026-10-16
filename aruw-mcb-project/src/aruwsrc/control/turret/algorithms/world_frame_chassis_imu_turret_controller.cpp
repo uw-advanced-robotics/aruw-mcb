@@ -114,7 +114,7 @@ WorldFrameYawChassisImuTurretController::WorldFrameYawChassisImuTurretController
     TurretMotor &yawMotor,
     const tap::algorithms::SmoothPidConfig &pidConfig,
     const std::vector<TurretCompensatorInterface *> compensators)
-    : TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>(yawMotor, compensators),
+    : TurretAxisControllerInterface<Axis::YAW>(yawMotor, compensators),
       drivers(drivers),
       pid(pidConfig),
       worldFrameSetpoint(Angle(0)),
@@ -136,7 +136,7 @@ void WorldFrameYawChassisImuTurretController::initialize()
 }
 
 void WorldFrameYawChassisImuTurretController::runController(
-    const float dt,
+    const uint32_t dt,
     const WrappedFloat desiredSetpoint)
 {
     const WrappedFloat chassisFrameImuYawAngle = getMpu6500Yaw();

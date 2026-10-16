@@ -27,10 +27,10 @@ namespace tap
 {
 namespace control
 {
-void PressCommandMapping::executeCommandMapping(const GenericRemoteMapState &currState)
+void PressCommandMapping::executeCommandMapping(const RemoteMapState &currState)
 {
     if (mappingSubset(currState) &&
-        !(mapState->getNegKeysUsed() && negKeysSubset(*mapState, currState)))
+        !(mapState.getNegKeysUsed() && negKeysSubset(mapState, currState)))
     {
         if (!pressed)
         {

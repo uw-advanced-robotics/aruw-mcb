@@ -30,9 +30,9 @@ TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     SentryControlOperatorInterface &controlOperatorInterface,
     SentryTurretMinorSubsystem &turretMinorSubsystem,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        tap::algorithms::transforms::Axis::YAW> &yawController,
+        control::turret::algorithms::Axis::YAW> &yawController,
     aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
-        tap::algorithms::transforms::Axis::PITCH> &pitchController,
+        control::turret::algorithms::Axis::PITCH> &pitchController,
     float userYawInputScalar,
     float userPitchInputScalar)
     : drivers(drivers),
@@ -58,7 +58,7 @@ void TurretMinorSentryControlCommand::initialize()
 void TurretMinorSentryControlCommand::execute()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    float dt = (currTime - prevTime) / 1000.0f;
+    uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
     // Get pitch input from control operator interface

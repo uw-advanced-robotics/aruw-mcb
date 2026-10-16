@@ -21,7 +21,7 @@
 
 namespace aruwsrc::dart
 {
-DartOpenCommand::DartOpenCommand(DartServo &dartLauncher) : dartLauncher(dartLauncher)
+DartOpenCommand::DartOpenCommand(DartLauncherSubsystem &dartLauncher) : dartLauncher(dartLauncher)
 {
     addSubsystemRequirement(&dartLauncher);
 }

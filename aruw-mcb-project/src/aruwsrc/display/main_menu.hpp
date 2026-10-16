@@ -37,9 +37,7 @@
 #include "cv_menu.hpp"
 #include "error_menu.hpp"
 #include "imu_calibrate_menu.hpp"
-#include "limit_switch_menu.hpp"
 #include "mcb_lite_menu.hpp"
-#include "rtt_menu.hpp"
 #include "sentry_strategy_menu.hpp"
 #include "turret_mcb_menu.hpp"
 
@@ -63,8 +61,7 @@ public:
         communication::can::TurretMCBCanComm *turretMCBCanCommBus2,
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite1,
         aruwsrc::communication::mcb_lite::MCBLite *mcbLite2,
-        communication::can::cap_bank::CapacitorBank *capacitorBank,
-        aruwsrc::communication::rtt::RttTelemetry *rttTelemetry);
+        communication::can::cap_bank::CapacitorBank *capacitorBank);
 
     virtual ~MainMenu() = default;
 
@@ -80,7 +77,6 @@ private:
 
     ImuCalibrateMenu imuCalibrateMenu;
     AutotuneMenu autotuneMenu;
-    LimitSwitchMenu limitSwitchMenu;
     CVMenu cvMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
@@ -95,18 +91,15 @@ private:
     AboutMenu aboutMenu;
     SentryStrategyMenu sentryStrategyMenu;
     CapacitorBankMenu capBankMenu;
-    RttMenu rttMenu;
     communication::serial::VisionCoprocessor *visionCoprocessor;
     communication::can::TurretMCBCanComm *turretMCBCanCommBus1;
     communication::can::TurretMCBCanComm *turretMCBCanCommBus2;
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite1;
     aruwsrc::communication::mcb_lite::MCBLite *mcbLite2;
     communication::can::cap_bank::CapacitorBank *capacitorBank;
-    aruwsrc::communication::rtt::RttTelemetry *rttTelemetry;
 
     void addImuCalibrateMenuCallback();
     void addAutotuneMenuCallback();
-    void addLimitSwitchMenuCallback();
     void addCVMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();
@@ -122,7 +115,6 @@ private:
     void addMCBLiteMenu1Callback();
     void addMCBLiteMenu2Callback();
     void addCapacitorBankMenuCallback();
-    void addRttMenuCallback();
 };  // class MainMenu
 }  // namespace display
 }  // namespace aruwsrc

@@ -68,7 +68,7 @@ public:
 
     bool isOnline() const override
     {
-        syncEncoders();
+        const_cast<MultiEncoder<COUNT>*>(this)->syncEncoders();
 
         for (uint32_t i = 0; i < COUNT; i++)
         {
@@ -83,7 +83,7 @@ public:
 
     tap::algorithms::WrappedFloat getPosition() const override
     {
-        syncEncoders();
+        const_cast<MultiEncoder<COUNT>*>(this)->syncEncoders();
         int onlineEncoders = 0;
         float position = 0;
 
@@ -104,7 +104,7 @@ public:
 
     float getVelocity() const override
     {
-        syncEncoders();
+        const_cast<MultiEncoder<COUNT>*>(this)->syncEncoders();
         int onlineEncoders = 0;
         float velocity = 0;
 
@@ -120,7 +120,7 @@ public:
         return onlineEncoders == 0 ? 0 : velocity / onlineEncoders;
     };
 
-    void resetEncoderValue(float pos = 0) override
+    void resetEncoderValue() override
     {
         this->syncEncoders();
 
@@ -128,7 +128,7 @@ public:
         {
             if (encoder != nullptr)
             {
-                encoder->resetEncoderValue(pos);
+                encoder->resetEncoderValue();
             }
         }
     }
@@ -148,11 +148,11 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(MultiEncoder)
 
-protected:
+private:
     std::array<EncoderInterface*, COUNT> encoders;
-    mutable uint32_t seenEncoders;
+    uint32_t seenEncoders;
 
-    virtual void syncEncoders() const
+    void syncEncoders()
     {
         // The primary encoder *must* be online before syncing anything to it
         if (this->encoders[0]->isOnline())

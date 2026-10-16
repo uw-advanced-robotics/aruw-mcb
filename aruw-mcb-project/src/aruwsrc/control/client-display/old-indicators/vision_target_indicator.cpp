@@ -25,12 +25,10 @@ namespace aruwsrc::control::client_display::indicators
 {
 VisionTargetIndicator::VisionTargetIndicator(
     aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
-    const aruwsrc::algorithms::ballistics::CvBallisticsSolver &ballistics,
     RefSerialTransmitter &refSerialTransmitter,
     const Transform &worldToCameraTransform)
     : HudIndicator(refSerialTransmitter),
       visionCoprocessor(visionCoprocessor),
-      ballistics(ballistics),
       worldToCameraTransform(worldToCameraTransform),
       enemyPosition(0, 0, 0)
 {
@@ -40,13 +38,11 @@ modm::ResumableResult<void> VisionTargetIndicator::update()
 {
     auto aimData = visionCoprocessor.getLastAimData(0);
     bool visionHasTarget = visionCoprocessor.getSomeTurretHasTarget();
-    bool shotTimingMode = ballistics.getLastComputedSolution().has_value() &&
-                          ballistics.getLastComputedSolution()->shotWindowValid;
+    bool shotTimingMode = visionCoprocessor.getSomeTurretUsingTimedShots();
     auto visionIndicatorColor = shotTimingMode ? Tx::GraphicColor::ORANGE : Tx::GraphicColor::GREEN;
 
     // Get position
-    enemyPosition =
-        Position(aimData.targetState.xPos, aimData.targetState.yPos, aimData.targetState.zPos);
+    enemyPosition = Position(aimData.pva.xPos, aimData.pva.yPos, aimData.pva.zPos);
 
     enemyPositionScreenFrame = getEnemyPlatePosition(enemyPosition);
 

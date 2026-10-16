@@ -40,7 +40,7 @@ void CapacitorBankMenu::draw()
 
     display << "Cap Voltage: " << milliVolts << "mV" << modm::endl;
     display << "Output Current: " << milliAmps << "mA" << modm::endl;
-    display << "Avail Power: " << powerLimit << "W" << modm::endl;
+    display << "Max Charge Speed: " << powerLimit << "W" << modm::endl;
     display << "Available Energy: " << availableEnergy << "J" << modm::endl;
     display << "State: ";
 
@@ -49,40 +49,42 @@ void CapacitorBankMenu::draw()
         case communication::can::cap_bank::State::RESET:
             display << "RESET";
             break;
-        case communication::can::cap_bank::State::STANDBY:
-            display << "STANDBY";
+        case communication::can::cap_bank::State::SAFE:
+            display << "SAFE";
             break;
-        case communication::can::cap_bank::State::CHARGING:
+        case communication::can::cap_bank::State::CHARGE:
             display << "CHARGE";
             break;
-        case communication::can::cap_bank::State::BOOST:
-            display << "BOOST";
+        case communication::can::cap_bank::State::CHARGE_DISCHARGE:
+            display << "CHARGE_DISCHARGE";
             break;
-        case communication::can::cap_bank::State::SAFETY_DISCHARGE:
-            display << "SAFETY_DISCHARGE";
+        case communication::can::cap_bank::State::DISCHARGE:
+            display << "DISCHARGE";
+            break;
+        case communication::can::cap_bank::State::BATTERY_OFF:
+            display << "BATTERY_OFF";
+            break;
+        case communication::can::cap_bank::State::DISABLED:
+            display << "DISABLED";
             break;
         default:
             display << "UNKNOWN";
             break;
     }
     display << modm::endl;
-    // Latched fault: cleared by toggling caps off/on (C+SHIFT).
-    display << "Error: " << (this->error ? "YES" : "no") << modm::endl;
 }
 
 void CapacitorBankMenu::update()
 {
     if (this->milliAmps != this->capacitorBank->getCurrent() * 1000 ||
         this->milliVolts != this->capacitorBank->getVoltage() * 1000 ||
-        this->state != this->capacitorBank->getState() ||
-        this->error != this->capacitorBank->hasError())
+        this->state != this->capacitorBank->getState())
     {
         this->milliAmps = this->capacitorBank->getCurrent() * 1000;
         this->milliVolts = this->capacitorBank->getVoltage() * 1000;
-        this->powerLimit = this->capacitorBank->getAvailableSupplyPower();
+        this->powerLimit = this->capacitorBank->getPowerLimit();
         this->availableEnergy = this->capacitorBank->getAvailableEnergy();
         this->state = this->capacitorBank->getState();
-        this->error = this->capacitorBank->hasError();
         this->changed = true;
     }
 }

@@ -38,7 +38,7 @@ namespace aruwsrc::control::turret::algorithms
  *
  * Implements TurretControllerInterface interface, see parent class comment for details.
  */
-template <tap::algorithms::transforms::Axis AXIS>
+template <Axis AXIS>
 class ChassisFrameTurretController : public TurretAxisControllerInterface<AXIS>
 {
 public:
@@ -57,31 +57,30 @@ public:
      * @see TurretControllerInterface for more details.
      * @param[in] desiredSetpoint The yaw desired setpoint in the chassis frame.
      */
-    void runController(const float dt, const tap::algorithms::WrappedFloat desiredSetpoint);
+    void runController(const uint32_t dt, const WrappedFloat desiredSetpoint);
 
-    void setSetpoint(tap::algorithms::WrappedFloat desiredSetpoint);
+    void setSetpoint(WrappedFloat desiredSetpoint);
 
     /// @return The chassis frame yaw turret measurement, refer to top level documentation for more
     /// details.
-    tap::algorithms::WrappedFloat getMeasurement() const;
+    WrappedFloat getMeasurement() const;
 
     /**
      * @return The yaw setpoint, in the chassis frame.
      */
-    tap::algorithms::WrappedFloat getSetpoint() const;
+    WrappedFloat getSetpoint() const;
 
     bool isOnline() const;
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline tap::algorithms::WrappedFloat convertControllerAngleToChassisFrame(
-        tap::algorithms::WrappedFloat controllerFrameAngle) const
+    inline WrappedFloat convertControllerAngleToChassisFrame(
+        WrappedFloat controllerFrameAngle) const
     {
         return controllerFrameAngle;
     }
 
     /// Since the controller is in the chassis frame, no frame transformation is required.
-    inline tap::algorithms::WrappedFloat convertChassisAngleToControllerFrame(
-        tap::algorithms::WrappedFloat chassisFrameAngle) const
+    inline WrappedFloat convertChassisAngleToControllerFrame(WrappedFloat chassisFrameAngle) const
     {
         return chassisFrameAngle;
     }

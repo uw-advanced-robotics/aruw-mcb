@@ -47,7 +47,7 @@ PowerLimiter::PowerLimiter(
       energyBuffer(startingEnergyBuffer),
       consumedPower(0.0f),
       prevTime(0),
-      prevPowerHeatDataReceivedTimestamp(0)
+      prevRobotDataReceivedTimestamp(0)
 {
 }
 
@@ -90,10 +90,10 @@ void PowerLimiter::updatePowerAndEnergyBuffer()
     prevTime = tap::arch::clock::getTimeMilliseconds();
     energyBuffer -= (consumedPower - chassisData.powerConsumptionLimit) * dt / 1000.0f;
 
-    if (chassisData.powerHeatDataReceivedTimestamp != prevPowerHeatDataReceivedTimestamp)
+    if (robotData.robotDataReceivedTimestamp != prevRobotDataReceivedTimestamp)
     {
         energyBuffer = chassisData.powerBuffer;
-        prevPowerHeatDataReceivedTimestamp = chassisData.powerHeatDataReceivedTimestamp;
+        prevRobotDataReceivedTimestamp = robotData.robotDataReceivedTimestamp;
     }
 
     consumedPower = newChassisPower;

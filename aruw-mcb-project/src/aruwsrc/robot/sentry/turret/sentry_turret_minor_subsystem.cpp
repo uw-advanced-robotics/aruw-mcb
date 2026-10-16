@@ -23,11 +23,19 @@ namespace aruwsrc::sentry::turret
 {
 SentryTurretMinorSubsystem::SentryTurretMinorSubsystem(
     tap::Drivers& drivers,
-    aruwsrc::control::turret::TurretMotor& pitchMotor,
-    aruwsrc::control::turret::TurretMotor& yawMotor,
+    tap::motor::MotorInterface& pitchMotor,
+    tap::motor::MotorInterface& yawMotor,
+    const aruwsrc::control::turret::TurretMotorConfig& pitchMotorConfig,
+    const aruwsrc::control::turret::TurretMotorConfig& yawMotorConfig,
     const tap::communication::sensors::imu::AbstractIMU* turretIMU,
     uint8_t turretID)
-    : aruwsrc::control::turret::TurretSubsystem(&drivers, pitchMotor, yawMotor, turretIMU),
+    : aruwsrc::control::turret::TurretSubsystem(
+          &drivers,
+          &pitchMotor,
+          &yawMotor,
+          pitchMotorConfig,
+          yawMotorConfig,
+          turretIMU),
       turretID(turretID)
 {
 }

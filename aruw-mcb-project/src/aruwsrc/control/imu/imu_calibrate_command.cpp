@@ -52,7 +52,7 @@ ImuCalibrateCommand::ImuCalibrateCommand(
 {
     for (auto &config : turretsAndControllers)
     {
-        assert(config.turretImu != nullptr);
+        assert(config.turretMCBCanComm != nullptr);
         assert(config.turret != nullptr);
         assert(config.yawController != nullptr);
         assert(config.pitchController != nullptr);
@@ -113,7 +113,7 @@ void ImuCalibrateCommand::execute()
 
             for (auto &config : turretsAndControllers)
             {
-                turretMCBsReady &= config.turretImu->isOnline();
+                turretMCBsReady &= config.turretMCBCanComm->isConnected();
                 turretsOnline &= config.turret->isOnline();
             }
 
@@ -149,7 +149,7 @@ void ImuCalibrateCommand::execute()
 
                 for (auto &config : turretsAndControllers)
                 {
-                    config.turretImu->requestCalibration();
+                    config.turretMCBCanComm->requestCalibration();
                 }
 
                 drivers->mpu6500.requestCalibration();
@@ -196,7 +196,7 @@ void ImuCalibrateCommand::execute()
     }
 
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    float dt = (currTime - prevTime) / 1000.0f;
+    uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
     for (auto &config : turretsAndControllers)

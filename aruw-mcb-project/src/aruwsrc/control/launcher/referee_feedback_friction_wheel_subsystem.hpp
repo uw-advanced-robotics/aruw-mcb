@@ -46,7 +46,11 @@ class RefereeFeedbackFrictionWheelSubsystem : public FrictionWheelSubsystem<NUM_
                                               public LaunchSpeedPredictorInterface
 {
 public:
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+    using Motor = testing::NiceMock<tap::mock::DjiMotorMock>;
+#else
     using Motor = tap::motor::MotorInterface;
+#endif
 
     /**
      * For all params but `firingSystemMechanismId` see the `FrictionWheelSubsystem`.
@@ -55,39 +59,25 @@ public:
      * @param[in] bulletSpeedLowPassAlpha The low pass alpha used to combine previous and new
      * projectle speed when computing a new predicted launch speed.
      */
-    template <std::size_t LUT_SIZE>
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         std::array<FlywheelConfig, NUM_WHEELS> wheelConfigs,
-        const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-        const tap::algorithms::SmoothPidConfig speedCorrectionPidConfig = {})
-        : FrictionWheelSubsystem<NUM_WHEELS>(
-              drivers,
-              wheels,
-              wheelConfigs,
-              launchSpeedToFrictionWheelRpmLUT,
-              speedCorrectionPidConfig),
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
+        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfigs, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }
 
-    // constructor for using a single wheelConfig for all wheels
-    template <std::size_t LUT_SIZE>
+    // constructor for using a single wheelconfig for all wheels
     RefereeFeedbackFrictionWheelSubsystem(
         tap::Drivers *drivers,
         std::array<Motor *, NUM_WHEELS> wheels,
         FlywheelConfig wheelConfig,
-        const modm::Pair<float, float> (&launchSpeedToFrictionWheelRpmLUT)[LUT_SIZE],
-        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-        const tap::algorithms::SmoothPidConfig speedCorrectionPidConfig = {})
-        : FrictionWheelSubsystem<NUM_WHEELS>(
-              drivers,
-              wheels,
-              wheelConfig,
-              launchSpeedToFrictionWheelRpmLUT,
-              speedCorrectionPidConfig),
+        aruwsrc::communication::can::TurretMCBCanComm *turretMCB,
+        tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID)
+        : FrictionWheelSubsystem<NUM_WHEELS>(drivers, wheels, wheelConfig, turretMCB),
           firingSystemMechanismID(firingSystemMechanismID)
     {
     }
@@ -125,16 +115,15 @@ private:
     {
         const float desiredLaunchSpeed = this->getDesiredLaunchSpeed();
 
-        // reset averaging if desired launch speed has changed...if we change desired launch
-        // speed from 15 to 30, we should predict the launch speed to be around 30, not 15.
-        // Ignore if we're setting to zero though because that's us turning it off
-        if (!tap::algorithms::compareFloatClose(lastDesiredLaunchSpeed, desiredLaunchSpeed, 1E-5) &&
-            !tap::algorithms::compareFloatClose(0.0f, desiredLaunchSpeed, 1e-5f))
+        // reset averaging if desired launch speed has changed...if we change desired launch speed
+        // from 15 to 30, we should predict the launch speed to be around 30, not 15.
+        if (!tap::algorithms::compareFloatClose(lastDesiredLaunchSpeed, desiredLaunchSpeed, 1E-5))
         {
             lastDesiredLaunchSpeed = desiredLaunchSpeed;
             pastProjectileVelocitySpeedSummed = 0;
             this->ballSpeedAveragingTracker.clear();
         }
+
         if (this->drivers->refSerial.getRefSerialReceivingData())
         {
             const auto &turretData = this->drivers->refSerial.getRobotData().turret;

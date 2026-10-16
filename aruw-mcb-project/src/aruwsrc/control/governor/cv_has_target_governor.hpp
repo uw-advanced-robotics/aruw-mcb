@@ -48,7 +48,7 @@ public:
     bool isReady() final
     {
         return visionCoprocessor.isCvOnline() &&
-               visionCoprocessor.getLastAimData(turretID).targetState.updated;
+               visionCoprocessor.getLastAimData(turretID).timing.updated;
     }
 
     bool isFinished() final { return !isReady(); }

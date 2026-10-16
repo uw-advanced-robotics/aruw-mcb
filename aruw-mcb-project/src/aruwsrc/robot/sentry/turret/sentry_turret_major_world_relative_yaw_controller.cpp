@@ -28,20 +28,26 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const HolonomicChassisSubsystem& chassis,
     aruwsrc::control::turret::TurretMotor& yawMotor,
     tap::communication::sensors::imu::AbstractIMU& turretMajorIMU,
-    const SentryTurretMinorSubsystem& turretWidow,
+    const SentryTurretMinorSubsystem& turretLeft,
+    const SentryTurretMinorSubsystem& turretRight,
     SmoothPid& positionPid,
     SmoothPid& velocityPid,
-    float maxVelErrorInput)
-    : TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>(yawMotor),
+    float maxVelErrorInput,
+    float minorMajorTorqueRatio,
+    float feedforwardGain)
+    : TurretAxisControllerInterface<control::turret::algorithms::Axis::YAW>(yawMotor),
       worldToMajor(worldToMajor),
       chassis(chassis),
       yawMotor(yawMotor),
       turretMajorIMU(turretMajorIMU),
-      turretWidow(turretWidow),
+      turretLeft(turretLeft),
+      turretRight(turretRight),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(0, 0.0, M_TWOPI),
-      maxVelErrorInput(maxVelErrorInput)
+      maxVelErrorInput(maxVelErrorInput),
+      minorMajorTorqueRatio(minorMajorTorqueRatio),
+      feedforwardGain(feedforwardGain)
 {
     assert(maxVelErrorInput >= 0);
 }
@@ -60,11 +66,11 @@ void TurretMajorWorldFrameController::initialize()
     }
 }
 
-/// @todo implement separate controller with limiting or refactor elsewhere
-///       rationale: it is not at all intuitive or expected for angle limiting to occur here; makes
-///       code difficult to trace, follow, and maintain
+// @todo implement separate controller with limiting or refactor elsewhere
+//       rationale: it is not at all intuitive or expected for angle limiting to occur here; makes
+//       code difficult to trace, follow, and maintain
 void TurretMajorWorldFrameController::runController(
-    const float dt,
+    const uint32_t dt,
     const WrappedFloat desiredSetpoint)
 {
     worldFrameSetpoint = desiredSetpoint;
@@ -82,7 +88,18 @@ void TurretMajorWorldFrameController::runController(
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
-    turretMotor.setMotorOutput(velocityPidOutput);
+    torqueCompensation =
+        turretLeft.yawMotor.getMotorOutput() + turretRight.yawMotor.getMotorOutput();
+    if (abs(torqueCompensation) < 3000)  // @todo make a config
+    {
+        torqueCompensation = 0;
+    }
+    // @note: in case things look weird, try adding the chassis' rotational velocity to
+    // setMotorOutput
+    turretMotor.setMotorOutput(
+        velocityPidOutput + minorMajorTorqueRatio * torqueCompensation +
+        feedforwardGain * turretMotor.getMotorOutput());
+    // @todo: it would be nice to have a final maxOutput for this controller
 }
 
 // @todo what's the point of this; overridden by runController anyways?

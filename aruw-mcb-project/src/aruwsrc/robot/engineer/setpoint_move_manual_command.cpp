@@ -38,16 +38,16 @@ void SetpointMoveManualCommand::initialize() {}
 
 void SetpointMoveManualCommand::execute()
 {
-    if (!operatorInterface->isExtensionWristControlMode()) return;
+    if (!operatorInterface->isGantryWristControlMode()) return;
 
     float setpoint = subsystem.getSetpoint();
     switch (setpointType)
     {
-        case SetpointType::CUBE_STORAGE:
-            setpoint += operatorInterface->getCubeStorageVelocity() * moveSpeed;
+        case SetpointType::CUBE_LIFT:
+            setpoint += operatorInterface->getCubeLiftVelocity() * moveSpeed;
             break;
         case SetpointType::EXTENSION:
-            setpoint += operatorInterface->getExtensionVelocity() * moveSpeed;
+            setpoint += operatorInterface->getGantryExtensionVelocity() * moveSpeed;
             if (operatorInterface->getGantryKeyOut())
             {
                 setpoint += moveSpeed;

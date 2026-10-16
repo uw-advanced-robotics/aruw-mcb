@@ -30,6 +30,11 @@
 using namespace tap::communication::serial;
 namespace aruwsrc
 {
+namespace communication::rtt
+{
+class RttTelemetry;
+}
+
 namespace control
 {
 /**
@@ -49,7 +54,7 @@ public:
     static constexpr float SPEED_REDUCTION_SCALAR = (1.0f / 3.0f);
     static constexpr float USER_STICK_SENTRY_DRIVE_SCALAR = 5000.0f;
 
-#if defined(TARGET_HERO_NEPTUNE) && not defined(PLATFORM_HOSTED) && not defined(ENV_UNIT_TESTS)
+#if defined(TARGET_HERO_ZERO) && not defined(PLATFORM_HOSTED) && not defined(ENV_UNIT_TESTS)
     static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_NORMAL = 5.0f;
     static constexpr float USER_MOUSE_SENSITIVITY_SCALAR_LOW_DPI = 0.1f;
     /**
@@ -89,6 +94,11 @@ public:
     DISALLOW_COPY_AND_ASSIGN(ControlOperatorInterface)
     mockable ~ControlOperatorInterface() = default;
 
+    void setTelemetry(aruwsrc::communication::rtt::RttTelemetry* telemetry)
+    {
+        this->telemetry = telemetry;
+    }
+
     /**
      * @return The value used for chassis movement forward and backward, between
      * `[-getMaxUserWheelSpeed, getMaxUserWheelSpeed]`. Acceleration is applied to this value
@@ -118,14 +128,14 @@ public:
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    virtual float getTurretYawInput(uint8_t turretID);
+    mockable float getTurretYawInput(uint8_t turretID);
 
     /**
      * @returns the value used for turret pitch rotation, between about -1 and 1
      *      this value can be greater or less than (-1, 1) since the mouse input has no
      *      clear lower and upper bound.
      */
-    virtual float getTurretPitchInput(uint8_t turretID);
+    mockable float getTurretPitchInput(uint8_t turretID);
 
     /**
      * @returns the value used to scale turret yaw movement from horizontal movement.
@@ -141,7 +151,7 @@ public:
      * @returns the value used for sentiel drive speed, between
      *      [-USER_STICK_SENTRY_DRIVE_SCALAR, USER_STICK_SENTRY_DRIVE_SCALAR].
      */
-    virtual float getSentrySpeedInput();
+    mockable float getSentrySpeedInput();
 
 protected:
     tap::Drivers* drivers;
@@ -149,6 +159,7 @@ protected:
     uint32_t prevUpdateCounterX = 0;
     uint32_t prevUpdateCounterY = 0;
     uint32_t prevUpdateCounterR = 0;
+    uint32_t prevLoggedRemoteUpdateCounter = 0;
 
     tap::algorithms::LinearInterpolationPredictor chassisXInput;
     tap::algorithms::LinearInterpolationPredictor chassisYInput;
@@ -161,6 +172,8 @@ protected:
     uint32_t prevChassisXInputCalledTime = 0;
     uint32_t prevChassisYInputCalledTime = 0;
     uint32_t prevChassisRInputCalledTime = 0;
+
+    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
 
     /**
      * Scales `value` when ctrl/shift are pressed and returns the scaled value.

@@ -60,17 +60,17 @@ public:
 
     DISALLOW_COPY_AND_ASSIGN(CanEncoder)
 
-    void virtual processMessage(const modm::can::Message& message) override;
+    void processMessage(const modm::can::Message& message) override;
 
     mockable float getGauss() const { return this->gauss; };
 
-protected:
-    float gauss;
+private:
+    // wait time before the encoder is considered disconnected, in milliseconds
+    static const uint32_t DISCONNECT_TIME = 100;
 
     tap::arch::MilliTimeout encoderDisconnectTimeout{DISCONNECT_TIME};
 
-    // wait time before the encoder is considered disconnected, in milliseconds
-    static const uint32_t DISCONNECT_TIME = 100;
+    float gauss;
 };
 
 }  // namespace tap::encoder

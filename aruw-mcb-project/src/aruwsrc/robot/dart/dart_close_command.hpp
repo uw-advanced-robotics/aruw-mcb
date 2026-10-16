@@ -21,14 +21,14 @@
 
 #include "tap/control/command.hpp"
 
-#include "dart_servo.hpp"
+#include "dart_launcher_subsystem.hpp"
 
 namespace aruwsrc::dart
 {
 class DartCloseCommand : public tap::control::Command
 {
 public:
-    DartCloseCommand(DartServo &dartLauncher);
+    DartCloseCommand(DartLauncherSubsystem &dartLauncher);
 
     void initialize() override;
 
@@ -41,7 +41,7 @@ public:
     const char *getName() const override { return "DART CLOSE"; }
 
 private:
-    DartServo &dartLauncher;
+    DartLauncherSubsystem &dartLauncher;
 };  // class DartCloseCommand
 
 }  // namespace aruwsrc::dart

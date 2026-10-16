@@ -20,12 +20,8 @@
 /**
  * @file spring_autotune.hpp
  *
- * @brief Implements spring auto-tuning for turret calibration. If there is a gravity compensator,
- * it will separate the spring force from the gravity force and calculate the spring constant. If
- * there is no gravity compensator, it will calculate the combined effect of the spring constant and
- * the center of mass location, and return a calibration result in units of mm that represents the
- * effective distance from the pivot to the center of mass given the spring force. See
- * `drawCalibrationResult` for more details on how to interpret the calibration result.
+ * @brief   Implements spring auto-tuning for turret calibration.
+ *
  */
 
 #ifndef SPRING_AUTOTUNE_HPP_
@@ -34,22 +30,22 @@
 #include "aruwsrc/control/turret/algorithms/turret_gravity_compensation.hpp"
 #include "aruwsrc/control/turret/algorithms/turret_spring_compensation.hpp"
 
-#include "turret_autotune_command.hpp"
+#include "autotune_command_interface.hpp"
 
 namespace aruwsrc::control::autotune
 {
-template <uint32_t NUM_TEST_POINTS, tap::algorithms::transforms::Axis AXIS>
-class SpringAutotuneCommand : public TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>
+template <uint32_t numTestPoints>
+class SpringAutotuneCommand : public TurretAutotuneCommand<std::array<float, 4>, numTestPoints>
 {
 private:
-    using TurretTuneCommand = TurretAutotuneCommand<NUM_TEST_POINTS, AXIS>;
+    using TurretAutoCommand = TurretAutotuneCommand<std::array<float, 4>, numTestPoints>;
 
 public:
     /**
-     * Construct a new Spring Autotune Command object. If `gravityForce` is `nullptr`, the system
-     * will attempt to calculate both center of mass and spring constant. If gravityForce is
-     * provided, it will only calculate the spring constant by subtracting the gravity force values
-     * from the torque readings.
+     * @brief Construct a new Spring Autotune Command object. If gravityForce is nullptr,
+     * the system will attempt to calculate both center of mass and spring constant. If
+     * gravityForce is provided, it will only calculate the spring constant by subtracting the
+     * gravity force values from the torque readings.
      *
      * @param drivers Pointer to global drivers object.
      * @param config Configuration for the turret autotune.
@@ -64,18 +60,18 @@ public:
      * @param failChime Chime to play on failed autotune.
      */
     SpringAutotuneCommand(
-        tap::Drivers* drivers,
-        const TurretTuneCommand::TurretCalibrationConfig& config,
-        const aruwsrc::control::turret::algorithms::TurretSpringForceOffset* springForce,
-        const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset* gravityForce =
+        tap::Drivers *drivers,
+        const TurretAutoCommand::TurretCalibrationConfig &config,
+        const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce,
+        const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce =
             nullptr,
-        chassis::HolonomicChassisSubsystem* chassis = nullptr,
-        const std::array<float, NUM_TEST_POINTS> points = {},
-        aruwsrc::control::buzzer::NoteSequenceCommand* failChime = nullptr,
-        aruwsrc::control::buzzer::NoteSequenceCommand* successChime = nullptr,
-        const float velocityZeroThreshold = TurretTuneCommand::DEFAULT_VELOCITY_THRESHOLD,
-        const float positionZeroThreshold = TurretTuneCommand::DEFAULT_POSITION_THRESHOLD)
-        : TurretTuneCommand(
+        chassis::HolonomicChassisSubsystem *chassis = nullptr,
+        const std::array<float, numTestPoints> points = {},
+        aruwsrc::control::buzzer::NoteSequenceCommand *failChime = nullptr,
+        aruwsrc::control::buzzer::NoteSequenceCommand *successChime = nullptr,
+        const float velocityZeroThreshold = TurretAutoCommand::DEFAULT_VELOCITY_THRESHOLD,
+        const float positionZeroThreshold = TurretAutoCommand::DEFAULT_POSITION_THRESHOLD)
+        : TurretAutoCommand(
               drivers,
               config,
               chassis,
@@ -88,9 +84,23 @@ public:
           gravityForce(gravityForce)
     {
     }
-    const char* getName() const override { return "Spring Gravity Autotune Command "; }
+    const char *getName() const override { return "Spring Gravity Autotune Command"; }
 
-    void drawCalibrationResult(modm::GraphicDisplay& display) const override
+    std::array<float, 4> calculate(
+        std::array<float, numTestPoints> Angles,
+        std::array<float, numTestPoints> Torques) const override
+    {
+        if (gravityForce)
+        {
+            return calculateJustSpring(Angles, Torques);
+        }
+        else
+        {
+            return calculateCOMandSpring(Angles, Torques);
+        }
+    }
+
+    void drawCalibrationResult(modm::GraphicDisplay &display) const override
     {
         if (gravityForce)
         {
@@ -102,45 +112,16 @@ public:
         }
     }
 
-protected:
-    void onMeasurementSample(size_t /*pointIndex*/, uint32_t sampleCount) override
-    {
-        // Add to the running average of the motors value and angle measurements
-        const float motorValue = static_cast<float>(this->config.motor->getMotorOutput());
-        averagingTorques += (motorValue - averagingTorques) / (sampleCount);
-
-        const float angleValue =
-            this->config.motor->getChassisFrameMeasuredAngle().getWrappedValue();
-        averagingAngles += (angleValue - averagingAngles) / sampleCount;
-    }
-
-    void onMeasurementComplete(size_t pointIndex) override
-    {
-        measuredTorques[pointIndex] = averagingTorques;
-        measuredAngles[pointIndex] = averagingAngles;
-
-        averagingTorques = 0.0f;
-        averagingAngles = 0.0f;
-    }
-
 private:
-    const aruwsrc::control::turret::algorithms::TurretSpringForceOffset* springForce;
-    const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset* gravityForce;
-
-    // Array of torque measurements received post averaging
-    std::array<float, NUM_TEST_POINTS> measuredTorques{};
-
-    // Array of angle measurements received post averaging
-    std::array<float, NUM_TEST_POINTS> measuredAngles{};
-
-    float averagingTorques{0.0f};
-    float averagingAngles{0.0f};
+    const aruwsrc::control::turret::algorithms::TurretSpringForceOffset *springForce;
+    const aruwsrc::control::turret::algorithms::TurretGravitationalForceOffset *gravityForce;
 
     /**
-     * @brief Helper function that turns the calibration result into units of mm.
+     * @brief Helper function that turns the calibration result into
+     * units of mm.
      *
      * @param calibrationNum Value from the COM calculation
-     * @return `calibrationNum` in mm
+     * @return float `COMLocation` in mm
      */
     inline float calibrationResultToMM(float calibrationNum) const
     {
@@ -149,9 +130,9 @@ private:
                this->getCalibrationConfig().gravity / this->getCalibrationConfig().turretMass;
     }
 
-    void drawCalibrationResultSpringGrav(modm::GraphicDisplay& display) const
+    void drawCalibrationResultSpringGrav(modm::GraphicDisplay &display) const
     {
-        const std::array<float, 4> result = calculateCOMandSpring(measuredAngles, measuredTorques);
+        const std::array<float, 4> result = this->getCalibrationResult();
         const float X = result[0];
         const float Z = result[1];
         const float scalar = result[2];
@@ -164,26 +145,26 @@ private:
         display.printf("Spring Constant K: %.2f", static_cast<double>(K));
     }
 
-    void drawCalibrationResultJustSpring(modm::GraphicDisplay& display) const
+    void drawCalibrationResultJustSpring(modm::GraphicDisplay &display) const
     {
-        const std::array<float, 4> result = calculateJustSpring(measuredAngles, measuredTorques);
+        const std::array<float, 4> result = this->getCalibrationResult();
         const float K = result[3];
         display.printf("Spring Constant K: %.2f", static_cast<double>(K));
     }
 
     /**
-     * @brief Calculates the center of mass and spring constant with least squares simultaneously.
+     * @brief Calculates the center of mass and spring constant with least squares as one go
      *
-     * @return {cgX, cgZ, magnitude, K}
+     * @return std::array<float,4> cgX, cgZ, magnitude, and K.
      */
     std::array<float, 4> calculateCOMandSpring(
-        std::array<float, NUM_TEST_POINTS> Angles,
-        std::array<float, NUM_TEST_POINTS> Torques) const
+        std::array<float, numTestPoints> Angles,
+        std::array<float, numTestPoints> Torques) const
     {
-        Eigen::MatrixXd X(NUM_TEST_POINTS, 3);
-        Eigen::VectorXd Y(NUM_TEST_POINTS);
+        Eigen::MatrixXd X(numTestPoints, 3);
+        Eigen::VectorXd Y(numTestPoints);
 
-        for (uint32_t i = 0; i < NUM_TEST_POINTS; ++i)
+        for (uint32_t i = 0; i < numTestPoints; ++i)
         {
             X(i, 0) = std::cos(Angles[i]);  // corresponds to A (m·g·x)
             X(i, 1) = std::sin(Angles[i]);  // corresponds to B (−m·g·z)
@@ -202,19 +183,19 @@ private:
     };
 
     /**
-     * @brief Calculates the spring constant with least squares, subtracting gravity if it is able
-     * to.
+     * @brief Calculates the center of spring constant with least squares subtracting gravity if it
+     * is able too
      *
-     * @return {0, 0, 0, K}
+     * @return std::array<float,4> K, 0, 0, 0
      */
     std::array<float, 4> calculateJustSpring(
-        std::array<float, NUM_TEST_POINTS> Angles,
-        std::array<float, NUM_TEST_POINTS> Torques) const
+        std::array<float, numTestPoints> Angles,
+        std::array<float, numTestPoints> Torques) const
     {
-        Eigen::MatrixXd X(NUM_TEST_POINTS, 1);
-        Eigen::VectorXd Y(NUM_TEST_POINTS);
+        Eigen::MatrixXd X(numTestPoints, 1);
+        Eigen::VectorXd Y(numTestPoints);
 
-        for (uint32_t i = 0; i < NUM_TEST_POINTS; ++i)
+        for (uint32_t i = 0; i < numTestPoints; ++i)
         {
             // remove the gravity component from the torque readings
             const float Torque = Torques[i] - gravityForce->calculateCompensationEffort(
@@ -233,4 +214,4 @@ private:
 };  // class autotune
 }  // namespace aruwsrc::control::autotune
 
-#endif  // SPRING_AUTOTUNE_HPP_
+#endif  // GRAVITY_AUTOTUNE_HPP_

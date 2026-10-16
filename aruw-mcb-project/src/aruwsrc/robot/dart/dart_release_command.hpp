@@ -22,30 +22,29 @@
 
 #include "tap/control/command.hpp"
 
-#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
-
-#include "dart_servo.hpp"
+#include "dart_launcher_subsystem.hpp"
 
 namespace aruwsrc::dart
 {
 class DartReleaseCommand : public tap::control::Command
 {
 public:
-    DartReleaseCommand(aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher);
+    DartReleaseCommand(DartLauncherSubsystem &dartLauncher, int32_t desiredOuput);
 
     void initialize() override;
 
     void execute() override {}
 
-    void end(bool) override {}
+    void end(bool interrupted) override;
 
     bool isFinished() const override;
 
-    const char* getName() const override { return "DART RELEASE"; }
+    const char *getName() const override { return "DART RELEASE"; }
 
 private:
-    aruwsrc::control::joint::homing::TriggerHomedJointSubsystem& dartLauncher;
-};  // class DartReleaseCommand
+    DartLauncherSubsystem &dartLauncher;
+    int32_t desiredOutput;
+};  // class DART RELEASE
 
 }  // namespace aruwsrc::dart
 #endif  // DART_RELEASE_COMMAND_HPP_

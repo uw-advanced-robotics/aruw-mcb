@@ -36,11 +36,9 @@ bool SentryControlOperatorInterface::isTurretControlMode()
     Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
     Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
 
-    // Manual-aim-enabled modes from the 2026 sentry table:
-    // left mid + right down, left down + right up, left down + right down.
-    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN) ||
-           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
-           (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
+    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::MID) ||
+           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::DOWN);
 }
 
 bool SentryControlOperatorInterface::isDriveMode()
@@ -48,10 +46,7 @@ bool SentryControlOperatorInterface::isDriveMode()
     Remote::SwitchState leftState = drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH);
     Remote::SwitchState rightState = drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH);
 
-    // Manual-drive-enabled modes from the 2026 sentry table:
-    // left mid + (right up/right mid), left down + (right mid/right down).
-    return (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::UP) ||
-           (leftState == Remote::SwitchState::MID && rightState == Remote::SwitchState::MID) ||
+    return (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::UP) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::MID) ||
            (leftState == Remote::SwitchState::DOWN && rightState == Remote::SwitchState::DOWN);
 }
@@ -157,8 +152,8 @@ float SentryControlOperatorInterface::getChassisYawVelocity()
 
     uint32_t updateCounter = drivers->remote.getUpdateCounter();
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevChassisYawInputCalledTime;
-    prevChassisYawInputCalledTime = currTime;
+    uint32_t dt = currTime - prevChassisYawnputCalledTime;  // @todo typo lol
+    prevChassisYawnputCalledTime = currTime;
 
     if (prevUpdateCounterChassisYawInput != updateCounter)
     {
@@ -181,7 +176,7 @@ float SentryControlOperatorInterface::getChassisYawVelocity()
         MAX_DECELERATION_R,
         static_cast<float>(dt) / 1E3);
 
-    return chassisYawInputRamp.getValue();
+    return chassisYawInputRamp.getValue() * 20;
 }
 
 float SentryControlOperatorInterface::getTurretMajorYawVelocity()
@@ -195,14 +190,14 @@ float SentryControlOperatorInterface::getTurretMinor1YawVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
 
-    return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL);
+    return -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
 }
 
 float SentryControlOperatorInterface::getTurretMinor1PitchVelocity()
 {
     if (!isTurretControlMode()) return 0.f;
 
-    return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
+    return -drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
 }
 
 float SentryControlOperatorInterface::getTurretMinor2YawVelocity()

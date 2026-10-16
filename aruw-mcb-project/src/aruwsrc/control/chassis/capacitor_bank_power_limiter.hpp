@@ -33,6 +33,11 @@ class Drivers;
 
 namespace aruwsrc::control::chassis
 {
+static constexpr float VOLTAGE_RAMPDOWN_RANGE = 5.0f;
+
+static constexpr float K_I = 0.002;
+static constexpr float K_P = 0.005;
+
 class CapacitorSelectingSensor
     : public tap::communication::sensors::current::CurrentSensorInterface,
       public tap::communication::sensors::voltage::VoltageSensorInterface
@@ -78,6 +83,8 @@ private:
     CapacitorSelectingSensor sensor;
 
     tap::control::chassis::PowerLimiter fallback;
+
+    float currentIntegrator = 0;
 };
 }  // namespace aruwsrc::control::chassis
 

@@ -33,7 +33,7 @@ using tap::algorithms::WrappedFloat;
 
 namespace aruwsrc::control::turret::algorithms
 {
-template <tap::algorithms::transforms::Axis AXIS>
+template <Axis AXIS>
 ChassisFrameTurretController<AXIS>::ChassisFrameTurretController(
     TurretMotor &Motor,
     const tap::algorithms::SmoothPidConfig &pidConfig,
@@ -42,7 +42,7 @@ ChassisFrameTurretController<AXIS>::ChassisFrameTurretController(
       pid(pidConfig)
 {
 }
-template <tap::algorithms::transforms::Axis AXIS>
+template <Axis AXIS>
 void ChassisFrameTurretController<AXIS>::initialize()
 {
     if (this->turretMotor.getTurretController() != this)
@@ -51,9 +51,9 @@ void ChassisFrameTurretController<AXIS>::initialize()
         this->turretMotor.attachTurretController(this);
     }
 }
-template <tap::algorithms::transforms::Axis AXIS>
+template <Axis AXIS>
 void ChassisFrameTurretController<AXIS>::runController(
-    const float dt,
+    const uint32_t dt,
     const WrappedFloat desiredSetpoint)
 {
     // limit the yaw min and max angles
@@ -64,7 +64,7 @@ void ChassisFrameTurretController<AXIS>::runController(
 
     float pidOutput =
         pid.runController(positionControllerError, this->turretMotor.getChassisFrameVelocity(), dt);
-    if constexpr (AXIS == tap::algorithms::transforms::Axis::PITCH)
+    if constexpr (AXIS == Axis::PITCH)
     {
         // WorldFrame is wrong, but it's the best estimate the robot has
         pidOutput +=
@@ -86,22 +86,22 @@ void ChassisFrameTurretController<AXIS>::runController(
 
     this->turretMotor.setMotorOutput(pidOutput);
 }
-template <tap::algorithms::transforms::Axis AXIS>
+template <Axis AXIS>
 void ChassisFrameTurretController<AXIS>::setSetpoint(WrappedFloat desiredSetpoint)
 {
     this->turretMotor.setChassisFrameSetpoint(desiredSetpoint);
 }
-template <tap::algorithms::transforms::Axis AXIS>
+template <Axis AXIS>
 WrappedFloat ChassisFrameTurretController<AXIS>::getSetpoint() const
 {
     return this->turretMotor.getChassisFrameSetpoint();
 }
-template <tap::algorithms::transforms::Axis AXIS>
+template <Axis AXIS>
 WrappedFloat ChassisFrameTurretController<AXIS>::getMeasurement() const
 {
     return this->turretMotor.getChassisFrameMeasuredAngle();
 }
-template <tap::algorithms::transforms::Axis AXIS>
+template <Axis AXIS>
 bool ChassisFrameTurretController<AXIS>::isOnline() const
 {
     return this->turretMotor.isOnline();

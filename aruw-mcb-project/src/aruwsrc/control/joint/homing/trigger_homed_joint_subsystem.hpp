@@ -37,14 +37,14 @@ public:
     {
         JointSubsystem::Config super;
         float home = 0.0f;
-        float homingSpeed = 0.00025f;
+        float homingSpeed = 0.25f;
         bool homingReversed = false;
     };
 
     TriggerHomedJointSubsystem(
-        tap::Drivers* drivers,
-        tap::motor::MotorInterface& motor,
-        trigger::TriggerInterface& trigger,
+        tap::Drivers *drivers,
+        tap::motor::MotorInterface &motor,
+        trigger::TriggerInterface &trigger,
         Config config)
         : Subsystem(drivers),
           HomeableSubsystemInterface(drivers, trigger),
@@ -54,10 +54,6 @@ public:
           homingSpeed(config.homingSpeed),
           homingReversed(config.homingReversed)
     {
-        // for somereason these werent getting set?
-        // setting them in here fixed the subsystems not folloing bounds
-        lowerBound = config.super.lowerBound;
-        upperBound = config.super.upperBound;
     }
 
     virtual inline void resetEncoderValue() { motor.getEncoder()->resetEncoderValue(); }
@@ -93,7 +89,7 @@ public:
             {
                 calibrationState = CalibrationState::CALIBRATION_COMPLETE;
                 resetEncoderValue();
-                setSetpoint(getPosition());
+                setSetpoint(home);
             }
             else
             {
@@ -101,22 +97,18 @@ public:
             }
         }
 
-        /// @TODO: Unhardcode
         runPosPidController(0.002f);
     }
 
     void moveTowardLowerBound() override
     {
-        /// @TODO: add dt to make speed in real units
         setSetpoint(getPosition() + (homingReversed ? homingSpeed : -homingSpeed));
     }
 
-    /// @TODO: remove for unused and also not safe in a world with gravity
     void stopDuringHoming() override { motor.setDesiredOutput(0); }
 
 protected:
-    float debug_lowerBound, debug_upperBound;
-    tap::motor::MotorInterface& motor;
+    tap::motor::MotorInterface &motor;
 
     float home;
     float homingSpeed;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2021-2024 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -23,7 +23,6 @@
 #include <cassert>
 #include <deque>
 
-#include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/architecture/periodic_timer.hpp"
 #include "tap/architecture/timeout.hpp"
@@ -65,7 +64,7 @@ public:
 
     static_assert(control::turret::NUM_TURRETS > 0, "must have at least 1 turret");
 
-#if defined(TARGET_SENTRY_ACHLYS)
+#if defined(TARGET_SENTRY_ECLIPSE)
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 1'000'000;
 #else
     static constexpr size_t VISION_COPROCESSOR_BAUD_RATE = 500'000;
@@ -76,6 +75,22 @@ public:
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
         tap::communication::serial::Uart::UartPort::Uart3;
+
+#if defined(TARGET_HERO_PERSEUS)
+    /** Amount that the IMU is rotated on the chassis about the z axis (z+ is up)
+     *  The IMU Faces to the left of the 'R' on the Type A MCB
+     *  0 Rotation corresponds with a 0 rotation of the chassis
+     */
+    // MCB has power inlet facing forward
+    static constexpr float MCB_ROTATION_OFFSET = -M_PI_2;
+#elif defined(TARGET_SENTRY_ECLIPSE)
+    // MCB is on a diagonal
+    // @todo: ensure this is correct
+    static constexpr float MCB_ROTATION_OFFSET = 0;
+#else
+    // MCB has power inlet facing backwards
+    static constexpr float MCB_ROTATION_OFFSET = M_PI_2;
+#endif
 
     enum class FireRate : uint8_t
     {
@@ -97,7 +112,7 @@ public:
         FLAGS_BYTES = 1,
         TIMESTAMP_BYTES = 4,
         FIRERATE_BYTES = 1,
-        TARGET_DATA_BYTES = 70,  // 17 floats and 2 bytes (from firerate and icon)
+        TARGET_DATA_BYTES = 37,  // 9 floats and 1 byte (from firerate)
         SHOT_TIMING_BYTES = 12,
     };
 
@@ -105,88 +120,45 @@ public:
         messageWidths::TARGET_DATA_BYTES,
         messageWidths::SHOT_TIMING_BYTES};  // indices correspond to Tags
 
-    enum class PlateIcon : uint8_t
-    {
-        UNKNOWN = 0,
-        HERO_ONE = 1,
-        ENGINEER_TWO = 2,
-        STANDARD_THREE = 3,  // standard
-        STANDARD_FOUR = 4,   // standard
-        STANDARD_FIVE = 5,
-        SEVEN = 6,
-        EIGHT = 7,
-        SENTRY = 8,
-        BASE = 9,
-        OUTPOST = 10,
-    };
-
     /**
-     * AutoAim data to receive from Jetson. Describes a rectangular robot with separate z offsets
-     * for each plate. Stores linear pos, vel, acc of robot center as well as angular position and
-     * velocity of the entire robot.
-     *
-     * Plate indices are assumed to be 0 for the plate referred to by the angular
-     * position, and incrementing counterclockwise.
+     * AutoAim data to receive from Jetson.
      */
 
-    struct TargetState
+    struct PositionData
     {
         FireRate firerate;  //.< Firerate of sentry (low 0 - 3 high)
 
-        float xPos;  ///< x position of the robot center (in m).
-        float yPos;  ///< y position of the robot center (in m).
-        float zPos;  ///< z position of the robot center (in m).
+        float xPos;  ///< x position of the target (in m).
+        float yPos;  ///< y position of the target (in m).
+        float zPos;  ///< z position of the target (in m).
 
-        float xVel;  ///< x velocity of the robot center (in m/s).
-        float yVel;  ///< y velocity of the robot center (in m/s).
-        float zVel;  ///< z velocity of the robot center (in m/s).
+        float xVel;  ///< x velocity of the target (in m/s).
+        float yVel;  ///< y velocity of the target (in m/s).
+        float zVel;  ///< z velocity of the target (in m/s).
 
-        float xAcc;  ///< x acceleration of the robot center (in m/s^2).
-        float yAcc;  ///< y acceleration of the robot center (in m/s^2).
-        float zAcc;  ///< z acceleration of the robot center (in m/s^2).
-
-        float theta;  ///< angular position of the robot
-        float omega;  ///< angular velocity of the robot
-
-        float radius0;          ///< distance from center to plates 0 and 2
-        float radius1;          ///< distance from center to plates 1 and 3
-        float plateHeights[4];  ///< height of each plate off the robot center
-        // ^ measured from the ground to the center of the plate
-
-        PlateIcon icon;
+        float xAcc;  ///< x acceleration of the target (in m/s^2).
+        float yAcc;  ///< y acceleration of the target (in m/s^2).
+        float zAcc;  ///< z acceleration of the target (in m/s^2).
 
         bool updated;  ///< whether or not this came from the most recent message
 
-        inline TargetState projectForward(float dt) const
-        {
-            TargetState projected = *this;
-            projected.xPos =
-                tap::algorithms::ballistics::AbstractKinematicState::quadraticKinematicProjection(
-                    dt,
-                    xPos,
-                    xVel,
-                    xAcc);
-            projected.yPos =
-                tap::algorithms::ballistics::AbstractKinematicState::quadraticKinematicProjection(
-                    dt,
-                    yPos,
-                    yVel,
-                    yAcc);
-            projected.zPos =
-                tap::algorithms::ballistics::AbstractKinematicState::quadraticKinematicProjection(
-                    dt,
-                    zPos,
-                    zVel,
-                    zAcc);
-            projected.theta += omega * dt;
-            return projected;
-        }
+    } modm_packed;
+
+    struct TimingData
+    {
+        uint32_t offset;         ///< estimated microseconds beyond "timestamp" at which our
+        uint32_t pulseInterval;  ///< time between plate centers transiting the target point
+        uint32_t duration;       ///< duration during which the plate is at the target point
+                                 ///< next shot should ideally hit
+
+        bool updated;  ///< whether or not this came from the most recent message
     } modm_packed;
 
     struct TurretAimData
     {
-        TargetState targetState;
+        struct PositionData pva;
         uint32_t timestamp;  ///< timestamp in microseconds
+        struct TimingData timing;
     } modm_packed;
 
     /**
@@ -233,8 +205,6 @@ public:
         float quatX;
         float quatY;
         float quatZ;
-        float cameraToTagMagnitude;
-        float cameraToTagAngle;
         long long timestamp;
         uint8_t turretId;
     } modm_packed;
@@ -332,7 +302,17 @@ public:
         bool hasTarget = false;
         for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
         {
-            hasTarget |= lastAimData[i].targetState.updated;
+            hasTarget |= lastAimData[i].pva.updated;
+        }
+        return hasTarget;
+    }
+
+    mockable inline bool getSomeTurretUsingTimedShots() const
+    {
+        bool hasTarget = false;
+        for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
+        {
+            hasTarget |= lastAimData[i].pva.updated && lastAimData[i].timing.updated;
         }
         return hasTarget;
     }
@@ -387,6 +367,7 @@ public:
 
     // @todo private should not be here
 private:
+    void logVisionTelemetry();
     void logRefereeTelemetry();
 
     enum TxMessageTypes
@@ -475,12 +456,12 @@ private:
         .setpoints = {}};
 
     ArucoResetData lastRealsenseArucoData{
-        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
     };
 
     ArucoResetData lastArducamArucoData{
-        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
+        .data = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0},
         .updated = false,
     };
 
@@ -527,8 +508,6 @@ private:
     bool decodeToRealsenseArucoData(const ReceivedSerialMessage& message);
 
     bool decodeToArducamArucoData(const ReceivedSerialMessage& message);
-
-    bool decodeToArucoResetData(const ReceivedSerialMessage& message, ArucoResetData& resetData);
 
     bool decodeToRobotOrbitData(const ReceivedSerialMessage& message);
 

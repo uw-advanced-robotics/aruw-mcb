@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,10 +21,13 @@
 #define ERROR_MENU_HPP_
 
 #include "tap/display/dummy_allocator.hpp"
-#include "tap/display/vertical_scroll_logic_handler.hpp"
-#include "tap/drivers.hpp"
 
 #include "modm/ui/menu/abstract_menu.hpp"
+
+namespace aruwsrc
+{
+class Drivers;
+}
 
 namespace aruwsrc
 {
@@ -33,10 +36,7 @@ namespace display
 class ErrorMenu : public modm::AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >
 {
 public:
-    ErrorMenu(
-        modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        tap::Drivers *drivers,
-        int entriesToDisplay);
+    ErrorMenu(modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs);
 
     void draw() override;
 
@@ -50,15 +50,7 @@ public:
 
 private:
     static constexpr int ERROR_MENU_ID = 3;
-    tap::Drivers *drivers;
-    tap::display::VerticalScrollLogicHandler vertScrollHandler;
-
-    uint32_t okTapNum = 0;
-    std::size_t prevErrorCount = 0;
-};
-
-std::string wrapText(std::string_view text, size_t maxCharsPerLine);
-
+};  // class ErrorMenu
 }  // namespace display
 }  // namespace aruwsrc
 
