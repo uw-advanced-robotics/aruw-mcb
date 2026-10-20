@@ -873,7 +873,6 @@ void registerStandardSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
     drivers->commandScheduler.registerSubsystem(&dummySubsystem);
-    drivers->commandScheduler.registerSubsystem(&turret);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -893,14 +892,12 @@ void initializeSubsystems()
     perpendicularOmni.initialize();
     parallelOmni.initialize();
     dummySubsystem.initialize();
-    turret.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers*)
 {
     chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
     turret.setDefaultCommand(&turretUserControlCommand);
