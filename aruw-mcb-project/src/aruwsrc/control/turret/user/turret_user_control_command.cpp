@@ -31,13 +31,13 @@ namespace aruwsrc::control::turret::user
 {
 // STEP 1 (Turret User Control): Complete constructor
 TurretUserControlCommand::TurretUserControlCommand(
-    tap::Drivers *drivers,
-    ControlOperatorInterface &controlOperatorInterface,
-    TurretSubsystem *turretSubsystem,
-    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
-        *yawController,
-    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
-        *pitchController,
+    tap::Drivers* drivers,
+    ControlOperatorInterface& controlOperatorInterface,
+    TurretSubsystem* turretSubsystem,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>*
+        yawController,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>*
+        pitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)
@@ -54,16 +54,19 @@ TurretUserControlCommand::TurretUserControlCommand(
     // CALL the inherited method that registers a subsystem requirement
     // PASS the turret subsystem pointer as the argument
     // This prevents other commands from using the turret while this command runs
+    addSubsystemRequirement(turretSubsystem);
 }
 
 // STEP 4A (Turret User Control): Implement isReady
-bool TurretUserControlCommand::isReady() {
+bool TurretUserControlCommand::isReady()
+{
     // TODO: Check if command can safely execute
     // IF command is not finished AND controllers are online:
     //     RETURN true (ready to run)
     // ELSE:
     //     RETURN false (not ready)
     // Controllers have an isOnline() method to check hardware status
+    return !isFinished();
 }
 
 // STEP 2 (Turret User Control): Implement initialize method
@@ -73,10 +76,15 @@ void TurretUserControlCommand::initialize()
     // FOR each controller (yaw and pitch):
     // CALL the controller's initialize method
     // This resets internal state like accumulated error and previous setpoints
+    yawController->initialize();
+    pitchController->initialize();
+    // turretSubsystem->yawMotor.setMotorOutput(0);
+    // turretSubsystem->pitchMotor.setMotorOutput(0);
 
     // SET prevTime to current system time in milliseconds
     // CALL the clock utility function that returns current time
     // This gives execute() a starting point for calculating time deltas
+    prevTime = tap::arch::clock::getTimeMilliseconds();
 }
 
 // STEP 3 (Turret User Control): Implement execute method
@@ -86,21 +94,31 @@ void TurretUserControlCommand::execute()
     // DECLARE current_time = get current system time in milliseconds
     // CALCULATE dt = current_time - prevTime
     // UPDATE prevTime = current_time for next iteration
+    uint32_t current_time = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = current_time - prevTime;
+    prevTime = current_time;
 
     // TODO: Get user input from operator interface
     // DECLARE yaw_input = get turret yaw input for this turret ID
     // DECLARE pitch_input = get turret pitch input for this turret ID
     // The operator interface returns processed, scaled input values
+    float yaw_input = controlOperatorInterface.getTurretYawInput(turretID);
+    float pitch_input = controlOperatorInterface.getTurretPitchInput(turretID);
 
     // TODO: Calculate new setpoints based on current position + user input
     // DECLARE yaw_setpoint = current yaw setpoint + (yaw_sensitivity * yaw_input)
     // DECLARE pitch_setpoint = current pitch setpoint + (pitch_sensitivity * pitch_input)
     // Use WrappedFloat for angle arithmetic to handle wrapping
+    WrappedFloat yaw_setpoint = yawController->getSetpoint() + (userYawInputScalar * yaw_input);
+    WrappedFloat pitch_setpoint =
+        pitchController->getSetpoint() + (userPitchInputScalar * pitch_input);
 
     // TODO: Command controllers to track new setpoints
     // FOR each controller (yaw and pitch):
     //     CALL runController with time delta and new setpoint
     //     This updates motor outputs to track the desired position
+    yawController->runController(dt, yaw_setpoint);
+    pitchController->runController(dt, pitch_setpoint);
 }
 
 // STEP 4B (Turret User Control): Implement isFinished
@@ -113,6 +131,14 @@ bool TurretUserControlCommand::isFinished() const
     // ELSE:
     //     RETURN false (continue running)
     // Check both yaw and pitch controllers for hardware status
+    if (!yawController->isOnline() || !pitchController->isOnline())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 // STEP 4C (Turret User Control): Implement end
@@ -128,6 +154,8 @@ void TurretUserControlCommand::end(bool)
     // The 'interrupted' parameter tells you if the command was forcibly stopped
     // interrupted == true: Another command took control
     // interrupted == false: Command finished naturally (unlikely for user control)
+    turretSubsystem->yawMotor.setMotorOutput(0);
+    turretSubsystem->pitchMotor.setMotorOutput(0);
 }
 
 }  // namespace aruwsrc::control::turret::user

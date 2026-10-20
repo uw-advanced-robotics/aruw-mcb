@@ -155,6 +155,9 @@ inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 }
 using Compose = CommandCompositionHelper;
 
+static constexpr float USER_YAW_INPUT_SCALAR = 0.05f;
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.03f;
+
 /* define subsystems ----------------------------c---------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
@@ -445,6 +448,16 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::trans
 // #endif
 
 // turret commands
+user::TurretUserControlCommand turretUserControlCommand(
+    drivers(),                            // Global drivers object
+    drivers()->controlOperatorInterface,  // Input processing system
+    &turret,                              // Turret subsystem instance
+    &chassisFrameYawTurretController,     // Yaw control algorithm
+    &chassisFramePitchTurretController,   // Pitch control algorithm
+    USER_YAW_INPUT_SCALAR,                // Yaw sensitivity scaling
+    USER_PITCH_INPUT_SCALAR,              // Pitch sensitivity scaling
+    0);
+
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     drivers()->controlOperatorInterface,
@@ -860,6 +873,7 @@ void registerStandardSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
     drivers->commandScheduler.registerSubsystem(&arucoResetSubsystem);
     drivers->commandScheduler.registerSubsystem(&dummySubsystem);
+    drivers->commandScheduler.registerSubsystem(&turret);
 }
 
 /* initialize subsystems ----------------------------------------------------*/
@@ -879,6 +893,7 @@ void initializeSubsystems()
     perpendicularOmni.initialize();
     parallelOmni.initialize();
     dummySubsystem.initialize();
+    turret.initialize();
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -888,6 +903,7 @@ void setDefaultStandardCommands(Drivers*)
     turret.setDefaultCommand(&turretUserWorldRelativeCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    turret.setDefaultCommand(&turretUserControlCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/

@@ -57,7 +57,7 @@ namespace control
 class ComprisedCommand : public Command
 {
 public:
-    ComprisedCommand(Drivers *drivers) : Command(), comprisedCommandScheduler(drivers) {}
+    ComprisedCommand(Drivers* drivers) : Command(), comprisedCommandScheduler(drivers) {}
 
 protected:
     CommandScheduler comprisedCommandScheduler;
