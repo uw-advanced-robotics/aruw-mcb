@@ -20,10 +20,8 @@
 #ifndef MOTOR_SUBSYSTEM_HPP_
 #define MOTOR_SUBSYSTEM_HPP_
 
-#include <algorithm>
-
+#include "tap/algorithms/smooth_pid.hpp"
 #include "tap/control/subsystem.hpp"
-#include "tap/motor/dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
 
 namespace aruwsrc::motor_tester
@@ -32,25 +30,41 @@ namespace aruwsrc::motor_tester
 class MotorSubsystem final : public tap::control::Subsystem
 {
 public:
-    MotorSubsystem(tap::motor::MotorInterface& motor) : motor(motor) {}
-
-    inline void initialize() override { motor.initialize(); };
-
-    void setDesiredOutput(int32_t desiredOutput)
+    MotorSubsystem(
+        tap::Drivers* drivers,
+        tap::motor::MotorInterface& motor,
+        const tap::algorithms::SmoothPidConfig& pidConfig)
+        : Subsystem(drivers),
+          motor(motor),
+          pidController(pidConfig)
     {
-        this->desiredOutput = std::clamp(
-            desiredOutput,
-            -static_cast<int32_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620),
-            static_cast<int32_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620));
     }
 
-    int32_t getDesiredOutput() const { return desiredOutput; }
+    void initialize() override
+    {
+        motor.initialize();
+        desiredPosition = motor.getEncoder()->getPosition().getUnwrappedValue();
+    }
 
-    inline void refresh() override { motor.setDesiredOutput(desiredOutput); };
+    void setDesiredPosition(float desiredPosition) { this->desiredPosition = desiredPosition; }
+
+    float getDesiredPosition() const { return desiredPosition; }
+
+    void refresh() override
+    {
+        const float output = pidController.runController(
+            desiredPosition - motor.getEncoder()->getPosition().getUnwrappedValue(),
+            -motor.getEncoder()->getVelocity(),
+            0.002);
+        motor.setDesiredOutput(static_cast<int32_t>(output));
+    }
+
+    void refreshSafeDisconnect() override { motor.setDesiredOutput(0); }
 
 private:
     tap::motor::MotorInterface& motor;
-    int32_t desiredOutput = 0;
+    float desiredPosition = 0.0f;
+    tap::algorithms::SmoothPid pidController;
 };
 
 }  // namespace aruwsrc::motor_tester

@@ -20,15 +20,11 @@
 #ifndef STICK_TORQUE_COMMAND_HPP_
 #define STICK_TORQUE_COMMAND_HPP_
 
-#include <algorithm>
-
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/command.hpp"
-#include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/robot/motor_tester/motor_subsystem.hpp"
 
-using namespace aruwsrc::motor_tester;
 using namespace tap::communication::serial;
 
 namespace aruwsrc::motor_tester
@@ -44,32 +40,34 @@ public:
         : drivers(drivers),
           motorSubsystem(motorSubsystem),
           channel(channel),
-          SENSITIVITY(sensitivity)
+          sensitivity(sensitivity)
     {
         addSubsystemRequirement(motorSubsystem);
     }
 
     void execute() override
     {
-        float input = drivers->remote.getChannel(channel);
-        int scaled_input =
-            static_cast<int>((input * SENSITIVITY) * tap::motor::DjiMotor::MAX_OUTPUT_C620);
-        motorSubsystem->setDesiredOutput(scaled_input);
+        const float input = drivers->remote.getChannel(channel);
+        position += input * sensitivity;
+        motorSubsystem->setDesiredPosition(position);
     }
 
-    inline void initialize() override {};
+    void initialize() override { position = motorSubsystem->getDesiredPosition(); }
 
-    inline bool isFinished() const override { return false; };
+    bool isFinished() const override { return false; }
 
-    inline void end(bool) override { motorSubsystem->setDesiredOutput(0); };
+    void end(bool) override { motorSubsystem->setDesiredPosition(position); }
 
-    inline const char* getName() const override { return "StickTorqueCommand"; };
+    const char* getName() const override { return "stick torque"; }
 
 private:
     tap::Drivers* drivers;
     MotorSubsystem* motorSubsystem;
     Remote::Channel channel;
-    const float SENSITIVITY;
+    const float sensitivity;
+    float position = 0.0f;
 };
 
 }  // namespace aruwsrc::motor_tester
+
+#endif  // STICK_TORQUE_COMMAND_HPP_

@@ -80,6 +80,9 @@ static constexpr aruwsrc::control::agitator::UnjamSpokeAgitatorCommand::Config
         .targetCycleCount = 3,
 };
 
+static constexpr tap::algorithms::SmoothPidConfig POSITION_PID_CONFIG =
+    {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+
 tap::algorithms::SmoothPidConfig m2006VelocityPidConfig =
     {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 

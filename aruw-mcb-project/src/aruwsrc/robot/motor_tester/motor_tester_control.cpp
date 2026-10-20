@@ -25,8 +25,10 @@
 
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
+#include "aruwsrc/robot/motor_tester/motor_subsystem.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_constants.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
+#include "aruwsrc/robot/motor_tester/stick_torque_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
 using namespace aruwsrc::motor_tester;
@@ -45,16 +47,35 @@ namespace motor_tester_control
 {
 
 // motors, subsystems, commands, etc.
+tap::motor::DjiMotor motor(
+    drivers(),
+    tap::motor::MOTOR1,
+    tap::can::CanBus::CAN_BUS1,
+    false,
+    "Motor Tester");
+
+MotorSubsystem motorSubsystem(drivers(), motor, POSITION_PID_CONFIG);
+
+StickTorqueCommand stickTorqueCommand(
+    drivers(),
+    &motorSubsystem,
+    Remote::Channel::LEFT_VERTICAL,
+    0.01f);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems() {}
+void initializeSubsystems()
+{
+    motorSubsystem.initialize();
+    motorSubsystem.setDefaultCommand(&stickTorqueCommand);
+}
 
 void registerSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &motor_tester_control::remoteSafeDisconnectFunction);
+    drivers->commandScheduler.registerSubsystem(&motorSubsystem);
 }
 
 void registerIoMappings(Drivers* drivers) {}
