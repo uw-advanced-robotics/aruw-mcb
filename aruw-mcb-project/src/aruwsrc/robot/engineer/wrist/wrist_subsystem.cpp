@@ -21,6 +21,8 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
+#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
+
 #define ts this
 
 using namespace tap::algorithms::transforms;
@@ -50,7 +52,10 @@ WristSubsystem::WristSubsystem(
           tap::algorithms::Angle(0)),  // TODO: in theory this could be wrapped to PI/2 bc square
       pidTheta1(config.theta1PidConfig),
       pidTheta2(config.theta2PidConfig),
-      pidTheta3(config.theta3PidConfig)
+      pidTheta3(config.theta3PidConfig),
+      lastMotor1Pos(0.0),
+      lastMotor2Pos(0.0),
+      lastMotor3Pos(0.0)
 {
     ts->motorDifferential2 = motorDifferential2;
 }
@@ -170,18 +175,16 @@ void WristSubsystem::refresh()
     float theta2GravityTorque = mountRelativeGravityTorque.dot(axisTheta2);
     float theta3GravityTorque = mountRelativeGravityTorque.dot(axisTheta3);
 
-    // differential
-    motor1GravityTorque = theta1GravityTorque * gravityCompConfig->motor1TorqueConstant;
-    motor2GravityTorque =
-        (theta1GravityTorque + theta2GravityTorque) * gravityCompConfig->motor2TorqueConstant;
-    motor3GravityTorque = theta3GravityTorque * gravityCompConfig->motor3TorqueConstant;
+    // gravity torques from motors
+    g1 = theta1GravityTorque * gravityCompConfig->motor1TorqueConstant;
+    g21 = theta1GravityTorque * gravityCompConfig->motor2TorqueConstant;
+    g22 = theta2GravityTorque * gravityCompConfig->motor2TorqueConstant;
+    g3 = theta3GravityTorque * gravityCompConfig->motor3TorqueConstant;
 
-    // TODO scale gravity torques by gravityCompScales for each axis
-    // (and replace gravityTorques in outMotor calculations)
-
-    float outMotorDifferential1 = pidOutTheta1 - motor1GravityTorque;
-    float outMotorDifferential2 = pidOutTheta1 + pidOutTheta2 - motor2GravityTorque;
-    float outMotor3 = pidOutTheta3 - motor3GravityTorque;
+    float outMotorDifferential1 = pidOutTheta1;  /// - WRIST_THETA_1_GRAVITY_COMP_SCALE * g1;
+    float outMotorDifferential2 =
+        pidOutTheta1 + pidOutTheta2;  // - WRIST_THETA_2_GRAVITY_COMP_SCALE * (g21 + g22);
+    float outMotor3 = pidOutTheta3;   //- WRIST_THETA_3_GRAVITY_COMP_SCALE * g3;
 
     motorDifferential1.setDesiredOutput(std::clamp<int32_t>(
         outMotorDifferential1,
@@ -208,6 +211,15 @@ bool WristSubsystem::isOnline() const
 {
     return motorDifferential1.isMotorOnline() && motorDifferential2.isMotorOnline() &&
            motorTheta3.isMotorOnline() && encoderTheta2.isOnline();
+}
+
+bool WristSubsystem::isWristMoving() const
+{
+    if (!isOnline()) return false;
+    // use external encoder for more accurate pitch/theta2 reading
+    return std::abs(motorDifferential1.getEncoder()->getVelocity()) > MOVING_VELOCITY_THRESHOLD ||
+           std::abs(encoderTheta2.getVelocity()) > MOVING_VELOCITY_THRESHOLD ||
+           std::abs(motorTheta3.getEncoder()->getVelocity()) > MOVING_VELOCITY_THRESHOLD;
 }
 
 Orientation WristSubsystem::getOrientation() const

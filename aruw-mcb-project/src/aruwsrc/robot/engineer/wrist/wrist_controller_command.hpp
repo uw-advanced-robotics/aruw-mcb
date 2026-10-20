@@ -43,7 +43,8 @@ public:
         WristSubsystem &wrist,
         EngineerControlOperatorInterface *operatorInterface,
         std::optional<std::pair<uint8_t, float>> axisAndSetpoint = std::nullopt,
-        std::optional<uint8_t*> commandCounter = std::nullopt);
+        std::optional<uint8_t*> commandCounter = std::nullopt,
+        std::optional<bool*> settled = std::nullopt);
 
     void initialize() override;
 
@@ -64,10 +65,14 @@ private:
 
     const std::optional<std::pair<uint8_t, float>> axisAndSetpoint;
     std::optional<uint8_t*> commandCounter;
+    std::optional<bool*> isSettled;
 
     static constexpr float SETPOINT_EPSILON = 0.05f;
-    static constexpr uint32_t SETPOINT_HOLD_TIME_MS = 1'000;
+    static constexpr uint32_t SETPOINT_HOLD_TIME_MS = 2'000;
+    static constexpr uint32_t MAX_COMMAND_TIMEOUT = 6'000;
+
     tap::arch::MilliTimeout setpointHoldTimer = tap::arch::MilliTimeout(SETPOINT_HOLD_TIME_MS);
+    tap::arch::MilliTimeout maxTimeoutTimer = tap::arch::MilliTimeout(MAX_COMMAND_TIMEOUT);
 
     bool selectedAxisIsAtSetpoint() const;
 };

@@ -27,12 +27,14 @@ WristControllerCommand::WristControllerCommand(
     WristSubsystem &wrist,
     EngineerControlOperatorInterface *operatorInterface,
     std::optional<std::pair<uint8_t, float>> axisAndSetpoint,
-    std::optional<uint8_t*> commandCounter)
+    std::optional<uint8_t*> commandCounter,
+    std::optional<bool*> isSettled)
     : tap::control::Command(),
       wrist(wrist),
       operatorInterface(operatorInterface),
       axisAndSetpoint(axisAndSetpoint),
-      commandCounter(commandCounter)
+      commandCounter(commandCounter),
+      isSettled(isSettled)
 {
     addSubsystemRequirement(&wrist);
 }
@@ -40,6 +42,7 @@ WristControllerCommand::WristControllerCommand(
 void WristControllerCommand::initialize()
 {
     setpointHoldTimer.stop();
+    maxTimeoutTimer.restart(MAX_COMMAND_TIMEOUT);
     bool axesToSet[3] = {true, true, true};
     if (axisAndSetpoint.has_value())
     {
@@ -68,6 +71,7 @@ void WristControllerCommand::initialize()
     if (axesToSet[0]) wrist.setSetpointTheta1(wrist.getTheta1());
     if (axesToSet[1]) wrist.setSetpointTheta2(wrist.getTheta2());
     if (axesToSet[2]) wrist.setSetpointTheta3(wrist.getTheta3());
+    **isSettled = !wrist.isWristMoving();
 }
 
 void WristControllerCommand::execute()
@@ -101,8 +105,9 @@ void WristControllerCommand::execute()
 
 bool WristControllerCommand::isFinished() const
 {
-    // only finishes in tuning mode once setpoint has been held for 2 seconds
-    return axisAndSetpoint.has_value() && setpointHoldTimer.isExpired() && !setpointHoldTimer.isStopped();
+    // only finishes in tuning mode once setpoint has been held for 2 seconds or max timeout has been reached
+    return (axisAndSetpoint.has_value() && setpointHoldTimer.isExpired() && !setpointHoldTimer.isStopped()) ||
+        (axisAndSetpoint.has_value() && maxTimeoutTimer.isExpired());
 }
 
 bool WristControllerCommand::selectedAxisIsAtSetpoint() const {

@@ -100,6 +100,10 @@ static constexpr float WRIST_THETA_1_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_THETA_2_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_THETA_3_SCALING_FACTOR = 0.01f;
 
+static constexpr float WRIST_THETA_1_GRAVITY_COMP_SCALE = 1.0f;
+static constexpr float WRIST_THETA_2_GRAVITY_COMP_SCALE = 1.0f;
+static constexpr float WRIST_THETA_3_GRAVITY_COMP_SCALE = 1.0f;
+
 static constexpr float WRIST_ROLL_CLICK_VELOCITY = 0.5f;
 
 static constexpr wrist::Setpoint WRIST_IN_SETPOINT{

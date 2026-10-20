@@ -104,6 +104,8 @@ public:
 
     bool isOnline() const;
 
+    bool isWristMoving() const;
+
     tap::algorithms::transforms::Orientation getOrientation() const;
 
     inline void attachGravityCompConfig(const WristGravityCompensationConfig config)
@@ -117,6 +119,8 @@ public:
         float theta3);
 
 private:
+    static constexpr float MOVING_VELOCITY_THRESHOLD = modm::toRadian(1.0f);
+    
     const WristConfig config;
     std::optional<WristGravityCompensationConfig> gravityCompConfig;
     tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;
@@ -126,9 +130,11 @@ private:
     tap::algorithms::WrappedFloat setpointTheta3;
     tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
 
+    float lastMotor1Pos, lastMotor2Pos, lastMotor3Pos;
+
     // variables for gravity comp characterization
     float theta1, theta2, theta3;
-    float motor1GravityTorque, motor2GravityTorque, motor3GravityTorque;
+    float g1, g21, g22, g3;
     float pidOutTheta1, pidOutTheta2, pidOutTheta3;
 };
 }  // namespace aruwsrc::engineer::wrist

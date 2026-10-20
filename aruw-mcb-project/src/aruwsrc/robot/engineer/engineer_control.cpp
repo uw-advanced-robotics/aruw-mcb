@@ -574,53 +574,64 @@ WristControllerCommand wristControllerCommand(wristSubsystem, &drivers()->contro
 inline constexpr float WRIST_GRAVITY_TEST_ANGLE = modm::toRadian(30.0f);
 
 uint8_t commandCounter = 0;
+bool isSettled = false;
+
 WristControllerCommand wristTheta1NegativeGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
     std::pair<uint8_t, float>{0, -WRIST_GRAVITY_TEST_ANGLE},
-    &commandCounter);
+    &commandCounter,
+    &isSettled);
 WristControllerCommand wristTheta1ZeroGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
     std::pair<uint8_t, float>{0, 0},
-    &commandCounter);
+    &commandCounter,
+    &isSettled);
 WristControllerCommand wristTheta1PositiveGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
     std::pair<uint8_t, float>{0, WRIST_GRAVITY_TEST_ANGLE},
-    &commandCounter);
+    &commandCounter,
+    &isSettled);
 
 WristControllerCommand wristTheta2NegativeGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
     std::pair<uint8_t, float>{1, -WRIST_GRAVITY_TEST_ANGLE},
-    &commandCounter);
+    &commandCounter,
+    &isSettled);
 WristControllerCommand wristTheta2ZeroGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
     std::pair<uint8_t, float>{1, 0},
-    &commandCounter);
+    &commandCounter,
+    &isSettled);
 WristControllerCommand wristTheta2PositiveGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
     std::pair<uint8_t, float>{1, WRIST_GRAVITY_TEST_ANGLE},
-    &commandCounter);
+    &commandCounter,
+    &isSettled);
 
 WristControllerCommand wristTheta3NegativeGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
     std::pair<uint8_t, float>{2, -WRIST_GRAVITY_TEST_ANGLE},
-    &commandCounter);
+    &commandCounter,
+    &isSettled);
 WristControllerCommand wristTheta3ZeroGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
     std::pair<uint8_t, float>{2, 0},
-    &commandCounter);
+    &commandCounter,
+    &isSettled);
 WristControllerCommand wristTheta3PositiveGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
     std::pair<uint8_t, float>{2, WRIST_GRAVITY_TEST_ANGLE},
-    &commandCounter);
+    &commandCounter,
+    &isSettled);
 
 InstantCommand holdExtensionAtCurrentPosition(
     []() { 
