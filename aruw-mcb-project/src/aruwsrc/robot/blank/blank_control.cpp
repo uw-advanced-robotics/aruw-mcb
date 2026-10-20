@@ -43,19 +43,18 @@ namespace blank_control
 
 // TODO: instantiate buzzer subsystem
 // BuzzerSubsystem buzzer(...)
+BuzzerSubsystem buzzer(drivers());
 
 NoteSequenceCommand hesAPirateCommand(buzzer, HES_A_PIRATE_NOTES, HES_A_PIRATE_NOTE_LENGTH_MS);
 
 void initializeSubsystems()
 {
     // TODO: register initialize buzzer subsystem
-    
+    buzzer.initialize();
     buzzer.setDefaultCommand(&hesAPirateCommand);
 }
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
-
-void initializeSubsystems() {}
 
 }  // namespace blank_control
 
@@ -65,6 +64,7 @@ void initSubsystemCommands(aruwsrc::blank::Drivers* drivers)
 {
     drivers->commandScheduler.setSafeDisconnectFunction(
         &blank_control::remoteSafeDisconnectFunction);
+    drivers->commandScheduler.registerSubsystem(&blank_control::buzzer);
     blank_control::initializeSubsystems();
 }
 
