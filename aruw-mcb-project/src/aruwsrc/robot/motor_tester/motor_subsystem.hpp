@@ -41,7 +41,7 @@ public:
         this->desiredOutput = std::clamp(
             desiredOutput,
             -static_cast<int32_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620),
-            static_cast<int32_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620);)
+            static_cast<int32_t>(tap::motor::DjiMotor::MAX_OUTPUT_C620));
     }
 
     int32_t getDesiredOutput() const { return desiredOutput; }
@@ -49,9 +49,9 @@ public:
     inline void refresh() override { motor.setDesiredOutput(desiredOutput); };
 
 private:
-    tap::motor::MotorInterface motor;
+    tap::motor::MotorInterface& motor;
     int32_t desiredOutput = 0;
-}
+};
 
 }  // namespace aruwsrc::motor_tester
 
