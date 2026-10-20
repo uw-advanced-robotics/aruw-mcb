@@ -293,9 +293,9 @@ static constexpr tap::algorithms::SmoothPidConfig MINOR_YAW_PID_CONFIG_WORLD_FRA
 };
 
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG_WORLD_FRAME_POS = {
-    .kp = 25.0f,
-    .ki = 750.0f,
-    .kd = 0.75f,
+    .kp = 45.0f,
+    .ki = 500.0f,
+    .kd = 0.25f,
     .maxICumulative = 0.5f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
 };
