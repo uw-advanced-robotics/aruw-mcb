@@ -32,11 +32,7 @@ namespace aruwsrc::motor_tester
 class MotorSubsystem final : public tap::control::Subsystem
 {
 public:
-    MotorSubsystem(tap::Drivers* drivers, tap::motor::MotorInterface& motor)
-        : Subsystem(drivers),
-          motor(motor)
-    {
-    }
+    MotorSubsystem(tap::motor::MotorInterface& motor) : motor(motor) {}
 
     inline void initialize() override { motor.initialize(); };
 
