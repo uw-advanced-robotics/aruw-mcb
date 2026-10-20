@@ -30,6 +30,8 @@
 #include "tap/drivers.hpp"
 #include "tap/motor/motor_interface.hpp"
 
+#include "damiao_constants.hpp"
+
 namespace aruwsrc::control::motor
 {
 class DamiaoMotorEncoder : public tap::encoder::EncoderInterface
@@ -99,7 +101,7 @@ enum DamiaoControlMode : uint16_t
 };
 
 /**
- * DaMiao CAN motor driver implementing MIT-mode torque control.
+ * DaMiao CAN motor driver supporting MIT torque, position-speed, and velocity control.
  *
  * The frame layout follows the DM-J4310 documentation:
  * - Command frame (8 bytes): pos[16], vel[12], kp[12], kd[12], torque[12]
@@ -108,22 +110,7 @@ enum DamiaoControlMode : uint16_t
 class DamiaoMotor : public tap::can::CanRxListener, public tap::motor::MotorInterface
 {
 public:
-    // DM-J4310 MIT mode limits.
-    static constexpr float DM_J4310_P_MIN = -12.5f;
-    static constexpr float DM_J4310_P_MAX = 12.5f;
-    static constexpr float DM_J4310_V_MIN = -30.0f;
-    static constexpr float DM_J4310_V_MAX = 30.0f;
-    static constexpr float DM_J4310_T_MIN = -10.0f;
-    static constexpr float DM_J4310_T_MAX = 10.0f;
-    static constexpr int32_t MAX_OUTPUT_DM_J4310_MILLI_NM = 10000;
-
-    // DM-J4310 position mode limits
-    // TODO: figure out sensible limits
-
-    // DM-J4310 velocity mode limits
-    // TODO: figure out sensible limits - maybe look in specs to find max physical limit?
-    static constexpr float DM_J4310_VEL_MIN = -30.0f;
-    static constexpr float DM_J4310_VEL_MAX = 30.0f;
+    // Retain the existing public names for the shared DM-J4310 limits.
 
     /**
      * Constructor for a Damiao motor.
@@ -135,6 +122,7 @@ public:
      * @param name The name of the motor.
      * @param feedbackCanId The CAN ID of the feedback frame.
      * @param controlMode The control mode of the motor, defaults to MIT mode (torque control).
+     * Must match the mode configured on the motor using the debugging assistant.
      */
     DamiaoMotor(
         tap::Drivers* drivers,
@@ -154,6 +142,7 @@ public:
         return const_cast<DamiaoMotorEncoder*>(&encoder);
     }
 
+    // Torque in milli-Nm; only used in MIT mode.
     void setDesiredOutput(int32_t desiredOutput) override;
 
     bool isMotorOnline() const override;
@@ -166,6 +155,14 @@ public:
 
     void processMessage(const modm::can::Message& message) override;
 
+    // Position in radians and maximum speed in rad/s. Call each control cycle.
+    // Returns false if the selected mode does not match or CAN transmission fails.
+    bool sendPositionCommand(float targetPosition, float velocityMax);
+
+    // Velocity in rad/s. Call each control cycle; honors motor inversion.
+    // Returns false if the selected mode does not match or CAN transmission fails.
+    bool sendVelocityCommand(float targetVelocity);
+
     bool enable();
 
     bool disable();
@@ -175,6 +172,8 @@ public:
 private:
     static constexpr uint32_t MOTOR_DISCONNECT_TIME_MS = 100;
     static constexpr uint32_t STARTUP_RETRY_PERIOD_MS = 100;
+
+    void retryStartup();
 
     static uint16_t floatToUint(float x, float xMin, float xMax, uint8_t bits);
 
@@ -187,18 +186,12 @@ private:
         float kd,
         float torqueNm);
 
-    // sends a position-speed command to the motor, with a target position and maximum
-    // velocity used during the motion
-    bool sendPositionCommand(float targetPosition, float velocityMax);
-
-    // sends a velocity command, target velocity in rad/s
-    bool sendVelocityCommand(float targetVelocity);
-
     bool sendRawFrame(const uint8_t* data, uint8_t dataLen, uint16_t frameId) const;
 
     tap::Drivers* drivers;
     uint16_t motorIdentifier;
-    uint16_t controlMode;
+    DamiaoControlMode controlMode;
+    uint16_t commandIdentifier;
     tap::can::CanBus motorCanBus;
     bool motorInverted;
 
