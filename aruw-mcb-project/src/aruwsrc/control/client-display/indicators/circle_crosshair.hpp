@@ -37,7 +37,7 @@ public:
      *
      * @param[in] refSerialTransmitter RefSerialTransmitter instance.
      */
-    CircleCrosshair(tap::communication::serial::RefSerialTransmitter &refSerialTransmitter);
+    CircleCrosshair(tap::communication::serial::RefSerialTransmitter& refSerialTransmitter);
 
     void initialize() override final;
 
@@ -60,12 +60,16 @@ private:
 #endif
 
     // TODO (EDU): Modify these constants or add new ones to mess with your new graphic!
+
+    static constexpr uint16_t RECT_WIDTH = 20;
+    static constexpr uint16_t RECT_HEIGHT = 20;
+
     // X position of the circle
-    static constexpr uint16_t CRICLE_X = SCREEN_WIDTH / 2 + OFFSET_X;
+    static constexpr uint16_t RECT_X = SCREEN_WIDTH / 2 + OFFSET_X - RECT_WIDTH / 2;
     // Y position of the circle
-    static constexpr uint16_t CRICLE_Y = SCREEN_HEIGHT / 2 + OFFSET_Y;
+    static constexpr uint16_t RECT_Y = SCREEN_HEIGHT / 2 + OFFSET_Y - RECT_HEIGHT / 2;
     // SIZE of the circle
-    static constexpr uint16_t CRICLE_SIZE = 2;
+    static constexpr uint16_t RECT_SIZE = 2;
 // Thickness of the line
 #if defined(TARGET_HERO_ZERO)
     static constexpr uint16_t LINE_THICKNESS = 10;
