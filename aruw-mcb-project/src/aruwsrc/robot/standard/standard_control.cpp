@@ -108,7 +108,8 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
-#include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
+// #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
+#include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/display/autotune_menu.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -846,12 +847,19 @@ Trigger shiftPressed =
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+// STEP 7A (Turret User Control): Register subsystem
+// In registerSubsystems() function:
 /* register subsystems here -------------------------------------------------*/
 void registerStandardSubsystems(Drivers* drivers)
 {
+    // TODO: Register the turret subsystem with command scheduler
+    // ACCESS the command scheduler through the drivers object
+    // CALL the register subsystem method
+    // PASS a pointer to the turret subsystem
+    // This makes the turret available for command scheduling
+    
+    // Other subsystems are registered here too...
     drivers->commandScheduler.registerSubsystem(&agitator);
-    drivers->commandScheduler.registerSubsystem(&chassis);
-    drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -867,7 +875,6 @@ void initializeSubsystems()
 {
     turret.initialize();
     voltageCurrentSensor.initialize();
-    chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();
     frictionWheels.initialize();
@@ -881,11 +888,17 @@ void initializeSubsystems()
     dummySubsystem.initialize();
 }
 
+// STEP 7B (Turret User Control): Set default command  
+// In setDefaultCommands() function:
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers*)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    // TODO: Set turret default command
+    // CALL the setDefaultCommand method on the turret subsystem
+    // PASS a pointer to your turret user control command
+    // This command will run whenever no other command is using the turret
+    
+    // Other default commands are set here too...
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
