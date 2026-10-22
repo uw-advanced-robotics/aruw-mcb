@@ -27,13 +27,27 @@ using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::sentry::algorithms::odometry
 {
-SentryTransformAdapter::SentryTransformAdapter(const SentryTransforms& transforms)
-    : transforms(transforms)
+SentryTransformAdapter::SentryTransformAdapter(
+    const SentryTransforms& transforms,
+    const aruwsrc::algorithms::odometry::VisionOdometryDataProvider* visionOdometryProvider)
+    : transforms(transforms),
+      visionOdometryProvider(visionOdometryProvider)
 {
 }
 
 modm::Vector2f SentryTransformAdapter::getChassisVelocity2d() const
 {
+    return transforms.getChassisOdometry().getCurrentVelocity2D();
+}
+
+modm::Vector2f SentryTransformAdapter::getVisionChassisVelocity2d() const
+{
+    // TODO: this should be turret major velocity
+    if (visionOdometryProvider != nullptr)
+    {
+        return visionOdometryProvider->getVisionCurrentVelocity2D();
+    }
+
     return transforms.getChassisOdometry().getCurrentVelocity2D();
 }
 
@@ -48,16 +62,19 @@ const Transform& SentryTransformAdapter::getWorldToChassis() const
     return this->transforms.getWorldToChassis();
 }
 
-const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t turretID) const
+const Transform& SentryTransformAdapter::getVisionWorldToChassis() const
 {
-    if (turretID == 0)
-    {
-        return this->transforms.getWorldToTurretLeft();
-    }
-    else
-    {
-        return this->transforms.getWorldToTurretRight();
-    }
+    return this->transforms.getWorldToTurretMajor();
+}
+
+const Transform& SentryTransformAdapter::getWorldToTurretYaw(uint8_t /* turretId */) const
+{
+    return this->transforms.getWorldToTurretWidow();
+}
+
+const Transform& SentryTransformAdapter::getWorldToTurret(uint8_t /* turretId */) const
+{
+    return this->transforms.getWorldToTurretWidow();
 }
 
 const Transform& SentryTransformAdapter::getWorldToVTM() const

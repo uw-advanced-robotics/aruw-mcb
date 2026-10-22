@@ -30,7 +30,7 @@
 #include "aruwsrc/control/imu/imu_calibrate_command.hpp"
 #include "modm/processing/resumable.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * A list of indicators that represent different boolean (true/false) states.
@@ -159,6 +159,6 @@ private:
     Tx::Graphic1Message booleanHudIndicatorStaticGraphics[NUM_BOOLEAN_HUD_INDICATORS];
     Tx::GraphicCharacterMessage booleanHudIndicatorStaticLabelGraphics[NUM_BOOLEAN_HUD_INDICATORS];
 };
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  //  BOOLEAN_HUD_INDICATORS_HPP_

@@ -20,9 +20,10 @@
 #ifndef TURRET_CONTROLLER_INTERFACE_HPP_
 #define TURRET_CONTROLLER_INTERFACE_HPP_
 
+#include "tap/algorithms/transforms/axis.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 
-using namespace tap::algorithms;
+#include "turret_compensator_interface.hpp"
 
 namespace aruwsrc::control::turret
 {
@@ -47,7 +48,13 @@ public:
     /**
      * @param[in] TurretMotor A `TurretMotor` object accessible for children objects to use.
      */
-    TurretControllerInterface(TurretMotor &turretMotor) : turretMotor(turretMotor) {}
+    TurretControllerInterface(
+        TurretMotor &turretMotor,
+        const std::vector<TurretCompensatorInterface *> compensators = {})
+        : turretMotor(turretMotor),
+          compensators(compensators)
+    {
+    }
 
     /**
      * Initializes the controller, resetting any controllers and configuring any variables that need
@@ -65,27 +72,48 @@ public:
      * @param[in] desiredSetpoint The controller's desired setpoint in whatever frame the controller
      * is operating. Units radians.
      */
-    virtual void runController(const uint32_t dt, const WrappedFloat desiredSetpoint) = 0;
+    virtual void runController(
+        const float dt,
+        const tap::algorithms::WrappedFloat desiredSetpoint) = 0;
+
+    /**
+     * Calculates the total output from all attached compensators.
+     *
+     * @param[in] state The current turret state.
+     * @return The total output.
+     */
+    virtual float calculateCompensationEffort(
+        TurretCompensatorInterface::TurretCompensatorState state)
+    {
+        if (compensators.empty()) return 0.0f;
+
+        float total = 0.0f;
+        for (const auto &ff : compensators) total += ff->calculateCompensationEffort(state);
+        return total;
+    }
 
     /**
      * Sets the controller setpoint, but doesn't run the controller.
      */
-    virtual void setSetpoint(WrappedFloat desiredSetpoint) = 0;
+    virtual void setSetpoint(tap::algorithms::WrappedFloat desiredSetpoint) = 0;
 
-    inline void setSetpoint(float desiredSetpoint) { setSetpoint(Angle(desiredSetpoint)); }
+    inline void setSetpoint(float desiredSetpoint)
+    {
+        setSetpoint(tap::algorithms::Angle(desiredSetpoint));
+    }
 
     /**
      * @return The controller's setpoint, units radians. **Does not** have to be in the same
      * reference frame as the TurretSubsystem's `get<yaw|pitch>Setpoint` functions.
      */
-    virtual WrappedFloat getSetpoint() const = 0;
+    virtual tap::algorithms::WrappedFloat getSetpoint() const = 0;
 
     /**
      * @return The controller's measurement (current value of the system), units radians. **Does
      * not** have to be in the same reference frame as the TurretMotor's `getChassisFrame*`
      * functions. Does not need to be normalized.
      */
-    virtual WrappedFloat getMeasurement() const = 0;
+    virtual tap::algorithms::WrappedFloat getMeasurement() const = 0;
 
     /**
      * @return `false` if the turret controller should not be running, whether this is because the
@@ -103,8 +131,8 @@ public:
      * @return The controllerFrameAngle converted to the chassis frame, a value in radians that is
      * not required to be normalized.
      */
-    virtual WrappedFloat convertControllerAngleToChassisFrame(
-        WrappedFloat controllerFrameAngle) const = 0;
+    virtual tap::algorithms::WrappedFloat convertControllerAngleToChassisFrame(
+        tap::algorithms::WrappedFloat controllerFrameAngle) const = 0;
 
     /**
      * Converts the passed in controllerFrameAngle from the chassis frame to the controller frame of
@@ -115,26 +143,22 @@ public:
      * @return The chassisFrameAngle converted to the controller frame, a value in radians that is
      * not required to be normalized.
      */
-    virtual WrappedFloat convertChassisAngleToControllerFrame(
-        WrappedFloat chassisFrameAngle) const = 0;
+    virtual tap::algorithms::WrappedFloat convertChassisAngleToControllerFrame(
+        tap::algorithms::WrappedFloat chassisFrameAngle) const = 0;
 
 protected:
     TurretMotor &turretMotor;
+    const std::vector<TurretCompensatorInterface *> compensators;
 };
 
-class TurretPitchControllerInterface : public TurretControllerInterface
+template <tap::algorithms::transforms::Axis AXIS>
+class TurretAxisControllerInterface : public TurretControllerInterface
 {
 public:
-    TurretPitchControllerInterface(TurretMotor &turretMotor)
-        : TurretControllerInterface(turretMotor)
-    {
-    }
-};
-
-class TurretYawControllerInterface : public TurretControllerInterface
-{
-public:
-    TurretYawControllerInterface(TurretMotor &turretMotor) : TurretControllerInterface(turretMotor)
+    TurretAxisControllerInterface(
+        TurretMotor &turretMotor,
+        const std::vector<TurretCompensatorInterface *> compensators = {})
+        : TurretControllerInterface(turretMotor, compensators)
     {
     }
 };

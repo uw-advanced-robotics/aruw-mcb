@@ -29,7 +29,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * A list of text indicators that are displayed if a condition is met
@@ -113,6 +113,6 @@ private:
     int index = 0;
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // TEXT_HUD_INDICATORS_HPP_

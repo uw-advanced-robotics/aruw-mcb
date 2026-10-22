@@ -22,9 +22,14 @@
 
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "aruwsrc/robot/dart/dart_control_operator_interface.hpp"
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+#include "aruwsrc/mock/control_operator_interface_mock.hpp"
+#include "aruwsrc/mock/oled_display_mock.hpp"
 
 #else
+#include "aruwsrc/display/oled_display.hpp"
 
 #endif
 
@@ -37,14 +42,40 @@ class Drivers : public tap::Drivers
 #ifdef ENV_UNIT_TESTS
 public:
 #endif
-    Drivers() : tap::Drivers() {}
+    Drivers()
+        : tap::Drivers(),
+          rttTelemetry(this),
+          controlOperatorInterface(this),
+#if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr)
+#else
+          oledDisplay(this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &rttTelemetry)
+#endif
+    {
+    }
+    communication::rtt::RttTelemetry rttTelemetry;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 
+    testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
+    testing::NiceMock<mock::OledDisplayMock> oledDisplay;
 #else
-public:
 
+public:
+    dart::DartControlOperatorInterface controlOperatorInterface;
+    display::OledDisplay oledDisplay;
 #endif
+
+    void init(const float) { oledDisplay.initialize(); }
+
+    void updateIo() { oledDisplay.updateDisplay(); }
+
+    void update()
+    {
+        oledDisplay.updateMenu();
+        rttTelemetry.updateTelemetryAsync();
+    }
+
 };  // class aruwsrc::DartDrivers
 }  // namespace aruwsrc::dart
 

@@ -34,7 +34,7 @@
 
 using tap::motor::DjiMotor;
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 /**
  * Maps max power (in Watts) to max chassis wheel speed (RPM).
@@ -108,13 +108,7 @@ static constexpr float AUTOROTATION_DIAGONAL_SPEED = 0.0f;
  */
 static constexpr float WHEEL_RADIUS = 0.076;
 
-static constexpr float WIDTH_BETWEEN_WHEELS_Y = 0.395f;
-static constexpr float WIDTH_BETWEEN_WHEELS_X = 0.395f;
-
-static constexpr float WHEELBASE_HYPOTENUSE =
-    (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y == 0)
-        ? 1
-        : 2 / (WIDTH_BETWEEN_WHEELS_X + WIDTH_BETWEEN_WHEELS_Y);
+static constexpr float WHEELBASE_RADIUS = 0.395;  // wrong
 
 /*
  * Gimbal offset from the center of the chassis, see note above for explanation of x and y (m).
@@ -133,6 +127,12 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .translationalSpeedThresholdMultiplierForRotationSpeedDecrease = 0.5f,
     .beybladeRampRate = 50,
 };
-}  // namespace aruwsrc::chassis
+
+static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR4;
+static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
+static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+}  // namespace aruwsrc::control::chassis
 
 #endif  // TESTBED_CHASSIS_CONSTANTS_HPP_

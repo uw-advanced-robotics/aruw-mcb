@@ -28,7 +28,7 @@
 #include "aruwsrc/communication/can/turret_mcb_can_comm.hpp"
 #include "modm/math/filter/pid.hpp"
 
-namespace aruwsrc::control
+namespace aruwsrc::control::hopper_cover
 {
 /**
  * Subsystem that wraps a turret hopper cover that is controlled via the
@@ -40,7 +40,7 @@ class TurretMCBHopperSubsystem : public tap::control::Subsystem
 public:
     TurretMCBHopperSubsystem(
         tap::Drivers *drivers,
-        aruwsrc::can::TurretMCBCanComm &turretMCBCanComm)
+        aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm)
         : tap::control::Subsystem(drivers),
           turretMCBCanComm(turretMCBCanComm)
     {
@@ -65,11 +65,11 @@ public:
     bool getIsHopperOpen() const { return hopperOpen; }
 
 private:
-    aruwsrc::can::TurretMCBCanComm &turretMCBCanComm;
+    aruwsrc::communication::can::TurretMCBCanComm &turretMCBCanComm;
 
     bool hopperOpen = false;
 };
 
-}  // namespace aruwsrc::control
+}  // namespace aruwsrc::control::hopper_cover
 
 #endif  // TURRET_MCB_HOPPER_COVER_SUBSYSTEM_HPP_

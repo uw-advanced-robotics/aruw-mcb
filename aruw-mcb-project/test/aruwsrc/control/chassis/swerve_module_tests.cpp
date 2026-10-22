@@ -29,7 +29,7 @@
 using modm::Matrix;
 using modm::Vector3f;
 using tap::algorithms::getSign;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace testing;
 
 class SwerveModuleTest : public Test

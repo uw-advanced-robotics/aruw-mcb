@@ -29,7 +29,7 @@ using namespace tap::algorithms;
 
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
     CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
@@ -125,6 +125,6 @@ void ChassisSubsystem::refresh()
     }
 }
 
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 
 }  // namespace aruwsrc

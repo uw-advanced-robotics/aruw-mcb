@@ -21,10 +21,14 @@
 #define HEAT_LIMIT_GOVERNOR_HPP_
 
 #include <cassert>
+#include <cmath>
 
+#include "tap/architecture/clock.hpp"
 #include "tap/control/governor/command_governor_interface.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/launcher/friction_wheel_interface.hpp"
 #include "aruwsrc/ref_system_constants.hpp"
 
 namespace aruwsrc::control::governor
@@ -33,6 +37,7 @@ namespace aruwsrc::control::governor
  * Governor that blocks Commands from running if the referee-reported heat limit is too high. Use to
  * avoid running commands that cause ref-system overheating.
  */
+template <uint32_t HISTORY_WINDOW_MS = 200>
 class HeatLimitGovernor : public tap::control::governor::CommandGovernorInterface
 {
 public:
@@ -44,11 +49,28 @@ public:
     HeatLimitGovernor(
         tap::Drivers &drivers,
         const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID,
-        const uint16_t heatLimitBuffer)
+        const uint16_t heatLimitBuffer,
+        float heatRateDerivativeTrigger = 130.0f,
+        float ballHeatCostMultiplier = 3.0f,
+        aruwsrc::control::agitator::VelocityAgitatorSubsystem *predictiveAgitator = nullptr,
+        aruwsrc::control::launcher::FrictionWheelInterface *predictiveFrictionWheels = nullptr,
+        float agitatorShotAngle = 0.0f,
+        float frictionWheelShotDropRpm = 200.0f)
         : drivers(drivers),
           firingSystemMechanismID(firingSystemMechanismID),
-          heatLimitBuffer(heatLimitBuffer)
+          heatLimitBuffer(heatLimitBuffer),
+          heatRateDerivativeTrigger(heatRateDerivativeTrigger),
+          ballHeatCostMultiplier(ballHeatCostMultiplier),
+          predictiveAgitator(predictiveAgitator),
+          predictiveFrictionWheels(predictiveFrictionWheels),
+          agitatorShotAngle(agitatorShotAngle),
+          frictionWheelShotDropRpm(frictionWheelShotDropRpm)
     {
+        static_assert(
+            HISTORY_WINDOW_MS >= SAMPLE_INTERVAL_MS,
+            "History window must be larger than sample interval.");
+        assert(agitatorShotAngle >= 0.0f);
+        assert(frictionWheelShotDropRpm >= 0.0f);
     }
 
     bool isReady() final { return enoughHeatToLaunchProjectile(); }
@@ -57,12 +79,46 @@ public:
 
 private:
     tap::Drivers &drivers;
-
     const tap::communication::serial::RefSerialData::Rx::MechanismID firingSystemMechanismID;
-
     const uint16_t heatLimitBuffer;
+    const float heatRateDerivativeTrigger;
+    const float ballHeatCostMultiplier;
 
-    bool enoughHeatToLaunchProjectile() const
+    aruwsrc::control::agitator::VelocityAgitatorSubsystem *predictiveAgitator;
+    aruwsrc::control::launcher::FrictionWheelInterface *predictiveFrictionWheels;
+    const float agitatorShotAngle;
+    const float frictionWheelShotDropRpm;
+
+    static constexpr uint32_t SAMPLE_INTERVAL_MS = 10;  // Minimum time between recording samples
+
+    // Buffer size based on window and interval.
+    static constexpr size_t BUFFER_SIZE = HISTORY_WINDOW_MS / SAMPLE_INTERVAL_MS;
+
+    struct HeatSample
+    {
+        uint32_t timeMs;
+        int32_t heat;  // Signed to easily handle heat drops
+    };
+
+    HeatSample heatHistory[BUFFER_SIZE] = {};
+    size_t historyHead = 0;
+    size_t historyCount = 0;
+    uint32_t lastSampleTimeMs = 0;
+
+    float heatRate = 0.0f;  // Current calculated derivative (heat per second)
+
+    bool predictedHeatInitialized = false;
+    float predictedHeat = 0.0f;
+    float nextPredictedShotAgitatorPosition = 0.0f;
+    float previousFrictionWheelRpm = 0.0f;
+    uint32_t previousPredictedHeatUpdateMs = 0;
+    uint32_t lastPendingPredictedShotTimeMs = 0;
+    uint8_t pendingPredictedShots = 0;
+    u_int16_t currentHeat = 0;
+    static constexpr uint32_t PENDING_PREDICTED_SHOT_TIMEOUT_MS = 250;
+    static constexpr uint32_t HEAT_COOLING_PERIOD_MS = 100;
+
+    bool enoughHeatToLaunchProjectile()
     {
         if (!drivers.refSerial.getRefSerialReceivingData())
         {
@@ -71,35 +127,192 @@ private:
 
         const auto &robotData = drivers.refSerial.getRobotData();
 
-        uint16_t heat = 0, heatLimit = robotData.turret.heatLimit, nextCost = 0;
+        uint16_t heatLimit = robotData.turret.heatLimit;
+        uint16_t nextCost = 0;
+        currentHeat = 0;
 
         switch (firingSystemMechanismID)
         {
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_1:
-                heat = robotData.turret.heat17ID1;
-                nextCost = aruwsrc::constants::HEAT_COST_17MM;
-                break;
-            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM_2:
-                heat = robotData.turret.heat17ID2;
+            case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM:
+                currentHeat = robotData.turret.heat17;
                 nextCost = aruwsrc::constants::HEAT_COST_17MM;
                 break;
             case tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM:
-                heat = robotData.turret.heat42;
+                currentHeat = robotData.turret.heat42;
                 nextCost = aruwsrc::constants::HEAT_COST_42MM;
                 break;
             default:
                 // don't perform heat limiting
-                heat = 0;
+                currentHeat = 0;
                 nextCost = 0;
                 heatLimit = heatLimitBuffer;
         }
 
-        const bool heatBelowLimit = heat + nextCost + heatLimitBuffer <= heatLimit;
+        updateHeatDerivative(currentHeat);
+        updatePredictedHeat(
+            currentHeat,
+            nextCost,
+            robotData.turret.coolingRate,
+            tap::communication::serial::RefSerial::heatAndLimitValid(currentHeat, heatLimit));
 
-        return !tap::communication::serial::RefSerial::heatAndLimitValid(heat, heatLimit) ||
-               heatBelowLimit;
+        /// @todo: remove this hardcode/make this system better thought out
+        if (firingSystemMechanismID ==
+            tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM)
+        {
+            if (heatRate > heatRateDerivativeTrigger)
+            {
+                nextCost = static_cast<uint16_t>(nextCost * ballHeatCostMultiplier);
+            }
+        }
+
+        const bool heatBelowLimit = currentHeat + nextCost + heatLimitBuffer <= heatLimit;
+        const bool predictedHeatBelowLimit =
+            !predictedHeatInitialized || predictedHeat + nextCost + heatLimitBuffer <= heatLimit;
+
+        return !tap::communication::serial::RefSerial::heatAndLimitValid(currentHeat, heatLimit) ||
+               (heatBelowLimit && predictedHeatBelowLimit);
+    }
+
+    bool predictiveHeatEnabled() const
+    {
+        return predictiveAgitator != nullptr && predictiveFrictionWheels != nullptr &&
+               agitatorShotAngle > 0.0f &&
+               firingSystemMechanismID ==
+                   tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_17MM;
+    }
+
+    void updatePredictedHeat(
+        uint16_t refHeat,
+        uint16_t shotHeatCost,
+        uint16_t coolingRate,
+        bool heatAndLimitValid)
+    {
+        if (!predictiveHeatEnabled() || !heatAndLimitValid)
+        {
+            predictedHeatInitialized = false;
+            pendingPredictedShots = 0;
+            return;
+        }
+
+        const uint32_t now = tap::arch::clock::getTimeMilliseconds();
+        const float currentAgitatorPosition = predictiveAgitator->getCurrentValueIntegral();
+        const float currentFrictionWheelRpm =
+            predictiveFrictionWheels->getCurrentAverageFrictionWheelSpeed();
+
+        if (!predictedHeatInitialized)
+        {
+            predictedHeat = refHeat;
+            nextPredictedShotAgitatorPosition = currentAgitatorPosition + agitatorShotAngle;
+            previousFrictionWheelRpm = currentFrictionWheelRpm;
+            previousPredictedHeatUpdateMs = now;
+            predictedHeatInitialized = true;
+            return;
+        }
+
+        const uint32_t elapsedCoolingMs = now - previousPredictedHeatUpdateMs;
+        const uint32_t coolingTicks = elapsedCoolingMs / HEAT_COOLING_PERIOD_MS;
+        if (coolingTicks > 0)
+        {
+            predictedHeat -=
+                static_cast<float>(coolingTicks) * (static_cast<float>(coolingRate) / 10.0f);
+            if (predictedHeat < 0.0f)
+            {
+                predictedHeat = 0.0f;
+            }
+            previousPredictedHeatUpdateMs += coolingTicks * HEAT_COOLING_PERIOD_MS;
+        }
+
+        if (refHeat > predictedHeat)
+        {
+            predictedHeat = refHeat;
+        }
+
+        updatePendingPredictedShots(currentAgitatorPosition, now);
+        confirmPendingPredictedShots(currentFrictionWheelRpm, shotHeatCost);
+
+        previousFrictionWheelRpm = currentFrictionWheelRpm;
+    }
+
+    void updatePendingPredictedShots(float currentAgitatorPosition, uint32_t now)
+    {
+        if (predictiveAgitator->isJammed())
+        {
+            nextPredictedShotAgitatorPosition = currentAgitatorPosition + agitatorShotAngle;
+            pendingPredictedShots = 0;
+            return;
+        }
+
+        while (currentAgitatorPosition >= nextPredictedShotAgitatorPosition)
+        {
+            pendingPredictedShots++;
+            lastPendingPredictedShotTimeMs = now;
+            nextPredictedShotAgitatorPosition += agitatorShotAngle;
+        }
+
+        if (pendingPredictedShots > 0 &&
+            now - lastPendingPredictedShotTimeMs > PENDING_PREDICTED_SHOT_TIMEOUT_MS)
+        {
+            pendingPredictedShots = 0;
+        }
+    }
+
+    void confirmPendingPredictedShots(float currentFrictionWheelRpm, uint16_t shotHeatCost)
+    {
+        if (pendingPredictedShots == 0)
+        {
+            return;
+        }
+
+        const float frictionWheelRpmDrop = previousFrictionWheelRpm - currentFrictionWheelRpm;
+        if (frictionWheelRpmDrop >= frictionWheelShotDropRpm)
+        {
+            predictedHeat += shotHeatCost;
+            pendingPredictedShots--;
+        }
+    }
+
+    /**
+     * @brief Records a sample into the circular buffer if enough time has passed,
+     * and calculates the heat rate over the entire recorded window.
+     */
+    void updateHeatDerivative(uint16_t currentHeat)
+    {
+        uint32_t currentTimeMs = tap::arch::clock::getTimeMilliseconds();
+
+        // Sample rate limiter: only record data if at least SAMPLE_INTERVAL_MS has passed
+        // as to not have a huge buffer
+        if (currentTimeMs - lastSampleTimeMs >= SAMPLE_INTERVAL_MS)
+        {
+            heatHistory[historyHead] = {currentTimeMs, currentHeat};
+            historyHead = (historyHead + 1) % BUFFER_SIZE;
+
+            if (historyCount < BUFFER_SIZE)
+            {
+                historyCount++;
+            }
+            lastSampleTimeMs = currentTimeMs;
+        }
+
+        // Calculate rate based on the oldest and newest sample in the window
+        if (historyCount > 1)
+        {
+            // If buffer isn't full, oldest is at index 0. If full, oldest is at historyHead.
+            size_t oldestIdx = (historyCount < BUFFER_SIZE) ? 0 : historyHead;
+            // Newest is the index just before historyHead
+            size_t newestIdx = (historyHead == 0) ? BUFFER_SIZE - 1 : historyHead - 1;
+
+            const auto &oldest = heatHistory[oldestIdx];
+            const auto &newest = heatHistory[newestIdx];
+
+            float dt = static_cast<float>(newest.timeMs - oldest.timeMs) / 1000.0f;
+
+            if (dt > 0.0f)
+            {
+                heatRate = static_cast<float>(newest.heat - oldest.heat) / dt;
+            }
+        }
     }
 };
 }  // namespace aruwsrc::control::governor
 
-#endif  //  HEAT_LIMIT_GOVERNOR_HPP_
+#endif  // HEAT_LIMIT_GOVERNOR_HPP_

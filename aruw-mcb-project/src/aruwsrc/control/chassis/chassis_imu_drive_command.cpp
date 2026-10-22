@@ -23,14 +23,14 @@
 #include "tap/communication/sensors/imu/mpu6500/mpu6500.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 #include "chassis_rel_drive.hpp"
 #include "holonomic_chassis_subsystem.hpp"
 
 using namespace tap::communication::sensors::imu::mpu6500;
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 ChassisImuDriveCommand::ChassisImuDriveCommand(
     tap::Drivers* drivers,
@@ -164,4 +164,4 @@ void ChassisImuDriveCommand::execute()
 void ChassisImuDriveCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisImuDriveCommand::isFinished() const { return false; }
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

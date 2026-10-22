@@ -34,7 +34,7 @@ namespace aruwsrc::control::client_display
 ClientDisplayCommand::ClientDisplayCommand(
     tap::Drivers &drivers,
     ClientDisplaySubsystem &clientDisplay,
-    std::vector<HudIndicator *> &hudIndicators)
+    std::vector<indicators::HudIndicator *> &hudIndicators)
     : Command(),
       drivers(drivers),
       hudIndicators(hudIndicators),
@@ -54,7 +54,7 @@ void ClientDisplayCommand::initialize()
 
 void ClientDisplayCommand::restartHud()
 {
-    HudIndicator::resetGraphicNameGenerator();
+    indicators::HudIndicator::resetGraphicNameGenerator();
 
     // Initialize all the HUD indicators
     for (auto &indicator : hudIndicators)

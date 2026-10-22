@@ -23,9 +23,9 @@
 
 #include "robot_sim.hpp"
 
-namespace aruwsrc::sim
+namespace aruwsrc::sim_initialization
 {
 void initialize_robot_sim() {}
-}  // namespace aruwsrc::sim
+}  // namespace aruwsrc::sim_initialization
 
 #endif

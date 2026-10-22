@@ -31,19 +31,21 @@
 using namespace tap::algorithms;
 using namespace aruwsrc::control::turret;
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 ChassisAutorotateCommand::ChassisAutorotateCommand(
     tap::Drivers* drivers,
     aruwsrc::control::ControlOperatorInterface* operatorInterface,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    ChassisSymmetry chassisSymmetry)
+    ChassisSymmetry chassisSymmetry,
+    const float angleOffset)
     : drivers(drivers),
       operatorInterface(operatorInterface),
       chassis(chassis),
       yawMotor(yawMotor),
       chassisSymmetry(chassisSymmetry),
+      angleOffset(angleOffset),
       chassisAutorotating(true)
 {
     addSubsystemRequirement(chassis);
@@ -90,7 +92,8 @@ void ChassisAutorotateCommand::execute()
     {
         updateAutorotateState();
 
-        float turretAngleFromCenter = yawMotor->getChassisFrameMeasuredAngle().getWrappedValue();
+        float turretAngleFromCenter =
+            (yawMotor->getChassisFrameMeasuredAngle() + angleOffset).getWrappedValue();
 
         if (chassisAutorotating)
         {
@@ -153,7 +156,10 @@ void ChassisAutorotateCommand::execute()
             rotationLimitedMaxTranslationalSpeed);
 
         // Rotate X and Y depending on turret angle
-        rotateVector(&chassisXDesiredWheelspeed, &chassisYDesiredWheelspeed, turretAngleFromCenter);
+        rotateVector(
+            &chassisXDesiredWheelspeed,
+            &chassisYDesiredWheelspeed,
+            yawMotor->getChassisFrameMeasuredAngle().getWrappedValue());
 
         chassis->setDesiredOutput(
             chassisXDesiredWheelspeed,
@@ -170,4 +176,4 @@ void ChassisAutorotateCommand::end(bool) { chassis->setZeroRPM(); }
 
 bool ChassisAutorotateCommand::isFinished() const { return false; }
 
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis

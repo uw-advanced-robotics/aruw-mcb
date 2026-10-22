@@ -23,9 +23,9 @@
 #include "tap/control/command.hpp"
 
 #include "../algorithms/turret_controller_interface.hpp"
-#include "aruwsrc/algorithms/otto_ballistics_solver.hpp"
+#include "aruwsrc/algorithms/ballistics/cv_ballistics_solver.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
 #include "turret_cv_command_interface.hpp"
 
@@ -50,7 +50,7 @@ namespace aruwsrc::control::launcher
 class LaunchSpeedPredictorInterface;
 }
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class HolonomicChassisSubsystem;
 }
@@ -92,12 +92,14 @@ public:
      * for more information.
      */
     TurretCVCommand(
-        serial::VisionCoprocessor *visionCoprocessor,
+        communication::serial::VisionCoprocessor *visionCoprocessor,
         control::ControlOperatorInterface *controlOperatorInterface,
         RobotTurretSubsystem *turretSubsystem,
-        algorithms::TurretYawControllerInterface *yawController,
-        algorithms::TurretPitchControllerInterface *pitchController,
-        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
+        algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
+            *yawController,
+        algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
+            *pitchController,
+        aruwsrc::algorithms::ballistics::CvBallisticsSolver *ballisticsSolver,
         const float userYawInputScalar,
         const float userPitchInputScalar,
         uint8_t turretID = 0);
@@ -124,17 +126,19 @@ public:
     bool isAimingWithinLaunchingTolerance() const override { return withinAimingTolerance; }
 
 private:
-    serial::VisionCoprocessor *visionCoprocessor;
+    communication::serial::VisionCoprocessor *visionCoprocessor;
     control::ControlOperatorInterface *controlOperatorInterface;
 
     uint8_t turretID;
 
     RobotTurretSubsystem *turretSubsystem;
 
-    algorithms::TurretYawControllerInterface *yawController;
-    algorithms::TurretPitchControllerInterface *pitchController;
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
+        *yawController;
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
+        *pitchController;
 
-    aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver;
+    aruwsrc::algorithms::ballistics::CvBallisticsSolver *ballisticsSolver;
 
     const float userYawInputScalar;
     const float userPitchInputScalar;

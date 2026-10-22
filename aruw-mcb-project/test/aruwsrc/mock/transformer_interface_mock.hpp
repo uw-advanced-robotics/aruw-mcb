@@ -24,16 +24,22 @@
 
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 
 namespace aruwsrc::mock
 {
-class TransformerInterfaceMock : public aruwsrc::algorithms::transforms::TransformerInterface
+class TransformerInterfaceMock
+    : public aruwsrc::algorithms::odometry::transforms::TransformerInterface
 {
 public:
     MOCK_METHOD(modm::Vector2f, getChassisVelocity2d, (), (const override));
     MOCK_METHOD(uint32_t, getLastComputedOdometryTime, (), (const override));
     MOCK_METHOD(tap::algorithms::transforms::Transform&, getWorldToChassis, (), (const override));
+    MOCK_METHOD(
+        tap::algorithms::transforms::Transform&,
+        getWorldToTurretYaw,
+        (uint8_t),
+        (const override));
     MOCK_METHOD(
         tap::algorithms::transforms::Transform&,
         getWorldToTurret,

@@ -24,7 +24,7 @@
 
 #include "tap/drivers.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 enum MessageTypes : uint8_t
 {
@@ -43,6 +43,10 @@ enum MessageTypes : uint8_t
     CAN1_ENCODER_MESSAGE = 12,
     CAN2_ENCODER_MESSAGE = 13,
     VOLTAGE_CURRENT_MESSAGE = 14,
+    ANALOG_SENSOR_MESSAGE = 15,
+    IMU_MOUNTING_TRANSFORM_MESSAGE = 16,
+    MOUNTING_TRANSFORM_CONFIRMED_MESSAGE = 17,
+    DIGITAL_PIN_CONFIG_CONFIRMED_MESSAGE = 18
 };
 
 // CAN Bus message Lite -> MCB
@@ -170,6 +174,52 @@ struct VoltageCurrentMessage
     uint16_t current;
 } modm_packed;
 
-}  // namespace aruwsrc::virtualMCB
+struct AnalogSensorMessage
+{
+    uint16_t ai0;
+    uint16_t ai1;
+
+} modm_packed;
+
+// Servo messages MCB -> Lite
+struct ServoTargetMessage
+{
+    tap::gpio::Pwm::Pin pin;
+    float pwm;
+} modm_packed;
+
+struct ServoRampMessage
+{
+    tap::gpio::Pwm::Pin pin;
+    float minPwm;
+    float maxPwm;
+    float rampSpeed;
+} modm_packed;
+
+// Servo Messages Lite -> MCB
+struct ServoFeedbackMessage
+{
+    tap::gpio::Pwm::Pin pin;
+    float currentPwm;
+    bool isRampTargetMet;
+} modm_packed;
+
+struct IMUMountingTransformMessage
+{
+    float x, y, z;
+    float roll, pitch, yaw;
+} modm_packed;
+
+struct MountingTransformConfirmedMessage
+{
+    uint8_t val;
+} modm_packed;
+
+struct DigitalPinConfigConfirmedMessage
+{
+    uint8_t val;
+} modm_packed;
+
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif  // MESSAGE_TYPES_HPP_

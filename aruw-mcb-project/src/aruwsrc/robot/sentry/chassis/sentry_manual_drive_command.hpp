@@ -26,8 +26,6 @@
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
 #include "aruwsrc/robot/sentry/sentry_control_operator_interface.hpp"
 
-using namespace aruwsrc::control::sentry;
-
 namespace aruwsrc::sentry::chassis
 {
 /**
@@ -39,7 +37,7 @@ public:
     SentryManualDriveCommand(
         tap::Drivers* drivers,
         SentryControlOperatorInterface* operatorInterface,
-        aruwsrc::chassis::HolonomicChassisSubsystem* chassis);
+        aruwsrc::control::chassis::HolonomicChassisSubsystem* chassis);
 
     void initialize() override;
 
@@ -59,7 +57,7 @@ public:
 private:
     tap::Drivers* drivers;
     SentryControlOperatorInterface* operatorInterface;
-    aruwsrc::chassis::HolonomicChassisSubsystem* chassis;
+    aruwsrc::control::chassis::HolonomicChassisSubsystem* chassis;
 };  // class SentryManualDriveCommand
 
 }  // namespace aruwsrc::sentry::chassis

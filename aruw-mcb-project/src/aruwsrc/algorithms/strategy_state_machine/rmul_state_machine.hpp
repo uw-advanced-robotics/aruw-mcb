@@ -22,6 +22,10 @@
 
 #include <array>
 
+#include <span>
+
+#include "tap/architecture/periodic_timer.hpp"
+#include "tap/architecture/timeout.hpp"
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
@@ -65,13 +69,15 @@
 namespace aruwsrc::algorithms::strategy_state_machine
 {
 using namespace tap::communication::serial;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 using namespace aruwsrc::algorithms;
 using namespace tap::algorithms::transforms;
 class RMULStateMachine
 {
 public:
-    RMULStateMachine(RefSerial& refSerial, aruwsrc::serial::VisionCoprocessor& visionCoprocessor)
+    RMULStateMachine(
+        RefSerial& refSerial,
+        aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor)
         : refSerial(refSerial),
           visionCoprocessor(visionCoprocessor)
     {
@@ -83,10 +89,13 @@ public:
 
 private:
     RefSerial& refSerial;
-    aruwsrc::serial::VisionCoprocessor& visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor& visionCoprocessor;
     ChassisAutoNavController* autoNavController;
 
     AutoNavPath path;
+
+    tap::arch::MilliTimeout pathTimeout;
+    tap::arch::PeriodicMilliTimer patrolTimer;
 
     enum State
     {
@@ -94,8 +103,9 @@ private:
         ATTACKING,
     };
     State state = State::ATTACKING;
+    uint8_t patrolState{0};
 
-    void updatePath();
+    void updatePath(const std::span<const Position> points);
 
     bool safeToAttack();
 
@@ -108,19 +118,22 @@ private:
     int PROJECTILE_COUNT_THRESHOLD = 100;  // Minimum number of projectiles to attack
 
     // Speed at which the robot moves when healing, in m/s
-    float SPEED = 1.0f;
+    float SPEED = 5.0f;
 
     const Position RESUPPLY_ZONE = Position(0.75, 7, 0);
     const Position POINT_1 = Position(1.2, 2.1, 0);   // BOTTOM_MIDDLE
     const Position POINT_2 = Position(3.5, 1.5, 0);   // MIDDLE_RIGHT
-    const Position POINT_3 = Position(5, 4.0, 0);     // MIDDLE
-    const Position POINT_4 = Position(5.25, 7.5, 0);  // SIDE_WALL
+    const Position POINT_3 = Position(5.25, 1.1, 0);  // RIGHT SIDE_WALL
+    const Position PATROL_POINTS[2]{
+        POINT_3,
+        POINT_3 - Vector(3, 0.1, 0)};  // BIT BEHIND RIGHT SIDE_WALL
 
-    const std::array<Position, 5> ATTACKING_PATH =
-        {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3, POINT_4};
+    const std::array<const Position, 4> ATTACKING_PATH = {RESUPPLY_ZONE, POINT_1, POINT_2, POINT_3};
 
-    const std::array<Position, 5> HEALING_PATH =
-        {POINT_4, POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
+    const std::array<const Position, 4> HEALING_PATH = {POINT_3, POINT_2, POINT_1, RESUPPLY_ZONE};
+
+    static constexpr uint16_t PATH_LENGTH_MILLIS = 11000;
+    static constexpr uint16_t PATROL_SEGMENT_LENGTH_MILLIS = 5000;
 };
 }  // namespace aruwsrc::algorithms::strategy_state_machine
 

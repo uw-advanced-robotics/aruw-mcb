@@ -22,7 +22,7 @@
 
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 using namespace tap::encoder;
 
@@ -45,6 +45,6 @@ public:
     DISALLOW_COPY_AND_ASSIGN(VirtualCanEncoder)
 };
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif  // VIRTUAL_CAN_ENCODER_HPP_

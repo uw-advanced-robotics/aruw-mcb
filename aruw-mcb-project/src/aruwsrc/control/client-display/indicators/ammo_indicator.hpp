@@ -29,7 +29,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Adds text to show in bright yellow the number of bullets currently the robot has.
@@ -55,7 +55,7 @@ public:
 
 private:
 // X position of the text
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
     static constexpr uint16_t TEXT_X = 611;
     static constexpr uint16_t NUMBER_X = 1018;
 #else
@@ -67,7 +67,7 @@ private:
     // WIDTH of the text
     static constexpr uint16_t WIDTH = 4;
 // SIZE of the text
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
     static constexpr uint16_t SIZE = 80;
 #else
     static constexpr uint16_t SIZE = 40;
@@ -95,6 +95,6 @@ private:
     }
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // AMMO_INDICATOR_HPP_

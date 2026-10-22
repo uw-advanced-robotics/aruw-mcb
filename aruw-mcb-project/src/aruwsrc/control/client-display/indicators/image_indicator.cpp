@@ -25,7 +25,7 @@
 using namespace tap::communication::serial;
 using namespace aruwsrc::control::client_display::images;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 ImageIndicator::ImageIndicator(RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
@@ -88,4 +88,4 @@ modm::ResumableResult<void> ImageIndicator::update()
     RF_END();
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

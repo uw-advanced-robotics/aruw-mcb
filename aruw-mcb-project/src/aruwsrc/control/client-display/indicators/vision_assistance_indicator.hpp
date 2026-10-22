@@ -24,16 +24,16 @@
 #include "tap/communication/serial/ref_serial.hpp"
 
 #include "../projection_utils.hpp"
-#include "aruwsrc/algorithms/odometry/transformer_interface.hpp"
+#include "aruwsrc/algorithms/odometry/transforms/transformer_interface.hpp"
 #include "aruwsrc/communication/inter_robot_comm/inter_robot_transmitter.hpp"
 #include "aruwsrc/communication/serial/vision_coprocessor.hpp"
 #include "modm/processing/resumable.hpp"
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
-using namespace aruwsrc::algorithms::transforms;
+using namespace aruwsrc::algorithms::odometry::transforms;
 using namespace tap::communication::serial;
 using namespace aruwsrc::communication::inter_robot_comm;
 /**
@@ -45,7 +45,7 @@ class VisionAssistanceIndicator : public HudIndicator, protected modm::Resumable
 {
 public:
     VisionAssistanceIndicator(
-        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         RefSerialTransmitter &refSerialTransmitter,
         RefSerial &refSerial,
         const Transform &worldToCameraTransform,
@@ -58,7 +58,7 @@ public:
     modm::ResumableResult<void> sendInitialGraphics() override;
 
 private:
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     RefSerial &refSerial;
     const Transform &worldToCameraTransform;
     InterRobotTransmitter &interRobotTransmitter;
@@ -94,6 +94,6 @@ private:
     uint32_t TIME_CUTOFF_MS = 3000;
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // VISION_ASSISTANCE_INDICATOR_HPP_

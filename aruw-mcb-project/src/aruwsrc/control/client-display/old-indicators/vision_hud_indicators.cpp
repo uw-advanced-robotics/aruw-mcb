@@ -25,13 +25,15 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 VisionHudIndicators::VisionHudIndicators(
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
+    const aruwsrc::algorithms::ballistics::CvBallisticsSolver &ballistics,
     tap::communication::serial::RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter),
-      visionCoprocessor(visionCoprocessor)
+      visionCoprocessor(visionCoprocessor),
+      ballistics(ballistics)
 {
 }
 
@@ -51,7 +53,8 @@ modm::ResumableResult<void> VisionHudIndicators::update()
 
         if (hasTarget)
         {
-            bool shotTimingMode = visionCoprocessor.getSomeTurretUsingTimedShots();
+            bool shotTimingMode = ballistics.getLastComputedSolution().has_value() &&
+                                  ballistics.getLastComputedSolution()->shotWindowValid;
             newVisionIndicatorColor =
                 shotTimingMode ? Tx::GraphicColor::ORANGE : Tx::GraphicColor::GREEN;
         }
@@ -131,4 +134,4 @@ void VisionHudIndicators::initializeVisionHudIndicator(
         graphicData);
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

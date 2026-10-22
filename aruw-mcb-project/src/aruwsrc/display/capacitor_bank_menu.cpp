@@ -25,7 +25,7 @@ namespace aruwsrc::display
 {
 CapacitorBankMenu::CapacitorBankMenu(
     modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-    can::capbank::CapacitorBank *capacitorBank)
+    communication::can::cap_bank::CapacitorBank *capacitorBank)
     : AbstractMenu<tap::display::DummyAllocator<modm::IAbstractView> >(vs, TURRET_MCB_MENU_ID),
       capacitorBank(capacitorBank)
 {
@@ -40,51 +40,49 @@ void CapacitorBankMenu::draw()
 
     display << "Cap Voltage: " << milliVolts << "mV" << modm::endl;
     display << "Output Current: " << milliAmps << "mA" << modm::endl;
-    display << "Max Charge Speed: " << powerLimit << "W" << modm::endl;
+    display << "Avail Power: " << powerLimit << "W" << modm::endl;
     display << "Available Energy: " << availableEnergy << "J" << modm::endl;
     display << "State: ";
 
     switch (this->state)
     {
-        case can::capbank::State::RESET:
+        case communication::can::cap_bank::State::RESET:
             display << "RESET";
             break;
-        case can::capbank::State::SAFE:
-            display << "SAFE";
+        case communication::can::cap_bank::State::STANDBY:
+            display << "STANDBY";
             break;
-        case can::capbank::State::CHARGE:
+        case communication::can::cap_bank::State::CHARGING:
             display << "CHARGE";
             break;
-        case can::capbank::State::CHARGE_DISCHARGE:
-            display << "CHARGE_DISCHARGE";
+        case communication::can::cap_bank::State::BOOST:
+            display << "BOOST";
             break;
-        case can::capbank::State::DISCHARGE:
-            display << "DISCHARGE";
-            break;
-        case can::capbank::State::BATTERY_OFF:
-            display << "BATTERY_OFF";
-            break;
-        case can::capbank::State::DISABLED:
-            display << "DISABLED";
+        case communication::can::cap_bank::State::SAFETY_DISCHARGE:
+            display << "SAFETY_DISCHARGE";
             break;
         default:
             display << "UNKNOWN";
             break;
     }
     display << modm::endl;
+    // Latched fault: cleared by toggling caps off/on (C+SHIFT).
+    display << "Error: " << (this->error ? "YES" : "no") << modm::endl;
 }
 
 void CapacitorBankMenu::update()
 {
     if (this->milliAmps != this->capacitorBank->getCurrent() * 1000 ||
         this->milliVolts != this->capacitorBank->getVoltage() * 1000 ||
-        this->state != this->capacitorBank->getState())
+        this->state != this->capacitorBank->getState() ||
+        this->error != this->capacitorBank->hasError())
     {
         this->milliAmps = this->capacitorBank->getCurrent() * 1000;
         this->milliVolts = this->capacitorBank->getVoltage() * 1000;
-        this->powerLimit = this->capacitorBank->getPowerLimit();
+        this->powerLimit = this->capacitorBank->getAvailableSupplyPower();
         this->availableEnergy = this->capacitorBank->getAvailableEnergy();
         this->state = this->capacitorBank->getState();
+        this->error = this->capacitorBank->hasError();
         this->changed = true;
     }
 }

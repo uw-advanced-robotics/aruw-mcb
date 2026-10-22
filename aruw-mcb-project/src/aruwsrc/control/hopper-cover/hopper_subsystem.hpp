@@ -36,9 +36,7 @@
 
 #include "hopper_test_command.hpp"
 
-namespace aruwsrc
-{
-namespace control
+namespace aruwsrc::control::hopper_cover
 {
 class HopperSubsystem : public tap::control::Subsystem
 {
@@ -96,8 +94,6 @@ private:
     float getClosePWM();
 };
 
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::hopper_cover
 
 #endif  // HOPPER_SUBSYSTEM_HPP_

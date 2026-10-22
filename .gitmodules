@@ -5,3 +5,6 @@
 [submodule "taproot-scripts"]
 	path = taproot-scripts
 	url = https://gitlab.com/aruw/controls/taproot-scripts.git
+[submodule "segger-rtt"]
+	path = segger-rtt
+	url = https://github.com/SEGGERMicro/RTT.git

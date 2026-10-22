@@ -21,7 +21,7 @@
 
 #include "mcb_lite.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 using namespace tap::encoder;
 
@@ -47,4 +47,4 @@ VirtualCanEncoder::VirtualCanEncoder(
 
 void VirtualCanEncoder::initialize() {}
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite

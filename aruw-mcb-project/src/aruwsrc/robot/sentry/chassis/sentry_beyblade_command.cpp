@@ -35,11 +35,11 @@ namespace aruwsrc::sentry::chassis
 {
 SentryBeybladeCommand::SentryBeybladeCommand(
     tap::Drivers* drivers,
-    aruwsrc::chassis::HolonomicChassisSubsystem* chassis,
+    aruwsrc::control::chassis::HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
-    aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
+    aruwsrc::sentry::SentryControlOperatorInterface& operatorInterface,
     const tap::algorithms::transforms::Transform& worldToChassis,
-    const aruwsrc::chassis::BeybladeConfig config)
+    const aruwsrc::control::chassis::BeybladeConfig config)
     : drivers(drivers),
       chassis(chassis),
       yawMotor(yawMotor),
@@ -83,9 +83,11 @@ void SentryBeybladeCommand::execute()
         x *= config.beybladeTranslationalSpeedMultiplier;
         y *= config.beybladeTranslationalSpeedMultiplier;
 
-        const float maxWheelSpeed = aruwsrc::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            aruwsrc::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        const float maxWheelSpeed =
+            aruwsrc::control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+                drivers->refSerial.getRefSerialReceivingData(),
+                aruwsrc::control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(
+                    drivers));
 
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
         // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)

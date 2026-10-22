@@ -21,18 +21,106 @@
 #define DART_CONSTANTS_HPP_
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/communication/gpio/digital.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/motor/servo.hpp"
 
-#include "aruwsrc/control/turret/turret_motor_config.hpp"
-#include "modm/math/geometry/angle.hpp"
-
-namespace aruwsrc::control::turret
+#include "aruwsrc/control/joint/homing/trigger_homed_dual_joint_subsystem.hpp"
+#include "aruwsrc/control/joint/homing/trigger_homed_joint_subsystem.hpp"
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
+namespace aruwsrc::dart
 {
-static constexpr tap::motor::MotorId PULL_MOTOR_ID =
-    tap::motor::MOTOR6;  // TODO: update correct motor
+static constexpr tap::motor::MotorId UPPER_PULL_MOTOR_ID = tap::motor::MOTOR2;
+static constexpr tap::motor::MotorId LOWER_PULL_MOTOR_ID = tap::motor::MOTOR1;
+static constexpr tap::motor::MotorId RELOADER_MOTOR_ID = tap::motor::MOTOR8;
 static constexpr tap::motor::MotorId DEAD_MOTOR1 = tap::motor::MOTOR5;
 static constexpr tap::motor::MotorId DEAD_MOTOR2 = tap::motor::MOTOR4;
-static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+static constexpr tap::can::CanBus RELOADER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+static constexpr tap::can::CanBus LAUNCHER_CAN_BUS = tap::can::CanBus::CAN_BUS2;
+static constexpr int32_t MANUAL_RELEASE_DESIRED_OUTPUT = -5000;
+static constexpr int32_t MANUAL_PULLBACK_DESIRED_OUTPUT = 5000;
+static constexpr tap::algorithms::SmoothPidConfig DART_RELOADER_PID_CONFIG = {
+    .kp = 4000.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxOutput = 2400.0f,
+    .errDeadzone = 0.0f,
+};
+static constexpr float DART_MAGAZINE_TOLERANCE = 0.0125f;
+static constexpr float YAW_INPUT_SENSITIVITY =
+    0.0001;  // mutliplied by joystick input for changing setpoint with manual control
+static constexpr tap::gpio::Digital::InputPin YAW_LIMITSWITCH_PORT =
+    tap::gpio::Digital::InputPin::D;
+static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
+static constexpr float YAW_MOTOR_GEAR_RATIO = tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508;
+static constexpr float YAW_LEADSCREW_THREAD_PITCH = 0.002;  // 2 mm
 
-}  // namespace aruwsrc::control::turret
+static constexpr float LEADSCREW_LENGTH = 0.13926685 * 2.0f;
+static constexpr float DART_LAUNCHER_YAW_RADIAL_LENGTH = 0.763;  // 76.3 cm
+
+static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
+    .kp = 100000.0f,
+    .ki = 0.0f,
+    .kd = 40000.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = 2000.0f,
+    .errDeadzone = 0.00002f,
+    .errorDerivativeFloor = 0.0f,
+};
+
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
+    YAW_HOME_CONFIG = {
+        .super =
+            {
+                .lowerBound = -0.24f,  // these have been tuned
+                .upperBound = 0.00f,
+                .epsilon = 0.00002f,
+                .maxSetpointIncrement = 0.05f,
+                .encoderRatio = YAW_MOTOR_GEAR_RATIO * YAW_LEADSCREW_THREAD_PITCH,
+                .posPidConfig = YAW_PID_CONFIG,
+                .maxOutput = YAW_PID_CONFIG.maxOutput,
+                .staticFeedforward = 0,
+            },
+        .home = 0.0f,
+        .homingSpeed = 0.007f,  // could make this a little faster, but safe speed that homes in a
+                                // reasonable time
+        .homingReversed = true};
+
+static constexpr float MANUAL_PULLBACK_SPEED_MULTIPLIER = 1.0f;
+
+static constexpr float PULLBACK_PULL_POSITION = 0;  // TODO: FIND
+static constexpr float RELEASE_POSITION = 0;        // TODO: FIND
+static constexpr float GRAB_POSITION = -9790.0f;
+static constexpr float RELOAD_POSITION = 0.0f;
+//  * @param[in] pwmRampSpeed The speed in PWM percent per millisecond.
+
+static constexpr float SERVO_MIN = 0.7f;
+static constexpr float SERVO_MAX = 0.99f;
+static constexpr float SERVO_SPEED = 1.0f;
+static constexpr tap::gpio::Pwm::Pin SERVO_PORT = tap::gpio::Pwm::Pin::X;
+static constexpr tap::gpio::Digital::InputPin BEAMBREAK_PORT = tap::gpio::Digital::InputPin::B;
+static constexpr tap::gpio::Digital::InputPin LIMITSWITCH_PORT =
+    tap::gpio::Digital::InputPin::D;  // TODO: update value when limit switch is installed on dart
+
+static constexpr aruwsrc::control::joint::homing::TriggerHomedJointSubsystem::Config
+    PULL_MOTOR_CONFIG{
+        .super =
+            {
+                .lowerBound = 0.0f,
+                .upperBound = 500.0f,
+                .epsilon = 1.0,
+                .posPidConfig{
+                    .kp = 80.0f,
+                    .ki = 0.0f,
+                    .kd = 20.0f,
+                    .maxICumulative = 0.0f,
+                    .maxOutput = 5000.0f},
+                .maxOutput = 5000.0f,
+
+            },
+        .home = 0.0f,
+        .homingSpeed = 50.0f,
+        .homingReversed = true};
+
+}  // namespace aruwsrc::dart
 #endif

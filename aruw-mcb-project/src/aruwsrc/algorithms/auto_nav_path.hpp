@@ -40,6 +40,13 @@ class AutoNavPath
 public:
     AutoNavPath() : setpointData(), pathChanged(false) {}
 
+    template <typename Container>
+    explicit AutoNavPath(const Container& points)
+        : setpointData(std::begin(points), std::end(points)),
+          pathChanged(false)
+    {
+    }
+
     /**
      * Appends the given point to the path.
      */
@@ -66,15 +73,21 @@ public:
      */
     float positionToClosestParameter(const Position pos) const;
 
+    float estimateRobotProgress(const Position robotPos, const float lastRobotParam) const;
+
     /**
      * Returns the point the given distance along the path.
      */
     Position parametertoPosition(const float parameter) const;
 
+    float totalDistance() const;
+
     /**
      * Returns whether the path was updated.
      */
     bool hasChanged() const;
+
+    Position* getFinalPosition();
 
     inline void clearPathChanged() { pathChanged = false; }
 

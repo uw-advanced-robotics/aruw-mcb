@@ -20,11 +20,16 @@
 #ifndef UTIL_MACROS_HPP_
 #define UTIL_MACROS_HPP_
 
+#if defined(TARGET_MOTOR_TESTER) || defined(TARGET_LAUNCHER_TARGET)
+#define SSH1106_OLED
+#endif
+
 /**
  * Define a helper macro that makes it easier to specify at compile time something that should be
  * true for all standards.
  */
-#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_VOID)
+#if defined(TARGET_STANDARD_NULL) || defined(TARGET_STANDARD_PHOBOS) || \
+    defined(TARGET_STANDARD_DEIMOS)
 #define ALL_STANDARDS
 #endif
 
@@ -32,8 +37,13 @@
  * A helper macro that makes it easier to specify at compile time something that should be true for
  * all sentries.
  */
-#if defined(TARGET_SENTRY_ECLIPSE)
+#if defined(TARGET_SENTRY_ACHLYS)
 #define ALL_SENTRIES
+#endif
+
+#if defined(TARGET_HERO_NEPTUNE) || defined(TARGET_DRONE) || defined(ALL_STANDARDS) || \
+    defined(TARGET_SENTRY_ACHLYS)
+#define ALL_TURRETED_ROBOTS
 #endif
 
 #endif  // UTIL_MACROS_HPP_

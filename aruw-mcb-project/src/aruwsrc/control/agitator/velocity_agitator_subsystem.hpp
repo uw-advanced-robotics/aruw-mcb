@@ -20,6 +20,7 @@
 #ifndef VELOCITY_AGITATOR_SUBSYSTEM_HPP_
 #define VELOCITY_AGITATOR_SUBSYSTEM_HPP_
 
+#include "tap/architecture/clock.hpp"
 #include "tap/architecture/conditional_timer.hpp"
 #include "tap/architecture/timeout.hpp"
 #include "tap/control/subsystem.hpp"
@@ -43,7 +44,7 @@ namespace aruwsrc
 class Drivers;
 }
 
-namespace aruwsrc::agitator
+namespace aruwsrc::control::agitator
 {
 /**
  * Subsystem whose primary purpose is to encapsulate an agitator motor that operates using a
@@ -128,6 +129,7 @@ public:
     {
         subsystemJamStatus = false;
         jamChecker.restart();
+        lastProjectileLaunchDetectedAtMs = tap::arch::clock::getTimeMilliseconds();
     }
 
     /**
@@ -172,7 +174,7 @@ private:
      */
     bool agitatorIsCalibrated = false;
 
-    /// Previous time the velocity controller was called, in milliseconds
+    /// Previous time the velocity controller was called
     uint32_t prevTime = 0;
 
     /// The velocity setpoint in radians / second
@@ -180,6 +182,13 @@ private:
 
     /// Runes the velocity PID controller
     void runVelocityPidControl();
+
+    bool checkemptyJamCondition();
+
+    /// Last ref-reported projectile launch timestamp value observed for the configured barrel.
+    uint32_t lastRefLaunchTimestamp = 0;
+    /// Local time in ms when we last observed a projectile launch.
+    uint32_t lastProjectileLaunchDetectedAtMs = 0;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:
@@ -191,6 +200,6 @@ private:
 #endif
 };
 
-}  // namespace aruwsrc::agitator
+}  // namespace aruwsrc::control::agitator
 
 #endif  // VELOCITY_AGITATOR_SUBSYSTEM_HPP_

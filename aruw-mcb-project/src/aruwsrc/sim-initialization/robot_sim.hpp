@@ -22,7 +22,7 @@
 
 #if defined(PLATFORM_HOSTED)
 
-namespace aruwsrc::sim
+namespace aruwsrc::sim_initialization
 {
 void initialize_robot_sim();
 }

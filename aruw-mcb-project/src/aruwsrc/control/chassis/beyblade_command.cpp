@@ -34,16 +34,14 @@
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 BeybladeCommand::BeybladeCommand(
     tap::Drivers* drivers,
     HolonomicChassisSubsystem* chassis,
     const aruwsrc::control::turret::TurretMotor* yawMotor,
     aruwsrc::control::ControlOperatorInterface& operatorInterface,
-    const aruwsrc::chassis::BeybladeConfig config,
+    const aruwsrc::control::chassis::BeybladeConfig config,
     const float rotationMultiplier)
     : drivers(drivers),
       chassis(chassis),
@@ -127,6 +125,4 @@ void BeybladeCommand::execute()
 }
 
 void BeybladeCommand::end(bool) { chassis->setZeroRPM(); }
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

@@ -19,20 +19,69 @@
 
 #include "vision_coprocessor.hpp"
 
+#include <algorithm>
 #include <cassert>
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/drivers.hpp"
 #include "tap/errors/create_errors.hpp"
 
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
 #include "aruwsrc/util_macros.hpp"
 
 using namespace tap::arch;
 using namespace tap::communication::serial;
-using namespace aruwsrc::serial;
+using namespace aruwsrc::communication::serial;
 using tap::arch::clock::getTimeMicroseconds;
 
 VisionCoprocessor* VisionCoprocessor::visionCoprocessorInstance = nullptr;
+
+namespace
+{
+void overrideOwnRobotHp(
+    RefSerialData::Rx::RobotHpData* allRobotHp,
+    const RefSerialData::Rx::RobotData& robotData)
+{
+    RefSerialData::Rx::RobotHpData::RobotHp& ownSideHp =
+        RefSerialData::isBlueTeam(robotData.robotId) ? allRobotHp->blue : allRobotHp->red;
+
+    switch (robotData.robotId)
+    {
+        case RefSerialData::RobotId::RED_HERO:
+            ownSideHp.hero1 = robotData.currentHp;
+            break;
+        case RefSerialData::RobotId::BLUE_HERO:
+            ownSideHp.hero1 = robotData.currentHp;
+            break;
+        case RefSerialData::RobotId::RED_ENGINEER:
+            ownSideHp.engineer2 = robotData.currentHp;
+            break;
+        case RefSerialData::RobotId::BLUE_ENGINEER:
+            ownSideHp.engineer2 = robotData.currentHp;
+            break;
+        case RefSerialData::RobotId::RED_SOLDIER_1:
+            ownSideHp.standard3 = robotData.currentHp;
+            break;
+        case RefSerialData::RobotId::BLUE_SOLDIER_1:
+            ownSideHp.standard3 = robotData.currentHp;
+            break;
+        case RefSerialData::RobotId::RED_SOLDIER_2:
+            ownSideHp.standard4 = robotData.currentHp;
+            break;
+        case RefSerialData::RobotId::BLUE_SOLDIER_2:
+            ownSideHp.standard4 = robotData.currentHp;
+            break;
+        case RefSerialData::RobotId::RED_SENTINEL:
+            ownSideHp.sentry7 = robotData.currentHp;
+            break;
+        case RefSerialData::RobotId::BLUE_SENTINEL:
+            ownSideHp.sentry7 = robotData.currentHp;
+            break;
+        default:
+            break;
+    }
+}
+}  // namespace
 
 #ifndef PLATFORM_HOSTED
 MODM_ISR(EXTI0)
@@ -59,7 +108,7 @@ VisionCoprocessor::VisionCoprocessor(tap::Drivers* drivers)
     // Initialize all aim state to be invalid/unknown
     for (size_t i = 0; i < control::turret::NUM_TURRETS; i++)
     {
-        this->lastAimData[i].pva.updated = 0;
+        this->lastAimData[i].targetState.updated = 0;
         this->lastAimData[i].timestamp = 0;
     }
 }
@@ -143,6 +192,11 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
     }
     lastSetpointData = setpointData;
 
+    if (telemetry && numSetpoints > 0)
+    {
+        telemetry->logSignal("as", setpointData.setpoints[0].x, setpointData.setpoints[0].y);
+    }
+
     if (this->autoNavController != nullptr)
     {
         this->autoNavController->attachPath(&autoNavPath);
@@ -154,17 +208,29 @@ bool VisionCoprocessor::decodeToAutoNavSetpointData(const ReceivedSerialMessage&
 
 bool VisionCoprocessor::decodeToRealsenseArucoData(const ReceivedSerialMessage& message)
 {
-    // copy packet into data field
-    memcpy(&(lastRealsenseArucoData.data), &message.data, sizeof(ArucoResetPacket));
-    lastRealsenseArucoData.updated = true;
-    return true;
+    return decodeToArucoResetData(message, lastRealsenseArucoData);
 }
 
 bool VisionCoprocessor::decodeToArducamArucoData(const ReceivedSerialMessage& message)
 {
-    // copy packet into data field
-    memcpy(&(lastArducamArucoData.data), &message.data, sizeof(ArucoResetPacket));
-    lastArducamArucoData.updated = true;
+    return decodeToArucoResetData(message, lastArducamArucoData);
+}
+
+bool VisionCoprocessor::decodeToArucoResetData(
+    const ReceivedSerialMessage& message,
+    ArucoResetData& resetData)
+{
+    if (message.header.dataLength < sizeof(ArucoResetPacket))
+    {
+        return false;
+    }
+
+    memcpy(&resetData.data, &message.data, sizeof(ArucoResetPacket));
+    resetData.updated = true;
+    if (telemetry)
+    {
+        telemetry->logSignal("atid", lastArducamArucoData.data.turretId);
+    }
     return true;
 }
 
@@ -187,8 +253,7 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
     for (int j = 0; j < control::turret::NUM_TURRETS; j++)
     {
         uint8_t flags = message.data[currIndex];
-        lastAimData[j].pva.updated = 0;
-        lastAimData[j].timing.updated = 0;
+        lastAimData[j].targetState.updated = 0;
 
         currIndex += messageWidths::FLAGS_BYTES;
         memcpy(&lastAimData[j].timestamp, &message.data[currIndex], messageWidths::TIMESTAMP_BYTES);
@@ -200,12 +265,11 @@ bool VisionCoprocessor::decodeToTurretAimData(const ReceivedSerialMessage& messa
                 switch (i)
                 {
                     case 0:
-                        memcpy(&lastAimData[j].pva, &message.data[currIndex], LEN_FIELDS[i]);
-                        lastAimData[j].pva.updated = 1;
-                        break;
-                    case 1:
-                        memcpy(&lastAimData[j].timing, &message.data[currIndex], LEN_FIELDS[i]);
-                        lastAimData[j].timing.updated = 1;
+                        memcpy(
+                            &lastAimData[j].targetState,
+                            &message.data[currIndex],
+                            LEN_FIELDS[i]);
+                        lastAimData[j].targetState.updated = 1;
                         break;
                 }
                 currIndex += (int)LEN_FIELDS[i];
@@ -228,6 +292,22 @@ void VisionCoprocessor::sendMessage()
 }
 
 bool VisionCoprocessor::isCvOnline() const { return !cvOfflineTimeout.isExpired(); }
+
+void VisionCoprocessor::logRefereeTelemetry()
+{
+    if (!telemetry)
+    {
+        return;
+    }
+
+    auto& rxData = drivers->refSerial.getRobotData();
+
+    telemetry->logSignal("hp", rxData.currentHp);
+    telemetry->logSignal("hu", std::max(rxData.turret.heat17, rxData.turret.heat42));
+    telemetry->logSignal("hl", rxData.turret.heatLimit);
+    telemetry->logSignal("bs", rxData.turret.bulletSpeed);
+    telemetry->logSignal("pb", rxData.chassis.powerBuffer);
+}
 
 void VisionCoprocessor::sendShutdownMessage()
 {
@@ -278,7 +358,7 @@ void VisionCoprocessor::sendOdometryData()
 
     odometryMessage.messageType = CV_MESSAGE_TYPE_ODOMETRY_DATA;
 
-    auto& worldToChassis = transformer->getWorldToChassis();
+    auto& worldToChassis = transformer->getVisionWorldToChassis();
 
     // chassis odometry
     odometryData->timestamp = getTimeMicroseconds();
@@ -319,10 +399,9 @@ void VisionCoprocessor::sendHealthMessage()
     {
         DJISerial::SerialMessage<sizeof(RefSerialData::Rx::RobotHpData::RobotHp) * 2> healthMessage;
         healthMessage.messageType = CV_MESSAGE_TYPES_HEALTH_DATA;
-        memcpy(
-            &healthMessage.data,
-            &drivers->refSerial.getRobotData().allRobotHp,
-            sizeof(healthMessage.data));
+        RefSerialData::Rx::RobotHpData allRobotHp = drivers->refSerial.getRobotData().allRobotHp;
+        overrideOwnRobotHp(&allRobotHp, drivers->refSerial.getRobotData());
+        memcpy(&healthMessage.data, &allRobotHp, sizeof(healthMessage.data));
         healthMessage.setCRC16();
         drivers->uart.write(
             VISION_COPROCESSOR_TX_UART_PORT,
@@ -358,6 +437,8 @@ void VisionCoprocessor::sendRefereeRealtimeData()
         data->stageRemainTime = gameData.stageTimeRemaining;
         data->unixTime = gameData.unixTime;
         data->powerSupplyStatus = robotData.robotPower.value;
+
+        logRefereeTelemetry();
 
         message.setCRC16();
         drivers->uart.write(
@@ -461,7 +542,7 @@ void VisionCoprocessor::sendBulletsRemaining()
             bulletsRemainMessage;
         bulletsRemainMessage.messageType = CV_MESSAGE_TYPES_BULLETS_REMAINING;
 
-#if defined(TARGET_HERO_ZERO)
+#if defined(TARGET_HERO_NEPTUNE)
         const uint16_t* bulletsRemaining =
             &drivers->refSerial.getRobotData().turret.bulletsRemaining42;
 #else

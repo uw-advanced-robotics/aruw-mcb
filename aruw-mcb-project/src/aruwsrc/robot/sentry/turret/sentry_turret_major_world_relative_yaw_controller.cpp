@@ -19,7 +19,7 @@
 #include "sentry_turret_major_world_relative_yaw_controller.hpp"
 
 using namespace tap::algorithms;
-using namespace aruwsrc::chassis;
+using namespace aruwsrc::control::chassis;
 
 namespace aruwsrc::sentry::turret
 {
@@ -27,27 +27,21 @@ TurretMajorWorldFrameController::TurretMajorWorldFrameController(
     const transforms::Transform& worldToMajor,
     const HolonomicChassisSubsystem& chassis,
     aruwsrc::control::turret::TurretMotor& yawMotor,
-    tap::communication::sensors::imu::ImuInterface& turretMajorIMU,
-    const SentryTurretMinorSubsystem& turretLeft,
-    const SentryTurretMinorSubsystem& turretRight,
+    tap::communication::sensors::imu::AbstractIMU& turretMajorIMU,
+    const SentryTurretMinorSubsystem& turretWidow,
     SmoothPid& positionPid,
     SmoothPid& velocityPid,
-    float maxVelErrorInput,
-    float minorMajorTorqueRatio,
-    float feedforwardGain)
-    : TurretYawControllerInterface(yawMotor),
+    float maxVelErrorInput)
+    : TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>(yawMotor),
       worldToMajor(worldToMajor),
       chassis(chassis),
       yawMotor(yawMotor),
       turretMajorIMU(turretMajorIMU),
-      turretLeft(turretLeft),
-      turretRight(turretRight),
+      turretWidow(turretWidow),
       positionPid(positionPid),
       velocityPid(velocityPid),
       worldFrameSetpoint(0, 0.0, M_TWOPI),
-      maxVelErrorInput(maxVelErrorInput),
-      minorMajorTorqueRatio(minorMajorTorqueRatio),
-      feedforwardGain(feedforwardGain)
+      maxVelErrorInput(maxVelErrorInput)
 {
     assert(maxVelErrorInput >= 0);
 }
@@ -66,11 +60,11 @@ void TurretMajorWorldFrameController::initialize()
     }
 }
 
-// @todo implement separate controller with limiting or refactor elsewhere
-//       rationale: it is not at all intuitive or expected for angle limiting to occur here; makes
-//       code difficult to trace, follow, and maintain
+/// @todo implement separate controller with limiting or refactor elsewhere
+///       rationale: it is not at all intuitive or expected for angle limiting to occur here; makes
+///       code difficult to trace, follow, and maintain
 void TurretMajorWorldFrameController::runController(
-    const uint32_t dt,
+    const float dt,
     const WrappedFloat desiredSetpoint)
 {
     worldFrameSetpoint = desiredSetpoint;
@@ -88,18 +82,7 @@ void TurretMajorWorldFrameController::runController(
     const float velocityPidOutput =
         velocityPid.runControllerDerivateError(velocityControllerError, dt);
 
-    torqueCompensation =
-        turretLeft.yawMotor.getMotorOutput() + turretRight.yawMotor.getMotorOutput();
-    if (abs(torqueCompensation) < 3000)  // @todo make a config
-    {
-        torqueCompensation = 0;
-    }
-    // @note: in case things look weird, try adding the chassis' rotational velocity to
-    // setMotorOutput
-    turretMotor.setMotorOutput(
-        velocityPidOutput + minorMajorTorqueRatio * torqueCompensation +
-        feedforwardGain * turretMotor.getMotorOutput());
-    // @todo: it would be nice to have a final maxOutput for this controller
+    turretMotor.setMotorOutput(velocityPidOutput);
 }
 
 // @todo what's the point of this; overridden by runController anyways?
@@ -115,6 +98,11 @@ WrappedFloat TurretMajorWorldFrameController::getMeasurement() const
     return yawMotor.getChassisFrameMeasuredAngle() + worldToMajor.getYaw();
 }
 
-bool TurretMajorWorldFrameController::isOnline() const { return turretMotor.isOnline(); }
+bool TurretMajorWorldFrameController::isOnline() const
+{
+    return turretMotor.isOnline() &&
+           turretMajorIMU.getImuState() !=
+               tap::communication::sensors::imu::AbstractIMU::ImuState::IMU_NOT_CONNECTED;
+}
 
 }  // namespace aruwsrc::sentry::turret

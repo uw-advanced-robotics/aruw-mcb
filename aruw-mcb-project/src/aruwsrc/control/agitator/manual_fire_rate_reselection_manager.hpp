@@ -41,6 +41,8 @@ public:
     /// Sets fire rate and limits any negative fire rate to 0. Fire rate in rounds per second.
     mockable inline void setFireRate(float fireRate) { this->fireRate = std::max(0.0f, fireRate); }
 
+    inline float getFireRateRps() final_mockable { return fireRate; }
+
     /// @return the set fire rate period (time distance between launching projectiles) in
     /// milliseconds
     inline uint32_t getFireRatePeriod() final_mockable { return rpsToPeriodMS(fireRate); }

@@ -38,9 +38,7 @@
 
 #include "agitator_test_command.hpp"
 
-namespace aruwsrc
-{
-namespace agitator
+namespace aruwsrc::control::agitator
 {
 /**
  * Subsystem whose primary purpose is to encapsulate an agitator motor
@@ -217,8 +215,6 @@ private:
     AgitatorTestCommand agitatorTestCommand;
 };  // class AgitatorSubsystem
 
-}  // namespace agitator
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::agitator
 
 #endif  // AGITATOR_SUBSYSTEM_HPP_

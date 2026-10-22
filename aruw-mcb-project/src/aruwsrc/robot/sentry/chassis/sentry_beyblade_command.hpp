@@ -40,11 +40,11 @@ class SentryBeybladeCommand : public tap::control::Command
 public:
     SentryBeybladeCommand(
         tap::Drivers* drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem* chassis,
+        aruwsrc::control::chassis::HolonomicChassisSubsystem* chassis,
         const aruwsrc::control::turret::TurretMotor* yawMotor,
-        aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface,
+        aruwsrc::sentry::SentryControlOperatorInterface& operatorInterface,
         const tap::algorithms::transforms::Transform& worldToChassis,
-        const aruwsrc::chassis::BeybladeConfig config);
+        const aruwsrc::control::chassis::BeybladeConfig config);
 
     /**
      * Sets rotational input target on Ramp
@@ -69,11 +69,11 @@ private:
     tap::algorithms::Ramp rotateSpeedRamp;
 
     tap::Drivers* drivers;
-    aruwsrc::chassis::HolonomicChassisSubsystem* chassis;
+    aruwsrc::control::chassis::HolonomicChassisSubsystem* chassis;
     const aruwsrc::control::turret::TurretMotor* yawMotor;
-    aruwsrc::control::sentry::SentryControlOperatorInterface& operatorInterface;
+    aruwsrc::sentry::SentryControlOperatorInterface& operatorInterface;
     const tap::algorithms::transforms::Transform& worldToChassis;
-    const aruwsrc::chassis::BeybladeConfig config;
+    const aruwsrc::control::chassis::BeybladeConfig config;
 };  // class BeybladeCommand
 
 }  // namespace aruwsrc::sentry::chassis

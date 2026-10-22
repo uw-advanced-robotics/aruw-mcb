@@ -19,7 +19,7 @@
 
 #include "buzzer_subsystem.hpp"
 
-#include "tap/control/subsystem.hpp"
+#include "tap/communication/sensors/buzzer/buzzer.hpp"
 
 namespace aruwsrc::control::buzzer
 {

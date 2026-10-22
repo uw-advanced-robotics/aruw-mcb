@@ -30,12 +30,14 @@ class TurretCVCommandMock : public aruwsrc::control::turret::cv::TurretCVCommand
 {
 public:
     TurretCVCommandMock(
-        serial::VisionCoprocessor *visionCoprocessor,
-        control::ControlOperatorInterface *controlOperatorInterface,
-        aruwsrc::control::turret::RobotTurretSubsystem *turretSubsystem,
-        aruwsrc::control::turret::algorithms::TurretYawControllerInterface *yawController,
-        aruwsrc::control::turret::algorithms::TurretPitchControllerInterface *pitchController,
-        aruwsrc::algorithms::OttoBallisticsSolver *ballisticsSolver,
+        communication::serial::VisionCoprocessor* visionCoprocessor,
+        control::ControlOperatorInterface* controlOperatorInterface,
+        aruwsrc::control::turret::RobotTurretSubsystem* turretSubsystem,
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            tap::algorithms::transforms::Axis::YAW>* yawController,
+        aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+            tap::algorithms::transforms::Axis::PITCH>* pitchController,
+        aruwsrc::algorithms::ballistics::CvBallisticsSolver* ballisticsSolver,
         const float userPitchInputScalar,
         const float userYawInputScalar,
         uint8_t turretID = 0);

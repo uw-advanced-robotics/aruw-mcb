@@ -19,108 +19,306 @@
 
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
 
-namespace aruwsrc::control::engineer
+#include "tap/algorithms/math_user_utils.hpp"
+
+#include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
+
+using namespace tap::algorithms;
+using namespace aruwsrc::control::chassis;
+
+namespace aruwsrc::engineer
 {
 bool EngineerControlOperatorInterface::isDriveMode()
 {
-    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN &&
-           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) != Remote::SwitchState::UP;
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::DOWN;
 }
 
-bool EngineerControlOperatorInterface::isGantryControlMode()
+bool EngineerControlOperatorInterface::isExtensionWristControlMode()
 {
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
-           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) != Remote::SwitchState::UP;
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID;
 }
 
-bool EngineerControlOperatorInterface::isWristControlMode()
+bool EngineerControlOperatorInterface::isCubeStorageControlMode()
 {
     return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP &&
-           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) != Remote::SwitchState::UP;
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::MID;
 }
 
-float EngineerControlOperatorInterface::getCubeLiftVelocity()
+float EngineerControlOperatorInterface::getCubeStorageVelocity()
 {
-    if (isGantryControlMode())
-        return drivers->remote.getChannel(Remote::Channel::WHEEL);
-    else
-        return 0.0f;
+    if (!isCubeStorageControlMode()) return 0.0f;
+
+    return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
 }
 
-float EngineerControlOperatorInterface::getGantryLiftVelocity()
+float EngineerControlOperatorInterface::getExtensionVelocity()
 {
-    if (isGantryControlMode())
-        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
-    else
-        return 0.0f;
+    if (!isExtensionWristControlMode()) return 0.0f;
+
+    return drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL);
 }
 
-float EngineerControlOperatorInterface::getGantryExtensionVelocity()
+bool EngineerControlOperatorInterface::getGantryKeyIn()
 {
-    if (isGantryControlMode())
-        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
-    else
-        return 0.0f;
+    return drivers->remote.keyPressed(Remote::Key::B);
 }
 
-float EngineerControlOperatorInterface::getWristPitchVelocity()
+bool EngineerControlOperatorInterface::getGantryKeyOut()
 {
-    if (isWristControlMode())
-        return drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
-    else
-        return 0.0f;
+    return drivers->remote.keyPressed(Remote::Key::G);
 }
 
-float EngineerControlOperatorInterface::getWristYawVelocity()
+bool EngineerControlOperatorInterface::getShiftKey()
 {
-    if (isWristControlMode())
-        return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
-    else
-        return 0.0f;
+    return drivers->remote.keyPressed(Remote::Key::SHIFT);
 }
 
-float EngineerControlOperatorInterface::getWristRollVelocity()
+float EngineerControlOperatorInterface::getWristTheta2Velocity()
 {
-    if (isWristControlMode())
-        return drivers->remote.getChannel(Remote::Channel::WHEEL);
-    else
-        return 0.0f;
+    if (!isExtensionWristControlMode()) return 0.0f;
+
+    return -drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL);
 }
 
+float EngineerControlOperatorInterface::getWristTheta1Velocity()
+{
+    if (!isExtensionWristControlMode()) return 0.0f;
+
+    return -drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL);
+}
+
+float EngineerControlOperatorInterface::getWristTheta3Velocity()
+{
+    if (!isExtensionWristControlMode()) return 0.0f;
+
+    return drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL);
+}
+
+bool EngineerControlOperatorInterface::isIKTranslationMode() const
+{
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::MID &&
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN;
+}
+bool EngineerControlOperatorInterface::isIKRotationMode() const
+{
+    return drivers->remote.getSwitch(Remote::Switch::LEFT_SWITCH) == Remote::SwitchState::UP &&
+           drivers->remote.getSwitch(Remote::Switch::RIGHT_SWITCH) == Remote::SwitchState::DOWN;
+}
+
+float EngineerControlOperatorInterface::getIKVelX() const
+{
+    return isIKTranslationMode()
+               ? drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL) * MAX_IK_TRANSLATION_VEL
+               : 0;
+}
+float EngineerControlOperatorInterface::getIKVelY() const
+{
+    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) *
+                                       MAX_IK_TRANSLATION_VEL
+                                 : 0;
+}
+float EngineerControlOperatorInterface::getIKVelZ() const
+{
+    return isIKTranslationMode() ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) *
+                                       MAX_IK_TRANSLATION_VEL
+                                 : 0;
+}
+float EngineerControlOperatorInterface::getIKVelRoll() const
+{
+    return isIKRotationMode()
+               ? drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL) * MAX_IK_ROTATION_VEL
+               : 0;
+}
+float EngineerControlOperatorInterface::getIKVelPitch() const
+{
+    return isIKRotationMode()
+               ? drivers->remote.getChannel(Remote::Channel::RIGHT_VERTICAL) * MAX_IK_ROTATION_VEL
+               : 0;
+}
+float EngineerControlOperatorInterface::getIKVelYaw() const
+{
+    return isIKRotationMode()
+               ? drivers->remote.getChannel(Remote::Channel::RIGHT_HORIZONTAL) * MAX_IK_ROTATION_VEL
+               : 0;
+}
+
+// this is basically the same thing as getChassisXInput in the basic control operator interface, but
+// uh... we wanted sprint to work so hopefully the two don't get too out of sync
 float EngineerControlOperatorInterface::getChassisXInput()
 {
-    if (isDriveMode())
+    uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisXInputCalledTime;
+    prevChassisXInputCalledTime = currTime;
+
+    if (prevUpdateCounterX != updateCounter)
     {
-        return ControlOperatorInterface::getChassisXInput();
+        if (isDriveMode())
+        {
+            chassisXInput.update(
+                drivers->remote.getChannel(Remote::Channel::LEFT_VERTICAL),
+                currTime);
+        }
+        else
+        {
+            chassisXInput.update(0, currTime);
+        }
+        prevUpdateCounterX = updateCounter;
+    }
+
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
+
+    const float maxChassisSpeed =
+        aruwsrc::control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            aruwsrc::control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+
+    float finalX = maxChassisSpeed *
+                   limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisXInputRamp.setTarget(applyChassisSpeedScaling(finalX));
+
+    ControlOperatorInterface::applyAccelerationToRamp(
+        chassisXInputRamp,
+        MAX_ACCELERATION_X,
+        MAX_DECELERATION_X,
+        static_cast<float>(dt) / 1E3F);
+
+    float xInput = chassisXInputRamp.getValue();
+
+    if (drivers->remote.keyPressed(Remote::Key::R))
+    {
+        return xInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return 0.0f;
+        return xInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
+
+    return 0;
 }
 
 float EngineerControlOperatorInterface::getChassisYInput()
 {
-    if (isDriveMode())
+    uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisYInputCalledTime;
+    prevChassisYInputCalledTime = currTime;
+
+    if (prevUpdateCounterY != updateCounter)
     {
-        return ControlOperatorInterface::getChassisYInput();
+        if (isDriveMode())
+        {
+            chassisYInput.update(
+                -drivers->remote.getChannel(Remote::Channel::LEFT_HORIZONTAL),
+                currTime);
+        }
+        else
+        {
+            chassisYInput.update(0, currTime);
+        }
+
+        prevUpdateCounterY = updateCounter;
+    }
+
+    float keyInput =
+        drivers->remote.keyPressed(Remote::Key::A) - drivers->remote.keyPressed(Remote::Key::D);
+
+    const float maxChassisSpeed =
+        aruwsrc::control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            aruwsrc::control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+
+    float finalY = maxChassisSpeed *
+                   limitVal(chassisYInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisYInputRamp.setTarget(applyChassisSpeedScaling(finalY));
+
+    applyAccelerationToRamp(
+        chassisYInputRamp,
+        MAX_ACCELERATION_Y,
+        MAX_DECELERATION_Y,
+        static_cast<float>(dt) / 1E3F);
+
+    float yInput = chassisYInputRamp.getValue();
+    if (drivers->remote.keyPressed(Remote::Key::R))
+    {
+        return yInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return 0.0f;
+        return yInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 }
 
 float EngineerControlOperatorInterface::getChassisRInput()
 {
+    uint32_t updateCounter = drivers->remote.getUpdateCounter();
+    uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
+    uint32_t dt = currTime - prevChassisRInputCalledTime;
+    prevChassisRInputCalledTime = currTime;
+
+    if (prevUpdateCounterR != updateCounter)
+    {
+        chassisRInput.update(0, currTime);
+        prevUpdateCounterR = updateCounter;
+    }
+
+    float keyInput = 0.0f;
     if (isDriveMode())
     {
-        return ControlOperatorInterface::getChassisRInput();
+        keyInput =
+            drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
+    }
+
+    const float maxChassisSpeed =
+        aruwsrc::control::chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
+            drivers->refSerial.getRefSerialReceivingData(),
+            aruwsrc::control::chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+
+    float finalR = maxChassisSpeed *
+                   limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
+
+    chassisRInputRamp.setTarget(finalR);
+
+    applyAccelerationToRamp(
+        chassisRInputRamp,
+        MAX_ACCELERATION_R,
+        MAX_DECELERATION_R,
+        static_cast<float>(dt) / 1E3);
+
+    float rInput = chassisRInputRamp.getValue();
+    if (drivers->remote.keyPressed(Remote::Key::R))
+    {
+        return rInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return 0.0f;
+        return rInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 }
 
-}  // namespace aruwsrc::control::engineer
+float EngineerControlOperatorInterface::getTurretYawInput(uint8_t turretID)
+{
+    if (!isDriveMode())
+    {
+        return 0.0f;
+    }
+
+    return ControlOperatorInterface::getTurretYawInput(turretID);
+}
+
+float EngineerControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
+{
+    if (!isDriveMode())
+    {
+        return 0.0f;
+    }
+
+    return ControlOperatorInterface::getTurretPitchInput(turretID);
+}
+
+}  // namespace aruwsrc::engineer

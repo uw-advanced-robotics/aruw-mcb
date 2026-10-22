@@ -19,9 +19,7 @@
 
 #include "hopper_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace control
+namespace aruwsrc::control::hopper_cover
 {
 HopperSubsystem::HopperSubsystem(
     tap::Drivers* drivers,
@@ -47,6 +45,4 @@ float HopperSubsystem::getOpenPWM() { return hopper.getMaxPWM(); }
 
 float HopperSubsystem::getClosePWM() { return hopper.getMinPWM(); }
 
-}  // namespace control
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::hopper_cover

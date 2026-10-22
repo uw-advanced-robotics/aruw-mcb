@@ -25,7 +25,7 @@
 
 #include "virtual_analog.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 class VirtualCurrentSensor : public tap::communication::sensors::current::CurrentSensorInterface
 {
@@ -75,6 +75,6 @@ private:
 
     float current = 0;
 };
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif  // VIRTUAL_CURRENT_SENSOR_HPP_

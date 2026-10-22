@@ -36,9 +36,7 @@
 #include "tap/motor/dji_motor.hpp"
 #endif
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 /**
  *
@@ -180,8 +178,6 @@ private:
 
 };  // class SwerveModule
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
 
 #endif  // SWERVE_MODULE_HPP_

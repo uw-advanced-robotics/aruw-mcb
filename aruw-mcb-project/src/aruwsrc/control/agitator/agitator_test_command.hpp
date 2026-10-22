@@ -24,9 +24,7 @@
 #include "tap/control/command.hpp"
 #include "tap/control/setpoint/interfaces/setpoint_subsystem.hpp"
 
-namespace aruwsrc
-{
-namespace agitator
+namespace aruwsrc::control::agitator
 {
 class AgitatorTestCommand : public tap::control::Command
 {
@@ -58,8 +56,6 @@ private:
     tap::control::setpoint::SetpointSubsystem* subsystem;
 };  // class AgitatorTestCommand
 
-}  // namespace agitator
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::agitator
 
 #endif  // AGITATOR_TEST_COMMAND_HPP_

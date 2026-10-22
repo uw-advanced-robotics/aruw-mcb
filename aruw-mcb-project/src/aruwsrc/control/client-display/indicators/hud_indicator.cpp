@@ -21,7 +21,7 @@
 
 #include <cstdint>
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 uint32_t HudIndicator::currGraphicName = 0;
 
@@ -47,4 +47,4 @@ void HudIndicator::getUnusedGraphicName(uint8_t graphicName[3])
     }
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

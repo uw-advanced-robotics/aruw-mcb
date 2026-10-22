@@ -21,24 +21,44 @@
 
 #include "tap/control/subsystem.hpp"
 
-#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transforms.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+
+#include "sentry_transforms.hpp"
 
 namespace aruwsrc::sentry::algorithms::odometry
 {
 class SentryTransformSubystem : public tap::control::Subsystem
 {
 public:
-    SentryTransformSubystem(tap::Drivers& drivers, SentryTransforms& transformer)
+    SentryTransformSubystem(
+        tap::Drivers& drivers,
+        SentryTransforms& transformer,
+        aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr)
         : tap::control::Subsystem(&drivers),
-          transformer(transformer)
+          transformer(transformer),
+          telemetry(telemetry)
     {
     }
 
     inline void initialize() override { transformer.initialize(); };
-    inline void refresh() override { transformer.updateTransforms(); };
+    inline void refresh() override
+    {
+        transformer.updateTransforms();
+
+        if (telemetry != nullptr)
+        {
+            const Transform& worldToChassis = transformer.getWorldToChassis();
+            telemetry->logSignal(
+                "o",
+                worldToChassis.getX(),
+                worldToChassis.getY(),
+                worldToChassis.getYaw());
+        }
+    };
 
 private:
     SentryTransforms& transformer;
+    aruwsrc::communication::rtt::RttTelemetry* telemetry;
 };
 
 }  // namespace aruwsrc::sentry::algorithms::odometry

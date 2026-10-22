@@ -29,6 +29,7 @@
 #include "modm/ui/menu/abstract_menu.hpp"
 
 #include "dummy_allocator.hpp"
+#include "motor_specific_menu.hpp"
 #include "vertical_scroll_logic_handler.hpp"
 
 namespace tap
@@ -73,6 +74,7 @@ private:
     uint8_t can2PrevDisplayedStatus;
 
     void drawMotor(tap::can::CanBus canBus, int normalizedMotorId);
+    MotorSpecificMenu motorSpecificMenu;
 };
 }  // namespace display
 }  // namespace tap

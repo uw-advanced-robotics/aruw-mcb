@@ -26,10 +26,12 @@
 
 #include "aruwsrc/algorithms/auto_nav_path.hpp"
 #include "aruwsrc/algorithms/interpolate.hpp"
+#include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/chassis/beyblade_config.hpp"
 #include "aruwsrc/control/chassis/holonomic_chassis_subsystem.hpp"
+#include "aruwsrc/robot/sentry/algorithms/odometry/sentry_transform_adapter.hpp"
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 class ChassisAutoNavController
 {
@@ -38,21 +40,31 @@ public:
     const float LOOKAHEAD_DISTANCE = 0.2f;
 
     // how long the controller takes to smoothly transition to an updated path
-    const uint32_t PATH_TRANSITION_TIME_MILLIS = 400;
+    const uint32_t PATH_TRANSITION_TIME_MILLIS = 0;
 
     // distance from setpoint under which robot is considered "on target"
     const float POS_ERROR_THRESHOLD = 0.01;
 
+    const float MAX_TRANSLATION_ACCELERATION = 1.0f;
+
     inline ChassisAutoNavController(
         tap::Drivers& drivers,
-        aruwsrc::chassis::HolonomicChassisSubsystem& chassis,
-        const Transform& worldToChassis,
-        const aruwsrc::chassis::BeybladeConfig beybladeConfig)
+        HolonomicChassisSubsystem& chassis,
+        const tap::algorithms::transforms::Transform& worldToChassis,
+        const aruwsrc::control::chassis::BeybladeConfig beybladeConfig,
+        aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem,
+        float capBankEnergyThreshold,
+        float capBankTranslationalVelocityThreshold)
         : chassis(chassis),
+          lastParameter(0),
           lastSetPoint(Position(-1, -1, 0)),
           drivers(drivers),
           worldToChassis(worldToChassis),
-          beybladeConfig(beybladeConfig)
+          beybladeConfig(beybladeConfig),
+          capBankSubsystem(capBankSubsystem),
+          capBankEnergyThreshold(capBankEnergyThreshold),
+          capBankTranslationalVelocityThreshold(capBankTranslationalVelocityThreshold)
+
     {
     }
 
@@ -63,32 +75,45 @@ public:
         const bool movementEnabled,
         const bool beybladeEnabled);
 
+    void stop();
+
     Position calculateSetPoint(
         Position current,
         float interpolationParameter,
         bool movementEnabled);
 
+    bool atSetpoint();
+
+    void pushPoint(Position newPoint);
     // Sets the maximum speed the chassis moves at, in units of Meters per Second
-    inline void setDesiredSpeed(float speed) { this->desiredSpeed = speed; }
+    inline void setDesiredSpeed(float speed) { this->translateSpeedRamp.setTarget(speed); }
 
     inline void attachPath(aruwsrc::algorithms::AutoNavPath* path) { this->path = path; }
 
 private:
-    aruwsrc::chassis::HolonomicChassisSubsystem& chassis;
+    aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     aruwsrc::algorithms::AutoNavPath* path = nullptr;
+    float lastParameter;
     Position lastSetPoint;
     tap::Drivers& drivers;
+    float errorMag;
+    Vector chassisFrameMoveVector = Vector(0, 0, 0);
+    Position setpoint = Position(0, 0, 0);
+    Vector moveVector = Vector(0, 0, 0);
+    Vector posError = Vector(0, 0, 0);
 
-    const Transform& worldToChassis;
+    const tap::algorithms::transforms::Transform& worldToChassis;
 
-    aruwsrc::chassis::BeybladeConfig beybladeConfig;
+    aruwsrc::control::chassis::BeybladeConfig beybladeConfig;
 
     tap::arch::MilliTimeout pathTransitionTimeout;
     float rotationDirection;
-    tap::algorithms::Ramp rotateSpeedRamp;
+    tap::algorithms::Ramp rotateSpeedRamp, translateSpeedRamp;
 
-    float desiredSpeed = 0;
+    aruwsrc::control::cap_bank::CapBankSubsystem* capBankSubsystem;
+    const float capBankEnergyThreshold;
+    const float capBankTranslationalVelocityThreshold;
 };
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 
 #endif  // CHASSIS_AUTO_NAV_CONTROLLER_HPP_
