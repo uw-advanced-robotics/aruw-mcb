@@ -30,7 +30,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 class ImageIndicator : public HudIndicator, protected modm::Resumable<2>
 {
@@ -51,6 +51,6 @@ private:
     std::vector<images::Image> images;
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif

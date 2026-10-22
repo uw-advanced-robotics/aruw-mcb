@@ -38,7 +38,7 @@ public:
 
     MCBLiteMenu(
         modm::ViewStack<tap::display::DummyAllocator<modm::IAbstractView> > *vs,
-        aruwsrc::virtualMCB::MCBLite *mcbLite);
+        aruwsrc::communication::mcb_lite::MCBLite *mcbLite);
 
     void draw() override;
 
@@ -53,7 +53,7 @@ public:
 private:
     static constexpr int MCB_LITE_MENU_ID = 14;
 
-    aruwsrc::virtualMCB::MCBLite *mcbLite;
+    aruwsrc::communication::mcb_lite::MCBLite *mcbLite;
 
     tap::arch::PeriodicMilliTimer updatePeriodicTimer{DISPLAY_DRAW_PERIOD};
 };

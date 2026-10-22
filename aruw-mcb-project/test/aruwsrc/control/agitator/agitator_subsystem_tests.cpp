@@ -25,7 +25,7 @@
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 
 using namespace testing;
-using namespace aruwsrc::agitator;
+using namespace aruwsrc::control::agitator;
 using namespace aruwsrc;
 using namespace tap::motor;
 

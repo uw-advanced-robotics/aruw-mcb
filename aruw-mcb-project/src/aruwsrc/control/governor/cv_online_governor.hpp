@@ -35,7 +35,7 @@ class CvOnlineGovernor : public tap::control::governor::CommandGovernorInterface
 public:
     CvOnlineGovernor(
         tap::Drivers &drivers,
-        aruwsrc::serial::VisionCoprocessor &visionCoprocessor,
+        aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor,
         aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand)
         : drivers(drivers),
           visionCoprocessor(visionCoprocessor),
@@ -53,7 +53,7 @@ public:
 
 private:
     tap::Drivers &drivers;
-    aruwsrc::serial::VisionCoprocessor &visionCoprocessor;
+    aruwsrc::communication::serial::VisionCoprocessor &visionCoprocessor;
     aruwsrc::control::turret::cv::TurretCVCommandInterface &turretCVCommand;
 };
 }  // namespace aruwsrc::control::governor

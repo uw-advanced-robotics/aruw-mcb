@@ -30,7 +30,7 @@ namespace tap::communication::serial
 class RefSerialTransmitter;
 }
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * A generic HUD indicator interface class with helper utilities that other HUD indicators may use.
@@ -94,6 +94,6 @@ protected:
      */
     tap::arch::MilliTimeout delayTimer;
 };
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // HUD_INDICATOR_HPP_

@@ -30,7 +30,7 @@
 
 #include "hud_indicator.hpp"
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Draws 1 line on the screen around the center circle to indicate where damage has come from.
@@ -84,6 +84,6 @@ private:
     uint32_t prevTimestamp;
 };
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  // DAMAGE_INDICATOR_HPP_

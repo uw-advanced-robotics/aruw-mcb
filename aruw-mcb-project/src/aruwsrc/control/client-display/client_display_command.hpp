@@ -56,7 +56,7 @@ public:
     ClientDisplayCommand(
         tap::Drivers &drivers,
         ClientDisplaySubsystem &clientDisplay,
-        std::vector<HudIndicator *> &hudIndicators);
+        std::vector<indicators::HudIndicator *> &hudIndicators);
 
     const char *getName() const override { return "client display"; }
 
@@ -70,7 +70,7 @@ public:
 
 private:
     tap::Drivers &drivers;
-    std::vector<HudIndicator *> &hudIndicators;
+    std::vector<indicators::HudIndicator *> &hudIndicators;
     uint8_t index = 0;
     RefSerialTransmitter refSerialTransmitter;
 

@@ -22,9 +22,10 @@
 #include "tap/drivers.hpp"
 #include "tap/mock/dji_motor_mock.hpp"
 
-#include "aruwsrc/control/bounded-subsystem/trigger/motor_stall_trigger.hpp"
+#include "aruwsrc/control/joint/homing/trigger/motor_stall_trigger.hpp"
 
 using namespace aruwsrc::control;
+using namespace aruwsrc::control::joint::homing::trigger;
 using namespace testing;
 
 class MotorStallTriggerTest : public Test

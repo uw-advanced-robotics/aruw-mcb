@@ -33,7 +33,7 @@ namespace tap
 class Drivers;
 }
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Draws the current pitch/yaw turret angles (in degrees, in the world frame).
@@ -107,6 +107,6 @@ private:
 
     void updateTurretAnglesGraphicMsg();
 };
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators
 
 #endif  //  TURRET_ANGLES_INDICATOR_HPP_

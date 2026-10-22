@@ -18,6 +18,7 @@
  */
 
 #if defined(TARGET_MOTOR_TESTER)
+#include <memory>
 
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"

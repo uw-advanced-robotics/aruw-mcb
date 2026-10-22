@@ -26,7 +26,7 @@
 using namespace tap::communication::serial;
 using namespace tap::communication::referee;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 /**
  * Updates the color of a graphic to be either `ON_COLOR` if `indicatorStatus == true` or
@@ -177,4 +177,4 @@ void BooleanHudIndicators::initialize()
         hudIndicatorListCurrY -= BOOLEAN_HUD_INDICATOR_LIST_DIST_BTWN_BULLETS;
     }
 }
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

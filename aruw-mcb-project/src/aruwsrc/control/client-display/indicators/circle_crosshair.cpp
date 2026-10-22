@@ -21,7 +21,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 CircleCrosshair::CircleCrosshair(RefSerialTransmitter &refSerialTransmitter)
     : HudIndicator(refSerialTransmitter)
@@ -57,4 +57,4 @@ modm::ResumableResult<void> CircleCrosshair::sendInitialGraphics()
     RF_END();
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

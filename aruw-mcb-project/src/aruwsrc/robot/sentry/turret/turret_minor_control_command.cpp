@@ -21,7 +21,7 @@
 
 #include "tap/drivers.hpp"
 
-using namespace aruwsrc::control::sentry;
+using namespace aruwsrc::sentry;
 
 namespace aruwsrc::sentry::turret
 {
@@ -29,8 +29,10 @@ TurretMinorSentryControlCommand::TurretMinorSentryControlCommand(
     tap::Drivers *drivers,
     SentryControlOperatorInterface &controlOperatorInterface,
     SentryTurretMinorSubsystem &turretMinorSubsystem,
-    aruwsrc::control::turret::algorithms::TurretYawControllerInterface &yawController,
-    aruwsrc::control::turret::algorithms::TurretPitchControllerInterface &pitchController,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        tap::algorithms::transforms::Axis::YAW> &yawController,
+    aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
+        tap::algorithms::transforms::Axis::PITCH> &pitchController,
     float userYawInputScalar,
     float userPitchInputScalar)
     : drivers(drivers),
@@ -56,7 +58,7 @@ void TurretMinorSentryControlCommand::initialize()
 void TurretMinorSentryControlCommand::execute()
 {
     uint32_t currTime = tap::arch::clock::getTimeMilliseconds();
-    uint32_t dt = currTime - prevTime;
+    float dt = (currTime - prevTime) / 1000.0f;
     prevTime = currTime;
 
     // Get pitch input from control operator interface

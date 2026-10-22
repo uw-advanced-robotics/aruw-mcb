@@ -23,7 +23,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::control::client_display
+namespace aruwsrc::control::client_display::indicators
 {
 DamageIndicator::DamageIndicator(
     aruwsrc::algorithms::PlateHitTracker &plateHitTracker,
@@ -114,4 +114,4 @@ void DamageIndicator::initialize()
         Tx::GraphicColor::PURPLISH_RED);
 }
 
-}  // namespace aruwsrc::control::client_display
+}  // namespace aruwsrc::control::client_display::indicators

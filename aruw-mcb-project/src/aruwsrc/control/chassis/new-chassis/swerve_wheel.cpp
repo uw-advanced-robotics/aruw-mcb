@@ -20,7 +20,7 @@
 using namespace tap::algorithms;
 namespace aruwsrc
 {
-namespace chassis
+namespace control::chassis::new_chassis
 {
 SwerveWheel::SwerveWheel(
     Motor& driveMotor,
@@ -129,6 +129,6 @@ bool SwerveWheel::allMotorsOnline() const
 
 float SwerveWheel::getAngularVelocity() const { return azimuthMotor.getEncoder()->getVelocity(); }
 
-}  // namespace chassis
+}  // namespace control::chassis::new_chassis
 
 }  // namespace aruwsrc
