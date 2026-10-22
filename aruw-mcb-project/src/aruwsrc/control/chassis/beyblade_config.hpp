@@ -19,7 +19,7 @@
 #ifndef BEYBLADE_CONFIG_HPP_
 #define BEYBLADE_CONFIG_HPP_
 
-namespace aruwsrc::chassis
+namespace aruwsrc::control::chassis
 {
 struct BeybladeConfig
 {
@@ -47,5 +47,5 @@ struct BeybladeConfig
      */
     const float beybladeRampRate;
 };
-}  // namespace aruwsrc::chassis
+}  // namespace aruwsrc::control::chassis
 #endif  // BEYBLADE_CONFIG_HPP

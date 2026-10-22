@@ -21,11 +21,11 @@
 
 #include "mcb_lite.hpp"
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 VirtualVoltageCurrentSensor::VirtualVoltageCurrentSensor(MCBLite* lite)
 {
     lite->voltageCurrentSensor = this;
 }
 
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite

@@ -27,7 +27,7 @@
 
 using namespace tap::communication::serial;
 
-namespace aruwsrc::virtualMCB
+namespace aruwsrc::communication::mcb_lite
 {
 class VirtualPWM : public tap::gpio::Pwm
 {
@@ -90,6 +90,6 @@ private:
 
     bool hasNewData = false;
 };
-}  // namespace aruwsrc::virtualMCB
+}  // namespace aruwsrc::communication::mcb_lite
 
 #endif  // VIRTUAL_PWM_HPP_

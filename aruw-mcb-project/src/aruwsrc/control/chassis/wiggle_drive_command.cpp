@@ -32,9 +32,7 @@
 using namespace tap::algorithms;
 using namespace tap::communication::sensors::imu::mpu6500;
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 WiggleDriveCommand::WiggleDriveCommand(
     tap::Drivers* drivers,
@@ -140,6 +138,4 @@ const WiggleDriveCommand::WiggleParams& WiggleDriveCommand::getWiggleParams() co
     }
 }
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis

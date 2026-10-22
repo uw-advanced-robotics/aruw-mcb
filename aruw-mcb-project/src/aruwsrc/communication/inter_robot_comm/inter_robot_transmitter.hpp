@@ -30,7 +30,7 @@
 namespace aruwsrc::communication::inter_robot_comm
 {
 using namespace tap::communication::serial;
-using namespace aruwsrc::serial;
+using namespace aruwsrc::communication::serial;
 class InterRobotTransmitter : public modm::pt::Protothread,
                               public RefSerial::RobotToRobotMessageHandler
 {

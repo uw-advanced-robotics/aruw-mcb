@@ -27,7 +27,8 @@
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 #include "aruwsrc/mock/control_operator_interface_mock.hpp"
 #else
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/communication/rtt/rtt_telemetry.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 #endif
 
 namespace aruwsrc::testbed
@@ -41,6 +42,7 @@ public:
 #endif
     Drivers()
         : tap::Drivers(),
+          rttTelemetry(this),
           controlOperatorInterface(this),
           lite(this, tap::communication::serial::Uart::UartPort::Uart7)
     {
@@ -50,12 +52,20 @@ public:
     testing::NiceMock<mock::ControlOperatorInterfaceMock> controlOperatorInterface;
 #else
 public:
+    communication::rtt::RttTelemetry rttTelemetry;
     control::ControlOperatorInterface controlOperatorInterface;
 #endif
+    aruwsrc::communication::mcb_lite::MCBLite lite;
 
-    aruwsrc::virtualMCB::MCBLite lite;
+    void init(const float) { lite.initialize(); }
 
-public:
+    void updateIo() { lite.updateSerial(); }
+
+    void update()
+    {
+        lite.sendData();
+        rttTelemetry.updateTelemetryAsync();
+    }
 };  // class aruwsrc::TestbedDrivers
 }  // namespace aruwsrc::testbed
 

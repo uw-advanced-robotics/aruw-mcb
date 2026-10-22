@@ -25,54 +25,70 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
-#include "aruwsrc/robot/control_operator_interface.hpp"
+#include "aruwsrc/control/control_operator_interface.hpp"
 
-namespace aruwsrc::control::engineer
+namespace aruwsrc::engineer
 {
-class EngineerControlOperatorInterface : public ControlOperatorInterface
+class EngineerControlOperatorInterface : public control::ControlOperatorInterface
 {
 public:
-    EngineerControlOperatorInterface(tap::Drivers *drivers)
-        : ControlOperatorInterface(drivers),
-          drivers(drivers)
-    {
-    }
+    EngineerControlOperatorInterface(tap::Drivers *drivers) : ControlOperatorInterface(drivers) {}
 
-    virtual float getChassisXInput() override;
+    mockable float getChassisXInput() override;
 
-    virtual float getChassisYInput() override;
+    mockable float getChassisYInput() override;
 
-    virtual float getChassisRInput() override;
+    mockable float getChassisRInput() override;
 
-    /**
-     * @return The cube lift velocity.
-     */
-    mockable float getCubeLiftVelocity();
+    mockable float getTurretYawInput(uint8_t turretID) override;
+
+    mockable float getTurretPitchInput(uint8_t turretID) override;
 
     /**
-     * @return The gantry lift velocity
+     * @return The cube storage velocity.
      */
-    mockable float getGantryLiftVelocity();
+    mockable float getCubeStorageVelocity();
+
+    mockable bool isIKTranslationMode() const;
+    mockable bool isIKRotationMode() const;
+    mockable float getIKVelX() const;
+    mockable float getIKVelY() const;
+    mockable float getIKVelZ() const;
+    mockable float getIKVelRoll() const;
+    mockable float getIKVelPitch() const;
+    mockable float getIKVelYaw() const;
+
+    bool getGantryKeyUp();
+
+    bool getGantryKeyDown();
+
+    bool getGantryKeyIn();
+
+    bool getGantryKeyOut();
+
+    bool getSprintKey();
+
+    bool getShiftKey();
 
     /**
      * @return The gantry extension velocity
      */
-    mockable float getGantryExtensionVelocity();
+    mockable float getExtensionVelocity();
 
     /**
      * @return The wrist pitch velocity
      */
-    mockable float getWristPitchVelocity();
+    mockable float getWristTheta2Velocity();
 
     /**
      * @return The wrist yaw velocity
      */
-    mockable float getWristYawVelocity();
+    mockable float getWristTheta1Velocity();
 
     /**
      * @return The wrist roll velocity
      */
-    mockable float getWristRollVelocity();
+    mockable float getWristTheta3Velocity();
 
     /**
      * @return whether or not the control switch is set to drive mode.
@@ -83,16 +99,17 @@ public:
      * @return whether or not the control switch is set to gantry (lift + horizontal extension)
      * control mode.
      */
-    bool isGantryControlMode();
+    bool isExtensionWristControlMode();
 
     /**
-     * @return whether or not the control switch is set to wrist control mode.
+     * @return whether or not the control switch is set to cube storage control mode.
      */
-    bool isWristControlMode();
+    bool isCubeStorageControlMode();
 
 private:
-    tap::Drivers *drivers;
+    float MAX_IK_TRANSLATION_VEL = 0.2f;  // m/s for each axis
+    float MAX_IK_ROTATION_VEL = M_PI_4;   // rad/s for each of roll/pitch/yaw
 };
-}  // namespace aruwsrc::control::engineer
+}  // namespace aruwsrc::engineer
 
 #endif  // ENGINEER_CONTROL_OPERATOR_INTERFACE_HPP__

@@ -24,13 +24,11 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
+#include "aruwsrc/control/control_operator_interface.hpp"
 #include "aruwsrc/control/turret/turret_motor.hpp"
-#include "aruwsrc/robot/control_operator_interface.hpp"
 #include "modm/math/geometry/angle.hpp"
 
-namespace aruwsrc
-{
-namespace chassis
+namespace aruwsrc::control::chassis
 {
 class HolonomicChassisSubsystem;
 
@@ -107,8 +105,6 @@ private:
     const WiggleParams& getWiggleParams() const;
 };  // class WiggleDriveCommand
 
-}  // namespace chassis
-
-}  // namespace aruwsrc
+}  // namespace aruwsrc::control::chassis
 
 #endif  // WIGGLE_DRIVE_COMMAND_HPP_
