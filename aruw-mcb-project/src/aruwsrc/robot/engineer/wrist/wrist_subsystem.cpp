@@ -181,11 +181,11 @@ void WristSubsystem::refresh()
     g22 = theta2GravityTorque * gravityCompConfig->motor2TorqueConstant;
     g3 = theta3GravityTorque * gravityCompConfig->motor3TorqueConstant;
 
-    outMotorDifferential1 = pidOutTheta1; // - WRIST_THETA_1_GRAVITY_COMP_SCALE * g1;
+    outMotorDifferential1 = pidOutTheta1 - WRIST_THETA_1_GRAVITY_COMP_SCALE * g1;
     outMotorDifferential2 =
-        pidOutTheta1 + pidOutTheta2;
-        //- (WRIST_THETA_2_GRAVITY_COMP_SCALE * g22 + WRIST_THETA_1_GRAVITY_COMP_SCALE * g21);
-    outMotor3 = pidOutTheta3; // - WRIST_THETA_3_GRAVITY_COMP_SCALE * g3;
+        pidOutTheta1 + pidOutTheta2
+        - (WRIST_THETA_2_GRAVITY_COMP_SCALE * g22 + WRIST_THETA_1_GRAVITY_COMP_SCALE * g21);
+    outMotor3 = pidOutTheta3 - WRIST_THETA_3_GRAVITY_COMP_SCALE * g3;
 
     motorDifferential1.setDesiredOutput(std::clamp<int32_t>(
         outMotorDifferential1,
