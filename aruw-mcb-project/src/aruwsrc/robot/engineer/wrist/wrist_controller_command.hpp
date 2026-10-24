@@ -22,8 +22,8 @@
 
 #include <optional>
 
-#include "tap/control/command.hpp"
 #include "tap/architecture/timeout.hpp"
+#include "tap/control/command.hpp"
 
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_control_operator_interface.hpp"
@@ -37,14 +37,13 @@ using namespace aruwsrc::engineer;
  */
 class WristControllerCommand : public tap::control::Command
 {
-
 public:
     WristControllerCommand(
         WristSubsystem &wrist,
         EngineerControlOperatorInterface *operatorInterface,
         std::optional<std::pair<uint8_t, float>> axisAndSetpoint = std::nullopt,
-        std::optional<uint8_t*> commandCounter = std::nullopt,
-        std::optional<bool*> settled = std::nullopt);
+        std::optional<uint8_t *> commandCounter = std::nullopt,
+        std::optional<bool *> settled = std::nullopt);
 
     void initialize() override;
 
@@ -64,8 +63,8 @@ private:
     EngineerControlOperatorInterface *operatorInterface;
 
     const std::optional<std::pair<uint8_t, float>> axisAndSetpoint;
-    std::optional<uint8_t*> commandCounter;
-    std::optional<bool*> isSettled;
+    std::optional<uint8_t *> commandCounter;
+    std::optional<bool *> isSettled;
 
     static constexpr float SETPOINT_EPSILON = 0.05f;
     static constexpr uint32_t SETPOINT_HOLD_TIME_MS = 2'000;

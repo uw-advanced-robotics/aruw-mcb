@@ -121,7 +121,8 @@ void EngineerTransforms::updateTransforms()
             .getChassisFrameVelocity());  // should be added to chassis angular velocity, but can't
                                           // use imu rn so need to expose it in odometry
 
-    // get transform downstream of turret pitch from the finalized imu-oriented worldToTurretPitch transform
+    // get transform downstream of turret pitch from the finalized imu-oriented worldToTurretPitch
+    // transform
     worldToExtension = worldToTurretPitch.composeStatic(turretPitchToExtension);
     Transform worldToWrist = worldToExtension.composeStatic(extensionToWrist);
     worldToEndEffector = worldToExtension.composeStatic(extensionToEndEffector);

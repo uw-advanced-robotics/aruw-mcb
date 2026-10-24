@@ -27,8 +27,8 @@ WristControllerCommand::WristControllerCommand(
     WristSubsystem &wrist,
     EngineerControlOperatorInterface *operatorInterface,
     std::optional<std::pair<uint8_t, float>> axisAndSetpoint,
-    std::optional<uint8_t*> commandCounter,
-    std::optional<bool*> isSettled)
+    std::optional<uint8_t *> commandCounter,
+    std::optional<bool *> isSettled)
     : tap::control::Command(),
       wrist(wrist),
       operatorInterface(operatorInterface),
@@ -80,16 +80,23 @@ void WristControllerCommand::execute()
         **isSettled = selectedAxisIsAtSetpoint() && !wrist.isWristMoving();
     }
     // control from operator interface when not tuning a specific axis
-    if (axisAndSetpoint.has_value()) {
-        if (selectedAxisIsAtSetpoint()) {
-            if (setpointHoldTimer.isStopped()) {
+    if (axisAndSetpoint.has_value())
+    {
+        if (selectedAxisIsAtSetpoint())
+        {
+            if (setpointHoldTimer.isStopped())
+            {
                 setpointHoldTimer.restart(SETPOINT_HOLD_TIME_MS);
             }
-        } else {
+        }
+        else
+        {
             // reset timer if not within setpoint epsilon
             setpointHoldTimer.stop();
         }
-    } else {
+    }
+    else
+    {
         // Get the desired velocities from the operator interface
         // to add/subtract from position setpoint
         float theta1Velocity =
@@ -108,12 +115,15 @@ void WristControllerCommand::execute()
 
 bool WristControllerCommand::isFinished() const
 {
-    // only finishes in tuning mode once setpoint has been held for 2 seconds or max timeout has been reached
-    return (axisAndSetpoint.has_value() && setpointHoldTimer.isExpired() && !setpointHoldTimer.isStopped()) ||
-        (axisAndSetpoint.has_value() && maxTimeoutTimer.isExpired());
+    // only finishes in tuning mode once setpoint has been held for 2 seconds or max timeout has
+    // been reached
+    return (axisAndSetpoint.has_value() && setpointHoldTimer.isExpired() &&
+            !setpointHoldTimer.isStopped()) ||
+           (axisAndSetpoint.has_value() && maxTimeoutTimer.isExpired());
 }
 
-bool WristControllerCommand::selectedAxisIsAtSetpoint() const {
+bool WristControllerCommand::selectedAxisIsAtSetpoint() const
+{
     if (!axisAndSetpoint.has_value()) return false;
 
     switch (axisAndSetpoint->first)

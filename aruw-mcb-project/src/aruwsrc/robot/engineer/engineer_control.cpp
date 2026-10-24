@@ -634,9 +634,9 @@ WristControllerCommand wristTheta3PositiveGravityTestCommand(
     &isSettled);
 
 InstantCommand holdExtensionAtCurrentPosition(
-    []() { 
+    []() {
         commandCounter = 0;
-        extensionSubsystem.setSetpoint(extensionSubsystem.getPosition()); 
+        extensionSubsystem.setSetpoint(extensionSubsystem.getPosition());
     },
     std::array<tap::control::Subsystem*, 1>{&extensionSubsystem});
 
@@ -785,8 +785,7 @@ inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
     chassisFramePitchTurretController,
     depositTrajectory);
 
-
-Trigger rightUp = 
+Trigger rightUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
         .whileTrue(&wristGravityCompensationTestSequence);
 
