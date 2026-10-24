@@ -71,11 +71,14 @@ void WristControllerCommand::initialize()
     if (axesToSet[0]) wrist.setSetpointTheta1(wrist.getTheta1());
     if (axesToSet[1]) wrist.setSetpointTheta2(wrist.getTheta2());
     if (axesToSet[2]) wrist.setSetpointTheta3(wrist.getTheta3());
-    **isSettled = !wrist.isWristMoving();
 }
 
 void WristControllerCommand::execute()
 {
+    if (isSettled.has_value())
+    {
+        **isSettled = selectedAxisIsAtSetpoint() && !wrist.isWristMoving();
+    }
     // control from operator interface when not tuning a specific axis
     if (axisAndSetpoint.has_value()) {
         if (selectedAxisIsAtSetpoint()) {

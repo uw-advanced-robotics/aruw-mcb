@@ -107,7 +107,6 @@ void EngineerTransforms::updateTransforms()
 
     // update requested transforms
     Transform worldToTurretYaw = worldToChassis.composeStatic(chassisToTurretYaw);
-    worldToExtension = worldToTurretYaw.composeStatic(turretYawToExtension);
     worldToTurretYaw.updateRotation(
         tpRoll,  // could be either inherited or use turret imu, either works
         worldToTurretYaw.getPitch(),
@@ -121,6 +120,11 @@ void EngineerTransforms::updateTransforms()
         turret.yawMotor
             .getChassisFrameVelocity());  // should be added to chassis angular velocity, but can't
                                           // use imu rn so need to expose it in odometry
+
+    // get transform downstream of turret pitch from the finalized imu-oriented worldToTurretPitch transform
+    worldToExtension = worldToTurretPitch.composeStatic(turretPitchToExtension);
+    Transform worldToWrist = worldToExtension.composeStatic(extensionToWrist);
+    worldToEndEffector = worldToExtension.composeStatic(extensionToEndEffector);
 
     worldToRealsense = worldToTurretYaw.composeStatic(TURRET_YAW_TO_REALSENSE);
 
@@ -138,12 +142,7 @@ void EngineerTransforms::updateTransforms()
     endEffectorToCubeDist =
         turretYawToEndEffector.getInverse().composeStatic(TURRET_YAW_TO_CUBE_DIST);
 
-    worldToEndEffector = worldToTurretYaw.composeStatic(turretYawToEndEffector);
-
     // COMs
-    Transform turretYawToWrist = turretYawToExtension.composeStatic(extensionToWrist);
-    Transform worldToWrist = worldToTurretYaw.composeStatic(turretYawToWrist);
-
     // TODO: tap should have a single operation for this
     COMCube.location = worldToEndEffector.getInverse().apply(MASS_CUBE.location);
     COMBeyondWrist.mass = MASS_BEYOND_WRIST.mass;

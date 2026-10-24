@@ -120,7 +120,7 @@ public:
 
 private:
     static constexpr float MOVING_VELOCITY_THRESHOLD = modm::toRadian(1.0f);
-    
+
     const WristConfig config;
     std::optional<WristGravityCompensationConfig> gravityCompConfig;
     tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;
@@ -136,6 +136,7 @@ private:
     float theta1, theta2, theta3;
     float g1, g21, g22, g3;
     float pidOutTheta1, pidOutTheta2, pidOutTheta3;
+    float outMotorDifferential1, outMotorDifferential2, outMotor3;
 };
 }  // namespace aruwsrc::engineer::wrist
 
