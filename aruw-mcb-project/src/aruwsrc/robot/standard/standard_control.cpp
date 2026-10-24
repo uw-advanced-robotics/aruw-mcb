@@ -155,6 +155,9 @@ inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 }
 using Compose = CommandCompositionHelper;
 
+static constexpr float USER_YAW_INPUT_SCALAR = 0.05f;
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.03f;
+
 /* define subsystems ----------------------------c---------------------------*/
 BuzzerSubsystem buzzer(drivers());
 
@@ -371,10 +374,25 @@ algorithms::TurretSpringForceOffset turretSpringCompensation(
     pitchMotor.isMotorInverted());
 
 // Turret controllers
+//test pid
+tap::algorithms::SmoothPidConfig testPIDConfig = {
+    .kp = 5000.0f, //20'000.0f,
+    .ki = 100.0f, //500'000.0f,
+    .kd = 0.0f, //3'000.0f,
+    .maxICumulative = 16'000.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
+    .tQDerivativeKalman = 1.0f,
+    .tRDerivativeKalman = 10.0f,
+    .tQProportionalKalman = 1.0f,
+    .tRProportionalKalman = 2.0f,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+    .antiSaturation = true,
+};
 algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
     chassisFramePitchTurretController(
         turret.pitchMotor,
-        chassis_rel::PITCH_PID_CONFIG,
+        testPIDConfig,
         {&turretGravityCompensation, &turretSpringCompensation});
 
 algorithms::ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
@@ -445,6 +463,16 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::trans
 // #endif
 
 // turret commands
+user::TurretUserControlCommand turretUserControlCommand(
+    drivers(),
+    drivers()->controlOperatorInterface,
+    &turret,
+    &chassisFrameYawTurretController,
+    &chassisFramePitchTurretController,
+    USER_YAW_INPUT_SCALAR,
+    USER_PITCH_INPUT_SCALAR,
+    0);
+
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
     drivers(),
     drivers()->controlOperatorInterface,
@@ -850,7 +878,7 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 void registerStandardSubsystems(Drivers* drivers)
 {
     drivers->commandScheduler.registerSubsystem(&agitator);
-    drivers->commandScheduler.registerSubsystem(&chassis);
+    // drivers->commandScheduler.registerSubsystem(&chassis);
     drivers->commandScheduler.registerSubsystem(&turret);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
@@ -867,7 +895,7 @@ void initializeSubsystems()
 {
     turret.initialize();
     voltageCurrentSensor.initialize();
-    chassis.initialize();
+    // chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();
     frictionWheels.initialize();
@@ -884,8 +912,8 @@ void initializeSubsystems()
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers*)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    // chassis.setDefaultCommand(&chassisAutorotateCommand);
+    turret.setDefaultCommand(&turretUserControlCommand);
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
