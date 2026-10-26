@@ -23,6 +23,7 @@
 #include "tap/drivers.hpp"
 
 #include "../turret_subsystem.hpp"
+#include "aruwsrc/communication/rtt/segger_rtt_wrapper.hpp"
 #include "aruwsrc/control/control_operator_interface.hpp"
 
 using tap::algorithms::WrappedFloat;
@@ -31,13 +32,13 @@ namespace aruwsrc::control::turret::user
 {
 // STEP 1 (Turret User Control): Complete constructor
 TurretUserControlCommand::TurretUserControlCommand(
-    tap::Drivers *drivers,
-    ControlOperatorInterface &controlOperatorInterface,
-    TurretSubsystem *turretSubsystem,
-    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
-        *yawController,
-    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
-        *pitchController,
+    tap::Drivers* drivers,
+    ControlOperatorInterface& controlOperatorInterface,
+    TurretSubsystem* turretSubsystem,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>*
+        yawController,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>*
+        pitchController,
     float userYawInputScalar,
     float userPitchInputScalar,
     uint8_t turretID)
@@ -58,17 +59,20 @@ TurretUserControlCommand::TurretUserControlCommand(
 }
 
 // STEP 4A (Turret User Control): Implement isReady
-bool TurretUserControlCommand::isReady() {
+bool TurretUserControlCommand::isReady()
+{
     // TODO: Check if command can safely execute
     // IF command is not finished AND controllers are online:
     //     RETURN true (ready to run)
     // ELSE:
     //     RETURN false (not ready)
     // Controllers have an isOnline() method to check hardware status
-    if(!isFinished() && yawController->isOnline() && pitchController->isOnline()){
+    if (!isFinished() && yawController->isOnline() && pitchController->isOnline())
+    {
         return true;
     }
-    else{
+    else
+    {
         return false;
     }
 }
@@ -111,7 +115,8 @@ void TurretUserControlCommand::execute()
     // DECLARE pitch_setpoint = current pitch setpoint + (pitch_sensitivity * pitch_input)
     // Use WrappedFloat for angle arithmetic to handle wrapping
     auto yaw_setpoint = WrappedFloat(yawController->getSetpoint() + userYawInputScalar * yaw_input);
-    auto pitch_setpoint = WrappedFloat(pitchController->getSetpoint() + userPitchInputScalar * pitch_input);
+    auto pitch_setpoint =
+        WrappedFloat(pitchController->getSetpoint() + userPitchInputScalar * pitch_input);
     // TODO: Command controllers to track new setpoints
     // FOR each controller (yaw and pitch):
     //     CALL runController with time delta and new setpoint
@@ -130,10 +135,12 @@ bool TurretUserControlCommand::isFinished() const
     // ELSE:
     //     RETURN false (continue running)
     // Check both yaw and pitch controllers for hardware status
-    if(!yawController->isOnline() || !pitchController->isOnline()){
+    if (!yawController->isOnline() || !pitchController->isOnline())
+    {
         return true;
     }
-    else{
+    else
+    {
         return false;
     }
 }
@@ -146,7 +153,6 @@ void TurretUserControlCommand::end(bool interrupted)
     // You might want to:
     // - Stop motor outputs by setting them to zero
     // - Reset controller states
-    // - Log why the command ended (normal vs interrupted)
     turretSubsystem->yawMotor.setMotorOutput(0.0f);
     turretSubsystem->pitchMotor.setMotorOutput(0.0f);
     yawController->initialize();
@@ -154,12 +160,13 @@ void TurretUserControlCommand::end(bool interrupted)
     // The 'interrupted' parameter tells you if the command was forcibly stopped
     // interrupted == true: Another command took control
     // interrupted == false: Command finished naturally (unlikely for user control)
-    if(interrupted){
-        printf("Turret user control interrupted\n");
+    if (interrupted)
+    {
+        aruwsrc::communication::rtt::seggerRttPrintf("Turret user control interrupted\n");
     }
-    else{
-        printf("Turret user control ended normally\n");
-
+    else
+    {
+        aruwsrc::communication::rtt::seggerRttPrintf("Turret user control ended normally\n");
     }
 }
 
