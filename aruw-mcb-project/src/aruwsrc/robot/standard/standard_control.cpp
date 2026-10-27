@@ -108,7 +108,8 @@
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
 #include "aruwsrc/control/turret/cv/turret_cv_command.hpp"
 #include "aruwsrc/control/turret/user/turret_quick_turn_command.hpp"
-#include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
+// #include "aruwsrc/control/turret/user/turret_user_world_relative_command.hpp"
+#include "aruwsrc/control/turret/user/turret_user_control_command.hpp"
 #include "aruwsrc/display/autotune_menu.hpp"
 #include "aruwsrc/display/imu_calibrate_menu.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
@@ -445,16 +446,33 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::trans
 // #endif
 
 // turret commands
-user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
-    drivers(),
-    drivers()->controlOperatorInterface,
-    &turret,
-    &worldFrameYawChassisImuController,
-    &chassisFramePitchTurretController,
-    &worldFrameYawTurretImuController,
-    &worldFramePitchTurretImuController,
-    USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+// user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
+//     drivers(),
+//     drivers()->controlOperatorInterface,
+//     &turret,
+//     &worldFrameYawChassisImuController,
+//     &chassisFramePitchTurretController,
+//     &worldFrameYawTurretImuController,
+//     &worldFramePitchTurretImuController,
+//     USER_YAW_INPUT_SCALAR,
+//     USER_PITCH_INPUT_SCALAR);
+// STEP 6 (Turret User Control): Add command instantiation
+// In the robot control file (e.g., standard_control.cpp)
+
+// Define sensitivity constants at the top of the file
+static constexpr float USER_YAW_INPUT_SCALAR = 0.05f;    // Radians per input unit
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.03f;  // Typically lower than yaw
+
+// In the define commands section:
+user::TurretUserControlCommand turretUserControlCommand(
+    drivers(),                            // Global drivers object
+    drivers()->controlOperatorInterface,  // Input processing system
+    &turret,                              // Turret subsystem instance
+    &chassisFrameYawTurretController,     // Yaw control algorithm
+    &chassisFramePitchTurretController,   // Pitch control algorithm
+    USER_YAW_INPUT_SCALAR,                // Yaw sensitivity scaling
+    USER_PITCH_INPUT_SCALAR,              // Pitch sensitivity scaling
+    0);
 
 cv::TurretCVCommand turretCVCommand(
     &drivers()->visionCoprocessor,
@@ -464,7 +482,8 @@ cv::TurretCVCommand turretCVCommand(
     &worldFramePitchTurretImuControllerCv,
     &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+    USER_PITCH_INPUT_SCALAR,
+    0);
 
 NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
     buzzer,
@@ -846,12 +865,20 @@ Trigger shiftPressed =
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
+// STEP 7A (Turret User Control): Register subsystem
+// In registerSubsystems() function:
 /* register subsystems here -------------------------------------------------*/
 void registerStandardSubsystems(Drivers* drivers)
 {
-    drivers->commandScheduler.registerSubsystem(&agitator);
-    drivers->commandScheduler.registerSubsystem(&chassis);
+    // TODO: Register the turret subsystem with command scheduler
+    // ACCESS the command scheduler through the drivers object
+    // CALL the register subsystem method
+    // PASS a pointer to the turret subsystem
+    // This makes the turret available for command scheduling
     drivers->commandScheduler.registerSubsystem(&turret);
+
+    // Other subsystems are registered here too...
+    drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
     drivers->commandScheduler.registerSubsystem(&clientDisplay);
     drivers->commandScheduler.registerSubsystem(&odometrySubsystem);
@@ -867,7 +894,6 @@ void initializeSubsystems()
 {
     turret.initialize();
     voltageCurrentSensor.initialize();
-    chassis.initialize();
     odometrySubsystem.initialize();
     agitator.initialize();
     frictionWheels.initialize();
@@ -881,11 +907,18 @@ void initializeSubsystems()
     dummySubsystem.initialize();
 }
 
+// STEP 7B (Turret User Control): Set default command
+// In setDefaultCommands() function:
 /* set any default commands to subsystems here ------------------------------*/
 void setDefaultStandardCommands(Drivers*)
 {
-    chassis.setDefaultCommand(&chassisAutorotateCommand);
-    turret.setDefaultCommand(&turretUserWorldRelativeCommand);
+    // TODO: Set turret default command
+    // CALL the setDefaultCommand method on the turret subsystem
+    // PASS a pointer to your turret user control command
+    // This command will run whenever no other command is using the turret
+    turret.setDefaultCommand(&turretUserControlCommand);
+
+    // Other default commands are set here too...
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
