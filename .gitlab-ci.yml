@@ -151,6 +151,39 @@ before_script:
         - robot-$ROBOT-develop-test
       when: 'always'
 
+# Boots the robot's real control code (main.cpp + *_control.cpp, which the test builds exclude)
+# in the simulator. All commands and subsystems are globals, so construction-time asserts such
+# as "Multiple commands to concurrent command have overlapping requirements" fire immediately
+# and kill the process. If the sim is still running after the timeout (exit 124), boot passed.
+# Note: an assert during static init usually shows up as a segfault (exit 139), because modm's
+# logger isn't constructed yet when the assert handler tries to print. The backtrace shows the
+# real cause.
+.sim_boot_check:
+  stage: Tests
+  only: *default_only
+  needs: []
+  script:
+    - cd aruw-mcb-project
+    - scons build-sim robot=$ROBOT -j${NUM_JOBS}
+    - status=0; timeout 10s build/sim/scons-release/TARGET_$ROBOT/aruw-mcb.elf > sim-boot.log 2>&1 || status=$?
+    - tail -n 50 sim-boot.log
+    - |
+      if [ "$status" -ne 124 ]; then
+        echo "$ROBOT exited during boot with code $status (expected to still be running after 10s)."
+        echo "Likely a failed modm_assert during static init, e.g. overlapping subsystem requirements in a ConcurrentCommand."
+        if command -v gdb > /dev/null; then
+          timeout 30s gdb -batch -ex run -ex bt build/sim/scons-release/TARGET_$ROBOT/aruw-mcb.elf || true
+        fi
+        exit 1
+      fi
+  cache:
+    - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG-sim
+      paths:
+        - aruw-mcb-project/build/sim/scons-release/
+      fallback_keys:
+        - robot-$ROBOT-develop-sim
+      when: 'always'
+
 # Generic build, done before other builds which then use shared cache to build faster
 
 "MCB Lib Build":
@@ -204,6 +237,12 @@ before_script:
   variables:
     ROBOT: STANDARD_NULL
 
+"Standard (Null): Sim Boot Check":
+  extends:
+    - .sim_boot_check
+  variables:
+    ROBOT: STANDARD_NULL
+
 # Standard (Phobos) build
 
 "Standard (Phobos): MCB Build":
@@ -240,6 +279,12 @@ before_script:
       - robot-STANDARD_PHOBOS-develop-tests
     when: 'always'
 
+"Standard (Phobos): Sim Boot Check":
+  extends:
+    - .sim_boot_check
+  variables:
+    ROBOT: STANDARD_PHOBOS
+
 # Standard (Deimos) build
 
 "Standard (Deimos): MCB Build":
@@ -275,6 +320,12 @@ before_script:
       - robot-STANDARD_DEIMOS-develop-tests
     when: 'always'
 
+"Standard (Deimos): Sim Boot Check":
+  extends:
+    - .sim_boot_check
+  variables:
+    ROBOT: STANDARD_DEIMOS
+
 # Drone build
 
 "Drone: MCB Build":
@@ -286,6 +337,12 @@ before_script:
 "Drone: Test Build":
   extends:
     - .test_build
+  variables:
+    ROBOT: DRONE
+
+"Drone: Sim Boot Check":
+  extends:
+    - .sim_boot_check
   variables:
     ROBOT: DRONE
 
@@ -303,6 +360,12 @@ before_script:
   variables:
     ROBOT: ENGINEER
 
+"Engineer: Sim Boot Check":
+  extends:
+    - .sim_boot_check
+  variables:
+    ROBOT: ENGINEER
+
 # Hero build
 
 "Hero: MCB Build":
@@ -314,6 +377,12 @@ before_script:
 "Hero: Test Build":
   extends:
     - .test_build
+  variables:
+    ROBOT: HERO_NEPTUNE
+
+"Hero: Sim Boot Check":
+  extends:
+    - .sim_boot_check
   variables:
     ROBOT: HERO_NEPTUNE
 
