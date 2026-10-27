@@ -657,6 +657,11 @@ GovernorLimitedCommand<4> launchKickerHeatAndCVLimited(
      &kickerWheelLimitSwitchDepressedGovernor});
 }  // namespace kicker
 
+// DO NOT MERGE: intentional overlapping requirements to verify the Sim Boot Check CI job fails.
+tap::control::WeakConcurrentCommand<2> bootCheckOverlap(
+    {&waterwheel::rotateAndUnjamWaterwheel, &waterwheel::rotateAndUnjamWaterwheel},
+    "intentional overlap");
+
 tap::control::WeakConcurrentCommand<2> launcherLutAutotuneFireCommand(
     {&waterwheel::rotateAndUnjamWaterwheel, &kicker::launchKicker},
     "Hero launcher LUT autotune fire");
