@@ -596,9 +596,9 @@ static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
 
 #elif defined(TARGET_STANDARD_DEIMOS)
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 40'000.0f,
-    .ki = 1'000'000.0f,
-    .kd = 4'000.0f,
+    .kp = 10'000.0f, //40'000.0f,
+    .ki = 0.0f, //1'000'000.0f,
+    .kd = 2'000.0f, //4'000.0f,
     .maxICumulative = 4000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
@@ -611,9 +611,9 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 20'000.0f,
-    .ki = 500'000.0f,
-    .kd = 3'000.0f,
+    .kp = 5'000.0f, //20'000.0f,
+    .ki = 250'000.0f, //500'000.0f,
+    .kd = 1'500.0f, //3'000.0f,
     .maxICumulative = 16'000.0f,
     .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_GM6020_mA,
     .tQDerivativeKalman = 1.0f,
