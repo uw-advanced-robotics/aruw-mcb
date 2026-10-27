@@ -93,12 +93,12 @@ void WristSubsystem::homeTheta3(float pos) { motorTheta3.getEncoder()->resetEnco
 void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint)
 {
     float theta1 = atan2f(setpoint.matrix().data[3], -setpoint.matrix().data[6]);
-    float theta2 = acosf(setpoint.matrix().data[0]);
+    // clamp pitch to prevent gimbal lock
+    float theta2 = std::clamp(acosf(setpoint.matrix().data[0]), -90.0f + GIMBAL_LOCK_THRESHOLD, 90.0f - GIMBAL_LOCK_THRESHOLD);
     float theta3 = atan2f(setpoint.matrix().data[1], setpoint.matrix().data[2]);
     setSetpointTheta1(theta1);
     setSetpointTheta2(theta2);
     setSetpointTheta3(theta3);
-    // TODO: handle gimbal lock
 }
 
 bool WristSubsystem::atSetpointTheta1(float epsilon) const

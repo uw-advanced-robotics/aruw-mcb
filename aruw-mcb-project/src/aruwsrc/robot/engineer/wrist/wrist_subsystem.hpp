@@ -120,7 +120,7 @@ public:
 
 private:
     static constexpr float MOVING_VELOCITY_THRESHOLD = modm::toRadian(1.0f);
-
+    static constexpr float GIMBAL_LOCK_THRESHOLD = modm::toRadian(0.1f);
     const WristConfig config;
     std::optional<WristGravityCompensationConfig> gravityCompConfig;
     tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;
