@@ -95,8 +95,8 @@ void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orienta
     // clamp pitch to prevent gimbal lock
     float theta2 = std::clamp(
         acosf(setpoint.matrix().data[0]),
-        -90.0f + GIMBAL_LOCK_THRESHOLD,
-        90.0f - GIMBAL_LOCK_THRESHOLD);
+        (float)(-M_PI_2 + GIMBAL_LOCK_THRESHOLD),
+        (float)(M_PI_2 - GIMBAL_LOCK_THRESHOLD));
     float theta3 = atan2f(setpoint.matrix().data[1], setpoint.matrix().data[2]);
     setSetpointTheta1(theta1);
     setSetpointTheta2(theta2);
