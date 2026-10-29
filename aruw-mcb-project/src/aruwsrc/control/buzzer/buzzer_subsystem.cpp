@@ -19,11 +19,43 @@
 
 #include "buzzer_subsystem.hpp"
 
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+
 #include "tap/communication/sensors/buzzer/buzzer.hpp"
 
 namespace aruwsrc::control::buzzer
 {
+    BuzzerSubsystem::BuzzerSubsystem(tap::Drivers* drivers) : Subsystem(drivers) {}
 
-// TODO: Write function implementations
+    void BuzzerSubsystem::playFrequency(float frequency)
+    {
+        if (!std::isfinite(frequency) || frequency <= 0.0F || static_cast<double>(frequency) > std::numeric_limits<uint32_t>::max())
+        {
+            stop();
+            return;
+        }
+
+        tap::buzzer::playNote(&drivers->pwm, static_cast<uint32_t>(frequency));
+    }
+
+    void BuzzerSubsystem::playNote(uint8_t note)
+    {
+        constexpr std::size_t NOTE_COUNT = sizeof(NOTE_FREQUENCIES) / sizeof(NOTE_FREQUENCIES[0]);
+        if (note >= NOTE_COUNT || note == 0)
+        {
+            stop();
+            return;
+        }
+
+        playFrequency(NOTE_FREQUENCIES[note]);
+    }
+
+    void BuzzerSubsystem::stop()
+    {
+        tap::buzzer::silenceBuzzer(&drivers->pwm);
+    }
 
 }  // namespace aruwsrc::control::buzzer
