@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -53,6 +53,7 @@
 #include "aruwsrc/control/chassis/x_drive_chassis_subsystem.hpp"
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
+#include "aruwsrc/control/client-display/indicators/pump_indicator.hpp"
 #include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/digital/digital_out_command.hpp"
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
@@ -66,6 +67,7 @@
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_dynamic_com_gravity_compensator.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -77,7 +79,6 @@
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
 #include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/manual_ik_command.hpp"
 #include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/trajectory_ik_command.hpp"
-#include "aruwsrc/robot/engineer/binned_alignment_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
@@ -115,6 +116,7 @@ using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
 using namespace tap::gpio;
 
+using tap::algorithms::transforms::Axis;
 using tap::algorithms::transforms::Transform;
 using tap::communication::serial::Remote;
 using tap::control::CommandMapper;
@@ -456,8 +458,7 @@ EngineerTransforms transformer(
     drivers()->mcbLite.imu,
     extensionSubsystem,
     wristSubsystem,
-    cubeStorage,
-    drivers()->engineerCVCommunication);
+    cubeStorage);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
@@ -477,8 +478,21 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
-    chassisFramePitchTurretController(engTurret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
+inline constexpr float M3508_TORQUE_CONSTANT =
+    (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
+
+inline constexpr float M2006_TORQUE_CONSTANT =
+    tap::motor::DjiMotor::MAX_OUTPUT_C610 / 1.0f;  // desOut/Nm
+
+TurretDynamicCOMGravityCompensator gravityPitchCompensator(
+    {.pointMass = transformer.getCOMBeyondTurretPitch(),
+     .worldToTurretPitch = transformer.getWorldToTurretPitch(),
+     .motorTorqueConstant = M3508_TORQUE_CONSTANT * PITCH_TURRET_GEAR_RATIO});
+
+ChassisFrameTurretController<Axis::PITCH> chassisFramePitchTurretController(
+    engTurret.pitchMotor,
+    chassis_rel::PITCH_PID_CONFIG,
+    {&gravityPitchCompensator});
 
 ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
     chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
@@ -519,15 +533,6 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-BinnedAlignmentCommand binnedAlignmentCommand(
-    engTurret,
-    lampreyEncoder,
-    pulleyEncoder,
-    *yawTurretMotor.getEncoder(),
-    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    BINNED_ALIGNMENT_OFFSET,
-    YAW_ALIGNMENT_OFFSET);
-
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
@@ -564,12 +569,105 @@ aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     &drivers()->controlOperatorInterface,
     &chassisSubsystem);
 
-WristControllerCommand wristControllerCommand(
+WristControllerCommand wristControllerCommand(wristSubsystem, &drivers()->controlOperatorInterface);
+
+inline constexpr float WRIST_GRAVITY_TEST_ANGLE = modm::toRadian(30.0f);
+
+uint8_t commandCounter = 0;
+bool isSettled = false;
+
+WristControllerCommand wristTheta1NegativeGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
-    WRIST_THETA_1_SCALING_FACTOR,
-    WRIST_THETA_2_SCALING_FACTOR,
-    WRIST_THETA_3_SCALING_FACTOR);
+    std::pair<uint8_t, float>{0, -WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta1ZeroGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{0, 0},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta1PositiveGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{0, WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+
+WristControllerCommand wristTheta2NegativeGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{1, -WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta2ZeroGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{1, 0},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta2PositiveGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{1, WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+
+WristControllerCommand wristTheta3NegativeGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{2, -WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta3ZeroGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{2, 0},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta3PositiveGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{2, WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+
+InstantCommand holdExtensionAtCurrentPosition(
+    []() {
+        commandCounter = 0;
+        extensionSubsystem.setSetpoint(extensionSubsystem.getPosition());
+    },
+    std::array<tap::control::Subsystem*, 1>{&extensionSubsystem});
+
+SetpointMoveManualCommand holdExtensionDuringThetaTest(
+    extensionSubsystem,
+    &drivers()->controlOperatorInterface,
+    0.0f,
+    SetpointType::EXTENSION);
+
+SequentialCommand<12> wristGravityCompensationSetpointSequence(
+    &wristTheta1NegativeGravityTestCommand,
+    &wristTheta1ZeroGravityTestCommand,
+    &wristTheta1PositiveGravityTestCommand,
+    &wristTheta1ZeroGravityTestCommand,
+    &wristTheta2NegativeGravityTestCommand,
+    &wristTheta2ZeroGravityTestCommand,
+    &wristTheta2PositiveGravityTestCommand,
+    &wristTheta2ZeroGravityTestCommand,
+    &wristTheta3NegativeGravityTestCommand,
+    &wristTheta3ZeroGravityTestCommand,
+    &wristTheta3PositiveGravityTestCommand,
+    &wristTheta3ZeroGravityTestCommand);
+
+ConcurrentDeadlineCommand<1> wristGravityCompensationTestWithExtensionHold(
+    std::array<Command*, 1>{&holdExtensionDuringThetaTest},
+    "Wrist gravity compensation test",
+    &wristGravityCompensationSetpointSequence);
+
+SequentialCommand<2> wristGravityCompensationTestSequence(
+    &holdExtensionAtCurrentPosition,
+    &wristGravityCompensationTestWithExtensionHold);
 
 // wrist fold in commands are not fully tuned yet
 WristSetpointsCommand wristFoldInCommand(
@@ -660,6 +758,14 @@ autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     lampreyEncoder,
     &chassisSubsystem);
 
+PumpIndicator pumpIndicator(refSerialTransmitter, mainSuckSubsystem);
+std::vector<HudIndicator*> hudIndicators = {&pumpIndicator};
+
+aruwsrc::control::client_display::ClientDisplayCommand clientDisplayCommand(
+    *drivers(),
+    clientDisplay,
+    hudIndicators);
+
 // Safe disconnect function
 RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
@@ -667,24 +773,6 @@ tap::control::Subsystem dummySubsystem(drivers());
 
 inverse_kinematics::Trajectory6D<2> depositTrajectory{
     {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
-
-InstantCommand populateDepositTrajectory(
-    []() {
-        depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
-
-        if (transformer.isWorldToReceptacleValid() &&
-            transformer.getWorldToReceptacleReceivedTimeMs() >
-                tap::arch::clock::getTimeMilliseconds() - 2'000)
-        {
-            depositTrajectory.waypoints[1].pose =
-                transformer.getWorldToReceptacle().composeStatic(Transform(-0.25, 0, 0, 0, 0, 0));
-        }
-        else
-        {
-            depositTrajectory.waypoints[1].pose = transformer.getWorldToEndEffector();
-        }
-    },
-    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
 
 inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
     transformer.getChassisToWorld(),
@@ -696,23 +784,9 @@ inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
     chassisFramePitchTurretController,
     depositTrajectory);
 
-SequentialCommand depositCommand(&populateDepositTrajectory, &depositIKCommand);
-
-Trigger leftUpRightUp =
-    (TriggerHelpers::switchState(
-         drivers(),
-         Remote::Switch::RIGHT_SWITCH,
-         Remote::SwitchState::UP) &&
-     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP))
-        .onTrue(&depositCommand);
-
-Trigger leftDownMidRightUp =
-    (!TriggerHelpers::switchState(
-         drivers(),
-         Remote::Switch::LEFT_SWITCH,
-         Remote::SwitchState::UP) &&
-     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
-        .onTrue(&binnedAlignmentCommand);
+Trigger rightUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(&wristGravityCompensationTestSequence);
 
 // joint control mode
 Trigger rightMid =
@@ -741,7 +815,7 @@ void initializeSubsystems()
 {
     pulleyEncoder.initialize();
     lampreyEncoder.initialize();
-
+    clientDisplay.initialize();
     chassisSubsystem.initialize();
     engTurret.initialize();
     extensionSubsystem.initialize();
@@ -754,6 +828,14 @@ void initializeSubsystems()
     parallelOmniOne.initialize();
     parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
+
+    wristSubsystem.attachGravityCompConfig({
+        .pointMass = transformer.getCOMBeyondWrist(),
+        .worldToMountingFrame = transformer.getWorldToExtension(),
+        .motor1TorqueConstant = M2006_TORQUE_CONSTANT * WRIST_MOTOR_1_GEAR_RATIO,
+        .motor2TorqueConstant = M2006_TORQUE_CONSTANT * WRIST_MOTOR_2_GEAR_RATIO,
+        .motor3TorqueConstant = M2006_TORQUE_CONSTANT * WRIST_MOTOR_3_GEAR_RATIO,
+    });
     mainSuctionAnalogSensor.initialize();
 }
 
@@ -780,11 +862,14 @@ void setDefaultEngineerCommands(aruwsrc::engineer::Drivers*)
     engTurret.setDefaultCommand(&turretUserWorldRelativeCommand);
     cubeStorage.setDefaultCommand(&cubeManualControl);
 
-    // clientDisplay.setDefaultCommand(&clientDisplayCommand);
+    clientDisplay.setDefaultCommand(&clientDisplayCommand);
 }
 
 /* add any starting commands to the scheduler here --------------------------*/
-void startEngineerCommands(aruwsrc::engineer::Drivers*) {}
+void startEngineerCommands(aruwsrc::engineer::Drivers* drivers)
+{
+    drivers->commandScheduler.addCommand(&clientDisplayCommand);
+}
 
 /* register io mappings here ------------------------------------------------*/
 void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}
