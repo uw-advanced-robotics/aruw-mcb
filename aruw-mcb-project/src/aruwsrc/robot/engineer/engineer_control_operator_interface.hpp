@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -107,6 +107,9 @@ public:
     bool isCubeStorageControlMode();
 
 private:
+    float chassisXApplied = 0.0f;
+    float chassisYApplied = 0.0f;
+
     float MAX_IK_TRANSLATION_VEL = 0.2f;  // m/s for each axis
     float MAX_IK_ROTATION_VEL = M_PI_4;   // rad/s for each of roll/pitch/yaw
 };
