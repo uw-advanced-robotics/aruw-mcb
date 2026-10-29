@@ -55,8 +55,8 @@ private:
     static constexpr int16_t OFFSET_X = 2;
     static constexpr int16_t OFFSET_Y = -42;
 #else
-    static constexpr int16_t OFFSET_X = 0;
-    static constexpr int16_t OFFSET_Y = 0;
+    static constexpr int16_t OFFSET_X = -1;
+    static constexpr int16_t OFFSET_Y = -1;
 #endif
 
     // TODO (EDU): Modify these constants or add new ones to mess with your new graphic!
