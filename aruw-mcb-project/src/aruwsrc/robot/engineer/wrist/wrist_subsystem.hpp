@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,12 +20,16 @@
 #ifndef WRIST_SUBSYSTEM_HPP_
 #define WRIST_SUBSYSTEM_HPP_
 
+#include <optional>
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
+
+#include "aruwsrc/algorithms/point_mass.hpp"
 
 namespace aruwsrc::engineer::wrist
 {
@@ -45,6 +49,13 @@ struct WristConfig
     float epsilon = 1e-4f;  // angular tolerance used to determine if we reached the setpoint
 
     int32_t maxMotorDesiredOutput;
+};
+
+struct WristGravityCompensationConfig
+{
+    const aruwsrc::algorithms::PointMass& pointMass;
+    const tap::algorithms::transforms::Transform& worldToMountingFrame;
+    float motor1TorqueConstant, motor2TorqueConstant, motor3TorqueConstant;
 };
 
 class WristSubsystem : public tap::control::Subsystem
@@ -93,7 +104,14 @@ public:
 
     bool isOnline() const;
 
+    bool isWristMoving() const;
+
     tap::algorithms::transforms::Orientation getOrientation() const;
+
+    inline void attachGravityCompConfig(const WristGravityCompensationConfig config)
+    {
+        gravityCompConfig.emplace(config);
+    }
 
     static tap::algorithms::transforms::Orientation getHypotheticalOrientation(
         float theta1,
@@ -101,13 +119,24 @@ public:
         float theta3);
 
 private:
+    static constexpr float MOVING_VELOCITY_THRESHOLD = modm::toRadian(1.0f);
+    static constexpr float GIMBAL_LOCK_THRESHOLD = modm::toRadian(0.1f);
     const WristConfig config;
+    std::optional<WristGravityCompensationConfig> gravityCompConfig;
     tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;
     tap::encoder::EncoderInterface& encoderTheta2;
     tap::algorithms::WrappedFloat setpointTheta1;
     float setpointTheta2;
     tap::algorithms::WrappedFloat setpointTheta3;
     tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
+
+    float lastMotor1Pos, lastMotor2Pos, lastMotor3Pos;
+
+    // variables for gravity comp characterization
+    float theta1, theta2, theta3;
+    float g1, g21, g22, g3;
+    float pidOutTheta1, pidOutTheta2, pidOutTheta3;
+    float outMotorDifferential1, outMotorDifferential2, outMotor3;
 };
 }  // namespace aruwsrc::engineer::wrist
 

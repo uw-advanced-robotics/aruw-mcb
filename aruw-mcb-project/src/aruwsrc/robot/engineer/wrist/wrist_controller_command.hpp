@@ -20,6 +20,9 @@
 #ifndef WRIST_CONTROLLER_COMMAND_HPP_
 #define WRIST_CONTROLLER_COMMAND_HPP_
 
+#include <optional>
+
+#include "tap/architecture/timeout.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
@@ -38,9 +41,9 @@ public:
     WristControllerCommand(
         WristSubsystem &wrist,
         EngineerControlOperatorInterface *operatorInterface,
-        float theta1ScalingFactor,
-        float theta2ScalingFactor,
-        float theta3ScalingFactor);
+        std::optional<std::pair<uint8_t, float>> axisAndSetpoint = std::nullopt,
+        std::optional<uint8_t *> commandCounter = std::nullopt,
+        std::optional<bool *> settled = std::nullopt);
 
     void initialize() override;
 
@@ -49,19 +52,28 @@ public:
      */
     void execute() override;
 
-    void end(bool) override{};
+    void end(bool) override;
 
     const char *getName() const override { return "Engineer Wrist Controller Command"; };
 
-    virtual bool isFinished() const override { return false; }
+    bool isFinished() const override;
 
 private:
     WristSubsystem &wrist;
-
     EngineerControlOperatorInterface *operatorInterface;
-    const float theta1ScalingFactor;
-    const float theta2ScalingFactor;
-    const float theta3ScalingFactor;
+
+    const std::optional<std::pair<uint8_t, float>> axisAndSetpoint;
+    std::optional<uint8_t *> commandCounter;
+    std::optional<bool *> isSettled;
+
+    static constexpr float SETPOINT_EPSILON = 0.05f;
+    static constexpr uint32_t SETPOINT_HOLD_TIME_MS = 2'000;
+    static constexpr uint32_t MAX_COMMAND_TIMEOUT = 6'000;
+
+    tap::arch::MilliTimeout setpointHoldTimer = tap::arch::MilliTimeout(SETPOINT_HOLD_TIME_MS);
+    tap::arch::MilliTimeout maxTimeoutTimer = tap::arch::MilliTimeout(MAX_COMMAND_TIMEOUT);
+
+    bool selectedAxisIsAtSetpoint() const;
 };
 
 }  // namespace aruwsrc::engineer::wrist
