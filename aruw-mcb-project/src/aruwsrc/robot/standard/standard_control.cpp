@@ -446,16 +446,16 @@ algorithms::WorldFrameTurretImuCascadePidTurretController<tap::algorithms::trans
 // #endif
 
 // turret commands
-user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
-    drivers(),
-    drivers()->controlOperatorInterface,
-    &turret,
-    &worldFrameYawChassisImuController,
-    &chassisFramePitchTurretController,
-    &worldFrameYawTurretImuController,
-    &worldFramePitchTurretImuController,
-    USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+// user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
+//     drivers(),
+//     drivers()->controlOperatorInterface,
+//     &turret,
+//     &worldFrameYawChassisImuController,
+//     &chassisFramePitchTurretController,
+//     &worldFrameYawTurretImuController,
+//     &worldFramePitchTurretImuController,
+//     USER_YAW_INPUT_SCALAR,
+//     USER_PITCH_INPUT_SCALAR);
 
 cv::TurretCVCommand turretCVCommand(
     &drivers()->visionCoprocessor,
@@ -857,7 +857,7 @@ void registerStandardSubsystems(Drivers* drivers)
     // CALL the register subsystem method
     // PASS a pointer to the turret subsystem
     // This makes the turret available for command scheduling
-    
+    driver->commandScheduler.registerSubsystem(&turret);
     // Other subsystems are registered here too...
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&frictionWheels);
@@ -897,7 +897,7 @@ void setDefaultStandardCommands(Drivers*)
     // CALL the setDefaultCommand method on the turret subsystem
     // PASS a pointer to your turret user control command
     // This command will run whenever no other command is using the turret
-    
+    turret.setDefultCommand(&turretUserControlCommand);
     // Other default commands are set here too...
     frictionWheels.setDefaultCommand(&stopFrictionWheels);
     clientDisplay.setDefaultCommand(&clientDisplayCommand);
