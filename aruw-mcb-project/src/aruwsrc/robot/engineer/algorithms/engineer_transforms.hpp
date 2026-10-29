@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -22,10 +22,10 @@
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
+#include "aruwsrc/algorithms/point_mass.hpp"
 #include "modm/math/geometry/location_2d.hpp"
 
 #include "engineer_kinematic_constants.hpp"
-#include "point_mass.hpp"
 
 namespace tap::communication::sensors::imu
 {
@@ -42,10 +42,6 @@ class JointSubsystem;
 namespace aruwsrc::engineer::wrist
 {
 class WristSubsystem;
-}
-namespace aruwsrc::communication::serial
-{
-class EngineerCVCommunication;
 }
 
 namespace aruwsrc::engineer::algorithms
@@ -70,8 +66,7 @@ public:
         const tap::communication::sensors::imu::AbstractIMU& turretPitchImu,
         const aruwsrc::control::joint::JointSubsystem& extension,
         const aruwsrc::engineer::wrist::WristSubsystem& wrist,
-        const aruwsrc::control::joint::JointSubsystem& cubeStorage,
-        aruwsrc::communication::serial::EngineerCVCommunication& engineerCVCommunication);
+        const aruwsrc::control::joint::JointSubsystem& cubeStorage);
 
     void updateTransforms();
 
@@ -92,6 +87,7 @@ public:
 
     inline const Transform& getWorldToTurretPitch() const { return worldToTurretPitch; }
     inline const Transform& getWorldToRealsense() const { return worldToRealsense; }
+    inline const Transform& getWorldToExtension() const { return worldToExtension; }
     inline const Transform& getWorldToEndEffector() const { return worldToEndEffector; }
     inline const Transform& getChassisToEndEffector() const { return chassisToEndEffector; }
     inline const Transform& getWorldToReceptacle() const { return worldToReceptacle; }
@@ -111,8 +107,14 @@ public:
     inline const Transform& getEndEffectorToCubeDist() const { return endEffectorToCubeDist; }
     inline const Transform& getVtmGimbalToEndEffector() const { return vtmGimbalToEndEffector; }
 
-    inline const PointMass& getCOMBeyondTurretPitch() const { return COMBeyondTurretPitch; }
-    inline const PointMass& getCOMBeyondWrist() const { return COMBeyondWrist; }
+    inline const aruwsrc::algorithms::PointMass& getCOMBeyondTurretPitch() const
+    {
+        return COMBeyondTurretPitch;
+    }
+    inline const aruwsrc::algorithms::PointMass& getCOMBeyondWrist() const
+    {
+        return COMBeyondWrist;
+    }
 
     static Transform getHypotheticalChassisToTurretYaw(float yawAngle)
     {
@@ -145,7 +147,6 @@ private:
     const aruwsrc::control::joint::JointSubsystem& extension;
     const aruwsrc::engineer::wrist::WristSubsystem& wrist;
     const aruwsrc::control::joint::JointSubsystem& cubeStorage;
-    aruwsrc::communication::serial::EngineerCVCommunication& engineerCVCommunication;
 
     // Joint Transforms
     Transform worldToChassis, chassisToWorld;
@@ -160,6 +161,7 @@ private:
     Transform worldToTurretPitch;
     Transform worldToRealsense;
     Transform worldToReceptacle;
+    Transform worldToExtension;
     Transform worldToEndEffector;
     Transform chassisToEndEffector;
     Transform cubeStore1ToEndEffector;  // TODO: should be cube not EE
@@ -168,9 +170,10 @@ private:
     Transform endEffectorToCubeDist;
 
     // Subtree Center of Masses
-    PointMass COMBeyondTurretPitch;
-    PointMass COMBeyondWrist;
-    int64_t worldToReceptacleReceivedTimeMs;  // -1 = never received
+    aruwsrc::algorithms::PointMass COMBeyondTurretPitch;
+    aruwsrc::algorithms::PointMass COMBeyondWrist;
+    int64_t worldToReceptacleReceivedTimeMs;
+    aruwsrc::algorithms::PointMass COMCube;
 };
 
 }  // namespace aruwsrc::engineer::algorithms

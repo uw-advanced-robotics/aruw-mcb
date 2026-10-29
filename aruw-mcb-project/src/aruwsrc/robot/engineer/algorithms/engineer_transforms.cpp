@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -21,13 +21,14 @@
 
 #include "tap/communication/sensors/imu/abstract_imu.hpp"
 
-#include "aruwsrc/communication/serial/engineer_cv_communication.hpp"
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/turret/turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
 
 using namespace tap::algorithms::odometry;
 using namespace tap::algorithms::transforms;
+
+using aruwsrc::algorithms::PointMass;
 
 namespace aruwsrc::engineer::algorithms
 {
@@ -38,8 +39,7 @@ EngineerTransforms::EngineerTransforms(
     const tap::communication::sensors::imu::AbstractIMU& turretPitchImu,
     const aruwsrc::control::joint::JointSubsystem& extension,
     const aruwsrc::engineer::wrist::WristSubsystem& wrist,
-    const aruwsrc::control::joint::JointSubsystem& cubeStorage,
-    aruwsrc::communication::serial::EngineerCVCommunication& engineerCVCommunication)
+    const aruwsrc::control::joint::JointSubsystem& cubeStorage)
     : chassisOdometry(chassisOdometry),
       chassisImu(chassisImu),
       turret(turret),
@@ -47,7 +47,6 @@ EngineerTransforms::EngineerTransforms(
       extension(extension),
       wrist(wrist),
       cubeStorage(cubeStorage),
-      engineerCVCommunication(engineerCVCommunication),
       worldToChassis(),
       chassisToWorld(),
       chassisToTurretYaw(getHypotheticalChassisToTurretYaw(0)),
@@ -57,7 +56,6 @@ EngineerTransforms::EngineerTransforms(
       cubeStoreFrameToCubeStoreCenter(),
       worldToTurretPitch(),
       worldToRealsense(),
-      worldToReceptacle(),
       worldToEndEffector(),
       chassisToEndEffector(),
       cubeStore1ToEndEffector(),
@@ -66,23 +64,23 @@ EngineerTransforms::EngineerTransforms(
       endEffectorToCubeDist(),
       COMBeyondTurretPitch(
           {.mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass + MASS_BEYOND_WRIST.mass,
-           .location = Position(0, 0, 0)}),
-      COMBeyondWrist(MASS_BEYOND_WRIST),
-      worldToReceptacleReceivedTimeMs(-1)
+           .location = Position(0, 0, 0)}),  // overwritten each loop
+      COMBeyondWrist(MASS_BEYOND_WRIST),     // only mass is kept, location is overwritten each loop
+      COMCube(MASS_CUBE)
 {
 }
 
 void EngineerTransforms::updateTransforms()
 {
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();
-    // float tpRoll = turretPitchImu.getRoll();
-    // float tpPitch = turretPitchImu.getPitch();
-    // float tpYaw = turretPitchImu.getYaw();
+    float tpRoll = turretPitchImu.getRoll();
+    float tpPitch = turretPitchImu.getPitch();
+    float tpYaw = turretPitchImu.getYaw();
     float extPos = extension.getPosition();
 
     // update joint transforms
-    worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
-
+    // worldToChassis.updateTranslation(chassisPose.getX(), chassisPose.getY(), 0.);
+    worldToChassis.updateTranslation(0, 0, 0);
     // use odometry yaw because it likely filters more information than imu alone, but only for yaw
     worldToChassis.updateRotation(
         // chassisImu.getRoll(),
@@ -98,10 +96,7 @@ void EngineerTransforms::updateTransforms()
         0,
         0,
         turret.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
-    turretYawToTurretPitch.updateRotation(
-        0,
-        turret.pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue(),
-        0);
+    turretYawToTurretPitch.updateRotation(0, tpPitch, 0);
     turretPitchToExtension = getHypotheticalTurretPitchToExtension(extPos);
     extensionToWrist.updateRotation(wrist.getOrientation());
 
@@ -113,18 +108,13 @@ void EngineerTransforms::updateTransforms()
 
     // update requested transforms
     Transform worldToTurretYaw = worldToChassis.composeStatic(chassisToTurretYaw);
-    // worldToTurretYaw.updateRotation(
-    //     tpRoll,  // could be either inherited or use turret imu, either works
-    //     worldToTurretYaw.getPitch(),
-    //     tpYaw);
+    worldToTurretYaw.updateRotation(
+        tpRoll,  // could be either inherited or use turret imu, either works
+        worldToTurretYaw.getPitch(),
+        tpYaw);
 
     worldToTurretPitch = worldToTurretYaw.composeStatic(turretYawToTurretPitch);
-    // worldToTurretPitch.updateRotation(tpRoll, tpPitch, tpYaw);
-    // worldToTurretPitch.updateAngularVelocity(
-    //     turretPitchImu.getGx(),
-    //     turretPitchImu.getGy(),
-    //     turretPitchImu.getGz());
-
+    worldToTurretPitch.updateRotation(tpRoll, tpPitch, tpYaw);
     worldToTurretPitch.updateAngularVelocity(
         0,
         turret.pitchMotor.getChassisFrameVelocity(),
@@ -132,16 +122,13 @@ void EngineerTransforms::updateTransforms()
             .getChassisFrameVelocity());  // should be added to chassis angular velocity, but can't
                                           // use imu rn so need to expose it in odometry
 
+    // get transform downstream of turret pitch from the finalized imu-oriented worldToTurretPitch
+    // transform
+    worldToExtension = worldToTurretPitch.composeStatic(turretPitchToExtension);
+    Transform worldToWrist = worldToExtension.composeStatic(extensionToWrist);
+    worldToEndEffector = worldToExtension.composeStatic(extensionToEndEffector);
+
     worldToRealsense = worldToTurretYaw.composeStatic(TURRET_YAW_TO_REALSENSE);
-    if (engineerCVCommunication.getIsFresh())
-    {
-        // cv communication gives the receptacle pose in the camera frame
-        worldToReceptacle =
-            worldToRealsense.composeStatic(engineerCVCommunication.getCamToReceptacle());
-        // Stamp this pose with the packet's received-time; doubles as the validity flag.
-        worldToReceptacleReceivedTimeMs = engineerCVCommunication.getLastReceivedTimeMs();
-        engineerCVCommunication.markTargetPoseStale();
-    }
 
     Transform cubeStoreCenterToTurretYaw =
         TURRET_YAW_TO_CUBE_STORE_FRAME.composeStatic(cubeStoreFrameToCubeStoreCenter);
@@ -161,11 +148,14 @@ void EngineerTransforms::updateTransforms()
     chassisToEndEffector = chassisToTurretYaw.composeStatic(turretYawToEndEffector);
 
     // COMs
-    Transform turretYawToWrist = turretYawToExtension.composeStatic(extensionToWrist);
-    Transform worldToWrist = worldToTurretYaw.composeStatic(turretYawToWrist);
-
     // TODO: tap should have a single operation for this
+    COMCube.location = worldToEndEffector.getInverse().apply(MASS_CUBE.location);
+    COMBeyondWrist.mass = MASS_BEYOND_WRIST.mass;
     COMBeyondWrist.location = worldToWrist.getInverse().apply(MASS_BEYOND_WRIST.location);
+
+    // TODO: use pressure sensor as condition
+    if (false) COMBeyondWrist = PointMass::merge(COMBeyondWrist, COMCube);
+
     PointMass COMBetweenTurretPitchAndWrist{
         .mass = MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT.mass,
         .location = worldToTurretPitch.getInverse().apply(

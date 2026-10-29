@@ -62,28 +62,28 @@ before_script:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
     - python3 ./taproot-scripts/check_singleton_drivers.py DoNotUse_getDrivers
-        -p ./aruw-mcb-project/src/
-        -w aruwsrc/drivers_singleton.cpp
-            aruwsrc/drivers_singleton.hpp
-            aruwsrc/robot/2025engineer/engineer_control.cpp
-            aruwsrc/robot/engineer/engineer_control.cpp
-            aruwsrc/robot/sentry/sentry_control.cpp
-            aruwsrc/robot/standard/standard_control.cpp
-            aruwsrc/robot/drone/drone_control.cpp
-            aruwsrc/robot/dart/dart_control.cpp
-            aruwsrc/robot/hero/hero_control.cpp
-            aruwsrc/robot/testbed/testbed_control.cpp
-            aruwsrc/robot/blank/blank_control.cpp
-            aruwsrc/robot/motor_tester/motor_tester_control.cpp
-            aruwsrc/robot/flywheel_testing/flywheel_testing_control.cpp
-            aruwsrc/robot/launcher_target/launcher_target_control.cpp
-            aruwsrc/robot/characterizer/characterizer_control.cpp
-            main.cpp
+      -p ./aruw-mcb-project/src/
+      -w aruwsrc/drivers_singleton.cpp
+      aruwsrc/drivers_singleton.hpp
+      aruwsrc/robot/2025engineer/engineer_control.cpp
+      aruwsrc/robot/engineer/engineer_control.cpp
+      aruwsrc/robot/sentry/sentry_control.cpp
+      aruwsrc/robot/standard/standard_control.cpp
+      aruwsrc/robot/drone/drone_control.cpp
+      aruwsrc/robot/dart/dart_control.cpp
+      aruwsrc/robot/hero/hero_control.cpp
+      aruwsrc/robot/testbed/testbed_control.cpp
+      aruwsrc/robot/blank/blank_control.cpp
+      aruwsrc/robot/motor_tester/motor_tester_control.cpp
+      aruwsrc/robot/flywheel_testing/flywheel_testing_control.cpp
+      aruwsrc/robot/launcher_target/launcher_target_control.cpp
+      aruwsrc/robot/characterizer/characterizer_control.cpp
+      main.cpp
 
     - python3 ./taproot-scripts/check_license_headers.py
-        -p aruw-mcb
-        -i './**/__init__.py' 'taproot/**/*' 'taproot-scripts/**/*' 'aruw-mcb-project/taproot/**/*' 'docs/**/*' 'aruw-mcb-project/robot-type/robot_type.hpp' 'segger-rtt/**/*'
-        -o 'Advanced Robotics at the University of Washington'
+      -p aruw-mcb
+      -i './**/__init__.py' 'taproot/**/*' 'taproot-scripts/**/*' 'aruw-mcb-project/taproot/**/*' 'docs/**/*' 'aruw-mcb-project/robot-type/robot_type.hpp' 'segger-rtt/**/*'
+      -o 'Advanced Robotics at the University of Washington'
 
     - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
 
@@ -125,7 +125,7 @@ before_script:
         - aruw-mcb-project/build/hardware/scons-release/TARGET_$ROBOT/
       fallback_keys:
         - robot-$ROBOT-develop
-      when: 'always'
+      when: "always"
 
 .test_build:
   stage: Tests
@@ -149,7 +149,35 @@ before_script:
         - aruw-mcb-project/build/tests/scons-fast/TARGET_$ROBOT/
       fallback_keys:
         - robot-$ROBOT-develop-test
-      when: 'always'
+      when: "always"
+
+# Boots the robot's real control code in the simulator. If the sim is still running after the
+# timeout (exit 124), boot passed.
+.sim_boot_check:
+  stage: Tests
+  only: *default_only
+  needs: []
+  script:
+    - cd aruw-mcb-project
+    - scons build-sim robot=$ROBOT -j${NUM_JOBS}
+    - status=0; timeout 10s build/sim/scons-release/TARGET_$ROBOT/aruw-mcb.elf > sim-boot.log 2>&1 || status=$?
+    - tail -n 50 sim-boot.log
+    - |
+      if [ "$status" -ne 124 ]; then
+        echo "$ROBOT exited during boot with code $status (expected to still be running after 10s)."
+        echo "Something crashed or stopped the robot code during boot. Check the backtrace below (if printed), or run the sim locally under a debugger."
+        if command -v gdb > /dev/null; then
+          timeout 30s gdb -batch -ex run -ex bt build/sim/scons-release/TARGET_$ROBOT/aruw-mcb.elf || true
+        fi
+        exit 1
+      fi
+  cache:
+    - key: robot-$ROBOT-$CI_COMMIT_REF_SLUG-sim
+      paths:
+        - aruw-mcb-project/build/sim/scons-release/
+      fallback_keys:
+        - robot-$ROBOT-develop-sim
+      when: "always"
 
 # Generic build, done before other builds which then use shared cache to build faster
 
@@ -169,7 +197,7 @@ before_script:
       - aruw-mcb-project/build/hardware/scons-release/.sconsign
     fallback_keys:
       - mcb-libs-develop
-    when: 'always'
+    when: "always"
 
 "Test Lib Build":
   stage: Build Libraries
@@ -188,7 +216,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/.sconsign
     fallback_keys:
       - mcb-test-libs-develop
-    when: 'always'
+    when: "always"
 
 # Standard (Null) build
 
@@ -201,6 +229,12 @@ before_script:
 "Standard (Null): Test Build":
   extends:
     - .test_build
+  variables:
+    ROBOT: STANDARD_NULL
+
+"Standard (Null): Sim Boot Check":
+  extends:
+    - .sim_boot_check
   variables:
     ROBOT: STANDARD_NULL
 
@@ -238,7 +272,13 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/
     fallback_keys:
       - robot-STANDARD_PHOBOS-develop-tests
-    when: 'always'
+    when: "always"
+
+"Standard (Phobos): Sim Boot Check":
+  extends:
+    - .sim_boot_check
+  variables:
+    ROBOT: STANDARD_PHOBOS
 
 # Standard (Deimos) build
 
@@ -273,7 +313,13 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/
     fallback_keys:
       - robot-STANDARD_DEIMOS-develop-tests
-    when: 'always'
+    when: "always"
+
+"Standard (Deimos): Sim Boot Check":
+  extends:
+    - .sim_boot_check
+  variables:
+    ROBOT: STANDARD_DEIMOS
 
 # Drone build
 
@@ -286,6 +332,12 @@ before_script:
 "Drone: Test Build":
   extends:
     - .test_build
+  variables:
+    ROBOT: DRONE
+
+"Drone: Sim Boot Check":
+  extends:
+    - .sim_boot_check
   variables:
     ROBOT: DRONE
 
@@ -303,6 +355,12 @@ before_script:
   variables:
     ROBOT: ENGINEER
 
+"Engineer: Sim Boot Check":
+  extends:
+    - .sim_boot_check
+  variables:
+    ROBOT: ENGINEER
+
 # Hero build
 
 "Hero: MCB Build":
@@ -314,6 +372,12 @@ before_script:
 "Hero: Test Build":
   extends:
     - .test_build
+  variables:
+    ROBOT: HERO_NEPTUNE
+
+"Hero: Sim Boot Check":
+  extends:
+    - .sim_boot_check
   variables:
     ROBOT: HERO_NEPTUNE
 
@@ -352,7 +416,7 @@ before_script:
     - .mcb_build
   variables:
     ROBOT: TESTBED
-  
+
 "Testbed: Test Build":
   extends:
     - .test_build
@@ -366,7 +430,7 @@ before_script:
     - .mcb_build
   variables:
     ROBOT: BLANK
-  
+
 "Blank: Test Build":
   extends:
     - .test_build

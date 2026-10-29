@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -267,14 +267,14 @@ float EngineerControlOperatorInterface::getChassisXInput()
 
     if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
-        return xInput / CHASSIS_SPEED_DIVSOR_SPRINT;
+        chassisXApplied = xInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return xInput / CHASSIS_SPEED_DIVSOR_NORMAL;
+        chassisXApplied = xInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
 
-    return 0;
+    return chassisXApplied;
 }
 
 float EngineerControlOperatorInterface::getChassisYInput()
@@ -322,12 +322,13 @@ float EngineerControlOperatorInterface::getChassisYInput()
     float yInput = chassisYInputRamp.getValue();
     if (drivers->remote.keyPressed(Remote::Key::CTRL))
     {
-        return yInput / CHASSIS_SPEED_DIVSOR_SPRINT;
+        chassisYApplied = yInput / CHASSIS_SPEED_DIVSOR_SPRINT;
     }
     else
     {
-        return yInput / CHASSIS_SPEED_DIVSOR_NORMAL;
+        chassisYApplied = yInput / CHASSIS_SPEED_DIVSOR_NORMAL;
     }
+    return chassisYApplied;
 }
 
 float EngineerControlOperatorInterface::getChassisRInput()
