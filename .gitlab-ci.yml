@@ -62,28 +62,28 @@ before_script:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
     - python3 ./taproot-scripts/check_singleton_drivers.py DoNotUse_getDrivers
-        -p ./aruw-mcb-project/src/
-        -w aruwsrc/drivers_singleton.cpp
-            aruwsrc/drivers_singleton.hpp
-            aruwsrc/robot/2025engineer/engineer_control.cpp
-            aruwsrc/robot/engineer/engineer_control.cpp
-            aruwsrc/robot/sentry/sentry_control.cpp
-            aruwsrc/robot/standard/standard_control.cpp
-            aruwsrc/robot/drone/drone_control.cpp
-            aruwsrc/robot/dart/dart_control.cpp
-            aruwsrc/robot/hero/hero_control.cpp
-            aruwsrc/robot/testbed/testbed_control.cpp
-            aruwsrc/robot/blank/blank_control.cpp
-            aruwsrc/robot/motor_tester/motor_tester_control.cpp
-            aruwsrc/robot/flywheel_testing/flywheel_testing_control.cpp
-            aruwsrc/robot/launcher_target/launcher_target_control.cpp
-            aruwsrc/robot/characterizer/characterizer_control.cpp
-            main.cpp
+      -p ./aruw-mcb-project/src/
+      -w aruwsrc/drivers_singleton.cpp
+      aruwsrc/drivers_singleton.hpp
+      aruwsrc/robot/2025engineer/engineer_control.cpp
+      aruwsrc/robot/engineer/engineer_control.cpp
+      aruwsrc/robot/sentry/sentry_control.cpp
+      aruwsrc/robot/standard/standard_control.cpp
+      aruwsrc/robot/drone/drone_control.cpp
+      aruwsrc/robot/dart/dart_control.cpp
+      aruwsrc/robot/hero/hero_control.cpp
+      aruwsrc/robot/testbed/testbed_control.cpp
+      aruwsrc/robot/blank/blank_control.cpp
+      aruwsrc/robot/motor_tester/motor_tester_control.cpp
+      aruwsrc/robot/flywheel_testing/flywheel_testing_control.cpp
+      aruwsrc/robot/launcher_target/launcher_target_control.cpp
+      aruwsrc/robot/characterizer/characterizer_control.cpp
+      main.cpp
 
     - python3 ./taproot-scripts/check_license_headers.py
-        -p aruw-mcb
-        -i './**/__init__.py' 'taproot/**/*' 'taproot-scripts/**/*' 'aruw-mcb-project/taproot/**/*' 'docs/**/*' 'aruw-mcb-project/robot-type/robot_type.hpp' 'segger-rtt/**/*'
-        -o 'Advanced Robotics at the University of Washington'
+      -p aruw-mcb
+      -i './**/__init__.py' 'taproot/**/*' 'taproot-scripts/**/*' 'aruw-mcb-project/taproot/**/*' 'docs/**/*' 'aruw-mcb-project/robot-type/robot_type.hpp' 'segger-rtt/**/*'
+      -o 'Advanced Robotics at the University of Washington'
 
     - python3 ./taproot-scripts/check_header_guard.py aruw-mcb-project/src aruw-mcb-project/test/
 
@@ -125,7 +125,7 @@ before_script:
         - aruw-mcb-project/build/hardware/scons-release/TARGET_$ROBOT/
       fallback_keys:
         - robot-$ROBOT-develop
-      when: 'always'
+      when: "always"
 
 .test_build:
   stage: Tests
@@ -149,15 +149,10 @@ before_script:
         - aruw-mcb-project/build/tests/scons-fast/TARGET_$ROBOT/
       fallback_keys:
         - robot-$ROBOT-develop-test
-      when: 'always'
+      when: "always"
 
-# Boots the robot's real control code (main.cpp + *_control.cpp, which the test builds exclude)
-# in the simulator. All commands and subsystems are globals, so construction-time asserts such
-# as "Multiple commands to concurrent command have overlapping requirements" fire immediately
-# and kill the process. If the sim is still running after the timeout (exit 124), boot passed.
-# Note: an assert during static init usually shows up as a segfault (exit 139), because modm's
-# logger isn't constructed yet when the assert handler tries to print. The backtrace shows the
-# real cause.
+# Boots the robot's real control code in the simulator. If the sim is still running after the
+# timeout (exit 124), boot passed.
 .sim_boot_check:
   stage: Tests
   only: *default_only
@@ -170,7 +165,7 @@ before_script:
     - |
       if [ "$status" -ne 124 ]; then
         echo "$ROBOT exited during boot with code $status (expected to still be running after 10s)."
-        echo "Likely a failed modm_assert during static init, e.g. overlapping subsystem requirements in a ConcurrentCommand."
+        echo "Something crashed or stopped the robot code during boot. Check the backtrace below (if printed), or run the sim locally under a debugger."
         if command -v gdb > /dev/null; then
           timeout 30s gdb -batch -ex run -ex bt build/sim/scons-release/TARGET_$ROBOT/aruw-mcb.elf || true
         fi
@@ -182,7 +177,7 @@ before_script:
         - aruw-mcb-project/build/sim/scons-release/
       fallback_keys:
         - robot-$ROBOT-develop-sim
-      when: 'always'
+      when: "always"
 
 # Generic build, done before other builds which then use shared cache to build faster
 
@@ -202,7 +197,7 @@ before_script:
       - aruw-mcb-project/build/hardware/scons-release/.sconsign
     fallback_keys:
       - mcb-libs-develop
-    when: 'always'
+    when: "always"
 
 "Test Lib Build":
   stage: Build Libraries
@@ -221,7 +216,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/.sconsign
     fallback_keys:
       - mcb-test-libs-develop
-    when: 'always'
+    when: "always"
 
 # Standard (Null) build
 
@@ -277,7 +272,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/
     fallback_keys:
       - robot-STANDARD_PHOBOS-develop-tests
-    when: 'always'
+    when: "always"
 
 "Standard (Phobos): Sim Boot Check":
   extends:
@@ -318,7 +313,7 @@ before_script:
       - aruw-mcb-project/build/tests/scons-fast/
     fallback_keys:
       - robot-STANDARD_DEIMOS-develop-tests
-    when: 'always'
+    when: "always"
 
 "Standard (Deimos): Sim Boot Check":
   extends:
@@ -421,7 +416,7 @@ before_script:
     - .mcb_build
   variables:
     ROBOT: TESTBED
-  
+
 "Testbed: Test Build":
   extends:
     - .test_build
@@ -435,7 +430,7 @@ before_script:
     - .mcb_build
   variables:
     ROBOT: BLANK
-  
+
 "Blank: Test Build":
   extends:
     - .test_build
