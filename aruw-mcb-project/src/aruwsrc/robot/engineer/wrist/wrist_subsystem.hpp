@@ -20,6 +20,7 @@
 #ifndef WRIST_SUBSYSTEM_HPP_
 #define WRIST_SUBSYSTEM_HPP_
 
+#include <array>
 #include <optional>
 
 #include "tap/algorithms/smooth_pid.hpp"
@@ -118,9 +119,25 @@ public:
         float theta2,
         float theta3);
 
+    /**
+     * Inverse of getHypotheticalOrientation. Every orientation has two joint solutions,
+     * (theta1, theta2, theta3) and (theta1 + pi, -theta2, theta3 + pi), so this returns the one
+     * closest to the given previous angles to avoid the wrist flipping 180 degrees.
+     */
+    static std::array<float, 3> getJointAnglesForOrientation(
+        const tap::algorithms::transforms::Orientation& orientation,
+        float prevTheta1,
+        float prevTheta2,
+        float prevTheta3);
+
+    /**
+     * When theta2 is within this of 0, theta1 and theta3 rotate about the same axis and only
+     * their sum is defined (the wrist's singularity).
+     */
+    static constexpr float SINGULARITY_THRESHOLD = modm::toRadian(2.0f);
+
 private:
     static constexpr float MOVING_VELOCITY_THRESHOLD = modm::toRadian(1.0f);
-    static constexpr float GIMBAL_LOCK_THRESHOLD = modm::toRadian(0.1f);
     const WristConfig config;
     std::optional<WristGravityCompensationConfig> gravityCompConfig;
     tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;

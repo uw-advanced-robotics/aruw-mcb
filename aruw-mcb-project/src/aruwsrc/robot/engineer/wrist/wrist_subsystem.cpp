@@ -91,16 +91,53 @@ void WristSubsystem::homeTheta3(float pos) { motorTheta3.getEncoder()->resetEnco
 
 void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint)
 {
-    float theta1 = atan2f(setpoint.matrix().data[3], -setpoint.matrix().data[6]);
-    // clamp pitch to prevent gimbal lock
-    float theta2 = std::clamp(
-        acosf(setpoint.matrix().data[0]),
-        (float)(-M_PI_2 + GIMBAL_LOCK_THRESHOLD),
-        (float)(M_PI_2 - GIMBAL_LOCK_THRESHOLD));
-    float theta3 = atan2f(setpoint.matrix().data[1], setpoint.matrix().data[2]);
+    auto [theta1, theta2, theta3] = getJointAnglesForOrientation(
+        setpoint,
+        getSetpointTheta1(),
+        getSetpointTheta2(),
+        getSetpointTheta3());
     setSetpointTheta1(theta1);
     setSetpointTheta2(theta2);
     setSetpointTheta3(theta3);
+}
+
+std::array<float, 3> WristSubsystem::getJointAnglesForOrientation(
+    const Orientation& orientation,
+    float prevTheta1,
+    float prevTheta2,
+    float prevTheta3)
+{
+    const auto& r = orientation.matrix().data;
+
+    // clamp first, float error can push this slightly past 1 and make acosf return NaN
+    float theta2 = acosf(std::clamp(r[0], -1.0f, 1.0f));
+
+    if (theta2 < SINGULARITY_THRESHOLD)
+    {
+        // wrist is straight: theta1 and theta3 spin about the same axis, so hold theta1 and let
+        // theta3 make up the rest of the roll
+        float theta1PlusTheta3 = atan2f(r[7], r[4]);
+        return {prevTheta1, 0.0f, theta1PlusTheta3 - prevTheta1};
+    }
+
+    float theta1 = atan2f(r[3], -r[6]);
+    float theta3 = atan2f(r[1], r[2]);
+
+    // acosf only returns positive theta2, the other solution has negative theta2
+    float flippedTheta1 = theta1 + M_PI;
+    float flippedTheta3 = theta3 + M_PI;
+
+    auto distance = [&](float t1, float t2, float t3) {
+        return std::abs(tap::algorithms::Angle(prevTheta1).minDifference(t1)) +
+               std::abs(prevTheta2 - t2) +
+               std::abs(tap::algorithms::Angle(prevTheta3).minDifference(t3));
+    };
+
+    if (distance(flippedTheta1, -theta2, flippedTheta3) < distance(theta1, theta2, theta3))
+    {
+        return {flippedTheta1, -theta2, flippedTheta3};
+    }
+    return {theta1, theta2, theta3};
 }
 
 bool WristSubsystem::atSetpointTheta1(float epsilon) const
