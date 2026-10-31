@@ -20,6 +20,7 @@
 #if defined(TARGET_BLANK)
 
 // TODO: import buzzer subsystem
+#include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
 #include "aruwsrc/control/buzzer/note_sequences.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
@@ -43,19 +44,21 @@ namespace blank_control
 
 // TODO: instantiate buzzer subsystem
 // BuzzerSubsystem buzzer(...)
+BuzzerSubsystem buzzer(drivers());
 
 NoteSequenceCommand hesAPirateCommand(buzzer, HES_A_PIRATE_NOTES, HES_A_PIRATE_NOTE_LENGTH_MS);
 
 void initializeSubsystems()
 {
     // TODO: register initialize buzzer subsystem
-    
+    drivers()->commandScheduler.registerSubsystem(&buzzer);
+    buzzer.initialize();
     buzzer.setDefaultCommand(&hesAPirateCommand);
 }
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems() {}
+//void initializeSubsystems() {}
 
 }  // namespace blank_control
 
