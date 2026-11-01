@@ -98,9 +98,16 @@ protected:
         tap::algorithms::transforms::Axis::PITCH>& pitchController;
 
 private:
+    void updateBaseToFollowerFromSetpoints();
+
     const float turretPitchToExtensionZeroX, turretPitchToExtensionZeroZ2;
-    tap::algorithms::transforms::Transform chassisToEndEffectorDesired, chassisToWristDesiredPos,
-        turretPitchToExtension, extensionToWristDesired;
+    // Both directions of this fixed offset are reused by the inverse solve and clamped feedback.
+    const tap::algorithms::transforms::Position followerToWristPos;
+    const tap::algorithms::CMSISMat<3, 3> followerToWristRotation, wristToFollowerRotation;
+    const tap::algorithms::transforms::Position wristToFollowerPos;
+    // Avoid full Transform temporaries and unused Euler-angle extraction in intermediate poses.
+    tap::algorithms::transforms::Position chassisToWristDesiredPos;
+    tap::algorithms::CMSISMat<3, 3> chassisToWristDesiredRotation, extensionToWristDesiredRotation;
     float turretYawDesired, turretPitchDesired, extensionDesired;
 };
 

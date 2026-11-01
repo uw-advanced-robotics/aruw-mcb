@@ -91,13 +91,18 @@ void WristSubsystem::homeTheta3(float pos) { motorTheta3.getEncoder()->resetEnco
 
 void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint)
 {
-    float theta1 = atan2f(setpoint.matrix().data[3], -setpoint.matrix().data[6]);
+    setSetpointRotationMatrix(setpoint.matrix());
+}
+
+void WristSubsystem::setSetpointRotationMatrix(const tap::algorithms::CMSISMat<3, 3>& setpoint)
+{
+    float theta1 = atan2f(setpoint.data[3], -setpoint.data[6]);
     // clamp pitch to prevent gimbal lock
     float theta2 = std::clamp(
-        acosf(setpoint.matrix().data[0]),
+        acosf(setpoint.data[0]),
         (float)(-M_PI_2 + GIMBAL_LOCK_THRESHOLD),
         (float)(M_PI_2 - GIMBAL_LOCK_THRESHOLD));
-    float theta3 = atan2f(setpoint.matrix().data[1], setpoint.matrix().data[2]);
+    float theta3 = atan2f(setpoint.data[1], setpoint.data[2]);
     setSetpointTheta1(theta1);
     setSetpointTheta2(theta2);
     setSetpointTheta3(theta3);
@@ -232,13 +237,26 @@ Orientation WristSubsystem::getOrientation() const
 
 Orientation WristSubsystem::getSetpointOrientation() const
 {
-    return getHypotheticalOrientation(
+    return Orientation(getSetpointRotationMatrix());
+}
+
+tap::algorithms::CMSISMat<3, 3> WristSubsystem::getSetpointRotationMatrix() const
+{
+    return getHypotheticalRotationMatrix(
         getSetpointTheta1(),
         getSetpointTheta2(),
         getSetpointTheta3());
 }
 
 Orientation WristSubsystem::getHypotheticalOrientation(float theta1, float theta2, float theta3)
+{
+    return Orientation(getHypotheticalRotationMatrix(theta1, theta2, theta3));
+}
+
+tap::algorithms::CMSISMat<3, 3> WristSubsystem::getHypotheticalRotationMatrix(
+    float theta1,
+    float theta2,
+    float theta3)
 {
     float s1 = sinf(theta1), c1 = cosf(theta1);
     float s2 = sinf(theta2), c2 = cosf(theta2);
@@ -249,7 +267,7 @@ Orientation WristSubsystem::getHypotheticalOrientation(float theta1, float theta
     float c1c2 = c1 * c2;
     float s1c2 = s1 * c2;
 
-    return Orientation(tap::algorithms::CMSISMat<3, 3>(
+    return tap::algorithms::CMSISMat<3, 3>(
         {c2,
          s2 * s3,
          s2 * c3,
@@ -260,6 +278,6 @@ Orientation WristSubsystem::getHypotheticalOrientation(float theta1, float theta
 
          -c1 * s2,
          s1c3 + s3 * c1c2,
-         -s1 * s3 + c1c2 * c3}));
+         -s1 * s3 + c1c2 * c3});
 }
 }  // namespace aruwsrc::engineer::wrist

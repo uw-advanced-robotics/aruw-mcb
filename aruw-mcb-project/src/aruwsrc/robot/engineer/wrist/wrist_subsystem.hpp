@@ -84,11 +84,17 @@ public:
      * */
     void setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint);
 
+    /** Sets a valid rotation matrix directly, without extracting unused Euler angles. */
+    void setSetpointRotationMatrix(const tap::algorithms::CMSISMat<3, 3>& setpoint);
+
     inline float getSetpointTheta1() const { return setpointTheta1.getWrappedValue(); }
     inline float getSetpointTheta2() const { return setpointTheta2; }
     inline float getSetpointTheta3() const { return setpointTheta3.getWrappedValue(); }
 
     tap::algorithms::transforms::Orientation getSetpointOrientation() const;
+
+    /** Returns the rotation after wrist setpoint limits have been applied. */
+    tap::algorithms::CMSISMat<3, 3> getSetpointRotationMatrix() const;
 
     virtual void initialize() override;
 
@@ -121,6 +127,11 @@ public:
         float theta3);
 
 private:
+    static tap::algorithms::CMSISMat<3, 3> getHypotheticalRotationMatrix(
+        float theta1,
+        float theta2,
+        float theta3);
+
     static constexpr float MOVING_VELOCITY_THRESHOLD = modm::toRadian(1.0f);
     static constexpr float GIMBAL_LOCK_THRESHOLD = modm::toRadian(0.1f);
     const WristConfig config;
