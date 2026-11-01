@@ -21,6 +21,10 @@
 
 #include "tap/architecture/clock.hpp"
 
+#include "aruwsrc/control/joint/joint_subsystem.hpp"
+#include "aruwsrc/control/turret/turret_subsystem.hpp"
+#include "aruwsrc/robot/engineer/wrist/wrist_subsystem.hpp"
+
 #include "abstract_ik_command.hpp"
 #include "trajectory_6d.hpp"
 
@@ -40,7 +44,8 @@ public:
             tap::algorithms::transforms::Axis::YAW>& yawController,
         aruwsrc::control::turret::algorithms::TurretAxisControllerInterface<
             tap::algorithms::transforms::Axis::PITCH>& pitchController,
-        const Trajectory6D<LEN>& trajectory)
+        const Trajectory6D<LEN>& trajectory,
+        bool holdFinalPose = false)
         : AbstractIKCommand(
               chassisToBase,
               followerToEndEffector,
@@ -49,18 +54,49 @@ public:
               wrist,
               yawController,
               pitchController),
-          trajectory(trajectory)
+          trajectory(trajectory),
+          holdFinalPose(holdFinalPose)
     {
     }
 
-    const char* getName() const override { return "Manual IK Command"; }
+    const char* getName() const override { return "Trajectory IK Command"; }
 
-    void initialize() override { startTime = tap::arch::clock::getTimeMilliseconds(); }
+    bool isReady() override
+    {
+        return yawController.isOnline() && pitchController.isOnline() && extension.isOnline() &&
+               wrist.isOnline();
+    }
+
+    void initialize() override
+    {
+        yawController.initialize();
+        pitchController.initialize();
+        startTime = tap::arch::clock::getTimeMilliseconds();
+        baseToFollowerDesired = trajectory.atTime(0.0f);
+    }
+
+    void end(bool interrupted) override
+    {
+        turret.yawMotor.setMotorOutput(0);
+        turret.pitchMotor.setMotorOutput(0);
+        if (interrupted || holdFinalPose)
+        {
+            // The extension and wrist run their controllers in subsystem refresh(). Stop chasing
+            // the old trajectory setpoints when the operator leaves trajectory mode. Trigger
+            // bindings call end(false) on switch release, even for an unfinished held trajectory.
+            extension.setSetpoint(extension.getPosition());
+            wrist.setSetpointTheta1(wrist.getTheta1());
+            wrist.setSetpointTheta2(wrist.getTheta2());
+            wrist.setSetpointTheta3(wrist.getTheta3());
+        }
+    }
 
     bool isFinished() const override
     {
         uint32_t now = tap::arch::clock::getTimeMilliseconds();
-        return (now - startTime) / 1000.0f > trajectory.waypoints.back().time;
+        // Holding keeps the controllers active and prevents whileTrue bindings from restarting
+        // a completed trajectory. Leaving the mode interrupts the command instead.
+        return !holdFinalPose && (now - startTime) / 1000.0f >= trajectory.waypoints.back().time;
     }
 
     void updateBaseToFollowerDesired() override
@@ -72,8 +108,9 @@ public:
 
 private:
     const Trajectory6D<LEN>& trajectory;
+    const bool holdFinalPose;
 
-    uint32_t startTime;
+    uint32_t startTime = 0;
 };  // class TrajectoryIKCommand
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

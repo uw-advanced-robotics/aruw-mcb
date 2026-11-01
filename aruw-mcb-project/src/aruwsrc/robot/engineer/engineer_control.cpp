@@ -771,22 +771,55 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 tap::control::Subsystem dummySubsystem(drivers());
 
-inverse_kinematics::Trajectory6D<2> depositTrajectory{
-    {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
+// Initial robot-test values, not a tuned scoring path. Positions are in meters in chassis frame;
+// these angles describe the end effector, not the individual differential wrist joints.
+const Transform DEPOSIT_TARGET_POSE(
+    0.7f,
+    0.3f,
+    0.7f,
+    modm::toRadian(10.0f),
+    modm::toRadian(10.0f),
+    modm::toRadian(15.0f));
+inline constexpr float DEPOSIT_APPROACH_CLEARANCE = -0.25f;
+inline constexpr float DEPOSIT_APPROACH_TIME = 2.0f;
+inline constexpr float DEPOSIT_FINISH_TIME = 3.0f;
+static_assert(DEPOSIT_FINISH_TIME > DEPOSIT_APPROACH_TIME);
 
-inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
-    transformer.getChassisToWorld(),
+inverse_kinematics::Trajectory6D<3> depositTrajectory{
+    {{{.pose = Transform(), .time = 0.0f},  // Captured from the robot on every activation below.
+      {.pose = Transform(
+           DEPOSIT_TARGET_POSE.getTranslation() + tap::algorithms::transforms::Vector(
+                                                      DEPOSIT_APPROACH_CLEARANCE,
+                                                      -0.3f,
+                                                      -0.3f),
+           DEPOSIT_TARGET_POSE.getRotation()),
+       .time = DEPOSIT_APPROACH_TIME},
+      {.pose = DEPOSIT_TARGET_POSE, .time = DEPOSIT_FINISH_TIME}}}};
+
+InstantCommand captureDepositStartPose(
+    []() {
+        // Seed from the same joint encoders used by the chassis-frame controllers. Converting
+        // the IMU-oriented world pose back to chassis frame can introduce a yaw step at t=0.
+        depositTrajectory.waypoints.front().pose = transformer.getChassisToEndEffector();
+    },
+    std::array<tap::control::Subsystem*, 0>{});
+
+inverse_kinematics::TrajectoryIKCommand<3> depositIKCommand(
+    IDENTITY_TRANSFORM,
     IDENTITY_TRANSFORM,
     engTurret,
     extensionSubsystem,
     wristSubsystem,
     chassisFrameYawTurretController,
     chassisFramePitchTurretController,
-    depositTrajectory);
+    depositTrajectory,
+    true);  // Hold at the end until the operator leaves UP; do not automatically release suction.
+
+SequentialCommand<2> depositTestCommand(&captureDepositStartPose, &depositIKCommand);
 
 Trigger rightUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(&wristGravityCompensationTestSequence);
+        .whileTrue(&depositTestCommand);
 
 // joint control mode
 Trigger rightMid =

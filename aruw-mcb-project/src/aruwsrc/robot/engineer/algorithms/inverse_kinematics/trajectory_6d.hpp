@@ -37,12 +37,19 @@ struct Waypoint
 template <size_t LENGTH>
 struct Trajectory6D
 {
+    static_assert(LENGTH > 0, "A trajectory must contain at least one waypoint");
+
+    // Waypoint times must be strictly increasing, in seconds.
     std::array<Waypoint, LENGTH> waypoints;
 
     tap::algorithms::transforms::Transform atTime(float time) const
     {
+        // Clamp at both ends, including the single-waypoint (hold-position) case.
+        if (time <= waypoints.front().time) return waypoints.front().pose;
+        if (time >= waypoints.back().time) return waypoints.back().pose;
+
         size_t i = 0;
-        while (i < LENGTH - 1 && waypoints[i + 1].time < time) i++;
+        while (i + 1 < LENGTH - 1 && waypoints[i + 1].time < time) i++;
 
         float t = (time - waypoints[i].time) / (waypoints[i + 1].time - waypoints[i].time);
 

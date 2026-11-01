@@ -69,6 +69,22 @@ EngineerTransforms::EngineerTransforms(
 {
 }
 
+EngineerTransforms::Transform EngineerTransforms::getChassisToEndEffector() const
+{
+    const Transform chassisToYaw = getHypotheticalChassisToTurretYaw(
+        turret.yawMotor.getChassisFrameMeasuredAngle().getWrappedValue());
+    const Transform yawToPitch = getHypotheticalTurretYawToTurretPitch(
+        turret.pitchMotor.getChassisFrameMeasuredAngle().getWrappedValue());
+    const Transform pitchToExtension =
+        getHypotheticalTurretPitchToExtension(extension.getPosition());
+    const Transform extensionToMeasuredWrist(Position(0, 0, 0), wrist.getOrientation());
+
+    return chassisToYaw.composeStatic(yawToPitch)
+        .composeStatic(pitchToExtension)
+        .composeStatic(extensionToMeasuredWrist)
+        .composeStatic(WRIST_TO_END_EFFECTOR);
+}
+
 void EngineerTransforms::updateTransforms()
 {
     modm::Location2D chassisPose = chassisOdometry.getCurrentLocation2D();

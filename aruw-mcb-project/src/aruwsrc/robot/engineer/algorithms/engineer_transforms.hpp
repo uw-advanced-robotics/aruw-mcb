@@ -89,6 +89,14 @@ public:
     inline const Transform& getWorldToRealsense() const { return worldToRealsense; }
     inline const Transform& getWorldToExtension() const { return worldToExtension; }
     inline const Transform& getWorldToEndEffector() const { return worldToEndEffector; }
+
+    /**
+     * Computes the current chassis-relative end-effector pose from joint encoders only.
+     * Use this to seed chassis-frame IK: the world transforms incorporate IMU yaw/pitch,
+     * whose reference can differ from the encoders used by chassis-frame controllers.
+     */
+    Transform getChassisToEndEffector() const;
+
     inline const Transform& getCubeStore1ToEndEffector() const { return cubeStore1ToEndEffector; }
     inline const Transform& getCubeStore2ToEndEffector() const { return cubeStore2ToEndEffector; }
     inline const Transform& getEndEffectorToCubeDist() const { return endEffectorToCubeDist; }
