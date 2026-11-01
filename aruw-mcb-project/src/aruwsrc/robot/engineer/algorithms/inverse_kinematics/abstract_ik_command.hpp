@@ -98,10 +98,37 @@ protected:
         tap::algorithms::transforms::Axis::PITCH>& pitchController;
 
 private:
+    static constexpr float TRANSFORM_EPSILON = 1e-5f;
+
+    static bool staticTransformsClose(
+        const tap::algorithms::transforms::Transform& first,
+        const tap::algorithms::transforms::Transform& second);
+    static bool staticTransformIsFinite(const tap::algorithms::transforms::Transform& transform);
+    bool shouldRecalculateIk() const;
+    bool calculateDesiredSetpoints();
+    void updateBaseToFollowerFromSetpoints();
+
     const float turretPitchToExtensionZeroX, turretPitchToExtensionZeroZ2;
     tap::algorithms::transforms::Transform chassisToEndEffectorDesired, chassisToWristDesiredPos,
         turretPitchToExtension, extensionToWristDesired;
-    float turretYawDesired, turretPitchDesired, extensionDesired;
+    float turretYawDesired = 0.0f, turretPitchDesired = 0.0f, extensionDesired = 0.0f;
+
+    bool ikSolutionInitialized = false;
+    tap::algorithms::transforms::Transform cachedIkBaseToFollowerDesired;
+
+    bool forwardKinematicsCacheInitialized = false;
+    tap::algorithms::transforms::Transform cachedChassisToBase;
+    tap::algorithms::transforms::Transform cachedFollowerToEndEffector;
+    tap::algorithms::transforms::Transform cachedBaseToTurretYaw;
+    tap::algorithms::transforms::Transform cachedTurretYawToExtension;
+    tap::algorithms::transforms::Transform cachedExtensionToFollower;
+    tap::algorithms::transforms::Transform cachedBaseToFollowerFromSetpoints;
+    float cachedYawSetpoint = 0.0f;
+    float cachedPitchSetpoint = 0.0f;
+    float cachedExtensionSetpoint = 0.0f;
+    float cachedWristTheta1Setpoint = 0.0f;
+    float cachedWristTheta2Setpoint = 0.0f;
+    float cachedWristTheta3Setpoint = 0.0f;
 };
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics
