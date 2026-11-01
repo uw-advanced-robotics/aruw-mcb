@@ -41,7 +41,7 @@ namespace aruwsrc::control::turret
 static constexpr uint8_t NUM_TURRETS = 1;
 
 static constexpr float USER_YAW_INPUT_SCALAR = 0.01f;
-static constexpr float USER_PITCH_INPUT_SCALAR = 0.02f;
+static constexpr float USER_PITCH_INPUT_SCALAR = 0.005f;
 
 static constexpr tap::can::CanBus CAN_BUS_YAW_MOTOR = tap::can::CanBus::CAN_BUS1;
 static constexpr tap::motor::MotorId YAW_MOTOR_ID = tap::motor::MOTOR5;
@@ -117,10 +117,10 @@ inline float getPitchMinLimit(float extensionPosition)
 inline float getPitchMaxLimit(float extensionPosition)
 {
     // Pitch down is positive on engineer.
-    if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN)
-    {
-        return aruwsrc::control::turret::PITCH_DOWN_LIMIT_EXTENSION_PARTIAL;
-    }
+    // if (extensionPosition < aruwsrc::control::turret::MIN_EXTENSION_FOR_EXTRA_PITCH_DOWN)
+    // {
+    //     return aruwsrc::control::turret::PITCH_DOWN_LIMIT_EXTENSION_PARTIAL;
+    // }
 
     if (extensionPosition > aruwsrc::control::turret::MAX_EXTENSION_FOR_FULL_PITCH_DOWN)
     {
