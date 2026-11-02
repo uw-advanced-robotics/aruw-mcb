@@ -81,30 +81,13 @@ private:
     tap::arch::MilliTimeout disconnectTimeout;
 };
 
-enum DamiaoMotorId : uint16_t
-{
-    DAMIAO_MOTOR1 = 0x001,
-    DAMIAO_MOTOR2 = 0x002,
-    DAMIAO_MOTOR3 = 0x003,
-    DAMIAO_MOTOR4 = 0x004,
-    DAMIAO_MOTOR5 = 0x005,
-    DAMIAO_MOTOR6 = 0x006,
-    DAMIAO_MOTOR7 = 0x007,
-    DAMIAO_MOTOR8 = 0x008,
-};
-
-enum DamiaoControlMode : uint16_t
-{
-    DAMIAO_CONTROL_MODE_MIT = 0x000,
-    DAMIAO_CONTROL_MODE_POSITION_SPEED = 0x001,
-    DAMIAO_CONTROL_MODE_VELOCITY = 0x002,
-};
-
 /**
  * DaMiao CAN motor driver supporting MIT torque, position-speed, and velocity control.
  *
  * The frame layout follows the DM-J4310 documentation:
- * - Command frame (8 bytes): pos[16], vel[12], kp[12], kd[12], torque[12]
+ * - MIT command (8 bytes): pos[16], vel[12], kp[12], kd[12], torque[12]
+ * - Position-speed command (8 bytes): little-endian position and velocity floats
+ * - Velocity command (4 bytes): little-endian velocity float
  * - Feedback frame (8 bytes): id/status nibble + pos/vel/torque + temperatures
  */
 class DamiaoMotor : public tap::can::CanRxListener, public tap::motor::MotorInterface
@@ -153,6 +136,11 @@ public:
 
     int16_t getTorque() const override;
 
+    float getPosition() const;
+
+    // Feedback status nibble: 0 disabled, 1 enabled, 8..E faults; FF before feedback.
+    uint8_t getStatus() const { return motorStatus; }
+
     void processMessage(const modm::can::Message& message) override;
 
     // Position in radians and maximum speed in rad/s. Call each control cycle.
@@ -163,21 +151,14 @@ public:
     // Returns false if the selected mode does not match or CAN transmission fails.
     bool sendVelocityCommand(float targetVelocity);
 
+    // Stop in the configured mode: zero torque, zero speed, or current position at zero speed.
+    void stop();
+
     bool enable();
 
     bool disable();
 
     bool clearError();
-
-private:
-    static constexpr uint32_t MOTOR_DISCONNECT_TIME_MS = 100;
-    static constexpr uint32_t STARTUP_RETRY_PERIOD_MS = 100;
-
-    void retryStartup();
-
-    static uint16_t floatToUint(float x, float xMin, float xMax, uint8_t bits);
-
-    static float uintToFloat(uint16_t xInt, float xMin, float xMax, uint8_t bits);
 
     bool sendMitCommand(
         float targetPosition,
@@ -186,12 +167,23 @@ private:
         float kd,
         float torqueNm);
 
+private:
+    static constexpr uint32_t MOTOR_DISCONNECT_TIME_MS = 100;
+    static constexpr uint32_t STARTUP_RETRY_PERIOD_MS = 100;
+
+    void retryStartup();
+
+    // 12/16 bits uses MIT scaling; 32 bits preserves raw float encoding.
+    template <typename Uint, uint8_t Bits>
+    static Uint floatToUint(float x, float xMin, float xMax);
+
+    static float uintToFloat(uint16_t xInt, float xMin, float xMax, uint8_t bits);
+
     bool sendRawFrame(const uint8_t* data, uint8_t dataLen, uint16_t frameId) const;
 
     tap::Drivers* drivers;
     uint16_t motorIdentifier;
     DamiaoControlMode controlMode;
-    uint16_t commandIdentifier;
     tap::can::CanBus motorCanBus;
     bool motorInverted;
 
@@ -200,6 +192,9 @@ private:
     tap::arch::MilliTimeout startupRetryTimeout;
 
     int32_t desiredOutputMilliNm = 0;
+    uint8_t motorStatus = 0xFF;
+    // Preserve the motor's raw coordinate for position-mode stop commands.
+    float measuredPositionRad = 0.0f;
     int16_t measuredTorqueMilliNm = 0;
     int8_t temperatureMos = 0;
 };
