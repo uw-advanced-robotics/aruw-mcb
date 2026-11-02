@@ -29,6 +29,8 @@
 #include "aruwsrc/robot/motor_tester/motor_tester_constants.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
+#include "aruwsrc/robot/motor_tester/motor_tester_subsystem.hpp"
+#include "aruwsrc/robot/motor_tester/motor_tester_command.hpp"
 
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;
@@ -45,8 +47,30 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace motor_tester_control
 {
 
-// motors, subsystems, commands, etc.
+// Motor hardware settings: verify against actual configuration
+tap::motor::DjiMotor motor(
+    drivers(),
+    tap::motor::MOTOR1,
+    tap::can::CanBus::CAN_BUS1,
+    false,
+    "Motor Tester"
+);
 
+// Subsystem
+MotorTesterSubsystem motorSubsystem(
+    drivers(),
+    motor,
+    MOTOR_TESTER_POSITION_PID_CONFIG
+);
+
+// Command
+MotorTesterCommand motorCommand(
+    drivers(),
+    motorSubsystem,
+    tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
+    1.0f
+);
+    
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 

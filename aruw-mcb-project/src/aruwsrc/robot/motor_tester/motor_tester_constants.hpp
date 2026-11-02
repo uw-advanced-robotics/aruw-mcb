@@ -33,6 +33,17 @@ namespace aruwsrc::motor_tester::constants
 {
 // position PID terms
 // PID terms for standard
+// Position PID config for Motor Tester
+static constexpr tap::algorithms::SmoothPidConfig MOTOR_TESTER_POSITION_PID_CONFIG = {
+    .kp = 0.0f,
+    .ki = 0.0f,
+    .kd = 0.0f,
+    .maxICumulative = 0.0f,
+    .maxOutput = tap::motor::DjiMotor::MAX_OUTPUT_C620,
+    .errDeadzone = 0.0f,
+    .errorDerivativeFloor = 0.0f,
+};
+
 static constexpr tap::algorithms::SmoothPidConfig AGITATOR_PID_CONFIG = {
     .kp = 3'000.0f,
     .ki = 0.0f,
