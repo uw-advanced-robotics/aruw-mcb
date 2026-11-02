@@ -22,6 +22,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
+#include "tap/control/repeat_command.hpp"
 #include "tap/drivers.hpp"
 #include "tap/mock/abstract_imu_mock.hpp"
 #include "tap/mock/encoder_interface_mock.hpp"
@@ -420,5 +421,41 @@ TEST_F(TrajectoryIKCommandTest, switch_release_stops_outputs_and_holds_measured_
     EXPECT_FLOAT_EQ(wrist.getTheta1(), wrist.getSetpointTheta1());
     EXPECT_FLOAT_EQ(wrist.getTheta2(), wrist.getSetpointTheta2());
     EXPECT_FLOAT_EQ(wrist.getTheta3(), wrist.getSetpointTheta3());
+}
+
+TEST_F(TrajectoryIKCommandTest, switch_release_during_timed_trajectory_holds_measured_joints)
+{
+    command.initialize();
+    clock.time += 500;
+    extension.setSetpoint(0.7f);
+    wrist.setSetpointTheta1(0.2f);
+    wrist.setSetpointTheta2(0.3f);
+    wrist.setSetpointTheta3(0.4f);
+    EXPECT_CALL(yawMotor, setDesiredOutput(0));
+    EXPECT_CALL(pitchMotor, setDesiredOutput(0));
+    command.end(false);
+    extension.updateSetpoint();
+    EXPECT_FLOAT_EQ(extension.getPosition(), extension.getSetpoint());
+    EXPECT_FLOAT_EQ(wrist.getTheta1(), wrist.getSetpointTheta1());
+    EXPECT_FLOAT_EQ(wrist.getTheta2(), wrist.getSetpointTheta2());
+    EXPECT_FLOAT_EQ(wrist.getTheta3(), wrist.getSetpointTheta3());
+}
+
+TEST_F(TrajectoryIKCommandTest, repeated_timed_trajectory_restarts_each_lap_and_never_finishes)
+{
+    tap::control::RepeatCommand repeat(&command);
+    repeat.initialize();
+    for (size_t lap = 0; lap < 3; ++lap)
+    {
+        clock.time += 2000;
+        repeat.execute();
+        EXPECT_TRUE(command.isFinished());
+        EXPECT_FALSE(repeat.isFinished());
+        clock.time += 2;
+        repeat.execute();
+        EXPECT_FALSE(command.isFinished());
+        EXPECT_FALSE(repeat.isFinished());
+    }
+    repeat.end(false);
 }
 }  // namespace

@@ -771,40 +771,67 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 tap::control::Subsystem dummySubsystem(drivers());
 
-// Initial robot-test values, not a tuned scoring path. Positions are in meters in chassis frame;
-// these angles describe the end effector, not the individual differential wrist joints.
-const Transform DEPOSIT_TARGET_POSE(
-    0.7f,
-    0.3f,
-    0.7f,
-    modm::toRadian(10.0f),
-    modm::toRadian(10.0f),
-    modm::toRadian(15.0f));
-inline constexpr float DEPOSIT_APPROACH_CLEARANCE = -0.25f;
-inline constexpr float DEPOSIT_APPROACH_TIME = 2.0f;
-inline constexpr float DEPOSIT_FINISH_TIME = 3.0f;
-static_assert(DEPOSIT_FINISH_TIME > DEPOSIT_APPROACH_TIME);
+// Supplied Y-right/Z-up poses, 0.5 m forward of the chassis origin.
+// Roll is the end-effector orientation, not an individual differential wrist angle.
+inline constexpr float PATTERN_X = 0.5f;
+inline constexpr float PATTERN_ENTRY_TIME = 3.0f;
+inline constexpr float PATTERN_POSE_TIME = 0.2f;
+static_assert(PATTERN_ENTRY_TIME > 0 && PATTERN_POSE_TIME > 0);
 
-inverse_kinematics::Trajectory6D<3> depositTrajectory{
-    {{{.pose = Transform(), .time = 0.0f},  // Captured from the robot on every activation below.
-      {.pose = Transform(
-           DEPOSIT_TARGET_POSE.getTranslation() + tap::algorithms::transforms::Vector(
-                                                      DEPOSIT_APPROACH_CLEARANCE,
-                                                      -0.3f,
-                                                      -0.3f),
-           DEPOSIT_TARGET_POSE.getRotation()),
-       .time = DEPOSIT_APPROACH_TIME},
-      {.pose = DEPOSIT_TARGET_POSE, .time = DEPOSIT_FINISH_TIME}}}};
+inverse_kinematics::Waypoint makePatternWaypoint(
+    size_t poseIndex,
+    float yRightMm,
+    float zUpMm,
+    float rollDeg)
+{
+    // Chassis +Y points left. Convert the supplied right-positive mm to left-positive meters.
+    return {
+        .pose = Transform(
+            PATTERN_X,
+            -yRightMm / 1000.0f,
+            zUpMm / 1000.0f,
+            modm::toRadian(-1*rollDeg),
+            0,
+            0),
+        .time = poseIndex * PATTERN_POSE_TIME};
+}
 
-InstantCommand captureDepositStartPose(
+const inverse_kinematics::Trajectory6D<21> patternTrajectory{
+    {{makePatternWaypoint(0, 0.0f, 229.1f, 0.0f),
+      makePatternWaypoint(1, 0.0f, 273.3f, 0.0f),
+      makePatternWaypoint(2, 0.0f, 290.6f, -12.4f),
+      makePatternWaypoint(3, 9.5f, 316.6f, -36.3f),
+      makePatternWaypoint(4, 38.1f, 342.6f, -51.0f),
+      makePatternWaypoint(5, 68.5f, 364.3f, -47.8f),
+      makePatternWaypoint(6, 85.0f, 385.1f, -26.1f),
+      makePatternWaypoint(7, 87.6f, 403.3f, 10.8f),
+      makePatternWaypoint(8, 78.0f, 421.5f, 44.2f),
+      makePatternWaypoint(9, 55.5f, 436.3f, 64.9f),
+      makePatternWaypoint(10, 9.5f, 453.6f, 69.5f),
+      makePatternWaypoint(11, -44.2f, 473.5f, 66.1f),
+      makePatternWaypoint(12, -72.8f, 490.0f, 48.1f),
+      makePatternWaypoint(13, -86.7f, 511.7f, 19.1f),
+      makePatternWaypoint(14, -88.4f, 535.1f, -7.8f),
+      makePatternWaypoint(15, -80.6f, 555.9f, -32.8f),
+      makePatternWaypoint(16, -63.3f, 574.1f, -51.7f),
+      makePatternWaypoint(17, -31.2f, 594.9f, -52.7f),
+      makePatternWaypoint(18, -8.7f, 615.7f, -36.1f),
+      makePatternWaypoint(19, -0.9f, 636.5f, -9.6f),
+      makePatternWaypoint(20, -0.9f, 750.7f, 0.0f)}}};
+
+inverse_kinematics::Trajectory6D<2> patternEntryTrajectory{
+    {{{.pose = Transform(), .time = 0.0f},  // Captured on every activation.
+      {.pose = patternTrajectory.waypoints.front().pose, .time = PATTERN_ENTRY_TIME}}}};
+
+InstantCommand capturePatternStartPose(
     []() {
         // Seed from the same joint encoders used by the chassis-frame controllers. Converting
         // the IMU-oriented world pose back to chassis frame can introduce a yaw step at t=0.
-        depositTrajectory.waypoints.front().pose = transformer.getChassisToEndEffector();
+        patternEntryTrajectory.waypoints.front().pose = transformer.getChassisToEndEffector();
     },
     std::array<tap::control::Subsystem*, 0>{});
 
-inverse_kinematics::TrajectoryIKCommand<3> depositIKCommand(
+inverse_kinematics::TrajectoryIKCommand<2> patternEntryIKCommand(
     IDENTITY_TRANSFORM,
     IDENTITY_TRANSFORM,
     engTurret,
@@ -812,14 +839,28 @@ inverse_kinematics::TrajectoryIKCommand<3> depositIKCommand(
     wristSubsystem,
     chassisFrameYawTurretController,
     chassisFramePitchTurretController,
-    depositTrajectory,
-    true);  // Hold at the end until the operator leaves UP; do not automatically release suction.
+    patternEntryTrajectory);
 
-SequentialCommand<2> depositTestCommand(&captureDepositStartPose, &depositIKCommand);
+inverse_kinematics::TrajectoryIKCommand<21> patternIKCommand(
+    IDENTITY_TRANSFORM,
+    IDENTITY_TRANSFORM,
+    engTurret,
+    extensionSubsystem,
+    wristSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController,
+    patternTrajectory,
+    true);  // Hold the final pose so whileTrue cannot restart the trajectory.
+
+// Enter from the measured pose, run the supplied pattern once, then hold until leaving UP.
+SequentialCommand<3> patternTraceCommand(
+    &capturePatternStartPose,
+    &patternEntryIKCommand,
+    &patternIKCommand);
 
 Trigger rightUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(&depositTestCommand);
+        .whileTrue(&patternTraceCommand);
 
 // joint control mode
 Trigger rightMid =

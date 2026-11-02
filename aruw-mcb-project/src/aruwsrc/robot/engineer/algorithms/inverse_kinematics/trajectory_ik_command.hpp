@@ -79,11 +79,11 @@ public:
     {
         turret.yawMotor.setMotorOutput(0);
         turret.pitchMotor.setMotorOutput(0);
-        if (interrupted || holdFinalPose)
+        if (interrupted || holdFinalPose || !isFinished())
         {
             // The extension and wrist run their controllers in subsystem refresh(). Stop chasing
             // the old trajectory setpoints when the operator leaves trajectory mode. Trigger
-            // bindings call end(false) on switch release, even for an unfinished held trajectory.
+            // bindings call end(false) on switch release, even for an unfinished timed trajectory.
             extension.setSetpoint(extension.getPosition());
             wrist.setSetpointTheta1(wrist.getTheta1());
             wrist.setSetpointTheta2(wrist.getTheta2());
