@@ -78,7 +78,6 @@ void AbstractIKCommand::execute()
     updateBaseToFollowerFromSetpoints();
 }
 
-
 bool AbstractIKCommand::shouldRecalculateIk() const
 {
     const bool inputsChanged =

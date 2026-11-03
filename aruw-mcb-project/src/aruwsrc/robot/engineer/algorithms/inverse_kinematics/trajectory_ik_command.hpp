@@ -60,7 +60,7 @@ public:
     bool isFinished() const override
     {
         uint32_t now = tap::arch::clock::getTimeMilliseconds();
-        return (now - startTime) / 1000.0f > trajectory.waypoints.back().time;
+        return (now - startTime) / 1000.0f >= trajectory.waypoints.back().time;
     }
 
     void updateBaseToFollowerDesired() override

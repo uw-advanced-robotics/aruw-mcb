@@ -39,17 +39,38 @@ struct Trajectory6D
 {
     std::array<Waypoint, LENGTH> waypoints;
 
+    bool hasStrictlyIncreasingWaypointTimes() const
+    {
+        for (size_t i = 1; i < LENGTH; ++i)
+        {
+            if (!(waypoints[i - 1].time < waypoints[i].time)) return false;
+        }
+        return true;
+    }
+
     tap::algorithms::transforms::Transform atTime(float time) const
     {
-        size_t i = 0;
-        while (i < LENGTH - 1 && waypoints[i + 1].time < time) i++;
+        if (LENGTH == 1)
+        {
+            return waypoints.front().pose;
+        }
+        else
+        {
+            const bool validWaypointTimes = hasStrictlyIncreasingWaypointTimes();
+            if (!validWaypointTimes) return waypoints.front().pose;
 
-        float t = (time - waypoints[i].time) / (waypoints[i + 1].time - waypoints[i].time);
+            if (time <= waypoints.front().time) return waypoints.front().pose;
+            if (time >= waypoints.back().time) return waypoints.back().pose;
 
-        return tap::algorithms::transforms::Transform::interpolate(
-            waypoints[i].pose,
-            waypoints[i + 1].pose,
-            t);
+            size_t i = 0;
+            while (i + 1 < LENGTH - 1 && waypoints[i + 1].time < time) i++;
+            float t = (time - waypoints[i].time) / (waypoints[i + 1].time - waypoints[i].time);
+
+            return tap::algorithms::transforms::Transform::interpolate(
+                waypoints[i].pose,
+                waypoints[i + 1].pose,
+                t);
+        }
     }
 };
 
