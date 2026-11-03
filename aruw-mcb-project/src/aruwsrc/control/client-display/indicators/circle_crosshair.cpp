@@ -33,6 +33,8 @@ void CircleCrosshair::initialize()
     uint8_t crosshairName[3];
 
     getUnusedGraphicName(crosshairName);
+
+    // TODO (EDU): Modify the lines below so you draw something different than a circle!!
     RefSerialTransmitter::configGraphicGenerics(
         &crosshairGraphics.graphicData,
         crosshairName,
