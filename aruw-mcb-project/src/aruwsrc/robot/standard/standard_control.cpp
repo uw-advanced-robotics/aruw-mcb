@@ -75,6 +75,7 @@
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/client-display/indicators/ammo_indicator.hpp"
+#include "aruwsrc/control/client-display/indicators/brayden_image.hpp"
 #include "aruwsrc/control/client-display/indicators/cap_bank_indicator.hpp"
 #include "aruwsrc/control/client-display/indicators/circle_crosshair.hpp"
 #include "aruwsrc/control/client-display/indicators/damage_indicator.hpp"
@@ -701,6 +702,8 @@ AmmoIndicator ammoIndicator(refSerialTransmitter, drivers()->refSerial);
 
 CircleCrosshair circleCrosshair(refSerialTransmitter);
 
+BraydenImageIndicator braydenImageIndicator(refSerialTransmitter);
+
 DamageIndicator damageIndicator(drivers()->plateHitTracker, turret, refSerialTransmitter);
 
 TextHudIndicators textHudIndicators(
@@ -728,6 +731,7 @@ std::vector<HudIndicator*> hudIndicators = {
     &positionHudIndicators,
     &ammoIndicator,
     &circleCrosshair,
+    &braydenImageIndicator,
     // &damageIndicator,
     &textHudIndicators,
     &visionTargetIndicator};

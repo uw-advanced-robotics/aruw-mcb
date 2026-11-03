@@ -50,7 +50,7 @@ void CircleCrosshair::initialize()
 
 modm::ResumableResult<void> CircleCrosshair::sendInitialGraphics()
 {
-    RF_BEGIN(0)
+    RF_BEGIN(0);
 
     RF_CALL(refSerialTransmitter.sendGraphic(&crosshairGraphics));
 
