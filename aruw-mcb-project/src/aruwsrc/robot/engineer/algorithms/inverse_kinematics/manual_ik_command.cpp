@@ -49,7 +49,9 @@ ManualIKCommand::ManualIKCommand(
 {
 }
 
-void ManualIKCommand::initialize() { baseToFollowerDesired = baseToEndEffector; }
+void ManualIKCommand::initialize() { 
+    baseToFollowerDesired = baseToEndEffector;
+}
 
 void ManualIKCommand::updateBaseToFollowerDesired()
 {
@@ -68,6 +70,10 @@ void ManualIKCommand::updateBaseToFollowerDesired()
         baseToFollowerDesired.getTranslation() + endEffectorPrevToEndEffectorNextTrans);
     baseToFollowerDesired.updateRotation(
         baseToFollowerDesired.getRotation().compose(endEffectorPrevToEndEffectorNextRot));
+    
+    ikVelX = controlOperatorInterface.getIKVelX();
+    ikVelY = controlOperatorInterface.getIKVelY();
+    ikVelZ = controlOperatorInterface.getIKVelZ();
 }
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

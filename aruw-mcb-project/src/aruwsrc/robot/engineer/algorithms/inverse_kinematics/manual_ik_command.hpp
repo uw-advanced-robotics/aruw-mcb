@@ -50,6 +50,10 @@ public:
 private:
     const aruwsrc::engineer::EngineerControlOperatorInterface& controlOperatorInterface;
     const tap::algorithms::transforms::Transform& baseToEndEffector;
+
+    float ikVelX = 0.0f;
+    float ikVelY = 0.0f;
+    float ikVelZ = 0.0f;
 };  // class ManualIKCommand
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

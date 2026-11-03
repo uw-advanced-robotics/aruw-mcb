@@ -87,6 +87,7 @@ bool AbstractIKCommand::shouldRecalculateIk() const
         !staticTransformsClose(chassisToBase, cachedChassisToBase) ||
         !staticTransformsClose(followerToEndEffector, cachedFollowerToEndEffector);
 
+    // recalculate if the inputs are changed and the inputs are finite
     return inputsChanged && staticTransformIsFinite(baseToFollowerDesired) &&
            staticTransformIsFinite(chassisToBase) && staticTransformIsFinite(followerToEndEffector);
 }

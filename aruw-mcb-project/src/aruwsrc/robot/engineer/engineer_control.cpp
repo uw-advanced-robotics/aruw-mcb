@@ -771,22 +771,52 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 tap::control::Subsystem dummySubsystem(drivers());
 
-inverse_kinematics::Trajectory6D<2> depositTrajectory{
-    {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
 
-inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
-    transformer.getChassisToWorld(),
+// Supplied Y-right/Z-up poses, 0.5 m forward of the chassis origin.
+// Roll is the end-effector orientation, not an individual differential wrist angle.
+inline constexpr float PATTERN_X = 0.5f;
+inline constexpr float PATTERN_ENTRY_TIME = 3.0f;
+inline constexpr float PATTERN_POSE_TIME = 0.2f;
+
+inverse_kinematics::Waypoint makeWaypoint(
+    size_t poseIndex,
+    float yRightMm,
+    float zUpMm,
+    float rollDeg)
+{
+    // Chassis +Y points left. Convert the supplied right-positive mm to left-positive meters.
+    return {
+        .pose = Transform(
+            PATTERN_X,
+            -yRightMm / 1000.0f,
+            zUpMm / 1000.0f,
+            modm::toRadian(-1*rollDeg),
+            0,
+            0),
+        .time = poseIndex * PATTERN_POSE_TIME};
+}
+
+inverse_kinematics::Trajectory6D<3> testTrajectory{
+    {{
+        makeWaypoint(0, 0.0f, 20.0f, 0.0f),
+        makeWaypoint(1, 10.0f, 40.0f, 10.0f),
+        makeWaypoint(2, 25.0f, 60.0f, -20.0f),
+    }}};
+
+inverse_kinematics::TrajectoryIKCommand<3> testIKTrajectoryCommand(
+    IDENTITY_TRANSFORM,
     IDENTITY_TRANSFORM,
     engTurret,
     extensionSubsystem,
     wristSubsystem,
     chassisFrameYawTurretController,
     chassisFramePitchTurretController,
-    depositTrajectory);
+    testTrajectory);
 
 Trigger rightUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        .whileTrue(&wristGravityCompensationTestSequence);
+        //.whileTrue(&wristGravityCompensationTestSequence);
+        .whileTrue(&testIKTrajectoryCommand);
 
 // joint control mode
 Trigger rightMid =
