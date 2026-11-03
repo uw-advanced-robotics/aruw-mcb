@@ -30,7 +30,7 @@ StickTorqueCommand::StickTorqueCommand(
 
     void StickTorqueCommand::execute() {
         float input = drivers->remote.getChannel(channel);
-        motor->setDesiredOutput(input * tap::motor::DjiMotor::MAX_OUTPUT_C620 * scaleFactor);
+        motor->setDesiredPosition(input * scaleFactor);
     }
 
     bool StickTorqueCommand::isFinished() const {
@@ -38,6 +38,6 @@ StickTorqueCommand::StickTorqueCommand(
     }
 
     void StickTorqueCommand::end(bool) {
-        motor->setDesiredOutput(0);
+        motor->setDesiredPosition(0);
     }
 }

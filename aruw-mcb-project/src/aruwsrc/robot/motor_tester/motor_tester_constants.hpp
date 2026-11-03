@@ -93,6 +93,9 @@ tap::algorithms::SmoothPidConfig gm6020VelocityPidConfig =
 tap::algorithms::SmoothPidConfig Ak809VelocityPidConfig =
     {.kp = 50.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
 
+tap::algorithms::SmoothPidConfig MotorTesterConfig = 
+    {.kp = 10.0f, .ki = 0.0f, .kd = 0.0f, .maxICumulative = 0.0f, .maxOutput = 16000.0f};
+
 }  // namespace aruwsrc::motor_tester::constants
 
 #endif  // MOTOR_TESTER_CONSTANTS_HPP_
