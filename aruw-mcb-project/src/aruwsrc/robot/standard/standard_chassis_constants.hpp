@@ -160,8 +160,11 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
     .beybladeRampRate = 50,
 };
 
-static constexpr float INITIAL_CHASSIS_POSITION_X = 0.75f;
-static constexpr float INITIAL_CHASSIS_POSITION_Y = 4.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_X = 0.0f;
+static constexpr float INITIAL_CHASSIS_POSITION_Y = 0.0f;
+
+static constexpr float CAP_BANK_SPRINT_TRANSLATIONAL_VELOCITY_THRESHOLD = 0.25f;  // m/s
+static constexpr float CAP_BANK_SPRINT_ENERGY_THRESHOLD = 50.0f;                  // J
 
 static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;

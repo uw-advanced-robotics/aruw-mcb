@@ -36,7 +36,8 @@ using namespace aruwsrc::control::auto_aim;
 enum class CvOnTargetGovernorMode
 {
     ON_TARGET,
-    ON_TARGET_AND_GATED
+    ON_TARGET_AND_GATED,
+    ON_TARGET_AND_GATED_FAIL_CLOSED
 };
 
 /**
@@ -94,7 +95,7 @@ public:
     {
         if (!isGovernorGating())
         {
-            return true;
+            return mode != CvOnTargetGovernorMode::ON_TARGET_AND_GATED_FAIL_CLOSED;
         }
 
         bool isOnTarget = turretCVCommand.isAimingWithinLaunchingTolerance();
@@ -119,7 +120,7 @@ public:
             case AutoAimLaunchTimer::LaunchInclination::GATED_ALLOW:
                 return true;
             case AutoAimLaunchTimer::LaunchInclination::GATED_DENY:
-                bool ignoreDenyGates = mode != CvOnTargetGovernorMode::ON_TARGET_AND_GATED;
+                bool ignoreDenyGates = mode == CvOnTargetGovernorMode::ON_TARGET;
                 return ignoreDenyGates;
         }
 

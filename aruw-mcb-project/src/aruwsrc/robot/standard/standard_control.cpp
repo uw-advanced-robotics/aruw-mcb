@@ -66,7 +66,9 @@
 #include "aruwsrc/control/cap-bank/cap_bank_sprint_command.hpp"
 #include "aruwsrc/control/cap-bank/cap_bank_subsystem.hpp"
 #include "aruwsrc/control/cap-bank/cap_bank_toggle_command.hpp"
+#include "aruwsrc/control/chassis/auto_nav_command.hpp"
 #include "aruwsrc/control/chassis/beyblade_command.hpp"
+#include "aruwsrc/control/chassis/chassis_auto_nav_controller.hpp"
 #include "aruwsrc/control/chassis/chassis_autorotate_command.hpp"
 #include "aruwsrc/control/chassis/chassis_drive_command.hpp"
 #include "aruwsrc/control/chassis/chassis_imu_drive_command.hpp"
@@ -322,6 +324,15 @@ aruwsrc::control::cap_bank::CapBankSubsystem capBankSubsystem(
     drivers()->capacitorBank,
     voltageCurrentSensor);
 
+aruwsrc::control::chassis::ChassisAutoNavController autoNavController(
+    *drivers(),
+    chassis,
+    transformAdapter.getWorldToChassis(),
+    aruwsrc::control::chassis::BEYBLADE_CONFIG,
+    &capBankSubsystem,
+    aruwsrc::control::chassis::CAP_BANK_SPRINT_ENERGY_THRESHOLD,
+    aruwsrc::control::chassis::CAP_BANK_SPRINT_TRANSLATIONAL_VELOCITY_THRESHOLD);
+
 aruwsrc::control::aruco::ArucoResetSubsystem arucoResetSubsystem(
     drivers(),
     drivers()->visionCoprocessor,
@@ -341,6 +352,12 @@ aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     drivers(),
     &drivers()->controlOperatorInterface,
     &chassis);
+
+aruwsrc::control::chassis::AutoNavCommand autoNavCommand(
+    *drivers(),
+    chassis,
+    autoNavController,
+    true);
 
 aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     drivers(),
@@ -464,7 +481,13 @@ cv::TurretCVCommand turretCVCommand(
     &worldFramePitchTurretImuControllerCv,
     &ballisticsSolver,
     USER_YAW_INPUT_SCALAR,
-    USER_PITCH_INPUT_SCALAR);
+    USER_PITCH_INPUT_SCALAR,
+    0,
+    {
+        .enabled = true,
+        .pitchScanMinAngle = PITCH_MOTOR_CONFIG.minAngle,
+        .pitchScanMaxAngle = modm::toRadian(25.0f),
+    });
 
 NoteSequenceCommand imuCalibrateSuccessBuzzCommand(
     buzzer,
@@ -643,10 +666,22 @@ CvOnTargetGovernor cvOnTargetGovernor(
     autoAimLaunchTimer,
     CvOnTargetGovernorMode::ON_TARGET_AND_GATED);
 
+CvOnTargetGovernor autoAimCvOnTargetGovernor(
+    ((tap::Drivers*)(drivers())),
+    drivers()->visionCoprocessor,
+    turretCVCommand,
+    autoAimLaunchTimer,
+    CvOnTargetGovernorMode::ON_TARGET_AND_GATED_FAIL_CLOSED);
+
 GovernorLimitedCommand<2> rotateAndUnjamAgitatorWithHeatAndCVLimiting(
     {&agitator},
     rotateAndUnjamAgitatorWhenFrictionWheelsOn,
     {&heatLimitGovernor, &cvOnTargetGovernor});
+
+GovernorLimitedCommand<2> autoAimRotateAndUnjamAgitatorWithHeatAndCVLimiting(
+    {&agitator},
+    rotateAndUnjamAgitatorWhenFrictionWheelsOn,
+    {&heatLimitGovernor, &autoAimCvOnTargetGovernor});
 
 // GovernorLimitedCommand<3> rotateAndUnjamAgitatorWithHeatAndCVWindowLimiting(
 //     {&agitator},
@@ -743,21 +778,32 @@ Trigger rightSwitchMiddle =
         .onTrue(&spinFrictionWheels)
         .onFalse(&stopFrictionWheels);
 
-Trigger rightSwitchUp =
-    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        .onTrue(&spinFrictionWheels)
-        .whileTrue(&rotateAndUnjamAgitatorWithHeatAndCVLimiting);
-
 Trigger leftSwitchDown =
     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
         .whileTrue(&beybladeCommand);
 
-Trigger leftSwitchUp =
-    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
+Trigger leftSwitchUpState =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
+
+Trigger rightSwitchUpState =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP);
+
+Trigger rightSwitchUp = rightSwitchUpState.onTrue(&spinFrictionWheels);
+
+Trigger rightSwitchUpWithoutLeftSwitchUp =
+    (rightSwitchUpState && !leftSwitchUpState).whileTrue(&rotateAndUnjamAgitatorWithHeatLimiting);
+
+Trigger leftSwitchUpRightSwitchUp =
+    (leftSwitchUpState && rightSwitchUpState)
         .whileTrue(&turretCVCommand)  // shouldn't be composed into a concurrent command as
                                       // cvOnTargetGoverner checks if this command specifically is
                                       // scheduled
-        .whileTrue(&chassisDriveCommand);
+        .whileTrue(&autoNavCommand)
+        .whileTrue(&autoAimRotateAndUnjamAgitatorWithHeatAndCVLimiting);
+
+Trigger leftSwitchUpWithoutRightSwitchUp = (leftSwitchUpState && !rightSwitchUpState)
+                                               .whileTrue(&turretCVCommand)
+                                               .whileTrue(&chassisDriveCommand);
 
 Trigger fToggled = TriggerHelpers::button(drivers(), Remote::Key::F).toggleOnTrue(&beybladeCommand);
 
@@ -896,6 +942,7 @@ void startStandardCommands(Drivers* drivers)
     drivers->commandScheduler.addCommand(&clientDisplayCommand);
     drivers->commandScheduler.addCommand(&imuCalibrateCommand);
     drivers->visionCoprocessor.attachTransformer(&transformAdapter);
+    drivers->visionCoprocessor.attachAutoNavController(&autoNavController);
     drivers->plateHitTracker.attachTransformer(&transformAdapter);
 #if defined(TARGET_STANDARD_PHOBOS) || defined(TARGET_STANDARD_DEIMOS)
     getTurretMCBCanComm().setImuMountingTransforms(

@@ -46,6 +46,33 @@ TurretCVCommand::TurretCVCommand(
     const float userYawInputScalar,
     const float userPitchInputScalar,
     uint8_t turretID)
+    : TurretCVCommand(
+          visionCoprocessor,
+          controlOperatorInterface,
+          turretSubsystem,
+          yawController,
+          pitchController,
+          ballisticsSolver,
+          userYawInputScalar,
+          userPitchInputScalar,
+          turretID,
+          ScanConfig{})
+{
+}
+
+TurretCVCommand::TurretCVCommand(
+    communication::serial::VisionCoprocessor *visionCoprocessor,
+    control::ControlOperatorInterface *controlOperatorInterface,
+    RobotTurretSubsystem *turretSubsystem,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
+        *yawController,
+    algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
+        *pitchController,
+    CvBallisticsSolver *ballisticsSolver,
+    const float userYawInputScalar,
+    const float userPitchInputScalar,
+    uint8_t turretID,
+    const ScanConfig &scanConfig)
     : visionCoprocessor(visionCoprocessor),
       controlOperatorInterface(controlOperatorInterface),
       turretID(turretID),
@@ -54,7 +81,8 @@ TurretCVCommand::TurretCVCommand(
       pitchController(pitchController),
       ballisticsSolver(ballisticsSolver),
       userYawInputScalar(userYawInputScalar),
-      userPitchInputScalar(userPitchInputScalar)
+      userPitchInputScalar(userPitchInputScalar),
+      scanConfig(scanConfig)
 {
     assert(ballisticsSolver != nullptr);
 
@@ -72,6 +100,58 @@ void TurretCVCommand::initialize()
     visionCoprocessor->sendSelectNewTargetMessage();
 }
 
+void TurretCVCommand::enterScanMode(const WrappedFloat &yawSetpoint)
+{
+    scanning = true;
+    yawScanCenter = yawSetpoint;
+    yawScanOffset = 0.0f;
+    pitchScanValue = scanConfig.pitchScanMinAngle;
+    yawScanDirection = 1;
+    pitchScanDirection = 1;
+}
+
+void TurretCVCommand::exitScanMode()
+{
+    scanning = false;
+    lostTargetCounter = 0;
+}
+
+void TurretCVCommand::updateScanSetpoints(WrappedFloat *yawSetpoint, WrappedFloat *pitchSetpoint)
+{
+    yawScanOffset += scanConfig.yawScanDeltaAngle * yawScanDirection;
+    yawScanOffset = tap::algorithms::limitVal(
+        yawScanOffset,
+        -scanConfig.yawScanHalfRange,
+        scanConfig.yawScanHalfRange);
+
+    pitchScanValue += scanConfig.pitchScanDeltaAngle * pitchScanDirection;
+    if (pitchScanValue >= scanConfig.pitchScanMaxAngle)
+    {
+        pitchScanValue = scanConfig.pitchScanMaxAngle;
+        pitchScanDirection = -1;
+    }
+    else if (pitchScanValue <= scanConfig.pitchScanMinAngle)
+    {
+        pitchScanValue = scanConfig.pitchScanMinAngle;
+        pitchScanDirection = 1;
+    }
+
+    const WrappedFloat targetYawSetpoint = yawScanCenter + yawScanOffset;
+    *yawSetpoint = yawSetpoint->minInterpolate(targetYawSetpoint, scanConfig.lowPassAlpha);
+    *pitchSetpoint = pitchSetpoint->minInterpolate(Angle(pitchScanValue), scanConfig.lowPassAlpha);
+
+    const bool yawAtEndpoint =
+        abs(yawSetpoint->minDifference(targetYawSetpoint)) < scanConfig.endpointTolerance;
+    if (yawAtEndpoint && yawScanOffset >= scanConfig.yawScanHalfRange)
+    {
+        yawScanDirection = -1;
+    }
+    else if (yawAtEndpoint && yawScanOffset <= -scanConfig.yawScanHalfRange)
+    {
+        yawScanDirection = 1;
+    }
+}
+
 void TurretCVCommand::execute()
 {
     WrappedFloat pitchSetpoint = pitchController->getSetpoint();
@@ -82,6 +162,7 @@ void TurretCVCommand::execute()
 
     if (ballisticsSolution != std::nullopt)
     {
+        exitScanMode();
         pitchSetpoint = Angle(ballisticsSolution->pitchAngle);
         yawSetpoint = Angle(ballisticsSolution->yawAngle);
 
@@ -96,13 +177,32 @@ void TurretCVCommand::execute()
     }
     else
     {
-        // no valid ballistics solution, let user control turret
-        pitchSetpoint +=
-            userPitchInputScalar * controlOperatorInterface->getTurretPitchInput(turretID);
-
-        yawSetpoint += userYawInputScalar * controlOperatorInterface->getTurretYawInput(turretID);
-
         withinAimingTolerance = false;
+
+        if (scanConfig.enabled)
+        {
+            if (lostTargetCounter < scanConfig.aimLostNumCounts)
+            {
+                lostTargetCounter++;
+            }
+            else
+            {
+                if (!scanning)
+                {
+                    enterScanMode(yawSetpoint);
+                }
+                updateScanSetpoints(&yawSetpoint, &pitchSetpoint);
+            }
+        }
+        else
+        {
+            // No valid ballistics solution, let the user control the turret.
+            pitchSetpoint +=
+                userPitchInputScalar * controlOperatorInterface->getTurretPitchInput(turretID);
+
+            yawSetpoint +=
+                userYawInputScalar * controlOperatorInterface->getTurretYawInput(turretID);
+        }
     }
 
     uint32_t currTime = getTimeMilliseconds();
@@ -128,6 +228,7 @@ void TurretCVCommand::end(bool)
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
     withinAimingTolerance = false;
+    exitScanMode();
 }
 
 }  // namespace aruwsrc::control::turret::cv

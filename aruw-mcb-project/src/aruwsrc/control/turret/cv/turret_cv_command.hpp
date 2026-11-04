@@ -72,6 +72,20 @@ namespace aruwsrc::control::turret::cv
 class TurretCVCommand : public TurretCVCommandInterface
 {
 public:
+    struct ScanConfig
+    {
+        bool enabled = false;
+        unsigned int aimLostNumCounts = 500;
+        float yawScanDeltaAngle = modm::toRadian(0.30f);
+        // Two full rotations between endpoints, plus overscan to disambiguate the wrapped endpoint.
+        float yawScanHalfRange = M_TWOPI + modm::toRadian(4.0f);
+        float pitchScanMinAngle = 0.0f;
+        float pitchScanMaxAngle = 0.0f;
+        float pitchScanDeltaAngle = modm::toRadian(0.19f);
+        float lowPassAlpha = 0.035f;
+        float endpointTolerance = modm::toRadian(1.0f);
+    };
+
     /**
      * Constructs a TurretCVCommand
      *
@@ -103,6 +117,20 @@ public:
         const float userYawInputScalar,
         const float userPitchInputScalar,
         uint8_t turretID = 0);
+
+    TurretCVCommand(
+        communication::serial::VisionCoprocessor *visionCoprocessor,
+        control::ControlOperatorInterface *controlOperatorInterface,
+        RobotTurretSubsystem *turretSubsystem,
+        algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::YAW>
+            *yawController,
+        algorithms::TurretAxisControllerInterface<tap::algorithms::transforms::Axis::PITCH>
+            *pitchController,
+        aruwsrc::algorithms::ballistics::CvBallisticsSolver *ballisticsSolver,
+        const float userYawInputScalar,
+        const float userPitchInputScalar,
+        uint8_t turretID,
+        const ScanConfig &scanConfig);
 
     void initialize() override;
 
@@ -143,9 +171,23 @@ private:
     const float userYawInputScalar;
     const float userPitchInputScalar;
 
+    const ScanConfig scanConfig;
+
+    bool scanning = false;
+    unsigned int lostTargetCounter = 0;
+    int yawScanDirection = 1;
+    int pitchScanDirection = 1;
+    float yawScanOffset = 0.0f;
+    float pitchScanValue = 0.0f;
+    WrappedFloat yawScanCenter = Angle(0.0f);
+
     uint32_t prevTime;
 
     bool withinAimingTolerance = false;
+
+    void enterScanMode(const WrappedFloat &yawSetpoint);
+    void exitScanMode();
+    void updateScanSetpoints(WrappedFloat *yawSetpoint, WrappedFloat *pitchSetpoint);
 };
 }  // namespace aruwsrc::control::turret::cv
 
