@@ -21,7 +21,7 @@
 
 #include "tap/algorithms/math_user_utils.hpp"
 
-using namespace tap::algorithms;
+// using namespace tap::algorithms; //TODO: I think this is what chinmay wanted to get rid of?
 using namespace tap::algorithms::transforms;
 
 namespace aruwsrc::control::aruco

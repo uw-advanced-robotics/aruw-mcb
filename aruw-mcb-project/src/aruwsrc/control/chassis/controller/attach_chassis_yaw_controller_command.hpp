@@ -52,7 +52,7 @@ public:
 private:
     aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     ChassisYawControllerInterface* controller;
-};  // class AttachChassisYawControlerCommand
+};  // class AttachChassisYawControllerCommand
 
 }  // namespace aruwsrc::control::chassis::controller
 #endif  // ATTACH_CHASSIS_YAW_CONTROLLER_COMMAND_HPP_

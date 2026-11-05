@@ -50,7 +50,7 @@ public:
 
 private:
     const tap::algorithms::transforms::Transform& frameToChassis;
-};  // class ChassisYawControllerInterface
+};  // class ChassisYawControllerInterface // TODO: chat why is everything a chassisyawcontoller
 
 }  // namespace aruwsrc::control::chassis::controller
 

@@ -475,8 +475,6 @@ private:
 
     aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
 
-    aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr;
-
     aruwsrc::control::chassis::controller::ChassisAutoNavController* autoNavController = nullptr;
 
     tap::arch::PeriodicMilliTimer sendRobotIdTimeout{TIME_BTWN_SENDING_ROBOT_ID_MSG};

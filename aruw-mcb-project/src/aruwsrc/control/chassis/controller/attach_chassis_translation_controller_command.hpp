@@ -52,7 +52,7 @@ public:
 private:
     aruwsrc::control::chassis::HolonomicChassisSubsystem& chassis;
     ChassisTranslationControllerInterface* controller;
-};  // class AttachChassisTranslationControlerCommand
+};  // class AttachChassisTranslationControllerCommand
 
 }  // namespace aruwsrc::control::chassis::controller
 #endif  // ATTACH_CHASSIS_TRANSLATION_CONTROLLER_COMMAND_HPP_
