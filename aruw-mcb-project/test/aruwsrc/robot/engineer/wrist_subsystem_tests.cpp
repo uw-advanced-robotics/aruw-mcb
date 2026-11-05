@@ -45,7 +45,7 @@ TEST(WristSubsystem, getJointAnglesForOrientation_round_trips_positive_theta2)
 {
     Orientation target = WristSubsystem::getHypotheticalOrientation(0.3f, 0.5f, -0.4f);
 
-    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.3f, 0.5f, -0.4f);
+    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.3f);
 
     expectAngleNear(t1, 0.3f);
     EXPECT_NEAR(t2, 0.5f, EPS);
@@ -56,7 +56,7 @@ TEST(WristSubsystem, getJointAnglesForOrientation_round_trips_negative_theta2)
 {
     Orientation target = WristSubsystem::getHypotheticalOrientation(0.3f, -0.5f, -0.4f);
 
-    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.3f, -0.5f, -0.4f);
+    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.3f);
 
     expectAngleNear(t1, 0.3f);
     EXPECT_NEAR(t2, -0.5f, EPS);
@@ -65,10 +65,10 @@ TEST(WristSubsystem, getJointAnglesForOrientation_round_trips_negative_theta2)
 
 TEST(WristSubsystem, getJointAnglesForOrientation_does_not_flip_when_theta2_crosses_zero)
 {
-    // previously at slightly positive theta2, target is slightly negative theta2
+    // theta1 is already right, so the solver should bend the other way instead of flipping theta1
     Orientation target = WristSubsystem::getHypotheticalOrientation(0.2f, -0.1f, 0.1f);
 
-    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.2f, 0.1f, 0.1f);
+    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.2f);
 
     expectAngleNear(t1, 0.2f);
     EXPECT_NEAR(t2, -0.1f, EPS);
@@ -79,7 +79,7 @@ TEST(WristSubsystem, getJointAnglesForOrientation_holds_theta1_when_wrist_straig
 {
     Orientation target = WristSubsystem::getHypotheticalOrientation(0.3f, 0.0f, 0.2f);
 
-    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.1f, 0.0f, 0.0f);
+    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.1f);
 
     EXPECT_NEAR(t1, 0.1f, EPS);
     EXPECT_NEAR(t2, 0.0f, EPS);
@@ -87,12 +87,23 @@ TEST(WristSubsystem, getJointAnglesForOrientation_holds_theta1_when_wrist_straig
     expectSameOrientation(WristSubsystem::getHypotheticalOrientation(t1, t2, t3), target);
 }
 
+TEST(WristSubsystem, getJointAnglesForOrientation_limits_theta1_step)
+{
+    Orientation target = WristSubsystem::getHypotheticalOrientation(1.0f, 0.5f, 0.0f);
+
+    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.0f);
+
+    EXPECT_NEAR(t1, WristSubsystem::MAX_THETA1_STEP, EPS);
+    EXPECT_FALSE(std::isnan(t2));
+    EXPECT_FALSE(std::isnan(t3));
+}
+
 TEST(WristSubsystem, getJointAnglesForOrientation_no_nan_when_float_error_exceeds_one)
 {
     Orientation target(tap::algorithms::CMSISMat<3, 3>(
         {1.0000001f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f}));
 
-    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.0f, 0.0f, 0.0f);
+    auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, 0.0f);
 
     EXPECT_FALSE(std::isnan(t1));
     EXPECT_FALSE(std::isnan(t2));
@@ -108,8 +119,7 @@ TEST(WristSubsystem, getJointAnglesForOrientation_round_trips_many_poses)
             for (float a3 = -3.0f; a3 <= 3.0f; a3 += 0.7f)
             {
                 Orientation target = WristSubsystem::getHypotheticalOrientation(a1, a2, a3);
-                auto [t1, t2, t3] =
-                    WristSubsystem::getJointAnglesForOrientation(target, a1, a2, a3);
+                auto [t1, t2, t3] = WristSubsystem::getJointAnglesForOrientation(target, a1);
                 expectSameOrientation(
                     WristSubsystem::getHypotheticalOrientation(t1, t2, t3),
                     target);

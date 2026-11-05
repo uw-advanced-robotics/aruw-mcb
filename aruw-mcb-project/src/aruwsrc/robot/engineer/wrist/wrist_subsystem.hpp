@@ -120,21 +120,22 @@ public:
         float theta3);
 
     /**
-     * Inverse of getHypotheticalOrientation. Every orientation has two joint solutions,
-     * (theta1, theta2, theta3) and (theta1 + pi, -theta2, theta3 + pi), so this returns the one
-     * closest to the given previous angles to avoid the wrist flipping 180 degrees.
+     * Inverse of getHypotheticalOrientation, called once per control loop. theta1 moves toward its
+     * solution at a limited rate, and theta2 and theta3 get as close to the orientation as they
+     * can with that theta1. The result can lag the orientation while theta1 catches up.
      */
     static std::array<float, 3> getJointAnglesForOrientation(
         const tap::algorithms::transforms::Orientation& orientation,
-        float prevTheta1,
-        float prevTheta2,
-        float prevTheta3);
+        float prevTheta1);
 
     /**
-     * When theta2 is within this of 0, theta1 and theta3 rotate about the same axis and only
-     * their sum is defined (the wrist's singularity).
+     * When the wrist bend is within this of straight, theta1 and theta3 rotate about nearly the
+     * same axis, so theta1 is held and theta3 provides the roll.
      */
     static constexpr float SINGULARITY_THRESHOLD = modm::toRadian(2.0f);
+
+    /** Max theta1 setpoint change per 2 ms control loop, equal to 180 deg/s. */
+    static constexpr float MAX_THETA1_STEP = modm::toRadian(180.0f) * 0.002f;
 
 private:
     static constexpr float MOVING_VELOCITY_THRESHOLD = modm::toRadian(1.0f);

@@ -91,11 +91,7 @@ void WristSubsystem::homeTheta3(float pos) { motorTheta3.getEncoder()->resetEnco
 
 void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint)
 {
-    auto [theta1, theta2, theta3] = getJointAnglesForOrientation(
-        setpoint,
-        getSetpointTheta1(),
-        getSetpointTheta2(),
-        getSetpointTheta3());
+    auto [theta1, theta2, theta3] = getJointAnglesForOrientation(setpoint, getSetpointTheta1());
     setSetpointTheta1(theta1);
     setSetpointTheta2(theta2);
     setSetpointTheta3(theta3);
@@ -103,40 +99,31 @@ void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orienta
 
 std::array<float, 3> WristSubsystem::getJointAnglesForOrientation(
     const Orientation& orientation,
-    float prevTheta1,
-    float prevTheta2,
-    float prevTheta3)
+    float prevTheta1)
 {
     const auto& r = orientation.matrix().data;
 
-    // clamp first, float error can push this slightly past 1 and make acosf return NaN
-    float theta2 = acosf(std::clamp(r[0], -1.0f, 1.0f));
-
-    if (theta2 < SINGULARITY_THRESHOLD)
+    // theta1 sets the plane the wrist bends in. near straight that plane is undefined and swings
+    // quickly, so hold theta1 there and limit how fast it can follow everywhere else
+    float theta1 = prevTheta1;
+    if (hypotf(r[3], r[6]) > sinf(SINGULARITY_THRESHOLD))
     {
-        // wrist is straight: theta1 and theta3 spin about the same axis, so hold theta1 and let
-        // theta3 make up the rest of the roll
-        float theta1PlusTheta3 = atan2f(r[7], r[4]);
-        return {prevTheta1, 0.0f, theta1PlusTheta3 - prevTheta1};
+        float theta1Error = tap::algorithms::Angle(prevTheta1).minDifference(atan2f(r[3], -r[6]));
+
+        // turning theta1 half a turn and bending the other way gives the same orientation
+        if (std::abs(theta1Error) > M_PI_2)
+        {
+            theta1Error += theta1Error > 0 ? -M_PI : M_PI;
+        }
+        theta1 += std::clamp(theta1Error, -MAX_THETA1_STEP, MAX_THETA1_STEP);
     }
 
-    float theta1 = atan2f(r[3], -r[6]);
-    float theta3 = atan2f(r[1], r[2]);
+    // get as close to the orientation as possible with this theta1, so theta2 and theta3 stay
+    // continuous even while theta1 is catching up
+    float s1 = sinf(theta1), c1 = cosf(theta1);
+    float theta2 = atan2f(s1 * r[3] - c1 * r[6], r[0]);
+    float theta3 = atan2f(-(c1 * r[5] + s1 * r[8]), c1 * r[4] + s1 * r[7]);
 
-    // acosf only returns positive theta2, the other solution has negative theta2
-    float flippedTheta1 = theta1 + M_PI;
-    float flippedTheta3 = theta3 + M_PI;
-
-    auto distance = [&](float t1, float t2, float t3) {
-        return std::abs(tap::algorithms::Angle(prevTheta1).minDifference(t1)) +
-               std::abs(prevTheta2 - t2) +
-               std::abs(tap::algorithms::Angle(prevTheta3).minDifference(t3));
-    };
-
-    if (distance(flippedTheta1, -theta2, flippedTheta3) < distance(theta1, theta2, theta3))
-    {
-        return {flippedTheta1, -theta2, flippedTheta3};
-    }
     return {theta1, theta2, theta3};
 }
 
