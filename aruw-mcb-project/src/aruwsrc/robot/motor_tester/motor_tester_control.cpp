@@ -23,14 +23,12 @@
 #include "tap/communication/serial/remote.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/subsystem.hpp"
-#include "tap/control/trigger.hpp"
-#include "tap/control/trigger_helpers.hpp"
+#include "aruwsrc/control/motor/damiao_constants.hpp"
 #if defined(TARGET_MOTOR_TESTER)
 #include <memory>
 
 #include "tap/control/hold_command_mapping.hpp"
 #include "tap/control/hold_repeat_command_mapping.hpp"
-#include "tap/control/instant_command.hpp"
 #include "tap/control/press_command_mapping.hpp"
 #include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
@@ -46,6 +44,7 @@
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/motor_tester/constant_rpm_command.hpp"
+#include "aruwsrc/robot/motor_tester/damiao_stick_velocity_command.hpp"
 #include "aruwsrc/robot/motor_tester/motor_subsystem.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_constants.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
@@ -72,12 +71,12 @@ namespace motor_tester_control
 
 aruwsrc::control::motor::DamiaoMotor damiao(
     drivers(),
-    aruwsrc::control::motor::DamiaoMotorId::DAMIAO_MOTOR1,
+    aruwsrc::control::motor::DamiaoMotorId::DAMIAO_MOTOR7,
     tap::can::CanBus::CAN_BUS1,
     false,
     "Damiao Motor",
-    0x011,
-    aruwsrc::control::motor::DAMIAO_CONTROL_MODE_VELOCITY);
+    0x11,
+    aruwsrc::control::motor::DAMIAO_CONTROL_MODE_MIT);
 aruwsrc::control::motor::DamiaoSubsystem damiaoSubsystem(drivers(), damiao);
 
 // m2006
@@ -112,21 +111,11 @@ tap::motor::DjiMotor motor3510(
     true,
     (1.0f));
 
-// 6020
-tap::motor::DjiMotor motor6020(
-    drivers(),
-    tap::motor::MOTOR7,          // id 3+4
-    tap::can::CanBus::CAN_BUS1,  // bus 1
-    false,
-    "6020 Motor",
-    true,
-    tap::motor::DjiMotorEncoder::GEAR_RATIO_GM6020);
 
 MotorSubsystem motorSubsystem2006(drivers(), motor2006, m2006VelocityPidConfig);
 
 MotorSubsystem motorSubsystem3505(drivers(), motor3508, rm3508VelocityPidConfig);
 
-MotorSubsystem motorSubsystem6020(drivers(), motor6020, gm6020VelocityPidConfig);
 
 MotorSubsystem motorSubsystem3510(drivers(), motor3510, rm3510VelocityPidConfig);
 
@@ -134,11 +123,14 @@ MotorSubsystem motorSubsystem3510(drivers(), motor3510, rm3510VelocityPidConfig)
 // Commands
 // ----------
 
-StickRpmCommand leftVerticalManual(
-    &motorSubsystem2006,
-    &drivers()->remote,
-    tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
-    500.0f);
+// Left vertical is reserved for the Damiao velocity command.
+// StickRpmCommand leftVerticalManual(
+//     &motorSubsystem2006,
+//     &drivers()->remote,
+//     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
+//     500.0f);
+
+DamiaoStickVelocityCommand damiaoStickVelocity(damiaoSubsystem, drivers()->remote);
 
 StickRpmCommand leftHorizontalManual(
     &motorSubsystem3510,
@@ -152,11 +144,6 @@ StickRpmCommand rightVerticalManual(
     tap::communication::serial::Remote::Channel::RIGHT_VERTICAL,
     482.0f);
 
-StickRpmCommand wheelManual(
-    &motorSubsystem6020,
-    &drivers()->remote,
-    tap::communication::serial::Remote::Channel::WHEEL,
-    320.0f);
 
 // agitator rotate/unjam commands
 MoveIntegralCommand rotateAgitator(agitator, AGITATOR_ROTATE_CONFIG);
@@ -183,40 +170,8 @@ auto leftSwitchUp = std::make_unique<tap::control::HoldRepeatCommandMapping>(
     &leftSwitchUpRms,
     true);
 
-tap::control::InstantCommand<1> sendMitCommand(
-    []() { damiaoSubsystem.sendMitCommand(0.0, 3.0, 5.0, 0.01, 3.0); },
-    std::array<tap::control::Subsystem*, 1>{&damiaoSubsystem}
-
-);
-tap::control::InstantCommand<1> sendVelo(
-    []() { damiaoSubsystem.sendVeloCommand(1.0); },
-    std::array<tap::control::Subsystem*, 1>{&damiaoSubsystem}
-
-);
-tap::control::InstantCommand<1> stopDamiao(
-    []() { damiaoSubsystem.stop(); },
-    std::array<tap::control::Subsystem*, 1>{&damiaoSubsystem});
-auto rightSwitchUpRms = tap::control::RemoteMapState(
-    tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
-    tap::communication::serial::Remote::SwitchState::UP);
-
-tap::control::Trigger rightSwitchUp = tap::control::TriggerHelpers::switchState(
-                                          drivers(),
-                                          Remote::Switch::RIGHT_SWITCH,
-                                          Remote::SwitchState::UP)
-                                          .whileTrue(&sendMitCommand);
-tap::control::Trigger rightSwitchMid = tap::control::TriggerHelpers::switchState(
-                                           drivers(),
-                                           Remote::Switch::RIGHT_SWITCH,
-                                           Remote::SwitchState::MID)
-                                           .whileTrue(&stopDamiao);
-tap::control::Trigger rightSwitchDown = tap::control::TriggerHelpers::switchState(
-                                            drivers(),
-                                            Remote::Switch::RIGHT_SWITCH,
-                                            Remote::SwitchState::DOWN)
-                                            .whileTrue(&sendVelo);
-
-// Safe disconnect function
+// Remote disconnect cancels commands and calls DamiaoSubsystem::refreshSafeDisconnect(),
+// which stops the motor every scheduler cycle until the remote reconnects.
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 // inits
@@ -226,7 +181,6 @@ void initializeSubsystems()
     agitator.initialize();
     motorSubsystem2006.initialize();
     motorSubsystem3505.initialize();
-    motorSubsystem6020.initialize();
     motorSubsystem3510.initialize();
     damiaoSubsystem.initialize();
 }
@@ -245,6 +199,7 @@ void registerSubsystems(Drivers* drivers)
 
 void registerIoMappings(Drivers* drivers)
 {
+    damiaoSubsystem.setDefaultCommand(&damiaoStickVelocity);
     // motorSubsystem6020.setDefaultCommand(&wheelManual);
     // motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
     // motorSubsystem3505.setDefaultCommand(&rightVerticalManual);

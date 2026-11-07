@@ -13,12 +13,12 @@ void DamiaoSubsystem::refresh()
 {
     DEBUG_position = motor.getPosition();
     DEBUG_motorStatus = motor.getStatus();
+    DEBUG_motorVelocity = motor.getEncoder()->getVelocity();
 }
 void DamiaoSubsystem::refreshSafeDisconnect()
 {
     DEBUG_position = motor.getPosition();
     DEBUG_motorStatus = motor.getStatus();
-
     stop();
 }
 

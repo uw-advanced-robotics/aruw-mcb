@@ -30,6 +30,10 @@
 #include "arm_math.h"
 #include "damiao_constants.hpp"
 
+#ifndef PLATFORM_HOSTED
+#include "modm/platform.hpp"
+#endif
+
 namespace aruwsrc::control::motor
 {
 DamiaoMotor::DamiaoMotor(
@@ -75,8 +79,6 @@ void DamiaoMotor::setDesiredOutput(int32_t desiredOutput)
         -MAX_OUTPUT_DM_J4310_MILLI_NM,
         MAX_OUTPUT_DM_J4310_MILLI_NM);
 
-    retryStartup();
-
     // Always send MIT command every frame so motor gets constant position/torque updates.
     const float torqueNm = static_cast<float>(desiredOutputMilliNm) / 1000.0f;
     sendMitCommand(0.0f, 0.0f, 0.0f, 0.0f, torqueNm);
@@ -111,17 +113,22 @@ float DamiaoMotor::getPosition() const { return encoder.getPosition().getUnwrapp
 
 void DamiaoMotor::processMessage(const modm::can::Message& message)
 {
+    ++DEBUG_feedbackFramesReceived;
     if (message.getLength() != 8)
     {
+        ++DEBUG_feedbackBadLength;
         return;
     }
 
+    DEBUG_feedbackFirstByte = message.data[0];
     const uint8_t logicalId = message.data[0] & 0x0F;
     if (logicalId != (motorIdentifier & 0x0F))
     {
+        ++DEBUG_feedbackWrongMotorId;
         return;
     }
 
+    ++DEBUG_feedbackFramesAccepted;
     motorStatus = message.data[0] >> 4;
     const uint16_t posInt = static_cast<uint16_t>((message.data[1] << 8) | message.data[2]);
     const uint16_t velInt = static_cast<uint16_t>((message.data[3] << 4) | (message.data[4] >> 4));
@@ -200,6 +207,9 @@ bool DamiaoMotor::sendMitCommand(
     {
         return false;
     }
+    // Direct MIT callers also need the startup handshake, including after a motor power cycle.
+    retryStartup();
+
     const uint16_t posU = floatToUint<uint16_t, 16>(targetPosition, DM_J4310_P_MIN, DM_J4310_P_MAX);
     const uint16_t velU = floatToUint<uint16_t, 12>(targetVelocity, DM_J4310_V_MIN, DM_J4310_V_MAX);
     const uint16_t kpU = floatToUint<uint16_t, 12>(kp, DM_J4310_KP_MIN, DM_J4310_KP_MAX);
@@ -304,7 +314,12 @@ bool DamiaoMotor::sendRawFrame(const uint8_t* data, uint8_t dataLen, uint16_t fr
         message.data[i] = data[i];
     }
 
-    return drivers->can.sendMessage(motorCanBus, message);
+    const bool sent = drivers->can.sendMessage(motorCanBus, message);
+    if (!sent)
+    {
+        ++DEBUG_canSendFailures;
+    }
+    return sent;
 }
 
 }  // namespace aruwsrc::control::motor

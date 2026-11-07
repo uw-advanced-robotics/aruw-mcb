@@ -197,6 +197,19 @@ private:
     float measuredPositionRad = 0.0f;
     int16_t measuredTorqueMilliNm = 0;
     int8_t temperatureMos = 0;
+
+    // Inspect these in the debugger to distinguish CAN bus failures from rejected feedback.
+    uint32_t DEBUG_feedbackFramesReceived = 0;
+    uint32_t DEBUG_feedbackFramesAccepted = 0;
+    uint32_t DEBUG_feedbackBadLength = 0;
+    uint32_t DEBUG_feedbackWrongMotorId = 0;
+    uint8_t DEBUG_feedbackFirstByte = 0;
+    mutable uint32_t DEBUG_canErrorStatus = 0;
+    mutable uint8_t DEBUG_canLastError = 0;
+    mutable uint8_t DEBUG_canTxErrorCount = 0;
+    mutable uint8_t DEBUG_canRxErrorCount = 0;
+    mutable bool DEBUG_canBusOff = false;
+    mutable uint32_t DEBUG_canSendFailures = 0;
 };
 
 }  // namespace aruwsrc::control::motor
