@@ -68,18 +68,23 @@ MotorTesterCommand motorCommand(
     drivers(),
     motorSubsystem,
     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
-    1.0f
+    10.0f
 );
     
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
-void initializeSubsystems() {}
+void initializeSubsystems() 
+{
+    motorSubsystem.initialize();
+    motorSubsystem.setDefaultCommand(&motorCommand);
+}
 
 void registerSubsystems(Drivers* drivers)
 {
+    drivers->commandScheduler.registerSubsystem(&motorSubsystem);
     drivers->commandScheduler.setSafeDisconnectFunction(
-        &motor_tester_control::remoteSafeDisconnectFunction);
+        &remoteSafeDisconnectFunction);
 }
 
 void registerIoMappings(Drivers* drivers) {}

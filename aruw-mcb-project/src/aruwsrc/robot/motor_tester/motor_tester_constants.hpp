@@ -35,7 +35,7 @@ namespace aruwsrc::motor_tester::constants
 // PID terms for standard
 // Position PID config for Motor Tester
 static constexpr tap::algorithms::SmoothPidConfig MOTOR_TESTER_POSITION_PID_CONFIG = {
-    .kp = 0.0f,
+    .kp = 300.0f,
     .ki = 0.0f,
     .kd = 0.0f,
     .maxICumulative = 0.0f,

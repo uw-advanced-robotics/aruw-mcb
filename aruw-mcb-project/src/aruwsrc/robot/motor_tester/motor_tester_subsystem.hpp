@@ -35,7 +35,11 @@ public:
     }
 
     void refresh() override
-    {
+    {   
+        pid.setP(kp);
+        pid.setI(ki);
+        pid.setD(kd);
+
         float actualPosition =
             motor.getEncoder()->getPosition().getUnwrappedValue();
 
@@ -83,6 +87,11 @@ private:
     tap::motor::MotorInterface& motor;
     tap::algorithms::SmoothPid pid;
     float desiredPosition;
+
+public:
+    volatile float kp = 300.0f;
+    volatile float ki = 0.0f;
+    volatile float kd = 0.0f;
 };
 
 }  // namespace aruwsrc::motor_tester
