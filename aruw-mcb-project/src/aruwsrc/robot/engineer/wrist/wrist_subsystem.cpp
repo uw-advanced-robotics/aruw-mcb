@@ -144,8 +144,7 @@ void WristSubsystem::refresh()
         return;
     }
 
-    theta1Error =
-        motorDifferential1.getEncoder()->getPosition().minDifference(setpointTheta1);
+    theta1Error = motorDifferential1.getEncoder()->getPosition().minDifference(setpointTheta1);
     theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
     theta3Error = motorTheta3.getEncoder()->getPosition().minDifference(setpointTheta3);
 

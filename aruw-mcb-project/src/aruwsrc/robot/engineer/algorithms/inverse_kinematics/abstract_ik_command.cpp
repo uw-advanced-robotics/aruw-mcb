@@ -162,7 +162,8 @@ bool AbstractIKCommand::calculateDesiredSetpoints()
     extensionToWristDesired = newExtensionToWristDesired;
 
     turretYawDelta = turret.yawMotor.getChassisFrameMeasuredAngle().minDifference(turretYawDesired);
-    turretPitchDelta = turret.pitchMotor.getChassisFrameMeasuredAngle().minDifference(turretPitchDesired);
+    turretPitchDelta =
+        turret.pitchMotor.getChassisFrameMeasuredAngle().minDifference(turretPitchDesired);
     extensionDelta = extensionDesired - extension.getPosition();
 
     return true;

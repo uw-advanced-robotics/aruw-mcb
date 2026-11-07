@@ -20,11 +20,12 @@
 #ifndef ENGINEER_TRAJECTORY_IK_CONSTANTS_HPP_
 #define ENGINEER_TRAJECTORY_IK_CONSTANTS_HPP_
 
-namespace aruwsrc::engineer {
-    static constexpr float PER_POSE_TIME = 1.5f;
-    static constexpr float TEST_EXTENSION_MIN_M = 0.02f;
-    static constexpr float TEST_EXTENSION_NEUTRAL_M = 0.25f;
-    static constexpr float TEST_EXTENSION_MAX_M = 0.60f;
-}
+namespace aruwsrc::engineer
+{
+static constexpr float PER_POSE_TIME = 1.5f;
+static constexpr float TEST_EXTENSION_MIN_M = 0.02f;
+static constexpr float TEST_EXTENSION_NEUTRAL_M = 0.25f;
+static constexpr float TEST_EXTENSION_MAX_M = 0.60f;
+}  // namespace aruwsrc::engineer
 
 #endif  // ENGINEER_TRAJECTORY_IK_CONSTANTS_HPP_
