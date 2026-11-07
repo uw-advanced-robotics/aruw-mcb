@@ -7,11 +7,12 @@
 
 namespace aruwsrc::motor_tester
 {
-class StickTorqueCommand : tap::control::Command
+class StickTorqueCommand : public tap::control::Command
 {
 public:
     StickTorqueCommand(
         tap::Drivers* drivers,
+        tap::communication::serial::Remote* remote,
         tap::communication::serial::Remote::Channel channel,
         motor_tester::MotorSubsystem* motor,
         float scaleFactor
@@ -26,6 +27,7 @@ public:
 
 private:
     tap::Drivers* drivers;
+    tap::communication::serial::Remote* remote;
     tap::communication::serial::Remote::Channel channel;
     motor_tester::MotorSubsystem* motor;
     float scaleFactor;

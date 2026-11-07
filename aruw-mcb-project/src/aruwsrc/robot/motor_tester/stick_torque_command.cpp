@@ -9,10 +9,12 @@ namespace aruwsrc::motor_tester
 {
 StickTorqueCommand::StickTorqueCommand(
     tap::Drivers* drivers,
+    Remote* remote,
     Remote::Channel channel,
     motor_tester::MotorSubsystem* motor,
     float scaleFactor)
     : drivers(drivers),
+      remote(remote),
       channel(channel),
       motor(motor),
       scaleFactor(scaleFactor)
@@ -29,7 +31,7 @@ StickTorqueCommand::StickTorqueCommand(
     }
 
     void StickTorqueCommand::execute() {
-        float input = drivers->remote.getChannel(channel);
+        float input = remote->getChannel(channel);
         motor->setDesiredPosition(input * scaleFactor);
     }
 
@@ -38,6 +40,6 @@ StickTorqueCommand::StickTorqueCommand(
     }
 
     void StickTorqueCommand::end(bool) {
-        motor->setDesiredPosition(0);
+        motor->setDesiredPosition(motor->getDesiredPosition());
     }
 }
