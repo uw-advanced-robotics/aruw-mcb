@@ -144,10 +144,10 @@ void WristSubsystem::refresh()
         return;
     }
 
-    float theta1Error =
+    theta1Error =
         motorDifferential1.getEncoder()->getPosition().minDifference(setpointTheta1);
-    float theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
-    float errorTheta3 = motorTheta3.getEncoder()->getPosition().minDifference(setpointTheta3);
+    theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
+    theta3Error = motorTheta3.getEncoder()->getPosition().minDifference(setpointTheta3);
 
     pidOutTheta1 = pidTheta1.runController(
         theta1Error,
@@ -155,7 +155,7 @@ void WristSubsystem::refresh()
         0.002f);
     pidOutTheta2 = pidTheta2.runController(theta2Error, encoderTheta2.getVelocity(), 0.002f);
     pidOutTheta3 =
-        pidTheta3.runController(errorTheta3, motorTheta3.getEncoder()->getVelocity(), 0.002f);
+        pidTheta3.runController(theta3Error, motorTheta3.getEncoder()->getVelocity(), 0.002f);
 
     // gravity comp
     Position mountingFrameToCOM =

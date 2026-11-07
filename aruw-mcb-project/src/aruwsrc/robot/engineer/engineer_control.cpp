@@ -88,6 +88,7 @@
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
+#include "aruwsrc/robot/engineer/engineer_trajectory_ik_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
 #include "aruwsrc/robot/engineer/score_position_command.hpp"
 #include "aruwsrc/robot/engineer/setpoint_move_manual_command.hpp"
@@ -771,33 +772,89 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 tap::control::Subsystem dummySubsystem(drivers());
 
-inline constexpr float X_OFFSET_M = 0.5f;
-inline constexpr float PER_POSE_TIME = 0.2f;
-
-inverse_kinematics::Waypoint makeWaypoint(
+inverse_kinematics::Waypoint makeCartesianWaypoint(
     size_t poseIndex,
-    float yRightMm,
-    float zUpMm,
-    float rollDeg)
+    float xLeftM,
+    float yRightM,
+    float zUpM,
+    float rollDeg,
+    float pitchDeg,
+    float yawDeg)
 {
     return {
         .pose = Transform(
-            X_OFFSET_M,
-            -yRightMm / 1000.0f,  // left is positive
-            zUpMm / 1000.0f,
-            modm::toRadian(-1 * rollDeg),
-            0,
-            0),
+            xLeftM,
+            -yRightM,  // left is positive
+            zUpM,
+            modm::toRadian(-rollDeg),
+            modm::toRadian(pitchDeg),
+            modm::toRadian(yawDeg)),
         .time = poseIndex * PER_POSE_TIME};
 }
 
-inverse_kinematics::Trajectory6D<3> testTrajectory{{{
-    makeWaypoint(0, 0.0f, 0.0f, 0.0f),
-    makeWaypoint(1, 10.0f, 40.0f, 10.0f),
-    makeWaypoint(2, 25.0f, 60.0f, -20.0f),
+inverse_kinematics::Waypoint makeJointWaypoint(
+    size_t poseIndex,
+    float yawDeg,
+    float pitchDeg,
+    float extensionM,
+    float wristTheta1Deg,
+    float wristTheta2Deg,
+    float wristTheta3Deg)
+{
+    const Transform extensionToWrist(
+        tap::algorithms::transforms::Position(),
+        WristSubsystem::getHypotheticalOrientation(
+            modm::toRadian(wristTheta1Deg),
+            modm::toRadian(wristTheta2Deg),
+            modm::toRadian(wristTheta3Deg)));
+    const Transform pose =
+        EngineerTransforms::getHypotheticalChassisToTurretYaw(modm::toRadian(yawDeg))
+            .composeStatic(
+                EngineerTransforms::getHypotheticalTurretYawToTurretPitch(modm::toRadian(pitchDeg)))
+            .composeStatic(EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionM))
+            .composeStatic(extensionToWrist)
+            .composeStatic(WRIST_TO_END_EFFECTOR);
+    return {.pose = pose, .time = poseIndex * PER_POSE_TIME};
+}
+
+inverse_kinematics::Trajectory6D<6> workspaceTrajectory{{{
+    makeCartesianWaypoint(0, 0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f),
+    makeCartesianWaypoint(1, 0.54f, 0.10f, 0.38f, -30.0f, 0.0f, 0.0f),
+    makeCartesianWaypoint(2, 0.54f, 0.10f, 0.58f, 30.0f, 0.0f, 0.0f),
+    makeCartesianWaypoint(3, 0.54f, -0.10f, 0.58f, -30.0f, 0.0f, 0.0f),
+    makeCartesianWaypoint(4, 0.54f, -0.10f, 0.38f, 30.0f, 0.0f, 0.0f),
+    makeCartesianWaypoint(5, 0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f),
 }}};
 
-inverse_kinematics::TrajectoryIKCommand<3> testIKTrajectoryCommand(
+inverse_kinematics::Trajectory6D<25> jointRangeTrajectory{{{
+    makeJointWaypoint(0, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(1, 0.0f, 0.0f, TEST_EXTENSION_MIN_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(2, 0.0f, -30.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(3, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(4, 0.0f, 0.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(5, 0.0f, 13.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(6, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(7, 170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(8, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(9, -170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(10, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(11, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 150.0f, 0.0f, 0.0f),
+    makeJointWaypoint(12, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(13, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, -150.0f, 0.0f, 0.0f),
+    makeJointWaypoint(14, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(15, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 75.0f, 0.0f),
+    makeJointWaypoint(16, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(17, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 150.0f),
+    makeJointWaypoint(18, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(19, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, -150.0f),
+    makeJointWaypoint(20, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(21, 120.0f, -25.0f, 0.55f, 90.0f, 60.0f, -90.0f),
+    makeJointWaypoint(22, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+    makeJointWaypoint(23, -120.0f, 10.0f, 0.55f, -90.0f, 60.0f, 90.0f),
+    makeJointWaypoint(24, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
+}}};
+
+inverse_kinematics::TrajectoryIKCommand<6> workspaceIKTrajectoryCommand(
     IDENTITY_TRANSFORM,
     IDENTITY_TRANSFORM,
     engTurret,
@@ -805,12 +862,21 @@ inverse_kinematics::TrajectoryIKCommand<3> testIKTrajectoryCommand(
     wristSubsystem,
     chassisFrameYawTurretController,
     chassisFramePitchTurretController,
-    testTrajectory);
+    workspaceTrajectory);
+
+inverse_kinematics::TrajectoryIKCommand<25> jointRangeIKTrajectoryCommand(
+    IDENTITY_TRANSFORM,
+    IDENTITY_TRANSFORM,
+    engTurret,
+    extensionSubsystem,
+    wristSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController,
+    jointRangeTrajectory);
 
 Trigger rightUp =
     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
-        //.whileTrue(&wristGravityCompensationTestSequence);
-        .whileTrue(&testIKTrajectoryCommand);
+        .onTrue(&workspaceIKTrajectoryCommand);
 
 // joint control mode
 Trigger rightMid =

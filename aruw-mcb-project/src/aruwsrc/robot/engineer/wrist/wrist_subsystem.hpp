@@ -139,6 +139,11 @@ private:
     float g1, g21, g22, g3;
     float pidOutTheta1, pidOutTheta2, pidOutTheta3;
     float outMotorDifferential1, outMotorDifferential2, outMotor3;
+
+    // Angle errors for setpoint convergence tracking
+    float theta1Error = 0.0f;
+    float theta2Error = 0.0f;
+    float theta3Error = 0.0f;
 };
 }  // namespace aruwsrc::engineer::wrist
 

@@ -129,6 +129,10 @@ private:
     float cachedWristTheta1Setpoint = 0.0f;
     float cachedWristTheta2Setpoint = 0.0f;
     float cachedWristTheta3Setpoint = 0.0f;
+
+    float turretYawDelta = 0.0f;
+    float turretPitchDelta = 0.0f;
+    float extensionDelta = 0.0f;
 };
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

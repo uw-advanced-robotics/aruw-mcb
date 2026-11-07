@@ -65,16 +65,21 @@ AbstractIKCommand::AbstractIKCommand(
 void AbstractIKCommand::execute()
 {
     updateBaseToFollowerDesired();
-    if (shouldRecalculateIk() && calculateDesiredSetpoints())
+    if (shouldRecalculateIk())
     {
-        cachedIkBaseToFollowerDesired = baseToFollowerDesired;
-        ikSolutionInitialized = true;
+        // only update setpoints if ik needs to be recalculated
+        if (calculateDesiredSetpoints())
+        {
+            cachedIkBaseToFollowerDesired = baseToFollowerDesired;
+            ikSolutionInitialized = true;
+        }
     }
 
     yawController.runController(0.002f, Angle(turretYawDesired));
     pitchController.runController(0.002f, Angle(turretPitchDesired));
     extension.setSetpoint(extensionDesired);
     wrist.setSetpointOrientation(extensionToWristDesired.getRotation());
+    // uses the cached transforms when possible to update ik
     updateBaseToFollowerFromSetpoints();
 }
 
@@ -155,6 +160,11 @@ bool AbstractIKCommand::calculateDesiredSetpoints()
     turretPitchDesired = newTurretPitchDesired;
     extensionDesired = newExtensionDesired;
     extensionToWristDesired = newExtensionToWristDesired;
+
+    turretYawDelta = turret.yawMotor.getChassisFrameMeasuredAngle().minDifference(turretYawDesired);
+    turretPitchDelta = turret.pitchMotor.getChassisFrameMeasuredAngle().minDifference(turretPitchDesired);
+    extensionDelta = extensionDesired - extension.getPosition();
+
     return true;
 }
 

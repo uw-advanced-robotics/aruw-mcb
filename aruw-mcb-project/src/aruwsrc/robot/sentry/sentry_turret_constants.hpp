@@ -180,7 +180,8 @@ static constexpr tap::can::CanBus CAN_BUS_MOTOR = tap::can::CanBus::CAN_BUS2;
 static constexpr float MAX_VEL_ERROR_INPUT = 20.0f;
 }  // namespace turretMajor
 
-static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(334);
+// Physical minor yaw hardstop range (CAD: 297.75 deg)
+static constexpr float ANGLES_OF_FREEDOM = modm::toRadian(297);
 static constexpr float PADDING = modm::toRadian(5);
 namespace turretWidow
 {
