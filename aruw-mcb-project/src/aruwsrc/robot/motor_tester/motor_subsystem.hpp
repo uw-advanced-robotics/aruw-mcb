@@ -18,7 +18,8 @@ public:
     : Subsystem(drivers),
       motor(motor),
       pidController(pidConfig),
-      desiredPosition(0)
+      desiredPosition(0),
+      currentPosition(0)
     {}
 
     // void setDesiredOutput(int32_t output) {
@@ -39,7 +40,8 @@ public:
 
     void refresh() override {
         // motor.setDesiredOutput(desiredOutput);
-        float error = desiredPosition - motor.getEncoder()->getPosition().getUnwrappedValue();
+        currentPosition = motor.getEncoder()->getPosition().getUnwrappedValue();
+        float error = desiredPosition - currentPosition;
         float errorDeriv = -motor.getEncoder()->getVelocity();
         float output = pidController.runController(error, errorDeriv, 0.002f);
         motor.setDesiredOutput(std::clamp(output, (float) -DjiMotor::MAX_OUTPUT_C620, (float) DjiMotor::MAX_OUTPUT_C620));
@@ -52,6 +54,7 @@ public:
 
 private:
     float desiredPosition;
+    float currentPosition;
     tap::motor::MotorInterface& motor;
     tap::algorithms::SmoothPid pidController;
 };
