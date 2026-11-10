@@ -87,9 +87,9 @@ bool AbstractIKCommand::shouldRecalculateIk() const
 {
     const bool inputsChanged =
         !ikSolutionInitialized ||
-        !staticTransformsClose(baseToFollowerDesired, cachedIkBaseToFollowerDesired) ||
-        !staticTransformsClose(chassisToBase, cachedChassisToBase) ||
-        !staticTransformsClose(followerToEndEffector, cachedFollowerToEndEffector);
+        !Transform::staticTransformsClose(baseToFollowerDesired, cachedIkBaseToFollowerDesired) ||
+        !Transform::staticTransformsClose(chassisToBase, cachedChassisToBase) ||
+        !Transform::staticTransformsClose(followerToEndEffector, cachedFollowerToEndEffector);
 
     // recalculate if the inputs are changed and the inputs are finite
     return inputsChanged && staticTransformIsFinite(baseToFollowerDesired) &&
@@ -169,29 +169,6 @@ bool AbstractIKCommand::calculateDesiredSetpoints()
     return true;
 }
 
-bool AbstractIKCommand::staticTransformsClose(const Transform& first, const Transform& second)
-{
-    const Vector translationDifference = first.getTranslation() - second.getTranslation();
-    if (translationDifference.magnitudeSq() > TRANSFORM_EPSILON * TRANSFORM_EPSILON)
-    {
-        return false;
-    }
-
-    const auto& firstRotation = first.getRotation().matrix();
-    const auto& secondRotation = second.getRotation().matrix();
-    for (size_t i = 0; i < firstRotation.data.size(); ++i)
-    {
-        if (!tap::algorithms::compareFloatClose(
-                firstRotation[i],
-                secondRotation[i],
-                TRANSFORM_EPSILON))
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
 bool AbstractIKCommand::staticTransformIsFinite(const Transform& transform)
 {
     const Position& translation = transform.getTranslation();
@@ -232,11 +209,12 @@ void AbstractIKCommand::updateBaseToFollowerFromSetpoints()
         return;
     }
 
-    const bool chassisChanged = !forwardKinematicsCacheInitialized ||
-                                !staticTransformsClose(chassisToBase, cachedChassisToBase);
+    const bool chassisChanged =
+        !forwardKinematicsCacheInitialized ||
+        !Transform::staticTransformsClose(chassisToBase, cachedChassisToBase);
     const bool followerChanged =
         !forwardKinematicsCacheInitialized ||
-        !staticTransformsClose(followerToEndEffector, cachedFollowerToEndEffector);
+        !Transform::staticTransformsClose(followerToEndEffector, cachedFollowerToEndEffector);
     const bool yawChanged =
         !forwardKinematicsCacheInitialized ||
         !tap::algorithms::compareFloatClose(yawSetpoint, cachedYawSetpoint, TRANSFORM_EPSILON);

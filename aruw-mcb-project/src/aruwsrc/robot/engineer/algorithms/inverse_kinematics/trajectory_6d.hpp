@@ -37,41 +37,43 @@ struct Waypoint
 template <size_t LENGTH>
 struct Trajectory6D
 {
-    std::array<Waypoint, LENGTH> waypoints;
-
-    bool hasStrictlyIncreasingWaypointTimes() const
+    Trajectory6D(std::array<Waypoint, LENGTH> waypoints) : waypoints(waypoints), timesInvalid(false)
     {
         for (size_t i = 1; i < LENGTH; ++i)
         {
-            if (!(waypoints[i - 1].time < waypoints[i].time)) return false;
+            if (!(waypoints[i - 1].time < waypoints[i].time))
+            {
+                timesInvalid = true;
+                break;
+            }
         }
-        return true;
     }
 
     tap::algorithms::transforms::Transform atTime(float time) const
     {
-        if (LENGTH == 1)
+        if (LENGTH == 1 || timesInvalid)
         {
             return waypoints.front().pose;
         }
-        else
-        {
-            const bool validWaypointTimes = hasStrictlyIncreasingWaypointTimes();
-            if (!validWaypointTimes) return waypoints.front().pose;
 
-            if (time <= waypoints.front().time) return waypoints.front().pose;
-            if (time >= waypoints.back().time) return waypoints.back().pose;
+        if (time <= waypoints.front().time) return waypoints.front().pose;
+        if (time >= waypoints.back().time) return waypoints.back().pose;
 
-            size_t i = 0;
-            while (i + 1 < LENGTH - 1 && waypoints[i + 1].time < time) i++;
-            float t = (time - waypoints[i].time) / (waypoints[i + 1].time - waypoints[i].time);
+        size_t i = 0;
+        while (i + 1 < LENGTH - 1 && waypoints[i + 1].time < time) i++;
+        float t = (time - waypoints[i].time) / (waypoints[i + 1].time - waypoints[i].time);
 
-            return tap::algorithms::transforms::Transform::interpolate(
-                waypoints[i].pose,
-                waypoints[i + 1].pose,
-                t);
-        }
+        return tap::algorithms::transforms::Transform::interpolate(
+            waypoints[i].pose,
+            waypoints[i + 1].pose,
+            t);
     }
+
+    const std::array<Waypoint, LENGTH>& getWaypoints() const { return waypoints; }
+
+private:
+    std::array<Waypoint, LENGTH> waypoints;
+    bool timesInvalid;
 };
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

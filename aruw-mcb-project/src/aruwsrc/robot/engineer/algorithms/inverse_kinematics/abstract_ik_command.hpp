@@ -99,10 +99,6 @@ protected:
 
 private:
     static constexpr float TRANSFORM_EPSILON = 1e-5f;
-
-    static bool staticTransformsClose(
-        const tap::algorithms::transforms::Transform& first,
-        const tap::algorithms::transforms::Transform& second);
     static bool staticTransformIsFinite(const tap::algorithms::transforms::Transform& transform);
     bool shouldRecalculateIk() const;
     bool calculateDesiredSetpoints();
