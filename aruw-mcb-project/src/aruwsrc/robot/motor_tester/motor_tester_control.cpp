@@ -17,24 +17,19 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <vector>
-
 #include "tap/communication/can/can_bus.hpp"
 #include "tap/communication/serial/remote.hpp"
-#include "tap/control/press_command_mapping.hpp"
 #include "tap/control/subsystem.hpp"
-#include "aruwsrc/control/motor/damiao_constants.hpp"
-#if defined(TARGET_MOTOR_TESTER)
-#include <memory>
 
-#include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/hold_repeat_command_mapping.hpp"
-#include "tap/control/press_command_mapping.hpp"
-#include "tap/control/remote_map_state.hpp"
+#include "aruwsrc/control/motor/damiao_constants.hpp"
+#include "aruwsrc/robot/motor_tester/damiao_rotate_slot_command.hpp"
+#if defined(TARGET_MOTOR_TESTER)
+#include "tap/control/instant_command.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
@@ -69,15 +64,28 @@ driversFunc drivers = DoNotUse_getDrivers;
 namespace motor_tester_control
 {
 
-aruwsrc::control::motor::DamiaoMotor damiao(
+aruwsrc::control::motor::DamiaoMotor damiao2325(
     drivers(),
     aruwsrc::control::motor::DamiaoMotorId::DAMIAO_MOTOR7,
     tap::can::CanBus::CAN_BUS1,
     false,
     "Damiao Motor",
+    aruwsrc::control::motor::DAMIAO_2325,
     0x11,
     aruwsrc::control::motor::DAMIAO_CONTROL_MODE_MIT);
-aruwsrc::control::motor::DamiaoSubsystem damiaoSubsystem(drivers(), damiao);
+
+aruwsrc::control::motor::DamiaoMotor damiao4340(
+    drivers(),
+    aruwsrc::control::motor::DamiaoMotorId::DAMIAO_MOTOR2,
+    tap::can::CanBus::CAN_BUS1,
+    false,
+    "Damiao 4340",
+    aruwsrc::control::motor::DAMIAO_4340,
+    0x12,
+    aruwsrc::control::motor::DAMIAO_CONTROL_MODE_MIT);
+
+aruwsrc::control::motor::DamiaoSubsystem damiaoSubsystem(drivers(), damiao2325);
+aruwsrc::control::motor::DamiaoSubsystem damiao4340sub(drivers(), damiao4340);
 
 // m2006
 tap::motor::DjiMotor motor2006(
@@ -111,11 +119,9 @@ tap::motor::DjiMotor motor3510(
     true,
     (1.0f));
 
-
 MotorSubsystem motorSubsystem2006(drivers(), motor2006, m2006VelocityPidConfig);
 
 MotorSubsystem motorSubsystem3505(drivers(), motor3508, rm3508VelocityPidConfig);
-
 
 MotorSubsystem motorSubsystem3510(drivers(), motor3510, rm3510VelocityPidConfig);
 
@@ -130,20 +136,22 @@ MotorSubsystem motorSubsystem3510(drivers(), motor3510, rm3510VelocityPidConfig)
 //     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
 //     500.0f);
 
-DamiaoStickVelocityCommand damiaoStickVelocity(damiaoSubsystem, drivers()->remote);
+DamiaoStickVelocityCommand damiaoStickVelocity(
+    damiaoSubsystem,
+    drivers()->remote,
+    tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
+    9.0f);
+DamiaoStickVelocityCommand velocity4340(
+    damiao4340sub,
+    drivers()->remote,
+    tap::communication::serial::Remote::Channel::RIGHT_VERTICAL,
+    2.0f);
 
 StickRpmCommand leftHorizontalManual(
     &motorSubsystem3510,
     &drivers()->remote,
     tap::communication::serial::Remote::Channel::LEFT_HORIZONTAL,
     500.0f);
-
-StickRpmCommand rightVerticalManual(
-    &motorSubsystem3505,
-    &drivers()->remote,
-    tap::communication::serial::Remote::Channel::RIGHT_VERTICAL,
-    482.0f);
-
 
 // agitator rotate/unjam commands
 MoveIntegralCommand rotateAgitator(agitator, AGITATOR_ROTATE_CONFIG);
@@ -161,14 +169,23 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 // ------------------
 tap::control::Subsystem dummySubsystem(drivers());
 
-auto leftSwitchUpRms = tap::control::RemoteMapState(
-    tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-    tap::communication::serial::Remote::SwitchState::UP);
-auto leftSwitchUp = std::make_unique<tap::control::HoldRepeatCommandMapping>(
+DamiaoRotateSlotCommand rotateSlot(damiao4340sub);
+tap::control::InstantCommand<1> stopRotateSlot(
+    [] { damiao4340sub.stop(); },
+    {&damiao4340sub});
+
+auto leftSwitchUp = tap::control::TriggerHelpers::switchState(
     drivers(),
-    std::vector<tap::control::Command*>{&rotateAndUnjamAgitator},
-    &leftSwitchUpRms,
-    true);
+    tap::communication::serial::Remote::Switch::LEFT_SWITCH,
+    tap::communication::serial::Remote::SwitchState::UP)
+                        .onTrue(&rotateSlot)
+                        .onFalse(&stopRotateSlot);
+
+auto leftSwitchDown = tap::control::TriggerHelpers::switchState(
+    drivers(),
+    tap::communication::serial::Remote::Switch::LEFT_SWITCH,
+    tap::communication::serial::Remote::SwitchState::DOWN)
+                          .whileTrue(&velocity4340);
 
 // Remote disconnect cancels commands and calls DamiaoSubsystem::refreshSafeDisconnect(),
 // which stops the motor every scheduler cycle until the remote reconnects.
@@ -183,6 +200,7 @@ void initializeSubsystems()
     motorSubsystem3505.initialize();
     motorSubsystem3510.initialize();
     damiaoSubsystem.initialize();
+    damiao4340sub.initialize();
 }
 
 void registerSubsystems(Drivers* drivers)
@@ -192,6 +210,7 @@ void registerSubsystems(Drivers* drivers)
     // drivers->commandScheduler.registerSubsystem(&motorSubsystem2006);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&damiaoSubsystem);
+    drivers->commandScheduler.registerSubsystem(&damiao4340sub);
     // drivers->commandScheduler.registerSubsystem(&motorSubsystem3505);
     // drivers->commandScheduler.registerSubsystem(&motorSubsystem6020);
     // drivers->commandScheduler.registerSubsystem(&motorSubsystem3510);

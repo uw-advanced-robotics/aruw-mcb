@@ -32,7 +32,9 @@ class DamiaoStickVelocityCommand : public tap::control::Command
 public:
     DamiaoStickVelocityCommand(
         control::motor::DamiaoSubsystem& subsystem,
-        tap::communication::serial::Remote& remote);
+        tap::communication::serial::Remote& remote,
+        tap::communication::serial::Remote::Channel channel,
+        float maxVelocityRadPerSec);
 
     void initialize() override {}
     void execute() override;
@@ -43,10 +45,13 @@ public:
 private:
     control::motor::DamiaoSubsystem& subsystem;
     tap::communication::serial::Remote& remote;
+    tap::communication::serial::Remote::Channel channel;
 
-    float MAX_VELOCITY_RAD_PER_SEC = 9.0f;
-    static constexpr float STICK_DEADZONE = 0.05f;
+    float maxVelocityRadPerSec;
+    float STICK_DEADZONE = 0.05f;
     float KD = 0.1f;
+    volatile float DEBUG_wrappedPosition = 0.0f;
+    volatile float DEBUG_unwrappedPosition = 0.0f;
 };
 }  // namespace aruwsrc::motor_tester
 

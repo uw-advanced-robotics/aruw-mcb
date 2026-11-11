@@ -42,6 +42,7 @@ DamiaoMotor::DamiaoMotor(
     tap::can::CanBus motorCanBus,
     bool isInverted,
     const char* name,
+    DamiaoMotorType motorType,
     uint16_t feedbackCanId,
     DamiaoControlMode controlMode)
     : CanRxListener(drivers, feedbackCanId, motorCanBus),
@@ -50,7 +51,8 @@ DamiaoMotor::DamiaoMotor(
       controlMode(controlMode),
       motorCanBus(motorCanBus),
       motorInverted(isInverted),
-      encoder(isInverted)
+      limits(getDamiaoMotorLimits(motorType)),
+      encoder(isInverted, limits.pmax - limits.pmin)
 {
     (void)name;
     motorDisconnectTimeout.stop();
@@ -66,18 +68,18 @@ void DamiaoMotor::initialize()
     startupRetryTimeout.stop();
 }
 
-void DamiaoMotor::setDesiredOutput(int32_t desiredOutput)
+void DamiaoMotor::setDesiredOutput(int32_t milliNM)
 {
     if (controlMode != DAMIAO_CONTROL_MODE_MIT)
     {
         return;
     }
 
-    const int32_t signedOutput = motorInverted ? -desiredOutput : desiredOutput;
+    const int32_t signedOutput = motorInverted ? -milliNM : milliNM;
     desiredOutputMilliNm = tap::algorithms::limitVal<int32_t>(
         signedOutput,
-        -MAX_OUTPUT_DM_J4310_MILLI_NM,
-        MAX_OUTPUT_DM_J4310_MILLI_NM);
+        -limits.maxOutputMilliNm,
+        limits.maxOutputMilliNm);
 
     // Always send MIT command every frame so motor gets constant position/torque updates.
     const float torqueNm = static_cast<float>(desiredOutputMilliNm) / 1000.0f;
@@ -113,31 +115,26 @@ float DamiaoMotor::getPosition() const { return encoder.getPosition().getUnwrapp
 
 void DamiaoMotor::processMessage(const modm::can::Message& message)
 {
-    ++DEBUG_feedbackFramesReceived;
     if (message.getLength() != 8)
     {
-        ++DEBUG_feedbackBadLength;
         return;
     }
 
-    DEBUG_feedbackFirstByte = message.data[0];
     const uint8_t logicalId = message.data[0] & 0x0F;
     if (logicalId != (motorIdentifier & 0x0F))
     {
-        ++DEBUG_feedbackWrongMotorId;
         return;
     }
 
-    ++DEBUG_feedbackFramesAccepted;
     motorStatus = message.data[0] >> 4;
     const uint16_t posInt = static_cast<uint16_t>((message.data[1] << 8) | message.data[2]);
     const uint16_t velInt = static_cast<uint16_t>((message.data[3] << 4) | (message.data[4] >> 4));
     const uint16_t torqueInt =
         static_cast<uint16_t>(((message.data[4] & 0x0F) << 8) | message.data[5]);
 
-    const float posRad = uintToFloat(posInt, DM_J4310_P_MIN, DM_J4310_P_MAX, 16);
-    const float velRadPerSec = uintToFloat(velInt, DM_J4310_V_MIN, DM_J4310_V_MAX, 12);
-    const float torqueNm = uintToFloat(torqueInt, DM_J4310_T_MIN, DM_J4310_T_MAX, 12);
+    const float posRad = uintToFloat(posInt, limits.pmin, limits.pmax, 16);
+    const float velRadPerSec = uintToFloat(velInt, limits.vmin, limits.vmax, 12);
+    const float torqueNm = uintToFloat(torqueInt, limits.tmin, limits.tmax, 12);
 
     measuredPositionRad = posRad;
     encoder.updateFromFeedback(posRad, velRadPerSec);
@@ -210,11 +207,11 @@ bool DamiaoMotor::sendMitCommand(
     // Direct MIT callers also need the startup handshake, including after a motor power cycle.
     retryStartup();
 
-    const uint16_t posU = floatToUint<uint16_t, 16>(targetPosition, DM_J4310_P_MIN, DM_J4310_P_MAX);
-    const uint16_t velU = floatToUint<uint16_t, 12>(targetVelocity, DM_J4310_V_MIN, DM_J4310_V_MAX);
-    const uint16_t kpU = floatToUint<uint16_t, 12>(kp, DM_J4310_KP_MIN, DM_J4310_KP_MAX);
-    const uint16_t kdU = floatToUint<uint16_t, 12>(kd, DM_J4310_KD_MIN, DM_J4310_KD_MAX);
-    const uint16_t torqueU = floatToUint<uint16_t, 12>(torqueNm, DM_J4310_T_MIN, DM_J4310_T_MAX);
+    const uint16_t posU = floatToUint<uint16_t, 16>(targetPosition, limits.pmin, limits.pmax);
+    const uint16_t velU = floatToUint<uint16_t, 12>(targetVelocity, limits.vmin, limits.vmax);
+    const uint16_t kpU = floatToUint<uint16_t, 12>(kp, DAMIAO_KP_MIN, DAMIAO_KP_MAX);
+    const uint16_t kdU = floatToUint<uint16_t, 12>(kd, DAMIAO_KD_MIN, DAMIAO_KD_MAX);
+    const uint16_t torqueU = floatToUint<uint16_t, 12>(torqueNm, limits.tmin, limits.tmax);
 
     uint8_t data[8] = {
         static_cast<uint8_t>((posU >> 8) & 0xFF),
@@ -238,8 +235,8 @@ bool DamiaoMotor::sendPositionCommand(float32_t targetPosition, float32_t target
     }
 
     retryStartup();
-    const uint32_t posU = floatToUint<uint32_t, 32>(targetPosition, DM_J4310_P_MIN, DM_J4310_P_MAX);
-    const uint32_t velU = floatToUint<uint32_t, 32>(targetVelocity, DM_J4310_V_MIN, DM_J4310_V_MAX);
+    const uint32_t posU = floatToUint<uint32_t, 32>(targetPosition, limits.pmin, limits.pmax);
+    const uint32_t velU = floatToUint<uint32_t, 32>(targetVelocity, limits.vmin, limits.vmax);
 
     // Position-speed commands use little-endian IEEE-754 floats (manual, page 10).
     uint8_t data[8] = {
@@ -266,8 +263,8 @@ bool DamiaoMotor::sendVelocityCommand(float targetVelocity)
     retryStartup();
     const uint32_t velU = floatToUint<uint32_t, 32>(
         motorInverted ? -targetVelocity : targetVelocity,
-        DM_J4310_V_MIN,
-        DM_J4310_V_MAX);
+        limits.vmin,
+        limits.vmax);
 
     // Velocity commands use a little-endian IEEE-754 float (manual, page 11).
     uint8_t data[4] = {
@@ -314,12 +311,7 @@ bool DamiaoMotor::sendRawFrame(const uint8_t* data, uint8_t dataLen, uint16_t fr
         message.data[i] = data[i];
     }
 
-    const bool sent = drivers->can.sendMessage(motorCanBus, message);
-    if (!sent)
-    {
-        ++DEBUG_canSendFailures;
-    }
-    return sent;
+    return drivers->can.sendMessage(motorCanBus, message);
 }
 
 }  // namespace aruwsrc::control::motor

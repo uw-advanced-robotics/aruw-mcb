@@ -23,20 +23,27 @@ namespace aruwsrc::motor_tester
 {
 DamiaoStickVelocityCommand::DamiaoStickVelocityCommand(
     control::motor::DamiaoSubsystem& subsystem,
-    tap::communication::serial::Remote& remote)
+    tap::communication::serial::Remote& remote,
+    tap::communication::serial::Remote::Channel channel,
+    float maxVelocityRadPerSec)
     : subsystem(subsystem),
-      remote(remote)
+      remote(remote),
+      channel(channel),
+      maxVelocityRadPerSec(maxVelocityRadPerSec)
 {
     addSubsystemRequirement(&subsystem);
 }
 
 void DamiaoStickVelocityCommand::execute()
 {
-    const float stick = remote.getChannel(
-        tap::communication::serial::Remote::Channel::LEFT_VERTICAL);
+    const auto position = subsystem.getEncoder().getPosition();
+    DEBUG_wrappedPosition = position.getWrappedValue();
+    DEBUG_unwrappedPosition = position.getUnwrappedValue();
+
+    const float stick = remote.getChannel(channel);
     const float targetVelocity = (stick > -STICK_DEADZONE && stick < STICK_DEADZONE)
                                      ? 0.0f
-                                     : stick * MAX_VELOCITY_RAD_PER_SEC;
+                                     : stick * maxVelocityRadPerSec;
     subsystem.sendMitCommand(0.0f, targetVelocity, 0.0f, KD, 0.0f);
 }
 

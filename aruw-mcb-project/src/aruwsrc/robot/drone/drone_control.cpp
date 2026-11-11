@@ -85,6 +85,7 @@ aruwsrc::control::motor::DamiaoMotor pitchMotor(
     CAN_BUS_PITCH_MOTOR,
     true,
     "Pitch Turret",
+    aruwsrc::control::motor::DAMIAO_4310,
     0x011);
 
 tap::encoder::CanEncoder yawEncoder(

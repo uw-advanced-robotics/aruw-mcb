@@ -1,6 +1,7 @@
 #ifndef DAMIAO_CONSTANTS_HPP_
 #define DAMIAO_CONSTANTS_HPP_
 
+#include <cassert>
 #include <cstdint>
 
 namespace aruwsrc::control::motor
@@ -26,35 +27,52 @@ enum DamiaoControlMode : uint16_t
     DAMIAO_CONTROL_MODE_VELOCITY = 0x200,
 };
 
-// max output for DM-J4310
-static constexpr int32_t MAX_OUTPUT_DM_J4310_MILLI_NM = 10000;
-
-// limits for position, velocity, and torque
-static constexpr float DM_J4310_P_MIN = -12.5f;
-static constexpr float DM_J4310_P_MAX = 12.5f;
-static constexpr float DM_J4310_V_MIN = -30.0f;
-static constexpr float DM_J4310_V_MAX = 30.0f;
-static constexpr float DM_J4310_T_MIN = -10.0f;
-static constexpr float DM_J4310_T_MAX = 10.0f;
-
-static constexpr float DM_J4310_KP_MIN = 0.0f;
-static constexpr float DM_J4310_KP_MAX = 500.0f;
-static constexpr float DM_J4310_KD_MIN = 0.0f;
-static constexpr float DM_J4310_KD_MAX = 5.0f;
+enum DamiaoMotorType : uint16_t
+{
+    DAMIAO_4310,
+    DAMIAO_2325,
+    DAMIAO_4340,
+};
 
 struct DamiaoMotorLimits
 {
-    float pmin = 0.0f;
-    float pmax = 0.0f;
-    float vmin = 0.0f;
-    float vmax = 0.0f;
-    float tmin = 0.0f;
-    float tmax = 0.0f;
-    float kpmin = 0.0f;
-    float kpmax = 0.0f;
-    float kdmin = 0.0f;
-    float kdmax = 0.0f;
+    float pmin;
+    float pmax;
+    float vmin;
+    float vmax;
+    float tmin;
+    float tmax;
+    int32_t maxOutputMilliNm;
 };
+
+// Mapping ranges must match the motor's PMAX, VMAX, and TMAX registers.
+static constexpr DamiaoMotorLimits DM_J4310_LIMITS =
+    {-12.5f, 12.5f, -30.0f, 30.0f, -10.0f, 10.0f, 10000};
+static constexpr DamiaoMotorLimits DM_J4340_LIMITS =
+    {-12.5f, 12.5f, -10.0f, 10.0f, -28.0f, 28.0f, 28000};
+// shortcut: 2325 values are J4310 placeholders; replace with verified motor settings before use.
+static constexpr DamiaoMotorLimits DM_J2325_LIMITS =
+    {-12.5f, 12.5f, -30.0f, 30.0f, -10.0f, 10.0f, 10000};
+
+constexpr DamiaoMotorLimits getDamiaoMotorLimits(DamiaoMotorType type)
+{
+    switch (type)
+    {
+        case DAMIAO_4310:
+            return DM_J4310_LIMITS;
+        case DAMIAO_2325:
+            return DM_J2325_LIMITS;
+        case DAMIAO_4340:
+            return DM_J4340_LIMITS;
+    }
+    assert(false && "Invalid Damiao motor type");
+    return DM_J4310_LIMITS;
+}
+
+static constexpr float DAMIAO_KP_MIN = 0.0f;
+static constexpr float DAMIAO_KP_MAX = 500.0f;
+static constexpr float DAMIAO_KD_MIN = 0.0f;
+static constexpr float DAMIAO_KD_MAX = 5.0f;
 }  // namespace aruwsrc::control::motor
 
 #endif  // DAMIAO_CONSTANTS_HPP_

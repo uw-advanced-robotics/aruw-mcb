@@ -37,7 +37,8 @@ namespace aruwsrc::control::motor
 class DamiaoMotorEncoder : public tap::encoder::EncoderInterface
 {
 public:
-    explicit DamiaoMotorEncoder(bool inverted) : position(0.0f, -M_PI, M_PI), inverted(inverted)
+    DamiaoMotorEncoder(bool inverted, float feedbackSpan)
+        : inverted(inverted), feedbackSpan(feedbackSpan)
     {
         disconnectTimeout.stop();
     }
@@ -66,18 +67,29 @@ public:
     void updateFromFeedback(float posRad, float velRadPerSec)
     {
         const float signedPos = inverted ? -posRad : posRad;
-        const float signedVel = inverted ? -velRadPerSec : velRadPerSec;
-        position.setUnwrappedValue(
-            position.getUnwrappedValue() + position.minDifference(signedPos));
-        velocity = signedVel;
+        float delta = signedPos - lastFeedbackPosition;
+        const float halfSpan = feedbackSpan / 2.0f;
+        if (delta > halfSpan)
+        {
+            delta -= feedbackSpan;
+        }
+        else if (delta < -halfSpan)
+        {
+            delta += feedbackSpan;
+        }
+        position += delta;
+        lastFeedbackPosition = signedPos;
+        velocity = inverted ? -velRadPerSec : velRadPerSec;
         disconnectTimeout.restart(MOTOR_DISCONNECT_TIME_MS);
     }
 
 private:
     static constexpr uint32_t MOTOR_DISCONNECT_TIME_MS = 100;
-    tap::algorithms::WrappedFloat position;
+    tap::algorithms::Angle position{0.0f};
+    float lastFeedbackPosition = 0.0f;
     float velocity = 0.0f;
-    bool inverted;
+    const bool inverted;
+    const float feedbackSpan;
     tap::arch::MilliTimeout disconnectTimeout;
 };
 
@@ -93,8 +105,6 @@ private:
 class DamiaoMotor : public tap::can::CanRxListener, public tap::motor::MotorInterface
 {
 public:
-    // Retain the existing public names for the shared DM-J4310 limits.
-
     /**
      * Constructor for a Damiao motor.
      *
@@ -103,6 +113,7 @@ public:
      * @param motorCanBus The motor CAN bus.
      * @param isInverted Whether the motor is inverted.
      * @param name The name of the motor.
+     * @param motorType Selects the command and feedback mapping ranges.
      * @param feedbackCanId The CAN ID of the feedback frame.
      * @param controlMode The control mode of the motor, defaults to MIT mode (torque control).
      * Must match the mode configured on the motor using the debugging assistant.
@@ -113,6 +124,7 @@ public:
         tap::can::CanBus motorCanBus,
         bool isInverted,
         const char* name,
+        DamiaoMotorType motorType,
         uint16_t feedbackCanId = 0x000,
         DamiaoControlMode controlMode = DamiaoControlMode::DAMIAO_CONTROL_MODE_MIT);
 
@@ -125,8 +137,8 @@ public:
         return const_cast<DamiaoMotorEncoder*>(&encoder);
     }
 
-    // Torque in milli-Nm; only used in MIT mode.
-    void setDesiredOutput(int32_t desiredOutput) override;
+    // sets torque in milli-Nm; only used in MIT mode.
+    void setDesiredOutput(int32_t milliNM) override;
 
     bool isMotorOnline() const override;
 
@@ -187,29 +199,16 @@ private:
     tap::can::CanBus motorCanBus;
     bool motorInverted;
 
+    const DamiaoMotorLimits limits;
     DamiaoMotorEncoder encoder;
     tap::arch::MilliTimeout motorDisconnectTimeout;
     tap::arch::MilliTimeout startupRetryTimeout;
 
     int32_t desiredOutputMilliNm = 0;
     uint8_t motorStatus = 0xFF;
-    // Preserve the motor's raw coordinate for position-mode stop commands.
     float measuredPositionRad = 0.0f;
     int16_t measuredTorqueMilliNm = 0;
     int8_t temperatureMos = 0;
-
-    // Inspect these in the debugger to distinguish CAN bus failures from rejected feedback.
-    uint32_t DEBUG_feedbackFramesReceived = 0;
-    uint32_t DEBUG_feedbackFramesAccepted = 0;
-    uint32_t DEBUG_feedbackBadLength = 0;
-    uint32_t DEBUG_feedbackWrongMotorId = 0;
-    uint8_t DEBUG_feedbackFirstByte = 0;
-    mutable uint32_t DEBUG_canErrorStatus = 0;
-    mutable uint8_t DEBUG_canLastError = 0;
-    mutable uint8_t DEBUG_canTxErrorCount = 0;
-    mutable uint8_t DEBUG_canRxErrorCount = 0;
-    mutable bool DEBUG_canBusOff = false;
-    mutable uint32_t DEBUG_canSendFailures = 0;
 };
 
 }  // namespace aruwsrc::control::motor

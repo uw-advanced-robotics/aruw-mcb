@@ -11,14 +11,7 @@ class DamiaoSubsystem : public tap::control::Subsystem
 {
     tap::Drivers* drivers;
     DamiaoMotor& motor;
-    float DEBUG_position = 0.0f;
-    float DEBUG_motorVelocity = 0.0f;
-    uint8_t DEBUG_motorStatus = 0xFF;
-    uint32_t DEBUG_velocityCommandCount = 0;
-    bool DEBUG_velocityCommandSent = false;
-    uint32_t DEBUG_mitCommandCount = 0;
-    float DEBUG_mitTargetVelocity = 0.0f;
-    bool DEBUG_mitCommandSent = false;
+    bool commandSent = false;
 
 public:
     DamiaoSubsystem(tap::Drivers* drivers, DamiaoMotor& motor) : Subsystem(drivers), motor(motor) {}
@@ -28,6 +21,8 @@ public:
     void refresh() override;
 
     void refreshSafeDisconnect() override;
+    const tap::encoder::EncoderInterface& getEncoder() const { return *motor.getEncoder(); }
+    void setDesiredOutput(int32_t torqueMilliNm);
     void sendMitCommand(
         float targetPosition,
         float targetVelocity,

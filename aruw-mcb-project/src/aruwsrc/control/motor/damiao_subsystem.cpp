@@ -11,15 +11,23 @@ void DamiaoSubsystem::initialize()
 }
 void DamiaoSubsystem::refresh()
 {
-    DEBUG_position = motor.getPosition();
-    DEBUG_motorStatus = motor.getStatus();
-    DEBUG_motorVelocity = motor.getEncoder()->getVelocity();
+    // Keep the motor's CAN watchdog alive after a command finishes.
+    if (!commandSent)
+    {
+        stop();
+    }
+    commandSent = false;
 }
 void DamiaoSubsystem::refreshSafeDisconnect()
 {
-    DEBUG_position = motor.getPosition();
-    DEBUG_motorStatus = motor.getStatus();
     stop();
+    commandSent = false;
+}
+
+void DamiaoSubsystem::setDesiredOutput(int32_t torqueMilliNm)
+{
+    commandSent = true;
+    motor.setDesiredOutput(torqueMilliNm);
 }
 
 void DamiaoSubsystem::sendMitCommand(
@@ -29,11 +37,12 @@ void DamiaoSubsystem::sendMitCommand(
     float kd,
     float torqueNm)
 {
+    commandSent = true;
     motor.sendMitCommand(targetPosition, targetVelocity, kp, kd, torqueNm);
 }
 void DamiaoSubsystem::sendVeloCommand(float velo)
 {
-    ++DEBUG_velocityCommandCount;
-    DEBUG_velocityCommandSent = motor.sendVelocityCommand(velo);
+    commandSent = true;
+    motor.sendVelocityCommand(velo);
 }
 }  // namespace aruwsrc::control::motor
