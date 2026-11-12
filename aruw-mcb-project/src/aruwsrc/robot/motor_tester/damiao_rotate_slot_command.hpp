@@ -19,9 +19,11 @@
 #ifndef DAMIAO_ROTATE_SLOT_COMMAND_
 #define DAMIAO_ROTATE_SLOT_COMMAND_
 
+#include <sys/types.h>
 #include <cstdint>
 
 #include "tap/algorithms/smooth_pid.hpp"
+#include "tap/architecture/clock.hpp"
 #include "tap/control/command.hpp"
 
 #include "aruwsrc/control/motor/damiao_subsystem.hpp"
@@ -36,25 +38,28 @@ public:
     void initialize() override;
     void execute() override;
     void end(bool interrupted) override;
-    bool isFinished() const override;
+    bool isFinished() const override { return false; }
+    bool isReady() override;
     const char* getName() const override { return "Damiao rotate slot"; }
 
 private:
     control::motor::DamiaoSubsystem& subsystem;
 
+    uint64_t start = 0;
+    uint64_t len = 0;
     static constexpr int SLOT_COUNT = 6;
     static constexpr float ROTATE_INCR = (2.0f * M_PI) / SLOT_COUNT;
-    static constexpr float POSITION_TOLERANCE = 0.005f;
+    static constexpr float POSITION_TOLERANCE = 0.05f;
     tap::algorithms::SmoothPid positionPid{{
-        .kp = 500.0f,
+        .kp = 40000.0f,
         .ki = 200.0f,
-        .kd = 150.0f,
+        .kd = 2000.0f,
         .maxICumulative = 500.0f,
         .maxOutput = control::motor::DM_J4340_LIMITS.maxOutputMilliNm,
     }};
     uint32_t lastUpdateMillis = 0;
     float setpoint = 0.0f;
-    float positionError = 0.0f;
+    bool accelerating = true;
 };
 }  // namespace aruwsrc::motor_tester
 

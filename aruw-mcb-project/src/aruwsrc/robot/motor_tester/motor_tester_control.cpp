@@ -24,7 +24,6 @@
 #include "aruwsrc/control/motor/damiao_constants.hpp"
 #include "aruwsrc/robot/motor_tester/damiao_rotate_slot_command.hpp"
 #if defined(TARGET_MOTOR_TESTER)
-#include "tap/control/instant_command.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -141,11 +140,6 @@ DamiaoStickVelocityCommand damiaoStickVelocity(
     drivers()->remote,
     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
     9.0f);
-DamiaoStickVelocityCommand velocity4340(
-    damiao4340sub,
-    drivers()->remote,
-    tap::communication::serial::Remote::Channel::RIGHT_VERTICAL,
-    2.0f);
 
 StickRpmCommand leftHorizontalManual(
     &motorSubsystem3510,
@@ -170,22 +164,12 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 tap::control::Subsystem dummySubsystem(drivers());
 
 DamiaoRotateSlotCommand rotateSlot(damiao4340sub);
-tap::control::InstantCommand<1> stopRotateSlot(
-    [] { damiao4340sub.stop(); },
-    {&damiao4340sub});
 
 auto leftSwitchUp = tap::control::TriggerHelpers::switchState(
     drivers(),
     tap::communication::serial::Remote::Switch::LEFT_SWITCH,
     tap::communication::serial::Remote::SwitchState::UP)
-                        .onTrue(&rotateSlot)
-                        .onFalse(&stopRotateSlot);
-
-auto leftSwitchDown = tap::control::TriggerHelpers::switchState(
-    drivers(),
-    tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-    tap::communication::serial::Remote::SwitchState::DOWN)
-                          .whileTrue(&velocity4340);
+                        .whileTrue(&rotateSlot);
 
 // Remote disconnect cancels commands and calls DamiaoSubsystem::refreshSafeDisconnect(),
 // which stops the motor every scheduler cycle until the remote reconnects.

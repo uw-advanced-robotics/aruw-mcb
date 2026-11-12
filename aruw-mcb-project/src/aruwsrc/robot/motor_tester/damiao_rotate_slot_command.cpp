@@ -19,8 +19,6 @@
 
 #include "damiao_rotate_slot_command.hpp"
 
-#include <cmath>
-
 #include "tap/architecture/clock.hpp"
 
 namespace aruwsrc::motor_tester
@@ -33,35 +31,45 @@ DamiaoRotateSlotCommand::DamiaoRotateSlotCommand(control::motor::DamiaoSubsystem
 
 void DamiaoRotateSlotCommand::initialize()
 {
-    const float angle = subsystem.getEncoder().getPosition().getWrappedValue();
-    setpoint = (std::floor(angle / ROTATE_INCR) + 1.0f) * ROTATE_INCR;
+    start = tap::arch::clock::getTimeMicroseconds();
+    const auto position = subsystem.getEncoder().getPosition();
+    // Treat an encoder reading just below a slot as already at that slot.
+    const int slot =
+        static_cast<int>((position.getWrappedValue() + POSITION_TOLERANCE) / ROTATE_INCR);
+    // Keep this crossing tied to the selected revolution even after a large overshoot.
+    setpoint = position.getUnwrappedValue() +
+               position.minDifference(((slot + 1) % SLOT_COUNT) * ROTATE_INCR);
     positionPid.reset();
     lastUpdateMillis = tap::arch::clock::getTimeMilliseconds();
+    accelerating = true;
 }
 
 void DamiaoRotateSlotCommand::execute()
 {
-    const auto& encoder = subsystem.getEncoder();
-    if (!encoder.isOnline())
-    {
-        return;
-    }
-
     const uint32_t now = tap::arch::clock::getTimeMilliseconds();
     const float dt = (now - lastUpdateMillis) * 0.001f;
     lastUpdateMillis = now;
 
-    positionError = encoder.getPosition().minDifference(setpoint);
-    subsystem.setDesiredOutput(
-        static_cast<int32_t>(positionPid.runController(positionError, encoder.getVelocity(), dt)));
+    const auto& encoder = subsystem.getEncoder();
+    if (encoder.isOnline())
+    {
+        const float error = setpoint - encoder.getPosition().getUnwrappedValue();
+        if (error <= 0.0f)
+        {
+            if (accelerating)
+            {
+                len = tap::arch::clock::getTimeMicroseconds() - start;
+            }
+            accelerating = false;
+        }
+        subsystem.setDesiredOutput(
+            accelerating ? control::motor::DM_J4340_LIMITS.maxOutputMilliNm
+                         : static_cast<int32_t>(
+                               positionPid.runController(error, encoder.getVelocity(), dt)));
+    }
 }
 
-bool DamiaoRotateSlotCommand::isFinished() const
-{
-    // Stopping short would leave this same slot ahead on the next switch flick.
-    return !subsystem.getEncoder().isOnline() ||
-           (positionError <= 0.0f && positionError >= -POSITION_TOLERANCE);
-}
+bool DamiaoRotateSlotCommand::isReady() { return subsystem.getEncoder().isOnline(); }
 
 void DamiaoRotateSlotCommand::end(bool) { subsystem.setDesiredOutput(0); }
 
