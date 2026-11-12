@@ -19,6 +19,10 @@
 
 #include "abstract_ik_command.hpp"
 
+#include <algorithm>
+#include <cmath>
+
+#include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/wrapped_float.hpp"
 
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
@@ -60,8 +64,42 @@ AbstractIKCommand::AbstractIKCommand(
 
 void AbstractIKCommand::execute()
 {
-    chassisToEndEffectorDesired = chassisToBase.composeStatic(getBaseToFollowerDesired())
-                                      .composeStatic(followerToEndEffector);
+    updateBaseToFollowerDesired();
+    if (shouldRecalculateIk())
+    {
+        // only update setpoints if ik needs to be recalculated
+        if (calculateDesiredSetpoints())
+        {
+            cachedIkBaseToFollowerDesired = baseToFollowerDesired;
+            ikSolutionInitialized = true;
+        }
+    }
+
+    yawController.runController(0.002f, Angle(turretYawDesired));
+    pitchController.runController(0.002f, Angle(turretPitchDesired));
+    extension.setSetpoint(extensionDesired);
+    wrist.setSetpointOrientation(extensionToWristDesired.getRotation());
+    // uses the cached transforms when possible to update ik
+    updateBaseToFollowerFromSetpoints();
+}
+
+bool AbstractIKCommand::shouldRecalculateIk() const
+{
+    const bool inputsChanged =
+        !ikSolutionInitialized ||
+        !Transform::staticTransformsClose(baseToFollowerDesired, cachedIkBaseToFollowerDesired) ||
+        !Transform::staticTransformsClose(chassisToBase, cachedChassisToBase) ||
+        !Transform::staticTransformsClose(followerToEndEffector, cachedFollowerToEndEffector);
+
+    // recalculate if the inputs are changed and the inputs are finite
+    return inputsChanged && staticTransformIsFinite(baseToFollowerDesired) &&
+           staticTransformIsFinite(chassisToBase) && staticTransformIsFinite(followerToEndEffector);
+}
+
+bool AbstractIKCommand::calculateDesiredSetpoints()
+{
+    chassisToEndEffectorDesired =
+        chassisToBase.composeStatic(baseToFollowerDesired).composeStatic(followerToEndEffector);
 
     // kept as a Transform because we want to compose it easily
     chassisToWristDesiredPos = chassisToEndEffectorDesired.composeStatic(END_EFFECTOR_TO_WRIST);
@@ -72,42 +110,176 @@ void AbstractIKCommand::execute()
                                               .getTranslation();
 
     // We know y component of turretPitchToExtension is 0 and thus doesn't affect yaw
-    turretYawDesired = atan2f(turretYawToWristDesiredPos.y(), turretYawToWristDesiredPos.x());
+    const float newTurretYawDesired =
+        atan2f(turretYawToWristDesiredPos.y(), turretYawToWristDesiredPos.x());
 
     Position turretPitchToWristDesiredPos =
-        EngineerTransforms::getHypotheticalChassisToTurretYaw(turretYawDesired)
+        EngineerTransforms::getHypotheticalChassisToTurretYaw(newTurretYawDesired)
             .composeStatic(EngineerTransforms::getHypotheticalTurretYawToTurretPitch(0))
             .getInverse()
             .composeStatic(chassisToWristDesiredPos)
             .getTranslation();
 
     float turretPitchToWristDesiredDistSq = turretPitchToWristDesiredPos.toVector().magnitudeSq();
-    extensionDesired = sqrtf(turretPitchToWristDesiredDistSq - turretPitchToExtensionZeroZ2) -
-                       turretPitchToExtensionZeroX;
+    if (!std::isfinite(turretPitchToWristDesiredDistSq))
+    {
+        return false;
+    }
+    const float extensionRadicand =
+        std::max(turretPitchToWristDesiredDistSq - turretPitchToExtensionZeroZ2, 0.0f);
+    const float newExtensionDesired = std::clamp(
+        sqrtf(extensionRadicand) - turretPitchToExtensionZeroX,
+        extension.getLowerBound(),
+        extension.getUpperBound());
 
     turretPitchToExtension =
-        EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionDesired);
+        EngineerTransforms::getHypotheticalTurretPitchToExtension(newExtensionDesired);
     float x1 = turretPitchToWristDesiredPos.x();
     float y1 = turretPitchToWristDesiredPos.z();
     float x2 = turretPitchToExtension.getX();
     float y2 = turretPitchToExtension.getZ();
-    turretPitchDesired = atan2f(x1 * y2 - y1 * x2, x1 * x2 + y1 * y2);
+    const float newTurretPitchDesired = atan2f(x1 * y2 - y1 * x2, x1 * x2 + y1 * y2);
 
-    extensionToWristDesired =
-        EngineerTransforms::getHypotheticalChassisToTurretYaw(turretYawDesired)
+    Transform newExtensionToWristDesired =
+        EngineerTransforms::getHypotheticalChassisToTurretYaw(newTurretYawDesired)
             .composeStatic(
-                EngineerTransforms::getHypotheticalTurretYawToTurretPitch(turretPitchDesired))
+                EngineerTransforms::getHypotheticalTurretYawToTurretPitch(newTurretPitchDesired))
             .composeStatic(
-                EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionDesired))
+                EngineerTransforms::getHypotheticalTurretPitchToExtension(newExtensionDesired))
             .getInverse()
             .composeStatic(chassisToEndEffectorDesired)
             .composeStatic(END_EFFECTOR_TO_WRIST);
 
-    // Set the desired setpoints
-    yawController.runController(0.002f, Angle(turretYawDesired));
-    pitchController.runController(0.002f, Angle(turretPitchDesired));
-    extension.setSetpoint(extensionDesired);
-    wrist.setSetpointOrientation(extensionToWristDesired.getRotation());
+    if (!std::isfinite(newTurretYawDesired) || !std::isfinite(newTurretPitchDesired) ||
+        !std::isfinite(newExtensionDesired) || !staticTransformIsFinite(newExtensionToWristDesired))
+    {
+        return false;
+    }
+
+    turretYawDesired = newTurretYawDesired;
+    turretPitchDesired = newTurretPitchDesired;
+    extensionDesired = newExtensionDesired;
+    extensionToWristDesired = newExtensionToWristDesired;
+
+    turretYawDelta = turret.yawMotor.getChassisFrameMeasuredAngle().minDifference(turretYawDesired);
+    turretPitchDelta =
+        turret.pitchMotor.getChassisFrameMeasuredAngle().minDifference(turretPitchDesired);
+    extensionDelta = extensionDesired - extension.getPosition();
+
+    return true;
+}
+
+bool AbstractIKCommand::staticTransformIsFinite(const Transform& transform)
+{
+    const Position& translation = transform.getTranslation();
+    if (!std::isfinite(translation.x()) || !std::isfinite(translation.y()) ||
+        !std::isfinite(translation.z()))
+    {
+        return false;
+    }
+
+    const auto& rotation = transform.getRotation().matrix();
+    for (size_t i = 0; i < rotation.data.size(); ++i)
+    {
+        if (!std::isfinite(rotation[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void AbstractIKCommand::updateBaseToFollowerFromSetpoints()
+{
+    const float yawSetpoint = yawController.getSetpoint().getWrappedValue();
+    const float pitchSetpoint = pitchController.getSetpoint().getWrappedValue();
+    const float extensionSetpoint = extension.getSetpoint();
+    const float wristTheta1Setpoint = wrist.getSetpointTheta1();
+    const float wristTheta2Setpoint = wrist.getSetpointTheta2();
+    const float wristTheta3Setpoint = wrist.getSetpointTheta3();
+
+    const bool inputsFinite =
+        staticTransformIsFinite(chassisToBase) && staticTransformIsFinite(followerToEndEffector) &&
+        std::isfinite(yawSetpoint) && std::isfinite(pitchSetpoint) &&
+        std::isfinite(extensionSetpoint) && std::isfinite(wristTheta1Setpoint) &&
+        std::isfinite(wristTheta2Setpoint) && std::isfinite(wristTheta3Setpoint);
+    if (!inputsFinite)
+    {
+        baseToFollowerDesired = cachedBaseToFollowerFromSetpoints;
+        return;
+    }
+
+    const bool chassisChanged =
+        !forwardKinematicsCacheInitialized ||
+        !Transform::staticTransformsClose(chassisToBase, cachedChassisToBase);
+    const bool followerChanged =
+        !forwardKinematicsCacheInitialized ||
+        !Transform::staticTransformsClose(followerToEndEffector, cachedFollowerToEndEffector);
+    const bool yawChanged =
+        !forwardKinematicsCacheInitialized ||
+        !tap::algorithms::compareFloatClose(yawSetpoint, cachedYawSetpoint, TRANSFORM_EPSILON);
+    const bool pitchChanged =
+        !forwardKinematicsCacheInitialized ||
+        !tap::algorithms::compareFloatClose(pitchSetpoint, cachedPitchSetpoint, TRANSFORM_EPSILON);
+    const bool extensionChanged =
+        !forwardKinematicsCacheInitialized || !tap::algorithms::compareFloatClose(
+                                                  extensionSetpoint,
+                                                  cachedExtensionSetpoint,
+                                                  TRANSFORM_EPSILON);
+    const bool wristChanged = !forwardKinematicsCacheInitialized ||
+                              !tap::algorithms::compareFloatClose(
+                                  wristTheta1Setpoint,
+                                  cachedWristTheta1Setpoint,
+                                  TRANSFORM_EPSILON) ||
+                              !tap::algorithms::compareFloatClose(
+                                  wristTheta2Setpoint,
+                                  cachedWristTheta2Setpoint,
+                                  TRANSFORM_EPSILON) ||
+                              !tap::algorithms::compareFloatClose(
+                                  wristTheta3Setpoint,
+                                  cachedWristTheta3Setpoint,
+                                  TRANSFORM_EPSILON);
+
+    const bool baseToYawChanged = chassisChanged || yawChanged;
+    const bool yawToExtensionChanged = pitchChanged || extensionChanged;
+    const bool extensionToFollowerChanged = wristChanged || followerChanged;
+
+    if (baseToYawChanged)
+    {
+        cachedBaseToTurretYaw = chassisToBase.getInverse().composeStatic(
+            EngineerTransforms::getHypotheticalChassisToTurretYaw(yawSetpoint));
+    }
+    if (yawToExtensionChanged)
+    {
+        cachedTurretYawToExtension =
+            EngineerTransforms::getHypotheticalTurretYawToTurretPitch(pitchSetpoint)
+                .composeStatic(
+                    EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionSetpoint));
+    }
+    if (extensionToFollowerChanged)
+    {
+        cachedExtensionToFollower = Transform(Position(), wrist.getSetpointOrientation())
+                                        .composeStatic(WRIST_TO_END_EFFECTOR)
+                                        .composeStatic(followerToEndEffector.getInverse());
+    }
+    if (baseToYawChanged || yawToExtensionChanged || extensionToFollowerChanged)
+    {
+        cachedBaseToFollowerFromSetpoints =
+            cachedBaseToTurretYaw.composeStatic(cachedTurretYawToExtension)
+                .composeStatic(cachedExtensionToFollower);
+    }
+
+    cachedChassisToBase = chassisToBase;
+    cachedFollowerToEndEffector = followerToEndEffector;
+    cachedYawSetpoint = yawSetpoint;
+    cachedPitchSetpoint = pitchSetpoint;
+    cachedExtensionSetpoint = extensionSetpoint;
+    cachedWristTheta1Setpoint = wristTheta1Setpoint;
+    cachedWristTheta2Setpoint = wristTheta2Setpoint;
+    cachedWristTheta3Setpoint = wristTheta3Setpoint;
+    forwardKinematicsCacheInitialized = true;
+
+    baseToFollowerDesired = cachedBaseToFollowerFromSetpoints;
 }
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics
