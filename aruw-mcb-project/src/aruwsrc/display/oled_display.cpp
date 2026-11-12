@@ -41,7 +41,7 @@ OledDisplay::OledDisplay(
       viewStack(&display),
       buttonHandler(
           drivers,
-          tap::gpio::Analog::Pin::OledJoystick
+          tap::gpio::Analog::Pin::DisplayJoystick
 #ifndef SSH1106_OLED
           ,
           buttonConfig
@@ -64,12 +64,9 @@ OledDisplay::OledDisplay(
 void OledDisplay::initialize()
 {
 #ifndef PLATFORM_HOSTED
-    Board::DisplaySpiMaster::
-        connect<Board::DisplayMiso::Miso, Board::DisplayMosi::Mosi, Board::DisplaySck::Sck>();
-
     // SPI1 is on ABP2 which is at 90MHz; use prescaler 64 to get ~fastest baud rate below 1mHz max
     // 90MHz/64=~14MHz
-    Board::DisplaySpiMaster::initialize<Board::SystemClock, 1406250_Hz>();
+    Board::initializeDisplaySpi<1406250_Hz>();
 #endif
 
     display.initializeBlocking();

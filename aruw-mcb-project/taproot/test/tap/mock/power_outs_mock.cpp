@@ -21,13 +21,10 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "terminal_serial_mock.hpp"
+#include "power_outs_mock.hpp"
 
 namespace tap::mock
 {
-TerminalSerialMock::TerminalSerialMock(Drivers *drivers)
-    : communication::serial::TerminalSerial(drivers)
-{
-}
-TerminalSerialMock::~TerminalSerialMock() {}
+PowerOutsMock::PowerOutsMock() {}
+PowerOutsMock::~PowerOutsMock() {}
 }  // namespace tap::mock

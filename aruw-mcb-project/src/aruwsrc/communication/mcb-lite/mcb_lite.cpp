@@ -47,17 +47,11 @@ void MCBLite::initialize()
     initialized = true;
     switch (this->port)
     {
-        case Uart::UartPort::Uart1:
-            drivers->uart.init<Uart::UartPort::Uart1, UART_BAUDRATE>();
+        case Uart::UartPort::Usart2:
+            drivers->uart.init<Uart::UartPort::Usart2, UART_BAUDRATE>();
             break;
-        case Uart::UartPort::Uart2:
-            drivers->uart.init<Uart::UartPort::Uart2, UART_BAUDRATE>();
-            break;
-        case Uart::UartPort::Uart3:
-            drivers->uart.init<Uart::UartPort::Uart3, UART_BAUDRATE>();
-            break;
-        case Uart::UartPort::Uart6:
-            drivers->uart.init<Uart::UartPort::Uart6, UART_BAUDRATE>();
+        case Uart::UartPort::Usart3:
+            drivers->uart.init<Uart::UartPort::Usart3, UART_BAUDRATE>();
             break;
         case Uart::UartPort::Uart7:
             drivers->uart.init<Uart::UartPort::Uart7, UART_BAUDRATE>();
@@ -66,6 +60,8 @@ void MCBLite::initialize()
             drivers->uart.init<Uart::UartPort::Uart8, UART_BAUDRATE>();
             break;
         default:
+            initialized = false;
+            modm_assert(false, "McbLite", "Invalid UART port for MCB Lite");
             break;
     }
 }

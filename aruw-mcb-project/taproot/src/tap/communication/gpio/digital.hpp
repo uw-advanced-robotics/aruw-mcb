@@ -72,9 +72,9 @@ public:
         F,
         G,
         H,
+        Laser,
         Y,
         Z,
-        Laser,
     };
 
 #ifdef PLATFORM_HOSTED
