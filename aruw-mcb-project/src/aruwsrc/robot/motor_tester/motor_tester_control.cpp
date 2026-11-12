@@ -50,10 +50,12 @@ namespace motor_tester_control
 // Motor hardware settings: verify against actual configuration
 tap::motor::DjiMotor motor(
     drivers(),
-    tap::motor::MOTOR1,
+    tap::motor::MOTOR2,
     tap::can::CanBus::CAN_BUS1,
     false,
-    "Motor Tester"
+    "Motor Tester",
+    true,
+    tap::motor::DjiMotorEncoder::GEAR_RATIO_M2006
 );
 
 // Subsystem

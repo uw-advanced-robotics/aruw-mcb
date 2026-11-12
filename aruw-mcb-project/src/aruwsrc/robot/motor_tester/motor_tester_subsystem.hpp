@@ -34,6 +34,7 @@ public:
             motor.getEncoder()->getPosition().getUnwrappedValue();
     }
 
+
     void refresh() override
     {   
         pid.setP(kp);
