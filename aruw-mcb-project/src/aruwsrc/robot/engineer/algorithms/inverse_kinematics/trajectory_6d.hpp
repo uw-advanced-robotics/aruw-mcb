@@ -37,13 +37,30 @@ struct Waypoint
 template <size_t LENGTH>
 struct Trajectory6D
 {
-    std::array<Waypoint, LENGTH> waypoints;
+    Trajectory6D(std::array<Waypoint, LENGTH> waypoints) : waypoints(waypoints), timesInvalid(false)
+    {
+        for (size_t i = 1; i < LENGTH; ++i)
+        {
+            if (!(waypoints[i - 1].time < waypoints[i].time))
+            {
+                timesInvalid = true;
+                break;
+            }
+        }
+    }
 
     tap::algorithms::transforms::Transform atTime(float time) const
     {
-        size_t i = 0;
-        while (i < LENGTH - 1 && waypoints[i + 1].time < time) i++;
+        if (LENGTH == 1 || timesInvalid)
+        {
+            return waypoints.front().pose;
+        }
 
+        if (time <= waypoints.front().time) return waypoints.front().pose;
+        if (time >= waypoints.back().time) return waypoints.back().pose;
+
+        size_t i = 0;
+        while (i + 1 < LENGTH - 1 && waypoints[i + 1].time < time) i++;
         float t = (time - waypoints[i].time) / (waypoints[i + 1].time - waypoints[i].time);
 
         return tap::algorithms::transforms::Transform::interpolate(
@@ -51,6 +68,12 @@ struct Trajectory6D
             waypoints[i + 1].pose,
             t);
     }
+
+    const std::array<Waypoint, LENGTH>& getWaypoints() const { return waypoints; }
+
+private:
+    std::array<Waypoint, LENGTH> waypoints;
+    bool timesInvalid;
 };
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

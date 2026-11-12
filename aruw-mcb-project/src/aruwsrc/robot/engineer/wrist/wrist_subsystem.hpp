@@ -84,9 +84,11 @@ public:
      * */
     void setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint);
 
-    inline float getSetpointTheta1() { return setpointTheta1.getWrappedValue(); }
-    inline float getSetpointTheta2() { return setpointTheta2; }
-    inline float getSetpointTheta3() { return setpointTheta3.getWrappedValue(); }
+    inline float getSetpointTheta1() const { return setpointTheta1.getWrappedValue(); }
+    inline float getSetpointTheta2() const { return setpointTheta2; }
+    inline float getSetpointTheta3() const { return setpointTheta3.getWrappedValue(); }
+
+    tap::algorithms::transforms::Orientation getSetpointOrientation() const;
 
     virtual void initialize() override;
 
@@ -137,6 +139,9 @@ private:
     float g1, g21, g22, g3;
     float pidOutTheta1, pidOutTheta2, pidOutTheta3;
     float outMotorDifferential1, outMotorDifferential2, outMotor3;
+
+    // Angle errors for setpoint convergence tracking
+    float theta1Error, theta2Error, theta3Error;
 };
 }  // namespace aruwsrc::engineer::wrist
 
