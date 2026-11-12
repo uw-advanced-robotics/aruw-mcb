@@ -34,7 +34,7 @@ public:
     // should be receiving on same port as vision coprocessor
     // no need to transmit
     static constexpr tap::communication::serial::Uart::UartPort ENGINEER_CV_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart3;
+        tap::communication::serial::Uart::UartPort::Usart3;
     static constexpr size_t ENGINEER_CV_UART_BAUD_RATE = 57'600;
     static constexpr uint16_t TARGET_POSITION_MESSAGE_TYPE = 0xFA;
 

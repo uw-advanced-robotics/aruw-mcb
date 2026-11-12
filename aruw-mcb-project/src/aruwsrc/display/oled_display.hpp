@@ -81,7 +81,7 @@ private:
 #ifdef SSH1106_OLED
     tap::display::Sh1106<
 #ifndef PLATFORM_HOSTED
-        Board::DisplaySpiMaster,
+        Board::DisplaySpi,
         Board::DisplayCommand,
         Board::DisplayReset,
 #endif
@@ -92,7 +92,7 @@ private:
 #else
     tap::display::Sh1107<
 #ifndef PLATFORM_HOSTED
-        Board::DisplaySpiMaster,
+        Board::DisplaySpi,
         Board::DisplayCommand,
         Board::DisplayReset,
 #endif

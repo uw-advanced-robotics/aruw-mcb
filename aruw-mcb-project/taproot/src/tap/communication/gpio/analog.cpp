@@ -28,6 +28,7 @@
 
 using namespace Board;
 
+
 namespace tap
 {
 namespace gpio
@@ -38,13 +39,13 @@ void Analog::init()
     AnalogInPins::setAnalogInput();
 
     // Initial ADC/Timer setup
-    Adc1::connect<AnalogInPinS::In0, AnalogInPinU::In2, AnalogInPinV::In3, AnalogInPinOledJoystick::In6>();
+    Adc1::connect<Board::DisplayJoystick::In6, Board::AnalogInPinS::In0, Board::AnalogInPinU::In2, Board::AnalogInPinV::In3>();
     Adc1::initialize<SystemClock, 22500000_Bd>();
 
-    Adc1::setPinChannel<AnalogInPinS>();
-    Adc1::setPinChannel<AnalogInPinU>();
-    Adc1::setPinChannel<AnalogInPinV>();
-    Adc1::setPinChannel<AnalogInPinOledJoystick>();
+    Adc1::setPinChannel<Board::DisplayJoystick>();
+    Adc1::setPinChannel<Board::AnalogInPinS>();
+    Adc1::setPinChannel<Board::AnalogInPinU>();
+    Adc1::setPinChannel<Board::AnalogInPinV>();
 
 #endif
 }
@@ -58,13 +59,13 @@ uint16_t Analog::read(Pin pin) const
     switch (pin)
     {
         case Pin::S:
-            return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinS>());
+            return Adc1::readChannel(Adc1::getPinChannel<Board::AnalogInPinS>());
         case Pin::U:
-            return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinU>());
+            return Adc1::readChannel(Adc1::getPinChannel<Board::AnalogInPinU>());
         case Pin::V:
-            return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinV>());
-        case Pin::OledJoystick:
-            return Adc1::readChannel(Adc1::getPinChannel<AnalogInPinOledJoystick>());
+            return Adc1::readChannel(Adc1::getPinChannel<Board::AnalogInPinV>());
+        case Pin::DisplayJoystick:
+            return Adc1::readChannel(Adc1::getPinChannel<Board::DisplayJoystick>());
         default:
             return 0;
     }
