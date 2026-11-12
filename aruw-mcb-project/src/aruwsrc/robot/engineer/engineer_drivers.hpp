@@ -20,7 +20,6 @@
 #ifndef ENGINEER_DRIVERS_HPP_
 #define ENGINEER_DRIVERS_HPP_
 
-#include "tap/communication/sensors/imu/imu_terminal_serial_handler.hpp"
 #include "tap/drivers.hpp"
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)

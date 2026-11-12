@@ -21,12 +21,27 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_UART_TERMINAL_DEVICE_CONSTANTS_HPP_
-#define TAPROOT_UART_TERMINAL_DEVICE_CONSTANTS_HPP_
+#ifndef TAPROOT_POWER_OUTS_MOCK_HPP_
+#define TAPROOT_POWER_OUTS_MOCK_HPP_
 
-namespace tap::communication::serial::bound_ports
+#include <gmock/gmock.h>
+
+#include "tap/communication/gpio/power_outs.hpp"
+
+namespace tap
 {
-    static constexpr Uart::UartPort TERMINAL_SERIAL_UART_PORT = Uart::UartPort::Uart7;
-}  // namespace tap::communication::serial::bound_ports
+namespace mock
+{
+class PowerOutsMock : public tap::gpio::PowerOuts
+{
+public:
+    PowerOutsMock();
+    virtual ~PowerOutsMock();
 
-#endif  // TAPROOT_UART_TERMINAL_DEVICE_CONSTANTS_HPP_
+    MOCK_METHOD(void, init, (), (override));
+    MOCK_METHOD(void, set, (PowerOutPin pin, bool set), (override));
+};  // class PowerOutsMock
+}  // namespace mock
+}  // namespace tap
+
+#endif  // TAPROOT_POWER_OUTS_MOCK_HPP_
