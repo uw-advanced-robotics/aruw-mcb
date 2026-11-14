@@ -86,9 +86,7 @@ void BeybladeCommand::execute()
         x *= config.beybladeTranslationalSpeedMultiplier;
         y *= config.beybladeTranslationalSpeedMultiplier;
 
-        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+        const float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed();
 
         // BEYBLADE_TRANSLATIONAL_SPEED_THRESHOLD_MULTIPLIER_FOR_ROTATION_SPEED_DECREASE, scaled up
         // by the current max speed, (BEYBLADE_TRANSLATIONAL_SPEED_MULTIPLIER * maxWheelSpeed)

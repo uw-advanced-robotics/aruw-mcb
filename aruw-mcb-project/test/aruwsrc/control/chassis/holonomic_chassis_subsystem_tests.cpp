@@ -37,8 +37,7 @@ using namespace testing;
 
 // See this paper for equations: https://www.hindawi.com/journals/js/2015/347379/.
 
-static constexpr float WHEEL_VEL =
-    CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 3.0f * M_TWOPI / 60.0f;
+static constexpr float WHEEL_VEL = MAX_CHASSIS_WHEEL_SPEED_RPM / 3.0f * M_TWOPI / 60.0f;
 // translational chassis velocity in m/s, if WHEEL_VEL velocity commanded in X or Y direction
 static constexpr float CHASSIS_VEL = WHEEL_VEL * WHEEL_RADIUS;
 // rotational chassis velocity in rad/s, if WHEEL_VEL velocity commanded in R direction
@@ -112,8 +111,11 @@ TEST_F(
 TEST_F(HolonomicChassisSubsystemTest, calculateRotationTranslationalGain_max_velocity)  // holonomic
 {
     EXPECT_NEAR(
-        powf(MIN_ROTATION_THRESHOLD / CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second, 2.0f),
-        chassis.calculateRotationTranslationalGain(CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second),
+        tap::algorithms::limitVal(
+            powf(MIN_ROTATION_THRESHOLD / MAX_CHASSIS_WHEEL_SPEED_RPM, 2.0f),
+            0.0f,
+            1.0f),
+        chassis.calculateRotationTranslationalGain(MAX_CHASSIS_WHEEL_SPEED_RPM),
         1E-3);
 }
 
@@ -124,7 +126,7 @@ TEST_F(
     EXPECT_NEAR(
         0,
         chassis.calculateRotationTranslationalGain(
-            CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second + MIN_ROTATION_THRESHOLD),
+            MAX_CHASSIS_WHEEL_SPEED_RPM + MIN_ROTATION_THRESHOLD),
         1E-3);
 }
 
@@ -145,7 +147,7 @@ TEST_F(
     calculateRotationTranslationalGain_half_rotation)  // holonomic
 {
     EXPECT_THAT(
-        chassis.calculateRotationTranslationalGain(CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second / 2),
+        chassis.calculateRotationTranslationalGain(MAX_CHASSIS_WHEEL_SPEED_RPM / 2),
         InClosedRange(0.0f, 1.0f));
 }
 
@@ -241,44 +243,6 @@ INSTANTIATE_TEST_SUITE_P(
     HolonomicChassisSubsystem,
     VelocityGetterTest,
     ValuesIn(velocityGetterValuesToTest));
-
-class MaxWheelSpeedGetterTest : public TestWithParam<std::tuple<bool, int, float>>
-{
-};
-
-TEST_P(MaxWheelSpeedGetterTest, getMaxWheelSpeed)
-{
-    float maxWheelSpeed = HolonomicChassisSubsystem::getMaxWheelSpeed(
-        std::get<0>(GetParam()),
-        std::get<1>(GetParam()));
-
-    EXPECT_NEAR(std::get<2>(GetParam()), maxWheelSpeed, 1E-3);
-}
-
-static constexpr int POWER_TO_SPEED_LUT_ELEMENTS = MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT);
-
-std::tuple<bool, int, float> maxWheelSpeedValuesToTest[] = {
-    {false, 0, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {false, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first - 1, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {false, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {true, 0, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {true, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first - 1, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {true, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first, CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-    {true,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].first,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].second},
-    {true,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].first + 1,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].second},
-    {false,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[POWER_TO_SPEED_LUT_ELEMENTS - 1].first,
-     CHASSIS_POWER_TO_MAX_SPEED_LUT[0].second},
-};
-
-INSTANTIATE_TEST_SUITE_P(
-    HolonomicChassisSubsystem,
-    MaxWheelSpeedGetterTest,
-    ValuesIn(maxWheelSpeedValuesToTest));
 
 struct ActualVelocityParam
 {

@@ -37,17 +37,6 @@ static constexpr float INITIAL_CHASSIS_POSITION_X = 0.75f;
 static constexpr float INITIAL_CHASSIS_POSITION_Y = 4.0f;
 
 /**
- * Maps max power (in Watts) to max chassis wheel speed (RPM).
- */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {1, 370},
-    {2, 375}};  // TODO: TUNE!
-
-static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
-    CHASSIS_POWER_TO_MAX_SPEED_LUT,
-    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
-
-/**
  * The minimum desired wheel speed for chassis rotation when translational scaling via
  * calculateRotationTranslationalGain is performed.
  */
@@ -117,6 +106,13 @@ static constexpr BeybladeConfig BEYBLADE_CONFIG{
 static constexpr float CAP_BANK_SPRINT_TRANSLATIONAL_VELOCITY_THRESHOLD = 0.25f;  // m/s
 static constexpr float CAP_BANK_SPRINT_ENERGY_THRESHOLD = 50.0f;                  // J
 
+// 482 is maximum physicially possible post-gearbox RPM with the standard gearbox per 3508 datasheet
+static constexpr float MAX_3508_PRE_GEARBOX_RPM =
+    482.0f * (1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+static constexpr float MAX_CHASSIS_WHEEL_SPEED_RPM =
+    MAX_3508_PRE_GEARBOX_RPM *
+    CHASSIS_GEARBOX_RATIO;  // Max theoretical M3508 wheel speed post gearbox
+
 static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR4;
 static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
 static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR2;
@@ -141,5 +137,6 @@ inline const tap::algorithms::transforms::Transform CHASSIS_MCB_ISM330_MOUNTING_
     0.0f,
     0.0f);
 }  // namespace chassisImu
+
 }  // namespace aruwsrc::control::chassis
 #endif  // SENTRY_CHASSIS_CONSTANTS_HPP_

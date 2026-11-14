@@ -31,9 +31,6 @@ namespace aruwsrc
 {
 namespace control::chassis::new_chassis
 {
-modm::Pair<int, float> ChassisSubsystem::lastComputedMaxWheelSpeed =
-    CHASSIS_POWER_TO_MAX_SPEED_LUT[0];
-
 ChassisSubsystem::ChassisSubsystem(
     tap::Drivers* drivers,
     std::vector<Wheel>* wheels,
@@ -79,9 +76,7 @@ float ChassisSubsystem::calculateRotationTranslationalGain(float chassisRotation
     // MIN_ROTATION_THRESHOLD
     if (fabsf(chassisRotationDesiredWheelspeed) > MIN_ROTATION_THRESHOLD)
     {
-        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed(
-            drivers->refSerial.getRefSerialReceivingData(),
-            drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
+        const float maxWheelSpeed = ChassisSubsystem::getMaxWheelSpeed();
 
         // power(max revolve speed + min rotation threshold - specified revolve speed, 2) /
         // power(max revolve speed, 2)

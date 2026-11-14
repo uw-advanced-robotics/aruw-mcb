@@ -39,7 +39,8 @@ using namespace aruwsrc::control::chassis;
 using namespace aruwsrc;
 using namespace testing;
 
-static constexpr float MAX_SPEED = CHASSIS_POWER_TO_MAX_SPEED_LUT[0].first;
+static constexpr float MAX_SPEED =
+    MAX_CHASSIS_WHEEL_SPEED_RPM;  // Max theoretical M3508 wheel speed in m/s post gearbox
 
 static constexpr tap::algorithms::SmoothPidConfig MOCK_WHEEL_VELOCITY_PID_CONFIG = {
     .kp = 1,
@@ -158,12 +159,25 @@ TEST_P(
 
     chassisImuDriveCommand.initialize();
 
+    // inputs
+    const float userX = std::get<0>(GetParam());
+    const float userY = std::get<1>(GetParam());
+    const float userR = std::get<2>(GetParam());
+    const float rotationLimitedMaxTranslationalSpeed =
+        chassis.calculateRotationTranslationalGain(userR) * MAX_SPEED;
+    // make sure to limit
+    const float expectedX = tap::algorithms::limitVal(
+        userX,
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
+    const float expectedY = tap::algorithms::limitVal(
+        userY,
+        -rotationLimitedMaxTranslationalSpeed,
+        rotationLimitedMaxTranslationalSpeed);
+
     EXPECT_CALL(
         chassis,
-        setDesiredOutput(
-            std::get<0>(GetParam()),
-            std::get<1>(GetParam()),
-            std::get<2>(GetParam())));
+        setDesiredOutput(FloatNear(expectedX, 1E-3), FloatNear(expectedY, 1E-3), userR));
 
     chassisImuDriveCommand.execute();
 }
@@ -256,13 +270,28 @@ TEST_P(
 
     imuYaw += modm::toRadian(10);
 
-    float xExpected = std::get<0>(GetParam());
-    float yExpected = std::get<1>(GetParam());
-    tap::algorithms::rotateVector(&xExpected, &yExpected, -modm::toRadian(10));
+    const float userX = std::get<0>(GetParam());
+    const float userY = std::get<1>(GetParam());
+    const float userR = std::get<2>(GetParam());
+    const float expectedAngleFromDesiredRotation =
+        userR * ChassisImuDriveCommand::USER_INPUT_TO_ANGLE_DELTA_SCALAR - modm::toRadian(10);
+    EXPECT_CALL(chassis, setDesiredOutput(_, _, _)).WillOnce([&](float x, float y, float r) {
+        const float rotationLimitedMaxTranslationalSpeed =
+            chassis.calculateRotationTranslationalGain(r) * MAX_SPEED;
+        float xExpected = tap::algorithms::limitVal(
+            userX,
+            -rotationLimitedMaxTranslationalSpeed,
+            rotationLimitedMaxTranslationalSpeed);  // limit values since the power limit doesnt do
+                                                    // for us anymore
+        float yExpected = tap::algorithms::limitVal(
+            userY,
+            -rotationLimitedMaxTranslationalSpeed,
+            rotationLimitedMaxTranslationalSpeed);
+        tap::algorithms::rotateVector(&xExpected, &yExpected, expectedAngleFromDesiredRotation);
 
-    EXPECT_CALL(
-        chassis,
-        setDesiredOutput(FloatNear(xExpected, 1E-1), FloatNear(yExpected, 1E-1), _));
+        EXPECT_NEAR(xExpected, x, 1E-1);
+        EXPECT_NEAR(yExpected, y, 1E-1);
+    });
 
     chassisImuDriveCommand.execute();
 }
