@@ -33,7 +33,7 @@ namespace aruwsrc::motor_tester
 class DamiaoRotateSlotCommand : public tap::control::Command
 {
 public:
-    DamiaoRotateSlotCommand(control::motor::DamiaoSubsystem& subsystem);
+    DamiaoRotateSlotCommand(control::motor::DamiaoSubsystem& subsystem, int slotcount);
 
     void initialize() override;
     void execute() override;
@@ -47,8 +47,8 @@ private:
 
     uint64_t start = 0;
     uint64_t len = 0;
-    static constexpr int SLOT_COUNT = 6;
-    static constexpr float ROTATE_INCR = (2.0f * M_PI) / SLOT_COUNT;
+    int slotcount = 6;
+    float ROTATE_INCR = (2.0f * M_PI) / slotcount;
     static constexpr float POSITION_TOLERANCE = 0.05f;
     tap::algorithms::SmoothPid positionPid{{
         .kp = 40000.0f,
@@ -64,3 +64,8 @@ private:
 }  // namespace aruwsrc::motor_tester
 
 #endif  // DAMIAO_ROTATE_SLOT_COMMAND_
+
+
+
+
+

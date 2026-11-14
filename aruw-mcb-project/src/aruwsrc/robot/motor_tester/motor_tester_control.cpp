@@ -70,7 +70,7 @@ aruwsrc::control::motor::DamiaoMotor damiao2325(
     false,
     "Damiao Motor",
     aruwsrc::control::motor::DAMIAO_2325,
-    0x11,
+    0x17,
     aruwsrc::control::motor::DAMIAO_CONTROL_MODE_MIT);
 
 aruwsrc::control::motor::DamiaoMotor damiao4340(
@@ -163,13 +163,19 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 // ------------------
 tap::control::Subsystem dummySubsystem(drivers());
 
-DamiaoRotateSlotCommand rotateSlot(damiao4340sub);
+DamiaoRotateSlotCommand rotateSlot(damiao4340sub, 6);
+DamiaoRotateSlotCommand doubleSlot(damiao4340sub, 3);
 
 auto leftSwitchUp = tap::control::TriggerHelpers::switchState(
     drivers(),
     tap::communication::serial::Remote::Switch::LEFT_SWITCH,
     tap::communication::serial::Remote::SwitchState::UP)
                         .whileTrue(&rotateSlot);
+auto rightSwitchUp = tap::control::TriggerHelpers::switchState(
+    drivers(),
+    tap::communication::serial::Remote::Switch::RIGHT_SWITCH,
+    tap::communication::serial::Remote::SwitchState::UP)
+                        .whileTrue(&doubleSlot);
 
 // Remote disconnect cancels commands and calls DamiaoSubsystem::refreshSafeDisconnect(),
 // which stops the motor every scheduler cycle until the remote reconnects.

@@ -50,9 +50,10 @@ static constexpr DamiaoMotorLimits DM_J4310_LIMITS =
     {-12.5f, 12.5f, -30.0f, 30.0f, -10.0f, 10.0f, 10000};
 static constexpr DamiaoMotorLimits DM_J4340_LIMITS =
     {-12.5f, 12.5f, -10.0f, 10.0f, -28.0f, 28.0f, 28000};
-// shortcut: 2325 values are J4310 placeholders; replace with verified motor settings before use.
-static constexpr DamiaoMotorLimits DM_J2325_LIMITS =
-    {-12.5f, 12.5f, -30.0f, 30.0f, -10.0f, 10.0f, 10000};
+// NOTE: currently limited to 3nm of torque control for desired out, should do further
+// testing to determine  safe motor limits
+static constexpr DamiaoMotorLimits DM_S2325_LIMITS =
+    {-12.5f, 12.5f, -200.0f, 200.0f, -10.0f, 10.0f, 3000};
 
 constexpr DamiaoMotorLimits getDamiaoMotorLimits(DamiaoMotorType type)
 {
@@ -61,7 +62,7 @@ constexpr DamiaoMotorLimits getDamiaoMotorLimits(DamiaoMotorType type)
         case DAMIAO_4310:
             return DM_J4310_LIMITS;
         case DAMIAO_2325:
-            return DM_J2325_LIMITS;
+            return DM_S2325_LIMITS;
         case DAMIAO_4340:
             return DM_J4340_LIMITS;
     }

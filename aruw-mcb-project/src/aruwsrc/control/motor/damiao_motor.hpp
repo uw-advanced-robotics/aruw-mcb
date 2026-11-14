@@ -38,7 +38,8 @@ class DamiaoMotorEncoder : public tap::encoder::EncoderInterface
 {
 public:
     DamiaoMotorEncoder(bool inverted, float feedbackSpan)
-        : inverted(inverted), feedbackSpan(feedbackSpan)
+        : lastFeedbackPosition(0.0f, -feedbackSpan / 2.0f, feedbackSpan / 2.0f),
+          inverted(inverted)
     {
         disconnectTimeout.stop();
     }
@@ -67,18 +68,8 @@ public:
     void updateFromFeedback(float posRad, float velRadPerSec)
     {
         const float signedPos = inverted ? -posRad : posRad;
-        float delta = signedPos - lastFeedbackPosition;
-        const float halfSpan = feedbackSpan / 2.0f;
-        if (delta > halfSpan)
-        {
-            delta -= feedbackSpan;
-        }
-        else if (delta < -halfSpan)
-        {
-            delta += feedbackSpan;
-        }
-        position += delta;
-        lastFeedbackPosition = signedPos;
+        position += lastFeedbackPosition.minDifference(signedPos);
+        lastFeedbackPosition.setWrappedValue(signedPos);
         velocity = inverted ? -velRadPerSec : velRadPerSec;
         disconnectTimeout.restart(MOTOR_DISCONNECT_TIME_MS);
     }
@@ -86,10 +77,9 @@ public:
 private:
     static constexpr uint32_t MOTOR_DISCONNECT_TIME_MS = 100;
     tap::algorithms::Angle position{0.0f};
-    float lastFeedbackPosition = 0.0f;
+    tap::algorithms::WrappedFloat lastFeedbackPosition;
     float velocity = 0.0f;
     const bool inverted;
-    const float feedbackSpan;
     tap::arch::MilliTimeout disconnectTimeout;
 };
 

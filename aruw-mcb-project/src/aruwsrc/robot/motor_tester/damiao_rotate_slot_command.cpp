@@ -23,8 +23,8 @@
 
 namespace aruwsrc::motor_tester
 {
-DamiaoRotateSlotCommand::DamiaoRotateSlotCommand(control::motor::DamiaoSubsystem& subsystem)
-    : subsystem(subsystem)
+DamiaoRotateSlotCommand::DamiaoRotateSlotCommand(control::motor::DamiaoSubsystem& subsystem, int slotcount)
+    : subsystem(subsystem), slotcount(slotcount)
 {
     addSubsystemRequirement(&subsystem);
 }
@@ -38,7 +38,7 @@ void DamiaoRotateSlotCommand::initialize()
         static_cast<int>((position.getWrappedValue() + POSITION_TOLERANCE) / ROTATE_INCR);
     // Keep this crossing tied to the selected revolution even after a large overshoot.
     setpoint = position.getUnwrappedValue() +
-               position.minDifference(((slot + 1) % SLOT_COUNT) * ROTATE_INCR);
+               position.minDifference(((slot + 1) % slotcount) * ROTATE_INCR);
     positionPid.reset();
     lastUpdateMillis = tap::arch::clock::getTimeMilliseconds();
     accelerating = true;
