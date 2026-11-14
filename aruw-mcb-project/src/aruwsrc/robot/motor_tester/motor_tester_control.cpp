@@ -18,15 +18,12 @@
  */
 
 #if defined(TARGET_MOTOR_TESTER)
-#include <memory>
-
-#include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/hold_repeat_command_mapping.hpp"
-#include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
@@ -40,12 +37,13 @@
 #include "aruwsrc/robot/motor_tester/stick_rpm_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
+using namespace tap::communication::serial;
+using namespace tap::control;
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;
-// using namespace tap::control;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -146,18 +144,9 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
     rotateAgitator,
     unjamAgitator);
 
-// ------------------
-// command mappings
-// ------------------
-
-auto leftSwitchUpRms = tap::control::RemoteMapState(
-    tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-    tap::communication::serial::Remote::SwitchState::UP);
-auto leftSwitchUp = std::make_unique<tap::control::HoldRepeatCommandMapping>(
-    drivers(),
-    std::vector<tap::control::Command*>{&rotateAndUnjamAgitator},
-    &leftSwitchUpRms,
-    true);
+Trigger leftSwitchUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(&rotateAndUnjamAgitator);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -184,10 +173,8 @@ void registerSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&motorSubsystem3510);
 }
 
-void registerIoMappings(Drivers* drivers)
+void registerIoMappings(Drivers*)
 {
-    drivers->commandMapper.addMap(std::move(leftSwitchUp));
-
     motorSubsystem6020.setDefaultCommand(&wheelManual);
     motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
     motorSubsystem3505.setDefaultCommand(&rightVerticalManual);

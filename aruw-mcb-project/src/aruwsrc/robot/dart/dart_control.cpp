@@ -18,14 +18,9 @@
  */
 #include "aruwsrc/control/joint/homing/homeable_subsystem_interface.hpp"
 #if defined(TARGET_DART)
-#include <memory>
-
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
-#include "tap/control/command_mapper.hpp"
-#include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/press_command_mapping.hpp"
-#include "tap/control/remote_map_state.hpp"
-#include "tap/control/sequential_command.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/drivers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 #include "tap/motor/servo.hpp"
@@ -145,55 +140,44 @@ aruwsrc::dart::DartYawVelocityCommand dartYawVelocityCommand(
     yawSubsystem,
     &drivers()->controlOperatorInterface);
 // grab the string and pullback to setpoint
-SequentialCommand<2> pullBackCommand(&servoClose, &dartPullback);
+Command* pullBackCommand(servoClose.andThen(&dartPullback));
 
 // release the string to let the dart go, then go to reload position
-SequentialCommand<3> releaseDartAndReload(&servoOpen, &dartGrab, &rotateMagazine);
+Command* releaseDartAndReload(servoOpen.andThen({&dartGrab, &rotateMagazine}));
 
-SequentialCommand<2> homeAll(&pullMotorHome, &yawHomeCommand);
+Command* homeAll(pullMotorHome.andThen(&yawHomeCommand));
+
+// Homing finishes, so hold an idle command afterwards. whileTrue would otherwise reschedule
+// startCalibrate() on every loop once the joint is already homed.
+Command* homeYawHeld(yawHomeCommand.andThen(yawSubsystem.run([]() {})));
+
+Trigger bothSwitches(Remote::SwitchState left, Remote::SwitchState right)
+{
+    return TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, left) &&
+           TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, right);
+}
 
 // Left Up + Right Down -> Servo Open
-RemoteMapState openServoRemoteMapState =
-    RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::DOWN);
-auto openServoMapping = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&servoOpen},
-    &openServoRemoteMapState);
+Trigger openServoMapping =
+    bothSwitches(Remote::SwitchState::UP, Remote::SwitchState::DOWN).whileTrue(&servoOpen);
 
 // Left down + Right Down -> Servo Close
-RemoteMapState closeServoRemoteMapState =
-    RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN);
-auto closeServoMapping = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&servoClose},
-    &closeServoRemoteMapState);
+Trigger closeServoMapping =
+    bothSwitches(Remote::SwitchState::DOWN, Remote::SwitchState::DOWN).whileTrue(&servoClose);
 
-// Left Mid + Right Up -> Home Pullback
-auto homePullbackRemoteMapState = RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::UP);
-auto homePullbackCommand = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&pullMotorHome},
-    &homePullbackRemoteMapState);
-
-// Left Mid + Right Down -> Pullback Dart
-auto pullbackRemoteMapState = RemoteMapState(Remote::SwitchState::MID, Remote::SwitchState::DOWN);
-auto pullbackCommand = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&dartPullback},
-    &pullbackRemoteMapState);
-
-auto rightMidLeftDownRms = RemoteMapState(Remote::SwitchState::UP, Remote::SwitchState::UP);
-auto rightMidLeftDown = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&rotateMagazine},
-    &rightMidLeftDownRms);
+// Disabled until the dart mechanism is reassembled.
+// Command* homePullbackHeld(pullMotorHome.andThen(pullMotorSubsystem.run([]() {})));
+// Trigger homePullback =
+//     bothSwitches(Remote::SwitchState::MID, Remote::SwitchState::UP).whileTrue(homePullbackHeld);
+// Command* pullbackHeld(dartPullback.andThen(pullMotorSubsystem.run([]() {})));
+// Trigger pullback =
+//     bothSwitches(Remote::SwitchState::MID, Remote::SwitchState::DOWN).whileTrue(pullbackHeld);
+// Trigger rotateMagazinePressed =
+//     bothSwitches(Remote::SwitchState::UP, Remote::SwitchState::UP).onTrue(&rotateMagazine);
 
 // Left Down + Right Up -> Home Yaw
-auto homeYawRemoteMapState = RemoteMapState(Remote::SwitchState::DOWN, Remote::SwitchState::UP);
-auto homeYawCommand = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&yawHomeCommand},
-    &homeYawRemoteMapState);
+Trigger homeYaw =
+    bothSwitches(Remote::SwitchState::DOWN, Remote::SwitchState::UP).whileTrue(homeYawHeld);
 
 void initializeSubsystems()
 {
@@ -223,17 +207,7 @@ void setDefaultDartCommands(aruwsrc::dart::Drivers*)
 
 void startDartCommands(aruwsrc::dart::Drivers*) {}
 
-void registerDartIoMappings(aruwsrc::dart::Drivers* drivers)
-{
-    drivers->commandMapper.addMap(std::move(openServoMapping));
-    drivers->commandMapper.addMap(std::move(closeServoMapping));
-    // drivers->commandMapper.addMap(std::move(homePullbackCommand));
-    // drivers->commandMapper.addMap(std::move(pullbackCommand));
-    //  TODO: uncomment when dart squad reassembles this, currently not attached and dont wanna risk
-    //  robot damage
-    // drivers->commandMapper.addMap(std::move(rightMidLeftDown));
-    drivers->commandMapper.addMap(std::move(homeYawCommand));
-}
+void registerDartIoMappings(aruwsrc::dart::Drivers*) {}
 
 }  // namespace dart_control
 namespace aruwsrc::dart

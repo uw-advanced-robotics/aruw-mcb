@@ -24,8 +24,6 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "modm/math/geometry/quaternion.hpp"
-
 namespace aruwsrc::engineer::algorithms::inverse_kinematics
 {
 struct Waypoint

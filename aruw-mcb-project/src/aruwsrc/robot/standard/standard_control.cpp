@@ -25,12 +25,8 @@
 
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/serial/ref_serial_transmitter.hpp"
-#include "tap/control/command_composition_helper.hpp"
-#include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
-#include "tap/control/instant_command.hpp"
-#include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
@@ -153,7 +149,6 @@ inline aruwsrc::communication::can::TurretMCBCanComm& getTurretMCBCanComm()
 {
     return drivers()->turretMCBCanCommBus1;
 }
-using Compose = CommandCompositionHelper;
 
 /* define subsystems ----------------------------c---------------------------*/
 BuzzerSubsystem buzzer(drivers());
@@ -795,11 +790,9 @@ Trigger qPressed = TriggerHelpers::button(drivers(), Remote::Key::Q).toggleOnTru
 Trigger xPressed =
     TriggerHelpers::button(drivers(), Remote::Key::X).onTrue(&chassisAutorotateCommand);
 
-// Compose::parallel<1> so that multishot is still a weakconcurrentcommand and isReady is bypassed
 // since trigger doesn't have ownership
 Trigger leftMousePressed =
     TriggerHelpers::leftMouseButton(drivers()).whileTrue(&multiShotCvCommand);
-//.whileTrue(Compose::parallel<2>({&turretCVCommand, &multiShotCvCommand}));
 
 auto cycleStateController = CycleStateModeController<
     MultiShotCvCommand::LaunchMode,
@@ -809,31 +802,29 @@ auto cycleStateController = CycleStateModeController<
     &multiShotCvCommand,
     &MultiShotCvCommand::setShooterState);
 
-InstantCommand incrementCycleShootCommand(
-    []() { cycleStateController.cycleState(); },
-    std::array<tap::control::Subsystem*, 1>{
-        &dummySubsystem});  // fake requirement so gets scheduled by command scheduler
+// Fake subsystem requirement so the command scheduler will schedule these
+Command* incrementCycleShootCommand(dummySubsystem.runOnce([]() {
+    cycleStateController.cycleState();
+}));
 
 Trigger vPressed =
-    TriggerHelpers::button(drivers(), Remote::Key::V).onTrue(&incrementCycleShootCommand);
+    TriggerHelpers::button(drivers(), Remote::Key::V).onTrue(incrementCycleShootCommand);
 
-InstantCommand decrementCycleShootCommand(
-    []() { cycleStateController.reverseCycleState(); },
-    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
+Command* decrementCycleShootCommand(dummySubsystem.runOnce([]() {
+    cycleStateController.reverseCycleState();
+}));
 
 Trigger ePressed =
-    TriggerHelpers::button(drivers(), Remote::Key::E).onTrue(&decrementCycleShootCommand);
+    TriggerHelpers::button(drivers(), Remote::Key::E).onTrue(decrementCycleShootCommand);
 
 auto cycleStateGovernor = CycleStateModeController<bool, 2, CvOnTargetGovernor>(
     true,
     &cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
-InstantCommand toggleGovernorMode(
-    []() { cycleStateGovernor.cycleState(); },
-    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
+Command* toggleGovernorMode(dummySubsystem.runOnce([]() { cycleStateGovernor.cycleState(); }));
 
-Trigger rPressed = TriggerHelpers::button(drivers(), Remote::Key::R).onTrue(&toggleGovernorMode);
+Trigger rPressed = TriggerHelpers::button(drivers(), Remote::Key::R).onTrue(toggleGovernorMode);
 
 // cap bank
 Trigger cShiftPressed = (TriggerHelpers::button(drivers(), Remote::Key::C) &&
