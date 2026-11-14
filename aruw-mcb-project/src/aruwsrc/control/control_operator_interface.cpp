@@ -70,9 +70,7 @@ float ControlOperatorInterface::getChassisXInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::W) - drivers->remote.keyPressed(Remote::Key::S);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed();
 
     float finalX = maxChassisSpeed *
                    limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
@@ -106,9 +104,7 @@ float ControlOperatorInterface::getChassisYInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::A) - drivers->remote.keyPressed(Remote::Key::D);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed();
 
     float finalY = maxChassisSpeed *
                    limitVal(chassisYInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
@@ -142,9 +138,7 @@ float ControlOperatorInterface::getChassisRInput()
     float keyInput =
         drivers->remote.keyPressed(Remote::Key::Q) - drivers->remote.keyPressed(Remote::Key::E);
 
-    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed(
-        drivers->refSerial.getRefSerialReceivingData(),
-        chassis::HolonomicChassisSubsystem::getChassisPowerLimit(drivers));
+    const float maxChassisSpeed = chassis::HolonomicChassisSubsystem::getMaxWheelSpeed();
 
     float finalR = maxChassisSpeed *
                    limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
