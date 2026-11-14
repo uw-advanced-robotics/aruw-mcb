@@ -37,18 +37,6 @@ using tap::motor::DjiMotor;
 namespace aruwsrc::control::chassis
 {
 /**
- * Maps max power (in Watts) to max chassis wheel speed (RPM).
- */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {1, 10'000},
-    {1, 10'000},
-};
-
-static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
-    CHASSIS_POWER_TO_MAX_SPEED_LUT,
-    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
-
-/**
  * The minimum desired wheel speed for chassis rotation when translational scaling via
  * calculateRotationTranslationalGain is performed.
  */
@@ -133,6 +121,14 @@ static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
 static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId RIGHT_FRONT_MOTOR_ID = tap::motor::MOTOR1;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS1;
+
+// 482 is maximum physicially possible post-gearbox RPM with the standard gearbox per 3508 datasheet
+static constexpr float MAX_3508_PRE_GEARBOX_RPM =
+    482.0f * (1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+static constexpr float MAX_CHASSIS_WHEEL_SPEED_RPM =
+    MAX_3508_PRE_GEARBOX_RPM *
+    CHASSIS_GEARBOX_RATIO;  // Max theoretical M3508 wheel speed post gearbox
+
 }  // namespace aruwsrc::control::chassis
 
 #endif  // TESTBED_CHASSIS_CONSTANTS_HPP_
