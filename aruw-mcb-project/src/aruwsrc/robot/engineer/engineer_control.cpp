@@ -817,42 +817,54 @@ inverse_kinematics::Waypoint makeJointWaypoint(
     return {.pose = pose, .time = poseIndex * PER_POSE_TIME};
 }
 
-inverse_kinematics::Trajectory6D<6> workspaceTrajectory{{{
-    makeCartesianWaypoint(0, 0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(1, 0.54f, 0.10f, 0.38f, -30.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(2, 0.54f, 0.10f, 0.58f, 30.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(3, 0.54f, -0.10f, 0.58f, -30.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(4, 0.54f, -0.10f, 0.38f, 30.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(5, 0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f),
-}}};
+// {xLeftM, yRightM, zUpM, rollDeg, pitchDeg, yawDeg}
+static constexpr std::array<std::array<float, 6>, 6> WORKSPACE_WAYPOINTS{{
+    {0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f},
+    {0.54f, 0.10f, 0.38f, -30.0f, 0.0f, 0.0f},
+    {0.54f, 0.10f, 0.58f, 30.0f, 0.0f, 0.0f},
+    {0.54f, -0.10f, 0.58f, -30.0f, 0.0f, 0.0f},
+    {0.54f, -0.10f, 0.38f, 30.0f, 0.0f, 0.0f},
+    {0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f},
+}};
 
-inverse_kinematics::Trajectory6D<25> jointRangeTrajectory{{{
-    makeJointWaypoint(0, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(1, 0.0f, 0.0f, TEST_EXTENSION_MIN_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(2, 0.0f, -30.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(3, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(4, 0.0f, 0.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(5, 0.0f, 13.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(6, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(7, 170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(8, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(9, -170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(10, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(11, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 150.0f, 0.0f, 0.0f),
-    makeJointWaypoint(12, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(13, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, -150.0f, 0.0f, 0.0f),
-    makeJointWaypoint(14, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(15, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 75.0f, 0.0f),
-    makeJointWaypoint(16, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(17, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 150.0f),
-    makeJointWaypoint(18, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(19, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, -150.0f),
-    makeJointWaypoint(20, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(21, 120.0f, -25.0f, 0.55f, 90.0f, 60.0f, -90.0f),
-    makeJointWaypoint(22, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(23, -120.0f, 10.0f, 0.55f, -90.0f, 60.0f, 90.0f),
-    makeJointWaypoint(24, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-}}};
+// {yawDeg, pitchDeg, extensionM, wristTheta1Deg, wristTheta2Deg, wristTheta3Deg}
+static constexpr std::array<std::array<float, 6>, 25> JOINT_RANGE_WAYPOINTS{{
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_MIN_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, -30.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 13.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {-170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 150.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, -150.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 75.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 150.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, -150.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {120.0f, -25.0f, 0.55f, 90.0f, 60.0f, -90.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {-120.0f, 10.0f, 0.55f, -90.0f, 60.0f, 90.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+}};
+
+inverse_kinematics::Trajectory6D<WORKSPACE_WAYPOINTS.size()> workspaceTrajectory([](size_t i) {
+    const auto& w = WORKSPACE_WAYPOINTS[i];
+    return makeCartesianWaypoint(i, w[0], w[1], w[2], w[3], w[4], w[5]);
+});
+
+inverse_kinematics::Trajectory6D<JOINT_RANGE_WAYPOINTS.size()> jointRangeTrajectory([](size_t i) {
+    const auto& w = JOINT_RANGE_WAYPOINTS[i];
+    return makeJointWaypoint(i, w[0], w[1], w[2], w[3], w[4], w[5]);
+});
 
 inverse_kinematics::TrajectoryIKCommand<6> workspaceIKTrajectoryCommand(
     IDENTITY_TRANSFORM,
