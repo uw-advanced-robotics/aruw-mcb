@@ -19,8 +19,9 @@
 
 #if defined(TARGET_CHARACTERIZER)
 
-#include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/hold_repeat_command_mapping.hpp"
+#include "tap/control/command.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/motor/tmotor_ak80_9.hpp"
@@ -33,6 +34,8 @@
 #include "aruwsrc/robot/robot_control.hpp"
 
 using namespace aruwsrc::characterizer;
+using namespace tap::communication::serial;
+using namespace tap::control;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -79,23 +82,14 @@ OutputSweepCommand sweep(
     250,    // step size
     -1);
 
-// ------------------
-// command mappings
-// ------------------
+Command* sweepHeld(sweep.andThen(motorSubsystem.run([]() {})));
+Trigger leftSwitchUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(sweepHeld);
 
-tap::control::HoldCommandMapping leftSwitchUp(
-    drivers(),
-    {&sweep},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::UP));
-
-tap::control::HoldCommandMapping leftSwitchDown(
-    drivers(),
-    {&manual},
-    tap::control::RemoteMapState(
-        tap::communication::serial::Remote::Switch::LEFT_SWITCH,
-        tap::communication::serial::Remote::SwitchState::DOWN));
+Trigger leftSwitchDown =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
+        .whileTrue(&manual);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -110,13 +104,7 @@ void registerSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&motorSubsystem);
 }
 
-void registerIoMappings(Drivers* drivers)
-{
-    drivers->commandMapper.addMap(&leftSwitchUp);
-    drivers->commandMapper.addMap(&leftSwitchDown);
-
-    motorSubsystem.setDefaultCommand(&manualFine);
-}
+void registerIoMappings(Drivers*) { motorSubsystem.setDefaultCommand(&manualFine); }
 
 }  // namespace characterizer_control
 

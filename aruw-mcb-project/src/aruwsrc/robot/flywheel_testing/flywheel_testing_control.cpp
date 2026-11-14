@@ -18,16 +18,12 @@
  */
 
 #if defined(TARGET_FLYWHEEL_TESTING)
-#include <memory>
-
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
-#include "tap/control/command_mapper.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
-#include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/hold_repeat_command_mapping.hpp"
-#include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
@@ -54,8 +50,6 @@ using namespace aruwsrc::control::chassis;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::flywheel_testing;
-using tap::control::CommandMapper;
-using tap::control::RemoteMapState;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -138,19 +132,13 @@ FrictionWheelSpinRefLimitedCommand stopFrictionWheels(
 MoveIntegralCommand loadKicker(kickerAgitator, constants::KICKER_LOAD_AGITATOR_ROTATE_CONFIG);
 MoveIntegralCommand launchKicker(kickerAgitator, constants::KICKER_SHOOT_AGITATOR_ROTATE_CONFIG);
 
-/* define command mappings --------------------------------------------------*/
-auto rightUpRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP);
-auto rightSwitchUp = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&spinFrictionWheels},
-    &rightUpRms);
+Trigger rightSwitchUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(&spinFrictionWheels);
 
-auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
-auto leftSwitchUp = std::make_unique<HoldRepeatCommandMapping>(
-    drivers(),
-    std::vector<Command *>{&launchKicker},
-    &leftUpRms,
-    false);
+Trigger leftSwitchUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(&launchKicker);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -176,11 +164,7 @@ void setDefaultFlywheelTestingCommands() { frictionWheels.setDefaultCommand(&sto
 void startFlywheelTestingCommands(Drivers *) {}
 
 /* register io mappings here ------------------------------------------------*/
-void registerFlywheelTestingIoMappings(Drivers *drivers)
-{
-    drivers->commandMapper.addMap(std::move(rightSwitchUp));
-    drivers->commandMapper.addMap(std::move(leftSwitchUp));
-}
+void registerFlywheelTestingIoMappings(Drivers *) {}
 }  // namespace flywheel_testing_control
 
 namespace aruwsrc::flywheel_testing
