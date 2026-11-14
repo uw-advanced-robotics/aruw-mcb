@@ -33,6 +33,7 @@
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
+#include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
@@ -51,12 +52,13 @@
 #include "aruwsrc/robot/motor_tester/stick_rpm_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
+using namespace tap::communication::serial;
+using namespace tap::control;
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::motor_tester;
 using namespace aruwsrc::motor_tester::constants;
-// using namespace tap::control;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -234,7 +236,7 @@ void registerSubsystems(Drivers* drivers)
     // drivers->commandScheduler.registerSubsystem(&motorSubsystem3510);
 }
 
-void registerIoMappings(Drivers* drivers)
+void registerIoMappings(Drivers*)
 {
     damiaoSubsystem.setDefaultCommand(&damiaoStickVelocity);
     // motorSubsystem6020.setDefaultCommand(&wheelManual);

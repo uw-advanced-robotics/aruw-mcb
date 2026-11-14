@@ -23,12 +23,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
-#include "tap/control/command_composition_helper.hpp"
-#include "tap/control/command_mapper.hpp"
 #include "tap/control/command_scheduler.hpp"
-#include "tap/control/instant_command.hpp"
-#include "tap/control/remote_map_state.hpp"
-#include "tap/control/sequential_command.hpp"
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 
@@ -54,7 +49,6 @@
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/client-display/indicators/pump_indicator.hpp"
-#include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/digital/digital_out_command.hpp"
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
 #include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
@@ -120,7 +114,6 @@ using namespace tap::gpio;
 using tap::algorithms::transforms::Axis;
 using tap::algorithms::transforms::Transform;
 using tap::communication::serial::Remote;
-using tap::control::CommandMapper;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -539,7 +532,6 @@ ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
 /* define commands ----------------------------------------------------------*/
-HomingCommand cubeStorageHome(cubeStorage);
 HomingCommand extensionHome(extensionSubsystem);
 
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -634,12 +626,10 @@ WristControllerCommand wristTheta3PositiveGravityTestCommand(
     &commandCounter,
     &isSettled);
 
-InstantCommand holdExtensionAtCurrentPosition(
-    []() {
-        commandCounter = 0;
-        extensionSubsystem.setSetpoint(extensionSubsystem.getPosition());
-    },
-    std::array<tap::control::Subsystem*, 1>{&extensionSubsystem});
+Command* holdExtensionAtCurrentPosition(extensionSubsystem.runOnce([]() {
+    commandCounter = 0;
+    extensionSubsystem.setSetpoint(extensionSubsystem.getPosition());
+}));
 
 SetpointMoveManualCommand holdExtensionDuringThetaTest(
     extensionSubsystem,
@@ -647,28 +637,24 @@ SetpointMoveManualCommand holdExtensionDuringThetaTest(
     0.0f,
     SetpointType::EXTENSION);
 
-SequentialCommand<12> wristGravityCompensationSetpointSequence(
-    &wristTheta1NegativeGravityTestCommand,
-    &wristTheta1ZeroGravityTestCommand,
-    &wristTheta1PositiveGravityTestCommand,
-    &wristTheta1ZeroGravityTestCommand,
-    &wristTheta2NegativeGravityTestCommand,
-    &wristTheta2ZeroGravityTestCommand,
-    &wristTheta2PositiveGravityTestCommand,
-    &wristTheta2ZeroGravityTestCommand,
-    &wristTheta3NegativeGravityTestCommand,
-    &wristTheta3ZeroGravityTestCommand,
-    &wristTheta3PositiveGravityTestCommand,
-    &wristTheta3ZeroGravityTestCommand);
+Command* wristGravityCompensationSetpointSequence(wristTheta1NegativeGravityTestCommand.andThen(
+    {&wristTheta1ZeroGravityTestCommand,
+     &wristTheta1PositiveGravityTestCommand,
+     &wristTheta1ZeroGravityTestCommand,
+     &wristTheta2NegativeGravityTestCommand,
+     &wristTheta2ZeroGravityTestCommand,
+     &wristTheta2PositiveGravityTestCommand,
+     &wristTheta2ZeroGravityTestCommand,
+     &wristTheta3NegativeGravityTestCommand,
+     &wristTheta3ZeroGravityTestCommand,
+     &wristTheta3PositiveGravityTestCommand,
+     &wristTheta3ZeroGravityTestCommand}));
 
-ConcurrentDeadlineCommand<1> wristGravityCompensationTestWithExtensionHold(
-    std::array<Command*, 1>{&holdExtensionDuringThetaTest},
-    "Wrist gravity compensation test",
-    &wristGravityCompensationSetpointSequence);
+Command* wristGravityCompensationTestWithExtensionHold(
+    holdExtensionDuringThetaTest.deadlineWith(wristGravityCompensationSetpointSequence));
 
-SequentialCommand<2> wristGravityCompensationTestSequence(
-    &holdExtensionAtCurrentPosition,
-    &wristGravityCompensationTestWithExtensionHold);
+Command* wristGravityCompensationTestSequence(
+    holdExtensionAtCurrentPosition->andThen(wristGravityCompensationTestWithExtensionHold));
 
 // wrist fold in commands are not fully tuned yet
 WristSetpointsCommand wristFoldInCommand(
@@ -686,11 +672,6 @@ SetpointMovePositionCommand extensionOutCommand(extensionSubsystem, 2);
 // commands for pickup/scoring positions
 SetpointMovePositionCommand extensionOut(extensionSubsystem, EXTENSION_SCORE);
 SetpointMovePositionCommand extensionIn(extensionSubsystem, EXTENSION_PICKUP);
-
-// rotating cube storage
-SetpointMovePositionCommand leftCubePosition(cubeStorage, CUBE_STORAGE_LEFT_SETPOINT);
-SetpointMovePositionCommand rightCubePosition(cubeStorage, CUBE_STORAGE_RIGHT_SETPOINT);
-SetpointMovePositionCommand centerCubePosition(cubeStorage, CUBE_STORAGE_CENTER_SETPOINT);
 
 ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem);
 
@@ -731,22 +712,6 @@ inverse_kinematics::ManualIKCommand manualIKCommand(
     wristSubsystem,
     chassisFrameYawTurretController,
     chassisFramePitchTurretController);
-
-SequentialCommand<3> storeCubeCommand(
-    &selectCubeAddPositionCommand,
-    &cubeStorageSuckOnCommand,
-    // hand down
-    // hand release cube
-    // hand up
-    &centerCubePosition);
-
-SequentialCommand<3> removeCubeCommand(
-    &selectCubeRemovePositionCommand,
-    // hand suction on
-    // hand down
-    &cubeStorageSuckOffCommand,
-    // hand up
-    &centerCubePosition);
 
 autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     drivers(),

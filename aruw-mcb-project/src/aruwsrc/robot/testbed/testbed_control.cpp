@@ -19,8 +19,8 @@
 
 #if defined(TARGET_TESTBED)
 
-#include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/toggle_command_mapping.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 
 #include "aruwsrc/communication/can/aruw_voltage_current_sensor.hpp"
 #include "aruwsrc/communication/mcb-lite/virtual_can_encoder.hpp"
@@ -136,16 +136,16 @@ aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
 //     &turret.yawMotor,
 //     (drivers()->controlOperatorInterface));
 
-// HoldCommandMapping leftSwitchDown(
-//     drivers(),
-//     {&beybladeCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN));
-// HoldCommandMapping leftSwitchUp(
-//     drivers(),
-//     {&turretCVCommand, &chassisDriveCommand},
-//     RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP));
-
-// ToggleCommandMapping fToggled(drivers(), {&beybladeCommand}, RemoteMapState({Remote::Key::F}));
+// Trigger leftSwitchDown =
+//     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH,
+//     Remote::SwitchState::DOWN)
+//         .whileTrue(&beybladeCommand);
+// Trigger leftSwitchUp =
+//     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
+//         .whileTrue(&turretCVCommand)
+//         .whileTrue(&chassisDriveCommand);
+// Trigger fToggled = TriggerHelpers::button(drivers(),
+// Remote::Key::F).toggleOnTrue(&beybladeCommand);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -164,12 +164,7 @@ void registerSubsystems(Drivers* drivers)
 
 void setDefaultCommands(Drivers*) { chassis.setDefaultCommand(&chassisDriveCommand); }
 
-void registerIoMappings(Drivers*)
-{
-    // drivers->commandMapper.addMap(&leftSwitchDown);
-    // drivers->commandMapper.addMap(&leftSwitchUp);
-    // drivers->commandMapper.addMap(&fToggled);
-}
+void registerIoMappings(Drivers*) {}
 
 }  // namespace testbed_control
 
