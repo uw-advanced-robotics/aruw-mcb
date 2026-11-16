@@ -18,16 +18,12 @@
  */
 
 #if defined(TARGET_LAUNCHER_TARGET)
-#include <memory>
-
-#include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/hold_repeat_command_mapping.hpp"
-#include "tap/control/press_command_mapping.hpp"
-#include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_integral_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
 #include "tap/control/setpoint/commands/unjam_integral_command.hpp"
+#include "tap/control/trigger.hpp"
+#include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
@@ -42,13 +38,13 @@
 #include "aruwsrc/robot/launcher_target/terminal_moving_target_command.hpp"
 #include "aruwsrc/robot/robot_control.hpp"
 
+using namespace tap::communication::serial;
+using namespace tap::control;
 using namespace tap::control::setpoint;
 
 using namespace aruwsrc::control::agitator;
 using namespace aruwsrc::launcher_target;
 using namespace aruwsrc::launcher_target::constants;
-// using namespace tap::control;
-
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
  *      because this file defines all subsystems and command
@@ -83,21 +79,13 @@ StickRpmCommand leftVerticalManual(
 
 RandomMovingTargetCommand randomMovingTargetCommand(&motorSubsystem2006);
 TerminalMovingTargetCommand terminalMovingTargetCommand(&motorSubsystem2006);
-// ------------------
-// command mappings
-// ------------------
-auto leftUpRms = tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
-auto leftUp = std::make_unique<tap::control::PressCommandMapping>(
-    drivers(),
-    std::vector<tap::control::Command*>{&randomMovingTargetCommand},
-    &leftUpRms);
+Trigger leftUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
+        .onTrue(&randomMovingTargetCommand);
 
-auto leftDownRms =
-    tap::control::RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
-auto leftDown = std::make_unique<tap::control::PressCommandMapping>(
-    drivers(),
-    std::vector<tap::control::Command*>{&terminalMovingTargetCommand},
-    &leftDownRms);
+Trigger leftDown =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
+        .onTrue(&terminalMovingTargetCommand);
 
 // Safe disconnect function
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
@@ -117,12 +105,7 @@ void registerSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&motorSubsystem2006);
 }
 
-void registerIoMappings(Drivers* drivers)
-{
-    motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
-    drivers->commandMapper.addMap(std::move(leftUp));
-    drivers->commandMapper.addMap(std::move(leftDown));
-}
+void registerIoMappings(Drivers*) { motorSubsystem2006.setDefaultCommand(&leftVerticalManual); }
 }  // namespace launcher_target_control
 
 namespace aruwsrc::launcher_target

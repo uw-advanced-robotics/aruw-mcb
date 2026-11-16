@@ -23,12 +23,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
-#include "tap/control/command_composition_helper.hpp"
-#include "tap/control/command_mapper.hpp"
 #include "tap/control/command_scheduler.hpp"
-#include "tap/control/instant_command.hpp"
-#include "tap/control/remote_map_state.hpp"
-#include "tap/control/sequential_command.hpp"
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 
@@ -55,7 +50,6 @@
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/client-display/indicators/pump_indicator.hpp"
-#include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/digital/digital_out_command.hpp"
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
 #include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
@@ -121,7 +115,6 @@ using namespace tap::gpio;
 using tap::algorithms::transforms::Axis;
 using tap::algorithms::transforms::Transform;
 using tap::communication::serial::Remote;
-using tap::control::CommandMapper;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -547,7 +540,6 @@ ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
 /* define commands ----------------------------------------------------------*/
-HomingCommand cubeStorageHome(cubeStorage);
 HomingCommand extensionHome(extensionSubsystem);
 
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -642,12 +634,10 @@ WristControllerCommand wristTheta3PositiveGravityTestCommand(
     &commandCounter,
     &isSettled);
 
-InstantCommand holdExtensionAtCurrentPosition(
-    []() {
-        commandCounter = 0;
-        extensionSubsystem.setSetpoint(extensionSubsystem.getPosition());
-    },
-    std::array<tap::control::Subsystem*, 1>{&extensionSubsystem});
+Command* holdExtensionAtCurrentPosition(extensionSubsystem.runOnce([]() {
+    commandCounter = 0;
+    extensionSubsystem.setSetpoint(extensionSubsystem.getPosition());
+}));
 
 SetpointMoveManualCommand holdExtensionDuringThetaTest(
     extensionSubsystem,
@@ -655,28 +645,24 @@ SetpointMoveManualCommand holdExtensionDuringThetaTest(
     0.0f,
     SetpointType::EXTENSION);
 
-SequentialCommand<12> wristGravityCompensationSetpointSequence(
-    &wristTheta1NegativeGravityTestCommand,
-    &wristTheta1ZeroGravityTestCommand,
-    &wristTheta1PositiveGravityTestCommand,
-    &wristTheta1ZeroGravityTestCommand,
-    &wristTheta2NegativeGravityTestCommand,
-    &wristTheta2ZeroGravityTestCommand,
-    &wristTheta2PositiveGravityTestCommand,
-    &wristTheta2ZeroGravityTestCommand,
-    &wristTheta3NegativeGravityTestCommand,
-    &wristTheta3ZeroGravityTestCommand,
-    &wristTheta3PositiveGravityTestCommand,
-    &wristTheta3ZeroGravityTestCommand);
+Command* wristGravityCompensationSetpointSequence(wristTheta1NegativeGravityTestCommand.andThen(
+    {&wristTheta1ZeroGravityTestCommand,
+     &wristTheta1PositiveGravityTestCommand,
+     &wristTheta1ZeroGravityTestCommand,
+     &wristTheta2NegativeGravityTestCommand,
+     &wristTheta2ZeroGravityTestCommand,
+     &wristTheta2PositiveGravityTestCommand,
+     &wristTheta2ZeroGravityTestCommand,
+     &wristTheta3NegativeGravityTestCommand,
+     &wristTheta3ZeroGravityTestCommand,
+     &wristTheta3PositiveGravityTestCommand,
+     &wristTheta3ZeroGravityTestCommand}));
 
-ConcurrentDeadlineCommand<1> wristGravityCompensationTestWithExtensionHold(
-    std::array<Command*, 1>{&holdExtensionDuringThetaTest},
-    "Wrist gravity compensation test",
-    &wristGravityCompensationSetpointSequence);
+Command* wristGravityCompensationTestWithExtensionHold(
+    holdExtensionDuringThetaTest.deadlineWith(wristGravityCompensationSetpointSequence));
 
-SequentialCommand<2> wristGravityCompensationTestSequence(
-    &holdExtensionAtCurrentPosition,
-    &wristGravityCompensationTestWithExtensionHold);
+Command* wristGravityCompensationTestSequence(
+    holdExtensionAtCurrentPosition->andThen(wristGravityCompensationTestWithExtensionHold));
 
 // wrist fold in commands are not fully tuned yet
 WristSetpointsCommand wristFoldInCommand(
@@ -694,11 +680,6 @@ SetpointMovePositionCommand extensionOutCommand(extensionSubsystem, 2);
 // commands for pickup/scoring positions
 SetpointMovePositionCommand extensionOut(extensionSubsystem, EXTENSION_SCORE);
 SetpointMovePositionCommand extensionIn(extensionSubsystem, EXTENSION_PICKUP);
-
-// rotating cube storage
-SetpointMovePositionCommand leftCubePosition(cubeStorage, CUBE_STORAGE_LEFT_SETPOINT);
-SetpointMovePositionCommand rightCubePosition(cubeStorage, CUBE_STORAGE_RIGHT_SETPOINT);
-SetpointMovePositionCommand centerCubePosition(cubeStorage, CUBE_STORAGE_CENTER_SETPOINT);
 
 ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem);
 
@@ -739,22 +720,6 @@ inverse_kinematics::ManualIKCommand manualIKCommand(
     wristSubsystem,
     chassisFrameYawTurretController,
     chassisFramePitchTurretController);
-
-SequentialCommand<3> storeCubeCommand(
-    &selectCubeAddPositionCommand,
-    &cubeStorageSuckOnCommand,
-    // hand down
-    // hand release cube
-    // hand up
-    &centerCubePosition);
-
-SequentialCommand<3> removeCubeCommand(
-    &selectCubeRemovePositionCommand,
-    // hand suction on
-    // hand down
-    &cubeStorageSuckOffCommand,
-    // hand up
-    &centerCubePosition);
 
 autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     drivers(),
@@ -825,42 +790,54 @@ inverse_kinematics::Waypoint makeJointWaypoint(
     return {.pose = pose, .time = poseIndex * PER_POSE_TIME};
 }
 
-inverse_kinematics::Trajectory6D<6> workspaceTrajectory{{{
-    makeCartesianWaypoint(0, 0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(1, 0.54f, 0.10f, 0.38f, -30.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(2, 0.54f, 0.10f, 0.58f, 30.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(3, 0.54f, -0.10f, 0.58f, -30.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(4, 0.54f, -0.10f, 0.38f, 30.0f, 0.0f, 0.0f),
-    makeCartesianWaypoint(5, 0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f),
-}}};
+// {xLeftM, yRightM, zUpM, rollDeg, pitchDeg, yawDeg}
+static constexpr std::array<std::array<float, 6>, 6> WORKSPACE_WAYPOINTS{{
+    {0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f},
+    {0.54f, 0.10f, 0.38f, -30.0f, 0.0f, 0.0f},
+    {0.54f, 0.10f, 0.58f, 30.0f, 0.0f, 0.0f},
+    {0.54f, -0.10f, 0.58f, -30.0f, 0.0f, 0.0f},
+    {0.54f, -0.10f, 0.38f, 30.0f, 0.0f, 0.0f},
+    {0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f},
+}};
 
-inverse_kinematics::Trajectory6D<25> jointRangeTrajectory{{{
-    makeJointWaypoint(0, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(1, 0.0f, 0.0f, TEST_EXTENSION_MIN_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(2, 0.0f, -30.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(3, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(4, 0.0f, 0.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(5, 0.0f, 13.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(6, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(7, 170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(8, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(9, -170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(10, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(11, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 150.0f, 0.0f, 0.0f),
-    makeJointWaypoint(12, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(13, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, -150.0f, 0.0f, 0.0f),
-    makeJointWaypoint(14, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(15, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 75.0f, 0.0f),
-    makeJointWaypoint(16, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(17, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 150.0f),
-    makeJointWaypoint(18, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(19, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, -150.0f),
-    makeJointWaypoint(20, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(21, 120.0f, -25.0f, 0.55f, 90.0f, 60.0f, -90.0f),
-    makeJointWaypoint(22, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-    makeJointWaypoint(23, -120.0f, 10.0f, 0.55f, -90.0f, 60.0f, 90.0f),
-    makeJointWaypoint(24, 0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f),
-}}};
+// {yawDeg, pitchDeg, extensionM, wristTheta1Deg, wristTheta2Deg, wristTheta3Deg}
+static constexpr std::array<std::array<float, 6>, 25> JOINT_RANGE_WAYPOINTS{{
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_MIN_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, -30.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 13.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {-170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 150.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, -150.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 75.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 150.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, -150.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {120.0f, -25.0f, 0.55f, 90.0f, 60.0f, -90.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {-120.0f, 10.0f, 0.55f, -90.0f, 60.0f, 90.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+}};
+
+inverse_kinematics::Trajectory6D<WORKSPACE_WAYPOINTS.size()> workspaceTrajectory([](size_t i) {
+    const auto& w = WORKSPACE_WAYPOINTS[i];
+    return makeCartesianWaypoint(i, w[0], w[1], w[2], w[3], w[4], w[5]);
+});
+
+inverse_kinematics::Trajectory6D<JOINT_RANGE_WAYPOINTS.size()> jointRangeTrajectory([](size_t i) {
+    const auto& w = JOINT_RANGE_WAYPOINTS[i];
+    return makeJointWaypoint(i, w[0], w[1], w[2], w[3], w[4], w[5]);
+});
 
 inverse_kinematics::TrajectoryIKCommand<6> workspaceIKTrajectoryCommand(
     IDENTITY_TRANSFORM,

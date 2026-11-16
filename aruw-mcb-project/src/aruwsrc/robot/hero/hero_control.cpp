@@ -19,20 +19,13 @@
 
 #if defined(TARGET_HERO_NEPTUNE)
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
-#include "tap/control/command_mapper.hpp"
-#include "tap/control/concurrent_command.hpp"
 #include "tap/control/governor/governor_limited_command.hpp"
 #include "tap/control/governor/governor_with_fallback_command.hpp"
-#include "tap/control/hold_command_mapping.hpp"
-#include "tap/control/hold_repeat_command_mapping.hpp"
-#include "tap/control/press_command_mapping.hpp"
-#include "tap/control/remote_map_state.hpp"
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/setpoint/commands/move_absolute_command.hpp"
 #include "tap/control/setpoint/commands/move_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_comprised_command.hpp"
 #include "tap/control/setpoint/commands/move_unjam_integral_comprised_command.hpp"
-#include "tap/control/toggle_command_mapping.hpp"
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 #include "tap/motor/double_dji_motor.hpp"
@@ -52,6 +45,7 @@
 #include "aruwsrc/communication/serial/sentry_response_handler.hpp"
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
+#include "aruwsrc/control/agitator/multi_shot_cv_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/autotune/chassis_wheel_pid_autotune.hpp"
 #include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
@@ -79,7 +73,6 @@
 #include "aruwsrc/control/client-display/indicators/matrix_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/indicators/text_hud_indicators.hpp"
 #include "aruwsrc/control/client-display/old-indicators/vision_target_indicator.hpp"
-#include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/cycle_state_mode_controller.hpp"
 #include "aruwsrc/control/governor/cv_on_target_governor.hpp"
 #include "aruwsrc/control/governor/fired_recently_governor.hpp"
@@ -131,8 +124,6 @@ using namespace aruwsrc::control::governor;
 using namespace aruwsrc::control::launcher;
 using namespace aruwsrc::control::turret;
 using namespace aruwsrc::hero;
-using tap::control::CommandMapper;
-using tap::control::RemoteMapState;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -665,15 +656,14 @@ GovernorLimitedCommand<4> launchKickerHeatAndCVLimited(
      &kickerWheelLimitSwitchDepressedGovernor});
 }  // namespace kicker
 
-tap::control::WeakConcurrentCommand<2> launcherLutAutotuneFireCommand(
-    {&waterwheel::rotateAndUnjamWaterwheel, &kicker::launchKicker},
-    "Hero launcher LUT autotune fire");
+Command* launcherLutAutotuneFireCommand(
+    waterwheel::rotateAndUnjamWaterwheel.alongWith(&kicker::launchKicker));
 
 aruwsrc::control::launcher::FrictionWheelLutAutotuneCommand<16> launcherLutAutotuneCommand(
     drivers(),
     {
         .frictionWheels = &frictionWheelSubsystem,
-        .manualFireCommand = &launcherLutAutotuneFireCommand,
+        .manualFireCommand = launcherLutAutotuneFireCommand,
         .barrelId = tap::communication::serial::RefSerialData::Rx::MechanismID::TURRET_42MM,
         .numFrictionWheels = 4,
         .startRpm = 2000.0f,
@@ -746,117 +736,88 @@ std::vector<HudIndicator*> hudIndicators = {
 
 ClientDisplayCommand clientDisplayCommand(*drivers(), clientDisplay, hudIndicators);
 
-/* define command mappings --------------------------------------------------*/
-auto rightMidRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID);
-auto rightSwitchMiddle = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&spinFrictionWheels},
-    &rightMidRms);
-
-auto rightUpRms = RemoteMapState(Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP);
-auto rightSwitchUp = std::make_unique<HoldRepeatCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&spinFrictionWheels, &kicker::launchKickerHeatAndCVLimited},
-    &rightUpRms,
-    false);
-
-auto leftDownRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN);
-auto leftSwitchDown = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&beybladeCommand},
-    &leftDownRms);
-
-auto leftUpRms = RemoteMapState(Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP);
-auto leftSwitchUp = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{
-        &chassisDriveCommand,
-        &turretCVCommand,
-    },
-    &leftUpRms);
-
-auto leftMouseBNotPressedVNotPressedRms =
-    RemoteMapState(RemoteMapState::MouseButton::LEFT, {}, {Remote::Key::B, Remote::Key::V});
-auto leftMousePressedBNotPressedVNotPressed = std::make_unique<MultiShotCvCommandMapping>(
+MultiShotCvCommand multiShotCvCommand(
     *drivers(),
     kicker::launchKickerHeatAndCVLimited,
-    leftMouseBNotPressedVNotPressedRms,
     std::nullopt,
     kicker::cvOnTargetGovernor);
 
-auto leftMouseBPressedRms = RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::B});
-auto leftMousePressedBPressed = std::make_unique<HoldRepeatCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&kicker::launchKickerNoHeatLimiting},
-    &leftMouseBPressedRms,
-    false);
+tap::control::Subsystem dummySubsystem(drivers());
 
-// Same thing as leftMousePressedBPressed; used for ease of access.
-auto leftVRms = RemoteMapState(RemoteMapState::MouseButton::LEFT, {Remote::Key::V});
-auto leftMousePressedVPressed = std::make_unique<HoldRepeatCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&kicker::launchKickerNoHeatLimiting},
-    &leftVRms,
-    false);
-
-auto rightMouseRms = RemoteMapState(RemoteMapState::MouseButton::RIGHT);
-auto rightMousePressed = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&turretCVCommand},
-    &rightMouseRms);
-
-auto fRms = RemoteMapState({Remote::Key::F});
-auto fToggled = std::make_unique<ToggleCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&beybladeCommand},
-    &fRms);
-
-auto zRms = RemoteMapState({Remote::Key::Z});
-auto zPressed = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&turretUTurnCommandLimited},
-    &zRms);
-// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
-auto bNotCtrlRightDownRms = RemoteMapState(
-    Remote::SwitchState::UNKNOWN,
-    Remote::SwitchState::DOWN,
-    {Remote::Key::B},
-    {Remote::Key::CTRL},
-    false,
-    false);
-auto bNotCtrlPressedRightSwitchDown = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&imuCalibrateCommand},
-    &bNotCtrlRightDownRms);
-// The user can press b+ctrl when the remote right switch is in the down position to restart the
-// client display command. This is necessary since we don't know when the robot is connected to the
-// server and thus don't know when to start sending the initial HUD graphics.
-auto bCtrlRms = RemoteMapState({Remote::Key::CTRL, Remote::Key::B});
-auto bCtrlPressed = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&clientDisplayCommand},
-    &bCtrlRms);
-
-auto rRms = RemoteMapState({Remote::Key::R});
-auto rPressed = std::make_unique<CycleStateCommandMapping<bool, 2, CvOnTargetGovernor>>(
-    drivers(),
-    &rRms,
+auto cycleStateGovernor = CycleStateModeController<bool, 2, CvOnTargetGovernor>(
     true,
     &kicker::cvOnTargetGovernor,
     &CvOnTargetGovernor::setGovernorEnabled);
 
-// cap bank
-auto cShiftRms = RemoteMapState({Remote::Key::SHIFT, Remote::Key::C});
-auto cShiftPressed = std::make_unique<PressCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&capBankToggleCommand},
-    &cShiftRms);
+Command* toggleGovernorMode(dummySubsystem.runOnce([]() { cycleStateGovernor.cycleState(); }));
 
-auto shiftRms = RemoteMapState({Remote::Key::SHIFT});
-auto shiftPressed = std::make_unique<HoldCommandMapping>(
-    drivers(),
-    std::vector<Command*>{&capBankSprintCommand},
-    &shiftRms);
+Trigger rightSwitchMiddle =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::MID)
+        .whileTrue(&spinFrictionWheels);
+
+Trigger rightSwitchUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(&spinFrictionWheels)
+        .whileTrue(&kicker::launchKickerHeatAndCVLimited);
+
+Trigger leftSwitchDown =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::DOWN)
+        .whileTrue(&beybladeCommand);
+
+// turretCVCommand stays its own binding. cvOnTargetGovernor checks that this command specifically
+// is scheduled.
+Trigger leftSwitchUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP)
+        .whileTrue(&chassisDriveCommand)
+        .whileTrue(&turretCVCommand);
+
+Trigger leftMousePressedBNotPressedVNotPressed =
+    (TriggerHelpers::leftMouseButton(drivers()) &&
+     !TriggerHelpers::button(drivers(), Remote::Key::B) &&
+     !TriggerHelpers::button(drivers(), Remote::Key::V))
+        .whileTrue(&multiShotCvCommand);
+
+Trigger leftMousePressedBPressed = (TriggerHelpers::leftMouseButton(drivers()) &&
+                                    TriggerHelpers::button(drivers(), Remote::Key::B))
+                                       .whileTrue(&kicker::launchKickerNoHeatLimiting);
+
+// Same thing as leftMousePressedBPressed; used for ease of access.
+Trigger leftMousePressedVPressed = (TriggerHelpers::leftMouseButton(drivers()) &&
+                                    TriggerHelpers::button(drivers(), Remote::Key::V))
+                                       .whileTrue(&kicker::launchKickerNoHeatLimiting);
+
+Trigger rightMousePressed = TriggerHelpers::rightMouseButton(drivers()).whileTrue(&turretCVCommand);
+
+Trigger fToggled = TriggerHelpers::button(drivers(), Remote::Key::F).toggleOnTrue(&beybladeCommand);
+
+Trigger zPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::Z).onTrue(&turretUTurnCommandLimited);
+
+// The "right switch down" portion is to avoid accidentally recalibrating in the middle of a match.
+Trigger bNotCtrlPressedRightSwitchDown = (TriggerHelpers::switchState(
+                                              drivers(),
+                                              Remote::Switch::RIGHT_SWITCH,
+                                              Remote::SwitchState::DOWN) &&
+                                          TriggerHelpers::button(drivers(), Remote::Key::B) &&
+                                          !TriggerHelpers::button(drivers(), Remote::Key::CTRL))
+                                             .onTrue(&imuCalibrateCommand);
+
+// The user can press b+ctrl when the remote right switch is in the down position to restart the
+// client display command. This is necessary since we don't know when the robot is connected to the
+// server and thus don't know when to start sending the initial HUD graphics.
+Trigger bCtrlPressed = (TriggerHelpers::button(drivers(), Remote::Key::B) &&
+                        TriggerHelpers::button(drivers(), Remote::Key::CTRL))
+                           .onTrue(&clientDisplayCommand);
+
+Trigger rPressed = TriggerHelpers::button(drivers(), Remote::Key::R).onTrue(toggleGovernorMode);
+
+// cap bank
+Trigger cShiftPressed = (TriggerHelpers::button(drivers(), Remote::Key::C) &&
+                         TriggerHelpers::button(drivers(), Remote::Key::SHIFT))
+                            .onTrue(&capBankToggleCommand);
+
+Trigger shiftPressed =
+    TriggerHelpers::button(drivers(), Remote::Key::SHIFT).whileTrue(&capBankSprintCommand);
 
 /* initialize subsystems ----------------------------------------------------*/
 void initializeSubsystems()
@@ -872,6 +833,7 @@ void initializeSubsystems()
     buzzer.initialize();
     transformSubsystem.initialize();
     capBankSubsystem.initialize();
+    dummySubsystem.initialize();
     heroTurretEncoders.registerAndInitialize();
 }
 
@@ -888,6 +850,7 @@ void registerHeroSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&buzzer);
     drivers->commandScheduler.registerSubsystem(&transformSubsystem);
     drivers->commandScheduler.registerSubsystem(&capBankSubsystem);
+    drivers->commandScheduler.registerSubsystem(&dummySubsystem);
 }
 
 /* set any default commands to subsystems here ------------------------------*/
@@ -919,24 +882,7 @@ void startHeroCommands(Drivers* drivers)
 }
 
 /* register io mappings here ------------------------------------------------*/
-void registerHeroIoMappings(Drivers* drivers)
-{
-    drivers->commandMapper.addMap(std::move(rightSwitchMiddle));
-    drivers->commandMapper.addMap(std::move(rightSwitchUp));
-    drivers->commandMapper.addMap(std::move(leftMousePressedBNotPressedVNotPressed));
-    drivers->commandMapper.addMap(std::move(leftMousePressedBPressed));
-    drivers->commandMapper.addMap(std::move(leftMousePressedVPressed));
-    drivers->commandMapper.addMap(std::move(rightMousePressed));
-    drivers->commandMapper.addMap(std::move(leftSwitchDown));
-    drivers->commandMapper.addMap(std::move(leftSwitchUp));
-    drivers->commandMapper.addMap(std::move(fToggled));
-    drivers->commandMapper.addMap(std::move(zPressed));
-    drivers->commandMapper.addMap(std::move(bNotCtrlPressedRightSwitchDown));
-    drivers->commandMapper.addMap(std::move(bCtrlPressed));
-    drivers->commandMapper.addMap(std::move(rPressed));
-    drivers->commandMapper.addMap(std::move(cShiftPressed));
-    drivers->commandMapper.addMap(std::move(shiftPressed));
-}
+void registerHeroIoMappings(Drivers*) {}
 }  // namespace hero_control
 
 namespace aruwsrc::hero

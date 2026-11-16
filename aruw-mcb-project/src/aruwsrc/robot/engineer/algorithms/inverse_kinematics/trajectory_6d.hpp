@@ -24,8 +24,6 @@
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "modm/math/geometry/quaternion.hpp"
-
 namespace aruwsrc::engineer::algorithms::inverse_kinematics
 {
 struct Waypoint
@@ -39,14 +37,18 @@ struct Trajectory6D
 {
     Trajectory6D(std::array<Waypoint, LENGTH> waypoints) : waypoints(waypoints), timesInvalid(false)
     {
-        for (size_t i = 1; i < LENGTH; ++i)
+        validateTimes();
+    }
+
+    template <typename WaypointGenerator>
+    explicit Trajectory6D(WaypointGenerator generate) : waypoints(),
+                                                        timesInvalid(false)
+    {
+        for (size_t i = 0; i < LENGTH; ++i)
         {
-            if (!(waypoints[i - 1].time < waypoints[i].time))
-            {
-                timesInvalid = true;
-                break;
-            }
+            waypoints[i] = generate(i);
         }
+        validateTimes();
     }
 
     tap::algorithms::transforms::Transform atTime(float time) const
@@ -72,6 +74,18 @@ struct Trajectory6D
     const std::array<Waypoint, LENGTH>& getWaypoints() const { return waypoints; }
 
 private:
+    void validateTimes()
+    {
+        for (size_t i = 1; i < LENGTH; ++i)
+        {
+            if (!(waypoints[i - 1].time < waypoints[i].time))
+            {
+                timesInvalid = true;
+                break;
+            }
+        }
+    }
+
     std::array<Waypoint, LENGTH> waypoints;
     bool timesInvalid;
 };
