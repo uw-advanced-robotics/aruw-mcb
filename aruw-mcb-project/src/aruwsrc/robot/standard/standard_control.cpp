@@ -56,6 +56,7 @@
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
+#include "aruwsrc/control/autotune/chassis_wheel_pid_autotune.hpp"
 #include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/second_order_autotune.hpp"
@@ -552,6 +553,13 @@ autotune::FreqSweepAutotuneCommand<tap::algorithms::transforms::Axis::YAW> freqS
     &getTurretMCBCanComm(),
     {&chassisFramePitchTurretController});
 
+// Run with the robot on a stand.
+autotune::ChassisWheelPidAutotuneCommand chassisWheelPidAutotuneCommand(
+    drivers(),
+    {.chassis = &chassis,
+     .successChime = &imuCalibrateSuccessBuzzCommand,
+     .failChime = &imuCalibrateFailBuzzCommand});
+
 user::TurretQuickTurnCommand turretUTurnCommand(&turret, M_PI);
 
 // beyblade governors
@@ -943,6 +951,7 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCom
         &standard_control::freqSweepAutotuneCommand,
         &standard_control::secondOrderAutotuneCommand,
         &standard_control::launcherLutAutotuneCommand,
+        &standard_control::chassisWheelPidAutotuneCommand,
     };
     return commands;
 }

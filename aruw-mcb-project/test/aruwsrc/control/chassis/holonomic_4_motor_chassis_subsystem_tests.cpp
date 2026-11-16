@@ -146,3 +146,52 @@ TEST_F(Holonomic4MotorChassisSubsystemTest, initialize)
 
     chassis.initialize();
 }
+
+TEST_F(Holonomic4MotorChassisSubsystemTest, wheel_test_mode_sends_clamped_outputs)
+{
+    tap::algorithms::SmoothPidConfig config = MOCK_WHEEL_VELOCITY_PID_CONFIG;
+    config.maxOutput = 1000.0f;
+    MecanumChassisSubsystem testChassis(
+        &drivers,
+        &currentSensor,
+        &voltageSensor,
+        leftFrontMotor,
+        leftBackMotor,
+        rightFrontMotor,
+        rightBackMotor,
+        config,
+        WHEEL_RADIUS,
+        WHEELBASE_RADIUS);
+
+    testChassis.setWheelTestOutputs({100.0f, -200.0f, 5000.0f, -5000.0f});
+
+    // Indexed LF, RF, LB, RB.
+    EXPECT_CALL(leftFrontMotor, setDesiredOutput(100));
+    EXPECT_CALL(rightFrontMotor, setDesiredOutput(-200));
+    EXPECT_CALL(leftBackMotor, setDesiredOutput(1000));
+    EXPECT_CALL(rightBackMotor, setDesiredOutput(-1000));
+
+    testChassis.refresh();
+}
+
+TEST_F(Holonomic4MotorChassisSubsystemTest, wheel_test_mode_ignores_driving_until_exited)
+{
+    chassis.setWheelTestOutputs({});
+    EXPECT_TRUE(chassis.isInWheelTestMode());
+
+    chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
+    EXPECT_NEAR(0, chassis.getDesiredRotation(), 1E-3);
+
+    chassis.exitWheelTestMode();
+    EXPECT_FALSE(chassis.isInWheelTestMode());
+
+    chassis.setDesiredOutput(0, 0, CHASSIS_VEL);
+    EXPECT_NEAR(CHASSIS_VEL, chassis.getDesiredRotation(), 1E-3);
+}
+
+TEST_F(Holonomic4MotorChassisSubsystemTest, getWheelVelocityRpm_converts_rad_per_s)
+{
+    ON_CALL(*rightBackMotor.getEncoder(), getVelocity).WillByDefault(Return(M_TWOPI));
+
+    EXPECT_NEAR(60.0f, chassis.getWheelVelocityRpm(Holonomic4MotorChassisSubsystem::RB), 1e-4);
+}

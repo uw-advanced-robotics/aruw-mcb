@@ -47,6 +47,7 @@ Holonomic4MotorChassisSubsystem::Holonomic4MotorChassisSubsystem(
           tap::algorithms::SmoothPid(wheelVelocityPidConfig),
           tap::algorithms::SmoothPid(wheelVelocityPidConfig)},
       velocityPidErrors{0, 0, 0, 0},
+      wheelMaxOutput(wheelVelocityPidConfig.maxOutput),
       leftFrontMotor(leftFrontMotor),
       leftBackMotor(leftBackMotor),
       rightFrontMotor(rightFrontMotor),
@@ -68,6 +69,11 @@ void Holonomic4MotorChassisSubsystem::initialize()
 
 void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r)
 {
+    if (wheelTestMode)
+    {
+        return;
+    }
+
     calculateOutput(
         x,
         y,
@@ -79,14 +85,51 @@ void Holonomic4MotorChassisSubsystem::setDesiredOutput(float x, float y, float r
 modm::Matrix<float, 3, 1> state;
 void Holonomic4MotorChassisSubsystem::refresh()
 {
+    const uint32_t now = tap::arch::clock::getTimeMilliseconds();
+    const float dt = (now - lastUpdateTime) / 1000.0f;
+    lastUpdateTime = now;
+
+    if (wheelTestMode)
+    {
+        for (int i = 0; i < getNumChassisMotors(); i++)
+        {
+            motors[i]->setDesiredOutput(
+                limitVal(wheelTestOutputs[i], -wheelMaxOutput, wheelMaxOutput));
+        }
+        state = getActualVelocityChassisRelative();
+        return;
+    }
+
     for (int i = 0; i < getNumChassisMotors(); i++)
     {
-        updateMotorRpmPid(i);
+        updateMotorRpmPid(i, dt);
     }
 
     state = getActualVelocityChassisRelative();
 
     limitChassisPower();
+}
+
+void Holonomic4MotorChassisSubsystem::setWheelTestOutputs(const std::array<float, 4>& outputs)
+{
+    wheelTestMode = true;
+    wheelTestOutputs = outputs;
+}
+
+void Holonomic4MotorChassisSubsystem::exitWheelTestMode()
+{
+    wheelTestMode = false;
+    wheelTestOutputs = {};
+    setZeroRPM();
+    for (int i = 0; i < getNumChassisMotors(); i++)
+    {
+        velocityPid[i].reset();
+    }
+}
+
+float Holonomic4MotorChassisSubsystem::getWheelVelocityRpm(int i) const
+{
+    return motors[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
 }
 
 void Holonomic4MotorChassisSubsystem::limitChassisPower()
@@ -169,12 +212,8 @@ void Holonomic4MotorChassisSubsystem::calculateOutput(
     desiredRotation = r;
 }
 
-void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(int i)
+void Holonomic4MotorChassisSubsystem::updateMotorRpmPid(int i, float dt)
 {
-    const uint32_t now = tap::arch::clock::getTimeMilliseconds();
-    const float dt = (now - lastUpdateTime) / 1000.0f;
-    lastUpdateTime = now;
-
     velocityPidErrors[i] =
         *desiredWheelRPM[i] - motors[i]->getEncoder()->getVelocity() * 60.0f / M_TWOPI;
 

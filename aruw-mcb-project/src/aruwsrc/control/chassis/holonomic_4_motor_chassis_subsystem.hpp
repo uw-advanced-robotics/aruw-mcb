@@ -20,6 +20,8 @@
 #ifndef HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 #define HOLONOMIC_4_MOTOR_CHASSIS_SUBSYSTEM_HPP_
 
+#include <array>
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/communication/sensors/current/analog_current_sensor.hpp"
 #include "tap/drivers.hpp"
@@ -110,6 +112,15 @@ public:
      */
     mockable modm::Matrix<float, 3, 1> getDesiredVelocityChassisRelative() const;
 
+    /// Sends raw outputs (by WheelRPMIndex), bypassing the velocity PID and power limiting.
+    void setWheelTestOutputs(const std::array<float, 4>& outputs);
+
+    void exitWheelTestMode();
+
+    inline bool isInWheelTestMode() const { return wheelTestMode; }
+
+    float getWheelVelocityRpm(int i) const;
+
 protected:
     modm::Matrix<float, 3, 4> wheelVelToChassisVelMat;
 
@@ -120,7 +131,7 @@ private:
      */
     void calculateOutput(float x, float y, float r, float maxWheelSpeed);
 
-    void updateMotorRpmPid(int i);
+    void updateMotorRpmPid(int i, float dt);
 
     // wheel velocity PID variables
     tap::algorithms::SmoothPid velocityPid[4];
@@ -133,6 +144,12 @@ private:
     tap::motor::MotorInterface* motors[4];
 
     uint32_t lastUpdateTime{0};
+
+    bool wheelTestMode{false};
+
+    std::array<float, 4> wheelTestOutputs{};
+
+    const float wheelMaxOutput;
 
 #if defined(PLATFORM_HOSTED) && defined(ENV_UNIT_TESTS)
 public:

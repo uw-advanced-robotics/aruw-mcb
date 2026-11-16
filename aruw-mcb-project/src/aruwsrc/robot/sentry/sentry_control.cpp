@@ -39,6 +39,7 @@
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/aruco/aruco_reset_subsystem.hpp"
 #include "aruwsrc/control/auto-aim/auto_aim_fire_rate_reselection_manager.hpp"
+#include "aruwsrc/control/autotune/chassis_wheel_pid_autotune.hpp"
 #include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/autotune/lamprey_autotune.hpp"
@@ -498,6 +499,13 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
+// Run with the robot on a stand.
+aruwsrc::control::autotune::ChassisWheelPidAutotuneCommand chassisWheelPidAutotuneCommand(
+    drivers(),
+    {.chassis = &chassis,
+     .successChime = &imuCalibrateSuccessBuzzCommand,
+     .failChime = &imuCalibrateFailBuzzCommand});
+
 SentryImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {
@@ -938,7 +946,8 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface *> getAutotuneCo
         &sentry_control::gravityAutotuneCommandWidow,
         &sentry_control::lampreyAutotuneCommand,
         &sentry_control::freqSweepAutotuneCommand,
-        &sentry_control::turretWidowLauncherLutAutotuneCommand};
+        &sentry_control::turretWidowLauncherLutAutotuneCommand,
+        &sentry_control::chassisWheelPidAutotuneCommand};
     return commands;
 }
 #endif

@@ -53,6 +53,7 @@
 #include "aruwsrc/control/agitator/agitator_subsystem.hpp"
 #include "aruwsrc/control/agitator/constants/agitator_constants.hpp"
 #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+#include "aruwsrc/control/autotune/chassis_wheel_pid_autotune.hpp"
 #include "aruwsrc/control/autotune/freq_sweep_autotune.hpp"
 #include "aruwsrc/control/autotune/gravity_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
@@ -545,6 +546,13 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
+// Run with the robot on a stand.
+aruwsrc::control::autotune::ChassisWheelPidAutotuneCommand chassisWheelPidAutotuneCommand(
+    drivers(),
+    {.chassis = &chassis,
+     .successChime = &imuCalibrateSuccessBuzzCommand,
+     .failChime = &imuCalibrateFailBuzzCommand});
+
 aruwsrc::control::imu::ImuCalibrateCommand imuCalibrateCommand(
     drivers(),
     {{
@@ -956,7 +964,8 @@ std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCom
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
         &hero_control::gravityAutotuneCommand,
         &hero_control::launcherLutAutotuneCommand,
-        &hero_control::freqSweep};
+        &hero_control::freqSweep,
+        &hero_control::chassisWheelPidAutotuneCommand};
     return commands;
 }
 #endif

@@ -43,6 +43,7 @@
 #include "aruwsrc/communication/sensors/current/acs712_current_sensor_config.hpp"
 #include "aruwsrc/communication/sensors/encoder/lamprey_encoder.hpp"
 #include "aruwsrc/communication/sensors/voltage/fake_voltage_sensor.hpp"
+#include "aruwsrc/control/autotune/chassis_wheel_pid_autotune.hpp"
 #include "aruwsrc/control/autotune/lamprey_autotune.hpp"
 #include "aruwsrc/control/buzzer/buzzer_subsystem.hpp"
 #include "aruwsrc/control/buzzer/note_sequence_command.hpp"
@@ -534,6 +535,13 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
+// Run with the robot on a stand.
+aruwsrc::control::autotune::ChassisWheelPidAutotuneCommand chassisWheelPidAutotuneCommand(
+    drivers(),
+    {.chassis = &chassisSubsystem,
+     .successChime = &imuCalibrateSuccessBuzzCommand,
+     .failChime = &imuCalibrateFailBuzzCommand});
+
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
@@ -969,7 +977,8 @@ void registerEngineerIoMappings(aruwsrc::engineer::Drivers*) {}
 std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> getAutotuneCommands()
 {
     static std::vector<aruwsrc::control::autotune::TurretAutotuneInterface*> commands = {
-        &aruwsrc::control::lampreyAutotuneCommand};
+        &aruwsrc::control::lampreyAutotuneCommand,
+        &aruwsrc::control::chassisWheelPidAutotuneCommand};
     return commands;
 }
 
