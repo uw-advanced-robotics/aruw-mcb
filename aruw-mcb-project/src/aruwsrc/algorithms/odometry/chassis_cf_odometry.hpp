@@ -76,6 +76,8 @@ public:
 
     void refresh() override { update(); }
 
+    void refreshSafeDisconnect() override { update(); }
+
     void overrideOdometryPosition(const float positionX, const float positionY)
     {
         location.setPosition(positionX, positionY);

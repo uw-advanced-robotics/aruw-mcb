@@ -71,6 +71,9 @@ public:
 
     void refreshSafeDisconnect() override
     {
+        // still update data when remote is off
+        yawMotor.updateMotorAngle();
+        pitchMotor.updateMotorAngle();
         yawMotor.setMotorOutput(0);
         pitchMotor.setMotorOutput(0);
     }

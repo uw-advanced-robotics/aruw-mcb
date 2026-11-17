@@ -59,6 +59,8 @@ public:
                 worldToChassis.getYaw());
         }
     };
+
+    inline void refreshSafeDisconnect() override { refresh(); }
     const char* getName() const { return "Standard and hero transformer subsystem"; }
 
 private:

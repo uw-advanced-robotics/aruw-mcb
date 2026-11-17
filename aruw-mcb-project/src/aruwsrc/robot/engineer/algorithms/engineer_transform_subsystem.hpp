@@ -37,6 +37,8 @@ public:
     inline void initialize() override { transformer.initialize(); };
     inline void refresh() override { transformer.updateTransforms(); };
 
+    inline void refreshSafeDisconnect() override { refresh(); }
+
 private:
     EngineerTransforms& transformer;
 };
