@@ -91,16 +91,45 @@ void WristSubsystem::homeTheta3(float pos) { motorTheta3.getEncoder()->resetEnco
 
 void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint)
 {
-    float theta1 = atan2f(setpoint.matrix().data[3], -setpoint.matrix().data[6]);
-    // clamp pitch to prevent gimbal lock
-    float theta2 = std::clamp(
-        acosf(setpoint.matrix().data[0]),
-        (float)(-M_PI_2 + GIMBAL_LOCK_THRESHOLD),
-        (float)(M_PI_2 - GIMBAL_LOCK_THRESHOLD));
-    float theta3 = atan2f(setpoint.matrix().data[1], setpoint.matrix().data[2]);
+    auto [theta1, theta2, theta3] =
+        getJointAnglesForOrientation(setpoint, setpointTheta1.getUnwrappedValue());
     setSetpointTheta1(theta1);
     setSetpointTheta2(theta2);
     setSetpointTheta3(theta3);
+}
+
+std::array<float, 3> WristSubsystem::getJointAnglesForOrientation(
+    const Orientation& orientation,
+    float prevTheta1)
+{
+    const auto& r = orientation.matrix().data;
+
+    // e.g. joint mode moved it past the limit: same angle, a whole turn closer to 0
+    if (std::abs(prevTheta1) > THETA1_LIMIT)
+    {
+        prevTheta1 = remainderf(prevTheta1, 2 * M_PI);
+    }
+    float theta1 = prevTheta1;
+
+    // hypot(r[3], r[6]) = |sin(theta2)|: is the wrist bent more than SINGULARITY_THRESHOLD
+    if (hypotf(r[3], r[6]) > sinf(SINGULARITY_THRESHOLD))
+    {
+        // solutions repeat every half turn, so round to the closest, then step toward 0 if past
+        float solution = atan2f(r[3], -r[6]);
+        float target = solution + M_PI * roundf((prevTheta1 - solution) / M_PI);
+        if (std::abs(target) > THETA1_LIMIT)
+        {
+            target -= std::copysign(M_PI, target);
+        }
+        theta1 += std::clamp(target - prevTheta1, -MAX_THETA1_STEP, MAX_THETA1_STEP);
+    }
+
+    // solved for this theta1, so they stay continuous while theta1 catches up
+    float s1 = sinf(theta1), c1 = cosf(theta1);
+    float theta2 = atan2f(s1 * r[3] - c1 * r[6], r[0]);
+    float theta3 = atan2f(-(c1 * r[5] + s1 * r[8]), c1 * r[4] + s1 * r[7]);
+
+    return {theta1, theta2, theta3};
 }
 
 bool WristSubsystem::atSetpointTheta1(float epsilon) const
