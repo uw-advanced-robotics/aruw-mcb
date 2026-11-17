@@ -20,6 +20,7 @@
 #ifndef WRIST_SUBSYSTEM_HPP_
 #define WRIST_SUBSYSTEM_HPP_
 
+#include <array>
 #include <optional>
 
 #include "tap/algorithms/smooth_pid.hpp"
@@ -120,9 +121,34 @@ public:
         float theta2,
         float theta3);
 
+    /**
+     * Inverse of getHypotheticalOrientation, called once per control loop. theta1 moves toward its
+     * solution at a limited rate, and theta2 and theta3 get as close to the orientation as they
+     * can with that theta1. The result can lag the orientation while theta1 catches up.
+     * theta1 is kept within +-THETA1_LIMIT, so near the limit it may turn the long way to unwind.
+     */
+    static std::array<float, 3> getJointAnglesForOrientation(
+        const tap::algorithms::transforms::Orientation& orientation,
+        float prevTheta1);
+
+    /**
+     * When the wrist bend is within this of straight, theta1 and theta3 rotate about nearly the
+     * same axis, so theta1 is held and theta3 provides the roll.
+     */
+    static constexpr float SINGULARITY_THRESHOLD = modm::toRadian(2.0f);
+
+    /** Max theta1 setpoint change per 2 ms control loop, equal to 180 deg/s. */
+    static constexpr float MAX_THETA1_STEP = modm::toRadian(180.0f) * 0.002f;
+
+    /**
+     * IK keeps theta1 within this of its power-on angle so the wrist can't wind up. Must be at
+     * least half a turn so every orientation is reachable. Set it to what the wrist's cables allow.
+     */
+    static constexpr float THETA1_LIMIT = modm::toRadian(270.0f);
+    static_assert(THETA1_LIMIT >= M_PI, "THETA1_LIMIT must be at least half a turn");
+
 private:
     static constexpr float MOVING_VELOCITY_THRESHOLD = modm::toRadian(1.0f);
-    static constexpr float GIMBAL_LOCK_THRESHOLD = modm::toRadian(0.1f);
     const WristConfig config;
     std::optional<WristGravityCompensationConfig> gravityCompConfig;
     tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;
