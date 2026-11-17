@@ -59,7 +59,11 @@ public:
         return yawMotor;
     }
 
-    void refreshSafeDisconnect() override { yawMotor.setMotorOutput(0); }
+    void refreshSafeDisconnect() override
+    {
+        yawMotor.updateMotorAngle();
+        yawMotor.setMotorOutput(0);
+    }
 
 private:
     aruwsrc::control::turret::TurretMotor yawMotor;

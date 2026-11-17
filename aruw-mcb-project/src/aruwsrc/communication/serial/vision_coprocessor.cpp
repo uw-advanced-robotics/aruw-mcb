@@ -341,6 +341,7 @@ void VisionCoprocessor::sendRobotTypeData()
         DJISerial::SerialMessage<1> robotTypeMessage;
         robotTypeMessage.messageType = CV_MESSAGE_TYPE_ROBOT_ID;
         robotTypeMessage.data[0] = static_cast<uint8_t>(drivers->refSerial.getRobotData().robotId);
+        lastRobotId = robotTypeMessage.data[0];
         robotTypeMessage.setCRC16();
         drivers->uart.write(
             VISION_COPROCESSOR_TX_UART_PORT,
@@ -384,7 +385,7 @@ void VisionCoprocessor::sendOdometryData()
         odometryData->turretOdometry[i].yaw = worldToTurret.getYaw();
     }
 
-    // @debug write into a class-variable for debugging, don't actually send to vision
+    lastOdometryData = *odometryData;
 
     odometryMessage.setCRC16();
     drivers->uart.write(
@@ -525,6 +526,7 @@ void VisionCoprocessor::sendSentryMotionStrategy()
                 break;
             }
         }
+        lastMotionStrategy = sentryMotionStrategyMessage.data[0];
 
         sentryMotionStrategyMessage.setCRC16();
         drivers->uart.write(
@@ -550,6 +552,7 @@ void VisionCoprocessor::sendBulletsRemaining()
             &drivers->refSerial.getRobotData().turret.bulletsRemaining17;
 #endif
 
+        lastBulletsRemaining = *bulletsRemaining;
         memcpy(&bulletsRemainMessage.data, bulletsRemaining, sizeof(bulletsRemainMessage.data));
 
         bulletsRemainMessage.setCRC16();
