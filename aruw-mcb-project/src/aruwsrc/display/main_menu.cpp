@@ -49,6 +49,7 @@ MainMenu::MainMenu(
       autotuneMenu(stack, drivers, ENTRIES),
       limitSwitchMenu(stack, drivers),
       cvMenu(stack, drivers, visionCoprocessor),
+      visionCoprocessorMenu(stack, drivers, visionCoprocessor),
       errorMenu(stack, drivers, ENTRIES),
       hardwareTestMenu(stack, drivers),
       motorMenu(stack, drivers, ENTRIES),
@@ -91,11 +92,18 @@ void MainMenu::initialize()
             this,
             &MainMenu::addErrorMenuCallback));
     if (this->visionCoprocessor != nullptr)
+    {
         addEntry(
             CVMenu::getMenuName(),
             modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
                 this,
                 &MainMenu::addCVMenuCallback));
+    }
+    addEntry(
+        VisionCoprocessorMenu::getMenuName(),
+        modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
+            this,
+            &MainMenu::addVisionCoprocessorMenuCallback));
     addEntry(
         MotorMenu::getMenuName(),
         modm::MenuEntryCallback<DummyAllocator<modm::IAbstractView>>(
@@ -194,6 +202,13 @@ void MainMenu::addCVMenuCallback()
 {
     CVMenu* cvm = new (&cvMenu) CVMenu(getViewStack(), drivers, visionCoprocessor);
     getViewStack()->push(cvm);
+}
+
+void MainMenu::addVisionCoprocessorMenuCallback()
+{
+    VisionCoprocessorMenu* vcm = new (&visionCoprocessorMenu)
+        VisionCoprocessorMenu(getViewStack(), drivers, visionCoprocessor);
+    getViewStack()->push(vcm);
 }
 
 void MainMenu::addErrorMenuCallback()
