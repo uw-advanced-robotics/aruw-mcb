@@ -23,7 +23,9 @@
 
 namespace aruwsrc::motor_tester
 {
-DamiaoRotateSlotCommand::DamiaoRotateSlotCommand(control::motor::DamiaoSubsystem& subsystem, int slotcount)
+DamiaoRotateSlotCommand::DamiaoRotateSlotCommand(
+    control::motor::DamiaoSubsystem& subsystem,
+    int slotcount)
     : subsystem(subsystem), slotcount(slotcount)
 {
     addSubsystemRequirement(&subsystem);
@@ -32,6 +34,7 @@ DamiaoRotateSlotCommand::DamiaoRotateSlotCommand(control::motor::DamiaoSubsystem
 void DamiaoRotateSlotCommand::initialize()
 {
     start = tap::arch::clock::getTimeMicroseconds();
+    len = 0;
     const auto position = subsystem.getEncoder().getPosition();
     // Treat an encoder reading just below a slot as already at that slot.
     const int slot =
@@ -56,10 +59,6 @@ void DamiaoRotateSlotCommand::execute()
         const float error = setpoint - encoder.getPosition().getUnwrappedValue();
         if (error <= 0.0f)
         {
-            if (accelerating)
-            {
-                len = tap::arch::clock::getTimeMicroseconds() - start;
-            }
             accelerating = false;
         }
         subsystem.setDesiredOutput(
@@ -67,6 +66,16 @@ void DamiaoRotateSlotCommand::execute()
                          : static_cast<int32_t>(
                                positionPid.runController(error, encoder.getVelocity(), dt)));
     }
+}
+
+bool DamiaoRotateSlotCommand::pastSetpoint(){
+  return !accelerating;
+  
+}
+
+void DamiaoRotateSlotCommand::recordLaunchTime()
+{
+    len = tap::arch::clock::getTimeMicroseconds() - start;
 }
 
 bool DamiaoRotateSlotCommand::isReady() { return subsystem.getEncoder().isOnline(); }
