@@ -38,14 +38,13 @@
 #include "tap/motor/dji_motor.hpp"
 
 #include "aruwsrc/control/agitator/unjam_spoke_agitator_command.hpp"
-#include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
 #include "aruwsrc/control/launcher/friction_wheel_subsystem.hpp"
 #include "aruwsrc/control/motor/damiao_motor.hpp"
 #include "aruwsrc/control/motor/damiao_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/drivers_singleton.hpp"
 #include "aruwsrc/robot/motor_tester/constant_rpm_command.hpp"
-#include "aruwsrc/robot/motor_tester/damiao_stick_velocity_command.hpp"
+#include "aruwsrc/robot/motor_tester/damiao_agitator_subsystem.hpp"
 #include "aruwsrc/robot/motor_tester/motor_subsystem.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_constants.hpp"
 #include "aruwsrc/robot/motor_tester/motor_tester_drivers.hpp"
@@ -75,10 +74,10 @@ aruwsrc::control::motor::DamiaoMotor damiao2325(
     drivers(),
     aruwsrc::control::motor::DamiaoMotorId::DAMIAO_MOTOR7,
     tap::can::CanBus::CAN_BUS1,
-    false,
+    true,
     "Damiao Motor",
     aruwsrc::control::motor::DAMIAO_2325,
-    0x17,
+    0x11,
     aruwsrc::control::motor::DAMIAO_CONTROL_MODE_MIT);
 
 aruwsrc::control::motor::DamiaoMotor damiao4340(
@@ -91,7 +90,6 @@ aruwsrc::control::motor::DamiaoMotor damiao4340(
     0x12,
     aruwsrc::control::motor::DAMIAO_CONTROL_MODE_MIT);
 
-aruwsrc::control::motor::DamiaoSubsystem damiaoSubsystem(drivers(), damiao2325);
 aruwsrc::control::motor::DamiaoSubsystem damiao4340sub(drivers(), damiao4340);
 
 tap::motor::DjiMotor leftFlywheel(
@@ -116,7 +114,11 @@ aruwsrc::control::launcher::FrictionWheelSubsystem<2> launcher(
     aruwsrc::control::launcher::WHEEL_CONFIG,
     aruwsrc::control::launcher::LAUNCH_SPEED_TO_FRICTION_WHEEL_RPM_LUT);
 
-VelocityAgitatorSubsystem agitator(drivers(), AGITATOR_PID_CONFIG, AGITATOR_CONFIG);
+DamiaoAgitatorSubsystem agitator(
+    drivers(),
+    damiao2325,
+    AGITATOR_CONFIG.jammingVelocityDifference,
+    AGITATOR_CONFIG.jammingTime);
 
 
 
@@ -124,20 +126,6 @@ VelocityAgitatorSubsystem agitator(drivers(), AGITATOR_PID_CONFIG, AGITATOR_CONF
 // ----------
 // Commands
 // ----------
-
-// Left vertical is reserved for the Damiao velocity command.
-// StickRpmCommand leftVerticalManual(
-//     &motorSubsystem2006,
-//     &drivers()->remote,
-//     tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
-//     500.0f);
-
-DamiaoStickVelocityCommand damiaoStickVelocity(
-    damiaoSubsystem,
-    drivers()->remote,
-    tap::communication::serial::Remote::Channel::LEFT_VERTICAL,
-    9.0f);
-
 
 // agitator rotate/unjam commands
 MoveIntegralCommand rotateAgitator(agitator, AGITATOR_ROTATE_CONFIG);
@@ -162,7 +150,7 @@ auto leftSwitchUp = tap::control::TriggerHelpers::switchState(
                         drivers(),
                         tap::communication::serial::Remote::Switch::LEFT_SWITCH,
                         tap::communication::serial::Remote::SwitchState::UP)
-                        .whileTrue(&rotateSlot);
+                        .whileTrue(&rotateAndUnjamAgitator);
 auto leftSwitchDown = tap::control::TriggerHelpers::switchState(
                           drivers(),
                           tap::communication::serial::Remote::Switch::LEFT_SWITCH,
@@ -207,8 +195,7 @@ auto rpmDrop = tap::control::Trigger(
                    })
                    .onTrue(&recordLaunchTime);
 
-// Remote disconnect cancels commands and calls DamiaoSubsystem::refreshSafeDisconnect(),
-// which stops the motor every scheduler cycle until the remote reconnects.
+// Remote disconnect cancels commands and stops the motors every scheduler cycle.
 aruwsrc::control::RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 // inits
@@ -217,7 +204,6 @@ void initializeSubsystems()
 {
     agitator.initialize();
     launcher.initialize();
-    damiaoSubsystem.initialize();
     damiao4340sub.initialize();
 }
 
@@ -229,7 +215,6 @@ void registerSubsystems(Drivers* drivers)
     drivers->commandScheduler.registerSubsystem(&dummySubsystem);
     drivers->commandScheduler.registerSubsystem(&agitator);
     drivers->commandScheduler.registerSubsystem(&launcher);
-    drivers->commandScheduler.registerSubsystem(&damiaoSubsystem);
     drivers->commandScheduler.registerSubsystem(&damiao4340sub);
     // drivers->commandScheduler.registerSubsystem(&motorSubsystem3505);
     // drivers->commandScheduler.registerSubsystem(&motorSubsystem6020);
@@ -238,7 +223,6 @@ void registerSubsystems(Drivers* drivers)
 
 void registerIoMappings(Drivers*)
 {
-    damiaoSubsystem.setDefaultCommand(&damiaoStickVelocity);
     // motorSubsystem6020.setDefaultCommand(&wheelManual);
     // motorSubsystem2006.setDefaultCommand(&leftVerticalManual);
     // motorSubsystem3505.setDefaultCommand(&rightVerticalManual);

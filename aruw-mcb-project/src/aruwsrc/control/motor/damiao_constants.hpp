@@ -53,7 +53,7 @@ static constexpr DamiaoMotorLimits DM_J4340_LIMITS =
 // NOTE: currently limited to 3nm of torque control for desired out, should do further
 // testing to determine  safe motor limits
 static constexpr DamiaoMotorLimits DM_S2325_LIMITS =
-    {-12.5f, 12.5f, -200.0f, 200.0f, -10.0f, 10.0f, 3000};
+    {-12.5f, 12.5f, -200.0f, 200.0f, -10.0f, 10.0f, 10000};
 
 constexpr DamiaoMotorLimits getDamiaoMotorLimits(DamiaoMotorType type)
 {

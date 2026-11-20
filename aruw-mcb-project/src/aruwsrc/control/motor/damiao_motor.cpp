@@ -75,9 +75,9 @@ void DamiaoMotor::setDesiredOutput(int32_t milliNM)
         return;
     }
 
-    const int32_t signedOutput = motorInverted ? -milliNM : milliNM;
+    // Keep output in logical coordinates; sendMitCommand applies motor inversion.
     desiredOutputMilliNm = tap::algorithms::limitVal<int32_t>(
-        signedOutput,
+        milliNM,
         -limits.maxOutputMilliNm,
         limits.maxOutputMilliNm);
 
@@ -206,6 +206,14 @@ bool DamiaoMotor::sendMitCommand(
     }
     // Direct MIT callers also need the startup handshake, including after a motor power cycle.
     retryStartup();
+
+    // Match the encoder's logical coordinates for all direct MIT callers.
+    if (motorInverted)
+    {
+        targetPosition = -targetPosition;
+        targetVelocity = -targetVelocity;
+        torqueNm = -torqueNm;
+    }
 
     const uint16_t posU = floatToUint<uint16_t, 16>(targetPosition, limits.pmin, limits.pmax);
     const uint16_t velU = floatToUint<uint16_t, 12>(targetVelocity, limits.vmin, limits.vmax);
