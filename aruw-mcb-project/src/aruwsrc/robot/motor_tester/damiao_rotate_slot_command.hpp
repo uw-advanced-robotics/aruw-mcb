@@ -33,9 +33,18 @@ namespace aruwsrc::motor_tester
 class DamiaoRotateSlotCommand : public tap::control::Command
 {
 public:
+    // Commands for the same agitator share the encoder-seeded slot grid.
+    struct SlotReference
+    {
+        const int slotCount;
+        float origin = 0.0f;
+        bool initialized = false;
+    };
+
     DamiaoRotateSlotCommand(
         control::motor::DamiaoSubsystem& subsystem,
-        int slotcount);
+        SlotReference& slotReference,
+        int slotsToRotate = 1);
 
     void initialize() override;
     void execute() override;
@@ -51,9 +60,9 @@ private:
 
     uint32_t start = 0;
     uint32_t len = 0;
-    int slotcount = 6;
-    bool past = false;
-    float ROTATE_INCR = (2.0f * M_PI) / slotcount;
+    SlotReference& slotReference;
+    const int slotsToRotate;
+    const float slotAngle;
     static constexpr float POSITION_TOLERANCE = 0.05f;
     tap::algorithms::SmoothPid positionPid{{
         .kp = 40000.0f,
@@ -65,6 +74,7 @@ private:
     uint32_t lastUpdateMillis = 0;
     float setpoint = 0.0f;
     bool accelerating = true;
+    bool DEBUG_launch_detected = false;
 };
 }  // namespace aruwsrc::motor_tester
 

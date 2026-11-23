@@ -19,14 +19,20 @@
 
 #include "damiao_rotate_slot_command.hpp"
 
+#include <cmath>
+
 #include "tap/architecture/clock.hpp"
 
 namespace aruwsrc::motor_tester
 {
 DamiaoRotateSlotCommand::DamiaoRotateSlotCommand(
     control::motor::DamiaoSubsystem& subsystem,
-    int slotcount)
-    : subsystem(subsystem), slotcount(slotcount)
+    SlotReference& slotReference,
+    int slotsToRotate)
+    : subsystem(subsystem),
+      slotReference(slotReference),
+      slotsToRotate(slotsToRotate),
+      slotAngle((2.0f * M_PI) / slotReference.slotCount)
 {
     addSubsystemRequirement(&subsystem);
 }
@@ -35,13 +41,19 @@ void DamiaoRotateSlotCommand::initialize()
 {
     start = tap::arch::clock::getTimeMicroseconds();
     len = 0;
-    const auto position = subsystem.getEncoder().getPosition();
+    DEBUG_launch_detected = false;
+    const float position = subsystem.getEncoder().getPosition().getUnwrappedValue();
+    if (!slotReference.initialized)
+    {
+        slotReference.origin = position;
+        slotReference.initialized = true;
+    }
+    // Use the same single-slot grid for both commands, anchored to the initial encoder reading.
     // Treat an encoder reading just below a slot as already at that slot.
-    const int slot =
-        static_cast<int>((position.getWrappedValue() + POSITION_TOLERANCE) / ROTATE_INCR);
-    // Keep this crossing tied to the selected revolution even after a large overshoot.
-    setpoint = position.getUnwrappedValue() +
-               position.minDifference(((slot + 1) % slotcount) * ROTATE_INCR);
+    const float slot =
+        std::floor((position - slotReference.origin + POSITION_TOLERANCE) / slotAngle);
+    // Keep the target unwrapped so advancing two slots never selects a shorter crossing.
+    setpoint = slotReference.origin + (slot + slotsToRotate) * slotAngle;
     positionPid.reset();
     lastUpdateMillis = tap::arch::clock::getTimeMilliseconds();
     accelerating = true;
@@ -75,6 +87,11 @@ bool DamiaoRotateSlotCommand::pastSetpoint(){
 
 void DamiaoRotateSlotCommand::recordLaunchTime()
 {
+    if (DEBUG_launch_detected)
+    {
+        return;
+    }
+    DEBUG_launch_detected = true;
     len = tap::arch::clock::getTimeMicroseconds() - start;
 }
 

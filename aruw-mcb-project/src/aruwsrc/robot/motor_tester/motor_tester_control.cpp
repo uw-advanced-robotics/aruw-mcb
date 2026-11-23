@@ -153,8 +153,9 @@ MoveUnjamIntegralComprisedCommand rotateAndUnjamAgitator(
 // ------------------
 tap::control::Subsystem dummySubsystem(drivers());
 
-DamiaoRotateSlotCommand rotateSlot(damiao4340sub, 6);
-DamiaoRotateSlotCommand doubleSlot(damiao4340sub, 3);
+DamiaoRotateSlotCommand::SlotReference agitatorSlotReference{6};
+DamiaoRotateSlotCommand rotateSlot(damiao4340sub, agitatorSlotReference);
+DamiaoRotateSlotCommand doubleSlot(damiao4340sub, agitatorSlotReference, 2);
 
 auto leftSwitchUp = tap::control::TriggerHelpers::switchState(
                         drivers(),
@@ -168,7 +169,7 @@ auto leftSwitchDown = tap::control::TriggerHelpers::switchState(
                           .whileTrue(&doubleSlot);
 
 tap::control::InstantCommand<1> setLaunchSpeed(
-    []() { launcher.setDesiredLaunchSpeed(2.5); },
+    []() { launcher.setDesiredLaunchSpeed(15); },
     std::array<tap::control::Subsystem*, 1>{&launcher});
 tap::control::InstantCommand<1> stopLauncher(
     []() { launcher.setDesiredLaunchSpeed(0); },
@@ -193,7 +194,7 @@ tap::control::InstantCommand recordLaunchTime(
     },
     std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
 
-float RPM_DROP_THRESHOLD = 100;
+float RPM_DROP_THRESHOLD = 50;
 auto rpmDrop = tap::control::Trigger(
                    drivers(),
                    []()
@@ -201,7 +202,10 @@ auto rpmDrop = tap::control::Trigger(
                        return launcher.getDesiredFrictionWheelSpeed() -
                                       launcher.getCurrentAverageFrictionWheelSpeed() >
                                   RPM_DROP_THRESHOLD &&
-                              rotateSlot.pastSetpoint();
+                              ((drivers()->commandScheduler.isCommandScheduled(&rotateSlot) &&
+                                rotateSlot.pastSetpoint()) ||
+                               (drivers()->commandScheduler.isCommandScheduled(&doubleSlot) &&
+                                doubleSlot.pastSetpoint()));
                    })
                    .onTrue(&recordLaunchTime);
 
