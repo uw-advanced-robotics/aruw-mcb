@@ -56,6 +56,8 @@ public:
         }
     };
 
+    inline void refreshSafeDisconnect() override { refresh(); }
+
 private:
     SentryTransforms& transformer;
     aruwsrc::communication::rtt::RttTelemetry* telemetry;

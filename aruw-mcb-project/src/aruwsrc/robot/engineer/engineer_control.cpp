@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -23,12 +23,7 @@
 #include "tap/communication/gpio/digital.hpp"
 #include "tap/communication/sensors/encoder/can_encoder/can_encoder.hpp"
 #include "tap/communication/sensors/limit_switch/limit_switch_interface.hpp"
-#include "tap/control/command_composition_helper.hpp"
-#include "tap/control/command_mapper.hpp"
 #include "tap/control/command_scheduler.hpp"
-#include "tap/control/instant_command.hpp"
-#include "tap/control/remote_map_state.hpp"
-#include "tap/control/sequential_command.hpp"
 #include "tap/control/trigger.hpp"
 #include "tap/control/trigger_helpers.hpp"
 
@@ -54,7 +49,6 @@
 #include "aruwsrc/control/client-display/client_display_command.hpp"
 #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
 #include "aruwsrc/control/client-display/indicators/pump_indicator.hpp"
-#include "aruwsrc/control/cycle_state_command_mapping.hpp"
 #include "aruwsrc/control/digital/digital_out_command.hpp"
 #include "aruwsrc/control/digital/digital_out_subsystem.hpp"
 #include "aruwsrc/control/digital/digital_out_toggle_command.hpp"
@@ -67,6 +61,7 @@
 #include "aruwsrc/control/joint/joint_subsystem.hpp"
 #include "aruwsrc/control/safe_disconnect.hpp"
 #include "aruwsrc/control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "aruwsrc/control/turret/algorithms/turret_dynamic_com_gravity_compensator.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_chassis_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/algorithms/world_frame_turret_imu_turret_controller.hpp"
 #include "aruwsrc/control/turret/constants/turret_constants.hpp"
@@ -78,7 +73,6 @@
 #include "aruwsrc/robot/engineer/algorithms/engineer_transforms.hpp"
 #include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/manual_ik_command.hpp"
 #include "aruwsrc/robot/engineer/algorithms/inverse_kinematics/trajectory_ik_command.hpp"
-#include "aruwsrc/robot/engineer/binned_alignment_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_position_digital_out_command.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/cube_storage_subsystem.hpp"
 #include "aruwsrc/robot/engineer/cube_storage/engineer_cube_storage_constants.hpp"
@@ -86,6 +80,7 @@
 #include "aruwsrc/robot/engineer/engineer_drivers.hpp"
 #include "aruwsrc/robot/engineer/engineer_extension_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_setpoint_constants.hpp"
+#include "aruwsrc/robot/engineer/engineer_trajectory_ik_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_constants.hpp"
 #include "aruwsrc/robot/engineer/engineer_turret_subsystem.hpp"
 #include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
@@ -116,9 +111,9 @@ using namespace aruwsrc::engineer::wrist;
 using namespace tap::control;
 using namespace tap::gpio;
 
+using tap::algorithms::transforms::Axis;
 using tap::algorithms::transforms::Transform;
 using tap::communication::serial::Remote;
-using tap::control::CommandMapper;
 
 /*
  * NOTE: We are using the DoNotUse_getDrivers() function here
@@ -457,8 +452,7 @@ EngineerTransforms transformer(
     drivers()->mcbLite.imu,
     extensionSubsystem,
     wristSubsystem,
-    cubeStorage,
-    drivers()->engineerCVCommunication);
+    cubeStorage);
 
 EngineerTransformSubsystem transformSubsystem(*drivers(), transformer);
 
@@ -478,8 +472,21 @@ aruwsrc::control::chassis::ChassisAutorotateCommand chassisAutorotateCommand(
     &engTurret.yawMotor,
     aruwsrc::control::chassis::ChassisAutorotateCommand::ChassisSymmetry::SYMMETRICAL_180);
 
-ChassisFrameTurretController<tap::algorithms::transforms::Axis::PITCH>
-    chassisFramePitchTurretController(engTurret.pitchMotor, chassis_rel::PITCH_PID_CONFIG);
+inline constexpr float M3508_TORQUE_CONSTANT =
+    (tap::motor::DjiMotor::MAX_OUTPUT_C620 / 20.0f) / 0.21f;  // desOut/A / (Nm/A) = desOut/Nm
+
+inline constexpr float M2006_TORQUE_CONSTANT =
+    tap::motor::DjiMotor::MAX_OUTPUT_C610 / 1.0f;  // desOut/Nm
+
+TurretDynamicCOMGravityCompensator gravityPitchCompensator(
+    {.pointMass = transformer.getCOMBeyondTurretPitch(),
+     .worldToTurretPitch = transformer.getWorldToTurretPitch(),
+     .motorTorqueConstant = M3508_TORQUE_CONSTANT * PITCH_TURRET_GEAR_RATIO});
+
+ChassisFrameTurretController<Axis::PITCH> chassisFramePitchTurretController(
+    engTurret.pitchMotor,
+    chassis_rel::PITCH_PID_CONFIG,
+    {&gravityPitchCompensator});
 
 ChassisFrameTurretController<tap::algorithms::transforms::Axis::YAW>
     chassisFrameYawTurretController(engTurret.yawMotor, chassis_rel::YAW_PID_CONFIG);
@@ -520,21 +527,11 @@ NoteSequenceCommand imuCalibrateFailBuzzCommand(
     IMU_CALIBRATE_FAIL_NOTES,
     IMU_CALIBRATE_FAIL_NOTE_LENGTH_MS);
 
-BinnedAlignmentCommand binnedAlignmentCommand(
-    engTurret,
-    lampreyEncoder,
-    pulleyEncoder,
-    *yawTurretMotor.getEncoder(),
-    imu::ImuCalibrateCommand::DEFAULT_VELOCITY_ZERO_THRESHOLD,
-    BINNED_ALIGNMENT_OFFSET,
-    YAW_ALIGNMENT_OFFSET);
-
 /* define client display / HUD related items --------------------------------*/
 ClientDisplaySubsystem clientDisplay(drivers());
 tap::communication::serial::RefSerialTransmitter refSerialTransmitter(drivers());
 
 /* define commands ----------------------------------------------------------*/
-HomingCommand cubeStorageHome(cubeStorage);
 HomingCommand extensionHome(extensionSubsystem);
 
 user::TurretUserWorldRelativeCommand turretUserWorldRelativeCommand(
@@ -565,12 +562,99 @@ aruwsrc::control::chassis::ChassisDriveCommand chassisDriveCommand(
     &drivers()->controlOperatorInterface,
     &chassisSubsystem);
 
-WristControllerCommand wristControllerCommand(
+WristControllerCommand wristControllerCommand(wristSubsystem, &drivers()->controlOperatorInterface);
+
+inline constexpr float WRIST_GRAVITY_TEST_ANGLE = modm::toRadian(30.0f);
+
+uint8_t commandCounter = 0;
+bool isSettled = false;
+
+WristControllerCommand wristTheta1NegativeGravityTestCommand(
     wristSubsystem,
     &drivers()->controlOperatorInterface,
-    WRIST_THETA_1_SCALING_FACTOR,
-    WRIST_THETA_2_SCALING_FACTOR,
-    WRIST_THETA_3_SCALING_FACTOR);
+    std::pair<uint8_t, float>{0, -WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta1ZeroGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{0, 0},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta1PositiveGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{0, WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+
+WristControllerCommand wristTheta2NegativeGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{1, -WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta2ZeroGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{1, 0},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta2PositiveGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{1, WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+
+WristControllerCommand wristTheta3NegativeGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{2, -WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta3ZeroGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{2, 0},
+    &commandCounter,
+    &isSettled);
+WristControllerCommand wristTheta3PositiveGravityTestCommand(
+    wristSubsystem,
+    &drivers()->controlOperatorInterface,
+    std::pair<uint8_t, float>{2, WRIST_GRAVITY_TEST_ANGLE},
+    &commandCounter,
+    &isSettled);
+
+Command* holdExtensionAtCurrentPosition(extensionSubsystem.runOnce([]() {
+    commandCounter = 0;
+    extensionSubsystem.setSetpoint(extensionSubsystem.getPosition());
+}));
+
+SetpointMoveManualCommand holdExtensionDuringThetaTest(
+    extensionSubsystem,
+    &drivers()->controlOperatorInterface,
+    0.0f,
+    SetpointType::EXTENSION);
+
+Command* wristGravityCompensationSetpointSequence(wristTheta1NegativeGravityTestCommand.andThen(
+    {&wristTheta1ZeroGravityTestCommand,
+     &wristTheta1PositiveGravityTestCommand,
+     &wristTheta1ZeroGravityTestCommand,
+     &wristTheta2NegativeGravityTestCommand,
+     &wristTheta2ZeroGravityTestCommand,
+     &wristTheta2PositiveGravityTestCommand,
+     &wristTheta2ZeroGravityTestCommand,
+     &wristTheta3NegativeGravityTestCommand,
+     &wristTheta3ZeroGravityTestCommand,
+     &wristTheta3PositiveGravityTestCommand,
+     &wristTheta3ZeroGravityTestCommand}));
+
+Command* wristGravityCompensationTestWithExtensionHold(
+    holdExtensionDuringThetaTest.deadlineWith(wristGravityCompensationSetpointSequence));
+
+Command* wristGravityCompensationTestSequence(
+    holdExtensionAtCurrentPosition->andThen(wristGravityCompensationTestWithExtensionHold));
 
 // wrist fold in commands are not fully tuned yet
 WristSetpointsCommand wristFoldInCommand(
@@ -588,11 +672,6 @@ SetpointMovePositionCommand extensionOutCommand(extensionSubsystem, 2);
 // commands for pickup/scoring positions
 SetpointMovePositionCommand extensionOut(extensionSubsystem, EXTENSION_SCORE);
 SetpointMovePositionCommand extensionIn(extensionSubsystem, EXTENSION_PICKUP);
-
-// rotating cube storage
-SetpointMovePositionCommand leftCubePosition(cubeStorage, CUBE_STORAGE_LEFT_SETPOINT);
-SetpointMovePositionCommand rightCubePosition(cubeStorage, CUBE_STORAGE_RIGHT_SETPOINT);
-SetpointMovePositionCommand centerCubePosition(cubeStorage, CUBE_STORAGE_CENTER_SETPOINT);
 
 ScorePositionCommand scorePositionCommand(extensionSubsystem, wristSubsystem);
 
@@ -634,22 +713,6 @@ inverse_kinematics::ManualIKCommand manualIKCommand(
     chassisFrameYawTurretController,
     chassisFramePitchTurretController);
 
-SequentialCommand<3> storeCubeCommand(
-    &selectCubeAddPositionCommand,
-    &cubeStorageSuckOnCommand,
-    // hand down
-    // hand release cube
-    // hand up
-    &centerCubePosition);
-
-SequentialCommand<3> removeCubeCommand(
-    &selectCubeRemovePositionCommand,
-    // hand suction on
-    // hand down
-    &cubeStorageSuckOffCommand,
-    // hand up
-    &centerCubePosition);
-
 autotune::LampreyAutotuneCommand<36, Axis::YAW> lampreyAutotuneCommand(
     drivers(),
     {&engTurret,
@@ -674,54 +737,123 @@ RemoteSafeDisconnectFunction remoteSafeDisconnectFunction(drivers());
 
 tap::control::Subsystem dummySubsystem(drivers());
 
-inverse_kinematics::Trajectory6D<2> depositTrajectory{
-    {{{.pose = Transform(), .time = 0.0f}, {.pose = Transform(), .time = 2.5f}}}};
+inverse_kinematics::Waypoint makeCartesianWaypoint(
+    size_t poseIndex,
+    float xLeftM,
+    float yRightM,
+    float zUpM,
+    float rollDeg,
+    float pitchDeg,
+    float yawDeg)
+{
+    return {
+        .pose = Transform(
+            xLeftM,
+            -yRightM,  // left is positive
+            zUpM,
+            modm::toRadian(-rollDeg),
+            modm::toRadian(pitchDeg),
+            modm::toRadian(yawDeg)),
+        .time = poseIndex * PER_POSE_TIME};
+}
 
-InstantCommand populateDepositTrajectory(
-    []() {
-        depositTrajectory.waypoints[0].pose = transformer.getWorldToEndEffector();
+inverse_kinematics::Waypoint makeJointWaypoint(
+    size_t poseIndex,
+    float yawDeg,
+    float pitchDeg,
+    float extensionM,
+    float wristTheta1Deg,
+    float wristTheta2Deg,
+    float wristTheta3Deg)
+{
+    const Transform extensionToWrist(
+        tap::algorithms::transforms::Position(),
+        WristSubsystem::getHypotheticalOrientation(
+            modm::toRadian(wristTheta1Deg),
+            modm::toRadian(wristTheta2Deg),
+            modm::toRadian(wristTheta3Deg)));
+    const Transform pose =
+        EngineerTransforms::getHypotheticalChassisToTurretYaw(modm::toRadian(yawDeg))
+            .composeStatic(
+                EngineerTransforms::getHypotheticalTurretYawToTurretPitch(modm::toRadian(pitchDeg)))
+            .composeStatic(EngineerTransforms::getHypotheticalTurretPitchToExtension(extensionM))
+            .composeStatic(extensionToWrist)
+            .composeStatic(WRIST_TO_END_EFFECTOR);
+    return {.pose = pose, .time = poseIndex * PER_POSE_TIME};
+}
 
-        if (transformer.isWorldToReceptacleValid() &&
-            transformer.getWorldToReceptacleReceivedTimeMs() >
-                tap::arch::clock::getTimeMilliseconds() - 2'000)
-        {
-            depositTrajectory.waypoints[1].pose =
-                transformer.getWorldToReceptacle().composeStatic(Transform(-0.25, 0, 0, 0, 0, 0));
-        }
-        else
-        {
-            depositTrajectory.waypoints[1].pose = transformer.getWorldToEndEffector();
-        }
-    },
-    std::array<tap::control::Subsystem*, 1>{&dummySubsystem});
+// {xLeftM, yRightM, zUpM, rollDeg, pitchDeg, yawDeg}
+static constexpr std::array<std::array<float, 6>, 6> WORKSPACE_WAYPOINTS{{
+    {0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f},
+    {0.54f, 0.10f, 0.38f, -30.0f, 0.0f, 0.0f},
+    {0.54f, 0.10f, 0.58f, 30.0f, 0.0f, 0.0f},
+    {0.54f, -0.10f, 0.58f, -30.0f, 0.0f, 0.0f},
+    {0.54f, -0.10f, 0.38f, 30.0f, 0.0f, 0.0f},
+    {0.54f, 0.0f, 0.48f, 0.0f, 0.0f, 0.0f},
+}};
 
-inverse_kinematics::TrajectoryIKCommand<2> depositIKCommand(
-    transformer.getChassisToWorld(),
+// {yawDeg, pitchDeg, extensionM, wristTheta1Deg, wristTheta2Deg, wristTheta3Deg}
+static constexpr std::array<std::array<float, 6>, 25> JOINT_RANGE_WAYPOINTS{{
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_MIN_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, -30.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 13.0f, TEST_EXTENSION_MAX_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {-170.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 150.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, -150.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 75.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 150.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, -150.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {120.0f, -25.0f, 0.55f, 90.0f, 60.0f, -90.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+    {-120.0f, 10.0f, 0.55f, -90.0f, 60.0f, 90.0f},
+    {0.0f, 0.0f, TEST_EXTENSION_NEUTRAL_M, 0.0f, 0.0f, 0.0f},
+}};
+
+inverse_kinematics::Trajectory6D<WORKSPACE_WAYPOINTS.size()> workspaceTrajectory([](size_t i) {
+    const auto& w = WORKSPACE_WAYPOINTS[i];
+    return makeCartesianWaypoint(i, w[0], w[1], w[2], w[3], w[4], w[5]);
+});
+
+inverse_kinematics::Trajectory6D<JOINT_RANGE_WAYPOINTS.size()> jointRangeTrajectory([](size_t i) {
+    const auto& w = JOINT_RANGE_WAYPOINTS[i];
+    return makeJointWaypoint(i, w[0], w[1], w[2], w[3], w[4], w[5]);
+});
+
+inverse_kinematics::TrajectoryIKCommand<6> workspaceIKTrajectoryCommand(
+    IDENTITY_TRANSFORM,
     IDENTITY_TRANSFORM,
     engTurret,
     extensionSubsystem,
     wristSubsystem,
     chassisFrameYawTurretController,
     chassisFramePitchTurretController,
-    depositTrajectory);
+    workspaceTrajectory);
 
-SequentialCommand depositCommand(&populateDepositTrajectory, &depositIKCommand);
+inverse_kinematics::TrajectoryIKCommand<25> jointRangeIKTrajectoryCommand(
+    IDENTITY_TRANSFORM,
+    IDENTITY_TRANSFORM,
+    engTurret,
+    extensionSubsystem,
+    wristSubsystem,
+    chassisFrameYawTurretController,
+    chassisFramePitchTurretController,
+    jointRangeTrajectory);
 
-Trigger leftUpRightUp =
-    (TriggerHelpers::switchState(
-         drivers(),
-         Remote::Switch::RIGHT_SWITCH,
-         Remote::SwitchState::UP) &&
-     TriggerHelpers::switchState(drivers(), Remote::Switch::LEFT_SWITCH, Remote::SwitchState::UP))
-        .onTrue(&depositCommand);
-
-Trigger leftDownMidRightUp =
-    (!TriggerHelpers::switchState(
-         drivers(),
-         Remote::Switch::LEFT_SWITCH,
-         Remote::SwitchState::UP) &&
-     TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP))
-        .onTrue(&binnedAlignmentCommand);
+Trigger rightUp =
+    TriggerHelpers::switchState(drivers(), Remote::Switch::RIGHT_SWITCH, Remote::SwitchState::UP)
+        .onTrue(&workspaceIKTrajectoryCommand);
 
 // joint control mode
 Trigger rightMid =
@@ -763,6 +895,14 @@ void initializeSubsystems()
     parallelOmniOne.initialize();
     parallelOmniTwo.initialize();
     perpendicularOmni.initialize();
+
+    wristSubsystem.attachGravityCompConfig({
+        .pointMass = transformer.getCOMBeyondWrist(),
+        .worldToMountingFrame = transformer.getWorldToExtension(),
+        .motor1TorqueConstant = M2006_TORQUE_CONSTANT * WRIST_MOTOR_1_GEAR_RATIO,
+        .motor2TorqueConstant = M2006_TORQUE_CONSTANT * WRIST_MOTOR_2_GEAR_RATIO,
+        .motor3TorqueConstant = M2006_TORQUE_CONSTANT * WRIST_MOTOR_3_GEAR_RATIO,
+    });
     mainSuctionAnalogSensor.initialize();
 }
 

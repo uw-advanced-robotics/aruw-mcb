@@ -21,7 +21,6 @@
 #define VISION_COPROCESSOR_HPP_
 
 #include <cassert>
-#include <deque>
 
 #include "tap/algorithms/ballistics.hpp"
 #include "tap/algorithms/odometry/odometry_2d_interface.hpp"
@@ -72,10 +71,10 @@ public:
 #endif
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_TX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart2;
+        tap::communication::serial::Uart::UartPort::Usart2;
 
     static constexpr tap::communication::serial::Uart::UartPort VISION_COPROCESSOR_RX_UART_PORT =
-        tap::communication::serial::Uart::UartPort::Uart3;
+        tap::communication::serial::Uart::UartPort::Usart3;
 
     enum class FireRate : uint8_t
     {
@@ -342,6 +341,35 @@ public:
         return lastRobotOrbitData;
     }
 
+    inline const OdometryData& getLastOdometryData() const { return lastOdometryData; }
+
+    inline uint8_t getLastRobotId() const { return lastRobotId; }
+
+    /** Index written into the sentry motion-strategy message. */
+    inline uint8_t getLastMotionStrategy() const { return lastMotionStrategy; }
+
+    inline uint16_t getLastBulletsRemaining() const { return lastBulletsRemaining; }
+
+    inline uint32_t getLastAutoNavSequenceNum() const { return lastSetpointData.sequenceNum; }
+
+    inline float getLastAutoNavSpeed() const { return lastSetpointData.speed; }
+
+    inline uint32_t getLastAutoNavNumSetpoints() const
+    {
+        return lastSetpointData.numSetpoints <= MAXSETPOINTS ? lastSetpointData.numSetpoints
+                                                             : MAXSETPOINTS;
+    }
+
+    inline float getLastAutoNavSetpointX(uint32_t index) const
+    {
+        return index < getLastAutoNavNumSetpoints() ? lastSetpointData.setpoints[index].x : 0.0f;
+    }
+
+    inline float getLastAutoNavSetpointY(uint32_t index) const
+    {
+        return index < getLastAutoNavNumSetpoints() ? lastSetpointData.setpoints[index].y : 0.0f;
+    }
+
     mockable inline void attachTransformer(
         aruwsrc::algorithms::odometry::transforms::TransformerInterface* transformer)
     {
@@ -457,11 +485,9 @@ private:
 
     struct AutoNavSetpointMessage
     {
-        // Header
         uint32_t sequenceNum;
         float speed;
         uint32_t numSetpoints;
-        // Setpoints
         AutoNavCoordinate setpoints[MAXSETPOINTS];
     };
 
@@ -485,6 +511,11 @@ private:
     };
 
     RobotOrbitData lastRobotOrbitData;
+
+    OdometryData lastOdometryData{};
+    uint8_t lastRobotId = 0;
+    uint8_t lastMotionStrategy = 0;
+    uint16_t lastBulletsRemaining = 0;
 
     // CV online variables.
     /// Timer for determining if serial is offline.

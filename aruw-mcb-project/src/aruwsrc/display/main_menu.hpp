@@ -42,6 +42,7 @@
 #include "rtt_menu.hpp"
 #include "sentry_strategy_menu.hpp"
 #include "turret_mcb_menu.hpp"
+#include "vision_coprocessor_menu.hpp"
 
 namespace aruwsrc
 {
@@ -82,6 +83,7 @@ private:
     AutotuneMenu autotuneMenu;
     LimitSwitchMenu limitSwitchMenu;
     CVMenu cvMenu;
+    VisionCoprocessorMenu visionCoprocessorMenu;
     ErrorMenu errorMenu;
     tap::display::HardwareTestMenu hardwareTestMenu;
     tap::display::MotorMenu motorMenu;
@@ -108,6 +110,7 @@ private:
     void addAutotuneMenuCallback();
     void addLimitSwitchMenuCallback();
     void addCVMenuCallback();
+    void addVisionCoprocessorMenuCallback();
     void addErrorMenuCallback();
     void addHardwareTestMenuCallback();
     void addMotorMenuCallback();

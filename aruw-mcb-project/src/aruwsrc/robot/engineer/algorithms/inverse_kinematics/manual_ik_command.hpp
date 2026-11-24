@@ -45,12 +45,15 @@ public:
 
     void initialize() override;
 
-    tap::algorithms::transforms::Transform getBaseToFollowerDesired() override;
+    void updateBaseToFollowerDesired() override;
 
 private:
     const aruwsrc::engineer::EngineerControlOperatorInterface& controlOperatorInterface;
-    tap::algorithms::transforms::Transform baseToEndEffectorDesired;
     const tap::algorithms::transforms::Transform& baseToEndEffector;
+
+    float ikVelX = 0.0f;
+    float ikVelY = 0.0f;
+    float ikVelZ = 0.0f;
 };  // class ManualIKCommand
 
 }  // namespace aruwsrc::engineer::algorithms::inverse_kinematics

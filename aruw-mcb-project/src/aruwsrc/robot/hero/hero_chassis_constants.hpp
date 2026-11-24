@@ -37,22 +37,11 @@ namespace aruwsrc::control::chassis
 {
 static constexpr float CAP_BANK_CAPACITANCE = 6.66f;
 static constexpr int CAP_BANK_MAX_AVAILABLE_POWER = 50;  // watts
-/**
- * Maps max power (in Watts) to max chassis wheel speed (RPM).
- */
-static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {1, 200},
-    {2, 250},
-    {100, 375}};
 
 static const tap::algorithms::transforms::Transform MPU6500_MCB_MOUNTING_TRANSFORM =
     tap::algorithms::transforms::Transform(0.1426, 0.0245, 0, 0, 0, modm::toRadian(180));
 static const tap::algorithms::transforms::Transform ISM330_MCB_MOUNTING_TRANSFORM =
     tap::algorithms::transforms::Transform(0.131, 0.011, 0, 0, 0, modm::toRadian(180 + 45));
-
-static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
-    CHASSIS_POWER_TO_MAX_SPEED_LUT,
-    MODM_ARRAY_SIZE(CHASSIS_POWER_TO_MAX_SPEED_LUT));
 
 /**
  * The minimum desired wheel speed for chassis rotation when translational scaling via
@@ -151,6 +140,14 @@ static constexpr tap::motor::MotorId LEFT_FRONT_MOTOR_ID = tap::motor::MOTOR2;
 static constexpr tap::motor::MotorId LEFT_BACK_MOTOR_ID = tap::motor::MOTOR3;
 static constexpr tap::motor::MotorId RIGHT_BACK_MOTOR_ID = tap::motor::MOTOR4;
 static constexpr tap::can::CanBus CAN_BUS_MOTORS = tap::can::CanBus::CAN_BUS2;
+
+// 482 is maximum physicially possible post-gearbox RPM with the standard gearbox per 3508 datasheet
+static constexpr float MAX_3508_PRE_GEARBOX_RPM =
+    482.0f * (1 / tap::motor::DjiMotorEncoder::GEAR_RATIO_M3508);
+static constexpr float MAX_CHASSIS_WHEEL_SPEED_RPM =
+    MAX_3508_PRE_GEARBOX_RPM *
+    CHASSIS_GEARBOX_RATIO;  // Max theoretical M3508 wheel speed post gearbox
+
 }  // namespace aruwsrc::control::chassis
 
 #endif  // HERO_CHASSIS_CONSTANTS_HPP_

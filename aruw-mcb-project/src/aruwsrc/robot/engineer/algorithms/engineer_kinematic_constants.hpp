@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026-2026 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -23,7 +23,7 @@
 #include "tap/algorithms/transforms/position.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 
-#include "point_mass.hpp"
+#include "aruwsrc/algorithms/point_mass.hpp"
 
 namespace aruwsrc::engineer::algorithms
 {
@@ -37,13 +37,7 @@ static const tap::algorithms::transforms::Position TURRET_PITCH_TO_EXTENSION_ZER
     0,
     0.099);
 static const tap::algorithms::transforms::Transform WRIST_TO_END_EFFECTOR(0.0803, 0, 0, 0, 0, 0);
-static const tap::algorithms::transforms::Transform EXTENSION_TO_VTM_GIMBAL(
-    0,
-    0,
-    0,
-    0,
-    0,
-    0);  // TODO
+static const tap::algorithms::transforms::Transform EXTENSION_TO_VTM_GIMBAL(0, 0, 0, 0, 0, 0);
 static const tap::algorithms::transforms::Transform TURRET_YAW_TO_CUBE_STORE_FRAME(
     -0.03089,
     0,
@@ -92,18 +86,23 @@ static const tap::algorithms::transforms::Transform TURRET_YAW_TO_CUBE_DIST =
 // static constexpr float TRUE_WRIST_ROLL_OFFSET = 0;
 
 // Center of Masses
-static const PointMass MASS_BEYOND_WRIST{
+static const aruwsrc::algorithms::PointMass MASS_BEYOND_WRIST{
     .mass = 0.471,
-    .location = tap::algorithms::transforms::Position(0.0457, -0.01134, 0)};  // TODO
-static constexpr float EXTENSION_STATIONARY_MASS = 1;                         // TODO
-static constexpr float EXTENSION_MIDDLE_MASS = 1;                             // TODO
-static constexpr float EXTENSION_END_MASS = 1;                                // TODO
-static const PointMass MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT{
+    .location = tap::algorithms::transforms::Position(0.0457, -0.01134, 0)};
+static constexpr float EXTENSION_STATIONARY_MASS = 1.255;
+static constexpr float EXTENSION_MIDDLE_MASS = 0.987;
+static constexpr float EXTENSION_END_MASS = 1.231;
+static const aruwsrc::algorithms::PointMass MASS_BETWEEN_TURRET_PITCH_AND_WRIST_ZERO_EXT{
     .mass = EXTENSION_STATIONARY_MASS + EXTENSION_MIDDLE_MASS + EXTENSION_END_MASS,
-    .location = tap::algorithms::transforms::Position(0, 0, 0)};  // TODO
-static constexpr float EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR =
-    (EXTENSION_MIDDLE_MASS / 2 + EXTENSION_END_MASS) /
-    (EXTENSION_STATIONARY_MASS + EXTENSION_MIDDLE_MASS + EXTENSION_END_MASS);
+    .location = tap::algorithms::transforms::Position(-0.02251, 0.00453, 0.06967)};
+
+inline constexpr float EXT_TO_COM_POS_BETWEEN_TURRET_PITCH_AND_WRIST_SCALAR =
+    0.2f;  // found empirically
+
+inline const aruwsrc::algorithms::PointMass MASS_CUBE{
+    .mass = 0.6f,
+    .location =
+        tap::algorithms::transforms::Position(0.1, 0, 0)};  // center of face to center of cube
 
 }  // namespace aruwsrc::engineer::algorithms
 #endif  // ENGINEER_KINEMATIC_CONSTANTS_HPP_

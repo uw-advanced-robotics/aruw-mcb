@@ -40,21 +40,19 @@ namespace tap::communication::serial
 /**
  * Class that wraps modm's Uart implementation.
  *
- * Currently only wraps the uart ports that we are generating modm
- * code for. If additional `UartPort`'s are added, they must be added
- * to this wrapper class here.
+ * Only wraps the uart ports specified in the board.xml file.
  */
 class Uart
 {
 public:
     enum UartPort
     {
-        Uart1,
-        Uart2,
-        Uart3,
-        Uart6,
-        Uart7,
-        Uart8,
+        Remote, // Usart1
+        Usart2, // Usart2
+        Usart3, // Usart3
+        RefSerial, // Usart6
+        Uart7, // Uart7
+        Uart8, // Uart8
     };
 
 #ifdef PLATFORM_HOSTED
@@ -84,22 +82,22 @@ public:
     void init()
     {
 #ifndef PLATFORM_HOSTED
-        if constexpr (port == UartPort::Uart1)
+        if constexpr (port == UartPort::Remote)
         {
             modm::platform::Usart1::connect<GpioB7::Rx>();
             modm::platform::Usart1::initialize<Board::SystemClock, baudrate>(parity);
         }
-        else if constexpr (port == UartPort::Uart2)
+        else if constexpr (port == UartPort::Usart2)
         {
             modm::platform::Usart2::connect<GpioD5::Tx, GpioD6::Rx>();
             modm::platform::Usart2::initialize<Board::SystemClock, baudrate>(parity);
         }
-        else if constexpr (port == UartPort::Uart3)
+        else if constexpr (port == UartPort::Usart3)
         {
             modm::platform::Usart3::connect<GpioD8::Tx, GpioD9::Rx>();
             modm::platform::Usart3::initialize<Board::SystemClock, baudrate>(parity);
         }
-        else if constexpr (port == UartPort::Uart6)
+        else if constexpr (port == UartPort::RefSerial)
         {
             modm::platform::Usart6::connect<GpioG14::Tx, GpioG9::Rx>();
             modm::platform::Usart6::initialize<Board::SystemClock, baudrate>(parity);

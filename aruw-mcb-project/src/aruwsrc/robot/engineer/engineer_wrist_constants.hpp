@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -35,7 +35,7 @@ static constexpr tap::motor::MotorId WRIST_MOTOR_1_ID = tap::motor::MotorId::MOT
 static constexpr tap::motor::MotorId WRIST_MOTOR_2_ID = tap::motor::MotorId::MOTOR2;
 static constexpr tap::motor::MotorId WRIST_THETA3_MOTOR_ID = tap::motor::MotorId::MOTOR3;
 static constexpr tap::encoder::CanEncoderId WRIST_THETA1_ENCODER_ID =
-    tap::encoder::CanEncoderId::ID1;  // todo: lamprey
+    tap::encoder::CanEncoderId::ID1;
 static constexpr tap::encoder::CanEncoderId WRIST_THETA2_ENCODER_ID =
     tap::encoder::CanEncoderId::ID0;
 
@@ -99,6 +99,10 @@ static constexpr aruwsrc::control::joint::JointSubsystem::Config WRIST_ROLL_CONF
 static constexpr float WRIST_THETA_1_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_THETA_2_SCALING_FACTOR = 0.01f;
 static constexpr float WRIST_THETA_3_SCALING_FACTOR = 0.01f;
+
+static constexpr float WRIST_THETA_1_GRAVITY_COMP_SCALE = 0.5598f;
+static constexpr float WRIST_THETA_2_GRAVITY_COMP_SCALE = 0.2963f;
+static constexpr float WRIST_THETA_3_GRAVITY_COMP_SCALE = 0.0029f;
 
 static constexpr float WRIST_ROLL_CLICK_VELOCITY = 0.5f;
 

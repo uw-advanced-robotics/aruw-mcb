@@ -84,6 +84,8 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override { refresh(); }
+
     void overrideOdometryPosition(const float positionX, const float positionY);
 
     void overrideOdometryOrientation(const float deltaYaw);

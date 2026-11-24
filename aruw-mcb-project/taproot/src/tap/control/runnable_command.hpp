@@ -21,49 +21,55 @@
  * along with Taproot.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef TAPROOT_SCHEDULER_TERMINAL_HANDLER_HPP_
-#define TAPROOT_SCHEDULER_TERMINAL_HANDLER_HPP_
+#ifndef TAPROOT_RUNNABLE_COMMAND_HPP_
+#define TAPROOT_RUNNABLE_COMMAND_HPP_
 
-#include "tap/communication/serial/terminal_serial.hpp"
-#include "tap/util_macros.hpp"
+#include <array>
+#include <functional>
+
+#include "tap/drivers.hpp"
+
+#include "command.hpp"
+#include "repeat_command.hpp"
+#include "subsystem.hpp"
 
 namespace tap
 {
-class Drivers;
 namespace control
 {
-class SchedulerTerminalHandler : public communication::serial::TerminalSerialCallbackInterface
+template <size_t SUBSYSTEMS>
+/**
+ * A class for a command that runs a given action every loop of the command scheduler until
+ * interrupted.
+ */
+class RunnableCommand : public Command
 {
 public:
-    static constexpr char HEADER[] = "scheduler";
+    RunnableCommand(
+        std::function<void()> actionToRun,
+        std::array<Subsystem *, SUBSYSTEMS> dependencies)
+        : Command(),
+          actionToRun(actionToRun)
+    {
+        for (Subsystem *dep : dependencies) addSubsystemRequirement(dep);
+    }
 
-    SchedulerTerminalHandler(Drivers* drivers);
-    DISALLOW_COPY_AND_ASSIGN(SchedulerTerminalHandler);
-    mockable ~SchedulerTerminalHandler() = default;
+    bool isReady() override { return true; }
 
-    mockable void init();
+    void initialize() override {}
 
-    bool terminalSerialCallback(
-        char* inputLine,
-        modm::IOStream& outputStream,
-        bool streamingEnabled) override;
+    void execute() override { actionToRun(); }
 
-    void terminalSerialStreamCallback(modm::IOStream& outputStream) override;
+    void end(bool) override {}
+
+    bool isFinished() const override { return false; }
+
+    const char *getName() const override { return "runnable command"; }
 
 private:
-    Drivers* drivers;
-
-    static constexpr char USAGE[] =
-        "Usage: scheduler <target>\n"
-        "  Where \"<target>\" is one of:\n"
-        "    - \"-H\": displays possible commands.\n"
-        "    - \"allsubcmd\" prints all running subsystems and.\n";
-
-    void printInfo(modm::IOStream& outputStream);
+    std::function<void()> actionToRun;
 };
-
 }  // namespace control
-
 }  // namespace tap
 
-#endif  // TAPROOT_SCHEDULER_TERMINAL_HANDLER_HPP_
+#endif

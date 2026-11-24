@@ -73,6 +73,8 @@ public:
 
     void refresh() override;
 
+    void refreshSafeDisconnect() override { refresh(); }
+
 private:
     OttoChassisWorldYawObserver orientationObserver;
 };

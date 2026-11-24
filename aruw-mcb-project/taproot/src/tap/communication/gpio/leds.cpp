@@ -40,52 +40,43 @@ void Leds::init()
 #endif
 }
 
-void Leds::set(Leds::LedPin pin, bool isSet)
+void Leds::set(Leds::LedPin pin, bool set)
 {
 #ifdef PLATFORM_HOSTED
     UNUSED(pin);
-    UNUSED(isSet);
+    UNUSED(set);
 #else
     switch (pin)
     {
         case Leds::LedPin::A:
-            LedA::set(isSet);
+            LedA::set(set);
             break;
-
         case Leds::LedPin::B:
-            LedB::set(isSet);
+            LedB::set(set);
             break;
-
         case Leds::LedPin::C:
-            LedC::set(isSet);
+            LedC::set(set);
             break;
-
         case Leds::LedPin::D:
-            LedD::set(isSet);
+            LedD::set(set);
             break;
-
         case Leds::LedPin::E:
-            LedE::set(isSet);
+            LedE::set(set);
             break;
-
         case Leds::LedPin::F:
-            LedF::set(isSet);
+            LedF::set(set);
             break;
-
         case Leds::LedPin::G:
-            LedG::set(isSet);
+            LedG::set(set);
             break;
-
         case Leds::LedPin::H:
-            LedH::set(isSet);
+            LedH::set(set);
             break;
-
         case Leds::LedPin::Green:
-            LedGreen::set(isSet);
+            LedGreen::set(set);
             break;
-
         case Leds::LedPin::Red:
-            LedRed::set(isSet);
+            LedRed::set(set);
             break;
     }
 #endif

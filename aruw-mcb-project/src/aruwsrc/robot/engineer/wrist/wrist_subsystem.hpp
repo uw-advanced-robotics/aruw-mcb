@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -20,12 +20,17 @@
 #ifndef WRIST_SUBSYSTEM_HPP_
 #define WRIST_SUBSYSTEM_HPP_
 
+#include <array>
+#include <optional>
+
 #include "tap/algorithms/smooth_pid.hpp"
 #include "tap/algorithms/transforms/transform.hpp"
 #include "tap/control/subsystem.hpp"
 #include "tap/motor/dji_motor.hpp"
 #include "tap/motor/motor_interface.hpp"
 #include "tap/util_macros.hpp"
+
+#include "aruwsrc/algorithms/point_mass.hpp"
 
 namespace aruwsrc::engineer::wrist
 {
@@ -45,6 +50,13 @@ struct WristConfig
     float epsilon = 1e-4f;  // angular tolerance used to determine if we reached the setpoint
 
     int32_t maxMotorDesiredOutput;
+};
+
+struct WristGravityCompensationConfig
+{
+    const aruwsrc::algorithms::PointMass& pointMass;
+    const tap::algorithms::transforms::Transform& worldToMountingFrame;
+    float motor1TorqueConstant, motor2TorqueConstant, motor3TorqueConstant;
 };
 
 class WristSubsystem : public tap::control::Subsystem
@@ -73,9 +85,11 @@ public:
      * */
     void setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint);
 
-    inline float getSetpointTheta1() { return setpointTheta1.getWrappedValue(); }
-    inline float getSetpointTheta2() { return setpointTheta2; }
-    inline float getSetpointTheta3() { return setpointTheta3.getWrappedValue(); }
+    inline float getSetpointTheta1() const { return setpointTheta1.getWrappedValue(); }
+    inline float getSetpointTheta2() const { return setpointTheta2; }
+    inline float getSetpointTheta3() const { return setpointTheta3.getWrappedValue(); }
+
+    tap::algorithms::transforms::Orientation getSetpointOrientation() const;
 
     virtual void initialize() override;
 
@@ -93,21 +107,67 @@ public:
 
     bool isOnline() const;
 
+    bool isWristMoving() const;
+
     tap::algorithms::transforms::Orientation getOrientation() const;
+
+    inline void attachGravityCompConfig(const WristGravityCompensationConfig config)
+    {
+        gravityCompConfig.emplace(config);
+    }
 
     static tap::algorithms::transforms::Orientation getHypotheticalOrientation(
         float theta1,
         float theta2,
         float theta3);
 
+    /**
+     * Inverse of getHypotheticalOrientation, called once per control loop. theta1 moves toward its
+     * solution at a limited rate, and theta2 and theta3 get as close to the orientation as they
+     * can with that theta1. The result can lag the orientation while theta1 catches up.
+     * theta1 is kept within +-THETA1_LIMIT, so near the limit it may turn the long way to unwind.
+     */
+    static std::array<float, 3> getJointAnglesForOrientation(
+        const tap::algorithms::transforms::Orientation& orientation,
+        float prevTheta1);
+
+    /**
+     * When the wrist bend is within this of straight, theta1 and theta3 rotate about nearly the
+     * same axis, so theta1 is held and theta3 provides the roll.
+     */
+    static constexpr float SINGULARITY_THRESHOLD = modm::toRadian(2.0f);
+
+    /** Max theta1 setpoint change per 2 ms control loop, equal to 180 deg/s. */
+    static constexpr float MAX_THETA1_STEP = modm::toRadian(180.0f) * 0.002f;
+
+    /**
+     * IK keeps theta1 within this of its power-on angle so the wrist can't wind up. Must be at
+     * least half a turn so every orientation is reachable. Set it to what the wrist's cables allow.
+     */
+    static constexpr float THETA1_LIMIT = modm::toRadian(270.0f);
+    static_assert(THETA1_LIMIT >= M_PI, "THETA1_LIMIT must be at least half a turn");
+
 private:
+    static constexpr float MOVING_VELOCITY_THRESHOLD = modm::toRadian(1.0f);
     const WristConfig config;
+    std::optional<WristGravityCompensationConfig> gravityCompConfig;
     tap::motor::MotorInterface &motorDifferential1, &motorDifferential2, &motorTheta3;
     tap::encoder::EncoderInterface& encoderTheta2;
     tap::algorithms::WrappedFloat setpointTheta1;
     float setpointTheta2;
     tap::algorithms::WrappedFloat setpointTheta3;
     tap::algorithms::SmoothPid pidTheta1, pidTheta2, pidTheta3;
+
+    float lastMotor1Pos, lastMotor2Pos, lastMotor3Pos;
+
+    // variables for gravity comp characterization
+    float theta1, theta2, theta3;
+    float g1, g21, g22, g3;
+    float pidOutTheta1, pidOutTheta2, pidOutTheta3;
+    float outMotorDifferential1, outMotorDifferential2, outMotor3;
+
+    // Angle errors for setpoint convergence tracking
+    float theta1Error, theta2Error, theta3Error;
 };
 }  // namespace aruwsrc::engineer::wrist
 

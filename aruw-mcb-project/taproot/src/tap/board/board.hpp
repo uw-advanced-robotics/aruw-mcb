@@ -51,28 +51,24 @@ namespace Board
 using namespace modm::literals;
 
 /**
- * STM32F427 running at 180MHz from the external 12MHz crystal
+ * STM32F427IIH6 running at 180MHz from the external 12MHz crystal
  */
 struct SystemClock
 {
     static constexpr uint32_t Frequency = 180_MHz;
-    static constexpr uint32_t Apb1 = Frequency / 4;
-    static constexpr uint32_t Apb2 = Frequency / 2;
+    static constexpr uint32_t Ahb = Frequency;
+    static constexpr uint32_t Apb1 = Ahb / 4;
+    static constexpr uint32_t Apb2 = Ahb / 2;
 
     static constexpr uint32_t Adc = Apb2;
 
     static constexpr uint32_t Spi1 = Apb2;
-    static constexpr uint32_t Spi2 = Apb1;
-    static constexpr uint32_t Spi3 = Apb1;
     static constexpr uint32_t Spi4 = Apb2;
     static constexpr uint32_t Spi5 = Apb2;
-    static constexpr uint32_t Spi6 = Apb2;
 
     static constexpr uint32_t Usart1 = Apb2;
     static constexpr uint32_t Usart2 = Apb1;
     static constexpr uint32_t Usart3 = Apb1;
-    static constexpr uint32_t Uart4 = Apb1;
-    static constexpr uint32_t Uart5 = Apb1;
     static constexpr uint32_t Usart6 = Apb2;
     static constexpr uint32_t Uart7 = Apb1;
     static constexpr uint32_t Uart8 = Apb1;
@@ -80,31 +76,22 @@ struct SystemClock
     static constexpr uint32_t Can1 = Apb1;
     static constexpr uint32_t Can2 = Apb1;
 
-    static constexpr uint32_t I2c1 = Apb1;
     static constexpr uint32_t I2c2 = Apb1;
-    static constexpr uint32_t I2c3 = Apb1;
 
-    static constexpr uint32_t Apb1Timer = 2 * Apb1;
-    static constexpr uint32_t Apb2Timer = 2 * Apb2;
-    static constexpr uint32_t Timer1 = Apb2Timer;
+    static constexpr uint32_t Apb1Timer = Apb1 * 2;
+    static constexpr uint32_t Apb2Timer = Apb2 * 2;
     static constexpr uint32_t Timer2 = Apb1Timer;
     static constexpr uint32_t Timer3 = Apb1Timer;
     static constexpr uint32_t Timer4 = Apb1Timer;
     static constexpr uint32_t Timer5 = Apb1Timer;
-    static constexpr uint32_t Timer6 = Apb1Timer;
-    static constexpr uint32_t Timer7 = Apb1Timer;
     static constexpr uint32_t Timer8 = Apb2Timer;
     static constexpr uint32_t Timer9 = Apb2Timer;
-    static constexpr uint32_t Timer10 = Apb2Timer;
-    static constexpr uint32_t Timer11 = Apb2Timer;
     static constexpr uint32_t Timer12 = Apb1Timer;
-    static constexpr uint32_t Timer13 = Apb1Timer;
-    static constexpr uint32_t Timer14 = Apb1Timer;
 
     static bool inline enable()
     {
 #ifndef PLATFORM_HOSTED
-        Rcc::enableExternalCrystal();  // 8 MHz
+        Rcc::enableExternalCrystal();  // 12 MHz
         Rcc::PllFactors pllF = {
             6,    // 12MHz / M=6 -> 2MHz
             180,  // 2MHz * N=180 -> 360MHz
@@ -114,6 +101,7 @@ struct SystemClock
 
         Rcc::setFlashLatency<Frequency>();
         Rcc::enableSystemClock(Rcc::SystemClockSource::Pll);
+        Rcc::setAhbPrescaler(Rcc::AhbPrescaler::Div1);
         Rcc::setApb1Prescaler(Rcc::Apb1Prescaler::Div4);
         Rcc::setApb2Prescaler(Rcc::Apb2Prescaler::Div2);
         Rcc::updateCoreFrequency<Frequency>();
@@ -125,94 +113,85 @@ struct SystemClock
 
 #ifndef PLATFORM_HOSTED
 
-// initialize 9 green Leds and 1 red LED
-// leds 1-8 used for error handling codes
-// led9 used for error handling error (unrepresentable error)
 
-using LedA = GpioOutputG8;
-using LedB = GpioOutputG7;
-using LedC = GpioOutputG6;
-using LedD = GpioOutputG5;
-using LedE = GpioOutputG4;
-using LedF = GpioOutputG3;
-using LedG = GpioOutputG2;
-using LedH = GpioOutputG1;
-using LedGreen = GpioOutputF14;
-using LedRed = GpioOutputE11;
+// initialize 9 green Leds and 1 red LED
+using LedA = GpioInverted<GpioG8>;
+using LedB = GpioInverted<GpioG7>;
+using LedC = GpioInverted<GpioG6>;
+using LedD = GpioInverted<GpioG5>;
+using LedE = GpioInverted<GpioG4>;
+using LedF = GpioInverted<GpioG3>;
+using LedG = GpioInverted<GpioG2>;
+using LedH = GpioInverted<GpioG1>;
+using LedGreen = GpioInverted<GpioF14>;
+using LedRed = GpioInverted<GpioE11>;
 using LedsPort = SoftwareGpioPort<LedA, LedB, LedC, LedD, LedE, LedF, LedG, LedH, LedGreen, LedRed>;
 
 // initialize 4 24V outputs
+using PowerOutPort1 = GpioH2;
+using PowerOutPort2 = GpioH3;
+using PowerOutPort3 = GpioH4;
+using PowerOutPort4 = GpioH5;
+using PowerOutsPort = SoftwareGpioPort<PowerOutPort1, PowerOutPort2, PowerOutPort3, PowerOutPort4>;
 
-using PowerOut1 = GpioOutputH2;
-using PowerOut2 = GpioOutputH3;
-using PowerOut3 = GpioOutputH4;
-using PowerOut4 = GpioOutputH5;
-using PowerOuts = SoftwareGpioPort<PowerOut1, PowerOut2, PowerOut3, PowerOut4>;
 
 // Initialize analog input pins
-        
 using AnalogInPinS = GpioA0;
 using AnalogInPinU = GpioA2;
 using AnalogInPinV = GpioA3;
-using AnalogInPinOledJoystick = GpioA6;
-        
-using AnalogInPins = SoftwareGpioPort<AnalogInPinS, AnalogInPinU, AnalogInPinV, AnalogInPinOledJoystick>;
+using AnalogInPins = SoftwareGpioPort<AnalogInPinS, AnalogInPinU, AnalogInPinV>;
 
 // Initialize PWM pins
-        
+using Buzzer = GpioH6;
 using PWMOutPinW = GpioI5;
 using PWMOutPinX = GpioI6;
-using PWMOutPinBuzzer = GpioH6;
-using PWMOutPinImuHeater = GpioB5;
-        
-using PWMOutPins = SoftwareGpioPort<PWMOutPinW, PWMOutPinX, PWMOutPinBuzzer, PWMOutPinImuHeater>;
+using PWMOutPins = SoftwareGpioPort<Buzzer, PWMOutPinW, PWMOutPinX>;
 
 // Initialize digital input pins
-        
-using DigitalInPinB = GpioH12;
-using DigitalInPinC = GpioH11;
-using DigitalInPinD = GpioH10;
 using DigitalInPinT = GpioA1;
-using DigitalInPinButton = GpioB2;
-        
-using DigitalInPins = SoftwareGpioPort<DigitalInPinB, DigitalInPinC, DigitalInPinD, DigitalInPinT, DigitalInPinButton>;
+using Button = GpioB2;
+using DigitalInPinD = GpioH10;
+using DigitalInPinC = GpioH11;
+using DigitalInPinB = GpioH12;
+using DigitalInPins = SoftwareGpioPort<DigitalInPinT, Button, DigitalInPinD, DigitalInPinC, DigitalInPinB>;
 
 // Initialize digital output pins
-        
-using DigitalOutPinE = GpioD15;
-using DigitalOutPinF = GpioD14;
-using DigitalOutPinG = GpioD13;
 using DigitalOutPinH = GpioD12;
-using DigitalOutPinY = GpioI7;
-using DigitalOutPinZ = GpioI2;
+using DigitalOutPinG = GpioD13;
+using DigitalOutPinF = GpioD14;
+using DigitalOutPinE = GpioD15;
 using DigitalOutPinLaser = GpioG13;
-        
-using DigitalOutPins = SoftwareGpioPort<DigitalOutPinE, DigitalOutPinF, DigitalOutPinG, DigitalOutPinH, DigitalOutPinY, DigitalOutPinZ, DigitalOutPinLaser>;
+using DigitalOutPinZ = GpioI2;
+using DigitalOutPinY = GpioI7;
+using DigitalOutPins = SoftwareGpioPort<DigitalOutPinH, DigitalOutPinG, DigitalOutPinF, DigitalOutPinE, DigitalOutPinLaser, DigitalOutPinZ, DigitalOutPinY>;
 
-// gpio pins used for SPI communication to the onboard MPU6500 IMU
 
-using ImuSck = GpioF7;
-using ImuMiso = GpioF8;
-using ImuMosi = GpioF9;
-using ImuNss = GpioF6;
-using ImuSpiMaster = SpiMaster5;
-
+// SPI to the display spi port on the board
 using DisplaySck = GpioB3;
-using DisplayMiso = GpioB4;
-using DisplayMosi = GpioA7;
+using DisplayPoci = GpioB4;
+using DisplayPico = GpioA7;
 using DisplayReset = GpioB10;
 using DisplayCommand = GpioB9;
-using DisplaySpiMaster = SpiMaster1;
+using DisplayJoystick = GpioA6;
+using DisplaySpi = SpiMaster1;
 
-using I2CSda = GpioF0;
-using I2cScl = GpioF1;
-using I2CMaster = I2cMaster2;
+using Ism330Sck = GpioE12;
+using Ism330Poci = GpioE5;
+using Ism330Pico = GpioE6;
+using Ism330Nss = GpioE4;
+using Ism330Spi = SpiMaster4;
 
-using SpiSck = GpioE12;
-using SpiMiso = GpioE5;
-using SpiMosi = GpioE6;
-using SpiNss = GpioE4;
-using GenSpiMaster = SpiMaster4;
+// SPI for the Mpu6500 IMU on the board
+using ImuSck = GpioF7;
+using ImuPoci = GpioF8;
+using ImuPico = GpioF9;
+using ImuNss = GpioF6;
+using ImuHeater = GpioB5;
+using ImuSpi = SpiMaster5;
+
+using I2c2Sda = GpioF0;
+using I2c2Scl = GpioF1;
+using I2c2 = I2cMaster2;
 
 #endif
 
@@ -222,10 +201,39 @@ inline void initialize()
     SystemClock::enable();
 #ifndef PLATFORM_HOSTED
     SysTickTimer::initialize<SystemClock>();
-    // init 24V output
-    PowerOuts::setOutput(modm::Gpio::High);
 #endif
 }
+
+#ifndef PLATFORM_HOSTED
+
+template <uint32_t Baudrate = 10000000>
+inline void initializeDisplaySpi()
+{
+    DisplaySpi::connect<DisplayPoci::Miso, DisplayPico::Mosi, DisplaySck::Sck>();
+    DisplaySpi::initialize<SystemClock, Baudrate>();
+}
+
+template <uint32_t Baudrate = 10000000>
+inline void initializeIsm330Spi()
+{
+    Ism330Spi::connect<Ism330Poci::Miso, Ism330Pico::Mosi, Ism330Sck::Sck>();
+    Ism330Spi::initialize<SystemClock, Baudrate>();
+}
+
+template <uint32_t Baudrate = 10000000>
+inline void initializeImuSpi()
+{
+    ImuSpi::connect<ImuPoci::Miso, ImuPico::Mosi, ImuSck::Sck>();
+    ImuSpi::initialize<SystemClock, Baudrate>();
+}
+
+template <uint32_t Baudrate = 100000>
+inline void initializeI2c2(I2c2::PullUps pullups = I2c2::PullUps::Internal)
+{
+    I2c2::connect<I2c2Scl::Scl, I2c2Sda::Sda>(pullups);
+    I2c2::initialize<SystemClock, Baudrate>();
+}
+#endif
 
 }  // namespace Board
 

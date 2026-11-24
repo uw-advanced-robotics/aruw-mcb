@@ -72,6 +72,8 @@ public:
         aruwsrc::communication::rtt::RttTelemetry* telemetry = nullptr);
 
     void refresh() override;
+
+    void refreshSafeDisconnect() override { refresh(); }
 };
 
 }  // namespace aruwsrc::algorithms::odometry

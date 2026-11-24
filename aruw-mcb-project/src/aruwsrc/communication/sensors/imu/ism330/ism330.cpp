@@ -39,7 +39,7 @@ void noopChipSelectControl() {}
 
 ISM330::ISM330()
 #ifndef PLATFORM_HOSTED
-    : ISM330(chipSelectFromGpio<Board::SpiNss>())
+    : ISM330(chipSelectFromGpio<Board::Ism330Nss>())
 #else
     : ISM330({noopChipSelectControl, noopChipSelectControl, noopChipSelectControl})
 #endif
@@ -54,14 +54,14 @@ void ISM330::initialize(float sampleFrequency, float mahonyKp, float mahonyKi)
 {
     AbstractIMU::initialize(sampleFrequency, mahonyKp, mahonyKi);
 #ifndef PLATFORM_HOSTED
+
     if (chipSelectControl.initialize != nullptr)
     {
         chipSelectControl.initialize();
     }
     ismNssHigh();
-    Board::GenSpiMaster::connect<Board::SpiMiso::Miso, Board::SpiMosi::Mosi, Board::SpiSck::Sck>();
-    Board::GenSpiMaster::initialize<Board::SystemClock, 5625000_Hz>();
-    Board::GenSpiMaster::setDataMode(Board::GenSpiMaster::DataMode::Mode3);
+    Board::initializeIsm330Spi<5625000_Hz>();
+    Board::Ism330Spi::setDataMode(Board::Ism330Spi::DataMode::Mode3);
     modm::delay_ms(10);
     setODR(DEFAULT_ODR);
     setGyroRange(DEFAULT_GYRO_RANGE);
@@ -99,8 +99,8 @@ bool ISM330::read()
         tx = CTRL1_XL | ISM330_READ_BIT;
         rx = 0;
         ismNssLow();
-        PT_CALL(Board::GenSpiMaster::transfer(&tx, &rx, 1));
-        PT_CALL(Board::GenSpiMaster::transfer(&tx, &rx, 1));
+        PT_CALL(Board::Ism330Spi::transfer(&tx, &rx, 1));
+        PT_CALL(Board::Ism330Spi::transfer(&tx, &rx, 1));
         ismNssHigh();
 
         // Sketchy check to see if IMU is was reset.
@@ -110,17 +110,17 @@ bool ISM330::read()
             tx = CTRL1_XL & ISM330_WRITE_BIT;
             rx = 0;
             ismNssLow();
-            PT_CALL(Board::GenSpiMaster::transfer(&tx, &rx, 1));
+            PT_CALL(Board::Ism330Spi::transfer(&tx, &rx, 1));
             tx = DEFAULT_CTRL1_XL_VALUE;
-            PT_CALL(Board::GenSpiMaster::transfer(&tx, &rx, 1));
+            PT_CALL(Board::Ism330Spi::transfer(&tx, &rx, 1));
             ismNssHigh();
 
             tx = CTRL2_G & ISM330_WRITE_BIT;
             rx = 0;
             ismNssLow();
-            PT_CALL(Board::GenSpiMaster::transfer(&tx, &rx, 1));
+            PT_CALL(Board::Ism330Spi::transfer(&tx, &rx, 1));
             tx = DEFAULT_CTRL2_G_VALUE;
-            PT_CALL(Board::GenSpiMaster::transfer(&tx, &rx, 1));
+            PT_CALL(Board::Ism330Spi::transfer(&tx, &rx, 1));
             ismNssHigh();
             // zero out stuff
             curImuData.gyroRaw = {0, 0, 0};
@@ -142,8 +142,8 @@ bool ISM330::read()
         rx = 0;
 
         ismNssLow();
-        PT_CALL(Board::GenSpiMaster::transfer(&tx, &rx, 1));
-        PT_CALL(Board::GenSpiMaster::transfer(txBuff, rxBuff, READ_LENGTH));
+        PT_CALL(Board::Ism330Spi::transfer(&tx, &rx, 1));
+        PT_CALL(Board::Ism330Spi::transfer(txBuff, rxBuff, READ_LENGTH));
         ismNssHigh();
 
         curImuData.temperature = tempValueToCelsius(rxBuff);
@@ -192,9 +192,9 @@ void ISM330::spiWriteRegister(uint8_t reg, uint8_t data)
     ismNssLow();
     uint8_t tx = reg & ISM330_WRITE_BIT;
     uint8_t rx = 0;
-    Board::GenSpiMaster::transferBlocking(&tx, &rx, 1);
+    Board::Ism330Spi::transferBlocking(&tx, &rx, 1);
     tx = data;
-    Board::GenSpiMaster::transferBlocking(&tx, &rx, 1);
+    Board::Ism330Spi::transferBlocking(&tx, &rx, 1);
     ismNssHigh();
 #endif
 }
@@ -208,8 +208,8 @@ uint8_t ISM330::spiReadRegister(uint8_t reg)
     ismNssLow();
     uint8_t tx = reg | ISM330_READ_BIT;
     uint8_t rx = 0;
-    Board::GenSpiMaster::transferBlocking(&tx, &rx, 1);
-    Board::GenSpiMaster::transferBlocking(&tx, &rx, 1);
+    Board::Ism330Spi::transferBlocking(&tx, &rx, 1);
+    Board::Ism330Spi::transferBlocking(&tx, &rx, 1);
     ismNssHigh();
     return rx;
 #endif

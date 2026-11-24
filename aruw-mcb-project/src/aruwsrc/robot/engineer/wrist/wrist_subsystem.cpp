@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Advanced Robotics at the University of Washington <robomstr@uw.edu>
+ * Copyright (c) 2026-2027 Advanced Robotics at the University of Washington <robomstr@uw.edu>
  *
  * This file is part of aruw-mcb.
  *
@@ -18,9 +18,16 @@
  */
 
 #include "wrist_subsystem.hpp"
+
+#include "tap/algorithms/math_user_utils.hpp"
+
+#include "aruwsrc/robot/engineer/engineer_wrist_constants.hpp"
+
 #define ts this
 
 using namespace tap::algorithms::transforms;
+
+using tap::algorithms::ACCELERATION_GRAVITY;
 using tap::algorithms::CMSISMat;
 
 namespace aruwsrc::engineer::wrist
@@ -34,17 +41,20 @@ WristSubsystem::WristSubsystem(
     const WristConfig config)
     : tap::control::Subsystem(drivers),
       config(config),
+      gravityCompConfig(std::nullopt),
       motorDifferential1(motorDifferential1),
       motorDifferential2(motorDifferential2),
       motorTheta3(motorTheta3),
       encoderTheta2(encoderTheta2),
       setpointTheta1(tap::algorithms::Angle(0)),
       setpointTheta2(0),
-      setpointTheta3(
-          tap::algorithms::Angle(0)),  // TODO: in theory this could be wrapped to PI/2 bc square
+      setpointTheta3(tap::algorithms::Angle(0)),
       pidTheta1(config.theta1PidConfig),
       pidTheta2(config.theta2PidConfig),
-      pidTheta3(config.theta3PidConfig)
+      pidTheta3(config.theta3PidConfig),
+      lastMotor1Pos(0.0),
+      lastMotor2Pos(0.0),
+      lastMotor3Pos(0.0)
 {
     ts->motorDifferential2 = motorDifferential2;
 }
@@ -81,13 +91,45 @@ void WristSubsystem::homeTheta3(float pos) { motorTheta3.getEncoder()->resetEnco
 
 void WristSubsystem::setSetpointOrientation(tap::algorithms::transforms::Orientation setpoint)
 {
-    float theta1 = atan2f(setpoint.matrix().data[3], -setpoint.matrix().data[6]);
-    float theta2 = acosf(setpoint.matrix().data[0]);
-    float theta3 = atan2f(setpoint.matrix().data[1], setpoint.matrix().data[2]);
+    auto [theta1, theta2, theta3] =
+        getJointAnglesForOrientation(setpoint, setpointTheta1.getUnwrappedValue());
     setSetpointTheta1(theta1);
     setSetpointTheta2(theta2);
     setSetpointTheta3(theta3);
-    // TODO: handle gimbal lock
+}
+
+std::array<float, 3> WristSubsystem::getJointAnglesForOrientation(
+    const Orientation& orientation,
+    float prevTheta1)
+{
+    const auto& r = orientation.matrix().data;
+
+    // e.g. joint mode moved it past the limit: same angle, a whole turn closer to 0
+    if (std::abs(prevTheta1) > THETA1_LIMIT)
+    {
+        prevTheta1 = remainderf(prevTheta1, 2 * M_PI);
+    }
+    float theta1 = prevTheta1;
+
+    // hypot(r[3], r[6]) = |sin(theta2)|: is the wrist bent more than SINGULARITY_THRESHOLD
+    if (hypotf(r[3], r[6]) > sinf(SINGULARITY_THRESHOLD))
+    {
+        // solutions repeat every half turn, so round to the closest, then step toward 0 if past
+        float solution = atan2f(r[3], -r[6]);
+        float target = solution + M_PI * roundf((prevTheta1 - solution) / M_PI);
+        if (std::abs(target) > THETA1_LIMIT)
+        {
+            target -= std::copysign(M_PI, target);
+        }
+        theta1 += std::clamp(target - prevTheta1, -MAX_THETA1_STEP, MAX_THETA1_STEP);
+    }
+
+    // solved for this theta1, so they stay continuous while theta1 catches up
+    float s1 = sinf(theta1), c1 = cosf(theta1);
+    float theta2 = atan2f(s1 * r[3] - c1 * r[6], r[0]);
+    float theta3 = atan2f(-(c1 * r[5] + s1 * r[8]), c1 * r[4] + s1 * r[7]);
+
+    return {theta1, theta2, theta3};
 }
 
 bool WristSubsystem::atSetpointTheta1(float epsilon) const
@@ -131,22 +173,49 @@ void WristSubsystem::refresh()
         return;
     }
 
-    float theta1Error =
-        motorDifferential1.getEncoder()->getPosition().minDifference(setpointTheta1);
-    float theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
-    float errorTheta3 = motorTheta3.getEncoder()->getPosition().minDifference(setpointTheta3);
+    theta1Error = motorDifferential1.getEncoder()->getPosition().minDifference(setpointTheta1);
+    theta2Error = encoderTheta2.getPosition().minDifference(setpointTheta2);
+    theta3Error = motorTheta3.getEncoder()->getPosition().minDifference(setpointTheta3);
 
-    float pidOutTheta1 = pidTheta1.runController(
+    pidOutTheta1 = pidTheta1.runController(
         theta1Error,
         motorDifferential1.getEncoder()->getVelocity(),
         0.002f);
-    float pidOutTheta2 = pidTheta2.runController(theta2Error, encoderTheta2.getVelocity(), 0.002f);
-    float pidOutTheta3 =
-        pidTheta3.runController(errorTheta3, motorTheta3.getEncoder()->getVelocity(), 0.002f);
+    pidOutTheta2 = pidTheta2.runController(theta2Error, encoderTheta2.getVelocity(), 0.002f);
+    pidOutTheta3 =
+        pidTheta3.runController(theta3Error, motorTheta3.getEncoder()->getVelocity(), 0.002f);
 
-    // differential
-    float outMotorDifferential1 = pidOutTheta1;
-    float outMotorDifferential2 = pidOutTheta2 + pidOutTheta1;
+    // gravity comp
+    Position mountingFrameToCOM =
+        gravityCompConfig->worldToMountingFrame.apply(gravityCompConfig->pointMass.location);
+    Vector mountRelativeGravityForce = gravityCompConfig->worldToMountingFrame.apply(
+        Vector(0, 0, -ACCELERATION_GRAVITY * gravityCompConfig->pointMass.mass));
+    Vector mountRelativeGravityTorque =
+        mountingFrameToCOM.toVector().cross(mountRelativeGravityForce);
+
+    theta1 = getTheta1();
+    theta2 = getTheta2();
+    theta3 = getTheta3();
+
+    Vector axisTheta1(1, 0, 0);
+    Vector axisTheta2(0, cosf(theta1), sinf(theta1));
+    Vector axisTheta3(cosf(theta2), sinf(theta1) * sinf(theta2), -cosf(theta1) * sinf(theta2));
+
+    float theta1GravityTorque = mountRelativeGravityTorque.dot(axisTheta1);
+    float theta2GravityTorque = mountRelativeGravityTorque.dot(axisTheta2);
+    float theta3GravityTorque = mountRelativeGravityTorque.dot(axisTheta3);
+
+    // gravity torques from motors
+    g1 = theta1GravityTorque * gravityCompConfig->motor1TorqueConstant;
+    g21 = theta1GravityTorque * gravityCompConfig->motor2TorqueConstant;
+    g22 = theta2GravityTorque * gravityCompConfig->motor2TorqueConstant;
+    g3 = theta3GravityTorque * gravityCompConfig->motor3TorqueConstant;
+
+    outMotorDifferential1 = pidOutTheta1 - WRIST_THETA_1_GRAVITY_COMP_SCALE * g1;
+    outMotorDifferential2 =
+        pidOutTheta1 + pidOutTheta2 -
+        (WRIST_THETA_2_GRAVITY_COMP_SCALE * g22 + WRIST_THETA_1_GRAVITY_COMP_SCALE * g21);
+    outMotor3 = pidOutTheta3 - WRIST_THETA_3_GRAVITY_COMP_SCALE * g3;
 
     motorDifferential1.setDesiredOutput(std::clamp<int32_t>(
         outMotorDifferential1,
@@ -157,7 +226,7 @@ void WristSubsystem::refresh()
         -config.maxMotorDesiredOutput,
         config.maxMotorDesiredOutput));
     motorTheta3.setDesiredOutput(std::clamp<int32_t>(
-        pidOutTheta3,
+        outMotor3,
         -config.maxMotorDesiredOutput,
         config.maxMotorDesiredOutput));
 }
@@ -175,9 +244,26 @@ bool WristSubsystem::isOnline() const
            motorTheta3.isMotorOnline() && encoderTheta2.isOnline();
 }
 
+bool WristSubsystem::isWristMoving() const
+{
+    if (!isOnline()) return false;
+    // use external encoder for more accurate pitch/theta2 reading
+    return std::abs(motorDifferential1.getEncoder()->getVelocity()) > MOVING_VELOCITY_THRESHOLD ||
+           std::abs(encoderTheta2.getVelocity()) > MOVING_VELOCITY_THRESHOLD ||
+           std::abs(motorTheta3.getEncoder()->getVelocity()) > MOVING_VELOCITY_THRESHOLD;
+}
+
 Orientation WristSubsystem::getOrientation() const
 {
     return getHypotheticalOrientation(getTheta1(), getTheta2(), getTheta3());
+}
+
+Orientation WristSubsystem::getSetpointOrientation() const
+{
+    return getHypotheticalOrientation(
+        getSetpointTheta1(),
+        getSetpointTheta2(),
+        getSetpointTheta3());
 }
 
 Orientation WristSubsystem::getHypotheticalOrientation(float theta1, float theta2, float theta3)

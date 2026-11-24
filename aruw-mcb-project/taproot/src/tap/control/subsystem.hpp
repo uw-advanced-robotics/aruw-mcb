@@ -24,7 +24,8 @@
 #ifndef TAPROOT_SUBSYSTEM_HPP_
 #define TAPROOT_SUBSYSTEM_HPP_
 
-#include <cstdint>
+#include <functional>
+#include <initializer_list>
 
 #include "tap/util_macros.hpp"
 
@@ -133,6 +134,23 @@ public:
     virtual const char* getName() const;
 
     mockable inline int getGlobalIdentifier() const { return globalIdentifier; }
+
+    /**
+     * @param[in] runnable function to be run once, then the command finishes.
+     * @param[in] otherDeps subsystems required in addition to this one.
+     * @return a command that requires this subsystem.
+     */
+    Command* runOnce(
+        std::function<void()> runnable,
+        std::initializer_list<Subsystem*> otherDeps = {});
+
+    /**
+     * @param[in] runnable function to be run every scheduler iteration until the command is
+     * interrupted.
+     * @param[in] otherDeps subsystems required in addition to this one.
+     * @return a command that requires this subsystem.
+     */
+    Command* run(std::function<void()> runnable, std::initializer_list<Subsystem*> otherDeps = {});
 
 protected:
     Drivers* drivers;

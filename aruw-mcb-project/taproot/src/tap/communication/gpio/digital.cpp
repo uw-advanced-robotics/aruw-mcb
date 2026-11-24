@@ -28,6 +28,8 @@
 
 using namespace Board;
 
+
+
 namespace tap
 {
 namespace gpio
@@ -52,19 +54,19 @@ void Digital::configureInputPullMode(Digital::InputPin pin, Digital::InputPullMo
     switch (pin)
     {
         case Digital::InputPin::B:
-            DigitalInPinB::configure(mode);
+            Board::DigitalInPinB::configure(mode);
             break;
         case Digital::InputPin::C:
-            DigitalInPinC::configure(mode);
+            Board::DigitalInPinC::configure(mode);
             break;
         case Digital::InputPin::D:
-            DigitalInPinD::configure(mode);
+            Board::DigitalInPinD::configure(mode);
             break;
         case Digital::InputPin::T:
-            DigitalInPinT::configure(mode);
+            Board::DigitalInPinT::configure(mode);
             break;
         case Digital::InputPin::Button:
-            DigitalInPinButton::configure(mode);
+            Board::Button::configure(mode);
             break;
     }
 #endif
@@ -79,25 +81,25 @@ void Digital::set(Digital::OutputPin pin, bool isSet)
     switch (pin)
     {
         case Digital::OutputPin::E:
-            DigitalOutPinE::set(isSet);
+            Board::DigitalOutPinE::set(isSet);
             break;
         case Digital::OutputPin::F:
-            DigitalOutPinF::set(isSet);
+            Board::DigitalOutPinF::set(isSet);
             break;
         case Digital::OutputPin::G:
-            DigitalOutPinG::set(isSet);
+            Board::DigitalOutPinG::set(isSet);
             break;
         case Digital::OutputPin::H:
-            DigitalOutPinH::set(isSet);
-            break;
-        case Digital::OutputPin::Y:
-            DigitalOutPinY::set(isSet);
-            break;
-        case Digital::OutputPin::Z:
-            DigitalOutPinZ::set(isSet);
+            Board::DigitalOutPinH::set(isSet);
             break;
         case Digital::OutputPin::Laser:
-            DigitalOutPinLaser::set(isSet);
+            Board::DigitalOutPinLaser::set(isSet);
+            break;
+        case Digital::OutputPin::Y:
+            Board::DigitalOutPinY::set(isSet);
+            break;
+        case Digital::OutputPin::Z:
+            Board::DigitalOutPinZ::set(isSet);
             break;
     }
 #endif
@@ -112,15 +114,15 @@ bool Digital::read(Digital::InputPin pin) const
     switch (pin)
     {
         case Digital::InputPin::B:
-            return DigitalInPinB::read();
+            return Board::DigitalInPinB::read();
         case Digital::InputPin::C:
-            return DigitalInPinC::read();
+            return Board::DigitalInPinC::read();
         case Digital::InputPin::D:
-            return DigitalInPinD::read();
+            return Board::DigitalInPinD::read();
         case Digital::InputPin::T:
-            return DigitalInPinT::read();
+            return Board::DigitalInPinT::read();
         case Digital::InputPin::Button:
-            return DigitalInPinButton::read();
+            return Board::Button::read();
         default:
             return false;
     }
